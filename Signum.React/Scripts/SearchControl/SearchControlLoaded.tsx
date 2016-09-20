@@ -8,7 +8,7 @@ import {
     ResultTable, ResultRow, FindOptionsParsed, FindOptions, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnOptionsMode, ColumnDescription,
     toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, is, isEntity, isLite, toLite } from '../Signum.Entities'
-import { getTypeInfos, getTypeInfo, TypeReference, IsByAll, getQueryKey, TypeInfo, EntityData, QueryKey, PseudoType } from '../Reflection'
+import { getTypeInfos, getTypeInfo, TypeReference, IsByAll, getQueryKey, TypeInfo, EntityData, QueryKey, PseudoType, isTypeModel } from '../Reflection'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import PaginationSelector from './PaginationSelector'
@@ -693,13 +693,16 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 {this.props.findOptions.columnOptions.map((co, i) =>
                     <th draggable={true}
                         style={i == this.state.dragColumnIndex ? { opacity: 0.5 } : undefined}
-                        className={classes(co == this.state.editingColumn ? "sf-current-column" : undefined,
-                            co == this.state.editingColumn && co.token && co.token.type.isCollection ? "error" : undefined,
-                            i == this.state.dropBorderIndex ? "drag-left " : i == this.state.dropBorderIndex - 1 ? "drag-right " : undefined)}
+                        className={classes(
+                            co == this.state.editingColumn  && "sf-current-column",
+                            !this.canOrder(co) && "noOrder" ,
+                            co == this.state.editingColumn && co.token && co.token.type.isCollection && "error",
+                            i == this.state.dropBorderIndex ? "drag-left " :
+                                i == this.state.dropBorderIndex - 1 ? "drag-right " : undefined)}
                         data-column-name={co.token && co.token.fullKey}
                         data-column-index={i}
                         key={i}
-                        onClick={this.handleHeaderClick}
+                        onClick={this.canOrder(co) ? this.handleHeaderClick : undefined}
                         onDragStart={this.handleHeaderDragStart}
                         onDragEnd={this.handleHeaderDragEnd}
                         onDragOver={this.handlerHeaderDragOver}
@@ -710,6 +713,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 )}
             </tr>
         );
+    }
+
+    canOrder(column: ColumnOptionParsed) {
+        return column.token && !column.token.type.isCollection && !column.token.type.isEmbedded && !isTypeModel(column.token.type.name);
     }
 
     orderClassName(column: ColumnOptionParsed) {
@@ -807,7 +814,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         const columns = this.props.findOptions.columnOptions.map(co => ({
             columnOption: co,
-            cellFormatter: co.token == undefined ? undefined : (qs && qs.formatters && qs.formatters[co.token.fullKey]) || Finder.formatRules.filter(a => a.isApplicable(co)).last("FormatRules").formatter(co),
+            cellFormatter: Finder.getCellFormatter(qs, co),
             resultIndex: co.token == undefined ? -1 : resultTable.columns.indexOf(co.token.fullKey)
         }));
 

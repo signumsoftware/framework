@@ -1,14 +1,14 @@
 ﻿import * as React from 'react'
 import { Link } from 'react-router'
 import { Dic, classes } from '../Globals'
-import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, newMListElement } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, newMListElement, isLite } from '../Signum.Entities'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
-import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll } from '../Reflection'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks} from '../Lines/LineBase'
+import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, getTypeName } from '../Reflection'
+import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
 import Typeahead from '../Lines/Typeahead'
 import { EntityBase, EntityBaseProps} from './EntityBase'
 
@@ -115,11 +115,9 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
                 if (!e)
                     return;
 
-                this.convert(e).then(m => {
-                    const list = this.props.ctx.value!;
-                    list.push(newMListElement(m));
-                    this.setValue(list);
-                }).done();
+                this.convert(e)
+                    .then(m => this.addElement(m))
+                    .done();
             }).done();
     };
 
@@ -131,6 +129,16 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
         return this.chooseType(Finder.isFindable)
             .then<(ModifiableEntity | Lite<Entity>)[] | undefined>(qn => qn == undefined ? undefined : Finder.findMany({ queryName: qn } as FindOptions));
+    }
+
+    addElement(entityOrLite: Lite<Entity> | ModifiableEntity) {
+
+        if (isLite(entityOrLite) != (this.state.type!.isLite || false))
+            throw new Error("entityOrLite should be already converted");
+
+        const list = this.props.ctx.value!;
+        list.push(newMListElement(entityOrLite));
+        this.setValue(list);
     }
 
 
@@ -145,9 +153,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
                 return;
 
             Promise.all(lites.map(a => this.convert(a))).then(entites => {
-                const list = this.props.ctx.value!;
-                entites.forEach(e => list.push(newMListElement(e)));
-                this.setValue(list);
+                entites.forEach(e => this.addElement(e));
             }).done();
         }).done();
     };
@@ -155,7 +161,6 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     handleRemoveElementClick = (event: React.SyntheticEvent, index: number) => {
 
         event.preventDefault();
-
 
         const list = this.props.ctx.value!;
         const mle = list[index];
@@ -166,7 +171,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
                     return;
 
                 list.remove(mle);
-                this.forceUpdate();
+                this.setValue(list);
             }).done();
     };
 

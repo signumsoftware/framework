@@ -57,7 +57,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
         if (t.name == "datetime")
             return ValueLineType.DateTime;
 
-        if (t.name == "string" || t.name == "TimeSpan" || t.name == "Guid")
+        if (t.name == "string" || t.name == "Guid")
             return ValueLineType.TextBox;
 
         if (t.name == "number")
@@ -185,8 +185,8 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo, parseValue: (str: s
     if (s.ctx.readOnly)
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-                { ValueLine.withUnit(s.unitText,
-                    <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx}>
+                {ValueLine.withUnit(s.unitText,
+                    <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx}>
                            {s.ctx.value == undefined ? undefined : items.filter(a => a.name == toStringValue(s.ctx.value)).single().niceName}
                     </FormControlStatic>) }
             </FormGroup>
@@ -217,7 +217,7 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
     if (s.ctx.readOnly)
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-                { ValueLine.withUnit(s.unitText, <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
+                {ValueLine.withUnit(s.unitText, <FormControlStatic htmlProps={vl.state.valueHtmlProps}  ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
             </FormGroup>
         );
 
@@ -266,7 +266,7 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
     if (s.ctx.readOnly)
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-                { ValueLine.withUnit(s.unitText, <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
+                {ValueLine.withUnit(s.unitText, <FormControlStatic htmlProps={vl.state.valueHtmlProps}  ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
             </FormGroup>
         );
 
@@ -314,7 +314,7 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) 
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
                 { ValueLine.withUnit(s.unitText,
-                    <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx} className={addClass(vl.state.valueHtmlProps, "numeric") }>
+                    <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx} className="numeric">
                         {s.ctx.value == null ? "" : numbro(s.ctx.value).format(numbroFormat) }
                     </FormControlStatic>) }
             </FormGroup>
@@ -401,7 +401,7 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
     if (s.ctx.readOnly)
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-                { ValueLine.withUnit(s.unitText, <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx}>{m && m.format(momentFormat) }</FormControlStatic>) }
+                {ValueLine.withUnit(s.unitText, <FormControlStatic htmlProps={vl.state.valueHtmlProps}  ctx={s.ctx}>{m && m.format(momentFormat) }</FormControlStatic>) }
             </FormGroup>
         );
 
@@ -440,7 +440,7 @@ function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler)
         const d = s.ctx.value ? moment.duration(s.ctx.value / ticksPerMillisecond) : undefined;
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-                <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx} className={addClass(vl.state.valueHtmlProps, "numeric") }>{d && d.format(durationFormat) }</FormControlStatic>
+                <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx} className={addClass(vl.state.valueHtmlProps, "numeric") }>{d && d.format(durationFormat) }</FormControlStatic>
             </FormGroup>
         );
     }

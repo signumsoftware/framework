@@ -8,7 +8,7 @@ export function getEnumInfo(enumTypeName: string, enumId: number) {
 
     const ti = getTypeInfo(enumTypeName);
 
-    if (!ti || ti.kind != KindOfType.Enum)
+    if (!ti || ti.kind != "Enum")
         throw new Error(`${enumTypeName} is not an Enum`);
 
     return ti.membersById![enumId];
@@ -69,6 +69,9 @@ export enum OperationType {
 //http://momentjs.com/docs/#/displaying/format/
 export function toMomentFormat(format: string | undefined): string | undefined {
 
+    if (!format)
+        return undefined;
+
     switch (format) {
         case "d": return "L"; // or "l"
         case "D": return "LL";
@@ -84,7 +87,16 @@ export function toMomentFormat(format: string | undefined): string | undefined {
         case "T": return "LTS";
         case "y": return "LTS";
         case "Y": return "L";
-        default: return format;
+        default: return format
+            .replaceAll("y", "Y")
+            .replaceAll("f", "S")
+            .replaceAll("tt", "A")
+            .replaceAll("t", "a")
+            .replaceAll("dddd", "ßßßß") 
+            .replaceAll("ddd", "ßßß")
+            .replaceAll("d", "D") //replace only d -> D and dd -> DD
+            .replaceAll("ßßß", "ddd")
+            .replaceAll("ßßßß", "dddd");
     }
 }
 
@@ -105,20 +117,22 @@ export function toNumbroFormat(format: string | undefined) {
     if (format == undefined)
         return undefined;
 
-    if (format.startsWith("C"))
-        return "0." + "0".repeat(parseInt(format.after("C")));
+    const f = format.toUpperCase();
 
-    if (format.startsWith("N"))
-        return "0." + "0".repeat(parseInt(format.after("N")));
+    if (f.startsWith("C"))
+        return "0." + "0".repeat(parseInt(f.after("C")));
 
-    if (format.startsWith("D"))
-        return "0".repeat(parseInt(format.after("D")));
+    if (f.startsWith("N"))
+        return "0." + "0".repeat(parseInt(f.after("N")));
 
-    if (format.startsWith("E"))
-        return "0." + "0".repeat(parseInt(format.after("E")));
+    if (f.startsWith("D"))
+        return "0".repeat(parseInt(f.after("D")));
 
-    if (format.startsWith("P"))
-        return "0." + "0".repeat(parseInt(format.after("P"))) + "%";
+    if (f.startsWith("E"))
+        return "0." + "0".repeat(parseInt(f.after("E")));
+
+    if (f.startsWith("P"))
+        return "0." + "0".repeat(parseInt(f.after("P"))) + "%";
 
     return format;
 }
@@ -132,29 +146,11 @@ export interface TypeReference {
     isEmbedded?: boolean;
 }
 
-export enum KindOfType {
-    Entity = "Entity" as any,
-    Enum = "Enum" as any,
-    Message = "Message" as any,
-    Query = "Query" as any,
-    SymbolContainer = "SymbolContainer" as any,
-}
+export type KindOfType = "Entity" | "Enum" | "Message" | "Query" | "SymbolContainer";
 
-export enum EntityKind {
-    SystemString = "SystemString" as any,
-    System = "System" as any,
-    Relational = "Relational" as any,
-    String = "String" as any,
-    Shared = "Shared" as any,
-    Main = "Main" as any,
-    Part = "Part" as any,
-    SharedPart = "SharedPart" as any,
-}
+export type EntityKind = "SystemString" | "System" | "Relational" | "String" | "Shared" | "Main" | "Part" | "SharedPart";
 
-export enum EntityData {
-    Master = "Master" as any,
-    Transactional = "Transactional" as any,
-}
+export type EntityData = "Master" | "Transactional";
 
 export interface TypeInfoDictionary {
     [name: string]: TypeInfo
@@ -169,7 +165,13 @@ let _queryNames: {
 
 export type PseudoType = IType | TypeInfo | string;
 
-export function getTypeName(pseudoType: IType | TypeInfo | string): string {
+export function getTypeName(pseudoType: IType | TypeInfo | string | Lite<Entity> | ModifiableEntity): string {
+    if ((pseudoType as Lite<Entity>).EntityType)
+        return (pseudoType as Lite<Entity>).EntityType;
+
+    if ((pseudoType as ModifiableEntity).Type)
+        return (pseudoType as ModifiableEntity).Type;
+    
     if ((pseudoType as IType).typeName)
         return (pseudoType as IType).typeName;
 
@@ -184,17 +186,17 @@ export function getTypeName(pseudoType: IType | TypeInfo | string): string {
 
 export function isTypeEntity(type: PseudoType): boolean {
     const ti = getTypeInfo(type);
-    return ti && ti.kind == KindOfType.Entity && !!ti.members["Id"];
+    return ti && ti.kind == "Entity" && !!ti.members["Id"];
 }
 
 export function isTypeEnum(type: PseudoType): boolean {
     const ti = getTypeInfo(type);
-    return ti && ti.kind == KindOfType.Enum;
+    return ti && ti.kind == "Enum";
 }
 
 export function isTypeModel(type: PseudoType): boolean {
     const ti = getTypeInfo(type);
-    return ti && ti.kind == KindOfType.Entity && !ti.members["Id"];
+    return ti && ti.kind == "Entity" && !ti.members["Id"];
 }
 
 export function isTypeEmbeddedOrValue(type: PseudoType): boolean {
@@ -343,7 +345,7 @@ export function setTypes(types: TypeInfoDictionary) {
             Dic.foreach(t.members, (k2, t2) => t2.name = k2);
             Object.freeze(t.members);
 
-            if (t.kind == KindOfType.Enum) {
+            if (t.kind == "Enum") {
                 t.membersById = Dic.getValues(t.members).toObject(a => a.name);
                 Object.freeze(t.membersById);
             }
@@ -380,7 +382,7 @@ export function setTypes(types: TypeInfoDictionary) {
         }
     });
 
-    _queryNames = Dic.getValues(types).filter(t => t.kind == KindOfType.Query)
+    _queryNames = Dic.getValues(types).filter(t => t.kind == "Query")
         .flatMap(a => Dic.getValues(a.members))
         .toObject(m => m.name.toLocaleLowerCase(), m => m);
 
@@ -396,14 +398,14 @@ export function setTypes(types: TypeInfoDictionary) {
 function calculateRequiresSaveOperation(entityKind: EntityKind): boolean 
 {
     switch (entityKind) {
-        case EntityKind.SystemString: return false;
-        case EntityKind.System: return false;
-        case EntityKind.Relational: return false;
-        case EntityKind.String: return true;
-        case EntityKind.Shared: return true;
-        case EntityKind.Main: return true;
-        case EntityKind.Part: return false;
-        case EntityKind.SharedPart: return false;
+        case "SystemString": return false;
+        case "System": return false;
+        case "Relational": return false;
+        case "String": return true;
+        case "Shared": return true;
+        case "Main": return true;
+        case "Part": return false;
+        case "SharedPart": return false;
         default: throw new Error("Unexpeced entityKind");
     }
 }
@@ -429,7 +431,7 @@ export class Binding<T> implements IBinding<T> {
     static create<F, T>(parentValue: F, fieldAccessor: (from: F) => T) {
         const members = getLambdaMembers(fieldAccessor);
 
-        if (members.length != 1 || members[0].type != LambdaMemberType.Member)
+        if (members.length != 1 || members[0].type != "Member")
             throw Error("invalid function 'fieldAccessor'");
 
         return new Binding<T>(parentValue, members[0].name);
@@ -540,7 +542,7 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
 }
 
 
-const functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*(\"use strict\"\;)?\s*return\s*(.*)\s*;\s*}$/;
+const functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*(\"use strict\"\;)?\s*return\s*([^;]*)\s*;?\s*}$/;
 const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
 const indexRegex = /^(.*)\[(\d+)\]$/;
 const mixinRegex = /^(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)$/
@@ -560,15 +562,15 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
     while (body != parameter) {
         let m: RegExpExecArray | null;
         if (m = memberRegex.exec(body)) {
-            result.push({ name: m[2], type: LambdaMemberType.Member });
+            result.push({ name: m[2], type: "Member" });
             body = m[1];
         }
         else if (m = indexRegex.exec(body)) {
-            result.push({ name: m[2], type: LambdaMemberType.Indexer });
+            result.push({ name: m[2], type: "Indexer" });
             body = m[1];
         }
         else if (m = mixinRegex.exec(body)) {
-            result.push({ name: m[4], type: LambdaMemberType.Mixin });
+            result.push({ name: m[4], type: "Mixin" });
             body = m[2];
         } else {
             throw new Error(`Unexpected body in Property Route ${body}`);
@@ -577,7 +579,7 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
 
     result = result.reverse();
 
-    result = result.filter((m, i) => !(m.type == LambdaMemberType.Member && m.name == "element" && i > 0 && result[i - 1].type == LambdaMemberType.Indexer));
+    result = result.filter((m, i) => !(m.type == "Member" && m.name == "element" && i > 0 && result[i - 1].type == "Indexer"));
 
     return result;
 }
@@ -588,11 +590,7 @@ export interface LambdaMember {
     type: LambdaMemberType
 }
 
-export enum LambdaMemberType {
-    Member = "Member" as any,
-    Mixin = "Mixin" as any,
-    Indexer = "Indexer" as any,
-}
+export type LambdaMemberType = "Member" | "Mixin" | "Indexer";
 
 export function basicConstruct(type: PseudoType): ModifiableEntity {
 
@@ -798,23 +796,23 @@ export class PropertyRoute {
         if (!typeInfo) {
             throw Error(`No TypeInfo for "${getTypeName(type)}" found. Consider calling ReflectionServer.RegisterLike on the server side.`);
         }
-        return new PropertyRoute(undefined, PropertyRouteType.Root, typeInfo, undefined, undefined);
+        return new PropertyRoute(undefined, "Root", typeInfo, undefined, undefined);
     }
 
     static member(parent: PropertyRoute, member: MemberInfo) {
-        return new PropertyRoute(parent, PropertyRouteType.Field, undefined, member, undefined);
+        return new PropertyRoute(parent, "Field", undefined, member, undefined);
     }
 
     static mixin(parent: PropertyRoute, mixinName: string) {
-        return new PropertyRoute(parent, PropertyRouteType.Mixin, undefined, undefined, mixinName);
+        return new PropertyRoute(parent, "Mixin", undefined, undefined, mixinName);
     }
 
     static mlistItem(parent: PropertyRoute) {
-        return new PropertyRoute(parent, PropertyRouteType.MListItem, undefined, undefined, undefined);
+        return new PropertyRoute(parent, "MListItem", undefined, undefined, undefined);
     }
 
     static liteEntity(parent: PropertyRoute) {
-        return new PropertyRoute(parent, PropertyRouteType.LiteEntity, undefined, undefined, undefined);
+        return new PropertyRoute(parent, "LiteEntity", undefined, undefined, undefined);
     }
 
     constructor(
@@ -846,11 +844,11 @@ export class PropertyRoute {
 
     typeReference(): TypeReference {
         switch (this.propertyRouteType) {
-            case PropertyRouteType.Root: return { name: this.rootType!.name };
-            case PropertyRouteType.Field: return this.member!.type;
-            case PropertyRouteType.Mixin: throw new Error("mixins can not be used alone");
-            case PropertyRouteType.MListItem: return Dic.extend({}, this.parent!.typeReference(), { isCollection: false });
-            case PropertyRouteType.LiteEntity: return Dic.extend({}, this.parent!.typeReference(), { isLite: false });
+            case "Root": return { name: this.rootType!.name };
+            case "Field": return this.member!.type;
+            case "Mixin": throw new Error("mixins can not be used alone");
+            case "MListItem": return Dic.extend({}, this.parent!.typeReference(), { isCollection: false });
+            case "LiteEntity": return Dic.extend({}, this.parent!.typeReference(), { isLite: false });
             default: throw new Error("Unexpected propertyRouteType");
         }
     }
@@ -861,33 +859,41 @@ export class PropertyRoute {
 
     rootTypeInfo(): TypeInfo {
         switch (this.propertyRouteType) {
-            case PropertyRouteType.Root: return this.rootType!;
-            case PropertyRouteType.Field: return this.parent!.rootTypeInfo();
-            case PropertyRouteType.Mixin: return this.parent!.rootTypeInfo();
-            case PropertyRouteType.MListItem: return this.parent!.rootTypeInfo();
-            case PropertyRouteType.LiteEntity: return this.parent!.rootTypeInfo();
+            case "Root": return this.rootType!;
+            case "Field": return this.parent!.rootTypeInfo();
+            case "Mixin": return this.parent!.rootTypeInfo();
+            case "MListItem": return this.parent!.rootTypeInfo();
+            case "LiteEntity": return this.parent!.rootTypeInfo();
             default: throw new Error("Unexpected propertyRouteType");
         }
     }
 
     propertyPath(): string {
         switch (this.propertyRouteType) {
-            case PropertyRouteType.Root: throw new Error("Root has no PropertyString");
-            case PropertyRouteType.Field: return this.member!.name;
-            case PropertyRouteType.Mixin: return "[" + this.mixinName + "]";
-            case PropertyRouteType.MListItem: return this.parent!.propertyPath() + "/";
-            case PropertyRouteType.LiteEntity: return this.parent!.propertyPath() + ".entity";
+            case "Root": throw new Error("Root has no PropertyString");
+            case "Field": return this.member!.name;
+            case "Mixin": return "[" + this.mixinName + "]";
+            case "MListItem": return this.parent!.propertyPath() + "/";
+            case "LiteEntity": return this.parent!.propertyPath() + ".entity";
             default: throw new Error("Unexpected propertyRouteType");
+        }
+    }
+
+    tryAddMember(member: LambdaMember): PropertyRoute | undefined {
+        try {
+            return this.addMember(member);
+        } catch (e) {
+            return undefined;
         }
     }
 
     addMember(member: LambdaMember): PropertyRoute {
 
-        if (member.type == LambdaMemberType.Member) {
+        if (member.type == "Member") {
 
-            if (this.propertyRouteType == PropertyRouteType.Field  ||
-                this.propertyRouteType == PropertyRouteType.MListItem ||
-                this.propertyRouteType == PropertyRouteType.LiteEntity) {
+            if (this.propertyRouteType == "Field"  ||
+                this.propertyRouteType == "MListItem" ||
+                this.propertyRouteType == "LiteEntity") {
                 const ref = this.typeReference();
 
                 if (ref.isLite) {
@@ -905,13 +911,13 @@ export class PropertyRoute {
                         throw new Error(`member '${memberName}' not found`);
 
                     return PropertyRoute.member(PropertyRoute.root(ti), m);
-                } else if (this.propertyRouteType == PropertyRouteType.LiteEntity) {
+                } else if (this.propertyRouteType == "LiteEntity") {
                     throw Error("Unexpected lite case");
                 }
             }
 
-            const memberName = this.propertyRouteType == PropertyRouteType.Root ? member.name.firstUpper() :
-                this.propertyRouteType == PropertyRouteType.MListItem ? this.propertyPath() + member.name.firstUpper() :
+            const memberName = this.propertyRouteType == "Root" ? member.name.firstUpper() :
+                this.propertyRouteType == "MListItem" ? this.propertyPath() + member.name.firstUpper() :
                     this.propertyPath() + "." + member.name.firstUpper();
 
             const m = this.rootTypeInfo().members[memberName];
@@ -921,15 +927,15 @@ export class PropertyRoute {
             return PropertyRoute.member(this, m);
         }
 
-        if (member.type == LambdaMemberType.Mixin) {
-            if (this.propertyRouteType != PropertyRouteType.Root)
+        if (member.type == "Mixin") {
+            if (this.propertyRouteType != "Root")
                 throw new Error("invalid mixin at this stage");
 
             return PropertyRoute.mixin(this, member.name);
         }
 
-        if (member.type == LambdaMemberType.Indexer) {
-            if (this.propertyRouteType != PropertyRouteType.Field)
+        if (member.type == "Indexer") {
+            if (this.propertyRouteType != "Field")
                 throw new Error("invalid indexer at this stage");
 
             const tr = this.typeReference();
@@ -947,7 +953,7 @@ export class PropertyRoute {
         function simpleMembersAfter(type: TypeInfo, path: string) {
             return Dic.getValues(type.members)
                 .filter(m => {
-                    if (m.name == path && !m.name.startsWith(path))
+                    if (m.name == path || !m.name.startsWith(path))
                         return false;
 
                     var name = m.name.substring(path.length);
@@ -961,17 +967,17 @@ export class PropertyRoute {
         
 
         switch (this.propertyRouteType) {
-            case PropertyRouteType.Root: return simpleMembersAfter(this.rootTypeInfo(), "");
-            case PropertyRouteType.Mixin: return simpleMembersAfter(this.rootTypeInfo(), this.propertyPath());                
-            case PropertyRouteType.LiteEntity: return simpleMembersAfter(this.typeReferenceInfo(), "");
-            case PropertyRouteType.Field:
-            case PropertyRouteType.MListItem: 
+            case "Root": return simpleMembersAfter(this.rootTypeInfo(), "");
+            case "Mixin": return simpleMembersAfter(this.rootTypeInfo(), this.propertyPath());                
+            case "LiteEntity": return simpleMembersAfter(this.typeReferenceInfo(), "");
+            case "Field":
+            case "MListItem": 
                 {
                     const ti = getTypeInfos(this.typeReference()).single("Ambiguity due to multiple Implementations"); //[undefined]
                     if (ti && isTypeEntity(ti))
                         return simpleMembersAfter(ti, "");
                     else
-                        return simpleMembersAfter(this.rootTypeInfo(), this.propertyPath() + (this.propertyRouteType == PropertyRouteType.Field ? "." : ""));
+                        return simpleMembersAfter(this.rootTypeInfo(), this.propertyPath() + (this.propertyRouteType == "Field" ? "." : ""));
                 }
             default: throw new Error("Unexpected propertyRouteType");
 
@@ -981,20 +987,14 @@ export class PropertyRoute {
     
 
     toString() {
-        if (this.propertyRouteType == PropertyRouteType.Root)
+        if (this.propertyRouteType == "Root")
             return `(${this.findRootType().name})`;
 
         return `(${this.findRootType().name}).${this.propertyPath()}`;
     }
 }
 
-export enum PropertyRouteType {
-    Root = "Root" as any,
-    Field = "Field" as any,
-    Mixin = "Mixin" as any,
-    LiteEntity = "LiteEnity" as any,
-    MListItem = "MListItem" as any,
-}
+export type PropertyRouteType = "Root" | "Field" | "Mixin" | "LiteEntity" | "MListItem";
 
 
 export class GraphExplorer {
@@ -1115,7 +1115,8 @@ export class GraphExplorer {
                 delete mod.error;
         }
         else if (this.modelStateMode == "clean") {
-            delete mod.error;
+            if (mod.error)
+                delete mod.error
         }
 
         

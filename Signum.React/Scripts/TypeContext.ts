@@ -290,7 +290,7 @@ export function mlistItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[
     
     return ctx.value!.map((mle, i) =>
         new TypeContext<T>(ctx, undefined,
-            ctx.propertyRoute.addMember({ name: "", type: LambdaMemberType.Indexer }),
+            ctx.propertyRoute.addMember({ name: "", type: "Indexer" }),
             new ReadonlyBinding(mle.element, i.toString())));
 }
 
