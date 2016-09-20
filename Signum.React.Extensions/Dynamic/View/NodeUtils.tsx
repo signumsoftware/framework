@@ -35,20 +35,22 @@ export interface NodeOptions<N extends BaseNode> {
     validate?: (node: DesignerNode<N>) => string | null | undefined;
     validParent?: string;
     validChild?: string;
+    avoidHighlight?: boolean;
     initialize?: (node: N) => void
 }
 
 export interface DesignerContext {
     refreshView: () => void;
     onClose: () => void;
+    getSelectedNode: () => DesignerNode<BaseNode> | undefined;
+    setSelectedNode: (newSelectedNode: DesignerNode<BaseNode>) => void;
 }
 
 export class DesignerNode<N extends BaseNode> {
     parent?: DesignerNode<BaseNode>;
     context: DesignerContext;
     node: N;
-    route: PropertyRoute;
-
+    route?: PropertyRoute;
 
     static root<N extends BaseNode>(node: N, context: DesignerContext, typeName: string) {
         var res = new DesignerNode();
@@ -64,25 +66,38 @@ export class DesignerNode<N extends BaseNode> {
         res.context = this.context;
         res.node = node;
         res.route = this.fixRoute();
-        const lbn = node as BaseNode as LineBaseNode;
-        if (lbn.field)
-            lbn.field.split(".").forEach(p =>
-                res.route = res.route.addMember({ name: p, type: "Member" })
-            );
+        const lbn = node as LineBaseNode;
+        if (lbn.field && res.route)
+            res.route = res.route.tryAddMember({ name: lbn.field, type: "Member" });
+
         return res;
     }
 
-    fixRoute() {
+    refresh() {
+        if (this.parent == undefined)
+            return this;
+
+        return this.parent.createChild(this.node);
+    }
+
+    fixRoute(): PropertyRoute | undefined {
         let res = this.route;
+
+        if (!res)
+            return undefined;
+
         const options = registeredNodes[this.node.kind];
         if (options.hasCollection)
-            res = res.addMember({ name: "", type: "Indexer" });
+            res = res.tryAddMember({ name: "", type: "Indexer" });
+
+        if (!res)
+            return undefined;
 
         if (options.hasEntity)
         {
             const tr = res.typeReference();
             if (tr.isLite)
-                res = res.addMember({ name: "entity", type: "Member" });
+                res = res.tryAddMember({ name: "entity", type: "Member" });
         }
         return res;
     }
@@ -116,7 +131,16 @@ export function render(dn: DesignerNode<BaseNode>, ctx: TypeContext<ModifiableEn
         if (evaluateAndValidate(ctx, dn, "visible", isBooleanOrNull) == false)
             return null;
 
+        const sn = dn.context.getSelectedNode();
+
+        if (sn && sn.node == dn.node && registeredNodes[sn.node.kind].avoidHighlight != true)
+            return (
+                <div style={{ border: "1px solid #337ab7", borderRadius: "2px" }}>
+                    {registeredNodes[dn.node.kind].render(dn, ctx)}
+                </div>);
+    
         return registeredNodes[dn.node.kind].render(dn, ctx);
+
     } catch (e) {
         return (<div className="alert alert-danger">{getErrorTitle(dn)}&nbsp;{(e as Error).message}</div>);
     }
@@ -265,10 +289,15 @@ export function validateFieldMandatory(dn: DesignerNode<LineBaseNode>) {
 
 export function validateField(dn: DesignerNode<LineBaseNode>) {
 
-    const m = dn.parent!.route.subMembers()[dn.node.field!]
+    const parentRoute = dn.parent!.route;
+
+    if (parentRoute == undefined)
+        return undefined;
+    
+    const m = parentRoute.subMembers()[dn.node.field!]
 
     if (!m)
-        return DynamicViewValidationMessage.Type0DoesNotContainsField1.niceToString(dn.route.typeReference().name, dn.node.field);
+        return DynamicViewValidationMessage.Type0DoesNotContainsField1.niceToString(parentRoute.typeReference().name, dn.node.field);
 
     const options = registeredNodes[dn.node.kind]
 
@@ -288,7 +317,12 @@ export function validateField(dn: DesignerNode<LineBaseNode>) {
 
 export function validateTableColumnProperty(dn: DesignerNode<EntityTableColumnNode>) {
 
-    const m = dn.parent!.route.subMembers()[dn.node.property!]
+    const parentRoute = dn.parent!.route;
+
+    if (parentRoute == undefined)
+        return undefined;
+
+    const m = parentRoute.subMembers()[dn.node.property!]
     const DVVM = DynamicViewValidationMessage;
 
     if ( m.type.isCollection)
@@ -333,7 +367,7 @@ export function getGetComponent(dn: DesignerNode<ContainerNode>, ctx: TypeContex
 
 export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { isCreable: boolean; isFindable: boolean; isViewable: boolean; showAutoComplete: boolean, showMove?: boolean }) {
   
-    const m = dn.route.member;
+    const m = dn.route && dn.route.member;
     return (<div>
         <FieldComponent dn={dn} member="field" />
        
