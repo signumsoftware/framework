@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Utilities
 {
@@ -33,7 +35,16 @@ namespace Signum.Utilities
             if (args == null)
                 return Enumerable.Empty<T>();
 
-            return args.OfType<T>();
+            return args
+                .Where(o => o is T || o is List<object> && typeof(T).IsInstantiationOf(typeof(List<>)))
+                .Select(o => o is T ? (T) o : (T)giConvertListTo.GetInvoker(typeof(T).ElementType())((List<object>) o));
+        }
+
+        static readonly GenericInvoker<Func<List<object>,IList>> giConvertListTo = new GenericInvoker<Func<List<object>, IList>>(list => ConvertListTo<int>(list));
+
+        static List<S> ConvertListTo<S>(List<object> list)
+        {
+            return list.Cast<S>().ToList();
         }
     }
 }

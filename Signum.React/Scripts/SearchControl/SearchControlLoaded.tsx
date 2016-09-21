@@ -860,10 +860,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         const m = this.state.markedRows[liteKey(entity)];
 
         if (typeof m === "string") {
-            if (m)
-                return { style: "error", message: m };
-            else
+            if (m == "")
                 return { style: "sf-entity-ctxmenu-success", message: undefined };
+            else
+                return { style: "danger", message: m };
         }
         else {
             return m;
@@ -876,7 +876,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         const tooltip = <Tooltip id={"mark_" + index} >{mark.message}</Tooltip>;
 
-        return <OverlayTrigger placement="bottom" overlay={tooltip}>{child}</OverlayTrigger>;
+        return <OverlayTrigger placement="bottom" overlay={tooltip}>
+            <span className="sf-search-entity-error">
+                {child}
+            </span>
+        </OverlayTrigger>;
     }
 
 }

@@ -185,7 +185,7 @@ namespace Signum.React.ApiControllers
         static Dictionary<string, string> ForeachMultiple(IEnumerable<Lite<Entity>> lites, Action<Lite<Entity>> action)
         {
             Dictionary<string, string> errors = new Dictionary<string, string>();
-            foreach (var lite in lites)
+            foreach (var lite in lites.Distinct())
             {
                 try
                 {
