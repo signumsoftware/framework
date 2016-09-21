@@ -545,7 +545,7 @@ namespace Signum.Entities.UserAssets
         {
             if (value == CurrentUserKey)
             {
-                result = UserEntity.Current.ToLite();
+                result = UserEntity.Current?.ToLite();
                 return null;
             }
 

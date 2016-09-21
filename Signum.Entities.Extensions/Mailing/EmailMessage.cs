@@ -171,7 +171,7 @@ namespace Signum.Entities.Mailing
         }
 
         [NotNullable, SqlDbType(Size = 300)]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 300)]
+        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 300)]
         public string ContentId { get; set; }
 
         public EmailAttachmentEntity Clone()

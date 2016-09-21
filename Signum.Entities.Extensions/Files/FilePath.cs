@@ -124,7 +124,12 @@ namespace Signum.Entities.Files
             if (string.IsNullOrEmpty(pp.WebPrefix))
                 return null;
 
-            return VirtualPathUtility.ToAbsolute(pp.WebPrefix + "/" + HttpFilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/")));
+            var result = pp.WebPrefix + "/" + HttpFilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/"));
+
+            if (result.StartsWith("http"))
+                return result;
+
+            return VirtualPathUtility.ToAbsolute(result);
         }
 
         public override string ToString()

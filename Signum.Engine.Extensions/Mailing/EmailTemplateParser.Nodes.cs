@@ -137,7 +137,8 @@ namespace Signum.Engine.Mailing
                 if (IsRaw)
                     sb.Append("raw");
 
-                ValueProvider.ToString(sb, variables, Format.HasText() ? (":" + Format) : null);
+                ValueProvider.ToString(sb, variables,
+                    Format.HasText() ? (":" + TemplateUtils.ScapeColon(Format)) : null);
             }
 
             public override void Synchronize(SyncronizationContext sc)
