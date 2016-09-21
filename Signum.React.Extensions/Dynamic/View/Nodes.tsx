@@ -66,6 +66,7 @@ NodeUtils.register<ColumnNode>({
     group: null,
     order: null,
     isContainer: true,
+    avoidHighlight: true,
     validParent: "Row",
     validate: dn => NodeUtils.mandatory(dn, "width"),
     initialize: dn => dn.width = 6,
@@ -114,6 +115,7 @@ NodeUtils.register<TabNode>({
     group: null,
     order: null,
     isContainer: true,
+    avoidHighlight: true,
     validParent: "Tabs",
     initialize: dn => dn.title = "My Tab",
     renderTreeNode: NodeUtils.treeNodeKind, 
@@ -183,7 +185,7 @@ NodeUtils.register<ValueLineNode>({
         onChange={NodeUtils.evaluateOnChange(ctx, dn.node.redrawOnChange)}
         />),
     renderDesigner: (dn) => {
-        const m = dn.route.member;
+        const m = dn.route && dn.route.member;
         return (<div>
             <FieldComponent dn={dn} member="field"/>
             <ExpressionOrValueComponent dn={dn} member="labelText" type="string" defaultValue={m && m.niceName || ""} />
@@ -280,7 +282,7 @@ NodeUtils.register<EnumCheckboxListNode>({
         onChange={NodeUtils.evaluateOnChange(ctx, dn.node.redrawOnChange)}
         />),
     renderDesigner: (dn) => {
-        const m = dn.route.member;
+        const m = dn.route && dn.route.member;
         return (<div>
             <FieldComponent dn={dn} member="field" />
             <ExpressionOrValueComponent dn={dn} member="labelText" type="string" defaultValue={m && m.niceName || ""} />
@@ -437,6 +439,7 @@ NodeUtils.register<EntityTableColumnNode>({
     group: null,
     order: null,
     isContainer: true,
+    avoidHighlight: true,
     validParent: "EntityTable",
     validate: (dn) => dn.node.property ? NodeUtils.validateTableColumnProperty(dn) : NodeUtils.mandatory(dn, "header"),
     renderTreeNode: NodeUtils.treeNodeTableColumnProperty,

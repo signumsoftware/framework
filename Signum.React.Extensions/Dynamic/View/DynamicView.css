@@ -43,8 +43,9 @@ span.design-default {
         flex-direction: row;
     }
 
-        div.design-main.open .design-left {
+        div.design-main .design-left.open {
             width: 40%;
+            min-width:300px;
         }
 }
 
