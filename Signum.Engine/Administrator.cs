@@ -483,7 +483,7 @@ namespace Signum.Engine
         {
 
             if (message != null)
-                return SafeConsole.WaitRows(message == "auto" ? $"BulkInsering { typeof(T).TypeName()}" : message,
+                return SafeConsole.WaitRows(message == "auto" ? $"BulkInsering {entities.Count()} {typeof(T).TypeName()}" : message,
                     () => BulkInsert(entities, options, validateFirst, timeout, message: null));
 
             if (options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
