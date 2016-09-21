@@ -10,13 +10,13 @@ export interface ContextMenuProps extends React.Props<ContextMenu>, React.HTMLAt
 export default class ContextMenu extends React.Component<ContextMenuProps, {}> {
     render() {
 
-        const { position } = this.props;
-        const props = Dic.without(this.props, { position, ref: null });
+        const { position, onHide } = this.props;
+        const props = Dic.without(this.props, { position, onHide, ref: undefined });
 
         const style: React.CSSProperties = { left: position.pageX + "px", top: position.pageY + "px", zIndex: 999, display: "block", position: "absolute" };
 
-        var childrens = React.Children.map(this.props.children,
-            (c: React.ReactElement<any>) => React.cloneElement(c, { "onSelect": combineFunction(c.props.onSelect, this.props.onHide) }));
+        const childrens = React.Children.map(this.props.children,
+            (c: React.ReactElement<any>) => c && React.cloneElement(c, { "onSelect": combineFunction(c.props.onSelect, onHide) }));
 
         const ul = (
             <ul {...props as any}  className={classes(props.className, "dropdown-menu sf-context-menu") } style={style}>
@@ -24,6 +24,6 @@ export default class ContextMenu extends React.Component<ContextMenuProps, {}> {
             </ul>
         );
 
-        return <RootCloseWrapper onRootClose={this.props.onHide}>{ul}</RootCloseWrapper>;
+        return <RootCloseWrapper onRootClose={onHide}>{ul}</RootCloseWrapper>;
     }
 }

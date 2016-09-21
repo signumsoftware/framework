@@ -100,19 +100,30 @@ namespace Signum.Windows
             return tc.Add("Item");
         }
 
+        bool isListUserInteraction = true;
+
         public IList EnsureEntities()
         {
-            if (Entities == null)
-                Entities = (IList)Activator.CreateInstance(EntitiesType);
-            return Entities;
+            try
+            {
+                this.isListUserInteraction = false;
+                if (Entities == null)
+                    Entities = (IList)Activator.CreateInstance(EntitiesType);
+                return Entities;
+            }
+            finally
+            {
+                this.isListUserInteraction = true;
+            }
         }
+
 
         public event EntityChangedEventHandler EntitiesChanged;
 
         public virtual void OnEntitiesChanged(DependencyPropertyChangedEventArgs e)
         {
             if (EntitiesChanged != null)
-                EntitiesChanged(this, false, e.OldValue, e.NewValue);
+                EntitiesChanged(this, isListUserInteraction, e.OldValue, e.NewValue);
         }
     }
 }

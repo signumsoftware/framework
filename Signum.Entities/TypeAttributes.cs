@@ -25,12 +25,36 @@ namespace Signum.Entities
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Property | AttributeTargets.Interface, AllowMultiple = false)]
     public sealed class InTypeScriptAttribute : Attribute
     {
-        public bool InTypeScript { get; set; }
+        bool? inTypeScript = null;
+        public bool? GetInTypeScript() => inTypeScript;
+        
+        
+        bool? undefined = null;
+        public bool? GetUndefined() => undefined;
+        public bool Undefined
+        {
+            get { return undefined ?? NotSet(); }
+            set { undefined = value; }
+        }
+
+        bool NotSet()
+        {
+            throw new InvalidOperationException("Not Set");
+        }
+
+        bool? @null = null;
+        public bool? GetNull() => @null;
+        public bool Null
+        {
+            get { return @null ?? NotSet(); }
+            set { @null = value; }
+        }
+
+        public InTypeScriptAttribute() { }
         public InTypeScriptAttribute(bool inTypeScript)
         {
-            this.InTypeScript = inTypeScript;
+            this.inTypeScript = inTypeScript;
         }
-        
     }
 
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]

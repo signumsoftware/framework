@@ -13,7 +13,7 @@ export interface GlobalModalContainerState {
 let current: GlobalModalContainer;
 
 export class GlobalModalContainer extends React.Component<{}, GlobalModalContainerState> {
-    constructor(props) {
+    constructor(props: {}) {
         super(props);
         this.state = { modals: [] };
         current = this;
@@ -28,11 +28,10 @@ export class GlobalModalContainer extends React.Component<{}, GlobalModalContain
     }
 }
 
-
-export function openModal<T>(modal: React.ReactElement<IModalProps>): Promise<T> {
+export function openModal<T>(modal: React.ReactElement<IModalProps>): Promise<T | undefined> {
 
     return new Promise<T>((resolve) => {
-        let cloned;
+        let cloned: React.ReactElement<IModalProps>;
         const onExited = (val: T) => {
             current.state.modals.remove(cloned);
             current.forceUpdate();
@@ -46,12 +45,3 @@ export function openModal<T>(modal: React.ReactElement<IModalProps>): Promise<T>
     });
 }
 
-
-export interface SelectValueProps extends IModalProps {
-    values: any[];
-}
-
-
-export function selectValue<T>(values: T[], toString: (val: T) => string) {
-    return null;
-}

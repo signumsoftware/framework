@@ -31,8 +31,15 @@ namespace Signum.TSGenerator
                         string result = obj.Process(file, References, this.BuildEngine.ProjectFileOfTaskNode);
 
                         var targetFile = Path.ChangeExtension(file, ".ts");
-                        Log.LogMessage($"Writing {targetFile}");
-                        File.WriteAllText(targetFile, result);
+                        if (File.Exists(targetFile) && File.ReadAllText(targetFile) == result)
+                        {
+                            Log.LogMessage($"Skipping {targetFile} (Up to date)");
+                        }
+                        else
+                        {
+                            Log.LogMessage($"Writing {targetFile}");
+                            File.WriteAllText(targetFile, result);
+                        }
                     }
                     catch (LoggerException ex)
                     {
@@ -58,7 +65,6 @@ namespace Signum.TSGenerator
     {
         public string Process(string templateFile, string referenceList, string projectFile)
         {
-
             var options = new Options
             {
                 TemplateFileName = templateFile,

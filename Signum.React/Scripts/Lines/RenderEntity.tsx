@@ -15,7 +15,7 @@ import { EntityBase, EntityBaseProps} from './EntityBase'
 
 
 export interface RenderEntityProps {
-    ctx?: TypeContext<ModifiableEntity | Lite<Entity>>;
+    ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
 }
 
@@ -26,10 +26,10 @@ export interface RenderEntityState {
 
 export class RenderEntity extends React.Component<RenderEntityProps, RenderEntityState> {
 
-    constructor(props) {
+    constructor(props: RenderEntityProps) {
         super(props);
 
-        this.state = { getComponent: null, lastLoadedType: null };
+        this.state = { getComponent: undefined, lastLoadedType: undefined };
     }
 
 
@@ -50,21 +50,21 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
     loadEntity(nextProps: RenderEntityProps): Promise<void> {
 
         if (!nextProps.ctx.value)
-            return Promise.resolve(null);
+            return Promise.resolve(undefined);
 
-        var ent = this.toEntity(nextProps.ctx.value);
+        const ent = this.toEntity(nextProps.ctx.value);
         if (ent)
-            return Promise.resolve(null);
+            return Promise.resolve(undefined);
 
-        var lite = nextProps.ctx.value as Lite<Entity>;
-        return Navigator.API.fetchAndRemember(lite).then(a => null);
+        const lite = nextProps.ctx.value as Lite<Entity>;
+        return Navigator.API.fetchAndRemember(lite).then(a => undefined);
     }
 
 
-    toEntity(entityOrLite: ModifiableEntity | Lite<Entity>): ModifiableEntity {
+    toEntity(entityOrLite: ModifiableEntity | Lite<Entity> | undefined | null): ModifiableEntity | undefined {
 
         if (!entityOrLite)
-            return null;
+            return undefined;
 
         if (isLite(entityOrLite))
             return entityOrLite.entity;
@@ -77,70 +77,76 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
 
     loadComponent(nextProps: RenderEntityProps): Promise<void> {
 
-        var e = this.toEntity(nextProps.ctx.value);
+        const e = this.toEntity(nextProps.ctx.value);
 
         if (nextProps.getComponent)
-            return Promise.resolve(null);
+            return Promise.resolve(undefined);
 
-        if (e == null) {
-            this.setState({ getComponent: null, lastLoadedType: null });
-            return Promise.resolve(null);
+        if (e == undefined) {
+            this.setState({ getComponent: undefined, lastLoadedType: undefined });
+            return Promise.resolve(undefined);
         }
         
         if (this.state.lastLoadedType == e.Type)
-            return Promise.resolve(null);
+            return Promise.resolve(undefined);
 
-
-        return Navigator.getComponent(e).then(c => {
+        return Navigator.getViewPromise(e).promise.then(c => {
             this.setState({
-                getComponent: (ctx) => React.createElement<{ ctx: TypeContext<ModifiableEntity> }>(c, {
-                    ctx: ctx
-                }),
+                getComponent: c,
                 lastLoadedType: e.Type
             });
         });
     }
 
-    render() {
-        var entity = this.toEntity(this.props.ctx.value);
+    entityComponent: React.Component<any, any>;
 
-        if (entity == null)
+    setComponent(c: React.Component<any, any>) {
+        if (c && this.entityComponent != c) {
+            this.entityComponent = c;
+            this.forceUpdate();
+        }
+    }
+
+    render() {
+        const entity = this.toEntity(this.props.ctx.value);
+
+        if (entity == undefined)
             return null;
 
-        var getComponent = this.props.getComponent;
+        let getComponent = this.props.getComponent;
 
-        if (getComponent == null) {
+        if (getComponent == undefined) {
             if (entity.Type != this.state.lastLoadedType)
                 return null;
 
             getComponent = this.state.getComponent;
 
-            if (getComponent == null)
+            if (getComponent == undefined)
                 return null;
         }
 
        
-        var ti = getTypeInfo(entity.Type);
+        const ti = getTypeInfo(entity.Type);
 
-        var ctx = this.props.ctx;
+        const ctx = this.props.ctx;
 
-        var pr = !ti ? ctx.propertyRoute : PropertyRoute.root(ti);
+        const pr = !ti ? ctx.propertyRoute : PropertyRoute.root(ti);
         
 
-        var frame: EntityFrame<ModifiableEntity> = {
+        const frame: EntityFrame<ModifiableEntity> = {
             frameComponent: this,
-            entityComponent: null,
+            entityComponent: this.entityComponent,
             revalidate: () => this.props.ctx.frame && this.props.ctx.frame.revalidate(),
             onClose: () => { throw new Error("Not implemented Exception"); },
             onReload: pack => { throw new Error("Not implemented Exception"); },
             setError: (modelState, initialPrefix) => { throw new Error("Not implemented Exception"); },
         }; 
 
-        var newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(entity, ""));
+        const newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(entity, ""));
 
         return (
             <div data-propertypath={ctx.propertyPath}>
-                {getComponent(newCtx) }
+                {React.cloneElement(getComponent(newCtx), { ref: (c: React.Component<any, any>) => this.setComponent(c) }) }
             </div>
         );
     }

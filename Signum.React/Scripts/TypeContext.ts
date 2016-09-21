@@ -19,7 +19,7 @@ export class StyleContext {
     styleOptions: StyleOptions;
     parent: StyleContext;
 
-    constructor(parent: StyleContext, styleOptions: StyleOptions) {
+    constructor(parent: StyleContext | undefined, styleOptions: StyleOptions | undefined) {
         this.parent = parent || StyleContext.default;
         this.styleOptions = styleOptions || {};
 
@@ -27,7 +27,7 @@ export class StyleContext {
             this.styleOptions.valueColumns = StyleContext.bsColumnsInvert(this.styleOptions.labelColumns);
     }
 
-    static default: StyleContext = new StyleContext(null,
+    static default: StyleContext = new StyleContext(undefined,
     {
         formGroupStyle : "LabelColumns",
         formGroupSize : "Small",
@@ -35,15 +35,15 @@ export class StyleContext {
         readOnly : false,
         placeholderLabels : false,
         formControlStaticAsFormControlReadonly: false,
-        frame: null,
+        frame: undefined,
     });
 
     get formGroupStyle(): FormGroupStyle {
-        return this.styleOptions.formGroupStyle != null ? this.styleOptions.formGroupStyle : this.parent.formGroupStyle;
+        return this.styleOptions.formGroupStyle != undefined ? this.styleOptions.formGroupStyle : this.parent.formGroupStyle;
     }
 
     get formGroupSize(): FormGroupSize {
-        return this.styleOptions.formGroupSize != null ? this.styleOptions.formGroupSize : this.parent.formGroupSize;
+        return this.styleOptions.formGroupSize != undefined ? this.styleOptions.formGroupSize : this.parent.formGroupSize;
     }
 
     get formGroupSizeCss(): string {
@@ -52,15 +52,15 @@ export class StyleContext {
     }
 
     get placeholderLabels(): boolean {
-        return this.styleOptions.placeholderLabels != null ? this.styleOptions.placeholderLabels : this.parent.placeholderLabels;
+        return this.styleOptions.placeholderLabels != undefined ? this.styleOptions.placeholderLabels : this.parent.placeholderLabels;
     }
 
     get formControlStaticAsFormControlReadonly(): boolean {
-        return this.styleOptions.formControlStaticAsFormControlReadonly != null ? this.styleOptions.formControlStaticAsFormControlReadonly : this.parent.formControlStaticAsFormControlReadonly;
+        return this.styleOptions.formControlStaticAsFormControlReadonly != undefined ? this.styleOptions.formControlStaticAsFormControlReadonly : this.parent.formControlStaticAsFormControlReadonly;
     }
     
     get labelColumns(): BsColumns {
-        return this.styleOptions.labelColumns != null ? this.styleOptions.labelColumns : this.parent.labelColumns;
+        return this.styleOptions.labelColumns != undefined ? this.styleOptions.labelColumns : this.parent.labelColumns;
     }
 
     get labelColumnsCss(): string {
@@ -68,7 +68,7 @@ export class StyleContext {
     }
 
     get valueColumns(): BsColumns {
-        return this.styleOptions.valueColumns != null ? this.styleOptions.valueColumns : this.parent.valueColumns;
+        return this.styleOptions.valueColumns != undefined ? this.styleOptions.valueColumns : this.parent.valueColumns;
     }
 
     get valueColumnsCss(): string {
@@ -76,7 +76,7 @@ export class StyleContext {
     }
 
     get readOnly(): boolean {
-        return this.styleOptions.readOnly != null ? this.styleOptions.readOnly :
+        return this.styleOptions.readOnly != undefined ? this.styleOptions.readOnly :
             this.parent ? this.parent.readOnly : false;
     }
 
@@ -84,10 +84,14 @@ export class StyleContext {
         this.styleOptions.readOnly = value;
     }
 
-    
-    get frame(): EntityFrame<ModifiableEntity> {
-        return this.styleOptions.frame ? this.styleOptions.frame :
-            this.parent ? this.parent.frame : null;
+    get frame(): EntityFrame<ModifiableEntity> | undefined {
+        if (this.styleOptions.frame)
+            return this.styleOptions.frame;
+
+        if (this.parent)
+            return this.parent.frame;
+
+        return undefined;
     }
 
 
@@ -103,7 +107,7 @@ export class StyleContext {
     static bsColumnsInvert(bs: BsColumns): BsColumns {
         return {
             xs: bs.xs ? (12 - bs.xs) : undefined,
-            sm: bs.sm ? (12 - bs.sm) : undefined,
+            sm: (12 - bs.sm),
             md: bs.md ? (12 - bs.md) : undefined,
             lg: bs.lg ? (12 - bs.lg) : undefined,
         };
@@ -111,7 +115,6 @@ export class StyleContext {
 }
 
 export interface StyleOptions {
-
     formGroupStyle?: FormGroupStyle;
     formGroupSize?: FormGroupSize;
     placeholderLabels?: boolean;
@@ -134,15 +137,14 @@ export interface BsColumns {
 
 
 export class TypeContext<T> extends StyleContext {
-
-
+    
     propertyRoute: PropertyRoute;
     binding: IBinding<T>;
     prefix: string;
 
     get value() {
-        if (this.binding == null)
-            return null; //React Dev Tools
+        if (this.binding == undefined)
+            return undefined as any; //React Dev Tools
 
         return this.binding.getValue();
     }
@@ -153,22 +155,22 @@ export class TypeContext<T> extends StyleContext {
 
 
     get error() {
-        if (this.binding == null)
-            return null; //React Dev Tools
+        if (this.binding == undefined)
+            return undefined as any; //React Dev Tools
 
         return this.binding.getError();
     }
 
-    set error(val: string) {
+    set error(val: string | undefined) {
         this.binding.setError(val);
     }
 
     
     static root<T extends ModifiableEntity>(type: Type<T>, value: T, styleOptions?: StyleOptions): TypeContext<T> {
-        return new TypeContext(null, styleOptions, PropertyRoute.root(type), new ReadonlyBinding<T>(value, ""));
+        return new TypeContext(undefined, styleOptions, PropertyRoute.root(type), new ReadonlyBinding<T>(value, ""));
     }
 
-    constructor(parent: StyleContext, styleOptions: StyleOptions, propertyRoute: PropertyRoute, binding: IBinding<T>) {
+    constructor(parent: StyleContext | undefined, styleOptions: StyleOptions | undefined, propertyRoute: PropertyRoute /*| undefined*/, binding: IBinding<T>) {
         super(parent, styleOptions);
         this.propertyRoute = propertyRoute;
         this.binding = binding;
@@ -176,8 +178,8 @@ export class TypeContext<T> extends StyleContext {
         this.prefix = compose(parent && (parent as TypeContext<any>).prefix, binding.suffix);
 
     }
-
-    subCtx(styleOptions?: StyleOptions): TypeContext<T>     
+  
+    subCtx(styleOptions: StyleOptions): TypeContext<T>     
     subCtx<R>(property: (val: T) => R, styleOptions?: StyleOptions): TypeContext<R>
     subCtx(propertyOrStyleOptions: ((val: T) => any) | StyleOptions, styleOptions?: StyleOptions): TypeContext<any>
     {
@@ -197,39 +199,39 @@ export class TypeContext<T> extends StyleContext {
         return result;
     }
 
-    niceName(property?: (val: T) => any) {
+    niceName(property?: (val: T) => any): string  {
 
-        if (this.propertyRoute == null)
-            return null;
+        if (this.propertyRoute == undefined)
+            throw new Error("No propertyRoute");
 
-        if (property == null)
-            return this.propertyRoute.member.niceName;
+        if (property == undefined)
+            return this.propertyRoute.member!.niceName;
 
-        return this.propertyRoute.add(property).member.niceName;
+        return this.propertyRoute.add(property).member!.niceName;
     }
 
-    compose(suffix: string) {
+    compose(suffix: string): string {
         return compose(this.prefix, suffix);
     }
 
-    tryFindParent<S extends ModifiableEntity>(type: Type<S>): S {
+    tryFindParent<S extends ModifiableEntity>(type: Type<S>): S | undefined {
 
-        var current: TypeContext<any> = this;
+        let current: TypeContext<any> = this;
 
         while (current) {
-            var entity = current.value as ModifiableEntity;
+            const entity = current.value as ModifiableEntity;
             if (entity && entity.Type == type.typeName)
                 return entity as S;
 
             current = current.parent as TypeContext<any>;
         }
 
-        return null;
+        return undefined;
     }
 
     findParent<S extends ModifiableEntity>(type: Type<S>): S {
-        var result = this.tryFindParent(type);
-        if (result == null)
+        const result = this.tryFindParent(type);
+        if (result == undefined)
             throw new Error(`No '${type.typeName}' found in the parent chain`);
 
         return result;
@@ -245,11 +247,11 @@ export class TypeContext<T> extends StyleContext {
     }
 
     get propertyPath() {
-        return this.propertyRoute ? this.propertyRoute.propertyPath() : null;
+        return this.propertyRoute ? this.propertyRoute.propertyPath() : undefined;
     }
 
-    get errorClass(): string {
-        return !!this.error ? "has-error" : null;
+    get errorClass(): string | undefined {
+        return !!this.error ? "has-error" : undefined;
     }
 }
 
@@ -274,21 +276,21 @@ export interface EntityFrame<T extends ModifiableEntity> {
 }
 
 
-function compose(prefix: string, suffix: string){
+function compose(prefix: string | undefined, suffix: string | undefined): string {
     if (!prefix || prefix == "")
-        return suffix;
+        return suffix || "";
 
     if (!suffix || suffix == "")
-        return prefix;
+        return prefix || "";
 
     return prefix + "_" + suffix;
 }
 
 export function mlistItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[] {
     
-    return ctx.value.map((mle, i) =>
-        new TypeContext<T>(ctx, null,
-            ctx.propertyRoute.addMember({ name: "", type: LambdaMemberType.Indexer }),
+    return ctx.value!.map((mle, i) =>
+        new TypeContext<T>(ctx, undefined,
+            ctx.propertyRoute.addMember({ name: "", type: "Indexer" }),
             new ReadonlyBinding(mle.element, i.toString())));
 }
 

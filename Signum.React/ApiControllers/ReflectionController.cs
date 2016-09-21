@@ -12,6 +12,8 @@ using Signum.React.Facades;
 using Signum.Utilities;
 using Signum.Engine;
 using Signum.React.Filters;
+using Signum.Entities.Basics;
+using Signum.Engine.Basics;
 
 namespace Signum.React.ApiControllers
 {
@@ -21,6 +23,12 @@ namespace Signum.React.ApiControllers
         public Dictionary<string, TypeInfoTS> Types()
         {
             return ReflectionServer.GetTypeInfoTS();
+        }
+
+        [Route("api/reflection/typeEntity/{typeName}"), HttpGet]
+        public TypeEntity GetTypeEntity(string typeName)
+        {
+            return TypeLogic.GetType(typeName).ToTypeEntity();
         }
     }
 }

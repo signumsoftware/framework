@@ -194,6 +194,7 @@
   <Type Name="ModifiableEntity" Description="Veränderbare Entität" />
   <Type Name="NormalControlMessage">
     <Member Name="Save" Description="Speichern" />
+    <Member Name="SaveChangesFirst" Description="Erst Änderungen speichern" />
     <Member Name="ViewForType0IsNotAllowed" Description="Anzeigen des Typs {0} ist nicht zulässig" />
   </Type>
   <Type Name="NormalWindowMessage">

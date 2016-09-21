@@ -1,23 +1,23 @@
 ﻿import * as React from 'react'
 import { Link } from 'react-router'
 import { Dic, classes } from '../Globals'
-import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, newMListElement } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, newMListElement, isLite } from '../Signum.Entities'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
-import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll } from '../Reflection'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks} from '../Lines/LineBase'
+import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, getTypeName } from '../Reflection'
+import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
 import Typeahead from '../Lines/Typeahead'
 import { EntityBase, EntityBaseProps} from './EntityBase'
 
 
 export interface EntityListBaseProps extends EntityBaseProps {
     move?: boolean;
-    onFindMany?: () => Promise<(ModifiableEntity | Lite<Entity>)[]>;
+    onFindMany?: () => Promise<(ModifiableEntity | Lite<Entity>)[] | undefined>;
 
-    ctx?: TypeContext<MList<Lite<Entity> | ModifiableEntity>>;
+    ctx: TypeContext<MList<Lite<Entity> | ModifiableEntity>>;
 }
 
 
@@ -29,7 +29,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
             throw new Error(`'onFind' property is not applicable to '${this}'. Use 'onFindMany' instead`);
 
 
-        if(props.ctx.value == null)
+        if(props.ctx.value == undefined)
             props.ctx.value = [];
 
         super.calculateDefaultState(props);
@@ -40,7 +40,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     }
 
     moveUp(index: number) {
-        const list = this.props.ctx.value;
+        const list = this.props.ctx.value!;
         if (index == 0)
             return;
 
@@ -51,10 +51,10 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     }
     renderMoveUp(btn: boolean, index: number) {
         if (!this.state.move || this.state.ctx.readOnly)
-            return null;
+            return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-move", btn ? "btn btn-default" : null) }
+            <a className={classes("sf-line-button", "sf-move", btn ? "btn btn-default" : undefined) }
                 onClick={() => this.moveUp(index) }
                 title={EntityControlMessage.MoveUp.niceToString() }>
                 <span className="glyphicon glyphicon-chevron-up"/>
@@ -63,7 +63,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     }
 
     moveDown(index: number) {
-        const list = this.props.ctx.value;
+        const list = this.props.ctx.value!;
         if (index == list.length - 1)
             return;
   
@@ -75,10 +75,10 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
     renderMoveDown(btn: boolean, index: number) {
         if (!this.state.move || this.state.ctx.readOnly)
-            return null;
+            return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-move", btn ? "btn btn-default" : null) }
+            <a className={classes("sf-line-button", "sf-move", btn ? "btn btn-default" : undefined) }
                 onClick={() => this.moveDown(index) }
                 title={EntityControlMessage.MoveUp.niceToString() }>
                 <span className="glyphicon glyphicon-chevron-down"/>
@@ -89,14 +89,17 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
         event.preventDefault();
 
-        const onCreate = this.props.onCreate ?
+        const promise = this.props.onCreate ?
             this.props.onCreate() : this.defaultCreate();
 
-        onCreate
-            .then(e => {
+        if (promise == null)
+            return;
 
-                if (e == null)
-                    return null;
+        promise
+            .then<ModifiableEntity | Lite<Entity> | undefined>(e => {
+
+                if (e == undefined)
+                    return undefined;
 
                 if (!this.state.viewOnCreate)
                     return Promise.resolve(e);
@@ -112,17 +115,30 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
                 if (!e)
                     return;
 
-                this.convert(e).then(m => {
-                    const list = this.props.ctx.value;
-                    list.push(newMListElement(e));
-                    this.setValue(list);
-                }).done();
+                this.convert(e)
+                    .then(m => this.addElement(m))
+                    .done();
             }).done();
     };
 
-    defaultFindMany(): Promise<(ModifiableEntity | Lite<Entity>)[]> {
+    defaultFindMany(): Promise<(ModifiableEntity | Lite<Entity>)[] | undefined> {
+
+        if (this.props.findOptions) {
+            return Finder.findMany(this.props.findOptions);
+        }
+
         return this.chooseType(Finder.isFindable)
-            .then(qn => qn == null ? null : Finder.findMany({ queryName: qn } as FindOptions));
+            .then<(ModifiableEntity | Lite<Entity>)[] | undefined>(qn => qn == undefined ? undefined : Finder.findMany({ queryName: qn } as FindOptions));
+    }
+
+    addElement(entityOrLite: Lite<Entity> | ModifiableEntity) {
+
+        if (isLite(entityOrLite) != (this.state.type!.isLite || false))
+            throw new Error("entityOrLite should be already converted");
+
+        const list = this.props.ctx.value!;
+        list.push(newMListElement(entityOrLite));
+        this.setValue(list);
     }
 
 
@@ -137,9 +153,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
                 return;
 
             Promise.all(lites.map(a => this.convert(a))).then(entites => {
-                const list = this.props.ctx.value;
-                entites.forEach(e => list.push(newMListElement(e)));
-                this.setValue(list);
+                entites.forEach(e => this.addElement(e));
             }).done();
         }).done();
     };
@@ -148,15 +162,16 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
         event.preventDefault();
 
-        var mle = this.props.ctx.value[index];
+        const list = this.props.ctx.value!;
+        const mle = list[index];
 
         (this.props.onRemove ? this.props.onRemove(mle.element) : Promise.resolve(true))
             .then(result => {
                 if (result == false)
                     return;
 
-                this.props.ctx.value.remove(mle);
-                this.forceUpdate();
+                list.remove(mle);
+                this.setValue(list);
             }).done();
     };
 

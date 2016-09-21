@@ -6,7 +6,7 @@ import { Dic, addClass } from '../Globals'
 import { DateTimePicker } from 'react-widgets'
 import 'react-widgets/dist/css/react-widgets.css';
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
-import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference, toMomentFormat, toMomentDurationFormat } from '../Reflection'
+import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference, toMomentFormat, toMomentDurationFormat, toNumbroFormat, isTypeEnum } from '../Reflection'
 import { LineBase, LineBaseProps, runTasks, FormGroup, FormControlStatic } from '../Lines/LineBase'
 
 
@@ -43,12 +43,12 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
 
     calculateValueLineType(state : ValueLineProps): ValueLineType {
 
-        var t = state.type;
+        const t = state.type!;
 
         if (t.isCollection || t.isLite)
             throw new Error("ValueLine not implemented for " + JSON.stringify(t));
-
-        if (t.isEnum || t.name == "boolean" && !t.isNotNullable)
+        
+        if (isTypeEnum(t.name) || t.name == "boolean" && !t.isNotNullable)
             return ValueLineType.Enum;
 
         if (t.name == "boolean")
@@ -57,7 +57,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
         if (t.name == "datetime")
             return ValueLineType.DateTime;
 
-        if (t.name == "string" || t.name == "TimeSpan")
+        if (t.name == "string" || t.name == "Guid")
             return ValueLineType.TextBox;
 
         if (t.name == "number")
@@ -66,14 +66,14 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
         if (t.name == "decimal")
             return ValueLineType.Decimal;
 
-        if (t.name == "timespan")
+        if (t.name == "TimeSpan")
             return ValueLineType.TimeSpan;
 
         throw new Error(`No value line found for '${t.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
     }
 
     overrideProps(state: ValueLineProps, overridenProps: ValueLineProps) {
-        var valueHtmlProps = Dic.extend(state.valueHtmlProps, overridenProps.valueHtmlProps);
+        const valueHtmlProps = Dic.extendUndefined(state.valueHtmlProps, overridenProps.valueHtmlProps);
         super.overrideProps(state, overridenProps);
         state.valueHtmlProps = valueHtmlProps;
     }
@@ -85,14 +85,14 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
 
     renderInternal() {
 
-        if (this.state.visible == false || this.state.hideIfNull && this.state.ctx.value == null)
+        if (this.state.visible == false || this.state.hideIfNull && this.state.ctx.value == undefined)
             return null;
 
-        return ValueLine.renderers[this.state.valueLineType](this);
+        return ValueLine.renderers[this.state.valueLineType!](this);
 
     }
 
-    static withUnit(unit: React.ReactNode, input: JSX.Element): JSX.Element {
+    static withUnit(unit: React.ReactNode | undefined, input: JSX.Element): JSX.Element {
         if (!unit)
             return input;
 
@@ -166,12 +166,12 @@ ValueLine.renderers[ValueLineType.Boolean as any] = (vl) => {
 
 ValueLine.renderers[ValueLineType.Enum as any] = (vl) => {
 
-    if (vl.state.type.name == "boolean")
+    if (vl.state.type!.name == "boolean")
         return internalComboBox(vl, getTypeInfo("BooleanEnum"),
             str => str == "True" ? true : false,
             val => val == true ? "True" : "False");
 
-    return internalComboBox(vl, getTypeInfo(vl.state.type.name), str => str, str => str);
+    return internalComboBox(vl, getTypeInfo(vl.state.type!.name), str => str, str => str);
 };
 
 function internalComboBox(vl: ValueLine, typeInfo: TypeInfo, parseValue: (str: string) => any, toStringValue: (val: any) => string) {
@@ -179,15 +179,15 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo, parseValue: (str: s
     const s = vl.state;
     let items = s.comboBoxItems || Dic.getValues(typeInfo.members);
 
-    if (!s.type.isNotNullable || s.ctx.value == null)
+    if (!s.type!.isNotNullable || s.ctx.value == undefined)
         items = [{ name: "", niceName: " - " }].concat(items);
 
     if (s.ctx.readOnly)
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-                { ValueLine.withUnit(s.unitText,
-                    <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx}>
-                           {s.ctx.value == null ? null : items.filter(a => a.name == toStringValue(s.ctx.value)).single().niceName}
+                {ValueLine.withUnit(s.unitText,
+                    <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx}>
+                           {s.ctx.value == undefined ? undefined : items.filter(a => a.name == toStringValue(s.ctx.value)).single().niceName}
                     </FormControlStatic>) }
             </FormGroup>
         );
@@ -201,7 +201,7 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo, parseValue: (str: s
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
             { ValueLine.withUnit(s.unitText,
-                <select {...vl.state.valueHtmlProps} value={s.ctx.value == null ? "" : toStringValue(s.ctx.value)} className={addClass(vl.state.valueHtmlProps, "form-control") } onChange={ handleEnumOnChange } >
+                <select {...vl.state.valueHtmlProps} value={s.ctx.value == undefined ? "" : toStringValue(s.ctx.value)} className={addClass(vl.state.valueHtmlProps, "form-control") } onChange={ handleEnumOnChange } >
                         {items.map((mi, i) => <option key={i} value={mi.name}>{mi.niceName}</option>) } 
                 </select>)
             }
@@ -217,7 +217,7 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
     if (s.ctx.readOnly)
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-                { ValueLine.withUnit(s.unitText, <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
+                {ValueLine.withUnit(s.unitText, <FormControlStatic htmlProps={vl.state.valueHtmlProps}  ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
             </FormGroup>
         );
 
@@ -226,8 +226,8 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
         vl.setValue(input.value);
     };
 
-    let handleBlur: (e: React.SyntheticEvent) => void;
-    if (s.autoTrim == null || s.autoTrim == true) {
+    let handleBlur: ((e: React.SyntheticEvent) => void) | undefined = undefined;
+    if (s.autoTrim == undefined || s.autoTrim == true) {
         handleBlur = (e: React.SyntheticEvent) => {
             const input = e.currentTarget as HTMLInputElement;
             if (input.value && input.value.trim() != input.value)
@@ -246,17 +246,17 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
                     value={s.ctx.value || ""}
                     onBlur={handleBlur}
                     onChange={handleTextOnChange}
-                    placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : null}/>)
+                    placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : undefined}/>)
             }
         </FormGroup>
     );
 };
 
-function asString(reactChild: React.ReactChild) {
+function asString(reactChild: React.ReactChild | undefined): string | undefined{
     if (typeof reactChild == "string")
         return reactChild as string;
 
-    return null;
+    return undefined;
 }
 
 ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
@@ -266,7 +266,7 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
     if (s.ctx.readOnly)
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-                { ValueLine.withUnit(s.unitText, <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
+                {ValueLine.withUnit(s.unitText, <FormControlStatic htmlProps={vl.state.valueHtmlProps}  ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
             </FormGroup>
         );
 
@@ -275,7 +275,7 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
         vl.setValue(input.value);
     };
 
-    let handleBlur: (e: React.SyntheticEvent) => void;
+    let handleBlur: ((e: React.SyntheticEvent) => void) | undefined = undefined;
     if (s.autoTrim == true) {
         handleBlur = (e: React.SyntheticEvent) => {
             const input = e.currentTarget as HTMLInputElement;
@@ -292,7 +292,7 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
             <textarea {...vl.state.valueHtmlProps} className={addClass(vl.state.valueHtmlProps, "form-control")} value={s.ctx.value || ""}
                 onChange={handleTextOnChange}
                 onBlur={handleBlur}
-                placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : null}/>
+                placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : undefined}/>
         </FormGroup>
     );
 };
@@ -308,14 +308,14 @@ ValueLine.renderers[ValueLineType.Decimal as any] = (vl) => {
 function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) {
     const s = vl.state
 
-    var numeralFormat = toNumeralFormat(s.formatText); 
+    const numbroFormat = toNumbroFormat(s.formatText); 
 
     if (s.ctx.readOnly)
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
                 { ValueLine.withUnit(s.unitText,
-                    <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx} className={addClass(vl.state.valueHtmlProps, "numeric") }>
-                        {s.ctx.value == null ? "" : numbro(s.ctx.value).format(numeralFormat) }
+                    <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx} className="numeric">
+                        {s.ctx.value == null ? "" : numbro(s.ctx.value).format(numbroFormat) }
                     </FormControlStatic>) }
             </FormGroup>
         );
@@ -324,8 +324,8 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) 
         vl.setValue(newValue);
     };
 
-    var htmlProps = Dic.extend(
-        { placeholder: s.ctx.placeholderLabels ? asString(s.labelText) : null } as React.HTMLAttributes,
+    const htmlProps = Dic.extend(
+        { placeholder: s.ctx.placeholderLabels ? asString(s.labelText) : undefined } as React.HTMLAttributes,
         vl.props.valueHtmlProps);
 
     return (
@@ -336,53 +336,32 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) 
                     value={s.ctx.value}
                     onChange={handleOnChange}
                     validateKey={validateKey}
-                    format={ numeralFormat}
+                    format={ numbroFormat}
                     />
             ) }
         </FormGroup>
     );
 }
 
-function toNumeralFormat(format: string) {
-
-    if (format == null)
-        return null;
-
-    if (format.startsWith("C"))
-        return "0." + "0".repeat(parseInt(format.after("C")));
-
-    if (format.startsWith("N"))
-        return "0." + "0".repeat(parseInt(format.after("N")));
-
-    if (format.startsWith("D"))
-        return "0".repeat(parseInt(format.after("D")));
-
-    if (format.startsWith("E"))
-        return "0." + "0".repeat(parseInt(format.after("E")));
-
-    if (format.startsWith("P"))
-        return "0." + "0".repeat(parseInt(format.after("P"))) + "%";
-
-    return format;
-}
-
 export interface NumericTextBoxProps {
     value: number;
-    onChange: (newValue: number) => void;
+    onChange: (newValue: number | null) => void;
     validateKey: React.KeyboardEventHandler;
-    format: string;
+    format?: string;
     htmlProps: React.HTMLAttributes;
 }
 
-export class NumericTextBox extends React.Component<NumericTextBoxProps, { text: string }> {
+export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?: string }> {
 
-    state = { text: null };
-
-
+    constructor(props: NumericTextBoxProps) {
+        super(props);
+        this.state = { text: undefined };
+    }
+    
     render() {
 
-        var value = this.state.text != null ? this.state.text :
-            this.props.value != null ? numbro(this.props.value).format(this.props.format) :
+        const value = this.state.text != undefined ? this.state.text :
+            this.props.value != undefined ? numbro(this.props.value).format(this.props.format) :
                 "";
 
         return <input {...this.props.htmlProps} type="text" className={addClass(this.props.htmlProps, "form-control numeric") } value={value}
@@ -394,8 +373,8 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text:
 
     handleOnBlur = (e: React.SyntheticEvent) => {
         const input = e.currentTarget as HTMLInputElement;
-        var result = input.value == null || input.value.length == 0 ? null : numbro(input.value).value();
-        this.setState({ text: null });
+        const result = input.value == undefined || input.value.length == 0 ? null : numbro(input.value).value();
+        this.setState({ text: undefined });
         this.props.onChange(result);
     }
 
@@ -416,13 +395,13 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
 
     const momentFormat = toMomentFormat(s.formatText);
 
-    const m = s.ctx.value ? moment(s.ctx.value, moment.ISO_8601()) : null;
+    const m = s.ctx.value ? moment(s.ctx.value, moment.ISO_8601()) : undefined;
     const showTime = momentFormat != "L" && momentFormat != "LL";
 
     if (s.ctx.readOnly)
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-                { ValueLine.withUnit(s.unitText, <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx}>{m && m.format(momentFormat) }</FormControlStatic>) }
+                {ValueLine.withUnit(s.unitText, <FormControlStatic htmlProps={vl.state.valueHtmlProps}  ctx={s.ctx}>{m && m.format(momentFormat) }</FormControlStatic>) }
             </FormGroup>
         );
 
@@ -432,7 +411,7 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
         vl.setValue(m.isValid() ? m.format(moment.ISO_8601()) : null);
     };
 
-    var currentDate = moment();
+    let currentDate = moment();
     if (!showTime)
         currentDate = currentDate.startOf("day");
     
@@ -458,10 +437,10 @@ function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler)
     const ticksPerMillisecond = 10000;
 
     if (s.ctx.readOnly) {
-        const d = s.ctx.value ? moment.duration(s.ctx.value / ticksPerMillisecond) : null;
+        const d = s.ctx.value ? moment.duration(s.ctx.value / ticksPerMillisecond) : undefined;
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-                <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx} className={addClass(vl.state.valueHtmlProps, "numeric") }>{d && d.format(durationFormat) }</FormControlStatic>
+                <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx} className={addClass(vl.state.valueHtmlProps, "numeric") }>{d && d.format(durationFormat) }</FormControlStatic>
             </FormGroup>
         );
     }
@@ -472,7 +451,7 @@ function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler)
         vl.setValue(moment.isDuration(d) ? (d.asMilliseconds() * ticksPerMillisecond) : null);
     };
 
-    var htmlProps = Dic.extend({ placeholder: s.ctx.placeholderLabels ? asString(s.labelText) : null } as React.HTMLAttributes, vl.props.valueHtmlProps);
+    const htmlProps = Dic.extend({ placeholder: s.ctx.placeholderLabels ? asString(s.labelText) : undefined } as React.HTMLAttributes, vl.props.valueHtmlProps);
 
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
@@ -483,21 +462,23 @@ function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler)
 
 export interface DurationTextBoxProps {
     value: number;
-    onChange: (newValue: number) => void;
+    onChange: (newValue: number | null) => void;
     validateKey: React.KeyboardEventHandler;
-    format: string;
+    format?: string;
     htmlProps: React.HTMLAttributes;
 }
 
-export class DurationTextBox extends React.Component<DurationTextBoxProps, { text: string }> {
+export class DurationTextBox extends React.Component<DurationTextBoxProps, { text?: string }> {
 
-    state = { text: null };
-
+    constructor(props: DurationTextBoxProps) {
+        super(props);
+        this.state = { text: undefined };
+    }
 
     render() {
         const ticksPerMillisecond = 10000;
-        var value = this.state.text != null ? this.state.text :
-            this.props.value != null ? moment.duration(this.props.value / ticksPerMillisecond).format(this.props.format) :
+        const value = this.state.text != undefined ? this.state.text :
+            this.props.value != undefined ? moment.duration(this.props.value / ticksPerMillisecond).format(this.props.format) :
                 "";
 
         return <input {...this.props.htmlProps} type="text" className={addClass(this.props.htmlProps, "form-control numeric") } value={value}
@@ -509,8 +490,8 @@ export class DurationTextBox extends React.Component<DurationTextBoxProps, { tex
 
     handleOnBlur = (e: React.SyntheticEvent) => {
         const input = e.currentTarget as HTMLInputElement;
-        var result = input.value == null || input.value.length == 0 ? null : moment.duration(input.value).asMilliseconds();
-        this.setState({ text: null });
+        const result = input.value == undefined || input.value.length == 0 ? null : moment.duration(input.value).asMilliseconds();
+        this.setState({ text: undefined });
         this.props.onChange(result);
     }
 

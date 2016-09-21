@@ -38,9 +38,9 @@ namespace Signum.React.Json
 
             while (reader.TokenType != JsonToken.EndArray)
             {
-                var obj = serializer.Deserialize(reader);
+                var token = JToken.Load(reader);
 
-                var converted = ConvertObject(obj, serializer);
+                var converted = ConvertObject(token, serializer);
 
                 args.Add(converted);
 
@@ -52,18 +52,19 @@ namespace Signum.React.Json
             return args.ToArray();
         }
 
-        private object ConvertObject(object obj, JsonSerializer serializer)
+        private object ConvertObject(JToken token, JsonSerializer serializer)
         {
-            if (obj == null)
+            if (token == null)
                 return null;
-
-            if (obj is string || obj is DateTime || obj is long || obj is double)
+            if (token is JValue)
             {
+                var obj = ((JValue) token).Value;
                 return obj;
             }
-            else if (obj is JObject)
+
+            if (token is JObject)
             {
-                var j = (JObject)obj;
+                var j = (JObject)token;
 
                 if (j.Property("EntityType") != null)
                     return serializer.Deserialize(new JTokenReader(j), typeof(Lite<Entity>));
@@ -71,8 +72,16 @@ namespace Signum.React.Json
                 if (j.Property("Type") != null)
                     return serializer.Deserialize(new JTokenReader(j), typeof(ModifiableEntity));
             }
+            else if (token is JArray)
+            {
+                var a = (JArray)token;
+                var result = a.Select(t => ConvertObject(t, serializer)).ToList();
+                return result;
 
-            throw new NotSupportedException("Unable to deserialize dynamically:" + obj.ToString());
+            }
+
+            throw new NotSupportedException("Unable to deserialize dynamically:" + token.ToString());
         }
+
     }
 }

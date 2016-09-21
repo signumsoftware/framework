@@ -10,6 +10,11 @@ export interface CountOptions {
     filterOptions?: FilterOption[];
 }
 
+export interface CountOptionsParsed {
+    queryKey: string;
+    filterOptions: FilterOptionParsed; 
+}
+
 export interface FindOptions {
     queryName: PseudoType | QueryKey;
     parentColumn?: string;
@@ -32,60 +37,57 @@ export interface FindOptions {
     contextMenu?: boolean;
 }
 
-export function expandParentColumn(findOptions: FindOptions) {
-
-    if (!findOptions.parentColumn)
-        return findOptions; 
-
-    var fo = Dic.extend({}, findOptions) as FindOptions;
-
-    fo.filterOptions = [
-        { columnName: fo.parentColumn, operation: "EqualTo", value: fo.parentValue, frozen: true },
-        ...(fo.filterOptions || [])
-    ];
-
-    if (!fo.parentColumn.contains(".") && (fo.columnOptionsMode == null || fo.columnOptionsMode == "Remove")) {
-        fo.columnOptions = [
-            { columnName: fo.parentColumn },
-            ...(fo.columnOptions || [])
-        ];
-
-        fo.columnOptionsMode = "Remove";
-    }
-
-    if (fo.searchOnLoad == null)
-        fo.searchOnLoad = true;
-
-    fo.parentColumn = null;
-    fo.parentValue = null;
-
-    return fo;
+export interface FindOptionsParsed {
+    queryKey: string;
+    filterOptions: FilterOptionParsed[];
+    orderOptions: OrderOptionParsed[];
+    columnOptions: ColumnOptionParsed[];
+    pagination: Pagination;
+    searchOnLoad: boolean;
+    showHeader: boolean;
+    showFilters: boolean;
+    showFilterButton: boolean;
+    showFooter: boolean;
+    allowChangeColumns: boolean;
+    create: boolean;
+    navigate: boolean;
+    contextMenu: boolean;
 }
+
 
 export interface FilterOption {
     columnName: string;
-    token?: QueryToken;
     frozen?: boolean;
     operation?: FilterOperation;
     value: any;
 }
 
-
-
+export interface FilterOptionParsed {
+    token?: QueryToken;
+    frozen: boolean;
+    operation?: FilterOperation;
+    value: any;
+}
 
 export interface OrderOption {
     columnName: string;
-    token?: QueryToken;
     orderType: OrderType;
 }
 
+export interface OrderOptionParsed {
+    token: QueryToken;
+    orderType: OrderType;
+}
 
 export interface ColumnOption {
     columnName: string;
-    token?: QueryToken;
     displayName?: string;
 }
 
+export interface ColumnOptionParsed {
+    token?: QueryToken;
+    displayName?: string;
+}
 
 export const DefaultPagination: Pagination = {
     mode: "Paginate",
@@ -115,10 +117,11 @@ export interface QueryToken {
     typeColor: string;
     niceTypeName: string;
     isGroupable: boolean;
-    filterType: FilterType;
+    filterType?: FilterType;
     fullKey: string;
     queryTokenType?: QueryTokenType;
     parent?: QueryToken;
+    propertyRoute?: string;
 }
 
 export enum QueryTokenType {
@@ -127,8 +130,8 @@ export enum QueryTokenType {
     AnyOrAll = "AnyOrAll" as any,
 }
 
-export function hasAnyOrAll(token: QueryToken) : boolean {
-    if(token == null)
+export function hasAnyOrAll(token: QueryToken | undefined) : boolean {
+    if(token == undefined)
         return false;
 
     if(token.queryTokenType == QueryTokenType.AnyOrAll)
@@ -137,8 +140,8 @@ export function hasAnyOrAll(token: QueryToken) : boolean {
     return hasAnyOrAll(token.parent);
 }
 
-export function hasAggregate(token: QueryToken): boolean {
-    if (token == null)
+export function hasAggregate(token: QueryToken | undefined): boolean {
+    if (token == undefined)
         return false;
 
     if (token.queryTokenType == QueryTokenType.Aggregate)
@@ -147,9 +150,9 @@ export function hasAggregate(token: QueryToken): boolean {
     return hasAggregate(token.parent);
 }
 
-export function getTokenParents(token: QueryToken): QueryToken[] {
-    const result = [];
-    while (token != null) {
+export function getTokenParents(token: QueryToken | null | undefined): QueryToken[] {
+    const result: QueryToken[] = [];
+    while (token) {
         result.insertAt(0, token);
         token = token.parent;
     }
@@ -169,6 +172,7 @@ export function toQueryToken(cd: ColumnDescription): QueryToken {
         niceTypeName: cd.niceTypeName,
         filterType: cd.filterType,
         isGroupable: cd.isGroupable,
+        propertyRoute: cd.propertyRoute
     };
 }
 
@@ -264,6 +268,7 @@ export interface ColumnDescription {
     format?: string;
     displayName: string;
     isGroupable: boolean;
+    propertyRoute?: string;
 }
 
 export function isList(fo: FilterOperation) {

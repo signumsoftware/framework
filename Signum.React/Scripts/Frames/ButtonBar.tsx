@@ -12,19 +12,22 @@ export interface ButtonBarProps extends ButtonsContext {
 
 export default class ButtonBar extends React.Component<ButtonBarProps, void>{
 
-    static onButtonBarRender: Array<(ctx: ButtonsContext) => Array<React.ReactElement<any>>> = [];
+    static onButtonBarRender: Array<(ctx: ButtonsContext) => Array<React.ReactElement<any> | undefined> | undefined> = [];
 
     render() {
 
-        var ctx: ButtonsContext = this.props;
+        const ctx: ButtonsContext = this.props;
 
-        var c = ctx.frame.entityComponent as any as IRenderButtons;
+        const c = ctx.frame.entityComponent as any as IRenderButtons;
 
-        var buttons = (c && c.renderButtons ? c.renderButtons(ctx) : [])
-            .concat(ButtonBar.onButtonBarRender.flatMap(func => func(this.props) || [])).map((a, i) => React.cloneElement(a, { key: i }));
+        const buttons = (c && c.renderButtons ? c.renderButtons(ctx) : [])
+            .concat(ButtonBar.onButtonBarRender
+                .flatMap(func => func(this.props) || [])
+                .filter(a => a != null)
+                .map((a, i) => React.cloneElement(a!, { key: i })));
 
         return (
-            <div className={classes("btn-toolbar", "sf-button-bar", this.props.align == "right" ? "right" : null) } >
+            <div className={classes("btn-toolbar", "sf-button-bar", this.props.align == "right" ? "right" : undefined) } >
                 { buttons }
             </div>
         );

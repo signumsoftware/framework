@@ -18,12 +18,10 @@ interface SearchModalProps extends React.Props<SearchModal>, IModalProps {
 
 export default class SearchModal extends React.Component<SearchModalProps, { show: boolean; }>  {
 
-    constructor(props) {
+    constructor(props: SearchModalProps) {
         super(props);
 
-        this.state = {
-            show: true
-        };
+        this.state = { show: true };
     }
 
     selectedEntites: Lite<Entity>[] = [];
@@ -45,7 +43,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
     }
 
     handleOnExited = () => {
-        this.props.onExited(this.okPressed ? this.selectedEntites : null);
+        this.props.onExited!(this.okPressed ? this.selectedEntites : undefined);
     }
 
     handleDoubleClick = (e: React.MouseEvent, row: ResultRow) => {
@@ -74,35 +72,35 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
                         </div>}
                     <h4>
                         <span className="sf-entity-title"> {this.props.title}</span>&nbsp;
-                        <a className ="sf-popup-fullscreen" href="#" onClick={(e) => this.searchControl.handleFullScreenClick(e) }>
+                        <a className ="sf-popup-fullscreen" href="#" onClick={(e) => this.searchControl.handleFullScreenClick(e)}>
                             <span className="glyphicon glyphicon-new-window"></span>
                         </a>
                     </h4>
                 </Modal.Header>
 
                 <Modal.Body>
-                    <SearchControl hideFullScreenButton={true}
-                        ref={e => this.searchControl = e}
+                    <SearchControl hideFullScreenButton={true} throwIfNotFindable={true}
+                        ref={(e: SearchControl) => this.searchControl = e}
                         findOptions={this.props.findOptions}
                         onSelectionChanged={this.handleSelectionChanged}
-                        onDoubleClick={this.props.findMode == FindMode.Find ? this.handleDoubleClick : null}
+                        onDoubleClick={this.props.findMode == FindMode.Find ? this.handleDoubleClick : undefined}
                         />
                 </Modal.Body>
             </Modal>
         );
     }
 
-    static open(findOptions: FindOptions, title?: string): Promise<Lite<Entity>> {
+    static open(findOptions: FindOptions, title?: string): Promise<Lite<Entity> | undefined> {
 
         return openModal<Lite<Entity>[]>(<SearchModal
             findOptions={findOptions}
             findMode={FindMode.Find}
             isMany={false}
-            title={title || getQueryNiceName(findOptions.queryName) } />)
-            .then(a => a ? a[0] : null);
+            title={title || getQueryNiceName(findOptions.queryName)} />)
+            .then(a => a ? a[0] : undefined);
     }
 
-    static openMany(findOptions: FindOptions, title?: string): Promise<Lite<Entity>[]> {
+    static openMany(findOptions: FindOptions, title?: string): Promise<Lite<Entity>[] | undefined> {
 
         return openModal<Lite<Entity>[]>(<SearchModal findOptions={findOptions}
             findMode={FindMode.Find}

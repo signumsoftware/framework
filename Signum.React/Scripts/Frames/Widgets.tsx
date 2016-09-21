@@ -15,12 +15,12 @@ export interface WidgetContext {
 
 export const onWidgets: Array<(ctx: WidgetContext) => React.ReactElement<any>> = [];
 
-export function renderWidgets(wc: WidgetContext): React.ReactNode
+export function renderWidgets(wc: WidgetContext): React.ReactNode | undefined
 {
-    const widgets = onWidgets.map(a => a(wc)).filter(a => a != null);
+    const widgets = onWidgets.map(a => a(wc)).filter(a => a != undefined);
 
     if (widgets.length == 0)
-        return null;
+        return undefined;
 
     return <ul className="sf-widgets">
         {widgets.map((w, i) => <li key={i}>{w}</li>)}
@@ -34,10 +34,10 @@ export interface EmbeddedWidget {
 
 export type EmbeddedWidgetPosition = "Top" | "Bottom";
 
-export var onEmbeddedWidgets: Array<(ctx: WidgetContext) => EmbeddedWidget> = [];
+export const onEmbeddedWidgets: Array<(ctx: WidgetContext) => EmbeddedWidget | undefined> = [];
 
 export function renderEmbeddedWidgets(wc: WidgetContext): { top: React.ReactElement<any>[]; bottom: React.ReactElement<any>[] } {
-    const widgets = onEmbeddedWidgets.map(a => a(wc)).filter(a => a != null);
+    const widgets = onEmbeddedWidgets.map(a => a(wc)).filter(a => a != undefined).map(a => a!);
     
     return {
         top: widgets.filter(ew => ew.position == "Top").map((ew, i) => React.cloneElement(ew.embeddedWidget, { key: i })),

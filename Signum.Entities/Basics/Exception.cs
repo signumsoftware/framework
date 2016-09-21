@@ -142,7 +142,7 @@ namespace Signum.Entities.Basics
 
         public DateTime DateLimit
         {
-            get { return DateTime.Today.AddDays(-DeleteLogsWithMoreThan); }
+            get { return TimeZoneManager.Now.Date.AddDays(-DeleteLogsWithMoreThan); }
         }
 
         public int ChunkSize { get; set; } = 1000;

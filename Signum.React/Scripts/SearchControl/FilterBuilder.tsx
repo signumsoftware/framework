@@ -4,7 +4,7 @@ import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
 import * as Finder from '../Finder'
 import { Dic, areEqual } from '../Globals'
 import { openModal, IModalProps } from '../Modals';
-import { FilterOption, QueryDescription, QueryToken, SubTokensOptions, filterOperations, FilterType, isList, FilterOperation } from '../FindOptions'
+import { FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, FilterType, isList, FilterOperation } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
 import { ValueLine, EntityLine, EntityCombo } from '../Lines'
 import { Binding, IsByAll, getTypeInfos } from '../Reflection'
@@ -14,12 +14,12 @@ import QueryTokenBuilder from './QueryTokenBuilder'
 require("!style!css!./FilterBuilder.css");
 
 interface FilterBuilderProps extends React.Props<FilterBuilder> {
-    filterOptions: FilterOption[];
+    filterOptions: FilterOptionParsed[];
     subTokensOptions: SubTokensOptions;
     queryDescription: QueryDescription;
     onTokenChanged: (token: QueryToken) => void;
-    lastToken: QueryToken;
-    onFiltersChanged?: (filters: FilterOption[]) => void;
+    lastToken?: QueryToken;
+    onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
 }
 
 export default class FilterBuilder extends React.Component<FilterBuilderProps, {}>  {
@@ -28,9 +28,9 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps, {
 
         this.props.filterOptions.push({
             token: this.props.lastToken,
-            columnName: null,
-            operation: !this.props.lastToken ? null : (filterOperations[this.props.lastToken.filterType] || []).firstOrNull(),
-            value: null,
+            operation: this.props.lastToken && (filterOperations[this.props.lastToken.filterType!] || []).firstOrNull() || undefined,
+            value: undefined,
+            frozen: false
         });
 
 
@@ -40,14 +40,14 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps, {
         this.forceUpdate();
     };
 
-    handlerDeleteFilter = (filter: FilterOption) => {
+    handlerDeleteFilter = (filter: FilterOptionParsed) => {
         this.props.filterOptions.remove(filter);
         if (this.props.onFiltersChanged)
             this.props.onFiltersChanged(this.props.filterOptions);
         this.forceUpdate();
     };
 
-    handleFilterChanged = (filter: FilterOption) => {
+    handleFilterChanged = (filter: FilterOptionParsed) => {
         if (this.props.onFiltersChanged)
             this.props.onFiltersChanged(this.props.filterOptions);
     };
@@ -97,12 +97,12 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps, {
 
 
 export interface FilterComponentProps extends React.Props<FilterComponent> {
-    filter: FilterOption;
-    onDeleteFilter: (fo: FilterOption) => void;
+    filter: FilterOptionParsed;
+    onDeleteFilter: (fo: FilterOptionParsed) => void;
     queryDescription: QueryDescription;
     subTokenOptions: SubTokensOptions;
     onTokenChanged: (token: QueryToken) => void;
-    onFilterChanged: (filter: FilterOption) => void;
+    onFilterChanged: (filter: FilterOptionParsed) => void;
 }
 
 export class FilterComponent extends React.Component<FilterComponentProps, {}>{
@@ -115,16 +115,15 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
 
         const f = this.props.filter;
 
-        if (newToken == null) {
-            f.operation = null;
-            f.value = null;
+        if (newToken == undefined) {
+            f.operation = undefined;
+            f.value = undefined;
         }
         else {
 
             if (!areEqual(f.token, newToken, a => a.filterType)) {
-                const operations = filterOperations[newToken.filterType];
-                f.operation = operations && operations.firstOrNull();
-                f.value = isList(f.operation) ? [null] : null;
+                f.operation = newToken.filterType && filterOperations[newToken.filterType].first();
+                f.value = f.operation && isList(f.operation) ? [undefined] : undefined;
             }
         }
         f.token = newToken;
@@ -138,8 +137,8 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
     
 
     handleChangeOperation = (event: React.FormEvent) => {
-        var operation = (event.currentTarget as HTMLSelectElement).value as any;
-        if (isList(operation) != isList(this.props.filter.operation))
+        const operation = (event.currentTarget as HTMLSelectElement).value as any;
+        if (isList(operation) != isList(this.props.filter.operation!))
             this.props.filter.value = isList(operation) ? [this.props.filter.value] : this.props.filter.value[0];
         
         this.props.filter.operation = operation;
@@ -164,15 +163,15 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
                 </td>
                 <td>
                     <QueryTokenBuilder
-                        queryToken={f.token}
+                        queryToken={f.token!}
                         onTokenChange={this.handleTokenChanged}
                         queryKey={ this.props.queryDescription.queryKey }
                         subTokenOptions={this.props.subTokenOptions}
-                        readOnly={f.frozen}/></td>
+                        readOnly={!!f.frozen}/></td>
                 <td className="sf-filter-operation">
                     {f.token && f.operation &&
                         <select className="form-control" value={f.operation as any} disabled={f.frozen} onChange={this.handleChangeOperation}>
-                            { filterOperations[f.token.filterType]
+                            { filterOperations[f.token.filterType!]
                                 .map((ft, i) => <option key={i} value={ft as any}>{ FilterOperation.niceName(ft) }</option>) }
                         </select> }
                 </td>
@@ -187,26 +186,26 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
     renderValue() {
         const f = this.props.filter;
 
-        if (isList(f.operation))
-            return <MultiValue values={f.value} createAppropiateControl={this.handleCreateAppropiateControl} frozen={this.props.filter.frozen} onChange={this.handleValueChange}/>;
+        if (isList(f.operation!))
+            return <MultiValue values={f.value} createAppropiateControl={this.handleCreateAppropiateControl} frozen={!!this.props.filter.frozen} onChange={this.handleValueChange}/>;
 
-        const ctx = new TypeContext<any>(null, { formGroupStyle: "None", readOnly: f.frozen }, null, Binding.create(f, a => a.value));
+        const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: f.frozen }, undefined as any, Binding.create(f, a => a.value));
 
         return this.handleCreateAppropiateControl(ctx);
     }
 
     handleCreateAppropiateControl = (ctx: TypeContext<any>): React.ReactElement<any> => {
 
-        var token = this.props.filter.token;
+        const token = this.props.filter.token!;
 
         switch (token.filterType) {
             case "Lite":
-                if (token.type.name == IsByAll || getTypeInfos(token.type).some(ti => !ti.isLowPopupation))
+                if (token.type.name == IsByAll || getTypeInfos(token.type).some(ti => !ti.isLowPopulation))
                     return <EntityLine ctx={ctx} type={token.type} create={false} onChange={this.handleValueChange} />;
                 else
                     return <EntityCombo ctx={ctx} type={token.type} create={false} onChange={this.handleValueChange}/>
             case "Embedded":
-                return <EntityLine ctx={ctx} type={token.type} create={false} autoComplete={false} onChange={this.handleValueChange}/>;
+                return <EntityLine ctx={ctx} type={token.type} create={false} autoComplete={null} onChange={this.handleValueChange}/>;
             case "Enum":
                 const ti = getTypeInfos(token.type).single();
                 if (!ti)
@@ -242,7 +241,7 @@ export class MultiValue extends React.Component<MultiValueProps, void> {
     }
 
     handleAddValue = () => {
-        this.props.values.push(null);
+        this.props.values.push(undefined);
         this.props.onChange();
         this.forceUpdate();
     }
@@ -263,11 +262,13 @@ export class MultiValue extends React.Component<MultiValueProps, void> {
                                         </a>}
                                 </td>
                                 <td>
-                                    {this.props.createAppropiateControl(new TypeContext<any>(null,
+                                    {
+                                        this.props.createAppropiateControl(new TypeContext<any>(undefined,
                                         {
                                             formGroupStyle: "None",
                                             readOnly: this.props.frozen
-                                        }, null, new Binding<any>(this.props.values, i))) }
+                                        }, undefined as any, new Binding<any>(this.props.values, i)))
+                                    }
                                 </td>
                             </tr>)
                     }

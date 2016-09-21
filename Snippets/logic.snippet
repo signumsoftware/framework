@@ -53,23 +53,14 @@
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<$entityName$Entity>();
-
-                dqm.RegisterQuery(typeof($entityName$Entity), ()=>
-                    from $entityParam$ in Database.Query<$entityName$Entity>()
-                    select new
+                sb.Include<$entityName$Entity>()
+					.WithSave($entityName$Operation.Save)
+					.WithQuery(dqm, $entityParam$ => new
                     {
                         Entity = $entityParam$,
                         $entityParam$.Id
                         //More fields
                     });
-
-                new Graph<$entityName$Entity>.Execute($entityName$Operation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = ($entityParam$, _)=>{}
-                }.Register();
             }
         }
     }]]>

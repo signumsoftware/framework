@@ -15,6 +15,7 @@ using Newtonsoft.Json;
 using Signum.Entities.Basics;
 using Signum.Engine;
 using Signum.React.Filters;
+using System.Collections.ObjectModel;
 
 namespace Signum.React.ApiControllers
 {
@@ -26,6 +27,19 @@ namespace Signum.React.ApiControllers
             Implementations implementations = ParseImplementations(types);
 
             return AutocompleteUtils.FindLiteLike(implementations, subString, count);
+        }
+
+        [Route("api/query/findLiteLikeWithFilters"), HttpPost, ProfilerActionSplitter("types")]
+        public List<Lite<Entity>> FindLiteLikeWithFilters(AutocompleteQueryRequestTS request)
+        {
+            var qn = QueryLogic.ToQueryName(request.queryKey);
+            var qd = DynamicQueryManager.Current.QueryDescription(qn);
+            var filters = request.filters.Select(a => a.ToFilter(qd, false)).ToList();
+
+            var entitiesQuery = DynamicQueryManager.Current.GetEntities(qn, filters);
+            var entityType = qd.Columns.Single(a => a.IsEntity).Implementations.Value.Types.SingleEx();
+
+            return entitiesQuery.AutocompleteUntyped(request.subString, request.count, entityType);
         }
 
         [Route("api/query/findTypeLike"), HttpGet]
@@ -143,6 +157,15 @@ namespace Signum.React.ApiControllers
         public override string ToString() => querykey;
     }
 
+    public class AutocompleteQueryRequestTS
+    {
+        public string queryKey;
+        public List<FilterTS> filters;
+        public string subString;
+        public int count;
+    }
+
+
     public class QueryRequestTS
     {
         public string queryKey;
@@ -191,7 +214,7 @@ namespace Signum.React.ApiControllers
         {
             var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (canAggregate ? SubTokensOptions.CanAggregate : 0);
             var parsedToken = QueryUtils.Parse(token, qd, options);
-            var expectedValueType = operation.IsList() ? typeof(IEnumerable<>).MakeGenericType(parsedToken.Type.Nullify()) : parsedToken.Type;
+            var expectedValueType = operation.IsList() ? typeof(ObservableCollection<>).MakeGenericType(parsedToken.Type.Nullify()) : parsedToken.Type;
             
             var val = value is JToken ?
                  ((JToken)value).ToObject(expectedValueType, JsonSerializer.Create(GlobalConfiguration.Configuration.Formatters.JsonFormatter.SerializerSettings)) :
@@ -264,6 +287,7 @@ namespace Signum.React.ApiControllers
         public string format;
         public string displayName;
         public bool isGroupable;
+        public string propertyRoute;
 
         public ColumnDescriptionTS(ColumnDescription a, object queryName)
         {
@@ -278,6 +302,7 @@ namespace Signum.React.ApiControllers
             this.unit = a.Unit;
             this.format = a.Format;
             this.displayName = a.DisplayName;
+            this.propertyRoute = token.GetPropertyRoute()?.ToString();
         }
     }
     
@@ -297,6 +322,7 @@ namespace Signum.React.ApiControllers
             this.niceTypeName = qt.NiceTypeName;
             this.queryTokenType = GetQueryTokenType(qt);
             this.isGroupable = qt.IsGroupable;
+            this.propertyRoute = qt.GetPropertyRoute()?.ToString();
             if (recursive && qt.Parent != null)
                 this.parent = new QueryTokenTS(qt.Parent, recursive);
         }
@@ -335,7 +361,8 @@ namespace Signum.React.ApiControllers
         public string format;
         public string unit;
         public bool isGroupable;
-        public QueryTokenTS parent; 
+        public QueryTokenTS parent;
+        private string propertyRoute;
     }
 
     public enum QueryTokenType

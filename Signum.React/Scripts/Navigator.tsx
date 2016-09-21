@@ -3,25 +3,29 @@ import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { Dic, } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
-import { Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, isEntity, isLite, isEntityPack, toLite } from './Signum.Entities';
-import { IUserEntity } from './Signum.Entities.Basics';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName, isEmbedded, KindOfType, OperationType, TypeReference  } from './Reflection';
+import { Lite, Entity, ModifiableEntity, EmbeddedEntity, ModelEntity, LiteMessage, EntityPack, isEntity, isLite, isEntityPack, toLite } from './Signum.Entities';
+import { IUserEntity, TypeEntity } from './Signum.Entities.Basics';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName, isTypeEmbeddedOrValue, isTypeModel, KindOfType, OperationType, TypeReference } from './Reflection';
 import { TypeContext } from './TypeContext';
 import * as Finder from './Finder';
 import { needsCanExecute } from './Operations/EntityOperations';
 import * as Operations from './Operations';
 import ModalFrame from './Frames/ModalFrame';
-import { ViewReplacer } from  './Frames/ReactVisitor'
+import { ViewReplacer } from './Frames/ReactVisitor'
 
-export let NotFound: __React.ComponentClass<any>;
 
-export let currentUser: IUserEntity;
-export let currentHistory: HistoryModule.History;
+Dic.skipClasses.push(React.Component);
+React.Component.prototype.changeState = function (this: React.Component<any, any>, func: (state: any) => void) {
+    func(this.state);
+    this.forceUpdate();
+}
 
-export function setCurrentUser(user: IUserEntity) {
+export let currentUser: IUserEntity | undefined;
+export function setCurrentUser(user: IUserEntity | undefined) {
     currentUser = user;
 }
 
+export let currentHistory: HistoryModule.History;
 export function setCurrentHistory(history: HistoryModule.History) {
     currentHistory = history;
 }
@@ -32,20 +36,27 @@ export namespace Expander {
 }
 
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<Route path="view/:type/:id" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(null, Comp.default)) } ></Route>);
-    options.routes.push(<Route path="create/:type" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(null, Comp.default))} ></Route>);
+    options.routes.push(<Route path="view/:type/:id" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(undefined, Comp.default))} ></Route>);
+    options.routes.push(<Route path="create/:type" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(undefined, Comp.default))} ></Route>);
 }
 
+export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined) {
 
-export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute) {
+    if (isTypeEmbeddedOrValue(entity.Type)) {
 
-    const typeInfo = getTypeInfo(entity.Type)
+        return pr!.typeReference().typeNiceName;
 
-    if (!typeInfo) {
-        return pr.typeReference().typeNiceName;
+    } else if (isTypeModel(entity.Type)) {
+
+        const typeInfo = getTypeInfo(entity.Type);
+
+        return typeInfo.niceName;
+
     }
-
     else {
+
+        const typeInfo = getTypeInfo(entity.Type);
+
         if (entity.isNew)
             return LiteMessage.New_G.niceToString().forGenderAndNumber(typeInfo.gender) + " " + typeInfo.niceName;
 
@@ -54,10 +65,10 @@ export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute) {
 }
 
 
-export function navigateRoute(entity: Entity);
-export function navigateRoute(lite: Lite<Entity>);
-export function navigateRoute(type: PseudoType, id: number | string);
-export function navigateRoute(typeOrEntity: Entity | Lite<Entity> | PseudoType, id: number | string = null) {
+export function navigateRoute(entity: Entity): string;
+export function navigateRoute(lite: Lite<Entity>): string;
+export function navigateRoute(type: PseudoType, id: number | string): string;
+export function navigateRoute(typeOrEntity: Entity | Lite<Entity> | PseudoType, id: number | string | undefined = undefined): string {
     let typeName: string;
     if (isEntity(typeOrEntity)) {
         typeName = typeOrEntity.Type;
@@ -81,7 +92,7 @@ export function createRoute(type: PseudoType) {
 export const entitySettings: { [type: string]: EntitySettings<ModifiableEntity> } = {};
 
 export function addSettings(...settings: EntitySettings<any>[]) {
-    settings.forEach(s=> Dic.addOrThrow(entitySettings, s.type.typeName, s));
+    settings.forEach(s => Dic.addOrThrow(entitySettings, s.type.typeName, s));
 }
 
 
@@ -93,69 +104,45 @@ export function getSettings(type: PseudoType): EntitySettings<ModifiableEntity> 
     return entitySettings[typeName];
 }
 
-export let fallbackGetComponent: (entity: ModifiableEntity) => Promise<{ default: React.ComponentClass<{ ctx: TypeContext<ModifiableEntity> }> }> =
-    e => new Promise(resolve => require(['./Lines/DynamicComponent'], resolve));
+export function setFallbackViewPromise(newFallback: (entity: ModifiableEntity) => ViewPromise<ModifiableEntity>) {
+    fallbackViewPromise = newFallback;
+}
 
-export function getComponent<T extends ModifiableEntity>(entity: T): Promise<React.ComponentClass<{ ctx: TypeContext<T> }>> {
+export let fallbackViewPromise: (entity: ModifiableEntity) => ViewPromise<ModifiableEntity> =
+    e => new ViewPromise<ModifiableEntity>(resolve => require(['./Lines/DynamicComponent'], resolve));
 
-    var settings = getSettings(entity.Type) as EntitySettings<T>;
+export function getViewPromise<T extends ModifiableEntity>(entity: T): ViewPromise<ModifiableEntity> {
 
-    if (settings == null) {
-        if (fallbackGetComponent)
-            return fallbackGetComponent(entity).then(a => a.default);
+    const settings = getSettings(entity.Type) as EntitySettings<T>;
+
+    if (settings == undefined) {
+        if (fallbackViewPromise)
+            return fallbackViewPromise(entity);
 
         throw new Error(`No settings for '${entity.Type}'`);
     }
 
-    if (settings.getComponent == null) {
-        if (fallbackGetComponent)
-            return fallbackGetComponent(entity).then(a => a.default);
+    if (settings.getViewPromise == undefined) {
+        if (fallbackViewPromise)
+            return fallbackViewPromise(entity);
 
         throw new Error(`No getComponent set for settings for '${entity.Type}'`);
     }
 
-    return settings.getComponent(entity).then(a => applyViewOverrides(settings, a.default));
+    return settings.getViewPromise(entity).applyViewOverrides(settings);
 }
 
-function applyViewOverrides<T extends ModifiableEntity>(setting: EntitySettings<T>, component: React.ComponentClass<{ ctx: TypeContext<T> }>) {
 
-    if (!component.prototype.render)
-        throw new Error("render function not defined in " + component);
-
-    if (setting.viewOverrides == null || setting.viewOverrides.length == 0)
-        return component;
-
-
-    if (component.prototype.render.withViewOverrides)
-        return component;
-
-    var baseRender = component.prototype.render as () => void;
-
-    component.prototype.render = function () {
-
-        var ctx = this.props.ctx;
-
-        var view = baseRender.call(this);
-
-        var replacer = new ViewReplacer<T>(view, ctx);
-        setting.viewOverrides.forEach(vo => vo(replacer));
-        return replacer.result;
-    };
-
-    component.prototype.render.withViewOverrides = true;
-
-    return component;
-}
 
 export const isCreableEvent: Array<(typeName: string) => boolean> = [];
 
 export function isCreable(type: PseudoType, customView = false, isSearch = false) {
 
     const typeName = getTypeName(type);
-    
+
     const baseIsCreable = checkFlag(typeIsCreable(typeName), isSearch);
 
-    const hasView = customView || hasRegisteredView(typeName);
+    const hasView = customView || hasRegisteredViewPromise(typeName);
 
     const hasConstructor = hasAllowedConstructor(typeName);
 
@@ -163,17 +150,17 @@ export function isCreable(type: PseudoType, customView = false, isSearch = false
 }
 
 function hasAllowedConstructor(typeName: string) {
-    var ti = getTypeInfo(typeName);
+    const ti = getTypeInfo(typeName);
 
-    if (ti == null || ti.operations == null)
+    if (ti == undefined || ti.operations == undefined)
         return true;
 
-    var constructOperations = Dic.getValues(ti.operations).filter(a => a.operationType == OperationType.Constructor);
+    const constructOperations = Dic.getValues(ti.operations).filter(a => a.operationType == OperationType.Constructor);
 
     if (!constructOperations.length)
         return true;
-    
-    var allowed = constructOperations.filter(oi => Operations.isOperationAllowed(oi));
+
+    const allowed = constructOperations.filter(oi => Operations.isOperationAllowed(oi));
 
     return allowed.length > 0;
 }
@@ -181,25 +168,25 @@ function hasAllowedConstructor(typeName: string) {
 function typeIsCreable(typeName: string): EntityWhen {
 
     const es = entitySettings[typeName];
-    if (es != null && es.isCreable != null)
+    if (es != undefined && es.isCreable != undefined)
         return es.isCreable;
-    
+
     const typeInfo = getTypeInfo(typeName);
-    if (typeInfo == null)
+    if (typeInfo == undefined)
         return "IsLine";
 
-    if (typeInfo.kind == KindOfType.Enum)
+    if (typeInfo.kind == "Enum")
         return "Never";
 
     switch (typeInfo.entityKind) {
-        case EntityKind.SystemString: return "Never";
-        case EntityKind.System: return "Never";
-        case EntityKind.Relational: return "Never";
-        case EntityKind.String: return "IsSearch";
-        case EntityKind.Shared: return "Always";
-        case EntityKind.Main: return "IsSearch";
-        case EntityKind.Part: return "IsLine";
-        case EntityKind.SharedPart: return "IsLine";
+        case "SystemString": return "Never";
+        case "System": return "Never";
+        case "Relational": return "Never";
+        case "String": return "IsSearch";
+        case "Shared": return "Always";
+        case "Main": return "IsSearch";
+        case "Part": return "IsLine";
+        case "SharedPart": return "IsLine";
         default: return "Never";
     }
 }
@@ -209,7 +196,7 @@ export const isReadonlyEvent: Array<(typeName: string, entity?: EntityPack<Modif
 
 export function isReadOnly(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>) {
 
-    const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : null;
+    const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : undefined;
 
     const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
 
@@ -222,35 +209,35 @@ export function isReadOnly(typeOrEntity: PseudoType | EntityPack<ModifiableEntit
 function typeIsReadOnly(typeName: string): boolean {
 
     const es = entitySettings[typeName];
-    if (es != null && es.isReadOnly != null)
+    if (es != undefined && es.isReadOnly != undefined)
         return es.isReadOnly;
-    
+
     const typeInfo = getTypeInfo(typeName);
-    if (typeInfo == null)
+    if (typeInfo == undefined)
         return false;
 
-    if (typeInfo.kind == KindOfType.Enum)
+    if (typeInfo.kind == "Enum")
         return true;
 
     switch (typeInfo.entityKind) {
-        case EntityKind.SystemString: return true;
-        case EntityKind.System: return true;
-        case EntityKind.Relational: return true;
-        case EntityKind.String: return false;
-        case EntityKind.Shared: return false;
-        case EntityKind.Main: return false;
-        case EntityKind.Part: return false;
-        case EntityKind.SharedPart: return false;
+        case "SystemString": return true;
+        case "System": return true;
+        case "Relational": return true;
+        case "String": return false;
+        case "Shared": return false;
+        case "Main": return false;
+        case "Part": return false;
+        case "SharedPart": return false;
         default: return false;
     }
 }
 
-export const isFindableEvent: Array<(typeName: string) => boolean> = []; 
+export const isFindableEvent: Array<(typeName: string) => boolean> = [];
 
 export function isFindable(type: PseudoType, isSearch?: boolean) {
 
     const typeName = getTypeName(type);
-    
+
     const baseIsReadOnly = typeIsFindable(typeName);
 
     return baseIsReadOnly && Finder.isFindable(typeName);
@@ -260,89 +247,85 @@ function typeIsFindable(typeName: string) {
 
     const es = entitySettings[typeName];
 
-    if (es != null && es.isFindable != null)
+    if (es != undefined && es.isFindable != undefined)
         return es.isFindable;
 
     const typeInfo = getTypeInfo(typeName);
-    if (typeInfo == null)
+    if (typeInfo == undefined)
         return false;
 
-    if (typeInfo.kind == KindOfType.Enum)
+    if (typeInfo.kind == "Enum")
         return true;
 
     switch (typeInfo.entityKind) {
-        case EntityKind.SystemString: return true;
-        case EntityKind.System: return true;
-        case EntityKind.Relational: return false;
-        case EntityKind.String: return true;
-        case EntityKind.Shared: return true;
-        case EntityKind.Main: return true;
-        case EntityKind.Part: return false;
-        case EntityKind.SharedPart: return true;
+        case "SystemString": return true;
+        case "System": return true;
+        case "Relational": return false;
+        case "String": return true;
+        case "Shared": return true;
+        case "Main": return true;
+        case "Part": return false;
+        case "SharedPart": return true;
         default: return false;
     }
 }
 
-export const isViewableEvent: Array<(typeName: string, entityPack?: EntityPack<ModifiableEntity>) => boolean> = []; 
+export const isViewableEvent: Array<(typeName: string, entityPack?: EntityPack<ModifiableEntity>) => boolean> = [];
 
-export function isViewable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, customView = false): boolean{
+export function isViewable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, customView = false): boolean {
 
-    const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : null;
+    const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : undefined;
 
     const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
 
     const baseIsViewable = typeIsViewable(typeName);
-    
-    const hasView = customView || hasRegisteredView(typeName);
+
+    const hasView = customView || hasRegisteredViewPromise(typeName);
 
     return baseIsViewable && hasView && isViewableEvent.every(f => f(typeName, entityPack));
 }
 
-function hasRegisteredView(typeName: string) {
-        
+function hasRegisteredViewPromise(typeName: string) {
     const es = entitySettings[typeName];
-    if (es)
-        return !!es.getComponent;
-
-    return !!fallbackGetComponent;
+    return es && !!es.getViewPromise || !!fallbackViewPromise;
 }
 
 function typeIsViewable(typeName: string): boolean {
 
     const es = entitySettings[typeName];
 
-    if (es != null && es.isViewable != null)
+    if (es != undefined && es.isViewable != undefined)
         return es.isViewable;
 
     const typeInfo = getTypeInfo(typeName);
-    if (typeInfo == null)
+    if (typeInfo == undefined)
         return true;
 
-    if (typeInfo.kind == KindOfType.Enum)
+    if (typeInfo.kind == "Enum")
         return false;
 
     switch (typeInfo.entityKind) {
-        case EntityKind.SystemString: return false;
-        case EntityKind.System: return true;
-        case EntityKind.Relational: return false;
-        case EntityKind.String: return false;
-        case EntityKind.Shared: return true;
-        case EntityKind.Main: return true;
-        case EntityKind.Part: return true;
-        case EntityKind.SharedPart: return true;
+        case "SystemString": return false;
+        case "System": return true;
+        case "Relational": return false;
+        case "String": return false;
+        case "Shared": return true;
+        case "Main": return true;
+        case "Part": return true;
+        case "SharedPart": return true;
         default: return true;
     }
 }
 
-export function isNavigable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, customView = false, isSearch = false): boolean {
+export function isNavigable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, customComponent = false, isSearch = false): boolean {
 
-    const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : null;
+    const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : undefined;
 
     const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
 
     const baseTypeName = checkFlag(typeIsNavigable(typeName), isSearch);
 
-    const hasView = customView || hasRegisteredView(typeName);
+    const hasView = customComponent || hasRegisteredViewPromise(typeName);
 
     return baseTypeName && hasView && isViewableEvent.every(f => f(typeName, entityPack));
 }
@@ -353,25 +336,25 @@ function typeIsNavigable(typeName: string): EntityWhen {
 
     const es = entitySettings[typeName];
 
-    if (es != null && es.isViewable != null)
+    if (es != undefined && es.isViewable != undefined)
         return es.isNavigable;
 
     const typeInfo = getTypeInfo(typeName);
-    if (typeInfo == null)
+    if (typeInfo == undefined)
         return "Never";
 
-    if (typeInfo.kind == KindOfType.Enum)
+    if (typeInfo.kind == "Enum")
         return "Never";
 
     switch (typeInfo.entityKind) {
-        case EntityKind.SystemString: return "Never";
-        case EntityKind.System: return "Always";
-        case EntityKind.Relational: return "Never";
-        case EntityKind.String: return "IsSearch";
-        case EntityKind.Shared: return "Always";
-        case EntityKind.Main: return "Always";
-        case EntityKind.Part: return "Always";
-        case EntityKind.SharedPart: return "Always";
+        case "SystemString": return "Never";
+        case "System": return "Always";
+        case "Relational": return "Never";
+        case "String": return "IsSearch";
+        case "Shared": return "Always";
+        case "Main": return "Always";
+        case "Part": return "Always";
+        case "SharedPart": return "Always";
         default: return "Never";
     }
 }
@@ -385,7 +368,8 @@ export interface ViewOptions {
     validate?: boolean;
     requiresSaveOperation?: boolean;
     avoidPromptLooseChange?: boolean;
-    getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+    viewPromise?: ViewPromise<ModifiableEntity>;
+    extraComponentProps?: {};
 }
 
 export function view<T extends ModifiableEntity>(options: EntityPack<T>, viewOptions?: ViewOptions): Promise<T>;
@@ -404,17 +388,38 @@ export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<
 export interface NavigateOptions {
     readOnly?: boolean;
     avoidPromptLooseChange?: boolean;
-    getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+    viewPromise?: ViewPromise<ModifiableEntity>;
+    extraComponentProps?: {};
 }
 
-export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions? : NavigateOptions): Promise<void> {
-    
+export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
+
     return new Promise<void>((resolve, reject) => {
         require(["./Frames/ModalFrame"], function (NP: { default: typeof ModalFrame }) {
             NP.default.openNavigate(entityOrPack, navigateOptions || {}).then(resolve, reject);
         });
     });
-} 
+}
+
+export function createInNewTab(pack: EntityPack<ModifiableEntity>) {
+    var url = createRoute(pack.entity.Type) + "?waitData=true";
+    var win = window.open(url);
+    if (win) //blocked pop-up
+        win.parentWindowData = pack;
+}
+
+export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.MouseEvent) {
+    if (!pack || !pack.entity)
+        return;
+
+    const es = getSettings(pack.entity.Type);
+    if (es.avoidPopup || event.ctrlKey || event.button == 1) {
+        createInNewTab(pack);
+    }
+    else {
+        navigate(pack);
+    }
+}
 
 
 export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, showOperations: boolean): Promise<EntityPack<ModifiableEntity>> {
@@ -425,7 +430,7 @@ export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity
         entityOrEntityPack as ModifiableEntity :
         (entityOrEntityPack as Lite<Entity> | EntityPack<ModifiableEntity>).entity;
 
-    if (entity == null)
+    if (entity == undefined)
         return API.fetchEntityPack(entityOrEntityPack as Lite<Entity>);
 
     if (!showOperations || !needsCanExecute(entity))
@@ -442,7 +447,7 @@ export module API {
 
     export function fillToStrings<T extends Entity>(lites: Lite<T>[]): Promise<void> {
 
-        var realLites = lites.filter(a => a.toStr == null && a.entity == null);
+        const realLites = lites.filter(a => a.toStr == undefined && a.entity == undefined);
 
         if (!realLites.length)
             return Promise.resolve<void>();
@@ -461,13 +466,20 @@ export module API {
         if (lite.entity)
             return Promise.resolve(lite.entity);
 
+        if (lite.id == null)
+            throw new Error("Lite has no Id");
+
         return fetchEntity(lite.EntityType, lite.id).then(e => lite.entity = e as T);
     }
 
     export function fetchAndForget<T extends Entity>(lite: Lite<T>): Promise<T> {
+
+        if (lite.id == null)
+            throw new Error("Lite has no Id");
+
         return fetchEntity(lite.EntityType, lite.id);
     }
-    
+
     export function fetchEntity<T extends Entity>(type: Type<T>, id: any): Promise<T>;
     export function fetchEntity(type: PseudoType, id: number | string): Promise<Entity>;
     export function fetchEntity(type: PseudoType, id?: number | string): Promise<Entity> {
@@ -499,6 +511,11 @@ export module API {
     export function validateEntity(entity: ModifiableEntity): Promise<void> {
         return ajaxPost<void>({ url: "~/api/validateEntity" }, entity);
     }
+
+    export function getType(typeName: string): Promise<TypeEntity> {
+
+        return ajaxGet<TypeEntity>({ url: `~/api/reflection/typeEntity/${typeName}` });
+    }
 }
 
 
@@ -509,7 +526,7 @@ export class EntitySettings<T extends ModifiableEntity> {
 
     getToString: (entity: T) => string;
 
-    getComponent: (entity: T) => Promise<{ default: React.ComponentClass<{ ctx: TypeContext<T> }> }>;
+    getViewPromise?: (entity: T) => ViewPromise<T>;
 
     viewOverrides: Array<(replacer: ViewReplacer<T>) => void>;
 
@@ -520,21 +537,96 @@ export class EntitySettings<T extends ModifiableEntity> {
     isReadOnly: boolean;
 
     overrideView(override: (replacer: ViewReplacer<T>) => void) {
-        if (this.viewOverrides == null)
+        if (this.viewOverrides == undefined)
             this.viewOverrides = [];
 
         this.viewOverrides.push(override);
     }
 
-    constructor(type: Type<T>, getComponent: (entity: T) => Promise<any>,
+    constructor(type: Type<T>, getViewPromise?: (entity: T) => ViewPromise<any>,
         options?: { isCreable?: EntityWhen, isFindable?: boolean; isViewable?: boolean; isNavigable?: EntityWhen; isReadOnly?: boolean, avoidPopup?: boolean }) {
 
         this.type = type;
-        this.getComponent = getComponent;
+        this.getViewPromise = getViewPromise;
 
         Dic.extend(this, options);
     }
 }
+
+export type ViewModule<T extends ModifiableEntity> = { default: React.ComponentClass<{ ctx: TypeContext<T> }> };
+
+export class ViewPromise<T extends ModifiableEntity> {
+    promise: Promise<(ctx: TypeContext<T>) => React.ReactElement<any>>;
+
+    constructor(callback?: (loadModule: (module: ViewModule<T>) => void) => void) {
+        if (callback)
+            this.promise = new Promise<ViewModule<T>>(callback)
+                .then(mod => {
+                    return (ctx: TypeContext<T>) => React.createElement(mod.default, { ctx });
+                });
+    }
+
+    static resolve<T extends ModifiableEntity>(getComponent: (ctx: TypeContext<T>) => React.ReactElement<any>) {
+        var result = new ViewPromise();
+        result.promise = Promise.resolve(getComponent);
+        return result;
+    }
+
+    withProps(componentParams: {} | Promise<{}>): ViewPromise<T> {
+        this.promise = this.promise.then(func =>
+            Promise.resolve(componentParams).then(params => {
+                return (ctx: TypeContext<T>) => {
+                    var result = func(ctx);
+                    return React.cloneElement(result, params);
+                };
+            }));
+
+        return this;
+    }
+
+    applyViewOverrides(setting: EntitySettings<T>): ViewPromise<T> {
+        this.promise = this.promise.then(func => {
+            return (ctx: TypeContext<T>) => {
+                var result = func(ctx);
+                applyViewOverrides(setting, result.type as React.ComponentClass<{ ctx: TypeContext<T> }>);
+                return result;
+            };
+        });
+
+        return this;
+    }
+}
+
+function applyViewOverrides<T extends ModifiableEntity>(setting: EntitySettings<T>, component: React.ComponentClass<{ ctx: TypeContext<T> }>) {
+
+    if (!component.prototype.render)
+        throw new Error("render function not defined in " + component);
+
+    if (setting.viewOverrides == undefined || setting.viewOverrides.length == 0)
+        return component;
+
+
+    if (component.prototype.render.withViewOverrides)
+        return component;
+
+    const baseRender = component.prototype.render as () => void;
+
+    component.prototype.render = function (this: React.Component<any, any>) {
+
+        const ctx = this.props.ctx;
+
+        const view = baseRender.call(this);
+
+        const replacer = new ViewReplacer<T>(view, ctx);
+        setting.viewOverrides.forEach(vo => vo(replacer));
+        return replacer.result;
+    };
+
+    component.prototype.render.withViewOverrides = true;
+
+    return component;
+}
+
 
 export function checkFlag(entityWhen: EntityWhen, isSearch: boolean) {
     return entityWhen == "Always" ||
@@ -549,32 +641,30 @@ declare global {
     }
 }
 
-String.prototype.formatHtml = function () {
+String.prototype.formatHtml = function (this: string) {
     const regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
 
     const args = arguments;
 
     const parts = this.split(regex);
 
-    const result = [];
+    const result: (string | React.ReactElement<any>)[] = [];
     for (let i = 0; i < parts.length - 4; i += 4) {
         result.push(parts[i]);
-        result.push(args[parts[i + 1]]);
+        result.push(args[parseInt(parts[i + 1])]);
     }
     result.push(parts[parts.length - 1]);
 
-    return React.createElement("span", null, ...result);
+    return React.createElement("span", undefined, ...result);
 };
 
-
-
-function fixBaseName<T>(baseFunction: (location: HistoryModule.LocationDescriptorObject | string) => T, baseName: string): (location: HistoryModule.LocationDescriptorObject | string) => T {
+function fixBaseName<T>(baseFunction: (location?: HistoryModule.LocationDescriptorObject | string) => T, baseName: string): (location?: HistoryModule.LocationDescriptorObject | string) => T {
 
     function fixUrl(url: string): string {
         if (url && url.startsWith("~/"))
-            return baseName + "/" + url.after("~/");
+            return baseName + url.after("~/");
 
-        if (url.startsWith(baseName))
+        if (url.startsWith(baseName) || url.startsWith("http"))
             return url;
 
         console.warn(url);
@@ -585,7 +675,7 @@ function fixBaseName<T>(baseFunction: (location: HistoryModule.LocationDescripto
         if (typeof location === "string") {
             return baseFunction(fixUrl(location));
         } else {
-            location.pathname = fixUrl(location.pathname);
+            location!.pathname = fixUrl(location!.pathname!);
             return baseFunction(location);
         }
     };
@@ -599,7 +689,7 @@ export function useAppRelativeBasename(history: HistoryModule.History, baseName:
     history.createLocation = fixBaseName(history.createLocation, baseName);
 }
 
-export function tryConvert(value: any, type: TypeReference): Promise<any> {
+export function tryConvert(value: any, type: TypeReference): Promise<any> | undefined {
 
     if (value == null)
         return Promise.resolve(null);
@@ -612,10 +702,10 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> {
         if (isEntity(value))
             return Promise.resolve(toLite(value));
 
-        return null;
+        return undefined;
     }
 
-    if (getTypeInfo(type.name) && getTypeInfo(type.name).kind == KindOfType.Entity) {
+    if (getTypeInfo(type.name) && getTypeInfo(type.name).kind == "Entity") {
 
         if (isLite(value))
             return API.fetchAndForget(value);
@@ -623,14 +713,14 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> {
         if (isEntity(value))
             return Promise.resolve(value);
 
-        return null;
+        return undefined;
     }
 
     if (type.name == "string" || type.name == "Guid" || type.name == "Date") {
         if (typeof value === "string")
             return Promise.resolve(value);
 
-        return null;
+        return undefined;
     }
 
     if (type.name == "number") {
@@ -638,5 +728,5 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> {
             return Promise.resolve(value);
     }
 
-    return null;
+    return undefined;
 }

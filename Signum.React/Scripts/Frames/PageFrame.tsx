@@ -14,18 +14,18 @@ import ValidationErrors from './ValidationErrors'
 
 require("!style!css!./Frames.css");
 
-interface PageFrameProps extends ReactRouter.RouteComponentProps<{}, { type: string; id?: string }> {
+interface PageFrameProps extends ReactRouter.RouteComponentProps<{}, { type: string; id?: string, waitData?: string }> {
 }
 
 
 interface PageFrameState {
     pack?: EntityPack<Entity>;
-    componentClass?: React.ComponentClass<{ ctx: TypeContext<Entity> }>;
+    getComponent?: (ctx: TypeContext<Entity>) => React.ReactElement<any>;
 }
 
 export default class PageFrame extends React.Component<PageFrameProps, PageFrameState> {
 
-    constructor(props) {
+    constructor(props: PageFrameProps) {
         super(props);
         this.state = this.calculateState(props);
 
@@ -36,16 +36,16 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
     }
 
     getTypeInfo(): TypeInfo {
-        return getTypeInfo(this.props.routeParams.type);
+        return getTypeInfo(this.props.routeParams!.type);
     }
 
     calculateState(props: PageFrameProps) {
-        
-        return { componentClass: null, pack: null } as PageFrameState;
+
+        return { componentClass: undefined, pack: undefined } as PageFrameState;
     }
 
 
-    componentWillReceiveProps(newProps) {
+    componentWillReceiveProps(newProps: PageFrameProps) {
         this.setState(this.calculateState(newProps), () => {
             this.load(newProps);
         });
@@ -58,14 +58,23 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
     }
 
     loadEntity(props: PageFrameProps): Promise<void> {
-        
+
+        if (this.props.location.query["waitData"]) {
+            if (window.parentWindowData == null)
+                throw new Error("parentWindowData not found");
+
+            this.setState({ pack: window.parentWindowData });
+            window.parentWindowData = undefined;
+            return Promise.resolve<void>();
+        }
+
         const ti = this.getTypeInfo();
 
-        if (this.props.routeParams.id) {
+        if (this.props.routeParams!.id) {
             
             const lite: Lite<Entity> = {
                 EntityType: ti.name,
-                id: parseId(ti, props.routeParams.id),
+                id: parseId(ti, props.routeParams!.id!),
             };
 
             return Navigator.API.fetchEntityPack(lite)
@@ -74,19 +83,19 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
         } else {
 
             return Constructor.construct(ti.name)
-                .then(pack => this.setState({ pack : pack as EntityPack<Entity> }));
+                .then(pack => this.setState({ pack: pack as EntityPack<Entity> }));
         }
     }
-    
+
 
     loadComponent(): Promise<void> {
-        return Navigator.getComponent(this.state.pack.entity)
-            .then(c => this.setState({ componentClass: c }));
+        return Navigator.getViewPromise(this.state.pack!.entity).promise
+            .then(c => this.setState({ getComponent: c }));
     }
 
     onClose() {
-        if (Finder.isFindable(this.state.pack.entity.Type))
-            Navigator.currentHistory.push(Finder.findOptionsPath({ queryName: this.state.pack.entity.Type }));
+        if (Finder.isFindable(this.state.pack!.entity.Type))
+            Navigator.currentHistory.push(Finder.findOptionsPath({ queryName: this.state.pack!.entity.Type }));
         else
             Navigator.currentHistory.push("~/");
     }
@@ -112,27 +121,32 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
         }
 
         const entity = this.state.pack.entity;
-        
+
         const frame: EntityFrame<Entity> = {
             frameComponent: this,
             entityComponent: this.entityComponent,
-            onReload: pack => this.setState({ pack }),
+            onReload: pack => {
+                if (pack.entity.id != null && entity.id == null)
+                    Navigator.currentHistory.push(Navigator.navigateRoute(pack.entity));
+                else
+                    this.setState({ pack });
+            },
             onClose: () => this.onClose(),
             revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
-            setError: (ms, initialPrefix = "") => {
-                GraphExplorer.setModelState(entity, ms, initialPrefix);
+            setError: (ms, initialPrefix) => {
+                GraphExplorer.setModelState(entity, ms, initialPrefix || "");
                 this.forceUpdate()
             },
         };
 
-        var ti = this.getTypeInfo();
+        const ti = this.getTypeInfo();
 
         const styleOptions: StyleOptions = {
             readOnly: Navigator.isReadOnly(ti),
             frame: frame
         };
 
-        const ctx = new TypeContext<Entity>(null, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(entity, ""));
+        const ctx = new TypeContext<Entity>(undefined, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(entity, ""));
 
 
         const wc: WidgetContext = {
@@ -150,7 +164,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
                 <ValidationErrors entity={this.state.pack.entity} ref={ve => this.validationErrors = ve}/>
                 { embeddedWidgets.top }
                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-main-entity={entityInfo(ctx.value) }>
-                    {this.state.componentClass && React.createElement(this.state.componentClass, { ctx: ctx, ref: c => this.setComponent(c) } as any) }
+                    {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx),  { ref: (c: React.Component<any, any>) => this.setComponent(c) }) }
                 </div>
                 { embeddedWidgets.bottom }
             </div>
@@ -170,7 +184,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
             <h3>
                 <span className="sf-entity-title">{ getToString(entity) }</span>
                 <br/>
-                <small className="sf-type-nice-name">{ Navigator.getTypeTitle(entity, null) }</small>
+                <small className="sf-type-nice-name">{ Navigator.getTypeTitle(entity, undefined) }</small>
             </h3>
         );
     }

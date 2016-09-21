@@ -814,7 +814,7 @@ namespace Signum.Engine.Maps
             GlobalLazyManager = manager;
         }
 
-        public ResetLazy<T> GlobalLazy<T>(Func<T> func, InvalidateWith invalidateWith, Action onInvalidated = null) where T : class
+        public ResetLazy<T> GlobalLazy<T>(Func<T> func, InvalidateWith invalidateWith, Action onInvalidated = null, LazyThreadSafetyMode mode = LazyThreadSafetyMode.ExecutionAndPublication) where T : class
         {
             var result = Signum.Engine.GlobalLazy.WithoutInvalidations(() =>
             {

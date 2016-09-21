@@ -8,10 +8,10 @@ export function getEnumInfo(enumTypeName: string, enumId: number) {
 
     const ti = getTypeInfo(enumTypeName);
 
-    if (!ti || ti.kind != KindOfType.Enum)
+    if (!ti || ti.kind != "Enum")
         throw new Error(`${enumTypeName} is not an Enum`);
 
-    return ti.membersById[enumId];
+    return ti.membersById![enumId];
 }
 
 export interface TypeInfo {
@@ -23,10 +23,10 @@ export interface TypeInfo {
     entityKind?: EntityKind;
     entityData?: EntityData;
     toStringFunction?: string;
-    isLowPopupation?: boolean;
+    isLowPopulation?: boolean;
     requiresSaveOperation?: boolean;
     queryDefined?: boolean;
-    members?: { [name: string]: MemberInfo };
+    members: { [name: string]: MemberInfo };
     membersById?: { [name: string]: MemberInfo };
 
     operations?: { [name: string]: OperationInfo };
@@ -67,7 +67,10 @@ export enum OperationType {
 
 //https://msdn.microsoft.com/en-us/library/az4se3k1%28v=vs.110%29.aspx?f=255&MSPPError=-2147217396
 //http://momentjs.com/docs/#/displaying/format/
-export function toMomentFormat(format: string): any {
+export function toMomentFormat(format: string | undefined): string | undefined {
+
+    if (!format)
+        return undefined;
 
     switch (format) {
         case "d": return "L"; // or "l"
@@ -79,20 +82,59 @@ export function toMomentFormat(format: string): any {
         case "M":
         case "m": return "D MMM";
         case "u":
-        case "s": return moment.ISO_8601;
+        case "s": return moment.ISO_8601 as any;
         case "t": return "LT";
         case "T": return "LTS";
         case "y": return "LTS";
-        case "Y": return "MMMM YYY";
-        default: format;
+        case "Y": return "L";
+        default: return format
+            .replaceAll("y", "Y")
+            .replaceAll("f", "S")
+            .replaceAll("tt", "A")
+            .replaceAll("t", "a")
+            .replaceAll("dddd", "ßßßß") 
+            .replaceAll("ddd", "ßßß")
+            .replaceAll("d", "D") //replace only d -> D and dd -> DD
+            .replaceAll("ßßß", "ddd")
+            .replaceAll("ßßßß", "dddd");
     }
 }
 
 
 //https://msdn.microsoft.com/en-us/library/ee372286(v=vs.110).aspx
 //https://github.com/jsmreese/moment-duration-format
-export function toMomentDurationFormat(format: string) {
+export function toMomentDurationFormat(format: string | undefined): string | undefined{
+
+    if (format == undefined)
+        return undefined;
+
     return format.replace("\:", ":");
+}
+
+
+export function toNumbroFormat(format: string | undefined) {
+
+    if (format == undefined)
+        return undefined;
+
+    const f = format.toUpperCase();
+
+    if (f.startsWith("C"))
+        return "0." + "0".repeat(parseInt(f.after("C")));
+
+    if (f.startsWith("N"))
+        return "0." + "0".repeat(parseInt(f.after("N")));
+
+    if (f.startsWith("D"))
+        return "0".repeat(parseInt(f.after("D")));
+
+    if (f.startsWith("E"))
+        return "0." + "0".repeat(parseInt(f.after("E")));
+
+    if (f.startsWith("P"))
+        return "0." + "0".repeat(parseInt(f.after("P"))) + "%";
+
+    return format;
 }
 
 export interface TypeReference {
@@ -101,33 +143,14 @@ export interface TypeReference {
     isCollection?: boolean;
     isLite?: boolean;
     isNotNullable?: boolean;
-    isEnum?: boolean;
     isEmbedded?: boolean;
 }
 
-export enum KindOfType {
-    Entity = "Entity" as any,
-    Enum = "Enum" as any,
-    Message = "Message" as any,
-    Query = "Query" as any,
-    SymbolContainer = "SymbolContainer" as any,
-}
+export type KindOfType = "Entity" | "Enum" | "Message" | "Query" | "SymbolContainer";
 
-export enum EntityKind {
-    SystemString = "SystemString" as any,
-    System = "System" as any,
-    Relational = "Relational" as any,
-    String = "String" as any,
-    Shared = "Shared" as any,
-    Main = "Main" as any,
-    Part = "Part" as any,
-    SharedPart = "SharedPart" as any,
-}
+export type EntityKind = "SystemString" | "System" | "Relational" | "String" | "Shared" | "Main" | "Part" | "SharedPart";
 
-export enum EntityData {
-    Master = "Master" as any,
-    Transactional = "Transactional" as any,
-}
+export type EntityData = "Master" | "Transactional";
 
 export interface TypeInfoDictionary {
     [name: string]: TypeInfo
@@ -142,7 +165,13 @@ let _queryNames: {
 
 export type PseudoType = IType | TypeInfo | string;
 
-export function getTypeName(pseudoType: IType | TypeInfo | string): string {
+export function getTypeName(pseudoType: IType | TypeInfo | string | Lite<Entity> | ModifiableEntity): string {
+    if ((pseudoType as Lite<Entity>).EntityType)
+        return (pseudoType as Lite<Entity>).EntityType;
+
+    if ((pseudoType as ModifiableEntity).Type)
+        return (pseudoType as ModifiableEntity).Type;
+    
     if ((pseudoType as IType).typeName)
         return (pseudoType as IType).typeName;
 
@@ -155,25 +184,30 @@ export function getTypeName(pseudoType: IType | TypeInfo | string): string {
     throw new Error("Unexpected pseudoType " + pseudoType);
 }
 
-export function isEntity(type: PseudoType): boolean {
-    var ti = getTypeInfo(type);
-    return ti && !!ti.members["Id"];
+export function isTypeEntity(type: PseudoType): boolean {
+    const ti = getTypeInfo(type);
+    return ti && ti.kind == "Entity" && !!ti.members["Id"];
 }
 
-export function isModel(type: PseudoType): boolean {
-    var ti = getTypeInfo(type);
-    return ti && !ti.members["Id"];
+export function isTypeEnum(type: PseudoType): boolean {
+    const ti = getTypeInfo(type);
+    return ti && ti.kind == "Enum";
 }
 
-export function isEmbedded(type: PseudoType): boolean {
-    var ti = getTypeInfo(type);
+export function isTypeModel(type: PseudoType): boolean {
+    const ti = getTypeInfo(type);
+    return ti && ti.kind == "Entity" && !ti.members["Id"];
+}
+
+export function isTypeEmbeddedOrValue(type: PseudoType): boolean {
+    const ti = getTypeInfo(type);
     return !ti;
 }
 
 
 export function getTypeInfo(type: PseudoType): TypeInfo {
 
-    if ((type as TypeInfo).kind != null)
+    if ((type as TypeInfo).kind != undefined)
         return type as TypeInfo;
 
     if ((type as IType).typeName)
@@ -198,10 +232,10 @@ export function getTypeInfos(typeReference: TypeReference): TypeInfo[] {
 
 }
 
-export function getQueryNiceName(queryName: PseudoType | QueryKey) {
+export function getQueryNiceName(queryName: PseudoType | QueryKey): string {
 
-    if ((queryName as TypeInfo).kind != null)
-        return (queryName as TypeInfo).nicePluralName;
+    if ((queryName as TypeInfo).kind != undefined)
+        return (queryName as TypeInfo).nicePluralName!;
 
     if (queryName instanceof Type)
         return (queryName as Type<any>).nicePluralName();
@@ -214,7 +248,7 @@ export function getQueryNiceName(queryName: PseudoType | QueryKey) {
 
         const type = _types[str.toLowerCase()];
         if (type)
-            return type.nicePluralName;
+            return type.nicePluralName!;
 
         const qn = _queryNames[str.toLowerCase()];
         if (qn)
@@ -232,21 +266,21 @@ export function getQueryInfo(queryName: PseudoType | QueryKey): MemberInfo | Typ
         return queryName.memberInfo();
     }
     else {
-        var ti = getTypeInfo(queryName);
+        const ti = getTypeInfo(queryName);
         if (ti)
             return ti;
 
-        var mi = _queryNames[(queryName as string).toLowerCase()];
+        const mi = _queryNames[(queryName as string).toLowerCase()];
 
         if (mi)
             return mi;
 
-        return null;
+        throw Error("Unexpected query type");
     }
 }
 
 export function getQueryKey(queryName: PseudoType | QueryKey): string {
-    if ((queryName as TypeInfo).kind != null)
+    if ((queryName as TypeInfo).kind != undefined)
         return (queryName as TypeInfo).name;
 
     if (queryName instanceof Type)
@@ -269,15 +303,15 @@ export function getQueryKey(queryName: PseudoType | QueryKey): string {
         return str;
     }
 
-    return null;
+    throw Error("Unexpected query type");
 }
 
 export function isQueryDefined(queryName: PseudoType | QueryKey): boolean {
-    if ((queryName as TypeInfo).kind != null)
-        return (queryName as TypeInfo).queryDefined;
+    if ((queryName as TypeInfo).kind != undefined)
+        return (queryName as TypeInfo).queryDefined || false;
 
     if (queryName instanceof Type)
-        return getTypeInfo(queryName).queryDefined;
+        return getTypeInfo(queryName).queryDefined || false;
 
     if (queryName instanceof QueryKey)
         return !!_queryNames[queryName.name.toLowerCase()];
@@ -287,7 +321,7 @@ export function isQueryDefined(queryName: PseudoType | QueryKey): boolean {
 
         const type = _types[str.toLowerCase()];
         if (type) {
-            return type.queryDefined;
+            return type.queryDefined || false;
         }
 
         const qn = _queryNames[str.toLowerCase()];
@@ -311,13 +345,13 @@ export function setTypes(types: TypeInfoDictionary) {
             Dic.foreach(t.members, (k2, t2) => t2.name = k2);
             Object.freeze(t.members);
 
-            if (t.kind == KindOfType.Enum) {
+            if (t.kind == "Enum") {
                 t.membersById = Dic.getValues(t.members).toObject(a => a.name);
                 Object.freeze(t.membersById);
             }
         }
 
-        if (t.requiresSaveOperation == null && t.entityKind)
+        if (t.requiresSaveOperation == undefined && t.entityKind)
             t.requiresSaveOperation = calculateRequiresSaveOperation(t.entityKind);
 
         Object.freeze(t);
@@ -330,34 +364,48 @@ export function setTypes(types: TypeInfoDictionary) {
         if (t.operations) {
             Dic.foreach(t.operations, (k2, t2) => {
                 t2.key = k2;
-                t2.niceName = _types[k2.before(".").toLowerCase()].members[k2.after(".")].niceName;
+                const typeName = k2.before(".").toLowerCase();
+                const memberName = k2.after(".");
+
+                const ti = _types[typeName];
+                if (!ti)
+                    throw new Error(`Type ${typeName} not found. Consider synchronizing.`);
+
+                const member = ti.members[k2.after(".")];
+                if (!member)
+                    throw new Error(`Member ${memberName} not found in ${ti.name}. Consider synchronizing.`);
+
+                t2.niceName = member.niceName;
             });
 
             Object.freeze(t.operations);
         }
     });
 
-    _queryNames = Dic.getValues(types).filter(t => t.kind == KindOfType.Query)
+    _queryNames = Dic.getValues(types).filter(t => t.kind == "Query")
         .flatMap(a => Dic.getValues(a.members))
         .toObject(m => m.name.toLocaleLowerCase(), m => m);
 
     Object.freeze(_queryNames);
 
-    missingSymbols = missingSymbols.filter(s => !setSymbolId(s));
+    missingSymbols = missingSymbols.filter(s => {
+        const m = getMember(s.key);
+        if (m)
+            s.id = m.id;
+    });
 }
-
 
 function calculateRequiresSaveOperation(entityKind: EntityKind): boolean 
 {
     switch (entityKind) {
-        case EntityKind.SystemString: return false;
-        case EntityKind.System: return false;
-        case EntityKind.Relational: return false;
-        case EntityKind.String: return true;
-        case EntityKind.Shared: return true;
-        case EntityKind.Main: return true;
-        case EntityKind.Part: return false;
-        case EntityKind.SharedPart: return false;
+        case "SystemString": return false;
+        case "System": return false;
+        case "Relational": return false;
+        case "String": return true;
+        case "Shared": return true;
+        case "Main": return true;
+        case "Part": return false;
+        case "SharedPart": return false;
         default: throw new Error("Unexpeced entityKind");
     }
 }
@@ -366,8 +414,8 @@ export interface IBinding<T> {
     getValue(): T;
     setValue(val: T): void;
     suffix: string;
-    getError(): string;
-    setError(value: string);
+    getError(): string | undefined;
+    setError(value: string | undefined): void;
 }
 
 export class Binding<T> implements IBinding<T> {
@@ -381,9 +429,9 @@ export class Binding<T> implements IBinding<T> {
     }
 
     static create<F, T>(parentValue: F, fieldAccessor: (from: F) => T) {
-        var members = getLambdaMembers(fieldAccessor);
+        const members = getLambdaMembers(fieldAccessor);
 
-        if (members.length != 1 || members[0].type != LambdaMemberType.Member)
+        if (members.length != 1 || members[0].type != "Member")
             throw Error("invalid function 'fieldAccessor'");
 
         return new Binding<T>(parentValue, members[0].name);
@@ -413,13 +461,13 @@ export class Binding<T> implements IBinding<T> {
         }
     }
 
-    getError(): string {
+    getError(): string | undefined {
         const parentErrors = (this.parentValue as ModifiableEntity).error;
         return parentErrors && parentErrors[this.member];
     }
 
-    setError(value: string) {
-        var parent = this.parentValue as ModifiableEntity;
+    setError(value: string | undefined) {
+        const parent = this.parentValue as ModifiableEntity;
 
         if (!value) {
 
@@ -453,12 +501,11 @@ export class ReadonlyBinding<T> implements IBinding<T> {
         throw new Error("Readonly Binding");
     }
 
-    getError(): string {
-        return null;
+    getError(): string | undefined {
+        return undefined;
     }
 
-    setError(name: string) {
-        return null;
+    setError(name: string | undefined): void {        
     }
 }
 
@@ -466,7 +513,7 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
 
     const lambdaMatch = functionRegex.exec((lambda as any).toString());
 
-    if (lambdaMatch == null)
+    if (lambdaMatch == undefined)
         throw Error("invalid function");
 
     const parameter = lambdaMatch[1];
@@ -476,11 +523,11 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
         return new ReadonlyBinding<T>(parentValue as T, "");
 
     body = body.replace(partialMixinRegex,
-        (...m) => `${m[2]}.mixins["${m[4]}"]`);
+        (...m: string[]) => `${m[2]}.mixins["${m[4]}"]`);
 
     const m = memberRegex.exec(body);
 
-    if (m == null) {
+    if (m == undefined) {
         const realParentValue = eval(`(function(${parameter}){ return ${body};})`)(parentValue);
 
         return new ReadonlyBinding<T>(realParentValue as T, "");
@@ -495,7 +542,7 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
 }
 
 
-const functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*(\"use strict\"\;)?\s*return\s*(.*)\s*;\s*}$/;
+const functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*(\"use strict\"\;)?\s*return\s*([^;]*)\s*;?\s*}$/;
 const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
 const indexRegex = /^(.*)\[(\d+)\]$/;
 const mixinRegex = /^(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)$/
@@ -505,25 +552,25 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
     
     const lambdaMatch = functionRegex.exec((lambda as any).toString());
 
-    if (lambdaMatch == null)
+    if (lambdaMatch == undefined)
         throw Error("invalid function");
 
     const parameter = lambdaMatch[1];
     let body = lambdaMatch[3];
-    var result: LambdaMember[] = [];
+    let result: LambdaMember[] = [];
 
     while (body != parameter) {
-        let m: RegExpExecArray;
+        let m: RegExpExecArray | null;
         if (m = memberRegex.exec(body)) {
-            result.push({ name: m[2], type: LambdaMemberType.Member });
+            result.push({ name: m[2], type: "Member" });
             body = m[1];
         }
         else if (m = indexRegex.exec(body)) {
-            result.push({ name: m[2], type: LambdaMemberType.Indexer });
+            result.push({ name: m[2], type: "Indexer" });
             body = m[1];
         }
         else if (m = mixinRegex.exec(body)) {
-            result.push({ name: m[4], type: LambdaMemberType.Mixin });
+            result.push({ name: m[4], type: "Mixin" });
             body = m[2];
         } else {
             throw new Error(`Unexpected body in Property Route ${body}`);
@@ -532,7 +579,7 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
 
     result = result.reverse();
 
-    result = result.filter((m, i) => !(m.type == LambdaMemberType.Member && m.name == "element" && i > 0 && result[i - 1].type == LambdaMemberType.Indexer));
+    result = result.filter((m, i) => !(m.type == "Member" && m.name == "element" && i > 0 && result[i - 1].type == "Indexer"));
 
     return result;
 }
@@ -543,27 +590,32 @@ export interface LambdaMember {
     type: LambdaMemberType
 }
 
-export enum LambdaMemberType {
-    Member = "Member" as any,
-    Mixin = "Mixin" as any,
-    Indexer = "Indexer" as any,
-}
+export type LambdaMemberType = "Member" | "Mixin" | "Indexer";
 
 export function basicConstruct(type: PseudoType): ModifiableEntity {
 
-    var ti = getTypeInfo(type);
+    const ti = getTypeInfo(type);
 
-    var result = { Type: getTypeName(type), isNew: true, modified: true } as any as ModifiableEntity;
+    const result = { Type: getTypeName(type), isNew: true, modified: true } as any as ModifiableEntity;
 
     if (ti) {
 
-        var mixins = Dic.getKeys(ti.members)
-            .filter(a => a.startsWith("["))
-            .map(a => a.after("[").before("]"))
-            .toObjectDistinct(a => a, a => ({ Type: a, isNew: true, modified: true, }) as MixinEntity);
+        var e = result as Entity;
 
-        if (Dic.getKeys(mixins).length)
-            (result as Entity).mixins = mixins;
+        const mixins = Dic.getKeys(ti.members)
+            .filter(a => a.startsWith("["))
+            .groupBy(a => a.after("[").before("]"))
+            .forEach(gr => {
+
+                var m = ({ Type: gr.key, isNew: true, modified: true, }) as MixinEntity;
+
+                if (!e.mixins)
+                    e.mixins = {};
+
+                e.mixins[gr.key] = m;
+            });
+
+        Dic.getValues(ti.members).filter(a => a.type.isCollection).forEach(m => (result as any)[m.name.firstLower()] = []); //TODO: Collections in Embeddeds...
     }
 
     return result;
@@ -577,7 +629,7 @@ export class Type<T extends ModifiableEntity> implements IType {
 
     New(modify?: (entity: T) => void): T {
 
-        var result =  basicConstruct(this.typeName) as T;
+        const result =  basicConstruct(this.typeName) as T;
 
         if (modify)
             modify(result);
@@ -594,7 +646,7 @@ export class Type<T extends ModifiableEntity> implements IType {
 
     typeInfo(): TypeInfo {
 
-        var result = this.tryTypeInfo();
+        const result = this.tryTypeInfo();
 
         if (!result)
             throw new Error(`Type ${this.typeName} has no TypeInfo. Maybe is an embedded?`);
@@ -603,23 +655,43 @@ export class Type<T extends ModifiableEntity> implements IType {
     }
 
     memberInfo(lambdaToProperty: (v: T) => any): MemberInfo {
-        return PropertyRoute.root(this.typeInfo()).add(lambdaToProperty).member;
+        var pr = this.propertyRoute(lambdaToProperty);
+
+        if (!pr.member)
+            throw new Error(`${pr.propertyPath()} has no member`);
+
+        return pr.member;
     }
 
     propertyRoute(lambdaToProperty: (v: T) => any): PropertyRoute {
         return PropertyRoute.root(this.typeInfo()).add(lambdaToProperty);
     }
 
-    niceName() {
-        return this.typeInfo().niceName;
+    niceName(): string {
+        const ti = this.typeInfo();
+
+        if (!ti.niceName)
+            throw new Error(`no niceName found for ${ti.name}`);
+
+        return ti.niceName;
     }
 
-    nicePluralName() {
-        return this.typeInfo().nicePluralName;
+    nicePluralName(): string {
+        const ti = this.typeInfo();
+
+        if (!ti.nicePluralName)
+            throw new Error(`no nicePluralName found for ${ti.name}`);
+
+        return ti.nicePluralName;
     }
 
-    nicePropertyName(lambdaToProperty: (v: T) => any): string {
-        return this.memberInfo(lambdaToProperty).niceName;
+    nicePropertyName(lambdaToProperty: (v: T) => any): string  {
+        const member = this.memberInfo(lambdaToProperty);
+
+        if (!member.niceName)
+            throw new Error(`no nicePropertyName found for ${member.name}`);
+
+        return member.niceName;
     }
 }
 
@@ -634,9 +706,9 @@ export class EnumType<T extends string> {
         return Dic.getKeys(this.typeInfo().members) as T[];
     }
 
-    niceName(value?: T): string {
+    niceName(value?: T): string | undefined {
 
-        if (value == null)
+        if (value == undefined)
             return this.typeInfo().niceName;
 
         return this.typeInfo().members[value as string].niceName;
@@ -683,33 +755,29 @@ interface ISymbol {
 
 let missingSymbols: ISymbol[] = [];
 
-function setSymbolId(s: ISymbol): boolean {
+function getMember(key: string): MemberInfo | undefined {
 
-    const type = _types[s.key.before(".").toLowerCase()];
+    const type = _types[key.before(".").toLowerCase()];
 
     if (!type)
-        return false;
+        return undefined;
 
-    const member = type.members[s.key.after(".")];
+    const member: MemberInfo | undefined = type.members[key.after(".")];
 
-    if (!member)
-        return false;
-
-    const key = s.key;
-    delete s.key;
-
-    s.id = member.id;
-
-    s.key = key; //Key should be after id
-
-
-    return true;
+    return member;
 }
 
+export function registerSymbol(type: string, key: string): any /*ISymbol*/ {
 
-export function registerSymbol<T extends ISymbol>(symbol: T): any {
+    const mi = getMember(key);
 
-    if (!setSymbolId(symbol))
+    var symbol = {
+        Type: type,
+        id: mi && mi.id || null,
+        key: key
+    } as ISymbol;
+
+    if (symbol.id == null)
         missingSymbols.push(symbol);
 
     return symbol as any;
@@ -718,36 +786,41 @@ export function registerSymbol<T extends ISymbol>(symbol: T): any {
 export class PropertyRoute {
     
     propertyRouteType: PropertyRouteType;
-    parent: PropertyRoute; //!Root
-    rootType: TypeInfo; //Root
-    member: MemberInfo; //Member
-    mixinName: string; //Mixin
+    parent?: PropertyRoute; //!Root
+    rootType?: TypeInfo; //Root
+    member?: MemberInfo; //Member
+    mixinName?: string; //Mixin
 
     static root(type: PseudoType) {
-        var typeInfo = getTypeInfo(type);
+        const typeInfo = getTypeInfo(type);
         if (!typeInfo) {
             throw Error(`No TypeInfo for "${getTypeName(type)}" found. Consider calling ReflectionServer.RegisterLike on the server side.`);
         }
-        return new PropertyRoute(null, PropertyRouteType.Root, typeInfo, null, null);
+        return new PropertyRoute(undefined, "Root", typeInfo, undefined, undefined);
     }
 
     static member(parent: PropertyRoute, member: MemberInfo) {
-        return new PropertyRoute(parent, PropertyRouteType.Field, null, member, null);
+        return new PropertyRoute(parent, "Field", undefined, member, undefined);
     }
 
     static mixin(parent: PropertyRoute, mixinName: string) {
-        return new PropertyRoute(parent, PropertyRouteType.Mixin, null, null, mixinName);
+        return new PropertyRoute(parent, "Mixin", undefined, undefined, mixinName);
     }
 
     static mlistItem(parent: PropertyRoute) {
-        return new PropertyRoute(parent, PropertyRouteType.MListItem, null, null, null);
+        return new PropertyRoute(parent, "MListItem", undefined, undefined, undefined);
     }
 
     static liteEntity(parent: PropertyRoute) {
-        return new PropertyRoute(parent, PropertyRouteType.LiteEntity, null, null, null);
+        return new PropertyRoute(parent, "LiteEntity", undefined, undefined, undefined);
     }
 
-    constructor(parent: PropertyRoute, propertyRouteType: PropertyRouteType, rootType: TypeInfo, member: MemberInfo, mixinName: string) {
+    constructor(
+        parent: PropertyRoute | undefined,
+        propertyRouteType: PropertyRouteType,
+        rootType: TypeInfo | undefined,
+        member: MemberInfo | undefined,
+        mixinName: string | undefined) {
 
         this.propertyRouteType = propertyRouteType;
         this.parent = parent;
@@ -765,17 +838,18 @@ export class PropertyRoute {
         return current;
     }
 
-    findRootType() {
-        return this.rootType || this.parent.findRootType();
+    findRootType(): TypeInfo {
+        return this.rootType || this.parent!.findRootType();
     }
 
     typeReference(): TypeReference {
         switch (this.propertyRouteType) {
-            case PropertyRouteType.Root: return { name: this.rootType.name };
-            case PropertyRouteType.Field: return this.member.type;
-            case PropertyRouteType.Mixin: throw new Error("mixins can not be used alone");
-            case PropertyRouteType.MListItem: return Dic.extend({}, this.parent.typeReference(), { isCollection: false });
-            case PropertyRouteType.LiteEntity: return Dic.extend({}, this.parent.typeReference(), { isLite: false });
+            case "Root": return { name: this.rootType!.name };
+            case "Field": return this.member!.type;
+            case "Mixin": throw new Error("mixins can not be used alone");
+            case "MListItem": return Dic.extend({}, this.parent!.typeReference(), { isCollection: false });
+            case "LiteEntity": return Dic.extend({}, this.parent!.typeReference(), { isLite: false });
+            default: throw new Error("Unexpected propertyRouteType");
         }
     }
 
@@ -783,31 +857,43 @@ export class PropertyRoute {
         return getTypeInfo(this.typeReference().name);
     }
 
-    closestTypeInfo(): TypeInfo {
+    rootTypeInfo(): TypeInfo {
         switch (this.propertyRouteType) {
-            case PropertyRouteType.Root: return this.rootType;
-            case PropertyRouteType.Field: return this.parent.closestTypeInfo();
-            case PropertyRouteType.Mixin: return this.parent.closestTypeInfo();
-            case PropertyRouteType.MListItem: return this.parent.closestTypeInfo();
-            case PropertyRouteType.LiteEntity: return this.parent.closestTypeInfo();
+            case "Root": return this.rootType!;
+            case "Field": return this.parent!.rootTypeInfo();
+            case "Mixin": return this.parent!.rootTypeInfo();
+            case "MListItem": return this.parent!.rootTypeInfo();
+            case "LiteEntity": return this.parent!.rootTypeInfo();
+            default: throw new Error("Unexpected propertyRouteType");
         }
     }
 
-    propertyPath(): string{
+    propertyPath(): string {
         switch (this.propertyRouteType) {
-            case PropertyRouteType.Root: throw new Error("Root has no PropertyString");
-            case PropertyRouteType.Field: return this.member.name;
-            case PropertyRouteType.Mixin: return "[" + this.mixinName + "]";
-            case PropertyRouteType.MListItem: return this.parent.propertyPath() + "/";
-            case PropertyRouteType.LiteEntity: return this.parent.propertyPath() + ".entity";
+            case "Root": throw new Error("Root has no PropertyString");
+            case "Field": return this.member!.name;
+            case "Mixin": return "[" + this.mixinName + "]";
+            case "MListItem": return this.parent!.propertyPath() + "/";
+            case "LiteEntity": return this.parent!.propertyPath() + ".entity";
+            default: throw new Error("Unexpected propertyRouteType");
+        }
+    }
+
+    tryAddMember(member: LambdaMember): PropertyRoute | undefined {
+        try {
+            return this.addMember(member);
+        } catch (e) {
+            return undefined;
         }
     }
 
     addMember(member: LambdaMember): PropertyRoute {
 
-        if (member.type == LambdaMemberType.Member) {
+        if (member.type == "Member") {
 
-            if (this.propertyRouteType == PropertyRouteType.Field) {
+            if (this.propertyRouteType == "Field"  ||
+                this.propertyRouteType == "MListItem" ||
+                this.propertyRouteType == "LiteEntity") {
                 const ref = this.typeReference();
 
                 if (ref.isLite) {
@@ -816,8 +902,8 @@ export class PropertyRoute {
 
                     return PropertyRoute.liteEntity(this);
                 }
-          
-                const ti = getTypeInfos(ref).single("Ambiguity due to multiple Implementations");
+
+                const ti = getTypeInfos(ref).single("Ambiguity due to multiple Implementations"); //[undefined]
                 if (ti) {
                     const memberName = member.name.firstUpper();
                     const m = ti.members[memberName];
@@ -825,31 +911,36 @@ export class PropertyRoute {
                         throw new Error(`member '${memberName}' not found`);
 
                     return PropertyRoute.member(PropertyRoute.root(ti), m);
+                } else if (this.propertyRouteType == "LiteEntity") {
+                    throw Error("Unexpected lite case");
                 }
             }
 
-            const memberName = this.propertyRouteType == PropertyRouteType.Root ? member.name.firstUpper() :
-                this.propertyRouteType == PropertyRouteType.MListItem ? this.propertyPath() + member.name.firstUpper() :
+            const memberName = this.propertyRouteType == "Root" ? member.name.firstUpper() :
+                this.propertyRouteType == "MListItem" ? this.propertyPath() + member.name.firstUpper() :
                     this.propertyPath() + "." + member.name.firstUpper();
 
-            const m = this.closestTypeInfo().members[memberName];
+            const m = this.rootTypeInfo().members[memberName];
             if (!m)
                 throw new Error(`member '${memberName}' not found`)
 
             return PropertyRoute.member(this, m);
         }
 
-        if (member.type == LambdaMemberType.Mixin) {
-            if (this.propertyRouteType != PropertyRouteType.Root)
+        if (member.type == "Mixin") {
+            if (this.propertyRouteType != "Root")
                 throw new Error("invalid mixin at this stage");
 
             return PropertyRoute.mixin(this, member.name);
         }
 
+        if (member.type == "Indexer") {
+            if (this.propertyRouteType != "Field")
+                throw new Error("invalid indexer at this stage");
 
-        if (member.type == LambdaMemberType.Indexer) {
-            if (this.propertyRouteType != PropertyRouteType.Field)
-                throw new Error("invalid mixin at this stage");
+            const tr = this.typeReference();
+            if (!tr.isCollection)
+                throw new Error(`${this.propertyPath()} is not a collection`);
 
             return PropertyRoute.mlistItem(this);
         }
@@ -859,52 +950,51 @@ export class PropertyRoute {
 
     subMembers(): { [subMemberName: string]: MemberInfo } {
 
-        var type = this.closestTypeInfo();
+        function simpleMembersAfter(type: TypeInfo, path: string) {
+            return Dic.getValues(type.members)
+                .filter(m => {
+                    if (m.name == path || !m.name.startsWith(path))
+                        return false;
 
-        function containsDotOrSlash(name: string) {
-            return name.contains(".") || name.contains("/");
+                    var name = m.name.substring(path.length);
+                    if (name.contains(".") || name.contains("/"))
+                        return false;
+
+                    return true;
+                })
+                .toObject(m => m.name.substring(path.length))
         }
+        
 
         switch (this.propertyRouteType) {
-            case PropertyRouteType.Root: return Dic.getValues(type.members).filter(m => !containsDotOrSlash(m.name)).toObject(m => m.name);
-            case PropertyRouteType.Mixin:
-                
-            case PropertyRouteType.MListItem: 
+            case "Root": return simpleMembersAfter(this.rootTypeInfo(), "");
+            case "Mixin": return simpleMembersAfter(this.rootTypeInfo(), this.propertyPath());                
+            case "LiteEntity": return simpleMembersAfter(this.typeReferenceInfo(), "");
+            case "Field":
+            case "MListItem": 
                 {
-                    var path = this.propertyPath();
-                    return Dic.getValues(type.members)
-                        .filter(m => m.name != path && m.name.startsWith(path))
-                        .filter(m => !containsDotOrSlash(m.name.substring(path.length)))
-                        .toObject(m => m.name.substring(path.length));
+                    const ti = getTypeInfos(this.typeReference()).single("Ambiguity due to multiple Implementations"); //[undefined]
+                    if (ti && isTypeEntity(ti))
+                        return simpleMembersAfter(ti, "");
+                    else
+                        return simpleMembersAfter(this.rootTypeInfo(), this.propertyPath() + (this.propertyRouteType == "Field" ? "." : ""));
                 }
-            case PropertyRouteType.LiteEntity:
-            case PropertyRouteType.Field:
-                {
-                    const member = this.member;
-                    return Dic.getValues(type.members)
-                        .filter(m => m.name.startsWith(member.name + "."))
-                        .filter(m => !containsDotOrSlash(m.name.substring(member.name.length + 1)))
-                        .toObject(m => m.name.substring(member.name.length + 1));
-                }
+            default: throw new Error("Unexpected propertyRouteType");
 
         }
     }
 
+    
+
     toString() {
-        if (this.propertyRouteType == PropertyRouteType.Root)
+        if (this.propertyRouteType == "Root")
             return `(${this.findRootType().name})`;
 
         return `(${this.findRootType().name}).${this.propertyPath()}`;
     }
 }
 
-export enum PropertyRouteType {
-    Root = "Root" as any,
-    Field = "Field" as any,
-    Mixin = "Mixin" as any,
-    LiteEntity = "LiteEnity" as any,
-    MListItem = "MListItem" as any,
-}
+export type PropertyRouteType = "Root" | "Field" | "Mixin" | "LiteEntity" | "MListItem";
 
 
 export class GraphExplorer {
@@ -912,13 +1002,13 @@ export class GraphExplorer {
     static propagateAll(...args: any[]) {
         const ge = new GraphExplorer();
         ge.modelStateMode = "clean";
-        args.forEach(o => ge.isModified(o, null));
+        args.forEach(o => ge.isModified(o, ""));
     }
 
-    static setModelState(e: ModifiableEntity, modelState: ModelState, initialPrefix: string) {
+    static setModelState(e: ModifiableEntity, modelState: ModelState | undefined, initialPrefix: string) {
         const ge = new GraphExplorer();
         ge.modelStateMode = "set";
-        ge.modelState = modelState == null ? {} : Dic.copy(modelState);
+        ge.modelState = modelState == undefined ? {} : Dic.copy(modelState);
         ge.isModifiableObject(e, initialPrefix);
         if (Dic.getValues(ge.modelState).length) //Assign remaining
             e.error = Dic.extend(e.error || {}, ge.modelState);
@@ -933,8 +1023,8 @@ export class GraphExplorer {
     }
 
     //cycle detection
-    private modified = [];
-    private notModified = [];
+    private modified : any[] = [];
+    private notModified: any[] = [];
 
     private modelStateMode: "collect" | "set" | "clean";
 
@@ -943,7 +1033,7 @@ export class GraphExplorer {
 
     isModified(obj: any, modelStatePrefix: string): boolean {
 
-        if (obj == null)
+        if (obj == undefined)
             return false;
 
         const t = typeof obj;
@@ -965,24 +1055,24 @@ export class GraphExplorer {
 
     private static specialProperties = ["Type", "id", "isNew", "ticks", "toStr", "modified"];
 
-    private isModifiableObject(obj: Object, modelStatePrefix: string) {
+    private isModifiableObject(obj: any, modelStatePrefix: string) {
 
         if (obj instanceof Date)
             return false;
 
         if (obj instanceof Array)
-            return obj.map((o, i) => this.isModified(o, modelStatePrefix + "[" + i + "]")).some(a => a);
+            return (obj as Array<any>).map((o, i) => this.isModified(o, modelStatePrefix + "[" + i + "]")).some(a => a);
 
         const mle = obj as MListElement<any>;
         if (mle.hasOwnProperty("rowId"))
-            return this.isModified(mle.element, dot(modelStatePrefix, "element")) || mle.rowId == null;
+            return this.isModified(mle.element, dot(modelStatePrefix, "element")) || mle.rowId == undefined;
 
         const lite = obj as Lite<Entity>
         if (lite.EntityType)
-            return lite.entity != null && this.isModified(lite.entity, dot(modelStatePrefix, "entity"));
+            return lite.entity != undefined && this.isModified(lite.entity, dot(modelStatePrefix, "entity"));
 
         const mod = obj as ModifiableEntity;
-        if (mod.Type == null) {
+        if (mod.Type == undefined) {
             let result = false;
             for (const p in obj) {
                 if (obj.hasOwnProperty(p)) {
@@ -995,7 +1085,7 @@ export class GraphExplorer {
         }
 
         if (this.modelStateMode == "collect") {
-            if (mod.error != null) {
+            if (mod.error != undefined) {
                 for (const p in mod.error) {
                     const propertyPrefix = dot(modelStatePrefix, p);
 
@@ -1006,13 +1096,13 @@ export class GraphExplorer {
         }
         else if (this.modelStateMode == "set") {
 
-            mod.error = null;
+            mod.error = undefined;
 
             const prefix = dot(modelStatePrefix, "");
             for (const key in this.modelState) {
                 const propName = key.tryAfter(prefix)
                 if (propName && !propName.contains(".")) {
-                    if (mod.error == null)
+                    if (mod.error == undefined)
                         mod.error = {};
 
                     mod.error[propName] = this.modelState[key];
@@ -1021,11 +1111,12 @@ export class GraphExplorer {
                 }
             }
 
-            if (mod.error == null)
+            if (mod.error == undefined)
                 delete mod.error;
         }
         else if (this.modelStateMode == "clean") {
-            delete mod.error;
+            if (mod.error)
+                delete mod.error
         }
 
         
@@ -1045,7 +1136,7 @@ export class GraphExplorer {
 }
 
 function dot(prev: string, property: string) {
-    if (prev == null || prev == "")
+    if (prev == undefined || prev == "")
         return property;
 
     return prev + "." + property

@@ -13,9 +13,9 @@ interface SearchPageProps extends ReactRouter.RouteComponentProps<{}, { queryNam
 
 }
 
-export default class SearchPage extends React.Component<SearchPageProps, { findOptions?: FindOptions, }> {
+export default class SearchPage extends React.Component<SearchPageProps, { findOptions: FindOptions, }> {
 
-    constructor(props) {
+    constructor(props: SearchPageProps) {
         super(props);
         this.state = this.calculateState(this.props);
     }
@@ -28,7 +28,7 @@ export default class SearchPage extends React.Component<SearchPageProps, { findO
 
     calculateState(props: SearchPageProps) {
         return {
-            findOptions: Dic.extend({ showFilters: true }, Finder.parseFindOptionsPath(props.routeParams.queryName, props.location.query)),
+            findOptions: Dic.extend({ showFilters: true }, Finder.parseFindOptionsPath(props.routeParams!.queryName, props.location!.query)),
         };
     }
 
@@ -44,10 +44,11 @@ export default class SearchPage extends React.Component<SearchPageProps, { findO
                         <span className="glyphicon glyphicon-new-window"></span>
                     </a>
                 </h2>
-                <SearchControl ref={e => this.searchControl = e}
-                   showBarExtension={true}
-                   hideFullScreenButton={true}
-                   findOptions={fo} />
+                <SearchControl ref={(e: SearchControl) => this.searchControl = e}
+                    throwIfNotFindable={true}
+                    showBarExtension={true}
+                    hideFullScreenButton={true}
+                    findOptions={fo} />
             </div>
         );
     }

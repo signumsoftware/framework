@@ -121,7 +121,7 @@ declare namespace __React {
         //setState(f: (prevState: S, props: P) => S, callback?: () => any): void;
         setState(state: S, callback?: () => any): void;
         forceUpdate(callBack?: () => any): void;
-        render(): JSX.Element;
+        render(): JSX.Element | null;
         props: P;
         state: S;
         context: {};
@@ -145,7 +145,7 @@ declare namespace __React {
     // ----------------------------------------------------------------------
 
     interface StatelessComponent<P> {
-        (props?: P, context?: any): ReactElement<any>;
+        (props?: P, context?: any): ReactElement<any> | null;
         propTypes?: ValidationMap<P>;
         contextTypes?: ValidationMap<any>;
         defaultProps?: P;
@@ -196,7 +196,7 @@ declare namespace __React {
     }
 
     interface ComponentSpec<P, S> extends Mixin<P, S> {
-        render(): ReactElement<any>;
+        render(): ReactElement<any> | null;
 
         [propertyName: string]: any;
     }
@@ -215,6 +215,7 @@ declare namespace __React {
         nativeEvent: Event;
         preventDefault(): void;
         stopPropagation(): void;
+        persist(): void;
         target: EventTarget;
         timeStamp: Date;
         type: string;
@@ -553,6 +554,8 @@ declare namespace __React {
          * Shorthand property that defines the different properties of all four sides of an element's border in a single declaration. It can be used to set border-width, border-style and border-color, or a subset of these.
          */
         border?: any;
+
+        borderRadius?: any;
 
         /**
          * Defines the shape of the border of the bottom-left corner.
@@ -2083,11 +2086,11 @@ declare namespace __React {
     // ----------------------------------------------------------------------
 
     interface ReactChildren {
-        map<T>(children: ReactNode, fn: (child: ReactChild, index: number) => T): T[];
-        forEach(children: ReactNode, fn: (child: ReactChild, index: number) => any): void;
-        count(children: ReactNode): number;
-        only(children: ReactNode): ReactElement<any>;
-        toArray(children: ReactNode): ReactChild[];
+        map<T>(children: ReactNode | undefined, fn: (child: ReactChild, index: number) => T): T[];
+        forEach(children: ReactNode | undefined, fn: (child: ReactChild, index: number) => any): void;
+        count(children: ReactNode | undefined): number;
+        only(children: ReactNode | undefined): ReactElement<any>;
+        toArray(children: ReactNode | undefined): ReactChild[];
     }
 
     //
@@ -2128,7 +2131,7 @@ declare namespace JSX {
 
     interface Element extends React.ReactElement<any> { }
     interface ElementClass extends React.Component<any, any> {
-        render(): JSX.Element;
+        render(): JSX.Element | null;
     }
     interface ElementAttributesProperty { props: {}; }
 
@@ -2137,7 +2140,7 @@ declare namespace JSX {
     }
 
     interface IntrinsicClassAttributes<T> {
-        ref?: string | ((classInstance: T) => void);
+        ref?: ((classInstance: T) => void) | string;
     }
 
     interface IntrinsicElements {

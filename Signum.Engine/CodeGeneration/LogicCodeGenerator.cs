@@ -93,13 +93,13 @@ namespace Signum.Engine.CodeGeneration
             sb.AppendLine();
             sb.AppendLine("namespace " + GetNamespace(mod));
             sb.AppendLine("{");
-            sb.Append(WriteClass(mod, expression).Indent(4));
+            sb.Append(WriteLogicClass(mod, expression).Indent(4));
             sb.AppendLine("}");
 
             return sb.ToString();
         }
 
-        protected virtual string WriteClass(Module mod, List<ExpressionInfo> expressions)
+        protected virtual string WriteLogicClass(Module mod, List<ExpressionInfo> expressions)
         {
             var allExpression = mod.Types.SelectMany(t => GetExpressions(t)).ToList(); 
 
@@ -166,20 +166,22 @@ namespace Signum.Engine.CodeGeneration
                 string include = WritetInclude(item);
                 if (include != null)
                     sb.Append(include.Indent(8));
-            }
 
-            sb.AppendLine();
-
-            foreach (var item in mod.Types)
-            {
                 string query = WriteQuery(item);
                 if (query != null)
                 {
                     sb.Append(query.Indent(8));
                     sb.AppendLine();
                 }
-            }
 
+                string opers = WriteOperations(item);
+                if (opers != null)
+                {
+                    sb.Append(opers.Indent(8));
+                    sb.AppendLine();
+                }
+            }
+            
             if (expressions.Any())
             {
                 foreach (var ei in expressions)
@@ -191,16 +193,7 @@ namespace Signum.Engine.CodeGeneration
 
                 sb.AppendLine();
             }
-
-            foreach (var item in mod.Types)
-            {
-                string opers = WriteOperations(item);
-                if (opers != null)
-                {
-                    sb.Append(opers.Indent(8));
-                    sb.AppendLine();
-                }
-            }
+            
 
             sb.AppendLine("    }");
             sb.AppendLine("}");
@@ -220,11 +213,25 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string WritetInclude(Type type)
         {
-            return "sb.Include<" + type.TypeName() + ">();\r\n";
+            var ops = GetOperationsSymbols(type);
+            var save = ops.SingleOrDefaultEx(o => GetOperationType(o) == OperationType.Execute && IsSave(o));
+            var delete = ops.SingleOrDefaultEx(o => GetOperationType(o) == OperationType.Delete);
+            var p = ShouldWriteSimpleQuery(type) ?  GetVariableName(type)  : null;
+
+            return new[]
+            {
+                "sb.Include<" + type.TypeName() + ">()",
+                save != null && ShouldWriteSimpleOperations(save) ? ("   .WidthSave(" + save.Symbol.ToString() + ")") : null,
+                delete != null && ShouldWriteSimpleOperations(delete) ? ("   .WidthDelete(" + delete.Symbol.ToString() + ")") : null,
+                p == null ? null : $".    WithQuery(dqm, {p} => ${WriteQueryConstructor(type, p)})"
+            }.NotNull().ToString("\r\n") + ";";
         }
 
         protected virtual string WriteQuery(Type type)
         {
+            if (ShouldWriteSimpleQuery(type))
+                return null;
+
             string typeName = type.TypeName();
 
             var v = GetVariableName(type);
@@ -232,17 +239,29 @@ namespace Signum.Engine.CodeGeneration
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("dqm.RegisterQuery(typeof({0}), () =>".FormatWith(typeName));
             sb.AppendLine("    from {0} in Database.Query<{1}>()".FormatWith(v, typeName));
-            sb.AppendLine("    select new");
+            sb.AppendLine("    select " + WriteQueryConstructor(type, v) + ");");
+            return sb.ToString();
+        }
+
+        private string WriteQueryConstructor(Type type, string v)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("new");
             sb.AppendLine("    {");
             sb.AppendLine("        Entity = {0},".FormatWith(v));
             sb.AppendLine("        {0}.Id,".FormatWith(v));
             foreach (var prop in GetQueryProperties(type))
-	        {
+            {
                 sb.AppendLine("        {0}.{1},".FormatWith(v, prop.Name));
-	        }
-            sb.AppendLine("    });");
-
+            }
+            sb.Append("    }");
             return sb.ToString();
+
+        }
+
+        protected virtual bool ShouldWriteSimpleQuery(Type type)
+        {
+            return true;
         }
 
         protected internal class ExpressionInfo
@@ -389,28 +408,50 @@ public static IQueryable<{to}> {Method}(this {from} e)
 
         protected virtual string WriteOperation(IOperationSymbolContainer oper)
         {
+
+            switch (GetOperationType(oper))
+            {
+                case OperationType.Execute:
+                    if (IsSave(oper) && ShouldWriteSimpleOperations(oper))
+                        return null;
+                    return WriteExecuteOperation(oper);
+                case OperationType.Delete:
+                    return WriteDeleteOperation(oper);
+                case OperationType.Constructor:
+                    return WriteConstructSimple(oper);
+                case OperationType.ConstructorFrom:
+                    return WriteConstructFrom(oper);
+                case OperationType.ConstructorFromMany:
+                    return WriteConstructFromMany(oper);
+                default:
+                    throw new InvalidOperationException();
+            }
+        }
+
+        private OperationType GetOperationType(IOperationSymbolContainer oper)
+        {
             string type = oper.GetType().TypeName();
 
             if (type.Contains("ExecuteSymbolImp"))
-                return WriteExecuteOperation((IEntityOperationSymbolContainer)oper);
+                return OperationType.Execute;
 
             if (type.Contains("DeleteSymbolImp"))
-                return WriteDeleteOperation((IEntityOperationSymbolContainer)oper);
-
-            if (type.Contains("FromImp"))
-                return WriteConstructFrom((IEntityOperationSymbolContainer)oper);
-
-            if (type.Contains("FromManyImp"))
-                return WriteConstructFromMany(oper);
+                return OperationType.Delete;
 
             if (type.Contains("SimpleImp"))
-                return WriteConstructSimple(oper);
+                return OperationType.Constructor;
 
+            if (type.Contains("FromImp"))
+                return OperationType.ConstructorFrom;
+
+            if (type.Contains("FromManyImp"))
+                return OperationType.ConstructorFromMany;
+;
             throw new InvalidOperationException();
         }
 
-        protected virtual string WriteExecuteOperation(IEntityOperationSymbolContainer oper)
-        {
+        protected virtual string WriteExecuteOperation(IOperationSymbolContainer oper)
+        {   
             Type type = oper.GetType().GetGenericArguments().Single();
 
             var v = GetVariableName(type);
@@ -428,13 +469,21 @@ public static IQueryable<{to}> {Method}(this {from} e)
             return sb.ToString();
         }
 
-        protected virtual bool IsSave(IEntityOperationSymbolContainer oper)
+        private bool ShouldWriteSimpleOperations(IOperationSymbolContainer oper)
+        {
+            return true;
+        }
+
+        protected virtual bool IsSave(IOperationSymbolContainer oper)
         {
             return oper.ToString().Contains("Save"); ;
         }
 
-        protected virtual string WriteDeleteOperation(IEntityOperationSymbolContainer oper)
+        protected virtual string WriteDeleteOperation(IOperationSymbolContainer oper)
         {
+            if (ShouldWriteSimpleOperations(oper))
+                return null;
+
             Type type = oper.GetType().GetGenericArguments().Single();
 
             string v = GetVariableName(type);
@@ -466,7 +515,7 @@ public static IQueryable<{to}> {Method}(this {from} e)
             return sb.ToString();
         }
 
-        protected virtual string WriteConstructFrom(IEntityOperationSymbolContainer oper)
+        protected virtual string WriteConstructFrom(IOperationSymbolContainer oper)
         {
             List<Type> type = oper.GetType().GetGenericArguments().ToList();
 

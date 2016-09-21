@@ -23,11 +23,12 @@ export { RenderEntity };
 import { EntityBase } from  './Lines/EntityBase'
 export { EntityBase };
 
-import { EntityLine } from  './Lines/EntityLine'
-export { EntityLine };
+import { EntityLine, AutocompleteConfig, LiteAutocompleteConfig, FindOptionsAutocompleteConfig } from './Lines/EntityLine'
+export { EntityLine, AutocompleteConfig, LiteAutocompleteConfig, FindOptionsAutocompleteConfig };
 
 import { EntityCombo } from  './Lines/EntityCombo'
 export { EntityCombo };
+
 
 import { EntityDetail } from  './Lines/EntityDetail'
 export { EntityDetail };
@@ -52,14 +53,17 @@ export { EntityCheckboxList };
 
 import { EnumCheckboxList } from  './Lines/EnumCheckboxList'
 export { EnumCheckboxList };
- 
+
+
+import { EntityTable } from './Lines/EntityTable'
+export { EntityTable };
 
 tasks.push(taskSetNiceName);
 export function taskSetNiceName(lineBase: LineBase<any, any>, state: LineBaseProps) {
     if (!state.labelText &&
         state.ctx.propertyRoute &&
-        state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
-        state.labelText = state.ctx.propertyRoute.member.niceName;
+        state.ctx.propertyRoute.propertyRouteType == "Field") {
+        state.labelText = state.ctx.propertyRoute.member!.niceName;
     }
 }
 
@@ -70,8 +74,8 @@ export function taskSetUnit(lineBase: LineBase<any, any>, state: LineBaseProps) 
 
         if (!vProps.unitText &&
             state.ctx.propertyRoute &&
-            state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
-            vProps.unitText = state.ctx.propertyRoute.member.unit;
+            state.ctx.propertyRoute.propertyRouteType == "Field") {
+            vProps.unitText = state.ctx.propertyRoute.member!.unit;
         }
     }
 }
@@ -83,8 +87,8 @@ export function taskSetFormat(lineBase: LineBase<any, any>, state: LineBaseProps
 
         if (!vProps.formatText &&
             state.ctx.propertyRoute &&
-            state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
-            vProps.formatText = state.ctx.propertyRoute.member.format;
+            state.ctx.propertyRoute.propertyRouteType == "Field") {
+            vProps.formatText = state.ctx.propertyRoute.member!.format;
         }
     }
 }
@@ -93,8 +97,8 @@ tasks.push(taskSetReadOnly);
 export function taskSetReadOnly(lineBase: LineBase<any, any>, state: LineBaseProps) {
     if (!state.ctx.readOnly &&
         state.ctx.propertyRoute &&
-        state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field &&
-        state.ctx.propertyRoute.member.isReadOnly) {
+        state.ctx.propertyRoute.propertyRouteType == "Field" &&
+        state.ctx.propertyRoute.member!.isReadOnly) {
         state.ctx.readOnly = true;
     }
 }
@@ -103,8 +107,8 @@ tasks.push(taskSetMove);
 export function taskSetMove(lineBase: LineBase<any, any>, state: LineBaseProps) {
     if (lineBase instanceof EntityListBase &&
         state.ctx.propertyRoute &&
-        state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field &&
-        state.ctx.propertyRoute.member.preserveOrder) {
+        state.ctx.propertyRoute.propertyRouteType == "Field" &&
+        state.ctx.propertyRoute.member!.preserveOrder) {
         (state as EntityListBaseProps).move = true;
     }
 }
@@ -113,21 +117,24 @@ export let maxValueLineSize = 100;
 
 tasks.push(taskSetHtmlProperties);
 export function taskSetHtmlProperties(lineBase: LineBase<any, any>, state: LineBaseProps) {
-    var vl = lineBase instanceof ValueLine ? lineBase as ValueLine : null;
-    var pr = state.ctx.propertyRoute;
-    var s = state as ValueLineProps;
-    if (vl && pr && pr.propertyRouteType == PropertyRouteType.Field && (s.valueLineType == ValueLineType.TextBox || s.valueLineType == ValueLineType.TextArea)) {
-        if (pr.member.maxLength != null) {
+    const vl = lineBase instanceof ValueLine ? lineBase as ValueLine : undefined;
+    const pr = state.ctx.propertyRoute;
+    const s = state as ValueLineProps;
+    if (vl && pr && pr.propertyRouteType == "Field" && (s.valueLineType == ValueLineType.TextBox || s.valueLineType == ValueLineType.TextArea)) {
+
+        var member = pr.member!;
+
+        if (member.maxLength != undefined) {
 
             if (!s.valueHtmlProps)
                 s.valueHtmlProps = {};
 
-            s.valueHtmlProps.maxLength = pr.member.maxLength;
+            s.valueHtmlProps.maxLength = member.maxLength;
 
-            s.valueHtmlProps.size = maxValueLineSize == null ? pr.member.maxLength : Math.min(maxValueLineSize, pr.member.maxLength);
+            s.valueHtmlProps.size = maxValueLineSize == undefined ? member.maxLength : Math.min(maxValueLineSize, member.maxLength);
         }
 
-        if (pr.member.isMultiline)
+        if (member.isMultiline)
             s.valueLineType = ValueLineType.TextArea;
     }
 }

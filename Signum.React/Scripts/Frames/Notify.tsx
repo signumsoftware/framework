@@ -17,14 +17,19 @@ interface NotifyOptions
     type: NotifyType;
 }
 
+interface NotifyState {
+    text?: React.ReactChild;
+    type?: NotifyType;
+}
 
-export default class Notify extends React.Component<void, NotifyOptions>{
+
+export default class Notify extends React.Component<void, NotifyState>{
 
     static singletone: Notify;
 
-    constructor(props) {
+    constructor(props: void) {
         super(props);
-        this.state = { text: null, type: null };
+        this.state = { text: undefined, type: undefined };
 
         Notify.singletone = this;
     }
@@ -55,7 +60,7 @@ export default class Notify extends React.Component<void, NotifyOptions>{
         if (!this._isMounted)
             return;
         clearTimeout(this.handler);
-        this.setState({ text: null, type: null })
+        this.setState({ text: undefined, type: undefined })
     }
 
 
@@ -71,7 +76,7 @@ export default class Notify extends React.Component<void, NotifyOptions>{
         
         return (
             <div id="sfNotify">
-                <Transition in={this.state.text != null} className='notify' enteredClassName='in' enteringClassName='in' >
+                <Transition in={this.state.text != undefined} className='notify' enteredClassName='in' enteringClassName='in' >
                     <span className={this.state.type}>{this.state.text}</span>
                 </Transition>
             </div>

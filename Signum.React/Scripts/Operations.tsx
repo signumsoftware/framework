@@ -4,19 +4,21 @@ import { Button, OverlayTrigger, Tooltip, MenuItem, DropdownButton } from "react
 import { Dic } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
-import { Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, OperationMessage, EntityPack,
-    OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol } from './Signum.Entities';
+import {
+    Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, OperationMessage, EntityPack,
+    OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol
+} from './Signum.Entities';
 import { OperationLogEntity } from './Signum.Entities.Basics';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationInfo, OperationType, GraphExplorer  } from './Reflection';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationInfo, OperationType, GraphExplorer } from './Reflection';
 import { TypeContext, EntityFrame } from './TypeContext';
 import * as Finder from './Finder';
 import * as Navigator from './Navigator';
 import * as QuickLinks from './QuickLinks';
 import * as ContexualItems from './SearchControl/ContextualItems';
 import ButtonBar from './Frames/ButtonBar';
-import { getEntityOperationButtons }  from './Operations/EntityOperations';
-import { getConstructFromManyContextualItems, getEntityOperationsContextualItems }  from './Operations/ContextualOperations';
-import { ContextualItemsContext }  from './SearchControl/ContextualItems';
+import { getEntityOperationButtons } from './Operations/EntityOperations';
+import { getConstructFromManyContextualItems, getEntityOperationsContextualItems } from './Operations/ContextualOperations';
+import { ContextualItemsContext } from './SearchControl/ContextualItems';
 
 export function start() {
     ButtonBar.onButtonBarRender.push(getEntityOperationButtons);
@@ -32,17 +34,17 @@ export function start() {
 export const operationSettings: { [operationKey: string]: OperationSettings } = {};
 
 export function addSettings(...settings: OperationSettings[]) {
-    settings.forEach(s => Dic.addOrThrow(operationSettings, s.operationSymbol.key, s));
+    settings.forEach(s => Dic.addOrThrow(operationSettings, s.operationSymbol.key!, s));
 }
 
 
-export function getSettings(operation: OperationSymbol | string): OperationSettings {
-    const operationKey = (operation as OperationSymbol).key || operation as string; 
+export function getSettings(operation: OperationSymbol | string): OperationSettings | undefined {
+    const operationKey = (operation as OperationSymbol).key || operation as string;
 
     return operationSettings[operationKey];
 }
 
-export var isOperationAllowedEvent: Array<(oi: OperationInfo) => boolean> = [];
+export const isOperationAllowedEvent: Array<(oi: OperationInfo) => boolean> = [];
 
 export function isOperationAllowed(oi: OperationInfo) {
     return isOperationAllowedEvent.every(a => a(oi));
@@ -50,7 +52,7 @@ export function isOperationAllowed(oi: OperationInfo) {
 
 
 export function operationInfos(ti: TypeInfo) {
-    return Dic.getValues(ti.operations).filter(isOperationAllowed);
+    return Dic.getValues(ti.operations!).filter(isOperationAllowed);
 }
 
 /**
@@ -58,7 +60,7 @@ export function operationInfos(ti: TypeInfo) {
  */
 export abstract class OperationSettings {
 
-    text: () => string;
+    text?: () => string;
     operationSymbol: OperationSymbol;
 
     constructor(operationSymbol: OperationSymbol) {
@@ -73,8 +75,8 @@ export abstract class OperationSettings {
  */
 export class ConstructorOperationSettings<T extends Entity> extends OperationSettings {
 
-    isVisible: (ctx: ConstructorOperationContext<T>) => boolean;
-    onConstruct: (ctx: ConstructorOperationContext<T>) => Promise<EntityPack<T>>;
+    isVisible?: (ctx: ConstructorOperationContext<T>) => boolean;
+    onConstruct?: (ctx: ConstructorOperationContext<T>) => Promise<EntityPack<T> | undefined> | undefined;
 
     constructor(operationSymbol: ConstructSymbol_Simple<T>, options: ConstructorOperationOptions<T>) {
         super(operationSymbol);
@@ -82,11 +84,11 @@ export class ConstructorOperationSettings<T extends Entity> extends OperationSet
         Dic.extend(this, options);
     }
 }
- 
+
 export interface ConstructorOperationOptions<T extends Entity> {
     text?: () => string;
     isVisible?: (ctx: ConstructorOperationContext<T>) => boolean;
-    onConstruct?: (ctx: ConstructorOperationContext<T>) => Promise<EntityPack<T>>;
+    onConstruct?: (ctx: ConstructorOperationContext<T>) => Promise<EntityPack<T> | undefined> | undefined;
 }
 
 export interface ConstructorOperationContext<T extends Entity> {
@@ -102,12 +104,12 @@ export interface ConstructorOperationContext<T extends Entity> {
  */
 export class ContextualOperationSettings<T extends Entity> extends OperationSettings {
 
-    isVisible: (ctx: ContextualOperationContext<T>) => boolean;
-    hideOnCanExecute: boolean;
-    confirmMessage: (ctx: ContextualOperationContext<T>) => string;
-    onClick: (ctx: ContextualOperationContext<T>, event: React.MouseEvent) => void;
-    style: BsStyle;
-    order: number;
+    isVisible?: (ctx: ContextualOperationContext<T>) => boolean;
+    hideOnCanExecute?: boolean;
+    confirmMessage?: (ctx: ContextualOperationContext<T>) => string;
+    onClick?: (ctx: ContextualOperationContext<T>, event: React.MouseEvent) => void;
+    style?: BsStyle;
+    order?: number;
 
     constructor(operationSymbol: ConstructSymbol_FromMany<any, T>, options: ContextualOperationOptions<T>) {
         super(operationSymbol);
@@ -131,7 +133,7 @@ export interface ContextualOperationContext<T extends Entity> {
     operationInfo: OperationInfo;
     settings: ContextualOperationSettings<T>;
     entityOperationSettings: EntityOperationSettings<T>;
-    canExecute: string;
+    canExecute: string | undefined;
 }
 
 
@@ -143,29 +145,29 @@ export interface EntityOperationContext<T extends Entity> {
     operationInfo: OperationInfo;
     showOperations: boolean;
     settings: EntityOperationSettings<T>;
-    canExecute: string;
+    canExecute: string | undefined;
 }
 
 export class EntityOperationSettings<T extends Entity> extends OperationSettings {
 
-    contextual: ContextualOperationSettings<T>;
-    contextualFromMany: ContextualOperationSettings<T>;
-    
-    isVisible: (ctx: EntityOperationContext<T>) => boolean;
-    confirmMessage: (ctx: EntityOperationContext<T>) => string;
-    onClick: (ctx: EntityOperationContext<T>) => void;
-    hideOnCanExecute: boolean;
-    group: EntityOperationGroup;
-    order: number;
-    style: BsStyle;
+    contextual?: ContextualOperationSettings<T>;
+    contextualFromMany?: ContextualOperationSettings<T>;
+
+    isVisible?: (ctx: EntityOperationContext<T>) => boolean;
+    confirmMessage?: (ctx: EntityOperationContext<T>) => string;
+    onClick?: (ctx: EntityOperationContext<T>, event: React.MouseEvent) => void;
+    hideOnCanExecute?: boolean;
+    group?: EntityOperationGroup | null;
+    order?: number;
+    style?: BsStyle;
 
     constructor(operationSymbol: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>, options: EntityOperationOptions<T>) {
         super(operationSymbol)
 
         Dic.extend(this, options);
 
-        this.contextual = options.contextual ? new ContextualOperationSettings(operationSymbol as any, options.contextual) : null;
-        this.contextualFromMany = options.contextualFromMany ? new ContextualOperationSettings(operationSymbol as any, options.contextualFromMany) : null;
+        this.contextual = options.contextual ? new ContextualOperationSettings(operationSymbol as any, options.contextual) : undefined;
+        this.contextualFromMany = options.contextualFromMany ? new ContextualOperationSettings(operationSymbol as any, options.contextualFromMany) : undefined;
     }
 }
 
@@ -178,20 +180,18 @@ export interface EntityOperationOptions<T extends Entity> {
     text?: () => string;
     isVisible?: (ctx: EntityOperationContext<T>) => boolean;
     confirmMessage?: (ctx: EntityOperationContext<T>) => string;
-    onClick?: (ctx: EntityOperationContext<T>) => void;
+    onClick?: (ctx: EntityOperationContext<T>, event: React.MouseEvent) => void;
     hideOnCanExecute?: boolean;
-    group?: EntityOperationGroup;
+    group?: EntityOperationGroup | null;
     order?: number;
     style?: BsStyle;
 }
 
-
-
-export var CreateGroup: EntityOperationGroup = {
+export const CreateGroup: EntityOperationGroup = {
     key: "create",
     text: () => OperationMessage.Create.niceToString(),
     simplifyName: cs => {
-        var array = new RegExp(OperationMessage.CreateFromRegex.niceToString()).exec(cs);
+        const array = new RegExp(OperationMessage.CreateFromRegex.niceToString()).exec(cs);
         return array ? array[1].firstUpper() : cs;
     },
     cssClass: "sf-operation",
@@ -206,7 +206,7 @@ export interface EntityOperationGroup {
     order?: number;
 }
 
-export function autoStyleFunction(oi: OperationInfo): BsStyle{
+export function autoStyleFunction(oi: OperationInfo): BsStyle {
     return oi.operationType == OperationType.Delete ? "danger" :
         oi.operationType == OperationType.Execute && oi.key.endsWith(".Save") ? "primary" : "default";
 }
@@ -225,7 +225,7 @@ export namespace API {
     }
 
     export function constructFromEntity<T extends Entity, F extends Entity>(entity: F, operationKey: string | ConstructSymbol_From<T, F>, ...args: any[]): Promise<EntityPack<T>> {
-
+        GraphExplorer.propagateAll(entity, args);
         return ajaxPost<EntityPack<T>>({ url: "~/api/operation/constructFromEntity" }, { entity: entity, operationKey: getOperationKey(operationKey), args: args } as EntityOperationRequest);
     }
 
@@ -279,7 +279,7 @@ export namespace API {
     }
 
 
-  
+
 
     export function getOperationKey(operationKey: string | OperationSymbol) {
         return (operationKey as OperationSymbol).key || operationKey as string;

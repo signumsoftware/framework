@@ -13,6 +13,8 @@ namespace Signum.Entities
 {
     public static class Validator
     {
+        public static Func<ModifiableEntity, PropertyInfo, string> GlobalValidation { get; set; }
+
         static Polymorphic<Dictionary<string, IPropertyValidator>> validators =
             new Polymorphic<Dictionary<string, IPropertyValidator>>(PolymorphicMerger.InheritDictionary, typeof(ModifiableEntity));
 
@@ -117,7 +119,7 @@ namespace Signum.Entities
 
         public Func<T, bool> IsAplicable { get; set; }
         public Func<T, bool> IsAplicablePropertyValidation { get; set; }
-        public Func<T, bool> IsAplicableExternalPropertyValidation { get; set; }
+        public Func<T, bool> IsAplicableParentChildPropertyValidation { get; set; }
         public Func<T, bool> IsAplicableStaticPropertyValidation { get; set; }
 
         public Func<T, PropertyInfo, string> StaticPropertyValidation { get; set; }
@@ -164,10 +166,10 @@ namespace Signum.Entities
                     return result;
             }
 
-            //External Validation
-            if (IsAplicableExternalPropertyValidation == null || IsAplicableExternalPropertyValidation(entity))
+            //Parent Validation
+            if (IsAplicableParentChildPropertyValidation == null || IsAplicableParentChildPropertyValidation(entity))
             {
-                string result = entity.OnExternalPropertyValidation(PropertyInfo);
+                string result = entity.OnParentChildPropertyValidation(PropertyInfo);
                 if (result != null)
                     return result;
             }
@@ -176,6 +178,17 @@ namespace Signum.Entities
             if (StaticPropertyValidation != null && (IsAplicableStaticPropertyValidation == null || IsAplicableStaticPropertyValidation(entity)))
             {
                 foreach (var item in StaticPropertyValidation.GetInvocationListTyped())
+                {
+                    string result = item(entity, PropertyInfo);
+                    if (result != null)
+                        return result;
+                }
+            }
+
+            //Global validation
+            if (Validator.GlobalValidation != null)
+            {
+                foreach (var item in Validator.GlobalValidation.GetInvocationListTyped())
                 {
                     string result = item(entity, PropertyInfo);
                     if (result != null)

@@ -8,7 +8,7 @@ export default class ValidationErrors extends React.Component<{ entity: Modifiab
 {
     render() {
 
-        var modelState = GraphExplorer.collectModelState(this.props.entity, "");
+        const modelState = GraphExplorer.collectModelState(this.props.entity, "");
 
         if (!modelState || Dic.getKeys(modelState).length == 0)
             return null;

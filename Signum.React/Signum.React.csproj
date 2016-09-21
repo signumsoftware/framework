@@ -28,7 +28,7 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <TypeScriptToolsVersion>1.9</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>2.0</TypeScriptToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -201,6 +201,7 @@
     <Content Include="tsconfig.json" />
     <TypeScriptCompile Include="Scripts\ConfigureReactWidgets.ts" />
     <TypeScriptCompile Include="Scripts\Exceptions\ExceptionClient.tsx" />
+    <Content Include="Scripts\fetchWithAbort.js" />
     <TypeScriptCompile Include="Scripts\Frames\ContainerToggle.tsx" />
     <TypeScriptCompile Include="Scripts\Frames\Notify.tsx" />
     <TypeScriptCompile Include="Scripts\Frames\ValidationErrors.tsx" />
@@ -208,6 +209,7 @@
     <TypeScriptCompile Include="Scripts\Frames\Widgets.tsx" />
     <TypeScriptCompile Include="Scripts\Globals.d.ts" />
     <TypeScriptCompile Include="Scripts\Lines\DynamicComponent.tsx" />
+    <TypeScriptCompile Include="Scripts\Lines\EntityTable.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EnumCheckboxList.tsx" />
     <TypeScriptCompile Include="Scripts\Search.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityBase.tsx" />
@@ -244,6 +246,7 @@
     <TypeScriptCompile Include="Scripts\SearchControl\CountSearchControl.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\PaginationSelector.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\QueryTokenBuilder.tsx" />
+    <TypeScriptCompile Include="Scripts\SearchControl\SearchControlLoaded.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\SearchControl.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\SearchPage.tsx" />
     <TypeScriptCompile Include="Scripts\Modals\ErrorModal.tsx" />
@@ -308,7 +311,7 @@
     <TypeScriptSourceRoot />
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets')" />
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v12.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
   <Target Name="BeforeBuild">
     <ItemGroup>
       <EmbeddedResource Include="**\*.gif;**\*.png;**\*.jpg;**\*.css;**\*.ts;**\*.map;**\*.js;**\*.tsx" />
@@ -333,6 +336,7 @@
           <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>
       </FlavorProperties>
+      <UserProperties tsconfig_1json__JSONSchema="http://json.schemastore.org/tsconfig" />
     </VisualStudio>
   </ProjectExtensions>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

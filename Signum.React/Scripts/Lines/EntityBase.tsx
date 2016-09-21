@@ -6,7 +6,7 @@ import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, EntityFrame } from '../TypeContext'
-import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll } from '../Reflection'
+import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, TypeReference } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLiteFat, is, liteKey, isLite, isEntity, entityInfo } from '../Signum.Entities'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
 import Typeahead from '../Lines/Typeahead'
@@ -21,10 +21,11 @@ export interface EntityBaseProps extends LineBaseProps {
     find?: boolean;
     remove?: boolean;
 
-    onView?: (entity: ModifiableEntity | Lite<Entity>, pr: PropertyRoute) => Promise<ModifiableEntity>;
-    onCreate?: () => Promise<ModifiableEntity | Lite<Entity>>;
-    onFind?: () => Promise<ModifiableEntity | Lite<Entity>>;
+    onView?: (entity: ModifiableEntity | Lite<Entity>, pr: PropertyRoute) => Promise<ModifiableEntity | undefined> | undefined;
+    onCreate?: () => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined;
+    onFind?: () => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined;
     onRemove?: (entity: ModifiableEntity | Lite<Entity>) => Promise<boolean>;
+    findOptions?: FindOptions;
 
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
 }
@@ -33,7 +34,6 @@ export interface EntityBaseProps extends LineBaseProps {
 export interface EntityBaseState extends LineBaseProps {
     view?: boolean;
     viewOnCreate?: boolean;
-    navigate?: boolean;
     create?: boolean;
     find?: boolean;
     remove?: boolean;
@@ -42,25 +42,35 @@ export interface EntityBaseState extends LineBaseProps {
 
 export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBaseState> extends LineBase<T, S>
 {
-    calculateDefaultState(state: S) {
+    static hasChildrens(element: React.ReactElement<any>) {
+        return element.props.children && React.Children.toArray(element.props.children).length;
+    }
 
-        const type = state.type;
-
-        state.create = type.isEmbedded ? Navigator.isCreable(type.name, !!this.props.getComponent, false) :
+    static defaultIsCreable(type: TypeReference, customComponent: boolean) {
+        return type.isEmbedded ? Navigator.isCreable(type.name, customComponent , false) :
             type.name == IsByAll ? false :
-                getTypeInfos(type).some(ti => Navigator.isCreable(ti, !!this.props.getComponent, false));
+                getTypeInfos(type).some(ti => Navigator.isCreable(ti, customComponent, false));
+    }
 
-        state.view = type.isEmbedded ? Navigator.isViewable(type.name, !!this.props.getComponent) :
+    static defaultIsViewable(type: TypeReference, customComponent: boolean) {
+        return type.isEmbedded ? Navigator.isViewable(type.name, customComponent) :
             type.name == IsByAll ? true :
-                getTypeInfos(type).some(ti => Navigator.isViewable(ti, !!this.props.getComponent));
+                getTypeInfos(type).some(ti => Navigator.isViewable(ti, customComponent));
+    }
 
-        state.navigate = type.isEmbedded ? Navigator.isNavigable(type.name, !!this.props.getComponent) :
-            type.name == IsByAll ? true :
-                getTypeInfos(type).some(ti => Navigator.isNavigable(ti, !!this.props.getComponent));
-
-        state.find = type.isEmbedded ? false :
+    static defaultIsFindable(type: TypeReference) {
+        return type.isEmbedded ? false :
             type.name == IsByAll ? false :
                 getTypeInfos(type).some(ti => Navigator.isFindable(ti));
+    }
+    
+    calculateDefaultState(state: S) {
+
+        const type = state.type!;
+
+        state.create = EntityBase.defaultIsCreable(type, !!this.props.getComponent);
+        state.view = EntityBase.defaultIsViewable(type, !!this.props.getComponent);
+        state.find = EntityBase.defaultIsFindable(type);
 
         state.viewOnCreate = true;
         state.remove = true;
@@ -68,22 +78,22 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
     convert(entityOrLite: ModifiableEntity | Lite<Entity>): Promise<ModifiableEntity | Lite<Entity>> {
 
-        const tr = this.state.type;
+        const type = this.state.type!;
 
-        const isLite = (entityOrLite as Lite<Entity>).EntityType != null;
+        const isLite = (entityOrLite as Lite<Entity>).EntityType != undefined;
         const entityType = (entityOrLite as Lite<Entity>).EntityType || (entityOrLite as ModifiableEntity).Type;
 
 
-        if (tr.isEmbedded) {
-            if (entityType != tr.name || isLite)
-                throw new Error(`Impossible to convert '${entityType}' to '${tr.name}'`);
+        if (type.isEmbedded) {
+            if (entityType != type.name || isLite)
+                throw new Error(`Impossible to convert '${entityType}' to '${type.name}'`);
 
             return Promise.resolve(entityOrLite as ModifiableEntity);
         } else {
-            if (tr.name != IsByAll && !tr.name.split(',').map(a => a.trim()).contains(entityType))
-                throw new Error(`Impossible to convert '${entityType}' to '${tr.name}'`);
+            if (type.name != IsByAll && !type.name.split(',').map(a => a.trim()).contains(entityType))
+                throw new Error(`Impossible to convert '${entityType}' to '${type.name}'`);
 
-            if (!!isLite == !!tr.isLite)
+            if (!!isLite == !!type.isLite)
                 return Promise.resolve(entityOrLite);
 
             if (isLite) {
@@ -99,8 +109,10 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
 
     defaultView(value: ModifiableEntity | Lite<Entity>, propertyRoute: PropertyRoute): Promise<ModifiableEntity> {
-
-        return Navigator.view(value, { propertyRoute: propertyRoute, component: this.props.getComponent } as Navigator.ViewOptions);
+        return Navigator.view(value, {
+            propertyRoute: propertyRoute,
+            viewPromise: this.props.getComponent && Navigator.ViewPromise.resolve(this.props.getComponent)
+        });
     }
 
 
@@ -111,19 +123,22 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         const ctx = this.state.ctx;
         const entity = ctx.value;
 
-        var openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type.isEmbedded;
+        const openWindow = (event.button == 1 || event.ctrlKey) && !this.state.type!.isEmbedded;
         if (openWindow) {
             event.preventDefault();
-            var route = Navigator.navigateRoute(entity as Lite<Entity> /*or Entity*/);
+            const route = Navigator.navigateRoute(entity as Lite<Entity> /*or Entity*/);
             window.open(route);
         }
         else {
-            const onView = this.props.onView ?
+            const promise = this.props.onView ?
                 this.props.onView(entity, ctx.propertyRoute) :
                 this.defaultView(entity, ctx.propertyRoute);
 
-            onView.then(e => {
-                if (e == null)
+            if (!promise)
+                return;
+
+            promise.then(e => {
+                if (e == undefined)
                     return;
 
                 this.convert(e).then(m => this.setValue(m)).done();
@@ -133,10 +148,10 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
     renderViewButton(btn: boolean) {
         if (!this.state.view)
-            return null;
+            return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-view", btn ? "btn btn-default" : null) }
+            <a className={classes("sf-line-button", "sf-view", btn ? "btn btn-default" : undefined) }
                 onClick={this.handleViewClick}
                 title={EntityControlMessage.View.niceToString() }>
                 <span className="glyphicon glyphicon-arrow-right"/>
@@ -145,7 +160,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     }
 
     chooseType(predicate: (ti: TypeInfo) => boolean): Promise<string> {
-        const t = this.state.type;
+        const t = this.state.type!;
 
         if (t.isEmbedded)
             return Promise.resolve(t.name);
@@ -153,27 +168,41 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         const tis = getTypeInfos(t).filter(ti => predicate(ti));
 
         return SelectorModal.chooseType(tis)
-            .then(ti => ti ? ti.name : null);
+            .then(ti => ti ? ti.name : undefined);
     }
 
-    defaultCreate(): Promise<ModifiableEntity | Lite<Entity>> {
+    defaultCreate(): Promise<ModifiableEntity | Lite<Entity> | undefined> {
 
         return this.chooseType(t => Navigator.isCreable(t, !!this.props.getComponent, false))
-            .then(typeName => typeName ? Constructor.construct(typeName) : null)
-            .then(e => e ? e.entity : null);
+            .then(typeName => typeName ? Constructor.construct(typeName) : undefined)
+            .then(e => {
+                if (!e)
+                    return Promise.resolve(undefined);
+
+                var fo = this.props.findOptions;
+                if (!fo || !fo.filterOptions)
+                    return e.entity as Entity;
+
+                return Finder.getQueryDescription(fo.queryName)
+                    .then(qd => Finder.parseFilterOptions(fo!.filterOptions || [], qd))
+                    .then(filters => Finder.setFilters(e!.entity as Entity, filters));
+            });
     }
 
     handleCreateClick = (event: React.SyntheticEvent) => {
 
         event.preventDefault();
 
-        const onCreate = this.props.onCreate ?
+        const promise = this.props.onCreate ?
             this.props.onCreate() : this.defaultCreate();
 
-        onCreate.then(e => {
+        if (!promise)
+            return;
 
-            if (e == null)
-                return null;
+        promise.then<ModifiableEntity | Lite<Entity> | undefined>(e => {
+
+            if (e == undefined)
+                return undefined;
 
             if (!this.state.viewOnCreate)
                 return Promise.resolve(e);
@@ -193,10 +222,10 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
     renderCreateButton(btn: boolean) {
         if (!this.state.create || this.state.ctx.readOnly)
-            return null;
+            return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-create", btn ? "btn btn-default" : null) }
+            <a className={classes("sf-line-button", "sf-create", btn ? "btn btn-default" : undefined) }
                 onClick={this.handleCreateClick}
                 title={EntityControlMessage.Create.niceToString() }>
                 <span className="glyphicon glyphicon-plus"/>
@@ -204,7 +233,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         );
     }
 
-    static entityHtmlProps(entity: ModifiableEntity | Lite<Entity>): React.HTMLAttributes {
+    static entityHtmlProps(entity: ModifiableEntity | Lite<Entity> | undefined | null): React.HTMLAttributes {
 
         return {
             'data-entity': entityInfo(entity)
@@ -212,17 +241,26 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     }
 
 
-    defaultFind(): Promise<ModifiableEntity | Lite<Entity>> {
+    defaultFind(): Promise<ModifiableEntity | Lite<Entity> | undefined> {
+
+        if (this.props.findOptions) {
+            return Finder.find(this.props.findOptions);
+        }
+
         return this.chooseType(Finder.isFindable)
-            .then(qn => qn == null ? null : Finder.find({ queryName: qn } as FindOptions));
+            .then<ModifiableEntity | Lite<Entity> | undefined>(qn =>
+                qn == undefined ? undefined : Finder.find({ queryName: qn } as FindOptions));
     }
     handleFindClick = (event: React.SyntheticEvent) => {
 
         event.preventDefault();
 
-        const result = this.props.onFind ? this.props.onFind() : this.defaultFind();
+        const promise = this.props.onFind ? this.props.onFind() : this.defaultFind();
 
-        result.then(entity => {
+        if (!promise)
+            return;
+
+        promise.then(entity => {
             if (!entity)
                 return;
 
@@ -231,10 +269,10 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     };
     renderFindButton(btn: boolean) {
         if (!this.state.find || this.state.ctx.readOnly)
-            return null;
+            return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-find", btn ? "btn btn-default" : null) }
+            <a className={classes("sf-line-button", "sf-find", btn ? "btn btn-default" : undefined) }
                 onClick={this.handleFindClick}
                 title={EntityControlMessage.Find.niceToString() }>
                 <span className="glyphicon glyphicon-search"/>
@@ -254,12 +292,13 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
                 this.setValue(null);
             }).done();
     };
+
     renderRemoveButton(btn: boolean) {
         if (!this.state.remove || this.state.ctx.readOnly)
-            return null;
+            return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-remove", btn ? "btn btn-default" : null) }
+            <a className={classes("sf-line-button", "sf-remove", btn ? "btn btn-default" : undefined) }
                 onClick={this.handleRemoveClick}
                 title={EntityControlMessage.Remove.niceToString() }>
                 <span className="glyphicon glyphicon-remove"/>

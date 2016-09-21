@@ -4,7 +4,11 @@
     "sourceMap": true,
     "module": "commonjs",
     "jsx": "react",
-    "noEmit": true
+    "noEmit": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "strictNullChecks": true
   },
   "exclude": [ "node_modules" ]
 }

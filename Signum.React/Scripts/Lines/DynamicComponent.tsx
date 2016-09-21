@@ -10,16 +10,16 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
 
     render() {
 
-        var subContexts = this.subContext(this.props.ctx).filter(m => m.propertyRoute.member.name != "Id");
+        const subContexts = this.subContext(this.props.ctx).filter(m => m.propertyRoute.member!.name != "Id");
 
-        var components = subContexts.map(ctx => DynamicComponent.appropiateComponent(ctx));
+        const components = subContexts.map(ctx => DynamicComponent.appropiateComponent(ctx));
 
-        var result = React.createElement("div", null, ...components);
+        const result = React.createElement("div", undefined, ...components);
 
-        var es = Navigator.getSettings(this.props.ctx.value.Type);
+        const es = Navigator.getSettings(this.props.ctx.value.Type);
         
         if (es && es.viewOverrides && es.viewOverrides.length) {
-            var replacer = new ViewReplacer(result, this.props.ctx);
+            const replacer = new ViewReplacer(result, this.props.ctx);
             es.viewOverrides.forEach(vo => vo(replacer));
             return replacer.result;
         } else {
@@ -30,34 +30,34 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
 
     subContext(ctx: TypeContext<ModifiableEntity>): TypeContext<any>[] {
 
-        var members = ctx.propertyRoute.subMembers();
+        const members = ctx.propertyRoute.subMembers();
 
-        var result = Dic.map(members, (n, m) => new TypeContext<any>(ctx, null, ctx.propertyRoute.addMember({ name: n, type: LambdaMemberType.Member }), new Binding(ctx.value, n.firstLower())));
+        const result = Dic.map(members, (n, m) => new TypeContext<any>(ctx, undefined, ctx.propertyRoute.addMember({ name: n, type: "Member" }), new Binding(ctx.value, n.firstLower())));
 
         return result;
     }
 
     static specificComponents: {
-        [typeName: string]: (ctx: TypeContext<any>) => React.ReactElement<any>;
+        [typeName: string]: (ctx: TypeContext<any>) => React.ReactElement<any> | undefined;
     } = {};
 
     static appropiateComponent = (ctx: TypeContext<any>): React.ReactElement<any> => {
-        var tr = ctx.propertyRoute.typeReference();        
+        const tr = ctx.propertyRoute.typeReference();        
     
-        var sc = DynamicComponent.specificComponents[tr.name];
+        const sc = DynamicComponent.specificComponents[tr.name];
         if (sc) {
-            var result = sc(ctx);
+            const result = sc(ctx);
             if (result)
                 return result;
         }
         
-        var tis = getTypeInfos(tr);
-        var ti = tis.firstOrNull();
+        const tis = getTypeInfos(tr);
+        const ti = tis.firstOrNull();
 
         if (tr.isCollection) {
-            if (tr.isEmbedded || ti.entityKind == EntityKind.Part || ti.entityKind == EntityKind.SharedPart)
+            if (tr.isEmbedded || ti!.entityKind == "Part" || ti!.entityKind == "SharedPart")
                 return <EntityRepeater ctx={ctx}/>;
-            else if (ti.isLowPopupation)
+            else if (ti!.isLowPopulation)
                 return <EntityCheckboxList ctx ={ctx}/>;
             else
                 return <EntityStrip ctx={ctx}/>;
@@ -67,13 +67,13 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
             return <EntityLine ctx={ctx}/>;
 
         if (ti) {
-            if (ti.kind == KindOfType.Enum)
+            if (ti.kind == "Enum")
                 return <ValueLine ctx={ctx}/>;
 
-            if (ti.entityKind == EntityKind.Part || ti.entityKind == EntityKind.SharedPart)
+            if (ti.entityKind == "Part" || ti.entityKind == "SharedPart")
                 return <EntityDetail ctx={ctx} />;
 
-            if (ti.isLowPopupation)
+            if (ti.isLowPopulation)
                 return <EntityCombo ctx={ctx}/>;           
 
             return <EntityLine ctx={ctx}/>;

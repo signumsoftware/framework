@@ -13,46 +13,51 @@
 /// <reference path="../typings/moment-duration-format/moment-duration-format.d.ts"/>
 /// <reference path="../typings/es6-promise/es6-promise.d.ts" />
 
-declare var require: {
+declare const require: {
     <T>(path: string): T;
     (paths: string[], callback: (...modules: any[]) => void): void;
     ensure: (paths: string[], callback: (require: <T>(path: string) => T) => void) => void;
 };
 
 declare interface Promise<T> {
-    done(): void;
+    done(this: Promise<T>): void;
+}
+
+declare interface Window {
+    __baseUrl: string;
+    parentWindowData: any;
 }
 
 interface Array<T> {
-    groupBy(keySelector: (element: T) => string): { key: string; elements: T[] }[];
-    groupToObject(keySelector: (element: T) => string): { [key: string]: T[] };
-    groupWhen(condition: (element: T) => boolean): { key: T, elements: T[]}[];
-    groupWhenChange(keySelector: (element: T) => string): { key: string, elements: T[]}[];
-    orderBy<V>(keySelector: (element: T) => V): T[];
-    orderByDescending<V>(keySelector: (element: T) => V): T[];
-    toObject(keySelector: (element: T) => string): { [key: string]: T };
-    toObject<V>(keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
-    toObjectDistinct(keySelector: (element: T) => string): { [key: string]: T };
-    toObjectDistinct<V>(keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
-    flatMap<R>(selector: (element: T, index: number, array: T[]) => R[]): R[];
-    clear(): void;
-    groupsOf(maxCount: number): T[][];
-    max(): T;
-    min(): T;
-    first(errorContext?: string): T;
-    firstOrNull(): T;
-    last(errorContext?: string): T;
-    lastOrNull(): T;
-    single(errorContext?: string): T;
-    singleOrNull(errorContext?: string): T;
-    contains(element: T): boolean;
-    remove(element: T): boolean;
-    removeAt(index: number);
-    insertAt(index: number, element: T);
-    clone(): T[];
-    joinComma(lastSeparator: string);
-    extract(filter: (element: T) => boolean): T[]; 
-    notNull(): T[]; 
+    groupBy(this: Array<T>, keySelector: (element: T) => string): { key: string; elements: T[] }[];
+    groupToObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T[] };
+    groupWhen(this: Array<T>, condition: (element: T) => boolean): { key: T, elements: T[]}[];
+    groupWhenChange(this: Array<T>, keySelector: (element: T) => string): { key: string, elements: T[]}[];
+    orderBy<V>(this: Array<T>, keySelector: (element: T) => V): T[];
+    orderByDescending<V>(this: Array<T>, keySelector: (element: T) => V): T[];
+    toObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T };
+    toObject<V>(this: Array<T>, keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
+    toObjectDistinct(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T };
+    toObjectDistinct<V>(this: Array<T>, keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
+    flatMap<R>(this: Array<T>, selector: (element: T, index: number, array: T[]) => R[]): R[];
+    clear(this: Array<T>): void;
+    groupsOf(this: Array<T>, maxCount: number): T[][];
+    sum(this: Array<T>, ): T;
+    max(this: Array<T>, ): T;
+    min(this: Array<T>, ): T;
+    first(this: Array<T>, errorContext?: string): T;
+    firstOrNull(this: Array<T>, ): T | null;
+    last(this: Array<T>, errorContext?: string): T;
+    lastOrNull(this: Array<T>, ): T | null;
+    single(this: Array<T>, errorContext?: string): T;
+    singleOrNull(this: Array<T>, errorContext?: string): T | null;
+    contains(this: Array<T>, element: T): boolean;
+    remove(this: Array<T>, element: T): boolean;
+    removeAt(this: Array<T>, index: number): void;
+    insertAt(this: Array<T>, index: number, element: T): void;
+    clone(this: Array<T>, ): T[];
+    joinComma(this: Array<T>, lastSeparator: string): string;
+    extract(this: Array<T>, filter: (element: T) => boolean): T[];
 }
 
 interface ArrayConstructor {
@@ -62,42 +67,55 @@ interface ArrayConstructor {
 }
 
 interface String {
-    contains(str: string): boolean;
-    startsWith(str: string): boolean;
-    endsWith(str: string): boolean;
-    formatWith(...parameters: any[]): string;
-    forGenderAndNumber(number: number): string;
-    forGenderAndNumber(gender: string): string;
-    forGenderAndNumber(gender: any, number: number): string;
-    replaceAll(from: string, to: string);
-    after(separator: string): string;
-    before(separator: string): string;
-    tryAfter(separator: string): string;
-    tryBefore(separator: string): string;
-    afterLast(separator: string): string;
-    beforeLast(separator: string): string;
-    tryAfterLast(separator: string): string;
-    tryBeforeLast(separator: string): string;
-    etc(maxLength: number): string;
+    contains(this: string, str: string): boolean;
+    startsWith(this: string, str: string): boolean;
+    endsWith(this: string, str: string): boolean;
+    formatWith(this: string, ...parameters: any[]): string;
+    forGenderAndNumber(this: string, number: number): string;
+    forGenderAndNumber(this: string, gender: string | undefined): string;
+    forGenderAndNumber(this: string, gender: any , number?: number): string;
+    replaceAll(this: string, from: string, to: string): string;
+    after(this: string, separator: string): string;
+    before(this: string, separator: string): string;
+    tryAfter(this: string, separator: string): string | undefined;
+    tryBefore(this: string, separator: string): string | undefined;
+    afterLast(this: string, separator: string): string;
+    beforeLast(this: string, separator: string): string;
+    tryAfterLast(this: string, separator: string): string | undefined;
+    tryBeforeLast(this: string, separator: string): string | undefined;
+    etc(this: string, maxLength: number): string;
 
-    replaceAll(search: string, replacement: string): string;
-    firstUpper(): string;
-    firstLower(): string;
+    firstUpper(this: string): string;
+    firstLower(this: string, ): string;
 
-    trimEnd(char?: string): string;
-    trimStart(char?: string): string;
+    trimEnd(this: string, char?: string): string;
+    trimStart(this: string, char?: string): string;
 
-    repeat(n: number): string;
+    repeat(this: string, n: number): string;
 }
 
 declare module moment {
     interface Moment {
-        fromUserInterface(): Moment;
-        toUserInterface(): Moment;
+        fromUserInterface(this: moment.Moment): Moment;
+        toUserInterface(this: moment.Moment): Moment;
 
     }
 
     interface MomentStatic {
-        smartNow();
+        smartNow(this: moment.Moment): Moment;
     }
+}
+
+declare namespace __React {
+    interface Component<P, S> {
+        changeState(func: (state: S) => void): void;
+    }
+}
+
+interface FetchAbortController { //Signum patch
+    abort?: () => void;
+}
+
+interface RequestInit {
+    abortController?: FetchAbortController;
 }

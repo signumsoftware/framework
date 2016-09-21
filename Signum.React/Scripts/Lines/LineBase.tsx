@@ -25,11 +25,11 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
 
         const tCtx = ctx as TypeContext<any>;
 
-        var errorClass = tCtx.errorClass;
+        const errorClass = tCtx.errorClass;
 
         if (ctx.formGroupStyle == "None") {
 
-            var c = this.props.children as React.ReactElement<any>;
+            const c = this.props.children as React.ReactElement<any>;
          
             return (
                 <span {...this.props.htmlProps} className={ errorClass }>
@@ -40,11 +40,10 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
 
         const labelClasses = classes(ctx.formGroupStyle == "SrOnly" && "sr-only",
             ctx.formGroupStyle == "LabelColumns" && ("control-label " + ctx.labelColumnsCss));
-
-
+        
         const label = (
-            <label htmlFor={this.props.controlId} {...this.props.labelProps } className= { addClass(this.props.labelProps, labelClasses) } >
-                { this.props.labelText || tCtx.propertyRoute && tCtx.propertyRoute.member.niceName }
+            <label htmlFor={this.props.controlId} {...this.props.labelProps } className= {addClass(this.props.labelProps, labelClasses)} >
+                { this.props.labelText || tCtx.propertyRoute && tCtx.propertyRoute.member!.niceName }
             </label>
         );
 
@@ -60,8 +59,8 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
 
 
 export interface FormControlStaticProps extends React.Props<FormControlStatic> {
-    controlId?: string;
     ctx: StyleContext;
+    htmlProps?: React.HTMLAttributes;
     className?: string
 }
 
@@ -70,9 +69,11 @@ export class FormControlStatic extends React.Component<FormControlStaticProps, {
     render() {
         const ctx = this.props.ctx;
 
+        var p = this.props.htmlProps;
+
+        const className = ctx.formControlStaticAsFormControlReadonly ? "form-control readonly" : "form-control-static";
         return (
-            <p id={ this.props.controlId }
-                className ={classes(ctx.formControlStaticAsFormControlReadonly ? "form-control readonly" : "form-control-static", this.props.className) }>
+            <p {...p} className={classes(className, p && p.className, this.props.className)} >
                 { this.props.children }
             </p>
         );
@@ -80,7 +81,7 @@ export class FormControlStatic extends React.Component<FormControlStaticProps, {
 }
 
 export interface LineBaseProps extends StyleOptions {
-    ctx?: TypeContext<any>;
+    ctx: TypeContext<any>;
     type?: TypeReference;
     labelText?: React.ReactChild;
     visible?: boolean;
@@ -100,11 +101,15 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
     }
 
     shouldComponentUpdate(nextProps: LineBaseProps, nextState: LineBaseProps) {
-        return !Dic.equals(this.state, nextState, true);
+        if (Dic.equals(this.state, nextState, true))
+            return false; //For Debugging
+
+        return true; 
     }
 
     componentWillReceiveProps(nextProps: P, nextContext: any) {
-        this.setState(this.calculateState(nextProps));
+        this.state = this.calculateState(nextProps);
+        this.forceUpdate();
     }
 
     changes = 0;
@@ -118,22 +123,22 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
     }
 
     validate() {
-        var error = this.state.onValidate ? this.state.onValidate(this.state.ctx.value) : this.defaultValidate(this.state.ctx.value);
+        const error = this.state.onValidate ? this.state.onValidate(this.state.ctx.value) : this.defaultValidate(this.state.ctx.value);
         this.state.ctx.error = error;
         if (this.state.ctx.frame)
             this.state.ctx.frame.revalidate();
     }
 
     defaultValidate(val: any) {
-        if (this.state.type.isNotNullable && val == null)
+        if (this.state.type!.isNotNullable && val == undefined)
             return ValidationMessage._0IsNotSet.niceToString(this.state.ctx.niceName());
 
-        return null;
+        return undefined;
     }
 
     render() {
 
-        if (this.state.visible == false || this.state.hideIfNull && this.state.ctx.value == null)
+        if (this.state.visible == false || this.state.hideIfNull && this.state.ctx.value == undefined)
             return null;
 
         return this.renderInternal();
@@ -141,29 +146,29 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
 
     calculateState(props: P): S {
 
-        var so = {
-            formControlStaticAsFormControlReadonly: null,
-            formGroupSize: null,
-            formGroupStyle: null,
-            labelColumns: null,
-            placeholderLabels: null,
-            readOnly: null,
-            valueColumns: null,
+        const so = {
+            formControlStaticAsFormControlReadonly: undefined,
+            formGroupSize: undefined,
+            formGroupStyle: undefined,
+            labelColumns: undefined,
+            placeholderLabels: undefined,
+            readOnly: undefined,
+            valueColumns: undefined,
         } as StyleOptions;
 
-        var cleanProps = Dic.without(props, so);
+        const cleanProps = Dic.without(props, so);
 
-        const state = { ctx: cleanProps.ctx.subCtx(so), type: (cleanProps.type || cleanProps.ctx.propertyRoute.member.type) } as LineBaseProps as S;
+        const state = { ctx: cleanProps.ctx.subCtx(so), type: (cleanProps.type || cleanProps.ctx.propertyRoute.member!.type) } as LineBaseProps as S;
         this.calculateDefaultState(state);
         runTasks(this, state);
-        var overridenProps = Dic.without(cleanProps, { ctx: null, type: null }) as LineBaseProps as S;
+        const overridenProps = Dic.without(cleanProps, { ctx: undefined, type: undefined }) as LineBaseProps as S;
         this.overrideProps(state, overridenProps);
         return state;
     }
     
     overrideProps(state: S, overridenProps: S) {
-        var labelHtmlProps = Dic.extend(state.labelHtmlProps, overridenProps.labelHtmlProps);
-        Dic.extend(state, overridenProps);
+        const labelHtmlProps = Dic.extendUndefined(state.labelHtmlProps, overridenProps.labelHtmlProps);
+        Dic.extendUndefined(state, overridenProps);
         state.labelHtmlProps = labelHtmlProps;
     }
 
@@ -177,7 +182,7 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
     calculateDefaultState(state: S) {
     }
 
-    abstract renderInternal(): JSX.Element;
+    abstract renderInternal(): JSX.Element | null;
 }
 
 

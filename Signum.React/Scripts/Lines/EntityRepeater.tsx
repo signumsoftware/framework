@@ -10,11 +10,12 @@ import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../Lines/LineBase'
 import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
+import { EntityBase } from './EntityBase'
 import { EntityListBase, EntityListBaseProps } from './EntityListBase'
 import { RenderEntity } from './RenderEntity'
 
 export interface EntityRepeaterProps extends EntityListBaseProps {
-    createAsLink?: boolean;
+    createAsLink?: boolean | ((er: EntityRepeater) => React.ReactElement<any>);
 }
 
 export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRepeaterProps> {
@@ -27,42 +28,43 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
 
     renderInternal() {
 
-        var buttons = (
+        const buttons = (
             <span className="pull-right">
-                {!this.state.createAsLink && this.renderCreateButton(false) }
+                {this.state.createAsLink == false && this.renderCreateButton(false) }
                 {this.renderFindButton(false) }
             </span>
         );
 
+        let ctx = this.state.ctx;
 
-        if (!buttons.props.children.some(a => a))
-            buttons = null;
+        const readOnly = this.state.ctx.readOnly;
 
         return (
-            <fieldset className={classes("SF-repeater-field SF-control-container", this.state.ctx.errorClass) } {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
+            <fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass) } {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>
-                        {buttons}
+                        {EntityBase.hasChildrens(buttons) ? buttons : undefined}
                     </div>
                 </legend>
                 <div className="sf-repater-elements">
                     {
-                        mlistItemContext(this.state.ctx).map((mlec, i) =>
+                        mlistItemContext(ctx).map((mlec, i) =>
                             (<EntityRepeaterElement key={i}
-                                onRemove={this.state.remove ? e => this.handleRemoveElementClick(e, i) : null}
-                                onMoveDown ={this.state.move? e => this.moveDown(i) : null}
-                                onMoveUp ={this.state.move? e => this.moveUp(i) : null}
+                                onRemove={this.state.remove && !readOnly? e => this.handleRemoveElementClick(e, i) : undefined}
+                                onMoveDown ={this.state.move && !readOnly? e => this.moveDown(i) : undefined}
+                                onMoveUp ={this.state.move && !readOnly? e => this.moveUp(i) : undefined}
                                 ctx={mlec}
                                 getComponent={this.props.getComponent} />))
                     }
                     {
-                        this.state.createAsLink && this.state.create &&
-                        <a title={EntityControlMessage.Create.niceToString() }
-                            className="sf-line-button sf-create"
-                            onClick={this.handleCreateClick}>
-                            <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }}/>{EntityControlMessage.Create.niceToString() }
-                        </a>
+                        this.state.createAsLink && this.state.create && !readOnly &&
+                            (typeof this.state.createAsLink == "function" ? this.state.createAsLink(this) :
+                            <a title={EntityControlMessage.Create.niceToString()}
+                                className="sf-line-button sf-create"
+                                onClick={this.handleCreateClick}>
+                                <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }}/>{EntityControlMessage.Create.niceToString()}
+                            </a> )
                     }
                 </div>
             </fieldset>
@@ -73,10 +75,10 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
 
 export interface EntityRepeaterElementProps {
     ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
-    getComponent: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
-    onRemove: (event: React.MouseEvent) => void;
-    onMoveUp: (event: React.MouseEvent) => void;
-    onMoveDown: (event: React.MouseEvent) => void;
+    getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+    onRemove?: (event: React.MouseEvent) => void;
+    onMoveUp?: (event: React.MouseEvent) => void;
+    onMoveDown?: (event: React.MouseEvent) => void;
 }
 
 export class EntityRepeaterElement extends React.Component<EntityRepeaterElementProps, void>

@@ -25,44 +25,49 @@ export interface EntityListState extends EntityListBaseProps {
 export abstract class EntityList extends EntityListBase<EntityListProps, EntityListState>
 {
     static defaultProps: EntityListProps = {
-        size: 5
+        size: 5,
+        ctx: undefined as any,
     };
 
     moveUp(index: number) {
         super.moveUp(index);
-        this.setState({ selectedIndex: this.state.selectedIndex - 1 } as any);
+        this.state.selectedIndex = this.state.selectedIndex - 1;
+        this.forceUpdate();
     }
 
     moveDown(index: number) {
         super.moveDown(index);
-        this.setState({ selectedIndex: this.state.selectedIndex + 1 } as any);
+        this.state.selectedIndex = this.state.selectedIndex + 1;
+        this.forceUpdate();
     }
 
     handleOnSelect = (e: React.FormEvent) => {
-        this.setState({ selectedIndex: (e.currentTarget as HTMLSelectElement).selectedIndex });
+
+        this.state.selectedIndex = (e.currentTarget as HTMLSelectElement).selectedIndex;
+        this.forceUpdate();
     }
 
     renderInternal() {
 
         const s = this.state;
-        const list = this.state.ctx.value;
+        const list = this.state.ctx.value!;
 
-        const hasSelected = s.selectedIndex != null;
+        const hasSelected = s.selectedIndex != undefined;
 
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
                 <div className="SF-entity-line">
                     <div className="input-group">
                         <select className="form-control" size={this.props.size} onChange={this.handleOnSelect}>
-                            {s.ctx.value.map((e, i) => <option  key={i} title={this.getTitle(e.element) } {...EntityListBase.entityHtmlProps(e.element) }>{e.element.toStr}</option>) }
+                            {list.map((e, i) => <option  key={i} title={this.getTitle(e.element)} {...EntityListBase.entityHtmlProps(e.element) }>{e.element.toStr}</option>)}
                         </select>
                         <span className="input-group-btn btn-group-vertical">
                             { this.renderCreateButton(true) }
                             { this.renderFindButton(true) }
                             { hasSelected && this.renderViewButton(true) }
                             { hasSelected && this.renderRemoveButton(true) }
-                            { hasSelected && this.state.move && s.selectedIndex > 0 && this.renderMoveUp(true, s.selectedIndex) }
-                            { hasSelected && this.state.move && s.selectedIndex < list.length - 1 && this.renderMoveDown(true, s.selectedIndex) }
+                            { hasSelected && this.state.move && s.selectedIndex > 0 && this.renderMoveUp(true, s.selectedIndex!) }
+                            { hasSelected && this.state.move && s.selectedIndex < list.length - 1 && this.renderMoveDown(true, s.selectedIndex!) }
                         </span>
                     </div>
                 </div>
@@ -76,19 +81,21 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
 
         const s = this.state;
 
-        (s.onRemove ? s.onRemove(s.ctx.value[s.selectedIndex].element) : Promise.resolve(true))
+        var list = s.ctx.value!;
+
+        (s.onRemove ? s.onRemove(list[s.selectedIndex!].element) : Promise.resolve(true))
             .then(result => {
                 if (result == false)
                     return;
 
-                s.ctx.value.removeAt(s.selectedIndex);
-                if (s.ctx.value.length == s.selectedIndex)
+                list.removeAt(s.selectedIndex!);
+                if (list.length == s.selectedIndex)
                     s.selectedIndex--;
 
                 if (s.selectedIndex == -1)
-                    s.selectedIndex = null;
+                    s.selectedIndex = undefined;
 
-                this.setValue(s.ctx.value);
+                this.setValue(list);
             })
             .done();
     };
@@ -98,28 +105,32 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
         event.preventDefault();
 
         const ctx = this.state.ctx;
-        const selectedIndex = this.state.selectedIndex;
-        const entity = ctx.value[selectedIndex].element;
+        const selectedIndex = this.state.selectedIndex!;
+        const list = ctx.value!;
+        const entity = list[selectedIndex].element;
 
         const pr = ctx.propertyRoute.add(a => a[0]);
 
-        var openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type.isEmbedded;
+        const openWindow = (event.button == 1 || event.ctrlKey) && !this.state.type!.isEmbedded;
 
-        const onView = this.state.onView ?
+        const promise = this.state.onView ?
             this.state.onView(entity, pr) :
             this.defaultView(entity, pr);
 
-        onView.then(e => {
-            if (e == null)
+        if (promise == null)
+            return;
+
+        promise.then(e => {
+            if (e == undefined)
                 return;
 
             this.convert(e).then(m => {
-                if (is(ctx.value[selectedIndex].element as Entity, e as Entity))
-                    ctx.value[selectedIndex].element = m;
+                if (is(list[selectedIndex].element as Entity, e as Entity))
+                    list[selectedIndex].element = m;
                 else
-                    ctx.value[selectedIndex] = { element: m };
+                    list[selectedIndex] = { rowId: null, element: m };
 
-                this.setValue(ctx.value);
+                this.setValue(list);
             }).done();
         }).done();
     }

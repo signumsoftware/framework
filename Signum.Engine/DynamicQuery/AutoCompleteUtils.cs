@@ -80,6 +80,36 @@ namespace Signum.Engine.DynamicQuery
             return results;
         }
 
+        public static List<Lite<Entity>> AutocompleteUntyped(this IQueryable<Lite<Entity>> query, string subString, int count, Type type)
+        {
+            using (ExecutionMode.UserInterface())
+            {
+
+                List<Lite<Entity>> results = new List<Lite<Entity>>();
+
+                PrimaryKey id;
+                if (PrimaryKey.TryParse(subString, type, out id))
+                {
+                    Lite<Entity> entity = query.SingleOrDefaultEx(e => e.Id == id);
+
+                    if (entity != null)
+                        results.Add(entity);
+
+                    if (results.Count >= count)
+                        return results;
+                }
+
+                var parts = subString.Trim('\'', '"').SplitNoEmpty(' ');
+
+                results.AddRange(query.Where(a => a.ToString().ContainsAll(parts))
+                    .OrderBy(a => a.ToString().Length)
+                    .Take(count - results.Count));
+
+                return results;
+            }
+        }
+
+
         public static List<Lite<T>> Autocomplete<T>(this IQueryable<Lite<T>> query, string subString, int count)
             where T : Entity
         {

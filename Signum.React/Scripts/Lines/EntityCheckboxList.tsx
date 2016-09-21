@@ -8,7 +8,7 @@ import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, mlistItemContext, EntityFrame } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, LambdaMemberType } from '../Reflection'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../Lines/LineBase'
-import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, newMListElement  } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString  } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
 import { EntityListBase, EntityListBaseProps } from './EntityListBase'
 
@@ -33,22 +33,22 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
         state.columnWidth = 200;
 
         if (!state.data) {
-            if (this.state && this.state.type.name == state.type.name)
+            if (this.state && this.state.type!.name == state.type!.name)
                 state.data = this.state.data;
         }
     }
 
     componentWillMount() {
         if (!this.state.data) {
-            Finder.API.findAllLites({ types: this.state.type.name })
+            Finder.API.findAllLites({ types: this.state.type!.name })
                 .then(data => this.setState({ data: data.orderBy(a => a.toStr) } as any))
                 .done();
         }
     }
 
-    componentWillReceiveProps(newProps: EntityCheckboxListProps, newContext) {
+    componentWillReceiveProps(newProps: EntityCheckboxListProps, newContext: any) {
         if (!!newProps.data && !this.props.data)
-            console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityCheckboxList: ${this.state.type.name}`);
+            console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityCheckboxList: ${this.state.type!.name}`);
 
         super.componentWillReceiveProps(newProps, newContext);
     }
@@ -56,23 +56,22 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
     handleOnChange = (event: React.FormEvent, lite: Lite<Entity>) => {
         const current = event.currentTarget as HTMLSelectElement;
 
-        var list = this.state.ctx.value;
-        var toRemove = list.filter(mle => is(mle.element as Lite<Entity> | Entity, lite))
+        const list = this.state.ctx.value!;
+        const toRemove = list.filter(mle => is(mle.element as Lite<Entity> | Entity, lite))
 
         if (toRemove.length) {
             toRemove.forEach(mle => list.remove(mle));
-            this.forceUpdate();
+            this.setValue(list);
         }
         else {
             this.convert(lite).then(e => {
-                list.push(newMListElement(e));
-                this.forceUpdate();
+                this.addElement(e);
             }).done();
         }
     }
 
-    getColumnStyle(): React.CSSProperties {
-        var s = this.state;
+    getColumnStyle(): React.CSSProperties | undefined {
+        const s = this.state;
 
         if (s.columnCount && s.columnWidth)
             return {
@@ -95,11 +94,11 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
                 WebkitColumnWidth: s.columnWidth,
             };
 
-        return null;
+        return undefined;
     }
 
     maybeToLite(entityOrLite: Entity | Lite<Entity>) {
-        var entity = entityOrLite as Entity;
+        const entity = entityOrLite as Entity;
 
         if (entity.Type)
             return toLite(entity, entity.isNew);
@@ -129,13 +128,16 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
 
 
     renderContent() {
-        if (this.state.data == null)
-            return null;
+        if (this.state.data == undefined)
+            return undefined;
 
 
-        var data = [...this.state.data];
+        const data = [...this.state.data];
 
-        this.state.ctx.value.forEach(mle => {
+
+        const list = this.state.ctx.value!;
+
+        list.forEach(mle => {
             if (!data.some(d => is(d, mle.element as Entity | Lite<Entity>)))
                 data.insertAt(0, this.maybeToLite(mle.element as Entity | Lite<Entity>))
         });
@@ -143,7 +145,7 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
         return data.map((lite, i) =>
             <label className="sf-checkbox-element" key={i}>
                 <input type="checkbox"
-                    checked={this.state.ctx.value.some(mle => is(mle.element as Entity | Lite<Entity>, lite)) }
+                    checked={list.some(mle => is(mle.element as Entity | Lite<Entity>, lite))}
                     disabled={this.state.ctx.readOnly}
                     name={liteKey(lite) }
                     onChange={e => this.handleOnChange(e, lite) }  />

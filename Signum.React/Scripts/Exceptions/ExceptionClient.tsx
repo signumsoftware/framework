@@ -2,8 +2,9 @@
 
 import * as React from 'react'
 import { ExceptionEntity } from '../Signum.Entities.Basics'
-import { addSettings, EntitySettings } from '../Navigator'
+import { EntitySettings, ViewPromise } from '../Navigator'
+import * as Navigator from '../Navigator'
 
 export function start(options: { routes: JSX.Element[] }) {
-    addSettings(new EntitySettings(ExceptionEntity, e => new Promise(resolve => require(['./Exception'], resolve))));
+    Navigator.addSettings(new EntitySettings(ExceptionEntity, e => new ViewPromise(resolve => require(['./Exception'], resolve))));
 }

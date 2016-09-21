@@ -4,54 +4,57 @@ import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
 import { Dic } from './Globals';
 import { Lite, Entity, ModifiableEntity, EmbeddedEntity, SelectorMessage, EntityPack, MixinEntity } from './Signum.Entities';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationType, getTypeName, basicConstruct } from './Reflection';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationType, getTypeName, basicConstruct, OperationInfo } from './Reflection';
 import SelectorModal from './SelectorModal';
 import * as Operations from './Operations';
 import * as Navigator from './Navigator';
 
-export var customConstructors: { [typeName: string]: (typeName: string) => ModifiableEntity | Promise<ModifiableEntity> } = { }
+export const customConstructors: { [typeName: string]: (typeName: string) => ModifiableEntity | Promise<ModifiableEntity> } = { }
 
-export function construct<T extends ModifiableEntity>(type: Type<T>): Promise<EntityPack<T>>;
-export function construct(type: string): Promise<EntityPack<ModifiableEntity>>;
-export function construct(type: string | Type<any>): Promise<EntityPack<ModifiableEntity>> {
+export function construct<T extends ModifiableEntity>(type: Type<T>): Promise<EntityPack<T> | undefined>;
+export function construct(type: string): Promise<EntityPack<ModifiableEntity> | undefined>;
+export function construct(type: string | Type<any>): Promise<EntityPack<ModifiableEntity> | undefined> {
     
     const typeName = (type as Type<any>).typeName || type as string;
 
-    var c = customConstructors[typeName];
+    const c = customConstructors[typeName];
     if (c)
-        return asPromise(c(typeName)).then(e =>
-        {
-            if (e == null)
-                return null;
+        return asPromise(c(typeName)).then<EntityPack<ModifiableEntity> | undefined>(e => {
+            if (e == undefined)
+                return undefined;
 
             assertCorrect(e);
             return Navigator.toEntityPack(e, true);
         });
 
-    var ti = getTypeInfo(typeName);
+    const ti = getTypeInfo(typeName);
 
     if (ti) {
 
-        var constructOperations = Dic.getValues(ti.operations).filter(a => a.operationType == OperationType.Constructor);
+        const constructOperations = Dic.getValues(ti.operations!).filter(a => a.operationType == OperationType.Constructor);
 
         if (constructOperations.length) {
 
-            var ctrs = constructOperations.filter(oi => Operations.isOperationAllowed(oi)); 
+            const ctrs = constructOperations.filter(oi => Operations.isOperationAllowed(oi)); 
 
             if (!ctrs.length)
                 throw new Error("No constructor is allowed!");
 
             return SelectorModal.chooseElement(ctrs, { display: c => c.niceName, name: c => c.key, message: SelectorMessage.PleaseSelectAConstructor.niceToString() })
-                .then(oi => {
-                    var settings = Operations.getSettings(oi.key) as Operations.ConstructorOperationSettings<Entity>;
+                .then((oi: OperationInfo | undefined) => {
+
+                    if (!oi)
+                        return undefined;
+
+                    const settings = Operations.getSettings(oi.key) as Operations.ConstructorOperationSettings<Entity>;
 
                     if (settings && settings.onConstruct)
                         return settings.onConstruct({ operationInfo: oi, settings: settings, typeInfo: ti });
 
-                    return Operations.API.construct(ti.name, oi.key)
-                }).then(p => {
-                    if (p == null)
-                        return null;
+                    return Operations.API.construct(ti.name, oi.key) as Promise<EntityPack<Entity> | undefined>
+                }).then((p: EntityPack<Entity> | undefined) => {
+                    if (p == undefined)
+                        return undefined;
 
                     assertCorrect(p.entity);
                     return p;

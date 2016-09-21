@@ -23,6 +23,10 @@ table.sf-search-results > tbody > tr > td {
     margin-bottom: 10px;
 }
 
+.sf-filter-table div.sf-query-token-builder {
+    display: table;
+}
+
 /*Drag and drop*/
 
 th.drag-left {
@@ -37,6 +41,11 @@ th.drag-right {
     text-align: center;
     border-left: 1px solid #eee;
     border-right: 1px solid #eee;
+    cursor: pointer;
+}
+
+.sf-search-results > thead > tr > th.noOrder{
+    cursor:not-allowed;
 }
 
     .sf-search-results > thead > tr > th > span {
@@ -185,6 +194,11 @@ span.guid {
 
 tr.sf-entity-ctxmenu-success {
     opacity: .5;
+}
+span.sf-search-entity-error {
+    border: 1px solid red;
+    /* color: red; */
+    padding: 1px;
 }
 
 /*Count search*/

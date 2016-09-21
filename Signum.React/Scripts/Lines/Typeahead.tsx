@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { classes, Dic }from '../Globals'
+import { classes, Dic } from '../Globals'
 
 
 
@@ -9,7 +9,7 @@ export interface TypeaheadProps {
     getItemsTimeout?: number;
     minLength?: number;
     renderItem?: (item: any, query: string) => React.ReactNode;
-    onSelect?: (item: any, e: React.SyntheticEvent) => string;
+    onSelect?: (item: any, e: React.SyntheticEvent) => string | null;
     scrollHeight?: number;
     spanAttrs?: React.HTMLAttributes;
     inputAttrs?: React.HTMLAttributes;
@@ -29,39 +29,41 @@ export interface TypeaheadState {
 
 export default class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
 {
-    constructor(props) {
+    constructor(props: TypeaheadProps) {
         super(props);
         this.state = {
             shown: false,
-            items: null,
-            selectedIndex : null,
+            items: undefined,
+            selectedIndex: undefined,
         };
     }
 
-    static highlightedText = (val: string, query: string) => {
+    static highlightedText = (val: string, query?: string): React.ReactNode => {
+
+        if (query == undefined)
+            return val;
 
         const index = val.toLowerCase().indexOf(query.toLowerCase());
         if (index == -1)
-            return val as React.ReactNode;
+            return val;
 
         return [
             val.substr(0, index),
-            <strong key={0}>{val.substr(index, query.length) }</strong>,
+            <strong key={0}>{val.substr(index, query.length)}</strong>,
             val.substr(index + query.length)
         ];
     }
 
     static defaultProps: TypeaheadProps = {
-        getItems: null,
+        getItems: undefined as any,
         getItemsTimeout: 200,
         minLength: 1,
         renderItem: Typeahead.highlightedText,
         onSelect: (elem, event) => elem,
         scrollHeight: 0,
         loadingMessage: "Loading...",
-        noResultsMessage: " - No results -"
+        noResultsMessage: " - No results -",
     };
-    
 
     handle: number;
 
@@ -85,12 +87,12 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     popupate() {
 
         if (this.input.value.length < this.props.minLength) {
-            this.setState({ shown: false, items: null, selectedIndex: null });
+            this.setState({ shown: false, items: undefined, selectedIndex: undefined });
             return;
         }
 
-        //this.setState({ shown: true, items: null });
-               
+        //this.setState({ shown: true, items: undefined });
+
         const query = this.input.value;
         this.props.getItems(query).then(items => this.setState({
             items: items,
@@ -100,18 +102,20 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         })).done();
     }
 
-    select(e: React.SyntheticEvent) {
-        if (this.state.items.length == 0)
-            return;
+    select(e: React.SyntheticEvent): boolean {        
+        if (this.state.items!.length == 0)
+            return false;
 
-        this.input.value = this.props.onSelect(this.state.items[this.state.selectedIndex || 0], e);
+        const val = this.props.onSelect!(this.state.items![this.state.selectedIndex || 0], e);
+
+        this.input.value = val || "";
         this.setState({ shown: false });
+        return val != null;
     }
 
-    focused = false; 
+    focused = false;
     handleFocus = () => {
-        if(!this.focused)
-        {
+        if (!this.focused) {
             this.focused = true;
             if (this.props.minLength == 0 && !this.input.value)
                 this.lookup();
@@ -143,14 +147,14 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
             case 38: // up arrow
                 {
                     e.preventDefault();
-                    const newIndex = ((this.state.selectedIndex || 0) - 1 + this.state.items.length) % this.state.items.length;
+                    const newIndex = ((this.state.selectedIndex || 0) - 1 + this.state.items!.length) % this.state.items!.length;
                     this.setState({ selectedIndex: newIndex });
                     break;
                 }
             case 40: // down arrow
                 {
                     e.preventDefault();
-                    const newIndex = ((this.state.selectedIndex || 0) + 1) % this.state.items.length;
+                    const newIndex = ((this.state.selectedIndex || 0) + 1) % this.state.items!.length;
                     this.setState({ selectedIndex: newIndex });
                     break;
                 }
@@ -160,8 +164,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     }
 
     handleKeyUp = (e: React.KeyboardEvent) => {
-        switch (e.keyCode)
-        {
+        switch (e.keyCode) {
             case 40: // down arrow
             case 38: // up arrow
             case 16: // shift
@@ -171,7 +174,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
             case 9: // tab
             case 13: // enter
-                if (this.state.selectedIndex == null) return;
+                if (this.state.selectedIndex == undefined) return;
                 this.select(e);
                 break;
 
@@ -188,21 +191,21 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
     handleMenuClick = (e: React.MouseEvent) => {
         e.preventDefault();
-        this.select(e);
-        this.input.focus();
+        if (this.select(e))
+            this.input.focus();
     }
 
     mouseover = true;
     handleElementMouseEnter = (event: React.MouseEvent) => {
         this.mouseover = true;
         this.setState({
-            selectedIndex: parseInt((event.currentTarget as HTMLInputElement).getAttribute("data-index"))
+            selectedIndex: parseInt((event.currentTarget as HTMLInputElement).getAttribute("data-index") !)
         });
     }
 
     handleElementMouseLeave = (event: React.MouseEvent) => {
         this.mouseover = false;
-        this.setState({ selectedIndex: null });
+        this.setState({ selectedIndex: undefined });
         if (!this.focused && this.state.shown)
             this.setState({ shown: false });
     }
@@ -228,9 +231,9 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     }
 
     render() {
-        
+
         return (
-            <span {...this.props.spanAttrs} className={classes(this.props.spanAttrs && this.props.spanAttrs.className, "sf-typeahead") }>
+            <span {...this.props.spanAttrs} className={classes(this.props.spanAttrs && this.props.spanAttrs.className, "sf-typeahead")}>
                 <input type="text" autoComplete="off" ref={inp => this.input = inp} {...this.props.inputAttrs}
                     onFocus={this.handleFocus}
                     onBlur={this.handleBlur}
@@ -238,16 +241,20 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
                     onKeyDown={this.handleKeyDown}
                     />
                 <span>{/*placeholder for rouded borders*/}</span>
-                {this.state.shown && <ul className="typeahead dropdown-menu" {...this.props.menuAttrs} ref={this.onMenuLoad}>
-                    { /*!this.state.items ? <li className="loading"><a><small>{this.props.loadingMessage}</small></a></li> :*/
-                        !this.state.items.length ? <li className="no-results"><a><small>{this.props.noResultsMessage}</small></a></li> :
-                            this.state.items.map((item, i) => <li key={i} className={i == this.state.selectedIndex ? "active" : null} data-index={i} 
-                                onMouseEnter={this.handleElementMouseEnter}
-                                onMouseLeave={this.handleElementMouseLeave}
-                                {...this.props.liAttrs && this.props.liAttrs(item) }>
-                                <a href="#" onClick={this.handleMenuClick}>{this.props.renderItem(item, this.state.query) }</a>
-                            </li>) }
-                </ul>}
+                {
+                    this.state.shown &&
+                    <ul className="typeahead dropdown-menu" {...this.props.menuAttrs} ref={this.onMenuLoad}>
+                        {
+                            !this.state.items!.length ? <li className="no-results"><a><small>{this.props.noResultsMessage}</small></a></li> :
+                                this.state.items!.map((item, i) => <li key={i} className={i == this.state.selectedIndex ? "active" : undefined} data-index={i}
+                                    onMouseEnter={this.handleElementMouseEnter}
+                                    onMouseLeave={this.handleElementMouseLeave}
+                                    {...this.props.liAttrs && this.props.liAttrs(item) }>
+                                    <a href="#" onClick={this.handleMenuClick}>{this.props.renderItem!(item, this.state.query!)}</a>
+                                </li>)
+                        }
+                    </ul>
+                }
             </span>
         );
     }

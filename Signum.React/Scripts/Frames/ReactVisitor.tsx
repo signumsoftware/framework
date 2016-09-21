@@ -12,7 +12,7 @@ export class ReactVisitor {
     
     visitChild(child: React.ReactChild): React.ReactNode {
 
-        if (child == null)
+        if (child == undefined)
             return child;
 
         if (typeof child == "string")
@@ -29,21 +29,21 @@ export class ReactVisitor {
 
     visitElement(element: React.ReactElement<any>): React.ReactNode {
 
-        if (element.props.children == null || element.props.children.count == 0)
+        if (element.props.children == undefined || element.props.children.count == 0)
             return element;
 
-        var oldChildren = React.Children.toArray(element.props.children);
+        const oldChildren = React.Children.toArray(element.props.children);
 
-        var newChildren = React.Children.map(oldChildren, c => this.visitChild(c)); 
+        const newChildren = React.Children.map(oldChildren, c => this.visitChild(c)); 
 
         if (newChildren.length != oldChildren.length || newChildren.some((n, i) => n !== oldChildren[i]))
-            return React.cloneElement(element, null, newChildren);
+            return React.cloneElement(element, undefined, newChildren);
 
         return element;
     }
 
     visit(element: React.ReactElement<any>): React.ReactElement<any> {
-        var result = this.visitElement(element);
+        const result = this.visitElement(element);
 
         if (Array.isArray(result))
             return React.createElement("div", {}, ...result);
@@ -130,7 +130,7 @@ export class ViewReplacer<T> {
 }
 
 export function hasPropertyRoute(e: React.ReactElement<any>, pr: PropertyRoute) {
-    var tc = e.props.ctx as TypeContext<any>;
+    const tc = e.props.ctx as TypeContext<any>;
 
     return tc && tc.propertyRoute && tc.propertyRoute.toString() == pr.toString();
 }

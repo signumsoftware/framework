@@ -6,14 +6,14 @@ import { ValueLine, ValueLineType, EntityLine, TypeContext } from '../Lines'
 
 export default class Exception extends React.Component<{ ctx: TypeContext<ExceptionEntity> }, void> {
     render() {
-        var ctx = this.props.ctx;
+        const ctx = this.props.ctx;
         const sc = this.props.ctx.subCtx({ labelColumns: { sm: 4 } });
         return (
             <div>
                 <div className="row">
                     <div className="col-sm-6">
                         <ValueLine ctx={sc.subCtx(f => f.environment) } />
-                        <ValueLine ctx={sc.subCtx(f => f.creationDate) } unitText={moment(sc.value.creationDate).toUserInterface().fromNow() } />
+                        <ValueLine ctx={sc.subCtx(f => f.creationDate) } unitText={moment(sc.value.creationDate!).toUserInterface().fromNow() } />
                         <EntityLine ctx={sc.subCtx(f => f.user) } />
                         <ValueLine ctx={sc.subCtx(f => f.version) } />
                         <ValueLine ctx={sc.subCtx(f => f.threadId) } />
@@ -47,9 +47,9 @@ export default class Exception extends React.Component<{ ctx: TypeContext<Except
         const tc = this.props.ctx.subCtx(property);
 
         if (!tc.value || tc.value == "")
-            return null;
+            return undefined;
 
-        return <Tab title={tc.propertyRoute.member.niceName} eventKey={eventKey}>
+        return <Tab title={tc.propertyRoute.member!.niceName} eventKey={eventKey}>
             <pre>
                 <code>{tc.value}</code>
             </pre>

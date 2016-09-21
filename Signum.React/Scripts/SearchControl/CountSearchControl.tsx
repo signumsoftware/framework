@@ -2,8 +2,9 @@ import * as React from 'react'
 import { DropdownButton, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { Dic, DomUtils } from '../Globals'
 import * as Finder from '../Finder'
-import { ResultTable, ResultRow, FindOptions, FilterOption, QueryDescription, ColumnOption, ColumnOptionsMode, ColumnDescription,
-    toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, expandParentColumn, CountQueryRequest, QueryRequest } from '../FindOptions'
+import {
+    ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOption, QueryDescription, ColumnOption, ColumnOptionsMode, ColumnDescription,
+    toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, CountQueryRequest, QueryRequest } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, is } from '../Signum.Entities'
 import { getTypeInfos, IsByAll, getQueryKey, TypeInfo, EntityData, getQueryNiceName} from '../Reflection'
 import * as Navigator from '../Navigator'
@@ -28,31 +29,30 @@ export default class CountSearchControl extends React.Component<CountSearchContr
     constructor(props: CountSearchControlProps) {
         super(props);
         this.state = {
-            count: null,
+            count: undefined,
         };
     }
 
-    getQueryRequest(fo: FindOptions): CountQueryRequest {
+    getQueryRequest(fo: FindOptionsParsed): CountQueryRequest {
 
         return {
-            queryKey: getQueryKey(fo.queryName),
-            filters: (fo.filterOptions || []).map(fo => ({ token: fo.token.fullKey, operation: fo.operation, value: fo.value })),
+            queryKey: fo.queryKey,
+            filters: fo.filterOptions.map(fo => ({ token: fo.token!.fullKey, operation: fo.operation!, value: fo.value })),
         };
     }
 
     componentDidMount() {
 
-        if (!Finder.isFindable(this.props.findOptions.queryName))
+        var fo = this.props.findOptions;
+
+        if (!Finder.isFindable(fo.queryName))
             return;
 
-        var newFindOptions = expandParentColumn(this.props.findOptions);
-
-        Finder.parseTokens(newFindOptions)
+        Finder.getQueryDescription(fo.queryName)
+            .then(qd => Finder.parseFindOptions(fo, qd))
             .then(fo => Finder.API.queryCount(this.getQueryRequest(fo)))
-            .then(count => {
-                this.setState({ count });
-                this.forceUpdate();
-            }).done();
+            .then(count => this.setState({ count }))
+            .done();
     }
 
     render() {
@@ -66,7 +66,10 @@ export default class CountSearchControl extends React.Component<CountSearchContr
             return this.renderSpan();
 
         return (
-            <FormGroup ctx={this.props.ctx} labelText={this.props.labelText || getQueryNiceName(this.props.findOptions.queryName) } labelProps={this.props.labelProps} htmlProps={this.props.formGroupHtmlProps}>
+            <FormGroup ctx={this.props.ctx}
+                labelText={this.props.labelText || getQueryNiceName(this.props.findOptions.queryName)}
+                labelProps={this.props.labelProps}
+                htmlProps={this.props.formGroupHtmlProps}>
                 {this.props.style == "Link" ? this.renderAsLink() : this.renderAsView() }
             </FormGroup>
         );
@@ -80,9 +83,9 @@ export default class CountSearchControl extends React.Component<CountSearchContr
         return (
             <div>
                 <span className={this.state.count > 0 ? "count-search count-with-results badge" : "count-search count-no-results"}>
-                    {this.state.count == null ? "…" : this.state.count}
+                    {this.state.count == undefined ? "…" : this.state.count}
                 </span>
-                {this.state.count != null &&
+                {this.state.count != undefined &&
                     <a className="sf-line-button sf-view" onClick={this.handleClick}>
                         <span className={"glyphicon glyphicon-arrow-right"}>
                         </span>
@@ -94,20 +97,20 @@ export default class CountSearchControl extends React.Component<CountSearchContr
 
     renderAsLink() {
         return (<a onClick={this.handleClick}>
-            {this.state.count == null ? "…" : this.state.count}
+            {this.state.count == undefined ? "…" : this.state.count}
         </a>);
     }
 
 
     renderBadget() {
         return <a className={this.state.count > 0 ? "count-search count-with-results badge" : "count-search count-no-results"}  onClick={this.handleClick}>
-            {this.state.count == null ? "…" : this.state.count}
+            {this.state.count == undefined ? "…" : this.state.count}
         </a>;
     }
 
     renderSpan() {
         return <span>
-            {this.state.count == null ? "…" : this.state.count}
+            {this.state.count == undefined ? "…" : this.state.count}
         </span>;
     }
 }

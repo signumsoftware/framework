@@ -135,8 +135,17 @@ namespace Signum.React.Facades
             return EntityAssemblies.SelectMany(kvp =>
             {
                 var normalTypes = kvp.Key.GetTypes().Where(t => kvp.Value.Contains(t.Namespace));
+
+                var usedEnums = (from type in normalTypes
+                                 where typeof(ModifiableEntity).IsAssignableFrom(type)
+                                 from p in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
+                                 let pt = p.PropertyType.UnNullify()
+                                 where pt.IsEnum && !EntityAssemblies.ContainsKey(pt.Assembly)
+                                 select pt).Distinct().ToList();
+                
+
                 var importedTypes = kvp.Key.GetCustomAttributes<ImportInTypeScriptAttribute>().Where(a => kvp.Value.Contains(a.ForNamesace)).Select(a => a.Type);
-                return normalTypes.Concat(importedTypes).ToList();
+                return normalTypes.Concat(importedTypes).Concat(usedEnums).ToList();
             });
         }
 
@@ -190,7 +199,7 @@ namespace Signum.React.Facades
 
         private static bool InTypeScript(PropertyRoute pr)
         {
-            return (pr.Parent == null || InTypeScript(pr.Parent)) && (pr.PropertyInfo == null || pr.PropertyInfo.GetCustomAttribute<InTypeScriptAttribute>()?.InTypeScript != false);
+            return (pr.Parent == null || InTypeScript(pr.Parent)) && (pr.PropertyInfo == null || pr.PropertyInfo.GetCustomAttribute<InTypeScriptAttribute>()?.GetInTypeScript() != false);
         }
 
         private static string ToJavascript(LambdaExpression lambdaExpression)
@@ -410,8 +419,6 @@ namespace Signum.React.Facades
 
     public class TypeReferenceTS
     {
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isEnum")]
-        public bool IsEnum { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isCollection")]
         public bool IsCollection { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isLite")]
@@ -432,8 +439,8 @@ namespace Signum.React.Facades
             var clean = type == typeof(string) ? type :  (type.ElementType() ?? type);
             this.IsLite = clean.IsLite();
             this.IsNotNullable = clean.IsValueType && !clean.IsNullable();
-            this.IsEnum = clean.UnNullify().IsEnum;
             this.IsEmbedded = clean.IsEmbeddedEntity();
+
             if (this.IsEmbedded && !this.IsCollection)
                 this.TypeNiceName = type.NiceName();
 

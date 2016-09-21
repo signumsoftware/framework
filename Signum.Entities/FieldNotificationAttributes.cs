@@ -21,12 +21,6 @@ namespace Signum.Entities
 
     }
 
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-    public sealed class ValidateChildPropertyAttribute : Attribute
-    {
-
-    }
-
 
     //Used by NotifyCollectionChangedAttribute, NotifyChildPropertyAttribute, ValidateChildPropertyAttribute
     internal static class AttributeManager<T>
