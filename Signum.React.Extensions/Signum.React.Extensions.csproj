@@ -176,6 +176,8 @@
     <TypeScriptCompile Include="Dynamic\Validation\CSharpScriptCode.tsx" />
     <TypeScriptCompile Include="Dynamic\Validation\DynamicValidation.tsx" />
     <TypeScriptCompile Include="Dynamic\View\NodeSelectorModal.tsx" />
+    <TypeScriptCompile Include="Files\FileUploader.tsx" />
+    <TypeScriptCompile Include="Files\FileDownloader.tsx" />
     <TypeScriptCompile Include="Mailing\Templates\IFrameRenderer.tsx" />
     <Compile Include="Map\MapServer.cs" />
     <Compile Include="Map\MapController.cs" />

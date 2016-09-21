@@ -68,7 +68,7 @@ export class DesignerNode<N extends BaseNode> {
         res.route = this.fixRoute();
         const lbn = node as LineBaseNode;
         if (lbn.field && res.route)
-            res.route = res.route.tryAddMember({ name: lbn.field, type: LambdaMemberType.Member });
+            res.route = res.route.tryAddMember({ name: lbn.field, type: "Member" });
 
         return res;
     }
@@ -88,7 +88,7 @@ export class DesignerNode<N extends BaseNode> {
 
         const options = registeredNodes[this.node.kind];
         if (options.hasCollection)
-            res = res.tryAddMember({ name: "", type: LambdaMemberType.Indexer });
+            res = res.tryAddMember({ name: "", type: "Indexer" });
 
         if (!res)
             return undefined;
@@ -97,7 +97,7 @@ export class DesignerNode<N extends BaseNode> {
         {
             const tr = res.typeReference();
             if (tr.isLite)
-                res = res.tryAddMember({ name: "entity", type: LambdaMemberType.Member });
+                res = res.tryAddMember({ name: "entity", type: "Member" });
         }
         return res;
     }
@@ -366,7 +366,7 @@ export function getGetComponent(dn: DesignerNode<ContainerNode>, ctx: TypeContex
 }
 
 export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { isCreable: boolean; isFindable: boolean; isViewable: boolean; showAutoComplete: boolean, showMove?: boolean }) {
-
+  
     const m = dn.route && dn.route.member;
     return (<div>
         <FieldComponent dn={dn} member="field" />

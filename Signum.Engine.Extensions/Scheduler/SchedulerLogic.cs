@@ -194,7 +194,8 @@ namespace Signum.Engine.Scheduler
         static void ScheduledTasksLazy_OnReset(object sender, EventArgs e)
         {
             if (running)
-                Task.Factory.StartNew(() => { Thread.Sleep(1000); ReloadPlan(); });
+                using (ExecutionContext.SuppressFlow())
+                    Task.Run(() => { Thread.Sleep(1000); ReloadPlan(); });
         }
 
 
@@ -318,21 +319,22 @@ namespace Signum.Engine.Scheduler
 
         public static void ExecuteAsync(ITaskEntity task, ScheduledTaskEntity scheduledTask, IUserEntity user)
         {
-            Task.Factory.StartNew(() =>
-            {
-                try
+            using (ExecutionContext.SuppressFlow())
+                Task.Run(() =>
                 {
-                    ExecuteSync(task, scheduledTask, user);
-                }
-                catch (Exception e)
-                {
-                    e.LogException(ex =>
+                    try
                     {
-                        ex.ControllerName = "SchedulerLogic";
-                        ex.ActionName = "ExecuteAsync";
-                    });
-                }
-            });
+                        ExecuteSync(task, scheduledTask, user);
+                    }
+                    catch (Exception e)
+                    {
+                        e.LogException(ex =>
+                        {
+                            ex.ControllerName = "SchedulerLogic";
+                            ex.ActionName = "ExecuteAsync";
+                        });
+                    }
+                });
         }
 
         public static Lite<IEntity> ExecuteSync(ITaskEntity task, ScheduledTaskEntity scheduledTask, IUserEntity user)

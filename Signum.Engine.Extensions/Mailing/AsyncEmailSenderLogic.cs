@@ -47,11 +47,12 @@ namespace Signum.Engine.Mailing
                 ExecuteProcess();
             else
             {
-                Task.Factory.StartNew(() =>
-                {
-                    Thread.Sleep(initialDelayMilliseconds);
-                    ExecuteProcess();
-                });
+                using (ExecutionContext.SuppressFlow())
+                    Task.Run(() =>
+                    {
+                        Thread.Sleep(initialDelayMilliseconds);
+                        ExecuteProcess();
+                    });
             }
         }
 
@@ -60,121 +61,125 @@ namespace Signum.Engine.Mailing
             if (running)
                 throw new InvalidOperationException("EmailAsyncSender process is already running");
 
-            Task.Factory.StartNew(() =>
+
+            using (ExecutionContext.SuppressFlow())
             {
-                try
-                {
-                    running = true;
-                    CancelProcess = new CancellationTokenSource();
-                    autoResetEvent.Set();
-
-                    timer = new Timer(ob => WakeUp("TimerNextExecution", null),
-                         null,
-                         Timeout.Infinite,
-                         Timeout.Infinite);
-
-                    GC.KeepAlive(timer);
-
-                    using (AuthLogic.Disable())
-                    {
-                        if (EmailLogic.Configuration.AvoidSendingEmailsOlderThan.HasValue)
-                        {
-                            DateTime firstDate = TimeZoneManager.Now.AddHours(-EmailLogic.Configuration.AvoidSendingEmailsOlderThan.Value);
-                            Database.Query<EmailMessageEntity>().Where(m =>
-                                m.State == EmailMessageState.ReadyToSend &&
-                                m.CreationDate < firstDate).UnsafeUpdate()
-                                .Set(m => m.State, m => EmailMessageState.Outdated)
-                                .Execute();
-                        }
-
-                        if (CacheLogic.WithSqlDependency)
-                        {
-                            SetSqlDepndency();
-                        }
-
-                        while (autoResetEvent.WaitOne())
-                        {
-                            if (!EmailLogic.Configuration.SendEmails)
-                                throw new ApplicationException("Email configuration does not allow email sending");
-
-                            if (CancelProcess.IsCancellationRequested)
-                                return;
-
-                            timer.Change(Timeout.Infinite, Timeout.Infinite);
-                            nextPlannedExecution = null;
-
-                            using (HeavyProfiler.Log("EmailAsyncSender", () => "Execute process"))
-                            {
-                                processIdentifier = Guid.NewGuid();
-                                if (RecruitQueuedItems())
-                                {
-                                    while (queuedItems > 0 || RecruitQueuedItems())
-                                    {
-                                        var items = Database.Query<EmailMessageEntity>().Where(m =>
-                                            m.ProcessIdentifier == processIdentifier &&
-                                            m.State == EmailMessageState.RecruitedForSending)
-                                            .Take(EmailLogic.Configuration.ChunkSizeSendingEmails).ToList();
-                                        queuedItems = items.Count;
-                                        foreach (var email in items)
-                                        {
-                                            CancelProcess.Token.ThrowIfCancellationRequested();
-
-                                            try
-                                            {
-                                                using (Transaction tr = Transaction.ForceNew())
-                                                {
-                                                    EmailLogic.SenderManager.Send(email);
-                                                    tr.Commit();
-                                                }
-                                            }
-                                            catch
-                                            {
-                                                try
-                                                {
-                                                    if (email.SendRetries < EmailLogic.Configuration.MaxEmailSendRetries)
-                                                    {
-                                                        using (Transaction tr = Transaction.ForceNew())
-                                                        {
-                                                            var nm = email.ToLite().Retrieve();
-                                                            nm.SendRetries += 1;
-                                                            nm.State = EmailMessageState.ReadyToSend;
-                                                            nm.Save();
-                                                            tr.Commit();
-                                                        }
-                                                    }
-                                                }
-                                                catch { }
-                                            }
-                                            queuedItems--;
-                                        }
-                                        queuedItems = Database.Query<EmailMessageEntity>().Where(m =>
-                                            m.ProcessIdentifier == processIdentifier &&
-                                            m.State == EmailMessageState.RecruitedForSending).Count();
-                                    }
-                                }
-                                SetTimer();
-                                SetSqlDepndency();
-                            }
-                        }
-                    }
-                }
-                catch (Exception e)
+                Task.Factory.StartNew(() =>
                 {
                     try
                     {
-                        e.LogException(edn =>
+                        running = true;
+                        CancelProcess = new CancellationTokenSource();
+                        autoResetEvent.Set();
+
+                        timer = new Timer(ob => WakeUp("TimerNextExecution", null),
+                             null,
+                             Timeout.Infinite,
+                             Timeout.Infinite);
+
+                        GC.KeepAlive(timer);
+
+                        using (AuthLogic.Disable())
                         {
-                            edn.ControllerName = "EmailAsyncSender";
-                            edn.ActionName = "ExecuteProcess";
-                        });
+                            if (EmailLogic.Configuration.AvoidSendingEmailsOlderThan.HasValue)
+                            {
+                                DateTime firstDate = TimeZoneManager.Now.AddHours(-EmailLogic.Configuration.AvoidSendingEmailsOlderThan.Value);
+                                Database.Query<EmailMessageEntity>().Where(m =>
+                                    m.State == EmailMessageState.ReadyToSend &&
+                                    m.CreationDate < firstDate).UnsafeUpdate()
+                                    .Set(m => m.State, m => EmailMessageState.Outdated)
+                                    .Execute();
+                            }
+
+                            if (CacheLogic.WithSqlDependency)
+                            {
+                                SetSqlDepndency();
+                            }
+
+                            while (autoResetEvent.WaitOne())
+                            {
+                                if (!EmailLogic.Configuration.SendEmails)
+                                    throw new ApplicationException("Email configuration does not allow email sending");
+
+                                if (CancelProcess.IsCancellationRequested)
+                                    return;
+
+                                timer.Change(Timeout.Infinite, Timeout.Infinite);
+                                nextPlannedExecution = null;
+
+                                using (HeavyProfiler.Log("EmailAsyncSender", () => "Execute process"))
+                                {
+                                    processIdentifier = Guid.NewGuid();
+                                    if (RecruitQueuedItems())
+                                    {
+                                        while (queuedItems > 0 || RecruitQueuedItems())
+                                        {
+                                            var items = Database.Query<EmailMessageEntity>().Where(m =>
+                                                m.ProcessIdentifier == processIdentifier &&
+                                                m.State == EmailMessageState.RecruitedForSending)
+                                                .Take(EmailLogic.Configuration.ChunkSizeSendingEmails).ToList();
+                                            queuedItems = items.Count;
+                                            foreach (var email in items)
+                                            {
+                                                CancelProcess.Token.ThrowIfCancellationRequested();
+
+                                                try
+                                                {
+                                                    using (Transaction tr = Transaction.ForceNew())
+                                                    {
+                                                        EmailLogic.SenderManager.Send(email);
+                                                        tr.Commit();
+                                                    }
+                                                }
+                                                catch
+                                                {
+                                                    try
+                                                    {
+                                                        if (email.SendRetries < EmailLogic.Configuration.MaxEmailSendRetries)
+                                                        {
+                                                            using (Transaction tr = Transaction.ForceNew())
+                                                            {
+                                                                var nm = email.ToLite().Retrieve();
+                                                                nm.SendRetries += 1;
+                                                                nm.State = EmailMessageState.ReadyToSend;
+                                                                nm.Save();
+                                                                tr.Commit();
+                                                            }
+                                                        }
+                                                    }
+                                                    catch { }
+                                                }
+                                                queuedItems--;
+                                            }
+                                            queuedItems = Database.Query<EmailMessageEntity>().Where(m =>
+                                                m.ProcessIdentifier == processIdentifier &&
+                                                m.State == EmailMessageState.RecruitedForSending).Count();
+                                        }
+                                    }
+                                    SetTimer();
+                                    SetSqlDepndency();
+                                }
+                            }
+                        }
                     }
-                    catch { }
-                }
-                finally
-                {
-                    running = false;
-                }
-            }, TaskCreationOptions.LongRunning);
+                    catch (Exception e)
+                    {
+                        try
+                        {
+                            e.LogException(edn =>
+                            {
+                                edn.ControllerName = "EmailAsyncSender";
+                                edn.ActionName = "ExecuteProcess";
+                            });
+                        }
+                        catch { }
+                    }
+                    finally
+                    {
+                        running = false;
+                    }
+                }, TaskCreationOptions.LongRunning);
+            }
         }
 
 		static bool sqlDependencyRegistered = false;
