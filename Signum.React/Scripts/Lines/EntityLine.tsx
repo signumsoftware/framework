@@ -59,7 +59,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
             } else {
                 if (!this.state.currentItem || this.state.currentItem.entity !== newEntity) {
                     this.changeState(s => s.currentItem = undefined);
-                    this.state.autoComplete.getInitialItem(newEntity)
+                    this.state.autoComplete.getItemFromEntity(newEntity)
                         .then(item => this.changeState(s => s.currentItem = { entity: newEntity!, item }))
                         .done();
                 }
@@ -69,7 +69,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
     handleOnSelect = (item: any, event: React.SyntheticEvent) => {
 
-        var lite = this.state.autoComplete!.getLiteFromItem(item);
+        var lite = this.state.autoComplete!.getEntityFromItem(item);
 
         this.convert(lite)
             .then(entity => {
@@ -161,8 +161,8 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 export interface AutocompleteConfig<T> {
     getItems: (subStr: string) => Promise<T[]>;
     renderItem: (item: T, subStr?: string) => React.ReactNode
-    getLiteFromItem: (item: T) => Lite<Entity> | ModifiableEntity;
-    getInitialItem: (entity: Lite<Entity> | ModifiableEntity) => Promise<T>;
+    getEntityFromItem: (item: T) => Lite<Entity> | ModifiableEntity;
+    getItemFromEntity: (entity: Lite<Entity> | ModifiableEntity) => Promise<T>;
 }
 
 export class LiteAutocompleteConfig implements AutocompleteConfig<Lite<Entity>>{
@@ -176,11 +176,11 @@ export class LiteAutocompleteConfig implements AutocompleteConfig<Lite<Entity>>{
         return Typeahead.highlightedText(item.toStr || "", subStr)
     }
 
-    getLiteFromItem(item: Lite<Entity>) {
+    getEntityFromItem(item: Lite<Entity>) {
         return item;
     }
 
-    getInitialItem(entity: Lite<Entity> | ModifiableEntity): Promise<Lite<Entity>> {
+    getItemFromEntity(entity: Lite<Entity> | ModifiableEntity): Promise<Lite<Entity>> {
 
         var lite = this.convertToLite(entity);;
 
@@ -246,11 +246,11 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<Lite<En
         return Typeahead.highlightedText(item.toStr || "", subStr)
     }
 
-    getLiteFromItem(item: Lite<Entity>) {
+    getEntityFromItem(item: Lite<Entity>) {
         return item;
     }
 
-    getInitialItem(entity: Lite<Entity> | ModifiableEntity): Promise<Lite<Entity>> {
+    getItemFromEntity(entity: Lite<Entity> | ModifiableEntity): Promise<Lite<Entity>> {
 
         var lite = this.convertToLite(entity);;
 
