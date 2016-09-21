@@ -94,8 +94,6 @@ namespace Signum.Web.UserQueries
                             .CreateProperty(a=>a.OrderType)
                             
                     },
-
-                    new EntitySettings<UserQueryCountPartEntity>()
                 });
 
                 ButtonBarQueryHelper.RegisterGlobalButtons(ButtonBarQueryHelper_GetButtonBarForQueryName);

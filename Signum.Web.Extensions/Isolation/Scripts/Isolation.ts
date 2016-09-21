@@ -8,7 +8,9 @@ import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
 export function addIsolationPrefilter(isolationKey: string)
 {
     SF.registerAjaxExtraParameters((originalParams: FormObject) => {
-        $.extend(originalParams, { Isolation: getCurrentIsolation(originalParams["prefix"] || "") });
+        var isolation = getCurrentIsolation(originalParams["prefix"] || "");
+        if (!SF.isEmpty(isolation))
+            $.extend(originalParams, { Isolation: isolation });
     });
 }
 

@@ -152,7 +152,7 @@ namespace Signum.Entities.Chart
                 new XAttribute("Guid", Guid),
                 new XAttribute("DisplayName", DisplayName),
                 new XAttribute("Query", Query.Key),
-                EntityType == null ? null : new XAttribute("EntityType", EntityType.Key()),
+                EntityType == null ? null : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
                 Owner == null ? null : new XAttribute("Owner", Owner.Key()),
                 new XAttribute("ChartScript", ChartScript.Name),
                 new XAttribute("GroupResults", GroupResults),
@@ -166,7 +166,7 @@ namespace Signum.Entities.Chart
         {
             DisplayName = element.Attribute("DisplayName").Value;
             Query = ctx.GetQuery(element.Attribute("Query").Value);
-            EntityType = element.Attribute("EntityType")?.Let(a => Lite.Parse<TypeEntity>(a.Value));
+            EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value));
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value));
             ChartScript = ctx.ChartScript(element.Attribute("ChartScript").Value);
             GroupResults = bool.Parse(element.Attribute("GroupResults").Value);
