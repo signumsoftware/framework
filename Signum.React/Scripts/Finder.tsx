@@ -12,9 +12,9 @@ import {
     ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest
 } from './FindOptions';
 
-import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType } from './Signum.Entities.DynamicQuery';
+import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage } from './Signum.Entities.DynamicQuery';
 
-import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity } from './Signum.Entities';
+import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External } from './Signum.Entities';
 import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 
 import {
@@ -126,6 +126,30 @@ export function findOptionsPath(fo: FindOptions, extra?: any): string {
     return currentHistory.createPath({ pathname: "~/find/" + getQueryKey(fo.queryName), query: query });
 }
 
+export function getTypeNiceName(tr: TypeReference) {
+
+    const niceName = tr.typeNiceName ||
+        getTypeInfos(tr)
+            .map(ti => ti == undefined ? getSimpleTypeNiceName(tr.name) : (ti.niceName || ti.name))
+            .joinComma(External.CollectionMessage.Or.niceToString());
+
+    return tr.isCollection ? QueryTokenMessage.ListOf0.niceToString(niceName) : niceName;
+}
+
+export function getSimpleTypeNiceName(name: string) {
+
+    switch (name) {
+        case "string":
+        case "guid":
+            return QueryTokenMessage.Text.niceToString();
+        case "datetime": return QueryTokenMessage.DateTime.niceToString();
+        case "number": return QueryTokenMessage.Number.niceToString();
+        case "decimal": return QueryTokenMessage.DecimalNumber.niceToString();
+        case "boolean": return QueryTokenMessage.Check.niceToString();
+    }
+
+    return name;
+}
 
 
 export function parseFindOptionsPath(queryName: PseudoType | QueryKey, query: any): FindOptions {
@@ -278,7 +302,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
         if (qd.columns[defaultOrder]) {
             fo.orderOptions = [{
                 columnName: defaultOrder,
-                orderType: tis.some(a => a.entityData == EntityData.Transactional) ? "Descending" as OrderType : "Ascending" as OrderType
+                orderType: tis.some(a => a.entityData == "Transactional") ? "Descending" as OrderType : "Ascending" as OrderType
             }];
         }
     }

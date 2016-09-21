@@ -555,6 +555,8 @@ declare namespace __React {
          */
         border?: any;
 
+        borderRadius?: any;
+
         /**
          * Defines the shape of the border of the bottom-left corner.
          */

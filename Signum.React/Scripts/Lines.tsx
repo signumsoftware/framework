@@ -62,7 +62,7 @@ tasks.push(taskSetNiceName);
 export function taskSetNiceName(lineBase: LineBase<any, any>, state: LineBaseProps) {
     if (!state.labelText &&
         state.ctx.propertyRoute &&
-        state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
+        state.ctx.propertyRoute.propertyRouteType == "Field") {
         state.labelText = state.ctx.propertyRoute.member!.niceName;
     }
 }
@@ -74,7 +74,7 @@ export function taskSetUnit(lineBase: LineBase<any, any>, state: LineBaseProps) 
 
         if (!vProps.unitText &&
             state.ctx.propertyRoute &&
-            state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
+            state.ctx.propertyRoute.propertyRouteType == "Field") {
             vProps.unitText = state.ctx.propertyRoute.member!.unit;
         }
     }
@@ -87,7 +87,7 @@ export function taskSetFormat(lineBase: LineBase<any, any>, state: LineBaseProps
 
         if (!vProps.formatText &&
             state.ctx.propertyRoute &&
-            state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
+            state.ctx.propertyRoute.propertyRouteType == "Field") {
             vProps.formatText = state.ctx.propertyRoute.member!.format;
         }
     }
@@ -97,7 +97,7 @@ tasks.push(taskSetReadOnly);
 export function taskSetReadOnly(lineBase: LineBase<any, any>, state: LineBaseProps) {
     if (!state.ctx.readOnly &&
         state.ctx.propertyRoute &&
-        state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field &&
+        state.ctx.propertyRoute.propertyRouteType == "Field" &&
         state.ctx.propertyRoute.member!.isReadOnly) {
         state.ctx.readOnly = true;
     }
@@ -107,7 +107,7 @@ tasks.push(taskSetMove);
 export function taskSetMove(lineBase: LineBase<any, any>, state: LineBaseProps) {
     if (lineBase instanceof EntityListBase &&
         state.ctx.propertyRoute &&
-        state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field &&
+        state.ctx.propertyRoute.propertyRouteType == "Field" &&
         state.ctx.propertyRoute.member!.preserveOrder) {
         (state as EntityListBaseProps).move = true;
     }
@@ -120,7 +120,7 @@ export function taskSetHtmlProperties(lineBase: LineBase<any, any>, state: LineB
     const vl = lineBase instanceof ValueLine ? lineBase as ValueLine : undefined;
     const pr = state.ctx.propertyRoute;
     const s = state as ValueLineProps;
-    if (vl && pr && pr.propertyRouteType == PropertyRouteType.Field && (s.valueLineType == ValueLineType.TextBox || s.valueLineType == ValueLineType.TextArea)) {
+    if (vl && pr && pr.propertyRouteType == "Field" && (s.valueLineType == ValueLineType.TextBox || s.valueLineType == ValueLineType.TextArea)) {
 
         var member = pr.member!;
 

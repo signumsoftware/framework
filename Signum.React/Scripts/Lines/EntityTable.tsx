@@ -16,7 +16,7 @@ import DynamicComponent from './DynamicComponent'
 import { RenderEntity } from './RenderEntity'
 
 export interface EntityTableProps extends EntityListBaseProps {
-    createAsLink?: boolean;
+    createAsLink?: boolean | ((er: EntityTable) => React.ReactElement<any>);
     columns: EntityTableColumn<ModifiableEntity>[],
 }
 
@@ -46,7 +46,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
 
         const buttons = (
             <span className="pull-right">
-                {!this.state.createAsLink && this.renderCreateButton(false)}
+                {this.state.createAsLink == false && this.renderCreateButton(false)}
                 {this.renderFindButton(false)}
             </span>
         );
@@ -93,11 +93,12 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                             this.state.createAsLink && this.state.create && !readOnly &&
                             <tr>
                                 <td colSpan={1 + this.props.columns.length}>
-                                    <a title={EntityControlMessage.Create.niceToString()}
-                                        className="sf-line-button sf-create"
-                                        onClick={this.handleCreateClick}>
-                                        <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }}/>{EntityControlMessage.Create.niceToString()}
-                                    </a>
+                                    {typeof this.state.createAsLink == "function" ? this.state.createAsLink(this) :
+                                        <a title={EntityControlMessage.Create.niceToString()}
+                                            className="sf-line-button sf-create"
+                                            onClick={this.handleCreateClick}>
+                                            <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }}/>{EntityControlMessage.Create.niceToString()}
+                                        </a>}
                                 </td>
                             </tr>
                         }
