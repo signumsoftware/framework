@@ -60,6 +60,12 @@ namespace Signum.Engine.Maps
             get { return tables; }
         }
 
+        public static bool IsDeclared(Type type)
+        {
+            return Current.Tables.ContainsKey(type);
+        }
+
+
         const string errorType = "TypeEntity table not cached. Remember to call Schema.Current.Initialize";
 
 
