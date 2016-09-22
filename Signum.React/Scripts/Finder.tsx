@@ -356,7 +356,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
     });
 }
 
-export function getEntities(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], count: number) : Promise<Lite<Entity>[]> {
+export function fetchEntitiesWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], count: number) : Promise<Lite<Entity>[]> {
     return getQueryDescription(queryName).then(qd => {
         return parseFilterOptions(filterOptions, qd).then(fop => {
 
@@ -366,7 +366,7 @@ export function getEntities(queryName: PseudoType | QueryKey, filterOptions: Fil
                 value: fo.value,
             } as FilterRequest));
 
-            return API.fetchEntitiesWithFilter({
+            return API.fetchEntitiesWithFilters({
                 queryKey: qd.queryKey,
                 filters: filters,
                 count: count
@@ -577,7 +577,7 @@ export module API {
         return ajaxPost<number>({ url: "~/api/query/queryCount" }, request);
     }
 
-    export function fetchEntitiesWithFilter(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
+    export function fetchEntitiesWithFilters(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
         return ajaxPost<Lite<Entity>[]>({ url: "~/api/query/entitiesWithFilter" }, request);
     }
     
