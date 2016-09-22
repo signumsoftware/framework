@@ -142,6 +142,11 @@ namespace Signum.Entities.Dashboard
                 DashboardPriority = DashboardPriority,
                 Parts = Parts.Select(p => p.Clone()).ToMList(),
                 Owner = Owner,
+                EntityType = this.EntityType,
+                EmbeddedInEntity = this.EmbeddedInEntity,
+                AutoRefreshPeriod = this.AutoRefreshPeriod,
+                ForNavbar = this.ForNavbar,
+                Key = this.Key
             };
         }
 

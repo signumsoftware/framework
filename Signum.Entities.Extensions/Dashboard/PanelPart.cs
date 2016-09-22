@@ -63,7 +63,10 @@ namespace Signum.Entities.Dashboard
                 Columns = Columns,
                 StartColumn = StartColumn,
                 Content = Content.Clone(),
-                Title = Title
+                Title = Title,
+                Row = Row,
+                Style = Style,
+
             };
         }
 
@@ -148,6 +151,8 @@ namespace Signum.Entities.Dashboard
             return new UserQueryPartEntity
             {
                 UserQuery = this.UserQuery,
+                AllowSelection = this.AllowSelection,
+
             };
         }
 
@@ -155,13 +160,13 @@ namespace Signum.Entities.Dashboard
         {
             return new XElement("UserQueryPart",
                 new XAttribute("UserQuery", ctx.Include(UserQuery)),
-                new XAttribute("AllowSelection", AllowSelection.ToString()) );
+                new XAttribute("AllowSelection", AllowSelection.ToString()));
         }
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
             UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
-            AllowSelection= bool.Parse(element.Attribute("AllowSelection").Value);
+            AllowSelection = bool.Parse(element.Attribute("AllowSelection").Value);
         }
     }
 
@@ -189,7 +194,8 @@ namespace Signum.Entities.Dashboard
             return new UserChartPartEntity
             {
                 UserChart = this.UserChart,
-                ShowData = this.ShowData
+                ShowData = this.ShowData,
+
             };
         }
 
