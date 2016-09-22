@@ -6,7 +6,7 @@ import { Dic } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
 import {
-    QueryDescription, CountQueryRequest, QueryRequest, FindOptions, 
+    QueryDescription, CountQueryRequest, QueryRequest, QueryEntitiesRequest, FindOptions, 
     FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, CountOptionsParsed,
     QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination, ResultColumn,
     ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest
@@ -356,6 +356,25 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
     });
 }
 
+export function getEntities(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], count: number) : Promise<Lite<Entity>[]> {
+    return getQueryDescription(queryName).then(qd => {
+        return parseFilterOptions(filterOptions, qd).then(fop => {
+
+            let filters = fop.map(fo => ({
+                token: fo.token!.fullKey,
+                operation: fo.operation,
+                value: fo.value,
+            } as FilterRequest));
+
+            return API.fetchEntitiesWithFilter({
+                queryKey: qd.queryKey,
+                filters: filters,
+                count: count
+            });
+        }); 
+    });
+}
+
 export function expandParentColumn(fo: FindOptions): FindOptions {
     
     if (!fo.parentColumn)
@@ -558,6 +577,10 @@ export module API {
         return ajaxPost<number>({ url: "~/api/query/queryCount" }, request);
     }
 
+    export function fetchEntitiesWithFilter(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
+        return ajaxPost<Lite<Entity>[]>({ url: "~/api/query/entitiesWithFilter" }, request);
+    }
+    
     export function fetchAllLites(request: { types: string }): Promise<Lite<Entity>[]> {
         return ajaxGet<Lite<Entity>[]>({
             url: currentHistory.createHref({ pathname: "~/api/query/allLites", query: request })

@@ -130,6 +130,17 @@ namespace Signum.React.ApiControllers
             return DynamicQueryManager.Current.ExecuteQuery(request.ToQueryRequest());
         }
 
+        [Route("api/query/entitiesWithFilter"), HttpPost, ProfilerActionSplitter]
+        public List<Lite<Entity>> GetEntitiesWithFilter(QueryEntitiesRequestTS request)
+        {
+            var qn = QueryLogic.ToQueryName(request.queryKey);
+            var qd = DynamicQueryManager.Current.QueryDescription(qn);
+
+            var filters = request.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false)).ToList();
+
+            return DynamicQueryManager.Current.GetEntities(qn, filters).Take(request.count).ToList();
+        }
+
         [Route("api/query/queryCount"), HttpPost, ProfilerActionSplitter]
         public int? QueryCount(QueryCountTS request)
         {
@@ -189,6 +200,15 @@ namespace Signum.React.ApiControllers
             };
         }
 
+
+        public override string ToString() => queryKey;
+    }
+
+    public class QueryEntitiesRequestTS
+    {
+        public string queryKey;
+        public List<FilterTS> filters;
+        public int count;
 
         public override string ToString() => queryKey;
     }
