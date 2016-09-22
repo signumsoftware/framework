@@ -837,7 +837,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
                     {this.props.findOptions.navigate &&
                         <td>
-                            {this.wrapError(mark, i, ((qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row)).last("EntityFormatRules").formatter)(row, resultTable.columns))}
+                            {((qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row)).last("EntityFormatRules").formatter)(row, resultTable.columns)}
                         </td>
                     }
 
@@ -848,7 +848,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 </tr>
             );
 
-            return tr;
+            return this.wrapError(mark, i, tr);
         });
     }
 
@@ -870,17 +870,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         }
     }
 
-    wrapError(mark: MarkedRow | undefined, index: number, child: React.ReactChild | undefined) {
+    wrapError(mark: MarkedRow | undefined, index: number, tr: React.ReactChild | undefined) {
         if (!mark || mark.message == "")
-            return child;
+            return tr;
 
         const tooltip = <Tooltip id={"mark_" + index} >{mark.message}</Tooltip>;
 
-        return <OverlayTrigger placement="bottom" overlay={tooltip}>
-            <span className="sf-search-entity-error">
-                {child}
-            </span>
-        </OverlayTrigger>;
+        return <OverlayTrigger placement="bottom" overlay={tooltip}>{tr}</OverlayTrigger>;
     }
 
 }

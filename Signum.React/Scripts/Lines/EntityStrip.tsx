@@ -153,7 +153,7 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
 
     componentWillMount() {
         if (this.props.autoComplete)
-            this.props.autoComplete.getInitialItem(this.props.ctx.value).then(item => this.changeState(s => s.item = item)).done();
+            this.props.autoComplete.getItemFromEntity(this.props.ctx.value).then(item => this.changeState(s => s.item = item)).done();
     }
 
     render() {
