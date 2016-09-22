@@ -547,15 +547,27 @@ export module API {
     }
 
     export function fetchQueryEntity(queryKey: string): Promise<QueryEntity> {
-        return ajaxGet<QueryEntity>({ url: "~/api/query/entity/" + queryKey });
+        return ajaxGet<QueryEntity>({ url: "~/api/query/queryEntity/" + queryKey });
     }
 
-    export function search(request: QueryRequest): Promise<ResultTable> {
-        return ajaxPost<ResultTable>({ url: "~/api/query/search" }, request);
+    export function executeQuery(request: QueryRequest): Promise<ResultTable> {
+        return ajaxPost<ResultTable>({ url: "~/api/query/executeQuery" }, request);
     }
-
+    
     export function queryCount(request: CountQueryRequest): Promise<number> {
         return ajaxPost<number>({ url: "~/api/query/queryCount" }, request);
+    }
+
+    export function fetchAllLites(request: { types: string }): Promise<Lite<Entity>[]> {
+        return ajaxGet<Lite<Entity>[]>({
+            url: currentHistory.createHref({ pathname: "~/api/query/allLites", query: request })
+        });
+    }
+
+    export function findTypeLike(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {
+        return ajaxGet<Lite<TypeEntity>[]>({
+            url: currentHistory.createHref({ pathname: "~/api/query/findTypeLike", query: request })
+        });
     }
 
     export function findLiteLike(request: { types: string, subString: string, count: number }): Promise<Lite<Entity>[]> {
@@ -564,26 +576,9 @@ export module API {
         });
     }
 
+
     export function findLiteLikeWithFilters(request: { queryKey: string, filters: FilterRequest[], subString: string, count: number }): Promise<Lite<Entity>[]> {
         return ajaxPost<Lite<Entity>[]>({ url: "~/api/query/findLiteLikeWithFilters" }, request);
-    }
-
-    export function findTypeLike(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {
-        return ajaxGet<Lite<TypeEntity>[]>({
-            url: currentHistory.createHref({ pathname: "~/api/query/findLiteLike", query: request })
-        });
-    }
-
-    export function findAllLites(request: { types: string }): Promise<Lite<Entity>[]> {
-        return ajaxGet<Lite<Entity>[]>({
-            url: currentHistory.createHref({ pathname: "~/api/query/findAllLites", query: request })
-        });
-    }
-
-    export function findAllEntities(request: { types: string }): Promise<Entity[]> {
-        return ajaxGet<Entity[]>({
-            url: currentHistory.createHref({ pathname: "~/api/query/findAllEntities", query: request })
-        });
     }
 
     export function parseTokens(queryKey: string, tokens: { token: string, options: SubTokensOptions }[]): Promise<QueryToken[]> {

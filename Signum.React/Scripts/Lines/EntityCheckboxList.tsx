@@ -40,7 +40,7 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
 
     componentWillMount() {
         if (!this.state.data) {
-            Finder.API.findAllLites({ types: this.state.type!.name })
+            Finder.API.fetchAllLites({ types: this.state.type!.name })
                 .then(data => this.setState({ data: data.orderBy(a => a.toStr) } as any))
                 .done();
         }

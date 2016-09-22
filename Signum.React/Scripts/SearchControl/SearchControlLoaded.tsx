@@ -131,7 +131,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     doSearch() {
         this.getFindOptionsWithSFB().then(fo => {
             this.setState({ loading: false, editingColumn: undefined });
-            Finder.API.search(this.getQueryRequest()).then(rt => {
+            Finder.API.executeQuery(this.getQueryRequest()).then(rt => {
                 this.setState({
                     resultTable: rt,
                     selectedRows: [],
