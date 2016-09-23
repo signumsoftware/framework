@@ -20,7 +20,7 @@ export default class EntityLink extends React.Component<EntityLinkProps, void>{
         if (!Navigator.isNavigable(lite.EntityType, undefined, this.props.inSearch || false))
             return <span data-entity={liteKey(lite) }>{this.props.children || lite.toStr}</span>;
 
-        var htmlAtts = Dic.without(this.props, { lite: undefined, isSearch: undefined }) as React.HTMLAttributes;
+        var htmlAtts = Dic.without(this.props, { lite: undefined, inSearch: undefined }) as React.HTMLAttributes;
 
         return (
             <Link
