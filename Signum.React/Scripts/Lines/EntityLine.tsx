@@ -122,6 +122,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
                 inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
                 getItems={ac.getItems}
                 renderItem={ac.renderItem}
+                renderList={ac.renderList}
                 liAttrs={lite => ({ 'data-entity-key': liteKey(lite) }) }
                 onSelect={this.handleOnSelect}/>
         );
@@ -160,7 +161,8 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
 export interface AutocompleteConfig<T> {
     getItems: (subStr: string) => Promise<T[]>;
-    renderItem: (item: T, subStr?: string) => React.ReactNode
+    renderItem: (item: T, subStr?: string) => React.ReactNode;
+    renderList?: (typeahead: Typeahead) => React.ReactNode;
     getEntityFromItem: (item: T) => Lite<Entity> | ModifiableEntity;
     getItemFromEntity: (entity: Lite<Entity> | ModifiableEntity) => Promise<T>;
 }
