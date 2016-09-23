@@ -38,16 +38,15 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
             );
         }
 
-        const labelClasses = classes(ctx.formGroupStyle == "SrOnly" && "sr-only",
-            ctx.formGroupStyle == "LabelColumns" && ("control-label " + ctx.labelColumnsCss));
-        
+        const labelClasses = classes(ctx.formGroupStyle == "SrOnly" && "sr-only", ctx.formGroupStyle == "LabelColumns" && ("control-label " + ctx.labelColumnsCss));
         const label = (
             <label htmlFor={this.props.controlId} {...this.props.labelProps } className= {addClass(this.props.labelProps, labelClasses)} >
                 { this.props.labelText || tCtx.propertyRoute && tCtx.propertyRoute.member!.niceName }
             </label>
         );
 
-        return <div {...this.props.htmlProps} className={ classes("form-group", this.props.ctx.formGroupSizeCss, errorClass) }>
+        const formGroupClasses = classes("form-group", this.props.ctx.formGroupSizeCss, errorClass);
+        return <div {...this.props.htmlProps} className={addClass(this.props.htmlProps, formGroupClasses)}>
             { ctx.formGroupStyle != "BasicDown" && label }
             {
                 ctx.formGroupStyle == "LabelColumns" ? (<div className={ this.props.ctx.valueColumnsCss } > { this.props.children } </div>) : this.props.children}
