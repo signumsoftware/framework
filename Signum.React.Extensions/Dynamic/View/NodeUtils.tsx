@@ -6,7 +6,7 @@ import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import {
-    getQueryNiceName, TypeInfo, MemberInfo, getTypeInfo, EntityData, EntityKind, getTypeInfos, Binding,
+    getQueryNiceName, TypeInfo, MemberInfo, getTypeInfo, EntityData, EntityKind, getTypeInfos, Binding, EnumType,
     KindOfType, PropertyRoute, PropertyRouteType, LambdaMemberType, isTypeEntity, isTypeModel, isModifiableEntity
 } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
@@ -130,7 +130,7 @@ export function render(dn: DesignerNode<BaseNode>, ctx: TypeContext<ModifiableEn
         return (<div className="alert alert-danger">{getErrorTitle(dn)} {error}</div>);
 
     try {
-        if (evaluateAndValidate(ctx, dn, n => n.visible, isBooleanOrNull) == false)
+        if (evaluateAndValidate(ctx, dn.node, n => n.visible, isBooleanOrNull) == false)
             return null;
 
         const sn = dn.context.getSelectedNode();
@@ -192,7 +192,10 @@ export function asFieldFunction(field: string): (e: ModifiableEntity) => any {
     }
 }
 
-export function evaluate<T>(ctx: TypeContext<ModifiableEntity>, expressionOrValue: ExpressionOrValue<T> | undefined, fieldAccessor: (from: any) => any): T | undefined {
+export function evaluate<F, T>(ctx: TypeContext<ModifiableEntity>, object: F, fieldAccessor: (from: F) => ExpressionOrValue<T> | undefined): T | undefined {
+
+    var expressionOrValue = fieldAccessor(object);
+
     if (expressionOrValue == null)
         return undefined;
 
@@ -212,10 +215,9 @@ export function evaluate<T>(ctx: TypeContext<ModifiableEntity>, expressionOrValu
     }
 }
 
-export function evaluateAndValidate<T extends BaseNode>(ctx: TypeContext<ModifiableEntity>, dn: DesignerNode<T>, fieldAccessor: (from: T) => any, validate: (val: any) => string | null) {
+export function evaluateAndValidate<F, T>(ctx: TypeContext<ModifiableEntity>, object: F, fieldAccessor: (from: F) => ExpressionOrValue<T>, validate: (val: any) => string | null)   {
 
-    const expressionOrValue = fieldAccessor(dn.node);
-    var result = evaluate(ctx, expressionOrValue, fieldAccessor);
+    var result = evaluate(ctx, object, fieldAccessor);
 
     var error = validate(result);
     if (error)
@@ -227,11 +229,11 @@ export function evaluateAndValidate<T extends BaseNode>(ctx: TypeContext<Modifia
     return result;
 }
 
-export function evaluateOnChange<T>(ctx: TypeContext<ModifiableEntity>, redrawOnChange?: ExpressionOrValue<boolean>): (() => void) | undefined {
-    if (evaluate(ctx, redrawOnChange, (n: LineBaseNode) => n.redrawOnChange) == true)
-        return () => ctx.frame!.entityComponent.forceUpdate();
+export function evaluateOnChange<T>(ctx: TypeContext<ModifiableEntity>, dn: DesignerNode<LineBaseNode>): (() => void) | undefined {
 
-    return undefined;
+    return evaluateAndValidate(ctx, dn.node, n => n.redrawOnChange, isBooleanOrNull) == true ?
+        () => ctx.frame!.entityComponent.forceUpdate() :
+        undefined;
 }
 
 
@@ -264,6 +266,14 @@ export function isFindOptions(val: any) {
 
 export function isStringOrNull(val: any) {
     return val == null || typeof val == "string" ? null : `The returned value (${JSON.stringify(val)}) should be a string or null`;
+}
+
+export function isEnum(val: any, enumType: EnumType<any>) {
+    return val != null && typeof val == "string" && enumType.values().contains(val) ? null : `The returned value (${JSON.stringify(val)}) should be a valid ${enumType.type} (like ${enumType.values().joinComma(" or ")})`;
+}
+
+export function isEnumOrNull(val: any, enumType: EnumType<any>) {
+    return val == null || typeof val == "string" && enumType.values().contains(val) ? null : `The returned value (${JSON.stringify(val)}) should be a valid ${enumType.type} (like ${enumType.values().joinComma(" or ")}) or null`;
 }
 
 export function isNumberOrNull(val: any) {
@@ -357,24 +367,24 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, ctx: TypeCo
 
     var result = {
         ctx: ctx.subCtx(asFieldFunction(dn.node.field)),
-        labelText: evaluateAndValidate(ctx, dn, n => n.labelText, isStringOrNull),
-        visible: evaluateAndValidate(ctx, dn, n => n.visible, isBooleanOrNull),
-        readOnly: evaluateAndValidate(ctx, dn, n => n.readOnly, isBooleanOrNull),
-        create: evaluateAndValidate(ctx, dn, n => n.create, isBooleanOrNull),
-        remove: evaluateAndValidate(ctx, dn, n => n.remove, isBooleanOrNull),
-        find: evaluateAndValidate(ctx, dn, n => n.find, isBooleanOrNull),
-        view: evaluateAndValidate(ctx, dn, n => n.view, isBooleanOrNull),
-        onChange: evaluateOnChange(ctx, dn.node.redrawOnChange),
+        labelText: evaluateAndValidate(ctx, dn.node, n => n.labelText, isStringOrNull),
+        visible: evaluateAndValidate(ctx, dn.node, n => n.visible, isBooleanOrNull),
+        readOnly: evaluateAndValidate(ctx, dn.node, n => n.readOnly, isBooleanOrNull),
+        create: evaluateAndValidate(ctx, dn.node, n => n.create, isBooleanOrNull),
+        remove: evaluateAndValidate(ctx, dn.node, n => n.remove, isBooleanOrNull),
+        find: evaluateAndValidate(ctx, dn.node, n => n.find, isBooleanOrNull),
+        view: evaluateAndValidate(ctx, dn.node, n => n.view, isBooleanOrNull),
+        onChange: evaluateOnChange(ctx, dn),
         findOptions: dn.node.findOptions && toFindOptions(ctx, dn.node.findOptions),
         getComponent: getGetComponent(dn, ctx)
     };
 
 
     if (options.showAutoComplete)
-        result = Dic.extend(result, { autoComplete: evaluateAndValidate(ctx, dn, (n: EntityLineNode) => n.autoComplete, isBooleanOrNull) == false ? null : undefined});
+        result = Dic.extend(result, { autoComplete: evaluateAndValidate(ctx, dn.node, (n: EntityLineNode) => n.autoComplete, isBooleanOrNull) == false ? null : undefined});
 
     if (options.showMove)
-        result = Dic.extend(result, { move: evaluateAndValidate(ctx, dn, (n: EntityListBaseNode) => n.move, isBooleanOrNull) });
+        result = Dic.extend(result, { move: evaluateAndValidate(ctx, dn.node, (n: EntityListBaseNode) => n.move, isBooleanOrNull) });
 
     return result;
 }
@@ -402,7 +412,7 @@ export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { is
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.view)} type="boolean" defaultValue={options.isViewable && m && EntityBase.defaultIsViewable(m.type, false) || false} />
         {options.showMove && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, (n: EntityListBaseNode) => n.move)} type="boolean" defaultValue={m && m.preserveOrder || false} />}
         {options.showAutoComplete && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, (n: EntityLineNode) => n.autoComplete)} type="boolean" defaultValue={true} />}
-        <FindOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.findOptions)} />
+        <FindOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.findOptions)} avoidSuggestion={true} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.redrawOnChange)} type="boolean" defaultValue={false} />
     </div>)
 }

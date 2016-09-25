@@ -81,9 +81,9 @@ NodeUtils.register<ColumnNode>({
     initialize: dn => dn.width = 6,
     renderTreeNode: NodeUtils.treeNodeKind, 
     render: (dn, ctx) => {
-        const column = NodeUtils.evaluateAndValidate(ctx, dn, n => n.width, NodeUtils.isNumber);
-        const offset = NodeUtils.evaluateAndValidate(ctx, dn, n => n.offset, NodeUtils.isNumberOrNull);
-        const className = classes("col-sm-" + column, offset && "col-sm-offset-" + offset)
+        const column = NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.width, NodeUtils.isNumber);
+        const offset = NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.offset, NodeUtils.isNumberOrNull);
+        const className = classes("col-sm-" + column, offset != undefined && "col-sm-offset-" + offset)
 
         return NodeUtils.withChildrens(dn, ctx, <div className={className} />);
     },
@@ -106,7 +106,7 @@ NodeUtils.register<TabsNode>({
     initialize: dn => dn.id = "tabs", 
     renderTreeNode: NodeUtils.treeNodeKind, 
     render: (dn, ctx) => {
-        return NodeUtils.withChildrens(dn, ctx, <Tabs id={ctx.compose(NodeUtils.evaluateAndValidate(ctx, dn, n => n.id, NodeUtils.isString) !)} />);
+        return NodeUtils.withChildrens(dn, ctx, <Tabs id={ctx.compose(NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.id, NodeUtils.isString) !)} />);
     },
     renderDesigner: (dn) => (<div>
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.id)} type="string" defaultValue={null} />
@@ -129,7 +129,7 @@ NodeUtils.register<TabNode>({
     initialize: dn => dn.title = "My Tab",
     renderTreeNode: NodeUtils.treeNodeKind, 
     render: (dn, ctx) => {
-        return NodeUtils.withChildrens(dn, ctx, <Tab title={NodeUtils.evaluateAndValidate(ctx, dn, n => n.title, NodeUtils.isString)} />);
+        return NodeUtils.withChildrens(dn, ctx, <Tab title={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.title, NodeUtils.isString)} />);
     },
     renderDesigner: (dn) => (<div>
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.title)} type="string" defaultValue={null} />
@@ -151,7 +151,7 @@ NodeUtils.register<FieldsetNode>({
     renderTreeNode: NodeUtils.treeNodeKind, 
     render: (dn, ctx) => {
         return (<fieldset>
-            <legend>{NodeUtils.evaluateAndValidate(ctx, dn, n => n.legend, NodeUtils.isString)}</legend>
+            <legend>{NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.legend, NodeUtils.isString)}</legend>
             {NodeUtils.withChildrens(dn, ctx, <div />)}
         </fieldset>)
     },
@@ -184,14 +184,14 @@ NodeUtils.register<ValueLineNode>({
     renderTreeNode: NodeUtils.treeNodeKindField, 
     render: (dn, ctx) => (<ValueLine
         ctx={ctx.subCtx(NodeUtils.asFieldFunction(dn.node.field))}
-        labelText={NodeUtils.evaluateAndValidate(ctx, dn, n => n.labelText, NodeUtils.isStringOrNull)}
-        unitText={NodeUtils.evaluateAndValidate(ctx, dn, n => n.unitText, NodeUtils.isStringOrNull)}
-        formatText={NodeUtils.evaluateAndValidate(ctx, dn, n => n.formatText, NodeUtils.isStringOrNull)}
-        readOnly={NodeUtils.evaluateAndValidate(ctx, dn, n => n.readOnly, NodeUtils.isBooleanOrNull)}
-        inlineCheckbox={NodeUtils.evaluateAndValidate(ctx, dn, n => n.inlineCheckbox, NodeUtils.isBooleanOrNull)}
-        valueLineType={NodeUtils.evaluateAndValidate(ctx, dn, n => n.textArea, NodeUtils.isBooleanOrNull) ? ValueLineType.TextArea : undefined}
-        autoTrim={NodeUtils.evaluateAndValidate(ctx, dn, n => n.autoTrim, NodeUtils.isBooleanOrNull)}
-        onChange={NodeUtils.evaluateOnChange(ctx, dn.node.redrawOnChange)}
+        labelText={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
+        unitText={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.unitText, NodeUtils.isStringOrNull)}
+        formatText={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.formatText, NodeUtils.isStringOrNull)}
+        readOnly={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
+        inlineCheckbox={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.inlineCheckbox, NodeUtils.isBooleanOrNull)}
+        valueLineType={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.textArea, NodeUtils.isBooleanOrNull) ? ValueLineType.TextArea : undefined}
+        autoTrim={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.autoTrim, NodeUtils.isBooleanOrNull)}
+        onChange={NodeUtils.evaluateOnChange(ctx, dn)}
         />),
     renderDesigner: (dn) => {
         const m = dn.route && dn.route.member;
@@ -284,11 +284,11 @@ NodeUtils.register<EnumCheckboxListNode>({
     renderTreeNode: NodeUtils.treeNodeKindField,
     render: (dn, ctx) => (<EnumCheckboxList
         ctx={ctx.subCtx(NodeUtils.asFieldFunction(dn.node.field))}
-        labelText={NodeUtils.evaluateAndValidate(ctx, dn, n => n.labelText, NodeUtils.isStringOrNull)}
-        readOnly={NodeUtils.evaluateAndValidate(ctx, dn, n => n.readOnly, NodeUtils.isBooleanOrNull)}
-        columnCount={NodeUtils.evaluateAndValidate(ctx, dn, n => n.columnCount, NodeUtils.isNumberOrNull)}
-        columnWidth={NodeUtils.evaluateAndValidate(ctx, dn, n => n.columnWidth, NodeUtils.isNumberOrNull)}
-        onChange={NodeUtils.evaluateOnChange(ctx, dn.node.redrawOnChange)}
+        labelText={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
+        readOnly={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
+        columnCount={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.columnCount, NodeUtils.isNumberOrNull)}
+        columnWidth={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.columnWidth, NodeUtils.isNumberOrNull)}
+        onChange={NodeUtils.evaluateOnChange(ctx, dn)}
         />),
     renderDesigner: (dn) => {
         const m = dn.route && dn.route.member;
@@ -322,8 +322,8 @@ NodeUtils.register<EntityCheckboxListNode>({
     validate: (dn) => NodeUtils.validateEntityBase(dn),
     renderTreeNode: NodeUtils.treeNodeKindField,
     render: (dn, ctx) => (<EntityCheckboxList {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: false }) }
-        columnCount={NodeUtils.evaluateAndValidate(ctx, dn, n => n.columnCount, NodeUtils.isNumberOrNull)}
-        columnWidth={NodeUtils.evaluateAndValidate(ctx, dn, n => n.columnWidth, NodeUtils.isNumberOrNull)}
+        columnCount={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.columnCount, NodeUtils.isNumberOrNull)}
+        columnWidth={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.columnWidth, NodeUtils.isNumberOrNull)}
         />),
     renderDesigner: dn => <div>
         {NodeUtils.designEntityBase(dn, { isCreable: false, isFindable: false, isViewable: false, showAutoComplete: false, showMove: false })}
@@ -367,7 +367,7 @@ NodeUtils.register<EntityStripNode>({
     renderTreeNode: NodeUtils.treeNodeKindField,
     render: (dn, ctx) => (<EntityStrip
         {...NodeUtils.getEntityBaseProps(dn, ctx, { showAutoComplete: true, showMove: false }) }
-        vertical={NodeUtils.evaluateAndValidate(ctx, dn, n => n.vertical, NodeUtils.isBooleanOrNull)}
+        vertical={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.vertical, NodeUtils.isBooleanOrNull)}
         />),
     renderDesigner: dn =>
         <div>
@@ -453,7 +453,7 @@ NodeUtils.register<EntityTableColumnNode>({
     renderTreeNode: NodeUtils.treeNodeTableColumnProperty,
     render: (dn, ctx) => ({
         property: dn.node.property && NodeUtils.asFieldFunction(dn.node.property),
-        header: NodeUtils.evaluateAndValidate(ctx, dn, n => n.header, NodeUtils.isStringOrNull),
+        header: NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.header, NodeUtils.isStringOrNull),
         headerProps: dn.node.width ? { style: { width: dn.node.width } } : undefined,
         template: dn.node.children && dn.node.children.length > 0 ? NodeUtils.getGetComponent(dn, ctx) : undefined
     }) as EntityTableColumn<ModifiableEntity> as any, //HACK

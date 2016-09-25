@@ -69,50 +69,49 @@ export function toFindOptions(ctx: TypeContext<ModifiableEntity>, foe: FindOptio
     return {
         queryName: foe.queryKey!,
         parentColumn: foe.parentColumn,
-        parentValue: NodeUtils.evaluate(ctx, foe.parentValue, "parentValue"),
+        parentValue: NodeUtils.evaluate(ctx, foe, f => f.parentValue),
 
         filterOptions: foe.filterOptions ?
             foe.filterOptions
-                .filter(fo => NodeUtils.evaluate(ctx, fo.applicable, "applicable") != false)
+                .filter(fo => NodeUtils.evaluateAndValidate(ctx, fo, f => f.applicable, NodeUtils.isBooleanOrNull) != false)
                 .map(fo => ({
                     columnName: fo.columnName,
-                    frozen: NodeUtils.evaluate(ctx, fo.frozen, "frozen"),
-                    operation: NodeUtils.evaluate(ctx, fo.operation, "operation"),
-                    value: NodeUtils.evaluate(ctx, fo.value, "value")
+                    frozen: NodeUtils.evaluateAndValidate(ctx, fo, f => f.frozen, NodeUtils.isBooleanOrNull),
+                    operation: NodeUtils.evaluateAndValidate(ctx, fo, f => f.operation, v => NodeUtils.isEnumOrNull(v, FilterOperation)),
+                    value: NodeUtils.evaluate(ctx, fo, f => f.value)
                 } as FilterOption)) : undefined,
 
         orderOptions: foe.orderOptions ?
             foe.orderOptions
-                .filter(oo => NodeUtils.evaluate(ctx, oo.applicable, "applicable") != false)
+                .filter(oo => NodeUtils.evaluateAndValidate(ctx, oo, o => o.applicable, NodeUtils.isBooleanOrNull) != false)
                 .map(oo => ({
                     columnName: oo.columnName,
-                    orderType: NodeUtils.evaluate(ctx, oo.orderType, "orderType")
+                    orderType: NodeUtils.evaluateAndValidate(ctx, oo, o => o.orderType, v => NodeUtils.isEnumOrNull(v, OrderType))
                 } as OrderOption)) : undefined,
 
-        columnOptionsMode: NodeUtils.evaluate(ctx, foe.columnOptionsMode, "columnOptionsMode"),
+        columnOptionsMode: NodeUtils.evaluateAndValidate(ctx, foe, f => f.columnOptionsMode, v => NodeUtils.isEnumOrNull(v, ColumnOptionsMode)),
 
         columnOptions: foe.columnOptions ?
             foe.columnOptions
-                .filter(co => NodeUtils.evaluate(ctx, co.applicable, "applicable") != false)
+                .filter(co => NodeUtils.evaluateAndValidate(ctx, co, c => c.applicable, NodeUtils.isBooleanOrNull) != false)
                 .map(co => ({
                     columnName: co.columnName,
-                    displayName: NodeUtils.evaluate(ctx, co.displayName, "displayName")
+                    displayName: NodeUtils.evaluateAndValidate(ctx, co, c => c.displayName, NodeUtils.isStringOrNull)
                 } as ColumnOption)) : undefined,
 
-        pagination: NodeUtils.evaluate(ctx, foe.paginationMode, "paginationMode") ? ({
-            mode : NodeUtils.evaluate(ctx, foe.paginationMode, "paginationMode"),
-            currentPage: NodeUtils.evaluate(ctx, foe.currentPage, "currentPage"),
-            elementsPerPage: NodeUtils.evaluate(ctx, foe.elementsPerPage, "elementsPerPage")
+        pagination: NodeUtils.evaluateAndValidate(ctx, foe, f => f.paginationMode, v => NodeUtils.isEnumOrNull(v, PaginationMode)) ? ({
+            mode: NodeUtils.evaluateAndValidate(ctx, foe, f => f.paginationMode, v => NodeUtils.isEnumOrNull(v, PaginationMode)),
+            currentPage: NodeUtils.evaluateAndValidate(ctx, foe, f => f.currentPage, NodeUtils.isNumberOrNull),
+            elementsPerPage: NodeUtils.evaluateAndValidate(ctx, foe, f => f.elementsPerPage, NodeUtils.isNumberOrNull)
         } as Pagination) : undefined,
 
-        searchOnLoad: NodeUtils.evaluate(ctx, foe.searchOnLoad, "searchOnLoad"),
-        showHeader: NodeUtils.evaluate(ctx, foe.showHeader, "showHeader"),
-        showFilters: NodeUtils.evaluate(ctx, foe.showFilters, "showFilters"),
-        showFilterButton: NodeUtils.evaluate(ctx, foe.showFilterButton, "showFilterButton"),
-        showFooter: NodeUtils.evaluate(ctx, foe.showFooter, "showFooter"),
-        allowChangeColumns: NodeUtils.evaluate(ctx, foe.allowChangeColumns, "allowChangeColumns"),
-        create: NodeUtils.evaluate(ctx, foe.create, "create"),
-        navigate: NodeUtils.evaluate(ctx, foe.navigate, "navigate"),
-        contextMenu: NodeUtils.evaluate(ctx, foe.contextMenu, "contextMenu"),
+        searchOnLoad: NodeUtils.evaluateAndValidate(ctx, foe, f => f.searchOnLoad, NodeUtils.isBooleanOrNull),
+        showFilters: NodeUtils.evaluateAndValidate(ctx, foe, f => f.showFilters, NodeUtils.isBooleanOrNull),
+        showFilterButton: NodeUtils.evaluateAndValidate(ctx, foe, f => f.showFilterButton, NodeUtils.isBooleanOrNull),
+        showFooter: NodeUtils.evaluateAndValidate(ctx, foe, f => f.showFooter, NodeUtils.isBooleanOrNull),
+        allowChangeColumns: NodeUtils.evaluateAndValidate(ctx, foe, f => f.allowChangeColumns, NodeUtils.isBooleanOrNull),
+        create: NodeUtils.evaluateAndValidate(ctx, foe, f => f.create, NodeUtils.isBooleanOrNull),
+        navigate: NodeUtils.evaluateAndValidate(ctx, foe, f => f.navigate, NodeUtils.isBooleanOrNull),
+        contextMenu: NodeUtils.evaluateAndValidate(ctx, foe, f => f.contextMenu, NodeUtils.isBooleanOrNull),
     }
 }
