@@ -215,6 +215,10 @@ export function isTypeEmbeddedOrValue(type: PseudoType): boolean {
     return !ti;
 }
 
+export function isModifiableEntity(type: TypeReference): boolean {
+    return type.isEmbedded == true || getTypeInfos(type).every(ti => ti != undefined && (isTypeEntity(ti) || isTypeModel(ti)));
+}
+
 
 export function getTypeInfo(type: PseudoType): TypeInfo {
 
