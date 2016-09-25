@@ -51,13 +51,13 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
                 <Modal.Header closeButton={true} className="dialog-header-error">
                     {se ? this.renderServiceTitle(se) :
                         ve ? this.renderValidationTitle(ve) :
-                            this.renderTitle(se)}
+                            this.renderTitle(e)}
                 </Modal.Header>
 
                 <Modal.Body>
                     {se ? this.renderServiceMessage(se) :
                         ve ? this.renderValidationeMessage(ve) :
-                            this.renderMessage(se)}
+                            this.renderMessage(e)}
 
                     {
                         se && se.httpError.StackTrace &&
