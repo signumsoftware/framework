@@ -166,10 +166,12 @@
     <TypeScriptCompile Include="Dynamic\Signum.Entities.Dynamic.ts">
       <DependentUpon>Signum.Entities.Dynamic.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Dynamic\View\DynamicViewSelector.tsx" />
     <TypeScriptCompile Include="Dynamic\View\DynamicViewTree.tsx" />
     <TypeScriptCompile Include="Dynamic\View\DynamicViewComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\View\Designer.tsx" />
-    <TypeScriptCompile Include="Dynamic\View\ExpressionComponent.tsx" />
+    <TypeScriptCompile Include="Dynamic\View\AuthInfo.tsx" />
+    <TypeScriptCompile Include="Dynamic\View\JavascriptCodeMirror.tsx" />
     <TypeScriptCompile Include="Dynamic\View\FindOptionsLine.tsx" />
     <TypeScriptCompile Include="Dynamic\View\FindOptionsComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\View\FindOptionsExpression.tsx" />
@@ -179,6 +181,7 @@
     <TypeScriptCompile Include="Dynamic\Validation\CSharpScriptCode.tsx" />
     <TypeScriptCompile Include="Dynamic\Validation\DynamicValidation.tsx" />
     <TypeScriptCompile Include="Dynamic\View\NodeSelectorModal.tsx" />
+    <TypeScriptCompile Include="Dynamic\View\DynamicViewEntity.tsx" />
     <TypeScriptCompile Include="Mailing\Templates\IFrameRenderer.tsx" />
     <Compile Include="Map\MapServer.cs" />
     <Compile Include="Map\MapController.cs" />

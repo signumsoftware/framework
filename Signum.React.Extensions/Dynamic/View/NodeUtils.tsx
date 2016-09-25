@@ -17,6 +17,7 @@ import { DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
 import { ExpressionOrValueComponent, FieldComponent } from './Designer'
 import { FindOptionsLine } from './FindOptionsLine'
 import { FindOptionsExpr, toFindOptions } from './FindOptionsExpression'
+import { AuthInfo } from './AuthInfo'
 import { BaseNode, LineBaseNode, EntityBaseNode, EntityListBaseNode, EntityLineNode, ContainerNode, EntityTableColumnNode } from './Nodes'
 
 export type ExpressionOrValue<T> = T | Expression<T>;
@@ -165,13 +166,13 @@ export function renderDesigner(dn: DesignerNode<BaseNode>) {
     );
 }
 
-export function asFunction(expression: Expression<any>, fieldAccessor: (node: any) => any): (e: TypeContext<ModifiableEntity>) => any {
+export function asFunction(expression: Expression<any>, fieldAccessor: (node: any) => any): (e: TypeContext<ModifiableEntity>, auth: AuthInfo) => any {
     let code = expression.code;
 
     if (!code.contains(";") && !code.contains("return"))
         code = "return " + expression.code + ";";
 
-    code = "(function(ctx){ " + code + "})";
+    code = "(function(ctx, auth){ " + code + "})";
 
     try {
         return eval(code);
@@ -209,7 +210,7 @@ export function evaluate<F, T>(ctx: TypeContext<ModifiableEntity>, object: F, fi
     var f = asFunction(ex, fieldAccessor);
 
     try {
-        return f(ctx);
+        return f(ctx, new AuthInfo());
     } catch (e) {
         throw new Error("Eval '" + Binding.getSingleMember(fieldAccessor) + "':\r\n" + (e as Error).message);
     }

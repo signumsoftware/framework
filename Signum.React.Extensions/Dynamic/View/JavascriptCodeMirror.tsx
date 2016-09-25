@@ -30,27 +30,16 @@ require("codemirror/addon/search/match-highlighter");
 require("codemirror/addon/search/search");
 require("codemirror/addon/search/searchcursor");
 
-interface ExpressionComponentProps {
-    expression: Expression<any>;
-    typeName: string;
-    onChange?: () => void;
+interface JavascriptCodeMirrorProps {
+    code: string;
+    onChange?: (code: string) => void;
 }
 
-export default class ExpressionComponent extends React.Component<ExpressionComponentProps, void> {
-
-    handleOnChange = (newValue: string) => {
-        this.props.expression.code = newValue;
-
-        if (this.props.onChange)
-            this.props.onChange();
-    };
-
-
+export default class JavascriptCodeMirror extends React.Component<JavascriptCodeMirrorProps, void> {
+    
     codeMirrorComponent: CodeMirrorComponent;
 
     render() {
-        const ctx = this.props.expression;
-
         const options = {
             lineNumbers: true,
             viewportMargin: Infinity,
@@ -73,10 +62,9 @@ export default class ExpressionComponent extends React.Component<ExpressionCompo
 
         return (
             <div className="small-codemirror">
-                <pre style={{ border: "0", margin: "0" }}>{"(ctx: TypeContext<" + this.props.typeName + ">) =>"}</pre>
-                <CodeMirrorComponent value={this.props.expression.code} ref={cm => this.codeMirrorComponent = cm}
+                <CodeMirrorComponent value={this.props.code} ref={cm => this.codeMirrorComponent = cm}
                     options={options}
-                    onChange={this.handleOnChange} />
+                    onChange={this.props.onChange} />
             </div>
         );
     }

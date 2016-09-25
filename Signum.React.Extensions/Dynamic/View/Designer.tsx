@@ -10,10 +10,8 @@ import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/
 import { Expression, ExpressionOrValue, DesignerContext, DesignerNode } from './NodeUtils'
 import { BaseNode, LineBaseNode } from './Nodes'
 import * as NodeUtils from './NodeUtils'
-import ExpressionComponent from './ExpressionComponent'
+import JavascriptCodeMirror from './JavascriptCodeMirror'
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
-
-
 
 export interface ExpressionOrValueProps {
     binding: Binding<any>;
@@ -161,8 +159,13 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
             throw new Error("Unexpected expression");
 
         const typeName = dn.route!.typeReference().name.split(",").map(tn => tn + "Entity").join(" | ");
-
-        return <ExpressionComponent expression={expression} typeName={typeName} onChange={() => this.props.dn.context.refreshView()} />
+        return (
+            <div>
+                <pre style={{ border: "0", margin: "0" }}>{"(ctx: TypeContext<" + typeName + ">, auth) =>"}</pre>
+                <JavascriptCodeMirror code={expression.code} onChange={newCode => { expression.code = newCode; this.props.dn.context.refreshView() } } />
+            </div>
+        );
+        
     }
 }
 

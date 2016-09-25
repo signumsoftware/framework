@@ -16,6 +16,7 @@ import * as NodeUtils from './NodeUtils'
 import * as DynamicViewClient from '../DynamicViewClient'
 import { DynamicViewInspector  } from './Designer'
 import { DynamicViewTree } from './DynamicViewTree'
+import { AuthInfo } from './AuthInfo'
 import { DynamicViewEntity, DynamicViewOperation, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 
 require("!style!css!./DynamicView.css");

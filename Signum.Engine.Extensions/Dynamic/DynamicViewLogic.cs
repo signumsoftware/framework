@@ -56,6 +56,16 @@ namespace Signum.Engine.Dynamic
                 DynamicViews = sb.GlobalLazy(() =>
                     Database.Query<DynamicViewEntity>().GroupToDictionary(a => a.EntityType.ToType()),
                     new InvalidateWith(typeof(DynamicViewEntity)));
+
+                sb.Include<DynamicViewSelectorEntity>()
+                    .WithSave(DynamicViewSelectorOperation.Save)
+                    .WithDelete(DynamicViewSelectorOperation.Delete)
+                    .WithQuery(dqm, e => new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.EntityType,
+                    });
             }
         }
 
