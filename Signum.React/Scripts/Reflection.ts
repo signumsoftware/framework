@@ -38,7 +38,7 @@ export interface MemberInfo {
     typeNiceName: string;
     type: TypeReference;
     isReadOnly?: boolean;
-    isIgnored?: boolean;
+    isIgnoredEnum?: boolean;
     unit?: string;
     format?: string;
     maxLength?: number;
