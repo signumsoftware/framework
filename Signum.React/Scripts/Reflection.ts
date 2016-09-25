@@ -444,12 +444,19 @@ export class Binding<T> implements IBinding<T> {
     }
 
     static create<F, T>(parentValue: F, fieldAccessor: (from: F) => T) {
+
+        const memberName = Binding.getSingleMember(fieldAccessor);
+
+        return new Binding<T>(parentValue, memberName);
+    }
+
+    static getSingleMember(fieldAccessor: (from: any) => any) {
         const members = getLambdaMembers(fieldAccessor);
 
         if (members.length != 1 || members[0].type != LambdaMemberType.Member)
             throw Error("invalid function 'fieldAccessor'");
 
-        return new Binding<T>(parentValue, members[0].name);
+        return members[0].name;
     }
 
     get suffix() {
@@ -474,6 +481,13 @@ export class Binding<T> implements IBinding<T> {
         if (oldVal != val && (this.parentValue as ModifiableEntity).Type) {
             (this.parentValue as ModifiableEntity).modified = true;
         }
+    }
+
+    deleteValue() {
+        if (!this.parentValue)
+            throw new Error(`Impossible to delete '${this.member}' from '${this.parentValue}'`);
+
+        delete this.parentValue[this.member];
     }
 
     getError(): string | undefined {
