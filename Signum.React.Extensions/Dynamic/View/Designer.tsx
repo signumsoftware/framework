@@ -4,7 +4,7 @@ import { ModifiableEntity, External } from '../../../../Framework/Signum.React/S
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, MemberInfo, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { getQueryNiceName, MemberInfo, PropertyRoute, Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { Expression, ExpressionOrValue, DesignerContext, DesignerNode } from './NodeUtils'
@@ -16,8 +16,7 @@ import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynami
 
 
 export interface ExpressionOrValueProps {
-    object: any;
-    member: string;
+    binding: Binding<any>;
     dn: DesignerNode<BaseNode>;
     refreshView?: () => void;
     type: "number" | "string" | "boolean" | null;
@@ -38,9 +37,9 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
             parsedValue = null;
 
         if (parsedValue == p.defaultValue)
-            delete (p.object)[p.member];
+            p.binding.deleteValue();
         else
-            (p.object)[p.member] = parsedValue;
+            p.binding.setValue(parsedValue);
 
         (p.refreshView || p.dn.context.refreshView)();
     }
@@ -59,19 +58,19 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         e.preventDefault();
         e.stopPropagation();
         var p = this.props;
-        var value = ((p.object)[p.member]) as any | Expression<any>;
+        var value = p.binding.getValue();
 
         if (value instanceof Object && (value as Object).hasOwnProperty("code"))
-            delete (p.object)[p.member];
+            p.binding.deleteValue();
         else
-            (p.object)[p.member] = { code: "" } as Expression<any>;
+            p.binding.setValue({ code: "" } as Expression<any>);
 
         (p.refreshView || p.dn.context.refreshView)();
     }
 
     render() {
         const p = this.props;
-        const value = ((p.object)[p.member]) as any | Expression<any>;
+        const value = p.binding.getValue();
         
         const expr = value instanceof Object && (value as Object).hasOwnProperty("code") ? value as Expression<any> : null;
 
@@ -117,7 +116,7 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         return (
             <span
                 className={value === undefined ? "design-default" : "design-changed"}>
-                {this.props.member}
+                {this.props.binding.member}
             </span>
         );
     }
@@ -214,7 +213,7 @@ export class FieldComponent extends React.Component<FieldComponentProps, void> {
 
         return (<select className="form-control" value={strValue} onChange={this.handleChange} >
             <option value=""> - </option>
-            {Dic.getKeys(subMembers).filter(k => subMembers[k].name != "Id" && !subMembers[k].isIgnored).map((name, i) =>
+            {Dic.getKeys(subMembers).filter(k => subMembers[k].name != "Id").map((name, i) =>
                 <option key={i} value={name}>{name}</option>)
             })
         </select>);

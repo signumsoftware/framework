@@ -4,7 +4,7 @@ import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, Ent
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions, QueryToken, filterOperations, OrderType, ColumnOptionsMode } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, getTypeInfo, isTypeEntity } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { getQueryNiceName, getTypeInfo, isTypeEntity, Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import QueryTokenBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/QueryTokenBuilder'
@@ -23,8 +23,7 @@ import { DynamicViewMessage, DynamicViewValidationMessage } from '../Signum.Enti
 
 
 interface FindOptionsLineProps {
-    object: any;
-    member: string;
+    binding: Binding<FindOptionsExpr | undefined>;
     dn: DesignerNode<BaseNode>
 }
 
@@ -33,12 +32,12 @@ export class FindOptionsLine extends React.Component<FindOptionsLineProps, void>
     renderMember(fo: FindOptionsExpr | undefined): React.ReactNode {
         return (<span
             className={fo === undefined ? "design-default" : "design-changed"}>
-            {this.props.member}
+            {this.props.binding.member}
         </span>);
     }
 
     handleRemove = () => {
-        delete (this.props.object)[this.props.member];
+        this.props.binding.deleteValue();
         this.props.dn.context.refreshView();
     }
 
@@ -49,14 +48,14 @@ export class FindOptionsLine extends React.Component<FindOptionsLineProps, void>
 
     handleView = (e: React.MouseEvent) => {
         e.preventDefault();
-        var fo = JSON.parse(JSON.stringify((this.props.object)[this.props.member])) as FindOptionsExpr;
+        var fo = JSON.parse(JSON.stringify(this.props.binding.getValue())) as FindOptionsExpr;
         this.modifyFindOptions(fo);
     }
 
     modifyFindOptions(fo: FindOptionsExpr) {
         FindOptionsModal.show(fo, this.props.dn).then(result => {
             if (result)
-                (this.props.object)[this.props.member] = this.clean(fo);
+                this.props.binding.setValue(this.clean(fo));
 
             this.props.dn.context.refreshView();
         }).done();
@@ -71,7 +70,7 @@ export class FindOptionsLine extends React.Component<FindOptionsLineProps, void>
     }
 
     render() {
-        const fo = (this.props.object)[this.props.member] as FindOptionsExpr | undefined;
+        const fo = this.props.binding.getValue();
 
         return (
             <div className="form-group">

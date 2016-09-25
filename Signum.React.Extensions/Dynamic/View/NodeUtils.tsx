@@ -6,7 +6,7 @@ import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import {
-    getQueryNiceName, TypeInfo, MemberInfo, getTypeInfo, EntityData, EntityKind, getTypeInfos,
+    getQueryNiceName, TypeInfo, MemberInfo, getTypeInfo, EntityData, EntityKind, getTypeInfos, Binding,
     KindOfType, PropertyRoute, PropertyRouteType, LambdaMemberType, isTypeEntity, isTypeModel, isModifiableEntity
 } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
@@ -16,8 +16,8 @@ import { EntityListBase, EntityListBaseProps } from '../../../../Framework/Signu
 import { DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
 import { ExpressionOrValueComponent, FieldComponent } from './Designer'
 import { FindOptionsLine } from './FindOptionsLine'
-import { FindOptionsExpr } from './FindOptionsExpression'
-import { BaseNode, LineBaseNode, EntityBaseNode, EntityListBaseNode, ContainerNode, EntityTableColumnNode } from './Nodes'
+import { FindOptionsExpr, toFindOptions } from './FindOptionsExpression'
+import { BaseNode, LineBaseNode, EntityBaseNode, EntityListBaseNode, EntityLineNode, ContainerNode, EntityTableColumnNode } from './Nodes'
 
 export type ExpressionOrValue<T> = T | Expression<T>;
 
@@ -130,7 +130,7 @@ export function render(dn: DesignerNode<BaseNode>, ctx: TypeContext<ModifiableEn
         return (<div className="alert alert-danger">{getErrorTitle(dn)} {error}</div>);
 
     try {
-        if (evaluateAndValidate(ctx, dn, "visible", isBooleanOrNull) == false)
+        if (evaluateAndValidate(ctx, dn, n => n.visible, isBooleanOrNull) == false)
             return null;
 
         const sn = dn.context.getSelectedNode();
@@ -159,13 +159,13 @@ export function getErrorTitle(dn: DesignerNode<BaseNode>) {
 export function renderDesigner(dn: DesignerNode<BaseNode>) {
     return (
         <div>
-            <ExpressionOrValueComponent object={dn.node} dn={dn} member="visible" type="boolean" defaultValue={true} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, a => a.visible)} type="boolean" defaultValue={true} />
             {registeredNodes[dn.node.kind].renderDesigner(dn)}
         </div>
     );
 }
 
-export function asFunction(expression: Expression<any>, memberName: string): (e: TypeContext<ModifiableEntity>) => any {
+export function asFunction(expression: Expression<any>, fieldAccessor: (node: any) => any): (e: TypeContext<ModifiableEntity>) => any {
     let code = expression.code;
 
     if (!code.contains(";") && !code.contains("return"))
@@ -176,7 +176,7 @@ export function asFunction(expression: Expression<any>, memberName: string): (e:
     try {
         return eval(code);
     } catch (e) {
-        throw new Error("Syntax in '" + memberName + "':\r\n" + code + "\r\n" + (e as Error).message);
+        throw new Error("Syntax in '" + Binding.getSingleMember(fieldAccessor) + "':\r\n" + code + "\r\n" + (e as Error).message);
     }
 }
 
@@ -192,7 +192,7 @@ export function asFieldFunction(field: string): (e: ModifiableEntity) => any {
     }
 }
 
-export function evaluate<T>(ctx: TypeContext<ModifiableEntity>, expressionOrValue: ExpressionOrValue<T> | undefined, memberName: string): T | undefined {
+export function evaluate<T>(ctx: TypeContext<ModifiableEntity>, expressionOrValue: ExpressionOrValue<T> | undefined, fieldAccessor: (from: any) => any): T | undefined {
     if (expressionOrValue == null)
         return undefined;
 
@@ -203,23 +203,23 @@ export function evaluate<T>(ctx: TypeContext<ModifiableEntity>, expressionOrValu
     if (!ex.code)
         return undefined;
 
-    var f = asFunction(ex, memberName);
+    var f = asFunction(ex, fieldAccessor);
 
     try {
         return f(ctx);
     } catch (e) {
-        throw new Error("Eval '" + memberName + "':\r\n" + (e as Error).message);
+        throw new Error("Eval '" + Binding.getSingleMember(fieldAccessor) + "':\r\n" + (e as Error).message);
     }
 }
 
-export function evaluateAndValidate(ctx: TypeContext<ModifiableEntity>, dn: DesignerNode<BaseNode>, memberName: string, validate: (val: any) => string | null) {
+export function evaluateAndValidate<T extends BaseNode>(ctx: TypeContext<ModifiableEntity>, dn: DesignerNode<T>, fieldAccessor: (from: T) => any, validate: (val: any) => string | null) {
 
-    const expressionOrValue = (dn.node as any)[memberName];
-    var result = evaluate(ctx, expressionOrValue, memberName);
+    const expressionOrValue = fieldAccessor(dn.node);
+    var result = evaluate(ctx, expressionOrValue, fieldAccessor);
 
     var error = validate(result);
     if (error)
-        throw new Error("Result '" + memberName + "':\r\n" + error);
+        throw new Error("Result '" + Binding.getSingleMember(fieldAccessor) + "':\r\n" + error);
 
     if (result == null)
         return undefined;
@@ -228,7 +228,7 @@ export function evaluateAndValidate(ctx: TypeContext<ModifiableEntity>, dn: Desi
 }
 
 export function evaluateOnChange<T>(ctx: TypeContext<ModifiableEntity>, redrawOnChange?: ExpressionOrValue<boolean>): (() => void) | undefined {
-    if (evaluate(ctx, redrawOnChange, "redrawOnChange") == true)
+    if (evaluate(ctx, redrawOnChange, (n: LineBaseNode) => n.redrawOnChange) == true)
         return () => ctx.frame!.entityComponent.forceUpdate();
 
     return undefined;
@@ -284,15 +284,19 @@ export function withChildrens(dn: DesignerNode<ContainerNode>, ctx: TypeContext<
     return React.cloneElement(element, undefined, ...nodes);
 }
 
-export function mandatory(dn: DesignerNode<BaseNode>, member: string) {
-    if (!(dn.node as any)[member])
-        return DynamicViewValidationMessage.Member0IsMandatoryFor1.niceToString(member, dn.node.kind);
+export function mandatory<T extends BaseNode>(dn: DesignerNode<T>, fieldAccessor: (from: T) => any) {
+    if (!fieldAccessor(dn.node))
+        return DynamicViewValidationMessage.Member0IsMandatoryFor1.niceToString(Binding.getSingleMember(fieldAccessor), dn.node.kind);
 
     return undefined;
 }
 
 export function validateFieldMandatory(dn: DesignerNode<LineBaseNode>) {
-    return mandatory(dn, "field") || validateField(dn);
+    return mandatory(dn, n => n.field) || validateField(dn);
+}
+
+export function validateEntityBase(dn: DesignerNode<EntityBaseNode>) {
+    return validateFieldMandatory(dn) || (dn.node.findOptions && validateFindOptions(dn.node.findOptions));
 }
 
 
@@ -353,24 +357,24 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, ctx: TypeCo
 
     var result = {
         ctx: ctx.subCtx(asFieldFunction(dn.node.field)),
-        labelText: evaluateAndValidate(ctx, dn, "labelText", isStringOrNull),
-        visible: evaluateAndValidate(ctx, dn, "visible", isBooleanOrNull),
-        readOnly: evaluateAndValidate(ctx, dn, "readOnly", isBooleanOrNull),
-        create: evaluateAndValidate(ctx, dn, "create", isBooleanOrNull),
-        remove: evaluateAndValidate(ctx, dn, "remove", isBooleanOrNull),
-        find: evaluateAndValidate(ctx, dn, "find", isBooleanOrNull),
-        view: evaluateAndValidate(ctx, dn, "view", isBooleanOrNull),
+        labelText: evaluateAndValidate(ctx, dn, n => n.labelText, isStringOrNull),
+        visible: evaluateAndValidate(ctx, dn, n => n.visible, isBooleanOrNull),
+        readOnly: evaluateAndValidate(ctx, dn, n => n.readOnly, isBooleanOrNull),
+        create: evaluateAndValidate(ctx, dn, n => n.create, isBooleanOrNull),
+        remove: evaluateAndValidate(ctx, dn, n => n.remove, isBooleanOrNull),
+        find: evaluateAndValidate(ctx, dn, n => n.find, isBooleanOrNull),
+        view: evaluateAndValidate(ctx, dn, n => n.view, isBooleanOrNull),
         onChange: evaluateOnChange(ctx, dn.node.redrawOnChange),
-        findOptions: evaluateAndValidate(ctx, dn, "findOptions", isFindOptionsOrNull),
+        findOptions: dn.node.findOptions && toFindOptions(ctx, dn.node.findOptions),
         getComponent: getGetComponent(dn, ctx)
     };
 
 
     if (options.showAutoComplete)
-        result = Dic.extend(result, { autoComplete: evaluateAndValidate(ctx, dn, "autoComplete", isBooleanOrNull) == false ? null: undefined});
+        result = Dic.extend(result, { autoComplete: evaluateAndValidate(ctx, dn, (n: EntityLineNode) => n.autoComplete, isBooleanOrNull) == false ? null : undefined});
 
     if (options.showMove)
-        result = Dic.extend(result, { move: evaluateAndValidate(ctx, dn, "move", isBooleanOrNull) });
+        result = Dic.extend(result, { move: evaluateAndValidate(ctx, dn, (n: EntityListBaseNode) => n.move, isBooleanOrNull) });
 
     return result;
 }
@@ -389,16 +393,16 @@ export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { is
     return (<div>
         <FieldComponent dn={dn} member="field" />
 
-        <ExpressionOrValueComponent object={dn.node} dn={dn} member="labelText" type="string" defaultValue={m && m.niceName || ""} />
-        <ExpressionOrValueComponent object={dn.node} dn={dn} member="visible" type="boolean" defaultValue={true} />
-        <ExpressionOrValueComponent object={dn.node} dn={dn} member="readOnly" type="boolean" defaultValue={false} />
-        <ExpressionOrValueComponent object={dn.node} dn={dn} member="create" type="boolean" defaultValue={options.isCreable && m && EntityBase.defaultIsCreable(m.type, false) || false} />
-        <ExpressionOrValueComponent object={dn.node} dn={dn} member="remove" type="boolean" defaultValue={true} />
-        <ExpressionOrValueComponent object={dn.node} dn={dn} member="find" type="boolean" defaultValue={options.isFindable && m && EntityBase.defaultIsFindable(m.type) || false} />
-        <ExpressionOrValueComponent object={dn.node} dn={dn} member="view" type="boolean" defaultValue={options.isViewable && m && EntityBase.defaultIsViewable(m.type, false) || false} />
-        {options.showMove && <ExpressionOrValueComponent object={dn.node} dn={dn} member="move" type="boolean" defaultValue={m && m.preserveOrder || false} />}
-        {options.showAutoComplete && <ExpressionOrValueComponent object={dn.node} dn={dn} member="autoComplete" type="boolean" defaultValue={true} />}
-        <FindOptionsLine object={dn.node} dn={dn} member="findOptions" />
-        <ExpressionOrValueComponent object={dn.node} dn={dn} member="redrawOnChange" type="boolean" defaultValue={false} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.visible)} type="boolean" defaultValue={true} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={false} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.create)} type="boolean" defaultValue={options.isCreable && m && EntityBase.defaultIsCreable(m.type, false) || false} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.remove)} type="boolean" defaultValue={true} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.find)} type="boolean" defaultValue={options.isFindable && m && EntityBase.defaultIsFindable(m.type) || false} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.view)} type="boolean" defaultValue={options.isViewable && m && EntityBase.defaultIsViewable(m.type, false) || false} />
+        {options.showMove && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, (n: EntityListBaseNode) => n.move)} type="boolean" defaultValue={m && m.preserveOrder || false} />}
+        {options.showAutoComplete && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, (n: EntityLineNode) => n.autoComplete)} type="boolean" defaultValue={true} />}
+        <FindOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.findOptions)} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.redrawOnChange)} type="boolean" defaultValue={false} />
     </div>)
 }

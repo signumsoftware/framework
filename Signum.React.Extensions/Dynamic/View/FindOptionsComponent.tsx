@@ -3,7 +3,7 @@ import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, Ent
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions, QueryToken, filterOperations, OrderType, ColumnOptionsMode } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, getTypeInfo, isTypeEntity } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { getQueryNiceName, getTypeInfo, isTypeEntity, Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
@@ -59,30 +59,30 @@ export class FindOptionsComponent extends React.Component<FindOptionsComponentPr
                                     onChange={this.handleChangeParentColumn} queryKey={fo.queryKey} subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />
                             </div>
                             <div className="col-sm-6">
-                                {fo.parentToken &&
-                                    <ExpressionOrValueComponent object={fo} dn={dn} refreshView={() => this.forceUpdate()} member="parentValue"
-                                type={FilterOptionsComponent.getValueType(fo.parentToken)} defaultValue={null} />}
+                            {fo.parentToken &&
+                                <ExpressionOrValueComponent dn={dn} binding={Binding.create(fo, f => f.parentValue)} refreshView={() => this.forceUpdate()}
+                                    type={FilterOptionsComponent.getValueType(fo.parentToken)} defaultValue={null} />}
                             </div>
                         </div>
 
 
-                        <FilterOptionsComponent object={fo} dn={dn} member="filters" queryKey={fo.queryKey} refreshView={() => this.forceUpdate()} />
+                        <FilterOptionsComponent dn={dn} binding={Binding.create(fo, f => f.filterOptions)} queryKey={fo.queryKey} refreshView={() => this.forceUpdate()} />
 
-                        <ExpressionOrValueComponent object={fo} dn={dn} refreshView={() => this.forceUpdate()} member="columnOptionsMode" type="string" options={ColumnOptionsMode.values()} defaultValue={"Add" as ColumnOptionsMode} />
-                        <ColumnOptionsComponent object={fo} dn={dn} member="columns" queryKey={fo.queryKey} refreshView={() => this.forceUpdate()} />
+                        <ExpressionOrValueComponent dn={dn} binding={Binding.create(fo, f => f.columnOptionsMode)} refreshView={() => this.forceUpdate()} type="string" options={ColumnOptionsMode.values()} defaultValue={"Add" as ColumnOptionsMode} />
+                        <ColumnOptionsComponent dn={dn} binding={Binding.create(fo, f => f.columnOptions)} queryKey={fo.queryKey} refreshView={() => this.forceUpdate()} />
 
-                        <OrderOptionsComponent object={fo} dn={dn} member="orders" queryKey={fo.queryKey} refreshView={() => this.forceUpdate()} />
+                        <OrderOptionsComponent dn={dn} binding={Binding.create(fo, f => f.orderOptions)} queryKey={fo.queryKey} refreshView={() => this.forceUpdate()} />
                         <PaginationComponent dn={dn} findOptions={fo} refreshView={() => this.forceUpdate()} />
 
-                        <ExpressionOrValueComponent object={fo} dn={dn} refreshView={() => this.forceUpdate()} member="searchOnLoad" type="boolean" defaultValue={null} />
-                        <ExpressionOrValueComponent object={fo} dn={dn} refreshView={() => this.forceUpdate()} member="showHeader" type="boolean" defaultValue={null} />
-                        <ExpressionOrValueComponent object={fo} dn={dn} refreshView={() => this.forceUpdate()} member="showFilters" type="boolean" defaultValue={null} />
-                        <ExpressionOrValueComponent object={fo} dn={dn} refreshView={() => this.forceUpdate()} member="showFilterButton" type="boolean" defaultValue={null} />
-                        <ExpressionOrValueComponent object={fo} dn={dn} refreshView={() => this.forceUpdate()} member="showFooter" type="boolean" defaultValue={null} />
-                        <ExpressionOrValueComponent object={fo} dn={dn} refreshView={() => this.forceUpdate()} member="allowChangeColumns" type="boolean" defaultValue={null} />
-                        <ExpressionOrValueComponent object={fo} dn={dn} refreshView={() => this.forceUpdate()} member="create" type="boolean" defaultValue={null} />
-                        <ExpressionOrValueComponent object={fo} dn={dn} refreshView={() => this.forceUpdate()} member="navigate" type="boolean" defaultValue={null} />
-                        <ExpressionOrValueComponent object={fo} dn={dn} refreshView={() => this.forceUpdate()} member="contextMenu" type="boolean" defaultValue={null} />
+                        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(fo, f => f.searchOnLoad)} type="boolean" defaultValue={null} />
+                        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(fo, f => f.showHeader)} type="boolean" defaultValue={null} />
+                        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(fo, f => f.showFilters)} type="boolean" defaultValue={null} />
+                        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(fo, f => f.showFilterButton)} type="boolean" defaultValue={null} />
+                        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(fo, f => f.showFooter)} type="boolean" defaultValue={null} />
+                        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(fo, f => f.allowChangeColumns)} type="boolean" defaultValue={null} />
+                        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(fo, f => f.create)} type="boolean" defaultValue={null} />
+                        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(fo, f => f.navigate)} type="boolean" defaultValue={null} />
+                        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(fo, f => f.contextMenu)} type="boolean" defaultValue={null} />
                     </div>
                 }
             </div>
@@ -189,8 +189,7 @@ class QueryTokenBuilderString extends React.Component<QueryTokenBuilderStringPro
 }
 
 interface BaseOptionsComponentProps<T> {
-    object: any;
-    member: string;
+    binding: Binding<Array<T> | undefined>;
     dn: DesignerNode<BaseNode>;
     refreshView: () => void;
     queryKey: string;
@@ -198,27 +197,20 @@ interface BaseOptionsComponentProps<T> {
 
 abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsComponentProps<T>, void>{
 
-    getArray(): Array<T> | undefined {
-        return (this.props.object as any)[this.props.member] as Array<T> | undefined;
-    }
-
-    setArray(newArray: Array<T> | undefined): Array<T> | undefined {
-        return (this.props.object as any)[this.props.member] = newArray;
-    }
 
     handleOnRemove = (event: React.MouseEvent, index: number) => {
         event.preventDefault();
-        var array = this.getArray() !;
+        var array = this.props.binding.getValue()!;
         array.removeAt(index);
         if (array.length == 0)
-            this.setArray(undefined);
+            this.props.binding.deleteValue();
 
         this.props.refreshView();
     }
 
     handleOnMoveUp = (event: React.MouseEvent, index: number) => {
         event.preventDefault();
-        const list = this.getArray() !;
+        const list = this.props.binding.getValue()!;
         if (index == 0)
             return;
 
@@ -230,7 +222,7 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
 
     handleOnMoveDown = (event: React.MouseEvent, index: number) => {
         event.preventDefault();
-        const list = this.getArray() !;
+        const list = this.props.binding.getValue()!;
         if (index == list.length - 1)
             return;
 
@@ -242,7 +234,11 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
 
 
     handleCreateClick = (event: React.SyntheticEvent) => {
-        var array = this.getArray() || this.setArray([]);
+        var array = this.props.binding.getValue();
+        if (array == undefined) {
+            array = [];
+            this.props.binding.setValue(array);
+        }
         array!.push(this.newElement());
         this.props.refreshView();
     }
@@ -279,7 +275,7 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
 
     render() {
 
-        const array = this.getArray();
+        const array = this.props.binding.getValue();
 
         return (<fieldset className="SF-table-field">
             <legend>
@@ -338,10 +334,10 @@ class FilterOptionsComponent extends BaseOptionsComponent<FilterOptionExpr> {
                 <td>{this.renderButtons(index)}</td>
                 <td> <QueryTokenBuilderString label="columnName" columnName={item.columnName} token={item.token} onChange={newToken => this.handleColumnChange(item, newToken)}
                     queryKey={this.props.queryKey} subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} hideLabel={true} /></td>
-                <td> {item.token && <ExpressionOrValueComponent object={item} dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} member="operation" type="string" defaultValue={null} options={this.getOperations(item.token)} />}</td>
-                <td> {item.token && <ExpressionOrValueComponent object={item} dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} member="value" type={FilterOptionsComponent.getValueType(item.token)} defaultValue={null} />}</td>
-                <td> <ExpressionOrValueComponent object={item} dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} member="frozen" type="boolean" defaultValue={null} /></td>
-                <td> <ExpressionOrValueComponent object={item} dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} member="applicable" type="boolean" defaultValue={null} /></td>
+                <td> {item.token && <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.operation)} type="string" defaultValue={null} options={this.getOperations(item.token)} />}</td>
+                <td> {item.token && <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.value)} type={FilterOptionsComponent.getValueType(item.token)} defaultValue={null} />}</td>
+                <td> <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.frozen)} type="boolean" defaultValue={false} /></td>
+                <td> <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.applicable)} type="boolean" defaultValue={true} /></td>
             </tr>
         );
     }
@@ -409,8 +405,8 @@ class OrderOptionsComponent extends BaseOptionsComponent<OrderOptionExpr> {
                 <td>{this.renderButtons(index)}</td>
                 <td> <QueryTokenBuilderString label="columnName" token={item.token} columnName={item.columnName}
                     onChange={newToken => this.handleColumnChange(item, newToken)} queryKey={this.props.queryKey} subTokenOptions={SubTokensOptions.CanElement} hideLabel={true} /></td>
-                <td> {item.token && !item.token.type.isEmbedded && <ExpressionOrValueComponent object={item} dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} member="orderType" type="string" defaultValue={null} options={OrderType.values()} />}</td>
-                <td> <ExpressionOrValueComponent object={item} dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} member="applicable" type="boolean" defaultValue={null} /></td>
+                <td> {item.token && !item.token.type.isEmbedded && <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.orderType)} type="string" defaultValue={null} options={OrderType.values()} />}</td>
+                <td> <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.applicable)} type="boolean" defaultValue={true} /></td>
             </tr>
         );
     }
@@ -453,8 +449,8 @@ class ColumnOptionsComponent extends BaseOptionsComponent<ColumnOptionExpr> {
                 <td> <QueryTokenBuilderString label="columnName" token={item.token} columnName={item.columnName}
                     onChange={newToken => this.handleColumnChange(item, newToken)}
                     queryKey={this.props.queryKey} subTokenOptions={SubTokensOptions.CanElement} hideLabel={true} /></td>
-                <td> {item.token && <ExpressionOrValueComponent object={item} dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} member="displayName" type="string" defaultValue={null} />}</td>
-                <td> <ExpressionOrValueComponent object={item} dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} member="applicable" type="boolean" defaultValue={null} /></td>
+                <td> {item.token && <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.displayName)} type="string" defaultValue={null} />}</td>
+                <td> <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.applicable)} type="boolean" defaultValue={true} /></td>
             </tr>
         );
     }
@@ -476,11 +472,11 @@ class PaginationComponent extends React.Component<{ findOptions: FindOptionsExpr
         return (
             <fieldset>
                 <legend>Pagination</legend>
-                <ExpressionOrValueComponent object={fo} dn={dn} refreshView={this.props.refreshView} member="paginationMode" type="string" options={PaginationMode.values()} defaultValue={null} allowsExpression={false} />
+                <ExpressionOrValueComponent dn={dn} refreshView={this.props.refreshView} binding={Binding.create(fo, f => f.paginationMode)} type="string" options={PaginationMode.values()} defaultValue={null} allowsExpression={false} />
                 {(mode == "Firsts" || mode == "Paginate") &&
-                    <ExpressionOrValueComponent object={fo} dn={dn} refreshView={this.props.refreshView} member="elementsPerPage" type="number" defaultValue={null} />}
+                    <ExpressionOrValueComponent dn={dn} refreshView={this.props.refreshView} binding={Binding.create(fo, f => f.elementsPerPage)} type="number" defaultValue={null} />}
                 {(mode == "Paginate") &&
-                    <ExpressionOrValueComponent object={fo} dn={dn} refreshView={this.props.refreshView} member="currentPage" type="number" defaultValue={null} />}
+                    <ExpressionOrValueComponent dn={dn} refreshView={this.props.refreshView} binding={Binding.create(fo, f => f.currentPage)}  type="number" defaultValue={null} />}
             </fieldset>
         );
     }
