@@ -7,14 +7,16 @@ import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import {
     getQueryNiceName, TypeInfo, MemberInfo, getTypeInfo, EntityData, EntityKind, getTypeInfos,
-    KindOfType, PropertyRoute, PropertyRouteType, LambdaMemberType, isTypeEntity, isTypeModel
+    KindOfType, PropertyRoute, PropertyRouteType, LambdaMemberType, isTypeEntity, isTypeModel, isModifiableEntity
 } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { EntityBase, EntityBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines/EntityBase'
 import { EntityListBase, EntityListBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines/EntityListBase'
 import { DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
-import { ExpressionOrValueComponent, DesignFindOptions, FieldComponent } from './Designer'
+import { ExpressionOrValueComponent, FieldComponent } from './Designer'
+import { FindOptionsLine } from './FindOptionsLine'
+import { FindOptionsExpr } from './FindOptionsExpression'
 import { BaseNode, LineBaseNode, EntityBaseNode, EntityListBaseNode, ContainerNode, EntityTableColumnNode } from './Nodes'
 
 export type ExpressionOrValue<T> = T | Expression<T>;
@@ -73,7 +75,7 @@ export class DesignerNode<N extends BaseNode> {
         return res;
     }
 
-    refresh() {
+    reCreateNode() {
         if (this.parent == undefined)
             return this;
 
@@ -157,19 +159,19 @@ export function getErrorTitle(dn: DesignerNode<BaseNode>) {
 export function renderDesigner(dn: DesignerNode<BaseNode>) {
     return (
         <div>
-            <ExpressionOrValueComponent dn={dn} member="visible" type="boolean" defaultValue={true} />
+            <ExpressionOrValueComponent object={dn.node} dn={dn} member="visible" type="boolean" defaultValue={true} />
             {registeredNodes[dn.node.kind].renderDesigner(dn)}
         </div>
     );
 }
 
-export function asFunction(expression: Expression<any>, memberName: string): (e: ModifiableEntity) => any {
+export function asFunction(expression: Expression<any>, memberName: string): (e: TypeContext<ModifiableEntity>) => any {
     let code = expression.code;
 
     if (!code.contains(";") && !code.contains("return"))
         code = "return " + expression.code + ";";
 
-    code = "(function(e){ " + code + "})";
+    code = "(function(ctx){ " + code + "})";
 
     try {
         return eval(code);
@@ -178,9 +180,16 @@ export function asFunction(expression: Expression<any>, memberName: string): (e:
     }
 }
 
-export function asFieldFunction(field: string): (a: any) => any {
+export function asFieldFunction(field: string): (e: ModifiableEntity) => any {
     const fixedRoute = field.split(".").map(m => m.firstLower()).join(".");
-    return asFunction({ code: "e." + fixedRoute }, "field");
+
+    const code = "(function(e){ return e." + fixedRoute + ";})";
+
+    try {
+        return eval(code);
+    } catch (e) {
+        throw new Error("Syntax in '" + fixedRoute + "':\r\n" + code + "\r\n" + (e as Error).message);
+    }
 }
 
 export function evaluate<T>(ctx: TypeContext<ModifiableEntity>, expressionOrValue: ExpressionOrValue<T> | undefined, memberName: string): T | undefined {
@@ -197,7 +206,7 @@ export function evaluate<T>(ctx: TypeContext<ModifiableEntity>, expressionOrValu
     var f = asFunction(ex, memberName);
 
     try {
-        return f(ctx.value);
+        return f(ctx);
     } catch (e) {
         throw new Error("Eval '" + memberName + "':\r\n" + (e as Error).message);
     }
@@ -301,11 +310,12 @@ export function validateField(dn: DesignerNode<LineBaseNode>) {
 
     const options = registeredNodes[dn.node.kind]
 
-    const entity = m.type.isEmbedded || isTypeEntity(m.type.name) || isTypeModel(m.type.name);
+    const entity = isModifiableEntity(m.type);
 
     const DVVM = DynamicViewValidationMessage;
 
-    if (entity != options.hasEntity || m.type.isCollection != options.hasCollection)
+    if ((entity || false) != (options.hasEntity || false) ||
+        (m.type.isCollection || false) != (options.hasCollection || false))
         return DVVM._0RequiresA1.niceToString(dn.node.kind,
             (options.hasEntity ?
                 (options.hasCollection ? DVVM.CollectionOfEntities : DVVM.Entity) :
@@ -329,6 +339,14 @@ export function validateTableColumnProperty(dn: DesignerNode<EntityTableColumnNo
         return DVVM._0RequiresA1.niceToString(dn.node.kind, DVVM.EntityOrValue.niceToString());
 
     return undefined;
+}
+
+
+export function validateFindOptions(foe: FindOptionsExpr) {
+    if (!foe.queryKey)
+        return DynamicViewValidationMessage._0RequiresA1.niceToString("findOptions", "queryKey");
+
+    return null;
 }
 
 export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, ctx: TypeContext<ModifiableEntity>, options: { showAutoComplete?: boolean, showMove?: boolean }): EntityBaseProps {
@@ -370,17 +388,17 @@ export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { is
     const m = dn.route && dn.route.member;
     return (<div>
         <FieldComponent dn={dn} member="field" />
-       
-        <ExpressionOrValueComponent dn={dn} member="labelText" type="string" defaultValue={m && m.niceName || ""} />
-        <ExpressionOrValueComponent dn={dn} member="visible" type="boolean" defaultValue={true} />
-        <ExpressionOrValueComponent dn={dn} member="readOnly" type="boolean" defaultValue={false} />
-        <ExpressionOrValueComponent dn={dn} member="create" type="boolean" defaultValue={options.isCreable && m && EntityBase.defaultIsCreable(m.type, false) || false} />
-        <ExpressionOrValueComponent dn={dn} member="remove" type="boolean" defaultValue={true} />
-        <ExpressionOrValueComponent dn={dn} member="find" type="boolean" defaultValue={options.isFindable && m && EntityBase.defaultIsFindable(m.type) || false} />
-        <ExpressionOrValueComponent dn={dn} member="view" type="boolean" defaultValue={options.isViewable && m && EntityBase.defaultIsViewable(m.type, false) || false} />
-        {options.showMove && <ExpressionOrValueComponent dn={dn} member="move" type="boolean" defaultValue={m && m.preserveOrder || false} />}
-        {options.showAutoComplete && <ExpressionOrValueComponent dn={dn} member="autoComplete" type="boolean" defaultValue={true} />}
-        <DesignFindOptions dn={dn} member="findOptions" />
-        <ExpressionOrValueComponent dn={dn} member="redrawOnChange" type="boolean" defaultValue={false} />
+
+        <ExpressionOrValueComponent object={dn.node} dn={dn} member="labelText" type="string" defaultValue={m && m.niceName || ""} />
+        <ExpressionOrValueComponent object={dn.node} dn={dn} member="visible" type="boolean" defaultValue={true} />
+        <ExpressionOrValueComponent object={dn.node} dn={dn} member="readOnly" type="boolean" defaultValue={false} />
+        <ExpressionOrValueComponent object={dn.node} dn={dn} member="create" type="boolean" defaultValue={options.isCreable && m && EntityBase.defaultIsCreable(m.type, false) || false} />
+        <ExpressionOrValueComponent object={dn.node} dn={dn} member="remove" type="boolean" defaultValue={true} />
+        <ExpressionOrValueComponent object={dn.node} dn={dn} member="find" type="boolean" defaultValue={options.isFindable && m && EntityBase.defaultIsFindable(m.type) || false} />
+        <ExpressionOrValueComponent object={dn.node} dn={dn} member="view" type="boolean" defaultValue={options.isViewable && m && EntityBase.defaultIsViewable(m.type, false) || false} />
+        {options.showMove && <ExpressionOrValueComponent object={dn.node} dn={dn} member="move" type="boolean" defaultValue={m && m.preserveOrder || false} />}
+        {options.showAutoComplete && <ExpressionOrValueComponent object={dn.node} dn={dn} member="autoComplete" type="boolean" defaultValue={true} />}
+        <FindOptionsLine object={dn.node} dn={dn} member="findOptions" />
+        <ExpressionOrValueComponent object={dn.node} dn={dn} member="redrawOnChange" type="boolean" defaultValue={false} />
     </div>)
 }

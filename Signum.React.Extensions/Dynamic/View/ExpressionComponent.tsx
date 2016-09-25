@@ -53,6 +53,7 @@ export default class ExpressionComponent extends React.Component<ExpressionCompo
 
         const options = {
             lineNumbers: true,
+            viewportMargin: Infinity,
             mode: "javascript",
             extraKeys: {
                 "Ctrl-Space": "autocomplete",
@@ -71,12 +72,11 @@ export default class ExpressionComponent extends React.Component<ExpressionCompo
         (options as any).matchBrackets = true;
 
         return (
-            <div>
-                <pre>{"function (e: " + this.props.typeName + ") {"}</pre>
+            <div className="small-codemirror">
+                <pre style={{ border: "0", margin: "0" }}>{"(ctx: TypeContext<" + this.props.typeName + ">) =>"}</pre>
                 <CodeMirrorComponent value={this.props.expression.code} ref={cm => this.codeMirrorComponent = cm}
                     options={options}
                     onChange={this.handleOnChange} />
-                <pre>{"}"}</pre>
             </div>
         );
     }

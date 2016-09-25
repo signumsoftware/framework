@@ -66,3 +66,12 @@ i.formula:hover {
 i.formula.active {
     color:black;
 }
+
+.filter-options .table{
+    margin-top:-10px;
+    margin-bottom:-10px;
+}
+
+.small-codemirror .CodeMirror {
+    height: auto;
+}

@@ -13,15 +13,18 @@ import * as NodeUtils from './NodeUtils'
 import ExpressionComponent from './ExpressionComponent'
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 
-export interface DesignerProps {
-    dn: DesignerNode<BaseNode>,
-    member: string,
-}
 
-export interface ExpressionOrValueProps extends DesignerProps {
-    type: "number" | "string" | "boolean";
+
+export interface ExpressionOrValueProps {
+    object: any;
+    member: string;
+    dn: DesignerNode<BaseNode>;
+    refreshView?: () => void;
+    type: "number" | "string" | "boolean" | null;
     options?: (string | number | null)[];
     defaultValue: number | string | boolean | null;
+    allowsExpression?: boolean;
+    hideLabel?: boolean;
 }
 
 export class ExpressionOrValueComponent extends React.Component<ExpressionOrValueProps, void> {
@@ -35,11 +38,11 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
             parsedValue = null;
 
         if (parsedValue == p.defaultValue)
-            delete (p.dn.node as any)[p.member];
+            delete (p.object)[p.member];
         else
-            (p.dn.node as any)[p.member] = parsedValue;
+            (p.object)[p.member] = parsedValue;
 
-        p.dn.context.refreshView();
+        (p.refreshView || p.dn.context.refreshView)();
     }
 
     handleChangeCheckbox = (e: React.MouseEvent) => {
@@ -52,68 +55,93 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         this.updateValue(sender.value);
     }
 
-    handleToggleExpression = () => {
+    handleToggleExpression = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
         var p = this.props;
-        var value = ((p.dn.node as any)[p.member]) as any | Expression<any>;
+        var value = ((p.object)[p.member]) as any | Expression<any>;
 
         if (value instanceof Object && (value as Object).hasOwnProperty("code"))
-            delete (p.dn.node as any)[p.member];
+            delete (p.object)[p.member];
         else
-            (p.dn.node as any)[p.member] = { code: "" } as Expression<any>;
+            (p.object)[p.member] = { code: "" } as Expression<any>;
 
-        p.dn.context.refreshView();
+        (p.refreshView || p.dn.context.refreshView)();
     }
 
     render() {
-        var p = this.props;
-        var value = ((p.dn.node as any)[p.member]) as any | Expression<any>;
+        const p = this.props;
+        const value = ((p.object)[p.member]) as any | Expression<any>;
         
-        var expr = value instanceof Object && (value as Object).hasOwnProperty("code") ? value as Expression<any> : null;
+        const expr = value instanceof Object && (value as Object).hasOwnProperty("code") ? value as Expression<any> : null;
+
+        const expressionIcon = this.props.allowsExpression != false && < i className={classes("fa fa-calculator fa-1 formula", expr && "active")} onClick={this.handleToggleExpression}></i>;
+
 
         if (!expr && p.type == "boolean") {
-            return (<div>
-                <label>
-                    <i className={classes("fa fa-calculator fa-1 formula", expr && "active")} onClick={this.handleToggleExpression}></i>
-                    {this.renderCheckbox(value)}
-                    {this.renderMember(value)}
-                </label>
-            </div>);
+            return (
+                <div>
+                    <label>
+                        {expressionIcon}
+                        {this.renderCheckbox(value)}
+                        {!this.props.hideLabel && this.renderMember(value)}
+                    </label>
+                </div>
+            );
+        }
+
+        if (this.props.hideLabel) {
+            return (
+                <div className="form-inline">
+                    {expressionIcon}
+                    {expr ? this.renderExpression(expr, p.dn!) : this.renderValue(value)}
+                </div>
+            );
         }
 
         return (
             <div className="form-group">
                 <label className="control-label">
-                    <i className={classes("fa fa-calculator fa-1 formula", expr && "active")} onClick={this.handleToggleExpression}></i>
+                    { expressionIcon }
                     { this.renderMember(value) }
                 </label>
                 <div>
-                    {expr ? this.renderExpression(expr, p.dn.parent!) : this.renderValue(value)}
+                    {expr ? this.renderExpression(expr, p.dn!) : this.renderValue(value)}
                 </div>
             </div>
         );
     }
 
-    renderMember(value: number | string | null | undefined): React.ReactNode {
-        return (<span
-            className={value === undefined ? "design-default" : "design-changed"}>
-            {this.props.member}
-        </span>);
+    renderMember(value: number | string | null | undefined): React.ReactNode | undefined {
+      
+        return (
+            <span
+                className={value === undefined ? "design-default" : "design-changed"}>
+                {this.props.member}
+            </span>
+        );
     }
 
     renderValue(value: number | string | null | undefined) {
 
+        if (this.props.type == null)
+            return <p className="form-control-static">{DynamicViewMessage.UseExpression.niceToString()}</p>;
+
         const val = value === undefined ? this.props.defaultValue : value;
 
+        const style = this.props.hideLabel ? { display: "inline-block" } as React.CSSProperties : undefined;
+        
         if (this.props.options) {
             return (
-                <select className="form-control" value={val == null ? "" : val.toString()} onChange={this.handleChangeSelectOrInput} >
+                <select className="form-control" style={style}
+                    value={val == null ? "" : val.toString()} onChange={this.handleChangeSelectOrInput} >
                     {this.props.options.map((o, i) =>
                         <option key={i} value={o == null ? "" : o.toString()}>{o == null ? " - " : o.toString()}</option>)
                     }
                 </select>);
         }
         else {
-            return (<input className="form-control"
+            return (<input className="form-control" style={style}
                 type="text"
                 value={val == null ? "" : val.toString()}
                 onChange={this.handleChangeSelectOrInput} />);
@@ -128,9 +156,12 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
             onChange={this.handleChangeCheckbox} />);
     }
 
-    renderExpression(expression: Expression<any>, parentDN: DesignerNode<BaseNode>) {
+    renderExpression(expression: Expression<any>, dn: DesignerNode<BaseNode>) {
 
-        const typeName = parentDN.route!.typeReference().name.split(",").map(tn => tn + "Entity").join(" | ");
+        if (this.props.allowsExpression == false)
+            throw new Error("Unexpected expression");
+
+        const typeName = dn.route!.typeReference().name.split(",").map(tn => tn + "Entity").join(" | ");
 
         return <ExpressionComponent expression={expression} typeName={typeName} onChange={() => this.props.dn.context.refreshView()} />
     }
@@ -182,20 +213,11 @@ export class FieldComponent extends React.Component<FieldComponentProps, void> {
         const subMembers = route ? route.subMembers() : {};
 
         return (<select className="form-control" value={strValue} onChange={this.handleChange} >
-            <option  value=""> - </option>
-            {Dic.getKeys(subMembers).filter(k => subMembers[k].name != "Id").map((name, i) =>
+            <option value=""> - </option>
+            {Dic.getKeys(subMembers).filter(k => subMembers[k].name != "Id" && !subMembers[k].isIgnored).map((name, i) =>
                 <option key={i} value={name}>{name}</option>)
             })
         </select>);
-    }
-}
-
-export interface DesignFindOptionsProps extends DesignerProps {
-}
-
-export class DesignFindOptions extends React.Component<DesignFindOptionsProps, void> {
-    render() {
-        return null;
     }
 }
 

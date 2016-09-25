@@ -4,16 +4,18 @@ import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, Ent
 import { ModifiableEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
+import { FindOptions, SearchControl, CountSearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { getQueryNiceName, TypeInfo, MemberInfo, getTypeInfo, EntityData, EntityKind, getTypeInfos, KindOfType, PropertyRoute, PropertyRouteType, LambdaMemberType, isTypeEntity } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { EntityBase, EntityBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines/EntityBase'
 import { EntityTableColumn } from '../../../../Framework/Signum.React/Scripts/Lines/EntityTable'
 import { DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
-import { ExpressionOrValueComponent, DesignFindOptions, FieldComponent } from './Designer'
+import { ExpressionOrValueComponent, FieldComponent } from './Designer'
 import { ExpressionOrValue } from './NodeUtils'
+import { FindOptionsLine } from './FindOptionsLine'
 import * as NodeUtils from './NodeUtils'
+import { toFindOptions, FindOptionsExpr } from './FindOptionsExpression'
 
 export interface BaseNode {
     kind: string;
@@ -79,7 +81,7 @@ NodeUtils.register<ColumnNode>({
         return NodeUtils.withChildrens(dn, ctx, <div className={className} />);
     },
     renderDesigner: (dn) => (<div>
-        <ExpressionOrValueComponent dn={dn} member="width" type="string" options={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]} defaultValue={null} />
+        <ExpressionOrValueComponent object={dn.node} dn={dn} member="width" type="string" options={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]} defaultValue={null} />
     </div>),
 });
 
@@ -100,7 +102,7 @@ NodeUtils.register<TabsNode>({
         return NodeUtils.withChildrens(dn, ctx, <Tabs id={ctx.compose(NodeUtils.evaluateAndValidate(ctx, dn, "id", NodeUtils.isString) !)} />);
     },
     renderDesigner: (dn) => (<div>
-        <ExpressionOrValueComponent dn={dn} member="id" type="string" defaultValue={null} />
+        <ExpressionOrValueComponent object={dn.node} dn={dn} member="id" type="string" defaultValue={null} />
     </div>),
 });
 
@@ -123,7 +125,7 @@ NodeUtils.register<TabNode>({
         return NodeUtils.withChildrens(dn, ctx, <Tab title={NodeUtils.evaluateAndValidate(ctx, dn, "title", NodeUtils.isString)} />);
     },
     renderDesigner: (dn) => (<div>
-        <ExpressionOrValueComponent dn={dn} member="title" type="string" defaultValue={null} />
+        <ExpressionOrValueComponent object={dn.node} dn={dn} member="title" type="string" defaultValue={null} />
     </div>),
 });
 
@@ -147,7 +149,7 @@ NodeUtils.register<FieldsetNode>({
         </fieldset>)
     },
     renderDesigner: (dn) => (<div>
-        <ExpressionOrValueComponent dn={dn} member="legend" type="string" defaultValue={null} />
+        <ExpressionOrValueComponent object={dn.node} dn={dn} member="legend" type="string" defaultValue={null} />
     </div>),
 });
 
@@ -187,15 +189,15 @@ NodeUtils.register<ValueLineNode>({
     renderDesigner: (dn) => {
         const m = dn.route && dn.route.member;
         return (<div>
-            <FieldComponent dn={dn} member="field"/>
-            <ExpressionOrValueComponent dn={dn} member="labelText" type="string" defaultValue={m && m.niceName || ""} />
-            <ExpressionOrValueComponent dn={dn} member="unitText" type="string" defaultValue={m && m.unit || ""} />
-            <ExpressionOrValueComponent dn={dn} member="format" type="string" defaultValue={m && m.format || ""} />
-            <ExpressionOrValueComponent dn={dn} member="readOnly" type="boolean" defaultValue={false} />
-            <ExpressionOrValueComponent dn={dn} member="inlineCheckbox" type="boolean" defaultValue={false} />
-            <ExpressionOrValueComponent dn={dn} member="textArea" type="boolean" defaultValue={false} />
-            <ExpressionOrValueComponent dn={dn} member="autoTrim" type="boolean" defaultValue={true} />
-            <ExpressionOrValueComponent dn={dn} member="redrawOnChange" type="boolean" defaultValue={false} />
+            <FieldComponent dn={dn} member="field" />
+            <ExpressionOrValueComponent object={dn.node} dn={dn} member="labelText" type="string" defaultValue={m && m.niceName || ""} />
+            <ExpressionOrValueComponent object={dn.node} dn={dn} member="unitText" type="string" defaultValue={m && m.unit || ""} />
+            <ExpressionOrValueComponent object={dn.node} dn={dn} member="format" type="string" defaultValue={m && m.format || ""} />
+            <ExpressionOrValueComponent object={dn.node} dn={dn} member="readOnly" type="boolean" defaultValue={false} />
+            <ExpressionOrValueComponent object={dn.node} dn={dn} member="inlineCheckbox" type="boolean" defaultValue={false} />
+            <ExpressionOrValueComponent object={dn.node} dn={dn} member="textArea" type="boolean" defaultValue={false} />
+            <ExpressionOrValueComponent object={dn.node} dn={dn} member="autoTrim" type="boolean" defaultValue={true}  />
+            <ExpressionOrValueComponent object={dn.node} dn={dn} member="redrawOnChange" type="boolean" defaultValue={false} />
         </div>)
     },
 });
@@ -285,11 +287,11 @@ NodeUtils.register<EnumCheckboxListNode>({
         const m = dn.route && dn.route.member;
         return (<div>
             <FieldComponent dn={dn} member="field" />
-            <ExpressionOrValueComponent dn={dn} member="labelText" type="string" defaultValue={m && m.niceName || ""} />
-            <ExpressionOrValueComponent dn={dn} member="readOnly" type="boolean" defaultValue={false} />
-            <ExpressionOrValueComponent dn={dn} member="columnCount" type="number" defaultValue={null} />
-            <ExpressionOrValueComponent dn={dn} member="columnWidth" type="number" defaultValue={200} />
-            <ExpressionOrValueComponent dn={dn} member="redrawOnChange" type="boolean" defaultValue={false} />
+            <ExpressionOrValueComponent object={dn.node} dn={dn} member="labelText" type="string" defaultValue={m && m.niceName || ""} />
+            <ExpressionOrValueComponent object={dn.node} dn={dn} member="readOnly" type="boolean" defaultValue={false} />
+            <ExpressionOrValueComponent object={dn.node} dn={dn} member="columnCount" type="number" defaultValue={null} />
+            <ExpressionOrValueComponent object={dn.node} dn={dn} member="columnWidth" type="number" defaultValue={200} />
+            <ExpressionOrValueComponent object={dn.node} dn={dn} member="redrawOnChange" type="boolean" defaultValue={false} />
         </div>)
     },
 });
@@ -318,8 +320,8 @@ NodeUtils.register<EntityCheckboxListNode>({
         />),
     renderDesigner: dn => <div>
         {NodeUtils.designEntityBase(dn, { isCreable: false, isFindable: false, isViewable: false, showAutoComplete: false, showMove: false })}
-        <ExpressionOrValueComponent dn={dn} member="columnCount" type="number" defaultValue={null} />
-        <ExpressionOrValueComponent dn={dn} member="columnWidth" type="number" defaultValue={200} />
+        <ExpressionOrValueComponent object={dn.node} dn={dn} member="columnCount" type="number" defaultValue={null} />
+        <ExpressionOrValueComponent object={dn.node} dn={dn} member="columnWidth" type="number" defaultValue={200} />
     </div>
 });
 
@@ -362,7 +364,7 @@ NodeUtils.register<EntityStripNode>({
     renderDesigner: dn =>
         <div>
             {NodeUtils.designEntityBase(dn, { isCreable: false, isFindable: false, isViewable: true, showAutoComplete: true, showMove: false })}
-            <ExpressionOrValueComponent dn={dn} member="vertical" type="boolean" defaultValue={false} />
+            <ExpressionOrValueComponent object={dn.node} dn={dn} member="vertical" type="boolean" defaultValue={false} />
         </div>
 });
 
@@ -400,8 +402,6 @@ NodeUtils.register<EntityTabRepeaterNode>({
     render: (dn, ctx) => (<EntityTabRepeater {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: true }) } />),
     renderDesigner: dn => NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: false, showAutoComplete: false, showMove: true })
 });
-
-
 
 export interface EntityTableNode extends EntityListBaseNode {
     kind: "EntityTable",
@@ -451,8 +451,25 @@ NodeUtils.register<EntityTableColumnNode>({
     }) as EntityTableColumn<ModifiableEntity> as any, //HACK
     renderDesigner: dn => <div>
         <FieldComponent dn={dn} member="property" />
-        <ExpressionOrValueComponent dn={dn} member="header" type="string" defaultValue={null} />
-        <ExpressionOrValueComponent dn={dn} member="width" type="string" defaultValue={null} />
+        <ExpressionOrValueComponent object={dn.node} dn={dn} member="header" type="string" defaultValue={null} />
+        <ExpressionOrValueComponent object={dn.node} dn={dn} member="width" type="string" defaultValue={null} />
+    </div>
+});
+
+export interface SearchControlNode extends BaseNode {
+    kind: "SearchControl",
+    findOptions?: FindOptionsExpr;
+}
+
+NodeUtils.register<SearchControlNode>({
+    kind: "SearchControl",
+    group: "Search",
+    order: 1,
+    validate: (dn) => NodeUtils.mandatory(dn, "findOptions") || dn.node.findOptions && NodeUtils.validateFindOptions(dn.node.findOptions),
+    renderTreeNode: dn => <span><small>SearchControl:</small><strong>{dn.node.findOptions && dn.node.findOptions.queryKey || " - " }</strong></span>,
+    render: (dn, ctx) => <div><SearchControl findOptions={toFindOptions(ctx, dn.node.findOptions!)} /> </div>,
+    renderDesigner: dn => <div>
+        <FindOptionsLine object={dn.node} dn={dn} member="findOptions" />
     </div>
 });
 
@@ -461,17 +478,13 @@ export namespace NodeConstructor {
     export function createDefaultNode(ti: TypeInfo) {
         return {
             kind: "Div",
-            children: Dic.getValues(ti.members).filter(mi => mi.name != "Id" && !mi.name.contains(".") && !mi.name.contains("/")).map(mi => appropiateComponent(mi))
+            children: Dic.getValues(ti.members).filter(mi => mi.name != "Id" && !mi.isIgnored && !mi.name.contains(".") && !mi.name.contains("/")).map(mi => appropiateComponent(mi))
         } as DivNode;
     }
 
     export const specificComponents: {
         [typeName: string]: (ctx: MemberInfo) => BaseNode | undefined;
     } = {};
-
-    function notImplemented(what: string): never {
-        throw new Error(what + " not implemented");
-    }
 
     export var appropiateComponent = (mi: MemberInfo): BaseNode => {
         const tr = mi.type;

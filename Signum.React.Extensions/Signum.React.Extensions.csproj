@@ -170,6 +170,9 @@
     <TypeScriptCompile Include="Dynamic\View\DynamicViewComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\View\Designer.tsx" />
     <TypeScriptCompile Include="Dynamic\View\ExpressionComponent.tsx" />
+    <TypeScriptCompile Include="Dynamic\View\FindOptionsLine.tsx" />
+    <TypeScriptCompile Include="Dynamic\View\FindOptionsComponent.tsx" />
+    <TypeScriptCompile Include="Dynamic\View\FindOptionsExpression.tsx" />
     <TypeScriptCompile Include="Dynamic\View\NodeUtils.tsx" />
     <TypeScriptCompile Include="Dynamic\View\Nodes.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicValidationClient.tsx" />

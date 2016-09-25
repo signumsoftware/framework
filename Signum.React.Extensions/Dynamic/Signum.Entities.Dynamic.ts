@@ -40,6 +40,7 @@ export module DynamicViewMessage {
     export const Remove = new MessageKey("DynamicViewMessage", "Remove");
     export const SelectATypeOfComponent = new MessageKey("DynamicViewMessage", "SelectATypeOfComponent");
     export const SelectANodeFirst = new MessageKey("DynamicViewMessage", "SelectANodeFirst");
+    export const UseExpression = new MessageKey("DynamicViewMessage", "UseExpression");
 }
 
 export module DynamicViewOperation {

@@ -43,7 +43,8 @@ namespace Signum.Entities.Dynamic
         AddSibling,
         Remove,
         SelectATypeOfComponent,
-        SelectANodeFirst
+        SelectANodeFirst,
+        UseExpression
     }
 
     public enum DynamicViewValidationMessage
