@@ -149,25 +149,42 @@ Array.prototype.flatMap = function (this: any[], selector: (element: any, index:
     return result;
 };
 
-Array.prototype.groupsOf = function (this: any[], maxCount: number) {
-    
+Array.prototype.groupsOf = function (this: any[], groupSize: number, elementSize?: (item: any) => number) {
 
     const result: any[][] = [];
     let newList: any[] = [];
 
-    this.map(item => {
-        newList.push(item);
-        if (newList.length == maxCount) {
-            result.push(newList);
-            newList = [];
-        }
-    });
+
+    if (elementSize == null) {
+        this.forEach(item => {
+            newList.push(item);
+            if (newList.length == groupSize) {
+                result.push(newList);
+                newList = [];
+            }
+        });
+    }
+    else {
+        var accumSize = 0;
+        this.forEach(item => {
+            var size = elementSize(item);
+
+            if ((accumSize + size) > groupSize && newList.length > 0) {
+                result.push(newList);
+                newList = [item];
+                accumSize = size;
+            }
+            else {
+                accumSize += size;
+                newList.push(item);
+            }
+        });
+    }
 
     if (newList.length != 0)
         result.push(newList);
 
     return result;
-
 }
 
 Array.prototype.max = function (this: any[]) {
@@ -178,6 +195,17 @@ Array.prototype.min = function (this: any[]) {
     return Math.min.apply(undefined, this);
 };
 
+Array.prototype.sum = function (this: any[]) {
+
+    if (this.length == 0)
+        return 0;
+
+    var result = this[0];
+    for (var i = 1; i < this.length; i++) {
+        result += this[i];
+    }
+    return result;
+};
 
 Array.prototype.first = function (this: any[], errorContext: string) {
 
