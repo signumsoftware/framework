@@ -1,5 +1,8 @@
-﻿using Signum.Engine.Basics;
+﻿using Signum.Engine;
+using Signum.Engine.Basics;
 using Signum.Engine.Dynamic;
+using Signum.Engine.DynamicQuery;
+using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
@@ -32,6 +35,14 @@ namespace Signum.React.Dynamic
             Type type = TypeLogic.GetType(typeName);
             var res = DynamicViewLogic.DynamicViews.Value.TryGetC(type).EmptyIfNull().Select(a => a.ViewName).ToList();
             return res;
+        }
+
+        [Route("api/dynamic/suggestedFindOptions/{typeName}"), HttpGet]
+        public List<SuggestedFindOptions> GetSuggestedFindOptions(string typeName)
+        {
+            Type type = TypeLogic.GetType(typeName);
+
+            return DynamicViewLogic.GetSuggestedFindOptions(type);
         }
     }
 }

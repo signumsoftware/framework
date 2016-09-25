@@ -63,5 +63,14 @@ export namespace API {
     export function getDynamicViewNames(typeName: string): Promise<string[]> {
         return ajaxGet<string[]>({ url: `~/api/dynamic/viewNames/${typeName}`  });
     }
+
+    export function getSuggestedFindOptions(typeName: string): Promise<SuggestedFindOptions[]> {
+        return ajaxGet<SuggestedFindOptions[]>({ url: `~/api/dynamic/suggestedFindOptions/${typeName}` });
+    }
+}
+
+export interface SuggestedFindOptions {
+    queryKey: string;
+    parentColumn: string;
 }
 

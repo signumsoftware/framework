@@ -44,7 +44,10 @@ namespace Signum.Entities.Dynamic
         Remove,
         SelectATypeOfComponent,
         SelectANodeFirst,
-        UseExpression
+        UseExpression,
+        SuggestedFindOptions,
+        [Description("The following queries reference {0}:")]
+        TheFollowingQueriesReference0
     }
 
     public enum DynamicViewValidationMessage

@@ -14,17 +14,20 @@ import { FilterOperation, PaginationMode } from '../../../../Framework/Signum.Re
 import { ExpressionOrValueComponent, FieldComponent } from './Designer'
 import * as Nodes from './Nodes'
 import * as NodeUtils from './NodeUtils'
-import { DesignerNode } from './NodeUtils'
+import { DesignerNode, Expression } from './NodeUtils'
 import { FindOptionsComponent } from './FindOptionsComponent'
 import { BaseNode, SearchControlNode } from './Nodes'
 import { FindOptionsExpr, FilterOptionExpr, OrderOptionExpr, ColumnOptionExpr } from './FindOptionsExpression'
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
+import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal';
 import { DynamicViewMessage, DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
+import * as DynamicViewClient from '../DynamicViewClient'
 
 
 interface FindOptionsLineProps {
     binding: Binding<FindOptionsExpr | undefined>;
-    dn: DesignerNode<BaseNode>
+    dn: DesignerNode<BaseNode>;
+    avoidSuggestion?: boolean;
 }
 
 export class FindOptionsLine extends React.Component<FindOptionsLineProps, void>{
@@ -42,8 +45,24 @@ export class FindOptionsLine extends React.Component<FindOptionsLineProps, void>
     }
 
     handleCreate = () => {
-        var fo = {} as FindOptionsExpr;
-        this.modifyFindOptions(fo);
+
+        const route = this.props.dn.route;
+        const ti = route && route.typeReferenceInfo();
+
+        const promise = this.props.avoidSuggestion == true || !ti || !isTypeEntity(ti) ? Promise.resolve({} as FindOptionsExpr) :
+            DynamicViewClient.API.getSuggestedFindOptions(ti.name)
+                .then(sfos => SelectorModal.chooseElement(sfos, {
+                    title: DynamicViewMessage.SuggestedFindOptions.niceToString(),
+                    message: DynamicViewMessage.TheFollowingQueriesReference0.niceToString().formatHtml(<strong>{ti.niceName}</strong>),
+                    display: sfo => <div><strong>{sfo.queryKey}</strong><br/><small>(by <code>{sfo.parentColumn}</code>)</small></div>
+                }))
+                .then(sfo => ({
+                    queryKey: sfo && sfo.queryKey,
+                    parentColumn: sfo && sfo.parentColumn,
+                    parentValue: sfo && { code: "ctx.value" } as Expression<ModifiableEntity>
+                } as FindOptionsExpr));
+
+        promise.then(fo => this.modifyFindOptions(fo)).done();
     }
 
     handleView = (e: React.MouseEvent) => {

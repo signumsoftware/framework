@@ -41,6 +41,8 @@ export module DynamicViewMessage {
     export const SelectATypeOfComponent = new MessageKey("DynamicViewMessage", "SelectATypeOfComponent");
     export const SelectANodeFirst = new MessageKey("DynamicViewMessage", "SelectANodeFirst");
     export const UseExpression = new MessageKey("DynamicViewMessage", "UseExpression");
+    export const SuggestedFindOptions = new MessageKey("DynamicViewMessage", "SuggestedFindOptions");
+    export const TheFollowingQueriesReference0 = new MessageKey("DynamicViewMessage", "TheFollowingQueriesReference0");
 }
 
 export module DynamicViewOperation {
