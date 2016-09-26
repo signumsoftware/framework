@@ -16,6 +16,7 @@ import * as NodeUtils from './NodeUtils'
 import * as DynamicViewClient from '../DynamicViewClient'
 import { DynamicViewInspector  } from './Designer'
 import { DynamicViewTree } from './DynamicViewTree'
+import { AuthInfo } from './AuthInfo'
 import { DynamicViewEntity, DynamicViewOperation, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 
 require("!style!css!./DynamicView.css");
@@ -51,7 +52,7 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
 
         var context = {
             onClose: this.handleClose,
-            refreshView: () => { this.changeState(s => s.selectedNode = s.selectedNode.refresh()); },
+            refreshView: () => { this.changeState(s => s.selectedNode = s.selectedNode.reCreateNode()); },
             getSelectedNode: () => this.state.isDesignerOpen ? this.state.selectedNode : undefined,
             setSelectedNode: (newNode) => this.changeState(s => s.selectedNode = newNode)
         } as DesignerContext;

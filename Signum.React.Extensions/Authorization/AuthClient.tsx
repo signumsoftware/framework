@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { Route } from 'react-router'
-import { ModifiableEntity, EntityPack, is } from '../../../Framework/Signum.React/Scripts/Signum.Entities';
+import { ModifiableEntity, EntityPack, is, OperationSymbol } from '../../../Framework/Signum.React/Scripts/Signum.Entities';
 import { ifError } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile, ServiceError } from '../../../Framework/Signum.React/Scripts/Services';
 import * as Services from '../../../Framework/Signum.React/Scripts/Services';
@@ -71,7 +71,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     }
 
     if (options.operations) {
-        Operations.isOperationAllowedEvent.push(onOperationAuthorized);
+        Operations.isOperationAllowedEvent.push(isOperationAuthorized);
 
         Navigator.addSettings(new EntitySettings(OperationRulePack, e => new ViewPromise(resolve => require(['./Admin/OperationRulePackControl'], resolve))));
     }
@@ -102,10 +102,18 @@ export function queryIsFindable(queryKey: string) {
     return getQueryInfo(queryKey).queryAllowed;
 }
 
-export function onOperationAuthorized(oi: OperationInfo) {
-    const member = getTypeInfo(oi.key.before(".")).members[oi.key.after(".")];
+export function isOperationAuthorized(operation: OperationInfo | OperationSymbol | string) {
+    var key = (operation as PermissionSymbol | OperationSymbol).key || operation as string;
+    const member = getTypeInfo(key.before(".")).members[key.after(".")];
     return member.operationAllowed;
 }
+
+export function asserOperationAuthorized(operation: OperationInfo | OperationSymbol | string) {
+    var key = (operation as PermissionSymbol | OperationSymbol).key || operation as string;
+    if (!isOperationAuthorized(key))
+        throw new Error(`Operation ${key} is denied`);
+}
+
 
 export function taskAuthorizeProperties(lineBase: LineBase<LineBaseProps, LineBaseProps>, state: LineBaseProps) {
     if (state.ctx.propertyRoute &&
@@ -277,14 +285,16 @@ export namespace Options {
     }
 }
 
-export function isPermissionAuthorized(permission: PermissionSymbol) {
-    const member = getTypeInfo(permission.key.before(".")).members[permission.key.after(".")];
+export function isPermissionAuthorized(permission: PermissionSymbol | string) {
+    var key = (permission as PermissionSymbol).key || permission as string;
+    const member = getTypeInfo(key.before(".")).members[key.after(".")];
     return member.permissionAllowed;
 }
 
-export function asserPermissionAuthorized(permission: PermissionSymbol) {
-    if (!isPermissionAuthorized(permission))
-        throw new Error(`Permission ${permission.key} is denied`);
+export function asserPermissionAuthorized(permission: PermissionSymbol | string) {
+    var key = (permission as PermissionSymbol).key || permission as string;
+    if (!isPermissionAuthorized(key))
+        throw new Error(`Permission ${key} is denied`);
 }
 
 export module Api {

@@ -37,13 +37,48 @@ namespace Signum.Entities.Dynamic
         public static readonly DeleteSymbol<DynamicViewEntity> Delete;
     }
 
+
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    public class DynamicViewSelectorEntity : Entity
+    {
+        [NotNullable]
+        [NotNullValidator, UniqueIndex]
+        public TypeEntity EntityType { get; set; }
+
+        [SqlDbType(Size = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
+        public string Script { get; set; }
+        
+        static Expression<Func<DynamicViewSelectorEntity, string>> ToStringExpression = @this => "ViewSelector " + @this.EntityType;
+        [ExpressionField]
+        public override string ToString()
+        {
+            return ToStringExpression.Evaluate(this);
+        }
+    }
+
+    [AutoInit]
+    public static class DynamicViewSelectorOperation
+    {
+        public static readonly ExecuteSymbol<DynamicViewSelectorEntity> Save;
+        public static readonly DeleteSymbol<DynamicViewSelectorEntity> Delete;
+    }
+
+    
     public enum DynamicViewMessage
     {
         AddChild,
         AddSibling,
         Remove,
         SelectATypeOfComponent,
-        SelectANodeFirst
+        SelectANodeFirst,
+        UseExpression,
+        SuggestedFindOptions,
+        [Description("The following queries reference {0}:")]
+        TheFollowingQueriesReference0,
+        ChooseAView,
+        [Description("Since there is no DynamicViewSelector you need to choose a view manually:")]
+        SinceThereIsNoDynamicViewSelectorYouNeedToChooseAViewManually,
     }
 
     public enum DynamicViewValidationMessage

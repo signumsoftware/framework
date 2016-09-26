@@ -36,7 +36,7 @@ export default class TemplateControls extends React.Component<TemplateControlsPr
 
         return (
             <div className="form-sm">
-                <QueryTokenBuilder queryToken={ct} queryKey={this.props.queryKey} onTokenChange={t => this.setState({ currentToken: t }) } subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} readOnly={false} />
+                <QueryTokenBuilder queryToken={ct} queryKey={this.props.queryKey} onTokenChange={t => this.setState({ currentToken: t || undefined })} subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} readOnly={false} />
                 <div className="btn-group" style={{ marginLeft: "10px" }}>
                     {this.renderButton(TemplateTokenMessage.Insert.niceToString(), this.canElement(), token => `@[${token}]`) }
                     {this.renderButton("if", this.canIf(), token => this.props.forHtml ?

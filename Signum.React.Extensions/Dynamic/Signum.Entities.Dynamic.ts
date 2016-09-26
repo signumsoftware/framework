@@ -40,6 +40,11 @@ export module DynamicViewMessage {
     export const Remove = new MessageKey("DynamicViewMessage", "Remove");
     export const SelectATypeOfComponent = new MessageKey("DynamicViewMessage", "SelectATypeOfComponent");
     export const SelectANodeFirst = new MessageKey("DynamicViewMessage", "SelectANodeFirst");
+    export const UseExpression = new MessageKey("DynamicViewMessage", "UseExpression");
+    export const SuggestedFindOptions = new MessageKey("DynamicViewMessage", "SuggestedFindOptions");
+    export const TheFollowingQueriesReference0 = new MessageKey("DynamicViewMessage", "TheFollowingQueriesReference0");
+    export const ChooseAView = new MessageKey("DynamicViewMessage", "ChooseAView");
+    export const SinceThereIsNoDynamicViewSelectorYouNeedToChooseAViewManually = new MessageKey("DynamicViewMessage", "SinceThereIsNoDynamicViewSelectorYouNeedToChooseAViewManually");
 }
 
 export module DynamicViewOperation {
@@ -47,6 +52,18 @@ export module DynamicViewOperation {
     export const Clone : Entities.ConstructSymbol_From<DynamicViewEntity, DynamicViewEntity> = registerSymbol("Operation", "DynamicViewOperation.Clone");
     export const Save : Entities.ExecuteSymbol<DynamicViewEntity> = registerSymbol("Operation", "DynamicViewOperation.Save");
     export const Delete : Entities.DeleteSymbol<DynamicViewEntity> = registerSymbol("Operation", "DynamicViewOperation.Delete");
+}
+
+export const DynamicViewSelectorEntity = new Type<DynamicViewSelectorEntity>("DynamicViewSelector");
+export interface DynamicViewSelectorEntity extends Entities.Entity {
+    Type: "DynamicViewSelector";
+    entityType?: Basics.TypeEntity | null;
+    script?: string | null;
+}
+
+export module DynamicViewSelectorOperation {
+    export const Save : Entities.ExecuteSymbol<DynamicViewSelectorEntity> = registerSymbol("Operation", "DynamicViewSelectorOperation.Save");
+    export const Delete : Entities.DeleteSymbol<DynamicViewSelectorEntity> = registerSymbol("Operation", "DynamicViewSelectorOperation.Delete");
 }
 
 export module DynamicViewValidationMessage {

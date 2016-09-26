@@ -1,5 +1,8 @@
-﻿using Signum.Engine.Basics;
+﻿using Signum.Engine;
+using Signum.Engine.Basics;
 using Signum.Engine.Dynamic;
+using Signum.Engine.DynamicQuery;
+using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
@@ -19,10 +22,10 @@ namespace Signum.React.Dynamic
     public class DynamicController : ApiController
     {
         [Route("api/dynamic/view/{typeName}"), HttpGet]
-        public DynamicViewEntity GetDynamicView(string typeName, string viewName = "Default")
+        public DynamicViewEntity GetDynamicView(string typeName, string viewName = null)
         {
             Type type = TypeLogic.GetType(typeName);
-            var res = DynamicViewLogic.DynamicViews.Value.TryGetC(type)?.SingleOrDefaultEx(a => a.ViewName == viewName);
+            var res = DynamicViewLogic.DynamicViews.Value.TryGetC(type)?.SingleOrDefaultEx(a => viewName == null || a.ViewName == viewName);
             return res;
         }
 
@@ -32,6 +35,20 @@ namespace Signum.React.Dynamic
             Type type = TypeLogic.GetType(typeName);
             var res = DynamicViewLogic.DynamicViews.Value.TryGetC(type).EmptyIfNull().Select(a => a.ViewName).ToList();
             return res;
+        }
+
+        [Route("api/dynamic/suggestedFindOptions/{typeName}"), HttpGet]
+        public List<SuggestedFindOptions> GetSuggestedFindOptions(string typeName)
+        {
+            Type type = TypeLogic.GetType(typeName);
+
+            return DynamicViewLogic.GetSuggestedFindOptions(type);
+        }
+
+        [Route("api/dynamic/selector/{typeName}"), HttpGet]
+        public DynamicViewSelectorEntity GetDynamicViewSelector(string typeName)
+        {
+            return Database.Query<DynamicViewSelectorEntity>().SingleOrDefaultEx(a => a.EntityType.CleanName == typeName);
         }
     }
 }
