@@ -793,7 +793,7 @@ export class SearchControl {
             if (width < 100 ? (offsetX < (width / 2)) : (offsetX < 50))
                 return "drag-left";
 
-            if (width < 100 ? (offsetX > (width / 2)) : (offsetX > (width - 50)))
+            if (width < 100 ? (offsetX > width / 2) : (offsetX > width - 50))
                 return "drag-right";
 
             return null;
