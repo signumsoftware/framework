@@ -11,7 +11,6 @@ import {  OmniboxMessage } from './Signum.Entities.Omnibox'
 export interface OmniboxAutocompleteProps {
     spanAttrs?: React.HTMLAttributes;
     inputAttrs?: React.HTMLAttributes;
-    menuAttrs?: React.HTMLAttributes;
 }
 
 export default class OmniboxAutocomplete extends React.Component<OmniboxAutocompleteProps, void>
@@ -54,7 +53,6 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
                 onSelect={this.handleOnSelect}
                 spanAttrs={this.props.spanAttrs}
                 inputAttrs={inputAttr}
-                menuAttrs={this.props.menuAttrs}
                 minLength={0}
                 ></Typeahead>  
         );
