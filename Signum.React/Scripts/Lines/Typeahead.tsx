@@ -113,6 +113,13 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         return val != null;
     }
 
+    //public
+    writeInInput(query: string) {
+        this.input.value = query;
+        this.input.focus();
+        this.lookup();
+    }
+
     focused = false;
     handleFocus = () => {
         if (!this.focused) {

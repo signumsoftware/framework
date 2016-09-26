@@ -67,6 +67,12 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         }
     }
 
+
+    typeahead?: Typeahead;
+    writeInTypeahead(query: string) {
+        this.typeahead!.writeInInput(query);
+    }
+
     handleOnSelect = (item: any, event: React.SyntheticEvent) => {
 
         var lite = this.state.autoComplete!.getEntityFromItem(item);
@@ -118,7 +124,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
             return <FormControlStatic ctx={ctx}>{ctx.value && ctx.value.toStr}</FormControlStatic>;
 
         return (
-            <Typeahead
+            <Typeahead ref={ta => this.typeahead = ta}
                 inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
                 getItems={ac.getItems}
                 renderItem={ac.renderItem}
