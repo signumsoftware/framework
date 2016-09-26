@@ -210,7 +210,7 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
                 const ti = getTypeInfos(token.type).single();
                 if (!ti)
                     throw new Error(`EnumType ${token.type.name} not found`);
-                const members = Dic.getValues(ti.members).filter(a => !a.isIgnored);
+                const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
                 return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} comboBoxItems={members} onChange={this.handleValueChange}/>;
             default:
                 return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} onChange={this.handleValueChange}/>;

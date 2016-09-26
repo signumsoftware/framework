@@ -8,8 +8,8 @@ import { TypeInfo } from './Reflection'
 
 interface SelectorModalProps extends React.Props<SelectorModal>, IModalProps {
     options: { value: any; displayName: React.ReactChild; name: string }[];
-    title: string;
-    message: string;
+    title: React.ReactChild;
+    message: React.ReactChild;
 }
 
 export default class SelectorModal extends React.Component<SelectorModalProps, { show: boolean }>  {
@@ -97,8 +97,8 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
 export interface SelectorConfig<T> {
     display?: (val: T) => React.ReactChild;
     name?: (val: T) => string; //For testing
-    title?: string;
-    message?: string
+    title?: React.ReactChild;
+    message?: React.ReactChild
 }
 
 

@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, LambdaMemberType, Type } from './Reflection'
+import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, LambdaMemberType, Type, PseudoType, getTypeName } from './Reflection'
 import { ModelState, MList, ModifiableEntity, EntityPack } from './Signum.Entities'
 
 export type FormGroupStyle =
@@ -214,14 +214,15 @@ export class TypeContext<T> extends StyleContext {
         return compose(this.prefix, suffix);
     }
 
-    tryFindParent<S extends ModifiableEntity>(type: Type<S>): S | undefined {
-
+    tryFindParent<S extends ModifiableEntity>(type: Type<S>): S | undefined;
+    tryFindParent(type: PseudoType): ModifiableEntity | undefined;
+    tryFindParent(type: PseudoType): ModifiableEntity | undefined {
         let current: TypeContext<any> = this;
-
+        const typeName = getTypeName(type);
         while (current) {
             const entity = current.value as ModifiableEntity;
-            if (entity && entity.Type == type.typeName)
-                return entity as S;
+            if (entity && entity.Type == typeName)
+                return entity as ModifiableEntity;
 
             current = current.parent as TypeContext<any>;
         }
@@ -229,14 +230,15 @@ export class TypeContext<T> extends StyleContext {
         return undefined;
     }
 
-    findParent<S extends ModifiableEntity>(type: Type<S>): S {
+    findParent<S extends ModifiableEntity>(type: Type<S>): S;
+    findParent(type: PseudoType): ModifiableEntity;
+    findParent(type: PseudoType): ModifiableEntity {
         const result = this.tryFindParent(type);
         if (result == undefined)
-            throw new Error(`No '${type.typeName}' found in the parent chain`);
+            throw new Error(`No '${getTypeName(type)}' found in the parent chain`);
 
         return result;
     }
-
 
     using(render: (ctx: this) => React.ReactChild): React.ReactChild {
         return render(this);
