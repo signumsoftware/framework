@@ -25,7 +25,7 @@ export interface EntityLineState extends EntityBaseProps {
 
     autoComplete?: AutocompleteConfig<any> | null;
 
-    currentItem?: { entity: ModifiableEntity | Lite<Entity>, item: any };
+    currentItem?: { entity: ModifiableEntity | Lite<Entity>, item?: any };
 }
 
 export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
@@ -42,25 +42,37 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
                         count: 5
                     }), false);
         }
+
+        if (!state.currentItem) {
+            if (this.state && this.state.currentItem && this.state.currentItem.entity == state.ctx.value)
+                state.currentItem = this.state.currentItem;
+        }
     }
 
+    componentWillMount() {
+        this.refreshItem(this.props);
+    }
 
     componentWillReceiveProps(newProps: EntityLineProps, nextContext: any) {
 
         super.componentWillReceiveProps(newProps, nextContext);
 
-        if (this.state.autoComplete) {
+        this.refreshItem(newProps);
+    }
 
-            var newEntity = newProps.ctx.value; 
+    refreshItem(props: EntityLineProps) {
+        if (this.state.autoComplete) {
+            var newEntity = props.ctx.value;
 
             if (newEntity == null) {
                 if (this.state.currentItem)
                     this.changeState(s => s.currentItem = undefined);
             } else {
                 if (!this.state.currentItem || this.state.currentItem.entity !== newEntity) {
-                    this.changeState(s => s.currentItem = undefined);
+                    var ci = { entity: newEntity!, item: undefined }
+                    this.changeState(s => s.currentItem = ci);
                     this.state.autoComplete.getItemFromEntity(newEntity)
-                        .then(item => this.changeState(s => s.currentItem = { entity: newEntity!, item }))
+                        .then(item => this.changeState(s => ci.item = item))
                         .done();
                 }
             }
@@ -140,7 +152,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
         var value = s.ctx.value!;
 
-        const str = this.state.currentItem && this.state.autoComplete ?
+        const str = this.state.currentItem && this.state.currentItem.item && this.state.autoComplete ?
             this.state.autoComplete.renderItem(this.state.currentItem.item) :
             getToString(value);
 
