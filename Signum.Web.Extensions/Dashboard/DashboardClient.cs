@@ -21,6 +21,7 @@ namespace Signum.Web.Dashboard
 {
     public class DashboardClient
     {
+        public static string ViewPrefixOmnibox = "~/Omnibox/Views/{0}.cshtml";
         public static string AdminViewPrefix = "~/Dashboard/Views/Admin/{0}.cshtml";
         public static string ViewPrefix = "~/Dashboard/Views/{0}.cshtml";
         public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Dashboard/Scripts/Dashboard");
@@ -93,7 +94,7 @@ namespace Signum.Web.Dashboard
 
                     DashboardClient.PanelPartViews.Add(
                        typeof(OmniboxPanelPartEntity),
-                       new DashboardClient.PartViews(ViewPrefix.FormatWith("OmniboxPanelPart"), ViewPrefix.FormatWith("OmniboxPanelPart")));
+                       new DashboardClient.PartViews(ViewPrefixOmnibox.FormatWith("OmniboxPanelPart"), ViewPrefixOmnibox.FormatWith("OmniboxPanelPart")));
 
                     DashboardClient.PanelPartViews.Add(
                      typeof(UserQueryCountPartEntity),
