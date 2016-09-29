@@ -47,6 +47,41 @@ namespace Signum.Engine
             }
         }
 
+        public static void SynchronizeProgressForeach<K, N, O>(
+          Dictionary<K, N> newDictionary,
+          Dictionary<K, O> oldDictionary,
+          Action<K, N> createNew,
+          Action<K, O> removeOld,
+          Action<K, N, O> merge)
+            where O : class
+            where N : class
+        {
+            HashSet<K> keys = new HashSet<K>();
+            keys.UnionWith(oldDictionary.Keys);
+            keys.UnionWith(newDictionary.Keys);
+            keys.ProgressForeach(key => key.ToString(), key =>
+            {
+                var oldVal = oldDictionary.TryGetC(key);
+                var newVal = newDictionary.TryGetC(key);
+
+                if (oldVal == null)
+                {
+                    if (createNew != null)
+                        createNew(key, newVal);
+                }
+                else if (newVal == null)
+                {
+                    if (removeOld != null)
+                        removeOld(key, oldVal);
+                }
+                else
+                {
+                    if (merge != null)
+                        merge(key, newVal, oldVal);
+                }
+            });
+        }
+
         public static void SynchronizeReplacing<N, O>(
           Replacements replacements,
           string replacementsKey, 
