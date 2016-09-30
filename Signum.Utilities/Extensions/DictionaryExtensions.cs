@@ -146,6 +146,21 @@ namespace Signum.Utilities
             return result;
         }
 
+        public static Dictionary<K, V> ToDictionary<K, V>(this IEnumerable<KeyValuePair<K, V>> collection, IEqualityComparer<K> comparer)
+        {
+            var result = new Dictionary<K, V>(comparer);
+            result.AddRange<K, V>(collection);
+            return result;
+        }
+
+        public static Dictionary<K, V> ToDictionary<K, V>(this IEnumerable<KeyValuePair<K, V>> collection, IEqualityComparer<K> comparer, string errorContext)
+        {
+            var result = new Dictionary<K, V>(comparer);
+            result.AddRange<K, V>(collection, errorContext);
+            return result;
+        }
+
+
         public static Dictionary<K, T> ToDictionary<T, K>(this IEnumerable<T> source, Func<T, K> keySelector, string errorContext)
         {
             Dictionary<K, T> result = new Dictionary<K, T>();
