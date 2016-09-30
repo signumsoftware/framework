@@ -72,11 +72,16 @@ namespace Signum.TSGenerator
                 CurrentAssembly = Path.GetFileNameWithoutExtension(projectFile).Replace(".React", ".Entities"),
                 AssemblyReferences = (from r in referenceList.Split(';')
                                       where r.Contains(".Entities")
+                                      let reactDirectory = FindReactDirectory(r)
                                       select new AssemblyReference
                                       {
                                           AssemblyName = Path.GetFileNameWithoutExtension(r),
                                           AssemblyFullPath = r,
-                                          ReactDirectory = FindReactDirectory(r)
+                                          ReactDirectory = reactDirectory,
+                                          AllTypescriptFiles = new DirectoryInfo(reactDirectory)
+                                          .EnumerateFiles("*.ts", SearchOption.AllDirectories).Select(a => a.FullName)
+                                          .Where(fn => !fn.Contains(@"\obj\") && !fn.Contains(@"\bin\")) //Makes problem when deploying
+                                          .ToList(),
                                       }).ToDictionary(a => a.AssemblyName)
             };
 
