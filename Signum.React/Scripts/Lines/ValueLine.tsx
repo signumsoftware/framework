@@ -249,7 +249,7 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
                     className={addClass(vl.state.valueHtmlProps, "form-control") }
                     value={s.ctx.value || ""}
                     onBlur={handleBlur}
-                    //onChange={handleTextOnChange} https://github.com/facebook/react/issues/7211
+                    onChange={handleTextOnChange} //https://github.com/facebook/react/issues/7211
                     onInput={handleTextOnChange}
                     placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : undefined}/>)
             }
@@ -295,7 +295,7 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
             <textarea {...vl.state.valueHtmlProps} className={addClass(vl.state.valueHtmlProps, "form-control")} value={s.ctx.value || ""}
-                //onChange={handleTextOnChange} https://github.com/facebook/react/issues/7211
+                onChange={handleTextOnChange} //https://github.com/facebook/react/issues/7211
                 onInput={handleTextOnChange} 
                 onBlur={handleBlur}
                 placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : undefined}/>
@@ -372,7 +372,7 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?
 
         return <input {...this.props.htmlProps} type="text" className={addClass(this.props.htmlProps, "form-control numeric") } value={value}
             onBlur={this.handleOnBlur}
-            //onChange={this.handleOnChange} https://github.com/facebook/react/issues/7211
+            onChange={this.handleOnChange} //https://github.com/facebook/react/issues/7211
             onInput={this.handleOnChange}
             onKeyDown={this.handleKeyDown}/>
 
@@ -490,7 +490,7 @@ export class DurationTextBox extends React.Component<DurationTextBoxProps, { tex
 
         return <input {...this.props.htmlProps} type="text" className={addClass(this.props.htmlProps, "form-control numeric") } value={value}
             onBlur={this.handleOnBlur}
-            //onChange={this.handleOnChange} https://github.com/facebook/react/issues/7211
+            onChange={this.handleOnChange} //https://github.com/facebook/react/issues/7211
             onInput={this.handleOnChange} 
             onKeyDown={this.handleKeyDown}/>
 

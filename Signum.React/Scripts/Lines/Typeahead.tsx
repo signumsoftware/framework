@@ -181,12 +181,14 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
             case 9: // tab
             case 13: // enter
-                if (this.state.selectedIndex == undefined) return;
+                if (this.state.selectedIndex == undefined || !this.state.shown)
+                    return;
                 this.select(e);
                 break;
 
             case 27: // escape
-                if (!this.state.shown) return;
+                if (!this.state.shown)
+                    return;
                 this.setState({ shown: false });
                 break;
 
