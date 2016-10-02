@@ -171,8 +171,9 @@
     <TypeScriptCompile Include="Dynamic\View\DynamicViewComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\View\Designer.tsx" />
     <TypeScriptCompile Include="Dynamic\View\AuthInfo.tsx" />
+    <TypeScriptCompile Include="Dynamic\View\HtmlAttributesComponent.tsx" />
+    <TypeScriptCompile Include="Dynamic\View\HtmlAttributesExpression.tsx" />
     <TypeScriptCompile Include="Dynamic\View\JavascriptCodeMirror.tsx" />
-    <TypeScriptCompile Include="Dynamic\View\FindOptionsLine.tsx" />
     <TypeScriptCompile Include="Dynamic\View\FindOptionsComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\View\FindOptionsExpression.tsx" />
     <TypeScriptCompile Include="Dynamic\View\NodeUtils.tsx" />

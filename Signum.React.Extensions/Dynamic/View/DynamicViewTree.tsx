@@ -84,13 +84,14 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
         const dn = this.props.rootNode.context.getSelectedNode();
         if (!dn)
             return null;
+
+        const no = NodeUtils.registeredNodes[dn.node.kind];
         
-        const isContainer = NodeUtils.registeredNodes[dn.node.kind].isContainer;
         const isRoot = (dn == this.props.rootNode);
         
         return (
             <ContextMenu position={cm.position} onHide={this.handleContextOnHide}>
-                {isContainer && <MenuItem onClick={this.handleAddChildren}><i className="fa fa-arrow-down" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.AddChild.niceToString()}</MenuItem>}
+                {no.isContainer && <MenuItem onClick={this.handleAddChildren}><i className="fa fa-arrow-down" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.AddChild.niceToString()}</MenuItem>}
                 {!isRoot && <MenuItem onClick={this.handleAddSibling}><i className="fa fa-arrow-down" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.AddSibling.niceToString()}</MenuItem>}
                 {!isRoot && <MenuItem onClick={this.handleRemove} bsClass="danger"><i className="fa fa-trash" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.Remove.niceToString()}</MenuItem>}
             </ContextMenu>

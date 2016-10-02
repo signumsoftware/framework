@@ -15,10 +15,12 @@ import { EntityBase, EntityBaseProps } from '../../../../Framework/Signum.React/
 import { EntityListBase, EntityListBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines/EntityListBase'
 import { DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
 import { ExpressionOrValueComponent, FieldComponent } from './Designer'
-import { FindOptionsLine } from './FindOptionsLine'
+import { FindOptionsLine } from './FindOptionsComponent'
 import { FindOptionsExpr, toFindOptions } from './FindOptionsExpression'
 import { AuthInfo } from './AuthInfo'
 import { BaseNode, LineBaseNode, EntityBaseNode, EntityListBaseNode, EntityLineNode, ContainerNode, EntityTableColumnNode } from './Nodes'
+import { toHtmlAttributes, HtmlAttributesExpression, withClassName } from './HtmlAttributesExpression'
+import { HtmlAttributesLine } from './HtmlAttributesComponent'
 
 export type ExpressionOrValue<T> = T | Expression<T>;
 
@@ -166,7 +168,7 @@ export function renderDesigner(dn: DesignerNode<BaseNode>) {
     );
 }
 
-export function asFunction(expression: Expression<any>, fieldAccessor: (node: any) => any): (e: TypeContext<ModifiableEntity>, auth: AuthInfo) => any {
+export function asFunction(expression: Expression<any>, getFieldName: () => string): (e: TypeContext<ModifiableEntity>, auth: AuthInfo) => any {
     let code = expression.code;
 
     if (!code.contains(";") && !code.contains("return"))
@@ -177,7 +179,7 @@ export function asFunction(expression: Expression<any>, fieldAccessor: (node: an
     try {
         return eval(code);
     } catch (e) {
-        throw new Error("Syntax in '" + Binding.getSingleMember(fieldAccessor) + "':\r\n" + code + "\r\n" + (e as Error).message);
+        throw new Error("Syntax in '" + getFieldName() + "':\r\n" + code + "\r\n" + (e as Error).message);
     }
 }
 
@@ -195,24 +197,26 @@ export function asFieldFunction(field: string): (e: ModifiableEntity) => any {
 
 export function evaluate<F, T>(ctx: TypeContext<ModifiableEntity>, object: F, fieldAccessor: (from: F) => ExpressionOrValue<T> | undefined): T | undefined {
 
-    var expressionOrValue = fieldAccessor(object);
+    return evaluateUntyped(ctx, fieldAccessor(object), () => Binding.getSingleMember(fieldAccessor));
+}
 
+export function evaluateUntyped(ctx: TypeContext<ModifiableEntity>, expressionOrValue: ExpressionOrValue<any> | undefined, getFieldName: () => string): any {
     if (expressionOrValue == null)
         return undefined;
 
-    var ex = expressionOrValue as Expression<T>;
+    var ex = expressionOrValue as Expression<any>;
     if (!(ex as Object).hasOwnProperty("code"))
-        return expressionOrValue as T;
+        return expressionOrValue as any;
 
     if (!ex.code)
         return undefined;
 
-    var f = asFunction(ex, fieldAccessor);
+    var f = asFunction(ex, getFieldName);
 
     try {
         return f(ctx, new AuthInfo());
     } catch (e) {
-        throw new Error("Eval '" + Binding.getSingleMember(fieldAccessor) + "':\r\n" + (e as Error).message);
+        throw new Error("Eval '" + getFieldName() + "':\r\n" + (e as Error).message);
     }
 }
 
@@ -366,9 +370,11 @@ export function validateFindOptions(foe: FindOptionsExpr) {
 
 export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, ctx: TypeContext<ModifiableEntity>, options: { showAutoComplete?: boolean, showMove?: boolean }): EntityBaseProps {
 
-    var result = {
+    var result: EntityBaseProps = {
         ctx: ctx.subCtx(asFieldFunction(dn.node.field)),
         labelText: evaluateAndValidate(ctx, dn.node, n => n.labelText, isStringOrNull),
+        labelHtmlProps: toHtmlAttributes(ctx, dn.node.labelHtmlAttributes),
+        formGroupHtmlProps: toHtmlAttributes(ctx, dn.node.formGroupHtmlAttributes),
         visible: evaluateAndValidate(ctx, dn.node, n => n.visible, isBooleanOrNull),
         readOnly: evaluateAndValidate(ctx, dn.node, n => n.readOnly, isBooleanOrNull),
         create: evaluateAndValidate(ctx, dn.node, n => n.create, isBooleanOrNull),
@@ -377,7 +383,7 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, ctx: TypeCo
         view: evaluateAndValidate(ctx, dn.node, n => n.view, isBooleanOrNull),
         onChange: evaluateOnChange(ctx, dn),
         findOptions: dn.node.findOptions && toFindOptions(ctx, dn.node.findOptions),
-        getComponent: getGetComponent(dn, ctx)
+        getComponent: getGetComponent(dn, ctx),
     };
 
 
@@ -405,6 +411,8 @@ export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { is
         <FieldComponent dn={dn} member="field" />
 
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
+        <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
+        <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.visible)} type="boolean" defaultValue={true} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={false} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.create)} type="boolean" defaultValue={options.isCreable && m && EntityBase.defaultIsCreable(m.type, false) || false} />

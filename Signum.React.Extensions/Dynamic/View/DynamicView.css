@@ -75,3 +75,13 @@ i.formula.active {
 .small-codemirror .CodeMirror {
     height: auto;
 }
+
+ul.expression-list {
+    list-style: none;
+    padding-left: 20px;
+}
+
+ul.expression-list a.sf-remove {
+    float: left;
+    margin-left: -20px;
+}

@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { ModifiableEntity, External } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { ModifiableEntity, External, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
@@ -12,6 +12,8 @@ import { BaseNode, LineBaseNode } from './Nodes'
 import * as NodeUtils from './NodeUtils'
 import JavascriptCodeMirror from './JavascriptCodeMirror'
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
+import { Modal, ModalProps, ModalClass, ButtonToolbar, Button } from 'react-bootstrap'
+import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
 
 export interface ExpressionOrValueProps {
     binding: Binding<any>;
@@ -21,6 +23,7 @@ export interface ExpressionOrValueProps {
     options?: (string | number | null)[];
     defaultValue: number | string | boolean | null;
     allowsExpression?: boolean;
+    avoidDelete?: boolean;
     hideLabel?: boolean;
 }
 
@@ -34,7 +37,7 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         if (parsedValue === "")
             parsedValue = null;
 
-        if (parsedValue == p.defaultValue)
+        if (parsedValue == p.defaultValue && !p.avoidDelete)
             p.binding.deleteValue();
         else
             p.binding.setValue(parsedValue);
@@ -59,7 +62,12 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         var value = p.binding.getValue();
 
         if (value instanceof Object && (value as Object).hasOwnProperty("code"))
-            p.binding.deleteValue();
+        {
+            if (p.avoidDelete)
+                p.binding.setValue(undefined);
+            else
+                p.binding.deleteValue();
+        }
         else
             p.binding.setValue({ code: "" } as Expression<any>);
 
@@ -161,7 +169,7 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         const typeName = dn.route!.typeReference().name.split(",").map(tn => tn + "Entity").join(" | ");
         return (
             <div>
-                <pre style={{ border: "0", margin: "0" }}>{"(ctx: TypeContext<" + typeName + ">, auth) =>"}</pre>
+                <pre style={{ border: "0px", margin: "0px" }}>{"(ctx: TypeContext<" + typeName + ">, auth) =>"}</pre>
                 <JavascriptCodeMirror code={expression.code} onChange={newCode => { expression.code = newCode; this.props.dn.context.refreshView() } } />
             </div>
         );
@@ -241,5 +249,58 @@ export class DynamicViewInspector extends React.Component<{ selectedNode?: Desig
             {error && <div className="alert alert-danger">{error}</div>}
             {NodeUtils.renderDesigner(sn)}
         </div>);
+    }
+}
+
+
+
+interface DesignerModalProps extends React.Props<DesignerModal>, IModalProps {
+    title: React.ReactNode;
+    mainComponent: () => React.ReactElement<any>;
+}
+
+export class DesignerModal extends React.Component<DesignerModalProps, { show: boolean }>  {
+
+    constructor(props: DesignerModalProps) {
+        super(props);
+
+        this.state = { show: true };
+    }
+
+    okClicked: boolean
+    handleOkClicked = () => {
+        this.okClicked = true;
+        this.setState({ show: false });
+
+    }
+
+    handleCancelClicked = () => {
+        this.setState({ show: false });
+    }
+
+    handleOnExited = () => {
+        this.props.onExited!(this.okClicked);
+    }
+
+    render() {
+        return <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-selector-modal">
+            <Modal.Header closeButton={true}>
+                <h4 className="modal-title">
+                    {this.props.title}
+                </h4>
+                <ButtonToolbar>
+                    <Button className="sf-entity-button sf-close-button sf-ok-button" bsStyle="primary" onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString()}</Button>
+                    <Button className="sf-entity-button sf-close-button sf-cancel-button" bsStyle="default" onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString()}</Button>
+                </ButtonToolbar>
+            </Modal.Header>
+
+            <Modal.Body>
+                {this.props.mainComponent()}
+            </Modal.Body>
+        </Modal>;
+    }
+
+    static show(title: React.ReactNode, mainComponent: () => React.ReactElement<any>): Promise<boolean> {
+        return openModal<boolean>(<DesignerModal title={title} mainComponent={mainComponent} />);
     }
 }
