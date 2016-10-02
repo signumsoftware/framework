@@ -25,7 +25,7 @@ export interface EntityTableColumn<T> {
     header?: React.ReactNode | null;
     headerProps?: React.HTMLProps<any>;
     cellProps?: React.HTMLProps<any>;
-    template?: (ctx: TypeContext<T>, row: EntityTableRow) => React.ReactNode | null;
+    template?: (ctx: TypeContext<T>, row: EntityTableRow) => React.ReactChild | null;
 
 }
 
@@ -150,7 +150,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { entit
     }
 
 
-    getTemplate(col: EntityTableColumn<ModifiableEntity>) {
+    getTemplate(col: EntityTableColumn<ModifiableEntity>): React.ReactChild | undefined | null {
 
         if (col.template === null)
             return null;

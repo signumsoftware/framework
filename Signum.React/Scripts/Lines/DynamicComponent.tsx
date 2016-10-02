@@ -12,7 +12,7 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
 
         const subContexts = this.subContext(this.props.ctx).filter(m => m.propertyRoute.member!.name != "Id");
 
-        const components = subContexts.map(ctx => DynamicComponent.appropiateComponent(ctx));
+        const components = subContexts.map(ctx => DynamicComponent.appropiateComponent(ctx)).filter(a => !!a).map(a => a!);
 
         const result = React.createElement("div", undefined, ...components);
 
@@ -41,7 +41,7 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
         [typeName: string]: (ctx: TypeContext<any>) => React.ReactElement<any> | undefined;
     } = {};
 
-    static appropiateComponent = (ctx: TypeContext<any>): React.ReactElement<any> => {
+    static appropiateComponent = (ctx: TypeContext<any>): React.ReactElement<any> | undefined => {
         const tr = ctx.propertyRoute.typeReference();        
     
         const sc = DynamicComponent.specificComponents[tr.name];
@@ -82,7 +82,10 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
         if (tr.isEmbedded)
             return <EntityDetail ctx={ctx} />;
 
-        return <ValueLine ctx={ctx}/>;
+        if (ValueLine.getValueLineType(tr) != undefined)
+            return <ValueLine ctx={ctx} />;
+
+        return undefined;
     }
 
 }
