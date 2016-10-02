@@ -45,6 +45,7 @@ export module DynamicViewMessage {
     export const TheFollowingQueriesReference0 = new MessageKey("DynamicViewMessage", "TheFollowingQueriesReference0");
     export const ChooseAView = new MessageKey("DynamicViewMessage", "ChooseAView");
     export const SinceThereIsNoDynamicViewSelectorYouNeedToChooseAViewManually = new MessageKey("DynamicViewMessage", "SinceThereIsNoDynamicViewSelectorYouNeedToChooseAViewManually");
+    export const ExampleEntity = new MessageKey("DynamicViewMessage", "ExampleEntity");
 }
 
 export module DynamicViewOperation {

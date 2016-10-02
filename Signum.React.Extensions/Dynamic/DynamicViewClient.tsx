@@ -52,8 +52,6 @@ export function start(options: { routes: JSX.Element[] }) {
     });
 }
 
-
-
 export function getSeletor(typeName: string): Promise<((e: Entity, auth: AuthInfo) => any) | undefined> {
     return API.getDynamicViewSelector(typeName).then(dvs => {
         if (!dvs)
@@ -78,22 +76,23 @@ export function asFunction(dvs: DynamicViewSelectorEntity): (e: Entity, auth: Au
     }
 }
 
-
 export function chooseDynamicView(typeName: string, avoidMessage = false) {
     return API.getDynamicViewNames(typeName)
         .then(names => SelectorModal.chooseElement(names, {
             title: DynamicViewMessage.ChooseAView.niceToString(),
             message: avoidMessage ? undefined : DynamicViewMessage.SinceThereIsNoDynamicViewSelectorYouNeedToChooseAViewManually.niceToString(),
-        })).then(viewName => getOrCreateDynamicView(typeName, viewName));
+        })).then(viewName => {
+            return getOrCreateDynamicView(typeName, viewName);
+        });
 }
 
 export function getOrCreateDynamicView(typeName: string, viewName: string | undefined): Promise<DynamicViewEntity> {
-    return API.getDynamicView(typeName, viewName).then(dv => {
-        if (dv)
-            return dv;
 
+    if (viewName == undefined)
         return createDefaultDynamicView(typeName);
-    });
+
+    return API.getDynamicView(typeName, viewName)
+        .then(dv => { return dv; });
 }
 
 export function createDefaultDynamicView(typeName: string): Promise<DynamicViewEntity> {
@@ -107,14 +106,14 @@ export function createDefaultDynamicView(typeName: string): Promise<DynamicViewE
 
 export namespace API {
 
-    export function getDynamicView(typeName: string, viewName: string | undefined): Promise<DynamicViewEntity | null> {
+    export function getDynamicView(typeName: string, viewName: string): Promise<DynamicViewEntity> {
 
         var url = Navigator.currentHistory.createHref({
             pathname: `~/api/dynamic/view/${typeName}`,
             query: { viewName }
         });
 
-        return ajaxGet<DynamicViewEntity | null>({ url });
+        return ajaxGet<DynamicViewEntity>({ url });
     }
 
     export function getDynamicViewSelector(typeName: string): Promise<DynamicViewSelectorEntity> {

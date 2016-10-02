@@ -14,7 +14,7 @@ export class AuthInfo {
         return AuthClient.currentUser();
     }
 
-    get role() : Lite<RoleEntity> {
+    get role(): Lite<RoleEntity> {
         return this.user.role!;
     }
 

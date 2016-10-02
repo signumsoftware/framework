@@ -503,7 +503,7 @@ export namespace NodeConstructor {
     export function createDefaultNode(ti: TypeInfo) {
         return {
             kind: "Div",
-            children: Dic.getValues(ti.members).filter(mi => mi.name != "Id" && !mi.name.contains(".") && !mi.name.contains("/")).map(mi => appropiateComponent(mi))
+            children: Dic.getValues(ti.members).filter(mi => mi.name != "Id" && !mi.name.contains(".") && !mi.name.contains("/")).map(mi => appropiateComponent(mi)).filter(a => !!a).map(a => a!)
         } as DivNode;
     }
 
@@ -511,7 +511,7 @@ export namespace NodeConstructor {
         [typeName: string]: (ctx: MemberInfo) => BaseNode | undefined;
     } = {};
 
-    export var appropiateComponent = (mi: MemberInfo): BaseNode => {
+    export var appropiateComponent = (mi: MemberInfo): BaseNode | undefined => {
         const tr = mi.type;
         const sc = specificComponents[tr.name];
         if (sc) {
@@ -553,7 +553,10 @@ export namespace NodeConstructor {
         if (tr.isEmbedded)
             return { kind: "EntityDetail", field, children: [] } as EntityDetailNode;
 
-        return { kind: "ValueLine", field } as ValueLineNode;
+        if (ValueLine.getValueLineType(tr) != undefined)
+            return { kind: "ValueLine", field } as ValueLineNode;
+
+        return undefined;
     }
 }
 
