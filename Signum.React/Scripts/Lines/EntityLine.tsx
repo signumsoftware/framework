@@ -207,7 +207,7 @@ export class LiteAutocompleteConfig implements AutocompleteConfig<Lite<Entity>>{
             return entity;
 
         if (isEntity(entity))
-            return toLite(entity);
+            return toLite(entity, entity.isNew);
 
         throw new Error("Impossible to convert to Lite");
     }
@@ -282,7 +282,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<Lite<En
             return entity;
 
         if (isEntity(entity))
-            return toLite(entity);
+            return toLite(entity, entity.isNew);
 
         throw new Error("Impossible to convert to Lite");
     }
