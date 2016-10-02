@@ -6,6 +6,7 @@ import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scr
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
+import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 import { TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
 import { isTypeEntity, getTypeInfo, } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -14,7 +15,8 @@ import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructo
 import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal'
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
-import { DynamicViewEntity, DynamicViewSelectorEntity, DynamicViewMessage } from './Signum.Entities.Dynamic'
+import { DynamicViewEntity, DynamicViewSelectorEntity, DynamicViewMessage, DynamicViewOperation } from './Signum.Entities.Dynamic'
+import DynamicViewEntityComponent from './View/DynamicViewEntity'
 import { BaseNode, NodeConstructor } from './View/Nodes'
 import { DynamicViewComponentProps } from './View/DynamicViewComponent'
 import { AuthInfo } from './View/AuthInfo'
@@ -23,6 +25,13 @@ export function start(options: { routes: JSX.Element[] }) {
 
     Navigator.addSettings(new EntitySettings(DynamicViewEntity, w => new ViewPromise(resolve => require(['./View/DynamicViewEntity'], resolve))));
     Navigator.addSettings(new EntitySettings(DynamicViewSelectorEntity, w => new ViewPromise(resolve => require(['./View/DynamicViewSelector'], resolve))));
+
+    Operations.addSettings(new EntityOperationSettings(DynamicViewOperation.Save, {
+        onClick: ctx => {
+            (ctx.frame.entityComponent as DynamicViewEntityComponent).beforeSave();
+            EntityOperations.defaultExecuteEntity(ctx);
+        }
+    }));
 
     Navigator.setFallbackViewPromise(mod => {
         if (!isTypeEntity(mod.Type))

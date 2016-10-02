@@ -25,7 +25,6 @@ interface DynamicViewEntityComponentState {
     exampleEntity?: Entity;
     rootNode?: DesignerNode<BaseNode>;
     selectedNode?: DesignerNode<BaseNode>;
-    contentChanged?: boolean;
 }
 
 
@@ -37,16 +36,18 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
         this.state = {};
     }
 
+    componentWillMount() {
+        this.updateRoot();
+    }
+
     updateStateSelectedNode(newNode: DesignerNode<BaseNode>) {
-        this.state.selectedNode = newNode;
+        this.changeState(s => s.selectedNode = newNode);
+    }
 
+    beforeSave() {
         const ctx = this.props.ctx;
-
         ctx.value.viewContent = JSON.stringify(this.state.rootNode!.node);
         ctx.value.modified = true;
-        this.state.contentChanged = true;
-
-        this.forceUpdate();
     }
 
     updateRoot() {
@@ -86,7 +87,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
     }
 
     handleTypeRemove = () => {
-        if (this.state.contentChanged == true)
+        if (this.props.ctx.value.modified || this.props.ctx.value.viewContent != JSON.stringify(this.state.rootNode!.node))
             return Promise.resolve(confirm(JavascriptMessage.loseCurrentChanges.niceToString()));
 
         return Promise.resolve(true);
