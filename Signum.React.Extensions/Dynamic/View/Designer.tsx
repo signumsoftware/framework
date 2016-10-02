@@ -19,7 +19,7 @@ export interface ExpressionOrValueProps {
     binding: Binding<any>;
     dn: DesignerNode<BaseNode>;
     refreshView?: () => void;
-    type: "number" | "string" | "boolean" | null;
+    type: "number" | "string" | "boolean" | "textArea" |  null;
     options?: (string | number | null)[];
     defaultValue: number | string | boolean | null;
     allowsExpression?: boolean;
@@ -146,6 +146,14 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
                 </select>);
         }
         else {
+
+            if (this.props.type == "textArea") {
+                return (<textarea className="form-control" style={style}
+                    type="text"
+                    value={val == null ? "" : val.toString()}
+                    onChange={this.handleChangeSelectOrInput} />);
+            }
+
             return (<input className="form-control" style={style}
                 type="text"
                 value={val == null ? "" : val.toString()}

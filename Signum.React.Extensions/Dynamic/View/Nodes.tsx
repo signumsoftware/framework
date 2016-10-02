@@ -34,6 +34,8 @@ export interface ContainerNode extends BaseNode {
     children: BaseNode[],    
 }
 
+
+
 export interface DivNode extends ContainerNode {
     kind: "Div",
     htmlAttributes?: HtmlAttributesExpression;
@@ -172,6 +174,37 @@ NodeUtils.register<FieldsetNode>({
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.legend)} type="string" defaultValue={null} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.htmlAttributes)} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.legendHtmlAttributes)} />
+    </div>),
+});
+
+
+
+export interface TextNode extends ContainerNode {
+    kind: "Text",
+    htmlAttributes?: HtmlAttributesExpression;
+    breakLines?: ExpressionOrValue<boolean>
+    tagName?: ExpressionOrValue<string>;
+    message: ExpressionOrValue<string>;
+}
+
+NodeUtils.register<TextNode>({
+    kind: "Text",
+    group: "Container",
+    order: 4,
+    initialize: dn => { dn.message = "My message"; },
+    renderTreeNode: dn => <span><small>{dn.node.kind}:</small> <strong>{(typeof dn.node.message == "string" ? dn.node.message : (dn.node.message.code || "")).etc(20)}</strong></span>,
+    render: (dn, ctx) => React.createElement(
+        NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.tagName, NodeUtils.isStringOrNull) || "p",
+        toHtmlAttributes(ctx, dn.node.htmlAttributes),
+        ...NodeUtils.addBreakLines(
+            NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.breakLines, NodeUtils.isBooleanOrNull) || false,
+            NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.message, NodeUtils.isString) !),
+    ),
+    renderDesigner: dn => (<div>
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.tagName)} type="string" defaultValue={"p"} options={["p", "span", "div", "pre", "code", "strong", "em", "del", "sub", "sup", "ins", "h1", "h2", "h3", "h4", "h5"]} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.message)} type="textArea" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.breakLines)} type="boolean" defaultValue={false} />
+        <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.htmlAttributes)} />
     </div>),
 });
 

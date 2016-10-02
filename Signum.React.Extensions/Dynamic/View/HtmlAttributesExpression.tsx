@@ -56,5 +56,11 @@ export function toCssProperties(ctx: TypeContext<ModifiableEntity>, cpe: CssProp
 }
 
 export function toPascal(dashedName: string) {
+    if (dashedName == "class")
+        return "className";
+
+    if (dashedName == "for")
+        return "htmlFor";
+
     return dashedName.split("-").map((p, i) => i == 0 ? p : p.firstUpper()).join("");
 }

@@ -368,6 +368,13 @@ export function validateFindOptions(foe: FindOptionsExpr) {
     return null;
 }
 
+export function addBreakLines(breakLines: boolean, message: string): React.ReactNode[] {
+    if (!breakLines)
+        return [message];
+
+    return message.split("\n").flatMap((e, i) => i == 0 ? [e] : [<br />, e]);
+}
+
 export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, ctx: TypeContext<ModifiableEntity>, options: { showAutoComplete?: boolean, showMove?: boolean }): EntityBaseProps {
 
     var result: EntityBaseProps = {
