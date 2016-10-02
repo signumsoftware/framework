@@ -11,12 +11,120 @@ import QueryTokenBuilder from '../../../../Framework/Signum.React/Scripts/Search
 import { ModifiableEntity, JavascriptMessage, EntityControlMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { QueryEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { FilterOperation, PaginationMode } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.DynamicQuery'
-import { ExpressionOrValueComponent, FieldComponent } from './Designer'
+import { ExpressionOrValueComponent, FieldComponent, DesignerModal } from './Designer'
 import * as Nodes from './Nodes'
 import * as NodeUtils from './NodeUtils'
+import { DesignerNode, Expression } from './NodeUtils'
 import { BaseNode, SearchControlNode } from './Nodes'
-import { DesignerNode } from './NodeUtils'
 import { FindOptionsExpr, FilterOptionExpr, OrderOptionExpr, ColumnOptionExpr } from './FindOptionsExpression'
+import * as DynamicViewClient from '../DynamicViewClient'
+import { DynamicViewMessage, DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
+import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal';
+
+
+interface FindOptionsLineProps {
+    binding: Binding<FindOptionsExpr | undefined>;
+    dn: DesignerNode<BaseNode>;
+    avoidSuggestion?: boolean;
+}
+
+export class FindOptionsLine extends React.Component<FindOptionsLineProps, void>{
+
+    renderMember(fo: FindOptionsExpr | undefined): React.ReactNode {
+        return (<span
+            className={fo === undefined ? "design-default" : "design-changed"}>
+            {this.props.binding.member}
+        </span>);
+    }
+
+    handleRemove = () => {
+        this.props.binding.deleteValue();
+        this.props.dn.context.refreshView();
+    }
+
+    handleCreate = () => {
+
+        const route = this.props.dn.route;
+        const ti = route && route.typeReferenceInfo();
+
+        const promise = this.props.avoidSuggestion == true || !ti || !isTypeEntity(ti) ? Promise.resolve({} as FindOptionsExpr) :
+            DynamicViewClient.API.getSuggestedFindOptions(ti.name)
+                .then(sfos => SelectorModal.chooseElement(sfos, {
+                    title: DynamicViewMessage.SuggestedFindOptions.niceToString(),
+                    message: DynamicViewMessage.TheFollowingQueriesReference0.niceToString().formatHtml(<strong>{ti.niceName}</strong>),
+                    display: sfo => <div><strong>{sfo.queryKey}</strong><br /><small>(by <code>{sfo.parentColumn}</code>)</small></div>
+                }))
+                .then(sfo => ({
+                    queryKey: sfo && sfo.queryKey,
+                    parentColumn: sfo && sfo.parentColumn,
+                    parentValue: sfo && { code: "ctx.value" } as Expression<ModifiableEntity>
+                } as FindOptionsExpr));
+
+        promise.then(fo => this.modifyFindOptions(fo)).done();
+    }
+
+    handleView = (e: React.MouseEvent) => {
+        e.preventDefault();
+        var fo = JSON.parse(JSON.stringify(this.props.binding.getValue())) as FindOptionsExpr;
+        this.modifyFindOptions(fo);
+    }
+
+    modifyFindOptions(fo: FindOptionsExpr) {
+        DesignerModal.show("FindOptions", () => <FindOptionsComponent findOptions={fo} dn={this.props.dn} />).then(result => {
+            if (result)
+                this.props.binding.setValue(this.clean(fo));
+
+            this.props.dn.context.refreshView();
+        }).done();
+    }
+
+    clean(fo: FindOptionsExpr) {
+        delete fo.parentToken;
+        if (fo.filterOptions) fo.filterOptions.forEach(f => delete f.token);
+        if (fo.orderOptions) fo.orderOptions.forEach(o => delete o.token);
+        if (fo.columnOptions) fo.columnOptions.forEach(c => delete c.token);
+        return fo;
+    }
+
+    render() {
+        const fo = this.props.binding.getValue();
+
+        return (
+            <div className="form-group">
+                <label className="control-label">
+                    {this.renderMember(fo)}
+                </label>
+                <div>
+                    {fo ? <div>
+                        <a href="" onClick={this.handleView}>{this.getDescription(fo)}</a>
+                        {" "}
+                        <a className={classes("sf-line-button", "sf-remove")}
+                            onClick={this.handleRemove}
+                            title={EntityControlMessage.Remove.niceToString()}>
+                            <span className="glyphicon glyphicon-remove" />
+                        </a></div> :
+                        <a title={EntityControlMessage.Create.niceToString()}
+                            className="sf-line-button sf-create"
+                            onClick={this.handleCreate}>
+                            <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }} />{EntityControlMessage.Create.niceToString()}
+                        </a>}
+                </div>
+            </div>
+        );
+    }
+
+    getDescription(fo: FindOptionsExpr) {
+
+        var filters = [
+            fo.parentColumn,
+            fo.filterOptions && fo.filterOptions.length && fo.filterOptions.length + " filters"]
+            .filter(a => !!a).join(", ");
+
+        return `${fo.queryKey} (${filters || "No filter"})`.trim();
+    }
+}
+
+
 
 interface FindOptionsComponentProps {
     dn: DesignerNode<BaseNode>;

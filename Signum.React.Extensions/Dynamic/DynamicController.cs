@@ -22,10 +22,10 @@ namespace Signum.React.Dynamic
     public class DynamicController : ApiController
     {
         [Route("api/dynamic/view/{typeName}"), HttpGet]
-        public DynamicViewEntity GetDynamicView(string typeName, string viewName = null)
+        public DynamicViewEntity GetDynamicView(string typeName, string viewName)
         {
             Type type = TypeLogic.GetType(typeName);
-            var res = DynamicViewLogic.DynamicViews.Value.TryGetC(type)?.SingleOrDefaultEx(a => viewName == null || a.ViewName == viewName);
+            var res = DynamicViewLogic.DynamicViews.Value.TryGetC(type)?.Single(a => a.ViewName == viewName);
             return res;
         }
 
