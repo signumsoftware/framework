@@ -79,6 +79,7 @@ namespace Signum.Entities.Dynamic
         ChooseAView,
         [Description("Since there is no DynamicViewSelector you need to choose a view manually:")]
         SinceThereIsNoDynamicViewSelectorYouNeedToChooseAViewManually,
+        ExampleEntity,
     }
 
     public enum DynamicViewValidationMessage
