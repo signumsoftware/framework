@@ -38,15 +38,18 @@ export enum ValueLineType {
 export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
 
     calculateDefaultState(state: ValueLineProps) {
-        state.valueLineType = this.calculateValueLineType(state);
+        state.valueLineType = ValueLine.getValueLineType(state.type!);
+
+        if (state.valueLineType == undefined)
+            throw new Error(`No value line found for '${state.type!.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
     }
 
-    calculateValueLineType(state : ValueLineProps): ValueLineType {
 
-        const t = state.type!;
 
+    static getValueLineType(t: TypeReference): ValueLineType | undefined {
+        
         if (t.isCollection || t.isLite)
-            throw new Error("ValueLine not implemented for " + JSON.stringify(t));
+            return undefined;
         
         if (isTypeEnum(t.name) || t.name == "boolean" && !t.isNotNullable)
             return ValueLineType.Enum;
@@ -69,7 +72,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
         if (t.name == "TimeSpan")
             return ValueLineType.TimeSpan;
 
-        throw new Error(`No value line found for '${t.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
+        return undefined;
     }
 
     overrideProps(state: ValueLineProps, overridenProps: ValueLineProps) {

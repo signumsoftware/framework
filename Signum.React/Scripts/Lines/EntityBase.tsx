@@ -173,7 +173,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
     defaultCreate(): Promise<ModifiableEntity | Lite<Entity> | undefined> {
 
-        return this.chooseType(t => Navigator.isCreable(t, !!this.props.getComponent, false))
+        return this.chooseType(t => this.props.create /*Hack?*/ || Navigator.isCreable(t, !!this.props.getComponent, false))
             .then(typeName => typeName ? Constructor.construct(typeName) : undefined)
             .then(e => {
                 if (!e)
