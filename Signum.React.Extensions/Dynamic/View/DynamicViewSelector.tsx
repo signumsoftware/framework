@@ -61,7 +61,7 @@ export default class DynamicViewSelectorEntityComponent extends React.Component<
     render() {
         const ctx = this.props.ctx;
 
-        var res = this.state.testResult;
+
 
         return (
             <div>
@@ -70,15 +70,23 @@ export default class DynamicViewSelectorEntityComponent extends React.Component<
                 {ctx.value.entityType &&
                     <div>
                         {this.renderEditor()}
-                        <fieldset>
-                            <legend>TEST</legend>
-                            {this.renderExampleEntity(ctx.value.entityType.cleanName)}
-                            {res && res.type == "ERROR" && <div className="alert alert-danger">ERROR: {res.error}</div>}
-                            {res && res.type == "RESULT" && <div className={classes("alert", this.getTestAlertType(res.result))}>RESULT: {res.result === undefined ? "undefined" : JSON.stringify(res.result)}</div>}
-                        </fieldset>
+                        {this.renderTest()}
                     </div>
                 }
             </div>
+        );
+    }
+
+    renderTest() {
+        const ctx = this.props.ctx;
+        const res = this.state.testResult;
+        return (
+            <fieldset>
+                <legend>TEST</legend>
+                {this.renderExampleEntity(ctx.value.entityType!.cleanName)}
+                {res && res.type == "ERROR" && <div className="alert alert-danger">ERROR: {res.error}</div>}
+                {res && res.type == "RESULT" && <div className={classes("alert", this.getTestAlertType(res.result))}>RESULT: {res.result === undefined ? "undefined" : JSON.stringify(res.result)}</div>}
+            </fieldset>
         );
     }
 
@@ -89,9 +97,6 @@ export default class DynamicViewSelectorEntityComponent extends React.Component<
 
         if (this.allViewNames().contains(result))
             return "alert-success";
-
-        if (this.state.exampleEntity == undefined)
-            return "alert-warning";
 
         return "alert-danger";
     }
