@@ -46,7 +46,7 @@ namespace Signum.Entities.Dynamic
         public static readonly ExecuteSymbol<DynamicValidationEntity> Save;
     }
 
-    public class DynamicValidationEval : EvalEntity<IEvaluator>
+    public class DynamicValidationEval : EvalEntity<IDynamicValidationEvaluator>
     {
         static Func<DynamicValidationEval, IEnumerable<string>> GetAllowedAssemblies = de => Eval.BasicAssemblies;
         static Func<DynamicValidationEval, IEnumerable<string>> GetAllowedNamespaces = de => Eval.BasicNamespaces;
@@ -60,9 +60,9 @@ namespace Signum.Entities.Dynamic
             return Compile(GetAllowedAssemblies(this).ToArray(),
                 Eval.CreateUsings(GetAllowedNamespaces(this)) +
 @"
-namespace Signum.Entities.DynamicEntities
+namespace Signum.Entities.Dynamic
 {
-    class Evaluator : IEvaluator
+    class Evaluator : Signum.Entities.Dynamic.IDynamicValidationEvaluator
     {
         public string EvaluateUntyped(ModifiableEntity e, PropertyInfo pi)
         {
@@ -78,7 +78,7 @@ namespace Signum.Entities.DynamicEntities
         }
     }
 
-    public interface IEvaluator
+    public interface IDynamicValidationEvaluator
     {
         string EvaluateUntyped(ModifiableEntity c, PropertyInfo pi);
     }

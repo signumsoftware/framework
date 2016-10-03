@@ -152,7 +152,8 @@
     <Compile Include="DiffLog\DiffLogController.cs" />
     <Compile Include="DiffLog\DiffLogServer.cs" />
     <Compile Include="Disconnected\DisconnectedServer.cs" />
-    <Compile Include="Dynamic\DynamicController.cs" />
+    <Compile Include="Dynamic\DynamicValidationController.cs" />
+    <Compile Include="Dynamic\DynamicViewController.cs" />
     <Compile Include="Dynamic\DynamicServer.cs" />
     <Compile Include="Excel\ExcelController.cs" />
     <Compile Include="Excel\ExcelServer.cs" />

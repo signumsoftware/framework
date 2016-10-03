@@ -71,8 +71,8 @@ export class CountUserQueryElement extends React.Component<CountUserQueryElement
 
         return (
             <div>
-                <span>{ctx.value.label || getQueryNiceName(this.state.fo.queryName) }</span>&nbsp;
-                <CountSearchControl ctx ={ctx} findOptions={this.state.fo} style="Badge" />
+                <span>{ctx.value.label || getQueryNiceName(this.state.fo.queryName)}</span>&nbsp;
+                <CountSearchControl ctx={ctx} findOptions={this.state.fo} layout="Badge" />
             </div>             
         );
     }   
