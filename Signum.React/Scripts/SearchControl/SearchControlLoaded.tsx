@@ -616,6 +616,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     //HEADER DRAG AND DROP
 
     handleHeaderDragStart = (de: React.DragEvent) => {
+        de.dataTransfer.setData('text', "start"); //cannot be empty string
         de.dataTransfer.effectAllowed = "move";
         const dragIndex = parseInt((de.currentTarget as HTMLElement).getAttribute("data-column-index")!);
         this.setState({ dragColumnIndex: dragIndex });
@@ -659,7 +660,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         if (dropBorderIndex == this.state.dragColumnIndex || dropBorderIndex == this.state.dragColumnIndex + 1)
             dropBorderIndex = undefined;
 
-        de.dataTransfer.dropEffect = dropBorderIndex == undefined ? "none" : "move";
+        //de.dataTransfer.dropEffect = dropBorderIndex == undefined ? "none" : "move";
 
         if (this.state.dropBorderIndex != dropBorderIndex)
             this.setState({ dropBorderIndex: dropBorderIndex });
