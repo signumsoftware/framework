@@ -21,9 +21,11 @@ import { ExpressionOrValueComponent, FieldComponent } from './Designer'
 import { ExpressionOrValue } from './NodeUtils'
 import { FindOptionsLine } from './FindOptionsComponent'
 import { HtmlAttributesLine } from './HtmlAttributesComponent'
+import { StyleOptionsLine } from './StyleOptionsComponent'
 import * as NodeUtils from './NodeUtils'
 import { toFindOptions, FindOptionsExpr } from './FindOptionsExpression'
 import { toHtmlAttributes, HtmlAttributesExpression, withClassName } from './HtmlAttributesExpression'
+import { toStyleOptions, subCtx, StyleOptionsExpression } from './StyleOptionsExpression'
 
 export interface BaseNode {
     kind: string;
@@ -31,13 +33,13 @@ export interface BaseNode {
 }
 
 export interface ContainerNode extends BaseNode {
-    children: BaseNode[],    
+    children: BaseNode[]
 }
-
-
 
 export interface DivNode extends ContainerNode {
     kind: "Div",
+    field?: string;
+    styleOptions?: StyleOptionsExpression;
     htmlAttributes?: HtmlAttributesExpression;
 }
 
@@ -47,14 +49,18 @@ NodeUtils.register<DivNode>({
     order: 0,
     isContainer: true,
     renderTreeNode: NodeUtils.treeNodeKind,
-    render: (dn, ctx) => NodeUtils.withChildrens(dn, ctx, <div {...toHtmlAttributes(ctx, dn.node.htmlAttributes) } />),
+    render: (dn, parentCtx) => NodeUtils.withChildrens(dn, parentCtx, <div {...toHtmlAttributes(parentCtx, dn.node.htmlAttributes) } />),
     renderDesigner: dn => (<div>
+        <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
+        <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.htmlAttributes)} />
     </div>),
 });
 
 export interface RowNode extends ContainerNode {
     kind: "Row", 
+    field?: string;
+    styleOptions?: StyleOptionsExpression;
     htmlAttributes?: HtmlAttributesExpression;
 }
 
@@ -65,8 +71,10 @@ NodeUtils.register<RowNode>({
     isContainer: true,
     validChild: "Column",
     renderTreeNode: NodeUtils.treeNodeKind, 
-    render: (dn, ctx) => NodeUtils.withChildrens(dn, ctx, <div {...withClassName(toHtmlAttributes(ctx, dn.node.htmlAttributes), "row") } />),
+    render: (dn, parentCtx) => NodeUtils.withChildrens(dn, parentCtx, <div {...withClassName(toHtmlAttributes(parentCtx, dn.node.htmlAttributes), "row") } />),
     renderDesigner: dn => (<div>
+        <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
+        <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.htmlAttributes)} />
     </div>),
 });
@@ -74,6 +82,8 @@ NodeUtils.register<RowNode>({
 
 export interface ColumnNode extends ContainerNode {
     kind: "Column";
+    field?: string;
+    styleOptions?: StyleOptionsExpression;
     htmlAttributes?: HtmlAttributesExpression;
     width: ExpressionOrValue<number>;
     offset: ExpressionOrValue<number>;
@@ -89,21 +99,26 @@ NodeUtils.register<ColumnNode>({
     validate: dn => NodeUtils.mandatory(dn, n => n.width),
     initialize: dn => dn.width = 6,
     renderTreeNode: NodeUtils.treeNodeKind, 
-    render: (dn, ctx) => {
-        const column = NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.width, NodeUtils.isNumber);
-        const offset = NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.offset, NodeUtils.isNumberOrNull);
+    render: (dn, parentCtx) => {
+        const column = NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.width, NodeUtils.isNumber);
+        const offset = NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.offset, NodeUtils.isNumberOrNull);
         const className = classes("col-sm-" + column, offset != undefined && "col-sm-offset-" + offset)
 
-        return NodeUtils.withChildrens(dn, ctx, <div {...withClassName(toHtmlAttributes(ctx, dn.node.htmlAttributes), className)} />);
+        return NodeUtils.withChildrens(dn, parentCtx, <div {...withClassName(toHtmlAttributes(parentCtx, dn.node.htmlAttributes), className)} />);
     },
     renderDesigner: (dn) => (<div>
-        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.width)} type="string" options={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]} defaultValue={null} />
+        <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
+        <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.htmlAttributes)} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.width)} type="string" options={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]} defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.offset)} type="string" options={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]} defaultValue={null} />
     </div>),
 });
 
 export interface TabsNode extends ContainerNode {
     kind: "Tabs";
+    field?: string;
+    styleOptions?: StyleOptionsExpression;
     id: ExpressionOrValue<string>;
 }
 
@@ -115,10 +130,12 @@ NodeUtils.register<TabsNode>({
     validChild: "Tab",
     initialize: dn => dn.id = "tabs", 
     renderTreeNode: NodeUtils.treeNodeKind, 
-    render: (dn, ctx) => {
-        return NodeUtils.withChildrens(dn, ctx, <Tabs id={ctx.compose(NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.id, NodeUtils.isString) !)} />);
+    render: (dn, parentCtx) => {
+        return NodeUtils.withChildrens(dn, parentCtx, <Tabs id={parentCtx.compose(NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.id, NodeUtils.isString) !)} />);
     },
     renderDesigner: (dn) => (<div>
+        <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
+        <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.id)} type="string" defaultValue={null} />
     </div>),
 });
@@ -126,6 +143,8 @@ NodeUtils.register<TabsNode>({
 
 export interface TabNode extends ContainerNode {
     kind: "Tab";
+    field?: string;
+    styleOptions?: StyleOptionsExpression;
     title: ExpressionOrValue<string>;
 }
 
@@ -138,10 +157,12 @@ NodeUtils.register<TabNode>({
     validParent: "Tabs",
     initialize: dn => dn.title = "My Tab",
     renderTreeNode: NodeUtils.treeNodeKind, 
-    render: (dn, ctx) => {
-        return NodeUtils.withChildrens(dn, ctx, <Tab title={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.title, NodeUtils.isString)} />);
+    render: (dn, parentCtx) => {
+        return NodeUtils.withChildrens(dn, parentCtx, <Tab title={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.title, NodeUtils.isString)} />);
     },
     renderDesigner: (dn) => (<div>
+        <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
+        <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.title)} type="string" defaultValue={null} />
     </div>),
 });
@@ -149,6 +170,8 @@ NodeUtils.register<TabNode>({
 
 export interface FieldsetNode extends ContainerNode {
     kind: "Fieldset";
+    field?: string;
+    styleOptions?: StyleOptionsExpression;
     htmlAttributes?: HtmlAttributesExpression;
     legendHtmlAttributes?: HtmlAttributesExpression;
     legend: ExpressionOrValue<string>;
@@ -161,25 +184,27 @@ NodeUtils.register<FieldsetNode>({
     isContainer: true,
     initialize: dn => dn.legend = "My Fieldset",
     renderTreeNode: NodeUtils.treeNodeKind,
-    render: (dn, ctx) => {
+    render: (dn, parentCtx) => {
         return (
-            <fieldset {...toHtmlAttributes(ctx, dn.node.htmlAttributes) }>
-            <legend {...toHtmlAttributes(ctx, dn.node.legendHtmlAttributes) }>
-                    {NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.legend, NodeUtils.isString)}
+            <fieldset {...toHtmlAttributes(parentCtx, dn.node.htmlAttributes) }>
+            <legend {...toHtmlAttributes(parentCtx, dn.node.legendHtmlAttributes) }>
+                    {NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.legend, NodeUtils.isString)}
             </legend>
-            {NodeUtils.withChildrens(dn, ctx, <div />)}
+            {NodeUtils.withChildrens(dn,  parentCtx, <div />)}
         </fieldset>)
     },
     renderDesigner: (dn) => (<div>
-        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.legend)} type="string" defaultValue={null} />
+        <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
+        <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.htmlAttributes)} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.legend)} type="string" defaultValue={null} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.legendHtmlAttributes)} />
     </div>),
 });
 
 
 
-export interface TextNode extends ContainerNode {
+export interface TextNode extends BaseNode {
     kind: "Text",
     htmlAttributes?: HtmlAttributesExpression;
     breakLines?: ExpressionOrValue<boolean>
@@ -211,6 +236,7 @@ NodeUtils.register<TextNode>({
 export interface LineBaseNode extends BaseNode {
     labelText?: ExpressionOrValue<string>;
     field: string;
+    styleOptions?: StyleOptionsExpression;
     readOnly?: ExpressionOrValue<boolean>;
     redrawOnChange?: boolean;
     labelHtmlAttributes?: HtmlAttributesExpression;
@@ -248,13 +274,14 @@ NodeUtils.register<ValueLineNode>({
     renderDesigner: (dn) => {
         const m = dn.route && dn.route.member;
         return (<div>
-            <FieldComponent dn={dn} member="field" />
+            <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
+            <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
             <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
             <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.unitText)} type="string" defaultValue={m && m.unit || ""} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.formatText)} type="string" defaultValue={m && m.format || ""} />
-            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={false} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.inlineCheckbox)} type="boolean" defaultValue={false} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.textArea)} type="boolean" defaultValue={false} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.autoTrim)} type="boolean" defaultValue={true}  />
@@ -269,6 +296,7 @@ export interface EntityBaseNode extends LineBaseNode, ContainerNode {
     find?: ExpressionOrValue<boolean>;
     remove?: ExpressionOrValue<boolean>;
     view?: ExpressionOrValue<boolean>;
+    viewOnCreate?: ExpressionOrValue<boolean>;
     findOptions?: FindOptionsExpr;
 }
 
@@ -347,12 +375,12 @@ NodeUtils.register<EnumCheckboxListNode>({
     renderDesigner: (dn) => {
         const m = dn.route && dn.route.member;
         return (<div>
-            <FieldComponent dn={dn} member="field" />
+            <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
-            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={false} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.columnCount)} type="number" defaultValue={null} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.columnWidth)} type="number" defaultValue={200} />
-            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.redrawOnChange)} type="boolean" defaultValue={false} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.redrawOnChange)} type="boolean" defaultValue={null} />
         </div>)
     },
 });
@@ -514,7 +542,7 @@ NodeUtils.register<EntityTableColumnNode>({
         template: dn.node.children && dn.node.children.length > 0 ? NodeUtils.getGetComponent(dn, ctx) : undefined
     }) as EntityTableColumn<ModifiableEntity> as any, //HACK
     renderDesigner: dn => <div>
-        <FieldComponent dn={dn} member="property" />
+        <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.property)} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.header)} type="string" defaultValue={null} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.headerHtmlAttributes)} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.cellHtmlAttributes)} />

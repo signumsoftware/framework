@@ -24,17 +24,16 @@ import { DynamicViewMessage, DynamicViewValidationMessage } from '../Signum.Enti
 import * as DynamicViewClient from '../DynamicViewClient'
 import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 
-
-interface FindOptionsLineProps {
+interface HtmlAttributesLineProps {
     binding: Binding<HtmlAttributesExpression | undefined>;
     dn: DesignerNode<BaseNode>;
 }
 
-export class HtmlAttributesLine extends React.Component<FindOptionsLineProps, void>{
+export class HtmlAttributesLine extends React.Component<HtmlAttributesLineProps, void>{
 
-    renderMember(hae: HtmlAttributesExpression | undefined): React.ReactNode {
+    renderMember(expr: HtmlAttributesExpression | undefined): React.ReactNode {
         return (<span
-            className={hae === undefined ? "design-default" : "design-changed"}>
+            className={expr === undefined ? "design-default" : "design-changed"}>
             {this.props.binding.member}
         </span>);
     }
@@ -45,16 +44,16 @@ export class HtmlAttributesLine extends React.Component<FindOptionsLineProps, vo
     }
 
     handleCreate = () => {
-        this.modifyHtmlAttributes({});
+        this.modifyExpression({} as HtmlAttributesExpression);
     }
 
     handleView = (e: React.MouseEvent) => {
         e.preventDefault();
         var hae = JSON.parse(JSON.stringify(this.props.binding.getValue())) as HtmlAttributesExpression;
-        this.modifyHtmlAttributes(hae);
+        this.modifyExpression(hae);
     }
 
-    modifyHtmlAttributes(hae: HtmlAttributesExpression) {
+    modifyExpression(hae: HtmlAttributesExpression) {
 
         if (hae.style == undefined)
             hae.style = {};
@@ -82,7 +81,7 @@ export class HtmlAttributesLine extends React.Component<FindOptionsLineProps, vo
                 <label className="control-label">
                     {this.renderMember(val)}
 
-                    { val && " "}
+                    {val && " "}
                     {val && <a className={classes("sf-line-button", "sf-remove")}
                         onClick={this.handleRemove}
                         title={EntityControlMessage.Remove.niceToString()}>
@@ -92,7 +91,7 @@ export class HtmlAttributesLine extends React.Component<FindOptionsLineProps, vo
                 <div>
                     {val ?
                         <a href="" onClick={this.handleView}><pre style={{ padding: "0px", border: "none" }}>{this.getDescription(val)}</pre></a>
-                         :
+                        :
                         <a title={EntityControlMessage.Create.niceToString()}
                             className="sf-line-button sf-create"
                             onClick={this.handleCreate}>
@@ -102,7 +101,6 @@ export class HtmlAttributesLine extends React.Component<FindOptionsLineProps, vo
             </div>
         );
     }
-
     getDescription(hae: HtmlAttributesExpression) {
 
         var haeStyle: HtmlAttributesExpression = { style: undefined };

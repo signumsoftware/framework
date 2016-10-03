@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { ModifiableEntity, External, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { ModifiableEntity, External, JavascriptMessage, EntityControlMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
@@ -20,7 +20,7 @@ export interface ExpressionOrValueProps {
     dn: DesignerNode<BaseNode>;
     refreshView?: () => void;
     type: "number" | "string" | "boolean" | "textArea" |  null;
-    options?: (string | number | null)[];
+    options?: (string | number)[];
     defaultValue: number | string | boolean | null;
     allowsExpression?: boolean;
     avoidDelete?: boolean;
@@ -29,7 +29,7 @@ export interface ExpressionOrValueProps {
 
 export class ExpressionOrValueComponent extends React.Component<ExpressionOrValueProps, void> {
 
-    updateValue(value: string | boolean) {
+    updateValue(value: string | boolean | undefined) {
         var p = this.props;
 
         var parsedValue = p.type != "number" ? value : (parseFloat(value as string) || null);
@@ -84,15 +84,34 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
 
 
         if (!expr && p.type == "boolean") {
-            return (
-                <div>
+
+
+            if (p.defaultValue == null) {
+
+                return (<div>
                     <label>
                         {expressionIcon}
-                        {this.renderCheckbox(value)}
-                        {!this.props.hideLabel && this.renderMember(value)}
+                        <NullableCheckBox value={value}
+                            onChange={newValue => this.updateValue(newValue)}
+                            label={!this.props.hideLabel && this.renderMember(value)}
+                            />
                     </label>
                 </div>
-            );
+                );
+            } else {
+                return (
+                    <div>
+                        <label>
+                            {expressionIcon}
+                            <input className="design-check-box"
+                                type="checkbox"
+                                checked={value == undefined ? this.props.defaultValue as boolean : value}
+                                onChange={this.handleChangeCheckbox} />
+                            {!this.props.hideLabel && this.renderMember(value)}
+                        </label>
+                    </div>
+                );
+            }
         }
 
         if (this.props.hideLabel) {
@@ -140,8 +159,9 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
             return (
                 <select className="form-control" style={style}
                     value={val == null ? "" : val.toString()} onChange={this.handleChangeSelectOrInput} >
+                    {this.props.defaultValue == null && <option value="">{" - "}</option>}
                     {this.props.options.map((o, i) =>
-                        <option key={i} value={o == null ? "" : o.toString()}>{o == null ? " - " : o.toString()}</option>)
+                        <option key={i} value={o.toString()}>{o.toString()}</option>)
                     }
                 </select>);
         }
@@ -162,19 +182,13 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
     }
 
 
-    renderCheckbox(value: boolean | null | undefined) {
-        return (<input className="design-check-box"
-            type="checkbox"
-            checked={value == undefined ? this.props.defaultValue as boolean : value}
-            onChange={this.handleChangeCheckbox} />);
-    }
 
     renderExpression(expression: Expression<any>, dn: DesignerNode<BaseNode>) {
 
         if (this.props.allowsExpression == false)
             throw new Error("Unexpected expression");
 
-        const typeName = dn.route!.typeReference().name.split(",").map(tn => tn + "Entity").join(" | ");
+        const typeName = dn.parent!.fixRoute() !.typeReference().name.split(",").map(tn => tn.endsWith("Entity") ? tn : tn + "Entity").join(" | ");
         return (
             <div>
                 <pre style={{ border: "0px", margin: "0px" }}>{"(ctx: TypeContext<" + typeName + ">, auth) =>"}</pre>
@@ -186,9 +200,45 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
 }
 
 
+interface NullableCheckBoxProps {
+    label: React.ReactNode | undefined;
+    value: boolean | undefined;
+    onChange: (newValue: boolean | undefined) => void;
+}
+
+export class NullableCheckBox extends React.Component<NullableCheckBoxProps, void>{
+
+    getIcon() {
+        switch (this.props.value) {
+            case true: return "glyphicon glyphicon-ok design-changed";
+            case false: return "glyphicon glyphicon-remove design-changed";
+            case undefined: return "glyphicon glyphicon-minus design-default"
+        }
+    }
+
+    handleClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        switch (this.props.value) {
+            case true: this.props.onChange(false); break;
+            case false: this.props.onChange(undefined); break;
+            case undefined: this.props.onChange(true); break;
+        }
+    }
+
+    render() {
+        return (
+            <a href="" onClick={this.handleClick}>
+                <span className={this.getIcon()}/>
+                {" "}
+                {this.props.label}
+            </a>
+        );
+    }
+}
+
 export interface FieldComponentProps  {
     dn: DesignerNode<BaseNode>,
-    member: string,
+    binding: Binding<string | undefined>,
 }
 
 export class FieldComponent extends React.Component<FieldComponentProps, void> {
@@ -198,9 +248,9 @@ export class FieldComponent extends React.Component<FieldComponentProps, void> {
 
         const node = this.props.dn.node;
         if (!sender.value)
-            delete (node as any)[this.props.member];
+            this.props.binding.deleteValue()
         else
-            (node as any)[this.props.member] = sender.value;
+            this.props.binding.setValue(sender.value);
 
 
         this.props.dn.context.refreshView();
@@ -208,12 +258,12 @@ export class FieldComponent extends React.Component<FieldComponentProps, void> {
     
     render() {
         var p = this.props;
-        var value = (p.dn.node as any)[this.props.member];
+        var value = p.binding.getValue();
         
         return (
             <div className="form-group">
                 <label className="control-label">
-                    field
+                    {p.binding.member}
                 </label>
                 <div>
                     {this.renderValue(value)}
