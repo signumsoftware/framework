@@ -238,10 +238,12 @@ window.addEventListener("storage", se => {
     } else if (se.key == ('sessionStorage' + _appName) && !sessionStorage.length) {
         // sessionStorage is empty -> fill it
 
-        const data = JSON.parse(se.newValue!);
+        if (se.newValue) {
+            const data = JSON.parse(se.newValue);
 
-        for (let key in data) {
-            sessionStorage.setItem(key, data[key]);
+            for (let key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
         }
     }
 });
