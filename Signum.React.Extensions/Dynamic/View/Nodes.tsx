@@ -49,7 +49,7 @@ NodeUtils.register<DivNode>({
     order: 0,
     isContainer: true,
     renderTreeNode: NodeUtils.treeNodeKind,
-    render: (dn, parentCtx) => NodeUtils.withChildrens(dn, parentCtx, <div {...toHtmlAttributes(parentCtx, dn.node.htmlAttributes) } />),
+    render: (dn, parentCtx) => NodeUtils.withChildrensSubCtx(dn, parentCtx, <div {...toHtmlAttributes(parentCtx, dn.node.htmlAttributes) } />),
     renderDesigner: dn => (<div>
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
         <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
@@ -71,7 +71,7 @@ NodeUtils.register<RowNode>({
     isContainer: true,
     validChild: "Column",
     renderTreeNode: NodeUtils.treeNodeKind, 
-    render: (dn, parentCtx) => NodeUtils.withChildrens(dn, parentCtx, <div {...withClassName(toHtmlAttributes(parentCtx, dn.node.htmlAttributes), "row") } />),
+    render: (dn, parentCtx) => NodeUtils.withChildrensSubCtx(dn, parentCtx, <div {...withClassName(toHtmlAttributes(parentCtx, dn.node.htmlAttributes), "row") } />),
     renderDesigner: dn => (<div>
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
         <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
@@ -104,7 +104,7 @@ NodeUtils.register<ColumnNode>({
         const offset = NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.offset, NodeUtils.isNumberOrNull);
         const className = classes("col-sm-" + column, offset != undefined && "col-sm-offset-" + offset)
 
-        return NodeUtils.withChildrens(dn, parentCtx, <div {...withClassName(toHtmlAttributes(parentCtx, dn.node.htmlAttributes), className)} />);
+        return NodeUtils.withChildrensSubCtx(dn, parentCtx, <div {...withClassName(toHtmlAttributes(parentCtx, dn.node.htmlAttributes), className)} />);
     },
     renderDesigner: (dn) => (<div>
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
@@ -131,7 +131,7 @@ NodeUtils.register<TabsNode>({
     initialize: dn => dn.id = "tabs", 
     renderTreeNode: NodeUtils.treeNodeKind, 
     render: (dn, parentCtx) => {
-        return NodeUtils.withChildrens(dn, parentCtx, <Tabs id={parentCtx.compose(NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.id, NodeUtils.isString) !)} />);
+        return NodeUtils.withChildrensSubCtx(dn, parentCtx, <Tabs id={parentCtx.compose(NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.id, NodeUtils.isString) !)} />);
     },
     renderDesigner: (dn) => (<div>
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
@@ -158,7 +158,7 @@ NodeUtils.register<TabNode>({
     initialize: dn => dn.title = "My Tab",
     renderTreeNode: NodeUtils.treeNodeKind, 
     render: (dn, parentCtx) => {
-        return NodeUtils.withChildrens(dn, parentCtx, <Tab title={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.title, NodeUtils.isString)} />);
+        return NodeUtils.withChildrensSubCtx(dn, parentCtx, <Tab title={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.title, NodeUtils.isString)} />);
     },
     renderDesigner: (dn) => (<div>
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
@@ -190,7 +190,7 @@ NodeUtils.register<FieldsetNode>({
             <legend {...toHtmlAttributes(parentCtx, dn.node.legendHtmlAttributes) }>
                     {NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.legend, NodeUtils.isString)}
             </legend>
-            {NodeUtils.withChildrens(dn,  parentCtx, <div />)}
+            {NodeUtils.withChildrensSubCtx(dn,  parentCtx, <div />)}
         </fieldset>)
     },
     renderDesigner: (dn) => (<div>
@@ -602,15 +602,26 @@ export namespace NodeConstructor {
     export function createDefaultNode(ti: TypeInfo) {
         return {
             kind: "Div",
-            children: Dic.getValues(ti.members).filter(mi => mi.name != "Id" && !mi.name.contains(".") && !mi.name.contains("/")).map(mi => appropiateComponent(mi)).filter(a => !!a).map(a => a!)
+            children: createSubChildren(PropertyRoute.root(ti))
         } as DivNode;
+    }
+
+
+    export function createSubChildren(pr: PropertyRoute): BaseNode[] {
+
+        const subMembers = pr.subMembers();
+
+        return Dic.map(subMembers, (field, mi) => appropiateComponent(mi, field)).filter(a => !!a).map(a => a!);
     }
 
     export const specificComponents: {
         [typeName: string]: (ctx: MemberInfo) => BaseNode | undefined;
     } = {};
 
-    export var appropiateComponent = (mi: MemberInfo): BaseNode | undefined => {
+    export var appropiateComponent = (mi: MemberInfo, field: string): BaseNode | undefined => {
+        if (mi.name == "Id")
+            return undefined;
+
         const tr = mi.type;
         const sc = specificComponents[tr.name];
         if (sc) {
@@ -618,8 +629,6 @@ export namespace NodeConstructor {
             if (result)
                 return result;
         }
-
-        var field = mi.name;
 
         const tis = getTypeInfos(tr);
         const ti = tis.firstOrNull();

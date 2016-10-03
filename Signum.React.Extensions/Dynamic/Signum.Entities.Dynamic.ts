@@ -38,6 +38,8 @@ export module DynamicViewMessage {
     export const AddChild = new MessageKey("DynamicViewMessage", "AddChild");
     export const AddSibling = new MessageKey("DynamicViewMessage", "AddSibling");
     export const Remove = new MessageKey("DynamicViewMessage", "Remove");
+    export const GenerateChildren = new MessageKey("DynamicViewMessage", "GenerateChildren");
+    export const ClearChildren = new MessageKey("DynamicViewMessage", "ClearChildren");
     export const SelectATypeOfComponent = new MessageKey("DynamicViewMessage", "SelectATypeOfComponent");
     export const SelectANodeFirst = new MessageKey("DynamicViewMessage", "SelectANodeFirst");
     export const UseExpression = new MessageKey("DynamicViewMessage", "UseExpression");

@@ -14,7 +14,7 @@ import { MenuItem } from 'react-bootstrap'
 import * as NodeUtils from './NodeUtils'
 import NodeSelectorModal from './NodeSelectorModal'
 import { DesignerContext, DesignerNode } from './NodeUtils'
-import { BaseNode, ContainerNode, LineBaseNode } from './Nodes'
+import { BaseNode, ContainerNode, LineBaseNode, NodeConstructor } from './Nodes'
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 
 require("!style!css!./DynamicViewTree.css");
@@ -86,14 +86,23 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
             return null;
 
         const no = NodeUtils.registeredNodes[dn.node.kind];
+
+        const cn = dn.node as ContainerNode;
         
         const isRoot = (dn == this.props.rootNode);
         
         return (
             <ContextMenu position={cm.position} onHide={this.handleContextOnHide}>
-                {no.isContainer && <MenuItem onClick={this.handleAddChildren}><i className="fa fa-arrow-down" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.AddChild.niceToString()}</MenuItem>}
+                {no.isContainer && <MenuItem onClick={this.handleAddChildren}><i className="fa fa-arrow-right" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.AddChild.niceToString()}</MenuItem>}
                 {!isRoot && <MenuItem onClick={this.handleAddSibling}><i className="fa fa-arrow-down" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.AddSibling.niceToString()}</MenuItem>}
-                {!isRoot && <MenuItem onClick={this.handleRemove} bsClass="danger"><i className="fa fa-trash" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.Remove.niceToString()}</MenuItem>}
+
+                {no.isContainer && <MenuItem divider={true} />}
+
+                {no.isContainer && cn.children.length == 0 && dn.route && <MenuItem onClick={this.handleGenerateChildren}><i className="fa fa-bolt" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.GenerateChildren.niceToString()}</MenuItem>}
+                {no.isContainer && cn.children.length > 0 && <MenuItem onClick={this.handleClearChildren} bsClass="danger"><i className="fa fa-trash" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.ClearChildren.niceToString()}</MenuItem>}
+
+                {!isRoot && <MenuItem divider={true} />}
+                {!isRoot && <MenuItem onClick={this.handleRemove} bsClass="danger"><i className="fa fa-times" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.Remove.niceToString()}</MenuItem>}
             </ContextMenu>
         );
     }
@@ -137,6 +146,20 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
         parent.node.children.remove(selected.node);
         this.props.rootNode.context.setSelectedNode(parent);
         parent.context.refreshView();
+    }
+
+    handleClearChildren = () => {
+
+        var selected = this.props.rootNode.context.getSelectedNode() ! as DesignerNode<ContainerNode>;
+        selected.node.children.clear();
+        selected.context.refreshView();
+    }
+
+    handleGenerateChildren = () => {
+
+        var selected = this.props.rootNode.context.getSelectedNode() ! as DesignerNode<ContainerNode>;
+        selected.node.children.push(...NodeConstructor.createSubChildren(selected.route!));
+        selected.context.refreshView();
     }
 
     newNode(parentType: string): Promise<BaseNode | undefined>{

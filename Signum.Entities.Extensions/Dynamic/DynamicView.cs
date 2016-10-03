@@ -70,6 +70,8 @@ namespace Signum.Entities.Dynamic
         AddChild,
         AddSibling,
         Remove,
+        GenerateChildren,
+        ClearChildren,
         SelectATypeOfComponent,
         SelectANodeFirst,
         UseExpression,

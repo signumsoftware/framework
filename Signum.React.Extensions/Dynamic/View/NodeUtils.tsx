@@ -306,8 +306,12 @@ export function isFindOptionsOrNull(val: any) {
 }
 
 
-export function withChildrens(dn: DesignerNode<ContainerNode>, parentCtx: TypeContext<ModifiableEntity>, element: React.ReactElement<any>) {
+export function withChildrensSubCtx(dn: DesignerNode<ContainerNode>, parentCtx: TypeContext<ModifiableEntity>, element: React.ReactElement<any>) {
     var ctx = subCtx(parentCtx, (dn.node as any).field, (dn.node as any).styleOptions);
+    return withChildrens(dn, ctx, element);
+}
+
+export function withChildrens(dn: DesignerNode<ContainerNode>, ctx: TypeContext<ModifiableEntity>, element: React.ReactElement<any>) {   
     var nodes = dn.node.children && dn.node.children.map(n => render(dn.createChild(n), ctx)).filter(a => a != null).map(a => a!);
     return React.cloneElement(element, undefined, ...nodes);
 }
@@ -404,7 +408,7 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
         viewOnCreate: evaluateAndValidate(parentCtx, dn.node, n => n.viewOnCreate, isBooleanOrNull),
         onChange: evaluateOnChange(parentCtx, dn),
         findOptions: dn.node.findOptions && toFindOptions(parentCtx, dn.node.findOptions),
-        getComponent: getGetComponent(dn, parentCtx),
+        getComponent: getGetComponent(dn),
     };
 
 
@@ -418,10 +422,10 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
 }
 
 
-export function getGetComponent(dn: DesignerNode<ContainerNode>, ctx: TypeContext<ModifiableEntity>) {
+export function getGetComponent(dn: DesignerNode<ContainerNode>) {
     if (!dn.node.children || !dn.node.children.length)
         return undefined;
-    
+
     return (ctxe: TypeContext<ModifiableEntity>) => withChildrens(dn, ctxe, <div />);
 }
 
