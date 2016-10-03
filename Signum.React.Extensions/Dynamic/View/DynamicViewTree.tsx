@@ -215,17 +215,18 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
     }
 
     handleDragStart = (e: React.DragEvent) => {
+        e.dataTransfer.setData('text', "start"); //cannot be empty string
         e.dataTransfer.effectAllowed = "move";
         this.props.dynamicTreeView.changeState(s => s.draggedNode = this.props.node);
     }
 
     handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
+        const de = e.nativeEvent as DragEvent;
         const dn = this.props.node;
         const span = e.currentTarget as HTMLElement;
-        const newPosition = this.getOffset((e.nativeEvent as DragEvent).pageY, span.getBoundingClientRect(), 7);
+        const newPosition = this.getOffset(de.pageY, span.getBoundingClientRect(), 7);
         const newError = this.getError(newPosition);
-        e.dataTransfer.dropEffect = newError == "Error" ? "none" : "move";
 
         const s = this.props.dynamicTreeView.state;
 
@@ -249,7 +250,6 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
     }
     
     handleDrop = (e: React.DragEvent) => {
-
         const dragged = this.props.dynamicTreeView.state.draggedNode!;
         const over = this.props.dynamicTreeView.state.draggedOver!;
 
@@ -290,7 +290,7 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
     getError(position: DraggedPosition): DraggedError{
         const parent = position == "Middle" ? this.props.node : this.props.node.parent;
 
-        if (!parent)
+        if (!parent || !parent.node)
             return "Error";
 
         const parentOptions = NodeUtils.registeredNodes[parent.node.kind];    
