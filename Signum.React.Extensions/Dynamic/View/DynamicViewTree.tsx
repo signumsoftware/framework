@@ -227,6 +227,7 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
         const span = e.currentTarget as HTMLElement;
         const newPosition = this.getOffset(de.pageY, span.getBoundingClientRect(), 7);
         const newError = this.getError(newPosition);
+        //de.dataTransfer.dropEffect = newError == "Error" ? "none" : "move";
 
         const s = this.props.dynamicTreeView.state;
 
