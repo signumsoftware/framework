@@ -7,6 +7,7 @@ import { Entity, JavascriptMessage, is } from '../../../../Framework/Signum.Reac
 import { getTypeInfo, Binding, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import JavascriptCodeMirror from './JavascriptCodeMirror'
 import * as DynamicViewClient from '../DynamicViewClient'
+import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { AuthInfo } from './AuthInfo'
 
 
@@ -61,8 +62,6 @@ export default class DynamicViewSelectorEntityComponent extends React.Component<
     render() {
         const ctx = this.props.ctx;
 
-
-
         return (
             <div>
                 <EntityLine ctx={ctx.subCtx(a => a.entityType)} onChange={this.handleTypeChange} onRemove={this.handleTypeRemove} />
@@ -105,9 +104,13 @@ export default class DynamicViewSelectorEntityComponent extends React.Component<
         const exampleCtx = new TypeContext<Entity | undefined>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(this.state, s => s.exampleEntity));
 
         return (
-            <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} viewOnCreate={false} view={false} onChange={() => this.evaluateTest()}
+            <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={this.handleOnView} onChange={() => this.evaluateTest()}
                 type={{ name: typeName }} labelText={DynamicViewMessage.ExampleEntity.niceToString()} />
         );
+    }
+
+    handleOnView = (exampleEntity: Entity) => {
+        return Navigator.view(exampleEntity, { requiresSaveOperation: false, showOperations: false });
     }
 
     handleCodeChange = (newCode: string) => {
