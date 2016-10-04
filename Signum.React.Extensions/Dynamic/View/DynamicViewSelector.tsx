@@ -7,6 +7,7 @@ import { Entity, JavascriptMessage, is } from '../../../../Framework/Signum.Reac
 import { getTypeInfo, Binding, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import JavascriptCodeMirror from './JavascriptCodeMirror'
 import * as DynamicViewClient from '../DynamicViewClient'
+import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { AuthInfo } from './AuthInfo'
 
 
@@ -61,8 +62,6 @@ export default class DynamicViewSelectorEntityComponent extends React.Component<
     render() {
         const ctx = this.props.ctx;
 
-        var res = this.state.testResult;
-
         return (
             <div>
                 <EntityLine ctx={ctx.subCtx(a => a.entityType)} onChange={this.handleTypeChange} onRemove={this.handleTypeRemove} />
@@ -70,15 +69,23 @@ export default class DynamicViewSelectorEntityComponent extends React.Component<
                 {ctx.value.entityType &&
                     <div>
                         {this.renderEditor()}
-                        <fieldset>
-                            <legend>TEST</legend>
-                            {this.renderExampleEntity(ctx.value.entityType.cleanName)}
-                            {res && res.type == "ERROR" && <div className="alert alert-danger">ERROR: {res.error}</div>}
-                            {res && res.type == "RESULT" && <div className={classes("alert", this.getTestAlertType(res.result))}>RESULT: {res.result === undefined ? "undefined" : JSON.stringify(res.result)}</div>}
-                        </fieldset>
+                        {this.renderTest()}
                     </div>
                 }
             </div>
+        );
+    }
+
+    renderTest() {
+        const ctx = this.props.ctx;
+        const res = this.state.testResult;
+        return (
+            <fieldset>
+                <legend>TEST</legend>
+                {this.renderExampleEntity(ctx.value.entityType!.cleanName)}
+                {res && res.type == "ERROR" && <div className="alert alert-danger">ERROR: {res.error}</div>}
+                {res && res.type == "RESULT" && <div className={classes("alert", this.getTestAlertType(res.result))}>RESULT: {res.result === undefined ? "undefined" : JSON.stringify(res.result)}</div>}
+            </fieldset>
         );
     }
 
@@ -90,9 +97,6 @@ export default class DynamicViewSelectorEntityComponent extends React.Component<
         if (this.allViewNames().contains(result))
             return "alert-success";
 
-        if (this.state.exampleEntity == undefined)
-            return "alert-warning";
-
         return "alert-danger";
     }
 
@@ -100,9 +104,13 @@ export default class DynamicViewSelectorEntityComponent extends React.Component<
         const exampleCtx = new TypeContext<Entity | undefined>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(this.state, s => s.exampleEntity));
 
         return (
-            <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} viewOnCreate={false} view={false} onChange={() => this.evaluateTest()}
+            <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={this.handleOnView} onChange={() => this.evaluateTest()}
                 type={{ name: typeName }} labelText={DynamicViewMessage.ExampleEntity.niceToString()} />
         );
+    }
+
+    handleOnView = (exampleEntity: Entity) => {
+        return Navigator.view(exampleEntity, { requiresSaveOperation: false, showOperations: false });
     }
 
     handleCodeChange = (newCode: string) => {

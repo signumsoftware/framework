@@ -150,7 +150,7 @@ export function navigatorIsViewable(typeName: string, entityPack?: EntityPack<Mo
     const ti = getTypeInfo(typeName);
 
     if (ti == undefined)
-        return false;
+        return true;
 
     if (entityPack && entityPack.typeAllowed)
         return entityPack.typeAllowed != "None";

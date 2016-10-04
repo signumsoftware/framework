@@ -20,7 +20,9 @@ import { FindOptionsExpr, toFindOptions } from './FindOptionsExpression'
 import { AuthInfo } from './AuthInfo'
 import { BaseNode, LineBaseNode, EntityBaseNode, EntityListBaseNode, EntityLineNode, ContainerNode, EntityTableColumnNode } from './Nodes'
 import { toHtmlAttributes, HtmlAttributesExpression, withClassName } from './HtmlAttributesExpression'
+import { toStyleOptions, StyleOptionsExpression, subCtx } from './StyleOptionsExpression'
 import { HtmlAttributesLine } from './HtmlAttributesComponent'
+import { StyleOptionsLine } from './StyleOptionsComponent'
 
 export type ExpressionOrValue<T> = T | Expression<T>;
 
@@ -34,7 +36,7 @@ export interface NodeOptions<N extends BaseNode> {
     isContainer?: boolean;
     hasEntity?: boolean;
     hasCollection?: boolean;
-    render: (node: DesignerNode<N>, ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+    render: (node: DesignerNode<N>, parentCtx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
     renderTreeNode: (node: DesignerNode<N>) => React.ReactElement<any>;
     renderDesigner: (node: DesignerNode<N>) => React.ReactElement<any>;
     validate?: (node: DesignerNode<N>) => string | null | undefined;
@@ -57,9 +59,8 @@ export class DesignerNode<N extends BaseNode> {
     node: N;
     route?: PropertyRoute;
 
-    static root<N extends BaseNode>(node: N, context: DesignerContext, typeName: string) {
+    static zero<N extends BaseNode>(context: DesignerContext, typeName: string) {
         var res = new DesignerNode();
-        res.node = node;
         res.context = context;
         res.route = PropertyRoute.root(typeName);
         return res;
@@ -71,7 +72,7 @@ export class DesignerNode<N extends BaseNode> {
         res.context = this.context;
         res.node = node;
         res.route = this.fixRoute();
-        const lbn = node as LineBaseNode;
+        const lbn = node as any as { field: string };
         if (lbn.field && res.route)
             res.route = res.route.tryAddMember({ name: lbn.field, type: "Member" });
 
@@ -90,6 +91,9 @@ export class DesignerNode<N extends BaseNode> {
 
         if (!res)
             return undefined;
+
+        if (this.node == undefined)
+            return res;
 
         const options = registeredNodes[this.node.kind];
         if (options.hasCollection)
@@ -126,14 +130,14 @@ export function treeNodeTableColumnProperty(dn: DesignerNode<EntityTableColumnNo
     return <span><small>ETColumn:</small> <strong>{dn.node.property}</strong></span>;
 }
 
-export function render(dn: DesignerNode<BaseNode>, ctx: TypeContext<ModifiableEntity>) {
+export function render(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>) {
 
     const error = validate(dn);
     if (error)
         return (<div className="alert alert-danger">{getErrorTitle(dn)} {error}</div>);
 
     try {
-        if (evaluateAndValidate(ctx, dn.node, n => n.visible, isBooleanOrNull) == false)
+        if (evaluateAndValidate(parentCtx, dn.node, n => n.visible, isBooleanOrNull) == false)
             return null;
 
         const sn = dn.context.getSelectedNode();
@@ -141,10 +145,10 @@ export function render(dn: DesignerNode<BaseNode>, ctx: TypeContext<ModifiableEn
         if (sn && sn.node == dn.node && registeredNodes[sn.node.kind].avoidHighlight != true)
             return (
                 <div style={{ border: "1px solid #337ab7", borderRadius: "2px" }}>
-                    {registeredNodes[dn.node.kind].render(dn, ctx)}
+                    {registeredNodes[dn.node.kind].render(dn, parentCtx)}
                 </div>);
     
-        return registeredNodes[dn.node.kind].render(dn, ctx);
+        return registeredNodes[dn.node.kind].render(dn, parentCtx);
 
     } catch (e) {
         return (<div className="alert alert-danger">{getErrorTitle(dn)}&nbsp;{(e as Error).message}</div>);
@@ -195,12 +199,12 @@ export function asFieldFunction(field: string): (e: ModifiableEntity) => any {
     }
 }
 
-export function evaluate<F, T>(ctx: TypeContext<ModifiableEntity>, object: F, fieldAccessor: (from: F) => ExpressionOrValue<T> | undefined): T | undefined {
+export function evaluate<F, T>(parentCtx: TypeContext<ModifiableEntity>, object: F, fieldAccessor: (from: F) => ExpressionOrValue<T> | undefined): T | undefined {
 
-    return evaluateUntyped(ctx, fieldAccessor(object), () => Binding.getSingleMember(fieldAccessor));
+    return evaluateUntyped(parentCtx, fieldAccessor(object), () => Binding.getSingleMember(fieldAccessor));
 }
 
-export function evaluateUntyped(ctx: TypeContext<ModifiableEntity>, expressionOrValue: ExpressionOrValue<any> | undefined, getFieldName: () => string): any {
+export function evaluateUntyped(parentCtx: TypeContext<ModifiableEntity>, expressionOrValue: ExpressionOrValue<any> | undefined, getFieldName: () => string): any {
     if (expressionOrValue == null)
         return undefined;
 
@@ -214,15 +218,15 @@ export function evaluateUntyped(ctx: TypeContext<ModifiableEntity>, expressionOr
     var f = asFunction(ex, getFieldName);
 
     try {
-        return f(ctx, new AuthInfo());
+        return f(parentCtx, new AuthInfo());
     } catch (e) {
         throw new Error("Eval '" + getFieldName() + "':\r\n" + (e as Error).message);
     }
 }
 
-export function evaluateAndValidate<F, T>(ctx: TypeContext<ModifiableEntity>, object: F, fieldAccessor: (from: F) => ExpressionOrValue<T>, validate: (val: any) => string | null)   {
+export function evaluateAndValidate<F, T>(parentCtx: TypeContext<ModifiableEntity>, object: F, fieldAccessor: (from: F) => ExpressionOrValue<T>, validate: (val: any) => string | null)   {
 
-    var result = evaluate(ctx, object, fieldAccessor);
+    var result = evaluate(parentCtx, object, fieldAccessor);
 
     var error = validate(result);
     if (error)
@@ -281,6 +285,14 @@ export function isEnumOrNull(val: any, enumType: EnumType<any>) {
     return val == null || typeof val == "string" && enumType.values().contains(val) ? null : `The returned value (${JSON.stringify(val)}) should be a valid ${enumType.type} (like ${enumType.values().joinComma(" or ")}) or null`;
 }
 
+export function isInList(val: any, values: string[]) {
+    return val != null && typeof val == "string" && values.contains(val) ? null : `The returned value (${JSON.stringify(val)}) should be a value like ${values.joinComma(" or ")}`;
+}
+
+export function isInListOrNull(val: any, values: string[]) {
+    return val == null || typeof val == "string" && values.contains(val) ? null : `The returned value (${JSON.stringify(val)}) should be a value like ${values.joinComma(" or ")} or null`;
+}
+
 export function isNumberOrNull(val: any) {
     return val == null || typeof val == "number" ? null : `The returned value (${JSON.stringify(val)}) should be a number or null`;
 }
@@ -294,8 +306,13 @@ export function isFindOptionsOrNull(val: any) {
 }
 
 
-export function withChildrens(dn: DesignerNode<ContainerNode>, ctx: TypeContext<ModifiableEntity>, element: React.ReactElement<any>) {
-    var nodes = dn.node.children && dn.node.children.map(c => render(dn.createChild(c), ctx)).filter(a => a != null).map(a => a!);
+export function withChildrensSubCtx(dn: DesignerNode<ContainerNode>, parentCtx: TypeContext<ModifiableEntity>, element: React.ReactElement<any>) {
+    var ctx = subCtx(parentCtx, (dn.node as any).field, (dn.node as any).styleOptions);
+    return withChildrens(dn, ctx, element);
+}
+
+export function withChildrens(dn: DesignerNode<ContainerNode>, ctx: TypeContext<ModifiableEntity>, element: React.ReactElement<any>) {   
+    var nodes = dn.node.children && dn.node.children.map(n => render(dn.createChild(n), ctx)).filter(a => a != null).map(a => a!);
     return React.cloneElement(element, undefined, ...nodes);
 }
 
@@ -375,60 +392,63 @@ export function addBreakLines(breakLines: boolean, message: string): React.React
     return message.split("\n").flatMap((e, i) => i == 0 ? [e] : [<br />, e]);
 }
 
-export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, ctx: TypeContext<ModifiableEntity>, options: { showAutoComplete?: boolean, showMove?: boolean }): EntityBaseProps {
+export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: TypeContext<ModifiableEntity>, options: { showAutoComplete?: boolean, showMove?: boolean }): EntityBaseProps {
 
     var result: EntityBaseProps = {
-        ctx: ctx.subCtx(asFieldFunction(dn.node.field)),
-        labelText: evaluateAndValidate(ctx, dn.node, n => n.labelText, isStringOrNull),
-        labelHtmlProps: toHtmlAttributes(ctx, dn.node.labelHtmlAttributes),
-        formGroupHtmlProps: toHtmlAttributes(ctx, dn.node.formGroupHtmlAttributes),
-        visible: evaluateAndValidate(ctx, dn.node, n => n.visible, isBooleanOrNull),
-        readOnly: evaluateAndValidate(ctx, dn.node, n => n.readOnly, isBooleanOrNull),
-        create: evaluateAndValidate(ctx, dn.node, n => n.create, isBooleanOrNull),
-        remove: evaluateAndValidate(ctx, dn.node, n => n.remove, isBooleanOrNull),
-        find: evaluateAndValidate(ctx, dn.node, n => n.find, isBooleanOrNull),
-        view: evaluateAndValidate(ctx, dn.node, n => n.view, isBooleanOrNull),
-        onChange: evaluateOnChange(ctx, dn),
-        findOptions: dn.node.findOptions && toFindOptions(ctx, dn.node.findOptions),
-        getComponent: getGetComponent(dn, ctx),
+        ctx: parentCtx.subCtx(asFieldFunction(dn.node.field)),
+        labelText: evaluateAndValidate(parentCtx, dn.node, n => n.labelText, isStringOrNull),
+        labelHtmlProps: toHtmlAttributes(parentCtx, dn.node.labelHtmlAttributes),
+        formGroupHtmlProps: toHtmlAttributes(parentCtx, dn.node.formGroupHtmlAttributes),
+        visible: evaluateAndValidate(parentCtx, dn.node, n => n.visible, isBooleanOrNull),
+        readOnly: evaluateAndValidate(parentCtx, dn.node, n => n.readOnly, isBooleanOrNull),
+        create: evaluateAndValidate(parentCtx, dn.node, n => n.create, isBooleanOrNull),
+        remove: evaluateAndValidate(parentCtx, dn.node, n => n.remove, isBooleanOrNull),
+        find: evaluateAndValidate(parentCtx, dn.node, n => n.find, isBooleanOrNull),
+        view: evaluateAndValidate(parentCtx, dn.node, n => n.view, isBooleanOrNull),
+        viewOnCreate: evaluateAndValidate(parentCtx, dn.node, n => n.viewOnCreate, isBooleanOrNull),
+        onChange: evaluateOnChange(parentCtx, dn),
+        findOptions: dn.node.findOptions && toFindOptions(parentCtx, dn.node.findOptions),
+        getComponent: getGetComponent(dn),
     };
 
 
     if (options.showAutoComplete)
-        result = Dic.extend(result, { autoComplete: evaluateAndValidate(ctx, dn.node, (n: EntityLineNode) => n.autoComplete, isBooleanOrNull) == false ? null : undefined});
+        result = Dic.extend(result, { autoComplete: evaluateAndValidate(parentCtx, dn.node, (n: EntityLineNode) => n.autoComplete, isBooleanOrNull) == false ? null : undefined});
 
     if (options.showMove)
-        result = Dic.extend(result, { move: evaluateAndValidate(ctx, dn.node, (n: EntityListBaseNode) => n.move, isBooleanOrNull) });
+        result = Dic.extend(result, { move: evaluateAndValidate(parentCtx, dn.node, (n: EntityListBaseNode) => n.move, isBooleanOrNull) });
 
     return result;
 }
 
 
-export function getGetComponent(dn: DesignerNode<ContainerNode>, ctx: TypeContext<ModifiableEntity>) {
+export function getGetComponent(dn: DesignerNode<ContainerNode>) {
     if (!dn.node.children || !dn.node.children.length)
         return undefined;
-    
+
     return (ctxe: TypeContext<ModifiableEntity>) => withChildrens(dn, ctxe, <div />);
 }
 
 export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { isCreable: boolean; isFindable: boolean; isViewable: boolean; showAutoComplete: boolean, showMove?: boolean }) {
   
     const m = dn.route && dn.route.member;
-    return (<div>
-        <FieldComponent dn={dn} member="field" />
-
-        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
-        <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
-        <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
-        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.visible)} type="boolean" defaultValue={true} />
-        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={false} />
-        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.create)} type="boolean" defaultValue={options.isCreable && m && EntityBase.defaultIsCreable(m.type, false) || false} />
-        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.remove)} type="boolean" defaultValue={true} />
-        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.find)} type="boolean" defaultValue={options.isFindable && m && EntityBase.defaultIsFindable(m.type) || false} />
-        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.view)} type="boolean" defaultValue={options.isViewable && m && EntityBase.defaultIsViewable(m.type, false) || false} />
-        {options.showMove && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, (n: EntityListBaseNode) => n.move)} type="boolean" defaultValue={m && m.preserveOrder || false} />}
-        {options.showAutoComplete && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, (n: EntityLineNode) => n.autoComplete)} type="boolean" defaultValue={true} />}
-        <FindOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.findOptions)} avoidSuggestion={true} />
-        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.redrawOnChange)} type="boolean" defaultValue={false} />
-    </div>)
+    return (
+        <div>
+            <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
+            <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
+            <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
+            <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.create)} type="boolean" defaultValue={null} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.remove)} type="boolean" defaultValue={null} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.find)} type="boolean" defaultValue={null} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.view)} type="boolean" defaultValue={null} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.viewOnCreate)} type="boolean" defaultValue={null} />
+            {options.showMove && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, (n: EntityListBaseNode) => n.move)} type="boolean" defaultValue={null} />}
+            {options.showAutoComplete && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, (n: EntityLineNode) => n.autoComplete)} type="boolean" defaultValue={null} />}
+            <FindOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.findOptions)} avoidSuggestion={true} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.redrawOnChange)} type="boolean" defaultValue={null} />
+        </div>
+    );
 }

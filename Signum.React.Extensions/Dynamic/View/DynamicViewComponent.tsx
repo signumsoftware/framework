@@ -28,7 +28,7 @@ export interface DynamicViewComponentProps {
 
 export interface DynamicViewComponentState {
     isDesignerOpen: boolean;
-    rootNode: DesignerNode<BaseNode>;
+    rootNode: BaseNode;
     selectedNode: DesignerNode<BaseNode>;
     dynamicView: DynamicViewEntity;
 }
@@ -37,18 +37,19 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
 
     constructor(props: DynamicViewComponentProps) {
         super(props);
-
-        const root = this.getRootNode(props.initialDynamicView, props.ctx.value.Type)
-
+        
+        const rootNode = JSON.parse(props.initialDynamicView.viewContent!) as BaseNode;;
         this.state = {
             dynamicView: props.initialDynamicView,
             isDesignerOpen: false,
-            rootNode: root,
-            selectedNode: root
+            rootNode: rootNode,
+            selectedNode: this.getZeroNode().createChild(rootNode)
         };
     }
 
-    getRootNode(dynamicView: DynamicViewEntity, typeName: string) {
+    getZeroNode() {
+
+        const typeName = this.props.ctx.value.Type;
 
         var context = {
             onClose: this.handleClose,
@@ -56,20 +57,16 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
             getSelectedNode: () => this.state.isDesignerOpen ? this.state.selectedNode : undefined,
             setSelectedNode: (newNode) => this.changeState(s => s.selectedNode = newNode)
         } as DesignerContext;
-
-        var baseNode = JSON.parse(dynamicView.viewContent!) as BaseNode;
-
-        return DesignerNode.root(baseNode, context, typeName);
+        
+        return DesignerNode.zero(context, typeName);
     }
 
     handleReload = (dynamicView: DynamicViewEntity) => {
-
-        const root = this.getRootNode(dynamicView, this.props.ctx.value.Type);
-
+        
         this.changeState(s => {
             s.dynamicView = dynamicView;
-            s.rootNode = root;
-            s.selectedNode = root;
+            s.rootNode = JSON.parse(this.props.initialDynamicView.viewContent!) as BaseNode;
+            s.selectedNode = this.getZeroNode().createChild(s.rootNode);
         });
     }
 
@@ -82,12 +79,15 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
     }
 
     render() {
+
+        var rootNode = this.getZeroNode().createChild(this.state.rootNode);
+
         return (<div className="design-main">
             <div className={classes("design-left", this.state.isDesignerOpen && "open")}>
                 {!this.state.isDesignerOpen ?
                     <i className="fa fa-pencil-square-o design-open-icon" aria-hidden="true" onClick={this.handleOpen}></i> :
                     <DynamicViewDesigner
-                        rootNode={this.state.rootNode}
+                        rootNode={rootNode}
                         dynamicView={this.state.dynamicView}
                         onReload={this.handleReload}
                         onLoseChanges={this.handleLoseChanges}
@@ -95,13 +95,13 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
                 }
             </div>
             <div className={classes("design-content", this.state.isDesignerOpen && "open")}>
-                {NodeUtils.render(this.state.rootNode, this.props.ctx)}
+                {NodeUtils.render(rootNode, this.props.ctx)}
             </div>
         </div>);
     }
 
     handleLoseChanges = () => {
-        const node = JSON.stringify(this.state.rootNode.node);
+        const node = JSON.stringify(this.state.rootNode);
 
         if (this.state.dynamicView.isNew || node != this.state.dynamicView.viewContent) {
             return confirm(JavascriptMessage.loseCurrentChanges.niceToString());

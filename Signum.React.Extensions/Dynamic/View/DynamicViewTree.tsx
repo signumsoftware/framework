@@ -14,7 +14,7 @@ import { MenuItem } from 'react-bootstrap'
 import * as NodeUtils from './NodeUtils'
 import NodeSelectorModal from './NodeSelectorModal'
 import { DesignerContext, DesignerNode } from './NodeUtils'
-import { BaseNode, ContainerNode, LineBaseNode } from './Nodes'
+import { BaseNode, ContainerNode, LineBaseNode, NodeConstructor } from './Nodes'
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 
 require("!style!css!./DynamicViewTree.css");
@@ -86,14 +86,23 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
             return null;
 
         const no = NodeUtils.registeredNodes[dn.node.kind];
+
+        const cn = dn.node as ContainerNode;
         
         const isRoot = (dn == this.props.rootNode);
         
         return (
             <ContextMenu position={cm.position} onHide={this.handleContextOnHide}>
-                {no.isContainer && <MenuItem onClick={this.handleAddChildren}><i className="fa fa-arrow-down" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.AddChild.niceToString()}</MenuItem>}
+                {no.isContainer && <MenuItem onClick={this.handleAddChildren}><i className="fa fa-arrow-right" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.AddChild.niceToString()}</MenuItem>}
                 {!isRoot && <MenuItem onClick={this.handleAddSibling}><i className="fa fa-arrow-down" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.AddSibling.niceToString()}</MenuItem>}
-                {!isRoot && <MenuItem onClick={this.handleRemove} bsClass="danger"><i className="fa fa-trash" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.Remove.niceToString()}</MenuItem>}
+
+                {no.isContainer && <MenuItem divider={true} />}
+
+                {no.isContainer && cn.children.length == 0 && dn.route && <MenuItem onClick={this.handleGenerateChildren}><i className="fa fa-bolt" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.GenerateChildren.niceToString()}</MenuItem>}
+                {no.isContainer && cn.children.length > 0 && <MenuItem onClick={this.handleClearChildren} bsClass="danger"><i className="fa fa-trash" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.ClearChildren.niceToString()}</MenuItem>}
+
+                {!isRoot && <MenuItem divider={true} />}
+                {!isRoot && <MenuItem onClick={this.handleRemove} bsClass="danger"><i className="fa fa-times" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.Remove.niceToString()}</MenuItem>}
             </ContextMenu>
         );
     }
@@ -137,6 +146,20 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
         parent.node.children.remove(selected.node);
         this.props.rootNode.context.setSelectedNode(parent);
         parent.context.refreshView();
+    }
+
+    handleClearChildren = () => {
+
+        var selected = this.props.rootNode.context.getSelectedNode() ! as DesignerNode<ContainerNode>;
+        selected.node.children.clear();
+        selected.context.refreshView();
+    }
+
+    handleGenerateChildren = () => {
+
+        var selected = this.props.rootNode.context.getSelectedNode() ! as DesignerNode<ContainerNode>;
+        selected.node.children.push(...NodeConstructor.createSubChildren(selected.route!));
+        selected.context.refreshView();
     }
 
     newNode(parentType: string): Promise<BaseNode | undefined>{
@@ -192,17 +215,19 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
     }
 
     handleDragStart = (e: React.DragEvent) => {
+        e.dataTransfer.setData('text', "start"); //cannot be empty string
         e.dataTransfer.effectAllowed = "move";
         this.props.dynamicTreeView.changeState(s => s.draggedNode = this.props.node);
     }
 
     handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
+        const de = e.nativeEvent as DragEvent;
         const dn = this.props.node;
         const span = e.currentTarget as HTMLElement;
-        const newPosition = this.getOffset((e.nativeEvent as DragEvent).pageY, span.getBoundingClientRect(), 7);
+        const newPosition = this.getOffset(de.pageY, span.getBoundingClientRect(), 7);
         const newError = this.getError(newPosition);
-        e.dataTransfer.dropEffect = newError == "Error" ? "none" : "move";
+        //de.dataTransfer.dropEffect = newError == "Error" ? "none" : "move";
 
         const s = this.props.dynamicTreeView.state;
 
@@ -226,7 +251,6 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
     }
     
     handleDrop = (e: React.DragEvent) => {
-
         const dragged = this.props.dynamicTreeView.state.draggedNode!;
         const over = this.props.dynamicTreeView.state.draggedOver!;
 
@@ -267,7 +291,7 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
     getError(position: DraggedPosition): DraggedError{
         const parent = position == "Middle" ? this.props.node : this.props.node.parent;
 
-        if (!parent)
+        if (!parent || !parent.node)
             return "Error";
 
         const parentOptions = NodeUtils.registeredNodes[parent.node.kind];    

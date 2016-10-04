@@ -19,7 +19,7 @@ using System.Web.Http;
 
 namespace Signum.React.Dynamic
 {
-    public class DynamicController : ApiController
+    public class DynamicViewController : ApiController
     {
         [Route("api/dynamic/view/{typeName}"), HttpGet]
         public DynamicViewEntity GetDynamicView(string typeName, string viewName)

@@ -23,7 +23,7 @@ interface DynamicViewEntityComponentProps {
 
 interface DynamicViewEntityComponentState {
     exampleEntity?: Entity;
-    rootNode?: DesignerNode<BaseNode>;
+    rootNode?: BaseNode;
     selectedNode?: DesignerNode<BaseNode>;
 }
 
@@ -46,7 +46,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
 
     beforeSave() {
         const ctx = this.props.ctx;
-        ctx.value.viewContent = JSON.stringify(this.state.rootNode!.node);
+        ctx.value.viewContent = JSON.stringify(this.state.rootNode!);
         ctx.value.modified = true;
     }
 
@@ -59,18 +59,22 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
             return;
         }
 
+        const rootNode = JSON.parse(ctx.value.viewContent) as BaseNode;
+
+        this.changeState(s => {
+            s.rootNode = rootNode;
+            s.selectedNode = this.getZeroNode().createChild(rootNode);
+        });
+    }
+
+    getZeroNode() {
         const context = {
             refreshView: () => this.updateStateSelectedNode(this.state.selectedNode!.reCreateNode()),
             getSelectedNode: () => this.state.selectedNode,
             setSelectedNode: (newNode) => this.updateStateSelectedNode(newNode)
         } as DesignerContext;
-        
 
-        const baseNode = JSON.parse(ctx.value.viewContent) as BaseNode;
-
-        const root = DesignerNode.root(baseNode, context, ctx.value.entityType!.cleanName);
-
-        this.changeState(s => { s.rootNode = root; s.selectedNode = root; });
+        return DesignerNode.zero(context, this.props.ctx.value.entityType!.cleanName);
     }
 
 
@@ -87,7 +91,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
     }
 
     handleTypeRemove = () => {
-        if (this.props.ctx.value.modified || this.props.ctx.value.viewContent != JSON.stringify(this.state.rootNode!.node))
+        if (this.props.ctx.value.modified || this.props.ctx.value.viewContent != JSON.stringify(this.state.rootNode!))
             return Promise.resolve(confirm(JavascriptMessage.loseCurrentChanges.niceToString()));
 
         return Promise.resolve(true);
@@ -108,16 +112,19 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
 
 
     renderDesigner() {
-        const root = this.state.rootNode!;
+        const root = this.getZeroNode().createChild(this.state.rootNode!);
 
-        const exampleCtx = new TypeContext<Entity | undefined>(undefined, undefined, root.route!, Binding.create(this.state, s => s.exampleEntity));
+
+        const ctx = this.props.ctx;
+
+        const exampleCtx = new TypeContext<Entity | undefined>(undefined, { frame: ctx.frame }, root.route!, Binding.create(this.state, s => s.exampleEntity));
 
         return (
             <div className="design-main" style={{ marginTop: "10px" }}>
                 <div className="design-left open">
                     <div className="form-vertical">
                         <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} viewOnCreate={false} view={false} onChange={() => this.forceUpdate()} formGroupStyle="Basic"
-                            type={{ name: root.route!.rootType!.name }} labelText={DynamicViewMessage.ExampleEntity.niceToString()} />
+                            type={{ name: this.props.ctx.value.entityType!.cleanName }} labelText={DynamicViewMessage.ExampleEntity.niceToString()} />
                         <DynamicViewTree rootNode={root} />
                         <DynamicViewInspector selectedNode={root.context.getSelectedNode()} />
                     </div>

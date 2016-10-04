@@ -25,15 +25,15 @@ export interface CssPropertiesExpression {
     [key: string]: ExpressionOrValue<any>;
 }
 
-export function toHtmlAttributes(ctx: TypeContext<ModifiableEntity>, hae: HtmlAttributesExpression | undefined): React.HTMLAttributes | undefined {
+export function toHtmlAttributes(parentCtx: TypeContext<ModifiableEntity>, hae: HtmlAttributesExpression | undefined): React.HTMLAttributes | undefined {
 
     if (hae == undefined)
         return undefined;
 
     var result: React.HTMLAttributes = {};
-    Dic.getKeys(hae as any).filter(k => k != "style").forEach(key => (result as any)[toPascal(key)] = NodeUtils.evaluateUntyped(ctx, hae[key], () => key));
+    Dic.getKeys(hae as any).filter(k => k != "style").forEach(key => (result as any)[toPascal(key)] = NodeUtils.evaluateUntyped(parentCtx, hae[key], () => key));
     if (hae.style)
-        result.style = toCssProperties(ctx, hae.style);
+        result.style = toCssProperties(parentCtx, hae.style);
     
     return result;
 }
@@ -47,10 +47,10 @@ export function withClassName(attrs: React.HTMLAttributes | undefined, className
     return attrs;
 }
 
-export function toCssProperties(ctx: TypeContext<ModifiableEntity>, cpe: CssPropertiesExpression): React.CSSProperties {
+export function toCssProperties(parentCtx: TypeContext<ModifiableEntity>, cpe: CssPropertiesExpression): React.CSSProperties {
 
     var result: React.CSSProperties = {};
-    Dic.getKeys(cpe as any).forEach(key => (result as any)[toPascal(key)] = NodeUtils.evaluateUntyped(ctx, cpe[key], ()=>key));
+    Dic.getKeys(cpe as any).forEach(key => (result as any)[toPascal(key)] = NodeUtils.evaluateUntyped(parentCtx, cpe[key], ()=>key));
     return result;
 
 }
