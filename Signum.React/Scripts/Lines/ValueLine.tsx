@@ -38,15 +38,18 @@ export enum ValueLineType {
 export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
 
     calculateDefaultState(state: ValueLineProps) {
-        state.valueLineType = this.calculateValueLineType(state);
+        state.valueLineType = ValueLine.getValueLineType(state.type!);
+
+        if (state.valueLineType == undefined)
+            throw new Error(`No value line found for '${state.type!.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
     }
 
-    calculateValueLineType(state : ValueLineProps): ValueLineType {
 
-        const t = state.type!;
 
+    static getValueLineType(t: TypeReference): ValueLineType | undefined {
+        
         if (t.isCollection || t.isLite)
-            throw new Error("ValueLine not implemented for " + JSON.stringify(t));
+            return undefined;
         
         if (isTypeEnum(t.name) || t.name == "boolean" && !t.isNotNullable)
             return ValueLineType.Enum;
@@ -69,7 +72,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
         if (t.name == "TimeSpan")
             return ValueLineType.TimeSpan;
 
-        throw new Error(`No value line found for '${t.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
+        return undefined;
     }
 
     overrideProps(state: ValueLineProps, overridenProps: ValueLineProps) {
@@ -246,7 +249,7 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
                     className={addClass(vl.state.valueHtmlProps, "form-control") }
                     value={s.ctx.value || ""}
                     onBlur={handleBlur}
-                    //onChange={handleTextOnChange} https://github.com/facebook/react/issues/7211
+                    onChange={handleTextOnChange} //https://github.com/facebook/react/issues/7211
                     onInput={handleTextOnChange}
                     placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : undefined}/>)
             }
@@ -292,7 +295,7 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
             <textarea {...vl.state.valueHtmlProps} className={addClass(vl.state.valueHtmlProps, "form-control")} value={s.ctx.value || ""}
-                //onChange={handleTextOnChange} https://github.com/facebook/react/issues/7211
+                onChange={handleTextOnChange} //https://github.com/facebook/react/issues/7211
                 onInput={handleTextOnChange} 
                 onBlur={handleBlur}
                 placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : undefined}/>
@@ -369,7 +372,7 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?
 
         return <input {...this.props.htmlProps} type="text" className={addClass(this.props.htmlProps, "form-control numeric") } value={value}
             onBlur={this.handleOnBlur}
-            //onChange={this.handleOnChange} https://github.com/facebook/react/issues/7211
+            onChange={this.handleOnChange} //https://github.com/facebook/react/issues/7211
             onInput={this.handleOnChange}
             onKeyDown={this.handleKeyDown}/>
 
@@ -487,7 +490,7 @@ export class DurationTextBox extends React.Component<DurationTextBoxProps, { tex
 
         return <input {...this.props.htmlProps} type="text" className={addClass(this.props.htmlProps, "form-control numeric") } value={value}
             onBlur={this.handleOnBlur}
-            //onChange={this.handleOnChange} https://github.com/facebook/react/issues/7211
+            onChange={this.handleOnChange} //https://github.com/facebook/react/issues/7211
             onInput={this.handleOnChange} 
             onKeyDown={this.handleKeyDown}/>
 
