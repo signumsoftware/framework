@@ -16,6 +16,7 @@ using Signum.Entities.Basics;
 using Signum.Entities.RestLog;
 using Signum.Entities.UserAssets;
 using Signum.Utilities;
+using Signum.React.Filters;
 
 namespace Signum.React.RestLog
 {
@@ -37,8 +38,7 @@ namespace Signum.React.RestLog
                 Controller = actionContext.ControllerContext.Controller.ToString(),
                 Action = actionContext.ActionDescriptor.ActionName,
                 StartDate = TimeZoneManager.Now,
-                RequestBody = GetRequestBody(actionContext.Request)
-
+                RequestBody = (string)actionContext.Request.Properties.TryGetC(SignumAuthenticationAndProfilerAttribute.SavedRequestKey)
             };
 
             actionContext.ControllerContext.RouteData.Values.Add(typeof(RestLogEntity).FullName, request);

@@ -28,9 +28,6 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
         );
     }
     renderCode(ctx: TypeContext<string | null>) {
-        if (!ctx.value) 
-            return null;
-
         return (
             <fieldset>
                 <legend>{ctx.niceName()}</legend>
