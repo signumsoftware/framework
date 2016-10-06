@@ -212,7 +212,7 @@ namespace Signum.Engine.Migrations
                 int pos = 0;
 
                 try
-                {   
+                {
                     for (pos = 0; pos < parts.Length; pos++)
                     {
                         if (autoRun)
@@ -221,8 +221,12 @@ namespace Signum.Engine.Migrations
                             SafeConsole.WaitExecute("Executing {0} [{1}/{2}]".FormatWith(title, pos + 1, parts.Length), () => Executor.ExecuteNonQuery(parts[pos]));
                     }
                 }
-                catch (SqlException e)
+                catch (Exception ex)
                 {
+                    var e = ex as SqlException ?? ex.InnerException as SqlException;
+                    if (e == null)
+                        throw;
+
                     Console.WriteLine();
                     Console.WriteLine();
 
