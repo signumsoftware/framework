@@ -78,8 +78,9 @@ namespace Signum.TSGenerator
                                           AssemblyName = Path.GetFileNameWithoutExtension(r),
                                           AssemblyFullPath = r,
                                           ReactDirectory = reactDirectory,
-                                          AllTypescriptFiles = new DirectoryInfo(reactDirectory)
-                                          .EnumerateFiles("*.ts", SearchOption.AllDirectories).Select(a => a.FullName)
+                                          AllTypescriptFiles = new DirectoryInfo(reactDirectory).EnumerateFiles("*.ts", SearchOption.AllDirectories)
+                                          .Concat(new DirectoryInfo(reactDirectory).EnumerateFiles("*.t4s", SearchOption.AllDirectories))
+                                          .Select(a => a.FullName)
                                           .Where(fn => !fn.Contains(@"\obj\") && !fn.Contains(@"\bin\")) //Makes problem when deploying
                                           .ToList(),
                                       }).ToDictionary(a => a.AssemblyName)

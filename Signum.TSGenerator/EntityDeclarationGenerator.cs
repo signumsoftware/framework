@@ -544,17 +544,27 @@ namespace Signum.TSGenerator
 
         private static string FindDeclarationsFile(AssemblyReference assemblyReference, string @namespace)
         {
-            var file = @namespace + ".ts";
+            var fileTS = @namespace + ".ts";
 
-            var result = assemblyReference.AllTypescriptFiles.Where(a => Path.GetFileName(a) == file).ToList();
+            var result = assemblyReference.AllTypescriptFiles.Where(a => Path.GetFileName(a) == fileTS).ToList();
 
-            if (result.Count == 0)
-                throw new InvalidOperationException($"No '{file}' found in '{assemblyReference}'");
+            if (result.Count == 1)
+                return result.Single();
 
             if (result.Count > 1)
-                throw new InvalidOperationException($"Multiple '{file}' found in '{assemblyReference}':\r\n{string.Join("\r\n", result.Select(a => "    " + a).ToArray())}");
+                throw new InvalidOperationException($"Multiple '{fileTS}' found in '{assemblyReference.AssemblyName}':\r\n{string.Join("\r\n", result.Select(a => "    " + a).ToArray())}");
 
-            return result.Single();
+            var fileT4S = @namespace + ".t4s";
+
+            result = assemblyReference.AllTypescriptFiles.Where(a => Path.GetFileName(a) == fileT4S).ToList();
+
+            if (result.Count == 1)
+                return result.Single().RemoveSuffix(".t4s") + ".ts";
+
+            if (result.Count > 1)
+                throw new InvalidOperationException($"Multiple '{fileT4S}' found in '{assemblyReference.AssemblyName}':\r\n{string.Join("\r\n", result.Select(a => "    " + a).ToArray())}");
+
+            throw new InvalidOperationException($"No '{fileTS}' or '{fileT4S}' found in '{assemblyReference.AssemblyName}'");
         }
 
         private static string BaseTypeScriptName(Type type)
