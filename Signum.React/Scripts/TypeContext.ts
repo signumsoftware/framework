@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, LambdaMemberType, Type, PseudoType, getTypeName } from './Reflection'
-import { ModelState, MList, ModifiableEntity, EntityPack } from './Signum.Entities'
+import { ModelState, MList, ModifiableEntity, EntityPack, Entity } from './Signum.Entities'
 
 export type FormGroupStyle =
     "None" |  /// Unaffected by FormGroupSize     
@@ -195,6 +195,18 @@ export class TypeContext<T> extends StyleContext {
         const binding = createBinding(this.value, property);
 
         const result = new TypeContext<any>(this, styleOptions, subRoute, binding);
+
+        return result;
+    }
+
+    cast<R extends T & Entity>(type: Type<R>): TypeContext<R> {
+
+        const entity = this.value as any as Entity;
+
+        if (type.typeName != entity.Type)
+            throw new Error(`Impossible to cast ${entity.Type} into ${type.typeName}`);
+
+        const result = new TypeContext<any>(this, undefined, PropertyRoute.root(type), new ReadonlyBinding(entity, this.binding.suffix + "_" + type.typeName));
 
         return result;
     }
