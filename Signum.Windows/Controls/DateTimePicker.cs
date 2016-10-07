@@ -157,6 +157,8 @@ namespace Signum.Windows
 
         void monthCalendar_SelectedDatesChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
+            BindingExpression b = textBox.GetBindingExpression(TextBox.TextProperty);
+            b.UpdateSource();
             if (!avoidClose)
                 pickerBase.IsDropDownOpen = false;
         }
