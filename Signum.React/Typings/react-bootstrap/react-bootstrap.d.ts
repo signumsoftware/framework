@@ -1030,6 +1030,24 @@ declare module "react-bootstrap" {
     interface Fade extends React.ReactElement<FadeProps> { }
     interface FadeClass extends React.ComponentClass<FadeProps> { }
     var Fade: FadeClass;
+
+    // <Collapse />
+    // ----------------------------------------
+    interface CollapseProps extends React.Props<CollapseClass> {
+        in?: boolean;
+        onEnter?: Function;
+        onEntered?: Function;
+        onEntering?: Function;
+        onExit?: Function;
+        onExited?: Function;
+        onExiting?: Function;
+        timeout?: number;
+        transitionAppear?: boolean;
+        unmountOnExit?: boolean;
+    }
+    interface Collapse extends React.ReactElement<CollapseProps> { }
+    interface CollapseClass extends React.ComponentClass<CollapseProps> { }
+    var Collapse: CollapseClass;
 }
 
 
