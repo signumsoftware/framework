@@ -140,6 +140,11 @@ namespace Signum.Engine
             this.Parameters = parameters;
         }
 
+        public void AlterSql(string sql)
+        {
+            this.Sql = sql;
+        }
+
         public override IEnumerable<SqlPreCommandSimple> Leaves()
         {
             yield return this;
