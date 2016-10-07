@@ -261,7 +261,7 @@ export class TypeContext<T> extends StyleContext {
     }
 
     get propertyPath() {
-        return this.propertyRoute ? this.propertyRoute.propertyPath() : undefined;
+        return this.propertyRoute && this.propertyRoute.propertyRouteType != "Root" ? this.propertyRoute.propertyPath() : undefined;
     }
 
     get errorClass(): string | undefined {

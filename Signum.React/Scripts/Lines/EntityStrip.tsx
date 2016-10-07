@@ -144,7 +144,11 @@ export interface EntityStripElementProps {
     autoComplete?: AutocompleteConfig<any> | null;
 }
 
-export class EntityStripElement extends React.Component<EntityStripElementProps, {item?: any}>
+export interface EntityStripElementState {
+    currentItem?: { entity: ModifiableEntity | Lite<Entity>, item?: any };
+}
+
+export class EntityStripElement extends React.Component<EntityStripElementProps, EntityStripElementState>
 {
     constructor(props: EntityStripElementProps) {
         super(props);
@@ -152,13 +156,29 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
     }
 
     componentWillMount() {
-        if (this.props.autoComplete)
-            this.props.autoComplete.getItemFromEntity(this.props.ctx.value).then(item => this.changeState(s => s.item = item)).done();
+        this.refreshItem(this.props);
     }
 
+    componentWillReceiveProps(newProps: EntityStripElementProps, nextContext: any) {
+        this.refreshItem(newProps);
+    }
+
+    refreshItem(props: EntityStripElementProps) {
+        if (this.props.autoComplete) {
+            var newEntity = props.ctx.value;
+            if (!this.state.currentItem || this.state.currentItem.entity !== newEntity) {
+                var ci = { entity: newEntity!, item: undefined }
+                this.changeState(s => s.currentItem = ci);
+                this.props.autoComplete.getItemFromEntity(newEntity)
+                    .then(item => this.changeState(s => ci.item = item))
+                    .done();
+            }
+        }
+    }
+    
     render() {
 
-        const toStr = this.state.item ? this.props.autoComplete!.renderItem(this.state.item) : getToString(this.props.ctx.value);
+        const toStr = this.state.currentItem && this.state.currentItem.item ? this.props.autoComplete!.renderItem(this.state.currentItem.item) : getToString(this.props.ctx.value);
 
         return (
             <li className="sf-strip-element input-group" {...EntityListBase.entityHtmlProps(this.props.ctx.value) }>

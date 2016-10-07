@@ -11,13 +11,15 @@ import * as Navigator from '../Navigator'
 import { StyleContext } from '../Typecontext'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks} from '../Lines/LineBase'
 
+export type CountSearchControlLayout = "View" | "Link" | "Badge" | "Span";
+
 export interface CountSearchControlProps extends React.Props<CountSearchControl> {
     ctx: StyleContext;
     findOptions: FindOptions;
     labelText?: React.ReactChild;
     labelProps?: React.HTMLAttributes;
-    style?: "View" | "Link" | "Badge" | "Span";
-    formGroupHtmlProps?: React.HTMLProps<HTMLDivElement>;
+    layout?: CountSearchControlLayout;
+    formGroupHtmlProps?: React.HTMLAttributes;
 }
 
 export interface CountSearchControlState {
@@ -59,10 +61,10 @@ export default class CountSearchControl extends React.Component<CountSearchContr
         if (!Finder.isFindable(this.props.findOptions.queryName))
             return null;
 
-        if (this.props.style == "Badge")
+        if (this.props.layout == "Badge")
             return this.renderBadget();
 
-        if (this.props.style == "Span")
+        if (this.props.layout == "Span")
             return this.renderSpan();
 
         return (
@@ -70,7 +72,7 @@ export default class CountSearchControl extends React.Component<CountSearchContr
                 labelText={this.props.labelText || getQueryNiceName(this.props.findOptions.queryName)}
                 labelProps={this.props.labelProps}
                 htmlProps={this.props.formGroupHtmlProps}>
-                {this.props.style == "Link" ? this.renderAsLink() : this.renderAsView() }
+                {this.props.layout == "Link" ? this.renderAsLink() : this.renderAsView() }
             </FormGroup>
         );
     }

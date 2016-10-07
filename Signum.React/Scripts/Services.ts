@@ -248,7 +248,7 @@ window.addEventListener("storage", se => {
 
 if (!sessionStorage.length) {
     // Ask other tabs for session storage
-    localStorage.setItem('getSessionStorage', new Date().toString());
+    localStorage.setItem('getSessionStorage' + _appName, new Date().toString());
 };
 
 
