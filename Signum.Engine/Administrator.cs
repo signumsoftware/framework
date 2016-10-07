@@ -400,6 +400,9 @@ namespace Signum.Engine
             if (oldEntity.GetType() != newEntity.GetType())
                 throw new ArgumentException("oldEntity and newEntity should have the same type");
 
+            if(oldEntity.Is(newEntity))
+                throw new ArgumentException("oldEntity and newEntity should not be the same ");
+
             Schema s = Schema.Current;
 
             Table refTable = s.Table(typeof(T));

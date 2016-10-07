@@ -10,12 +10,12 @@ namespace Signum.Utilities
     {
         int[,] num;
 
-        public int LevenshteinDistance(string strOld, string strNew, IEqualityComparer<char> comparer = null, Func<Choice<char>, int> weight = null)
+        public int LevenshteinDistance(string strOld, string strNew, IEqualityComparer<char> comparer = null, Func<Choice<char>, int> weight = null, bool allowTransposition = false)
         {
-            return LevenshteinDistance<char>(strOld.ToCharArray(), strNew.ToCharArray(), comparer, weight);
+            return LevenshteinDistance<char>(strOld.ToCharArray(), strNew.ToCharArray(), comparer, weight, allowTransposition);
         }
 
-        public int LevenshteinDistance<T>(T[] strOld, T[] strNew, IEqualityComparer<T> comparer = null, Func<Choice<T>, int> weight = null)
+        public int LevenshteinDistance<T>(T[] strOld, T[] strNew, IEqualityComparer<T> comparer = null, Func<Choice<T>, int> weight = null, bool allowTransposition = false)
         {
             int M1 = strOld.Length + 1;
             int M2 = strNew.Length + 1;
@@ -42,10 +42,15 @@ namespace Signum.Utilities
                     if (comparer.Equals(strOld[i - 1], strNew[j - 1]))
                         num[i, j] = num[i - 1, j - 1];
                     else
+                    {
                         num[i, j] = Math.Min(Math.Min(
                             num[i - 1, j] + weight(Choice<T>.Remove(strOld[i - 1])),
                             num[i, j - 1] + weight(Choice<T>.Add(strNew[j - 1]))),
                             num[i - 1, j - 1] + weight(Choice<T>.Substitute(strOld[i - 1], strNew[j - 1])));
+
+                        if (allowTransposition && i > 1 && j > 1 && comparer.Equals(strOld[i - 1], strNew[j - 2]) && comparer.Equals(strOld[i - 2], strNew[j - 1]))
+                            num[i, j] = Math.Min(num[i, j], num[i - 2, j - 2] + weight(Choice<T>.Transpose(strOld[i - 1], strOld[i - 2])));
+                    }
                 }
             }
 
@@ -60,6 +65,7 @@ namespace Signum.Utilities
             Substitute,
             Remove,
             Add,
+            Transpose,
         }
 
         public struct Choice<T>
@@ -98,6 +104,11 @@ namespace Signum.Utilities
                 return new Choice<T>(ChoiceType.Substitute, remove, add);
             }
 
+            internal static Choice<T> Transpose(T remove, T add)
+            {
+                return new Choice<T>(ChoiceType.Transpose, remove, add);
+            }
+
 
             public override string ToString()
             {
@@ -110,6 +121,8 @@ namespace Signum.Utilities
                     default: return null;
                 }
             }
+
+            
         }
 
         public List<Choice<char>> LevenshteinChoices(string strOld, string strNew, IEqualityComparer<char> comparer = null, Func<Choice<char>, int> weight = null)

@@ -70,7 +70,7 @@ namespace Signum.Entities.Reflection
             return DirectedGraph<Modifiable>.Generate(roots.Cast<Modifiable>(), ModifyInspector.FullExplore, ReferenceEqualityComparer<Modifiable>.Default);
         }
 
-        public static DirectedGraph<Modifiable> FromRootsIdentifiable<T>(IEnumerable<T> roots)
+        public static DirectedGraph<Modifiable> FromRootsEntity<T>(IEnumerable<T> roots)
             where T : Modifiable
         {
             return DirectedGraph<Modifiable>.Generate(roots.Cast<Modifiable>(), ModifyInspector.EntityExplore, ReferenceEqualityComparer<Modifiable>.Default);
