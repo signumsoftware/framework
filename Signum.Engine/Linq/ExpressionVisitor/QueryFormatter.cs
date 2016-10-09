@@ -22,6 +22,9 @@ namespace Signum.Engine.Linq
     /// </summary>
     internal class QueryFormatter : DbExpressionVisitor
     {
+        public static readonly ThreadVariable<Func<SqlPreCommandSimple, SqlPreCommandSimple>> PostFormatter = Statics.ThreadVariable<Func<SqlPreCommandSimple, SqlPreCommandSimple>>("QueryFormatterPostFormatter");
+
+
         StringBuilder sb = new StringBuilder();
         int indent = 2;
         int depth;
@@ -80,7 +83,9 @@ namespace Signum.Engine.Linq
 
             var parameters = qf.parameterExpressions.Values.Select(pi => pi.Parameter).ToList();
 
-            return new  SqlPreCommandSimple(qf.sb.ToString(), parameters); 
+            var sqlpc = new SqlPreCommandSimple(qf.sb.ToString(), parameters);
+
+            return PostFormatter.Value == null ? sqlpc : PostFormatter.Value.Invoke(sqlpc);
         }
 
         protected enum Indentation
@@ -934,4 +939,25 @@ namespace Signum.Engine.Linq
         }
         
     }
+
+
+
+
+    public class QueryPostFormatter : IDisposable
+    {
+        Func<SqlPreCommandSimple, SqlPreCommandSimple> prePostFormatter = null;
+
+        public QueryPostFormatter(Func<SqlPreCommandSimple, SqlPreCommandSimple> postFormatter)
+        {
+            prePostFormatter = QueryFormatter.PostFormatter.Value;
+
+            QueryFormatter.PostFormatter.Value = postFormatter;
+        }
+
+        public void Dispose()
+        {
+            QueryFormatter.PostFormatter.Value = prePostFormatter;
+        }
+    }
+
 }
