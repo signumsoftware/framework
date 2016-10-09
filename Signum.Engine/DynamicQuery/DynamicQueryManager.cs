@@ -142,10 +142,13 @@ namespace Signum.Engine.DynamicQuery
 
         public bool QueryAllowed(object queryName)
         {
-            if (AllowQuery == null)
-                return true;
+            foreach (var f in AllowQuery.GetInvocationListTyped())
+            {
+                if (!f(queryName))
+                    return false;
+            }
 
-            return AllowQuery(queryName);
+            return true;
         }
 
         public bool QueryDefined(object queryName)

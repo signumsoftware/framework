@@ -86,11 +86,10 @@ export interface SemiSymbol extends Entities.Entity {
 export const TypeEntity = new Type<TypeEntity>("Type");
 export interface TypeEntity extends Entities.Entity {
     Type: "Type";
-    fullClassName: string;
-    cleanName: string;
     tableName: string;
-    namespace: string | null;
-    className: string | null;
+    cleanName: string;
+    namespace: string;
+    className: string;
 }
 
 export namespace External {
