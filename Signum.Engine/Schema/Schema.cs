@@ -354,7 +354,7 @@ namespace Signum.Engine.Maps
                         }
                         catch (Exception ex)
                         {
-                            return new SqlPreCommandSimple(" -- Exception on {0}.{1}: {2}".FormatWith(e.Method.DeclaringType.Name, e.Method.Name, ex.Message));
+                            return new SqlPreCommandSimple("-- Exception on {0}.{1}\r\n{2}".FormatWith(e.Method.DeclaringType.Name, e.Method.Name, ex.Message.Indent(2, '-')));
                         }
                     })
                     .Combine(Spacing.Triple);
