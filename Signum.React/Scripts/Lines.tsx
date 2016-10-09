@@ -23,8 +23,11 @@ export { RenderEntity };
 import { EntityBase } from  './Lines/EntityBase'
 export { EntityBase };
 
-import { EntityLine, AutocompleteConfig, LiteAutocompleteConfig, FindOptionsAutocompleteConfig } from './Lines/EntityLine'
-export { EntityLine, AutocompleteConfig, LiteAutocompleteConfig, FindOptionsAutocompleteConfig };
+import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './Lines/AutocompleteConfig'
+export { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig };
+
+import { EntityLine } from './Lines/EntityLine'
+export { EntityLine };
 
 import { EntityCombo } from  './Lines/EntityCombo'
 export { EntityCombo };

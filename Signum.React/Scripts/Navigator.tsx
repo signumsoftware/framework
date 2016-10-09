@@ -5,13 +5,15 @@ import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
 import { Lite, Entity, ModifiableEntity, EmbeddedEntity, ModelEntity, LiteMessage, EntityPack, isEntity, isLite, isEntityPack, toLite } from './Signum.Entities';
 import { IUserEntity, TypeEntity } from './Signum.Entities.Basics';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName, isTypeEmbeddedOrValue, isTypeModel, KindOfType, OperationType, TypeReference } from './Reflection';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeInfos, getTypeName, isTypeEmbeddedOrValue, isTypeModel, KindOfType, OperationType, TypeReference, IsByAll } from './Reflection';
 import { TypeContext } from './TypeContext';
 import * as Finder from './Finder';
 import { needsCanExecute } from './Operations/EntityOperations';
 import * as Operations from './Operations';
 import ModalFrame from './Frames/ModalFrame';
 import { ViewReplacer } from './Frames/ReactVisitor'
+import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './Lines/AutocompleteConfig'
+import { FindOptions } from './FindOptions'
 
 
 Dic.skipClasses.push(React.Component);
@@ -359,6 +361,29 @@ function typeIsNavigable(typeName: string): EntityWhen {
     }
 }
 
+export function getAutoComplete(type: TypeReference, findOptions: FindOptions | undefined): AutocompleteConfig<any> | null {
+    if (type.isEmbedded || type.name == IsByAll)
+        return null;
+
+    if (findOptions)
+        return new FindOptionsAutocompleteConfig(findOptions, 5, false);
+
+    const types = getTypeInfos(type);
+
+    if (types.length == 1) {
+        var s = getSettings(types[0]);
+
+        if (s && s.autocomplete)
+            return s.autocomplete;
+    }
+
+    return new LiteAutocompleteConfig((subStr: string) => Finder.API.findLiteLike({
+        types: type.name,
+        subString: subStr,
+        count: 5
+    }), false);
+}
+
 
 export interface ViewOptions {
     title?: string;
@@ -518,6 +543,15 @@ export module API {
     }
 }
 
+export interface EntitySettingsOptions<T> {
+    isCreable?: EntityWhen;
+    isFindable?: boolean;
+    isViewable?: boolean;
+    isNavigable?: EntityWhen;
+    isReadOnly?: boolean;
+    avoidPopup?: boolean;
+    autocomplete?: AutocompleteConfig<T>;
+}
 
 export class EntitySettings<T extends ModifiableEntity> {
     type: Type<T>;
@@ -535,7 +569,8 @@ export class EntitySettings<T extends ModifiableEntity> {
     isViewable: boolean;
     isNavigable: EntityWhen;
     isReadOnly: boolean;
-
+    autocomplete: AutocompleteConfig<T> | undefined;
+    
     overrideView(override: (replacer: ViewReplacer<T>) => void) {
         if (this.viewOverrides == undefined)
             this.viewOverrides = [];
@@ -543,8 +578,7 @@ export class EntitySettings<T extends ModifiableEntity> {
         this.viewOverrides.push(override);
     }
 
-    constructor(type: Type<T>, getViewPromise?: (entity: T) => ViewPromise<any>,
-        options?: { isCreable?: EntityWhen, isFindable?: boolean; isViewable?: boolean; isNavigable?: EntityWhen; isReadOnly?: boolean, avoidPopup?: boolean }) {
+    constructor(type: Type<T>, getViewPromise?: (entity: T) => ViewPromise<any>, options?: EntitySettingsOptions<T>) {
 
         this.type = type;
         this.getViewPromise = getViewPromise;
