@@ -131,14 +131,10 @@ namespace Signum.React.Authorization
                     ((UserEntity)ctx.Entity).PasswordHash = Security.EncodePassword(password);
                 }
             });
-
-            if (QueryAuthLogic.IsStarted)
-                Omnibox.OmniboxServer.IsFindable += queryName => QueryAuthLogic.GetQueryAllowed(queryName);
-
+            
             if (TypeAuthLogic.IsStarted)
                 Omnibox.OmniboxServer.IsNavigable += type => TypeAuthLogic.GetAllowed(type).MaxUI() >= TypeAllowedBasic.Read;
-
-
+            
             SchemaMap.GetColorProviders += GetMapColors;
         }
 
