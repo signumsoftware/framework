@@ -7,6 +7,22 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 
 interface IDynamicValidationEvaluator {}
+export const DynamicTypeEntity = new Type<DynamicTypeEntity>("DynamicType");
+export interface DynamicTypeEntity extends Entities.Entity {
+    Type: "DynamicType";
+    namespace?: string | null;
+    typeName?: string | null;
+    type?: Entities.Lite<Basics.TypeEntity> | null;
+    typeDefinition?: string | null;
+}
+
+export module DynamicTypeOperation {
+    export const Create : Entities.ConstructSymbol_Simple<DynamicTypeEntity> = registerSymbol("Operation", "DynamicTypeOperation.Create");
+    export const Clone : Entities.ConstructSymbol_From<DynamicTypeEntity, DynamicTypeEntity> = registerSymbol("Operation", "DynamicTypeOperation.Clone");
+    export const Save : Entities.ExecuteSymbol<DynamicTypeEntity> = registerSymbol("Operation", "DynamicTypeOperation.Save");
+    export const Delete : Entities.DeleteSymbol<DynamicTypeEntity> = registerSymbol("Operation", "DynamicTypeOperation.Delete");
+}
+
 export const DynamicValidationEntity = new Type<DynamicValidationEntity>("DynamicValidation");
 export interface DynamicValidationEntity extends Entities.Entity {
     Type: "DynamicValidation";
