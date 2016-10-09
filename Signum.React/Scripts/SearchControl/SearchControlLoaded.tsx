@@ -396,12 +396,21 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         
         const pair = Finder.smartColumns(fo.columnOptions, Dic.getValues(this.props.queryDescription.columns));
 
+        const qs = Finder.getQuerySettings(fo.queryKey);
+
+        const defaultPagination = qs && qs.pagination || Finder.defaultPagination;
+
+        function equalsPagination(p1: Pagination, p2: Pagination) {
+            return p1.mode == p2.mode && p1.elementsPerPage == p2.elementsPerPage && p1.currentPage == p2.currentPage;
+        }
+
         const path = Finder.findOptionsPath({
             queryName: fo.queryKey,
             filterOptions: fo.filterOptions.filter(a => !!a.token).map(f => ({ columnName: f.token!.fullKey, operation: f.operation, value: f.value, frozen: f.frozen }) as FilterOption),
             orderOptions: fo.orderOptions.filter(a => !!a.token).map(o => ({ columnName: o.token.fullKey, orderType: o.orderType }) as OrderOption),
             columnOptions: pair.columns,
             columnOptionsMode: pair.mode,
+            pagination: fo.pagination && !equalsPagination(fo.pagination, defaultPagination) ? fo.pagination : undefined
         } as FindOptions);
 
         if (ev.ctrlKey || ev.button == 1)
@@ -409,6 +418,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         else
             Navigator.currentHistory.push(path);
     };
+
+   
 
     createTitle() {
 
