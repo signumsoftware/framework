@@ -106,7 +106,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string BaseFileName(Module m)
         {
-            return Path.Combine(GetProjectFolder(), "Modules\\" + m.ModuleName + "\\");
+            return Path.Combine(GetProjectFolder(), "App\\" + m.ModuleName + "\\");
         }
 
         protected virtual IEnumerable<Module> GetModules()
@@ -275,24 +275,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string WriteTypingsFile(Module mod)
         {
-            var fra = FrameworkRelativePath(false);
-            var era = ExtensonsRelativePath(false);
-
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine("//Assembly: " + mod.Types.First().Assembly.GetName().Name + ".dll");
-            sb.AppendLine("import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '" + fra + "Signum.React/Scripts/Reflection'");
-            sb.AppendLine();
-            sb.AppendLine("//Entities.Assembly: Signum.Entities.dll");
-            sb.AppendLine("import * as Entities from '" + fra + "Signum.React/Scripts/Signum.Entities'");
-            sb.AppendLine();
-            foreach (var m in GetTypingsImports())
-            {
-                sb.AppendLine($"//{m}.Assembly: Signum.Entities.Extensions.dll");
-                sb.AppendLine($"import * as {m} from '{era}Signum.React.Extensions/{m}/Signum.Entities.{m}'");
-                sb.AppendLine();
-            }
-
-            return sb.ToString();
+            return "";
         }
 
         private static string[] GetTypingsImports()
@@ -352,7 +335,7 @@ namespace Signum.Engine.CodeGeneration
         {
             var v = GetVarName(type);
 
-            return "Navigator.addSettings(new EntitySettings({0}, {1} => new Promise(resolve => require(['./Templates/{2}'], resolve))));".FormatWith(
+            return "Navigator.addSettings(new EntitySettings({0}, {1} => new ViewPromise(resolve => require(['./Templates/{2}'], resolve))));".FormatWith(
                 type.Name, v, GetViewName(type));
         }
 
