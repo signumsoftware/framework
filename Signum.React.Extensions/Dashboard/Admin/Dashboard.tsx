@@ -18,7 +18,14 @@ import { EntityGridRepeater, EntityGridItem } from './EntityGridRepeater'
 
 require("!style!css!../Dashboard.css");
 
-export default class ChartScript extends React.Component<{ ctx: TypeContext<DashboardEntity> }, void> {
+export default class Dashboard extends React.Component<{ ctx: TypeContext<DashboardEntity> }, void> {
+
+    handleEntityTypeChange = () => {
+        if (!this.props.ctx.value.entityType)
+            this.props.ctx.value.embeddedInEntity = null;
+
+        this.forceUpdate() 
+    }
 
     render() {
         const ctx = this.props.ctx;
@@ -42,7 +49,7 @@ export default class ChartScript extends React.Component<{ ctx: TypeContext<Dash
                             <EntityLine ctx={sc.subCtx(cp => cp.owner) } create={false} />
                         </div>
                         <div className="col-sm-4">
-                            <EntityLine ctx={sc.subCtx(cp => cp.entityType) } onChange={() => this.forceUpdate() }  />
+                            <EntityLine ctx={sc.subCtx(cp => cp.entityType)} onChange={this.handleEntityTypeChange} />
                         </div>
                         {sc.value.entityType && <div className="col-sm-4">
                             <ValueLine ctx={sc.subCtx(f => f.embeddedInEntity) }  />
