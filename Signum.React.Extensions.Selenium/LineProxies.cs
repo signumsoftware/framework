@@ -604,7 +604,7 @@ arguments[0].dispatchEvent(new Event('blur'));";
         
         public LineContainer<T> Details<T>(int index) where T : ModifiableEntity
         {
-            return new LineContainer<T>(ItemElement(index).Find(), this.ItemRoute);
+            return new LineContainer<T>(ItemElement(index).WaitPresent(), this.ItemRoute);
         }
 
         public IWebElement RemoveElementIndex(int index)
@@ -743,6 +743,7 @@ arguments[0].dispatchEvent(new Event('blur'));";
         public FileLineProxy(IWebElement element, PropertyRoute route)
             : base(element, route)
         {
+            
         }
 
         public void SetPath(string path)
@@ -754,6 +755,19 @@ arguments[0].dispatchEvent(new Event('blur'));";
         private WebElementLocator FileElement
         {
             get { return this.Element.WithLocator(By.CssSelector("input[type=file]")); }
+        }
+    }
+
+    public static class FileExtensions
+    {
+        public static LineContainer<T> SetPath<T>(this EntityRepeaterProxy repeater, string path) where T: ModifiableEntity
+        {
+            var count = repeater.ItemsCount();
+
+            var input = repeater.Element.FindElement(By.CssSelector("input[type=file]"));
+            input.SendKeys(path);
+            
+            return repeater.Details<T>(count + 1);
         }
     }
 }
