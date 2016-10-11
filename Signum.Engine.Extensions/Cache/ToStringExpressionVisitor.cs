@@ -65,7 +65,7 @@ namespace Signum.Engine.Cache
 
             ConstantExpression tab = Expression.Constant(n.Constructor.cachedTable, typeof(CachedTable<>).MakeGenericType(((Table)n.Constructor.table).Type));
             
-            Expression origin = Expression.Convert(Expression.Property(Expression.Property(tab, "Rows"), "Item", n.PrimaryKey.UnNullify()), n.Constructor.tupleType);
+            Expression origin = Expression.Convert(Expression.Property(Expression.Call(tab, "GetRows", null), "Item", n.PrimaryKey.UnNullify()), n.Constructor.tupleType);
 
             var result = ExpressionReplacer.Replace(body, new Dictionary<ParameterExpression, Expression> { { n.Constructor.origin, origin } });
 
