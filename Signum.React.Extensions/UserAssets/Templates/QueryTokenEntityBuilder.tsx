@@ -49,11 +49,10 @@ export default class QueryTokenEntityBuilder extends React.Component<QueryTokenE
                 {
                     !qte || !qte.parseException ? tokenBuilder :
                         <div>
-                            {tokenBuilder}
-                            <br />
                             <code>{qte.tokenString}</code>
                             <br />
-
+                            {tokenBuilder}
+                            <br />
                             <p className="alert alert-danger">
                                 {qte.parseException}
                             </p>
