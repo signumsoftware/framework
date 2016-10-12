@@ -92,7 +92,7 @@ namespace Signum.Engine.Mailing
 
             void DeclareVariable(ValueProviderBase token)
             {
-                if (token.Variable.HasText())
+                if (token?.Variable.HasText() == true)
                 {
                     if (variables.ContainsKey(token.Variable))
                         AddError(true, "There's already a variable '{0}' defined in this scope".FormatWith(token.Variable));

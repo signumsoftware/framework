@@ -371,7 +371,7 @@ namespace Signum.Engine.Word
 
         void DeclareVariable(ValueProviderBase token)
         {
-            if (token.Variable.HasText())
+            if (token?.Variable.HasText() == true)
             {
                 ValueProviderBase t;
                 if (variables.TryGetValue(token.Variable, out t))
