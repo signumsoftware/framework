@@ -128,7 +128,7 @@ namespace Signum.Engine.Word
 
         public override void WriteTo(System.Xml.XmlWriter xmlWriter)
         {
-            var tempText = new Text(ValueProvider.ToString());
+            var tempText = new Text(ValueProvider?.ToString());
 
             this.AppendChild(tempText);
             base.WriteTo(xmlWriter);
