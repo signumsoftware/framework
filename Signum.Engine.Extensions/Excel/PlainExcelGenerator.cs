@@ -204,7 +204,7 @@ namespace Signum.Engine.Excel
             return 10;
         }
 
-        internal static List<T> ReadPlainExcel<T>(Stream stream, Func<string[], T> selector)
+        public static List<T> ReadPlainExcel<T>(Stream stream, Func<string[], T> selector)
         {
             using (SpreadsheetDocument document = SpreadsheetDocument.Open(stream, false))
             {
