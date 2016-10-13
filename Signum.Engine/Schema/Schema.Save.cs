@@ -642,6 +642,9 @@ namespace Signum.Engine.Maps
             if (ident.Modified == ModifiedState.Clean || ident.Modified == ModifiedState.Sealed)
                 return null;
 
+            if (ident.Modified == ModifiedState.Modified)
+                throw new InvalidOperationException("Some sub-entities of '{0}' are modified but not the entity itself".FormatWith(ident));
+
             var uc = updater.Value;
             SqlPreCommandSimple update = new SqlPreCommandSimple(uc.SqlUpdatePattern(suffix, false),
                 uc.UpdateParameters(ident, (ident as Entity)?.Ticks ?? -1, new Forbidden(), suffix)).AddComment(comment);
