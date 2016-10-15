@@ -2,7 +2,7 @@
 
 [Database](../Database.md) and [Administrator](../Administrator.md) are static classes, and you usually save, retrieve and query objects with a certain level of ignorance of how the database looks ([Schema](../Schema.md)), or where it is physically located (connection string). 
 
-Not having to pass the connectionString and the `Schema` as a parameter all the time doesn't mean that you don't have the flexibility to change it when you think it is convenient. In order to change the connection in a region of your code just use `Connector.Override`.
+Not having to pass the connectionString and the `Schema` as a parameter all the time doesn't mean that you don't have the flexibility to change it when you think it is necessary. In order to change the connection in a block of your code just use `Connector.Override`.
 
 
 ### Connector class

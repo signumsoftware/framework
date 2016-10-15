@@ -106,7 +106,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string BaseFileName(Module m)
         {
-            return Path.Combine(GetProjectFolder(), "Modules\\" + m.ModuleName + "\\");
+            return Path.Combine(GetProjectFolder(), "App\\" + m.ModuleName + "\\");
         }
 
         protected virtual IEnumerable<Module> GetModules()

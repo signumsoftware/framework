@@ -42,9 +42,9 @@ public static object ExecuteDataTable(this SqlPreCommandSimple preCommand)
 Calls `ExecuteDataSet` on a `DbConnection` of the current [Connector](Connector.md)
 
 ```C#
-public static object ExecuteDataSet(string sql)
-public static object ExecuteDataSet(string sql, List<DbParameter> parameters)
-public static object ExecuteDataSet(this SqlPreCommandSimple preCommand)
+public static DataSet ExecuteDataSet(string sql)
+public static DataSet ExecuteDataSet(string sql, List<DbParameter> parameters)
+public static DataSet ExecuteDataSet(this SqlPreCommandSimple preCommand)
 ```
 
 ### ExecuteLeaves
@@ -52,7 +52,7 @@ public static object ExecuteDataSet(this SqlPreCommandSimple preCommand)
 Calls `ExecuteLeaves` on a `DbConnection` of the current [Connector](Connector.md)
 
 ```C#
-public static object ExecuteLeaves(this SqlPreCommand preCommand)
+public static void ExecuteLeaves(this SqlPreCommand preCommand)
 ```
 
 

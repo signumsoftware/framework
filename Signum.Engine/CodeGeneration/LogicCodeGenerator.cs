@@ -163,7 +163,7 @@ namespace Signum.Engine.CodeGeneration
 
             foreach (var item in mod.Types)
             {
-                string include = WritetInclude(item);
+                string include = WriteInclude(item);
                 if (include != null)
                     sb.Append(include.Indent(8));
 
@@ -211,7 +211,7 @@ namespace Signum.Engine.CodeGeneration
                 .Replace("{NiceName}", ei.IsUnique ? "NiceName" : "NicePluralName");
         }
 
-        protected virtual string WritetInclude(Type type)
+        protected virtual string WriteInclude(Type type)
         {
             var ops = GetOperationsSymbols(type);
             var save = ops.SingleOrDefaultEx(o => GetOperationType(o) == OperationType.Execute && IsSave(o));
