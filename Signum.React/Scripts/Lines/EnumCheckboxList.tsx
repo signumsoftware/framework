@@ -35,11 +35,11 @@ export class EnumCheckboxList extends LineBase<EnumCheckboxListProps, EnumCheckb
 
         if (toRemove.length) {
             toRemove.forEach(mle => list.remove(mle));
-            this.forceUpdate();
+            this.setValue(list);
         }
         else {
             list.push(newMListElement(val));
-            this.forceUpdate();
+            this.setValue(list);
         }
     }
 

@@ -17,6 +17,8 @@ namespace Signum.React.Filters
 {
     public class SignumAuthenticationAndProfilerAttribute : FilterAttribute, IAuthorizationFilter
     {
+        public const string SavedRequestKey = "SAVED_REQUEST";
+
         public static Func<HttpActionContext, IDisposable> Authenticate;
 
         public async Task<HttpResponseMessage> ExecuteAuthorizationFilterAsync(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
@@ -34,6 +36,8 @@ namespace Signum.React.Filters
                     //        actionContext.Request.RegisterForDispose(sessionTimeout);
                     //}
 
+                    actionContext.Request.Properties[SavedRequestKey] = await actionContext.Request.Content.ReadAsStringAsync();
+                            
                     using (Authenticate == null ? null : Authenticate(actionContext))
                     {
                         if (actionContext.Response != null)

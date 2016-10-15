@@ -8,7 +8,7 @@ import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, mlistItemContext, EntityFrame } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, LambdaMemberType } from '../Reflection'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../Lines/LineBase'
-import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, newMListElement  } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString  } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
 import { EntityListBase, EntityListBaseProps } from './EntityListBase'
 
@@ -40,7 +40,7 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
 
     componentWillMount() {
         if (!this.state.data) {
-            Finder.API.findAllLites({ types: this.state.type!.name })
+            Finder.API.fetchAllLites({ types: this.state.type!.name })
                 .then(data => this.setState({ data: data.orderBy(a => a.toStr) } as any))
                 .done();
         }
@@ -61,12 +61,11 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
 
         if (toRemove.length) {
             toRemove.forEach(mle => list.remove(mle));
-            this.forceUpdate();
+            this.setValue(list);
         }
         else {
             this.convert(lite).then(e => {
-                list.push(newMListElement(e));
-                this.forceUpdate();
+                this.addElement(e);
             }).done();
         }
     }

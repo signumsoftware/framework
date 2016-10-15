@@ -285,7 +285,7 @@ namespace Signum.React.Facades
                               .ToDictionary(fi => fi.Name, fi => OnAddFieldInfoExtension(new MemberInfoTS
                               {
                                   NiceName = fi.NiceName(),
-                                  IsIgnored = kind == KindOfType.Enum && fi.HasAttribute<IgnoreAttribute>()
+                                  IsIgnoredEnum = kind == KindOfType.Enum && fi.HasAttribute<IgnoreAttribute>()
                               }, fi)),
                           }, type))).ToDictionary("enums");
 
@@ -375,8 +375,8 @@ namespace Signum.React.Facades
         public string Unit { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "format")]
         public string Format { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isIgnored")]
-        public bool IsIgnored { get; set; }
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isIgnoredEnum")]
+        public bool IsIgnoredEnum { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "maxLength")]
         public int? MaxLength { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isMultiline")]

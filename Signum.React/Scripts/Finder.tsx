@@ -6,15 +6,15 @@ import { Dic } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
 import {
-    QueryDescription, CountQueryRequest, QueryRequest, FindOptions, 
+    QueryDescription, CountQueryRequest, QueryRequest, QueryEntitiesRequest, FindOptions, 
     FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, CountOptionsParsed,
     QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination, ResultColumn,
     ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest
 } from './FindOptions';
 
-import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType } from './Signum.Entities.DynamicQuery';
+import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage } from './Signum.Entities.DynamicQuery';
 
-import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity } from './Signum.Entities';
+import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity, External } from './Signum.Entities';
 import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 
 import {
@@ -57,9 +57,9 @@ export function isFindable(queryName: PseudoType | QueryKey): boolean {
     return isFindableEvent.every(f=> f(queryKey));
 }
 
-export function find(findOptions: FindOptions): Promise<Lite<Entity>>;
-export function find<T extends Entity>(type: Type<T>): Promise<Lite<T>>;
-export function find(obj: FindOptions | Type<any>): Promise<Lite<Entity>> {
+export function find(findOptions: FindOptions): Promise<Lite<Entity> | undefined>;
+export function find<T extends Entity>(type: Type<T>): Promise<Lite<T> | undefined>;
+export function find(obj: FindOptions | Type<any>): Promise<Lite<Entity> | undefined> {
 
     const fo = (obj as FindOptions).queryName ? obj as FindOptions :
         { queryName: obj as Type<any> } as FindOptions;
@@ -71,9 +71,9 @@ export function find(obj: FindOptions | Type<any>): Promise<Lite<Entity>> {
     });
 }
 
-export function findMany(findOptions: FindOptions): Promise<Lite<Entity>[]>;
-export function findMany<T extends Entity>(type: Type<T>): Promise<Lite<T>[]>;
-export function findMany(findOptions: FindOptions | Type<any>): Promise<Lite<Entity>[]> {
+export function findMany(findOptions: FindOptions): Promise<Lite<Entity>[] | undefined>;
+export function findMany<T extends Entity>(type: Type<T>): Promise<Lite<T>[] | undefined>;
+export function findMany(findOptions: FindOptions | Type<any>): Promise<Lite<Entity>[] | undefined> {
 
     const fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
         { queryName: findOptions as Type<any> } as FindOptions;
@@ -115,6 +115,9 @@ export function findOptionsPath(fo: FindOptions, extra?: any): string {
         showFooter: fo.showFooter,
         showHeader: fo.showHeader,
         allowChangeColumns: fo.allowChangeColumns,
+        paginationMode: fo.pagination && fo.pagination.mode,
+        elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,
+        currentPage: fo.pagination && fo.pagination.currentPage,
     };
     
     Encoder.encodeFilters(query, fo.filterOptions);
@@ -126,6 +129,30 @@ export function findOptionsPath(fo: FindOptions, extra?: any): string {
     return currentHistory.createPath({ pathname: "~/find/" + getQueryKey(fo.queryName), query: query });
 }
 
+export function getTypeNiceName(tr: TypeReference) {
+
+    const niceName = tr.typeNiceName ||
+        getTypeInfos(tr)
+            .map(ti => ti == undefined ? getSimpleTypeNiceName(tr.name) : (ti.niceName || ti.name))
+            .joinComma(External.CollectionMessage.Or.niceToString());
+
+    return tr.isCollection ? QueryTokenMessage.ListOf0.niceToString(niceName) : niceName;
+}
+
+export function getSimpleTypeNiceName(name: string) {
+
+    switch (name) {
+        case "string":
+        case "guid":
+            return QueryTokenMessage.Text.niceToString();
+        case "datetime": return QueryTokenMessage.DateTime.niceToString();
+        case "number": return QueryTokenMessage.Number.niceToString();
+        case "decimal": return QueryTokenMessage.DecimalNumber.niceToString();
+        case "boolean": return QueryTokenMessage.Check.niceToString();
+    }
+
+    return name;
+}
 
 
 export function parseFindOptionsPath(queryName: PseudoType | QueryKey, query: any): FindOptions {
@@ -143,6 +170,11 @@ export function parseFindOptionsPath(queryName: PseudoType | QueryKey, query: an
         showFilters: parseBoolean(query.showFilters),
         showFooter: parseBoolean(query.showFooter),
         showHeader: parseBoolean(query.showHeader),
+        pagination: query.paginationMode && {
+            mode: query.paginationMode,
+            elementsPerPage: query.elementsPerPage,
+            currentPage: query.currentPage,
+        } as Pagination,
     } as FindOptions;
 
     return result;
@@ -278,7 +310,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
         if (qd.columns[defaultOrder]) {
             fo.orderOptions = [{
                 columnName: defaultOrder,
-                orderType: tis.some(a => a.entityData == EntityData.Transactional) ? "Descending" as OrderType : "Ascending" as OrderType
+                orderType: tis.some(a => a.entityData == "Transactional") ? "Descending" as OrderType : "Ascending" as OrderType
             }];
         }
     }
@@ -329,6 +361,25 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
 
         return parseFilterValues(result.filterOptions)
             .then(() => result)
+    });
+}
+
+export function fetchEntitiesWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], count: number) : Promise<Lite<Entity>[]> {
+    return getQueryDescription(queryName).then(qd => {
+        return parseFilterOptions(filterOptions, qd).then(fop => {
+
+            let filters = fop.map(fo => ({
+                token: fo.token!.fullKey,
+                operation: fo.operation,
+                value: fo.value,
+            } as FilterRequest));
+
+            return API.fetchEntitiesWithFilters({
+                queryKey: qd.queryKey,
+                filters: filters,
+                count: count
+            });
+        }); 
     });
 }
 
@@ -523,15 +574,31 @@ export module API {
     }
 
     export function fetchQueryEntity(queryKey: string): Promise<QueryEntity> {
-        return ajaxGet<QueryEntity>({ url: "~/api/query/entity/" + queryKey });
+        return ajaxGet<QueryEntity>({ url: "~/api/query/queryEntity/" + queryKey });
     }
 
-    export function search(request: QueryRequest): Promise<ResultTable> {
-        return ajaxPost<ResultTable>({ url: "~/api/query/search" }, request);
+    export function executeQuery(request: QueryRequest): Promise<ResultTable> {
+        return ajaxPost<ResultTable>({ url: "~/api/query/executeQuery" }, request);
     }
-
+    
     export function queryCount(request: CountQueryRequest): Promise<number> {
         return ajaxPost<number>({ url: "~/api/query/queryCount" }, request);
+    }
+
+    export function fetchEntitiesWithFilters(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
+        return ajaxPost<Lite<Entity>[]>({ url: "~/api/query/entitiesWithFilter" }, request);
+    }
+    
+    export function fetchAllLites(request: { types: string }): Promise<Lite<Entity>[]> {
+        return ajaxGet<Lite<Entity>[]>({
+            url: currentHistory.createHref({ pathname: "~/api/query/allLites", query: request })
+        });
+    }
+
+    export function findTypeLike(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {
+        return ajaxGet<Lite<TypeEntity>[]>({
+            url: currentHistory.createHref({ pathname: "~/api/query/findTypeLike", query: request })
+        });
     }
 
     export function findLiteLike(request: { types: string, subString: string, count: number }): Promise<Lite<Entity>[]> {
@@ -540,26 +607,9 @@ export module API {
         });
     }
 
+
     export function findLiteLikeWithFilters(request: { queryKey: string, filters: FilterRequest[], subString: string, count: number }): Promise<Lite<Entity>[]> {
         return ajaxPost<Lite<Entity>[]>({ url: "~/api/query/findLiteLikeWithFilters" }, request);
-    }
-
-    export function findTypeLike(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {
-        return ajaxGet<Lite<TypeEntity>[]>({
-            url: currentHistory.createHref({ pathname: "~/api/query/findLiteLike", query: request })
-        });
-    }
-
-    export function findAllLites(request: { types: string }): Promise<Lite<Entity>[]> {
-        return ajaxGet<Lite<Entity>[]>({
-            url: currentHistory.createHref({ pathname: "~/api/query/findAllLites", query: request })
-        });
-    }
-
-    export function findAllEntities(request: { types: string }): Promise<Entity[]> {
-        return ajaxGet<Entity[]>({
-            url: currentHistory.createHref({ pathname: "~/api/query/findAllEntities", query: request })
-        });
     }
 
     export function parseTokens(queryKey: string, tokens: { token: string, options: SubTokensOptions }[]): Promise<QueryToken[]> {

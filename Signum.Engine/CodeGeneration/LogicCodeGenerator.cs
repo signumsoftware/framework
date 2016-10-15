@@ -221,9 +221,9 @@ namespace Signum.Engine.CodeGeneration
             return new[]
             {
                 "sb.Include<" + type.TypeName() + ">()",
-                save != null && ShouldWriteSimpleOperations(save) ? ("   .WidthSave(" + save.Symbol.ToString() + ")") : null,
-                delete != null && ShouldWriteSimpleOperations(delete) ? ("   .WidthDelete(" + delete.Symbol.ToString() + ")") : null,
-                p == null ? null : $".    WithQuery(dqm, {p} => ${WriteQueryConstructor(type, p)})"
+                save != null && ShouldWriteSimpleOperations(save) ? ("   .WithSave(" + save.Symbol.ToString() + ")") : null,
+                delete != null && ShouldWriteSimpleOperations(delete) ? ("   .WithDelete(" + delete.Symbol.ToString() + ")") : null,
+                p == null ? null : $"   .WithQuery(dqm, {p} => {WriteQueryConstructor(type, p)})"
             }.NotNull().ToString("\r\n") + ";";
         }
 

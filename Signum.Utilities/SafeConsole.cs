@@ -68,6 +68,14 @@ namespace Signum.Utilities
             Console.ForegroundColor = old;
         }
 
+        public static void WriteSameLineColor(ConsoleColor color, string str)
+        {
+            ConsoleColor old = Console.ForegroundColor;
+            Console.ForegroundColor = color;
+            WriteSameLine(str);
+            Console.ForegroundColor = old;
+        }
+
         public static string AskString(string question, Func<string, string> stringValidator = null)
         {
             Console.Write(question);

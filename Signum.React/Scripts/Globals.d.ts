@@ -41,10 +41,10 @@ interface Array<T> {
     toObjectDistinct<V>(this: Array<T>, keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
     flatMap<R>(this: Array<T>, selector: (element: T, index: number, array: T[]) => R[]): R[];
     clear(this: Array<T>): void;
-    groupsOf(this: Array<T>, maxCount: number): T[][];
-    sum(this: Array<T>, ): T;
-    max(this: Array<T>, ): T;
-    min(this: Array<T>, ): T;
+    groupsOf(this: Array<T>, groupSize: number, elementSize?: (item: T) => number): T[][];
+    max(this: Array<T>): T;
+    min(this: Array<T>): T;
+    sum(this: Array<number>): number;
     first(this: Array<T>, errorContext?: string): T;
     firstOrNull(this: Array<T>, ): T | null;
     last(this: Array<T>, errorContext?: string): T;

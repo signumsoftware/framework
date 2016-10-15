@@ -75,7 +75,8 @@ namespace Signum.Engine.Basics
                         t.Id,
                         t.TableName,
                         t.CleanName,
-                        t.FullClassName,
+                        t.ClassName,
+                        t.Namespace,
                     });
 
                 TypeEntity.SetTypeDNCallbacks(
@@ -110,9 +111,10 @@ namespace Signum.Engine.Basics
                     {
                         var originalName = c.FullClassName;
 
-                        c.FullClassName = s.FullClassName;
                         c.TableName = s.TableName;
                         c.CleanName = s.CleanName;
+                        c.Namespace = s.Namespace;
+                        c.ClassName = s.ClassName;
                         return table.UpdateSqlSync(c, comment: originalName);
                     }, Spacing.Double);
         }
@@ -142,13 +144,14 @@ namespace Signum.Engine.Basics
         internal static List<TypeEntity> GenerateSchemaTypes()
         {
             var list = (from tab in Schema.Current.Tables.Values
-                         let type = EnumEntity.Extract(tab.Type) ?? tab.Type
-                         select new TypeEntity
-                         {
-                             FullClassName = type.FullName,
-                             TableName = tab.Name.Name,
-                             CleanName = Reflector.CleanTypeName(type)
-                         }).ToList();
+                        let type = EnumEntity.Extract(tab.Type) ?? tab.Type
+                        select new TypeEntity
+                        {
+                            TableName = tab.Name.Name,
+                            CleanName = Reflector.CleanTypeName(type),
+                            Namespace = type.Namespace,
+                            ClassName = type.Name,
+                        }).ToList();
             return list;
         }
 

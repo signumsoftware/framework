@@ -5,20 +5,34 @@ using System.Text;
 using Signum.Utilities;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities;
 
 namespace Signum.Entities.Basics
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Master), TicksColumn(false), InTypeScript(Undefined = false)]
     public class TypeEntity : Entity
     {
+
         [NotNullable, UniqueIndex]
-        public string FullClassName { get; set; }
+        public string TableName { get; set; }
 
         [NotNullable, UniqueIndex]
         public string CleanName { get; set; }
 
-        [NotNullable, UniqueIndex]
-        public string TableName { get; set; }
+        [NotNullable]
+        public string Namespace { get; set; }
+
+        [NotNullable]
+        public string ClassName { get; set; }
+
+
+        static Expression<Func<TypeEntity, string>> FullClassNameExpression =
+            t => t.Namespace + "." + t.ClassName;
+        [ExpressionField]
+        public string FullClassName
+        {
+            get { return FullClassNameExpression.Evaluate(this); }
+        }
 
         static Expression<Func<TypeEntity, string>> ToStringExpression = e => e.CleanName;
         [ExpressionField]
@@ -32,17 +46,7 @@ namespace Signum.Entities.Basics
             if (type == null)
                 throw new ArgumentException("type");
 
-            return FullClassName == type.FullName;
-        }
-
-        public string Namespace
-        {
-            get { return FullClassName.Substring(0, FullClassName.LastIndexOf('.').NotFound(0)); }
-        }
-
-        public string ClassName
-        {
-            get { return FullClassName.Substring(FullClassName.LastIndexOf('.') + 1); }
+            return ClassName == type.Name && Namespace == type.Namespace;
         }
 
         public static Func<Type, TypeEntity> ToTypeDNFunc = t => { throw new InvalidOperationException("Lite.ToTypeDNFunc is not set"); };

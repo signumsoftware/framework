@@ -517,7 +517,7 @@ namespace Signum.TSGenerator
                 nsReference = new NamespaceTSReference
                 {
                     Namespace = type.Namespace,
-                    Path = FindDeclarationsFile(assemblyReference.ReactDirectory, type.Namespace),
+                    Path = FindDeclarationsFile(assemblyReference, type.Namespace),
                     VariableName = GetVariableName(options, type.Namespace.Split('.'))
                 };
 
@@ -542,17 +542,29 @@ namespace Signum.TSGenerator
             }
         }
 
-        private static string FindDeclarationsFile(string reactDirectory, string @namespace)
+        private static string FindDeclarationsFile(AssemblyReference assemblyReference, string @namespace)
         {
-            var file = @namespace + ".ts";
+            var fileTS = @namespace + ".ts";
 
-            var result = new DirectoryInfo(reactDirectory).EnumerateFiles(file, SearchOption.AllDirectories).Select(a => a.FullName).FirstOrDefault();
+            var result = assemblyReference.AllTypescriptFiles.Where(a => Path.GetFileName(a) == fileTS).ToList();
 
-            if (result == null)
-                throw new InvalidOperationException($"Directory '{reactDirectory}' not found '{file}'");
+            if (result.Count == 1)
+                return result.Single();
 
-            return result;
+            if (result.Count > 1)
+                throw new InvalidOperationException($"Multiple '{fileTS}' found in '{assemblyReference.AssemblyName}':\r\n{string.Join("\r\n", result.Select(a => "    " + a).ToArray())}");
 
+            var fileT4S = @namespace + ".t4s";
+
+            result = assemblyReference.AllTypescriptFiles.Where(a => Path.GetFileName(a) == fileT4S).ToList();
+
+            if (result.Count == 1)
+                return result.Single().RemoveSuffix(".t4s") + ".ts";
+
+            if (result.Count > 1)
+                throw new InvalidOperationException($"Multiple '{fileT4S}' found in '{assemblyReference.AssemblyName}':\r\n{string.Join("\r\n", result.Select(a => "    " + a).ToArray())}");
+
+            throw new InvalidOperationException($"No '{fileTS}' or '{fileT4S}' found in '{assemblyReference.AssemblyName}'");
         }
 
         private static string BaseTypeScriptName(Type type)
@@ -640,6 +652,8 @@ namespace Signum.TSGenerator
         public string ReactDirectory;
         public string AssemblyFullPath;
         public string AssemblyName;
+
+        public List<string> AllTypescriptFiles;
 
         public Dictionary<string, NamespaceTSReference> NamespacesReferences = new Dictionary<string, NamespaceTSReference>();
     }

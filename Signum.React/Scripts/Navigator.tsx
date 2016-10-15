@@ -5,13 +5,15 @@ import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
 import { Lite, Entity, ModifiableEntity, EmbeddedEntity, ModelEntity, LiteMessage, EntityPack, isEntity, isLite, isEntityPack, toLite } from './Signum.Entities';
 import { IUserEntity, TypeEntity } from './Signum.Entities.Basics';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName, isTypeEmbeddedOrValue, isTypeModel, KindOfType, OperationType, TypeReference } from './Reflection';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeInfos, getTypeName, isTypeEmbeddedOrValue, isTypeModel, KindOfType, OperationType, TypeReference, IsByAll } from './Reflection';
 import { TypeContext } from './TypeContext';
 import * as Finder from './Finder';
 import { needsCanExecute } from './Operations/EntityOperations';
 import * as Operations from './Operations';
 import ModalFrame from './Frames/ModalFrame';
 import { ViewReplacer } from './Frames/ReactVisitor'
+import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './Lines/AutocompleteConfig'
+import { FindOptions } from './FindOptions'
 
 
 Dic.skipClasses.push(React.Component);
@@ -175,18 +177,18 @@ function typeIsCreable(typeName: string): EntityWhen {
     if (typeInfo == undefined)
         return "IsLine";
 
-    if (typeInfo.kind == KindOfType.Enum)
+    if (typeInfo.kind == "Enum")
         return "Never";
 
     switch (typeInfo.entityKind) {
-        case EntityKind.SystemString: return "Never";
-        case EntityKind.System: return "Never";
-        case EntityKind.Relational: return "Never";
-        case EntityKind.String: return "IsSearch";
-        case EntityKind.Shared: return "Always";
-        case EntityKind.Main: return "IsSearch";
-        case EntityKind.Part: return "IsLine";
-        case EntityKind.SharedPart: return "IsLine";
+        case "SystemString": return "Never";
+        case "System": return "Never";
+        case "Relational": return "Never";
+        case "String": return "IsSearch";
+        case "Shared": return "Always";
+        case "Main": return "IsSearch";
+        case "Part": return "IsLine";
+        case "SharedPart": return "IsLine";
         default: return "Never";
     }
 }
@@ -216,18 +218,18 @@ function typeIsReadOnly(typeName: string): boolean {
     if (typeInfo == undefined)
         return false;
 
-    if (typeInfo.kind == KindOfType.Enum)
+    if (typeInfo.kind == "Enum")
         return true;
 
     switch (typeInfo.entityKind) {
-        case EntityKind.SystemString: return true;
-        case EntityKind.System: return true;
-        case EntityKind.Relational: return true;
-        case EntityKind.String: return false;
-        case EntityKind.Shared: return false;
-        case EntityKind.Main: return false;
-        case EntityKind.Part: return false;
-        case EntityKind.SharedPart: return false;
+        case "SystemString": return true;
+        case "System": return true;
+        case "Relational": return true;
+        case "String": return false;
+        case "Shared": return false;
+        case "Main": return false;
+        case "Part": return false;
+        case "SharedPart": return false;
         default: return false;
     }
 }
@@ -254,18 +256,18 @@ function typeIsFindable(typeName: string) {
     if (typeInfo == undefined)
         return false;
 
-    if (typeInfo.kind == KindOfType.Enum)
+    if (typeInfo.kind == "Enum")
         return true;
 
     switch (typeInfo.entityKind) {
-        case EntityKind.SystemString: return true;
-        case EntityKind.System: return true;
-        case EntityKind.Relational: return false;
-        case EntityKind.String: return true;
-        case EntityKind.Shared: return true;
-        case EntityKind.Main: return true;
-        case EntityKind.Part: return false;
-        case EntityKind.SharedPart: return true;
+        case "SystemString": return true;
+        case "System": return true;
+        case "Relational": return false;
+        case "String": return true;
+        case "Shared": return true;
+        case "Main": return true;
+        case "Part": return false;
+        case "SharedPart": return true;
         default: return false;
     }
 }
@@ -301,18 +303,18 @@ function typeIsViewable(typeName: string): boolean {
     if (typeInfo == undefined)
         return true;
 
-    if (typeInfo.kind == KindOfType.Enum)
+    if (typeInfo.kind == "Enum")
         return false;
 
     switch (typeInfo.entityKind) {
-        case EntityKind.SystemString: return false;
-        case EntityKind.System: return true;
-        case EntityKind.Relational: return false;
-        case EntityKind.String: return false;
-        case EntityKind.Shared: return true;
-        case EntityKind.Main: return true;
-        case EntityKind.Part: return true;
-        case EntityKind.SharedPart: return true;
+        case "SystemString": return false;
+        case "System": return true;
+        case "Relational": return false;
+        case "String": return false;
+        case "Shared": return true;
+        case "Main": return true;
+        case "Part": return true;
+        case "SharedPart": return true;
         default: return true;
     }
 }
@@ -343,20 +345,43 @@ function typeIsNavigable(typeName: string): EntityWhen {
     if (typeInfo == undefined)
         return "Never";
 
-    if (typeInfo.kind == KindOfType.Enum)
+    if (typeInfo.kind == "Enum")
         return "Never";
 
     switch (typeInfo.entityKind) {
-        case EntityKind.SystemString: return "Never";
-        case EntityKind.System: return "Always";
-        case EntityKind.Relational: return "Never";
-        case EntityKind.String: return "IsSearch";
-        case EntityKind.Shared: return "Always";
-        case EntityKind.Main: return "Always";
-        case EntityKind.Part: return "Always";
-        case EntityKind.SharedPart: return "Always";
+        case "SystemString": return "Never";
+        case "System": return "Always";
+        case "Relational": return "Never";
+        case "String": return "IsSearch";
+        case "Shared": return "Always";
+        case "Main": return "Always";
+        case "Part": return "Always";
+        case "SharedPart": return "Always";
         default: return "Never";
     }
+}
+
+export function getAutoComplete(type: TypeReference, findOptions: FindOptions | undefined): AutocompleteConfig<any> | null {
+    if (type.isEmbedded || type.name == IsByAll)
+        return null;
+
+    if (findOptions)
+        return new FindOptionsAutocompleteConfig(findOptions, 5, false);
+
+    const types = getTypeInfos(type);
+
+    if (types.length == 1) {
+        var s = getSettings(types[0]);
+
+        if (s && s.autocomplete)
+            return s.autocomplete;
+    }
+
+    return new LiteAutocompleteConfig((subStr: string) => Finder.API.findLiteLike({
+        types: type.name,
+        subString: subStr,
+        count: 5
+    }), false);
 }
 
 
@@ -518,6 +543,15 @@ export module API {
     }
 }
 
+export interface EntitySettingsOptions<T> {
+    isCreable?: EntityWhen;
+    isFindable?: boolean;
+    isViewable?: boolean;
+    isNavigable?: EntityWhen;
+    isReadOnly?: boolean;
+    avoidPopup?: boolean;
+    autocomplete?: AutocompleteConfig<T>;
+}
 
 export class EntitySettings<T extends ModifiableEntity> {
     type: Type<T>;
@@ -535,7 +569,8 @@ export class EntitySettings<T extends ModifiableEntity> {
     isViewable: boolean;
     isNavigable: EntityWhen;
     isReadOnly: boolean;
-
+    autocomplete: AutocompleteConfig<T> | undefined;
+    
     overrideView(override: (replacer: ViewReplacer<T>) => void) {
         if (this.viewOverrides == undefined)
             this.viewOverrides = [];
@@ -543,8 +578,7 @@ export class EntitySettings<T extends ModifiableEntity> {
         this.viewOverrides.push(override);
     }
 
-    constructor(type: Type<T>, getViewPromise?: (entity: T) => ViewPromise<any>,
-        options?: { isCreable?: EntityWhen, isFindable?: boolean; isViewable?: boolean; isNavigable?: EntityWhen; isReadOnly?: boolean, avoidPopup?: boolean }) {
+    constructor(type: Type<T>, getViewPromise?: (entity: T) => ViewPromise<any>, options?: EntitySettingsOptions<T>) {
 
         this.type = type;
         this.getViewPromise = getViewPromise;
@@ -705,7 +739,7 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> | unde
         return undefined;
     }
 
-    if (getTypeInfo(type.name) && getTypeInfo(type.name).kind == KindOfType.Entity) {
+    if (getTypeInfo(type.name) && getTypeInfo(type.name).kind == "Entity") {
 
         if (isLite(value))
             return API.fetchAndForget(value);

@@ -131,7 +131,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     doSearch() {
         this.getFindOptionsWithSFB().then(fo => {
             this.setState({ loading: false, editingColumn: undefined });
-            Finder.API.search(this.getQueryRequest()).then(rt => {
+            Finder.API.executeQuery(this.getQueryRequest()).then(rt => {
                 this.setState({
                     resultTable: rt,
                     selectedRows: [],
@@ -396,12 +396,21 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         
         const pair = Finder.smartColumns(fo.columnOptions, Dic.getValues(this.props.queryDescription.columns));
 
+        const qs = Finder.getQuerySettings(fo.queryKey);
+
+        const defaultPagination = qs && qs.pagination || Finder.defaultPagination;
+
+        function equalsPagination(p1: Pagination, p2: Pagination) {
+            return p1.mode == p2.mode && p1.elementsPerPage == p2.elementsPerPage && p1.currentPage == p2.currentPage;
+        }
+
         const path = Finder.findOptionsPath({
             queryName: fo.queryKey,
             filterOptions: fo.filterOptions.filter(a => !!a.token).map(f => ({ columnName: f.token!.fullKey, operation: f.operation, value: f.value, frozen: f.frozen }) as FilterOption),
             orderOptions: fo.orderOptions.filter(a => !!a.token).map(o => ({ columnName: o.token.fullKey, orderType: o.orderType }) as OrderOption),
             columnOptions: pair.columns,
             columnOptionsMode: pair.mode,
+            pagination: fo.pagination && !equalsPagination(fo.pagination, defaultPagination) ? fo.pagination : undefined
         } as FindOptions);
 
         if (ev.ctrlKey || ev.button == 1)
@@ -409,6 +418,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         else
             Navigator.currentHistory.push(path);
     };
+
+   
 
     createTitle() {
 
@@ -616,6 +627,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     //HEADER DRAG AND DROP
 
     handleHeaderDragStart = (de: React.DragEvent) => {
+        de.dataTransfer.setData('text', "start"); //cannot be empty string
         de.dataTransfer.effectAllowed = "move";
         const dragIndex = parseInt((de.currentTarget as HTMLElement).getAttribute("data-column-index")!);
         this.setState({ dragColumnIndex: dragIndex });
@@ -659,7 +671,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         if (dropBorderIndex == this.state.dragColumnIndex || dropBorderIndex == this.state.dragColumnIndex + 1)
             dropBorderIndex = undefined;
 
-        de.dataTransfer.dropEffect = dropBorderIndex == undefined ? "none" : "move";
+        //de.dataTransfer.dropEffect = dropBorderIndex == undefined ? "none" : "move";
 
         if (this.state.dropBorderIndex != dropBorderIndex)
             this.setState({ dropBorderIndex: dropBorderIndex });
@@ -837,7 +849,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
                     {this.props.findOptions.navigate &&
                         <td>
-                            {this.wrapError(mark, i, ((qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row)).last("EntityFormatRules").formatter)(row, resultTable.columns))}
+                            {((qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row)).last("EntityFormatRules").formatter)(row, resultTable.columns)}
                         </td>
                     }
 
@@ -848,7 +860,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 </tr>
             );
 
-            return tr;
+            return this.wrapError(mark, i, tr);
         });
     }
 
@@ -860,23 +872,23 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         const m = this.state.markedRows[liteKey(entity)];
 
         if (typeof m === "string") {
-            if (m)
-                return { style: "error", message: m };
-            else
+            if (m == "")
                 return { style: "sf-entity-ctxmenu-success", message: undefined };
+            else
+                return { style: "danger", message: m };
         }
         else {
             return m;
         }
     }
 
-    wrapError(mark: MarkedRow | undefined, index: number, child: React.ReactChild | undefined) {
+    wrapError(mark: MarkedRow | undefined, index: number, tr: React.ReactChild | undefined) {
         if (!mark || mark.message == "")
-            return child;
+            return tr;
 
         const tooltip = <Tooltip id={"mark_" + index} >{mark.message}</Tooltip>;
 
-        return <OverlayTrigger placement="bottom" overlay={tooltip}>{child}</OverlayTrigger>;
+        return <OverlayTrigger placement="bottom" overlay={tooltip}>{tr}</OverlayTrigger>;
     }
 
 }

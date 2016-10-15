@@ -12,7 +12,7 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
 
         const subContexts = this.subContext(this.props.ctx).filter(m => m.propertyRoute.member!.name != "Id");
 
-        const components = subContexts.map(ctx => DynamicComponent.appropiateComponent(ctx));
+        const components = subContexts.map(ctx => DynamicComponent.appropiateComponent(ctx)).filter(a => !!a).map(a => a!);
 
         const result = React.createElement("div", undefined, ...components);
 
@@ -32,7 +32,7 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
 
         const members = ctx.propertyRoute.subMembers();
 
-        const result = Dic.map(members, (n, m) => new TypeContext<any>(ctx, undefined, ctx.propertyRoute.addMember({ name: n, type: LambdaMemberType.Member }), new Binding(ctx.value, n.firstLower())));
+        const result = Dic.map(members, (n, m) => new TypeContext<any>(ctx, undefined, ctx.propertyRoute.addMember({ name: n, type: "Member" }), new Binding(ctx.value, n.firstLower())));
 
         return result;
     }
@@ -41,7 +41,7 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
         [typeName: string]: (ctx: TypeContext<any>) => React.ReactElement<any> | undefined;
     } = {};
 
-    static appropiateComponent = (ctx: TypeContext<any>): React.ReactElement<any> => {
+    static appropiateComponent = (ctx: TypeContext<any>): React.ReactElement<any> | undefined => {
         const tr = ctx.propertyRoute.typeReference();        
     
         const sc = DynamicComponent.specificComponents[tr.name];
@@ -55,7 +55,7 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
         const ti = tis.firstOrNull();
 
         if (tr.isCollection) {
-            if (tr.isEmbedded || ti!.entityKind == EntityKind.Part || ti!.entityKind == EntityKind.SharedPart)
+            if (tr.isEmbedded || ti!.entityKind == "Part" || ti!.entityKind == "SharedPart")
                 return <EntityRepeater ctx={ctx}/>;
             else if (ti!.isLowPopulation)
                 return <EntityCheckboxList ctx ={ctx}/>;
@@ -67,10 +67,10 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
             return <EntityLine ctx={ctx}/>;
 
         if (ti) {
-            if (ti.kind == KindOfType.Enum)
+            if (ti.kind == "Enum")
                 return <ValueLine ctx={ctx}/>;
 
-            if (ti.entityKind == EntityKind.Part || ti.entityKind == EntityKind.SharedPart)
+            if (ti.entityKind == "Part" || ti.entityKind == "SharedPart")
                 return <EntityDetail ctx={ctx} />;
 
             if (ti.isLowPopulation)
@@ -82,7 +82,10 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
         if (tr.isEmbedded)
             return <EntityDetail ctx={ctx} />;
 
-        return <ValueLine ctx={ctx}/>;
+        if (ValueLine.getValueLineType(tr) != undefined)
+            return <ValueLine ctx={ctx} />;
+
+        return undefined;
     }
 
 }

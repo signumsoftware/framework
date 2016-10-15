@@ -48,7 +48,7 @@ namespace Signum.React.Filters
                     e.UserHostAddress = GetClientIp(req);
                     e.UserHostName = GetClientName(req);
                     e.QueryString = ExceptionEntity.Dump(req.RequestUri.ParseQueryString());
-                    e.Form = GetForm(req);
+                    e.Form = (string)req.Properties.TryGetC(SignumAuthenticationAndProfilerAttribute.SavedRequestKey);
                     e.Session = GetSession(req);
                 });
 
@@ -58,24 +58,6 @@ namespace Signum.React.Filters
             }
 
             base.OnException(ctx);
-        }
-
-        private string GetForm(HttpRequestMessage request)
-        {
-            if (request.Properties.ContainsKey("MS_HttpContext"))
-            {
-                var httpContextBase = (HttpContextWrapper)request.Properties["MS_HttpContext"];
-
-                using (var stream = new MemoryStream())
-                {
-                    var s = httpContextBase.Request.GetBufferedInputStream();
-                    s.CopyTo(stream);
-                    string requestBody = Encoding.UTF8.GetString(stream.ToArray());
-                    return requestBody;
-                }
-            }
-
-            return request.Content.ReadAsStringAsync().Result;
         }
 
         private HttpStatusCode GetStatus(Type type)

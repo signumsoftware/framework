@@ -8,12 +8,12 @@ export interface TypeaheadProps {
     getItems: (query: string) => Promise<any[]>;
     getItemsTimeout?: number;
     minLength?: number;
+    renderList?: (typeAhead: Typeahead) => React.ReactNode;
     renderItem?: (item: any, query: string) => React.ReactNode;
     onSelect?: (item: any, e: React.SyntheticEvent) => string | null;
     scrollHeight?: number;
     spanAttrs?: React.HTMLAttributes;
     inputAttrs?: React.HTMLAttributes;
-    menuAttrs?: React.HTMLAttributes;
     liAttrs?: (item: any) => React.HTMLAttributes;
     loadingMessage?: string;
     noResultsMessage?: string;
@@ -113,6 +113,13 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         return val != null;
     }
 
+    //public
+    writeInInput(query: string) {
+        this.input.value = query;
+        this.input.focus();
+        this.lookup();
+    }
+
     focused = false;
     handleFocus = () => {
         if (!this.focused) {
@@ -174,12 +181,14 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
             case 9: // tab
             case 13: // enter
-                if (this.state.selectedIndex == undefined) return;
+                if (this.state.selectedIndex == undefined || !this.state.shown)
+                    return;
                 this.select(e);
                 break;
 
             case 27: // escape
-                if (!this.state.shown) return;
+                if (!this.state.shown)
+                    return;
                 this.setState({ shown: false });
                 break;
 
@@ -213,20 +222,20 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     input: HTMLInputElement;
 
 
-    onMenuLoad = (ul: HTMLUListElement) => {
+    onMenuLoad = (elem: HTMLElement) => {
         if (!this.input)
             return;
 
         const rec = this.input.getBoundingClientRect();
-        if (ul) {
-            ul.style.top = (rec.height) + "px";
+        if (elem) {
+            elem.style.top = (rec.height) + "px";
 
-            if (getComputedStyle(ul).direction == "rtl")
-                ul.style.right = "0px";
+            if (getComputedStyle(elem).direction == "rtl")
+                elem.style.right = "0px";
             else
-                ul.style.left = "0px";
+                elem.style.left = "0px";
 
-            ul.style.display = "table";
+            elem.style.display = "table";
         }
     }
 
@@ -242,20 +251,23 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
                     />
                 <span>{/*placeholder for rouded borders*/}</span>
                 {
-                    this.state.shown &&
-                    <ul className="typeahead dropdown-menu" {...this.props.menuAttrs} ref={this.onMenuLoad}>
-                        {
-                            !this.state.items!.length ? <li className="no-results"><a><small>{this.props.noResultsMessage}</small></a></li> :
-                                this.state.items!.map((item, i) => <li key={i} className={i == this.state.selectedIndex ? "active" : undefined} data-index={i}
-                                    onMouseEnter={this.handleElementMouseEnter}
-                                    onMouseLeave={this.handleElementMouseLeave}
-                                    {...this.props.liAttrs && this.props.liAttrs(item) }>
-                                    <a href="#" onClick={this.handleMenuClick}>{this.props.renderItem!(item, this.state.query!)}</a>
-                                </li>)
-                        }
-                    </ul>
+                    this.state.shown && (this.props.renderList ? this.props.renderList(this) : this.renderDefaultList())
                 }
             </span>
         );
+    }
+
+    renderDefaultList() {
+        return (<ul className="typeahead dropdown-menu" ref={this.onMenuLoad}>
+            {
+                !this.state.items!.length ? <li className="no-results"><a><small>{this.props.noResultsMessage}</small></a></li> :
+                    this.state.items!.map((item, i) => <li key={i} className={i == this.state.selectedIndex ? "active" : undefined} data-index={i}
+                        onMouseEnter={this.handleElementMouseEnter}
+                        onMouseLeave={this.handleElementMouseLeave}
+                        {...this.props.liAttrs && this.props.liAttrs(item) }>
+                        <a href="#" onClick={this.handleMenuClick}>{this.props.renderItem!(item, this.state.query!)}</a>
+                    </li>)
+            }
+        </ul>);
     }
 }

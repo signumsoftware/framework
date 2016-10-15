@@ -10,7 +10,8 @@ import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, isLite, isEntity } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
-import { EntityBase, EntityBaseProps} from './EntityBase'
+import { EntityBase, EntityBaseProps } from './EntityBase'
+import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './AutocompleteConfig'
 
 export interface EntityLineProps extends EntityBaseProps {
 
@@ -25,7 +26,7 @@ export interface EntityLineState extends EntityBaseProps {
 
     autoComplete?: AutocompleteConfig<any> | null;
 
-    currentItem?: { entity: ModifiableEntity | Lite<Entity>, item: any };
+    currentItem?: { entity: ModifiableEntity | Lite<Entity>, item?: any };
 }
 
 export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
@@ -34,42 +35,54 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         super.overrideProps(state, overridenProps);
         if (state.autoComplete === undefined) {
             const type = state.type!;
-            state.autoComplete = type.isEmbedded || type.name == IsByAll ? null :
-                overridenProps.findOptions ? new FindOptionsAutocompleteConfig(overridenProps.findOptions, 5, false) :
-                    new LiteAutocompleteConfig((subStr: string) => Finder.API.findLiteLike({
-                        types: type.name,
-                        subString: subStr,
-                        count: 5
-                    }), false);
+            state.autoComplete = Navigator.getAutoComplete(type, overridenProps.findOptions);
+        }
+
+        if (!state.currentItem) {
+            if (this.state && this.state.currentItem && this.state.currentItem.entity == state.ctx.value)
+                state.currentItem = this.state.currentItem;
         }
     }
 
+    componentWillMount() {
+        this.refreshItem(this.props);
+    }
 
     componentWillReceiveProps(newProps: EntityLineProps, nextContext: any) {
 
         super.componentWillReceiveProps(newProps, nextContext);
 
-        if (this.state.autoComplete) {
+        this.refreshItem(newProps);
+    }
 
-            var newEntity = newProps.ctx.value; 
+    refreshItem(props: EntityLineProps) {
+        if (this.state.autoComplete) {
+            var newEntity = props.ctx.value;
 
             if (newEntity == null) {
                 if (this.state.currentItem)
                     this.changeState(s => s.currentItem = undefined);
             } else {
                 if (!this.state.currentItem || this.state.currentItem.entity !== newEntity) {
-                    this.changeState(s => s.currentItem = undefined);
-                    this.state.autoComplete.getInitialItem(newEntity)
-                        .then(item => this.changeState(s => s.currentItem = { entity: newEntity!, item }))
+                    var ci = { entity: newEntity!, item: undefined }
+                    this.changeState(s => s.currentItem = ci);
+                    this.state.autoComplete.getItemFromEntity(newEntity)
+                        .then(item => this.changeState(s => ci.item = item))
                         .done();
                 }
             }
         }
     }
 
+
+    typeahead?: Typeahead;
+    writeInTypeahead(query: string) {
+        this.typeahead!.writeInInput(query);
+    }
+
     handleOnSelect = (item: any, event: React.SyntheticEvent) => {
 
-        var lite = this.state.autoComplete!.getLiteFromItem(item);
+        var lite = this.state.autoComplete!.getEntityFromItem(item);
 
         this.convert(lite)
             .then(entity => {
@@ -118,10 +131,11 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
             return <FormControlStatic ctx={ctx}>{ctx.value && ctx.value.toStr}</FormControlStatic>;
 
         return (
-            <Typeahead
+            <Typeahead ref={ta => this.typeahead = ta}
                 inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
                 getItems={ac.getItems}
                 renderItem={ac.renderItem}
+                renderList={ac.renderList}
                 liAttrs={lite => ({ 'data-entity-key': liteKey(lite) }) }
                 onSelect={this.handleOnSelect}/>
         );
@@ -133,7 +147,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
         var value = s.ctx.value!;
 
-        const str = this.state.currentItem && this.state.autoComplete ?
+        const str = this.state.currentItem && this.state.currentItem.item && this.state.autoComplete ?
             this.state.autoComplete.renderItem(this.state.currentItem.item) :
             getToString(value);
 
@@ -158,135 +172,6 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
     }
 }
 
-export interface AutocompleteConfig<T> {
-    getItems: (subStr: string) => Promise<T[]>;
-    renderItem: (item: T, subStr?: string) => React.ReactNode
-    getLiteFromItem: (item: T) => Lite<Entity> | ModifiableEntity;
-    getInitialItem: (entity: Lite<Entity> | ModifiableEntity) => Promise<T>;
-}
-
-export class LiteAutocompleteConfig implements AutocompleteConfig<Lite<Entity>>{
-
-    constructor(
-        public getItems: (subStr: string) => Promise<Lite<Entity>[]>,
-        public withCustomToString: boolean) {
-    }
-
-    renderItem(item: Lite<Entity>, subStr: string) {
-        return Typeahead.highlightedText(item.toStr || "", subStr)
-    }
-
-    getLiteFromItem(item: Lite<Entity>) {
-        return item;
-    }
-
-    getInitialItem(entity: Lite<Entity> | ModifiableEntity): Promise<Lite<Entity>> {
-
-        var lite = this.convertToLite(entity);;
-
-        if (!this.withCustomToString)
-            return Promise.resolve(lite);
-
-        if (lite.id == undefined)
-            return Promise.resolve(lite);
-
-        return this.getItems(lite.id!.toString()).then(lites => {
-
-            const result = lites.filter(a => a.id == lite.id).firstOrNull();
-
-            if (!result)
-                throw new Error("Impossible to getInitialItem with the current implementation of getItems");
-
-            return result;
-        });
-    }
-
-    convertToLite(entity: Lite<Entity> | ModifiableEntity) {
-        
-        if (isLite(entity))
-            return entity;
-
-        if (isEntity(entity))
-            return toLite(entity);
-
-        throw new Error("Impossible to convert to Lite");
-    }
-}
-
-export class FindOptionsAutocompleteConfig implements AutocompleteConfig<Lite<Entity>>{
-
-    constructor(
-        public findOptions: FindOptions,
-        public count: number,
-        public withCustomToString: boolean) {
-    }
-
-    parsedFilters?: FilterOptionParsed[];
-
-    getParsedFilters(): Promise<FilterOptionParsed[]> {
-        if (this.parsedFilters)
-            return Promise.resolve(this.parsedFilters);
-
-        return Finder.getQueryDescription(this.findOptions.queryName)
-            .then(qd => Finder.parseFilterOptions(this.findOptions.filterOptions || [], qd))
-            .then(filters => this.parsedFilters = filters);
-    }
-
-    getItems = (subStr: string): Promise<Lite<Entity>[]> => {
-        return this.getParsedFilters()
-            .then(filters => Finder.API.findLiteLikeWithFilters({
-                queryKey: getQueryKey(this.findOptions.queryName),
-                filters: filters.map(f => ({ token: f.token!.fullKey, operation: f.operation, value: f.value }) as FilterRequest),
-                count: this.count,
-                subString: subStr
-            }));
-    }
-
-    renderItem(item: Lite<Entity>, subStr: string) {
-        return Typeahead.highlightedText(item.toStr || "", subStr)
-    }
-
-    getLiteFromItem(item: Lite<Entity>) {
-        return item;
-    }
-
-    getInitialItem(entity: Lite<Entity> | ModifiableEntity): Promise<Lite<Entity>> {
-
-        var lite = this.convertToLite(entity);;
-
-        if (!this.withCustomToString)
-            return Promise.resolve(lite);
-
-        if (lite.id == undefined)
-            return Promise.resolve(lite);
-
-        return Finder.API.findLiteLikeWithFilters({
-            queryKey: getQueryKey(this.findOptions.queryName),
-            filters:  [{ token: "Entity.Id", operation: "EqualTo", value: lite.id }],
-            count: 1,
-            subString: ""
-        }).then(lites => {
-
-            const result = lites.filter(a => a.id == lite.id).firstOrNull();
-
-            if (!result)
-                throw new Error("Impossible to getInitialItem with the current implementation of getItems");
-
-            return result;
-        });
-    }
-
-    convertToLite(entity: Lite<Entity> | ModifiableEntity) {
-
-        if (isLite(entity))
-            return entity;
-
-        if (isEntity(entity))
-            return toLite(entity);
-
-        throw new Error("Impossible to convert to Lite");
-    }
-}
 
 
 

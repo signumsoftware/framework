@@ -192,6 +192,12 @@ export interface ColumnRequest {
     displayName: string;
 }
 
+export interface QueryEntitiesRequest {
+    queryKey: string;
+    filters: FilterRequest[];
+    count: number;
+}
+
 export interface QueryRequest {
     queryKey: string;
     filters: FilterRequest[];
