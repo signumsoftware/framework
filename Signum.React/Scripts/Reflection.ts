@@ -149,8 +149,11 @@ export interface TypeReference {
 export type KindOfType = "Entity" | "Enum" | "Message" | "Query" | "SymbolContainer";
 
 export type EntityKind = "SystemString" | "System" | "Relational" | "String" | "Shared" | "Main" | "Part" | "SharedPart";
+export const EntityKindValues: EntityKind[] = ["SystemString", "System", "Relational", "String", "Shared", "Main", "Part", "SharedPart"];
 
 export type EntityData = "Master" | "Transactional";
+export const EntityDataValues: EntityData[] = ["Master", "Transactional"];
+
 
 export interface TypeInfoDictionary {
     [name: string]: TypeInfo
