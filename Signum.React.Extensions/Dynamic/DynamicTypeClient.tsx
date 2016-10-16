@@ -1,7 +1,9 @@
 
 import * as React from 'react'
 import { Route } from 'react-router'
+import { Tab } from 'react-bootstrap'
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
+import { CountSearchControl } from '../../../Framework/Signum.React/Scripts/Search'
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { EntityData, EntityKind } from '../../../Framework/Signum.React/Scripts/Reflection'
@@ -14,6 +16,7 @@ import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructo
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import { DynamicTypeEntity, DynamicTypeOperation } from './Signum.Entities.Dynamic'
 import DynamicTypeEntityComponent from './Type/DynamicTypeEntity'
+import * as DynamicClient from './DynamicClient'
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -25,6 +28,9 @@ export function start(options: { routes: JSX.Element[] }) {
             EntityOperations.defaultExecuteEntity(ctx);
         }
     }));
+
+    DynamicClient.Options.onGetDynamicLine.push(ctx => <CountSearchControl ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
+    DynamicClient.Options.onGetDynamicTab.push(() => <Tab key="migrations" title="Migrations" >Not implemented</Tab>);
 }
 
 export namespace API {

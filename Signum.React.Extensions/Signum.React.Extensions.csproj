@@ -164,12 +164,14 @@
     <Compile Include="RestLog\RestLogFilter.cs" />
     <Compile Include="Mailing\MailingController.cs" />
     <Compile Include="Mailing\MailingServer.cs" />
+    <TypeScriptCompile Include="Dynamic\DynamicClient.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicTypeClient.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicViewClient.tsx" />
     <TypeScriptCompile Include="Dynamic\Signum.Entities.Dynamic.ts">
       <DependentUpon>Signum.Entities.Dynamic.t4s</DependentUpon>
     </TypeScriptCompile>
     <TypeScriptCompile Include="Dynamic\Type\DynamicTypeDefinitionComponent.tsx" />
+    <TypeScriptCompile Include="Dynamic\DynamicPanelPage.tsx" />
     <TypeScriptCompile Include="Dynamic\Type\ValueComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\Type\DynamicTypeEntity.tsx" />
     <TypeScriptCompile Include="Dynamic\View\DynamicViewSelector.tsx" />
