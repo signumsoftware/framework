@@ -62,7 +62,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
 											<span className="glyphicon glyphicon-remove"/>
 											</span>
 										}
-									</div>
+									</div> as any
 								}>
 								<RenderEntity ctx={mlec} getComponent={this.props.getComponent}/>
 							</Tab>
