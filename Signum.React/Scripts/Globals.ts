@@ -277,6 +277,26 @@ Array.prototype.removeAt = function (this: any[], index: number) {
     this.splice(index, 1);
 };
 
+Array.prototype.moveUp = function (this: any[], index: number) {
+    if (index == 0)
+        return 0;
+
+    const entity = this[index]
+    this.removeAt(index);
+    this.insertAt(index - 1, entity);
+    return index - 1;
+};
+
+Array.prototype.moveDown = function (this: any[], index: number) {
+    if (index == this.length - 1)
+        return this.length - 1;
+
+    const entity = this[index]
+    this.removeAt(index);
+    this.insertAt(index + 1, entity);
+    return index + 1;
+};
+
 Array.prototype.remove = function (this: any[], element: any) {
 
     const index = this.indexOf(element);
