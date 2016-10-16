@@ -18,11 +18,7 @@ namespace Signum.Entities.Dynamic
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class DynamicTypeEntity : Entity
     {
-        [NotNullable, SqlDbType(Size = 200)]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
-        public string Namespace { get; set; }
-
-        [NotNullable, SqlDbType(Size = 100)]
+        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string TypeName { get; set; }
         
@@ -51,6 +47,11 @@ namespace Signum.Entities.Dynamic
         public static readonly ConstructSymbol<DynamicTypeEntity>.From<DynamicTypeEntity> Clone;
         public static readonly ExecuteSymbol<DynamicTypeEntity> Save;
         public static readonly DeleteSymbol<DynamicTypeEntity> Delete;
+    }
+
+    public enum DynamicTypeMessage
+    {
+
     }
 
     public class DynamicTypeDefinition
@@ -99,12 +100,16 @@ namespace Signum.Entities.Dynamic
         [JsonProperty(PropertyName = "isMList", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool IsMList;
 
+        [JsonProperty(PropertyName = "preserveOrder", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public bool PreserveOrder;
+
         [JsonProperty(PropertyName = "size", NullValueHandling = NullValueHandling.Ignore)]
         public int? Size;
 
         [JsonProperty(PropertyName = "scale", NullValueHandling = NullValueHandling.Ignore)]
         public int? Scale;
-
+        
+        [JsonProperty(PropertyName = "validators", NullValueHandling = NullValueHandling.Ignore)]
         public List<DynamicValidator> Validators; 
     }
 
@@ -128,7 +133,10 @@ namespace Signum.Entities.Dynamic
         {
             JObject obj = JObject.Load(reader);
             var type = DynamicValidator.GetDynamicValidatorType(obj.Property("type").Value.Value<string>());
-            return obj.ToObject(type); 
+
+            object target = Activator.CreateInstance(type);
+            serializer.Populate(obj.CreateReader(), target);
+            return target;
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

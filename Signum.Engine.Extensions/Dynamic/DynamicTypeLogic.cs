@@ -24,13 +24,14 @@ namespace Signum.Engine.Dynamic
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<DynamicTypeEntity>()
-                    .WithUniqueIndex(e => new { e.Namespace, e.TypeName })
                     .WithQuery(dqm, e => new
                     {
                         Entity = e,
                         e.Id,
                         e.TypeName,
                     });
+
+                DynamicTypeGraph.Register();
             }
         }
 
@@ -73,7 +74,14 @@ namespace Signum.Engine.Dynamic
             }
         }
 
+        public static string DynamicallyGeneratedEntitiesNamespace = "Signum.Entities.DynamicallyGenerated";
 
+        public static string GetPropertyType(DynamicProperty property)
+        {
+            var generator = new DynamicTypeCodeGenerator(DynamicallyGeneratedEntitiesNamespace, null, null, new string[0]);
+
+            return generator.GetPropertyType(property);
+        }
     }
 
     public class DynamicTypeCodeGenerator
@@ -185,7 +193,7 @@ namespace Signum.Engine.Dynamic
 
         protected virtual string WriteProperty(DynamicProperty property)
         {
-            string type = GetFieldType(property);
+            string type = GetPropertyType(property);
 
             StringBuilder sb = new StringBuilder();
 
@@ -249,23 +257,25 @@ namespace Signum.Engine.Dynamic
             return atts;
         }
 
-        private string GetFieldType(DynamicProperty property)
+        public virtual string GetPropertyType(DynamicProperty property)
         {
-            string result = Simplify(property.Type);
+            string result = SimplifyType(property.Type);
+
+            var t = ResolveType(property.Type);
             
-            if (property.IsNullable != IsNullable.No && IsValueType(property.Type))
+            if (property.IsNullable != IsNullable.No && t.IsValueType)
                 result = result + "?";
 
             if (property.IsLite)
                 result = "Lite<" + result + ">";
-
+            
             if (property.IsMList)
                 result = "MList<" + result + ">";
 
             return result;
         }
 
-        private string Simplify(string type)
+        private string SimplifyType(string type)
         {
             var ns = type.TryBeforeLast(".");
 
@@ -278,9 +288,38 @@ namespace Signum.Engine.Dynamic
             return type;
         }
 
-        public bool IsValueType(string typeName)
+        public Type ResolveType(string typeName)
         {
-            return false;
+            switch (typeName)
+            {
+                case "bool": return typeof(bool);
+                case "byte": return typeof(byte);
+                case "char": return typeof(char);
+                case "decimal": return typeof(decimal);
+                case "double": return typeof(double);
+                case "short": return typeof(short);
+                case "int": return typeof(int);
+                case "long": return typeof(long);
+                case "sbyte": return typeof(sbyte);
+                case "float": return typeof(float);
+                case "string": return typeof(string);
+                case "ushort": return typeof(ushort);
+                case "uint": return typeof(uint);
+                case "ulong": return typeof(ulong);
+            }
+
+
+            var result = Type.GetType("System." + typeName);
+
+            if (result != null)
+                return result;
+
+            var type = TypeLogic.TryGetType(typeName);
+            if (type != null)
+                return result;
+
+            throw new InvalidOperationException($"Type '{typeName}' Not found");
+
         }
     }
 }

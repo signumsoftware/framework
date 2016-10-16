@@ -10,10 +10,12 @@ interface IDynamicValidationEvaluator {}
 export const DynamicTypeEntity = new Type<DynamicTypeEntity>("DynamicType");
 export interface DynamicTypeEntity extends Entities.Entity {
     Type: "DynamicType";
-    namespace?: string | null;
     typeName?: string | null;
     type?: Entities.Lite<Basics.TypeEntity> | null;
     typeDefinition?: string | null;
+}
+
+export module DynamicTypeMessage {
 }
 
 export module DynamicTypeOperation {

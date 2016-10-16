@@ -7,7 +7,7 @@ import { Entity } from '../../../../Framework/Signum.React/Scripts/Signum.Entiti
 import { TypeEntity, PropertyRouteEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { API, DynamicValidationTestResponse } from '../DynamicValidationClient'
-import CSharpScriptCode from './CSharpScriptCode'
+import CSharpCodeMirror from '../CSharpCodeMirror'
 
 interface DynamicValidationProps {
     ctx: TypeContext<DynamicValidationEntity>;
@@ -36,6 +36,13 @@ export default class DynamicValidation extends React.Component<DynamicValidation
         });
     }
 
+    handleCodeChange = (newScript: string) => {
+        const evalEntity = this.props.ctx.value.eval;
+        evalEntity.modified = true;
+        evalEntity.script = newScript;
+        this.forceUpdate();
+    }
+
     render() {
         var ctx = this.props.ctx;
 
@@ -50,8 +57,8 @@ export default class DynamicValidation extends React.Component<DynamicValidation
                 {ctx.value.propertyRoute &&
                     <div>
                     {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handeEvaluate}><i className="fa fa-play" aria-hidden="true"></i> Evaluate</button>}
-                        <pre style={{ border: "0px", margin: "0px" }}>{"string PropertyValidate(" + (!ctx.value.entityType ? "Entity" : ctx.value.entityType.cleanName) + " e, PropertyInfo pi)\n{"}</pre>
-                        <CSharpScriptCode ctx={ctx.subCtx(d => d.eval)} />
+                    <pre style={{ border: "0px", margin: "0px" }}>{"string PropertyValidate(" + (!ctx.value.entityType ? "Entity" : ctx.value.entityType.cleanName) + " e, PropertyInfo pi)\n{"}</pre>
+                    <CSharpCodeMirror script={ctx.value.eval.script || ""} onChange={this.handleCodeChange} />
                         <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
                         {this.renderTest()}
                     </div>}

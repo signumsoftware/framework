@@ -318,25 +318,15 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
 
     handleOnMoveUp = (event: React.MouseEvent, index: number) => {
         event.preventDefault();
-        const list = this.props.binding.getValue()!;
-        if (index == 0)
-            return;
-
-        const entity = list[index]
-        list.removeAt(index);
-        list.insertAt(index - 1, entity);
+        const list = this.props.binding.getValue() !;
+        list.moveUp(index);
         this.props.refreshView();
     }
 
     handleOnMoveDown = (event: React.MouseEvent, index: number) => {
         event.preventDefault();
-        const list = this.props.binding.getValue()!;
-        if (index == list.length - 1)
-            return;
-
-        const entity = list[index]
-        list.removeAt(index);
-        list.insertAt(index + 1, entity);
+        const list = this.props.binding.getValue() !;
+        list.moveDown(index);
         this.props.refreshView();
     }
 
