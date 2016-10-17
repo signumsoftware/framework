@@ -25,7 +25,7 @@ declare interface Promise<T> {
 
 declare interface Window {
     __baseUrl: string;
-    parentWindowData: any;
+    dataForChildWindow?: any;
 }
 
 interface Array<T> {

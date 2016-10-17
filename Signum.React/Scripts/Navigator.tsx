@@ -428,9 +428,8 @@ export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityP
 
 export function createInNewTab(pack: EntityPack<ModifiableEntity>) {
     var url = createRoute(pack.entity.Type) + "?waitData=true";
+    window.dataForChildWindow = pack;
     var win = window.open(url);
-    if (win) //blocked pop-up
-        win.parentWindowData = pack;
 }
 
 export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.MouseEvent) {
