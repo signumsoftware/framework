@@ -80,7 +80,7 @@ export class DynamicCompileTab extends React.Component<{}, DynamicPanelState>{
 
     componentWillUnmount() {
         if (this.restartInterval)
-        clearInterval(this.restartInterval);
+            clearInterval(this.restartInterval);
     }
 
     render() {
