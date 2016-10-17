@@ -255,7 +255,7 @@ Lose changes?")]
         loseCurrentChanges,
         [Description("No elements selected")]
         noElementsSelected,
-        [Description("Seach for results")]
+        [Description("Search for results")]
         searchForResults,
         [Description("Select only one element")]
         selectOnlyOneElement,
