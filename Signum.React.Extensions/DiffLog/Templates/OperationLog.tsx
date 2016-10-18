@@ -92,7 +92,8 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
                         &nbsp;
                         <span className="glyphicon glyphicon-new-window"></span>
                     </span>
-                </LinkContainer> }>
+                </LinkContainer> as any
+            }>
             </Tab>
         );
     }
@@ -109,7 +110,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
         );
 
         return (
-            <Tab eventKey="prevDiff" title={title}>
+            <Tab eventKey="prevDiff" title={title as any}>
                 {renderDiffDocument(diffPrev) }
             </Tab>
         );
@@ -139,7 +140,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
         );
 
         return (
-            <Tab eventKey="diff" title={title}>
+            <Tab eventKey="diff" title={title as any}>
                 {this.state.result.diff && renderDiffDocument(this.state.result.diff) }
             </Tab>
         );
@@ -165,7 +166,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
         );
 
         return (
-            <Tab eventKey="nextDiff" title={title}>
+            <Tab eventKey="nextDiff" title={title as any}>
                 {renderDiffDocument(diffNext)}
             </Tab>
         );
@@ -180,7 +181,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
                         &nbsp;
                         <span className="glyphicon glyphicon-new-window"></span>
                     </span>
-                </LinkContainer> }>
+                </LinkContainer> as any}>
             </Tab>
         ); 
     }
@@ -194,7 +195,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
                         &nbsp;
                         <span className="glyphicon glyphicon-new-window"></span>
                     </span>
-                </LinkContainer> }>
+                </LinkContainer> as any}>
             </Tab>
         );
     }

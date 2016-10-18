@@ -1,12 +1,5 @@
 ﻿import * as React from 'react'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import CodeMirrorComponent from '../../../../Extensions/Signum.React.Extensions/Codemirror/CodeMirrorComponent'
-import { EvalEntity } from '../Signum.Entities.Dynamic'
+import CodeMirrorComponent from '../../../Extensions/Signum.React.Extensions/Codemirror/CodeMirrorComponent'
 import * as CodeMirror from 'codemirror'
 
 require("!style!css!codemirror/lib/codemirror.css");
@@ -28,31 +21,17 @@ require("codemirror/addon/search/match-highlighter");
 require("codemirror/addon/search/search");
 require("codemirror/addon/search/searchcursor");
 
-interface CSharpScriptCodeProps {
-    ctx: TypeContext<EvalEntity<any>>;
-    onChange?: () => void;
+interface CSharpCodeMirrorProps {
+    script: string;
+    onChange?: (newScript: string) => void;
+    isReadOnly?: boolean;
 }
 
-export default class CSharpScriptCode extends React.Component<CSharpScriptCodeProps, void> {
-
-    get entity() {
-        return this.props.ctx.value;
-    }
-
-    handleOnChange = (newValue: string) => {
-        this.props.ctx.value.script = newValue;
-        this.props.ctx.value.modified = true;
-
-        if (this.props.onChange)
-            this.props.onChange();
-    };
-    
+export default class CSharpCodeMirror extends React.Component<CSharpCodeMirrorProps, void> { 
 
     codeMirrorComponent: CodeMirrorComponent;
 
-    render() {
-
-        const ctx = this.props.ctx;
+    render() {        
 
         const options = {
             lineNumbers: true,
@@ -67,16 +46,17 @@ export default class CSharpScriptCode extends React.Component<CSharpScriptCodePr
                     if (cm.getOption("fullScreen"))
                         cm.setOption("fullScreen", false);
                 }
-            }
+            },
+            readOnly: this.props.isReadOnly,
         } as CodeMirror.EditorConfiguration;
 
         (options as any).highlightSelectionMatches = true;
         (options as any).matchBrackets = true;
         
         return (
-            <CodeMirrorComponent value={this.props.ctx.value.script} ref={cm => this.codeMirrorComponent = cm}
+            <CodeMirrorComponent value={this.props.script} ref={cm => this.codeMirrorComponent = cm}
                 options={options}
-                onChange={this.handleOnChange}/>
+                onChange={this.props.onChange} />
         );
     }
 }
