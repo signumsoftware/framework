@@ -90,7 +90,7 @@ export default class PaginationSelector extends React.Component<PaginationSelect
         this.props.onPagination(p);
     }
 
-    handlePageClick = (eventKey: number, e: React.SyntheticEvent) => {
+    handlePageClick = (eventKey: any, e: React.SyntheticEvent) => {
         const p = Dic.extend({}, this.props.pagination, { currentPage: eventKey });
         this.props.onPagination(p);
     }
@@ -129,7 +129,7 @@ export default class PaginationSelector extends React.Component<PaginationSelect
                 maxButtons={8}
                 first={true}
                 last={true}
-                onSelect={this.handlePageClick}/>
+                onSelect={this.handlePageClick as any} />
         );
     }
 }

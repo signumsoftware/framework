@@ -581,6 +581,17 @@ namespace Signum.Entities
         }
     }
 
+    [DescriptionOptions(DescriptionOptions.Members)]
+    public enum ComparisonType
+    {
+        EqualTo,
+        DistinctTo,
+        GreaterThan,
+        GreaterThanOrEqualTo,
+        LessThan,
+        LessThanOrEqualTo,
+    }
+
     public class DaysPrecissionValidatorAttribute : DateTimePrecissionValidatorAttribute
     {
         public DaysPrecissionValidatorAttribute()
@@ -762,16 +773,7 @@ namespace Signum.Entities
         Lowercase
     }
     
-    [DescriptionOptions(DescriptionOptions.Members)]
-    public enum ComparisonType
-    {
-        EqualTo,
-        DistinctTo,
-        GreaterThan,
-        GreaterThanOrEqualTo,
-        LessThan,
-        LessThanOrEqualTo,
-    }
+   
 
     public class IsAssignableToValidatorAttribute : ValidatorAttribute
     {
