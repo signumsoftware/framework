@@ -5,8 +5,54 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 interface IDynamicValidationEvaluator {}
+export module DynamicPanelPermission {
+    export const ViewDynamicPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "DynamicPanelPermission.ViewDynamicPanel");
+    export const RestartApplication : Authorization.PermissionSymbol = registerSymbol("Permission", "DynamicPanelPermission.RestartApplication");
+}
+
+export const DynamicSqlMigrationEntity = new Type<DynamicSqlMigrationEntity>("DynamicSqlMigration");
+export interface DynamicSqlMigrationEntity extends Entities.Entity {
+    Type: "DynamicSqlMigration";
+    creationDate?: string;
+    createdBy?: Entities.Lite<Basics.IUserEntity> | null;
+    executionDate?: string | null;
+    executedBy?: Entities.Lite<Basics.IUserEntity> | null;
+    comment?: string | null;
+    script?: string | null;
+}
+
+export module DynamicSqlMigrationMessage {
+    export const TheMigrationIsAlreadyExecuted = new MessageKey("DynamicSqlMigrationMessage", "TheMigrationIsAlreadyExecuted");
+}
+
+export module DynamicSqlMigrationOperation {
+    export const Create : Entities.ConstructSymbol_Simple<DynamicSqlMigrationEntity> = registerSymbol("Operation", "DynamicSqlMigrationOperation.Create");
+    export const Save : Entities.ExecuteSymbol<DynamicSqlMigrationEntity> = registerSymbol("Operation", "DynamicSqlMigrationOperation.Save");
+    export const Execute : Entities.ExecuteSymbol<DynamicSqlMigrationEntity> = registerSymbol("Operation", "DynamicSqlMigrationOperation.Execute");
+    export const Delete : Entities.DeleteSymbol<DynamicSqlMigrationEntity> = registerSymbol("Operation", "DynamicSqlMigrationOperation.Delete");
+}
+
+export const DynamicTypeEntity = new Type<DynamicTypeEntity>("DynamicType");
+export interface DynamicTypeEntity extends Entities.Entity {
+    Type: "DynamicType";
+    typeName?: string | null;
+    type?: Entities.Lite<Basics.TypeEntity> | null;
+    typeDefinition?: string | null;
+}
+
+export module DynamicTypeMessage {
+}
+
+export module DynamicTypeOperation {
+    export const Create : Entities.ConstructSymbol_Simple<DynamicTypeEntity> = registerSymbol("Operation", "DynamicTypeOperation.Create");
+    export const Clone : Entities.ConstructSymbol_From<DynamicTypeEntity, DynamicTypeEntity> = registerSymbol("Operation", "DynamicTypeOperation.Clone");
+    export const Save : Entities.ExecuteSymbol<DynamicTypeEntity> = registerSymbol("Operation", "DynamicTypeOperation.Save");
+    export const Delete : Entities.DeleteSymbol<DynamicTypeEntity> = registerSymbol("Operation", "DynamicTypeOperation.Delete");
+}
+
 export const DynamicValidationEntity = new Type<DynamicValidationEntity>("DynamicValidation");
 export interface DynamicValidationEntity extends Entities.Entity {
     Type: "DynamicValidation";
