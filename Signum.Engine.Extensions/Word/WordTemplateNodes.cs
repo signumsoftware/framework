@@ -530,7 +530,7 @@ namespace Signum.Engine.Word
             this.Operation = FilterValueConverter.ParseOperation(operation);
             this.Value = value;
 
-            ValueProvider.ValidateConditionValue(value, Operation, addError);
+            ValueProvider?.ValidateConditionValue(value, Operation, addError);
         }
 
         public AnyNode(AnyNode original)
@@ -711,7 +711,7 @@ namespace Signum.Engine.Word
             this.Operation = FilterValueConverter.ParseOperation(operation);
             this.Value = value;
 
-            ValueProvider.ValidateConditionValue(value, Operation, addError);
+            ValueProvider?.ValidateConditionValue(value, Operation, addError);
         }
 
         public IfNode(IfNode original)

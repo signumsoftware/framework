@@ -242,24 +242,24 @@ namespace Signum.Engine.Word
                         case "if":
                             {
                                 IfNode ifn;
-                                ValueProviderBase vp;
+                                ValueProviderBase vpb;
                                 var filter = TemplateUtils.TokenOperationValueRegex.Match(token);
                                 if (!filter.Success)
                                 {
-                                    vp = TryParseValueProvider(type, token, dec);
-                                    ifn = new IfNode(vp) { IfToken = new MatchNodePair(matchNode) };
+                                    vpb = TryParseValueProvider(type, token, dec);
+                                    ifn = new IfNode(vpb) { IfToken = new MatchNodePair(matchNode) };
                                 }
                                 else
                                 {
-                                    vp = TryParseValueProvider(type, filter.Groups["token"].Value, dec);
+                                    vpb = TryParseValueProvider(type, filter.Groups["token"].Value, dec);
                                     var comparer = filter.Groups["comparer"].Value;
                                     var value = filter.Groups["value"].Value;
-                                    ifn = new IfNode(vp, comparer, value, this.AddError) { IfToken = new MatchNodePair(matchNode) };
+                                    ifn = new IfNode(vpb, comparer, value, this.AddError) { IfToken = new MatchNodePair(matchNode) };
                                 }
 
                                 PushBlock(ifn);
 
-                                DeclareVariable(vp);
+                                DeclareVariable(vpb);
 
                                 break;
                             }
@@ -393,7 +393,7 @@ namespace Signum.Engine.Word
                 var list = root.Descendants<MatchNode>().ToList();
 
                 if (list.Any())
-                    throw new InvalidOperationException("{0} unexpected MatchNode instances found".FormatWith(list.Count));
+                    throw new InvalidOperationException("{0} unexpected MatchNode instances found: \r\n{1}".FormatWith(list.Count, list.ToString("\r\n").Indent(4)));
             }
         }
     }
