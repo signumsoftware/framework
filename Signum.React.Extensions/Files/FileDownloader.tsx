@@ -43,12 +43,7 @@ export default class FileDownloader extends React.Component<FileDownloaderProps,
                 .done();
     }
 
-    handleDownloadClick = (e: React.MouseEvent, url: string) => {
-        e.preventDefault();
-        Services.ajaxGetRaw({ url: url })
-            .then(resp => Services.saveFile(resp))
-            .done();
-    };
+   
 
     render() {
 
@@ -63,21 +58,16 @@ export default class FileDownloader extends React.Component<FileDownloaderProps,
 
 
         const configuration = this.props.configuration || FileDownloader.configurtions[entity.Type];
-
         if (!configuration)
             throw new Error("No configuration registered in FileDownloader.configurations for "); 
 
-        const dl = entity.binaryFile ?
-            { url: "data:application/octet-stream;base64," + entity.binaryFile, requiresToken: false } as DownloadLinkResult :
-            configuration.downloadLink(entity);
-
-
         return (
             <a
-                onClick={dl.requiresToken ? ((e) => this.handleDownloadClick(e, dl.url)) : undefined}
+                href=""
+                onClick={e => entity.binaryFile ? downloadBase64(e, entity.binaryFile, entity.fileName!) : configuration.downloadClick(e, entity)}
                 download={this.props.download == "View" ? undefined : entity.fileName }
-                href={dl.requiresToken ? "" : dl.url}
                 title={entity.fileName || undefined}
+                target="_blank"
                 {...this.props.htmlProps}>
                 {entity.fileName}
             </a>
@@ -88,33 +78,43 @@ export default class FileDownloader extends React.Component<FileDownloaderProps,
 
 
 export interface FileDownloaderConfiguration<T extends IFile> {
-    downloadLink: (entity: T) => DownloadLinkResult;
+    downloadClick: (event: React.MouseEvent, file: T) => void;
 }
-
-export interface DownloadLinkResult {
-    url: string;
-    requiresToken: boolean;
-}
-
 
 FileDownloader.configurtions[FileEntity.typeName] = {
-    downloadLink: e => ({ url: Navigator.currentHistory.createHref("~/api/files/downloadFile/" + e.id.toString()), requiresToken: true })
+    downloadClick: (event, file) => downloadUrl(event, Navigator.currentHistory.createHref("~/api/files/downloadFile/" + file.id.toString()))
 } as FileDownloaderConfiguration<FileEntity>;
 
 FileDownloader.configurtions[FilePathEntity.typeName] = {
-    downloadLink: e => ({ url: Navigator.currentHistory.createHref("~/api/files/downloadFilePath/" + e.id.toString()), requiresToken: true })
+    downloadClick: (event, file) => downloadUrl(event, Navigator.currentHistory.createHref("~/api/files/downloadFilePath/" + file.id.toString()))
 } as FileDownloaderConfiguration<FilePathEntity>;
 
 FileDownloader.configurtions[EmbeddedFileEntity.typeName] = {
-    downloadLink: e => ({ url: "data:application/octet-stream;base64," + e.binaryFile, requiresToken: false })
+    downloadClick: (event, file) => downloadBase64(event, file.binaryFile!, file.fileName!)
 } as FileDownloaderConfiguration<EmbeddedFileEntity>;
 
 FileDownloader.configurtions[EmbeddedFilePathEntity.typeName] = {
-    downloadLink: e => ({
-        url: Navigator.currentHistory.createHref({
-            pathname: "~/api/files/downloadEmbeddedFilePath/" + e.fileType!.key,
-            query: {  suffix: e.suffix, fileName: e.fileName }
-        }),
-        requiresToken: true
-    })
+    downloadClick: (event, file) => downloadUrl(event,
+        Navigator.currentHistory.createHref({
+            pathname: "~/api/files/downloadEmbeddedFilePath/" + file.fileType!.key,
+            query: { suffix: file.suffix, fileName: file.fileName }
+        }))
 } as FileDownloaderConfiguration<EmbeddedFilePathEntity>;
+
+
+function downloadUrl(e: React.MouseEvent, url: string) {
+    
+    e.preventDefault();
+    Services.ajaxGetRaw({ url: url })
+        .then(resp => Services.saveFile(resp))
+        .done();
+};
+
+function downloadBase64(e: React.MouseEvent, binaryFile: string, fileName: string) {
+    e.preventDefault();
+
+    var blob = Services.b64toBlob(binaryFile);
+
+    Services.saveFileBlob(blob, fileName);
+};
+
