@@ -154,21 +154,47 @@ export function saveFile(response: Response) {
         fileName = match[1].trimEnd("\"").trimStart("\"");
 
     response.blob().then(blob => {
-        
-        if (window.navigator.msSaveBlob)
-            window.navigator.msSaveBlob(blob, fileName);
-        else {
-            const url = window.URL.createObjectURL(blob);
-            a.href = url;
-
-
-            (a as any).download = fileName;
-
-            a.click();
-
-            setTimeout(() => window.URL.revokeObjectURL(url), 500);
-        }
+        saveFileBlob(blob, fileName);
     });
+}
+
+export function saveFileBlob(blob: Blob, fileName: string) {
+    if (window.navigator.msSaveBlob)
+        window.navigator.msSaveBlob(blob, fileName);
+    else {
+        const url = window.URL.createObjectURL(blob);
+        a.href = url;
+
+        (a as any).download = fileName;
+
+        a.click();
+
+        setTimeout(() => window.URL.revokeObjectURL(url), 500);
+    }
+}
+
+export function b64toBlob(b64Data: string, contentType: string = "", sliceSize = 512) {
+    contentType = contentType || '';
+    sliceSize = sliceSize || 512;
+
+    var byteCharacters = atob(b64Data);
+    var byteArrays: Uint8Array[] = [];
+
+    for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+        var byteNumbers = new Array(slice.length);
+        for (var i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+
+        var byteArray = new Uint8Array(byteNumbers);
+
+        byteArrays.push(byteArray);
+    }
+
+    var blob = new Blob(byteArrays, { type: contentType });
+    return blob;
 }
 
 export class ServiceError extends Error {
