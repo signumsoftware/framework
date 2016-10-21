@@ -204,8 +204,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         this.state.contextualMenu = {
             position: {
-                pageX: event.pageX - (op ? op.getBoundingClientRect().left : 0),
-                pageY: event.pageY - (op ? op.getBoundingClientRect().top : 0)
+                pageX: event.clientX - (op ? op.getBoundingClientRect().left : 0),
+                pageY: event.clientY - (op ? op.getBoundingClientRect().top : 0)
             },
             columnIndex,
             rowIndex,
