@@ -20,6 +20,7 @@ export interface CountSearchControlProps extends React.Props<CountSearchControl>
     labelProps?: React.HTMLAttributes;
     layout?: CountSearchControlLayout;
     formGroupHtmlProps?: React.HTMLAttributes;
+    avoidAutoRefresh? : boolean;
 }
 
 export interface CountSearchControlState {
@@ -44,7 +45,10 @@ export default class CountSearchControl extends React.Component<CountSearchContr
     }
 
     componentDidMount() {
+        this.refreshCount();
+    }
 
+    refreshCount() {
         var fo = this.props.findOptions;
 
         if (!Finder.isFindable(fo.queryName))
@@ -78,7 +82,13 @@ export default class CountSearchControl extends React.Component<CountSearchContr
     }
 
     handleClick = (e: React.MouseEvent) => {
-        Finder.exploreWindowsOpen(this.props.findOptions, e);
+        if (e.ctrlKey || e.button == 2)
+            window.open(Finder.findOptionsPath(this.props.findOptions));
+        else
+            Finder.explore(this.props.findOptions).then(() => {
+                if (!this.props.avoidAutoRefresh)
+                    this.refreshCount();
+            }).done();
     }
 
     renderAsView() {
