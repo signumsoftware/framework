@@ -14,12 +14,12 @@ export interface CodeMirrorProps {
     value?: string | null,
     className?: string,
     defaultValue?: string;
+    errorLineNumber?: number;
 }
 
 export default class CodeMirrorComponent extends React.Component<CodeMirrorProps, { isFocused: boolean }> {
 
     codeMirror: CodeMirror.EditorFromTextArea;
-    _currentCodemirrorValue: string;
 
     constructor(props: CodeMirrorProps) {
         super(props);
@@ -29,12 +29,14 @@ export default class CodeMirrorComponent extends React.Component<CodeMirrorProps
     textArea: HTMLTextAreaElement; 
 
     componentDidMount() {
-            this.codeMirror = CodeMirror.fromTextArea(this.textArea, this.props.options);
+        this.codeMirror = CodeMirror.fromTextArea(this.textArea, this.props.options);
+        if (this.props.onChange)
             this.codeMirror.on('change', this.codemirrorValueChanged);
-            this.codeMirror.on('focus', () => this.focusChanged(true));
-            this.codeMirror.on('blur', () => this.focusChanged.bind(false));
-            this._currentCodemirrorValue = this.props.defaultValue || this.props.value || '';
-            this.codeMirror.setValue(this._currentCodemirrorValue);
+        this.codeMirror.on('focus', () => this.focusChanged(true));
+        this.codeMirror.on('blur', () => this.focusChanged.bind(false));
+        this.codeMirror.setValue(this.props.defaultValue || this.props.value || '');
+        if (this.props.errorLineNumber != null)
+            this.lineHandle = this.codeMirror.addLineClass(this.props.errorLineNumber - 1, undefined, "exceptionLine");
     }
     componentWillUnmount() {
         // todo: is there a lighter-weight way to remove the cm instance?
@@ -42,9 +44,11 @@ export default class CodeMirrorComponent extends React.Component<CodeMirrorProps
             this.codeMirror.toTextArea();
         }
     }
+
+    lineHandle?: CodeMirror.LineHandle;
     componentWillReceiveProps(nextProps: CodeMirrorProps) {
         if (this.codeMirror) {
-            if (nextProps.value != undefined && this._currentCodemirrorValue !== nextProps.value) {
+            if (nextProps.value != undefined && this.codeMirror.getValue() !== nextProps.value) {
                 this.codeMirror.setValue(nextProps.value);
             }
 
@@ -55,9 +59,16 @@ export default class CodeMirrorComponent extends React.Component<CodeMirrorProps
                     }
                 }
             }
+            
+            if (this.lineHandle != undefined)
+                this.codeMirror.removeLineClass(this.lineHandle, undefined, undefined);
+
+            if (nextProps.errorLineNumber != null)
+                this.lineHandle = this.codeMirror.addLineClass(nextProps.errorLineNumber - 1, undefined, "exceptionLine");
+            
         }
     }
-
+    
     focus() {
         if (this.codeMirror) {
             this.codeMirror.focus();
@@ -73,7 +84,6 @@ export default class CodeMirrorComponent extends React.Component<CodeMirrorProps
 
     codemirrorValueChanged = (doc: CodeMirror.Editor, change: CodeMirror.EditorChangeLinkedList) => {
         const newValue = doc.getValue();
-        this._currentCodemirrorValue = newValue;
         this.props.onChange && this.props.onChange(newValue);
     }
     render() {
@@ -82,8 +92,11 @@ export default class CodeMirrorComponent extends React.Component<CodeMirrorProps
             this.state.isFocused ? 'ReactCodeMirror--focused' : undefined,
             this.props.className
         );
+
+        const css = ".exceptionLine { background: pink }";
         return (
             <div className={editorClassName}>
+                <style>{css}</style>
                 <textarea ref={ta => this.textArea = ta} name={this.props.path} defaultValue={this.props.value || undefined} autoComplete="off" />
             </div>
         );

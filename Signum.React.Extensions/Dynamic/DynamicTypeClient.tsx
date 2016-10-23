@@ -3,7 +3,7 @@ import * as React from 'react'
 import { Route } from 'react-router'
 import { Tab } from 'react-bootstrap'
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
-import { CountSearchControl } from '../../../Framework/Signum.React/Scripts/Search'
+import { SearchControl, CountSearchControl } from '../../../Framework/Signum.React/Scripts/Search'
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { EntityData, EntityKind } from '../../../Framework/Signum.React/Scripts/Reflection'
@@ -12,15 +12,18 @@ import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 import { Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
+import { StyleContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
+
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
-import { DynamicTypeEntity, DynamicTypeOperation } from './Signum.Entities.Dynamic'
+import { DynamicTypeEntity, DynamicTypeOperation, DynamicSqlMigrationEntity } from './Signum.Entities.Dynamic'
 import DynamicTypeEntityComponent from './Type/DynamicTypeEntity'
 import * as DynamicClient from './DynamicClient'
 
 export function start(options: { routes: JSX.Element[] }) {
 
     Navigator.addSettings(new EntitySettings(DynamicTypeEntity, w => new ViewPromise(resolve => require(['./Type/DynamicTypeEntity'], resolve))));
+    Navigator.addSettings(new EntitySettings(DynamicSqlMigrationEntity, w => new ViewPromise(resolve => require(['./Type/DynamicSqlMigrationEntity'], resolve))));
 
     Operations.addSettings(new EntityOperationSettings(DynamicTypeOperation.Save, {
         onClick: ctx => {
@@ -30,7 +33,10 @@ export function start(options: { routes: JSX.Element[] }) {
     }));
 
     DynamicClient.Options.onGetDynamicLine.push(ctx => <CountSearchControl ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
-    DynamicClient.Options.onGetDynamicTab.push(() => <Tab key="migrations" title="Migrations" >Not implemented</Tab>);
+    DynamicClient.Options.onGetDynamicTab.push(() =>
+        <Tab eventKey="migrations" title="Migrations" >
+            <SearchControl findOptions={{ queryName: DynamicSqlMigrationEntity }} />
+        </Tab>);
 }
 
 export namespace API {

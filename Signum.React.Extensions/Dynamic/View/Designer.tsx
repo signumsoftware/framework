@@ -10,7 +10,7 @@ import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/
 import { Expression, ExpressionOrValue, DesignerContext, DesignerNode } from './NodeUtils'
 import { BaseNode, LineBaseNode } from './Nodes'
 import * as NodeUtils from './NodeUtils'
-import JavascriptCodeMirror from './JavascriptCodeMirror'
+import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 import { Modal, ModalProps, ModalClass, ButtonToolbar, Button } from 'react-bootstrap'
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';

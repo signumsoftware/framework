@@ -4,6 +4,7 @@ using Signum.Engine.Maps;
 using Signum.Engine.Migrations;
 using Signum.Engine.Operations;
 using Signum.Entities;
+using Signum.Entities.Authorization;
 using Signum.Entities.Dynamic;
 using Signum.Utilities;
 using System;
@@ -42,6 +43,15 @@ namespace Signum.Engine.Dynamic
                         e.Comment,
                     });
 
+                new Graph<DynamicSqlMigrationEntity>.Construct(DynamicSqlMigrationOperation.Create)
+                {
+                    Construct = args => new DynamicSqlMigrationEntity
+                    {
+                        CreationDate = TimeZoneManager.Now,
+                        CreatedBy = UserEntity.Current.ToLite(),
+                    }
+                }.Register();
+
                 new Graph<DynamicSqlMigrationEntity>.Execute(DynamicSqlMigrationOperation.Save)
                 {
                     CanExecute = a=> a.ExecutionDate == null ? null : DynamicSqlMigrationMessage.TheMigrationIsAlreadyExecuted.NiceToString(),
@@ -53,12 +63,15 @@ namespace Signum.Engine.Dynamic
                 new Graph<DynamicSqlMigrationEntity>.Execute(DynamicSqlMigrationOperation.Execute)
                 {
                     CanExecute = a => a.ExecutionDate == null ? null : DynamicSqlMigrationMessage.TheMigrationIsAlreadyExecuted.NiceToString(),
-                    Execute = (m, _) => {
+                    
+                    Execute = (e, _) => {
 
                         if (CurrentLog != null)
                             throw new InvalidOperationException("There is already a migration running");
 
-                        
+                        e.ExecutionDate = TimeZoneManager.Now;
+                        e.ExecutedBy = UserEntity.Current.ToLite();
+
                         var oldOut = Console.Out;
                         try
                         {
@@ -66,9 +79,9 @@ namespace Signum.Engine.Dynamic
                             LastLog = null;
                             Console.SetOut(new SyncronizedStringWriter(CurrentLog));
 
-                            string title = m.CreationDate + (m.Comment.HasText() ? " ({0})".FormatWith(m.Comment) : null);
+                            string title = e.CreationDate + (e.Comment.HasText() ? " ({0})".FormatWith(e.Comment) : null);
 
-                            SqlMigrationRunner.ExecuteScript(title, m.Script);
+                            SqlMigrationRunner.ExecuteScript(title, e.Script);
                         }
                         finally
                         {

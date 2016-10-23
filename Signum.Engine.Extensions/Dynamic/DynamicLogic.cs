@@ -7,7 +7,9 @@ using Signum.Entities;
 using Signum.Entities.Dynamic;
 using Signum.Utilities;
 using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -24,5 +26,44 @@ namespace Signum.Engine.Dynamic
                 PermissionAuthLogic.RegisterTypes(typeof(DynamicPanelPermission));
             }
         }
+
+        public static List<string> Assemblies = Eval.BasicAssemblies;
+        public static string GeneratedCodeDirectory = "DynamicalyGeneratedCode";
+
+        public static Func<List<CodeFile>> GetCodeFiles = null;
+
+        public static CompilerResults Compile(out Dictionary<string, CodeFile> codeFiles)
+        {
+            using (HeavyProfiler.Log("COMPILE"))
+            {
+                CodeDomProvider supplier = new Microsoft.CodeDom.Providers.DotNetCompilerPlatform.CSharpCodeProvider();
+
+                CompilerParameters parameters = new CompilerParameters();
+
+                parameters.ReferencedAssemblies.Add("System.dll");
+                parameters.ReferencedAssemblies.Add("System.Core.dll");
+                foreach (var ass in Assemblies)
+                {
+                    parameters.ReferencedAssemblies.Add(Path.Combine(Eval.AssemblyDirectory, ass));
+                }
+
+                parameters.GenerateInMemory = true;
+
+                codeFiles = GetCodeFiles.GetInvocationListTyped().SelectMany(f => f()).ToDictionary(a => a.FileName, "C# code files");
+
+                Directory.CreateDirectory(GeneratedCodeDirectory);
+                codeFiles.Values.ToList().ForEach(a => File.WriteAllText(Path.Combine(GeneratedCodeDirectory, a.FileName), a.FileContent));
+
+                CompilerResults compiled = supplier.CompileAssemblyFromFile(parameters, codeFiles.Values.Select(a => Path.Combine(GeneratedCodeDirectory, a.FileName)).ToArray());
+
+                return compiled;
+            }
+        }
+    }
+
+    public class CodeFile
+    {
+        public string FileName; //Just for debugging
+        public string FileContent;
     }
 }

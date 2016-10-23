@@ -32,9 +32,11 @@ namespace Signum.Engine.Dynamic
                     });
 
                 DynamicTypeGraph.Register();
+
+                DynamicLogic.GetCodeFiles += GetCodeFiles;
+                DynamicLogic.GetCodeFiles += GetLogicCodeFiles;
             }
         }
-
 
         public class DynamicTypeGraph : Graph<DynamicTypeEntity>
         {
@@ -76,22 +78,69 @@ namespace Signum.Engine.Dynamic
 
         public static string DynamicallyGeneratedEntitiesNamespace = "Signum.Entities.DynamicallyGenerated";
 
+        public static List<string> Namespaces = Eval.BasicNamespaces;
+
         public static string GetPropertyType(DynamicProperty property)
         {
-            var generator = new DynamicTypeCodeGenerator(DynamicallyGeneratedEntitiesNamespace, null, null, new string[0]);
+            var generator = new DynamicTypeCodeGenerator(DynamicallyGeneratedEntitiesNamespace, null, null, new List<string>());
 
             return generator.GetPropertyType(property);
         }
+
+
+        public static List<CodeFile> GetCodeFiles()
+        {
+            var dynamicTypes = Database.Query<DynamicTypeEntity>().ToList();
+
+            return dynamicTypes.Select(dt =>
+            {
+                var def = dt.GetDefinition();
+
+                var dcg = new DynamicTypeCodeGenerator(DynamicallyGeneratedEntitiesNamespace, dt.TypeName, def, Namespaces);
+
+                var content = dcg.GetFileCode();
+                return new CodeFile
+                {
+                    FileName = dt.TypeName + ".cs",
+                    FileContent = content
+                };
+            }).ToList();
+        }
+
+        public static List<CodeFile> GetLogicCodeFiles()
+        {
+            var dynamicTypes = Database.Query<DynamicTypeEntity>().ToList();
+
+            var ns = Namespaces;
+            ns.Add("Signum.Engine.DynamicQuery");
+            ns.Add("Signum.Engine.Operations");
+            ns.Add("Signum.Engine.Maps");
+
+            return dynamicTypes.Select(dt =>
+            {
+                var def = dt.GetDefinition();
+
+                var dlg = new DynamicTypeLogicGenerator(DynamicallyGeneratedEntitiesNamespace, dt.TypeName, def, ns);
+
+                var content = dlg.GetFileCode();
+                return new CodeFile
+                {
+                    FileName = dt.TypeName + "Logic.cs",
+                    FileContent = content
+                };
+            }).ToList();
+        }
     }
+
 
     public class DynamicTypeCodeGenerator
     {
-        public string[] Usings { get; private set; }
+        public List<string> Usings { get; private set; }
         public string Namespace { get; private set; }
         public string TypeName { get; private set; }
         public DynamicTypeDefinition Def { get; private set; }
 
-        public DynamicTypeCodeGenerator(string @namespace, string typeName, DynamicTypeDefinition def, string[] usings)
+        public DynamicTypeCodeGenerator(string @namespace, string typeName, DynamicTypeDefinition def, List<string> usings)
         {
             this.Usings = usings;
             this.Namespace = @namespace;
@@ -108,12 +157,14 @@ namespace Signum.Engine.Dynamic
             sb.AppendLine();
             sb.AppendLine("namespace " + this.Namespace);
             sb.AppendLine("{");
-            int length = sb.Length;
-            sb.Append(GetEntityCode());
-
-            if (sb.Length == length)
-                return null;
-
+            sb.Append(GetEntityCode().Indent(4));
+         
+            var ops = GetEntityOperation();
+            if (ops != null)
+            {
+                sb.AppendLine();
+                sb.Append(ops.Indent(4));
+            }
             sb.AppendLine("}");
 
             return sb.ToString();
@@ -126,7 +177,7 @@ namespace Signum.Engine.Dynamic
             {
                 sb.AppendLine("[" + gr.ToString(", ") + "]");
             }
-            sb.AppendLine($"public class {Def.TableName} : {GetEntityBaseClass(Def.BaseType)}");
+            sb.AppendLine($"public class {this.TypeName}Entity : {GetEntityBaseClass(Def.BaseType)}");
             sb.AppendLine("{");
 
             foreach (var prop in Def.Properties)
@@ -153,11 +204,28 @@ namespace Signum.Engine.Dynamic
             return sb.ToString();
         }
 
-        private string GetEntityBaseClass(DynamcBaseType baseType)
+        public string GetEntityOperation()
+        {
+            if (!this.Def.RegisterSave && !this.Def.RegisterDelete)
+                return null;
+
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"public static class {this.TypeName}Operation");
+            sb.AppendLine("{");
+            if (this.Def.RegisterSave)
+                sb.AppendLine($"    public static readonly ExecuteSymbol<{this.TypeName}Entity> Save = OperationSymbol.Execute<{this.TypeName}Entity>(typeof({this.TypeName}Operation), \"Save\");");
+            if (this.Def.RegisterDelete)
+                sb.AppendLine($"    public static readonly DeleteSymbol<{this.TypeName}Entity> Delete = OperationSymbol.Delete<{this.TypeName}Entity>(typeof({this.TypeName}Operation), \"Delete\");");
+            sb.AppendLine("}");
+
+            return sb.ToString();
+        }
+
+        private string GetEntityBaseClass(DynamicBaseType baseType)
         {
             switch (baseType)
             {
-                case DynamcBaseType.Entity: return "Entity";
+                case DynamicBaseType.Entity: return "Entity";
                 default: throw new NotImplementedException();
             }
         }
@@ -168,7 +236,7 @@ namespace Signum.Engine.Dynamic
                 return null;
             
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"static Expression<Func<{TypeName}, string>> ToStringExpression = e => {Def.ToStringExpression};");
+            sb.AppendLine($"static Expression<Func<{TypeName}Entity, string>> ToStringExpression = e => {Def.ToStringExpression};");
             sb.AppendLine("[ExpressionField]");
             sb.AppendLine("public override string ToString()");
             sb.AppendLine("{");
@@ -197,19 +265,24 @@ namespace Signum.Engine.Dynamic
 
             StringBuilder sb = new StringBuilder();
 
-            WriteAttributeTag(sb, GetFieldAttributes(property));
-            WriteAttributeTag(sb, GetPropertyAttributes(property));
-
             string inititalizer = property.IsMList ? $" = new {type}()": null;
+            string fieldName = property.Name.FirstLower();
 
-            sb.AppendLine($"public {type} {property.Name} {{ get; set; }}{inititalizer}");
+            WriteAttributeTag(sb, GetFieldAttributes(property));
+            sb.AppendLine($"{type} {fieldName}{inititalizer};");
+            WriteAttributeTag(sb, GetPropertyAttributes(property));
+            sb.AppendLine($"public {type} {property.Name}");
+            sb.AppendLine("{");
+            sb.AppendLine($"    get {{ return this.Get({fieldName}); }}");
+            sb.AppendLine($"    set {{ this.Set(ref {fieldName}, value); }}");
+            sb.AppendLine("}");
 
             return sb.ToString();
         }
 
         private IEnumerable<string> GetPropertyAttributes(DynamicProperty property)
         {
-            return property.Validators.Select(v => GetValidatorAttribute(v));
+            return property.Validators.EmptyIfNull().Select(v => GetValidatorAttribute(v));
         }
 
         private string GetValidatorAttribute(DynamicValidator v)
@@ -252,6 +325,13 @@ namespace Signum.Engine.Dynamic
             if (property.ColumnName != null)
             {
                 atts.Add($"ColumnName({Literal(property.ColumnName)})");
+            }
+
+            switch (property.UniqueIndex)
+            {
+                case Entities.Dynamic.UniqueIndex.No: break;
+                case Entities.Dynamic.UniqueIndex.Yes: atts.Add("UniqueIndex"); break;
+                case Entities.Dynamic.UniqueIndex.YesAllowNull: atts.Add("UniqueIndex(AllowMultipleNulls = true)"); break;
             }
 
             return atts;
@@ -322,4 +402,69 @@ namespace Signum.Engine.Dynamic
 
         }
     }
+
+    public class DynamicTypeLogicGenerator {
+
+        public List<string> Usings { get; private set; }
+        public string Namespace { get; private set; }
+        public string TypeName { get; private set; }
+        public DynamicTypeDefinition Def { get; private set; }
+
+        public DynamicTypeLogicGenerator(string @namespace, string typeName, DynamicTypeDefinition def, List<string> usings)
+        {
+            this.Usings = usings;
+            this.Namespace = @namespace;
+            this.TypeName = typeName;
+            this.Def = def;
+        }
+
+        public string GetFileCode()
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var item in this.Usings)
+                sb.AppendLine("using {0};".FormatWith(item));
+
+            sb.AppendLine();
+            sb.AppendLine($"namespace {this.Namespace}");
+            sb.AppendLine($"{{");
+
+            sb.AppendLine($"    public static class {this.TypeName}Logic");
+            sb.AppendLine($"    {{");
+            sb.AppendLine($"        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)");
+            sb.AppendLine($"        {{");
+            sb.AppendLine($"            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))");
+            sb.AppendLine($"            {{");
+            sb.AppendLine(GetInclude().Indent(16));
+            sb.AppendLine($"            }}");
+            sb.AppendLine($"        }}");
+            sb.AppendLine($"    }}");
+            sb.AppendLine($"}}");
+
+            return sb.ToString();
+        }
+
+        private string GetInclude()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"sb.Include<{this.TypeName}Entity>()");
+
+            if (this.Def.RegisterSave)
+                sb.AppendLine($"    .WithSave({this.TypeName}Operation.Save)");
+
+            if (this.Def.RegisterDelete)
+                sb.AppendLine($"    .WithDelete({this.TypeName}Operation.Delete)");
+
+
+            var mcui = this.Def.MultiColumnUniqueIndex;
+            if (mcui != null)
+                sb.AppendLine($"    .WithUniqueIndex(e => new {{${ mcui.Fields.Select(f => "e." + f).Comma(", ")}}}{(mcui.Where.HasText() ? "," + mcui.Where: "")})");
+
+            if (this.Def.QueryFields.EmptyIfNull().Any())
+                sb.AppendLine($"    .WithQuery(dqm, e => new {{ Entity = e, {this.Def.QueryFields.Select(f => "e." + f).Comma(",\r\n")} }})");
+
+            sb.Insert(sb.Length - 2, ';');
+            return sb.ToString();
+        }
+    }
+
 }

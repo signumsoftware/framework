@@ -14,7 +14,7 @@ namespace Signum.Entities.Dynamic
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class DynamicSqlMigrationEntity : Entity
     {
-        public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
+        public DateTime CreationDate { get; set; }
 
         [NotNullable, ImplementedBy(typeof(UserEntity))]
         [NotNullValidator]
@@ -22,8 +22,7 @@ namespace Signum.Entities.Dynamic
 
         public DateTime? ExecutionDate { get; set; }
         
-        [NotNullable, ImplementedBy(typeof(UserEntity))]
-        [NotNullValidator]
+        [ImplementedBy(typeof(UserEntity))]
         public Lite<IUserEntity> ExecutedBy { get; set; }
 
         [NotNullable, SqlDbType(Size = 200)]
@@ -31,7 +30,7 @@ namespace Signum.Entities.Dynamic
         public string Comment { get; set; }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
-        [StringLengthValidator(AllowNulls = false, Max = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = false, Max = int.MaxValue, MultiLine = true)]
         public string Script { get; set; }
     }
 

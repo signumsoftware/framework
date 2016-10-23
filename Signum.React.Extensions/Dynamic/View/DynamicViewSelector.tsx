@@ -5,7 +5,7 @@ import { DynamicViewSelectorEntity, DynamicViewMessage } from '../Signum.Entitie
 import { EntityLine, TypeContext } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { Entity, JavascriptMessage, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { getTypeInfo, Binding, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import JavascriptCodeMirror from './JavascriptCodeMirror'
+import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
 import * as DynamicViewClient from '../DynamicViewClient'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { AuthInfo } from './AuthInfo'

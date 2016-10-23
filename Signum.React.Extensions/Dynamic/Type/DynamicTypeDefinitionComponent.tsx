@@ -16,7 +16,7 @@ import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorMo
 import * as DynamicTypeClient from '../DynamicTypeClient';
 import { Validators, DynamicTypeDefinition, DynamicProperty } from '../DynamicTypeClient';
 import ValueComponent from './ValueComponent';
-import CSharpCodeMirror from '../CSharpCodeMirror';
+import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror';
 
 require("!style!css!./DynamicType.css");
 
@@ -76,6 +76,14 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
         this.state = { activeIndex: 0 };
     }
 
+    componentWillMount() {
+        this.props.properties.forEach(p => fetchPropertyType(p, this.props.dc));
+    }
+
+    componentWillReceiveProps(newProps: PropertyRepeaterComponentProps) {
+        newProps.properties.filter(a => a._propertyType_ == undefined).forEach(p => fetchPropertyType(p, this.props.dc));    
+    }
+   
     handleSelect = (activeIndex: number) => {
         this.setState({ activeIndex });
     }
@@ -130,10 +138,7 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
         this.props.properties.push(p);
         this.props.dc.refreshView();
 
-        DynamicTypeClient.API.getPropertyType(p).then(s => {
-            p._propertyType_ = s;
-            this.props.dc.refreshView();
-        }).done();
+        fetchPropertyType(p, this.props.dc);
     }
 
     render() {
@@ -180,11 +185,19 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
                         <span className="glyphicon glyphicon-chevron-down" />
                     </a>
                 </span>
-                {" " + p._propertyType_ + " " + p.name}
+                {" " + (p._propertyType_ || "") + " " + p.name}
             </div>
         );
     }
 }
+
+function fetchPropertyType(p: DynamicProperty, dc: DynamicTypeDesignContext) {
+    DynamicTypeClient.API.getPropertyType(p).then(s => {
+        p._propertyType_ = s;
+        dc.refreshView();
+    }).done()
+}
+
 
 export interface PropertyComponentProps {
     property: DynamicProperty;
@@ -201,10 +214,7 @@ export class PropertyComponent extends React.Component<PropertyComponentProps, v
 
         this.props.dc.refreshView();
 
-        DynamicTypeClient.API.getPropertyType(p).then(s => {
-            p._propertyType_ = s;
-            this.props.dc.refreshView();
-        }).done();
+        fetchPropertyType(p, this.props.dc);
     }
 
     render() {
@@ -250,6 +260,9 @@ function autoFix(p: DynamicProperty) {
     if (p.size != undefined && !allowsSize(p.type))
         p.size = undefined;
 
+    if (p.size === undefined && isString(p.type))
+        p.size = 200;
+
     if (!p.validators)
         p.validators = [];
 
@@ -279,7 +292,7 @@ function autoFix(p: DynamicProperty) {
 }
 
 function allowsSize(type: string) {
-    return isString(type) || isInteger(type) || isDecimal(type);
+    return isString(type) || isDecimal(type);
 }
 
 export interface ValidatorRepeaterComponentProps {
