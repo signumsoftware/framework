@@ -22,9 +22,6 @@ namespace Signum.Entities.Dynamic
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string TypeName { get; set; }
         
-        [NotNullable]
-        public Lite<TypeEntity> Type { get; set; }
-
         [SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = false, Min = 3)]
         public string TypeDefinition { get; set; }
@@ -57,7 +54,7 @@ namespace Signum.Entities.Dynamic
     public class DynamicTypeDefinition
     {
         [JsonProperty(PropertyName = "baseType")]
-        public DynamcBaseType BaseType;
+        public DynamicBaseType BaseType;
 
         [JsonProperty(PropertyName = "entityKind", NullValueHandling = NullValueHandling.Ignore)]
         public EntityKind? EntityKind;
@@ -71,11 +68,33 @@ namespace Signum.Entities.Dynamic
         [JsonProperty(PropertyName = "properties")]
         public List<DynamicProperty> Properties;
 
-        [JsonProperty(PropertyName = "toStringExpression")]
+        [JsonProperty(PropertyName = "registerSave")]
+        public bool RegisterSave;
+
+        [JsonProperty(PropertyName = "registerDelete")]
+        public bool RegisterDelete;
+
+        [JsonProperty(PropertyName = "queryFields")]
+        public List<string> QueryFields;
+
+        [JsonProperty(PropertyName = "multiColumnUniqueIndex")]
+        public MultiColumnUniqueIndex MultiColumnUniqueIndex;
+        
+        [JsonProperty(PropertyName = "toStringExpression", NullValueHandling = NullValueHandling.Ignore)]
         public string ToStringExpression;
     }
 
-    public enum DynamcBaseType
+    public class MultiColumnUniqueIndex
+    {
+        [JsonProperty(PropertyName = "fields")]
+        public List<string> Fields;
+
+        [JsonProperty(PropertyName = "where")]
+        public string Where;
+
+    }
+
+    public enum DynamicBaseType
     {
         Entity,
     }
@@ -93,6 +112,9 @@ namespace Signum.Entities.Dynamic
 
         [JsonProperty(PropertyName = "isNullable")]
         public IsNullable IsNullable;
+
+        [JsonProperty(PropertyName = "isUnique")]
+        public UniqueIndex UniqueIndex;
 
         [JsonProperty(PropertyName = "isLite", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool IsLite;
@@ -119,6 +141,13 @@ namespace Signum.Entities.Dynamic
         Yes,
         OnlyInMemory,
         No,
+    }
+
+    public enum UniqueIndex
+    {
+        No,
+        Yes,
+        YesAllowNull,
     }
 
 

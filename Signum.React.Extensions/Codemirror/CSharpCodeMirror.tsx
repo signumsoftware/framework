@@ -25,6 +25,7 @@ interface CSharpCodeMirrorProps {
     script: string;
     onChange?: (newScript: string) => void;
     isReadOnly?: boolean;
+    errorLineNumber?: number;
 }
 
 export default class CSharpCodeMirror extends React.Component<CSharpCodeMirrorProps, void> { 
@@ -35,7 +36,7 @@ export default class CSharpCodeMirror extends React.Component<CSharpCodeMirrorPr
 
         const options = {
             lineNumbers: true,
-            mode: "clike",
+            mode: "text/x-csharp",
             extraKeys: {
                 "Ctrl-Space": "autocomplete",
                 "Ctrl-K": (cm: any) => cm.lineComment(cm.getCursor(true), cm.getCursor(false)),
@@ -56,7 +57,9 @@ export default class CSharpCodeMirror extends React.Component<CSharpCodeMirrorPr
         return (
             <CodeMirrorComponent value={this.props.script} ref={cm => this.codeMirrorComponent = cm}
                 options={options}
-                onChange={this.props.onChange} />
+                onChange={this.props.isReadOnly ? undefined : this.props.onChange}
+                errorLineNumber={this.props.errorLineNumber}
+                />
         );
     }
 }

@@ -13,9 +13,8 @@ import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructo
 import { StyleContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
-import { DynamicTypeEntity, DynamicTypeOperation, DynamicPanelPermission } from './Signum.Entities.Dynamic'
+import { DynamicTypeEntity, DynamicTypeOperation, DynamicPanelPermission, DynamicSqlMigrationEntity } from './Signum.Entities.Dynamic'
 import * as AuthClient from '../Authorization/AuthClient'
-import DynamicTypeEntityComponent from './Type/DynamicTypeEntity'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 
 export function start(options: { routes: JSX.Element[] }) {
@@ -40,8 +39,9 @@ export interface CompilationError {
     fileName: string;
     line: number;
     column: number;
-    errorCode: string;
-    errorMessage: string;
+    errorNumber: string;
+    errorText: string;
+    fileContent: string;
 }
 
 export namespace API {
@@ -53,8 +53,8 @@ export namespace API {
         return ajaxPost<void>({ url: `~/api/dynamic/restartApplication` }, null);
     }
 
-    export function pingApplication(): Promise<void> {
-        return ajaxPost<void>({ url: `~/api/dynamic/pingApplication` }, null);
+    export function pingApplication(): Promise<boolean> {
+        return ajaxPost<boolean>({ url: `~/api/dynamic/pingApplication` }, null);
     }
 }
 

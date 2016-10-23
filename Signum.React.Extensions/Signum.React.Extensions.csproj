@@ -152,6 +152,7 @@
     <Compile Include="DiffLog\DiffLogController.cs" />
     <Compile Include="DiffLog\DiffLogServer.cs" />
     <Compile Include="Disconnected\DisconnectedServer.cs" />
+    <Compile Include="Dynamic\DynamicController.cs" />
     <Compile Include="Dynamic\DynamicValidationController.cs" />
     <Compile Include="Dynamic\DynamicTypeController.cs" />
     <Compile Include="Dynamic\DynamicViewController.cs" />
@@ -170,8 +171,10 @@
     <TypeScriptCompile Include="Dynamic\Signum.Entities.Dynamic.ts">
       <DependentUpon>Signum.Entities.Dynamic.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Dynamic\Type\DynamicSqlMigrationEntity.tsx" />
     <TypeScriptCompile Include="Dynamic\Type\DynamicTypeDefinitionComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicPanelPage.tsx" />
+    <TypeScriptCompile Include="Codemirror\SqlCodeMirror.tsx" />
     <TypeScriptCompile Include="Dynamic\Type\ValueComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\Type\DynamicTypeEntity.tsx" />
     <TypeScriptCompile Include="Dynamic\View\DynamicViewSelector.tsx" />
@@ -183,13 +186,13 @@
     <TypeScriptCompile Include="Dynamic\View\HtmlAttributesComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\View\StyleOptionsExpression.tsx" />
     <TypeScriptCompile Include="Dynamic\View\HtmlAttributesExpression.tsx" />
-    <TypeScriptCompile Include="Dynamic\View\JavascriptCodeMirror.tsx" />
+    <TypeScriptCompile Include="Codemirror\JavascriptCodeMirror.tsx" />
     <TypeScriptCompile Include="Dynamic\View\FindOptionsComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\View\FindOptionsExpression.tsx" />
     <TypeScriptCompile Include="Dynamic\View\NodeUtils.tsx" />
     <TypeScriptCompile Include="Dynamic\View\Nodes.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicValidationClient.tsx" />
-    <TypeScriptCompile Include="Dynamic\CSharpCodeMirror.tsx" />
+    <TypeScriptCompile Include="Codemirror\CSharpCodeMirror.tsx" />
     <TypeScriptCompile Include="Dynamic\Validation\DynamicValidation.tsx" />
     <TypeScriptCompile Include="Dynamic\View\NodeSelectorModal.tsx" />
     <TypeScriptCompile Include="Files\FileUploader.tsx" />
@@ -226,6 +229,7 @@
     <Content Include="Chart\Chart.css" />
     <Content Include="Dashboard\Dashboard.css" />
     <Content Include="DiffLog\Templates\DiffLog.css" />
+    <Content Include="Dynamic\DynamicPanelPage.css" />
     <Content Include="Dynamic\Type\DynamicType.css" />
     <Content Include="Dynamic\View\DynamicView.css" />
     <Content Include="Dynamic\View\DynamicViewTree.css" />

@@ -21,8 +21,8 @@ namespace Signum.React.Dynamic
 {
     public class DynamicValidationController : ApiController
     {
-        [Route("api/dynamic/validationTest"), HttpPost]
-        public DynamicValidationTestResponse ValidationTest(DynamicValidationTestRequest request)
+        [Route("api/dynamic/validation/test"), HttpPost]
+        public DynamicValidationTestResponse Test(DynamicValidationTestRequest request)
         {
             IDynamicValidationEvaluator evaluator;
             try

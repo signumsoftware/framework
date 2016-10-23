@@ -39,7 +39,6 @@ export const DynamicTypeEntity = new Type<DynamicTypeEntity>("DynamicType");
 export interface DynamicTypeEntity extends Entities.Entity {
     Type: "DynamicType";
     typeName?: string | null;
-    type?: Entities.Lite<Basics.TypeEntity> | null;
     typeDefinition?: string | null;
 }
 

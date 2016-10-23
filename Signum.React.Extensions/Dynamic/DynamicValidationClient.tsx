@@ -24,7 +24,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
 export namespace API {
     export function validationTest(request: DynamicValidationTestRequest): Promise<DynamicValidationTestResponse> {
-        return ajaxPost<DynamicValidationTestResponse>({ url: `~/api/dynamic/validationTest` }, request);
+        return ajaxPost<DynamicValidationTestResponse>({ url: `~/api/dynamic/validation/test` }, request);
     }
 }
 

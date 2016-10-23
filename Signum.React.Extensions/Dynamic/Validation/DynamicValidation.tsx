@@ -7,7 +7,7 @@ import { Entity } from '../../../../Framework/Signum.React/Scripts/Signum.Entiti
 import { TypeEntity, PropertyRouteEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { API, DynamicValidationTestResponse } from '../DynamicValidationClient'
-import CSharpCodeMirror from '../CSharpCodeMirror'
+import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 
 interface DynamicValidationProps {
     ctx: TypeContext<DynamicValidationEntity>;
