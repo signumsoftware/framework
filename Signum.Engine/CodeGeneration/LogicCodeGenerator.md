@@ -20,18 +20,16 @@ This tree shows the call hierarchy or the methods, all `protected` and `virtual`
 					* `ShouldWriteExpression`
 			* `GetUsingNamespaces`
 			* `GetNamespace`
-			* `WriteClass`
+			* `WriteLogicClass`
 				* **foreach expression**
 					* `WriteExpressionMethod`
 				* `WriteStartMethod`
 					1. **foreach type in module**
 						* `WriteInclude`
-					* **foreach type in module**
-						* `WriteQuery`
-							* `GetQueryProperties`
-					* **foreach expression**
-						* `GetRegisterExpression`
-					* **foreach type in module**
+							* ShouldWriteSimpleOperations (for Save)
+							* ShouldWriteSimpleOperations (for Delete)
+							* ShouldWriteSimpleQuery
+						* `WriteQuery``
 						* `WriteOperations`
 							* **foreach operation in** `GetOperationsSymbols(type)`
 								* `WriteOperation`

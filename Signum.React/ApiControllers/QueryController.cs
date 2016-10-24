@@ -16,6 +16,7 @@ using Signum.Entities.Basics;
 using Signum.Engine;
 using Signum.React.Filters;
 using System.Collections.ObjectModel;
+using Signum.Engine.Maps;
 
 namespace Signum.React.ApiControllers
 {
@@ -40,16 +41,6 @@ namespace Signum.React.ApiControllers
             var entityType = qd.Columns.Single(a => a.IsEntity).Implementations.Value.Types.SingleEx();
 
             return entitiesQuery.AutocompleteUntyped(request.subString, request.count, entityType);
-        }
-
-        [Route("api/query/findTypeLike"), HttpGet]
-        public List<Lite<TypeEntity>> FindTypeLike(string subString, int count)
-        {
-            var lites = TypeLogic.TypeToEntity.Values.Select(a => a.ToLite()).ToList();
-
-            var result = AutocompleteUtils.Autocomplete(lites, subString, count);
-
-            return result;
         }
 
         [Route("api/query/allLites"), HttpGet, ProfilerActionSplitter("types")]

@@ -581,6 +581,17 @@ namespace Signum.Entities
         }
     }
 
+    [DescriptionOptions(DescriptionOptions.Members)]
+    public enum ComparisonType
+    {
+        EqualTo,
+        DistinctTo,
+        GreaterThan,
+        GreaterThanOrEqualTo,
+        LessThan,
+        LessThanOrEqualTo,
+    }
+
     public class DaysPrecissionValidatorAttribute : DateTimePrecissionValidatorAttribute
     {
         public DaysPrecissionValidatorAttribute()
@@ -762,16 +773,7 @@ namespace Signum.Entities
         Lowercase
     }
     
-    [DescriptionOptions(DescriptionOptions.Members)]
-    public enum ComparisonType
-    {
-        EqualTo,
-        DistinctTo,
-        GreaterThan,
-        GreaterThanOrEqualTo,
-        LessThan,
-        LessThanOrEqualTo,
-    }
+   
 
     public class IsAssignableToValidatorAttribute : ValidatorAttribute
     {
@@ -1002,7 +1004,7 @@ namespace Signum.Entities
         TheLengthOf0HasToBeLesserOrEqualTo1,
         [Description("The number of {0} is being multiplied by {1}")]
         TheNumberOf0IsBeingMultipliedBy1,
-        [Description("The number of elements of {0} has to be {0} {1}")]
+        [Description("The number of elements of {0} has to be {1} {2}")]
         TheNumberOfElementsOf0HasToBe12,
         [Description("Type {0} not allowed")]
         Type0NotAllowed,

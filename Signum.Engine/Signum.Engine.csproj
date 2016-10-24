@@ -196,6 +196,8 @@
     <None Include="CodeGeneration\EntityCodeGenerator.md" />
     <None Include="CodeGeneration\LegacyDatabase.AdventureWorks.md" />
     <None Include="CodeGeneration\LogicCodeGenerator.md" />
+    <None Include="CodeGeneration\ReactCodeConverter.md" />
+    <None Include="CodeGeneration\ReactCodeGenerator.md" />
     <None Include="CodeGeneration\WebCodeGenerator.md" />
     <None Include="CodeGeneration\WindowsCodeGenerator.md" />
     <None Include="Database.Delete.md" />

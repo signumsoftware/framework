@@ -25,7 +25,7 @@ declare interface Promise<T> {
 
 declare interface Window {
     __baseUrl: string;
-    parentWindowData: any;
+    dataForChildWindow?: any;
 }
 
 interface Array<T> {
@@ -54,6 +54,8 @@ interface Array<T> {
     contains(this: Array<T>, element: T): boolean;
     remove(this: Array<T>, element: T): boolean;
     removeAt(this: Array<T>, index: number): void;
+    moveUp(this: Array<T>, index: number): number;
+    moveDown(this: Array<T>, index: number): number;
     insertAt(this: Array<T>, index: number, element: T): void;
     clone(this: Array<T>, ): T[];
     joinComma(this: Array<T>, lastSeparator: string): string;

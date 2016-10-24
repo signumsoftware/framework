@@ -209,6 +209,7 @@
     <TypeScriptCompile Include="Scripts\Frames\Widgets.tsx" />
     <TypeScriptCompile Include="Scripts\Globals.d.ts" />
     <TypeScriptCompile Include="Scripts\Lines\DynamicComponent.tsx" />
+    <TypeScriptCompile Include="Scripts\Lines\AutocompleteConfig.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityTable.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EnumCheckboxList.tsx" />
     <TypeScriptCompile Include="Scripts\Search.tsx" />

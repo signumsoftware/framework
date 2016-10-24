@@ -115,6 +115,9 @@ export function findOptionsPath(fo: FindOptions, extra?: any): string {
         showFooter: fo.showFooter,
         showHeader: fo.showHeader,
         allowChangeColumns: fo.allowChangeColumns,
+        paginationMode: fo.pagination && fo.pagination.mode,
+        elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,
+        currentPage: fo.pagination && fo.pagination.currentPage,
     };
     
     Encoder.encodeFilters(query, fo.filterOptions);
@@ -167,6 +170,11 @@ export function parseFindOptionsPath(queryName: PseudoType | QueryKey, query: an
         showFilters: parseBoolean(query.showFilters),
         showFooter: parseBoolean(query.showFooter),
         showHeader: parseBoolean(query.showHeader),
+        pagination: query.paginationMode && {
+            mode: query.paginationMode,
+            elementsPerPage: query.elementsPerPage,
+            currentPage: query.currentPage,
+        } as Pagination,
     } as FindOptions;
 
     return result;
