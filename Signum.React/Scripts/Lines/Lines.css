@@ -290,9 +290,13 @@ ul.nav-tabs {
 }
 
 .form-xs .rw-combobox, 
-.form-xs .rw-datetimepicker, 
 .form-xs .rw-numberpicker, 
 .form-xs .rw-dropdownlist{
+    padding-right:1.5em;
+    line-height: 18px;
+}
+
+.form-xs .rw-datetimepicker {
     padding-right:1.9em;
     line-height: 18px;
 }
@@ -386,10 +390,15 @@ ul.nav-tabs {
     line-height: 24px;
 }
 
+
 .form-sm .rw-combobox, 
-.form-sm .rw-datetimepicker, 
 .form-sm .rw-numberpicker, 
 .form-sm .rw-dropdownlist{
+    padding-right:1.5em;
+    line-height: 24px;
+}
+
+.form-sm .rw-datetimepicker{
     padding-right:1.9em;
     line-height: 24px;
 }
