@@ -123,7 +123,7 @@ export function toNumbroFormat(format: string | undefined) {
         return "0." + "0".repeat(parseInt(f.after("C")));
 
     if (f.startsWith("N"))
-        return "0." + "0".repeat(parseInt(f.after("N")));
+        return "0,0." + "0".repeat(parseInt(f.after("N")));
 
     if (f.startsWith("D"))
         return "0".repeat(parseInt(f.after("D")));
