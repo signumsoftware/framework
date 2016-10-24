@@ -1,5 +1,6 @@
 ﻿import * as React from 'react'
-import { PanelGroup, Panel } from 'react-bootstrap'
+import { Combobox } from 'react-widgets'
+import { PanelGroup, Panel, Tabs, Tab } from 'react-bootstrap'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
@@ -32,29 +33,73 @@ interface DynamicTypeDefinitionComponentProps {
 
 export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeDefinitionComponentProps, void> {
 
+
+    handleMultiColumnUniqueIndexChecked = () => {
+        const def = this.props.definition;
+        if (def.multiColumnUniqueIndex)
+            def.multiColumnUniqueIndex = undefined;
+        else
+            def.multiColumnUniqueIndex = { fields: [""] };
+        this.forceUpdate();
+    }
+
     render() {
         const def = this.props.definition;
+
+        var propNames = def.properties.map(p => p.name);
+
         return (
             <div>
                 <ValueComponent dc={this.props.dc} binding={Binding.create(def, d => d.tableName)} type="string" defaultValue={null} autoOpacity={true} />
                 <div className="row">
                     <div className="col-sm-6">
                         <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.entityKind)} type="string" defaultValue={null} options={EntityKindValues} />
+                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.registerSave)} type="boolean" defaultValue={null} />
                     </div>
                     <div className="col-sm-6">
                         <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.entityData)} type="string" defaultValue={null} options={EntityDataValues} />
+                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.registerDelete)} type="boolean" defaultValue={null} />
                     </div>
                 </div>
 
-                <PropertyRepeaterComponent dc={this.props.dc} properties={def.properties} />
+                <Tabs defaultActiveKey="properties" id="DynamicTypeTabs">
+                    <Tab eventKey="properties" title="Properties">
+                        <PropertyRepeaterComponent dc={this.props.dc} properties={def.properties} />
+                        <fieldset>
+                            <legend><input type="checkbox" checked={!!def.multiColumnUniqueIndex} onChange={this.handleMultiColumnUniqueIndexChecked} /> Multi-column Unique Index</legend>
 
-                <h4>ToStringExpression</h4>
-                <pre style={{ border: "0px", margin: "0px" }}>{"(" + this.props.typeName + "Entity e) =>"}</pre>
-                <div className="small-codemirror">
-                <CSharpCodeMirror
-                    script={def.toStringExpression || ""}
-                    onChange={newScript => { def.toStringExpression = newScript; this.forceUpdate(); } } />
-                </div>
+                            {def.multiColumnUniqueIndex &&
+                                <div className="row">
+                                <div className="col-sm-6">
+                                    <ComboBoxRepeaterComponent options={propNames} list={def.multiColumnUniqueIndex.fields} />
+                                </div>
+                                <div className="col-sm-6">
+                                    <h4>Where</h4>
+                                    <pre style={{ border: "0px", margin: "0px" }}>{"(" + this.props.typeName + "Entity e) =>"}</pre>
+                                    <div className="small-codemirror">
+                                        <CSharpCodeMirror
+                                            script={def.multiColumnUniqueIndex.where || ""}
+                                            onChange={newScript => { def.multiColumnUniqueIndex!.where = newScript; this.forceUpdate(); } } />
+                                    </div>
+                                </div>
+                                </div>}
+
+                          
+                        </fieldset>
+                        <fieldset>
+                            <legend>ToString expression</legend>
+                            <pre style={{ border: "0px", margin: "0px" }}>{"(" + this.props.typeName + "Entity e) =>"}</pre>
+                            <div className="small-codemirror">
+                                <CSharpCodeMirror
+                                    script={def.toStringExpression || ""}
+                                    onChange={newScript => { def.toStringExpression = newScript; this.forceUpdate(); } } />
+                            </div>
+                        </fieldset>
+                    </Tab>
+                    <Tab eventKey="query" title="Query">
+                        <ComboBoxRepeaterComponent options={["Id"].concat(propNames)} list={def.queryFields} />
+                    </Tab>
+                </Tabs>
             </div>
         );
     }
@@ -81,9 +126,9 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
     }
 
     componentWillReceiveProps(newProps: PropertyRepeaterComponentProps) {
-        newProps.properties.filter(a => a._propertyType_ == undefined).forEach(p => fetchPropertyType(p, this.props.dc));    
+        newProps.properties.filter(a => a._propertyType_ == undefined).forEach(p => fetchPropertyType(p, this.props.dc));
     }
-   
+
     handleSelect = (activeIndex: number) => {
         this.setState({ activeIndex });
     }
@@ -144,7 +189,6 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
     render() {
         return (
             <div className="properties">
-                <h4>Properties</h4>
                 <PanelGroup activeKey={this.state.activeIndex} onSelect={this.handleSelect as any} accordion>
                     {
                         this.props.properties.map((p, i) =>
@@ -209,7 +253,7 @@ export class PropertyComponent extends React.Component<PropertyComponentProps, v
     handleAutoFix = () => {
 
         const p = this.props.property;
-        
+
         autoFix(p);
 
         this.props.dc.refreshView();
@@ -230,7 +274,7 @@ export class PropertyComponent extends React.Component<PropertyComponentProps, v
                     </div>
                     <div className="col-sm-4">
                         <ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.isMList)} type="boolean" defaultValue={null} onChange={this.handleAutoFix} />
-                        {p.isMList && < ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.preserveOrder)} type="boolean" defaultValue={null} /> }
+                        {p.isMList && < ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.preserveOrder)} type="boolean" defaultValue={null} />}
 
                         {isTypeEntity(p.type) && <ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.isLite)} type="boolean" defaultValue={null} />}
 
@@ -239,6 +283,8 @@ export class PropertyComponent extends React.Component<PropertyComponentProps, v
 
                         {(isDecimal(p.type)) &&
                             <ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.scale)} type="number" defaultValue={null} />}
+
+                        <ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.uniqueIndex)} type="string" defaultValue={null} options={DynamicTypeClient.UniqueIndexValues} />
                     </div>
                 </div >
                 <ValidatorRepeaterComponent dc={this.props.dc} property={this.props.property} />
@@ -293,6 +339,106 @@ function autoFix(p: DynamicProperty) {
 
 function allowsSize(type: string) {
     return isString(type) || isDecimal(type);
+}
+
+
+export interface ComboBoxRepeaterComponentProps {
+    options: string[];
+    list: string[];
+}
+
+
+export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterComponentProps, void> {
+
+
+    handleChange = (val: string, index: number) => {
+        var list = this.props.list;
+        list[index] = val;
+        this.forceUpdate();
+    }
+
+    handleCreateClick = (event: React.SyntheticEvent) => {
+        event.preventDefault();
+        this.props.list.push("");
+        this.forceUpdate();
+    }
+
+    handleOnRemove = (event: React.MouseEvent, index: number) => {
+        event.preventDefault();
+        event.stopPropagation();
+        this.props.list.removeAt(index);
+        this.forceUpdate();
+    }
+
+    handleOnMoveUp = (event: React.MouseEvent, index: number) => {
+        event.preventDefault();
+        event.stopPropagation();
+        this.props.list.moveUp(index);
+        this.forceUpdate();
+    }
+
+    handleOnMoveDown = (event: React.MouseEvent, index: number) => {
+        event.preventDefault();
+        event.stopPropagation();
+        this.props.list.moveDown(index);
+        this.forceUpdate();
+    }
+
+    render() {
+        return (
+            <div>
+                <table className="table table-condensed">
+                    <tbody>
+                        {
+                            this.props.list.map((value, i) => this.renderHeader(value, i))
+                        }
+                        <tr>
+                            <td colSpan={2}>
+                                <a title={EntityControlMessage.Create.niceToString()}
+                                    className="sf-line-button sf-create"
+                                    onClick={this.handleCreateClick}>
+                                    <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }} />{EntityControlMessage.Create.niceToString()}
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        );
+    }
+
+    renderHeader(value: string, i: number) {
+        return (
+            <tr key={i}>
+                <td>
+                    <span className="item-group">
+                        <a className={classes("sf-line-button", "sf-remove")}
+                            onClick={e => this.handleOnRemove(e, i)}
+                            title={EntityControlMessage.Remove.niceToString()}>
+                            <span className="glyphicon glyphicon-remove" />
+                        </a>
+
+                        <a className={classes("sf-line-button", "move-up")}
+                            onClick={e => this.handleOnMoveUp(e, i)}
+                            title={EntityControlMessage.MoveUp.niceToString()}>
+                            <span className="glyphicon glyphicon-chevron-up" />
+                        </a>
+
+                        <a className={classes("sf-line-button", "move-down")}
+                            onClick={e => this.handleOnMoveDown(e, i)}
+                            title={EntityControlMessage.MoveDown.niceToString()}>
+                            <span className="glyphicon glyphicon-chevron-down" />
+                        </a>
+                    </span>
+                </td>
+                <td className="form-sm">
+                    <Combobox value={value} key={i}
+                        data={this.props.options.filter(o => o == value || !this.props.list.contains(o))}
+                        onChange={val => this.handleChange(val, i)} />
+                </td>
+            </tr>
+        );
+    }
 }
 
 export interface ValidatorRepeaterComponentProps {
@@ -419,7 +565,7 @@ export function registerValidator<T extends Validators.DynamicValidator>(options
     registeredValidators[options.name] = options;
 }
 
-registerValidator<Validators.DynamicValidator>({ name: "NotNull", allowed: p => p.isMList == true || !isString(p.type) && (p.isNullable == "No" && isReferenceType(p.type) || p.isNullable == "OnlyInMemory")});
+registerValidator<Validators.DynamicValidator>({ name: "NotNull", allowed: p => p.isMList == true || !isString(p.type) && (p.isNullable == "No" && isReferenceType(p.type) || p.isNullable == "OnlyInMemory") });
 
 registerValidator<Validators.StringLength>({
     name: "StringLength",
@@ -454,8 +600,8 @@ registerValidator<Validators.DynamicValidator>({ name: "EMail", allowed: p => !p
 registerValidator<Validators.DynamicValidator>({ name: "Telephone", allowed: p => !p.isMList && isString(p.type) });
 registerValidator<Validators.DynamicValidator>({ name: "MultipleTelephone", allowed: p => !p.isMList && isString(p.type) });
 registerValidator<Validators.DynamicValidator>({ name: "NumericText", allowed: p => !p.isMList && isString(p.type) });
-registerValidator<Validators.DynamicValidator>({ name: "URL", allowed: p => !p.isMList &&  isString(p.type) });
-registerValidator<Validators.DynamicValidator>({ name: "FileName", allowed: p => !p.isMList &&  isString(p.type) });
+registerValidator<Validators.DynamicValidator>({ name: "URL", allowed: p => !p.isMList && isString(p.type) });
+registerValidator<Validators.DynamicValidator>({ name: "FileName", allowed: p => !p.isMList && isString(p.type) });
 registerValidator<Validators.DynamicValidator>({ name: "Ip", allowed: p => !p.isMList && isString(p.type) });
 
 registerValidator<Validators.DynamicValidator>({ name: "NoRepeat", allowed: p => p.isMList == true });
@@ -473,7 +619,7 @@ registerValidator<Validators.CountIs>({
         </div>
 });
 
-registerValidator<Validators.DynamicValidator>({ name: "DateInPast", allowed: p => !p.isMList &&  isDateTime(p.type) });
+registerValidator<Validators.DynamicValidator>({ name: "DateInPast", allowed: p => !p.isMList && isDateTime(p.type) });
 registerValidator<Validators.DateTimePrecision>({
     name: "DateTimePrecision",
     allowed: p => !p.isMList && isDateTime(p.type),

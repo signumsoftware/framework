@@ -32,6 +32,19 @@ namespace Signum.Engine.Dynamic
 
         public static Func<List<CodeFile>> GetCodeFiles = null;
 
+        public static void StartDynamicStarter(SchemaBuilder sb, DynamicQueryManager dqm)
+        {
+            Dictionary<string, CodeFile> codeFiles;
+            var cr = Compile(out codeFiles);
+            if (cr.Errors.Count == 0)
+            {
+                Assembly assembly = cr.CompiledAssembly;
+                Type type = assembly.GetTypes().Where(a => a.Name == "DynamicStarter").SingleEx();
+                MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static);
+                mi.Invoke(null, new object[] { sb, dqm });
+            }
+        }
+
         public static CompilerResults Compile(out Dictionary<string, CodeFile> codeFiles)
         {
             using (HeavyProfiler.Log("COMPILE"))

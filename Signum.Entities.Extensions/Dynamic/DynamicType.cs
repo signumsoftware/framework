@@ -113,7 +113,7 @@ namespace Signum.Entities.Dynamic
         [JsonProperty(PropertyName = "isNullable")]
         public IsNullable IsNullable;
 
-        [JsonProperty(PropertyName = "isUnique")]
+        [JsonProperty(PropertyName = "uniqueIndex")]
         public UniqueIndex UniqueIndex;
 
         [JsonProperty(PropertyName = "isLite", DefaultValueHandling = DefaultValueHandling.Ignore)]

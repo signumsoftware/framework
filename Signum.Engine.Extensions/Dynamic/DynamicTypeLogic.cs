@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Signum.Engine;
 using Signum.Engine.Basics;
+using Signum.Engine.Cache;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
@@ -19,6 +20,7 @@ namespace Signum.Engine.Dynamic
 {
     public static class DynamicTypeLogic
     {
+
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -34,7 +36,6 @@ namespace Signum.Engine.Dynamic
                 DynamicTypeGraph.Register();
 
                 DynamicLogic.GetCodeFiles += GetCodeFiles;
-                DynamicLogic.GetCodeFiles += GetLogicCodeFiles;
             }
         }
 
@@ -90,9 +91,11 @@ namespace Signum.Engine.Dynamic
 
         public static List<CodeFile> GetCodeFiles()
         {
-            var dynamicTypes = Database.Query<DynamicTypeEntity>().ToList();
+            CacheLogic.GloballyDisabled = true;
+            var types = ExecutionMode.Global().Using(a => Database.Query<DynamicTypeEntity>().ToList());
+            CacheLogic.GloballyDisabled = false;
 
-            return dynamicTypes.Select(dt =>
+            var entities =  types.Select(dt =>
             {
                 var def = dt.GetDefinition();
 
@@ -105,18 +108,13 @@ namespace Signum.Engine.Dynamic
                     FileContent = content
                 };
             }).ToList();
-        }
-
-        public static List<CodeFile> GetLogicCodeFiles()
-        {
-            var dynamicTypes = Database.Query<DynamicTypeEntity>().ToList();
-
-            var ns = Namespaces;
+             
+            var ns = Namespaces.ToList();
             ns.Add("Signum.Engine.DynamicQuery");
             ns.Add("Signum.Engine.Operations");
             ns.Add("Signum.Engine.Maps");
 
-            return dynamicTypes.Select(dt =>
+            var logics = types.Select(dt =>
             {
                 var def = dt.GetDefinition();
 
@@ -129,9 +127,70 @@ namespace Signum.Engine.Dynamic
                     FileContent = content
                 };
             }).ToList();
+
+            var dscg = new DynamicStarterCodeGenerator(DynamicallyGeneratedEntitiesNamespace, types.Select(a => a.TypeName).ToList(), ns);
+
+            var code = dscg.GetFileCode();
+
+            var starter = new List<CodeFile>
+            {
+                new CodeFile
+                {
+                    FileName = "DynamicStarter.cs",
+                    FileContent = code,
+                }
+            };
+
+            return entities.Concat(logics).Concat(starter).ToList();
         }
     }
 
+    public class DynamicStarterCodeGenerator
+    {
+        public List<string> Usings { get; private set; }
+        public string Namespace { get; private set; }
+        public List<string> TypeNames { get; private set; }
+
+        public DynamicStarterCodeGenerator(string @namespace, List<string> typeNames, List<string> usings)
+        {
+            this.Usings = usings;
+            this.Namespace = @namespace;
+            this.TypeNames = typeNames;
+        }
+
+        public string GetFileCode()
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var item in this.Usings)
+                sb.AppendLine("using {0};".FormatWith(item));
+
+            sb.AppendLine();
+            sb.AppendLine("namespace " + this.Namespace);
+            sb.AppendLine("{");
+            sb.Append(GetStarterClassCode().Indent(4));
+            sb.AppendLine("}");
+            
+            return sb.ToString();
+        }
+
+        public string GetStarterClassCode()
+        {
+            StringBuilder sb = new StringBuilder();
+          
+            sb.AppendLine($"public static class DynamicStarter");
+            sb.AppendLine("{");
+            sb.AppendLine("    public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)");
+            sb.AppendLine("    {");
+            foreach (var item in this.TypeNames)
+            {
+                sb.AppendLine($"        {item}Logic.Start(sb, dqm);");
+            }
+            sb.AppendLine("    }");
+            sb.AppendLine("}");
+
+            return sb.ToString();
+        }
+    }
 
     public class DynamicTypeCodeGenerator
     {
@@ -237,7 +296,7 @@ namespace Signum.Engine.Dynamic
             
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"static Expression<Func<{TypeName}Entity, string>> ToStringExpression = e => {Def.ToStringExpression};");
-            sb.AppendLine("[ExpressionField]");
+            sb.AppendLine("[ExpressionField(\"ToStringExpression\")]");
             sb.AppendLine("public override string ToString()");
             sb.AppendLine("{");
             sb.AppendLine("    return ToStringExpression.Evaluate(this);");
@@ -457,7 +516,7 @@ namespace Signum.Engine.Dynamic
 
             var mcui = this.Def.MultiColumnUniqueIndex;
             if (mcui != null)
-                sb.AppendLine($"    .WithUniqueIndex(e => new {{${ mcui.Fields.Select(f => "e." + f).Comma(", ")}}}{(mcui.Where.HasText() ? "," + mcui.Where: "")})");
+                sb.AppendLine($"    .WithUniqueIndex(e => new {{{ mcui.Fields.Select(f => "e." + f).Comma(", ")}}}{(mcui.Where.HasText() ? ", " + mcui.Where : "")})");
 
             if (this.Def.QueryFields.EmptyIfNull().Any())
                 sb.AppendLine($"    .WithQuery(dqm, e => new {{ Entity = e, {this.Def.QueryFields.Select(f => "e." + f).Comma(",\r\n")} }})");

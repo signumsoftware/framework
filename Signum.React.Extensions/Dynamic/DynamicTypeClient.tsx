@@ -53,6 +53,10 @@ export interface DynamicTypeDefinition {
     entityKind?: EntityKind;
     entityData?: EntityData;
     tableName?: string;
+    registerSave?: boolean;
+    registerDelete?: boolean;
+    queryFields: string[];
+    multiColumnUniqueIndex?: MultiColumnUniqueIndex; 
     properties: DynamicProperty[];
     toStringExpression?: string;
 }
@@ -62,6 +66,7 @@ export interface DynamicProperty {
     columnName?: string;
     type: string;
     isNullable: string;
+    uniqueIndex: string;
     isLite?: boolean;
     isMList?: boolean;
     preserveOrder?: boolean;
@@ -69,6 +74,11 @@ export interface DynamicProperty {
     scale?: number;
     _propertyType_?: string;
     validators?: Validators.DynamicValidator[];
+}
+
+export interface MultiColumnUniqueIndex {
+    fields: string[];
+    where?: string;
 }
 
 export namespace Validators {
@@ -134,3 +144,4 @@ export namespace Validators {
 }
 
 export const IsNullableValues = ["Yes", "OnlyInMemory", "No"];
+export const UniqueIndexValues = ["No", "Yes", "YesAllowNull"];
