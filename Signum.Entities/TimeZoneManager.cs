@@ -55,7 +55,7 @@ namespace Signum.Entities
 
         public static DateTime ToUserInterface(this DateTime dbDateTime)
         {
-            if (Mode == TimeZoneMode.Local)
+            if (Mode == TimeZoneMode.Local || dbDateTime.Kind == DateTimeKind.Local)
                 return dbDateTime;
             else
                 if (OverrideTimeZone == null)
@@ -71,7 +71,7 @@ namespace Signum.Entities
 
         public static DateTime FromUserInterface(this DateTime uiDateTime)
         {
-            if (Mode == TimeZoneMode.Local)
+            if (Mode == TimeZoneMode.Local || uiDateTime.Kind == DateTimeKind.Utc)
                 return uiDateTime;
             else
                 if (OverrideTimeZone == null)
