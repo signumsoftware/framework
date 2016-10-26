@@ -246,6 +246,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>LinkPart.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Dashboard\Views\Admin\UserQueryCountPartAdmin.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UserQueryCountPartAdmin.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Dashboard\Views\DashboardNavbarView.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -258,6 +263,11 @@
     </Compile>
     <Compile Include="Dashboard\Views\DashboardNavbarPartView.generated.cs">
       <DependentUpon>DashboardNavbarPartView.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Dashboard\Views\UserQueryCountPart.generated.cs">
+      <DependentUpon>UserQueryCountPart.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
@@ -981,16 +991,6 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="UserAssets\Controller\UserAssetsController.cs" />
-    <Compile Include="Dashboard\Views\Admin\UserQueryCountPartAdmin.generated.cs">
-      <DependentUpon>UserQueryCountPartAdmin.cshtml</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <Compile Include="Dashboard\Views\UserQueryCountPart.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>UserQueryCountPart.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="ViewLog\ViewLogClient.cs" />
     <Compile Include="UserAssets\UserAssetsHelper.cs" />
     <Compile Include="UserAssets\Views\ImportUserAsset.generated.cs">
@@ -1109,10 +1109,6 @@
       <LastGenOutput>ViewLog.generated.cs</LastGenOutput>
     </Content>
     <Content Include="ViewLog\Views\Web.config" />
-    <Content Include="Dashboard\Views\UserQueryCountPart.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>UserQueryCountPart.generated.cs</LastGenOutput>
-    </Content>
     <Content Include="Dashboard\Views\Admin\UserQueryCountPartAdmin.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>UserQueryCountPartAdmin.generated.cs</LastGenOutput>
@@ -1619,6 +1615,10 @@
     <Content Include="Dashboard\Views\DashboardNavbarPartView.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>DashboardNavbarPartView.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Dashboard\Views\UserQueryCountPart.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>UserQueryCountPart.generated.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>

@@ -89,8 +89,12 @@ namespace Signum.Web.Dashboard
                 if(navBar)
                 {
 
-                    Navigator.AddSetting(new EntitySettings<OmniboxPanelPartEntity>());
-                    Navigator.AddSetting(new EntitySettings<UserQueryCountPartEntity>());
+                    Navigator.AddSettings(new List<EntitySettings>
+                    {
+                        new EntitySettings<OmniboxPanelPartEntity> {  },
+                        new EntitySettings<UserQueryCountPartEntity> { PartialViewName = e => AdminViewPrefix.FormatWith("UserQueryCountPartAdmin") },
+                    });
+                    
 
                     DashboardClient.PanelPartViews.Add(
                        typeof(OmniboxPanelPartEntity),
@@ -98,7 +102,7 @@ namespace Signum.Web.Dashboard
 
                     DashboardClient.PanelPartViews.Add(
                      typeof(UserQueryCountPartEntity),
-                     new DashboardClient.PartViews(ViewPrefix.FormatWith("UserQueryCountPart"), ViewPrefix.FormatWith("UserQueryCountPartAdmin")));
+                     new DashboardClient.PartViews(ViewPrefix.FormatWith("UserQueryCountPart"), AdminViewPrefix.FormatWith("UserQueryCountPartAdmin")));
                 }
 
 
