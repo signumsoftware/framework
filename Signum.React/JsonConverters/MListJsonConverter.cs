@@ -151,7 +151,9 @@ namespace Signum.React.Json
                     existingValue = new MList<T>();
             }
 
-            if (!existingValue.IsEqualTo(newList))
+            bool orderMatters = GetPreserveOrderFromAttribute(pr);
+
+            if (!existingValue.IsEqualTo(newList,orderMatters))
             {
                 EntityJsonConverter.AssertCanWrite(pr);
 
@@ -176,6 +178,13 @@ namespace Signum.React.Json
             var att = Schema.Current.Settings.FieldAttribute<PrimaryKeyAttribute>(route) ?? Schema.Current.Settings.DefaultPrimaryKeyAttribute;
             
             return att.Type;
+        }
+
+        private static bool GetPreserveOrderFromAttribute(PropertyRoute route)
+        {
+            var att = Schema.Current.Settings.FieldAttribute<PreserveOrderAttribute>(route);
+
+            return att!=null;
         }
     }
 
