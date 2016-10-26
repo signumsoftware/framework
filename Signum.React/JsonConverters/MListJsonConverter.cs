@@ -75,11 +75,8 @@ namespace Signum.React.Json
 
             var elementPr = pr.Add("Item");
 
-            var isModel = typeof(ModelEntity).IsAssignableFrom(pr.RootType);
-
-            var rowIdType = isModel ? 
-                GetRowIdTypeFromAttribute(pr): 
-                GetRowIdTypeFromSchema(pr);
+            var rowIdType = GetRowIdTypeFromAttribute(pr);
+               
 
             reader.Assert(JsonToken.StartArray);
 
@@ -111,9 +108,6 @@ namespace Signum.React.Json
 
                         if (oldValue == null)
                         {
-                            if (!isModel)
-                                throw new KeyNotFoundException("RowID {0} not found".FormatWith(rowId));
-
                             T newValue = (T)serializer.DeserializeValue(reader, typeof(T), null);
 
                             newList.Add(new MList<T>.RowIdElement(newValue, rowId, null));
@@ -161,16 +155,6 @@ namespace Signum.React.Json
             }
 
             return (MList<T>)existingValue;
-        }
-
-        private static Type GetRowIdTypeFromSchema(PropertyRoute route)
-        {
-            var tryField = Schema.Current.TryField(route) as FieldMList;
-
-            if (tryField == null)
-                throw new InvalidOperationException($"Impossible to determine RowId type for {route} from schema.");
-
-            return tryField.TableMList.PrimaryKey.Type;
         }
 
         private static Type GetRowIdTypeFromAttribute(PropertyRoute route)
