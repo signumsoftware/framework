@@ -139,7 +139,7 @@ namespace Signum.React.Facades
                 var usedEnums = (from type in normalTypes
                                  where typeof(ModifiableEntity).IsAssignableFrom(type)
                                  from p in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
-                                 let pt = p.PropertyType.UnNullify()
+                                 let pt = (p.PropertyType.ElementType() ?? p.PropertyType).UnNullify()
                                  where pt.IsEnum && !EntityAssemblies.ContainsKey(pt.Assembly)
                                  select pt).Distinct().ToList();
                 
