@@ -45,10 +45,27 @@ namespace Signum.Engine.Dynamic
 
                 new Graph<DynamicSqlMigrationEntity>.Construct(DynamicSqlMigrationOperation.Create)
                 {
-                    Construct = args => new DynamicSqlMigrationEntity
+                    Construct = args => 
                     {
-                        CreationDate = TimeZoneManager.Now,
-                        CreatedBy = UserEntity.Current.ToLite(),
+                        var old = Replacements.AutoReplacement;
+                        try
+                        {
+                            if (Replacements.AutoReplacement == null)
+                                Replacements.AutoReplacement = DynamicAutoReplacements;
+
+                            var script = Schema.Current.SynchronizationScript(interactive: false, replaceDatabaseName: SqlMigrationRunner.DatabaseNameReplacement);
+
+                            return new DynamicSqlMigrationEntity
+                            {
+                                CreationDate = TimeZoneManager.Now,
+                                CreatedBy = UserEntity.Current.ToLite(),
+                                Script = script.ToString(),
+                            };
+                        }
+                        finally
+                        {
+                            Replacements.AutoReplacement = old;
+                        }
                     }
                 }.Register();
 
@@ -99,6 +116,12 @@ namespace Signum.Engine.Dynamic
                 }.Register();
             }
             
+        }
+
+
+        public static Replacements.Selection? DynamicAutoReplacements(Replacements.AutoReplacementContext ctx)
+        {
+            return new Replacements.Selection(ctx.OldValue, null);
         }
 
         public static string GetLog()

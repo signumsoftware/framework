@@ -168,9 +168,11 @@ namespace Signum.Entities.Dynamic
             return target;
         }
 
+        public override bool CanWrite { get { return false; } }
+
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            serializer.Serialize(writer, value);
+            throw new NotImplementedException();
         }
     }
 

@@ -35,14 +35,15 @@ namespace Signum.Engine.Dynamic
         public static void StartDynamicStarter(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             Dictionary<string, CodeFile> codeFiles;
+
             var cr = Compile(out codeFiles);
-            if (cr.Errors.Count == 0)
-            {
-                Assembly assembly = cr.CompiledAssembly;
-                Type type = assembly.GetTypes().Where(a => a.Name == "DynamicStarter").SingleEx();
-                MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static);
-                mi.Invoke(null, new object[] { sb, dqm });
-            }
+            if (cr.Errors.Count != 0)
+                throw new InvalidOperationException("Errors compiling  dynamic assembly:\r\n" + cr.Errors.Cast<CompilerError>().ToString("\r\n").Indent(4));
+            
+            Assembly assembly = cr.CompiledAssembly;
+            Type type = assembly.GetTypes().Where(a => a.Name == "DynamicStarter").SingleEx();
+            MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static);
+            mi.Invoke(null, new object[] { sb, dqm });
         }
 
         public static CompilerResults Compile(out Dictionary<string, CodeFile> codeFiles)
@@ -64,12 +65,12 @@ namespace Signum.Engine.Dynamic
 
                 codeFiles = GetCodeFiles.GetInvocationListTyped().SelectMany(f => f()).ToDictionary(a => a.FileName, "C# code files");
 
-                var output = Path.Combine(Eval.AssemblyDirectory, GeneratedCodeDirectory);
-                Directory.CreateDirectory(output);
+                Directory.CreateDirectory(GeneratedCodeDirectory);
+                Directory.EnumerateFiles(GeneratedCodeDirectory).ToList().ForEach(a => File.Delete(a));
 
-                codeFiles.Values.ToList().ForEach(a => File.WriteAllText(Path.Combine(output, a.FileName), a.FileContent));
+                codeFiles.Values.ToList().ForEach(a => File.WriteAllText(Path.Combine(GeneratedCodeDirectory, a.FileName), a.FileContent));
 
-                CompilerResults compiled = supplier.CompileAssemblyFromFile(parameters, codeFiles.Values.Select(a => Path.Combine(output, a.FileName)).ToArray());
+                CompilerResults compiled = supplier.CompileAssemblyFromFile(parameters, codeFiles.Values.Select(a => Path.Combine(GeneratedCodeDirectory, a.FileName)).ToArray());
 
                 return compiled;
             }

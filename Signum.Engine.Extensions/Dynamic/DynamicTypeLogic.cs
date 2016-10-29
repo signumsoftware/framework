@@ -164,6 +164,7 @@ namespace Signum.Engine.Dynamic
             foreach (var item in this.Usings)
                 sb.AppendLine("using {0};".FormatWith(item));
 
+            sb.AppendLine("[assembly: DefaultAssemblyCulture(\"en\")]");
             sb.AppendLine();
             sb.AppendLine("namespace " + this.Namespace);
             sb.AppendLine("{");
@@ -269,6 +270,7 @@ namespace Signum.Engine.Dynamic
                 return null;
 
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"[AutoInit]"); //Only for ReflectionServer
             sb.AppendLine($"public static class {this.TypeName}Operation");
             sb.AppendLine("{");
             if (this.Def.RegisterSave)
