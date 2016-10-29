@@ -117,7 +117,7 @@ namespace Signum.Entities.Basics
             }
         }
 
-        private void SetIdAndName(Tuple<PrimaryKey, string> idAndName)
+        internal void SetIdAndName(Tuple<PrimaryKey, string> idAndName)
         {
             this.id = idAndName.Item1;
             this.Name = idAndName.Item2;
