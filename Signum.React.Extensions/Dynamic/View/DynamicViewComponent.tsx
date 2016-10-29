@@ -65,7 +65,7 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
         
         this.changeState(s => {
             s.dynamicView = dynamicView;
-            s.rootNode = JSON.parse(this.props.initialDynamicView.viewContent!) as BaseNode;
+            s.rootNode = JSON.parse(dynamicView.viewContent!) as BaseNode;
             s.selectedNode = this.getZeroNode().createChild(s.rootNode);
         });
     }

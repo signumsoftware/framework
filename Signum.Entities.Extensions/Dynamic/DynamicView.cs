@@ -103,5 +103,8 @@ namespace Signum.Entities.Dynamic
         Value,
         CollectionOfEnums,
         EntityOrValue,
+
+        [Description("Filtering with new {0}. Consider changing visibility.")]
+        FilteringWithNew0ConsiderChangingVisibility,
     }
 }

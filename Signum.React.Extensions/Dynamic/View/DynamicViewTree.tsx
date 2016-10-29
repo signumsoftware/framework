@@ -114,7 +114,7 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
     handleAddChildren = () => {
         const parent = this.props.rootNode.context.getSelectedNode()! as DesignerNode<ContainerNode>;
 
-        this.newNode(parent.node.kind).then(n => {
+        this.newNode(parent).then(n => {
             if (!n)
                 return;
 
@@ -127,7 +127,7 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
     handleAddSibling = () => {
         var sibling = this.props.rootNode.context.getSelectedNode()!;
         var parent = sibling.parent! as DesignerNode<ContainerNode>;
-        this.newNode(parent.node.kind).then(n => {
+        this.newNode(parent).then(n => {
             if (!n)
                 return;
 
@@ -162,8 +162,8 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
         selected.context.refreshView();
     }
 
-    newNode(parentType: string): Promise<BaseNode | undefined>{
-        return NodeSelectorModal.chooseElement(parentType).then(t => {
+    newNode(parent: DesignerNode<ContainerNode>): Promise<BaseNode | undefined>{
+        return NodeSelectorModal.chooseElement(parent.node.kind).then(t => {
 
                 if (!t)
                     return undefined;
@@ -174,7 +174,7 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
                     (node as ContainerNode).children = [];
 
                 if (t.initialize)
-                    t.initialize(node);  
+                    t.initialize(node, parent);  
 
                 return node;
             });
@@ -316,7 +316,7 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
 
         var container = dn.node as ContainerNode;
 
-        const error = NodeUtils.validate(dn);
+        const error = NodeUtils.validate(dn, undefined);
 
         const tree = this.props.dynamicTreeView;
 

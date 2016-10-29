@@ -297,7 +297,7 @@ export class DynamicViewInspector extends React.Component<{ selectedNode?: Desig
         if (!sn)
             return <h4>{DynamicViewMessage.SelectANodeFirst.niceToString()}</h4>;
 
-        const error = NodeUtils.validate(sn);
+        const error = NodeUtils.validate(sn, undefined);
 
         return (<div className="form-sm form-horizontal">
             <h4>
