@@ -45,11 +45,18 @@ export default class CountSearchControl extends React.Component<CountSearchContr
     }
 
     componentDidMount() {
-        this.refreshCount();
+        this.refreshCount(this.props);
     }
 
-    refreshCount() {
-        var fo = this.props.findOptions;
+    componentWillReceiveProps(newProps: CountSearchControlProps) {
+        if (Finder.findOptionsPath(this.props.findOptions) == Finder.findOptionsPath(newProps.findOptions))
+            return;
+
+        this.refreshCount(newProps);
+    }
+
+    refreshCount(props: CountSearchControlProps) {
+        var fo = props.findOptions;
 
         if (!Finder.isFindable(fo.queryName))
             return;
@@ -87,7 +94,7 @@ export default class CountSearchControl extends React.Component<CountSearchContr
         else
             Finder.explore(this.props.findOptions).then(() => {
                 if (!this.props.avoidAutoRefresh)
-                    this.refreshCount();
+                    this.refreshCount(this.props);
             }).done();
     }
 
