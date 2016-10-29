@@ -83,8 +83,6 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                                     </div>
                                 </div>
                                 </div>}
-
-                          
                         </fieldset>
                         <fieldset>
                             <legend>ToString expression</legend>

@@ -21,7 +21,7 @@ namespace Signum.Engine.Dynamic
     public static class DynamicSqlMigrationLogic
     {
 
-        public static StringBuilder CurrentLog = new StringBuilder();
+        public static StringBuilder CurrentLog = null;
         public static string LastLog;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)

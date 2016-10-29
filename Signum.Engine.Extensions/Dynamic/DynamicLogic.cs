@@ -28,7 +28,7 @@ namespace Signum.Engine.Dynamic
         }
 
         public static List<string> Assemblies = Eval.BasicAssemblies;
-        public static string GeneratedCodeDirectory = "DynamicalyGeneratedCode";
+        public static string GeneratedCodeDirectory = "DynamicallyGeneratedCode";
 
         public static Func<List<CodeFile>> GetCodeFiles = null;
 
@@ -64,10 +64,12 @@ namespace Signum.Engine.Dynamic
 
                 codeFiles = GetCodeFiles.GetInvocationListTyped().SelectMany(f => f()).ToDictionary(a => a.FileName, "C# code files");
 
-                Directory.CreateDirectory(GeneratedCodeDirectory);
-                codeFiles.Values.ToList().ForEach(a => File.WriteAllText(Path.Combine(GeneratedCodeDirectory, a.FileName), a.FileContent));
+                var output = Path.Combine(Eval.AssemblyDirectory, GeneratedCodeDirectory);
+                Directory.CreateDirectory(output);
 
-                CompilerResults compiled = supplier.CompileAssemblyFromFile(parameters, codeFiles.Values.Select(a => Path.Combine(GeneratedCodeDirectory, a.FileName)).ToArray());
+                codeFiles.Values.ToList().ForEach(a => File.WriteAllText(Path.Combine(output, a.FileName), a.FileContent));
+
+                CompilerResults compiled = supplier.CompileAssemblyFromFile(parameters, codeFiles.Values.Select(a => Path.Combine(output, a.FileName)).ToArray());
 
                 return compiled;
             }
