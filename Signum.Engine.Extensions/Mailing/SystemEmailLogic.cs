@@ -115,9 +115,14 @@ namespace Signum.Engine.Mailing
                 systemEmailToEntity = sb.GlobalLazy(() =>
                 {
                     var dbSystemEmails = Database.RetrieveAll<SystemEmailEntity>();
-                    return EnumerableExtensions.JoinStrict(
-                        dbSystemEmails, systemEmails.Keys, systemEmail => systemEmail.FullClassName, type => type.FullName,
-                        (systemEmail, type) => KVP.Create(type, systemEmail), "caching EmailTemplates. Consider synchronize").ToDictionary();
+                    return EnumerableExtensions.JoinRelaxed(
+                        dbSystemEmails,
+                        systemEmails.Keys,
+                        systemEmail => systemEmail.FullClassName,
+                        type => type.FullName,
+                        (systemEmail, type) => KVP.Create(type, systemEmail),
+                        "caching EmailTemplates")
+                        .ToDictionary();
                 }, new InvalidateWith(typeof(SystemEmailEntity)));
 
 
