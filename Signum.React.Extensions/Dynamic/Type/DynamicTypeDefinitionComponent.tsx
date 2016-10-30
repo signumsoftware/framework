@@ -234,6 +234,7 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
 }
 
 function fetchPropertyType(p: DynamicProperty, dc: DynamicTypeDesignContext) {
+    p._propertyType_ = "";
     DynamicTypeClient.API.getPropertyType(p).then(s => {
         p._propertyType_ = s;
         dc.refreshView();
@@ -272,17 +273,20 @@ export class PropertyComponent extends React.Component<PropertyComponentProps, v
                     </div>
                     <div className="col-sm-4">
                         <ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.isMList)} type="boolean" defaultValue={null} onChange={this.handleAutoFix} />
-                        {p.isMList && < ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.preserveOrder)} type="boolean" defaultValue={null} />}
 
-                        {isTypeEntity(p.type) && <ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.isLite)} type="boolean" defaultValue={null} />}
+                        {p.type && <div>
+                            {p.isMList && < ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.preserveOrder)} type="boolean" defaultValue={null} />}
 
-                        {allowsSize(p.type) &&
-                            <ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.size)} type="number" defaultValue={null} onBlur={this.handleAutoFix} />}
+                            {isTypeEntity(p.type) && <ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.isLite)} type="boolean" defaultValue={null} onChange={this.handleAutoFix} />}
 
-                        {(isDecimal(p.type)) &&
-                            <ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.scale)} type="number" defaultValue={null} />}
+                            {allowsSize(p.type) &&
+                                <ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.size)} type="number" defaultValue={null} onBlur={this.handleAutoFix} />}
 
-                        <ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.uniqueIndex)} type="string" defaultValue={null} options={DynamicTypeClient.UniqueIndexValues} />
+                            {(isDecimal(p.type)) &&
+                                <ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.scale)} type="number" defaultValue={null} onBlur={this.handleAutoFix} />}
+
+                            <ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.uniqueIndex)} type="string" defaultValue={null} options={DynamicTypeClient.UniqueIndexValues} />
+                        </div>}
                     </div>
                 </div >
                 <ValidatorRepeaterComponent dc={this.props.dc} property={this.props.property} />
@@ -292,6 +296,10 @@ export class PropertyComponent extends React.Component<PropertyComponentProps, v
 }
 
 function autoFix(p: DynamicProperty) {
+
+    if (!p.type)
+        return;
+
     if (p.scale != undefined && !isDecimal(p.type))
         p.scale = undefined;
 

@@ -400,11 +400,14 @@ namespace Signum.Engine.Dynamic
 
         public virtual string GetPropertyType(DynamicProperty property)
         {
+            if (string.IsNullOrEmpty(property.Type))
+                return "";
+
             string result = SimplifyType(property.Type);
 
-            var t = ResolveType(property.Type);
+            var t = TryResolveType(property.Type);
             
-            if (property.IsNullable != IsNullable.No && t.IsValueType)
+            if (property.IsNullable != IsNullable.No && t?.IsValueType == true)
                 result = result + "?";
 
             if (property.IsLite)
@@ -429,7 +432,7 @@ namespace Signum.Engine.Dynamic
             return type;
         }
 
-        public Type ResolveType(string typeName)
+        public Type TryResolveType(string typeName)
         {
             switch (typeName)
             {
@@ -459,8 +462,7 @@ namespace Signum.Engine.Dynamic
             if (type != null)
                 return result;
 
-            throw new InvalidOperationException($"Type '{typeName}' Not found");
-
+            return null;
         }
     }
 

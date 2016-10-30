@@ -35,6 +35,13 @@ namespace Signum.Entities.Dynamic
         {
             this.TypeDefinition = JsonConvert.SerializeObject(definition);
         }
+        
+        static Expression<Func<DynamicTypeEntity, string>> ToStringExpression = @this => @this.TypeName;
+        [ExpressionField]
+        public override string ToString()
+        {
+            return ToStringExpression.Evaluate(this);
+        }
     }
 
     [AutoInit]
