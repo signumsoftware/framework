@@ -91,8 +91,11 @@ namespace Signum.Engine.Dynamic
 
         public static List<CodeFile> GetCodeFiles()
         {
+            if (!Administrator.ExistTable<DynamicTypeEntity>())
+                return new List<CodeFile>();
+
             CacheLogic.GloballyDisabled = true;
-            var types = ExecutionMode.Global().Using(a => Database.Query<DynamicTypeEntity>().ToList());
+            var types = ExecutionMode.Global().Using(a => Database.Query<DynamicTypeEntity>().ToList()); ;
             CacheLogic.GloballyDisabled = false;
 
             var entities =  types.Select(dt =>

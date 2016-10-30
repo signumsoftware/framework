@@ -37,6 +37,10 @@ namespace Signum.Engine.Dynamic
             Dictionary<string, CodeFile> codeFiles;
 
             var cr = Compile(out codeFiles);
+
+            if (cr == null)
+                return;
+
             if (cr.Errors.Count != 0)
                 throw new InvalidOperationException("Errors compiling  dynamic assembly:\r\n" + cr.Errors.Cast<CompilerError>().ToString("\r\n").Indent(4));
             
@@ -64,6 +68,9 @@ namespace Signum.Engine.Dynamic
                 parameters.GenerateInMemory = true;
 
                 codeFiles = GetCodeFiles.GetInvocationListTyped().SelectMany(f => f()).ToDictionary(a => a.FileName, "C# code files");
+
+                if (codeFiles.Count == 0)
+                    return null;
 
                 Directory.CreateDirectory(GeneratedCodeDirectory);
                 Directory.EnumerateFiles(GeneratedCodeDirectory).ToList().ForEach(a => File.Delete(a));
