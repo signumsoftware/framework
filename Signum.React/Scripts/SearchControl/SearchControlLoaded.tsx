@@ -854,7 +854,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     }
 
                     {columns.map((c, j) =>
-                        <td key={j} data-column-index={j} style={{ textAlign: c.cellFormatter && c.cellFormatter.textAllign }}>
+                        <td key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
                             {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex])}
                         </td>)}
                 </tr>
