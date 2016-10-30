@@ -138,17 +138,15 @@ export class TranslationTypeTable extends React.Component<{ type: LocalizableTyp
                     </tr>
                 </thead>
                 <tbody>
-                    {Dic.getValues(type.cultures).filter(c => !!c.typeDescription).map(loc =>
+                    {type.hasDescription && Dic.getValues(type.cultures).map(loc =>
                         <TranslationTypeDescription key={loc.culture } edit={this.editCulture(loc) } loc={loc} result={this.props.result} type={type} />) }
-                    {this.renderMembers(type) }
+                    {type.hasMembers && this.renderMembers(type) }
                 </tbody>
             </table>
         );
     }
 
     renderMembers(type: LocalizableType): React.ReactElement<any>[] {
-        if (!type.hasMembers)
-            return [];
 
         const members = Dic.getKeys(Dic.getValues(type.cultures).first().members);
 
