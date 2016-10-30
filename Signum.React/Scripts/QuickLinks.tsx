@@ -254,6 +254,33 @@ export class QuickLinkAction extends QuickLink {
     }
 }
 
+export class QuickLinkLink extends QuickLink {
+    url: string;
+
+    constructor(name: string, text: string, url: string, options?: QuickLinkOptions) {
+        super(name, options);
+        this.text = text;
+        this.url = url;
+    }
+
+    toMenuItem(key: any) {
+
+        return (
+            <MenuItem data-name={this.name} className="sf-quick-link" key={key} onClick={this.handleClick}>
+                {this.icon()}
+                {this.text}
+            </MenuItem>
+        );
+    }
+
+    handleClick = (e: React.MouseEvent) => {
+        if (e.ctrlKey || e.button == 1)
+            window.open(Navigator.currentHistory.createHref(this.url));
+        else
+            Navigator.currentHistory.push(this.url);
+    }
+}
+
 export class QuickLinkExplore extends QuickLink {
     findOptions: FindOptions;
 
