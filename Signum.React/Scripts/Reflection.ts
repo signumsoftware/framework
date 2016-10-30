@@ -789,6 +789,10 @@ function getMember(key: string): MemberInfo | undefined {
     return member;
 }
 
+export function symbolNiceName(symbol: ISymbol) {
+    return getMember(symbol.key) !.niceName;
+}
+
 export function registerSymbol(type: string, key: string): any /*ISymbol*/ {
 
     const mi = getMember(key);
