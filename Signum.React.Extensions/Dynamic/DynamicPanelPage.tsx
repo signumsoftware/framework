@@ -6,6 +6,7 @@ import { classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import { StyleContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
 import { ajaxPost } from '../../../Framework/Signum.React/Scripts/Services'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
+import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { CountSearchControl, SearchControl } from '../../../Framework/Signum.React/Scripts/Search'
 import EntityLink from '../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
 import { QueryDescription, SubTokensOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
@@ -19,40 +20,50 @@ import { DynamicPanelPermission } from './Signum.Entities.Dynamic'
 require("!style!css!./DynamicPanelPage.css");
 
 interface DynamicPanelProps extends ReactRouter.RouteComponentProps<{}, {}> {
-
 }
 
 export default class DynamicPanelPage extends React.Component<DynamicPanelProps, void> {
 
+    handleSelect = (key: any /*string*/) => {
+        Navigator.currentHistory.push("~/dynamic/panel?step=" + key);
+    }
+
     render() {
-
         AuthClient.asserPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel);
-        
-        var tabList = [<Tab eventKey="compile" title="Compile">
-            <DynamicCompileTab />
-        </Tab>]
-            .concat(Options.onGetDynamicTab.map(a => a()));
 
-        var tabs = React.cloneElement(<Tabs defaultActiveKey="compile" id="dynamicPanelTabs" />, undefined, ...tabList);
-        
+        let step = this.props.location.query["step"] as "compile" | "restartServer" | "migrations" | "refreshClients" | undefined;
+
         return (
-            <div>
-                <h2>Dynamic Panel</h2>
+            <Tabs defaultActiveKey={step || "compile"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} onSelect={this.handleSelect}>
+                <Tab eventKey="compile" title="1. Compile">
+                    <CompileStep />
+                </Tab>
+        
+                <Tab eventKey="restartServer" title="2. Restart Server">
+                    <RestartServerStep />
+                </Tab>
 
-                {tabs}
-            </div>
+                {Options.getDynaicMigrationsStep &&
+
+                    <Tab eventKey="migrations" title="3. Sql Migrations">
+                        {Options.getDynaicMigrationsStep()}
+                    </Tab>
+                }
+                <Tab eventKey="refreshClients" title={(Options.getDynaicMigrationsStep ? "4." : "3.") + " Refresh Clients"}>
+                    <RefreshClientsStep />
+                </Tab>
+            </Tabs>
         );
     }
 }
 
-
-interface DynamicCompileTabState {
+interface DynamicCompileStepState {
     complationErrors?: CompilationError[];
     selectedErrorIndex?: number;
     applicationRestarting?: moment.Moment;
 }
 
-export class DynamicCompileTab extends React.Component<{}, DynamicCompileTabState>{
+export class CompileStep extends React.Component<void, DynamicCompileStepState>{
 
     constructor(props: any) {
         super(props);
@@ -65,25 +76,6 @@ export class DynamicCompileTab extends React.Component<{}, DynamicCompileTabStat
             .then(errors => this.changeState(s => { s.complationErrors = errors; s.selectedErrorIndex = undefined; }))
             .done();
     }
-    
-
-    handleRestartApplication = (e: React.MouseEvent) => {
-        e.preventDefault();
-        API.restartApplication()
-            .then(() => {
-                this.changeState(s => s.applicationRestarting = moment());
-                API.pingApplication()
-                    .then(s => {
-                        this.changeState(s => s.applicationRestarting = undefined);
-                        if (confirm("Server restarted. Page should be reloaded")) {
-                            window.location.reload(true); 
-                        }
-                    })
-                    .done();
-            })
-            .done();
-    }
-
 
     render() {
 
@@ -104,8 +96,6 @@ export class DynamicCompileTab extends React.Component<{}, DynamicCompileTabStat
         );
     }
 
-   
-
     renderCompileResult(errors: CompilationError[]) {
 
         return (
@@ -117,7 +107,7 @@ export class DynamicCompileTab extends React.Component<{}, DynamicCompileTabStat
                         "Please fix this errors in the dynamic entities"}
                 </div>
                 <br />
-                {errors.length > 0 ? this.renderErrorTable(errors) : this.renderRestart()}
+                {errors.length > 0 && this.renderErrorTable(errors) }
             </div>
         );
     }
@@ -160,20 +150,43 @@ export class DynamicCompileTab extends React.Component<{}, DynamicCompileTabStat
             </div>
         );
     }
+}
 
-    renderRestart() {
+interface RestartServerStepState {
+    serverRestarting?: moment.Moment;
+}
+
+export class RestartServerStep extends React.Component<{}, RestartServerStepState>{
+
+    constructor(props: any) {
+        super(props);
+        this.state = {};
+    }
+
+    handleRestartApplication = (e: React.MouseEvent) => {
+        e.preventDefault();
+        API.restartApplication()
+            .then(() => {
+                this.changeState(s => s.serverRestarting = moment());
+                API.pingApplication()
+                    .then(s => this.changeState(s => s.serverRestarting = undefined))
+                    .done();
+            })
+            .done();
+    }
+
+    render() {
         return (
             <div>
                 {
-                    this.state.applicationRestarting ?
-                        this.renderProgress(this.state.applicationRestarting) :
+                    this.state.serverRestarting ?
+                        this.renderProgress(this.state.serverRestarting) :
                         AuthClient.isPermissionAuthorized(DynamicPanelPermission.RestartApplication) &&
-                        <a href="#" className="sf-button btn btn-danger" onClick={this.handleRestartApplication}>Restart Application</a>
+                        <a href="#" className="sf-button btn btn-danger" onClick={this.handleRestartApplication}>Restart Server</a>
                 }
             </div>
         );
     }
-    
 
     renderProgress(since: moment.Moment) {
 
@@ -185,6 +198,29 @@ export class DynamicCompileTab extends React.Component<{}, DynamicCompileTabStat
             </div>
         );
     }
+
+}
+
+interface RefreshClientsStepState {
+
+}
+
+export class RefreshClientsStep extends React.Component<{}, RefreshClientsStepState>{
+
+    handleRefreshClient = (e: React.MouseEvent) => {
+        e.preventDefault();
+        window.location.reload(true);
+    }
+
+    render() {
+        return (
+            <div>
+                <p>Now you need to refresh the clients manually (i.e. pressing F5).</p>
+                <a href="#" className="sf-button btn btn-warning" onClick={this.handleRefreshClient}>Refresh this client</a>
+            </div>
+        );
+    }
+
 }
 
 

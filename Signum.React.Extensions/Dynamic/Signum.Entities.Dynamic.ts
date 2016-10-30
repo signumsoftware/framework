@@ -43,6 +43,7 @@ export interface DynamicTypeEntity extends Entities.Entity {
 }
 
 export module DynamicTypeMessage {
+    export const DynamicType0SucessfullySavedGoToDynamicPanelNow = new MessageKey("DynamicTypeMessage", "DynamicType0SucessfullySavedGoToDynamicPanelNow");
 }
 
 export module DynamicTypeOperation {

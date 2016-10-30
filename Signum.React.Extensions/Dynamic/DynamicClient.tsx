@@ -32,7 +32,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
 export namespace Options {
     export let onGetDynamicLine: ((ctx: StyleContext) => React.ReactNode)[] = [];
-    export let onGetDynamicTab: (() => React.ReactElement<any>)[] = [];
+    export let getDynaicMigrationsStep: (() => React.ReactElement<any>) | undefined = undefined;
 }
 
 export interface CompilationError {

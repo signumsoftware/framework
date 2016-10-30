@@ -59,7 +59,7 @@ namespace Signum.Engine.Dynamic
                             {
                                 CreationDate = TimeZoneManager.Now,
                                 CreatedBy = UserEntity.Current.ToLite(),
-                                Script = script.ToString(),
+                                Script = script?.ToString(),
                             };
                         }
                         finally
