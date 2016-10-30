@@ -5,7 +5,7 @@ import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, Ent
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions, QueryToken, filterOperations, OrderType, ColumnOptionsMode } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, getTypeInfo, isTypeEntity, Binding, EntityDataValues, EntityKindValues, isTypeEnum } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { getQueryNiceName, Binding, EntityDataValues, EntityKindValues } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
@@ -183,6 +183,7 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
         } as DynamicProperty;
         autoFix(p);
         this.props.properties.push(p);
+        this.changeState(s => s.activeIndex = this.props.properties.length - 1);
         this.props.dc.refreshView();
 
         fetchPropertyType(p, this.props.dc);
@@ -272,7 +273,7 @@ export class PropertyComponent extends React.Component<PropertyComponentProps, v
                     <div className="col-sm-8">
                         <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.name)} type="string" defaultValue={null} />
                         <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.columnName)} type="string" defaultValue={null} autoOpacity={true} />
-                        <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.type)} type="string" defaultValue={null} onBlur={this.handleAutoFix} />
+                        <TypeCombo dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.type)} onBlur={this.handleAutoFix}/>
                         <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.isNullable)} type="string" defaultValue={null} options={DynamicTypeClient.IsNullableValues} onChange={this.handleAutoFix} />
                     </div>
                     <div className="col-sm-4">
@@ -281,7 +282,7 @@ export class PropertyComponent extends React.Component<PropertyComponentProps, v
                         {p.type && <div>
                             {p.isMList && < ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.preserveOrder)} type="boolean" defaultValue={null} />}
 
-                            {isTypeEntity(p.type) && <ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.isLite)} type="boolean" defaultValue={null} onChange={this.handleAutoFix} />}
+                            {isEntity(p.type) && <ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.isLite)} type="boolean" defaultValue={null} onChange={this.handleAutoFix} />}
 
                             {allowsSize(p.type) &&
                                 <ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.size)} type="number" defaultValue={null} onBlur={this.handleAutoFix} />}
@@ -299,6 +300,43 @@ export class PropertyComponent extends React.Component<PropertyComponentProps, v
     }
 }
 
+export class TypeCombo extends React.Component<{ dc: DynamicTypeDesignContext; binding: Binding<string>; labelColumns: number; onBlur: ()=> void }, { suggestions: string[] }>{
+
+    constructor(props: any) {
+        super(props);
+        this.state = { suggestions: [] };
+    }
+
+    handleGetItems = (query: string) => {
+        return DynamicTypeClient.API.autocompleteType(query, 5)
+    }
+
+    handleOnChange = (newValue: string) => {
+        this.props.binding.setValue(newValue);
+        this.props.dc.refreshView();
+    }
+
+    render() {
+        let lc = this.props.labelColumns;
+        return (
+            <div className="form-group form-sm" >
+                <label className={classes("control-label", "col-sm-" + (lc == null ? 2 : lc))}>
+                    {this.props.binding.member}
+                </label>
+                <div className={"col-sm-" + (lc == null ? 10 : 12 - lc)}>
+                    <div style={{ position: "relative" }}>
+                        <Typeahead
+                            inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
+                            onBlur={this.props.onBlur}
+                            getItems={this.handleGetItems} 
+                            value={this.props.binding.getValue()}
+                            onChange={this.handleOnChange} />
+                    </div>
+                </div>
+            </div>);
+    }
+}
+
 function autoFix(p: DynamicProperty) {
 
     if (!p.type)
@@ -307,7 +345,7 @@ function autoFix(p: DynamicProperty) {
     if (p.scale != undefined && !isDecimal(p.type))
         p.scale = undefined;
 
-    if (p.isLite != undefined && !isTypeEntity(p.type))
+    if (p.isLite != undefined && !isEntity(p.type))
         p.isLite = undefined;
 
     if (p.preserveOrder != undefined && !p.isMList)
@@ -456,7 +494,6 @@ export interface ValidatorRepeaterComponentProps {
     dc: DynamicTypeDesignContext;
 }
 
-
 export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeaterComponentProps, void> {
 
 
@@ -527,7 +564,7 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
 }
 
 function isReferenceType(type: string) {
-    return isTypeEntity(type) || isString(type);
+    return isEntity(type) || isString(type);
 }
 
 function isString(type: string) {
@@ -561,6 +598,10 @@ function isDecimal(type: string) {
         type == "double" || type == "System.Double" ||
         type == "decimal" || type == "System.Decimal"
     );
+}
+
+function isEntity(type: string) {
+    return type.endsWith("Entity");
 }
 
 export interface ValidatorOptions<T extends Validators.DynamicValidator> {

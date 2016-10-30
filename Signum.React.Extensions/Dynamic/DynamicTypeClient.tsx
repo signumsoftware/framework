@@ -61,6 +61,12 @@ export namespace API {
     export function getPropertyType(property: DynamicProperty): Promise<string> {
         return ajaxPost<string>({ url: `~/api/dynamic/type/propertyType` }, property);
     }
+
+    export function autocompleteType(query: string, limit: number): Promise<string[]> {
+        return ajaxGet<string[]>({
+            url: Navigator.currentHistory.createHref({ pathname: "~/api/dynamic/type/autocompleteType", query: { query, limit } })
+        });
+    }
 }
 
 export type DynamicBaseType = "Entity";
