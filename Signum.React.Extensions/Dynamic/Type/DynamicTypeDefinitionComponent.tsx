@@ -75,22 +75,26 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                                 </div>
                                 <div className="col-sm-6">
                                     <h4>Where</h4>
-                                    <pre style={{ border: "0px", margin: "0px" }}>{"(" + this.props.typeName + "Entity e) =>"}</pre>
-                                    <div className="small-codemirror">
-                                        <CSharpCodeMirror
-                                            script={def.multiColumnUniqueIndex.where || ""}
-                                            onChange={newScript => { def.multiColumnUniqueIndex!.where = newScript; this.forceUpdate(); } } />
-                                    </div>
+                                    <div className="code-container">
+                                        <pre style={{ border: "0px", margin: "0px" }}>{"(" + this.props.typeName + "Entity e) =>"}</pre>
+                                        <div className="small-codemirror">
+                                            <CSharpCodeMirror
+                                                script={def.multiColumnUniqueIndex.where || ""}
+                                                onChange={newScript => { def.multiColumnUniqueIndex!.where = newScript; this.forceUpdate(); } } />
+                                        </div>
+                                     </div>
                                 </div>
                                 </div>}
                         </fieldset>
                         <fieldset>
                             <legend>ToString expression</legend>
-                            <pre style={{ border: "0px", margin: "0px" }}>{"(" + this.props.typeName + "Entity e) =>"}</pre>
-                            <div className="small-codemirror">
-                                <CSharpCodeMirror
-                                    script={def.toStringExpression || ""}
-                                    onChange={newScript => { def.toStringExpression = newScript; this.forceUpdate(); } } />
+                            <div className="code-container">
+                                <pre style={{ border: "0px", margin: "0px" }}>{"(" + this.props.typeName + "Entity e) =>"}</pre>
+                                <div className="small-codemirror">
+                                    <CSharpCodeMirror
+                                        script={def.toStringExpression || ""}
+                                        onChange={newScript => { def.toStringExpression = newScript; this.forceUpdate(); } } />
+                                </div>
                             </div>
                         </fieldset>
                     </Tab>

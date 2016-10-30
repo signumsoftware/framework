@@ -56,7 +56,9 @@ export class EmailTemplateMessageComponent extends React.Component<EmailMasterTe
             <div className="sf-email-template-message">
                 <EntityCombo ctx={ec.subCtx(e => e.cultureInfo) } labelText={EmailTemplateViewMessage.Language.niceToString() } onChange={this.props.invalidate} />
                 <div className="form-vertical">
-                    <HtmlCodemirror ctx={ec.subCtx(e => e.text) } onChange={this.handleCodeMirrorChange}/>
+                    <div className="code-container">
+                        <HtmlCodemirror ctx={ec.subCtx(e => e.text)} onChange={this.handleCodeMirrorChange} />
+                    </div>
                     <br/>
                     <a href="#" onClick={this.handlePreviewClick}>
                         {this.state.showPreview ?

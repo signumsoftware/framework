@@ -139,7 +139,7 @@ export class CompileStep extends React.Component<void, DynamicCompileStepState>{
                         }
                     </tbody>
                 </table>
-                {err && <div>
+                {err && <div className="code-container">
                     <h4>{err.fileName}</h4>
                     <CSharpCodeMirror
                         script={err.fileContent}

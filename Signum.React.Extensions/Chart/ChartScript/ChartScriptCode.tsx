@@ -61,7 +61,7 @@ export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<
 
 
         return (
-            <div>
+            <div className="code-container">
                 <pre style={{ color: "Green", overflowStyle: "inherit" }}>{ChartScriptCode.example}</pre>
                 <style>{css}</style>
                 <JavascriptCodeMirror code={this.props.ctx.value.script || ""} ref={jscm => this.jsCodeMirror = jscm}

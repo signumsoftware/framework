@@ -8,6 +8,7 @@ import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Ref
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import ContextMenu from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
+import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal'
 import { MenuItem } from 'react-bootstrap'
 
@@ -34,7 +35,7 @@ export interface DnamicViewTreeState {
         error: DraggedError
     }
     contextualMenu?: {
-        position: { pageX: number, pageY: number };
+        position: ContextMenuPosition;
     };
 }
 
@@ -49,15 +50,12 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
         e.preventDefault();
         e.stopPropagation();
 
-        const op = DomUtils.offsetParent(this.treeContainer);
+       
 
         this.props.rootNode.context.setSelectedNode(n);
         this.changeState(s => {
             s.contextualMenu = {
-                position: {
-                    pageX: e.pageX - (op ? op.getBoundingClientRect().left : 0),
-                    pageY: e.pageY - (op ? op.getBoundingClientRect().top : 0)
-                }
+                position: ContextMenu.getPosition(e, this.treeContainer)
             };
         });
     }
@@ -92,18 +90,18 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
         const isRoot = (dn == this.props.rootNode);
         
         return (
-            <ContextMenu position={cm.position} onHide={this.handleContextOnHide}>
-                {no.isContainer && <MenuItem onClick={this.handleAddChildren}><i className="fa fa-arrow-right" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.AddChild.niceToString()}</MenuItem>}
-                {!isRoot && <MenuItem onClick={this.handleAddSibling}><i className="fa fa-arrow-down" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.AddSibling.niceToString()}</MenuItem>}
+                <ContextMenu position={cm.position} onHide={this.handleContextOnHide}>
+                    {no.isContainer && <MenuItem onClick={this.handleAddChildren}><i className="fa fa-arrow-right" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.AddChild.niceToString()}</MenuItem>}
+                    {!isRoot && <MenuItem onClick={this.handleAddSibling}><i className="fa fa-arrow-down" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.AddSibling.niceToString()}</MenuItem>}
 
-                {no.isContainer && <MenuItem divider={true} />}
+                    {no.isContainer && <MenuItem divider={true} />}
 
-                {no.isContainer && cn.children.length == 0 && dn.route && <MenuItem onClick={this.handleGenerateChildren}><i className="fa fa-bolt" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.GenerateChildren.niceToString()}</MenuItem>}
-                {no.isContainer && cn.children.length > 0 && <MenuItem onClick={this.handleClearChildren} bsClass="danger"><i className="fa fa-trash" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.ClearChildren.niceToString()}</MenuItem>}
+                    {no.isContainer && cn.children.length == 0 && dn.route && <MenuItem onClick={this.handleGenerateChildren}><i className="fa fa-bolt" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.GenerateChildren.niceToString()}</MenuItem>}
+                    {no.isContainer && cn.children.length > 0 && <MenuItem onClick={this.handleClearChildren} bsClass="danger"><i className="fa fa-trash" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.ClearChildren.niceToString()}</MenuItem>}
 
-                {!isRoot && <MenuItem divider={true} />}
-                {!isRoot && <MenuItem onClick={this.handleRemove} bsClass="danger"><i className="fa fa-times" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.Remove.niceToString()}</MenuItem>}
-            </ContextMenu>
+                    {!isRoot && <MenuItem divider={true} />}
+                    {!isRoot && <MenuItem onClick={this.handleRemove} bsClass="danger"><i className="fa fa-times" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.Remove.niceToString()}</MenuItem>}
+                </ContextMenu>
         );
     }
 
