@@ -169,7 +169,7 @@ export default class DynamicViewSelectorEntityComponent extends React.Component<
     renderEditor() {
         const ctx = this.props.ctx;
         return (
-            <div>
+            <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px", color: "Green" }}>Return {this.allViewNames().map(vn => '"' + vn + '"').joinComma(" or ")}</pre>
                 <pre style={{ border: "0px", margin: "0px" }}>{"(e: " + ctx.value.entityType!.className + ", auth) =>"}</pre>
                 <JavascriptCodeMirror code={ctx.value.script || ""} onChange={this.handleCodeChange} />

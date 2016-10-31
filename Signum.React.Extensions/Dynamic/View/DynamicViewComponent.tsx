@@ -65,7 +65,7 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
         
         this.changeState(s => {
             s.dynamicView = dynamicView;
-            s.rootNode = JSON.parse(this.props.initialDynamicView.viewContent!) as BaseNode;
+            s.rootNode = JSON.parse(dynamicView.viewContent!) as BaseNode;
             s.selectedNode = this.getZeroNode().createChild(s.rootNode);
         });
     }
@@ -132,7 +132,7 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { vi
         var ctx = TypeContext.root(DynamicViewEntity, dv);
 
         return (
-            <div className="form-vertical">
+            <div className="form-vertical code-container">
                 <button type="button" className="close" aria-label="Close" onClick={this.props.rootNode.context.onClose}><span aria-hidden="true">×</span></button>
                 <h3>
                     <small>{Navigator.getTypeTitle(this.props.dynamicView, undefined)}</small>

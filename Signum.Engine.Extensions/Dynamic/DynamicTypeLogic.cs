@@ -91,8 +91,11 @@ namespace Signum.Engine.Dynamic
 
         public static List<CodeFile> GetCodeFiles()
         {
+            if (!Administrator.ExistTable<DynamicTypeEntity>())
+                return new List<CodeFile>();
+
             CacheLogic.GloballyDisabled = true;
-            var types = ExecutionMode.Global().Using(a => Database.Query<DynamicTypeEntity>().ToList());
+            var types = ExecutionMode.Global().Using(a => Database.Query<DynamicTypeEntity>().ToList()); ;
             CacheLogic.GloballyDisabled = false;
 
             var entities =  types.Select(dt =>
@@ -164,6 +167,7 @@ namespace Signum.Engine.Dynamic
             foreach (var item in this.Usings)
                 sb.AppendLine("using {0};".FormatWith(item));
 
+            sb.AppendLine("[assembly: DefaultAssemblyCulture(\"en\")]");
             sb.AppendLine();
             sb.AppendLine("namespace " + this.Namespace);
             sb.AppendLine("{");
@@ -269,6 +273,7 @@ namespace Signum.Engine.Dynamic
                 return null;
 
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"[AutoInit]"); //Only for ReflectionServer
             sb.AppendLine($"public static class {this.TypeName}Operation");
             sb.AppendLine("{");
             if (this.Def.RegisterSave)
@@ -398,11 +403,14 @@ namespace Signum.Engine.Dynamic
 
         public virtual string GetPropertyType(DynamicProperty property)
         {
+            if (string.IsNullOrEmpty(property.Type))
+                return "";
+
             string result = SimplifyType(property.Type);
 
-            var t = ResolveType(property.Type);
+            var t = TryResolveType(property.Type);
             
-            if (property.IsNullable != IsNullable.No && t.IsValueType)
+            if (property.IsNullable != IsNullable.No && t?.IsValueType == true)
                 result = result + "?";
 
             if (property.IsLite)
@@ -427,7 +435,7 @@ namespace Signum.Engine.Dynamic
             return type;
         }
 
-        public Type ResolveType(string typeName)
+        public Type TryResolveType(string typeName)
         {
             switch (typeName)
             {
@@ -457,8 +465,7 @@ namespace Signum.Engine.Dynamic
             if (type != null)
                 return result;
 
-            throw new InvalidOperationException($"Type '{typeName}' Not found");
-
+            return null;
         }
     }
 

@@ -113,9 +113,13 @@ namespace Signum.Engine.Word
                 TypeToSystemWordTemplate = sb.GlobalLazy(() =>
                 {
                     var dbSystemWordReports = Database.RetrieveAll<SystemWordTemplateEntity>();
-                    return EnumerableExtensions.JoinStrict(
-                        dbSystemWordReports, systemWordReports.Keys, swr => swr.FullClassName, type => type.FullName,
-                        (swr, type) => KVP.Create(type, swr), "caching WordTemplates. Consider synchronize").ToDictionary();
+                    return EnumerableExtensions.JoinRelaxed(
+                        dbSystemWordReports, 
+                        systemWordReports.Keys, 
+                        swr => swr.FullClassName, 
+                        type => type.FullName,
+                        (swr, type) => KVP.Create(type, swr), 
+                        "caching WordTemplates").ToDictionary();
                 }, new InvalidateWith(typeof(SystemWordTemplateEntity)));
 
                 sb.Schema.Initializing += () => TypeToSystemWordTemplate.Load();

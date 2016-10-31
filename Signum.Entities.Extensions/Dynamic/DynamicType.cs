@@ -35,6 +35,13 @@ namespace Signum.Entities.Dynamic
         {
             this.TypeDefinition = JsonConvert.SerializeObject(definition);
         }
+        
+        static Expression<Func<DynamicTypeEntity, string>> ToStringExpression = @this => @this.TypeName;
+        [ExpressionField]
+        public override string ToString()
+        {
+            return ToStringExpression.Evaluate(this);
+        }
     }
 
     [AutoInit]
@@ -48,7 +55,8 @@ namespace Signum.Entities.Dynamic
 
     public enum DynamicTypeMessage
     {
-
+        [Description("DynamicType '{0}' successfully saved. Go to DynamicPanel now?")]
+        DynamicType0SucessfullySavedGoToDynamicPanelNow
     }
 
     public class DynamicTypeDefinition
@@ -168,9 +176,11 @@ namespace Signum.Entities.Dynamic
             return target;
         }
 
+        public override bool CanWrite { get { return false; } }
+
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            serializer.Serialize(writer, value);
+            throw new NotImplementedException();
         }
     }
 

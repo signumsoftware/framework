@@ -2,23 +2,26 @@
 import * as React from 'react'
 import { Route } from 'react-router'
 import { Tab } from 'react-bootstrap'
-import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
+import { ifError } from '../../../Framework/Signum.React/Scripts/Globals';
+import { ajaxPost, ajaxGet, ValidationError } from '../../../Framework/Signum.React/Scripts/Services';
 import { SearchControl, CountSearchControl } from '../../../Framework/Signum.React/Scripts/Search'
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import { EntityData, EntityKind } from '../../../Framework/Signum.React/Scripts/Reflection'
+import { EntityData, EntityKind, symbolNiceName } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 import { Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
+import * as QuickLink from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import { StyleContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
 
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
-import { DynamicTypeEntity, DynamicTypeOperation, DynamicSqlMigrationEntity } from './Signum.Entities.Dynamic'
+import { DynamicTypeEntity, DynamicTypeOperation, DynamicSqlMigrationEntity, DynamicTypeMessage, DynamicPanelPermission } from './Signum.Entities.Dynamic'
 import DynamicTypeEntityComponent from './Type/DynamicTypeEntity'
 import * as DynamicClient from './DynamicClient'
+import * as AuthClient from '../Authorization/AuthClient'
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -26,23 +29,43 @@ export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(DynamicSqlMigrationEntity, w => new ViewPromise(resolve => require(['./Type/DynamicSqlMigrationEntity'], resolve))));
 
     Operations.addSettings(new EntityOperationSettings(DynamicTypeOperation.Save, {
-        onClick: ctx => {
-            (ctx.frame.entityComponent as DynamicTypeEntityComponent).beforeSave();
-            EntityOperations.defaultExecuteEntity(ctx);
+        onClick: eoc => {
+            (eoc.frame.entityComponent as DynamicTypeEntityComponent).beforeSave();
+
+            Operations.API.executeEntity(eoc.entity, eoc.operationInfo.key)
+                .then(pack => { eoc.frame.onReload(pack); EntityOperations.notifySuccess(); })
+                .then(() => {
+                    if (AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel) &&
+                        confirm(DynamicTypeMessage.DynamicType0SucessfullySavedGoToDynamicPanelNow.niceToString(eoc.entity.typeName)))
+                        window.open(Navigator.currentHistory.createHref("~/dynamic/panel"));
+                }) 
+                .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
+                .done();
         }
     }));
 
+    QuickLink.registerQuickLink(DynamicTypeEntity, ctx => new QuickLink.QuickLinkLink("ViewDynamicPanel",
+        symbolNiceName(DynamicPanelPermission.ViewDynamicPanel), "~/dynamic/panel", {
+            isVisible: AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel)
+        }));
+
     DynamicClient.Options.onGetDynamicLine.push(ctx => <CountSearchControl ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
-    DynamicClient.Options.onGetDynamicTab.push(() =>
+    DynamicClient.Options.getDynaicMigrationsStep = () =>
         <Tab eventKey="migrations" title="Migrations" >
             <SearchControl findOptions={{ queryName: DynamicSqlMigrationEntity }} />
-        </Tab>);
+        </Tab>;
 }
 
 export namespace API {
 
     export function getPropertyType(property: DynamicProperty): Promise<string> {
         return ajaxPost<string>({ url: `~/api/dynamic/type/propertyType` }, property);
+    }
+
+    export function autocompleteType(query: string, limit: number): Promise<string[]> {
+        return ajaxGet<string[]>({
+            url: Navigator.currentHistory.createHref({ pathname: "~/api/dynamic/type/autocompleteType", query: { query, limit } })
+        });
     }
 }
 

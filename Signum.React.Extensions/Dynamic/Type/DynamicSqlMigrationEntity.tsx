@@ -42,8 +42,9 @@ export default class DynamicSqlMigrationEntityComponent extends React.Component<
                 </div>
               
                 <ValueLine ctx={ctx.subCtx(sm => sm.comment)} />
-
-                <SqlCodeMirror script={ctx.value.script || ""} onChange={this.handleScriptChange} />
+                <div className="code-container">
+                    <SqlCodeMirror script={ctx.value.script || ""} onChange={this.handleScriptChange} />
+                </div>
             </div>
         );
     }

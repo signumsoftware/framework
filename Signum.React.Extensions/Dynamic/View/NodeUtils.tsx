@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { Tabs, Tab } from 'react-bootstrap'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityDetail, EntityStrip } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { ModifiableEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { ModifiableEntity, isLite, isEntity, External } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
@@ -39,11 +39,11 @@ export interface NodeOptions<N extends BaseNode> {
     render: (node: DesignerNode<N>, parentCtx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
     renderTreeNode: (node: DesignerNode<N>) => React.ReactElement<any>;
     renderDesigner: (node: DesignerNode<N>) => React.ReactElement<any>;
-    validate?: (node: DesignerNode<N>) => string | null | undefined;
+    validate?: (node: DesignerNode<N>, parentCtx: TypeContext<ModifiableEntity> | undefined) => string | null | undefined;
     validParent?: string;
     validChild?: string;
     avoidHighlight?: boolean;
-    initialize?: (node: N) => void
+    initialize?: (node: N, parentNode: DesignerNode<ContainerNode>) => void
 }
 
 export interface DesignerContext {
@@ -132,7 +132,7 @@ export function treeNodeTableColumnProperty(dn: DesignerNode<EntityTableColumnNo
 
 export function render(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>) {
 
-    const error = validate(dn);
+    const error = validate(dn, parentCtx);
     if (error)
         return (<div className="alert alert-danger">{getErrorTitle(dn)} {error}</div>);
 
@@ -246,13 +246,13 @@ export function evaluateOnChange<T>(ctx: TypeContext<ModifiableEntity>, dn: Desi
 }
 
 
-export function validate(dn: DesignerNode<BaseNode>) {
+export function validate(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity> | undefined) {
     const options = registeredNodes[dn.node.kind];
     if (options.isContainer && options.validChild && (dn.node as ContainerNode).children && (dn.node as ContainerNode).children.some(c => c.kind != options.validChild))
         return DynamicViewValidationMessage.OnlyChildNodesOfType0Allowed.niceToString(options.validChild);
 
     if (options.validate)
-        return options.validate(dn);
+        return options.validate(dn, parentCtx);
 
     return undefined;
 }
@@ -327,8 +327,8 @@ export function validateFieldMandatory(dn: DesignerNode<LineBaseNode>) {
     return mandatory(dn, n => n.field) || validateField(dn);
 }
 
-export function validateEntityBase(dn: DesignerNode<EntityBaseNode>) {
-    return validateFieldMandatory(dn) || (dn.node.findOptions && validateFindOptions(dn.node.findOptions));
+export function validateEntityBase(dn: DesignerNode<EntityBaseNode>, parentCtx: TypeContext<ModifiableEntity> | undefined) {
+    return validateFieldMandatory(dn) || (dn.node.findOptions && validateFindOptions(dn.node.findOptions, parentCtx));
 }
 
 
@@ -378,11 +378,38 @@ export function validateTableColumnProperty(dn: DesignerNode<EntityTableColumnNo
 }
 
 
-export function validateFindOptions(foe: FindOptionsExpr) {
+export function validateFindOptions(foe: FindOptionsExpr, parentCtx: TypeContext<ModifiableEntity> | undefined) : string | undefined {
     if (!foe.queryKey)
         return DynamicViewValidationMessage._0RequiresA1.niceToString("findOptions", "queryKey");
 
-    return null;
+    if (parentCtx) {
+        let list = [
+            getTypeIfNew(parentCtx, foe.parentValue),
+            ...(foe.filterOptions || []).map(a => getTypeIfNew(parentCtx, a.value))
+        ].filter(a => !!a);
+
+        if (list.length)
+            return DynamicViewValidationMessage.FilteringWithNew0ConsiderChangingVisibility.niceToString(list.joinComma(External.CollectionMessage.And.niceToString()));
+    }
+
+    return undefined;
+}
+
+
+export function getTypeIfNew(parentCtx: TypeContext<ModifiableEntity>, value: ExpressionOrValue<any> | undefined) {
+    
+    var v = evaluateUntyped(parentCtx, value, ()=>"value");
+
+    if (v == undefined)
+        return undefined;
+
+    if (isEntity(v) && v.isNew)
+        return v.Type;
+
+    if (isLite(v) && v.id == null)
+        return v.EntityType;
+
+    return undefined;
 }
 
 export function addBreakLines(breakLines: boolean, message: string): React.ReactNode[] {

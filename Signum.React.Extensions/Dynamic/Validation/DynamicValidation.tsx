@@ -56,17 +56,19 @@ export default class DynamicValidation extends React.Component<DynamicValidation
                 <ValueLine ctx={ctx.subCtx(d => d.isGlobalyEnabled)} inlineCheckbox={true} />
                 {ctx.value.propertyRoute &&
                     <div>
-                    {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handeEvaluate}><i className="fa fa-play" aria-hidden="true"></i> Evaluate</button>}
-                    <pre style={{ border: "0px", margin: "0px" }}>{"string PropertyValidate(" + (!ctx.value.entityType ? "Entity" : ctx.value.entityType.cleanName) + " e, PropertyInfo pi)\n{"}</pre>
-                    <CSharpCodeMirror script={ctx.value.eval.script || ""} onChange={this.handleCodeChange} />
-                        <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
+                        {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handeEvaluate}><i className="fa fa-play" aria-hidden="true"></i> Evaluate</button>}
+                        <div className="code-container">
+                            <pre style={{ border: "0px", margin: "0px" }}>{"string PropertyValidate(" + (!ctx.value.entityType ? "Entity" : ctx.value.entityType.cleanName) + " e, PropertyInfo pi)\n{"}</pre>
+                            <CSharpCodeMirror script={ctx.value.eval.script || ""} onChange={this.handleCodeChange} />
+                            <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
+                        </div>
                         {this.renderTest()}
                     </div>}
             </div>
         );
     }
 
-    handeEvaluate = () =>  {
+    handeEvaluate = () => {
 
         if (this.state.exampleEntity == undefined)
             this.changeState(s => s.response = undefined);
@@ -111,13 +113,13 @@ export default class DynamicValidation extends React.Component<DynamicValidation
 
         if (res.validationException)
             return <div className="alert alert-danger">EXCEPTION: {res.validationException}</div>;
-        
+
         return (
             <div>
                 {
                     res.validationResult!.map(error => error ?
-                    <div className="alert alert-warning">INVALID: {res.validationResult}</div> :
-                    <div className="alert alert-success">VALID: null</div>)
+                        <div className="alert alert-warning">INVALID: {res.validationResult}</div> :
+                        <div className="alert alert-success">VALID: null</div>)
                 }
             </div>
         );

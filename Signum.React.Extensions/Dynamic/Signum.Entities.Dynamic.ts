@@ -43,6 +43,7 @@ export interface DynamicTypeEntity extends Entities.Entity {
 }
 
 export module DynamicTypeMessage {
+    export const DynamicType0SucessfullySavedGoToDynamicPanelNow = new MessageKey("DynamicTypeMessage", "DynamicType0SucessfullySavedGoToDynamicPanelNow");
 }
 
 export module DynamicTypeOperation {
@@ -124,6 +125,7 @@ export module DynamicViewValidationMessage {
     export const Value = new MessageKey("DynamicViewValidationMessage", "Value");
     export const CollectionOfEnums = new MessageKey("DynamicViewValidationMessage", "CollectionOfEnums");
     export const EntityOrValue = new MessageKey("DynamicViewValidationMessage", "EntityOrValue");
+    export const FilteringWithNew0ConsiderChangingVisibility = new MessageKey("DynamicViewValidationMessage", "FilteringWithNew0ConsiderChangingVisibility");
 }
 
 export interface EvalEntity<T> extends Entities.EmbeddedEntity {

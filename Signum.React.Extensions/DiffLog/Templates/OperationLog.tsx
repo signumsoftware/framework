@@ -35,7 +35,9 @@ export default class OperationLog extends React.Component<{ ctx: TypeContext<Ope
                         <EntityLine ctx={ctx6.subCtx(f => f.exception) }  />
                     </div>
                 </div>
-                <DiffMixinTabs ctx={ctx}/>
+                <div className="code-container">
+                    <DiffMixinTabs ctx={ctx} />
+                </div>
             </div>
         );
     }

@@ -122,7 +122,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
         return (
             <div className="design-main" style={{ marginTop: "10px" }}>
                 <div className="design-left open">
-                    <div className="form-vertical">
+                    <div className="form-vertical code-container">
                         <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} viewOnCreate={false} view={false} onChange={() => this.forceUpdate()} formGroupStyle="Basic"
                             type={{ name: this.props.ctx.value.entityType!.cleanName }} labelText={DynamicViewMessage.ExampleEntity.niceToString()} />
                         <DynamicViewTree rootNode={root} />

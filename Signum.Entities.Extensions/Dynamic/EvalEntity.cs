@@ -144,7 +144,7 @@ namespace Signum.Entities.Dynamic
 
     public static class Eval
     {
-        public static string AssemblyDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        public static string AssemblyDirectory = Path.GetDirectoryName(new Uri(typeof(Entity).Assembly.CodeBase).LocalPath);
 
         public static List<string> BasicNamespaces = new List<string>
         {

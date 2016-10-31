@@ -1,17 +1,17 @@
 ﻿import * as React from 'react'
+import { Link } from 'react-router'
 import { Button } from 'react-bootstrap'
 import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { DynamicTypeEntity, DynamicTypeMessage } from '../Signum.Entities.Dynamic'
+import { DynamicTypeEntity, DynamicTypeMessage, DynamicSqlMigrationMessage, DynamicPanelPermission } from '../Signum.Entities.Dynamic'
 import { ValueLine, EntityLine, TypeContext } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ModifiableEntity, Entity, Lite, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { getTypeInfo, Binding, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { getTypeInfo, Binding, PropertyRoute, symbolNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal'
 import * as DynamicTypeClient from '../DynamicTypeClient'
 import { DynamicTypeDefinitionComponent, PropertyRepeaterComponent } from './DynamicTypeDefinitionComponent'
-
 
 interface DynamicTypeEntityComponentProps {
     ctx: TypeContext<DynamicTypeEntity>;

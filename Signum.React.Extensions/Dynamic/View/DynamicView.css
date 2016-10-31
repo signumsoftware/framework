@@ -43,10 +43,16 @@ span.design-default {
         flex-direction: row;
     }
 
+    body.rtl-mode div.design-main {
+        flex-direction: row-reverse;
+    }
+
         div.design-main .design-left.open {
             width: 40%;
             min-width:300px;
         }
+
+   
 }
 
 
