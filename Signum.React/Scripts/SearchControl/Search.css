@@ -91,6 +91,13 @@ table.sf-search-results th.sf-current-column.error {
     border-bottom: 2px solid #a94442;
 }
 
+td.numeric-cell{
+    text-align: right
+}
+
+td.centered-cell{
+    text-align: center
+}
 
 .sf-search-results-container {
     overflow-x: auto;

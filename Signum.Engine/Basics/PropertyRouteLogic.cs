@@ -37,7 +37,7 @@ namespace Signum.Engine.Basics
                 sb.Schema.Synchronizing += SynchronizeProperties;
 
                 Properties = sb.GlobalLazy(() => Database.Query<PropertyRouteEntity>().AgGroupToDictionary(a => a.RootType, gr => gr.ToDictionary(a => a.Path)),
-                    new InvalidateWith(typeof(PropertyRouteEntity)));
+                    new InvalidateWith(typeof(PropertyRouteEntity)), Schema.Current.InvalidateMetadata);
             }
         }
 

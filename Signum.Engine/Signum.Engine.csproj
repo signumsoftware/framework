@@ -188,7 +188,7 @@
     <Compile Include="Engine\SqlBuilder.cs" />
     <Compile Include="Schema\UniqueIndex.cs" />
     <Compile Include="ServerBasic.cs" />
-    <Compile Include="Basics\TypesLogic.cs" />
+    <Compile Include="Basics\TypeLogic.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Administrator.md" />

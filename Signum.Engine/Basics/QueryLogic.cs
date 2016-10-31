@@ -47,17 +47,20 @@ namespace Signum.Engine.Basics
                 sb.Schema.Synchronizing += SynchronizeQueries;
                 sb.Schema.Generating += Schema_Generating;
 
-                queryNamesLazy = sb.GlobalLazy(()=>CreateQueryNames(), new InvalidateWith(typeof(QueryEntity)));
+                queryNamesLazy = sb.GlobalLazy(() => CreateQueryNames(),
+                    new InvalidateWith(typeof(QueryEntity)),
+                    Schema.Current.InvalidateMetadata);
 
-                queryNameToEntityLazy = sb.GlobalLazy(() => 
-                    EnumerableExtensions.JoinStrict(
+                queryNameToEntityLazy = sb.GlobalLazy(() =>
+                    EnumerableExtensions.JoinRelaxed(
                         Database.Query<QueryEntity>().ToList(),
                         QueryNames,
                         q => q.Key,
                         kvp => kvp.Key,
                         (q, kvp) => KVP.Create(kvp.Value, q),
-                        "caching QueryEntity. Consider synchronize").ToDictionary(),
-                    new InvalidateWith(typeof(QueryEntity)));
+                        "caching QueryEntity").ToDictionary(),
+                    new InvalidateWith(typeof(QueryEntity)),
+                    Schema.Current.InvalidateMetadata);
             }
         }
 

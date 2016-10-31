@@ -17,6 +17,7 @@ import ColumnEditor from './ColumnEditor'
 import MultipliedMessage from './MultipliedMessage'
 import { renderContextualItems, ContextualItemsContext, MarkedRowsDictionary, MarkedRow } from './ContextualItems'
 import ContextMenu from './ContextMenu'
+import { ContextMenuPosition } from './ContextMenu'
 import SelectorModal from '../SelectorModal'
 import { ISimpleFilterBuilder } from './SearchControl'
 
@@ -50,7 +51,7 @@ export interface SearchControlLoadedState {
     currentMenuItems?: React.ReactElement<any>[];
 
     contextualMenu?: {
-        position: { pageX: number, pageY: number };
+        position: ContextMenuPosition;
         columnIndex: number | null;
         columnOffset?: number ;
         rowIndex: number | null;
@@ -200,13 +201,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         const rowIndex = tr.getAttribute("data-row-index") ? parseInt(tr.getAttribute("data-row-index") !) : null;
 
 
-        const op = DomUtils.offsetParent(this.refs["container"] as HTMLElement);
-
         this.state.contextualMenu = {
-            position: {
-                pageX: event.clientX - (op ? op.getBoundingClientRect().left : 0),
-                pageY: event.clientY - (op ? op.getBoundingClientRect().top : 0)
-            },
+            position: ContextMenu.getPosition(event, this.refs["container"] as HTMLElement),
             columnIndex,
             rowIndex,
             columnOffset: td.tagName == "TH" ? this.getOffset(event.pageX, td.getBoundingClientRect(), Number.MAX_VALUE) : undefined
@@ -854,7 +850,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     }
 
                     {columns.map((c, j) =>
-                        <td key={j} data-column-index={j} style={{ textAlign: c.cellFormatter && c.cellFormatter.textAllign }}>
+                        <td key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
                             {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex])}
                         </td>)}
                 </tr>

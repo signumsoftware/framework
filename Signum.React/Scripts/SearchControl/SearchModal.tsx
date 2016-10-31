@@ -63,7 +63,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
             <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited}>
                 <Modal.Header closeButton={this.props.findMode == FindMode.Explore}>
                     { this.props.findMode == FindMode.Find &&
-                        <div className="btn-toolbar" style={{ float: "right" }}>
+                        <div className="btn-toolbar pull-right flip">
                             <button className ="btn btn-primary sf-entity-button sf-close-button sf-ok-button" disabled={!okEnabled} onClick={this.handleOkClicked}>
                                 {JavascriptMessage.ok.niceToString() }
                             </button>
