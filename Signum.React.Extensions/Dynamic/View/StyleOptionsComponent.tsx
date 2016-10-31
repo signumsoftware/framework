@@ -90,7 +90,7 @@ export class StyleOptionsLine extends React.Component<StyleOptionsLineProps, voi
                         <a title={EntityControlMessage.Create.niceToString()}
                             className="sf-line-button sf-create"
                             onClick={this.handleCreate}>
-                            <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }} />{EntityControlMessage.Create.niceToString()}
+                            <span className="glyphicon glyphicon-plus sf-create" />{EntityControlMessage.Create.niceToString()}
                         </a>}
                 </div>
             </div>
@@ -115,7 +115,7 @@ export class StyleOptionsComponent extends React.Component<StyleOptionsComponent
         const dn = this.props.dn;
 
         return (
-            <div className="form-sm">
+            <div className="form-sm code-container">
                 <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(so, s => s.formGroupStyle)} type="string" options={formGroupStyle} defaultValue={null} />
                 <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(so, s => s.formGroupSize)} type="string" options={formGroupSize} defaultValue={null} />
                 <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(so, s => s.placeholderLabels)} type="boolean" defaultValue={null} />

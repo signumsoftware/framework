@@ -203,7 +203,7 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
                 <a title={EntityControlMessage.Create.niceToString()}
                     className="sf-line-button sf-create"
                     onClick={this.handleCreateClick}>
-                    <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }} />{EntityControlMessage.Create.niceToString()}
+                    <span className="glyphicon glyphicon-plus sf-create"/>{EntityControlMessage.Create.niceToString()}
                 </a>
             </div>
         );
@@ -445,7 +445,7 @@ export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterC
                                 <a title={EntityControlMessage.Create.niceToString()}
                                     className="sf-line-button sf-create"
                                     onClick={this.handleCreateClick}>
-                                    <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }} />{EntityControlMessage.Create.niceToString()}
+                                    <span className="glyphicon glyphicon-plus sf-create" />{EntityControlMessage.Create.niceToString()}
                                 </a>
                             </td>
                         </tr>
@@ -540,7 +540,7 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
                 <a title={EntityControlMessage.Create.niceToString()}
                     className="sf-line-button sf-create"
                     onClick={this.handleCreateClick}>
-                    <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }} />{EntityControlMessage.Create.niceToString()}
+                    <span className="glyphicon glyphicon-plus sf-create" />{EntityControlMessage.Create.niceToString()}
                 </a>
             </div>
         );
