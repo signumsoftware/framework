@@ -510,3 +510,7 @@ ul.dropdown-menu > li > a.disabled {
     margin-bottom: 0px;
     color: #737373;
 }
+
+span.sf-create {
+    margin-right: 5px;
+}
