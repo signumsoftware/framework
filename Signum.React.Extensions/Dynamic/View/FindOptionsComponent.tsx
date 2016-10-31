@@ -106,7 +106,7 @@ export class FindOptionsLine extends React.Component<FindOptionsLineProps, void>
                         <a title={EntityControlMessage.Create.niceToString()}
                             className="sf-line-button sf-create"
                             onClick={this.handleCreate}>
-                            <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }} />{EntityControlMessage.Create.niceToString()}
+                            <span className="glyphicon glyphicon-plus sf-create" />{EntityControlMessage.Create.niceToString()}
                         </a>}
                 </div>
             </div>
@@ -156,7 +156,7 @@ export class FindOptionsComponent extends React.Component<FindOptionsComponentPr
         var dn = this.props.dn;
         const fo = this.props.findOptions;
         return (
-            <div className="form-sm filter-options">
+            <div className="form-sm filter-options code-container">
                 <QueryKeyLine queryKey={fo.queryKey} label="queryKey" onChange={this.handleChangeQueryKey} />
 
                 {fo.queryKey &&
@@ -379,7 +379,7 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
             <legend>
                 {this.renderTitle()}
             </legend>
-            <table className="table table-condensed form-vertical">
+            <table className="table table-condensed form-vertical code-container">
                 <thead>
                     {this.renderHeader()}
                 </thead>
@@ -390,7 +390,7 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
                             <a title={EntityControlMessage.Create.niceToString()}
                                 className="sf-line-button sf-create"
                                 onClick={this.handleCreateClick}>
-                                <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }} />{EntityControlMessage.Create.niceToString()}
+                                <span className="glyphicon glyphicon-plus sf-create" />{EntityControlMessage.Create.niceToString()}
                             </a>
                         </td>
                     </tr>
