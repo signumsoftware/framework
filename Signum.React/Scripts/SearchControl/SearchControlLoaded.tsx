@@ -335,7 +335,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     title={fo.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="glyphicon glyphicon glyphicon-filter"></span></a >}
                 <button className={"sf-query-button sf-search btn btn-primary" + (this.state.loading ? " disabled" : "")} onClick={this.handleSearchClick}>{SearchMessage.Search.niceToString()} </button>
                 {fo.create && <a className="sf-query-button btn btn-default sf-line-button sf-create" title={this.createTitle()} onClick={this.handleCreate}>
-                    <span className="glyphicon glyphicon-plus sf-create"></span>
+                    <span className="glyphicon glyphicon-plus"></span>
                 </a>}
                 {this.props.showContextMenu != false && this.renderSelecterButton()}
                 {Finder.ButtonBarQuery.getButtonBarElements({ findOptions: fo, searchControl: this }).map((a, i) => React.cloneElement(a, { key: i }))}
