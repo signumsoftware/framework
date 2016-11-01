@@ -97,7 +97,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                                         <a title={EntityControlMessage.Create.niceToString()}
                                             className="sf-line-button sf-create"
                                             onClick={this.handleCreateClick}>
-                                            <span className="glyphicon glyphicon-plus sf-create" />{EntityControlMessage.Create.niceToString()}
+                                            <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
                                         </a>}
                                 </td>
                             </tr>
