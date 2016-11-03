@@ -266,7 +266,7 @@ namespace Signum.Engine
             if (!temporalDefault)
                 return SqlBuilder.AlterTableAddColumn(table, column);
 
-            string defaultValue = SafeConsole.AskString("Default value for '{0}.{1}'? (or press enter) ".FormatWith(table.Name.Name, column.Name), stringValidator: str => null); ;
+            string defaultValue = rep.Interactive ? SafeConsole.AskString("Default value for '{0}.{1}'? (or press enter) ".FormatWith(table.Name.Name, column.Name), stringValidator: str => null) : "";
             if (defaultValue == "null")
                 return SqlBuilder.AlterTableAddColumn(table, column);
 

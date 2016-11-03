@@ -158,7 +158,6 @@ function onClick(eoc: EntityOperationContext<Entity>, event: React.MouseEvent): 
 
 export function notifySuccess() {
     Notify.singletone.notifyTimeout({ text: JavascriptMessage.executed.niceToString(), type: "success" });
-    return true;
 }
 
 export function defaultConstructFromEntity(eoc: EntityOperationContext<Entity>, event: React.MouseEvent, ...args: any[]) {
@@ -197,7 +196,7 @@ export function defaultExecuteEntity(eoc: EntityOperationContext<Entity>, ...arg
         return;
 
     API.executeEntity(eoc.entity, eoc.operationInfo.key, ...args)
-        .then(pack => { eoc.frame.onReload(pack); return notifySuccess(); })  
+        .then(pack => { eoc.frame.onReload(pack); notifySuccess(); })  
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
         .done();
 }
@@ -208,7 +207,7 @@ export function defaultExecuteLite(eoc: EntityOperationContext<Entity>, ...args:
         return;
 
     API.executeLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
-        .then(pack => { eoc.frame.onReload(pack); return notifySuccess(); })
+        .then(pack => { eoc.frame.onReload(pack); notifySuccess(); })
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
         .done();
 }
@@ -219,7 +218,7 @@ export function defaultDeleteEntity(eoc: EntityOperationContext<Entity>, ...args
         return;
 
     API.deleteEntity(eoc.entity, eoc.operationInfo.key, ...args)
-        .then(() => { eoc.frame.onClose(); return notifySuccess(); })
+        .then(() => { eoc.frame.onClose(); notifySuccess(); })
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
         .done();
 }
@@ -230,7 +229,7 @@ export function defaultDeleteLite(eoc: EntityOperationContext<Entity>, ...args: 
         return;
 
     API.deleteLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
-        .then(() => { eoc.frame.onClose(); return notifySuccess(); })
+        .then(() => { eoc.frame.onClose(); notifySuccess(); })
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
         .done();
 }

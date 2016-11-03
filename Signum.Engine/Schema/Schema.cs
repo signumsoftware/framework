@@ -41,6 +41,12 @@ namespace Signum.Engine.Maps
             set { this.version = value; }
         }
 
+        public event Action OnMetadataInvalidated;
+        public void InvalidateMetadata()
+        {
+            this.OnMetadataInvalidated?.Invoke();
+        }
+
         string applicationName; 
         public string ApplicationName
         {
