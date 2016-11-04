@@ -483,6 +483,7 @@ export module ValidationMessage {
     export const _0HasAPrecissionOf1InsteadOf2 = new MessageKey("ValidationMessage", "_0HasAPrecissionOf1InsteadOf2");
     export const _0ShouldBeOfType1 = new MessageKey("ValidationMessage", "_0ShouldBeOfType1");
     export const _0And1CanNotBeSetAtTheSameTime = new MessageKey("ValidationMessage", "_0And1CanNotBeSetAtTheSameTime");
+    export const ManufacturerForType0IsNotSet = new MessageKey("ValidationMessage", "ManufacturerForType0IsNotSet");
 }
 
 export module VoidEnumMessage {
