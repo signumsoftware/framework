@@ -127,7 +127,7 @@ namespace Signum.Engine.Files
         public static readonly Func<IFilePath, string> Year_Month_GuidExtension_Sufix = (IFilePath fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), Path.Combine(TimeZoneManager.Now.Month.ToString(), Guid.NewGuid() + Path.GetExtension(fp.FileName)));
 
         public static readonly Func<IFilePath, string> YearMonth_Guid_Filename_Sufix = (IFilePath fp) => Path.Combine(TimeZoneManager.Now.ToString("yyyy-MM"), Path.Combine(Guid.NewGuid().ToString(), fp.FileName));
-        public static readonly Func<IFilePath, string> Isolated_YearMonth_Guid_Filename_Sufix = (IFilePath fp) => Path.Combine(IsolationEntity.Current.IdOrNull.ToString() ?? "None", TimeZoneManager.Now.ToString("yyyy-MM"), Path.Combine(Guid.NewGuid().ToString(), fp.FileName));
+        public static readonly Func<IFilePath, string> Isolated_YearMonth_Guid_Filename_Sufix = (IFilePath fp) => Path.Combine(IsolationEntity.Current?.IdOrNull?.ToString() ?? "None", TimeZoneManager.Now.ToString("yyyy-MM"), Path.Combine(Guid.NewGuid().ToString(), fp.FileName));
 
 
         public string Errors()
