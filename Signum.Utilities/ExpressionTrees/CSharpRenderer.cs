@@ -45,10 +45,10 @@ namespace Signum.Utilities.ExpressionTrees
 
         public static bool IsBasicType(Type t) 
         {
-            return basicTypes.ContainsKey(Type.GetTypeCode(t));
+            return BasicTypeNames.ContainsKey(Type.GetTypeCode(t));
         }
 
-        static Dictionary<TypeCode, string> basicTypes = new Dictionary<TypeCode, string>
+        public static Dictionary<TypeCode, string> BasicTypeNames = new Dictionary<TypeCode, string>
         {
             { TypeCode.Boolean, "bool"}, 
             { TypeCode.Byte, "byte"}, 
@@ -137,7 +137,7 @@ namespace Signum.Utilities.ExpressionTrees
             if (type.IsEnum)
                 return type.Name;
 
-            string result = basicTypes.TryGetC(Type.GetTypeCode(type));
+            string result = BasicTypeNames.TryGetC(Type.GetTypeCode(type));
             if (result != null)
                 return result;
 

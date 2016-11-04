@@ -772,7 +772,7 @@ export interface FormatRule {
 export class CellFormatter {
     constructor(
         public formatter: (cell: any) => React.ReactChild | undefined,
-        public textAllign = "left") {
+        public cellClass? : string) {
     }
 }
 
@@ -837,7 +837,7 @@ export const formatRules: FormatRule[] = [
         isApplicable: col => col.token!.filterType == "Integer" || col.token!.filterType == "Decimal",
         formatter: col => {
             const numbroFormat = toNumbroFormat(col.token!.format);
-            return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat)}</span>, "right");
+            return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat)}</span>, "numeric-cell");
         }
     },
     {
@@ -845,13 +845,13 @@ export const formatRules: FormatRule[] = [
         isApplicable: col => (col.token!.filterType == "Integer" || col.token!.filterType == "Decimal") && !!col.token!.unit,
         formatter: col => {
             const numbroFormat = toNumbroFormat(col.token!.format);
-            return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat) + " " + col.token!.unit}</span>, "right");
+            return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat) + " " + col.token!.unit}</span>, "numeric-cell");
         }
     },
     {
         name: "Bool",
         isApplicable: col => col.token!.filterType == "Boolean",
-        formatter: col=> new CellFormatter((cell: boolean) => cell == undefined ? undefined : <input type="checkbox" disabled={true} checked={cell}/>, "center")
+        formatter: col=> new CellFormatter((cell: boolean) => cell == undefined ? undefined : <input type="checkbox" disabled={true} checked={cell}/>, "centered-cell")
     },
 ];
 

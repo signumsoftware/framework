@@ -54,6 +54,7 @@ namespace Signum.React.Facades
         internal static void Start()
         {
             DescriptionManager.Invalidated += () => cache.Clear();
+            Schema.Current.OnMetadataInvalidated += () => cache.Clear();
 
             EntityAssemblies = TypeLogic.TypeToEntity.Keys.AgGroupToDictionary(t => t.Assembly, gr => gr.Select(a => a.Namespace).ToHashSet());
             EntityAssemblies[typeof(PaginationMode).Assembly].Add(typeof(PaginationMode).Namespace);
@@ -139,7 +140,7 @@ namespace Signum.React.Facades
                 var usedEnums = (from type in normalTypes
                                  where typeof(ModifiableEntity).IsAssignableFrom(type)
                                  from p in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
-                                 let pt = p.PropertyType.UnNullify()
+                                 let pt = (p.PropertyType.ElementType() ?? p.PropertyType).UnNullify()
                                  where pt.IsEnum && !EntityAssemblies.ContainsKey(pt.Assembly)
                                  select pt).Distinct().ToList();
                 
@@ -294,6 +295,8 @@ namespace Signum.React.Facades
 
         public static Dictionary<string, TypeInfoTS> GetSymbolContainers(IEnumerable<Type> allTypes)
         {
+            SymbolLogic.LoadAll();
+
             var result = (from type in allTypes
                           where type.IsStaticClass() && type.HasAttribute<AutoInitAttribute>()
                           select KVP.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
@@ -316,8 +319,11 @@ namespace Signum.React.Facades
             if (v is IOperationSymbolContainer)
                 v = ((IOperationSymbolContainer)v).Symbol;
 
-            return ((Symbol)v);
+            var s = ((Symbol)v);
+
+            return s;
         }
+
 
         public static string GetTypeName(Type t)
         {

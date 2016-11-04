@@ -376,13 +376,14 @@ export function setTypes(types: TypeInfoDictionary) {
 
                 const ti = _types[typeName];
                 if (!ti)
-                    throw new Error(`Type ${typeName} not found. Consider synchronizing.`);
-
-                const member = ti.members[k2.after(".")];
-                if (!member)
-                    throw new Error(`Member ${memberName} not found in ${ti.name}. Consider synchronizing.`);
-
-                t2.niceName = member.niceName;
+                    console.error(`Type ${typeName} not found. Consider synchronizing.`);
+                else {
+                    const member = ti.members[k2.after(".")];
+                    if (!member)
+                        console.error(`Member ${memberName} not found in ${ti.name}. Consider synchronizing.`);
+                    else
+                        t2.niceName = member.niceName;
+                }
             });
 
             Object.freeze(t.operations);
@@ -786,6 +787,10 @@ function getMember(key: string): MemberInfo | undefined {
     const member: MemberInfo | undefined = type.members[key.after(".")];
 
     return member;
+}
+
+export function symbolNiceName(symbol: ISymbol) {
+    return getMember(symbol.key) !.niceName;
 }
 
 export function registerSymbol(type: string, key: string): any /*ISymbol*/ {

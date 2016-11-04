@@ -64,7 +64,7 @@ namespace Signum.Entities.Reflection
                     where da == null || da.Options.IsSet(DescriptionOptions.Members)
                     from p in t.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                     where DescriptionManager.OnShouldLocalizeMember(p)
-                    let et = p.PropertyType.UnNullify()
+                    let et = (p.PropertyType.ElementType() ?? p.PropertyType).UnNullify()
                     where et.IsEnum && et.Assembly.HasAttribute<DefaultAssemblyCultureAttribute>()
                     select et).ToHashSet();
         });
