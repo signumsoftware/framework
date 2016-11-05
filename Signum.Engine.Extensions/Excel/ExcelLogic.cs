@@ -31,7 +31,7 @@ namespace Signum.Engine.Excel
             {
                 if (excelReport)
                 {
-                    QueryLogic.Start(sb);
+                    QueryLogic.Start(sb, dqm);
 
                     sb.Include<ExcelReportEntity>();
                     dqm.RegisterQuery(typeof(ExcelReportEntity), () =>
