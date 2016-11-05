@@ -27,10 +27,10 @@ namespace Signum.Engine.Basics
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(sb)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(sb, null)));
         }
 
-        public static void Start(SchemaBuilder sb)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -42,7 +42,12 @@ namespace Signum.Engine.Basics
                     queryNameToEntityLazy.Load();
                 };
 
-                sb.Include<QueryEntity>();
+                sb.Include<QueryEntity>()
+                    .WithQuery(dqm, q => new
+                    {
+                        Entity = q,
+                        q.Key,
+                    });
 
                 sb.Schema.Synchronizing += SynchronizeQueries;
                 sb.Schema.Generating += Schema_Generating;
