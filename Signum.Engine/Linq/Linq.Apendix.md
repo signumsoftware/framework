@@ -3,29 +3,14 @@
 Here are the entity classes used as the Data Model. Just usual Signum Entities. 
 
 ```C#
-[Serializable]
+[Serializable, EntityKind(EntityKind.Master, EntityData.Transactional)]
 public class BugEntity : Entity
 {
-    string description;
-    public string Description
-    {
-        get { return description; }
-        set { Set(ref description, value); }
-    }
+    public string Description { get; set; }
 
-    DateTime start;
-    public DateTime Start
-    {
-        get { return start; }
-        set { if (Set(ref start, value)) CalculateHours(); }
-    }
+    public DateTime Start { get; set; }
 
-    DateTime? end;
-    public DateTime? End
-    {
-        get { return end; }
-        set { if (Set(ref end, value)) CalculateHours(); }
-    }
+    public DateTime? End { get; set; }
 
     decimal? hours;
     public decimal? Hours
@@ -34,41 +19,17 @@ public class BugEntity : Entity
     }
 
     Status status;
-    public Status Status
-    {
-        get { return status; }
-        set { Set(ref status, value); }
-    }
+    public Status Status { get; set; }
 
-    IBugDiscoverer discoverer;
+    [NotNullValidator, ImplementedBy(typeof(CustomerEntity), typeof(DeveloperEntity))]
+    public IBugDiscoverer Discoverer { get; set; }
+
+    public DeveloperEntity Fixer { get; set; }
+
     [NotNullValidator]
-    public IBugDiscoverer Discoverer
-    {
-        get { return discoverer; }
-        set { Set(ref discoverer, value); }
-    }
+    public Lazy<ProjectEntity> Project { get; set; }
 
-    DeveloperEntity fixer;
-    public DeveloperEntity Fixer
-    {
-        get { return fixer; }
-        set { Set(ref fixer, value); }
-    }
-
-    Lazy<ProjectEntity> project;
-    [NotNullValidator]
-    public Lazy<ProjectEntity> Project
-    {
-        get { return project; }
-        set { Set(ref project, value); }
-    }
-
-    MList<CommentEntity> comments;
-    public MList<CommentEntity> Comments
-    {
-        get { return comments; }
-        set { Set(ref comments, value); }
-    }
+    public MList<CommentEntity> Comments { get; set; } = new MList<CommentEntity>();
 
     protected override void PreSaving(ref bool graphModified)
     {
@@ -77,7 +38,7 @@ public class BugEntity : Entity
 
     private void CalculateHours()
     {
-        hours = end.HasValue ? (decimal?)(end.Value - start).TotalHours : null;
+        Hours = (End - Start)?.TotalHours;
         Notify(() => Hours);
     }
 
@@ -93,26 +54,12 @@ public class BugEntity : Entity
 [Serializable]
 public class CommentEntity : EmbeddedEntity
 {
-    string text;
-    public string Text
-    {
-        get { return text; }
-        set { Set(ref text, value); }
-    }
+    public string Text { get; set; }
 
-    DateTime date;
-    public DateTime Date
-    {
-        get { return date; }
-        set { Set(ref date, value); }
-    }
+    public DateTime Date { get; set; }
 
-    IBugDiscoverer writer;
-    public IBugDiscoverer Writer
-    {
-        get { return writer; }
-        set { Set(ref writer, value); }
-    }
+	[ImplementedBy(typeof(CustomerEntity), typeof(DeveloperEntity))]
+    public IBugDiscoverer Writer { get; set; }
 
     public override string ToString()
     {
@@ -129,22 +76,12 @@ public enum Status
 }
 
 
-[Serializable]
+[Serializable, EntityKind(EntityKind.Master, EntityData.Master)]
 public class ProjectEntity : Entity
 {
-    string name;
-    public string Name
-    {
-        get { return name; }
-        set { Set(ref name, value); }
-    }
+    public string Name { get; set; }
 
-    bool isInternal;
-    public bool IsInternal
-    {
-        get { return isInternal; }
-        set { Set(ref isInternal, value); }
-    }
+    public bool IsInternal { get; set; }
 
     public override string ToString()
     {
@@ -153,22 +90,16 @@ public class ProjectEntity : Entity
 }
 
 
-[ImplementedBy(typeof(CustomerEntity), typeof(DeveloperEntity))]
 public interface IBugDiscoverer: IEntity
 {
     public string Name { get; }
 }
 
 
-[Serializable]
+[Serializable, EntityKind(EntityKind.Master, EntityData.Master)]
 public class DeveloperEntity : Entity, IBugDiscoverer
 {
-    string name;
-    public string Name
-    {
-        get { return name; }
-        set { Set(ref name, value); }
-    }
+    public string Name { get; set; }
 
     static Expression<Func<DeveloperEntity, string>> ToStringExpression = e => e.Name;
     [ExpressionField]
@@ -179,15 +110,10 @@ public class DeveloperEntity : Entity, IBugDiscoverer
 }
 
 
-[Serializable]
+[Serializable, EntityKind(EntityKind.Master, EntityData.Master)]
 public class CustomerEntity : Entity, IBugDiscoverer
 {
-    string name;
-    public string Name
-    {
-        get { return name; }
-        set { Set(ref name, value); }
-    }
+    public string Name { get; set; }
 
     static Expression<Func<CustomerEntity, string>> ToStringExpression = e => e.Name;
     [ExpressionField]

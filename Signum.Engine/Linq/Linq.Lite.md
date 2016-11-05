@@ -3,11 +3,10 @@
 `Lite<T>` is fully supported in queries. If you don't know what a `Lite<T>` is, take a look [here](../Signum.Entities/Lite.md). 
 
 ### Navigating `Lite<T>` relationships
-At the database level there's just no difference between a `Lite<T>` reference an a normal one. `Lite<T>` objects are just a convenient way to tell the retriever when to finish (to avoid retrieving the whole database) and to delimiter the graph that will be sent to the client application. 
+`Lite<T>` objects are just a convenient way to tell the Framework when to load an entity eagerly and when lazily, and to delimiter the graph that will be sent to the client application (Windows/React). 
 
-But while you're writing Linq to Signum queries, `Lite<T>` relationships are just an annoyance that you can workaround using `Entity` or `EntityOrNull` properties of `Lite<T>`.
-
-
+In the SQL database schema there's no difference between an entity having a property of type `Lite<T>` or `T`: Both will create a foreign key to the related table, and
+ while you're writing Linq to Signum queries, `Lite<T>` relationships are just an annoyance that you can workaround using `Entity` or `EntityOrNull` properties of `Lite<T>`.
 
 ```C#
 var result = from b in Database.Query<BugEntity>()
@@ -25,7 +24,7 @@ LEFT OUTER JOIN ProjectEntity AS pdn
   ON (bdn.idProject = pdn.Id)
 ```
 
-`Retrieve` method is not supported in queries, because will be misleading... you're already in the database! You don't need to retrieve!. So this query:
+`Retrieve` method is not supported on queries, because will be misleading... you're already in the database! You don't need to retrieve!. So this query fails:
 
 ```C#
  from b in Database.Query<BugEntity>()
@@ -35,19 +34,20 @@ LEFT OUTER JOIN ProjectEntity AS pdn
      b.Description,
  }
 
+
 //throws InvalidOperationException("The expression can not be translated to SQL: new ProjectEntity(bdn.idProject)")
 ```
 
 ### Using `Lite<T>` as a result
  
-The second use of `Lite<T>` objects is to get them out from the database using a Linq query. You can create `Lite<T>` objects explicitly using `.ToLite()` extension method on any entity, or just get them if they are already in your data model: 
+The second use of `Lite<T>` objects is to use them for the set of results of a Linq query. You can create `Lite<T>` objects explicitly using `.ToLite()` extension method on any entity, or just get them if they are already `Lite<T>` in your data model: 
 
 ```C#
-//The first property is an explicit lazy, while the second is lazy just because BugEntity.Project is Lazy. 
+//The first property is an explicit lite, while the second is lite because BugEntity.Project is `Lite<ProjectEntity>`. 
 var result = from b in Database.Query<BugEntity>()
              select new 
 			 { 
-				Bug = b.ToLazy(), //Explicit ToLite() because b is a BugEntity 
+				Bug = b.ToLite(), //Explicit ToLite() because b is a BugEntity 
                 Project = b.Project //Implicit because b.Project is already a Lite<ProjectEntity>
              }; 
 ```
@@ -115,4 +115,6 @@ var result = from b in Database.Query<BugEntity>()
 
 //throws InvalidOperationException("Imposible to compare expressions of type IBugDiscoverer == Lite<DeveloperEntity>");
 ```
+
+```Note:``` Signum.Analyzer restores the compile-time errors when he finds comparishons between `Lite<T>` and `T`, or between `Lite<OrangeEntity>` and `Lite<AppleEntity>`. 
 
