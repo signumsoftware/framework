@@ -486,6 +486,39 @@
     <Member Name="DisconnectedMachine" Description="Getrennter Computer" />
     <Member Name="LastOnlineTicks" Description="Letzte Onlineticks" />
   </Type>
+  <Type Name="DynamicPanelPermission">
+    <Member Name="RestartApplication" Description="Anwendung neu starten" />
+    <Member Name="ViewDynamicPanel" Description="Dynamic Panel anzeigen" />
+  </Type>
+  <Type Name="DynamicSqlMigrationEntity" Description="Dynamische Sql-migration" PluralDescription="Dynamischen Sql-migrationen">
+    <Member Name="Comment" Description="Kommentar" />
+    <Member Name="CreatedBy" Description="Erstellt von" />
+    <Member Name="CreationDate" Description="Erstellungsdatum" />
+    <Member Name="ExecutedBy" Description="Ausgeführt durch" />
+    <Member Name="ExecutionDate" Description="Ausführungsdatum" />
+    <Member Name="Script" Description="Skript" />
+  </Type>
+  <Type Name="DynamicSqlMigrationMessage">
+    <Member Name="TheMigrationIsAlreadyExecuted" Description="Die Migration wird bereits ausgeführt" />
+  </Type>
+  <Type Name="DynamicSqlMigrationOperation">
+    <Member Name="Create" Description="Erstellen" />
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Execute" Description="Ausführen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="DynamicTypeEntity" Description="Dynamische Typ" PluralDescription="Dynamischen Typen">
+    <Member Name="Type" Description="Typ" />
+    <Member Name="TypeDefinition" Description="Typendefinition" />
+    <Member Name="TypeName" Description="Typname" />
+  </Type>
+  <Type Name="DynamicTypeMessage" />
+  <Type Name="DynamicTypeOperation">
+    <Member Name="Clone" Description="Klonen" />
+    <Member Name="Create" Description="Erstellen" />
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
   <Type Name="DynamicValidationEntity" Description="Dynamische Validierung">
     <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="Eval" Description="Auswertung" />
@@ -505,12 +538,29 @@
   <Type Name="DynamicViewMessage">
     <Member Name="AddChild" Description="Kind hinzufügen" />
     <Member Name="AddSibling" Description="Geschwister hinzufügen" />
+    <Member Name="ChooseAView" Description="Wählen Sie eine Ansicht" />
+    <Member Name="ClearChildren" Description="Lösche children" />
+    <Member Name="ExampleEntity" Description="Beispiel-Entität" />
+    <Member Name="GenerateChildren" Description="Erstellte children" />
     <Member Name="Remove" Description="Entfernen" />
     <Member Name="SelectANodeFirst" Description="Wählen Sie zuerst einen Knoten" />
     <Member Name="SelectATypeOfComponent" Description="Wählen Sie einen Komponententyp" />
+    <Member Name="SinceThereIsNoDynamicViewSelectorYouNeedToChooseAViewManually" Description="Da gibt es keinen DynamicViewSelector daher, müssen Sie eine Ansicht manuell wählen:" />
+    <Member Name="SuggestedFindOptions" Description="Vorgeschlagene Suchoptionen" />
+    <Member Name="TheFollowingQueriesReference0" Description="Die folgenden Abfragen verweisen {0}:" />
+    <Member Name="UseExpression" Description="Verwenden den Ausdruck" />
   </Type>
   <Type Name="DynamicViewOperation">
     <Member Name="Clone" Description="Klonen" />
+    <Member Name="Create" Description="Erstellen" />
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="DynamicViewSelectorEntity" Description="Dynamische Ansichten-Selektor" PluralDescription="Dynamischen Ansichten-Selektoren">
+    <Member Name="EntityType" Description="Entitätstyp" />
+    <Member Name="Script" Description="Skript" />
+  </Type>
+  <Type Name="DynamicViewSelectorOperation">
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
