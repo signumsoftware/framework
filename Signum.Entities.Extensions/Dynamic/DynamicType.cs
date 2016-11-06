@@ -76,11 +76,14 @@ namespace Signum.Entities.Dynamic
         [JsonProperty(PropertyName = "properties")]
         public List<DynamicProperty> Properties;
 
-        [JsonProperty(PropertyName = "registerSave")]
-        public bool RegisterSave;
+        [JsonProperty(PropertyName = "operationCreate")]
+        public string OperationCreate;
 
-        [JsonProperty(PropertyName = "registerDelete")]
-        public bool RegisterDelete;
+        [JsonProperty(PropertyName = "operationSave")]
+        public string OperationSave;
+
+        [JsonProperty(PropertyName = "operationDelete")]
+        public string OperationDelete;
 
         [JsonProperty(PropertyName = "queryFields")]
         public List<string> QueryFields;

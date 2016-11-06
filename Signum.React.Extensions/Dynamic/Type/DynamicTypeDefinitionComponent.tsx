@@ -61,11 +61,9 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                 <div className="row">
                     <div className="col-sm-6">
                         <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.entityKind)} type="string" defaultValue={null} options={EntityKindValues} />
-                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.registerSave)} type="boolean" defaultValue={null} />
                     </div>
                     <div className="col-sm-6">
                         <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.entityData)} type="string" defaultValue={null} options={EntityDataValues} />
-                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.registerDelete)} type="boolean" defaultValue={null} />
                     </div>
                 </div>
 
@@ -108,9 +106,68 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                     <Tab eventKey="query" title="Query">
                         <ComboBoxRepeaterComponent options={["Id"].concat(propNames)} list={def.queryFields} />
                     </Tab>
+
+                    <Tab eventKey="operations" title="Operations">
+                        <OperationCodeMirror binding={Binding.create(def, d => d.operationCreate)} title="Create" signature={"object[] args"} onInitialize={this.handleInitialize} />
+                        <OperationCodeMirror binding={Binding.create(def, d => d.operationSave)} title="Save" signature={this.props.typeName + "Entity e, object[] args"} />
+                        <OperationCodeMirror binding={Binding.create(def, d => d.operationDelete)} title="Delete" signature={this.props.typeName + "Entity e, object[] args"} />
+                    </Tab>
                 </Tabs>
             </div>
         );
+    }
+
+    handleInitialize = (): string => {
+        return "new " + this.props.typeName + "Entity\r\n{\r\n" +
+            this.props.definition.properties.map(p => "    " + p.name + " = null").join(", \r\n") +
+        "\r\n}";
+    }
+
+}
+
+export interface OperationCodeMirrorProps {
+    binding: Binding<string | undefined>;
+    title: string;
+    signature: string;
+    onInitialize?: ()=> string;
+}
+
+
+export class OperationCodeMirror extends React.Component<OperationCodeMirrorProps, void>{
+
+    handleCheckBoxChanged = () => {
+        let val = this.props.binding.getValue();
+
+        if (val == undefined)
+            val = this.props.onInitialize ? this.props.onInitialize() : "";
+        else
+            val = undefined;
+
+        this.props.binding.setValue(val);
+
+        this.forceUpdate();
+    }
+
+    render() {
+        let val = this.props.binding.getValue();
+
+        return (
+            <fieldset>
+                <legend>
+                    <input type="checkbox" checked={val != undefined} onChange={this.handleCheckBoxChanged} /> {this.props.title}
+                </legend>
+
+                {val != undefined &&
+                    <div className="code-container">
+                        <pre style={{ border: "0px", margin: "0px" }}>{"(" + this.props.signature + ") =>"}</pre>
+                        <div className="small-codemirror">
+                            <CSharpCodeMirror
+                                script={val}
+                                onChange={newScript => { this.props.binding.setValue(newScript); this.forceUpdate(); } } />
+                        </div>
+                    </div>
+                }
+        </fieldset>);
     }
 }
 

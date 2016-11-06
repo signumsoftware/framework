@@ -78,8 +78,9 @@ export interface DynamicTypeDefinition {
     baseType: DynamicBaseType;
     entityKind?: EntityKind;
     entityData?: EntityData;
-    registerSave?: boolean;
-    registerDelete?: boolean;
+    operationCreate?: string;
+    operationSave?: string;
+    operationDelete?: string;
     queryFields: string[];
     multiColumnUniqueIndex?: MultiColumnUniqueIndex; 
     properties: DynamicProperty[];
