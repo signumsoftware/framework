@@ -4,6 +4,7 @@ using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -46,5 +47,34 @@ namespace Signum.Entities.Dynamic
     public enum DynamicSqlMigrationMessage
     {
         TheMigrationIsAlreadyExecuted,
+        [Description("Preventing the generation of a new Script because of errors in dynamic code. Fix the errors and restart the server.")]
+        PreventingGenerationNewScriptBecauseOfErrorsInDynamicCodeFixErrorsAndRestartServer,
     }
+
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    public class DynamicRenameEntity : Entity
+    {
+        public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
+
+        [NotNullable, SqlDbType(Size = 200)]
+        [StringLengthValidator(AllowNulls = false, Max = 200)]
+        public string ReplacementKey { get; set; }
+
+        [NotNullable, SqlDbType(Size = 200)]
+        [StringLengthValidator(AllowNulls = false, Max = 200)]
+        public string OldName { get; set; }
+
+        [NotNullable, SqlDbType(Size = 200)]
+        [StringLengthValidator(AllowNulls = false, Max = 200)]
+        public string NewName { get; set; }
+
+        static Expression<Func<DynamicRenameEntity, string>> ToStringExpression = @this => @this.ReplacementKey + ": " + @this.OldName + " -> " + @this.NewName;
+        [ExpressionField]
+        public override string ToString()
+        {
+            return ToStringExpression.Evaluate(this);
+        }
+    }
+
+
 }

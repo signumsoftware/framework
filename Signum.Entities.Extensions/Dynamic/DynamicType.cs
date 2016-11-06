@@ -56,7 +56,10 @@ namespace Signum.Entities.Dynamic
     public enum DynamicTypeMessage
     {
         [Description("DynamicType '{0}' successfully saved. Go to DynamicPanel now?")]
-        DynamicType0SucessfullySavedGoToDynamicPanelNow
+        DynamicType0SucessfullySavedGoToDynamicPanelNow,
+
+        [Description("Server restarted with errors in dynamic code. Fix errors and restart again.")]
+        ServerRestartedWithErrorsInDynamicCodeFixErrorsAndRestartAgain
     }
 
     public class DynamicTypeDefinition
@@ -70,17 +73,17 @@ namespace Signum.Entities.Dynamic
         [JsonProperty(PropertyName = "entityData", NullValueHandling = NullValueHandling.Ignore)]
         public EntityData? EntityData;
 
-        [JsonProperty(PropertyName = "tableName", NullValueHandling = NullValueHandling.Ignore)]
-        public string TableName;
-
         [JsonProperty(PropertyName = "properties")]
         public List<DynamicProperty> Properties;
 
-        [JsonProperty(PropertyName = "registerSave")]
-        public bool RegisterSave;
+        [JsonProperty(PropertyName = "operationCreate")]
+        public string OperationCreate;
 
-        [JsonProperty(PropertyName = "registerDelete")]
-        public bool RegisterDelete;
+        [JsonProperty(PropertyName = "operationSave")]
+        public string OperationSave;
+
+        [JsonProperty(PropertyName = "operationDelete")]
+        public string OperationDelete;
 
         [JsonProperty(PropertyName = "queryFields")]
         public List<string> QueryFields;
@@ -109,11 +112,11 @@ namespace Signum.Entities.Dynamic
 
     public class DynamicProperty
     {
+        [JsonProperty(PropertyName = "uid")]
+        public string UID;
+
         [JsonProperty(PropertyName = "name")]
         public string Name;
-
-        [JsonProperty(PropertyName = "columnName", NullValueHandling = NullValueHandling.Ignore)]
-        public string ColumnName;
 
         [JsonProperty(PropertyName = "type")]
         public string Type;

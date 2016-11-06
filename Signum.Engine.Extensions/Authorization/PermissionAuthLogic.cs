@@ -62,10 +62,10 @@ namespace Signum.Engine.Authorization
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null)));
         }
 
-        public static void Start(SchemaBuilder sb)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -73,7 +73,7 @@ namespace Signum.Engine.Authorization
 
                 sb.Include<PermissionSymbol>();
 
-                SymbolLogic<PermissionSymbol>.Start(sb, () => RegisteredPermission.ToHashSet());
+                SymbolLogic<PermissionSymbol>.Start(sb, dqm, () => RegisteredPermission.ToHashSet());
 
                 cache = new AuthCache<RulePermissionEntity, PermissionAllowedRule, PermissionSymbol, PermissionSymbol, bool>(sb,
                     s=>s,

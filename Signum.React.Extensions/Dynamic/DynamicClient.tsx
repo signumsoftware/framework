@@ -49,12 +49,12 @@ export namespace API {
         return ajaxPost<CompilationError[]>({ url: `~/api/dynamic/compile` }, null);
     }
 
-    export function restartApplication(): Promise<void> {
-        return ajaxPost<void>({ url: `~/api/dynamic/restartApplication` }, null);
+    export function restartServer(): Promise<void> {
+        return ajaxPost<void>({ url: `~/api/dynamic/restartServer` }, null);
     }
 
-    export function pingApplication(): Promise<boolean> {
-        return ajaxPost<boolean>({ url: `~/api/dynamic/pingApplication` }, null);
+    export function pingServer(): Promise<void> {
+        return ajaxPost<void>({ url: `~/api/dynamic/pingServer` }, null);
     }
 }
 
