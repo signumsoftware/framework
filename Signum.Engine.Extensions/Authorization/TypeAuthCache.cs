@@ -55,7 +55,9 @@ namespace Signum.Entities.Authorization
             }
 
             Type type = TypeLogic.DnToType[rt.Resource];
-            var conditions = rt.Conditions.Where(a => !TypeConditionLogic.IsDefined(type, a.Condition));
+            var conditions = rt.Conditions.Where(a => 
+            a.Condition.FieldInfo != null && /*Not 100% Sync*/
+            !TypeConditionLogic.IsDefined(type, a.Condition));
 
             if (conditions.IsEmpty())
                 return null;
