@@ -132,6 +132,7 @@
     <Compile Include="Dynamic\DynamicLogic.cs" />
     <Compile Include="Dynamic\DynamicSqlMigrationLogic.cs" />
     <Compile Include="Dynamic\DynamicTypeLogic.cs" />
+    <Compile Include="Dynamic\DynamicTypeConditionLogic.cs" />
     <Compile Include="Dynamic\DynamicViewLogic.cs" />
     <Compile Include="Dynamic\DynamicValidationLogic.cs" />
     <Compile Include="Excel\ExcelAttachmentLogic.cs" />

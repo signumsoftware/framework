@@ -43,6 +43,14 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
         this.forceUpdate();
     }
 
+    handlePropertyRemoved = (dp: DynamicProperty) => {
+        var qfs = this.props.definition.queryFields;
+        if (qfs && qfs.contains(dp.name))
+            qfs.remove(dp.name);
+
+        this.props.dc.refreshView();
+    }
+
     render() {
         const def = this.props.definition;
 
@@ -50,7 +58,6 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
 
         return (
             <div>
-                <ValueComponent dc={this.props.dc} binding={Binding.create(def, d => d.tableName)} type="string" defaultValue={null} autoOpacity={true} />
                 <div className="row">
                     <div className="col-sm-6">
                         <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.entityKind)} type="string" defaultValue={null} options={EntityKindValues} />
@@ -64,7 +71,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
 
                 <Tabs defaultActiveKey="properties" id="DynamicTypeTabs">
                     <Tab eventKey="properties" title="Properties">
-                        <PropertyRepeaterComponent dc={this.props.dc} properties={def.properties} />
+                        <PropertyRepeaterComponent dc={this.props.dc} properties={def.properties} onRemove={this.handlePropertyRemoved} />
                         <fieldset>
                             <legend><input type="checkbox" checked={!!def.multiColumnUniqueIndex} onChange={this.handleMultiColumnUniqueIndexChecked} /> Multi-column Unique Index</legend>
 
@@ -110,6 +117,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
 export interface PropertyRepeaterComponentProps {
     properties: DynamicProperty[];
     dc: DynamicTypeDesignContext;
+    onRemove?: (dp: DynamicProperty) => void;
 }
 
 export interface PropertyRepeaterComponentState {
@@ -138,12 +146,16 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
     handleOnRemove = (event: React.MouseEvent, index: number) => {
         event.preventDefault();
         event.stopPropagation();
+        var old = this.props.properties[index];
         this.props.properties.removeAt(index);
 
         if (this.state.activeIndex == index)
             this.changeState(s => s.activeIndex == undefined);
 
         this.props.dc.refreshView();
+
+        if (this.props.onRemove)
+            this.props.onRemove(old);
     }
 
     handleOnMoveUp = (event: React.MouseEvent, index: number) => {
@@ -177,6 +189,7 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
 
     handleCreateClick = (event: React.SyntheticEvent) => {
         var p = {
+            uid: this.createGuid(),
             name: "Name",
             type: "string",
             isNullable: "No",
@@ -187,6 +200,15 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
         this.props.dc.refreshView();
 
         fetchPropertyType(p, this.props.dc);
+    }
+
+    createGuid() {
+        let d = new Date().getTime();
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+            let r = (d + Math.random() * 16) % 16 | 0;
+            d = Math.floor(d / 16);
+            return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+        });
     }
 
     render() {
@@ -203,7 +225,7 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
                 <a title={EntityControlMessage.Create.niceToString()}
                     className="sf-line-button sf-create"
                     onClick={this.handleCreateClick}>
-                    <span className="glyphicon glyphicon-plus sf-create"/>{EntityControlMessage.Create.niceToString()}
+                    <span className="glyphicon glyphicon-plus sf-create sf-create-label"/>{EntityControlMessage.Create.niceToString()}
                 </a>
             </div>
         );
@@ -272,7 +294,6 @@ export class PropertyComponent extends React.Component<PropertyComponentProps, v
                 <div className="row">
                     <div className="col-sm-8">
                         <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.name)} type="string" defaultValue={null} />
-                        <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.columnName)} type="string" defaultValue={null} autoOpacity={true} />
                         <TypeCombo dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.type)} onBlur={this.handleAutoFix}/>
                         <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.isNullable)} type="string" defaultValue={null} options={DynamicTypeClient.IsNullableValues} onChange={this.handleAutoFix} />
                     </div>
@@ -395,9 +416,7 @@ export interface ComboBoxRepeaterComponentProps {
     list: string[];
 }
 
-
 export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterComponentProps, void> {
-
 
     handleChange = (val: string, index: number) => {
         var list = this.props.list;
@@ -445,7 +464,7 @@ export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterC
                                 <a title={EntityControlMessage.Create.niceToString()}
                                     className="sf-line-button sf-create"
                                     onClick={this.handleCreateClick}>
-                                    <span className="glyphicon glyphicon-plus sf-create" />{EntityControlMessage.Create.niceToString()}
+                                    <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
                                 </a>
                             </td>
                         </tr>
@@ -540,7 +559,7 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
                 <a title={EntityControlMessage.Create.niceToString()}
                     className="sf-line-button sf-create"
                     onClick={this.handleCreateClick}>
-                    <span className="glyphicon glyphicon-plus sf-create" />{EntityControlMessage.Create.niceToString()}
+                    <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
                 </a>
             </div>
         );

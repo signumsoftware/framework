@@ -75,7 +75,6 @@ export interface DynamicTypeDefinition {
     baseType: DynamicBaseType;
     entityKind?: EntityKind;
     entityData?: EntityData;
-    tableName?: string;
     registerSave?: boolean;
     registerDelete?: boolean;
     queryFields: string[];
@@ -85,8 +84,8 @@ export interface DynamicTypeDefinition {
 }
 
 export interface DynamicProperty {
+    uid: string;
     name: string;
-    columnName?: string;
     type: string;
     isNullable: string;
     uniqueIndex: string;

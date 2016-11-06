@@ -8,9 +8,19 @@ import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 interface IDynamicValidationEvaluator {}
+interface IDynamicTypeConditionEvaluator {}
 export module DynamicPanelPermission {
     export const ViewDynamicPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "DynamicPanelPermission.ViewDynamicPanel");
     export const RestartApplication : Authorization.PermissionSymbol = registerSymbol("Permission", "DynamicPanelPermission.RestartApplication");
+}
+
+export const DynamicRenameEntity = new Type<DynamicRenameEntity>("DynamicRename");
+export interface DynamicRenameEntity extends Entities.Entity {
+    Type: "DynamicRename";
+    creationDate?: string;
+    replacementKey?: string | null;
+    oldName?: string | null;
+    newName?: string | null;
 }
 
 export const DynamicSqlMigrationEntity = new Type<DynamicSqlMigrationEntity>("DynamicSqlMigration");
@@ -33,6 +43,35 @@ export module DynamicSqlMigrationOperation {
     export const Save : Entities.ExecuteSymbol<DynamicSqlMigrationEntity> = registerSymbol("Operation", "DynamicSqlMigrationOperation.Save");
     export const Execute : Entities.ExecuteSymbol<DynamicSqlMigrationEntity> = registerSymbol("Operation", "DynamicSqlMigrationOperation.Execute");
     export const Delete : Entities.DeleteSymbol<DynamicSqlMigrationEntity> = registerSymbol("Operation", "DynamicSqlMigrationOperation.Delete");
+}
+
+export const DynamicTypeConditionEntity = new Type<DynamicTypeConditionEntity>("DynamicTypeCondition");
+export interface DynamicTypeConditionEntity extends Entities.Entity {
+    Type: "DynamicTypeCondition";
+    symbolName?: Entities.Lite<DynamicTypeConditionSymbolEntity> | null;
+    entityType?: Basics.TypeEntity | null;
+    eval: DynamicTypeConditionEval;
+}
+
+export const DynamicTypeConditionEval = new Type<DynamicTypeConditionEval>("DynamicTypeConditionEval");
+export interface DynamicTypeConditionEval extends EvalEntity<IDynamicTypeConditionEvaluator> {
+    Type: "DynamicTypeConditionEval";
+}
+
+export module DynamicTypeConditionOperation {
+    export const Save : Entities.ExecuteSymbol<DynamicTypeConditionEntity> = registerSymbol("Operation", "DynamicTypeConditionOperation.Save");
+    export const Delete : Entities.DeleteSymbol<DynamicTypeConditionEntity> = registerSymbol("Operation", "DynamicTypeConditionOperation.Delete");
+    export const Clone : Entities.ConstructSymbol_From<DynamicTypeConditionEntity, DynamicTypeConditionEntity> = registerSymbol("Operation", "DynamicTypeConditionOperation.Clone");
+}
+
+export const DynamicTypeConditionSymbolEntity = new Type<DynamicTypeConditionSymbolEntity>("DynamicTypeConditionSymbol");
+export interface DynamicTypeConditionSymbolEntity extends Entities.Entity {
+    Type: "DynamicTypeConditionSymbol";
+    name?: string | null;
+}
+
+export module DynamicTypeConditionSymbolOperation {
+    export const Save : Entities.ExecuteSymbol<DynamicTypeConditionSymbolEntity> = registerSymbol("Operation", "DynamicTypeConditionSymbolOperation.Save");
 }
 
 export const DynamicTypeEntity = new Type<DynamicTypeEntity>("DynamicType");

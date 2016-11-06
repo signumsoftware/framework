@@ -24,13 +24,38 @@ namespace Signum.Engine.Dynamic
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 PermissionAuthLogic.RegisterTypes(typeof(DynamicPanelPermission));
+                DynamicLogic.GetCodeFiles += GetCodeFile;
             }
         }
 
-        public static List<string> Assemblies = Eval.BasicAssemblies;
-        public static string GeneratedCodeDirectory = "DynamicallyGeneratedCode";
+        public static List<string> Namespaces = new List<string>
+        {
+            "System",
+            "System.Linq",
+            "System.Reflection",
+            "System.Collections.Generic",
+            "System.Linq.Expressions",
+            "Signum.Entities",
+            "Signum.Utilities",
+            "Signum.Engine.DynamicQuery",
+            "Signum.Engine.Maps",
+            "Signum.Engine.Basics",
+            "Signum.Entities.Basics",
+            "Signum.Engine.Operations",
+        };
+        public static List<string> Assemblies = new List<string>
+        {
+            "Signum.Engine.dll",
+            "Signum.Entities.dll",
+            "Signum.Utilities.dll",
+            "Signum.Entities.Extensions.dll",
+            "Signum.Engine.Extensions.dll"
+        };
 
+        public static string CodeGenEntitiesNamespace = "Signum.Entities.CodeGen";
+        public static string CodeGenDirectory = "CodeGen";
         public static Func<List<CodeFile>> GetCodeFiles = null;
+        public static Action<StringBuilder, int> OnWriteDynamicStarter;
 
         public static void StartDynamicStarter(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -45,7 +70,7 @@ namespace Signum.Engine.Dynamic
                 throw new InvalidOperationException("Errors compiling  dynamic assembly:\r\n" + cr.Errors.Cast<CompilerError>().ToString("\r\n").Indent(4));
             
             Assembly assembly = cr.CompiledAssembly;
-            Type type = assembly.GetTypes().Where(a => a.Name == "DynamicStarter").SingleEx();
+            Type type = assembly.GetTypes().Where(a => a.Name == "CodeGenStarter").SingleEx();
             MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static);
             mi.Invoke(null, new object[] { sb, dqm });
         }
@@ -72,14 +97,78 @@ namespace Signum.Engine.Dynamic
                 if (codeFiles.Count == 0)
                     return null;
 
-                Directory.CreateDirectory(GeneratedCodeDirectory);
-                Directory.EnumerateFiles(GeneratedCodeDirectory).ToList().ForEach(a => File.Delete(a));
+                Directory.CreateDirectory(CodeGenDirectory);
+                Directory.EnumerateFiles(CodeGenDirectory).ToList().ForEach(a => File.Delete(a));
 
-                codeFiles.Values.ToList().ForEach(a => File.WriteAllText(Path.Combine(GeneratedCodeDirectory, a.FileName), a.FileContent));
+                codeFiles.Values.ToList().ForEach(a => File.WriteAllText(Path.Combine(CodeGenDirectory, a.FileName), a.FileContent));
 
-                CompilerResults compiled = supplier.CompileAssemblyFromFile(parameters, codeFiles.Values.Select(a => Path.Combine(GeneratedCodeDirectory, a.FileName)).ToArray());
+                CompilerResults compiled = supplier.CompileAssemblyFromFile(parameters, codeFiles.Values.Select(a => Path.Combine(CodeGenDirectory, a.FileName)).ToArray());
 
                 return compiled;
+            }
+        }
+
+        private static List<CodeFile> GetCodeFile()
+        {
+            if (!Administrator.ExistTable<DynamicTypeEntity>())
+                return new List<CodeFile>();
+
+            var dscg = new DynamicStarterCodeGenerator(DynamicLogic.CodeGenEntitiesNamespace, Namespaces);
+
+            var code = dscg.GetFileCode();
+
+            var starter = new List<CodeFile>
+                    {
+                        new CodeFile
+                        {
+                            FileName = "CodeGenStarter.cs",
+                            FileContent = code,
+                        }
+                    };
+
+            return starter;
+        }
+
+        public class DynamicStarterCodeGenerator
+        {
+            public List<string> Usings { get; private set; }
+            public string Namespace { get; private set; }
+
+            public DynamicStarterCodeGenerator(string @namespace, List<string> usings)
+            {
+                this.Usings = usings;
+                this.Namespace = @namespace;
+            }
+
+            public string GetFileCode()
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach (var item in this.Usings)
+                    sb.AppendLine("using {0};".FormatWith(item));
+
+                sb.AppendLine("[assembly: DefaultAssemblyCulture(\"en\")]");
+                sb.AppendLine();
+                sb.AppendLine("namespace " + this.Namespace);
+                sb.AppendLine("{");
+                sb.Append(GetStarterClassCode().Indent(4));
+                sb.AppendLine("}");
+
+                return sb.ToString();
+            }
+
+            public string GetStarterClassCode()
+            {
+                StringBuilder sb = new StringBuilder();
+
+                sb.AppendLine($"public static class CodeGenStarter");
+                sb.AppendLine("{");
+                sb.AppendLine("    public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)");
+                sb.AppendLine("    {");
+                DynamicLogic.OnWriteDynamicStarter(sb, 8);
+                sb.AppendLine("    }");
+                sb.AppendLine("}");
+
+                return sb.ToString();
             }
         }
     }

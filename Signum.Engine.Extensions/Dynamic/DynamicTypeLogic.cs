@@ -20,7 +20,6 @@ namespace Signum.Engine.Dynamic
 {
     public static class DynamicTypeLogic
     {
-
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -36,6 +35,7 @@ namespace Signum.Engine.Dynamic
                 DynamicTypeGraph.Register();
 
                 DynamicLogic.GetCodeFiles += GetCodeFiles;
+                DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
             }
         }
 
@@ -53,7 +53,6 @@ namespace Signum.Engine.Dynamic
                     Construct = (e, _) => {
 
                         var def = e.GetDefinition();
-                        def.TableName = null;
                         var result = new DynamicTypeEntity { TypeName = null };
                         result.SetDefinition(def);
                         return result;
@@ -64,7 +63,28 @@ namespace Signum.Engine.Dynamic
                 {
                     AllowsNew = true,
                     Lite = false,
-                    Execute = (e, _) => { },
+                    Execute = (e, _) => {
+
+                        if (!e.IsNew)
+                        {
+                            var old = e.ToLite().Retrieve();
+                            if (e.TypeName != old.TypeName)
+                                DynamicSqlMigrationLogic.AddDynamicRename(Replacements.KeyTables, old.TypeName, e.TypeName);
+
+                            var newDef = e.GetDefinition();
+                            var oldDef = old.GetDefinition();
+
+                            var pairs = newDef.Properties
+                                .Join(oldDef.Properties, n => n.UID, o => o.UID, (n, o) => new { n, o })
+                                .Where(a => a.n.Type == a.o.Type);
+                            
+                            foreach (var a in pairs.Where(a =>  a.n.Name != a.o.Name))
+                            {
+                                DynamicSqlMigrationLogic.AddDynamicRename(Replacements.KeyColumnsForTable(old.TypeName),
+                                    a.o.Name, a.n.Name);
+                            }
+                        }
+                    },
                 }.Register();
 
                 new Delete(DynamicTypeOperation.Delete)
@@ -77,32 +97,44 @@ namespace Signum.Engine.Dynamic
             }
         }
 
-        public static string DynamicallyGeneratedEntitiesNamespace = "Signum.Entities.DynamicallyGenerated";
-
-        public static List<string> Namespaces = Eval.BasicNamespaces;
-
         public static string GetPropertyType(DynamicProperty property)
         {
-            var generator = new DynamicTypeCodeGenerator(DynamicallyGeneratedEntitiesNamespace, null, null, new List<string>());
+            var generator = new DynamicTypeCodeGenerator(DynamicLogic.CodeGenEntitiesNamespace, null, null, new List<string>());
 
             return generator.GetPropertyType(property);
         }
 
+        internal static List<DynamicTypeEntity> GetTypes()
+        {
+            CacheLogic.GloballyDisabled = true;
+            try
+            {
+                return ExecutionMode.Global().Using(a => Database.Query<DynamicTypeEntity>().ToList());
+            }
+            finally
+            {
+                CacheLogic.GloballyDisabled = false;
+            }
+        }
+
+        public static void WriteDynamicStarter(StringBuilder sb, int indent) {
+
+            var types = GetTypes();
+            foreach (var item in types)
+                sb.AppendLine($"{item}Logic.Start(sb, dqm);".Indent(indent));
+        }
 
         public static List<CodeFile> GetCodeFiles()
         {
             if (!Administrator.ExistTable<DynamicTypeEntity>())
                 return new List<CodeFile>();
 
-            CacheLogic.GloballyDisabled = true;
-            var types = ExecutionMode.Global().Using(a => Database.Query<DynamicTypeEntity>().ToList()); ;
-            CacheLogic.GloballyDisabled = false;
-
+            var types = GetTypes();
             var entities =  types.Select(dt =>
             {
                 var def = dt.GetDefinition();
 
-                var dcg = new DynamicTypeCodeGenerator(DynamicallyGeneratedEntitiesNamespace, dt.TypeName, def, Namespaces);
+                var dcg = new DynamicTypeCodeGenerator(DynamicLogic.CodeGenEntitiesNamespace, dt.TypeName, def, DynamicLogic.Namespaces);
 
                 var content = dcg.GetFileCode();
                 return new CodeFile
@@ -112,16 +144,14 @@ namespace Signum.Engine.Dynamic
                 };
             }).ToList();
              
-            var ns = Namespaces.ToList();
-            ns.Add("Signum.Engine.DynamicQuery");
-            ns.Add("Signum.Engine.Operations");
-            ns.Add("Signum.Engine.Maps");
+            var ns = DynamicLogic.Namespaces.ToList();
+           
 
             var logics = types.Select(dt =>
             {
                 var def = dt.GetDefinition();
 
-                var dlg = new DynamicTypeLogicGenerator(DynamicallyGeneratedEntitiesNamespace, dt.TypeName, def, ns);
+                var dlg = new DynamicTypeLogicGenerator(DynamicLogic.CodeGenEntitiesNamespace, dt.TypeName, def, ns);
 
                 var content = dlg.GetFileCode();
                 return new CodeFile
@@ -131,68 +161,7 @@ namespace Signum.Engine.Dynamic
                 };
             }).ToList();
 
-            var dscg = new DynamicStarterCodeGenerator(DynamicallyGeneratedEntitiesNamespace, types.Select(a => a.TypeName).ToList(), ns);
-
-            var code = dscg.GetFileCode();
-
-            var starter = new List<CodeFile>
-            {
-                new CodeFile
-                {
-                    FileName = "DynamicStarter.cs",
-                    FileContent = code,
-                }
-            };
-
-            return entities.Concat(logics).Concat(starter).ToList();
-        }
-    }
-
-    public class DynamicStarterCodeGenerator
-    {
-        public List<string> Usings { get; private set; }
-        public string Namespace { get; private set; }
-        public List<string> TypeNames { get; private set; }
-
-        public DynamicStarterCodeGenerator(string @namespace, List<string> typeNames, List<string> usings)
-        {
-            this.Usings = usings;
-            this.Namespace = @namespace;
-            this.TypeNames = typeNames;
-        }
-
-        public string GetFileCode()
-        {
-            StringBuilder sb = new StringBuilder();
-            foreach (var item in this.Usings)
-                sb.AppendLine("using {0};".FormatWith(item));
-
-            sb.AppendLine("[assembly: DefaultAssemblyCulture(\"en\")]");
-            sb.AppendLine();
-            sb.AppendLine("namespace " + this.Namespace);
-            sb.AppendLine("{");
-            sb.Append(GetStarterClassCode().Indent(4));
-            sb.AppendLine("}");
-            
-            return sb.ToString();
-        }
-
-        public string GetStarterClassCode()
-        {
-            StringBuilder sb = new StringBuilder();
-          
-            sb.AppendLine($"public static class DynamicStarter");
-            sb.AppendLine("{");
-            sb.AppendLine("    public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)");
-            sb.AppendLine("    {");
-            foreach (var item in this.TypeNames)
-            {
-                sb.AppendLine($"        {item}Logic.Start(sb, dqm);");
-            }
-            sb.AppendLine("    }");
-            sb.AppendLine("}");
-
-            return sb.ToString();
+            return entities.Concat(logics).ToList();
         }
     }
 
@@ -384,11 +353,6 @@ namespace Signum.Engine.Dynamic
                 }.NotNull().ToString(", ");
 
                 atts.Add($"SqlDbType({props})");
-            }
-
-            if (property.ColumnName != null)
-            {
-                atts.Add($"ColumnName({Literal(property.ColumnName)})");
             }
 
             switch (property.UniqueIndex)

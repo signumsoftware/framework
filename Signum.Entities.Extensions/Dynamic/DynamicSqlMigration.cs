@@ -47,4 +47,31 @@ namespace Signum.Entities.Dynamic
     {
         TheMigrationIsAlreadyExecuted,
     }
+
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    public class DynamicRenameEntity : Entity
+    {
+        public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
+
+        [NotNullable, SqlDbType(Size = 200)]
+        [StringLengthValidator(AllowNulls = false, Max = 200)]
+        public string ReplacementKey { get; set; }
+
+        [NotNullable, SqlDbType(Size = 200)]
+        [StringLengthValidator(AllowNulls = false, Max = 200)]
+        public string OldName { get; set; }
+
+        [NotNullable, SqlDbType(Size = 200)]
+        [StringLengthValidator(AllowNulls = false, Max = 200)]
+        public string NewName { get; set; }
+
+        static Expression<Func<DynamicRenameEntity, string>> ToStringExpression = @this => @this.ReplacementKey + ": " + @this.OldName + " -> " + @this.NewName;
+        [ExpressionField]
+        public override string ToString()
+        {
+            return ToStringExpression.Evaluate(this);
+        }
+    }
+
+
 }

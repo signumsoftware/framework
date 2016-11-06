@@ -79,7 +79,7 @@ export class CompileStep extends React.Component<void, DynamicCompileStepState>{
 
     render() {
 
-        var sc = new StyleContext(undefined, { labelColumns: { sm: 2 } });
+        var sc = new StyleContext(undefined, { labelColumns: { sm: 3 } });
 
         const lines = Options.onGetDynamicLine.map(f => f(sc));
         const lineContainer = React.cloneElement(<div className="form-horizontal" />, undefined, ...lines);

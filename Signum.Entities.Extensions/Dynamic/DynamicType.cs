@@ -70,9 +70,6 @@ namespace Signum.Entities.Dynamic
         [JsonProperty(PropertyName = "entityData", NullValueHandling = NullValueHandling.Ignore)]
         public EntityData? EntityData;
 
-        [JsonProperty(PropertyName = "tableName", NullValueHandling = NullValueHandling.Ignore)]
-        public string TableName;
-
         [JsonProperty(PropertyName = "properties")]
         public List<DynamicProperty> Properties;
 
@@ -109,11 +106,11 @@ namespace Signum.Entities.Dynamic
 
     public class DynamicProperty
     {
+        [JsonProperty(PropertyName = "uid")]
+        public string UID;
+
         [JsonProperty(PropertyName = "name")]
         public string Name;
-
-        [JsonProperty(PropertyName = "columnName", NullValueHandling = NullValueHandling.Ignore)]
-        public string ColumnName;
 
         [JsonProperty(PropertyName = "type")]
         public string Type;

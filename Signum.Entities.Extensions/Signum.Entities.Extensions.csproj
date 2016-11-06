@@ -117,10 +117,14 @@
     <Compile Include="Dynamic\Dynamic.cs" />
     <Compile Include="Dynamic\DynamicSqlMigration.cs" />
     <Compile Include="Dynamic\DynamicType.cs" />
+    <Compile Include="Dynamic\DynamicTypeConditionSymbol.cs" />
+    <Compile Include="Dynamic\DynamicTypeCondition.cs" />
     <Compile Include="Dynamic\DynamicView.cs" />
     <Compile Include="Dynamic\DynamicValidation.cs" />
     <Compile Include="Dynamic\EvalEntity.cs" />
     <Compile Include="Excel\ExcelAttachmentEntity.cs" />
+    <Compile Include="Excel\ExcelReportEntity.cs" />
+    <Compile Include="Excel\IExcelReportServer.cs" />
     <Compile Include="Files\EmbeddedFile.cs" />
     <Compile Include="Files\FileUtils.cs" />
     <Compile Include="Help\AppendixHelp.cs" />
@@ -200,10 +204,8 @@
     <Compile Include="Profiler\ProfilerPermissions.cs" />
     <Compile Include="SMS\SMSCharacters.cs" />
     <Compile Include="UserQueries\IUserQueryServer.cs" />
-    <Compile Include="Excel\ExcelReportEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserAssets\FilterValueConverter.cs" />
-    <Compile Include="Excel\IExcelReportServer.cs" />
     <Compile Include="UserQueries\UserQueryEntity.cs" />
     <Compile Include="Scheduler\HolidayCalendarEntity.cs" />
     <Compile Include="Scheduler\ScheduledTaskEntity.cs" />
