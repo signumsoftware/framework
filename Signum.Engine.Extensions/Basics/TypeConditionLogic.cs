@@ -14,6 +14,7 @@ using Signum.Utilities.Reflection;
 using Signum.Utilities.DataStructures;
 using Signum.Engine.Linq;
 using Signum.Engine.Authorization;
+using Signum.Engine.DynamicQuery;
 
 namespace Signum.Engine.Basics
 {
@@ -41,11 +42,11 @@ namespace Signum.Engine.Basics
             get { return infos.Keys; }
         }
 
-        public static void Start(SchemaBuilder sb)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                SymbolLogic<TypeConditionSymbol>.Start(sb, () => infos.SelectMany(a => a.Value.Keys).ToHashSet());
+                SymbolLogic<TypeConditionSymbol>.Start(sb, dqm, () => infos.SelectMany(a => a.Value.Keys).ToHashSet());
             }
         }
 

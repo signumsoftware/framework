@@ -8,9 +8,19 @@ import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 interface IDynamicValidationEvaluator {}
+interface IDynamicTypeConditionEvaluator {}
 export module DynamicPanelPermission {
     export const ViewDynamicPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "DynamicPanelPermission.ViewDynamicPanel");
     export const RestartApplication : Authorization.PermissionSymbol = registerSymbol("Permission", "DynamicPanelPermission.RestartApplication");
+}
+
+export const DynamicRenameEntity = new Type<DynamicRenameEntity>("DynamicRename");
+export interface DynamicRenameEntity extends Entities.Entity {
+    Type: "DynamicRename";
+    creationDate?: string;
+    replacementKey?: string | null;
+    oldName?: string | null;
+    newName?: string | null;
 }
 
 export const DynamicSqlMigrationEntity = new Type<DynamicSqlMigrationEntity>("DynamicSqlMigration");
@@ -26,6 +36,7 @@ export interface DynamicSqlMigrationEntity extends Entities.Entity {
 
 export module DynamicSqlMigrationMessage {
     export const TheMigrationIsAlreadyExecuted = new MessageKey("DynamicSqlMigrationMessage", "TheMigrationIsAlreadyExecuted");
+    export const PreventingGenerationNewScriptBecauseOfErrorsInDynamicCodeFixErrorsAndRestartServer = new MessageKey("DynamicSqlMigrationMessage", "PreventingGenerationNewScriptBecauseOfErrorsInDynamicCodeFixErrorsAndRestartServer");
 }
 
 export module DynamicSqlMigrationOperation {
@@ -44,6 +55,7 @@ export interface DynamicTypeEntity extends Entities.Entity {
 
 export module DynamicTypeMessage {
     export const DynamicType0SucessfullySavedGoToDynamicPanelNow = new MessageKey("DynamicTypeMessage", "DynamicType0SucessfullySavedGoToDynamicPanelNow");
+    export const ServerRestartedWithErrorsInDynamicCodeFixErrorsAndRestartAgain = new MessageKey("DynamicTypeMessage", "ServerRestartedWithErrorsInDynamicCodeFixErrorsAndRestartAgain");
 }
 
 export module DynamicTypeOperation {

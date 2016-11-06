@@ -18,7 +18,7 @@ import { StyleContext } from '../../../Framework/Signum.React/Scripts/TypeContex
 
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
-import { DynamicTypeEntity, DynamicTypeOperation, DynamicSqlMigrationEntity, DynamicTypeMessage, DynamicPanelPermission } from './Signum.Entities.Dynamic'
+import { DynamicTypeEntity, DynamicTypeOperation, DynamicSqlMigrationEntity, DynamicRenameEntity, DynamicTypeMessage, DynamicPanelPermission } from './Signum.Entities.Dynamic'
 import DynamicTypeEntityComponent from './Type/DynamicTypeEntity'
 import * as DynamicClient from './DynamicClient'
 import * as AuthClient from '../Authorization/AuthClient'
@@ -52,7 +52,10 @@ export function start(options: { routes: JSX.Element[] }) {
     DynamicClient.Options.onGetDynamicLine.push(ctx => <CountSearchControl ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
     DynamicClient.Options.getDynaicMigrationsStep = () =>
         <Tab eventKey="migrations" title="Migrations" >
+            <h3>{DynamicSqlMigrationEntity.nicePluralName()}</h3>
             <SearchControl findOptions={{ queryName: DynamicSqlMigrationEntity }} />
+            <h3>{DynamicRenameEntity.nicePluralName()}</h3>
+            <SearchControl findOptions={{ queryName: DynamicRenameEntity }} />
         </Tab>;
 }
 
@@ -75,9 +78,9 @@ export interface DynamicTypeDefinition {
     baseType: DynamicBaseType;
     entityKind?: EntityKind;
     entityData?: EntityData;
-    tableName?: string;
-    registerSave?: boolean;
-    registerDelete?: boolean;
+    operationCreate?: string;
+    operationSave?: string;
+    operationDelete?: string;
     queryFields: string[];
     multiColumnUniqueIndex?: MultiColumnUniqueIndex; 
     properties: DynamicProperty[];
@@ -85,8 +88,8 @@ export interface DynamicTypeDefinition {
 }
 
 export interface DynamicProperty {
+    uid: string;
     name: string;
-    columnName?: string;
     type: string;
     isNullable: string;
     uniqueIndex: string;

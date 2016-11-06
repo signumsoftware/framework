@@ -25,7 +25,7 @@ namespace Signum.Engine.Scheduler
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                SymbolLogic<SimpleTaskSymbol>.Start(sb, () => tasks.Keys.ToHashSet());
+                SymbolLogic<SimpleTaskSymbol>.Start(sb, dqm, () => tasks.Keys.ToHashSet());
 
                 SchedulerLogic.ExecuteTask.Register((SimpleTaskSymbol st) =>
                 {

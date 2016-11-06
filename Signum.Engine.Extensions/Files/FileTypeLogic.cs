@@ -33,7 +33,7 @@ namespace Signum.Engine.Files
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                SymbolLogic<FileTypeSymbol>.Start(sb, () => FileTypes.Keys.ToHashSet());
+                SymbolLogic<FileTypeSymbol>.Start(sb,dqm, () => FileTypes.Keys.ToHashSet());
 
                 dqm.RegisterQuery(typeof(FileTypeSymbol), () =>
                     from f in Database.Query<FileTypeSymbol>()

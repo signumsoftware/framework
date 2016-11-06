@@ -1,4 +1,5 @@
 ﻿using Signum.Engine.Dynamic;
+using Signum.Entities.Dynamic;
 using Signum.Utilities;
 using System;
 using System.CodeDom.Compiler;
@@ -31,16 +32,23 @@ namespace Signum.React.Dynamic
                     })).ToList();
         }
 
-        [Route("api/dynamic/restartApplication"), HttpPost]
-        public void RestartApplication()
+        [Route("api/dynamic/restartServer"), HttpPost]
+        public void RestartServer()
         {
             System.Web.HttpRuntime.UnloadAppDomain();
         }
 
-        [Route("api/dynamic/pingApplication"), HttpPost]
-        public bool PingApplication()
+        [Route("api/dynamic/pingServer"), HttpPost]
+        public HttpResponseMessage PingServer()
         {
-            return true;
+            if (DynamicLogic.CodeGenError != null)
+            {
+                var error = new HttpError(DynamicLogic.CodeGenError, true);
+                error.ExceptionMessage = DynamicTypeMessage.ServerRestartedWithErrorsInDynamicCodeFixErrorsAndRestartAgain.NiceToString() + "\r\n\r\n" + error.ExceptionMessage;
+                return Request.CreateResponse<HttpError>(HttpStatusCode.InternalServerError, error);
+            }
+
+            return Request.CreateResponse(HttpStatusCode.NoContent);
         }
     }
 

@@ -43,6 +43,14 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
         this.forceUpdate();
     }
 
+    handlePropertyRemoved = (dp: DynamicProperty) => {
+        var qfs = this.props.definition.queryFields;
+        if (qfs && qfs.contains(dp.name))
+            qfs.remove(dp.name);
+
+        this.props.dc.refreshView();
+    }
+
     render() {
         const def = this.props.definition;
 
@@ -50,21 +58,18 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
 
         return (
             <div>
-                <ValueComponent dc={this.props.dc} binding={Binding.create(def, d => d.tableName)} type="string" defaultValue={null} autoOpacity={true} />
                 <div className="row">
                     <div className="col-sm-6">
                         <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.entityKind)} type="string" defaultValue={null} options={EntityKindValues} />
-                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.registerSave)} type="boolean" defaultValue={null} />
                     </div>
                     <div className="col-sm-6">
                         <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.entityData)} type="string" defaultValue={null} options={EntityDataValues} />
-                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.registerDelete)} type="boolean" defaultValue={null} />
                     </div>
                 </div>
 
                 <Tabs defaultActiveKey="properties" id="DynamicTypeTabs">
                     <Tab eventKey="properties" title="Properties">
-                        <PropertyRepeaterComponent dc={this.props.dc} properties={def.properties} />
+                        <PropertyRepeaterComponent dc={this.props.dc} properties={def.properties} onRemove={this.handlePropertyRemoved} />
                         <fieldset>
                             <legend><input type="checkbox" checked={!!def.multiColumnUniqueIndex} onChange={this.handleMultiColumnUniqueIndexChecked} /> Multi-column Unique Index</legend>
 
@@ -101,15 +106,75 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                     <Tab eventKey="query" title="Query">
                         <ComboBoxRepeaterComponent options={["Id"].concat(propNames)} list={def.queryFields} />
                     </Tab>
+
+                    <Tab eventKey="operations" title="Operations">
+                        <OperationCodeMirror binding={Binding.create(def, d => d.operationCreate)} title="Create" signature={"object[] args"} onInitialize={this.handleInitialize} />
+                        <OperationCodeMirror binding={Binding.create(def, d => d.operationSave)} title="Save" signature={this.props.typeName + "Entity e, object[] args"} />
+                        <OperationCodeMirror binding={Binding.create(def, d => d.operationDelete)} title="Delete" signature={this.props.typeName + "Entity e, object[] args"} />
+                    </Tab>
                 </Tabs>
             </div>
         );
+    }
+
+    handleInitialize = (): string => {
+        return "new " + this.props.typeName + "Entity\r\n{\r\n" +
+            this.props.definition.properties.map(p => "    " + p.name + " = null").join(", \r\n") +
+        "\r\n}";
+    }
+
+}
+
+export interface OperationCodeMirrorProps {
+    binding: Binding<string | undefined>;
+    title: string;
+    signature: string;
+    onInitialize?: ()=> string;
+}
+
+
+export class OperationCodeMirror extends React.Component<OperationCodeMirrorProps, void>{
+
+    handleCheckBoxChanged = () => {
+        let val = this.props.binding.getValue();
+
+        if (val == undefined)
+            val = this.props.onInitialize ? this.props.onInitialize() : "";
+        else
+            val = undefined;
+
+        this.props.binding.setValue(val);
+
+        this.forceUpdate();
+    }
+
+    render() {
+        let val = this.props.binding.getValue();
+
+        return (
+            <fieldset>
+                <legend>
+                    <input type="checkbox" checked={val != undefined} onChange={this.handleCheckBoxChanged} /> {this.props.title}
+                </legend>
+
+                {val != undefined &&
+                    <div className="code-container">
+                        <pre style={{ border: "0px", margin: "0px" }}>{"(" + this.props.signature + ") =>"}</pre>
+                        <div className="small-codemirror">
+                            <CSharpCodeMirror
+                                script={val}
+                                onChange={newScript => { this.props.binding.setValue(newScript); this.forceUpdate(); } } />
+                        </div>
+                    </div>
+                }
+        </fieldset>);
     }
 }
 
 export interface PropertyRepeaterComponentProps {
     properties: DynamicProperty[];
     dc: DynamicTypeDesignContext;
+    onRemove?: (dp: DynamicProperty) => void;
 }
 
 export interface PropertyRepeaterComponentState {
@@ -138,12 +203,16 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
     handleOnRemove = (event: React.MouseEvent, index: number) => {
         event.preventDefault();
         event.stopPropagation();
+        var old = this.props.properties[index];
         this.props.properties.removeAt(index);
 
         if (this.state.activeIndex == index)
             this.changeState(s => s.activeIndex == undefined);
 
         this.props.dc.refreshView();
+
+        if (this.props.onRemove)
+            this.props.onRemove(old);
     }
 
     handleOnMoveUp = (event: React.MouseEvent, index: number) => {
@@ -177,6 +246,7 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
 
     handleCreateClick = (event: React.SyntheticEvent) => {
         var p = {
+            uid: this.createGuid(),
             name: "Name",
             type: "string",
             isNullable: "No",
@@ -187,6 +257,15 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
         this.props.dc.refreshView();
 
         fetchPropertyType(p, this.props.dc);
+    }
+
+    createGuid() {
+        let d = new Date().getTime();
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+            let r = (d + Math.random() * 16) % 16 | 0;
+            d = Math.floor(d / 16);
+            return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+        });
     }
 
     render() {
@@ -203,7 +282,7 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
                 <a title={EntityControlMessage.Create.niceToString()}
                     className="sf-line-button sf-create"
                     onClick={this.handleCreateClick}>
-                    <span className="glyphicon glyphicon-plus sf-create"/>{EntityControlMessage.Create.niceToString()}
+                    <span className="glyphicon glyphicon-plus sf-create sf-create-label"/>{EntityControlMessage.Create.niceToString()}
                 </a>
             </div>
         );
@@ -272,7 +351,6 @@ export class PropertyComponent extends React.Component<PropertyComponentProps, v
                 <div className="row">
                     <div className="col-sm-8">
                         <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.name)} type="string" defaultValue={null} />
-                        <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.columnName)} type="string" defaultValue={null} autoOpacity={true} />
                         <TypeCombo dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.type)} onBlur={this.handleAutoFix}/>
                         <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.isNullable)} type="string" defaultValue={null} options={DynamicTypeClient.IsNullableValues} onChange={this.handleAutoFix} />
                     </div>
@@ -395,9 +473,7 @@ export interface ComboBoxRepeaterComponentProps {
     list: string[];
 }
 
-
 export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterComponentProps, void> {
-
 
     handleChange = (val: string, index: number) => {
         var list = this.props.list;
@@ -445,7 +521,7 @@ export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterC
                                 <a title={EntityControlMessage.Create.niceToString()}
                                     className="sf-line-button sf-create"
                                     onClick={this.handleCreateClick}>
-                                    <span className="glyphicon glyphicon-plus sf-create" />{EntityControlMessage.Create.niceToString()}
+                                    <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
                                 </a>
                             </td>
                         </tr>
@@ -540,7 +616,7 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
                 <a title={EntityControlMessage.Create.niceToString()}
                     className="sf-line-button sf-create"
                     onClick={this.handleCreateClick}>
-                    <span className="glyphicon glyphicon-plus sf-create" />{EntityControlMessage.Create.niceToString()}
+                    <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
                 </a>
             </div>
         );
