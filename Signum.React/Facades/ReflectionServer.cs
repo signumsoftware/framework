@@ -296,7 +296,7 @@ namespace Signum.React.Facades
         public static Dictionary<string, TypeInfoTS> GetSymbolContainers(IEnumerable<Type> allTypes)
         {
             SymbolLogic.LoadAll();
-
+            
             var result = (from type in allTypes
                           where type.IsStaticClass() && type.HasAttribute<AutoInitAttribute>()
                           select KVP.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
