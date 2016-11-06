@@ -71,7 +71,7 @@ namespace Signum.TSGenerator
 
             var usedEnums = (from type in entityResults.Select(a => a.type)
                              from p in GetProperties(type, declaredOnly: false)
-                             let pt = p.PropertyType.UnNullify()
+                             let pt = (p.PropertyType.ElementType() ?? p.PropertyType).UnNullify()
                              where pt.IsEnum
                              select pt).Distinct().ToList();
 
@@ -502,6 +502,17 @@ namespace Signum.TSGenerator
         public static bool IsCollection(this Type type)
         {
             return type != typeof(byte[]) && type != typeof(string) && type.GetInterfaces().Contains(typeof(IEnumerable));
+        }
+        public static Type ElementType(this Type ft)
+        {
+            if (!typeof(IEnumerable).IsAssignableFrom(ft))
+                return null;
+
+            var ie = ft.GetInterfaces().FirstOrDefault(ti => ti.IsGenericType && ti.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+
+            if (ie == null)
+                return null;
+            return ie.GetGenericArguments()[0];
         }
 
         public static NamespaceTSReference GetNamespaceReference(Options options, Type type)

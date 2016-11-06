@@ -39,11 +39,17 @@ namespace Signum.Engine
             return new Disposable(() => avoidCache = old);
         }
 
-        public static void Start(SchemaBuilder sb, Func<IEnumerable<T>> getSymbols)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<IEnumerable<T>> getSymbols)
         {
             if (sb.NotDefined(typeof(SymbolLogic<T>).GetMethod("Start")))
             {
-                sb.Include<T>();
+                sb.Include<T>()
+                    .WithQuery(dqm, t => new
+                    {
+                        Entity = t,
+                        t.Id,
+                        t.Key
+                    });
 
                 SymbolLogic.OnLoadAll += () => lazy.Load();
                 sb.Schema.Initializing += () => lazy.Load();
@@ -79,7 +85,15 @@ namespace Signum.Engine
         static void SymbolLogic_Retrieved(T ident)
         {
             if (!avoidCache)
-                ident.FieldInfo = lazy.Value.GetOrThrow(ident.Key).FieldInfo;
+                try
+                {
+                    ident.FieldInfo = lazy.Value.GetOrThrow(ident.Key).FieldInfo;
+                }
+                catch
+                {
+                    //Just for alerting developers
+                    //Could happen when not 100% synchronizeds
+                }
         }
       
         static SqlPreCommand Schema_Generating()
