@@ -190,6 +190,10 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
             case 13: // enter
                 if (this.state.selectedIndex == undefined || !this.state.shown)
                     return;
+
+                if (this.state.query != this.input.value)
+                    return;
+
                 this.select(e);
                 break;
 

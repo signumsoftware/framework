@@ -325,9 +325,14 @@ namespace Signum.React.Json
                     {
                         if (!markedAsModified && parentRoute.RootType.IsEntity())
                         {
-                            //Only apply changes if the client notifies it, to avoid regressions
-                            if (!Debugger.IsAttached)
+                            try
+                            {
+                                //Call attention of developer
                                 throw new InvalidOperationException($"'modified' is not set but '{pi.Name}' is modified");
+                            }
+                            catch (Exception)
+                            {
+                            }
 
                         }
                         else
