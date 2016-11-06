@@ -54,8 +54,8 @@ namespace Signum.Engine.Word
                 sb.Include<WordTemplateEntity>();
                 SystemWordTemplateLogic.Start(sb, dqm);
 
-                SymbolLogic<WordTransformerSymbol>.Start(sb, () => Transformers.Keys.ToHashSet());
-                SymbolLogic<WordConverterSymbol>.Start(sb, () => Converters.Keys.ToHashSet());
+                SymbolLogic<WordTransformerSymbol>.Start(sb, dqm, () => Transformers.Keys.ToHashSet());
+                SymbolLogic<WordConverterSymbol>.Start(sb, dqm, () => Converters.Keys.ToHashSet());
 
                 dqm.RegisterQuery(typeof(WordTemplateEntity), ()=>
                     from e in Database.Query<WordTemplateEntity>()
