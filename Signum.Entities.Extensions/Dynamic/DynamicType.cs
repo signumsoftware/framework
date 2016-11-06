@@ -56,7 +56,10 @@ namespace Signum.Entities.Dynamic
     public enum DynamicTypeMessage
     {
         [Description("DynamicType '{0}' successfully saved. Go to DynamicPanel now?")]
-        DynamicType0SucessfullySavedGoToDynamicPanelNow
+        DynamicType0SucessfullySavedGoToDynamicPanelNow,
+
+        [Description("Server restarted with errors in dynamic code. Fix errors and restart again.")]
+        ServerRestartedWithErrorsInDynamicCodeFixErrorsAndRestartAgain
     }
 
     public class DynamicTypeDefinition

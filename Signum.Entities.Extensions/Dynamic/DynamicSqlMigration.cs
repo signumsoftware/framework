@@ -4,6 +4,7 @@ using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -46,6 +47,8 @@ namespace Signum.Entities.Dynamic
     public enum DynamicSqlMigrationMessage
     {
         TheMigrationIsAlreadyExecuted,
+        [Description("Preventing the generation of a new Script because of errors in dynamic code. Fix the errors and restart the server.")]
+        PreventingGenerationNewScriptBecauseOfErrorsInDynamicCodeFixErrorsAndRestartServer,
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]

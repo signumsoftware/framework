@@ -15,7 +15,7 @@ import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString,
 import { API, Options, CompilationError } from './DynamicClient'
 import CSharpCodeMirror from '../Codemirror/CSharpCodeMirror'
 import * as AuthClient from '../Authorization/AuthClient'
-import { DynamicPanelPermission } from './Signum.Entities.Dynamic'
+import { DynamicPanelPermission, DynamicTypeMessage } from './Signum.Entities.Dynamic'
 
 require("!style!css!./DynamicPanelPage.css");
 
@@ -35,7 +35,7 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
 
         return (
             <Tabs defaultActiveKey={step || "compile"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} onSelect={this.handleSelect}>
-                <Tab eventKey="compile" title="1. Compile">
+                <Tab eventKey="compile" title="1. Check">
                     <CompileStep />
                 </Tab>
         
@@ -165,11 +165,15 @@ export class RestartServerStep extends React.Component<{}, RestartServerStepStat
 
     handleRestartApplication = (e: React.MouseEvent) => {
         e.preventDefault();
-        API.restartApplication()
+        API.restartServer()
             .then(() => {
                 this.changeState(s => s.serverRestarting = moment());
-                API.pingApplication()
-                    .then(s => this.changeState(s => s.serverRestarting = undefined))
+                API.pingServer()
+                    .then(() => { this.changeState(s => s.serverRestarting = undefined); })
+                    .catch(error => {
+                        this.changeState(s => s.serverRestarting = undefined);
+                        throw error;
+                    })
                     .done();
             })
             .done();

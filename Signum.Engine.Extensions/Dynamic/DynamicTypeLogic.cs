@@ -487,10 +487,16 @@ namespace Signum.Engine.Dynamic
 
             var mcui = this.Def.MultiColumnUniqueIndex;
             if (mcui != null)
-                sb.AppendLine($"    .WithUniqueIndex(e => new {{{ mcui.Fields.Select(f => "e." + f).Comma(", ")}}}{(mcui.Where.HasText() ? ", " + mcui.Where : "")})");
+                sb.AppendLine($"    .WithUniqueIndex(e => new {{{ mcui.Fields.Select(f => "e." + f).ToString(", ")}}}{(mcui.Where.HasText() ? ", " + mcui.Where : "")})");
 
-            if (this.Def.QueryFields.EmptyIfNull().Any())
-                sb.AppendLine($"    .WithQuery(dqm, e => new {{ Entity = e, {this.Def.QueryFields.Select(f => "e." + f).Comma(",\r\n")} }})");
+            if (this.Def.QueryFields.EmptyIfNull().Any()) {
+                var lines = new[] { "Entity = e" }.Concat(this.Def.QueryFields.Select(f => "e." + f));
+
+                sb.AppendLine($@"    .WithQuery(dqm, e => new 
+    {{ 
+{ lines.ToString(",\r\n").Indent(8)}
+    }})");
+            }
 
             sb.Insert(sb.Length - 2, ';');
             return sb.ToString();

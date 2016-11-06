@@ -56,8 +56,8 @@ namespace Signum.Engine.Dynamic
         public static string CodeGenDirectory = "CodeGen";
         public static Func<List<CodeFile>> GetCodeFiles = null;
         public static Action<StringBuilder, int> OnWriteDynamicStarter;
-
-        public static void StartDynamicStarter(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static Exception CodeGenError;
+        public static void StartCodeGenStarter(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             Dictionary<string, CodeFile> codeFiles;
 
