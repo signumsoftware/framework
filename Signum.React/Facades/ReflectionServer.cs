@@ -56,7 +56,7 @@ namespace Signum.React.Facades
             DescriptionManager.Invalidated += () => cache.Clear();
             Schema.Current.OnMetadataInvalidated += () => cache.Clear();
 
-            EntityAssemblies = TypeLogic.TypeToEntity.Keys.AgGroupToDictionary(t => t.Assembly, gr => gr.Select(a => a.Namespace).ToHashSet());
+            EntityAssemblies = Schema.Current.Tables.Keys.AgGroupToDictionary(t => t.Assembly, gr => gr.Select(a => a.Namespace).ToHashSet());
             EntityAssemblies[typeof(PaginationMode).Assembly].Add(typeof(PaginationMode).Namespace);
         }
         
