@@ -88,7 +88,7 @@ namespace Signum.Engine.Operations
             {
                 sb.Include<OperationLogEntity>();
 
-                SymbolLogic<OperationSymbol>.Start(sb, () => RegisteredOperations);
+                SymbolLogic<OperationSymbol>.Start(sb, dqm, () => RegisteredOperations);
 
                 dqm.RegisterQuery(typeof(OperationSymbol), () =>
                     from os in Database.Query<OperationSymbol>()
