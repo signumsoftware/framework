@@ -67,7 +67,15 @@ namespace Signum.Engine.Extensions.Basics
         static void SymbolLogic_Retrieved(T ident)
         {
             if (!avoidCache && ident.Key.HasText())
-                ident.FieldInfo = lazy.Value.GetOrThrow(ident.Key).FieldInfo;
+                try
+                {
+                    ident.FieldInfo = lazy.Value.GetOrThrow(ident.Key).FieldInfo;
+                }
+                catch
+                {
+                    //Just for alerting developers
+                    //Could happen when not 100% synchronizeds
+                }
         }
 
         static SqlPreCommand Schema_Generating()
