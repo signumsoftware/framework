@@ -170,6 +170,8 @@ namespace Signum.Entities.Omnibox
         Omnibox_Field,
         [Description("Help")]
         Omnibox_Help,
+        [Description("Omnibox Syntax Guide:")]
+        Omnibox_OmniboxSyntaxGuide,
         [Description("You can match results by (st)art, mid(dle) or (U)pper(C)ase")]
         Omnibox_MatchingOptions,
         [Description("Query")]
