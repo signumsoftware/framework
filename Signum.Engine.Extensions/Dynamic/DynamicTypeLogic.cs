@@ -238,21 +238,13 @@ namespace Signum.Engine.Dynamic
 
         public string GetEntityOperation()
         {
-            if (this.Def.OperationCreate == null && 
-                this.Def.OperationSave == null &&
-                this.Def.OperationDelete == null)
-                return null;
-
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"[AutoInit]"); //Only for ReflectionServer
             sb.AppendLine($"public static class {this.TypeName}Operation");
             sb.AppendLine("{");
-            if (this.Def.OperationCreate == null)
-                sb.AppendLine($"    public static readonly ConstructSymbol<{this.TypeName}Entity>.Simple Create = OperationSymbol.Construct<{this.TypeName}Entity>.Simple(typeof({this.TypeName}Operation), \"Create\");");
-            if (this.Def.OperationSave== null)
-                sb.AppendLine($"    public static readonly ExecuteSymbol<{this.TypeName}Entity> Save = OperationSymbol.Execute<{this.TypeName}Entity>(typeof({this.TypeName}Operation), \"Save\");");
-           if (this.Def.OperationDelete == null)
-                sb.AppendLine($"    public static readonly DeleteSymbol<{this.TypeName}Entity> Delete = OperationSymbol.Delete<{this.TypeName}Entity>(typeof({this.TypeName}Operation), \"Delete\");");
+            sb.AppendLine($"    public static readonly ConstructSymbol<{this.TypeName}Entity>.Simple Create = OperationSymbol.Construct<{this.TypeName}Entity>.Simple(typeof({ this.TypeName}Operation), \"Create\");");
+            sb.AppendLine($"    public static readonly ExecuteSymbol<{this.TypeName}Entity> Save = OperationSymbol.Execute<{this.TypeName}Entity>(typeof({ this.TypeName}Operation), \"Save\");");
+            sb.AppendLine($"    public static readonly DeleteSymbol<{this.TypeName}Entity> Delete = OperationSymbol.Delete<{this.TypeName}Entity>(typeof({ this.TypeName}Operation), \"Delete\");");
             sb.AppendLine("}");
 
             return sb.ToString();
@@ -483,12 +475,11 @@ namespace Signum.Engine.Dynamic
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"sb.Include<{this.TypeName}Entity>()");
 
-            if (this.Def.OperationSave?.Trim() == "")
+            if (string.IsNullOrWhiteSpace(this.Def.OperationExecute?.Execute.Trim()))
                 sb.AppendLine($"    .WithSave({this.TypeName}Operation.Save)");
 
-            if (this.Def.OperationDelete?.Trim() == "")
+            if (string.IsNullOrWhiteSpace(this.Def.OperationDelete?.Delete.Trim()))
                 sb.AppendLine($"    .WithDelete({this.TypeName}Operation.Delete)");
-
 
             var mcui = this.Def.MultiColumnUniqueIndex;
             if (mcui != null)
@@ -510,37 +501,44 @@ namespace Signum.Engine.Dynamic
         private string RegisterComplexOperations()
         {
             StringBuilder sb = new StringBuilder();
-            var operationCreate = this.Def.OperationCreate?.Trim();
-            if (!string.IsNullOrWhiteSpace(operationCreate))
+            var operationConstruct = this.Def.OperationConstruct?.Construct.Trim();
+            if (!string.IsNullOrWhiteSpace(operationConstruct))
             {
-                if (operationCreate.Contains("return"))
-                    operationCreate = "return " + operationCreate;
-
                 sb.AppendLine();
                 sb.AppendLine("new Graph<{0}Entity>.Construct({0}Operation.Create)".FormatWith(this.TypeName));
                 sb.AppendLine("{");
-                sb.AppendLine("    Construct = (args) => {\r\n" + operationCreate + "\r\n}");
+                sb.AppendLine("    Construct = (args) => {\r\n" + operationConstruct + "\r\n}");
                 sb.AppendLine("}.Register();");
             }
 
-            var operationSave = this.Def.OperationSave?.Trim();
-            if (!string.IsNullOrWhiteSpace(operationSave))
+            var operationExecute = this.Def.OperationExecute?.Execute.Trim();
+            var operationCanExecute = this.Def.OperationExecute?.CanExecute?.Trim();
+            if (!string.IsNullOrWhiteSpace(operationExecute))
             {
                 sb.AppendLine();
                 sb.AppendLine("new Graph<{0}Entity>.Execute({0}Operation.Save)".FormatWith(this.TypeName));
                 sb.AppendLine("{");
+
+                if (!string.IsNullOrWhiteSpace(operationCanExecute))
+                    sb.AppendLine($"    CanExecute = e => {operationCanExecute},");
+
                 sb.AppendLine("    AllowsNew = true,");
                 sb.AppendLine("    Lite = false,");
-                sb.AppendLine("    Execute = (e, args) => {\r\n" + operationSave + "\r\n}");
+                sb.AppendLine("    Execute = (e, args) => {\r\n" + operationExecute + "\r\n}");
                 sb.AppendLine("}.Register();");
             }
 
-            var operationDelete = this.Def.OperationDelete?.Trim();
+            var operationDelete = this.Def.OperationDelete?.Delete.Trim();
+            var operationCanDelete = this.Def.OperationDelete?.CanDelete?.Trim();
             if (!string.IsNullOrWhiteSpace(operationDelete))
             {
                 sb.AppendLine();
                 sb.AppendLine("new Graph<{0}Entity>.Delete({0}Operation.Delete)".FormatWith(this.TypeName));
                 sb.AppendLine("{");
+
+                if (!string.IsNullOrWhiteSpace(operationCanDelete))
+                    sb.AppendLine($"    CanDelete = e => {operationCanDelete},");
+
                 sb.AppendLine("    Delete = (e, args) => {\r\n" + operationDelete + "\r\n}");
                 sb.AppendLine("}.Register();");
             }

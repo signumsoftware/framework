@@ -35,13 +35,14 @@ namespace Signum.Engine.Dynamic
             "System.Reflection",
             "System.Collections.Generic",
             "System.Linq.Expressions",
+            "Signum.Engine",
             "Signum.Entities",
-            "Signum.Utilities",
+            "Signum.Entities.Basics",
             "Signum.Engine.DynamicQuery",
             "Signum.Engine.Maps",
             "Signum.Engine.Basics",
-            "Signum.Entities.Basics",
             "Signum.Engine.Operations",
+            "Signum.Utilities",
         };
         public static List<string> Assemblies = new List<string>
         {
