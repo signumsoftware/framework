@@ -76,14 +76,14 @@ namespace Signum.Entities.Dynamic
         [JsonProperty(PropertyName = "properties")]
         public List<DynamicProperty> Properties;
 
-        [JsonProperty(PropertyName = "operationCreate")]
-        public string OperationCreate;
+        [JsonProperty(PropertyName = "operationConstruct")]
+        public OperationConstruct OperationConstruct;
 
-        [JsonProperty(PropertyName = "operationSave")]
-        public string OperationSave;
+        [JsonProperty(PropertyName = "operationExecute")]
+        public OperationExecute OperationExecute;
 
         [JsonProperty(PropertyName = "operationDelete")]
-        public string OperationDelete;
+        public OperationDelete OperationDelete;
 
         [JsonProperty(PropertyName = "queryFields")]
         public List<string> QueryFields;
@@ -103,6 +103,30 @@ namespace Signum.Entities.Dynamic
         [JsonProperty(PropertyName = "where")]
         public string Where;
 
+    }
+
+    public class OperationConstruct
+    {
+        [JsonProperty(PropertyName = "construct")]
+        public string Construct;
+    }
+
+    public class OperationExecute
+    {
+        [JsonProperty(PropertyName = "canExecute")]
+        public string CanExecute;
+
+        [JsonProperty(PropertyName = "execute")]
+        public string Execute;
+    }
+
+    public class OperationDelete
+    {
+        [JsonProperty(PropertyName = "canDelete")]
+        public string CanDelete;
+
+        [JsonProperty(PropertyName = "delete")]
+        public string Delete;
     }
 
     public enum DynamicBaseType

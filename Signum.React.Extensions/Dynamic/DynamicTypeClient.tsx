@@ -78,9 +78,9 @@ export interface DynamicTypeDefinition {
     baseType: DynamicBaseType;
     entityKind?: EntityKind;
     entityData?: EntityData;
-    operationCreate?: string;
-    operationSave?: string;
-    operationDelete?: string;
+    operationConstruct?: OperationConstruct;
+    operationExecute?: OperationExecute;
+    operationDelete?: OperationDelete;
     queryFields: string[];
     multiColumnUniqueIndex?: MultiColumnUniqueIndex; 
     properties: DynamicProperty[];
@@ -105,6 +105,20 @@ export interface DynamicProperty {
 export interface MultiColumnUniqueIndex {
     fields: string[];
     where?: string;
+}
+
+export interface OperationConstruct {
+    construct: string;
+}
+
+export interface OperationExecute {
+    canExecute?: string;
+    execute: string;
+}
+
+export interface OperationDelete {
+    canDelete?: string;
+    delete: string;
 }
 
 export namespace Validators {

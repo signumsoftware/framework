@@ -75,32 +75,18 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
 
                             {def.multiColumnUniqueIndex &&
                                 <div className="row">
-                                <div className="col-sm-6">
-                                    <ComboBoxRepeaterComponent options={propNames} list={def.multiColumnUniqueIndex.fields} />
-                                </div>
-                                <div className="col-sm-6">
-                                    <h4>Where</h4>
-                                    <div className="code-container">
-                                        <pre style={{ border: "0px", margin: "0px" }}>{"(" + this.props.typeName + "Entity e) =>"}</pre>
-                                        <div className="small-codemirror">
-                                            <CSharpCodeMirror
-                                                script={def.multiColumnUniqueIndex.where || ""}
-                                                onChange={newScript => { def.multiColumnUniqueIndex!.where = newScript; this.forceUpdate(); } } />
-                                        </div>
-                                     </div>
-                                </div>
+                                    <div className="col-sm-6">
+                                        <ComboBoxRepeaterComponent options={propNames} list={def.multiColumnUniqueIndex.fields} />
+                                    </div>
+                                    <div className="col-sm-6">
+                                        <CSharpExpressionCodeMirror binding={Binding.create(def.multiColumnUniqueIndex, d => d.where)} title="Where" signature={"(" + this.props.typeName + "Entity e) =>"} />
+                                    </div>
                                 </div>}
                         </fieldset>
+
                         <fieldset>
                             <legend>ToString expression</legend>
-                            <div className="code-container">
-                                <pre style={{ border: "0px", margin: "0px" }}>{"(" + this.props.typeName + "Entity e) =>"}</pre>
-                                <div className="small-codemirror">
-                                    <CSharpCodeMirror
-                                        script={def.toStringExpression || ""}
-                                        onChange={newScript => { def.toStringExpression = newScript; this.forceUpdate(); } } />
-                                </div>
-                            </div>
+                            <CSharpExpressionCodeMirror binding={Binding.create(def, d => d.toStringExpression)} signature={"(" + this.props.typeName + "Entity e) =>"} />
                         </fieldset>
                     </Tab>
                     <Tab eventKey="query" title="Query">
@@ -108,66 +94,94 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                     </Tab>
 
                     <Tab eventKey="operations" title="Operations">
-                        <OperationCodeMirror binding={Binding.create(def, d => d.operationCreate)} title="Create" signature={"object[] args"} onInitialize={this.handleInitialize} />
-                        <OperationCodeMirror binding={Binding.create(def, d => d.operationSave)} title="Save" signature={this.props.typeName + "Entity e, object[] args"} />
-                        <OperationCodeMirror binding={Binding.create(def, d => d.operationDelete)} title="Delete" signature={this.props.typeName + "Entity e, object[] args"} />
+                        <fieldset>
+                            <legend><input type="checkbox" checked={!!def.operationConstruct} onChange={this.handleOperationConstructChecked} /> Create</legend>
+                            {def.operationConstruct &&
+                                <CSharpExpressionCodeMirror binding={Binding.create(def.operationConstruct, d => d.construct)} signature={"(object[] args) =>"} />
+                            }
+                        </fieldset>
+
+                        <fieldset>
+                            <legend><input type="checkbox" checked={!!def.operationExecute} onChange={this.handleOperationSaveChecked} /> Save</legend>
+                            {def.operationExecute &&
+                                <div>
+                                <CSharpExpressionCodeMirror binding={Binding.create(def.operationExecute, d => d.canExecute)} title="CanSave" signature={"string (" + this.props.typeName + "Entity e) =>"} />
+                                <CSharpExpressionCodeMirror binding={Binding.create(def.operationExecute, d => d.execute)} title="OperationSave" signature={"(" + this.props.typeName + "Entity e, object[] args) =>"} />
+                                </div>
+                            }
+                        </fieldset>
+
+                        <fieldset>
+                            <legend><input type="checkbox" checked={!!def.operationDelete} onChange={this.handleOperationDeleteChecked} /> Delete</legend>
+                            {def.operationDelete &&
+                                <div>
+                                <CSharpExpressionCodeMirror binding={Binding.create(def.operationDelete, d => d.canDelete)} title="CanDelete" signature={"string (" + this.props.typeName + "Entity e) =>"} />
+                                <CSharpExpressionCodeMirror binding={Binding.create(def.operationDelete, d => d.delete)} title="OperationDelete" signature={"(" + this.props.typeName + "Entity e, object[] args) =>"} />
+                                </div>
+                            }
+                        </fieldset>
                     </Tab>
                 </Tabs>
             </div>
         );
     }
 
-    handleInitialize = (): string => {
-        return "new " + this.props.typeName + "Entity\r\n{\r\n" +
-            this.props.definition.properties.map(p => "    " + p.name + " = null").join(", \r\n") +
-        "\r\n}";
-    }
-
-}
-
-export interface OperationCodeMirrorProps {
-    binding: Binding<string | undefined>;
-    title: string;
-    signature: string;
-    onInitialize?: ()=> string;
-}
-
-
-export class OperationCodeMirror extends React.Component<OperationCodeMirrorProps, void>{
-
-    handleCheckBoxChanged = () => {
-        let val = this.props.binding.getValue();
-
-        if (val == undefined)
-            val = this.props.onInitialize ? this.props.onInitialize() : "";
+    handleOperationConstructChecked = () => {
+        const def = this.props.definition;
+        if (def.operationConstruct)
+            def.operationConstruct = undefined;
         else
-            val = undefined;
-
-        this.props.binding.setValue(val);
-
+            def.operationConstruct = {
+                construct:
+                    "return new " + this.props.typeName + "Entity\r\n{\r\n" +
+                    this.props.definition.properties.map(p => "    " + p.name + " = null").join(", \r\n") +
+                    "\r\n};" };
         this.forceUpdate();
     }
+
+    handleOperationSaveChecked = () => {
+        const def = this.props.definition;
+        if (def.operationExecute)
+            def.operationExecute = undefined;
+        else
+            def.operationExecute = { execute: "e.Save();" };
+        this.forceUpdate();
+    }
+
+    handleOperationDeleteChecked = () => {
+        const def = this.props.definition;
+        if (def.operationDelete)
+            def.operationDelete = undefined;
+        else
+            def.operationDelete = { delete: "e.Delete();" };
+        this.forceUpdate();
+    }
+}
+
+export interface CSharpExpressionCodeMirrorProps {
+    binding: Binding<string | undefined>;
+    title?: string;
+    signature?: string;
+}
+
+export class CSharpExpressionCodeMirror extends React.Component<CSharpExpressionCodeMirrorProps, void>{
 
     render() {
         let val = this.props.binding.getValue();
 
         return (
-            <fieldset>
-                <legend>
-                    <input type="checkbox" checked={val != undefined} onChange={this.handleCheckBoxChanged} /> {this.props.title}
-                </legend>
-
-                {val != undefined &&
-                    <div className="code-container">
-                        <pre style={{ border: "0px", margin: "0px" }}>{"(" + this.props.signature + ") =>"}</pre>
-                        <div className="small-codemirror">
-                            <CSharpCodeMirror
-                                script={val}
-                                onChange={newScript => { this.props.binding.setValue(newScript); this.forceUpdate(); } } />
-                        </div>
+            <div>
+                <h5><strong>{this.props.title || ""}</strong></h5>
+                <div className="code-container">
+                    <pre style={{ border: "0px", margin: "0px" }}>{this.props.signature || ""}</pre>
+                    <div className="small-codemirror">
+                        <CSharpCodeMirror
+                            script={val || ""}
+                            onChange={newScript => { this.props.binding.setValue(newScript); this.forceUpdate(); } } />
                     </div>
-                }
-        </fieldset>);
+                </div>
+            </div>
+        );
     }
 }
 
