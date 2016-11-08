@@ -144,14 +144,11 @@ namespace Signum.Engine.Dynamic
                 };
             }).ToList();
              
-            var ns = DynamicLogic.Namespaces.ToList();
-           
-
             var logics = types.Select(dt =>
             {
                 var def = dt.GetDefinition();
 
-                var dlg = new DynamicTypeLogicGenerator(DynamicLogic.CodeGenEntitiesNamespace, dt.TypeName, def, ns);
+                var dlg = new DynamicTypeLogicGenerator(DynamicLogic.CodeGenEntitiesNamespace, dt.TypeName, def, DynamicLogic.Namespaces);
 
                 var content = dlg.GetFileCode();
                 return new CodeFile
@@ -423,7 +420,7 @@ namespace Signum.Engine.Dynamic
 
             var type = TypeLogic.TryGetType(typeName);
             if (type != null)
-                return result;
+                return type;
 
             return null;
         }
