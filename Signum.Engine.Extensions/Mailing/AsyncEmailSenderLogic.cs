@@ -185,7 +185,7 @@ namespace Signum.Engine.Mailing
 		static bool sqlDependencyRegistered = false;
         private static void SetSqlDepndency()
         {
-			if(sqlDependencyRegistered)
+			if(!sqlDependencyRegistered)
 				return;
 			
             var query = Database.Query<EmailMessageEntity>().Where(m => m.State == EmailMessageState.ReadyToSend).Select(m => m.Id);
