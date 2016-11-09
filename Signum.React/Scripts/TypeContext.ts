@@ -199,14 +199,16 @@ export class TypeContext<T> extends StyleContext {
         return result;
     }
 
-    cast<R extends T & Entity>(type: Type<R>): TypeContext<R> {
+    cast<R extends T & ModifiableEntity>(type: Type<R>): TypeContext<R> {
 
         const entity = this.value as any as Entity;
 
         if (type.typeName != entity.Type)
             throw new Error(`Impossible to cast ${entity.Type} into ${type.typeName}`);
 
-        const result = new TypeContext<any>(this, undefined, PropertyRoute.root(type), new ReadonlyBinding(entity, this.binding.suffix + "_" + type.typeName));
+        var newPr = this.propertyRoute.typeReference().name == type.typeName ? this.propertyRoute : PropertyRoute.root(type);
+
+        const result = new TypeContext<any>(this, undefined, newPr, new ReadonlyBinding(entity, this.binding.suffix + "_" + type.typeName));
 
         return result;
     }
