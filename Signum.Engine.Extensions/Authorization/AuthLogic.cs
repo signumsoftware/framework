@@ -209,15 +209,16 @@ namespace Signum.Engine.Authorization
             return UserHolder.UserSession(user);
         }
 
+        public static Func<string, UserEntity> RetrieveUserByUsername = (username) =>Database.Query<UserEntity>().Where(u => u.UserName == username).SingleOrDefaultEx();
 
         public static UserEntity RetrieveUser(string username)
         {
-            var result = Database.Query<UserEntity>().SingleOrDefaultEx(u => u.UserName == username);
+            var result = RetrieveUserByUsername(username);
 
             if (result != null && result.State == UserState.Disabled)
                 throw new ApplicationException(AuthMessage.User0IsDisabled.NiceToString().FormatWith(result.UserName));
 
-            return result; 
+            return result;
         }
 
         public static IEnumerable<Lite<RoleEntity>> RolesInOrder()
