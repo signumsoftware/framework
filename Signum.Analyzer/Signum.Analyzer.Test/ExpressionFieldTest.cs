@@ -35,7 +35,7 @@ namespace Signum.Analyzer.Test
         [TestMethod]
         public void ExpressionComplexParameter()
         {
-            TestDiagnostic("complex paramerer 'e'", @"        
+            TestDiagnostic("complex parameter 'e'", @"        
         [ExpressionField]
         public static int OperationLogs(ref Entity e)
         {
