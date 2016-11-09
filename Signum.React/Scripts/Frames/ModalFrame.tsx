@@ -118,7 +118,8 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
     okClicked: boolean;
     handleOkClicked = (val: any) => {
-        if (this.hasChanges() && this.props.requiresSaveOperation) {
+        if (this.hasChanges() &&
+            (this.props.requiresSaveOperation != undefined ? this.props.requiresSaveOperation : Navigator.typeRequiresSaveOperation(this.state.pack!.entity.Type))) {
             alert(JavascriptMessage.saveChangesBeforeOrPressCancel.niceToString());
             return;
         }

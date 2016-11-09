@@ -30,9 +30,8 @@ namespace Signum.Engine.Basics
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<PropertyRouteEntity>();
-
-                sb.AddUniqueIndex<PropertyRouteEntity>(p => new { p.Path, p.RootType }); 
+                sb.Include<PropertyRouteEntity>()
+                    .WithUniqueIndex(p => new { p.Path, p.RootType }); 
 
                 sb.Schema.Synchronizing += SynchronizeProperties;
 

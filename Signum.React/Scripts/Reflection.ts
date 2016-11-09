@@ -547,7 +547,7 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
     body = body.replace(partialMixinRegex,
         (...m: string[]) => `${m[2]}.mixins["${m[4]}"]`);
 
-    const m = memberRegex.exec(body);
+    const m = memberRegex.exec(body) || memberIndexerRegex.exec(body);;
 
     if (m == undefined) {
         const realParentValue = eval(`(function(${parameter}){ return ${body};})`)(parentValue);
@@ -566,6 +566,7 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
 
 const functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*(\"use strict\"\;)?\s*return\s*([^;]*)\s*;?\s*}$/;
 const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
+const memberIndexerRegex = /^(.*)\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; //Necessary for some crazy minimizers
 const indexRegex = /^(.*)\[(\d+)\]$/;
 const mixinRegex = /^(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)$/
 const partialMixinRegex = /(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)/
@@ -583,7 +584,7 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
 
     while (body != parameter) {
         let m: RegExpExecArray | null;
-        if (m = memberRegex.exec(body)) {
+        if (m = memberRegex.exec(body) || memberIndexerRegex.exec(body)) {
             result.push({ name: m[2], type: "Member" });
             body = m[1];
         }

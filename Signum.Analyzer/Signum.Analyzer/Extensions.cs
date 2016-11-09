@@ -50,6 +50,13 @@ namespace Signum.Analyzer
             return false;
         }
 
+        public static INamedTypeSymbol GetLiteEntityType(this TypeInfo e)
+        {
+            var namedSymbol = (INamedTypeSymbol)e.Type;
+
+            return (INamedTypeSymbol)namedSymbol.TypeArguments.FirstOrDefault();
+        }
+
         public static bool IsEntity(this TypeInfo e)
         {
             var namedSymbol = e.Type as INamedTypeSymbol;
