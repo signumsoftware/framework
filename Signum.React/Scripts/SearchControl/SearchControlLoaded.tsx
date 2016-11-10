@@ -35,6 +35,7 @@ export interface SearchControlLoadedProps {
     onResult?: (table: ResultTable) => void;
     hideFullScreenButton?: boolean;
     showBarExtension?: boolean;
+    extraButtons?: (searchControl: SearchControlLoaded) => React.ReactNode
 }
 
 export interface SearchControlLoadedState {
@@ -343,6 +344,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     <a className="sf-query-button btn btn-default" href="#" onClick={this.handleFullScreenClick} >
                         <span className="glyphicon glyphicon-new-window"></span>
                     </a>}
+                {this.props.extraButtons && this.props.extraButtons(this)}
             </div>
         );
     }
