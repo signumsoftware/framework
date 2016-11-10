@@ -469,6 +469,20 @@ arguments[0].dispatchEvent(new Event('blur'));";
         {
             return EntityInfoInternal(null);
         }
+        public void AssertOptions(Lite<Entity>[] list, bool removeNullElement = true, bool orderIndependent = false)
+        {
+            this.Element.GetDriver().Wait(() =>
+            {
+                var options = this.Options();
+                if (removeNullElement)
+                    options = options.NotNull().ToList();
+
+                if (orderIndependent)
+                    return options.OrderBy(a => a.Id).SequenceEqual(list.OrderBy(a => a.Id));
+                else
+                    return options.SequenceEqual(list);
+            });
+        }
     }
 
     public class EntityDetailProxy : EntityBaseProxy
@@ -734,6 +748,19 @@ arguments[0].dispatchEvent(new Event('blur'));";
         public void SetChecked(Lite<Entity> lite, bool isChecked)
         {
             CheckBoxElement(lite).Find().SetChecked(isChecked);
+        }
+
+        public void AssertDataElements(Lite<Entity>[] list, bool orderIndependent = false)
+        {
+            this.Element.GetDriver().Wait(() =>
+            {
+                var options = this.GetDataElements();
+
+                if (orderIndependent)
+                    return options.OrderBy(a => a.Id).SequenceEqual(list.OrderBy(a => a.Id));
+                else
+                    return options.SequenceEqual(list);
+            });
         }
     }
 

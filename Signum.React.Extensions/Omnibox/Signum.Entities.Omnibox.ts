@@ -13,6 +13,7 @@ export module OmniboxMessage {
     export const Omnibox_Disambiguate = new MessageKey("OmniboxMessage", "Omnibox_Disambiguate");
     export const Omnibox_Field = new MessageKey("OmniboxMessage", "Omnibox_Field");
     export const Omnibox_Help = new MessageKey("OmniboxMessage", "Omnibox_Help");
+    export const Omnibox_OmniboxSyntaxGuide = new MessageKey("OmniboxMessage", "Omnibox_OmniboxSyntaxGuide");
     export const Omnibox_MatchingOptions = new MessageKey("OmniboxMessage", "Omnibox_MatchingOptions");
     export const Omnibox_Query = new MessageKey("OmniboxMessage", "Omnibox_Query");
     export const Omnibox_Type = new MessageKey("OmniboxMessage", "Omnibox_Type");

@@ -516,6 +516,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Chart\ChartColor\" />
+    <Folder Include="Dynamic\TypeCondition\" />
     <Folder Include="Requests\" />
   </ItemGroup>
   <ItemGroup>

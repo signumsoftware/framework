@@ -109,7 +109,7 @@ namespace Signum.Engine.Processes
 
                 PermissionAuthLogic.RegisterPermissions(ProcessPermission.ViewProcessPanel);
 
-                SymbolLogic<ProcessAlgorithmSymbol>.Start(sb, () => registeredProcesses.Keys.ToHashSet());
+                SymbolLogic<ProcessAlgorithmSymbol>.Start(sb, dqm, () => registeredProcesses.Keys.ToHashSet());
 
                 OperationLogic.AssertStarted(sb);
 

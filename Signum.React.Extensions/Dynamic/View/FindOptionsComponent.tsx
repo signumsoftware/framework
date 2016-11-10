@@ -106,7 +106,7 @@ export class FindOptionsLine extends React.Component<FindOptionsLineProps, void>
                         <a title={EntityControlMessage.Create.niceToString()}
                             className="sf-line-button sf-create"
                             onClick={this.handleCreate}>
-                            <span className="glyphicon glyphicon-plus sf-create" />{EntityControlMessage.Create.niceToString()}
+                            <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
                         </a>}
                 </div>
             </div>
@@ -390,7 +390,7 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
                             <a title={EntityControlMessage.Create.niceToString()}
                                 className="sf-line-button sf-create"
                                 onClick={this.handleCreateClick}>
-                                <span className="glyphicon glyphicon-plus sf-create" />{EntityControlMessage.Create.niceToString()}
+                                <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
                             </a>
                         </td>
                     </tr>

@@ -328,11 +328,11 @@ namespace Signum.Engine.Authorization
 
         public static void StartAllModules(SchemaBuilder sb, DynamicQueryManager dqm)
         {
-            TypeAuthLogic.Start(sb);
+            TypeAuthLogic.Start(sb, dqm);
             PropertyAuthLogic.Start(sb);
             QueryAuthLogic.Start(sb, dqm);
             OperationAuthLogic.Start(sb);
-            PermissionAuthLogic.Start(sb);
+            PermissionAuthLogic.Start(sb, dqm);
         }
 
         public static HashSet<Lite<RoleEntity>> CurrentRoles()
