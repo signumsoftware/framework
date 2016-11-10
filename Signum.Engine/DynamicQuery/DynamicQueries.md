@@ -16,7 +16,7 @@ This class is responsible of:
 
 ## Registering queries
 
-`RegisterQuery` method is used to add a query to the pool of available queries that will be available to the `SearchControl` in the user interface. This queries will only be the starting point, since the `SearchControl` is able to change order, add filters and add or remove columns.
+`RegisterQuery` method is used to add a query to the pool of queries that will be available to the `SearchControl` in the user interface. This queries will only be the starting point, since the `SearchControl` is able to change order, add filters and add or remove columns.
 
 There are two variants: 
 
@@ -64,17 +64,17 @@ Some interesting points:
 * **QueryName**: This object is the key that will be used to access the query. By convention, the default query for a entity of type `T` will be `typeof(T)`, but enums can also be used for alternative non-default views. 
 * **Lazy init**: Instead of a `IQueryable<T>`, `RegisterQuery` requires a `Func<IQueryable<T>>`. The only reason is to avoid creating thousands of expression trees every time the application starts, but the lambda will be called just once. 
 * **Entity property**: The first property, `Entity`, is mandatory and represents the entity that will be 'behind' each row in the result. The one that will be opened when double-click / view button and the one that will receive the contextual operations. 
-* **Lite is optional**: While calling `ToLite` has important performance consequences when using the LINQ provider directly, here the registered queries will be always manipulated by the `DynamicQueryManager`, and one of this changes is adding `ToLite` to every column automatically.
+* **Lite is optional**: While calling `ToLite` has important performance consequences when using the LINQ provider directly, here the registered queries will be always manipulated by the `DynamicQueryManager`, and one of this changes is adding `ToLite` to every column of type entity automatically.
 
 ### Metadata
-Additionally, the query will be processed not only to be translated to the database, also to get some  metadata. This metadata is used to inherit some information from the property/ies used in each column expression :
+Additionally, the query will be processed not only to be translated to the database, also to get some metadata. This metadata is used to inherit some information from the property/ies used in each column expression:
 
 * **Localized names** that will be used in the headers.
 * **Implementations** to allow smarter filters.
 * **Unit** and **Format** to show the results properly.
 * The **PropertyRoute** itself to allow removing any unauthorized column. 
 
-This meta-data can be override using a different variation of `RegisterQuery`:
+This meta-data can be overriden using a different variation of `RegisterQuery`:
 
 ```C#
 public class DynamicQueryManager
@@ -97,13 +97,13 @@ dqm.RegisterQuery(typeof(OrderEntity), () => DynamicQuery.Auto(
         o.Employee,
         o.OrderDate,
         Lines = o.Details.Count
-    }).ColumnDisplayName(a=>a.Lines, ()=>OrderMessage.Lines.NiceToString());
+    }).ColumnDisplayName(a => a.Lines, () => OrderMessage.Lines.NiceToString());
 ```
 
 ### Manual queries (Advanced)
 So far we have seen how to use `RegisterQuery` to create a automatic dynamic queries. This types of queries are super-concise and inherit as much as they can from your entities. 
 
-Sometimes you need more fine-grained control over how the query is executed. The typical scenario is having mixing information from two different tables in the same result. 
+Sometimes you need more fine-grained control over how the query is executed. The typical scenario is concatenating rows from two different tables in the same result. 
 
 In this case we use `RegisterQuery` in combination of `DynamicQuery.Manual`.
 
@@ -168,10 +168,11 @@ Using `ToDQueryable` we get a dynamic query (`DQueryable<T>`) that can be manipu
 
 Finally, note how manual queries have no way to inherit the matadata, and all this information has to be manually set using `ColumnProperyRoutes`, and from there, the columns now where to get the `NiceName`, `Format`, `Unit` and athorization. 
 
-## Registering Extensions
 
-The other main usage of `DynamicQueryManager` is to call `RegisterExpression`, that let any of out `expressionMethod` to be available for the user as a query token that he can use in the `SearchControl` for adding filters, columns or make charts with the chart module.
 
+## Registering expressions
+
+The other main usage of `DynamicQueryManager` is to call `RegisterExpression`, that let any of our `expressionMethod` to be available for the user as a query token that he can use in the `SearchControl` for adding filters, columns or use it in any other extension (chart, word and email templates, etc...).
 
 There are many overloads: 
 
@@ -190,7 +191,7 @@ public class ExtensionInfo
 }
 ```
 
-Typically you only need to use the two different ones, and all the information is taken from there.
+Typically you only need to use the two first ones, and all the information is taken from there.
 
 Let's suppose that we have an `expressionMethod` like this one: 
 
@@ -206,10 +207,10 @@ public static IQueryable<TerritoryEntity> Territories(this RegionEntity r)
 This `expressionMethod` let's us simplify queries like this one: 
 
 ```C#
-Database.Query<RegionEntity>().Where(r=>!r.Territories().Any()).UnsafeDelete();
+Database.Query<RegionEntity>().Where(r => !r.Territories().Any()).UnsafeDelete();
 ```
 
-But `Territories` is a concept that is only available for programmers, without `RegisterExpression` the user is not able to take advantage of it. Let's do it then: 
+But `Territories` is a concept that is only available for programmers, without `RegisterExpression` the user is not able to take advantage of it in the SearchControl. Let's do it then: 
 
 ```C#
 //In TerritoryLogic.Start
@@ -218,7 +219,7 @@ dqm.RegisterExpression((RegionEntity r) => r.Territories());
 
 Now, the a new expression with key `"Territories"` has been registered on `RegionEntity` and returns an `IQueryable<TerritoryEntity>`. 
 
-Unfortunately, the `NiceName` will always be `"Territories"`, independently of the user `CultureInfo`. 
+Unfortunately, the `NiceName` will always be `"Territories"`, independently of the user `CultureInfo` (logic assembly and arbitrary methods are not localized).
 
 Let's fix that re-using the `NicePluralName` of `TerritoryEntity`: 
 
@@ -229,7 +230,7 @@ dqm.RegisterExpression((RegionEntity r) => r.Territories(), () => typeof(Territo
 
 ## Executing queries (Advanced)
 
-`DynamicQueryManager` also has a bunch of method that are used as a service by the `SearchControl`, `CountSearchControl`, etc... You shoudn't need to know about them if you're not doing  'framework stuff'.
+`DynamicQueryManager` also has a bunch of method that are used as a service by the `SearchControl`, `CountSearchControl`, etc... You shoudn't need to know about them if you're not doing internal plumbing.
 
 ```C#
 public class DynamicQueryManager
@@ -251,7 +252,7 @@ Additionally, many of this objects make use of the concept of `QueryToken`.
 
 ## QueryToken (Advanced)
 
-A `QueryToken` is a chain of identifiers that can be used as a filter or added as a column in query. When the user explores the tables using a sequence of ComboBoxes in the `SearchControl`, he is ultimately creating a `QueryToken`.
+A `QueryToken` is a chain of identifiers that can be used as a filter, or be added as a column in query. When the user explores the tables using a sequence of ComboBoxes in the `SearchControl`, he is ultimately creating a `QueryToken`.
 
 There are many different types of `QueryToken`,  like `ColumnToken`, `EntityPropertyToken`, `CountToken`, `AggregateToken`,... all with a `Parent` property creating a chain.   
 

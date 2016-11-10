@@ -21,6 +21,8 @@ FROM BugEntity AS bdn
 WHERE (bdn.idDiscoverer_Developer) IS NOT NULL
 ```
 
+Note: Don't confuse C# `is` operator (like in `fruit is OrangeEntity`) with `.Is()` extension method to compare entities (like `person.is(john)`). 
+
 ### Casting
 
 C# has two ways of doing casting: Typical casting using type between parentheses `(DeveloperEntity)`, and the `as` operator. In case of an invalid conversion, casting will throw an `InvalidCastException` while `as` returns `null`.
@@ -76,7 +78,7 @@ FROM BugEntity AS bdn
 WHERE (bdn.idDiscoverer_Developer) IS NOT NULL
 ```
 
-And returns a `List<System.Type>`. 
+And returns a `List<System.Type>`, with all the elements being `typeof(ProjectEntity)`. 
 
 
 ### Polymorphism
@@ -134,4 +136,4 @@ WHERE (uibd.Name = 'John')
 
 Polymorphism even works if `Name` property is implemented using [explicit interface implementation](http://msdn.microsoft.com/en-us/library/ms173157.aspx) and/or [expression properties](../Signum.Utilities/ExpressionTrees/LinqExtensibility.md).
 
-As a general advice, try to avoid polymorphism and move all the common data to a common entity, using `ImplementedBy` only for the divergent data (extension pattern). 
+As a general advice, try to avoid polymorphism and move all the common data to a common entity, using `ImplementedBy` only for the diferent fields (extension pattern). 

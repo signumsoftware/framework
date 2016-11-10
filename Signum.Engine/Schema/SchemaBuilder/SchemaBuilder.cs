@@ -408,30 +408,7 @@ namespace Signum.Engine.Maps
             }
         }
 
-        public class FluentInclude<T>
-         where T : Entity
-        {
-            public SchemaBuilder SchemaBuilder { get; private set; }
-            public Table Table { get; private set; }
-
-            public FluentInclude(Table table, SchemaBuilder schemaBuilder)
-            {
-                Table = table;
-                SchemaBuilder = schemaBuilder;
-            }
-
-            public FluentInclude<T> WithUniqueIndex(Expression<Func<T, object>> fields, Expression<Func<T, bool>> where = null)
-            {
-                this.SchemaBuilder.AddUniqueIndex<T>(fields, where);
-                return this;
-            }
-
-            public FluentInclude<T> WithIndex(Expression<Func<T, object>> fields)
-            {
-                this.SchemaBuilder.AddIndex<T>(fields);
-                return this;
-            }
-        }
+        
 
 
         public enum KindOfField
@@ -830,6 +807,31 @@ namespace Signum.Engine.Maps
             });
 
             return result;
+        }
+    }
+
+    public class FluentInclude<T>
+         where T : Entity
+    {
+        public SchemaBuilder SchemaBuilder { get; private set; }
+        public Table Table { get; private set; }
+
+        public FluentInclude(Table table, SchemaBuilder schemaBuilder)
+        {
+            Table = table;
+            SchemaBuilder = schemaBuilder;
+        }
+
+        public FluentInclude<T> WithUniqueIndex(Expression<Func<T, object>> fields, Expression<Func<T, bool>> where = null)
+        {
+            this.SchemaBuilder.AddUniqueIndex<T>(fields, where);
+            return this;
+        }
+
+        public FluentInclude<T> WithIndex(Expression<Func<T, object>> fields)
+        {
+            this.SchemaBuilder.AddIndex<T>(fields);
+            return this;
         }
     }
 

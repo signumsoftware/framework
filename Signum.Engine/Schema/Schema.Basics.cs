@@ -223,26 +223,7 @@ namespace Signum.Engine.Maps
                 }
             }
         }
-
-        /// <summary>
-        /// Use this method also to change the Server
-        /// </summary>
-        public void ToDatabase(DatabaseName databaseName)
-        {
-            this.Name = this.Name.OnDatabase(databaseName);
-
-            foreach (var item in TablesMList())
-                item.ToDatabase(databaseName);
-        }
-
-        public void ToSchema(SchemaName schemaName)
-        {
-            this.Name = this.Name.OnSchema(schemaName);
-
-            foreach (var item in TablesMList())
-                item.ToSchema(schemaName);
-        }
-
+        
         public FieldTicks Ticks { get; internal set; }
         public FieldPrimaryKey PrimaryKey { get; internal set; }
 

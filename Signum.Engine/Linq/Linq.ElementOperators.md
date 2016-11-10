@@ -22,13 +22,13 @@ List<ProjectEntity> projects = //...
 project.Single();
 ```
 
-And `LINQ to Signum` also does exactly that **if the query ends in one of this operators**. Example:
+And `LINQ to Signum` also does exactly that, but only **if the query ends in one of this operators**. Example:
 
 ```C#
 Database.Query<ProjectEntity>().Single(); //Throws EXCEPTION if 0 or N elements
 ```
 
-The problem come if the operator is in the middle of a LINQ to Signum query: 
+The problem comes when the operator is in the middle of a LINQ to Signum query: 
 
 
 ## In-Database behavior: 

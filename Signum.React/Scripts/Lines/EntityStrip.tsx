@@ -23,9 +23,7 @@ export interface EntityStripProps extends EntityListBaseProps {
 export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripProps> {
 
     calculateDefaultState(state: EntityStripProps) {
-        super.calculateDefaultState(state);
-        state.create = false;
-        state.find = false;      
+        super.calculateDefaultState(state);   
     }
 
 
