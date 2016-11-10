@@ -422,9 +422,7 @@ export interface Symbol extends Entity {
 }
 
 export module SynchronizerMessage {
-    export const _0HasBeenRenamedIn1 = new MessageKey("SynchronizerMessage", "_0HasBeenRenamedIn1");
     export const EndOfSyncScript = new MessageKey("SynchronizerMessage", "EndOfSyncScript");
-    export const NNone = new MessageKey("SynchronizerMessage", "NNone");
     export const StartOfSyncScriptGeneratedOn0 = new MessageKey("SynchronizerMessage", "StartOfSyncScriptGeneratedOn0");
 }
 
