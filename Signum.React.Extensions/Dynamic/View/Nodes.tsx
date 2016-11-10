@@ -7,7 +7,7 @@ import {
 import { ModifiableEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { FindOptions, SearchControl, CountSearchControl, CountSearchControlLayout } from '../../../../Framework/Signum.React/Scripts/Search'
+import { FindOptions, SearchControl, CountSearchControlLine } from '../../../../Framework/Signum.React/Scripts/Search'
 import {
     getQueryNiceName, TypeInfo, MemberInfo, getTypeInfo, EntityData, EntityKind, getTypeInfos, KindOfType,
     PropertyRoute, PropertyRouteType, LambdaMemberType, isTypeEntity, Binding
@@ -583,9 +583,11 @@ export interface CountSearchControlNode extends BaseNode {
     kind: "CountSearchControl",
     findOptions?: FindOptionsExpr;
     labelText?: ExpressionOrValue<string>;
-    labelHtmlAttributes?: HtmlAttributesExpression,
-    layout?: ExpressionOrValue<CountSearchControlLayout>;
-    formGroupHtmlAttributes?: HtmlAttributesExpression,
+    labelHtmlAttributes?: HtmlAttributesExpression;
+    isBadge?: ExpressionOrValue<boolean>;
+    isLink?: ExpressionOrValue<boolean>;
+    viewButton?: ExpressionOrValue<boolean>;
+    formGroupHtmlAttributes?: HtmlAttributesExpression;
 }
 
 NodeUtils.register<CountSearchControlNode>({
@@ -594,10 +596,12 @@ NodeUtils.register<CountSearchControlNode>({
     order: 1,
     validate: (dn, ctx) => NodeUtils.mandatory(dn, n => n.findOptions) || dn.node.findOptions && NodeUtils.validateFindOptions(dn.node.findOptions, ctx),
     renderTreeNode: dn => <span><small>CountSearchControl:</small> <strong>{dn.node.findOptions && dn.node.findOptions.queryKey || " - "}</strong></span>,
-    render: (dn, ctx) => <div><CountSearchControl ctx={ctx}
+    render: (dn, ctx) => <div><CountSearchControlLine ctx={ctx}
         findOptions={toFindOptions(ctx, dn.node.findOptions!)}
         labelText={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
-        layout={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.layout, NodeUtils.isStringOrNull)}
+        isBadge={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.isBadge, NodeUtils.isBooleanOrNull)}
+        isLink={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.isLink, NodeUtils.isBooleanOrNull)}
+        viewButton={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.viewButton, NodeUtils.isBooleanOrNull)}
         labelProps={toHtmlAttributes(ctx, dn.node.labelHtmlAttributes)}
         formGroupHtmlProps={toHtmlAttributes(ctx, dn.node.formGroupHtmlAttributes)}
         /> </div>,
@@ -605,7 +609,9 @@ NodeUtils.register<CountSearchControlNode>({
         <FindOptionsLine dn={dn} binding={Binding.create(dn.node, a => a.findOptions)} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={null} />
-        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.layout)} type="string" defaultValue={null} options={["View", "Link", "Badge", "Span"]} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.isBadge)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.isLink)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.viewButton)} type="boolean" defaultValue={null} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
     </div>
 });
