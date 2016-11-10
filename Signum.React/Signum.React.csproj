@@ -225,6 +225,7 @@
     <TypeScriptCompile Include="Scripts\Operations\ContextualOperations.tsx" />
     <TypeScriptCompile Include="Scripts\QuickLinks.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\ContextMenu.tsx" />
+    <TypeScriptCompile Include="Scripts\SearchControl\CountSearchControlLine.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\EntityLink.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityList.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityListBase.tsx" />
