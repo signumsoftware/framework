@@ -8,7 +8,7 @@ import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Frame
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, Lite, is, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
-import { CountSearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
+import { CountSearchControlLine } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle, mlistItemContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
@@ -72,7 +72,7 @@ export class CountUserQueryElement extends React.Component<CountUserQueryElement
         return (
             <div>
                 <span>{ctx.value.label || getQueryNiceName(this.state.fo.queryName)}</span>&nbsp;
-                <CountSearchControl ctx={ctx} findOptions={this.state.fo} layout="Badge" />
+                <CountSearchControlLine ctx={ctx} findOptions={this.state.fo} />
             </div>             
         );
     }   

@@ -102,10 +102,13 @@ export function queryIsFindable(queryKey: string) {
     return getQueryInfo(queryKey).queryAllowed;
 }
 
-export function isOperationAuthorized(operation: OperationInfo | OperationSymbol | string) {
+export function isOperationAuthorized(operation: OperationInfo | OperationSymbol | string): boolean {
     var key = (operation as PermissionSymbol | OperationSymbol).key || operation as string;
     const member = getTypeInfo(key.before(".")).members[key.after(".")];
-    return member.operationAllowed;
+    if (member == null)
+        throw new Error(`Operation ${key} not found, consider Synchronize`);
+
+    return  member.operationAllowed;
 }
 
 export function asserOperationAuthorized(operation: OperationInfo | OperationSymbol | string) {
@@ -113,7 +116,6 @@ export function asserOperationAuthorized(operation: OperationInfo | OperationSym
     if (!isOperationAuthorized(key))
         throw new Error(`Operation ${key} is denied`);
 }
-
 
 export function taskAuthorizeProperties(lineBase: LineBase<LineBaseProps, LineBaseProps>, state: LineBaseProps) {
     if (state.ctx.propertyRoute &&
