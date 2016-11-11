@@ -153,6 +153,7 @@
     <Compile Include="DiffLog\DiffLogServer.cs" />
     <Compile Include="Disconnected\DisconnectedServer.cs" />
     <Compile Include="Dynamic\DynamicController.cs" />
+    <Compile Include="Dynamic\DynamicTypeConditionController.cs" />
     <Compile Include="Dynamic\DynamicValidationController.cs" />
     <Compile Include="Dynamic\DynamicTypeController.cs" />
     <Compile Include="Dynamic\DynamicViewController.cs" />
@@ -167,10 +168,12 @@
     <Compile Include="Mailing\MailingServer.cs" />
     <TypeScriptCompile Include="Dynamic\DynamicClient.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicTypeClient.tsx" />
+    <TypeScriptCompile Include="Dynamic\DynamicTypeConditionClient.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicViewClient.tsx" />
     <TypeScriptCompile Include="Dynamic\Signum.Entities.Dynamic.ts">
       <DependentUpon>Signum.Entities.Dynamic.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Dynamic\TypeCondition\DynamicTypeConditionEntity.tsx" />
     <TypeScriptCompile Include="Dynamic\Type\DynamicSqlMigrationEntity.tsx" />
     <TypeScriptCompile Include="Dynamic\Type\DynamicTypeDefinitionComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicPanelPage.tsx" />
@@ -516,7 +519,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Chart\ChartColor\" />
-    <Folder Include="Dynamic\TypeCondition\" />
     <Folder Include="Requests\" />
   </ItemGroup>
   <ItemGroup>

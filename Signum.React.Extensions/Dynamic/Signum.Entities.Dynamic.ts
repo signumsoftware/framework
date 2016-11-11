@@ -46,6 +46,34 @@ export module DynamicSqlMigrationOperation {
     export const Delete : Entities.DeleteSymbol<DynamicSqlMigrationEntity> = registerSymbol("Operation", "DynamicSqlMigrationOperation.Delete");
 }
 
+export const DynamicTypeConditionEntity = new Type<DynamicTypeConditionEntity>("DynamicTypeCondition");
+export interface DynamicTypeConditionEntity extends Entities.Entity {
+    Type: "DynamicTypeCondition";
+    symbolName?: DynamicTypeConditionSymbolEntity | null;
+    entityType?: Basics.TypeEntity | null;
+    eval: DynamicTypeConditionEval;
+}
+
+export const DynamicTypeConditionEval = new Type<DynamicTypeConditionEval>("DynamicTypeConditionEval");
+export interface DynamicTypeConditionEval extends EvalEntity<IDynamicTypeConditionEvaluator> {
+    Type: "DynamicTypeConditionEval";
+}
+
+export module DynamicTypeConditionOperation {
+    export const Clone : Entities.ConstructSymbol_From<DynamicTypeConditionEntity, DynamicTypeConditionEntity> = registerSymbol("Operation", "DynamicTypeConditionOperation.Clone");
+    export const Save : Entities.ExecuteSymbol<DynamicTypeConditionEntity> = registerSymbol("Operation", "DynamicTypeConditionOperation.Save");
+}
+
+export const DynamicTypeConditionSymbolEntity = new Type<DynamicTypeConditionSymbolEntity>("DynamicTypeConditionSymbol");
+export interface DynamicTypeConditionSymbolEntity extends Entities.Entity {
+    Type: "DynamicTypeConditionSymbol";
+    name?: string | null;
+}
+
+export module DynamicTypeConditionSymbolOperation {
+    export const Save : Entities.ExecuteSymbol<DynamicTypeConditionSymbolEntity> = registerSymbol("Operation", "DynamicTypeConditionSymbolOperation.Save");
+}
+
 export const DynamicTypeEntity = new Type<DynamicTypeEntity>("DynamicType");
 export interface DynamicTypeEntity extends Entities.Entity {
     Type: "DynamicType";
