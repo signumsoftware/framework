@@ -60,7 +60,7 @@ export default class CountSearchControlLine extends React.Component<CountSearchC
                         isLink={this.props.isLink}
                         onCountChange={() => this.forceUpdate()}/>
                     {this.countSearchControl && this.countSearchControl.state.count != undefined &&
-                        <a className="sf-line-button sf-view" onClick={this.countSearchControl.handleClick}> <span className={"glyphicon glyphicon-arrow-right"}> </span></a>
+                        <a className="sf-line-button sf-view" onClick={this.countSearchControl.handleClick}><span className={"glyphicon glyphicon-arrow-right"}></span></a>
                     }
                     {this.countSearchControl && this.props.extraButtons && this.props.extraButtons(this.countSearchControl)}
                 </div>
