@@ -16,7 +16,8 @@ namespace Signum.Engine.DiffLog
 {
     public static class DiffLogLogic
     {
-        public static Polymorphic<Func<IOperation, bool>> Types = new Polymorphic<Func<IOperation, bool>>(minimumType: typeof(Entity)); 
+        public static Polymorphic<Func<IOperation, bool>> Types = new Polymorphic<Func<IOperation, bool>>(minimumType: typeof(Entity));
+        public static Polymorphic<Func<IEntity, bool>> TypesByEntityTarject = new Polymorphic<Func<IEntity, bool>>(minimumType: typeof(Entity));
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -37,9 +38,18 @@ namespace Signum.Engine.DiffLog
 
         static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity entity, object[] args)
         {
-            var type = operation.OperationType == OperationType.Execute && operation.OperationType == OperationType.Delete ? entity.GetType() : null;
+            bool? strategy = null;
 
-            bool? strategy = type == null ? (bool?)null : Types.GetValue(type)(operation);
+            var byEntity = TypesByEntityTarject.TryGetValue(entity.GetType());
+            if (byEntity != null)
+            {
+                strategy = byEntity(entity);
+                if (strategy == false)
+                    return null;
+            }
+
+            var type = operation.OperationType == OperationType.Execute && operation.OperationType == OperationType.Delete ? entity.GetType() : null;
+            strategy = type == null ? (bool?)null : Types.GetValue(type)(operation);
 
             if (strategy == false)
                 return null;
