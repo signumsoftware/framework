@@ -78,6 +78,7 @@ label > input[type=checkbox] {
 
     .sf-line-button:not(.btn) {
         vertical-align: middle;
+         margin: 0 2px;
     }
 
 /* EntityLine buttons  */

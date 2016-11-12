@@ -10,5 +10,11 @@ export { EntityLink, EntityLinkProps };
 import SearchControl, { SearchControlProps, ISimpleFilterBuilder } from  './SearchControl/SearchControl'
 export { SearchControl, SearchControlProps, ISimpleFilterBuilder };
 
-import CountSearchControl, { CountSearchControlProps, CountSearchControlLayout } from './SearchControl/CountSearchControl'
-export { CountSearchControl, CountSearchControlProps, CountSearchControlLayout };
+import SearchControlLoaded, { SearchControlLoadedProps} from './SearchControl/SearchControlLoaded'
+export { SearchControlLoaded, SearchControlLoadedProps};
+
+import CountSearchControl, { CountSearchControlProps } from './SearchControl/CountSearchControl'
+export { CountSearchControl, CountSearchControlProps };
+
+import CountSearchControlLine, { CountSearchControlLineProps } from './SearchControl/CountSearchControlLine'
+export { CountSearchControlLine, CountSearchControlLineProps };

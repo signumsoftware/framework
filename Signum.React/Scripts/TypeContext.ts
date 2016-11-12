@@ -24,7 +24,7 @@ export class StyleContext {
         this.styleOptions = styleOptions || {};
 
         if (this.styleOptions.labelColumns && !this.styleOptions.valueColumns)
-            this.styleOptions.valueColumns = StyleContext.bsColumnsInvert(this.styleOptions.labelColumns);
+            this.styleOptions.valueColumns = StyleContext.bsColumnsInvert(toBsColumn(this.styleOptions.labelColumns));
     }
 
     static default: StyleContext = new StyleContext(undefined,
@@ -60,15 +60,17 @@ export class StyleContext {
     }
     
     get labelColumns(): BsColumns {
-        return this.styleOptions.labelColumns != undefined ? this.styleOptions.labelColumns : this.parent.labelColumns;
+        return this.styleOptions.labelColumns != undefined ? toBsColumn(this.styleOptions.labelColumns) : this.parent.labelColumns;
     }
+
+    
 
     get labelColumnsCss(): string {
         return StyleContext.bsColumnsCss(this.labelColumns);
     }
 
     get valueColumns(): BsColumns {
-        return this.styleOptions.valueColumns != undefined ? this.styleOptions.valueColumns : this.parent.valueColumns;
+        return this.styleOptions.valueColumns != undefined ? toBsColumn(this.styleOptions.valueColumns) : this.parent.valueColumns;
     }
 
     get valueColumnsCss(): string {
@@ -114,13 +116,17 @@ export class StyleContext {
     }
 }
 
+function toBsColumn(bsColumnOrNumber: BsColumns | number): BsColumns {
+    return typeof (bsColumnOrNumber) == "number" ? { sm: bsColumnOrNumber } : bsColumnOrNumber;
+}
+
 export interface StyleOptions {
     formGroupStyle?: FormGroupStyle;
     formGroupSize?: FormGroupSize;
     placeholderLabels?: boolean;
     formControlStaticAsFormControlReadonly?: boolean;
-    labelColumns?: BsColumns;
-    valueColumns?: BsColumns;
+    labelColumns?: BsColumns | number;
+    valueColumns?: BsColumns | number;
     readOnly?: boolean;
     frame?: EntityFrame<ModifiableEntity>;
 }
@@ -199,14 +205,16 @@ export class TypeContext<T> extends StyleContext {
         return result;
     }
 
-    cast<R extends T & Entity>(type: Type<R>): TypeContext<R> {
+    cast<R extends T & ModifiableEntity>(type: Type<R>): TypeContext<R> {
 
         const entity = this.value as any as Entity;
 
         if (type.typeName != entity.Type)
             throw new Error(`Impossible to cast ${entity.Type} into ${type.typeName}`);
 
-        const result = new TypeContext<any>(this, undefined, PropertyRoute.root(type), new ReadonlyBinding(entity, this.binding.suffix + "_" + type.typeName));
+        var newPr = this.propertyRoute.typeReference().name == type.typeName ? this.propertyRoute : PropertyRoute.root(type);
+
+        const result = new TypeContext<any>(this, undefined, newPr, new ReadonlyBinding(entity, this.binding.suffix + "_" + type.typeName));
 
         return result;
     }

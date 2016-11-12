@@ -1,64 +1,60 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Signum.Engine.Basics;
-using Signum.Engine.Maps;
 using Signum.Entities;
-using Signum.React.Facades;
+using Signum.React.ApiControllers;
 using Signum.Utilities;
-using Signum.Utilities.Reflection;
 using System;
-using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 
 namespace Signum.React.Json
 {
     public class ArgsJsonConverter : JsonConverter
     {
+        public static Dictionary<OperationSymbol, Func<JToken, object>> CustomOperationArgsConverters =
+            new Dictionary<OperationSymbol, Func<JToken, object>>();
+
+        public static void RegisterCustomOperationArgsConverter(OperationSymbol operationSymbol, Func<JToken, object> converter)
+        {
+            CustomOperationArgsConverters[operationSymbol] =
+                CustomOperationArgsConverters.TryGetC(operationSymbol) +
+                converter;
+        }
+
         public override bool CanConvert(Type objectType)
         {
-            return objectType == typeof(object[]);
+            return typeof(OperationController.BaseOperationRequest).IsAssignableFrom(objectType);
         }
-        
+
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             throw new NotImplementedException();
         }
-        
+
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            List<object> args = new List<object>();
+            var request = (OperationController.BaseOperationRequest)Activator.CreateInstance(objectType);
+            serializer.Populate(reader, request);
+            var operationSymbol = request.operarionSymbol;
+            if (request.args != null)
+                for (int i = 0; i < request.args.Length; i++)
+                {
+                    var jtoken = request.args[i] as JToken;
+                    if (jtoken != null)
+                        request.args[i] = ConvertObject(jtoken, serializer, operationSymbol);
+                }
 
-            reader.Assert(JsonToken.StartArray);
-
-            reader.Read();
-
-
-            while (reader.TokenType != JsonToken.EndArray)
-            {
-                var token = JToken.Load(reader);
-
-                var converted = ConvertObject(token, serializer);
-
-                args.Add(converted);
-
-                reader.Read();
-            }
-
-            reader.Assert(JsonToken.EndArray);
-
-            return args.ToArray();
+            return request;
         }
 
-        private object ConvertObject(JToken token, JsonSerializer serializer)
+        private object ConvertObject(JToken token, JsonSerializer serializer, OperationSymbol operationSymbol)
         {
             if (token == null)
                 return null;
+
             if (token is JValue)
             {
-                var obj = ((JValue) token).Value;
+                var obj = ((JValue)token).Value;
                 return obj;
             }
 
@@ -75,13 +71,17 @@ namespace Signum.React.Json
             else if (token is JArray)
             {
                 var a = (JArray)token;
-                var result = a.Select(t => ConvertObject(t, serializer)).ToList();
+                var result = a.Select(t => ConvertObject(t, serializer, operationSymbol)).ToList();
                 return result;
 
             }
 
-            throw new NotSupportedException("Unable to deserialize dynamically:" + token.ToString());
-        }
+            var conv = CustomOperationArgsConverters.TryGetC(operationSymbol);
 
+            if (conv == null)
+                throw new InvalidOperationException("Impossible to deserialize request before executing {0}.\r\nConsider registering your own converter in 'CustomOperationArgsConverters'.\r\nReceived JSON:\r\n\r\n{1}".FormatWith(operationSymbol, token));
+
+            return conv.GetInvocationListTyped().Select(f => conv(token)).NotNull().FirstOrDefault();
+        }
     }
 }

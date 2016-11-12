@@ -20,10 +20,10 @@ LEFT OUTER JOIN ProjectEntity AS pdn
 ```
 
 * **Enum:** Just the `idStatus` is enough to retrieve the `enum` value. 
-* **Entity:** The query has been expanded to include all the columns from `DeveloperEntity` table, in order to retrieve the `DeveloperEntity` object. A
+* **Entity:** The query has been expanded to include all the columns from `DeveloperEntity` table, in order to retrieve the `DeveloperEntity` object. 
 * **Lite\<T>:** Also a join has been made to `ProjectEntity` table, but just to retrieve the `ToStr` column.  
 
-In this case, retrieving a `DeveloperEntity` was just a few columns because is a simple entity but let's try a bigger entity likeBugEntity: 
+In this case, retrieving a `DeveloperEntity` was just a few columns because is a simple entity but let's try a bigger one like `BugEntity`: 
 
 ```C#
 var result = from b in Database.Query<BugEntity>()
@@ -83,7 +83,7 @@ var query2 = from b in Database.Query<BugEntity>()
              select new { b.Description, b.Fixer.Name };
 ```
 
-However, the behavior of both queries is slightly different. We use `LEFT OUTER JOIN` for implicit joins because we don't want the results to decrease just because you have used an implicit join somewhere.
+However, the behavior of both queries is slightly different. We use `LEFT OUTER JOIN` for implicit joins because we don't want the number or rows in the results to decrease just because you have used an implicit join somewhere.
 
 ```SQL
 SELECT bdn.Description, ddn.Name
@@ -130,7 +130,7 @@ public IQueryable<BugEntity> DeveloperBugs(DeveloperEntity dev)
 }
 ```
 
-Notice how we are mixing in-memory parameters with the query, for example the query: 
+Notice how we are using in-memory variables inside of the query, for example the query: 
 
 ```C#
 DeveloperEntity dev = new DeveloperEntity { Name = "John" }.Save();
@@ -144,14 +144,16 @@ Will translate to:
 ```SQL
 SELECT bdn.Description, bdn.Hours
 FROM BugEntity AS bdn
-WHERE (bdn.idFixer = 2)
+WHERE (bdn.idFixer = @p1)
+
+@p1 = 2
 ```
 
-> **Note:** For the sake of simplicity I'm removing `SqlParameters` in the SQL examples, but don't worry, you are 100% safe from SQL injection attacks while using Linq to Signum
+> **Note:** Notice how the query is automatically parametrized, so you are 100% safe from SQL injection attacks while using Linq to Signum and SQL Server can cache the execution plan.
 
 ### Polymorphic Entity Equality
 
-Also, this identity comparison even works with simple, `ImplementedBy` and `ImplementedByAll` references in any combinations so you should use this feature to increase your queries' simplicity and make them more robust against `Schema` changes. 
+We have seen that identity comparison works for simple references to entities, but you can also combine it with references of type `ImplementedBy` and `ImplementedByAll`, so you should use this feature to make the queries simple and future-proof against `Schema` changes. 
 
 Let's compare the two polymorphic references, `Discoverer` and `Writer`, each of type `Customer` or `Developer`:
 
@@ -187,9 +189,10 @@ Unfortunately, calling `.Equals` in C# is prone to `NullReferenceException` if s
 ```C#
 entititB == entititB; //only referential equality
 
-entityA.Equals(entititB); //throws NullReferenceException if entityA is null
+entityA.Equals(entititB); //Type + id equality, but throws NullReferenceException if entityA is null
 
 object.Equals(entityA, entityB); // too long
+entityA?.Equals(entityB) == true; // too long
 
 entityA.Is(entititB); //similar to object.Equals but sorter
 ```
