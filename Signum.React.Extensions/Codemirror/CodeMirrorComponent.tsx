@@ -13,7 +13,6 @@ export interface CodeMirrorProps {
     path?: string,
     value?: string | null,
     className?: string,
-    defaultValue?: string;
     errorLineNumber?: number;
 }
 
@@ -34,7 +33,7 @@ export default class CodeMirrorComponent extends React.Component<CodeMirrorProps
             this.codeMirror.on('change', this.codemirrorValueChanged);
         this.codeMirror.on('focus', () => this.focusChanged(true));
         this.codeMirror.on('blur', () => this.focusChanged.bind(false));
-        this.codeMirror.setValue(this.props.defaultValue || this.props.value || '');
+        this.codeMirror.setValue(this.props.value || '');
         if (this.props.errorLineNumber != null)
             this.lineHandle = this.codeMirror.addLineClass(this.props.errorLineNumber - 1, undefined, "exceptionLine");
     }
@@ -84,7 +83,8 @@ export default class CodeMirrorComponent extends React.Component<CodeMirrorProps
 
     codemirrorValueChanged = (doc: CodeMirror.Editor, change: CodeMirror.EditorChangeLinkedList) => {
         const newValue = doc.getValue();
-        this.props.onChange && this.props.onChange(newValue);
+        if (newValue != this.props.value && this.props.onChange)
+            this.props.onChange(newValue);
     }
     render() {
         const editorClassName = classes(
