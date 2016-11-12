@@ -151,7 +151,7 @@ namespace Signum.Engine.Dynamic
             sb.AppendLine("    {");
             foreach(var kvp in fieldNames)
             {
-                sb.AppendLine($"    dqm.RegisterExpression(({kvp.Value.FromType} e) => e.{kvp.Value.Name}());");
+                sb.AppendLine($"        dqm.RegisterExpression(({kvp.Value.FromType} e) => e.{kvp.Value.Name}());");
             }
             sb.AppendLine("    }");
             sb.AppendLine("}");

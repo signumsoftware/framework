@@ -64,6 +64,10 @@ export namespace API {
     export function getPropertyType(property: DynamicProperty): Promise<string> {
         return ajaxPost<string>({ url: `~/api/dynamic/type/propertyType` }, property);
     }
+
+    export function expressionNames(typeName: string): Promise<Array<string>> {
+        return ajaxGet<Array<string>>({ url: `~/api/dynamic/type/expressionNames/${typeName}` });
+    }
 }
 
 export type DynamicBaseType = "Entity";

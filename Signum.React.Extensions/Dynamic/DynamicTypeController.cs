@@ -28,5 +28,14 @@ namespace Signum.React.Dynamic
             return DynamicTypeLogic.GetPropertyType(property);
           
         }
+
+        [Route("api/dynamic/type/expressionNames/{typeName}"), HttpGet]
+        public List<string> ExpressionNames(string typeName)
+        {
+            if (!Schema.Current.Tables.ContainsKey(typeof(DynamicExpressionEntity)))
+                return new List<string>();
+
+            return Database.Query<DynamicExpressionEntity>().Where(a => a.FromType == typeName).Select(a => a.Name).ToList();
+        }
     }
 }

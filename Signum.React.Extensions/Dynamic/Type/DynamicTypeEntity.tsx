@@ -61,7 +61,7 @@ export default class DynamicTypeEntityComponent extends React.Component<DynamicT
 
         return (
             <div>
-                <ValueLine ctx={ctx.subCtx(dt => dt.typeName)} onChange={() => this.forceUpdate()} />
+                <ValueLine ctx={ctx.subCtx(dt => dt.typeName)} onChange={() => this.forceUpdate()} unitText="Entity" />
 
                 {this.state.typeDefinition &&
                     <div>

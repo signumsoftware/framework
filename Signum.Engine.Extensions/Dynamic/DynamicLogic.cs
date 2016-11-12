@@ -106,7 +106,7 @@ namespace Signum.Engine.Dynamic
                     return null;
 
                 Directory.CreateDirectory(CodeGenDirectory);
-                Directory.EnumerateFiles(CodeGenDirectory).Where(a=>!inMemory ||  a != DynamicLogic.CodeGenAssemblyPath).ToList().ForEach(a => File.Delete(a));
+                Directory.EnumerateFiles(CodeGenDirectory).Where(a => !inMemory || a != DynamicLogic.CodeGenAssemblyPath).ToList().ForEach(a => File.Delete(a));
 
                 codeFiles.Values.ToList().ForEach(a => File.WriteAllText(Path.Combine(CodeGenDirectory, a.FileName), a.FileContent));
 

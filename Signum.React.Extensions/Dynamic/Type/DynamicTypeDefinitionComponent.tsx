@@ -33,7 +33,24 @@ interface DynamicTypeDefinitionComponentProps {
     dc: DynamicTypeDesignContext;
 }
 
-export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeDefinitionComponentProps, void> {
+interface DynamicTypeDefinitionComponentState
+{
+    expressionsNames?: string[];
+}
+
+export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeDefinitionComponentProps, DynamicTypeDefinitionComponentState> {
+
+    constructor(props: DynamicTypeDefinitionComponentProps) {
+        super(props);
+        this.state = {};
+    }
+
+    componentWillMount() {
+        if (this.props.typeName)
+            DynamicTypeClient.API.expressionNames(this.props.typeName + "Entity")
+                .then(exprNames => this.changeState(s => s.expressionsNames = exprNames))
+                .done();
+    }
 
     handlePropertyRemoved = (dp: DynamicProperty) => {
         var qfs = this.props.definition.queryFields;
@@ -67,7 +84,9 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
     render() {
         const def = this.props.definition;
 
-        var propNames = def.properties.map(p => p.name);
+        var propNames = def.properties.map(p => "e." + p.name);
+
+        var expressionNames = (this.state.expressionsNames || []).map(exp => exp + "= e." + exp + "()");
 
         return (
             <div>
@@ -104,7 +123,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                         </fieldset>
                     </Tab>
                     <Tab eventKey="query" title="Query">
-                        <ComboBoxRepeaterComponent options={["Id"].concat(propNames)} list={def.queryFields} />
+                        <ComboBoxRepeaterComponent options={["e.Id"].concat(propNames).concat(expressionNames)} list={def.queryFields} />
                     </Tab>
 
                     <Tab eventKey="operations" title="Operations">
