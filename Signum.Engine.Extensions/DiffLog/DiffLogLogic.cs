@@ -16,10 +16,9 @@ namespace Signum.Engine.DiffLog
 {
     public static class DiffLogLogic
     {
-        public static Polymorphic<Func<IOperation, bool>> Types = new Polymorphic<Func<IOperation, bool>>(minimumType: typeof(Entity));
-        public static Polymorphic<Func<IEntity, bool>> TypesByEntityTarject = new Polymorphic<Func<IEntity, bool>>(minimumType: typeof(Entity));
+        public static Polymorphic<Func<IEntity, IOperation, bool>> Types = new Polymorphic<Func<IEntity, IOperation, bool>>(minimumType: typeof(Entity));
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool registerAll)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -27,29 +26,20 @@ namespace Signum.Engine.DiffLog
 
                 OperationLogic.SurroundOperation += OperationLogic_SurroundOperation;
 
-                RegisterGraph<Entity>(oper => true);
+                if (registerAll)
+                    RegisterGraph<Entity>((entity, oper) => true);
             }
         }
 
-        public static void RegisterGraph<T>(Func<IOperation, bool> func) where T : Entity
+        public static void RegisterGraph<T>(Func<IEntity, IOperation, bool> func) where T : Entity
         {
             Types.SetDefinition(typeof(T), func);
         }
 
         static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity entity, object[] args)
         {
-            bool? strategy = null;
-
-            var byEntity = TypesByEntityTarject.TryGetValue(entity.GetType());
-            if (byEntity != null)
-            {
-                strategy = byEntity(entity);
-                if (strategy == false)
-                    return null;
-            }
-
-            var type = operation.OperationType == OperationType.Execute && operation.OperationType == OperationType.Delete ? entity.GetType() : null;
-            strategy = type == null ? (bool?)null : Types.GetValue(type)(operation);
+            var type = entity.GetType();
+            bool strategy = Types.ContainsKey(type) ? Types.TryGetValue(type)(entity, operation) : false;
 
             if (strategy == false)
                 return null;
@@ -72,7 +62,7 @@ namespace Signum.Engine.DiffLog
                     {
                         using (CultureInfoUtils.ChangeBothCultures(Schema.Current.ForceCultureInfo))
                         {
-                            if (strategy ?? Types.GetValue(target.GetType())(operation))
+                            if (Types.GetValue(type)(entity, operation))
                                 log.Mixin<DiffLogMixin>().FinalState = entity.Dump();
                         }
                     }
