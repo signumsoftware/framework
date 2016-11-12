@@ -17,7 +17,7 @@ import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import { DynamicViewEntity, DynamicViewSelectorEntity, DynamicViewMessage, DynamicViewOperation } from './Signum.Entities.Dynamic'
 import DynamicViewEntityComponent from './View/DynamicViewEntity'
-import { BaseNode, NodeConstructor } from './View/Nodes'
+
 import { DynamicViewComponentProps } from './View/DynamicViewComponent'
 import { AuthInfo } from './View/AuthInfo'
 
@@ -105,13 +105,20 @@ export function getOrCreateDynamicView(typeName: string, viewName: string | unde
 }
 
 export function createDefaultDynamicView(typeName: string): Promise<DynamicViewEntity> {
-    return Navigator.API.getType(typeName).then(t => DynamicViewEntity.New(dv => {
-        dv.entityType = t;
-        dv.viewName = "My View";
-        const node = NodeConstructor.createDefaultNode(getTypeInfo(typeName));
-        dv.viewContent = JSON.stringify(node);
-    }));
+    return loadNodes().then(nodes =>
+        Navigator.API.getType(typeName).then(t => DynamicViewEntity.New(dv => {
+            dv.entityType = t;
+            dv.viewName = "My View";
+            const node = nodes.NodeConstructor.createDefaultNode(getTypeInfo(typeName));
+            dv.viewContent = JSON.stringify(node);
+        })));
 }
+
+import * as Nodes from './View/Nodes' //Typings-only
+export function loadNodes(): Promise<typeof Nodes> {
+    return new Promise<typeof Nodes>(resolve => require(["./View/Nodes"], resolve));
+}
+
 
 export namespace API {
 
