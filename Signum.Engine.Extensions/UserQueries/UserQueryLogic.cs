@@ -30,7 +30,7 @@ namespace Signum.Engine.UserQueries
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                QueryLogic.Start(sb);
+                QueryLogic.Start(sb, dqm);
 
                 PermissionAuthLogic.RegisterPermissions(UserQueryPermission.ViewUserQuery);
 

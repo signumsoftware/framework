@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { Route } from 'react-router'
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
-import { CountSearchControl } from '../../../Framework/Signum.React/Scripts/Search'
+import { CountSearchControlLine } from '../../../Framework/Signum.React/Scripts/Search'
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
@@ -19,7 +19,7 @@ export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(DynamicValidationEntity, w => new ViewPromise(resolve => require(['./Validation/DynamicValidation'], resolve))));
     Constructor.registerConstructor(DynamicValidationEntity, () => DynamicValidationEntity.New(f => f.eval = DynamicValidationEval.New()));
 
-    DynamicClient.Options.onGetDynamicLine.push(ctx => <CountSearchControl ctx={ctx} findOptions={{ queryName: DynamicValidationEntity }} />);
+    DynamicClient.Options.onGetDynamicLine.push(ctx => <CountSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicValidationEntity }} />);
 }
 
 export namespace API {

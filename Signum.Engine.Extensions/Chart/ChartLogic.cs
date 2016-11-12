@@ -27,7 +27,7 @@ namespace Signum.Engine.Chart
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                QueryLogic.Start(sb);
+                QueryLogic.Start(sb, dqm);
 
                 PermissionAuthLogic.RegisterTypes(typeof(ChartPermission));
 

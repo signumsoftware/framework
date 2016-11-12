@@ -68,6 +68,8 @@ $@"(?<entity>{ident};(\d+|{guid}))|
 
             if (IsHelp(omniboxQuery))
             {
+                result.Add(new HelpOmniboxResult { Text = OmniboxMessage.Omnibox_OmniboxSyntaxGuide.NiceToString() });
+
                 foreach (var generator in Generators)
                 {
                     if (ct.IsCancellationRequested)
@@ -76,14 +78,9 @@ $@"(?<entity>{ident};(\d+|{guid}))|
                     result.AddRange(generator.GetHelp());
                 }
 
-                string matchingOptions = OmniboxMessage.Omnibox_MatchingOptions.NiceToString();
-                result.Add(new HelpOmniboxResult { Text = matchingOptions });
-
-                string databaseAccess = OmniboxMessage.Omnibox_DatabaseAccess.NiceToString();
-                result.Add(new HelpOmniboxResult { Text = databaseAccess });
-
-                string disambiguate = OmniboxMessage.Omnibox_Disambiguate.NiceToString();
-                result.Add(new HelpOmniboxResult { Text = disambiguate });
+                result.Add(new HelpOmniboxResult { Text = OmniboxMessage.Omnibox_MatchingOptions.NiceToString() });
+                result.Add(new HelpOmniboxResult { Text = OmniboxMessage.Omnibox_DatabaseAccess.NiceToString() });
+                result.Add(new HelpOmniboxResult { Text = OmniboxMessage.Omnibox_Disambiguate.NiceToString() });
 
                 return result.ToList();
             }
