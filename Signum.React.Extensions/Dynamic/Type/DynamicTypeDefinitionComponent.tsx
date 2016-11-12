@@ -45,8 +45,8 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
         this.state = {};
     }
 
-    componentWillMount() {
-        if (this.props.typeName)
+    handleTabChange = (key: string)=> {
+        if (this.props.typeName && key == "query")
             DynamicTypeClient.API.expressionNames(this.props.typeName + "Entity")
                 .then(exprNames => this.changeState(s => s.expressionsNames = exprNames))
                 .done();
@@ -99,7 +99,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                     </div>
                 </div>
 
-                <Tabs defaultActiveKey="properties" id="DynamicTypeTabs">
+                <Tabs defaultActiveKey="properties" id="DynamicTypeTabs" onChange={this.handleTabChange}>
                     <Tab eventKey="properties" title="Properties">
                         <PropertyRepeaterComponent dc={this.props.dc} properties={def.properties} onRemove={this.handlePropertyRemoved} />
 
