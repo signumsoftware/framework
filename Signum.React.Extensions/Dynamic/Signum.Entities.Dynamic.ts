@@ -16,12 +16,7 @@ export interface DynamicExpressionEntity extends Entities.Entity {
     name?: string | null;
     fromType?: string | null;
     returnType?: string | null;
-    eval: DynamicExpressionEval;
-}
-
-export const DynamicExpressionEval = new Type<DynamicExpressionEval>("DynamicExpressionEval");
-export interface DynamicExpressionEval extends EvalEntity<IDynamicExpressionEvaluator> {
-    Type: "DynamicExpressionEval";
+    body?: string | null;
 }
 
 export module DynamicExpressionOperation {

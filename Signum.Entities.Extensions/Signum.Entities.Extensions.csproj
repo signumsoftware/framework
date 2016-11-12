@@ -117,6 +117,7 @@
     <Compile Include="Dynamic\Dynamic.cs" />
     <Compile Include="Dynamic\DynamicSqlMigration.cs" />
     <Compile Include="Dynamic\DynamicType.cs" />
+    <Compile Include="Dynamic\DynamicExpression.cs" />
     <Compile Include="Dynamic\DynamicTypeConditionSymbol.cs" />
     <Compile Include="Dynamic\DynamicTypeCondition.cs" />
     <Compile Include="Dynamic\DynamicView.cs" />

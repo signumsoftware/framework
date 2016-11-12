@@ -15,6 +15,7 @@ import { QueryEntity } from '../../../../Framework/Signum.React/Scripts/Signum.E
 import { FilterOperation, PaginationMode } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.DynamicQuery'
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal';
 import * as DynamicTypeClient from '../DynamicTypeClient';
+import * as DynamicClient from '../DynamicClient';
 import { DynamicTypeMessage } from '../Signum.Entities.Dynamic';
 import { Validators, DynamicTypeDefinition, DynamicProperty } from '../DynamicTypeClient';
 import ValueComponent from './ValueComponent';
@@ -414,7 +415,7 @@ export class TypeCombo extends React.Component<{ dc: DynamicTypeDesignContext; b
     }
 
     handleGetItems = (query: string) => {
-        return DynamicTypeClient.API.autocompleteType(query, 5)
+        return DynamicClient.API.autocompleteType({ query: query, limit: 5, includeBasicTypes: true, includeEntities: true, includeMList: true });
     }
 
     handleOnChange = (newValue: string) => {

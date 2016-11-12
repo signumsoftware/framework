@@ -55,6 +55,8 @@ namespace Signum.Engine.Dynamic
 
         public static string CodeGenEntitiesNamespace = "Signum.Entities.CodeGen";
         public static string CodeGenDirectory = "CodeGen";
+        public static string CodeGenAssemblyPath;
+
         public static Func<List<CodeFile>> GetCodeFiles = null;
         public static Action<StringBuilder, int> OnWriteDynamicStarter;
         public static Exception CodeGenError;
@@ -62,21 +64,23 @@ namespace Signum.Engine.Dynamic
         {
             Dictionary<string, CodeFile> codeFiles;
 
-            var cr = Compile(out codeFiles);
+            var cr = Compile(out codeFiles, inMemory: false);
 
             if (cr == null)
                 return;
 
             if (cr.Errors.Count != 0)
                 throw new InvalidOperationException("Errors compiling  dynamic assembly:\r\n" + cr.Errors.Cast<CompilerError>().ToString("\r\n").Indent(4));
-            
+
+            CodeGenAssemblyPath = cr.PathToAssembly;
+
             Assembly assembly = cr.CompiledAssembly;
             Type type = assembly.GetTypes().Where(a => a.Name == "CodeGenStarter").SingleEx();
             MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static);
             mi.Invoke(null, new object[] { sb, dqm });
         }
 
-        public static CompilerResults Compile(out Dictionary<string, CodeFile> codeFiles)
+        public static CompilerResults Compile(out Dictionary<string, CodeFile> codeFiles, bool inMemory)
         {
             using (HeavyProfiler.Log("COMPILE"))
             {
@@ -91,7 +95,10 @@ namespace Signum.Engine.Dynamic
                     parameters.ReferencedAssemblies.Add(Path.Combine(Eval.AssemblyDirectory, ass));
                 }
 
-                parameters.GenerateInMemory = true;
+                if (inMemory)
+                    parameters.GenerateInMemory = true;
+                else
+                    parameters.OutputAssembly = Path.Combine(CodeGenDirectory, "DynamicAssembly.dll");
 
                 codeFiles = GetCodeFiles.GetInvocationListTyped().SelectMany(f => f()).ToDictionary(a => a.FileName, "C# code files");
 
@@ -99,7 +106,7 @@ namespace Signum.Engine.Dynamic
                     return null;
 
                 Directory.CreateDirectory(CodeGenDirectory);
-                Directory.EnumerateFiles(CodeGenDirectory).ToList().ForEach(a => File.Delete(a));
+                Directory.EnumerateFiles(CodeGenDirectory).Where(a=>!inMemory ||  a != DynamicLogic.CodeGenAssemblyPath).ToList().ForEach(a => File.Delete(a));
 
                 codeFiles.Values.ToList().ForEach(a => File.WriteAllText(Path.Combine(CodeGenDirectory, a.FileName), a.FileContent));
 

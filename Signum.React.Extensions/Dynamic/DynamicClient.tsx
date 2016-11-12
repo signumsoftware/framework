@@ -56,5 +56,20 @@ export namespace API {
     export function pingServer(): Promise<void> {
         return ajaxPost<void>({ url: `~/api/dynamic/pingServer` }, null);
     }
+
+
+    export function autocompleteType(request: AutocompleteTypeRequest): Promise<string[]> {
+        return ajaxPost<string[]>({ url: "~/api/dynamic/autocompleteType" }, request);
+    }
 }
+
+export interface AutocompleteTypeRequest {
+    query: string;
+    limit: number;
+    includeBasicTypes: boolean;
+    includeEntities?: boolean;
+    includeMList?: boolean;
+    includeQueriable?: boolean;
+}
+
 

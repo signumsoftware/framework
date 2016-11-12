@@ -1,0 +1,162 @@
+﻿using Newtonsoft.Json;
+using Signum.Engine;
+using Signum.Engine.Basics;
+using Signum.Engine.Cache;
+using Signum.Engine.DynamicQuery;
+using Signum.Engine.Maps;
+using Signum.Engine.Operations;
+using Signum.Entities;
+using Signum.Entities.Basics;
+using Signum.Entities.Dynamic;
+using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Signum.Engine.Dynamic
+{
+    public static class DynamicExpressionLogic
+    {
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        {
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+            {
+                sb.Include<DynamicExpressionEntity>()
+                    .WithUniqueIndex(a => new { a.FromType, a.Name })
+                    .WithSave(DynamicExpressionOperation.Save)
+                    .WithDelete(DynamicExpressionOperation.Delete)
+                    .WithQuery(dqm, e => new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.Name,
+                        e.ReturnType,
+                        e.FromType,
+                    });
+
+                new Graph<DynamicExpressionEntity>.ConstructFrom<DynamicExpressionEntity>(DynamicExpressionOperation.Clone)
+                {
+                    Construct = (e, _) =>
+                    {
+                        return new DynamicExpressionEntity
+                        {
+                            Name = e.Name + "_2",
+                            ReturnType = e.ReturnType,
+                            FromType = e.FromType,
+                            Body = e.Body,
+                        };
+                    }
+                }.Register();
+
+                DynamicLogic.GetCodeFiles += GetCodeFiles;
+                DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
+            }
+        }
+
+        public static void WriteDynamicStarter(StringBuilder sb, int indent) {
+
+            sb.AppendLine("CodeGenExpressionStarter.Start(sb, dqm);".Indent(indent));
+        }
+
+        public static List<CodeFile> GetCodeFiles()
+        {
+            CacheLogic.GloballyDisabled = true;
+            try
+            {
+                using (ExecutionMode.Global())
+                {
+                    var result = new List<CodeFile>();
+
+                    var expressions = Database.Query<DynamicExpressionEntity>().ToList();
+
+                    var dtcg = new DynamicExpressionCodeGenerator(DynamicLogic.CodeGenEntitiesNamespace, expressions, DynamicLogic.Namespaces);
+
+                    var content = dtcg.GetFileCode();
+                    result.Add(new CodeFile
+                    {
+                        FileName = "CodeGenExpressionStarter.cs",
+                        FileContent = content,
+                    });
+                    return result;
+                }
+            }
+            finally
+            {
+                CacheLogic.GloballyDisabled = false;
+            }
+        }
+    }
+
+    public class DynamicExpressionCodeGenerator
+    {
+        public List<string> Usings { get; private set; }
+        public string Namespace { get; private set; }
+        public string TypeName { get; private set; }
+        public List<DynamicExpressionEntity> Expressions { get; private set; }
+
+        public DynamicExpressionCodeGenerator(string @namespace, List<DynamicExpressionEntity> expressions, List<string> usings)
+        {
+            this.Usings = usings;
+            this.Namespace = @namespace;
+            this.Expressions = expressions;
+        }
+
+        public string GetFileCode()
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var item in this.Usings)
+                sb.AppendLine("using {0};".FormatWith(item));
+
+            sb.AppendLine();
+            sb.AppendLine("namespace " + this.Namespace);
+            sb.AppendLine("{");
+            sb.Append(GetStarterClassCode().Indent(4));
+            sb.AppendLine("}");
+
+            return sb.ToString();
+        }
+        
+        public string GetStarterClassCode()
+        {
+            var fieldNames = this.Expressions
+                .GroupBy(a => a.Name)
+                .SelectMany(gr => gr.Count() == 1 ?
+                new[] { KVP.Create(gr.SingleEx().Name + "Expression", gr.SingleEx()) } :
+                gr.Select(a => KVP.Create(a.Name + "_" + a.FromType.RemoveChars('<', '>', '.') + "Expression", a))
+                ).ToDictionary("DynamicExpressions");
+
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine($"public static class CodeGenExpressionStarter");
+            sb.AppendLine("{");
+
+            foreach (var kvp in fieldNames)
+            {
+                sb.AppendLine($"    static Expression<Func<{kvp.Value.FromType}, {kvp.Value.ReturnType}>> {kvp.Key} =");
+                sb.AppendLine($"        e => {kvp.Value.Body};");
+                sb.AppendLine($"    [ExpressionField(\"{kvp.Key}\")]");
+                sb.AppendLine($"    public static {kvp.Value.ReturnType} {kvp.Value.Name}(this {kvp.Value.FromType} e)");
+                sb.AppendLine($"    {{");
+                sb.AppendLine($"        return {kvp.Key}.Evaluate(e);");
+                sb.AppendLine($"    }}");
+                sb.AppendLine("");
+            }
+
+            sb.AppendLine("    public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)");
+            sb.AppendLine("    {");
+            foreach(var kvp in fieldNames)
+            {
+                sb.AppendLine($"    dqm.RegisterExpression(({kvp.Value.FromType} e) => e.{kvp.Value.Name}());");
+            }
+            sb.AppendLine("    }");
+            sb.AppendLine("}");
+
+            return sb.ToString();
+        }
+    }
+}

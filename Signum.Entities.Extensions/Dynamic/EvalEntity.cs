@@ -66,7 +66,7 @@ namespace Signum.Entities.Dynamic
 
         static ConcurrentDictionary<string, CompilationResult> resultCache = new ConcurrentDictionary<string, CompilationResult>();
 
-        protected static CompilationResult Compile(IEnumerable<string> assemblies, string code)
+        public static CompilationResult Compile(IEnumerable<string> assemblies, string code)
         {
             return resultCache.GetOrAdd(code, _ =>
             {
