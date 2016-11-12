@@ -78,8 +78,8 @@ export interface DynamicTypeDefinition {
     baseType: DynamicBaseType;
     entityKind?: EntityKind;
     entityData?: EntityData;
-    operationConstruct?: OperationConstruct;
-    operationExecute?: OperationExecute;
+    operationCreate?: OperationConstruct;
+    operationSave?: OperationExecute;
     operationDelete?: OperationDelete;
     queryFields: string[];
     multiColumnUniqueIndex?: MultiColumnUniqueIndex; 

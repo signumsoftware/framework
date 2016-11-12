@@ -59,7 +59,10 @@ namespace Signum.Entities.Dynamic
         DynamicType0SucessfullySavedGoToDynamicPanelNow,
 
         [Description("Server restarted with errors in dynamic code. Fix errors and restart again.")]
-        ServerRestartedWithErrorsInDynamicCodeFixErrorsAndRestartAgain
+        ServerRestartedWithErrorsInDynamicCodeFixErrorsAndRestartAgain,
+
+        [Description("Remove Save Operation?")]
+        RemoveSaveOperation,
     }
 
     public class DynamicTypeDefinition
@@ -76,11 +79,11 @@ namespace Signum.Entities.Dynamic
         [JsonProperty(PropertyName = "properties")]
         public List<DynamicProperty> Properties;
 
-        [JsonProperty(PropertyName = "operationConstruct")]
-        public OperationConstruct OperationConstruct;
+        [JsonProperty(PropertyName = "operationCreate")]
+        public OperationConstruct OperationCreate;
 
-        [JsonProperty(PropertyName = "operationExecute")]
-        public OperationExecute OperationExecute;
+        [JsonProperty(PropertyName = "operationSave")]
+        public OperationExecute OperationSave;
 
         [JsonProperty(PropertyName = "operationDelete")]
         public OperationDelete OperationDelete;

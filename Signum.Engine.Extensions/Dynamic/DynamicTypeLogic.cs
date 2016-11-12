@@ -33,7 +33,6 @@ namespace Signum.Engine.Dynamic
                     });
 
                 DynamicTypeGraph.Register();
-
                 DynamicLogic.GetCodeFiles += GetCodeFiles;
                 DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
             }
@@ -235,13 +234,32 @@ namespace Signum.Engine.Dynamic
 
         public string GetEntityOperation()
         {
+            if (this.Def.OperationCreate == null &&
+                 this.Def.OperationSave == null &&
+                 this.Def.OperationDelete == null)
+                return null;
+
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"[AutoInit]"); //Only for ReflectionServer
             sb.AppendLine($"public static class {this.TypeName}Operation");
             sb.AppendLine("{");
-            sb.AppendLine($"    public static readonly ConstructSymbol<{this.TypeName}Entity>.Simple Create = OperationSymbol.Construct<{this.TypeName}Entity>.Simple(typeof({ this.TypeName}Operation), \"Create\");");
-            sb.AppendLine($"    public static readonly ExecuteSymbol<{this.TypeName}Entity> Save = OperationSymbol.Execute<{this.TypeName}Entity>(typeof({ this.TypeName}Operation), \"Save\");");
-            sb.AppendLine($"    public static readonly DeleteSymbol<{this.TypeName}Entity> Delete = OperationSymbol.Delete<{this.TypeName}Entity>(typeof({ this.TypeName}Operation), \"Delete\");");
+
+            if (this.Def.OperationCreate != null)
+                sb.AppendLine($"    public static readonly ConstructSymbol<{this.TypeName}Entity>.Simple Create = OperationSymbol.Construct<{this.TypeName}Entity>.Simple(typeof({ this.TypeName}Operation), \"Create\");");
+
+
+            var requiresSaveOperation = (this.Def.EntityKind != null && EntityKindAttribute.CalculateRequiresSaveOperation(this.Def.EntityKind.Value));
+            if ((this.Def.OperationSave != null) && !requiresSaveOperation)
+                throw new InvalidOperationException($"DynamicType '{this.TypeName}' defines Save but has EntityKind = '{this.Def.EntityKind}'");
+            else if (this.Def.OperationSave == null && requiresSaveOperation)
+                throw new InvalidOperationException($"DynamicType '{this.TypeName}' does not define Save but has EntityKind = '{this.Def.EntityKind}'");
+
+            if (this.Def.OperationSave != null)
+                sb.AppendLine($"    public static readonly ExecuteSymbol<{this.TypeName}Entity> Save = OperationSymbol.Execute<{this.TypeName}Entity>(typeof({ this.TypeName}Operation), \"Save\");");
+
+            if (this.Def.OperationDelete != null)
+                sb.AppendLine($"    public static readonly DeleteSymbol<{this.TypeName}Entity> Delete = OperationSymbol.Delete<{this.TypeName}Entity>(typeof({ this.TypeName}Operation), \"Delete\");");
+
             sb.AppendLine("}");
 
             return sb.ToString();
@@ -426,7 +444,8 @@ namespace Signum.Engine.Dynamic
         }
     }
 
-    public class DynamicTypeLogicGenerator {
+    public class DynamicTypeLogicGenerator
+    {
 
         public List<string> Usings { get; private set; }
         public string Namespace { get; private set; }
@@ -472,10 +491,10 @@ namespace Signum.Engine.Dynamic
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"sb.Include<{this.TypeName}Entity>()");
 
-            if (string.IsNullOrWhiteSpace(this.Def.OperationExecute?.Execute.Trim()))
+            if (this.Def.OperationSave != null && string.IsNullOrWhiteSpace(this.Def.OperationSave.Execute.Trim()))
                 sb.AppendLine($"    .WithSave({this.TypeName}Operation.Save)");
 
-            if (string.IsNullOrWhiteSpace(this.Def.OperationDelete?.Delete.Trim()))
+            if (this.Def.OperationDelete != null && string.IsNullOrWhiteSpace(this.Def.OperationDelete.Delete.Trim()))
                 sb.AppendLine($"    .WithDelete({this.TypeName}Operation.Delete)");
 
             var mcui = this.Def.MultiColumnUniqueIndex;
@@ -498,19 +517,19 @@ namespace Signum.Engine.Dynamic
         private string RegisterComplexOperations()
         {
             StringBuilder sb = new StringBuilder();
-            var operationConstruct = this.Def.OperationConstruct?.Construct.Trim();
+            var operationConstruct = this.Def.OperationCreate?.Construct.Trim();
             if (!string.IsNullOrWhiteSpace(operationConstruct))
             {
                 sb.AppendLine();
                 sb.AppendLine("new Graph<{0}Entity>.Construct({0}Operation.Create)".FormatWith(this.TypeName));
                 sb.AppendLine("{");
-                sb.AppendLine("    Construct = (args) => {\r\n" + operationConstruct + "\r\n}");
+                sb.AppendLine("    Construct = (args) => {\r\n" + operationConstruct.Indent(8) + "\r\n}");
                 sb.AppendLine("}.Register();");
             }
 
-            var operationExecute = this.Def.OperationExecute?.Execute.Trim();
-            var operationCanExecute = this.Def.OperationExecute?.CanExecute?.Trim();
-            if (!string.IsNullOrWhiteSpace(operationExecute))
+            var operationExecute = this.Def.OperationSave?.Execute.Trim();
+            var operationCanExecute = this.Def.OperationSave?.CanExecute?.Trim();
+            if (!string.IsNullOrWhiteSpace(operationExecute) || !string.IsNullOrWhiteSpace(operationCanExecute))
             {
                 sb.AppendLine();
                 sb.AppendLine("new Graph<{0}Entity>.Execute({0}Operation.Save)".FormatWith(this.TypeName));
@@ -521,13 +540,13 @@ namespace Signum.Engine.Dynamic
 
                 sb.AppendLine("    AllowsNew = true,");
                 sb.AppendLine("    Lite = false,");
-                sb.AppendLine("    Execute = (e, args) => {\r\n" + operationExecute + "\r\n}");
+                sb.AppendLine("    Execute = (e, args) => {\r\n" + operationExecute?.Indent(8) + "\r\n}");
                 sb.AppendLine("}.Register();");
             }
 
             var operationDelete = this.Def.OperationDelete?.Delete.Trim();
             var operationCanDelete = this.Def.OperationDelete?.CanDelete?.Trim();
-            if (!string.IsNullOrWhiteSpace(operationDelete))
+            if (!string.IsNullOrWhiteSpace(operationDelete) || !string.IsNullOrEmpty(operationCanDelete))
             {
                 sb.AppendLine();
                 sb.AppendLine("new Graph<{0}Entity>.Delete({0}Operation.Delete)".FormatWith(this.TypeName));
@@ -536,7 +555,7 @@ namespace Signum.Engine.Dynamic
                 if (!string.IsNullOrWhiteSpace(operationCanDelete))
                     sb.AppendLine($"    CanDelete = e => {operationCanDelete},");
 
-                sb.AppendLine("    Delete = (e, args) => {\r\n" + operationDelete + "\r\n}");
+                sb.AppendLine("    Delete = (e, args) => {\r\n" + (operationDelete.DefaultText("e.Delete();")).Indent(8) + "\r\n}");
                 sb.AppendLine("}.Register();");
             }
 
