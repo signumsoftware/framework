@@ -19,7 +19,8 @@ export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(DynamicValidationEntity, w => new ViewPromise(resolve => require(['./Validation/DynamicValidation'], resolve))));
     Constructor.registerConstructor(DynamicValidationEntity, () => DynamicValidationEntity.New(f => f.eval = DynamicValidationEval.New()));
 
-    DynamicClient.Options.onGetDynamicLine.push(ctx => <CountSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicValidationEntity }} />);
+    DynamicClient.Options.onGetDynamicLineForPanel.push(ctx => <CountSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicValidationEntity }} />);
+    DynamicClient.Options.onGetDynamicLineForType.push((ctx, type) => <CountSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicValidationEntity, parentColumn: "EntityType.CleanName", parentValue: type }} />);
 }
 
 export namespace API {

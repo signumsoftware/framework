@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { Route } from 'react-router'
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
-import { CountSearchControl } from '../../../Framework/Signum.React/Scripts/Search'
+import { CountSearchControlLine } from '../../../Framework/Signum.React/Scripts/Search'
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
@@ -17,7 +17,8 @@ import { DynamicExpressionEntity } from './Signum.Entities.Dynamic'
 export function start(options: { routes: JSX.Element[] }) {
 
     Navigator.addSettings(new EntitySettings(DynamicExpressionEntity, w => new ViewPromise(resolve => require(['./Expression/DynamicExpressionEntity'], resolve))));
-    DynamicClient.Options.onGetDynamicLine.push(ctx => <CountSearchControl ctx={ctx} findOptions={{ queryName: DynamicExpressionEntity }} />);
+    DynamicClient.Options.onGetDynamicLineForPanel.push(ctx => <CountSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicExpressionEntity }} />);
+    DynamicClient.Options.onGetDynamicLineForType.push((ctx, type) => <CountSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicExpressionEntity, parentColumn: "FromType", parentValue: type + "Entity" }} />);
 }
 
 export namespace API {

@@ -49,7 +49,7 @@ export function start(options: { routes: JSX.Element[] }) {
             isVisible: AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel)
         }));
 
-    DynamicClient.Options.onGetDynamicLine.push(ctx => <CountSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
+    DynamicClient.Options.onGetDynamicLineForPanel.push(ctx => <CountSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
     DynamicClient.Options.getDynaicMigrationsStep = () =>
         <Tab eventKey="migrations" title="Migrations" >
             <h3>{DynamicSqlMigrationEntity.nicePluralName()}</h3>

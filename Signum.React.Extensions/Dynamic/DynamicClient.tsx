@@ -31,7 +31,8 @@ export function start(options: { routes: JSX.Element[] }) {
 }
 
 export namespace Options {
-    export let onGetDynamicLine: ((ctx: StyleContext) => React.ReactNode)[] = [];
+    export let onGetDynamicLineForPanel: ((ctx: StyleContext) => React.ReactNode)[] = [];
+    export let onGetDynamicLineForType: ((ctx: StyleContext, type: string) => React.ReactNode)[] = [];
     export let getDynaicMigrationsStep: (() => React.ReactElement<any>) | undefined = undefined;
 }
 

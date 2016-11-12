@@ -7,7 +7,7 @@ import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions, QueryToken, filterOperations, OrderType, ColumnOptionsMode } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, Binding, EntityDataValues, EntityKindValues, EntityKind } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { StyleContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import QueryTokenBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/QueryTokenBuilder'
 import { ModifiableEntity, JavascriptMessage, EntityControlMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -45,8 +45,8 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
         this.state = {};
     }
 
-    handleTabChange = (key: string)=> {
-        if (this.props.typeName && key == "query")
+    handleTabSelect = (eventKey: any /*string*/)=> {
+        if (this.props.typeName && eventKey == "query")
             DynamicTypeClient.API.expressionNames(this.props.typeName + "Entity")
                 .then(exprNames => this.changeState(s => s.expressionsNames = exprNames))
                 .done();
@@ -99,7 +99,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                     </div>
                 </div>
 
-                <Tabs defaultActiveKey="properties" id="DynamicTypeTabs" onChange={this.handleTabChange}>
+                <Tabs defaultActiveKey="properties" id="DynamicTypeTabs" onSelect={this.handleTabSelect}>
                     <Tab eventKey="properties" title="Properties">
                         <PropertyRepeaterComponent dc={this.props.dc} properties={def.properties} onRemove={this.handlePropertyRemoved} />
 
@@ -158,11 +158,18 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                                 </div>
                         })}
                     </Tab>
+                    <Tab eventKey="other" title="Other">
+                        {this.renderOthers()}
+                    </Tab>
                 </Tabs>
             </div>
         );
     }
-
+    
+    renderOthers() {
+        var ctx = new StyleContext(undefined, { labelColumns: 3 });
+        return React.createElement("div", {}, ...DynamicClient.Options.onGetDynamicLineForType.map(f => f(ctx, this.props.typeName)));
+    }
 
     renderFieldSet<T>(
         binding: Binding<T | undefined>,
