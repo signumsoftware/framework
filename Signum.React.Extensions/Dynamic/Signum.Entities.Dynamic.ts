@@ -9,7 +9,7 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 interface IDynamicValidationEvaluator {}
 interface IDynamicTypeConditionEvaluator {}
-interface IDynamicExpressionEvaluator {}
+
 export const DynamicExpressionEntity = new Type<DynamicExpressionEntity>("DynamicExpression");
 export interface DynamicExpressionEntity extends Entities.Entity {
     Type: "DynamicExpression";
