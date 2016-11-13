@@ -82,6 +82,25 @@ namespace Signum.Engine.DynamicQuery
         IQueryable<Lite<Entity>> GetEntities(List<Filter> filters);
     }
 
+
+    public static class DynamicQueryCore
+    {
+        public static AutoDynamicQueryCore<T> Auto<T>(IQueryable<T> query)
+        {
+            return new AutoDynamicQueryCore<T>(query);
+        }
+
+        public static ManualDynamicQueryCore<T> Manual<T>(Func<QueryRequest, QueryDescription, DEnumerableCount<T>> execute)
+        {
+            return new ManualDynamicQueryCore<T>(execute);
+        }
+
+        public static Dictionary<string, Meta> QueryMetadata(IQueryable query)
+        {
+            return MetadataVisitor.GatherMetadata(query.Expression);
+        }
+    }
+
     public abstract class DynamicQueryCore<T> : IDynamicQueryCore
     {
         public object QueryName { get; set; }
@@ -201,22 +220,12 @@ namespace Signum.Engine.DynamicQuery
         public int? TotalElements {get; private set;}
     }
 
-    public static class DynamicQuery
-    {
-        public static AutoDynamicQueryCore<T> Auto<T>(IQueryable<T> query)
-        {
-            return new AutoDynamicQueryCore<T>(query); 
-        }
-
-        public static ManualDynamicQueryCore<T> Manual<T>(Func<QueryRequest, QueryDescription, DEnumerableCount<T>> execute)
-        {
-            return new ManualDynamicQueryCore<T>(execute); 
-        }
-
-
+   
+    public static class DQueryable
+    { 
         #region ToDQueryable
 
-        public static DQueryable<T> ToDQueryable<T>(this IQueryable<T> query, QueryDescription description)
+    public static DQueryable<T> ToDQueryable<T>(this IQueryable<T> query, QueryDescription description)
         {
             ParameterExpression pe = Expression.Parameter(typeof(object));
 
@@ -699,7 +708,7 @@ namespace Signum.Engine.DynamicQuery
 
         #endregion
 
-#region GroupBy
+        #region GroupBy
 
         static GenericInvoker<Func<IEnumerable<object>, Delegate, Delegate, IEnumerable<object>>> giGroupByE =
             new GenericInvoker<Func<IEnumerable<object>, Delegate, Delegate, IEnumerable<object>>>(
@@ -780,14 +789,8 @@ namespace Signum.Engine.DynamicQuery
             return Expression.Call(typeof(Enumerable), at.AggregateFunction.ToString(), new[] { groupType }, new[] { collection, lambda });
         }
 #endregion
-
-
-        public static Dictionary<string, Meta> QueryMetadata(IQueryable query)
-        {
-            return MetadataVisitor.GatherMetadata(query.Expression); 
-        }
-
-
+        
+      
         public static ResultTable ToResultTable<T>(this DEnumerableCount<T> collection, QueryRequest req)
         {
             object[] array = collection.Collection as object[] ?? collection.Collection.ToArray();
