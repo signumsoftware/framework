@@ -38,7 +38,7 @@ namespace Signum.Engine.DynamicQuery
 
         public void RegisterQuery<T>(object queryName, Func<IQueryable<T>> lazyQuery, Implementations? entityImplementations = null)
         {
-            queries[queryName] = new DynamicQueryBucket(queryName, () => DynamicQuery.Auto(lazyQuery()), entityImplementations ?? DefaultImplementations(typeof(T), queryName));
+            queries[queryName] = new DynamicQueryBucket(queryName, () => DynamicQueryCore.Auto(lazyQuery()), entityImplementations ?? DefaultImplementations(typeof(T), queryName));
         }
 
         public void RegisterQuery<T>(object queryName, Func<DynamicQueryCore<T>> lazyQueryCore, Implementations? entityImplementations = null)
