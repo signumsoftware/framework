@@ -29,6 +29,8 @@ namespace Signum.Entities.Dynamic
         [NotNullable, SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
         public string Body { get; set; }
+        
+        public DynamicExpressionTranslation Translation { get; set; }
 
         static Expression<Func<DynamicExpressionEntity, string>> ToStringExpression = @this => @this.ReturnType + " " + @this.Name + "(" + @this.FromType + " e)";
         [ExpressionField]
@@ -36,6 +38,13 @@ namespace Signum.Entities.Dynamic
         {
             return ToStringExpression.Evaluate(this);
         }
+    }
+
+    public enum DynamicExpressionTranslation
+    {
+        TranslateExpressionName,
+        ReuseTranslationOfReturnType,
+        NoTranslation,
     }
 
     [AutoInit]

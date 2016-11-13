@@ -55,6 +55,25 @@ namespace Signum.Engine.Dynamic
 
                 DynamicLogic.GetCodeFiles += GetCodeFiles;
                 DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
+
+                DynamicTypeLogic.GetAlreadyTranslatedExpressions = () =>
+                {
+
+                    CacheLogic.GloballyDisabled = true;
+                    try
+                    {
+                        using (ExecutionMode.Global())
+                            return Database.Query<DynamicExpressionEntity>()
+                            .Where(a => a.Translation == DynamicExpressionTranslation.TranslateExpressionName)
+                            .AgGroupToDictionary(a => a.FromType, gr => gr.ToDictionary(a => a.Name, a => "CodeGenExpressionMessage." + a.Name));
+                    }
+                    finally
+                    {
+                        CacheLogic.GloballyDisabled = false;
+                    }
+
+                   
+                }; 
             }
         }
 
@@ -94,12 +113,12 @@ namespace Signum.Engine.Dynamic
 
     public class DynamicExpressionCodeGenerator
     {
-        public List<string> Usings { get; private set; }
+        public HashSet<string> Usings { get; private set; }
         public string Namespace { get; private set; }
         public string TypeName { get; private set; }
         public List<DynamicExpressionEntity> Expressions { get; private set; }
 
-        public DynamicExpressionCodeGenerator(string @namespace, List<DynamicExpressionEntity> expressions, List<string> usings)
+        public DynamicExpressionCodeGenerator(string @namespace, List<DynamicExpressionEntity> expressions, HashSet<string> usings)
         {
             this.Usings = usings;
             this.Namespace = @namespace;
@@ -123,6 +142,7 @@ namespace Signum.Engine.Dynamic
         
         public string GetStarterClassCode()
         {
+            StringBuilder sb = new StringBuilder();
             var fieldNames = this.Expressions
                 .GroupBy(a => a.Name)
                 .SelectMany(gr => gr.Count() == 1 ?
@@ -130,7 +150,19 @@ namespace Signum.Engine.Dynamic
                 gr.Select(a => KVP.Create(a.Name + "_" + a.FromType.RemoveChars('<', '>', '.') + "Expression", a))
                 ).ToDictionary("DynamicExpressions");
 
-            StringBuilder sb = new StringBuilder();
+            var namesToTranslate = this.Expressions.Where(a => a.Translation == DynamicExpressionTranslation.TranslateExpressionName).Select(a => a.Name).Distinct();
+
+            if (namesToTranslate.Any())
+            {
+                sb.AppendLine($"public enum CodeGenExpressionMessage");
+                sb.AppendLine("{");
+                foreach (var item in namesToTranslate)
+                {
+                    sb.AppendLine("   " + item + ",");
+                }
+                sb.AppendLine("}");
+                sb.AppendLine();
+            }
 
             sb.AppendLine($"public static class CodeGenExpressionStarter");
             sb.AppendLine("{");
@@ -151,12 +183,33 @@ namespace Signum.Engine.Dynamic
             sb.AppendLine("    {");
             foreach(var kvp in fieldNames)
             {
-                sb.AppendLine($"        dqm.RegisterExpression(({kvp.Value.FromType} e) => e.{kvp.Value.Name}());");
+                sb.AppendLine($"        dqm.RegisterExpression(({kvp.Value.FromType} e) => e.{kvp.Value.Name}(){GetNiceNameCode(kvp.Value)});");
             }
             sb.AppendLine("    }");
             sb.AppendLine("}");
 
             return sb.ToString();
+        }
+
+        private string GetNiceNameCode(DynamicExpressionEntity value)
+        {
+            switch (value.Translation)
+            {
+                case DynamicExpressionTranslation.TranslateExpressionName:
+                    return $", () => CodeGenExpressionMessage.{value.Name}.NiceToString()";
+
+                case DynamicExpressionTranslation.ReuseTranslationOfReturnType:
+                    if (value.ReturnType.StartsWith("IQueryable<") && value.ReturnType.EndsWith(">"))                 
+                        return $", () => typeof({value.ReturnType.After("IQueryable<").BeforeLast(">")}).NicePluralName()"; 
+
+                    return $", () => typeof({value.ReturnType}).NiceName()";
+
+                case DynamicExpressionTranslation.NoTranslation:
+                    return null;
+
+                default:
+                    throw new InvalidOperationException("Unexpected translaltion");
+            }
         }
     }
 }

@@ -19,8 +19,8 @@ namespace Signum.React.Dynamic
         [Route("api/dynamic/compile"), HttpPost]
         public List<CompilationErrorTS> Compile()
         {
-            Dictionary<string, CodeFile> codeFiles;
-            var result = DynamicLogic.Compile(out codeFiles, inMemory: true);
+            Dictionary<string, CodeFile> codeFiles = DynamicLogic.GetCodeFilesDictionary();
+            var result = DynamicLogic.Compile(codeFiles, inMemory: true);
             return (from ce in result.Errors.Cast<CompilerError>()
                     let fileName = Path.GetFileName(ce.FileName)
                     select (new CompilationErrorTS

@@ -107,7 +107,7 @@ namespace Signum.Engine.Mailing.Pop3
                         s.EnableSSL
                     });
 
-                dqm.RegisterQuery(typeof(Pop3ReceptionEntity), () => DynamicQuery.DynamicQuery.Auto(
+                dqm.RegisterQuery(typeof(Pop3ReceptionEntity), () => DynamicQueryCore.Auto(
                  from s in Database.Query<Pop3ReceptionEntity>()
                  select new
                  {

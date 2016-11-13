@@ -6,7 +6,9 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
+using Signum.Entities.Authorization;
 using Signum.Entities.Dynamic;
+using Signum.Entities.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using System;
@@ -98,7 +100,7 @@ namespace Signum.Engine.Dynamic
 
         public static string GetPropertyType(DynamicProperty property)
         {
-            var generator = new DynamicTypeCodeGenerator(DynamicLogic.CodeGenEntitiesNamespace, null, null, new List<string>());
+            var generator = new DynamicTypeCodeGenerator(DynamicLogic.CodeGenEntitiesNamespace, null, null, new HashSet<string>());
 
             return generator.GetPropertyType(property);
         }
@@ -123,12 +125,16 @@ namespace Signum.Engine.Dynamic
                 sb.AppendLine($"{item}Logic.Start(sb, dqm);".Indent(indent));
         }
 
+        public static Func<Dictionary<string, Dictionary<string, string>>> GetAlreadyTranslatedExpressions;
+
         public static List<CodeFile> GetCodeFiles()
         {
             if (!Administrator.ExistTable<DynamicTypeEntity>())
                 return new List<CodeFile>();
 
-            var types = GetTypes();
+            List<DynamicTypeEntity> types = GetTypes();
+            var alreadyTranslatedExpressions = GetAlreadyTranslatedExpressions?.Invoke();
+
             var entities =  types.Select(dt =>
             {
                 var def = dt.GetDefinition();
@@ -147,7 +153,10 @@ namespace Signum.Engine.Dynamic
             {
                 var def = dt.GetDefinition();
 
-                var dlg = new DynamicTypeLogicGenerator(DynamicLogic.CodeGenEntitiesNamespace, dt.TypeName, def, DynamicLogic.Namespaces);
+                var dlg = new DynamicTypeLogicGenerator(DynamicLogic.CodeGenEntitiesNamespace, dt.TypeName, def, DynamicLogic.Namespaces)
+                {
+                    AlreadyTranslated = alreadyTranslatedExpressions?.TryGetC(dt.TypeName + "Entity"),
+                };
 
                 var content = dlg.GetFileCode();
                 return new CodeFile
@@ -163,12 +172,12 @@ namespace Signum.Engine.Dynamic
 
     public class DynamicTypeCodeGenerator
     {
-        public List<string> Usings { get; private set; }
+        public HashSet<string> Usings { get; private set; }
         public string Namespace { get; private set; }
         public string TypeName { get; private set; }
         public DynamicTypeDefinition Def { get; private set; }
 
-        public DynamicTypeCodeGenerator(string @namespace, string typeName, DynamicTypeDefinition def, List<string> usings)
+        public DynamicTypeCodeGenerator(string @namespace, string typeName, DynamicTypeDefinition def, HashSet<string> usings)
         {
             this.Usings = usings;
             this.Namespace = @namespace;
@@ -446,13 +455,14 @@ namespace Signum.Engine.Dynamic
 
     public class DynamicTypeLogicGenerator
     {
-
-        public List<string> Usings { get; private set; }
+        public HashSet<string> Usings { get; private set; }
         public string Namespace { get; private set; }
         public string TypeName { get; private set; }
         public DynamicTypeDefinition Def { get; private set; }
 
-        public DynamicTypeLogicGenerator(string @namespace, string typeName, DynamicTypeDefinition def, List<string> usings)
+        public Dictionary<string, string> AlreadyTranslated { get; set; }
+
+        public DynamicTypeLogicGenerator(string @namespace, string typeName, DynamicTypeDefinition def, HashSet<string> usings)
         {
             this.Usings = usings;
             this.Namespace = @namespace;
@@ -466,9 +476,22 @@ namespace Signum.Engine.Dynamic
             foreach (var item in this.Usings)
                 sb.AppendLine("using {0};".FormatWith(item));
 
+
             sb.AppendLine();
             sb.AppendLine($"namespace {this.Namespace}");
             sb.AppendLine($"{{");
+
+
+            var complexFields = this.Def.QueryFields.EmptyIfNull().Select(a => GetComplexQueryField(a)).NotNull().ToList();
+            var complexNotTranslated = complexFields.Where(a => this.AlreadyTranslated?.TryGetC(a) == null).ToList();
+            if (complexNotTranslated.Any())
+            {
+                sb.AppendLine($"    public enum CodeGenQuery{this.TypeName}Message");
+                sb.AppendLine($"    {{");
+                foreach (var item in complexNotTranslated)
+                    sb.AppendLine($"        " + item + ",");
+                sb.AppendLine($"    }}");
+            }
 
             sb.AppendLine($"    public static class {this.TypeName}Logic");
             sb.AppendLine($"    {{");
@@ -477,7 +500,14 @@ namespace Signum.Engine.Dynamic
             sb.AppendLine($"            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))");
             sb.AppendLine($"            {{");
             sb.AppendLine(GetInclude().Indent(16));
-            sb.AppendLine(RegisterComplexOperations().Indent(16));
+
+            if (complexFields != null)
+                sb.AppendLine(RegisterComplexQuery(complexFields).Indent(16));
+
+            var complexOperations = RegisterComplexOperations();
+            if (complexOperations != null)
+                sb.AppendLine(complexOperations.Indent(16));
+
             sb.AppendLine($"            }}");
             sb.AppendLine($"        }}");
             sb.AppendLine($"    }}");
@@ -501,8 +531,11 @@ namespace Signum.Engine.Dynamic
             if (mcui != null)
                 sb.AppendLine($"    .WithUniqueIndex(e => new {{{ mcui.Fields.ToString(", ")}}}{(mcui.Where.HasText() ? ", " + mcui.Where : "")})");
 
-            if (this.Def.QueryFields.EmptyIfNull().Any()) {
-                var lines = new[] { "Entity = e" }.Concat(this.Def.QueryFields);
+            var queryFields = this.Def.QueryFields.EmptyIfNull();
+
+            if (queryFields.EmptyIfNull().Any() && queryFields.All(a => GetComplexQueryField(a) == null))
+            {
+                var lines = new[] { "Entity = e" }.Concat(queryFields);
 
                 sb.AppendLine($@"    .WithQuery(dqm, e => new 
     {{ 
@@ -511,6 +544,43 @@ namespace Signum.Engine.Dynamic
             }
 
             sb.Insert(sb.Length - 2, ';');
+            return sb.ToString();
+        }
+
+        public static string GetComplexQueryField(string field)
+        {
+            var fieldName = field.TryBefore("=")?.Trim();
+
+            if (fieldName == null)
+                return null;
+
+            if (!Reflector.ValidIdentifier(fieldName))
+                return null;
+
+            var lastProperty = field.After("=").TryAfterLast(".")?.Trim();
+
+            if (lastProperty == null || fieldName != lastProperty)
+                return fieldName;
+
+            return null;
+        }
+
+        public string RegisterComplexQuery(List<string> complexQueryFields)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            var lines = new[] { "Entity = e" }.Concat(this.Def.QueryFields);
+
+            sb.AppendLine($@"dqm.RegisterQuery(typeof({this.TypeName}Entity), () => DynamicQueryCore.Auto(
+    from e in Database.Query<{this.TypeName}Entity>()
+    select new
+    {{
+{ lines.ToString(",\r\n").Indent(8)}
+    }})
+{complexQueryFields.Select(f => $".ColumnDisplayName(a => a.{f}, {this.AlreadyTranslated?.TryGetC(f) ?? $"CodeGenQuery{this.TypeName}Message.{f}"})").ToString("\r\n").Indent(4)}
+    );");
+
+            sb.AppendLine();
             return sb.ToString();
         }
 

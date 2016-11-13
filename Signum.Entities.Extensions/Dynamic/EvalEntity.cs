@@ -146,7 +146,7 @@ namespace Signum.Entities.Dynamic
     {
         public static string AssemblyDirectory = Path.GetDirectoryName(new Uri(typeof(Entity).Assembly.CodeBase).LocalPath);
 
-        public static List<string> BasicNamespaces = new List<string>
+        public static HashSet<string> BasicNamespaces = new HashSet<string>
         {
             "System",
             "System.Linq",
@@ -162,7 +162,7 @@ namespace Signum.Entities.Dynamic
             return namespaces.ToString(ns => "using {0};\r\n".FormatWith(ns), "");
         }
 
-        public static List<string> BasicAssemblies = new List<string>
+        public static HashSet<string> BasicAssemblies = new HashSet<string>
         {
             "Signum.Engine.dll",
             "Signum.Entities.dll",

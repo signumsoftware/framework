@@ -17,6 +17,7 @@ export interface DynamicExpressionEntity extends Entities.Entity {
     fromType?: string | null;
     returnType?: string | null;
     body?: string | null;
+    translation?: DynamicExpressionTranslation;
 }
 
 export module DynamicExpressionOperation {
@@ -24,6 +25,12 @@ export module DynamicExpressionOperation {
     export const Save : Entities.ExecuteSymbol<DynamicExpressionEntity> = registerSymbol("Operation", "DynamicExpressionOperation.Save");
     export const Delete : Entities.DeleteSymbol<DynamicExpressionEntity> = registerSymbol("Operation", "DynamicExpressionOperation.Delete");
 }
+
+export const DynamicExpressionTranslation = new EnumType<DynamicExpressionTranslation>("DynamicExpressionTranslation");
+export type DynamicExpressionTranslation =
+    "TranslateExpressionName" |
+    "ReuseTranslationOfReturnType" |
+    "NoTranslation";
 
 export module DynamicPanelPermission {
     export const ViewDynamicPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "DynamicPanelPermission.ViewDynamicPanel");

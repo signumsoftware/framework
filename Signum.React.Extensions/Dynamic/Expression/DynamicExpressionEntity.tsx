@@ -37,6 +37,7 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
 
         return (
             <div>
+                <ValueLine ctx={ctx.subCtx(dt => dt.translation)}/>
                 {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handleEvaluate}><i className="fa fa-play" aria-hidden="true"></i> Evaluate</button>}
                 <div className="code-container">
                     <pre style={{ border: "0px", margin: "0px", overflow: "visible" }}>
