@@ -18,7 +18,8 @@ export function start(options: { routes: JSX.Element[] }) {
 
     Navigator.addSettings(new EntitySettings(DynamicTypeConditionEntity, w => new ViewPromise(resolve => require(['./TypeCondition/DynamicTypeConditionEntity'], resolve))));
     Constructor.registerConstructor(DynamicTypeConditionEntity, () => DynamicTypeConditionEntity.New(f => f.eval = DynamicTypeConditionEval.New()));
-    DynamicClient.Options.onGetDynamicLine.push(ctx => <CountSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeConditionEntity }} />);
+    DynamicClient.Options.onGetDynamicLineForPanel.push(ctx => <CountSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeConditionEntity }} />);
+    DynamicClient.Options.onGetDynamicLineForType.push((ctx, type) => <CountSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeConditionEntity, parentColumn: "EntityType.CleanName", parentValue: type }} />);
 }
 
 export namespace API {

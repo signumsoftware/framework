@@ -9,6 +9,29 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 interface IDynamicValidationEvaluator {}
 interface IDynamicTypeConditionEvaluator {}
+
+export const DynamicExpressionEntity = new Type<DynamicExpressionEntity>("DynamicExpression");
+export interface DynamicExpressionEntity extends Entities.Entity {
+    Type: "DynamicExpression";
+    name?: string | null;
+    fromType?: string | null;
+    returnType?: string | null;
+    body?: string | null;
+    translation?: DynamicExpressionTranslation;
+}
+
+export module DynamicExpressionOperation {
+    export const Clone : Entities.ConstructSymbol_From<DynamicExpressionEntity, DynamicExpressionEntity> = registerSymbol("Operation", "DynamicExpressionOperation.Clone");
+    export const Save : Entities.ExecuteSymbol<DynamicExpressionEntity> = registerSymbol("Operation", "DynamicExpressionOperation.Save");
+    export const Delete : Entities.DeleteSymbol<DynamicExpressionEntity> = registerSymbol("Operation", "DynamicExpressionOperation.Delete");
+}
+
+export const DynamicExpressionTranslation = new EnumType<DynamicExpressionTranslation>("DynamicExpressionTranslation");
+export type DynamicExpressionTranslation =
+    "TranslateExpressionName" |
+    "ReuseTranslationOfReturnType" |
+    "NoTranslation";
+
 export module DynamicPanelPermission {
     export const ViewDynamicPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "DynamicPanelPermission.ViewDynamicPanel");
     export const RestartApplication : Authorization.PermissionSymbol = registerSymbol("Permission", "DynamicPanelPermission.RestartApplication");
@@ -84,6 +107,7 @@ export interface DynamicTypeEntity extends Entities.Entity {
 export module DynamicTypeMessage {
     export const DynamicType0SucessfullySavedGoToDynamicPanelNow = new MessageKey("DynamicTypeMessage", "DynamicType0SucessfullySavedGoToDynamicPanelNow");
     export const ServerRestartedWithErrorsInDynamicCodeFixErrorsAndRestartAgain = new MessageKey("DynamicTypeMessage", "ServerRestartedWithErrorsInDynamicCodeFixErrorsAndRestartAgain");
+    export const RemoveSaveOperation = new MessageKey("DynamicTypeMessage", "RemoveSaveOperation");
 }
 
 export module DynamicTypeOperation {

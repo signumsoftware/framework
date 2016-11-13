@@ -51,9 +51,8 @@ export default class DynamicTypeConditionComponent extends React.Component<Dynam
                         <br />
                         {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handleEvaluate}><i className="fa fa-play" aria-hidden="true"></i> Evaluate</button>}
                         <div className="code-container">
-                            <pre style={{ border: "0px", margin: "0px" }}>{"boolean Evaluate(" + ctx.value.entityType.cleanName + " e)\n{"}</pre>
+                            <pre style={{ border: "0px", margin: "0px" }}>{"boolean Evaluate(" + ctx.value.entityType.cleanName + " e) =>"}</pre>
                             <CSharpCodeMirror script={ctx.value.eval!.script || ""} onChange={this.handleCodeChange} />
-                            <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
                         </div>
                         {this.renderTest()}
                     </div>}

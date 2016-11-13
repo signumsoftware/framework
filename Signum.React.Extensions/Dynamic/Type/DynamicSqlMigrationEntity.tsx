@@ -25,8 +25,11 @@ export default class DynamicSqlMigrationEntityComponent extends React.Component<
     }
 
     render() {
+
         const ctx = this.props.ctx;
         const ctx4 = ctx.subCtx({ labelColumns: { sm: 4 } });
+        const executed = ctx.value.executedBy != null;
+
         return (
             <div>
                 <div className="row">
@@ -40,10 +43,10 @@ export default class DynamicSqlMigrationEntityComponent extends React.Component<
                         <EntityLine ctx={ctx4.subCtx(sm => sm.executedBy)} readOnly={true} />
                     </div>
                 </div>
-              
-                <ValueLine ctx={ctx.subCtx(sm => sm.comment)} />
+
+                <ValueLine ctx={ctx.subCtx(sm => sm.comment)} readOnly={executed} />
                 <div className="code-container">
-                    <SqlCodeMirror script={ctx.value.script || ""} onChange={this.handleScriptChange} />
+                    <SqlCodeMirror script={ctx.value.script || ""} onChange={this.handleScriptChange} isReadOnly={executed} />
                 </div>
             </div>
         );

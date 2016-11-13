@@ -49,7 +49,7 @@ export function start(options: { routes: JSX.Element[] }) {
             isVisible: AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel)
         }));
 
-    DynamicClient.Options.onGetDynamicLine.push(ctx => <CountSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
+    DynamicClient.Options.onGetDynamicLineForPanel.push(ctx => <CountSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
     DynamicClient.Options.getDynaicMigrationsStep = () =>
         <Tab eventKey="migrations" title="Migrations" >
             <h3>{DynamicSqlMigrationEntity.nicePluralName()}</h3>
@@ -65,10 +65,8 @@ export namespace API {
         return ajaxPost<string>({ url: `~/api/dynamic/type/propertyType` }, property);
     }
 
-    export function autocompleteType(query: string, limit: number): Promise<string[]> {
-        return ajaxGet<string[]>({
-            url: Navigator.currentHistory.createHref({ pathname: "~/api/dynamic/type/autocompleteType", query: { query, limit } })
-        });
+    export function expressionNames(typeName: string): Promise<Array<string>> {
+        return ajaxGet<Array<string>>({ url: `~/api/dynamic/type/expressionNames/${typeName}` });
     }
 }
 
@@ -78,8 +76,8 @@ export interface DynamicTypeDefinition {
     baseType: DynamicBaseType;
     entityKind?: EntityKind;
     entityData?: EntityData;
-    operationConstruct?: OperationConstruct;
-    operationExecute?: OperationExecute;
+    operationCreate?: OperationConstruct;
+    operationSave?: OperationExecute;
     operationDelete?: OperationDelete;
     queryFields: string[];
     multiColumnUniqueIndex?: MultiColumnUniqueIndex; 

@@ -90,7 +90,7 @@ export default class ValueComponent extends React.Component<ValueComponentProps,
             return (
                 <select className="form-control" style={style} onBlur={this.props.onBlur}
                     value={val == null ? "" : val.toString()} onChange={this.handleChangeSelectOrInput} >
-                    {this.props.defaultValue == null && <option value="">{" - "}</option>}
+                    {val == null && <option value="">{" - "}</option>}
                     {this.props.options.map((o, i) =>
                         <option key={i} value={o.toString()}>{o.toString()}</option>)
                     }

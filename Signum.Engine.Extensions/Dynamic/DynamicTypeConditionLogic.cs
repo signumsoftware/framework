@@ -104,13 +104,13 @@ namespace Signum.Engine.Dynamic
 
     public class DynamicTypeConditionCodeGenerator
     {
-        public List<string> Usings { get; private set; }
+        public HashSet<string> Usings { get; private set; }
         public string Namespace { get; private set; }
         public string TypeName { get; private set; }
         public List<DynamicTypeConditionSymbolEntity> TypeConditionSymbols { get; private set; }
         public List<DynamicTypeConditionEntity> TypeConditions { get; private set; }
 
-        public DynamicTypeConditionCodeGenerator(string @namespace, List<DynamicTypeConditionEntity> types, List<DynamicTypeConditionSymbolEntity> symbols, List<string> usings)
+        public DynamicTypeConditionCodeGenerator(string @namespace, List<DynamicTypeConditionEntity> types, List<DynamicTypeConditionSymbolEntity> symbols, HashSet<string> usings)
         {
             this.Usings = usings;
             this.Namespace = @namespace;

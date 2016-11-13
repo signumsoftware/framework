@@ -81,7 +81,7 @@ export class CompileStep extends React.Component<void, DynamicCompileStepState>{
 
         var sc = new StyleContext(undefined, { labelColumns: { sm: 3 } });
 
-        const lines = Options.onGetDynamicLine.map(f => f(sc));
+        const lines = Options.onGetDynamicLineForPanel.map(f => f(sc));
         const lineContainer = React.cloneElement(<div className="form-horizontal" />, undefined, ...lines);
 
         const errors = this.state.complationErrors;

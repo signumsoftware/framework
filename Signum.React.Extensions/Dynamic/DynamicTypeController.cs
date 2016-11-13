@@ -29,33 +29,13 @@ namespace Signum.React.Dynamic
           
         }
 
-        [Route("api/dynamic/type/autocompleteType"), HttpGet]
-        public List<string> AutocompleteType(string query, int limit) //Not comprehensive, just useful
+        [Route("api/dynamic/type/expressionNames/{typeName}"), HttpGet]
+        public List<string> ExpressionNames(string typeName)
         {
-            var types = GetTypes();
+            if (!Schema.Current.Tables.ContainsKey(typeof(DynamicExpressionEntity)))
+                return new List<string>();
 
-            var result = types.Where(a => a.StartsWith(query, StringComparison.InvariantCultureIgnoreCase)).OrderBy(a => a.Length).ThenBy(a => a).Take(limit).ToList();
-
-            if (result.Count < limit)
-                result.AddRange(types.Where(a => a.Contains(query, StringComparison.InvariantCultureIgnoreCase)).OrderBy(a => a.Length).ThenBy(a => a).Take(result.Count - limit).ToList());
-
-            return result;
-        }
-
-        public static List<string> AditionalTypes = new List<string>
-        {
-            "DateTime",
-            "TimeSpan",
-            "Guid",
-        };
-
-        public List<string> GetTypes()
-        {
-            var basic = CSharpRenderer.BasicTypeNames.Values;
-
-            var entities =  TypeLogic.TypeToEntity.Keys.Select(a => a.Name);
-
-            return basic.Concat(AditionalTypes).Concat(entities).ToList();
+            return Database.Query<DynamicExpressionEntity>().Where(a => a.FromType == typeName).Select(a => a.Name).ToList();
         }
     }
 }

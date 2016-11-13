@@ -5,9 +5,9 @@ import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, Ent
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions, QueryToken, filterOperations, OrderType, ColumnOptionsMode } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, Binding, EntityDataValues, EntityKindValues } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { getQueryNiceName, Binding, EntityDataValues, EntityKindValues, EntityKind } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { StyleContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import QueryTokenBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/QueryTokenBuilder'
 import { ModifiableEntity, JavascriptMessage, EntityControlMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -15,6 +15,8 @@ import { QueryEntity } from '../../../../Framework/Signum.React/Scripts/Signum.E
 import { FilterOperation, PaginationMode } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.DynamicQuery'
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal';
 import * as DynamicTypeClient from '../DynamicTypeClient';
+import * as DynamicClient from '../DynamicClient';
+import { DynamicTypeMessage } from '../Signum.Entities.Dynamic';
 import { Validators, DynamicTypeDefinition, DynamicProperty } from '../DynamicTypeClient';
 import ValueComponent from './ValueComponent';
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror';
@@ -31,16 +33,23 @@ interface DynamicTypeDefinitionComponentProps {
     dc: DynamicTypeDesignContext;
 }
 
-export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeDefinitionComponentProps, void> {
+interface DynamicTypeDefinitionComponentState
+{
+    expressionsNames?: string[];
+}
 
+export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeDefinitionComponentProps, DynamicTypeDefinitionComponentState> {
 
-    handleMultiColumnUniqueIndexChecked = () => {
-        const def = this.props.definition;
-        if (def.multiColumnUniqueIndex)
-            def.multiColumnUniqueIndex = undefined;
-        else
-            def.multiColumnUniqueIndex = { fields: [""] };
-        this.forceUpdate();
+    constructor(props: DynamicTypeDefinitionComponentProps) {
+        super(props);
+        this.state = {};
+    }
+
+    handleTabSelect = (eventKey: any /*string*/)=> {
+        if (this.props.typeName && eventKey == "query")
+            DynamicTypeClient.API.expressionNames(this.props.typeName + "Entity")
+                .then(exprNames => this.changeState(s => s.expressionsNames = exprNames))
+                .done();
     }
 
     handlePropertyRemoved = (dp: DynamicProperty) => {
@@ -51,110 +60,142 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
         this.props.dc.refreshView();
     }
 
+    handleEntityKindChange = () => {
+        const def = this.props.definition;
+        var requiresSave = def.entityKind != undefined && DynamicTypeDefinitionComponent.requiresSave.contains(def.entityKind)
+
+        if (requiresSave && !def.operationSave) {
+            def.operationSave = { execute: "" };
+        } else if (!requiresSave && def.operationSave) {
+            if (this.isEmpty(def.operationSave) ||
+                confirm(DynamicTypeMessage.RemoveSaveOperation.niceToString()))
+                def.operationSave = undefined;
+        }
+        this.forceUpdate();
+
+    }
+
+    isEmpty(operation: DynamicTypeClient.OperationExecute) {
+        return !operation.execute && !operation.canExecute;
+    }
+
+    static requiresSave: EntityKind[] = ["Main", "Shared", "String", "Relational"];
+
     render() {
         const def = this.props.definition;
 
-        var propNames = def.properties.map(p => p.name);
+        var propNames = def.properties.map(p => "e." + p.name);
+
+        var expressionNames = (this.state.expressionsNames || []).map(exp => exp + "= e." + exp + "()");
 
         return (
             <div>
                 <div className="row">
                     <div className="col-sm-6">
-                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.entityKind)} type="string" defaultValue={null} options={EntityKindValues} />
+                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.entityKind)} type="string" defaultValue={null} options={EntityKindValues} onChange={this.handleEntityKindChange}/>
                     </div>
                     <div className="col-sm-6">
                         <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.entityData)} type="string" defaultValue={null} options={EntityDataValues} />
                     </div>
                 </div>
 
-                <Tabs defaultActiveKey="properties" id="DynamicTypeTabs">
+                <Tabs defaultActiveKey="properties" id="DynamicTypeTabs" onSelect={this.handleTabSelect}>
                     <Tab eventKey="properties" title="Properties">
                         <PropertyRepeaterComponent dc={this.props.dc} properties={def.properties} onRemove={this.handlePropertyRemoved} />
-                        <fieldset>
-                            <legend><input type="checkbox" checked={!!def.multiColumnUniqueIndex} onChange={this.handleMultiColumnUniqueIndexChecked} /> Multi-column Unique Index</legend>
 
-                            {def.multiColumnUniqueIndex &&
+                        {this.renderFieldSet<DynamicTypeClient.MultiColumnUniqueIndex>(Binding.create(def, d => d.multiColumnUniqueIndex), {
+                            title: "Multi-column Unique Index",
+                            onCreate: () => ({ fields: [""] }),
+                            renderContent: mci => (
                                 <div className="row">
                                     <div className="col-sm-6">
-                                        <ComboBoxRepeaterComponent options={propNames} list={def.multiColumnUniqueIndex.fields} />
+                                        <ComboBoxRepeaterComponent options={propNames} list={mci.fields} />
                                     </div>
                                     <div className="col-sm-6">
-                                        <CSharpExpressionCodeMirror binding={Binding.create(def.multiColumnUniqueIndex, d => d.where)} title="Where" signature={"(" + this.props.typeName + "Entity e) =>"} />
+                                        <CSharpExpressionCodeMirror binding={Binding.create(mci, d => d.where)} title="Where" signature={"(" + this.props.typeName + "Entity e) =>"} />
                                     </div>
-                                </div>}
-                        </fieldset>
-
+                                </div>
+                            )
+                        })}
                         <fieldset>
                             <legend>ToString expression</legend>
                             <CSharpExpressionCodeMirror binding={Binding.create(def, d => d.toStringExpression)} signature={"(" + this.props.typeName + "Entity e) =>"} />
                         </fieldset>
                     </Tab>
                     <Tab eventKey="query" title="Query">
-                        <ComboBoxRepeaterComponent options={["Id"].concat(propNames)} list={def.queryFields} />
+                        <ComboBoxRepeaterComponent options={["e.Id"].concat(propNames).concat(expressionNames)} list={def.queryFields} />
                     </Tab>
 
                     <Tab eventKey="operations" title="Operations">
-                        <fieldset>
-                            <legend><input type="checkbox" checked={!!def.operationConstruct} onChange={this.handleOperationConstructChecked} /> Create</legend>
-                            {def.operationConstruct &&
-                                <CSharpExpressionCodeMirror binding={Binding.create(def.operationConstruct, d => d.construct)} signature={"(object[] args) =>"} />
-                            }
-                        </fieldset>
+                        {this.renderFieldSet<DynamicTypeClient.OperationConstruct>(Binding.create(def, d => d.operationCreate), {
+                            title: "Create",
+                            onCreate: () => ({
+                                construct: "return new " + this.props.typeName + "Entity\r\n{\r\n" +
+                                    def.properties.map(p => "    " + p.name + " = null").join(", \r\n") +
+                                    "\r\n};"
+                            }),
+                            renderContent: oc =>
+                                <CSharpExpressionCodeMirror binding={Binding.create(oc, d => d.construct)} signature={"(object[] args) =>"} />
+                        })}
 
-                        <fieldset>
-                            <legend><input type="checkbox" checked={!!def.operationExecute} onChange={this.handleOperationSaveChecked} /> Save</legend>
-                            {def.operationExecute &&
+                        {this.renderFieldSet<DynamicTypeClient.OperationExecute>(Binding.create(def, d => d.operationSave), {
+                            title: "Save",
+                            onCreate: () => ({ execute: "" }),
+                            renderContent: oe =>
                                 <div>
-                                <CSharpExpressionCodeMirror binding={Binding.create(def.operationExecute, d => d.canExecute)} title="CanSave" signature={"string (" + this.props.typeName + "Entity e) =>"} />
-                                <CSharpExpressionCodeMirror binding={Binding.create(def.operationExecute, d => d.execute)} title="OperationSave" signature={"(" + this.props.typeName + "Entity e, object[] args) =>"} />
+                                    <CSharpExpressionCodeMirror binding={Binding.create(oe, d => d.canExecute)} title="CanSave" signature={"string (" + this.props.typeName + "Entity e) =>"} />
+                                    <CSharpExpressionCodeMirror binding={Binding.create(oe, d => d.execute)} title="OperationSave" signature={"(" + this.props.typeName + "Entity e, object[] args) =>"} />
                                 </div>
-                            }
-                        </fieldset>
+                        })}
 
-                        <fieldset>
-                            <legend><input type="checkbox" checked={!!def.operationDelete} onChange={this.handleOperationDeleteChecked} /> Delete</legend>
-                            {def.operationDelete &&
+                        {this.renderFieldSet<DynamicTypeClient.OperationDelete>(Binding.create(def, d => d.operationDelete), {
+                            title: "Delete",
+                            onCreate: () => ({ delete: "" }),
+                            renderContent: od =>
                                 <div>
-                                <CSharpExpressionCodeMirror binding={Binding.create(def.operationDelete, d => d.canDelete)} title="CanDelete" signature={"string (" + this.props.typeName + "Entity e) =>"} />
-                                <CSharpExpressionCodeMirror binding={Binding.create(def.operationDelete, d => d.delete)} title="OperationDelete" signature={"(" + this.props.typeName + "Entity e, object[] args) =>"} />
+                                    <CSharpExpressionCodeMirror binding={Binding.create(od, d => d.canDelete)} title="CanDelete" signature={"string (" + this.props.typeName + "Entity e) =>"} />
+                                    <CSharpExpressionCodeMirror binding={Binding.create(od, d => d.delete)} title="OperationDelete" signature={"(" + this.props.typeName + "Entity e, object[] args) =>"} />
                                 </div>
-                            }
-                        </fieldset>
+                        })}
+                    </Tab>
+                    <Tab eventKey="other" title="Other">
+                        {this.renderOthers()}
                     </Tab>
                 </Tabs>
             </div>
         );
     }
-
-    handleOperationConstructChecked = () => {
-        const def = this.props.definition;
-        if (def.operationConstruct)
-            def.operationConstruct = undefined;
-        else
-            def.operationConstruct = {
-                construct:
-                    "return new " + this.props.typeName + "Entity\r\n{\r\n" +
-                    this.props.definition.properties.map(p => "    " + p.name + " = null").join(", \r\n") +
-                    "\r\n};" };
-        this.forceUpdate();
+    
+    renderOthers() {
+        var ctx = new StyleContext(undefined, { labelColumns: 3 });
+        return React.createElement("div", {}, ...DynamicClient.Options.onGetDynamicLineForType.map(f => f(ctx, this.props.typeName)));
     }
 
-    handleOperationSaveChecked = () => {
-        const def = this.props.definition;
-        if (def.operationExecute)
-            def.operationExecute = undefined;
-        else
-            def.operationExecute = { execute: "e.Save();" };
-        this.forceUpdate();
-    }
+    renderFieldSet<T>(
+        binding: Binding<T | undefined>,
+        options: {
+            title: React.ReactChild,
+            renderContent: (item: T) => React.ReactElement<any>,
+            onCreate: () => T
+        }) {
 
-    handleOperationDeleteChecked = () => {
-        const def = this.props.definition;
-        if (def.operationDelete)
-            def.operationDelete = undefined;
-        else
-            def.operationDelete = { delete: "e.Delete();" };
-        this.forceUpdate();
+        let value = binding.getValue();
+
+        let handleChecked = () => {
+            if (value)
+                binding.deleteValue();
+            else
+                binding.setValue(options.onCreate());
+            this.forceUpdate();
+        }
+
+        return (
+            <fieldset>
+                <legend><input type="checkbox" checked={!!value} onChange={handleChecked} /> {options.title}</legend>
+                {value && options.renderContent(value)}
+            </fieldset>
+        );
+
     }
 }
 
@@ -400,7 +441,7 @@ export class TypeCombo extends React.Component<{ dc: DynamicTypeDesignContext; b
     }
 
     handleGetItems = (query: string) => {
-        return DynamicTypeClient.API.autocompleteType(query, 5)
+        return DynamicClient.API.autocompleteType({ query: query, limit: 5, includeBasicTypes: true, includeEntities: true, includeMList: true });
     }
 
     handleOnChange = (newValue: string) => {

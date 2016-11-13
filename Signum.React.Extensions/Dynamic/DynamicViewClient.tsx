@@ -2,6 +2,7 @@
 import * as React from 'react'
 import { Route } from 'react-router'
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
+import { CountSearchControlLine } from '../../../Framework/Signum.React/Scripts/Search'
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
@@ -16,8 +17,9 @@ import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import { DynamicViewEntity, DynamicViewSelectorEntity, DynamicViewMessage, DynamicViewOperation } from './Signum.Entities.Dynamic'
-import DynamicViewEntityComponent from './View/DynamicViewEntity'
-import { BaseNode, NodeConstructor } from './View/Nodes'
+import DynamicViewEntityComponent from './View/DynamicViewEntity' //Just Typing
+import * as DynamicClient from './DynamicClient'
+
 import { DynamicViewComponentProps } from './View/DynamicViewComponent'
 import { AuthInfo } from './View/AuthInfo'
 
@@ -25,6 +27,10 @@ export function start(options: { routes: JSX.Element[] }) {
 
     Navigator.addSettings(new EntitySettings(DynamicViewEntity, w => new ViewPromise(resolve => require(['./View/DynamicViewEntity'], resolve))));
     Navigator.addSettings(new EntitySettings(DynamicViewSelectorEntity, w => new ViewPromise(resolve => require(['./View/DynamicViewSelector'], resolve))));
+
+    DynamicClient.Options.onGetDynamicLineForType.push((ctx, type) => <CountSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicViewEntity, parentColumn: "EntityType.CleanName", parentValue: type }} />);
+    DynamicClient.Options.onGetDynamicLineForType.push((ctx, type) => <CountSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicViewSelectorEntity, parentColumn: "EntityType.CleanName", parentValue: type }} />);
+
 
     Operations.addSettings(new EntityOperationSettings(DynamicViewOperation.Save, {
         onClick: ctx => {
@@ -105,13 +111,20 @@ export function getOrCreateDynamicView(typeName: string, viewName: string | unde
 }
 
 export function createDefaultDynamicView(typeName: string): Promise<DynamicViewEntity> {
-    return Navigator.API.getType(typeName).then(t => DynamicViewEntity.New(dv => {
-        dv.entityType = t;
-        dv.viewName = "My View";
-        const node = NodeConstructor.createDefaultNode(getTypeInfo(typeName));
-        dv.viewContent = JSON.stringify(node);
-    }));
+    return loadNodes().then(nodes =>
+        Navigator.API.getType(typeName).then(t => DynamicViewEntity.New(dv => {
+            dv.entityType = t;
+            dv.viewName = "My View";
+            const node = nodes.NodeConstructor.createDefaultNode(getTypeInfo(typeName));
+            dv.viewContent = JSON.stringify(node);
+        })));
 }
+
+import * as Nodes from './View/Nodes' //Typings-only
+export function loadNodes(): Promise<typeof Nodes> {
+    return new Promise<typeof Nodes>(resolve => require(["./View/Nodes"], resolve));
+}
+
 
 export namespace API {
 

@@ -31,7 +31,8 @@ export function start(options: { routes: JSX.Element[] }) {
 }
 
 export namespace Options {
-    export let onGetDynamicLine: ((ctx: StyleContext) => React.ReactNode)[] = [];
+    export let onGetDynamicLineForPanel: ((ctx: StyleContext) => React.ReactNode)[] = [];
+    export let onGetDynamicLineForType: ((ctx: StyleContext, type: string) => React.ReactNode)[] = [];
     export let getDynaicMigrationsStep: (() => React.ReactElement<any>) | undefined = undefined;
 }
 
@@ -56,5 +57,20 @@ export namespace API {
     export function pingServer(): Promise<void> {
         return ajaxPost<void>({ url: `~/api/dynamic/pingServer` }, null);
     }
+
+
+    export function autocompleteType(request: AutocompleteTypeRequest): Promise<string[]> {
+        return ajaxPost<string[]>({ url: "~/api/dynamic/autocompleteType" }, request);
+    }
 }
+
+export interface AutocompleteTypeRequest {
+    query: string;
+    limit: number;
+    includeBasicTypes: boolean;
+    includeEntities?: boolean;
+    includeMList?: boolean;
+    includeQueriable?: boolean;
+}
+
 

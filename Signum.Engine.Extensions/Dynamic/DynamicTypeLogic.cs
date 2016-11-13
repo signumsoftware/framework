@@ -6,7 +6,9 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
+using Signum.Entities.Authorization;
 using Signum.Entities.Dynamic;
+using Signum.Entities.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using System;
@@ -33,7 +35,6 @@ namespace Signum.Engine.Dynamic
                     });
 
                 DynamicTypeGraph.Register();
-
                 DynamicLogic.GetCodeFiles += GetCodeFiles;
                 DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
             }
@@ -99,7 +100,7 @@ namespace Signum.Engine.Dynamic
 
         public static string GetPropertyType(DynamicProperty property)
         {
-            var generator = new DynamicTypeCodeGenerator(DynamicLogic.CodeGenEntitiesNamespace, null, null, new List<string>());
+            var generator = new DynamicTypeCodeGenerator(DynamicLogic.CodeGenEntitiesNamespace, null, null, new HashSet<string>());
 
             return generator.GetPropertyType(property);
         }
@@ -124,12 +125,16 @@ namespace Signum.Engine.Dynamic
                 sb.AppendLine($"{item}Logic.Start(sb, dqm);".Indent(indent));
         }
 
+        public static Func<Dictionary<string, Dictionary<string, string>>> GetAlreadyTranslatedExpressions;
+
         public static List<CodeFile> GetCodeFiles()
         {
             if (!Administrator.ExistTable<DynamicTypeEntity>())
                 return new List<CodeFile>();
 
-            var types = GetTypes();
+            List<DynamicTypeEntity> types = GetTypes();
+            var alreadyTranslatedExpressions = GetAlreadyTranslatedExpressions?.Invoke();
+
             var entities =  types.Select(dt =>
             {
                 var def = dt.GetDefinition();
@@ -148,7 +153,10 @@ namespace Signum.Engine.Dynamic
             {
                 var def = dt.GetDefinition();
 
-                var dlg = new DynamicTypeLogicGenerator(DynamicLogic.CodeGenEntitiesNamespace, dt.TypeName, def, DynamicLogic.Namespaces);
+                var dlg = new DynamicTypeLogicGenerator(DynamicLogic.CodeGenEntitiesNamespace, dt.TypeName, def, DynamicLogic.Namespaces)
+                {
+                    AlreadyTranslated = alreadyTranslatedExpressions?.TryGetC(dt.TypeName + "Entity"),
+                };
 
                 var content = dlg.GetFileCode();
                 return new CodeFile
@@ -164,12 +172,12 @@ namespace Signum.Engine.Dynamic
 
     public class DynamicTypeCodeGenerator
     {
-        public List<string> Usings { get; private set; }
+        public HashSet<string> Usings { get; private set; }
         public string Namespace { get; private set; }
         public string TypeName { get; private set; }
         public DynamicTypeDefinition Def { get; private set; }
 
-        public DynamicTypeCodeGenerator(string @namespace, string typeName, DynamicTypeDefinition def, List<string> usings)
+        public DynamicTypeCodeGenerator(string @namespace, string typeName, DynamicTypeDefinition def, HashSet<string> usings)
         {
             this.Usings = usings;
             this.Namespace = @namespace;
@@ -235,13 +243,32 @@ namespace Signum.Engine.Dynamic
 
         public string GetEntityOperation()
         {
+            if (this.Def.OperationCreate == null &&
+                 this.Def.OperationSave == null &&
+                 this.Def.OperationDelete == null)
+                return null;
+
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"[AutoInit]"); //Only for ReflectionServer
             sb.AppendLine($"public static class {this.TypeName}Operation");
             sb.AppendLine("{");
-            sb.AppendLine($"    public static readonly ConstructSymbol<{this.TypeName}Entity>.Simple Create = OperationSymbol.Construct<{this.TypeName}Entity>.Simple(typeof({ this.TypeName}Operation), \"Create\");");
-            sb.AppendLine($"    public static readonly ExecuteSymbol<{this.TypeName}Entity> Save = OperationSymbol.Execute<{this.TypeName}Entity>(typeof({ this.TypeName}Operation), \"Save\");");
-            sb.AppendLine($"    public static readonly DeleteSymbol<{this.TypeName}Entity> Delete = OperationSymbol.Delete<{this.TypeName}Entity>(typeof({ this.TypeName}Operation), \"Delete\");");
+
+            if (this.Def.OperationCreate != null)
+                sb.AppendLine($"    public static readonly ConstructSymbol<{this.TypeName}Entity>.Simple Create = OperationSymbol.Construct<{this.TypeName}Entity>.Simple(typeof({ this.TypeName}Operation), \"Create\");");
+
+
+            var requiresSaveOperation = (this.Def.EntityKind != null && EntityKindAttribute.CalculateRequiresSaveOperation(this.Def.EntityKind.Value));
+            if ((this.Def.OperationSave != null) && !requiresSaveOperation)
+                throw new InvalidOperationException($"DynamicType '{this.TypeName}' defines Save but has EntityKind = '{this.Def.EntityKind}'");
+            else if (this.Def.OperationSave == null && requiresSaveOperation)
+                throw new InvalidOperationException($"DynamicType '{this.TypeName}' does not define Save but has EntityKind = '{this.Def.EntityKind}'");
+
+            if (this.Def.OperationSave != null)
+                sb.AppendLine($"    public static readonly ExecuteSymbol<{this.TypeName}Entity> Save = OperationSymbol.Execute<{this.TypeName}Entity>(typeof({ this.TypeName}Operation), \"Save\");");
+
+            if (this.Def.OperationDelete != null)
+                sb.AppendLine($"    public static readonly DeleteSymbol<{this.TypeName}Entity> Delete = OperationSymbol.Delete<{this.TypeName}Entity>(typeof({ this.TypeName}Operation), \"Delete\");");
+
             sb.AppendLine("}");
 
             return sb.ToString();
@@ -426,14 +453,16 @@ namespace Signum.Engine.Dynamic
         }
     }
 
-    public class DynamicTypeLogicGenerator {
-
-        public List<string> Usings { get; private set; }
+    public class DynamicTypeLogicGenerator
+    {
+        public HashSet<string> Usings { get; private set; }
         public string Namespace { get; private set; }
         public string TypeName { get; private set; }
         public DynamicTypeDefinition Def { get; private set; }
 
-        public DynamicTypeLogicGenerator(string @namespace, string typeName, DynamicTypeDefinition def, List<string> usings)
+        public Dictionary<string, string> AlreadyTranslated { get; set; }
+
+        public DynamicTypeLogicGenerator(string @namespace, string typeName, DynamicTypeDefinition def, HashSet<string> usings)
         {
             this.Usings = usings;
             this.Namespace = @namespace;
@@ -447,9 +476,22 @@ namespace Signum.Engine.Dynamic
             foreach (var item in this.Usings)
                 sb.AppendLine("using {0};".FormatWith(item));
 
+
             sb.AppendLine();
             sb.AppendLine($"namespace {this.Namespace}");
             sb.AppendLine($"{{");
+
+
+            var complexFields = this.Def.QueryFields.EmptyIfNull().Select(a => GetComplexQueryField(a)).NotNull().ToList();
+            var complexNotTranslated = complexFields.Where(a => this.AlreadyTranslated?.TryGetC(a) == null).ToList();
+            if (complexNotTranslated.Any())
+            {
+                sb.AppendLine($"    public enum CodeGenQuery{this.TypeName}Message");
+                sb.AppendLine($"    {{");
+                foreach (var item in complexNotTranslated)
+                    sb.AppendLine($"        " + item + ",");
+                sb.AppendLine($"    }}");
+            }
 
             sb.AppendLine($"    public static class {this.TypeName}Logic");
             sb.AppendLine($"    {{");
@@ -458,7 +500,14 @@ namespace Signum.Engine.Dynamic
             sb.AppendLine($"            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))");
             sb.AppendLine($"            {{");
             sb.AppendLine(GetInclude().Indent(16));
-            sb.AppendLine(RegisterComplexOperations().Indent(16));
+
+            if (complexFields != null)
+                sb.AppendLine(RegisterComplexQuery(complexFields).Indent(16));
+
+            var complexOperations = RegisterComplexOperations();
+            if (complexOperations != null)
+                sb.AppendLine(complexOperations.Indent(16));
+
             sb.AppendLine($"            }}");
             sb.AppendLine($"        }}");
             sb.AppendLine($"    }}");
@@ -472,18 +521,21 @@ namespace Signum.Engine.Dynamic
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"sb.Include<{this.TypeName}Entity>()");
 
-            if (string.IsNullOrWhiteSpace(this.Def.OperationExecute?.Execute.Trim()))
+            if (this.Def.OperationSave != null && string.IsNullOrWhiteSpace(this.Def.OperationSave.Execute.Trim()))
                 sb.AppendLine($"    .WithSave({this.TypeName}Operation.Save)");
 
-            if (string.IsNullOrWhiteSpace(this.Def.OperationDelete?.Delete.Trim()))
+            if (this.Def.OperationDelete != null && string.IsNullOrWhiteSpace(this.Def.OperationDelete.Delete.Trim()))
                 sb.AppendLine($"    .WithDelete({this.TypeName}Operation.Delete)");
 
             var mcui = this.Def.MultiColumnUniqueIndex;
             if (mcui != null)
-                sb.AppendLine($"    .WithUniqueIndex(e => new {{{ mcui.Fields.Select(f => "e." + f).ToString(", ")}}}{(mcui.Where.HasText() ? ", " + mcui.Where : "")})");
+                sb.AppendLine($"    .WithUniqueIndex(e => new {{{ mcui.Fields.ToString(", ")}}}{(mcui.Where.HasText() ? ", " + mcui.Where : "")})");
 
-            if (this.Def.QueryFields.EmptyIfNull().Any()) {
-                var lines = new[] { "Entity = e" }.Concat(this.Def.QueryFields.Select(f => "e." + f));
+            var queryFields = this.Def.QueryFields.EmptyIfNull();
+
+            if (queryFields.EmptyIfNull().Any() && queryFields.All(a => GetComplexQueryField(a) == null))
+            {
+                var lines = new[] { "Entity = e" }.Concat(queryFields);
 
                 sb.AppendLine($@"    .WithQuery(dqm, e => new 
     {{ 
@@ -495,22 +547,59 @@ namespace Signum.Engine.Dynamic
             return sb.ToString();
         }
 
+        public static string GetComplexQueryField(string field)
+        {
+            var fieldName = field.TryBefore("=")?.Trim();
+
+            if (fieldName == null)
+                return null;
+
+            if (!Reflector.ValidIdentifier(fieldName))
+                return null;
+
+            var lastProperty = field.After("=").TryAfterLast(".")?.Trim();
+
+            if (lastProperty == null || fieldName != lastProperty)
+                return fieldName;
+
+            return null;
+        }
+
+        public string RegisterComplexQuery(List<string> complexQueryFields)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            var lines = new[] { "Entity = e" }.Concat(this.Def.QueryFields);
+
+            sb.AppendLine($@"dqm.RegisterQuery(typeof({this.TypeName}Entity), () => DynamicQueryCore.Auto(
+    from e in Database.Query<{this.TypeName}Entity>()
+    select new
+    {{
+{ lines.ToString(",\r\n").Indent(8)}
+    }})
+{complexQueryFields.Select(f => $".ColumnDisplayName(a => a.{f}, {this.AlreadyTranslated?.TryGetC(f) ?? $"CodeGenQuery{this.TypeName}Message.{f}"})").ToString("\r\n").Indent(4)}
+    );");
+
+            sb.AppendLine();
+            return sb.ToString();
+        }
+
         private string RegisterComplexOperations()
         {
             StringBuilder sb = new StringBuilder();
-            var operationConstruct = this.Def.OperationConstruct?.Construct.Trim();
+            var operationConstruct = this.Def.OperationCreate?.Construct.Trim();
             if (!string.IsNullOrWhiteSpace(operationConstruct))
             {
                 sb.AppendLine();
                 sb.AppendLine("new Graph<{0}Entity>.Construct({0}Operation.Create)".FormatWith(this.TypeName));
                 sb.AppendLine("{");
-                sb.AppendLine("    Construct = (args) => {\r\n" + operationConstruct + "\r\n}");
+                sb.AppendLine("    Construct = (args) => {\r\n" + operationConstruct.Indent(8) + "\r\n}");
                 sb.AppendLine("}.Register();");
             }
 
-            var operationExecute = this.Def.OperationExecute?.Execute.Trim();
-            var operationCanExecute = this.Def.OperationExecute?.CanExecute?.Trim();
-            if (!string.IsNullOrWhiteSpace(operationExecute))
+            var operationExecute = this.Def.OperationSave?.Execute.Trim();
+            var operationCanExecute = this.Def.OperationSave?.CanExecute?.Trim();
+            if (!string.IsNullOrWhiteSpace(operationExecute) || !string.IsNullOrWhiteSpace(operationCanExecute))
             {
                 sb.AppendLine();
                 sb.AppendLine("new Graph<{0}Entity>.Execute({0}Operation.Save)".FormatWith(this.TypeName));
@@ -521,13 +610,13 @@ namespace Signum.Engine.Dynamic
 
                 sb.AppendLine("    AllowsNew = true,");
                 sb.AppendLine("    Lite = false,");
-                sb.AppendLine("    Execute = (e, args) => {\r\n" + operationExecute + "\r\n}");
+                sb.AppendLine("    Execute = (e, args) => {\r\n" + operationExecute?.Indent(8) + "\r\n}");
                 sb.AppendLine("}.Register();");
             }
 
             var operationDelete = this.Def.OperationDelete?.Delete.Trim();
             var operationCanDelete = this.Def.OperationDelete?.CanDelete?.Trim();
-            if (!string.IsNullOrWhiteSpace(operationDelete))
+            if (!string.IsNullOrWhiteSpace(operationDelete) || !string.IsNullOrEmpty(operationCanDelete))
             {
                 sb.AppendLine();
                 sb.AppendLine("new Graph<{0}Entity>.Delete({0}Operation.Delete)".FormatWith(this.TypeName));
@@ -536,7 +625,7 @@ namespace Signum.Engine.Dynamic
                 if (!string.IsNullOrWhiteSpace(operationCanDelete))
                     sb.AppendLine($"    CanDelete = e => {operationCanDelete},");
 
-                sb.AppendLine("    Delete = (e, args) => {\r\n" + operationDelete + "\r\n}");
+                sb.AppendLine("    Delete = (e, args) => {\r\n" + (operationDelete.DefaultText("e.Delete();")).Indent(8) + "\r\n}");
                 sb.AppendLine("}.Register();");
             }
 
