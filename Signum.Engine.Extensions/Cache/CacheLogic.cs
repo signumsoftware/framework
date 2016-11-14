@@ -44,6 +44,13 @@ namespace Signum.Engine.Cache
 
         public static bool DropStaleServices = true;
 
+        public static FluentInclude<T> WithCache<T>(this FluentInclude<T> fi)
+          where T : Entity
+        {
+            CacheLogic.TryCacheTable(fi.SchemaBuilder, typeof(T));
+            return fi;
+        }
+
         public static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null, null)));
