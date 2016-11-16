@@ -82,7 +82,7 @@ namespace Signum.Entities.Dynamic
                         parameters.ReferencedAssemblies.Add("System.Core.dll");
                         foreach (var ass in assemblies)
                         {
-                            parameters.ReferencedAssemblies.Add(Path.Combine(Eval.AssemblyDirectory, ass));
+                            parameters.ReferencedAssemblies.Add(ass);
                         }
 
                         parameters.GenerateInMemory = true;
