@@ -27,7 +27,7 @@ namespace Signum.Entities.Dynamic
         public string ReturnType { get; set; }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
-        [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
+        [StringLengthValidator(AllowNulls = false, Min = 1, MultiLine = true)]
         public string Body { get; set; }
         
         public DynamicExpressionTranslation Translation { get; set; }
