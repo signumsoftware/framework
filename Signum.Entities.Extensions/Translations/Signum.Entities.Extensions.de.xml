@@ -486,9 +486,32 @@
     <Member Name="DisconnectedMachine" Description="Getrennter Computer" />
     <Member Name="LastOnlineTicks" Description="Letzte Onlineticks" />
   </Type>
+  <Type Name="DynamicExpressionEntity" Description="Dynamischen Ausdruck" PluralDescription="Dynamischen Ausdrücke">
+    <Member Name="Body" Description="Körper" />
+    <Member Name="FromType" Description="Vom Typ" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="ReturnType" Description="Rückgabetyp" />
+    <Member Name="Translation" Description="Übersetzung" />
+  </Type>
+  <Type Name="DynamicExpressionOperation">
+    <Member Name="Clone" Description="Klonen" />
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="DynamicExpressionTranslation" Description="Dynamischer Ausdruck Übersetzung">
+    <Member Name="NoTranslation" Description="Keine Übersetzung" />
+    <Member Name="ReuseTranslationOfReturnType" Description="Übersetzung des Rückgabetyps wiederverwenden" />
+    <Member Name="TranslateExpressionName" Description="Ausdrucksnamen übersetzen" />
+  </Type>
   <Type Name="DynamicPanelPermission">
     <Member Name="RestartApplication" Description="Anwendung neu starten" />
     <Member Name="ViewDynamicPanel" Description="Dynamic Panel anzeigen" />
+  </Type>
+  <Type Name="DynamicRenameEntity" Description="Dynamisches umbenennen" PluralDescription="Dynamische umbenennungen">
+    <Member Name="CreationDate" Description="Erstellungsdatum" />
+    <Member Name="NewName" Description="Neuer Name" />
+    <Member Name="OldName" Description="Alter Name" />
+    <Member Name="ReplacementKey" Description="Ersatzschlüssel" />
   </Type>
   <Type Name="DynamicSqlMigrationEntity" Description="Dynamische Sql-migration" PluralDescription="Dynamischen Sql-migrationen">
     <Member Name="Comment" Description="Kommentar" />
@@ -499,6 +522,7 @@
     <Member Name="Script" Description="Skript" />
   </Type>
   <Type Name="DynamicSqlMigrationMessage">
+    <Member Name="PreventingGenerationNewScriptBecauseOfErrorsInDynamicCodeFixErrorsAndRestartServer" Description="Vermeidung von ein neues Skript aufgrund von Fehlern in dynamischen Code. Beheben Sie die Fehler, und starten Sie den Server neu." />
     <Member Name="TheMigrationIsAlreadyExecuted" Description="Die Migration wird bereits ausgeführt" />
   </Type>
   <Type Name="DynamicSqlMigrationOperation">
@@ -507,12 +531,31 @@
     <Member Name="Execute" Description="Ausführen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
+  <Type Name="DynamicTypeConditionEntity" Description="Dynamischer Typenzustand" PluralDescription="Dynamische Typenzustände">
+    <Member Name="EntityType" Description="Entitätstyp" />
+    <Member Name="Eval" Description="Auswertung" />
+    <Member Name="SymbolName" Description="Symbolname" />
+  </Type>
+  <Type Name="DynamicTypeConditionEval" Description="Dynamische Typ-Bedingung Auswertung" />
+  <Type Name="DynamicTypeConditionOperation">
+    <Member Name="Clone" Description="Klonen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="DynamicTypeConditionSymbolEntity" Description="Dynamisches Typenzustands Symbol" PluralDescription="Dynamische Typenzustands Symbole">
+    <Member Name="Name" Description="Name" />
+  </Type>
+  <Type Name="DynamicTypeConditionSymbolOperation">
+    <Member Name="Save" Description="Speichern" />
+  </Type>
   <Type Name="DynamicTypeEntity" Description="Dynamische Typ" PluralDescription="Dynamischen Typen">
-    <Member Name="Type" Description="Typ" />
     <Member Name="TypeDefinition" Description="Typendefinition" />
     <Member Name="TypeName" Description="Typname" />
   </Type>
-  <Type Name="DynamicTypeMessage" />
+  <Type Name="DynamicTypeMessage">
+    <Member Name="DynamicType0SucessfullySavedGoToDynamicPanelNow" Description="DynamicType &quot;{0}&quot; erfolgreich gespeichert. Zum DynamicPanel wechseln?" />
+    <Member Name="RemoveSaveOperation" Description="Speichervorgang entfernen?" />
+    <Member Name="ServerRestartedWithErrorsInDynamicCodeFixErrorsAndRestartAgain" Description="Server hat mit Fehlern im dynamischen Code neu gestartet. Beheben Sie die Fehler, und starten Sie nochmals neu." />
+  </Type>
   <Type Name="DynamicTypeOperation">
     <Member Name="Clone" Description="Klonen" />
     <Member Name="Create" Description="Erstellen" />
@@ -570,6 +613,7 @@
     <Member Name="CollectionOfEnums" Description="Sammlung von Enumerationen" />
     <Member Name="Entity" Description="Entität" />
     <Member Name="EntityOrValue" Description="Entität oder Wert" />
+    <Member Name="FilteringWithNew0ConsiderChangingVisibility" Description="Filtere mit neuem {0}. Erwäge Sichtbarkeit zu verändern." />
     <Member Name="Member0IsMandatoryFor1" Description="Mitglied &quot;{0}&quot; ist für &quot;{1}&quot; pflicht" />
     <Member Name="OnlyChildNodesOfType0Allowed" Description="Nur untergeordnete Knoten vom Typ &quot;{0}&quot; erlaubt" />
     <Member Name="Type0DoesNotContainsField1" Description="Typ &quot;{0}&quot; enthält kein Feld &quot;{1}&quot;" />
@@ -1115,6 +1159,7 @@
     <Member Name="Omnibox_Field" Description="Feld" />
     <Member Name="Omnibox_Help" Description="Hilfe" />
     <Member Name="Omnibox_MatchingOptions" Description="Sie können Ergebnisse mit (st)art, mit(te) oder (G)roße(B)uchstaben finden" />
+    <Member Name="Omnibox_OmniboxSyntaxGuide" Description="Omnibox Syntax-Anleitung:" />
     <Member Name="Omnibox_Query" Description="Abfrage" />
     <Member Name="Omnibox_Type" Description="Typ" />
     <Member Name="Omnibox_UserChart" Description="Benutzerdiagramm" />
