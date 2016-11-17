@@ -148,7 +148,7 @@ namespace Signum.Engine.Dynamic
                 .SelectMany(gr => gr.Count() == 1 ?
                 new[] { KVP.Create(gr.SingleEx().Name + "Expression", gr.SingleEx()) } :
                 gr.Select(a => KVP.Create(a.Name + "_" + a.FromType.RemoveChars('<', '>', '.') + "Expression", a))
-                ).ToDictionary("DynamicExpressions");
+                ).ToDictionaryEx("DynamicExpressions");
 
             var namesToTranslate = this.Expressions.Where(a => a.Translation == DynamicExpressionTranslation.TranslateExpressionName).Select(a => a.Name).Distinct();
 

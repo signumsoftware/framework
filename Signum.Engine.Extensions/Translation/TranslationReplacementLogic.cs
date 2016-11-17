@@ -53,7 +53,7 @@ namespace Signum.Engine.Translation
                     .AgGroupToDictionary(a => a.CultureInfo.ToCultureInfo(),
                     gr =>
                     {
-                        var dic = gr.ToDictionary(a => a.WrongTranslation, a => a.RightTranslation, StringComparer.InvariantCultureIgnoreCase, "wrong translations");
+                        var dic = gr.ToDictionaryEx(a => a.WrongTranslation, a => a.RightTranslation, StringComparer.InvariantCultureIgnoreCase, "wrong translations");
 
                         var regex = new Regex(dic.Keys.ToString(Regex.Escape, "|"), RegexOptions.IgnoreCase);
 

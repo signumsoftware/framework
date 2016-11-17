@@ -166,7 +166,7 @@ $@"(?<entity>{ident};(\d+|{guid}))|
         public Dictionary<string, object> GetQueries()
         {
             return queries.GetOrAdd(CultureInfo.CurrentCulture, ci =>
-                 GetAllQueryNames().ToDictionary(qn => QueryUtils.GetNiceName(qn).ToOmniboxPascal(), "Translated QueryNames"));
+                 GetAllQueryNames().ToDictionaryEx(qn => QueryUtils.GetNiceName(qn).ToOmniboxPascal(), "Translated QueryNames"));
         }
 
         protected abstract IEnumerable<Type> GetAllTypes();
@@ -176,7 +176,7 @@ $@"(?<entity>{ident};(\d+|{guid}))|
         public Dictionary<string, Type> Types()
         {
             return types.GetOrAdd(CultureInfo.CurrentUICulture, ci =>
-               GetAllTypes().Where(t => !t.IsEnumEntityOrSymbol()).ToDictionary(t => t.NicePluralName().ToOmniboxPascal(), "Translated Types"));
+               GetAllTypes().Where(t => !t.IsEnumEntityOrSymbol()).ToDictionaryEx(t => t.NicePluralName().ToOmniboxPascal(), "Translated Types"));
         }
     }
 

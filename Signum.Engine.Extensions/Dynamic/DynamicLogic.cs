@@ -114,7 +114,7 @@ namespace Signum.Engine.Dynamic
 
         public static Dictionary<string, CodeFile> GetCodeFilesDictionary()
         {
-            return GetCodeFiles.GetInvocationListTyped().SelectMany(f => f()).ToDictionary(a => a.FileName, "C# code files");
+            return GetCodeFiles.GetInvocationListTyped().SelectMany(f => f()).ToDictionaryEx(a => a.FileName, "C# code files");
         }
 
         public static CompilerResults Compile(Dictionary<string, CodeFile> codeFiles, bool inMemory)

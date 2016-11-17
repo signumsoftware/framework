@@ -47,7 +47,7 @@ namespace Signum.Engine.Migrations
 
             var executedMigrations = Database.Query<SqlMigrationEntity>().Select(m => m.VersionNumber).OrderBy().ToList().Where(d => first == null || first.Version.CompareTo(d) <= 0).ToList();
 
-            var dic = migrations.ToDictionary(a => a.Version, "Migrations in folder");
+            var dic = migrations.ToDictionaryEx(a => a.Version, "Migrations in folder");
 
             foreach (var ver in executedMigrations)
             {

@@ -112,7 +112,7 @@ namespace Signum.React.Translation
                  {
                      cultures = g.ToDictionary(a => a.culture)
                  }))
-                 .ToDictionary("types");
+                 .ToDictionaryEx("types");
 
 
             types.ToList().ForEach(lt => lt.Value.FixMembers(defaultCulture));
