@@ -13,6 +13,7 @@ using Signum.Utilities.ExpressionTrees;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
@@ -32,7 +33,7 @@ namespace Signum.React.Dynamic
             try
             {
                 var code = $@"
-{Eval.CreateUsings(DynamicLogic.Namespaces)}
+{Eval.CreateUsings(DynamicLogic.Namespaces.And(DynamicLogic.CodeGenEntitiesNamespace))}
 
 namespace Signum.Entities.Dynamic 
 {{
@@ -53,7 +54,11 @@ namespace Signum.Entities.Dynamic
 }}";
 
                 var res = EvalEntity<IDynamicExpressionEvaluator>.Compile(
-                    DynamicLogic.Assemblies.And(DynamicLogic.CodeGenAssemblyPath).NotNull().EmptyIfNull(),
+                    DynamicLogic.Assemblies
+                        .Select(ass => Path.Combine(Eval.AssemblyDirectory, ass))
+                        .And(DynamicLogic.CodeGenAssemblyPath)
+                        .NotNull()
+                        .EmptyIfNull(),
                     code);
 
                 if (res.CompilationErrors.HasText())

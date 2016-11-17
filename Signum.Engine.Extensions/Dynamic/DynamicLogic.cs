@@ -27,7 +27,16 @@ namespace Signum.Engine.Dynamic
             {
                 PermissionAuthLogic.RegisterTypes(typeof(DynamicPanelPermission));
                 DynamicLogic.GetCodeFiles += GetCodeGenStarter;
+                AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(AssemblyResolveHandler);
             }
+        }
+
+        private static Assembly AssemblyResolveHandler(object sender, ResolveEventArgs args)
+        {
+            if (args.Name.StartsWith(DynamicLogic.CodeGenAssembly.Before(".")))
+                return Assembly.LoadFrom(DynamicLogic.CodeGenAssemblyPath);
+
+            return null;
         }
 
         public static void IncludeAllAssembliesAndNamespaces(SchemaBuilder sb)
@@ -69,6 +78,7 @@ namespace Signum.Engine.Dynamic
 
         public static string CodeGenEntitiesNamespace = "Signum.Entities.CodeGen";
         public static string CodeGenDirectory = "CodeGen";
+        public static string CodeGenAssembly = "DynamicAssembly.dll";
         public static string CodeGenAssemblyPath;
 
         public static Func<List<CodeFile>> GetCodeFiles = null;
@@ -135,7 +145,7 @@ namespace Signum.Engine.Dynamic
                 if (inMemory)
                     parameters.GenerateInMemory = true;
                 else
-                    parameters.OutputAssembly = Path.Combine(CodeGenDirectory, "DynamicAssembly.dll");
+                    parameters.OutputAssembly = Path.Combine(CodeGenDirectory, CodeGenAssembly);
 
               
 
