@@ -43,7 +43,7 @@ namespace Signum.React.Facades
         public static ResetLazy<Dictionary<string, Type>> TypesByName = new ResetLazy<Dictionary<string, Type>>(
             () => GetTypes().Where(t => typeof(ModifiableEntity).IsAssignableFrom(t) ||
             t.IsEnum && !t.Name.EndsWith("Query") && !t.Name.EndsWith("Message"))
-            .ToDictionary(GetTypeName, "Types"));
+            .ToDictionaryEx(GetTypeName, "Types"));
 
         public static void RegisterLike(Type type)
         {
@@ -193,7 +193,7 @@ namespace Signum.React.Facades
                               Operations = !type.IsEntity() ? null : OperationLogic.GetAllOperationInfos(type)
                                 .ToDictionary(oi => oi.OperationSymbol.Key, oi => OnAddOperationExtension(new OperationInfoTS(oi), oi))
 
-                          }, type))).ToDictionary("entities");
+                          }, type))).ToDictionaryEx("entities");
 
             return result;
         }
@@ -288,7 +288,7 @@ namespace Signum.React.Facades
                                   NiceName = fi.NiceName(),
                                   IsIgnoredEnum = kind == KindOfType.Enum && fi.HasAttribute<IgnoreAttribute>()
                               }, fi)),
-                          }, type))).ToDictionary("enums");
+                          }, type))).ToDictionaryEx("enums");
 
             return result;
         }
@@ -307,7 +307,7 @@ namespace Signum.React.Facades
                                   NiceName = fi.NiceName(),
                                   Id = GetSymbol(fi).Id.Object
                               }, fi))
-                          }, type))).ToDictionary("symbols");
+                          }, type))).ToDictionaryEx("symbols");
 
             return result;
         }

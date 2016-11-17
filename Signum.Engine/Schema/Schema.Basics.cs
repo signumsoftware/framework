@@ -82,10 +82,10 @@ namespace Signum.Engine.Maps
         {
             var errorSuffix = "columns in table " + this.Name.Name;
 
-            var columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionary(c => c.Name, errorSuffix);
+            var columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionaryEx(c => c.Name, errorSuffix);
 
             if (Mixins != null)
-                columns.AddRange(Mixins.Values.SelectMany(m => m.Fields.Values).SelectMany(f => f.Field.Columns()).ToDictionary(c => c.Name, errorSuffix), errorSuffix);
+                columns.AddRange(Mixins.Values.SelectMany(m => m.Fields.Values).SelectMany(f => f.Field.Columns()).ToDictionaryEx(c => c.Name, errorSuffix), errorSuffix);
 
             SetFullMListGetter();
 

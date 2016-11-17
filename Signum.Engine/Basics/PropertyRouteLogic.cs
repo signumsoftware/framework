@@ -48,9 +48,9 @@ namespace Signum.Engine.Basics
         public const string PropertiesFor = "Properties For:{0}";
         static SqlPreCommand SynchronizeProperties(Replacements rep)
         {
-            var current = Administrator.TryRetrieveAll<PropertyRouteEntity>(rep).AgGroupToDictionary(a => a.RootType.FullClassName, g => g.ToDictionary(f => f.Path, "PropertyEntity in the database with path"));
+            var current = Administrator.TryRetrieveAll<PropertyRouteEntity>(rep).AgGroupToDictionary(a => a.RootType.FullClassName, g => g.ToDictionaryEx(f => f.Path, "PropertyEntity in the database with path"));
 
-            var should = TypeLogic.TryEntityToType(rep).SelectDictionary(dn => dn.FullClassName, (dn, t) => GenerateProperties(t, dn).ToDictionary(f => f.Path, "PropertyEntity in the database with path"));
+            var should = TypeLogic.TryEntityToType(rep).SelectDictionary(dn => dn.FullClassName, (dn, t) => GenerateProperties(t, dn).ToDictionaryEx(f => f.Path, "PropertyEntity in the database with path"));
 
             Table table = Schema.Current.Table<PropertyRouteEntity>();
 
