@@ -1,24 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection;
-using Signum.Engine.Maps;
-using Signum.Engine.DynamicQuery;
-using Signum.Entities.Chart;
+﻿using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
-using Signum.Entities.DynamicQuery;
+using Signum.Engine.DynamicQuery;
+using Signum.Engine.Maps;
+using Signum.Engine.Operations;
+using Signum.Engine.UserAssets;
+using Signum.Engine.ViewLog;
 using Signum.Entities;
 using Signum.Entities.Authorization;
-using Signum.Engine.Authorization;
-using Signum.Engine.Operations;
-using Signum.Utilities;
-using Signum.Engine.UserQueries;
 using Signum.Entities.Basics;
-using Signum.Entities.UserQueries;
-using Signum.Engine.UserAssets;
+using Signum.Entities.Chart;
+using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserAssets;
-using Signum.Engine.ViewLog;
+using Signum.Utilities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace Signum.Engine.Chart
 {
@@ -55,6 +52,9 @@ namespace Signum.Engine.Chart
                     });
 
                 sb.Schema.EntityEvents<UserChartEntity>().Retrieved += ChartLogic_Retrieved;
+
+                sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += e =>
+                  Administrator.UnsafeDeletePreCommand(Database.Query<UserChartEntity>().Where(a => a.Query == e));
 
                 new Graph<UserChartEntity>.Execute(UserChartOperation.Save)
                 {
@@ -274,7 +274,7 @@ namespace Signum.Engine.Chart
                 foreach (var item in uc.Parameters)
                 {
                     string val = item.Value;
-                    retry:
+                retry:
                     switch (FixParameter(item, ref val))
                     {
                         case FixTokenResult.Nothing: break;
@@ -290,7 +290,7 @@ namespace Signum.Engine.Chart
                 {
                     return table.UpdateSqlSync(uc, includeCollections: true);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Console.WriteLine("Integrity Error:");
                     SafeConsole.WriteLineColor(ConsoleColor.DarkRed, e.Message);
@@ -314,7 +314,7 @@ namespace Signum.Engine.Chart
                     }
                 }
 
-               
+
             }
             catch (Exception e)
             {
