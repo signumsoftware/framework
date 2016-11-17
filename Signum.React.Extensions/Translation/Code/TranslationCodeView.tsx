@@ -138,8 +138,8 @@ export class TranslationTypeTable extends React.Component<{ type: LocalizableTyp
                     </tr>
                 </thead>
                 <tbody>
-                    {type.hasDescription && Dic.getValues(type.cultures).map(loc =>
-                        <TranslationTypeDescription key={loc.culture } edit={this.editCulture(loc) } loc={loc} result={this.props.result} type={type} />) }
+                    {type.hasDescription && Dic.getValues(type.cultures).filter(loc => !!loc.typeDescription)
+                        .map(loc => <TranslationTypeDescription key={loc.culture} edit={this.editCulture(loc)} loc={loc} result={this.props.result} type={type} />)}
                     {type.hasMembers && this.renderMembers(type) }
                 </tbody>
             </table>
@@ -239,7 +239,7 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
 
         const { type, loc, edit } = this.props;
 
-        const td = loc.typeDescription;
+        const td = loc.typeDescription!;
 
         const pronoms = this.props.result.cultures[loc.culture].pronoms || [];
 
@@ -277,7 +277,7 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
 
     handleOnChange = (e: React.FormEvent) => {
         const { loc } = this.props;
-        const td = loc.typeDescription;
+        const td = loc.typeDescription!;
         td.description = (e.currentTarget as HTMLSelectElement).value;
 
         API.pluralize(loc.culture, td.description).then(plural => {
@@ -300,9 +300,9 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
 
     renderEdit() {
         const { loc } = this.props;
-        const td = loc.typeDescription;
+        const td = loc.typeDescription!;
 
-        const translatedTypes = Dic.getValues(this.props.type.cultures).filter(a => !!a.typeDescription.translatedDescription);
+        const translatedTypes = Dic.getValues(this.props.type.cultures).filter(a => !!a.typeDescription!.translatedDescription);
         if (!translatedTypes.length || this.state.avoidCombo)
             return (<textarea style={{ height: "24px", width: "90%" }} value={td.description || ""} onChange={this.handleOnChange} />);
 
@@ -310,7 +310,7 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
             <span>
                 <select value={td.description || ""} onChange={this.handleOnChange}>
                     {  initialElementIf(td.description == undefined).concat(
-                        translatedTypes.map(a => <option key={a.culture} value={a.typeDescription.translatedDescription}>{a.typeDescription.translatedDescription}</option>)) }
+                        translatedTypes.map(a => <option key={a.culture} value={a.typeDescription!.translatedDescription}>{a.typeDescription!.translatedDescription}</option>)) }
                 </select>
                 &nbsp;
                 <a href="#" onClick={this.handleAvoidCombo}>{TranslationMessage.Edit.niceToString() }</a>
