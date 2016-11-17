@@ -22,7 +22,7 @@ namespace Signum.Utilities
        
         public static Dictionary<string, object> ExportThreadContext(bool force = false)
         {
-            return threadVariables.Where(t => !t.Value.IsClean && (!t.Value.AvoidExportImport || force)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value.UntypedValue);
+            return threadVariables.Where(t => !t.Value.IsClean && (!t.Value.AvoidExportImport || force)).ToDictionaryEx(kvp => kvp.Key, kvp => kvp.Value.UntypedValue);
         }
 
         public static IDisposable ImportThreadContext(Dictionary<string, object> context)

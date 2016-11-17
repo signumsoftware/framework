@@ -97,10 +97,10 @@ namespace Signum.Engine.Basics
         {
             Table table = Schema.Current.Table<TypeEntity>();
 
-            Dictionary<string, TypeEntity> should = GenerateSchemaTypes().ToDictionary(s => s.TableName, "tableName in memory");
+            Dictionary<string, TypeEntity> should = GenerateSchemaTypes().ToDictionaryEx(s => s.TableName, "tableName in memory");
 
             Dictionary<string, TypeEntity> current = replacements.ApplyReplacementsToOldCleaning(
-                Administrator.TryRetrieveAll<TypeEntity>(replacements).ToDictionary(c => c.TableName, "tableName in database"), Replacements.KeyTables);
+                Administrator.TryRetrieveAll<TypeEntity>(replacements).ToDictionaryEx(c => c.TableName, "tableName in database"), Replacements.KeyTables);
 
             using (replacements.WithReplacedDatabaseName())
                 return Synchronizer.SynchronizeScript(

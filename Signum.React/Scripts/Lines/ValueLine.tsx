@@ -16,7 +16,7 @@ export interface ValueLineProps extends LineBaseProps, React.Props<ValueLine> {
     formatText?: string;
     autoTrim?: boolean;
     inlineCheckbox?: boolean;
-    comboBoxItems?: { name: string, niceName: string }[];
+    comboBoxItems?: ({ name: string, niceName: string } | string)[];
     onTextboxBlur?: (val: any) => void;
     valueHtmlProps?: React.HTMLAttributes;
 }
@@ -180,7 +180,8 @@ ValueLine.renderers[ValueLineType.Enum as any] = (vl) => {
 function internalComboBox(vl: ValueLine, typeInfo: TypeInfo, parseValue: (str: string) => any, toStringValue: (val: any) => string) {
 
     const s = vl.state;
-    let items = s.comboBoxItems || Dic.getValues(typeInfo.members);
+    let items = s.comboBoxItems ? s.comboBoxItems.map(a => typeof a == "string" ? typeInfo.members[a] : a) :
+        Dic.getValues(typeInfo.members);
 
     if (!s.type!.isNotNullable || s.ctx.value == undefined)
         items = [{ name: "", niceName: " - " }].concat(items);
@@ -212,6 +213,8 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo, parseValue: (str: s
     );
 
 }
+
+
 
 ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
 
