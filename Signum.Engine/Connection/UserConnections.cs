@@ -23,7 +23,7 @@ namespace Signum.Engine
             if (!File.Exists(FileName))
                 return new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
-            return File.ReadAllLines(FileName).Where(s=> !string.IsNullOrWhiteSpace(s) && !s.StartsWith("-") && !s.StartsWith("/")).ToDictionary(a => a.Before('>'), a => a.After('>'), "UserConnections");          
+            return File.ReadAllLines(FileName).Where(s=> !string.IsNullOrWhiteSpace(s) && !s.StartsWith("-") && !s.StartsWith("/")).ToDictionaryEx(a => a.Before('>'), a => a.After('>'), "UserConnections");          
         }
 
         public static string Replace(string connectionString)

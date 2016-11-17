@@ -15,7 +15,7 @@ namespace Signum.Utilities.ExpressionTrees
             LambdaExpression lambda = invocation.Expression as LambdaExpression;
             var replacer = new ExpressionReplacer()
             {
-                replacements = 0.To(lambda.Parameters.Count).ToDictionary(i => lambda.Parameters[i], i => invocation.Arguments[i])
+                replacements = 0.To(lambda.Parameters.Count).ToDictionaryEx(i => lambda.Parameters[i], i => invocation.Arguments[i])
             };
 
             return replacer.Visit(lambda.Body); 

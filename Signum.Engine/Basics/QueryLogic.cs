@@ -87,7 +87,7 @@ namespace Signum.Engine.Basics
 
         private static Dictionary<string, object> CreateQueryNames()
         {
-            return DynamicQueryManager.Current.GetQueryNames().ToDictionary(qn => QueryUtils.GetKey(qn), "queryName");
+            return DynamicQueryManager.Current.GetQueryNames().ToDictionaryEx(qn => QueryUtils.GetKey(qn), "queryName");
         }
 
         static IEnumerable<QueryEntity> GenerateQueries()
@@ -131,8 +131,8 @@ namespace Signum.Engine.Basics
                 return Synchronizer.SynchronizeScriptReplacing(
                     replacements,
                     QueriesKey,
-                    should.ToDictionary(a => a.Key, "query in memory"),
-                    current.ToDictionary(a => a.Key, "query in database"),
+                    should.ToDictionaryEx(a => a.Key, "query in memory"),
+                    current.ToDictionaryEx(a => a.Key, "query in database"),
                     (n, s) => table.InsertSqlSync(s),
                     (n, c) => table.DeleteSqlSync(c),
                     (fn, s, c) =>
