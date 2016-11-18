@@ -1,24 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection;
-using Signum.Entities;
-using Signum.Utilities;
-using System.Globalization;
-using System.Diagnostics;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Utilities.DataStructures;
-using System.Threading;
-using System.Linq.Expressions;
-using Signum.Entities.Reflection;
-using System.Collections;
-using Signum.Utilities.Reflection;
-using Signum.Engine.Linq;
-using Signum.Entities.DynamicQuery;
+﻿using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
-using Signum.Entities.Basics;
-using Signum.Engine.Basics;
+using Signum.Engine.Linq;
+using Signum.Entities;
+using Signum.Entities.DynamicQuery;
+using Signum.Entities.Reflection;
+using Signum.Utilities;
+using Signum.Utilities.DataStructures;
+using Signum.Utilities.ExpressionTrees;
+using Signum.Utilities.Reflection;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Signum.Engine.Maps
 {
@@ -47,7 +42,7 @@ namespace Signum.Engine.Maps
             this.OnMetadataInvalidated?.Invoke();
         }
 
-        string applicationName; 
+        string applicationName;
         public string ApplicationName
         {
             get { return applicationName ?? (applicationName = AppDomain.CurrentDomain.FriendlyName); }
@@ -204,7 +199,7 @@ namespace Signum.Engine.Maps
 
             if (ee == null)
                 return constructor;
-         
+
             return ee.OnPreUnsafeInsert(query, constructor, entityQuery);
         }
 
@@ -254,8 +249,8 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        FilterQueryResult<T> CombineFilterResult<T>(FilterQueryResult<T> result, FilterQueryResult<T> expression) 
-            where T: Entity
+        FilterQueryResult<T> CombineFilterResult<T>(FilterQueryResult<T> result, FilterQueryResult<T> expression)
+            where T : Entity
         {
             if (result == null)
                 return expression;
@@ -272,7 +267,7 @@ namespace Signum.Engine.Maps
         }
 
         public Func<T, bool> GetInMemoryFilter<T>(bool userInterface)
-            where T: Entity
+            where T : Entity
         {
             using (userInterface ? ExecutionMode.UserInterface() : null)
             {
@@ -283,7 +278,7 @@ namespace Signum.Engine.Maps
                 Func<T, bool> result = null;
                 foreach (var item in ee.OnFilterQuery().NotNull())
                 {
-                    if(item.InMemoryFunction == null)
+                    if (item.InMemoryFunction == null)
                         throw new InvalidOperationException("FilterQueryResult with InDatabaseExpresson '{0}' has no equivalent InMemoryFunction"
                         .FormatWith(item.InDatabaseExpresson.ToString()));
 
@@ -349,7 +344,7 @@ namespace Signum.Engine.Maps
             using (CultureInfoUtils.ChangeBothCultures(ForceCultureInfo))
             using (ExecutionMode.Global())
             {
-                Replacements replacements = new Replacements() { Interactive = interactive, ReplaceDatabaseName = replaceDatabaseName, SchemaOnly = schemaOnly  };
+                Replacements replacements = new Replacements() { Interactive = interactive, ReplaceDatabaseName = replaceDatabaseName, SchemaOnly = schemaOnly };
                 SqlPreCommand command = Synchronizing
                     .GetInvocationListTyped()
                     .Select(e =>
@@ -403,7 +398,7 @@ namespace Signum.Engine.Maps
             SchemaCompleted = null;
         }
 
-        public void WhenIncluded<T>(Action action) where T: Entity
+        public void WhenIncluded<T>(Action action) where T : Entity
         {
             SchemaCompleted += () =>
             {
@@ -480,6 +475,16 @@ namespace Signum.Engine.Maps
         public Table Table<T>() where T : Entity
         {
             return Table(typeof(T));
+        }
+
+        public TableMList TableMList<E, V>(Expression<Func<E, MList<V>>> mListProperty)
+            where E : Entity
+        {
+            PropertyInfo pi = ReflectionTools.GetPropertyInfo(mListProperty);
+
+            var list = (FieldMList)Schema.Current.Field(mListProperty);
+
+            return list.TableMList;
         }
 
         public Table Table(Type type)
@@ -658,7 +663,7 @@ namespace Signum.Engine.Maps
             return typeCachesLazy.Value.IdToType[id];
         }
 
-      
+
     }
 
     public class RelationInfo
@@ -670,7 +675,7 @@ namespace Signum.Engine.Maps
         public bool IsImplementedByAll { get; set; }
     }
 
-  
+
 
     public interface ICacheController
     {
@@ -707,7 +712,7 @@ namespace Signum.Engine.Maps
         public abstract string TryGetToString(PrimaryKey id);
     }
 
-    
+
 
 
 }
