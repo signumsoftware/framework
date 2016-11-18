@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Runtime.Serialization;
-using System.Linq.Expressions;
 
 namespace Signum.Utilities
 {
@@ -70,6 +65,15 @@ namespace Signum.Utilities
                 return null;
         }
 
+        public static bool? ToBool(this string str)
+        {
+            bool result;
+            if (bool.TryParse(str, out result))
+                return result;
+            else
+                return null;
+        }
+
         public static int ToInt(this string str, string error)
         {
             int result;
@@ -124,7 +128,16 @@ namespace Signum.Utilities
 
             throw new FormatException(error);
         }
-        
+
+        public static bool ToBool(this string str, string error)
+        {
+            bool result;
+            if (bool.TryParse(str, out result))
+                return result;
+
+            throw new FormatException(error);
+        }
+
         #endregion
 
         #region Math
@@ -221,7 +234,7 @@ namespace Signum.Utilities
 
         public static int? NotFoundToNull(this int value)
         {
-            return value == -1 ? null : (int?)value; 
+            return value == -1 ? null : (int?)value;
         }
 
         public static int NotFound(this int value, int defaultValue)
@@ -305,7 +318,7 @@ namespace Signum.Utilities
 
         public static IEnumerable<int> DownTo(this int startNotIncluded, int end, int step)
         {
-            for (int i = startNotIncluded - 1; i >= end; i-= step)
+            for (int i = startNotIncluded - 1; i >= end; i -= step)
                 yield return i;
         }
 
@@ -315,7 +328,7 @@ namespace Signum.Utilities
                 yield return i;
         }
 
-        public delegate R FuncCC<in T, R>(T input) 
+        public delegate R FuncCC<in T, R>(T input)
             where T : class
             where R : class;
         public static IEnumerable<T> Follow<T>(this T start, FuncCC<T, T> next) where T : class
@@ -337,12 +350,12 @@ namespace Signum.Utilities
                 yield return i.Value;
         }
 
-        public static T Throw<T>(this Exception exception) 
+        public static T Throw<T>(this Exception exception)
         {
             throw exception;
         }
 
-        public static IEnumerable<D> GetInvocationListTyped<D>(this D multicastDelegate) 
+        public static IEnumerable<D> GetInvocationListTyped<D>(this D multicastDelegate)
             where D : class, ICloneable, ISerializable
         {
             if (multicastDelegate == null)
