@@ -7,7 +7,8 @@ import {
 import { ModifiableEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { FindOptions, SearchControl, CountSearchControlLine } from '../../../../Framework/Signum.React/Scripts/Search'
+import { SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
+import { FindOptions, SearchControl, ValueSearchControlLine } from '../../../../Framework/Signum.React/Scripts/Search'
 import {
     getQueryNiceName, TypeInfo, MemberInfo, getTypeInfo, EntityData, EntityKind, getTypeInfos, KindOfType,
     PropertyRoute, PropertyRouteType, LambdaMemberType, isTypeEntity, Binding
@@ -19,7 +20,7 @@ import { EntityTableColumn } from '../../../../Framework/Signum.React/Scripts/Li
 import { DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
 import { ExpressionOrValueComponent, FieldComponent } from './Designer'
 import { ExpressionOrValue } from './NodeUtils'
-import { FindOptionsLine } from './FindOptionsComponent'
+import { FindOptionsLine, QueryTokenLine } from './FindOptionsComponent'
 import { HtmlAttributesLine } from './HtmlAttributesComponent'
 import { StyleOptionsLine } from './StyleOptionsComponent'
 import * as NodeUtils from './NodeUtils'
@@ -579,39 +580,56 @@ NodeUtils.register<SearchControlNode>({
     </div>
 });
 
-export interface CountSearchControlNode extends BaseNode {
-    kind: "CountSearchControl",
+export interface ValueSearchControlLineNode extends BaseNode {
+    kind: "ValueSearchControlLine",
     findOptions?: FindOptionsExpr;
+    valueToken?: string;
     labelText?: ExpressionOrValue<string>;
     labelHtmlAttributes?: HtmlAttributesExpression;
     isBadge?: ExpressionOrValue<boolean>;
     isLink?: ExpressionOrValue<boolean>;
-    viewButton?: ExpressionOrValue<boolean>;
+    isFormControl?: ExpressionOrValue<boolean>;
+    findButton?: ExpressionOrValue<boolean>;
+    viewEntityButton?: ExpressionOrValue<boolean>;
     formGroupHtmlAttributes?: HtmlAttributesExpression;
 }
 
-NodeUtils.register<CountSearchControlNode>({
-    kind: "CountSearchControl",
+NodeUtils.register<ValueSearchControlLineNode>({
+    kind: "ValueSearchControlLine",
     group: "Search",
     order: 1,
-    validate: (dn, ctx) => NodeUtils.mandatory(dn, n => n.findOptions) || dn.node.findOptions && NodeUtils.validateFindOptions(dn.node.findOptions, ctx),
-    renderTreeNode: dn => <span><small>CountSearchControl:</small> <strong>{dn.node.findOptions && dn.node.findOptions.queryKey || " - "}</strong></span>,
-    render: (dn, ctx) => <div><CountSearchControlLine ctx={ctx}
-        findOptions={toFindOptions(ctx, dn.node.findOptions!)}
+    validate: (dn, ctx) =>
+        (!dn.node.findOptions && !dn.node.valueToken && DynamicViewValidationMessage.Member0IsMandatoryFor1.niceToString("findOptions (or valueToken)", dn.node.kind)) ||
+        (dn.node.findOptions ? NodeUtils.validateFindOptions(dn.node.findOptions, ctx) : NodeUtils.validateCtxNotNew(ctx)) ||
+        (dn.node.findOptions && dn.node.valueToken && NodeUtils.validateAggregate(dn.node.valueToken))
+        ,
+    renderTreeNode: dn => <span><small>ValueSearchControlLine:</small> <strong>{
+        dn.node.valueToken ? dn.node.valueToken :
+            dn.node.findOptions ? dn.node.findOptions.queryKey : " - "
+    }</strong></span>,
+    render: (dn, ctx) => <div><ValueSearchControlLine ctx={ctx}
+        findOptions={dn.node.findOptions && toFindOptions(ctx, dn.node.findOptions!)}
+        valueToken={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.valueToken, NodeUtils.isStringOrNull)}
         labelText={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
         isBadge={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.isBadge, NodeUtils.isBooleanOrNull)}
         isLink={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.isLink, NodeUtils.isBooleanOrNull)}
-        viewButton={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.viewButton, NodeUtils.isBooleanOrNull)}
+        isFormControl={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.isFormControl, NodeUtils.isBooleanOrNull)}
+        findButton={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.findButton, NodeUtils.isBooleanOrNull)}
+        viewEntityButton={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.viewEntityButton, NodeUtils.isBooleanOrNull)}
         labelProps={toHtmlAttributes(ctx, dn.node.labelHtmlAttributes)}
         formGroupHtmlProps={toHtmlAttributes(ctx, dn.node.formGroupHtmlAttributes)}
         /> </div>,
     renderDesigner: dn => <div>
+        <QueryTokenLine dn={dn} binding={Binding.create(dn.node, a => a.valueToken)} queryKey={dn.node.findOptions && dn.node.findOptions.queryKey || dn.route!.findRootType().name}
+            subTokenOptions={SubTokensOptions.CanAggregate | SubTokensOptions.CanElement} />
         <FindOptionsLine dn={dn} binding={Binding.create(dn.node, a => a.findOptions)} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.isBadge)} type="boolean" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.isLink)} type="boolean" defaultValue={null} />
-        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.viewButton)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.isFormControl)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.findButton)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.viewEntityButton)} type="boolean" defaultValue={null} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
     </div>
 });

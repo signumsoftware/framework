@@ -190,6 +190,7 @@ export module DynamicViewValidationMessage {
     export const CollectionOfEnums = new MessageKey("DynamicViewValidationMessage", "CollectionOfEnums");
     export const EntityOrValue = new MessageKey("DynamicViewValidationMessage", "EntityOrValue");
     export const FilteringWithNew0ConsiderChangingVisibility = new MessageKey("DynamicViewValidationMessage", "FilteringWithNew0ConsiderChangingVisibility");
+    export const AggregateIsMandatoryFor01 = new MessageKey("DynamicViewValidationMessage", "AggregateIsMandatoryFor01");
 }
 
 export interface EvalEntity<T> extends Entities.EmbeddedEntity {

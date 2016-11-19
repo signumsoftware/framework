@@ -4,7 +4,7 @@ import { Route } from 'react-router'
 import { Tab } from 'react-bootstrap'
 import { ifError } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '../../../Framework/Signum.React/Scripts/Services';
-import { SearchControl, CountSearchControlLine } from '../../../Framework/Signum.React/Scripts/Search'
+import { SearchControl, ValueSearchControlLine } from '../../../Framework/Signum.React/Scripts/Search'
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { EntityData, EntityKind, symbolNiceName } from '../../../Framework/Signum.React/Scripts/Reflection'
@@ -49,7 +49,7 @@ export function start(options: { routes: JSX.Element[] }) {
             isVisible: AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel)
         }));
 
-    DynamicClient.Options.onGetDynamicLineForPanel.push(ctx => <CountSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
+    DynamicClient.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
     DynamicClient.Options.getDynaicMigrationsStep = () =>
         <Tab eventKey="migrations" title="Migrations" >
             <h3>{DynamicSqlMigrationEntity.nicePluralName()}</h3>

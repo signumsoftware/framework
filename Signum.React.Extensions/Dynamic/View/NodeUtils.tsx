@@ -131,14 +131,13 @@ export function treeNodeTableColumnProperty(dn: DesignerNode<EntityTableColumnNo
 }
 
 export function render(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>) {
-
-    const error = validate(dn, parentCtx);
-    if (error)
-        return (<div className="alert alert-danger">{getErrorTitle(dn)} {error}</div>);
-
     try {
         if (evaluateAndValidate(parentCtx, dn.node, n => n.visible, isBooleanOrNull) == false)
             return null;
+
+        const error = validate(dn, parentCtx);
+        if (error)
+            return (<div className="alert alert-danger">{getErrorTitle(dn)} {error}</div>);
 
         const sn = dn.context.getSelectedNode();
 
@@ -395,6 +394,27 @@ export function validateFindOptions(foe: FindOptionsExpr, parentCtx: TypeContext
     return undefined;
 }
 
+export function validateCtxNotNew(ctx: TypeContext<ModifiableEntity> | undefined) {
+
+    if (ctx == undefined)
+        return undefined;
+
+    if (ctx.value.isNew)
+        return DynamicViewValidationMessage.FilteringWithNew0ConsiderChangingVisibility.niceToString(ctx.value.Type);
+
+    return undefined;
+}
+
+let aggregates = ["Count", "Average", "Min", "Max", "Sum"];
+
+export function validateAggregate(token: string) {
+    var lastPart = token.tryAfterLast(".") || token;
+
+    if (!aggregates.contains(lastPart))
+        return DynamicViewValidationMessage.AggregateIsMandatoryFor01.niceToString("valueToken", aggregates.joinComma(External.CollectionMessage.Or.niceToString()));
+
+    return undefined;
+}
 
 export function getTypeIfNew(parentCtx: TypeContext<ModifiableEntity>, value: ExpressionOrValue<any> | undefined) {
     

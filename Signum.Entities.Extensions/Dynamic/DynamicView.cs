@@ -106,5 +106,9 @@ namespace Signum.Entities.Dynamic
 
         [Description("Filtering with new {0}. Consider changing visibility.")]
         FilteringWithNew0ConsiderChangingVisibility,
+
+
+        [Description("Aggregate is mandatory for '{0}' ({1}).")]
+        AggregateIsMandatoryFor01,
     }
 }

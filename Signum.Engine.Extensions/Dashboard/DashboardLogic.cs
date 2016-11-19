@@ -62,8 +62,8 @@ namespace Signum.Engine.Dashboard
                         Links = cp.Links.Count
                     });
 
-                dqm.RegisterQuery(typeof(CountSearchControlPartEntity), () =>
-                    from cp in Database.Query<CountSearchControlPartEntity>()
+                dqm.RegisterQuery(typeof(ValueUserQueryListPartEntity), () =>
+                    from cp in Database.Query<ValueUserQueryListPartEntity>()
                     select new
                     {
                         Entity = cp,
@@ -263,7 +263,7 @@ namespace Signum.Engine.Dashboard
 
         public static void RegisterPartsTypeCondition(TypeConditionSymbol typeCondition)
         {
-            TypeConditionLogic.Register<CountSearchControlPartEntity>(typeCondition,
+            TypeConditionLogic.Register<ValueUserQueryListPartEntity>(typeCondition,
                  cscp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(cp => cp.ContainsContent(cscp)));
 
             TypeConditionLogic.Register<LinkListPartEntity>(typeCondition,

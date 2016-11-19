@@ -5,7 +5,7 @@ import { ModifiableEntity } from '../../../../Framework/Signum.React/Scripts/Sig
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { ColumnOptionsMode, FilterOperation, OrderType, PaginationMode, FindOptions, FilterOption, OrderOption, ColumnOption, Pagination, QueryToken } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { SearchControl, CountSearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
+import { SearchControl, ValueSearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { getQueryNiceName, TypeInfo, MemberInfo, getTypeInfo, EntityData, EntityKind, getTypeInfos, KindOfType, PropertyRoute, PropertyRouteType, LambdaMemberType, isTypeEntity } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle, FormGroupSize, StyleOptions, BsColumns } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -20,7 +20,7 @@ export interface StyleOptionsExpression {
     formGroupStyle?: ExpressionOrValue<FormGroupStyle>;
     formGroupSize?: ExpressionOrValue<FormGroupSize>;
     placeholderLabels?: ExpressionOrValue<boolean>;
-    formControlStaticAsFormControlReadonly?: ExpressionOrValue<boolean>;
+    formControlClassReadonly?: ExpressionOrValue<string>;
     labelColumns?: ExpressionOrValue<number>;
     valueColumns?: ExpressionOrValue<number>;
     readOnly?: ExpressionOrValue<boolean>;
@@ -44,13 +44,12 @@ export function toStyleOptions(ctx: TypeContext<ModifiableEntity>, soe: StyleOpt
 
     if (soe == undefined)
         return undefined;
-
-
+    
     return {
         formGroupStyle: NodeUtils.evaluateAndValidate(ctx, soe, s => s.formGroupStyle, val => NodeUtils.isInListOrNull(val, formGroupStyle)),
         formGroupSize: NodeUtils.evaluateAndValidate(ctx, soe, s => s.formGroupSize, val => NodeUtils.isInListOrNull(val, formGroupSize)),
         placeholderLabels: NodeUtils.evaluateAndValidate(ctx, soe, s => s.placeholderLabels, NodeUtils.isBooleanOrNull),
-        formControlStaticAsFormControlReadonly: NodeUtils.evaluateAndValidate(ctx, soe, s => s.formControlStaticAsFormControlReadonly, NodeUtils.isBooleanOrNull),
+        formControlClassReadonly: NodeUtils.evaluateAndValidate(ctx, soe, s => s.formControlClassReadonly, NodeUtils.isStringOrNull),
         labelColumns: toBsColumns(NodeUtils.evaluateAndValidate(ctx, soe, s => s.labelColumns, NodeUtils.isNumberOrNull)),
         valueColumns: toBsColumns(NodeUtils.evaluateAndValidate(ctx, soe, s => s.valueColumns, NodeUtils.isNumberOrNull)),
         readOnly: NodeUtils.evaluateAndValidate(ctx, soe, s => s.readOnly, NodeUtils.isBooleanOrNull),

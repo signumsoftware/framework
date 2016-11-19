@@ -7,7 +7,7 @@ import { StyleContext } from '../../../Framework/Signum.React/Scripts/TypeContex
 import { ajaxPost } from '../../../Framework/Signum.React/Scripts/Services'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import { CountSearchControl, SearchControl } from '../../../Framework/Signum.React/Scripts/Search'
+import { ValueSearchControl, SearchControl } from '../../../Framework/Signum.React/Scripts/Search'
 import EntityLink from '../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
 import { QueryDescription, SubTokensOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../Framework/Signum.React/Scripts/Reflection'

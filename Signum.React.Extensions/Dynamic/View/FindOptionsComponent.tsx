@@ -125,6 +125,72 @@ export class FindOptionsLine extends React.Component<FindOptionsLineProps, void>
 }
 
 
+interface QueryTokenLineProps {
+    binding: Binding<string | undefined>;
+    dn: DesignerNode<BaseNode>;
+    subTokenOptions: SubTokensOptions;
+    queryKey: string;
+}
+
+interface QueryTokenLineState {
+    token?: QueryToken;
+}
+
+export class QueryTokenLine extends React.Component<QueryTokenLineProps, QueryTokenLineState>{
+
+    state = {} as QueryTokenLineState;
+
+    renderMember(columnName: string| undefined): React.ReactNode {
+        return (<span
+            className={columnName === undefined ? "design-default" : "design-changed"}>
+            {this.props.binding.member}
+        </span>);
+    }
+
+    handleChange = (qt: QueryToken | undefined) => {
+        this.setState({ token: qt });
+        if (qt)
+            this.props.binding.setValue(qt.fullKey);
+        else
+            this.props.binding.deleteValue();
+
+        this.props.dn.context.refreshView();
+    }
+
+    render() {
+        const columnName = this.props.binding.getValue();
+
+        return (
+            <div className="form-group">
+                <label className="control-label">
+                    {this.renderMember(columnName)}
+                </label>
+                <div>
+                    <QueryTokenBuilderString
+                        queryKey={this.props.queryKey}
+                        columnName={columnName}
+                        subTokenOptions={this.props.subTokenOptions}
+                        token={this.state.token}
+                        hideLabel={true}
+                        onChange={this.handleChange}
+                        label=""
+                        />
+                </div>
+            </div>
+        );
+    }
+
+    getDescription(fo: FindOptionsExpr) {
+
+        var filters = [
+            fo.parentColumn,
+            fo.filterOptions && fo.filterOptions.length && fo.filterOptions.length + " filters"]
+            .filter(a => !!a).join(", ");
+
+        return `${fo.queryKey} (${filters || "No filter"})`.trim();
+    }
+}
+
 
 interface FindOptionsComponentProps {
     dn: DesignerNode<BaseNode>;
@@ -265,7 +331,11 @@ class QueryTokenBuilderString extends React.Component<QueryTokenBuilderStringPro
     }
 
     loadInitialToken(props: QueryTokenBuilderStringProps) {
-        if (props.columnName && !props.token)
+        if (props.columnName == undefined) {
+            if (this.props.columnName != props.columnName)
+                props.onChange(undefined);
+        }
+        else if (!props.token || this.props.queryKey != props.queryKey || props.token.fullKey != props.columnName)
             return Finder.parseSingleToken(props.queryKey, props.columnName, props.subTokenOptions)
                 .then(t => this.props.onChange(t))
                 .done();
@@ -278,7 +348,7 @@ class QueryTokenBuilderString extends React.Component<QueryTokenBuilderStringPro
             queryKey={this.props.queryKey}
             onTokenChange={this.props.onChange}
             readOnly={false}
-            subTokenOptions={SubTokensOptions.CanElement} />;
+            subTokenOptions={this.props.subTokenOptions} />;
 
         if (this.props.hideLabel)
             return qt;

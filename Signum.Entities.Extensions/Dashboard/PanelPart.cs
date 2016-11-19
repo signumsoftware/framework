@@ -33,11 +33,11 @@ namespace Signum.Entities.Dashboard
         [ImplementedBy(
             typeof(UserChartPartEntity),
             typeof(UserQueryPartEntity),
-            typeof(CountSearchControlPartEntity),
+            typeof(ValueUserQueryListPartEntity),
             typeof(LinkListPartEntity),
             typeof(OmniboxPanelPartEntity),
             typeof(LinkPartEntity),
-            typeof(UserQueryCountPartEntity))]
+            typeof(ValueUserQueryPartEntity))]
         public IPartEntity Content { get; set; }
 
         public override string ToString()
@@ -213,10 +213,10 @@ namespace Signum.Entities.Dashboard
     }
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
-    public class CountSearchControlPartEntity : Entity, IPartEntity
+    public class ValueUserQueryListPartEntity : Entity, IPartEntity
     {
         [NotNullable]
-        public MList<CountUserQueryElementEntity> UserQueries { get; set; } = new MList<CountUserQueryElementEntity>();
+        public MList<ValueUserQueryElementEntity> UserQueries { get; set; } = new MList<ValueUserQueryElementEntity>();
 
         public override string ToString()
         {
@@ -230,7 +230,7 @@ namespace Signum.Entities.Dashboard
 
         public IPartEntity Clone()
         {
-            return new CountSearchControlPartEntity
+            return new ValueUserQueryListPartEntity
             {
                 UserQueries = this.UserQueries.Select(e => e.Clone()).ToMList(),
             };
@@ -238,7 +238,7 @@ namespace Signum.Entities.Dashboard
 
         public XElement ToXml(IToXmlContext ctx)
         {
-            return new XElement("CountSearchControlPart",
+            return new XElement("ValueUserQueryListPart",
                 UserQueries.Select(cuqe => cuqe.ToXml(ctx)));
         }
 
@@ -249,7 +249,7 @@ namespace Signum.Entities.Dashboard
     }
 
     [Serializable]
-    public class CountUserQueryElementEntity : EmbeddedEntity
+    public class ValueUserQueryElementEntity : EmbeddedEntity
     {
         string label;
         public string Label
@@ -263,9 +263,9 @@ namespace Signum.Entities.Dashboard
 
         public string Href { get; set; }
 
-        public CountUserQueryElementEntity Clone()
+        public ValueUserQueryElementEntity Clone()
         {
-            return new CountUserQueryElementEntity
+            return new ValueUserQueryElementEntity
             {
                 Href = this.Href,
                 Label = this.Label,
@@ -275,7 +275,7 @@ namespace Signum.Entities.Dashboard
 
         internal XElement ToXml(IToXmlContext ctx)
         {
-            return new XElement("CountUserQueryElement",
+            return new XElement("ValueUserQueryElement",
                 Label == null ? null : new XAttribute("Label", Label),
                 Href == null ? null : new XAttribute("Href", Href),
                 new XAttribute("UserQuery", ctx.Include(UserQuery)));
@@ -361,7 +361,7 @@ namespace Signum.Entities.Dashboard
     }
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
-    public class UserQueryCountPartEntity : Entity, IPartEntity
+    public class ValueUserQueryPartEntity : Entity, IPartEntity
     {
         public bool RequiresTitle { get; set; }
 

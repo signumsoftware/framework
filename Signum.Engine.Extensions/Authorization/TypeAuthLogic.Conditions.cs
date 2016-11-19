@@ -602,11 +602,11 @@ namespace Signum.Engine.Authorization
                 }
             }
 
-            public override int ExecuteQueryCount(QueryCountRequest request)
+            public override object ExecuteQueryValue(QueryValueRequest request)
             {
                 using (TypeAuthLogic.DisableQueryFilter())
                 {
-                    return base.ExecuteQueryCount(request);
+                    return base.ExecuteQueryValue(request);
                 }
             }
         }

@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
-import { CountSearchControlLine }  from '../../../../Framework/Signum.React/Scripts/Search'
+import { ValueSearchControlLine }  from '../../../../Framework/Signum.React/Scripts/Search'
 import { toLite }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator  from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -67,7 +67,7 @@ export default class Process extends React.Component<{ ctx: TypeContext<ProcessE
 
                 {this.renderProgress()}
 
-                <CountSearchControlLine ctx={ctx3} findOptions={{ queryName: ProcessExceptionLineEntity, parentColumn: "Process", parentValue: ctx3.value }} />
+                <ValueSearchControlLine ctx={ctx3} findOptions={{ queryName: ProcessExceptionLineEntity, parentColumn: "Process", parentValue: ctx3.value }} />
             </div>
         );
     }

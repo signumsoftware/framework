@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { WorkflowReplacementModel, WorkflowReplacementItemEntity, CaseActivityEntity } from '../Signum.Entities.Workflow'
 import { TypeContext, ValueLine, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { SearchControl, CountSearchControlLine } from '../../../../Framework/Signum.React/Scripts/Search'
+import { SearchControl, ValueSearchControlLine } from '../../../../Framework/Signum.React/Scripts/Search'
 import { PreviewTask } from '../WorkflowClient'
 
 export default class WorkflowReplacementComponent extends React.Component<{ ctx: TypeContext<WorkflowReplacementModel>, previewTasks: PreviewTask[] }, void> {
@@ -22,7 +22,7 @@ export default class WorkflowReplacementComponent extends React.Component<{ ctx:
                             {ctx.mlistItemCtxs(a => a.replacements).map(ectx =>
                                 <tr>
                                     <td>
-                                        <CountSearchControlLine ctx={ectx}
+                                        <ValueSearchControlLine ctx={ectx}
                                             labelText={ectx.value.oldTask.toStr}
                                             findOptions={{
                                                 queryName: CaseActivityEntity,

@@ -11,21 +11,6 @@ import * as Chart from '../Chart/Signum.Entities.Chart'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
-export const CountSearchControlPartEntity = new Type<CountSearchControlPartEntity>("CountSearchControlPart");
-export interface CountSearchControlPartEntity extends Entities.Entity, IPartEntity {
-    Type: "CountSearchControlPart";
-    userQueries: Entities.MList<CountUserQueryElementEntity>;
-    requiresTitle?: boolean;
-}
-
-export const CountUserQueryElementEntity = new Type<CountUserQueryElementEntity>("CountUserQueryElementEntity");
-export interface CountUserQueryElementEntity extends Entities.EmbeddedEntity {
-    Type: "CountUserQueryElementEntity";
-    label?: string | null;
-    userQuery?: UserQueries.UserQueryEntity | null;
-    href?: string | null;
-}
-
 export const DashboardEmbedededInEntity = new EnumType<DashboardEmbedededInEntity>("DashboardEmbedededInEntity");
 export type DashboardEmbedededInEntity =
     "None" |
@@ -128,21 +113,36 @@ export interface UserChartPartEntity extends Entities.Entity, IPartEntity {
     requiresTitle?: boolean;
 }
 
-export const UserQueryCountPartEntity = new Type<UserQueryCountPartEntity>("UserQueryCountPart");
-export interface UserQueryCountPartEntity extends Entities.Entity, IPartEntity {
-    Type: "UserQueryCountPart";
-    requiresTitle?: boolean;
-    userQuery?: Entities.Lite<UserQueries.UserQueryEntity> | null;
-    iconClass?: string | null;
-    showName?: boolean;
-}
-
 export const UserQueryPartEntity = new Type<UserQueryPartEntity>("UserQueryPart");
 export interface UserQueryPartEntity extends Entities.Entity, IPartEntity {
     Type: "UserQueryPart";
     userQuery?: UserQueries.UserQueryEntity | null;
     allowSelection?: boolean;
     requiresTitle?: boolean;
+}
+
+export const ValueUserQueryElementEntity = new Type<ValueUserQueryElementEntity>("ValueUserQueryElementEntity");
+export interface ValueUserQueryElementEntity extends Entities.EmbeddedEntity {
+    Type: "ValueUserQueryElementEntity";
+    label?: string | null;
+    userQuery?: UserQueries.UserQueryEntity | null;
+    href?: string | null;
+}
+
+export const ValueUserQueryListPartEntity = new Type<ValueUserQueryListPartEntity>("ValueUserQueryListPart");
+export interface ValueUserQueryListPartEntity extends Entities.Entity, IPartEntity {
+    Type: "ValueUserQueryListPart";
+    userQueries: Entities.MList<ValueUserQueryElementEntity>;
+    requiresTitle?: boolean;
+}
+
+export const ValueUserQueryPartEntity = new Type<ValueUserQueryPartEntity>("ValueUserQueryPart");
+export interface ValueUserQueryPartEntity extends Entities.Entity, IPartEntity {
+    Type: "ValueUserQueryPart";
+    requiresTitle?: boolean;
+    userQuery?: Entities.Lite<UserQueries.UserQueryEntity> | null;
+    iconClass?: string | null;
+    showName?: boolean;
 }
 
 

@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityDetail} from '../../../../Framework/Signum.React/Scripts/Lines'
-import { SearchControl, CountSearchControlLine }  from '../../../../Framework/Signum.React/Scripts/Search'
+import { SearchControl, ValueSearchControlLine }  from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { ExceptionEntity }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -24,7 +24,7 @@ export default class Pop3Configuration extends React.Component<{ ctx: TypeContex
                 <ValueLine ctx={sc.subCtx(s => s.readTimeout)}  />
                 <ValueLine ctx={sc.subCtx(s => s.deleteMessagesAfter)}  />
                 <EntityRepeater ctx={sc.subCtx(s => s.clientCertificationFiles)}  />
-                {sc.value.isNew && <CountSearchControlLine ctx={sc} findOptions={{queryName: Pop3ConfigurationEntity, parentColumn: "Pop3Configuration", parentValue: sc.value}}/> }
+                {sc.value.isNew && <ValueSearchControlLine ctx={sc} findOptions={{queryName: Pop3ConfigurationEntity, parentColumn: "Pop3Configuration", parentValue: sc.value}}/> }
             </div>
         );
     }
