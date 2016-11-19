@@ -207,6 +207,12 @@
     <Compile Include="Word\WordTemplateNodes.cs" />
     <Compile Include="Word\WordTemplateParser.cs" />
     <Compile Include="Word\WordTemplateRenderer.cs" />
+    <Compile Include="Workflow\CaseLogic.cs" />
+    <Compile Include="Workflow\LaneBuilder.cs" />
+    <Compile Include="Workflow\PoolBuilder.cs" />
+    <Compile Include="Workflow\WorkflowBuilder.cs" />
+    <Compile Include="Workflow\WorkflowLogic.cs" />
+    <Compile Include="Workflow\WorkflowLogicStarter.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj">

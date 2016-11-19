@@ -218,6 +218,18 @@
     <Compile Include="SMS\SMSPackages.cs" />
     <Compile Include="Word\WordTemplate.cs" />
     <Compile Include="Word\SystemWordTemplate.cs" />
+    <Compile Include="Workflow\Case.cs" />
+    <Compile Include="Workflow\CaseActivity.cs" />
+    <Compile Include="Workflow\CaseJunction.cs" />
+    <Compile Include="Workflow\CaseNotification.cs" />
+    <Compile Include="Workflow\Workflow.cs" />
+    <Compile Include="Workflow\WorkflowActivity.cs" />
+    <Compile Include="Workflow\WorkflowCondition.cs" />
+    <Compile Include="Workflow\WorkflowConnection.cs" />
+    <Compile Include="Workflow\WorkflowEvent.cs" />
+    <Compile Include="Workflow\WorkflowGateway.cs" />
+    <Compile Include="Workflow\WorkflowLane.cs" />
+    <Compile Include="Workflow\WorkflowPool.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj">

@@ -1,0 +1,7 @@
+
+interface IWorkflowEvaluator {}
+
+
+export interface WorkflowEntitiesDictionary {
+    [bpmnElementId: string]: Entities.ModelEntity
+}

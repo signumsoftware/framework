@@ -167,6 +167,8 @@
     <Compile Include="RestLog\RestLogFilter.cs" />
     <Compile Include="Mailing\MailingController.cs" />
     <Compile Include="Mailing\MailingServer.cs" />
+    <Compile Include="Workflow\WorkflowServer.cs" />
+    <Compile Include="Workflow\WorkflowController.cs" />
     <TypeScriptCompile Include="Dynamic\DynamicClient.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicTypeClient.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicExpressionClient.tsx" />
@@ -230,6 +232,21 @@
     <Compile Include="UserQueries\UserQueryServer.cs" />
     <Compile Include="Word\WordServer.cs" />
     <Compile Include="Word\WordController.cs" />
+    <TypeScriptCompile Include="Workflow\bpmn-js.d.ts" />
+    <TypeScriptCompile Include="Workflow\Signum.Entities.Workflow.ts">
+      <DependentUpon>Signum.Entities.Workflow.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Workflow\Templates\BpmnModelerComponent.tsx" />
+    <TypeScriptCompile Include="Workflow\Templates\BpmnViewerComponent.tsx" />
+    <TypeScriptCompile Include="Workflow\Templates\CaseModalFrame.tsx" />
+    <TypeScriptCompile Include="Workflow\Templates\CasePageFrame.tsx" />
+    <TypeScriptCompile Include="Workflow\Templates\InboxFilter.tsx" />
+    <TypeScriptCompile Include="Workflow\Templates\Workflow.tsx" />
+    <TypeScriptCompile Include="Workflow\Templates\WorkflowActivityModel.tsx" />
+    <TypeScriptCompile Include="Workflow\Templates\WorkflowConditionEntity.tsx" />
+    <TypeScriptCompile Include="Workflow\Templates\WorkflowDropdown.tsx" />
+    <TypeScriptCompile Include="Workflow\Templates\WorkflowReplacementComponent.tsx" />
+    <TypeScriptCompile Include="Workflow\WorkflowClient.tsx" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Authorization\Admin\AuthAdmin.css" />
@@ -245,6 +262,10 @@
     <Content Include="Map\Operation\operationMap.css" />
     <Content Include="Map\Schema\schemaMap.css" />
     <Content Include="packages.config" />
+    <Content Include="Workflow\Templates\InitialWorkflow.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Workflow\Templates\Workflow.css" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Processes\Processes.css" />
@@ -545,6 +566,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Dynamic\Signum.Entities.Dynamic.t4s" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Workflow\Signum.Entities.Workflow.t4s" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
