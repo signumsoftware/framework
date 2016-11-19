@@ -133,26 +133,30 @@ namespace Signum.React.ApiControllers
         }
 
         [Route("api/query/queryCount"), HttpPost, ProfilerActionSplitter]
-        public int? QueryCount(QueryCountTS request)
+        public object QueryCount(QueryValueRequestTS request)
         {
             return DynamicQueryManager.Current.ExecuteQueryCount(request.ToQueryCountRequest());
         }
     }
 
-    public class QueryCountTS
+    public class QueryValueRequestTS
     {
         public string querykey;
         public List<FilterTS> filters;
+        public string valueToken;
 
-        public QueryCountRequest ToQueryCountRequest()
+        public QueryValueRequest ToQueryCountRequest()
         {
             var qn = QueryLogic.ToQueryName(this.querykey);
             var qd = DynamicQueryManager.Current.QueryDescription(qn);
 
-            return new QueryCountRequest
+            var value = valueToken.HasText() ? QueryUtils.Parse(valueToken, qd, SubTokensOptions.CanAggregate | SubTokensOptions.CanElement) : null;
+
+            return new QueryValueRequest
             {
                 QueryName = qn,
                 Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false)).ToList(),
+                ValueToken = value,
             };
         }
 

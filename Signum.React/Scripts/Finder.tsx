@@ -6,7 +6,7 @@ import { Dic } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
 import {
-    QueryDescription, CountQueryRequest, QueryRequest, QueryEntitiesRequest, FindOptions, 
+    QueryDescription, QueryCountRequest, QueryRequest, QueryEntitiesRequest, FindOptions, 
     FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, CountOptionsParsed,
     QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination, ResultColumn,
     ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest
@@ -580,8 +580,8 @@ export module API {
     export function executeQuery(request: QueryRequest): Promise<ResultTable> {
         return ajaxPost<ResultTable>({ url: "~/api/query/executeQuery" }, request);
     }
-    
-    export function queryCount(request: CountQueryRequest): Promise<number> {
+
+    export function queryCount(request: QueryCountRequest): Promise<number> {
         return ajaxPost<number>({ url: "~/api/query/queryCount" }, request);
     }
 

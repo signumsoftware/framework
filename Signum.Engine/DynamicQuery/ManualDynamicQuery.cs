@@ -37,18 +37,33 @@ namespace Signum.Engine.DynamicQuery
             return manualResult.ToResultTable(request); 
         }
 
-        public override int ExecuteQueryCount(QueryCountRequest request)
+        public override object ExecuteQueryValue(QueryValueRequest request)
         {
             var req = new QueryRequest
             {
                 QueryName = request.QueryName,
                 Filters = request.Filters,
-                Columns = new List<Column>() { new Column(this.EntityColumnFactory().BuildColumnDescription(), QueryName) },
+                Columns = new List<Column>(),
                 Orders = new List<Order>(),
                 Pagination = new Pagination.All(),
             };
 
-            return Execute(req, GetQueryDescription()).Collection.Count();
+            if (request.ValueToken == null)
+            {
+                req.Columns.Add(new Column(this.EntityColumnFactory().BuildColumnDescription(), QueryName));
+                return Execute(req, GetQueryDescription()).Collection.Count();
+            }
+
+            else if (request.ValueToken is AggregateToken)
+            {
+                req.Columns.Add(new Column(request.ValueToken.Parent, request.ValueToken.Parent.NiceName()));
+                return Execute(req, GetQueryDescription()).SimpleAggregate((AggregateToken)request.ValueToken);
+            }
+            else
+            {
+                req.Columns.Add(new Column(request.ValueToken, request.ValueToken.NiceName()));
+                return Execute(req, GetQueryDescription()).SelectOne(request.ValueToken).Unique(UniqueType.Single);
+            }
         }
 
         public override Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request)

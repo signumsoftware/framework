@@ -76,7 +76,7 @@ namespace Signum.Engine.DynamicQuery
         QueryDescription GetQueryDescription();
 
         ResultTable ExecuteQuery(QueryRequest request);
-        int ExecuteQueryCount(QueryCountRequest request);
+        object ExecuteQueryValue(QueryValueRequest request);
         Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request);
         ResultTable ExecuteQueryGroup(QueryGroupRequest request);
         IQueryable<Lite<Entity>> GetEntities(List<Filter> filters);
@@ -108,7 +108,7 @@ namespace Signum.Engine.DynamicQuery
         public ColumnDescriptionFactory[] StaticColumns { get; protected set; }
 
         public abstract ResultTable ExecuteQuery(QueryRequest request);
-        public abstract int ExecuteQueryCount(QueryCountRequest request);
+        public abstract object ExecuteQueryValue(QueryValueRequest request);
         public abstract Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request);
         public abstract ResultTable ExecuteQueryGroup(QueryGroupRequest request);
         public abstract IQueryable<Lite<Entity>> GetEntities(List<Filter> filters);
@@ -250,6 +250,20 @@ namespace Signum.Engine.DynamicQuery
         #endregion 
 
         #region Select
+        
+        public static IEnumerable<object> SelectOne<T>(this DEnumerable<T> query, QueryToken token)
+        {
+            var exp = Expression.Lambda<Func<object, object>>(Expression.Convert(token.BuildExpression(query.Context), typeof(object)), query.Context.Parameter);
+
+            return query.Collection.Select(exp.Compile());
+        }
+
+        public static IQueryable<object> SelectOne<T>(this DQueryable<T> query, QueryToken token)
+        {
+            var exp = Expression.Lambda<Func<object, object>>(Expression.Convert(token.BuildExpression(query.Context), typeof(object)), query.Context.Parameter);
+
+            return query.Query.Select(exp);
+        }
 
         public static DQueryable<T> Select<T>(this DQueryable<T> query, List<Column> columns)
         {
@@ -258,7 +272,7 @@ namespace Signum.Engine.DynamicQuery
 
         public static DQueryable<T> Select<T>(this DQueryable<T> query, HashSet<QueryToken> columns)
         {
-            BuildExpressionContext newContext; 
+            BuildExpressionContext newContext;
             var selector = TupleConstructor(query.Context, columns, out newContext);
 
             return new DQueryable<T>(query.Query.Select(selector), newContext);
@@ -788,9 +802,37 @@ namespace Signum.Engine.DynamicQuery
 
             return Expression.Call(typeof(Enumerable), at.AggregateFunction.ToString(), new[] { groupType }, new[] { collection, lambda });
         }
-#endregion
+        #endregion
+
+        #region SimpleAggregate
         
-      
+        public static object SimpleAggregate<T>(this DEnumerable<T> collection, AggregateToken simpleAggregate)
+        {
+            throw new NotImplementedException();
+            //ParameterExpression param = Expression.Parameter(typeof(IEnumerable<object>), 
+
+            //var expression = BuildAggregateExpression(collection.Collection, collection.Context)
+
+
+            //var keySelector = KeySelector(collection.Context, keyTokens);
+
+            //BuildExpressionContext newContext;
+            //LambdaExpression resultSelector = ResultSelectSelectorAndContext(collection.Context, keyTokens, aggregateTokens, keySelector.Body.Type, out newContext);
+
+            //var resultCollection = giGroupByE.GetInvoker(typeof(object), keySelector.Body.Type, typeof(object))(collection.Collection, keySelector.Compile(), resultSelector.Compile());
+
+            //return new DEnumerable<T>(resultCollection, newContext);
+        }
+
+        public static object SimpleAggregate<T>(this DQueryable<T> query, AggregateToken simpleAggregate)
+        {
+            var expr = BuildAggregateExpression(query.Query.Expression, simpleAggregate, query.Context);
+
+            return Expression.Lambda<Func<object>>(Expression.Convert(expr, typeof(object))).Compile()();
+        }
+
+        #endregion
+
         public static ResultTable ToResultTable<T>(this DEnumerableCount<T> collection, QueryRequest req)
         {
             object[] array = collection.Collection as object[] ?? collection.Collection.ToArray();

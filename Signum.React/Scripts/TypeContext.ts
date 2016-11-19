@@ -34,7 +34,7 @@ export class StyleContext {
         labelColumns: { sm: 2 },
         readOnly : false,
         placeholderLabels : false,
-        formControlStaticAsFormControlReadonly: false,
+        formControlClassReadonly: "form-control-static", //form-control readonly
         frame: undefined,
     });
 
@@ -55,8 +55,8 @@ export class StyleContext {
         return this.styleOptions.placeholderLabels != undefined ? this.styleOptions.placeholderLabels : this.parent.placeholderLabels;
     }
 
-    get formControlStaticAsFormControlReadonly(): boolean {
-        return this.styleOptions.formControlStaticAsFormControlReadonly != undefined ? this.styleOptions.formControlStaticAsFormControlReadonly : this.parent.formControlStaticAsFormControlReadonly;
+    get formControlClassReadOnly(): string {
+        return this.styleOptions.formControlClassReadonly != undefined ? this.styleOptions.formControlClassReadonly : this.parent.formControlClassReadOnly;
     }
     
     get labelColumns(): BsColumns {
@@ -124,7 +124,7 @@ export interface StyleOptions {
     formGroupStyle?: FormGroupStyle;
     formGroupSize?: FormGroupSize;
     placeholderLabels?: boolean;
-    formControlStaticAsFormControlReadonly?: boolean;
+    formControlClassReadonly?: string;
     labelColumns?: BsColumns | number;
     valueColumns?: BsColumns | number;
     readOnly?: boolean;

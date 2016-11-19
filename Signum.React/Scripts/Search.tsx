@@ -13,8 +13,8 @@ export { SearchControl, SearchControlProps, ISimpleFilterBuilder };
 import SearchControlLoaded, { SearchControlLoadedProps} from './SearchControl/SearchControlLoaded'
 export { SearchControlLoaded, SearchControlLoadedProps};
 
-import CountSearchControl, { CountSearchControlProps } from './SearchControl/CountSearchControl'
-export { CountSearchControl, CountSearchControlProps };
+import ValueSearchControl, { ValueSearchControlProps } from './SearchControl/ValueSearchControl'
+export { ValueSearchControl, ValueSearchControlProps };
 
-import CountSearchControlLine, { CountSearchControlLineProps } from './SearchControl/CountSearchControlLine'
-export { CountSearchControlLine, CountSearchControlLineProps };
+import ValueSearchControlLine, { ValueSearchControlLineProps } from './SearchControl/ValueSearchControlLine'
+export { ValueSearchControlLine, ValueSearchControlLineProps };

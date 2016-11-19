@@ -251,11 +251,13 @@ namespace Signum.Entities.DynamicQuery
     }
 
     [Serializable]
-    public class QueryCountRequest : BaseQueryRequest
+    public class QueryValueRequest : BaseQueryRequest
     {
+        public QueryToken ValueToken { get; set; }
+
         public List<CollectionElementToken> Multiplications
         {
-            get { return CollectionElementToken.GetElements(Filters.Select(a => a.Token).ToHashSet()); }
+            get { return CollectionElementToken.GetElements(Filters.Select(a => a.Token).PreAnd(ValueToken).NotNull().ToHashSet()); }
         }
     }
 
