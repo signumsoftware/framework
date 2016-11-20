@@ -57,12 +57,21 @@ export namespace API {
     export function pingServer(): Promise<void> {
         return ajaxPost<void>({ url: `~/api/dynamic/pingServer` }, null);
     }
-
+    
+    export function autocompleteEntityCleanType(request: AutocompleteEntityCleanType): Promise<string[]> {
+        return ajaxPost<string[]>({ url: "~/api/dynamic/autocompleteEntityCleanType" }, request);
+    }
 
     export function autocompleteType(request: AutocompleteTypeRequest): Promise<string[]> {
         return ajaxPost<string[]>({ url: "~/api/dynamic/autocompleteType" }, request);
     }
+
+    export function typeHelp(typeName: string, mode: TypeHelpMode): Promise<TypeHelp> {
+        return ajaxGet<TypeHelp>({ url: `~/api/dynamic/typeHelp/${typeName}/${mode}` });
+    }
 }
+
+export type TypeHelpMode = "Typescript" | "CSharp";
 
 export interface AutocompleteTypeRequest {
     query: string;
@@ -72,5 +81,26 @@ export interface AutocompleteTypeRequest {
     includeMList?: boolean;
     includeQueriable?: boolean;
 }
+
+export interface AutocompleteEntityCleanType {
+    query: string;
+    limit: number;
+}
+
+
+export interface TypeHelp {
+    type: string;
+    cleanTypeName: string;
+    members: TypeMemberHelp[];
+}
+
+export interface TypeMemberHelp {
+    name?: string; //Mixins, MListElements
+    type: string;
+    isExpression: boolean;
+    cleanTypeName: string | null;
+    subMembers: TypeMemberHelp[];
+}
+
 
 

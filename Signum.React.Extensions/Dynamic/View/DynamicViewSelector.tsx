@@ -8,6 +8,7 @@ import { getTypeInfo, Binding, PropertyRoute } from '../../../../Framework/Signu
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
 import * as DynamicViewClient from '../DynamicViewClient'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
+import TypeHelpComponent from '../Help/TypeHelpComponent'
 import { AuthInfo } from './AuthInfo'
 
 
@@ -68,8 +69,16 @@ export default class DynamicViewSelectorEntityComponent extends React.Component<
 
                 {ctx.value.entityType &&
                     <div>
-                        {this.renderEditor()}
-                        {this.renderTest()}
+                        <br />
+                        <div className="row">
+                            <div className="col-sm-7">
+                                {this.renderEditor()}
+                                {this.renderTest()}
+                            </div>
+                            <div className="col-sm-5">
+                                <TypeHelpComponent initialType={ctx.value.entityType.cleanName} mode="Typescript" />
+                            </div>
+                        </div>
                     </div>
                 }
             </div>

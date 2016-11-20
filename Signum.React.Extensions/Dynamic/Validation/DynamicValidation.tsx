@@ -8,6 +8,7 @@ import { TypeEntity, PropertyRouteEntity } from '../../../../Framework/Signum.Re
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { API, DynamicValidationTestResponse } from '../DynamicValidationClient'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
+import TypeHelpComponent from '../Help/TypeHelpComponent'
 
 interface DynamicValidationProps {
     ctx: TypeContext<DynamicValidationEntity>;
@@ -56,13 +57,21 @@ export default class DynamicValidation extends React.Component<DynamicValidation
                 <ValueLine ctx={ctx.subCtx(d => d.isGlobalyEnabled)} inlineCheckbox={true} />
                 {ctx.value.propertyRoute &&
                     <div>
-                        {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handeEvaluate}><i className="fa fa-play" aria-hidden="true"></i> Evaluate</button>}
-                        <div className="code-container">
-                            <pre style={{ border: "0px", margin: "0px" }}>{"string PropertyValidate(" + (!ctx.value.entityType ? "Entity" : ctx.value.entityType.cleanName) + " e, PropertyInfo pi)\n{"}</pre>
-                            <CSharpCodeMirror script={ctx.value.eval.script || ""} onChange={this.handleCodeChange} />
-                            <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
+                        <br />
+                        <div className="row">
+                            <div className="col-sm-7">
+                                {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handeEvaluate}><i className="fa fa-play" aria-hidden="true"></i> Evaluate</button>}
+                                <div className="code-container">
+                                    <pre style={{ border: "0px", margin: "0px" }}>{"string PropertyValidate(" + (!ctx.value.entityType ? "Entity" : ctx.value.entityType.className) + " e, PropertyInfo pi)\n{"}</pre>
+                                    <CSharpCodeMirror script={ctx.value.eval.script || ""} onChange={this.handleCodeChange} />
+                                    <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
+                                </div>
+                                {this.renderTest()}
+                            </div>
+                            <div className="col-sm-5">
+                                <TypeHelpComponent initialType={ctx.value.entityType ? ctx.value.entityType.cleanName : undefined} mode="CSharp" />
+                            </div>
                         </div>
-                        {this.renderTest()}
                     </div>}
             </div>
         );

@@ -178,8 +178,8 @@
     <TypeScriptCompile Include="Dynamic\Signum.Entities.Dynamic.ts">
       <DependentUpon>Signum.Entities.Dynamic.t4s</DependentUpon>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="Dynamic\TypeCombo.tsx" />
-    <TypeScriptCompile Include="Dynamic\TypeCondition\DynamicTypeConditionEntity.tsx" />
+    <TypeScriptCompile Include="Dynamic\Help\TypeHelpComponent.tsx" />
+    <TypeScriptCompile Include="Dynamic\TypeCondition\DynamicTypeCondition.tsx" />
     <TypeScriptCompile Include="Dynamic\Type\DynamicSqlMigrationEntity.tsx" />
     <TypeScriptCompile Include="Dynamic\Type\DynamicTypeDefinitionComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicPanelPage.tsx" />
@@ -253,6 +253,7 @@
     <Content Include="Chart\Chart.css" />
     <Content Include="Dashboard\Dashboard.css" />
     <Content Include="DiffLog\Templates\DiffLog.css" />
+    <Content Include="Dynamic\Help\TypeHelpComponent.css" />
     <Content Include="Dynamic\DynamicPanelPage.css" />
     <Content Include="Dynamic\Type\DynamicType.css" />
     <Content Include="Dynamic\View\DynamicView.css" />

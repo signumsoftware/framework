@@ -6,6 +6,7 @@ import CSharpCodeMirror from '../../../../Extensions/Signum.React.Extensions/Cod
 import { Entity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { DynamicTypeConditionEntity } from '../Signum.Entities.Dynamic'
 import { DynamicTypeConditionTestResponse, API } from '../DynamicTypeConditionClient'
+import TypeHelpComponent from '../Help/TypeHelpComponent'
 
 
 interface DynamicTypeConditionComponentProps {
@@ -49,12 +50,21 @@ export default class DynamicTypeConditionComponent extends React.Component<Dynam
                 {ctx.value.entityType &&
                     <div>
                         <br />
-                        {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handleEvaluate}><i className="fa fa-play" aria-hidden="true"></i> Evaluate</button>}
-                        <div className="code-container">
-                            <pre style={{ border: "0px", margin: "0px" }}>{"boolean Evaluate(" + ctx.value.entityType.cleanName + " e) =>"}</pre>
-                            <CSharpCodeMirror script={ctx.value.eval!.script || ""} onChange={this.handleCodeChange} />
+                        <div className="row">
+                            <div className="col-sm-7">
+
+                                {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handleEvaluate}><i className="fa fa-play" aria-hidden="true"></i> Evaluate</button>}
+
+                                <div className="code-container">
+                                    <pre style={{ border: "0px", margin: "0px" }}>{"boolean Evaluate(" + ctx.value.entityType.cleanName + "Entity e) =>"}</pre>
+                                    <CSharpCodeMirror script={ctx.value.eval!.script || ""} onChange={this.handleCodeChange} />
+                                </div>
+                                {this.renderTest()}
+                            </div>
+                            <div className="col-sm-5">
+                                <TypeHelpComponent initialType={ctx.value.entityType.cleanName} mode="CSharp" />
+                            </div>
                         </div>
-                        {this.renderTest()}
                     </div>}
             </div>
         );

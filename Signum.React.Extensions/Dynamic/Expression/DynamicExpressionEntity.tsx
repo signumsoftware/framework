@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { ValueLine, EntityLine, TypeContext, FormGroup } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { PropertyRoute, Binding, getTypeInfo } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { PropertyRoute, Binding, isTypeEntity } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import CSharpCodeMirror from '../../../../Extensions/Signum.React.Extensions/Codemirror/CSharpCodeMirror'
 import { Entity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -8,6 +8,7 @@ import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahea
 import { DynamicExpressionEntity } from '../Signum.Entities.Dynamic'
 import { DynamicExpressionTestResponse, API } from '../DynamicExpressionClient'
 import * as DynamicClient from '../DynamicClient';
+import TypeHelpComponent from '../Help/TypeHelpComponent'
 
 interface DynamicExpressionComponentProps {
     ctx: TypeContext<DynamicExpressionEntity>;
@@ -35,17 +36,33 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
     render() {
         var ctx = this.props.ctx;
 
+        let cleanFromType = ctx.value.fromType || undefined;
+
+        if (cleanFromType && cleanFromType.endsWith("Entity"))
+            cleanFromType = cleanFromType.beforeLast("Entity");
+
+        if (cleanFromType && !isTypeEntity(cleanFromType))
+            cleanFromType = undefined;
+
         return (
             <div>
-                <ValueLine ctx={ctx.subCtx(dt => dt.translation)}/>
-                {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handleEvaluate}><i className="fa fa-play" aria-hidden="true"></i> Evaluate</button>}
-                <div className="code-container">
-                    <pre style={{ border: "0px", margin: "0px", overflow: "visible" }}>
-                        {this.renderTypeAutocomplete(ctx.subCtx(dt => dt.returnType))} {this.renderInput(ctx.subCtx(dt => dt.name))}({this.renderTypeAutocomplete(ctx.subCtx(dt => dt.fromType))} e) =>
+                <ValueLine ctx={ctx.subCtx(dt => dt.translation)} />
+                <br />
+                <div className="row">
+                    <div className="col-sm-7">
+                        {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handleEvaluate}><i className="fa fa-play" aria-hidden="true"></i> Evaluate</button>}
+                        <div className="code-container">
+                            <pre style={{ border: "0px", margin: "0px", overflow: "visible" }}>
+                                {this.renderTypeAutocomplete(ctx.subCtx(dt => dt.returnType))} {this.renderInput(ctx.subCtx(dt => dt.name))}({this.renderTypeAutocomplete(ctx.subCtx(dt => dt.fromType))}e) =>
                     </pre>
-                    <CSharpCodeMirror script={ctx.value.body || ""} onChange={this.handleCodeChange} />
+                            <CSharpCodeMirror script={ctx.value.body || ""} onChange={this.handleCodeChange} />
+                        </div>
+                        {ctx.value.body && cleanFromType && this.renderTest(cleanFromType)}
+                    </div>
+                    <div className="col-sm-5">
+                        <TypeHelpComponent initialType={cleanFromType} mode="CSharp" />
+                    </div>
                 </div>
-                {this.renderTest()}
             </div>
         );
     }
@@ -99,24 +116,13 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
         }
     }
 
-    renderTest() {
-        const ctx = this.props.ctx;
+    renderTest(cleanFromType: string) {
         const res = this.state.response;
-        if (!ctx.value.body || !ctx.value.fromType)
-            return null;
-
-        var fromType = ctx.value.fromType;
-
-        if (fromType.endsWith("Entity"))
-            fromType = fromType.beforeLast("Entity");
-
-        if (getTypeInfo(fromType) == null)
-            return null;
 
         return (
             <fieldset>
                 <legend>TEST</legend>
-                {this.renderExampleEntity(fromType)}
+                {this.renderExampleEntity(cleanFromType)}
                 {res && this.renderMessage(res)}
             </fieldset>
         );

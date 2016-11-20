@@ -19,6 +19,7 @@ import * as DynamicClient from '../DynamicClient';
 import { DynamicTypeMessage } from '../Signum.Entities.Dynamic';
 import { Validators, DynamicTypeDefinition, DynamicProperty } from '../DynamicTypeClient';
 import ValueComponent from './ValueComponent';
+import TypeHelpComponent from '../Help/TypeHelpComponent'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror';
 
 require("!style!css!./DynamicType.css");
@@ -92,7 +93,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
             <div>
                 <div className="row">
                     <div className="col-sm-6">
-                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.entityKind)} type="string" defaultValue={null} options={EntityKindValues} onChange={this.handleEntityKindChange}/>
+                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.entityKind)} type="string" defaultValue={null} options={EntityKindValues} onChange={this.handleEntityKindChange} />
                     </div>
                     <div className="col-sm-6">
                         <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.entityData)} type="string" defaultValue={null} options={EntityDataValues} />
@@ -127,36 +128,43 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                     </Tab>
 
                     <Tab eventKey="operations" title="Operations">
-                        {this.renderFieldSet<DynamicTypeClient.OperationConstruct>(Binding.create(def, d => d.operationCreate), {
-                            title: "Create",
-                            onCreate: () => ({
-                                construct: "return new " + this.props.typeName + "Entity\r\n{\r\n" +
+                        <div className="row">
+                            <div className="col-sm-7">
+                            {this.renderFieldSet<DynamicTypeClient.OperationConstruct>(Binding.create(def, d => d.operationCreate), {
+                                title: "Create",
+                                onCreate: () => ({
+                                    construct: "return new " + this.props.typeName + "Entity\r\n{\r\n" +
                                     def.properties.map(p => "    " + p.name + " = null").join(", \r\n") +
                                     "\r\n};"
-                            }),
-                            renderContent: oc =>
-                                <CSharpExpressionCodeMirror binding={Binding.create(oc, d => d.construct)} signature={"(object[] args) =>"} />
-                        })}
+                                }),
+                                renderContent: oc =>
+                                    <CSharpExpressionCodeMirror binding={Binding.create(oc, d => d.construct)} signature={"(object[] args) =>"} />
+                            })}
 
-                        {this.renderFieldSet<DynamicTypeClient.OperationExecute>(Binding.create(def, d => d.operationSave), {
-                            title: "Save",
-                            onCreate: () => ({ execute: "" }),
-                            renderContent: oe =>
-                                <div>
-                                    <CSharpExpressionCodeMirror binding={Binding.create(oe, d => d.canExecute)} title="CanSave" signature={"string (" + this.props.typeName + "Entity e) =>"} />
-                                    <CSharpExpressionCodeMirror binding={Binding.create(oe, d => d.execute)} title="OperationSave" signature={"(" + this.props.typeName + "Entity e, object[] args) =>"} />
-                                </div>
-                        })}
+                            {this.renderFieldSet<DynamicTypeClient.OperationExecute>(Binding.create(def, d => d.operationSave), {
+                                title: "Save",
+                                onCreate: () => ({ execute: "" }),
+                                renderContent: oe =>
+                                    <div>
+                                        <CSharpExpressionCodeMirror binding={Binding.create(oe, d => d.canExecute)} title="CanSave" signature={"string (" + this.props.typeName + "Entity e) =>"} />
+                                        <CSharpExpressionCodeMirror binding={Binding.create(oe, d => d.execute)} title="OperationSave" signature={"(" + this.props.typeName + "Entity e, object[] args) =>"} />
+                                    </div>
+                            })}
 
-                        {this.renderFieldSet<DynamicTypeClient.OperationDelete>(Binding.create(def, d => d.operationDelete), {
-                            title: "Delete",
-                            onCreate: () => ({ delete: "" }),
-                            renderContent: od =>
-                                <div>
-                                    <CSharpExpressionCodeMirror binding={Binding.create(od, d => d.canDelete)} title="CanDelete" signature={"string (" + this.props.typeName + "Entity e) =>"} />
-                                    <CSharpExpressionCodeMirror binding={Binding.create(od, d => d.delete)} title="OperationDelete" signature={"(" + this.props.typeName + "Entity e, object[] args) =>"} />
-                                </div>
-                        })}
+                            {this.renderFieldSet<DynamicTypeClient.OperationDelete>(Binding.create(def, d => d.operationDelete), {
+                                title: "Delete",
+                                onCreate: () => ({ delete: "" }),
+                                renderContent: od =>
+                                    <div>
+                                        <CSharpExpressionCodeMirror binding={Binding.create(od, d => d.canDelete)} title="CanDelete" signature={"string (" + this.props.typeName + "Entity e) =>"} />
+                                        <CSharpExpressionCodeMirror binding={Binding.create(od, d => d.delete)} title="OperationDelete" signature={"(" + this.props.typeName + "Entity e, object[] args) =>"} />
+                                    </div>
+                            })}
+                            </div>
+                            <div className="col-sm-5">
+                                <TypeHelpComponent initialType={this.props.typeName} mode="CSharp" />
+                            </div>
+                        </div>
                     </Tab>
                     <Tab eventKey="other" title="Other">
                         {this.renderOthers()}

@@ -10,7 +10,7 @@ import { ModifiableEntity, Entity, Lite, JavascriptMessage } from '../../../../F
 import { getTypeInfo, Binding, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal'
 import { DynamicViewTree } from './DynamicViewTree'
-import { DynamicViewInspector } from './Designer'
+import { DynamicViewInspector, CollapsableTypeHelp } from './Designer'
 import { NodeConstructor, BaseNode } from './Nodes'
 import { DesignerNode, DesignerContext } from './NodeUtils'
 import * as NodeUtils from './NodeUtils'
@@ -127,6 +127,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
                             type={{ name: this.props.ctx.value.entityType!.cleanName }} labelText={DynamicViewMessage.ExampleEntity.niceToString()} />
                         <DynamicViewTree rootNode={root} />
                         <DynamicViewInspector selectedNode={root.context.getSelectedNode()} />
+                        <CollapsableTypeHelp initialTypeName={ctx.value.entityType!.cleanName} />
                     </div>
                 </div>
                 <div className="design-content open">

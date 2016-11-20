@@ -14,7 +14,7 @@ import { BaseNode } from './Nodes'
 import { DesignerContext, DesignerNode } from './NodeUtils'
 import * as NodeUtils from './NodeUtils'
 import * as DynamicViewClient from '../DynamicViewClient'
-import { DynamicViewInspector  } from './Designer'
+import { DynamicViewInspector, CollapsableTypeHelp } from './Designer'
 import { DynamicViewTree } from './DynamicViewTree'
 import { AuthInfo } from './AuthInfo'
 import { DynamicViewEntity, DynamicViewOperation, DynamicViewMessage } from '../Signum.Entities.Dynamic'
@@ -141,6 +141,7 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { vi
                 {this.renderButtonBar()}
                 <DynamicViewTree rootNode={this.props.rootNode} />
                 <DynamicViewInspector selectedNode={this.props.rootNode.context.getSelectedNode()} />
+                <CollapsableTypeHelp initialTypeName={dv.entityType!.cleanName} />
             </div>
         );
     }

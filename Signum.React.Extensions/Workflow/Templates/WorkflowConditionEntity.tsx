@@ -5,6 +5,7 @@ import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator
 import CSharpCodeMirror from '../../../../Extensions/Signum.React.Extensions/Codemirror/CSharpCodeMirror'
 import { WorkflowConditionEntity, ICaseMainEntity, DecisionResult } from '../Signum.Entities.Workflow'
 import { WorkflowConditionTestResponse, API, DecisionResultValues } from '../WorkflowClient'
+import TypeHelpComponent from '../../Dynamic/Help/TypeHelpComponent'
 
 
 interface WorkflowConditionComponentProps {
@@ -50,13 +51,20 @@ export default class WorkflowConditionComponent extends React.Component<Workflow
                 {ctx.value.mainEntityType &&
                     <div>
                         <br />
-                        {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handleEvaluate}><i className="fa fa-play" aria-hidden="true"></i> Evaluate</button>}
-                        <div className="code-container">
-                            <pre style={{ border: "0px", margin: "0px" }}>{"boolean Evaluate(" + ctx.value.mainEntityType.cleanName + " e, WorkflowEvaluationContext ctx)\n{"}</pre>
-                            <CSharpCodeMirror script={ctx.value.eval!.script || ""} onChange={this.handleCodeChange} />
-                            <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
+                        <div className="row">
+                            <div className="col-sm-7">
+                                {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handleEvaluate}><i className="fa fa-play" aria-hidden="true"></i> Evaluate</button>}
+                                <div className="code-container">
+                                    <pre style={{ border: "0px", margin: "0px" }}>{"boolean Evaluate(" + ctx.value.mainEntityType.cleanName + " e, WorkflowEvaluationContext ctx)\n{"}</pre>
+                                    <CSharpCodeMirror script={ctx.value.eval!.script || ""} onChange={this.handleCodeChange} />
+                                    <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
+                                </div>
+                                {this.renderTest()}
+                            </div>
+                            <div className="col-sm-5">
+                                <TypeHelpComponent initialType={ctx.value.mainEntityType.cleanName} mode="CSharp" />
+                            </div>
                         </div>
-                        {this.renderTest()}
                     </div>}
             </div>
         );

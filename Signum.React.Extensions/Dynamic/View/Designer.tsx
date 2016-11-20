@@ -14,6 +14,7 @@ import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 import { Modal, ModalProps, ModalClass, ButtonToolbar, Button } from 'react-bootstrap'
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
+import TypeHelpComponent from '../Help/TypeHelpComponent'
 
 export interface ExpressionOrValueProps {
     binding: Binding<any>;
@@ -311,6 +312,37 @@ export class DynamicViewInspector extends React.Component<{ selectedNode?: Desig
 }
 
 
+export interface CollapsableTypeHelpState{
+    open: boolean;
+}
+
+export class CollapsableTypeHelp extends React.Component<{ initialTypeName?: string }, CollapsableTypeHelpState>{
+
+    constructor(props: any) {
+        super(props);
+        this.state = { open: false };
+    }
+
+    handleHelpClick = (e: React.FormEvent) => {
+        e.preventDefault();
+        this.setState({
+            open: !this.state.open
+        });
+    }
+
+    render() {
+        return (
+            <div>
+                <a href="#" onClick={this.handleHelpClick} className="design-help-button">
+                    {this.state.open ?
+                        DynamicViewMessage.HideHelp.niceToString() :
+                        DynamicViewMessage.ShowHelp.niceToString()}
+                </a>
+                {this.state.open && <TypeHelpComponent initialType={this.props.initialTypeName} mode="Typescript" />}
+            </div>
+        );
+    }
+}
 
 interface DesignerModalProps extends React.Props<DesignerModal>, IModalProps {
     title: React.ReactNode;

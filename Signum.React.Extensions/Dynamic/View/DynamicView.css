@@ -91,3 +91,10 @@ ul.expression-list a.sf-remove {
     float: left;
     margin-left: -20px;
 }
+
+
+.design-help-button {
+    background: #ddd;
+    padding: 5px;
+    margin: -5px;
+}

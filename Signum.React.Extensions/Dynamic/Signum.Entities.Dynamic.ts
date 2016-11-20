@@ -158,6 +158,8 @@ export module DynamicViewMessage {
     export const ChooseAView = new MessageKey("DynamicViewMessage", "ChooseAView");
     export const SinceThereIsNoDynamicViewSelectorYouNeedToChooseAViewManually = new MessageKey("DynamicViewMessage", "SinceThereIsNoDynamicViewSelectorYouNeedToChooseAViewManually");
     export const ExampleEntity = new MessageKey("DynamicViewMessage", "ExampleEntity");
+    export const ShowHelp = new MessageKey("DynamicViewMessage", "ShowHelp");
+    export const HideHelp = new MessageKey("DynamicViewMessage", "HideHelp");
 }
 
 export module DynamicViewOperation {

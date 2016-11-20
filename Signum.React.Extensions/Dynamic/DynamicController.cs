@@ -1,6 +1,10 @@
 ﻿using Signum.Engine.Basics;
 using Signum.Engine.Dynamic;
+using Signum.Engine.DynamicQuery;
+using Signum.Engine.Maps;
+using Signum.Entities;
 using Signum.Entities.Dynamic;
+using Signum.React.Facades;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using System;
@@ -63,16 +67,46 @@ namespace Signum.React.Dynamic
             return Request.CreateResponse(HttpStatusCode.NoContent);
         }
 
+        [Route("api/dynamic/autocompleteEntityCleanType"), HttpPost]
+        public List<string> AutocompleteEntityCleanType(AutocompleteEntityCleanTypeRequest request)
+        {
+            Schema s = Schema.Current;
+            var types = TypeLogic.NameToType
+                .Where(kvp => s.IsAllowed(kvp.Value, true) == null)
+                .Select(kvp => kvp.Key).ToList();
+
+            var result = Filter(types, request.query, request.limit);
+
+            return result;
+        }
+
+        public class AutocompleteEntityCleanTypeRequest
+        {
+            public string query;
+            public int limit;
+        }
 
         [Route("api/dynamic/autocompleteType"), HttpPost]
         public List<string> AutocompleteType(AutocompleteTypeRequest request) //Not comprehensive, just useful
         {
             var types = GetTypes(request);
 
-            var result = types.Where(a => a.StartsWith(request.query, StringComparison.InvariantCultureIgnoreCase)).OrderBy(a => a.Length).ThenBy(a => a).Take(request.limit).ToList();
+            return Filter(types, request.query, request.limit);
+        }
 
-            if (result.Count < request.limit)
-                result.AddRange(types.Where(a => a.Contains(request.query, StringComparison.InvariantCultureIgnoreCase)).OrderBy(a => a.Length).ThenBy(a => a).Take(result.Count - request.limit).ToList());
+        private List<string> Filter(List<string> types, string query, int limit)
+        {
+            var result = types
+                .Where(a => a.StartsWith(query, StringComparison.InvariantCultureIgnoreCase))
+                .OrderBy(a => a.Length)
+                .ThenBy(a => a)
+                .Take(limit).ToList();
+
+            if (result.Count < limit)
+                result.AddRange(types.Where(a => a.Contains(query, StringComparison.InvariantCultureIgnoreCase))
+                    .OrderBy(a => a.Length)
+                    .ThenBy(a => a)
+                    .Take(result.Count - limit).ToList());
 
             return result;
         }
@@ -108,6 +142,7 @@ namespace Signum.React.Dynamic
                 result.AddRange(TypeLogic.TypeToEntity.Keys.Select(a => a.Name));
             }
 
+        
             if (request.includeMList)
                 return Fix(result, "MList", request.query);
 
@@ -127,7 +162,92 @@ namespace Signum.React.Dynamic
                 return result;
             }
         }
+
+
+        [Route("api/dynamic/typeHelp/{typeName}/{mode}"), HttpGet]
+        public TypeHelpTS GetTypeHelp(string typeName, TypeHelpMode mode)
+        {
+            Type type = TypeLogic.GetType(typeName);
+
+            var routes = PropertyRoute.GenerateRoutes(type);
+
+            var root = TreeHelper.ToTreeC(routes, a => a.Parent).SingleEx();
+
+            var members = root.Children
+                .Where(a => mode == TypeHelpMode.CSharp || ReflectionServer.InTypeScript(a.Value))
+                .Select(pr => new TypeMemberHelpTS(pr, mode)).ToList();
+
+            if (mode == TypeHelpMode.CSharp)
+            {
+                var expressions = DynamicQueryManager.Current.RegisteredExtensions.GetValue(type);
+
+                members.AddRange(expressions.Values.Select(ex => new TypeMemberHelpTS(ex)));
+            }
+
+            return new TypeHelpTS
+            {
+                type = type.Name,
+                cleanTypeName = typeName,
+                members = members
+            };
+        }
+
     }
 
-   
+    public enum TypeHelpMode
+    {
+        CSharp,
+        Typescript
+    }
+
+    public class TypeHelpTS
+    {
+        public string type;
+        public string cleanTypeName;
+
+        public List<TypeMemberHelpTS> members;
+    }
+
+    public class TypeMemberHelpTS
+    {
+        public string name; 
+        public string type;
+        public string cleanTypeName;
+        public bool isExpression;
+
+        public List<TypeMemberHelpTS> subMembers;
+
+        public TypeMemberHelpTS(Node<PropertyRoute> node, TypeHelpMode mode)
+        {
+            var pr = node.Value;
+
+            this.name = mode == TypeHelpMode.Typescript ? 
+                pr.PropertyInfo?.Name.FirstLower() : 
+                pr.PropertyInfo?.Name;
+            this.type = mode ==  TypeHelpMode.Typescript && ReflectionServer.IsId(pr) ? 
+                PrimaryKey.Type(pr.RootType).Nullify().TypeName():
+                pr.Type.TypeName();
+            
+            this.isExpression = false;
+            this.cleanTypeName = GetCleanTypeName(pr.Type);
+            this.subMembers = node.Children.Select(a => new TypeMemberHelpTS(a, mode)).ToList();
+        }
+
+        public TypeMemberHelpTS(ExtensionInfo ex)
+        {
+            this.name = ex.Key;
+            this.type = ex.Type.TypeName();
+            this.isExpression = true;
+            this.cleanTypeName = GetCleanTypeName(ex.Type);
+            this.subMembers = new List<Dynamic.TypeMemberHelpTS>();
+        }
+
+        string GetCleanTypeName(Type type)
+        {
+            type = type.ElementType() ?? type;
+            return TypeLogic.TryGetCleanName(type.CleanType());
+        }
+    }
+
+
 }
