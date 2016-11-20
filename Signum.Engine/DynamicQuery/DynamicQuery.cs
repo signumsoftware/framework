@@ -783,10 +783,13 @@ namespace Signum.Engine.DynamicQuery
 
         static Expression BuildAggregateExpression(Expression collection, AggregateToken at, BuildExpressionContext context)
         {
-            Type groupType = collection.Type.GetGenericInterfaces(typeof(IEnumerable<>)).SingleEx(() => "IEnumerable<T> implementations on {0}".FormatWith(collection.Type)).GetGenericArguments()[0];
+            Type enumerableOrQueryable = collection.Type.IsInstantiationOf(typeof(IQueryable<>)) ? typeof(Queryable) : typeof(Enumerable); 
 
+
+            Type elementType = collection.Type.ElementType();
+                
             if (at.AggregateFunction == Signum.Entities.DynamicQuery.AggregateFunction.Count)
-                return Expression.Call(typeof(Enumerable), "Count", new[] { groupType }, new[] { collection });
+                return Expression.Call(enumerableOrQueryable, "Count", new[] { elementType }, new[] { collection });
 
             var body = at.Parent.BuildExpression(context);
 
@@ -794,13 +797,16 @@ namespace Signum.Engine.DynamicQuery
 
             if (body.Type != type)
                 body = body.TryConvert(type);
+            
 
             var lambda = Expression.Lambda(body, context.Parameter);
+            var quotedLambda = elementType == typeof(Queryable) ? Expression.Quote(lambda) : (Expression)lambda;
 
-            if (at.AggregateFunction == Signum.Entities.DynamicQuery.AggregateFunction.Min || at.AggregateFunction == Signum.Entities.DynamicQuery.AggregateFunction.Max)
-                return Expression.Call(typeof(Enumerable), at.AggregateFunction.ToString(), new[] { groupType, lambda.Body.Type }, new[] { collection, lambda });
+            if (at.AggregateFunction == Signum.Entities.DynamicQuery.AggregateFunction.Min || 
+                at.AggregateFunction == Signum.Entities.DynamicQuery.AggregateFunction.Max)
+                return Expression.Call(enumerableOrQueryable, at.AggregateFunction.ToString(), new[] { elementType, lambda.Body.Type }, new[] { collection, quotedLambda });
 
-            return Expression.Call(typeof(Enumerable), at.AggregateFunction.ToString(), new[] { groupType }, new[] { collection, lambda });
+            return Expression.Call(enumerableOrQueryable, at.AggregateFunction.ToString(), new[] { elementType }, new[] { collection, quotedLambda });
         }
         #endregion
 
@@ -808,20 +814,9 @@ namespace Signum.Engine.DynamicQuery
         
         public static object SimpleAggregate<T>(this DEnumerable<T> collection, AggregateToken simpleAggregate)
         {
-            throw new NotImplementedException();
-            //ParameterExpression param = Expression.Parameter(typeof(IEnumerable<object>), 
+            var expr = BuildAggregateExpression(Expression.Constant(collection.Collection), simpleAggregate, collection.Context);
 
-            //var expression = BuildAggregateExpression(collection.Collection, collection.Context)
-
-
-            //var keySelector = KeySelector(collection.Context, keyTokens);
-
-            //BuildExpressionContext newContext;
-            //LambdaExpression resultSelector = ResultSelectSelectorAndContext(collection.Context, keyTokens, aggregateTokens, keySelector.Body.Type, out newContext);
-
-            //var resultCollection = giGroupByE.GetInvoker(typeof(object), keySelector.Body.Type, typeof(object))(collection.Collection, keySelector.Compile(), resultSelector.Compile());
-
-            //return new DEnumerable<T>(resultCollection, newContext);
+            return Expression.Lambda<Func<object>>(Expression.Convert(expr, typeof(object))).Compile()();
         }
 
         public static object SimpleAggregate<T>(this DQueryable<T> query, AggregateToken simpleAggregate)

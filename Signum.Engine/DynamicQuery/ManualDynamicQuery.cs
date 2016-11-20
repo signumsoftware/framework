@@ -48,15 +48,17 @@ namespace Signum.Engine.DynamicQuery
                 Pagination = new Pagination.All(),
             };
 
-            if (request.ValueToken == null)
+            if (request.ValueToken == null || request.ValueToken is AggregateToken && ((AggregateToken)request.ValueToken).AggregateFunction == AggregateFunction.Count)
             {
+                req.Pagination = new Pagination.Paginate(1, 1);
                 req.Columns.Add(new Column(this.EntityColumnFactory().BuildColumnDescription(), QueryName));
-                return Execute(req, GetQueryDescription()).Collection.Count();
+                return Execute(req, GetQueryDescription()).TotalElements.Value;
             }
 
             else if (request.ValueToken is AggregateToken)
             {
-                req.Columns.Add(new Column(request.ValueToken.Parent, request.ValueToken.Parent.NiceName()));
+                var parent = request.ValueToken.Parent;
+                req.Columns.Add(new Column(parent, parent.NiceName()));
                 return Execute(req, GetQueryDescription()).SimpleAggregate((AggregateToken)request.ValueToken);
             }
             else
