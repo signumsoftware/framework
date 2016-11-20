@@ -71,7 +71,7 @@ export class FormControlStatic extends React.Component<FormControlStaticProps, {
         var p = this.props.htmlProps;
         
         return (
-            <p {...p} className={classes(ctx.formControlClassReadOnly, p && p.className, this.props.className)} >
+            <p {...p} className={classes(ctx.formControlClassReadonly, p && p.className, this.props.className)} >
                 { this.props.children }
             </p>
         );

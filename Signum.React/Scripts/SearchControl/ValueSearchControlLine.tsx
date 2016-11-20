@@ -106,7 +106,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
                         findOptions={fo}
                         isBadge={isBadge}
                         isLink={this.props.isLink}
-                        formControlClass={isFormControl ? this.props.ctx.formControlClassReadOnly : undefined}
+                        formControlClass={isFormControl ? this.props.ctx.formControlClassReadonly : undefined}
                         valueToken={this.props.valueToken}
                         onValueChange={() => this.forceUpdate()}
                         onTokenLoaded={() => this.forceUpdate()}

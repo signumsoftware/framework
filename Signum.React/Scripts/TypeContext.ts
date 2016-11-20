@@ -55,8 +55,8 @@ export class StyleContext {
         return this.styleOptions.placeholderLabels != undefined ? this.styleOptions.placeholderLabels : this.parent.placeholderLabels;
     }
 
-    get formControlClassReadOnly(): string {
-        return this.styleOptions.formControlClassReadonly != undefined ? this.styleOptions.formControlClassReadonly : this.parent.formControlClassReadOnly;
+    get formControlClassReadonly(): string {
+        return this.styleOptions.formControlClassReadonly != undefined ? this.styleOptions.formControlClassReadonly : this.parent.formControlClassReadonly;
     }
     
     get labelColumns(): BsColumns {
