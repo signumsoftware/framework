@@ -120,19 +120,19 @@ export function toNumbroFormat(format: string | undefined) {
     const f = format.toUpperCase();
 
     if (f.startsWith("C"))
-        return "0." + "0".repeat(parseInt(f.after("C")));
+        return "0." + "0".repeat(parseInt(f.after("C") || "2"));
 
     if (f.startsWith("N"))
-        return "0,0." + "0".repeat(parseInt(f.after("N")));
+        return "0,0." + "0".repeat(parseInt(f.after("N") || "2"));
 
     if (f.startsWith("D"))
-        return "0".repeat(parseInt(f.after("D")));
+        return "0".repeat(parseInt(f.after("D") || "1"));
 
     if (f.startsWith("E"))
-        return "0." + "0".repeat(parseInt(f.after("E")));
+        return "0." + "0".repeat(parseInt(f.after("E") || "2"));
 
     if (f.startsWith("P"))
-        return "0." + "0".repeat(parseInt(f.after("P"))) + "%";
+        return "0." + "0".repeat(parseInt(f.after("P") || "2")) + "%";
 
     return format;
 }
