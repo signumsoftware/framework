@@ -364,6 +364,8 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
     });
 }
 
+export function fetchEntitiesWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: FilterOption[], count: number): Promise<Lite<T>[]>;
+export function fetchEntitiesWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], count: number): Promise<Lite<Entity>[]>;
 export function fetchEntitiesWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], count: number) : Promise<Lite<Entity>[]> {
     return getQueryDescription(queryName).then(qd => {
         return parseFilterOptions(filterOptions, qd).then(fop => {
