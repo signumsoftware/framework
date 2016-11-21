@@ -44,10 +44,16 @@ export function getSettings(operation: OperationSymbol | string): OperationSetti
     return operationSettings[operationKey];
 }
 
-export const isOperationAllowedEvent: Array<(oi: OperationInfo) => boolean> = [];
+export const isOperationAllowedEvent: Array<(oi: OperationInfo | OperationSymbol | string) => boolean> = [];
 
-export function isOperationAllowed(oi: OperationInfo) {
+export function isOperationAllowed(oi: OperationInfo | OperationSymbol | string) {
     return isOperationAllowedEvent.every(a => a(oi));
+}
+
+export function assertOperationAllowed(operation: OperationInfo | OperationSymbol | string) {
+    var key = (operation as OperationInfo | OperationSymbol).key || operation as string;
+    if (!isOperationAllowed(key))
+        throw new Error(`Operation ${key} is denied`);
 }
 
 
