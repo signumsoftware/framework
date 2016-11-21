@@ -77,6 +77,11 @@ namespace Signum.Entities.DynamicQuery
             get { return this.parent.QueryName; }
         }
 
+        public Func<object, T> GetAccessor<T>(BuildExpressionContext context)
+        {
+            return Expression.Lambda<Func<object, T>>(this.BuildExpression(context), context.Parameter).Compile();
+        }
+
         public Expression BuildExpression(BuildExpressionContext context)
         {
             Expression result;

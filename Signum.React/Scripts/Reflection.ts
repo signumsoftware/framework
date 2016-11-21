@@ -865,10 +865,6 @@ export class PropertyRoute {
         return current;
     }
 
-    findRootType(): TypeInfo {
-        return this.rootType || this.parent!.findRootType();
-    }
-
     typeReference(): TypeReference {
         switch (this.propertyRouteType) {
             case "Root": return { name: this.rootType!.name };
@@ -884,13 +880,13 @@ export class PropertyRoute {
         return getTypeInfo(this.typeReference().name);
     }
 
-    rootTypeInfo(): TypeInfo {
+    findRootType(): TypeInfo {
         switch (this.propertyRouteType) {
             case "Root": return this.rootType!;
-            case "Field": return this.parent!.rootTypeInfo();
-            case "Mixin": return this.parent!.rootTypeInfo();
-            case "MListItem": return this.parent!.rootTypeInfo();
-            case "LiteEntity": return this.parent!.rootTypeInfo();
+            case "Field": return this.parent!.findRootType();
+            case "Mixin": return this.parent!.findRootType();
+            case "MListItem": return this.parent!.findRootType();
+            case "LiteEntity": return this.parent!.findRootType();
             default: throw new Error("Unexpected propertyRouteType");
         }
     }
@@ -947,7 +943,7 @@ export class PropertyRoute {
                 this.propertyRouteType == "MListItem" ? this.propertyPath() + member.name.firstUpper() :
                     this.propertyPath() + "." + member.name.firstUpper();
 
-            const m = this.rootTypeInfo().members[memberName];
+            const m = this.findRootType().members[memberName];
             if (!m)
                 throw new Error(`member '${memberName}' not found`)
 
@@ -994,8 +990,8 @@ export class PropertyRoute {
         
 
         switch (this.propertyRouteType) {
-            case "Root": return simpleMembersAfter(this.rootTypeInfo(), "");
-            case "Mixin": return simpleMembersAfter(this.rootTypeInfo(), this.propertyPath());                
+            case "Root": return simpleMembersAfter(this.findRootType(), "");
+            case "Mixin": return simpleMembersAfter(this.findRootType(), this.propertyPath());                
             case "LiteEntity": return simpleMembersAfter(this.typeReferenceInfo(), "");
             case "Field":
             case "MListItem": 
@@ -1004,7 +1000,7 @@ export class PropertyRoute {
                     if (ti && isTypeEntity(ti))
                         return simpleMembersAfter(ti, "");
                     else
-                        return simpleMembersAfter(this.rootTypeInfo(), this.propertyPath() + (this.propertyRouteType == "Field" ? "." : ""));
+                        return simpleMembersAfter(this.findRootType(), this.propertyPath() + (this.propertyRouteType == "Field" ? "." : ""));
                 }
             default: throw new Error("Unexpected propertyRouteType");
 

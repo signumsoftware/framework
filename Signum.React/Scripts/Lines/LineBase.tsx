@@ -69,10 +69,9 @@ export class FormControlStatic extends React.Component<FormControlStaticProps, {
         const ctx = this.props.ctx;
 
         var p = this.props.htmlProps;
-
-        const className = ctx.formControlStaticAsFormControlReadonly ? "form-control readonly" : "form-control-static";
+        
         return (
-            <p {...p} className={classes(className, p && p.className, this.props.className)} >
+            <p {...p} className={classes(ctx.formControlClassReadonly, p && p.className, this.props.className)} >
                 { this.props.children }
             </p>
         );
@@ -146,7 +145,7 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
     calculateState(props: P): S {
 
         const so = {
-            formControlStaticAsFormControlReadonly: undefined,
+            formControlClassReadonly: undefined,
             formGroupSize: undefined,
             formGroupStyle: undefined,
             labelColumns: undefined,

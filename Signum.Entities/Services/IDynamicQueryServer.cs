@@ -18,7 +18,7 @@ namespace Signum.Services
         ResultTable ExecuteQuery(QueryRequest request);
 
         [OperationContract, NetDataContract]
-        int ExecuteQueryCount(QueryCountRequest request);
+        int ExecuteQueryCount(QueryValueRequest request);
 
         [OperationContract, NetDataContract]
         Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request);

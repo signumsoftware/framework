@@ -113,9 +113,9 @@ namespace Signum.Engine.DynamicQuery
             return Execute(ExecuteType.ExecuteQuery, request.QueryName,request, dqb => dqb.Core.Value.ExecuteQuery(request));
         }
 
-        public int ExecuteQueryCount(QueryCountRequest request)
+        public object ExecuteQueryCount(QueryValueRequest request)
         {
-            return Execute(ExecuteType.ExecuteQueryCount, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryCount(request));
+            return Execute(ExecuteType.ExecuteQueryCount, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryValue(request));
         }
 
         public ResultTable ExecuteGroupQuery(QueryGroupRequest request)
@@ -257,8 +257,8 @@ namespace Signum.Engine.DynamicQuery
         {
             return requests.Select(r =>
             {
-                if (r is QueryCountRequest)
-                    return ExecuteQueryCount((QueryCountRequest)r);
+                if (r is QueryValueRequest)
+                    return ExecuteQueryCount((QueryValueRequest)r);
 
                 if (r is QueryRequest)
                     return ExecuteQuery((QueryRequest)r);

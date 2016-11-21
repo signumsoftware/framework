@@ -1737,7 +1737,12 @@ namespace Signum.Engine.Linq
                 return operand;
 
             if (operand.Type.IsLite() != uType.IsLite())
+            {
+                if (uType.IsAssignableFrom(operand.Type)) //(object)
+                    return null;
+
                 throw new InvalidCastException("Impossible to convert {0} to {1}".FormatWith(operand.Type.TypeName(), uType.TypeName()));
+            }
 
             if (operand is EntityExpression)
             {

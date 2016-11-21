@@ -44,13 +44,19 @@ namespace Signum.Engine.DynamicQuery
             return result.ToResultTable(request);
         }
 
-        public override int ExecuteQueryCount(QueryCountRequest request)
+        public override object ExecuteQueryValue(QueryValueRequest request)
         {
-            return Query.ToDQueryable(GetQueryDescription())
+            var query = Query.ToDQueryable(GetQueryDescription())
                 .SelectMany(request.Multiplications)
-                .Where(request.Filters)
-                .Query
-                .Count();
+                .Where(request.Filters);
+            
+            if (request.ValueToken == null)
+                return query.Query.Count();
+
+            if (request.ValueToken is AggregateToken)
+                return query.SimpleAggregate((AggregateToken)request.ValueToken);
+
+            return query.SelectOne(request.ValueToken).Unique(UniqueType.Single);
         }
 
         public override Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request)
@@ -61,12 +67,13 @@ namespace Signum.Engine.DynamicQuery
                 .ToDQueryable(GetQueryDescription())
                 .SelectMany(request.Multiplications)
                 .Where(request.Filters)
-                .OrderBy(request.Orders)
-                .Select(new List<Column> { ex });
+                .OrderBy(request.Orders);
 
-            var exp = Expression.Lambda<Func<object, Lite<IEntity>>>(Expression.Convert(ex.Token.BuildExpression(orderQuery.Context), typeof(Lite<IEntity>)), orderQuery.Context.Parameter);
+            var result = orderQuery
+                .SelectOne(ex.Token)
+                .Unique(request.UniqueType);
 
-            return (Lite<Entity>)orderQuery.Query.Select(exp).Unique(request.UniqueType);
+            return (Lite<Entity>)result;
         }
 
         public override ResultTable ExecuteQueryGroup(QueryGroupRequest request)

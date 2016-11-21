@@ -203,10 +203,10 @@ namespace Signum.Services
                 () => DynamicQueryManager.Current.ExecuteGroupQuery(request));
         }
 
-        public virtual int ExecuteQueryCount(QueryCountRequest request)
+        public virtual int ExecuteQueryCount(QueryValueRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
-                () => DynamicQueryManager.Current.ExecuteQueryCount(request));
+                () => (int)DynamicQueryManager.Current.ExecuteQueryCount(request));
         }
 
         public virtual Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request)

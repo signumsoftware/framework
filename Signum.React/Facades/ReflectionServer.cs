@@ -198,7 +198,7 @@ namespace Signum.React.Facades
             return result;
         }
 
-        private static bool InTypeScript(PropertyRoute pr)
+        public static bool InTypeScript(PropertyRoute pr)
         {
             return (pr.Parent == null || InTypeScript(pr.Parent)) && (pr.PropertyInfo == null || pr.PropertyInfo.GetCustomAttribute<InTypeScriptAttribute>()?.GetInTypeScript() != false);
         }
@@ -262,7 +262,7 @@ namespace Signum.React.Facades
             return null;
         }
 
-        private static bool IsId(PropertyRoute p)
+        public static bool IsId(PropertyRoute p)
         {
             return p.PropertyInfo.Name == nameof(Entity.Id) && p.Parent.PropertyRouteType == PropertyRouteType.Root;
         }
