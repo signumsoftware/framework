@@ -288,7 +288,7 @@ namespace Signum.Engine
                 }
             }
 
-            if (replacements.Count != 0)
+            if (replacements.Count != 0 && !this.ContainsKey(replacementsKey))
                 this.GetOrCreate(replacementsKey).SetRange(replacements);
         }
 
