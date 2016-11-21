@@ -243,6 +243,22 @@ namespace Signum.Engine
             if (oldOnly.Count == 0 || newOnly.Count == 0)
                 return;
 
+            Dictionary<string, string> replacements = this.TryGetC(replacementsKey) ?? new Dictionary<string, string>();
+
+            if (replacements.Any())
+            {
+                var toRemove = replacements.Where(a => oldOnly.Contains(a.Key) && newOnly.Contains(a.Value)).ToList();
+                foreach (var kvp in toRemove)
+                {
+                    oldOnly.Remove(kvp.Key);
+                    newOnly.Remove(kvp.Value);
+                }                
+            }
+
+
+            if (oldOnly.Count == 0 || newOnly.Count == 0)
+                return;
+
             StringDistance sd = new StringDistance();
 
             Dictionary<string, Dictionary<string, float>> distances = oldOnly.ToDictionary(o => o, o => newOnly.ToDictionary(n => n, n =>
@@ -250,7 +266,7 @@ namespace Signum.Engine
                 return Distance(sd, o, n);
             }));
 
-            Dictionary<string, string> replacements = new Dictionary<string, string>();
+            new Dictionary<string, string>();
 
             while (oldOnly.Count > 0 && newOnly.Count > 0)
             {
@@ -272,7 +288,7 @@ namespace Signum.Engine
                 }
             }
 
-            if (replacements.Count != 0)
+            if (replacements.Count != 0 && !this.ContainsKey(replacementsKey))
                 this.GetOrCreate(replacementsKey).SetRange(replacements);
         }
 
