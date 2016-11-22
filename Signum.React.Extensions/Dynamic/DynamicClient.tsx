@@ -91,6 +91,7 @@ export interface AutocompleteEntityCleanType {
 export interface TypeHelp {
     type: string;
     cleanTypeName: string;
+    isEnum: boolean;
     members: TypeMemberHelp[];
 }
 
@@ -98,6 +99,7 @@ export interface TypeMemberHelp {
     name?: string; //Mixins, MListElements
     type: string;
     isExpression: boolean;
+    isEnum: boolean;
     cleanTypeName: string | null;
     subMembers: TypeMemberHelp[];
 }
