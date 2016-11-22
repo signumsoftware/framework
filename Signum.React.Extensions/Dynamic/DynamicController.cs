@@ -169,29 +169,42 @@ namespace Signum.React.Dynamic
         {
             Type type = TypeLogic.GetType(typeName);
 
-            var routes = PropertyRoute.GenerateRoutes(type);
+            var isEnum = EnumEntity.IsEnumEntity(type);
 
-            var root = TreeHelper.ToTreeC(routes, a => a.Parent).SingleEx();
+            var members = new List<TypeMemberHelpTS>();
 
-            var members = root.Children
-                .Where(a => mode == TypeHelpMode.CSharp || ReflectionServer.InTypeScript(a.Value))
-                .Select(pr => new TypeMemberHelpTS(pr, mode)).ToList();
-
-            if (mode == TypeHelpMode.CSharp)
+            if (isEnum)
             {
-                var expressions = DynamicQueryManager.Current.RegisteredExtensions.GetValue(type);
+                var enumType = EnumEntity.Extract(type);
+                var values = EnumEntity.GetValues(enumType).ToList();
+                members.AddRange(values.Select(ev => new TypeMemberHelpTS(ev)));
+            }
+            else
+            {
+                var routes = PropertyRoute.GenerateRoutes(type);
 
-                members.AddRange(expressions.Values.Select(ex => new TypeMemberHelpTS(ex)));
+                var root = TreeHelper.ToTreeC(routes, a => a.Parent).SingleEx();
+
+                members = root.Children
+                    .Where(a => mode == TypeHelpMode.CSharp || ReflectionServer.InTypeScript(a.Value))
+                    .Select(pr => new TypeMemberHelpTS(pr, mode)).ToList();
+
+                if (mode == TypeHelpMode.CSharp)
+                {
+                    var expressions = DynamicQueryManager.Current.RegisteredExtensions.GetValue(type);
+
+                    members.AddRange(expressions.Values.Select(ex => new TypeMemberHelpTS(ex)));
+                }
             }
 
             return new TypeHelpTS
             {
-                type = type.Name,
+                type = (isEnum ? typeName : type.Name),
                 cleanTypeName = typeName,
+                isEnum = isEnum,
                 members = members
             };
         }
-
     }
 
     public enum TypeHelpMode
@@ -204,6 +217,7 @@ namespace Signum.React.Dynamic
     {
         public string type;
         public string cleanTypeName;
+        public bool isEnum;
 
         public List<TypeMemberHelpTS> members;
     }
@@ -214,6 +228,7 @@ namespace Signum.React.Dynamic
         public string type;
         public string cleanTypeName;
         public bool isExpression;
+        public bool isEnum;
 
         public List<TypeMemberHelpTS> subMembers;
 
@@ -224,12 +239,14 @@ namespace Signum.React.Dynamic
             this.name = mode == TypeHelpMode.Typescript ? 
                 pr.PropertyInfo?.Name.FirstLower() : 
                 pr.PropertyInfo?.Name;
+
             this.type = mode ==  TypeHelpMode.Typescript && ReflectionServer.IsId(pr) ? 
                 PrimaryKey.Type(pr.RootType).Nullify().TypeName():
                 pr.Type.TypeName();
             
             this.isExpression = false;
-            this.cleanTypeName = GetCleanTypeName(pr.Type);
+            this.isEnum = pr.Type.UnNullify().IsEnum;
+            this.cleanTypeName = GetCleanTypeName(pr.Type.UnNullify().IsEnum ? EnumEntity.Generate(pr.Type.UnNullify()) : pr.Type);
             this.subMembers = node.Children.Select(a => new TypeMemberHelpTS(a, mode)).ToList();
         }
 
@@ -238,7 +255,18 @@ namespace Signum.React.Dynamic
             this.name = ex.Key;
             this.type = ex.Type.TypeName();
             this.isExpression = true;
+            this.isEnum = false;
             this.cleanTypeName = GetCleanTypeName(ex.Type);
+            this.subMembers = new List<Dynamic.TypeMemberHelpTS>();
+        }
+
+        public TypeMemberHelpTS(Enum ev)
+        {
+            this.name = ev.ToString();
+            this.type = ev.GetType().TypeName();
+            this.isExpression = false;
+            this.isEnum = true;
+            this.cleanTypeName = null;
             this.subMembers = new List<Dynamic.TypeMemberHelpTS>();
         }
 

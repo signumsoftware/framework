@@ -38,7 +38,7 @@ span.sf-dynamic-member-primitive {
     color: blue;
 }
 
-span.sf-dynamic-member-class {
+.sf-dynamic-member-class {
     color: #156F8A;
 }
 
@@ -46,7 +46,7 @@ span.sf-dynamic-member-date {
     color: #5100A1;
 }
 
-span.sf-dynamic-member-enum {
+.sf-dynamic-member-enum {
     color: #800046;
 }
 
