@@ -148,23 +148,29 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
                 <h4>{h.type}</h4>
 
                 <ul className="sf-dynamic-members" style={{ paddingLeft: "0px" }}>
-                    {h.members.map((m, i) => this.renderMember(m, i))}
+                    {h.members.map((m, i) => this.renderMember(h, m, i))}
                 </ul>
             </div>
         );
     }
 
-    renderMember(m: DynamicClient.TypeMemberHelp, index: number): React.ReactChild {
+    renderMember(h: DynamicClient.TypeHelp, m: DynamicClient.TypeMemberHelp, index: number): React.ReactChild {
 
         return (
             <li>
-                {this.props.mode == "CSharp" ?
-                    <span>{this.renderType(m.type, m.cleanTypeName)}{" "}<span className="sf-dynamic-member-name">{m.name}{m.name && (m.isExpression ? "()" : "")}</span></span> :
-                    <span><span className="sf-dynamic-member-name">{m.name}</span>{": "}{this.renderType(m.type, m.cleanTypeName)}</span>}
+                {h.isEnum ?
+                    <span className="sf-dynamic-member-name">{m.name}</span>
+                    :
+                    <div>
+                        {this.props.mode == "CSharp" ?
+                            <span>{this.renderType(m.type, m.cleanTypeName)}{" "}<span className="sf-dynamic-member-name">{m.name}{m.name && (m.isExpression ? "()" : "")}</span></span> :
+                            <span><span className="sf-dynamic-member-name">{m.name}</span>{": "}{this.renderType(m.type, m.cleanTypeName)}</span>}
 
-                {m.subMembers.length > 0 && <ul className="sf-dynamic-members">
-                    {m.subMembers.map((sm, i) => this.renderMember(sm, i))}
-                </ul>}
+                        {m.subMembers.length > 0 &&
+                            <ul className="sf-dynamic-members">
+                                {m.subMembers.map((sm, i) => this.renderMember(h, sm, i))}
+                            </ul>}
+                    </div>}
             </li>
         );
     }
@@ -197,10 +203,12 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
 
         if (cleanType != null)
             return (
-                <a href="" className="sf-dynamic-member-class"
-                    onClick={(e) => { e.preventDefault(); this.goTo(cleanType); } }>
-                    {type}
-                </a>
+                <span>
+                    <a href="" className={"sf-dynamic-member-" + (isTypeEnum(type) ? "enum" : "class")}
+                        onClick={(e) => { e.preventDefault(); this.goTo(cleanType); } }>
+                        {type}
+                    </a>
+                </span>
             );
 
         var kind = type.firstLower() == type ? "primitive" :
@@ -211,5 +219,4 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
 
         return <span className={"sf-dynamic-member-" + kind} title={kind}>{type}</span>;
     }
-
 }
