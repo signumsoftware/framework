@@ -103,9 +103,42 @@ namespace Signum.Engine.Processes
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<ProcessAlgorithmSymbol>();
-                sb.Include<ProcessEntity>();
-                sb.Include<ProcessExceptionLineEntity>();
+                sb.Include<ProcessAlgorithmSymbol>()
+                    .WithQuery(dqm, pa => new
+                    {
+                        Entity = pa,
+                        pa.Id,
+                        pa.Key
+                    });
+
+                sb.Include<ProcessEntity>()
+                    .WithQuery(dqm, p => new
+                    {
+                        Entity = p,
+                        p.Id,
+                        Resume = p.ToString(),
+                        Process = p.Algorithm,
+                        State = p.State,
+                        p.MachineName,
+                        p.ApplicationName,
+                        p.CreationDate,
+                        p.PlannedDate,
+                        p.CancelationDate,
+                        p.QueuedDate,
+                        p.ExecutionStart,
+                        p.ExecutionEnd,
+                        p.SuspendDate,
+                        p.ExceptionDate,
+                    });
+
+                sb.Include<ProcessExceptionLineEntity>()
+                    .WithQuery(dqm, p => new
+                    {
+                        Entity = p,
+                        p.Line,
+                        p.Process,
+                        p.Exception,
+                    });
 
                 PermissionAuthLogic.RegisterPermissions(ProcessPermission.ViewProcessPanel);
 
@@ -114,47 +147,7 @@ namespace Signum.Engine.Processes
                 OperationLogic.AssertStarted(sb);
 
                 ProcessGraph.Register();
-
-                dqm.RegisterQuery(typeof(ProcessAlgorithmSymbol), () =>
-                             from pa in Database.Query<ProcessAlgorithmSymbol>()
-                             select new
-                             {
-                                 Entity = pa,
-                                 pa.Id,
-                                 pa.Key
-                             });
-
-                dqm.RegisterQuery(typeof(ProcessEntity), ()=>
-                             from p in Database.Query<ProcessEntity>()
-                              select new
-                              {
-                                  Entity = p,
-                                  p.Id,
-                                  Resume = p.ToString(),
-                                  Process = p.Algorithm,
-                                  State = p.State,
-                                  p.MachineName,
-                                  p.ApplicationName,
-                                  p.CreationDate,
-                                  p.PlannedDate,
-                                  p.CancelationDate,
-                                  p.QueuedDate,
-                                  p.ExecutionStart,
-                                  p.ExecutionEnd,
-                                  p.SuspendDate,
-                                  p.ExceptionDate,
-                              });
-
-                dqm.RegisterQuery(typeof(ProcessExceptionLineEntity), () =>
-                             from p in Database.Query<ProcessExceptionLineEntity>()
-                             select new
-                             {
-                                 Entity = p,
-                                 p.Line,
-                                 p.Process,
-                                 p.Exception,
-                             });
-
+                
                 dqm.RegisterExpression((ProcessAlgorithmSymbol p) => p.Processes(), () => typeof(ProcessEntity).NicePluralName());
                 dqm.RegisterExpression((ProcessAlgorithmSymbol p) => p.LastProcess(), () => ProcessMessage.LastProcess.NiceToString());
 

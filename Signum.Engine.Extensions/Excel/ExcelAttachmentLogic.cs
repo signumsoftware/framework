@@ -22,10 +22,8 @@ namespace Signum.Engine.Excel
     {
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
-            sb.Include<ExcelAttachmentEntity>();
-            dqm.RegisterQuery(typeof(ExcelAttachmentEntity), () =>
-                from s in Database.Query<ExcelAttachmentEntity>()
-                select new
+            sb.Include<ExcelAttachmentEntity>()
+                .WithQuery(dqm, s => new
                 {
                     Entity = s,
                     s.Id,
@@ -33,8 +31,7 @@ namespace Signum.Engine.Excel
                     s.UserQuery,
                     s.Related,
                 });
-
-
+            
             EmailTemplateLogic.FillAttachmentTokens.Register((ExcelAttachmentEntity uqe, EmailTemplateLogic.FillAttachmentTokenContext ctx) =>
             {
                 if (uqe.FileName != null)

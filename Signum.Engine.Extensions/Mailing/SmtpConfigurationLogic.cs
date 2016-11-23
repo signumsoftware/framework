@@ -24,11 +24,8 @@ namespace Signum.Engine.Mailing
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<SmtpConfigurationEntity>();
-
-                dqm.RegisterQuery(typeof(SmtpConfigurationEntity), () =>
-                    from s in Database.Query<SmtpConfigurationEntity>()
-                    select new
+                sb.Include<SmtpConfigurationEntity>()
+                    .WithQuery(dqm, s => new
                     {
                         Entity = s,
                         s.Id,
@@ -37,7 +34,7 @@ namespace Signum.Engine.Mailing
                         s.Network.Username,
                         s.PickupDirectoryLocation
                     });
-
+                
                 SmtpConfigCache = sb.GlobalLazy(() => Database.Query<SmtpConfigurationEntity>().ToDictionary(a => a.ToLite()),
                     new InvalidateWith(typeof(SmtpConfigurationEntity)));
 

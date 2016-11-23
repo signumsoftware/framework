@@ -37,11 +37,8 @@ namespace Signum.Engine.ViewLog
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<ViewLogEntity>();
-
-                dqm.RegisterQuery(typeof(ViewLogEntity), () =>
-                    from e in Database.Query<ViewLogEntity>()
-                    select new
+                sb.Include<ViewLogEntity>()
+                    .WithQuery(dqm, e => new
                     {
                         Entity = e,
                         e.Id,
@@ -52,7 +49,7 @@ namespace Signum.Engine.ViewLog
                         e.StartDate,
                         e.EndDate,
                     });
-
+                
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
 
                 var exp = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity entity) => entity.ViewLogs());

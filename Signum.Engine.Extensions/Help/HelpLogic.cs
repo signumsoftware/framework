@@ -223,9 +223,9 @@ namespace Signum.Engine.Help
                 Operations = sb.GlobalLazy<ConcurrentDictionary<CultureInfo, Dictionary<OperationSymbol, OperationHelp>>>(() => new ConcurrentDictionary<CultureInfo, Dictionary<OperationSymbol, OperationHelp>>(),
                     invalidateWith: new InvalidateWith(typeof(OperationHelpEntity)));
 
-                dqm.RegisterQuery(typeof(EntityHelpEntity), () =>
-                    from e in Database.Query<EntityHelpEntity>()
-                    select new
+                sb.Include<EntityHelpEntity>()
+                    .WithSave(EntityHelpOperation.Save)
+                    .WithQuery(dqm, e => new
                     {
                         Entity = e,
                         e.Id,
@@ -233,9 +233,9 @@ namespace Signum.Engine.Help
                         Description = e.Description.Etc(100)
                     });
 
-                dqm.RegisterQuery(typeof(NamespaceHelpEntity), () =>
-                    from n in Database.Query<NamespaceHelpEntity>()
-                    select new
+                sb.Include<NamespaceHelpEntity>()
+                    .WithSave(NamespaceHelpOperation.Save)
+                    .WithQuery(dqm, n => new
                     {
                         Entity = n,
                         n.Id,
@@ -243,77 +243,41 @@ namespace Signum.Engine.Help
                         n.Culture,
                         Description = n.Description.Etc(100)
                     });
+                
+                sb.Include<AppendixHelpEntity>()
+                .WithSave(AppendixHelpOperation.Save)
+                .WithQuery(dqm, a => new
+                {
+                    Entity = a,
+                    a.Id,
+                    a.UniqueName,
+                    a.Culture,
+                    a.Title,
+                    Description = a.Description.Etc(100)
+                });
 
-                dqm.RegisterQuery(typeof(AppendixHelpEntity), () =>
-                    from a in Database.Query<AppendixHelpEntity>()
-                    select new
+                sb.Include<QueryHelpEntity>()
+                    .WithSave(QueryHelpOperation.Save)
+                    .WithQuery(dqm, q => new
                     {
-                        Entity = a,
-                        a.Id,
-                        a.UniqueName,
-                        a.Culture,
-                        a.Title,
-                        Description = a.Description.Etc(100)
+                        Entity = q,
+                        q.Id,
+                        q.Query,
+                        q.Culture,
+                        Description = q.Description.Etc(100)
                     });
-
-                dqm.RegisterQuery(typeof(QueryHelpEntity), () =>
-                     from q in Database.Query<QueryHelpEntity>()
-                     select new
-                     {
-                         Entity = q,
-                         q.Id,
-                         q.Query,
-                         q.Culture,
-                         Description = q.Description.Etc(100)
-                     });
-
-
-                dqm.RegisterQuery(typeof(OperationHelpEntity), () =>
-                     from o in Database.Query<OperationHelpEntity>()
-                     select new
-                     {
-                         Entity = o,
-                         o.Id,
-                         o.Operation,
-                         o.Culture,
-                         Description = o.Description.Etc(100)
-                     });
-
-                new Graph<AppendixHelpEntity>.Execute(AppendixHelpOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (e, _) => { },
-                }.Register();
-
-                new Graph<NamespaceHelpEntity>.Execute(NamespaceHelpOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (e, _) => { },
-                }.Register();
-
-                new Graph<EntityHelpEntity>.Execute(EntityHelpOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (e, _) => { },
-                }.Register();
-
-                new Graph<QueryHelpEntity>.Execute(QueryHelpOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (e, _) => { },
-                }.Register();
-
-                new Graph<OperationHelpEntity>.Execute(OperationHelpOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (e, _) => { },
-                }.Register();
-
+            
+                sb.Include<OperationHelpEntity>()
+                    .WithSave(OperationHelpOperation.Save)
+                    .WithQuery(dqm, o => new
+                    {
+                        Entity = o,
+                        o.Id,
+                        o.Operation,
+                        o.Culture,
+                        Description = o.Description.Etc(100)
+                    });
+               
                 sb.Schema.Synchronizing += Schema_Synchronizing;
 
                 sb.Schema.Table<OperationSymbol>().PreDeleteSqlSync += operation =>

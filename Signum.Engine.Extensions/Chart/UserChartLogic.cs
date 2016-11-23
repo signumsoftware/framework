@@ -36,11 +36,10 @@ namespace Signum.Engine.Chart
 
                 sb.Schema.Synchronizing += Schema_Synchronizing;
 
-                sb.Include<UserChartEntity>();
-
-                dqm.RegisterQuery(typeof(UserChartEntity), () =>
-                    from uq in Database.Query<UserChartEntity>()
-                    select new
+                sb.Include<UserChartEntity>()
+                    .WithSave(UserChartOperation.Save)
+                    .WithDelete(UserChartOperation.Delete)
+                    .WithQuery(dqm, uq => new
                     {
                         Entity = uq,
                         uq.Query,
@@ -55,19 +54,8 @@ namespace Signum.Engine.Chart
 
                 sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += e =>
                   Administrator.UnsafeDeletePreCommand(Database.Query<UserChartEntity>().Where(a => a.Query == e));
-
-                new Graph<UserChartEntity>.Execute(UserChartOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (uc, _) => { }
-                }.Register();
-
-                new Graph<UserChartEntity>.Delete(UserChartOperation.Delete)
-                {
-                    Delete = (uc, _) => { uc.Delete(); }
-                }.Register();
-
+                
+               
                 UserCharts = sb.GlobalLazy(() => Database.Query<UserChartEntity>().ToDictionary(a => a.ToLite()),
                  new InvalidateWith(typeof(UserChartEntity)));
 

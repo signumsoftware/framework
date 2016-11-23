@@ -80,12 +80,8 @@ namespace Signum.Engine.SMS
                 SMSLogic.getConfiguration = getConfiguration;
                 SMSLogic.Provider = provider;
 
-                sb.Include<SMSMessageEntity>();
-                sb.Include<SMSTemplateEntity>();
-
-                dqm.RegisterQuery(typeof(SMSMessageEntity), () =>
-                    from m in Database.Query<SMSMessageEntity>()
-                    select new
+                sb.Include<SMSMessageEntity>()
+                    .WithQuery(dqm, m => new
                     {
                         Entity = m,
                         m.Id,
@@ -96,9 +92,8 @@ namespace Signum.Engine.SMS
                         m.Template
                     });
 
-                dqm.RegisterQuery(typeof(SMSTemplateEntity), () =>
-                    from t in Database.Query<SMSTemplateEntity>()
-                    select new
+                sb.Include<SMSTemplateEntity>()
+                    .WithQuery(dqm, t => new
                     {
                         Entity = t,
                         t.Id,
@@ -109,7 +104,7 @@ namespace Signum.Engine.SMS
                         t.StartDate,
                         t.EndDate,
                     });
-
+                
                 SMSMessageGraph.Register();
                 SMSTemplateGraph.Register();
 

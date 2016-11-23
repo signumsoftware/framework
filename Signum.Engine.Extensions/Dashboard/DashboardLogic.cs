@@ -39,12 +39,8 @@ namespace Signum.Engine.Dashboard
                     {"LinkListPart", typeof(LinkListPartEntity)},
                 });
 
-                sb.Include<DashboardEntity>();
-
-
-                dqm.RegisterQuery(typeof(DashboardEntity), () =>
-                    from cp in Database.Query<DashboardEntity>()
-                    select new
+                sb.Include<DashboardEntity>()
+                    .WithQuery(dqm, cp => new
                     {
                         Entity = cp,
                         cp.Id,
@@ -53,18 +49,16 @@ namespace Signum.Engine.Dashboard
                         Related = cp.Owner,
                     });
 
-                dqm.RegisterQuery(typeof(LinkListPartEntity), () =>
-                    from cp in Database.Query<LinkListPartEntity>()
-                    select new
+                sb.Include<LinkListPartEntity>()
+                    .WithQuery(dqm, cp => new
                     {
                         Entity = cp,
                         ToStr = cp.ToString(),
                         Links = cp.Links.Count
                     });
-
-                dqm.RegisterQuery(typeof(ValueUserQueryListPartEntity), () =>
-                    from cp in Database.Query<ValueUserQueryListPartEntity>()
-                    select new
+                
+                sb.Include<ValueUserQueryListPartEntity>()
+                    .WithQuery(dqm, cp => new
                     {
                         Entity = cp,
                         ToStr = cp.ToString(),

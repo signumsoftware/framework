@@ -42,23 +42,14 @@ namespace Signum.Engine.Isolation
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<IsolationEntity>();
-
-                dqm.RegisterQuery(typeof(IsolationEntity), () =>
-                    from iso in Database.Query<IsolationEntity>()
-                    select new
+                sb.Include<IsolationEntity>()
+                    .WithSave(IsolationOperation.Save)
+                    .WithQuery(dqm, iso => new
                     {
                         Entity = iso,
                         iso.Id,
                         iso.Name
                     });
-
-                new Graph<IsolationEntity>.Execute(IsolationOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (e, _) => { }
-                }.Register();
 
                 sb.Schema.EntityEventsGlobal.PreSaving += EntityEventsGlobal_PreSaving;
                 sb.Schema.SchemaCompleted += AssertIsolationStrategies;

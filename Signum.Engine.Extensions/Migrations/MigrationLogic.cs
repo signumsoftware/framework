@@ -26,23 +26,16 @@ namespace Signum.Engine.Migrations
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<SqlMigrationEntity>();
-
-                dqm.RegisterQuery(typeof(SqlMigrationEntity), () =>
-                    from e in Database.Query<SqlMigrationEntity>()
-                    select new
+                sb.Include<SqlMigrationEntity>()
+                    .WithQuery(dqm, e => new
                     {
                         Entity = e,
                         e.Id,
                         e.VersionNumber,
                     });
 
-
-                sb.Include<CSharpMigrationEntity>();
-
-                dqm.RegisterQuery(typeof(CSharpMigrationEntity), () =>
-                    from e in Database.Query<CSharpMigrationEntity>()
-                    select new
+                sb.Include<CSharpMigrationEntity>()
+                    .WithQuery(dqm, e => new
                     {
                         Entity = e,
                         e.Id,

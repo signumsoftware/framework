@@ -37,10 +37,9 @@ namespace Signum.Engine.Notes
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<NoteEntity>();
-                dqm.RegisterQuery(typeof(NoteEntity), () =>
-                    from n in Database.Query<NoteEntity>()
-                    select new
+                sb.Include<NoteEntity>()
+                    .WithSave(NoteOperation.Save)
+                    .WithQuery(dqm, n => new
                     {
                         Entity = n,
                         n.Id,
@@ -50,37 +49,23 @@ namespace Signum.Engine.Notes
                         Text = n.Text.Etc(100),
                         n.Target
                     });
-
+                
                 new Graph<NoteEntity>.ConstructFrom<Entity>(NoteOperation.CreateNoteFromEntity)
                 {
                     Construct = (a, _) => new NoteEntity{ CreationDate = TimeZoneManager.Now, Target = a.ToLite() }
                 }.Register();
 
-                new Graph<NoteEntity>.Execute(NoteOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (a, _) => { }
-                }.Register();
-
-                dqm.RegisterQuery(typeof(NoteTypeEntity), () =>
-                    from t in Database.Query<NoteTypeEntity>()
-                    select new
+                sb.Include<NoteTypeEntity>()
+                    .WithSave(NoteTypeOperation.Save)
+                    .WithQuery(dqm, t => new
                     {
                         Entity = t,
                         t.Id,
                         t.Name,
                         t.Key,
                     });
-
+                
                 SemiSymbolLogic<NoteTypeEntity>.Start(sb, () => SystemNoteTypes);
-
-                new Graph<NoteTypeEntity>.Execute(NoteTypeOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (a, _) => { }
-                }.Register();
 
                 if (registerExpressionsFor != null)
                 {
