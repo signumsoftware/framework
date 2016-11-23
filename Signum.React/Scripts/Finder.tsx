@@ -6,7 +6,7 @@ import { Dic } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
 import {
-    QueryDescription, CountQueryRequest, QueryRequest, QueryEntitiesRequest, FindOptions, 
+    QueryDescription, QueryCountRequest, QueryRequest, QueryEntitiesRequest, FindOptions, 
     FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, CountOptionsParsed,
     QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination, ResultColumn,
     ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest
@@ -364,6 +364,8 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
     });
 }
 
+export function fetchEntitiesWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: FilterOption[], count: number): Promise<Lite<T>[]>;
+export function fetchEntitiesWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], count: number): Promise<Lite<Entity>[]>;
 export function fetchEntitiesWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], count: number) : Promise<Lite<Entity>[]> {
     return getQueryDescription(queryName).then(qd => {
         return parseFilterOptions(filterOptions, qd).then(fop => {
@@ -580,8 +582,8 @@ export module API {
     export function executeQuery(request: QueryRequest): Promise<ResultTable> {
         return ajaxPost<ResultTable>({ url: "~/api/query/executeQuery" }, request);
     }
-    
-    export function queryCount(request: CountQueryRequest): Promise<number> {
+
+    export function queryCount(request: QueryCountRequest): Promise<number> {
         return ajaxPost<number>({ url: "~/api/query/queryCount" }, request);
     }
 
@@ -772,7 +774,7 @@ export interface FormatRule {
 export class CellFormatter {
     constructor(
         public formatter: (cell: any) => React.ReactChild | undefined,
-        public textAllign = "left") {
+        public cellClass? : string) {
     }
 }
 
@@ -837,7 +839,7 @@ export const formatRules: FormatRule[] = [
         isApplicable: col => col.token!.filterType == "Integer" || col.token!.filterType == "Decimal",
         formatter: col => {
             const numbroFormat = toNumbroFormat(col.token!.format);
-            return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat)}</span>, "right");
+            return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat)}</span>, "numeric-cell");
         }
     },
     {
@@ -845,13 +847,13 @@ export const formatRules: FormatRule[] = [
         isApplicable: col => (col.token!.filterType == "Integer" || col.token!.filterType == "Decimal") && !!col.token!.unit,
         formatter: col => {
             const numbroFormat = toNumbroFormat(col.token!.format);
-            return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat) + " " + col.token!.unit}</span>, "right");
+            return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat) + " " + col.token!.unit}</span>, "numeric-cell");
         }
     },
     {
         name: "Bool",
         isApplicable: col => col.token!.filterType == "Boolean",
-        formatter: col=> new CellFormatter((cell: boolean) => cell == undefined ? undefined : <input type="checkbox" disabled={true} checked={cell}/>, "center")
+        formatter: col=> new CellFormatter((cell: boolean) => cell == undefined ? undefined : <input type="checkbox" disabled={true} checked={cell}/>, "centered-cell")
     },
 ];
 

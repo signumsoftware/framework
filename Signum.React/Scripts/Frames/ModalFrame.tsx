@@ -118,7 +118,8 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
     okClicked: boolean;
     handleOkClicked = (val: any) => {
-        if (this.hasChanges() && this.props.requiresSaveOperation) {
+        if (this.hasChanges() &&
+            (this.props.requiresSaveOperation != undefined ? this.props.requiresSaveOperation : Navigator.typeRequiresSaveOperation(this.state.pack!.entity.Type))) {
             alert(JavascriptMessage.saveChangesBeforeOrPressCancel.niceToString());
             return;
         }
@@ -174,7 +175,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         return (
             <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-popup-control">
                 <Modal.Header closeButton={this.props.isNavigate}>
-                    {!this.props.isNavigate && <ButtonToolbar style={{ float: "right" }}>
+                    {!this.props.isNavigate && <ButtonToolbar className="pull-right flip">
                         <Button className="sf-entity-button sf-close-button sf-ok-button" bsStyle="primary" disabled={!pack} onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString() }</Button>
                         <Button className="sf-entity-button sf-close-button sf-cancel-button" bsStyle="default" disabled={!pack} onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString() }</Button>
                     </ButtonToolbar>}

@@ -206,9 +206,12 @@ export interface QueryRequest {
     pagination: Pagination;
 }
 
-export interface CountQueryRequest {
+export type AggregateType = "Count" | "Average" | "Sum" | "Min" | "Max";
+
+export interface QueryCountRequest {
     queryKey: string;
     filters: FilterRequest[];
+    valueToken?: string;
 }
 
 export interface ResultColumn {

@@ -78,6 +78,7 @@ label > input[type=checkbox] {
 
     .sf-line-button:not(.btn) {
         vertical-align: middle;
+         margin: 0 2px;
     }
 
 /* EntityLine buttons  */
@@ -509,4 +510,8 @@ ul.dropdown-menu > li > a.disabled {
     margin-top: 0px;
     margin-bottom: 0px;
     color: #737373;
+}
+
+.sf-create-label {
+    margin-right: 5px;
 }

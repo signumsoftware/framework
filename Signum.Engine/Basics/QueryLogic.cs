@@ -27,10 +27,10 @@ namespace Signum.Engine.Basics
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(sb)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(sb, null)));
         }
 
-        public static void Start(SchemaBuilder sb)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -42,22 +42,30 @@ namespace Signum.Engine.Basics
                     queryNameToEntityLazy.Load();
                 };
 
-                sb.Include<QueryEntity>();
+                sb.Include<QueryEntity>()
+                    .WithQuery(dqm, q => new
+                    {
+                        Entity = q,
+                        q.Key,
+                    });
 
                 sb.Schema.Synchronizing += SynchronizeQueries;
                 sb.Schema.Generating += Schema_Generating;
 
-                queryNamesLazy = sb.GlobalLazy(()=>CreateQueryNames(), new InvalidateWith(typeof(QueryEntity)));
+                queryNamesLazy = sb.GlobalLazy(() => CreateQueryNames(),
+                    new InvalidateWith(typeof(QueryEntity)),
+                    Schema.Current.InvalidateMetadata);
 
-                queryNameToEntityLazy = sb.GlobalLazy(() => 
-                    EnumerableExtensions.JoinStrict(
+                queryNameToEntityLazy = sb.GlobalLazy(() =>
+                    EnumerableExtensions.JoinRelaxed(
                         Database.Query<QueryEntity>().ToList(),
                         QueryNames,
                         q => q.Key,
                         kvp => kvp.Key,
                         (q, kvp) => KVP.Create(kvp.Value, q),
-                        "caching QueryEntity. Consider synchronize").ToDictionary(),
-                    new InvalidateWith(typeof(QueryEntity)));
+                        "caching QueryEntity").ToDictionary(),
+                    new InvalidateWith(typeof(QueryEntity)),
+                    Schema.Current.InvalidateMetadata);
             }
         }
 
@@ -79,7 +87,7 @@ namespace Signum.Engine.Basics
 
         private static Dictionary<string, object> CreateQueryNames()
         {
-            return DynamicQueryManager.Current.GetQueryNames().ToDictionary(qn => QueryUtils.GetKey(qn), "queryName");
+            return DynamicQueryManager.Current.GetQueryNames().ToDictionaryEx(qn => QueryUtils.GetKey(qn), "queryName");
         }
 
         static IEnumerable<QueryEntity> GenerateQueries()
@@ -123,8 +131,8 @@ namespace Signum.Engine.Basics
                 return Synchronizer.SynchronizeScriptReplacing(
                     replacements,
                     QueriesKey,
-                    should.ToDictionary(a => a.Key, "query in memory"),
-                    current.ToDictionary(a => a.Key, "query in database"),
+                    should.ToDictionaryEx(a => a.Key, "query in memory"),
+                    current.ToDictionaryEx(a => a.Key, "query in database"),
                     (n, s) => table.InsertSqlSync(s),
                     (n, c) => table.DeleteSqlSync(c),
                     (fn, s, c) =>

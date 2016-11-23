@@ -234,6 +234,25 @@ function typeIsReadOnly(typeName: string): boolean {
     }
 }
 
+export function typeRequiresSaveOperation(typeName: string): boolean {
+
+    const typeInfo = getTypeInfo(typeName);
+    if (typeInfo == undefined)
+        return false;
+
+    switch (typeInfo.entityKind) {
+        case "SystemString": return true;
+        case "System": return true;
+        case "Relational": return true;
+        case "String": return true;
+        case "Shared": return true;
+        case "Main": return true;
+        case "Part": return false;
+        case "SharedPart": return false;
+        default: return false;
+    }
+}
+
 export const isFindableEvent: Array<(typeName: string) => boolean> = [];
 
 export function isFindable(type: PseudoType, isSearch?: boolean) {

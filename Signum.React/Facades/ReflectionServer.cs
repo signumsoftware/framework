@@ -43,7 +43,7 @@ namespace Signum.React.Facades
         public static ResetLazy<Dictionary<string, Type>> TypesByName = new ResetLazy<Dictionary<string, Type>>(
             () => GetTypes().Where(t => typeof(ModifiableEntity).IsAssignableFrom(t) ||
             t.IsEnum && !t.Name.EndsWith("Query") && !t.Name.EndsWith("Message"))
-            .ToDictionary(GetTypeName, "Types"));
+            .ToDictionaryEx(GetTypeName, "Types"));
 
         public static void RegisterLike(Type type)
         {
@@ -54,8 +54,9 @@ namespace Signum.React.Facades
         internal static void Start()
         {
             DescriptionManager.Invalidated += () => cache.Clear();
+            Schema.Current.OnMetadataInvalidated += () => cache.Clear();
 
-            EntityAssemblies = TypeLogic.TypeToEntity.Keys.AgGroupToDictionary(t => t.Assembly, gr => gr.Select(a => a.Namespace).ToHashSet());
+            EntityAssemblies = Schema.Current.Tables.Keys.AgGroupToDictionary(t => t.Assembly, gr => gr.Select(a => a.Namespace).ToHashSet());
             EntityAssemblies[typeof(PaginationMode).Assembly].Add(typeof(PaginationMode).Namespace);
         }
         
@@ -139,7 +140,7 @@ namespace Signum.React.Facades
                 var usedEnums = (from type in normalTypes
                                  where typeof(ModifiableEntity).IsAssignableFrom(type)
                                  from p in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
-                                 let pt = p.PropertyType.UnNullify()
+                                 let pt = (p.PropertyType.ElementType() ?? p.PropertyType).UnNullify()
                                  where pt.IsEnum && !EntityAssemblies.ContainsKey(pt.Assembly)
                                  select pt).Distinct().ToList();
                 
@@ -192,12 +193,12 @@ namespace Signum.React.Facades
                               Operations = !type.IsEntity() ? null : OperationLogic.GetAllOperationInfos(type)
                                 .ToDictionary(oi => oi.OperationSymbol.Key, oi => OnAddOperationExtension(new OperationInfoTS(oi), oi))
 
-                          }, type))).ToDictionary("entities");
+                          }, type))).ToDictionaryEx("entities");
 
             return result;
         }
 
-        private static bool InTypeScript(PropertyRoute pr)
+        public static bool InTypeScript(PropertyRoute pr)
         {
             return (pr.Parent == null || InTypeScript(pr.Parent)) && (pr.PropertyInfo == null || pr.PropertyInfo.GetCustomAttribute<InTypeScriptAttribute>()?.GetInTypeScript() != false);
         }
@@ -261,7 +262,7 @@ namespace Signum.React.Facades
             return null;
         }
 
-        private static bool IsId(PropertyRoute p)
+        public static bool IsId(PropertyRoute p)
         {
             return p.PropertyInfo.Name == nameof(Entity.Id) && p.Parent.PropertyRouteType == PropertyRouteType.Root;
         }
@@ -287,13 +288,15 @@ namespace Signum.React.Facades
                                   NiceName = fi.NiceName(),
                                   IsIgnoredEnum = kind == KindOfType.Enum && fi.HasAttribute<IgnoreAttribute>()
                               }, fi)),
-                          }, type))).ToDictionary("enums");
+                          }, type))).ToDictionaryEx("enums");
 
             return result;
         }
 
         public static Dictionary<string, TypeInfoTS> GetSymbolContainers(IEnumerable<Type> allTypes)
         {
+            SymbolLogic.LoadAll();
+            
             var result = (from type in allTypes
                           where type.IsStaticClass() && type.HasAttribute<AutoInitAttribute>()
                           select KVP.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
@@ -304,7 +307,7 @@ namespace Signum.React.Facades
                                   NiceName = fi.NiceName(),
                                   Id = GetSymbol(fi).Id.Object
                               }, fi))
-                          }, type))).ToDictionary("symbols");
+                          }, type))).ToDictionaryEx("symbols");
 
             return result;
         }
@@ -316,8 +319,11 @@ namespace Signum.React.Facades
             if (v is IOperationSymbolContainer)
                 v = ((IOperationSymbolContainer)v).Symbol;
 
-            return ((Symbol)v);
+            var s = ((Symbol)v);
+
+            return s;
         }
+
 
         public static string GetTypeName(Type t)
         {

@@ -225,6 +225,7 @@
     <TypeScriptCompile Include="Scripts\Operations\ContextualOperations.tsx" />
     <TypeScriptCompile Include="Scripts\QuickLinks.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\ContextMenu.tsx" />
+    <TypeScriptCompile Include="Scripts\SearchControl\ValueSearchControlLine.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\EntityLink.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityList.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityListBase.tsx" />
@@ -244,7 +245,7 @@
     <TypeScriptCompile Include="Scripts\SearchControl\ContextualItems.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\FilterBuilder.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\MultipliedMessage.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\CountSearchControl.tsx" />
+    <TypeScriptCompile Include="Scripts\SearchControl\ValueSearchControl.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\PaginationSelector.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\QueryTokenBuilder.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\SearchControlLoaded.tsx" />
@@ -272,7 +273,6 @@
     <TypeScriptCompile Include="Typings\es6-promise\es6-promise.d.ts" />
     <TypeScriptCompile Include="Typings\moment-duration-format\moment-duration-format.d.ts" />
     <TypeScriptCompile Include="Typings\moment\moment-node.d.ts" />
-    <TypeScriptCompile Include="Typings\moment\moment.d.ts" />
     <TypeScriptCompile Include="Typings\numbro\numbro.d.ts" />
     <TypeScriptCompile Include="Typings\react-router\history.d.ts" />
     <TypeScriptCompile Include="Typings\react-bootstrap\react-bootstrap.d.ts" />

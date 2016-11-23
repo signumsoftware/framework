@@ -1,23 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Signum.Engine.Linq;
+using Signum.Engine.Maps;
 using Signum.Entities;
+using Signum.Entities.Basics;
+using Signum.Entities.Internal;
 using Signum.Utilities;
-using Signum.Engine;
+using Signum.Utilities.ExpressionTrees;
+using Signum.Utilities.Reflection;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Signum.Engine.Linq;
-using Signum.Engine.Maps;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Entities.Reflection;
-using System.Collections;
-using Signum.Utilities.Reflection;
-using System.Threading;
-using Signum.Entities.Basics;
-using System.Collections.ObjectModel;
-using Signum.Entities.Internal;
-using System.Diagnostics;
 
 namespace Signum.Engine
 {
@@ -297,7 +293,7 @@ namespace Signum.Engine
                             using (new EntityCache())
                             using (var r = EntityCache.NewRetriever())
                             {
-                                result =  cc.GetAllIds().Select(id => r.Request<T>(id)).ToList();
+                                result = cc.GetAllIds().Select(id => r.Request<T>(id)).ToList();
                             }
 
                             if (filter != null)
@@ -647,7 +643,9 @@ namespace Signum.Engine
 
             var list = (FieldMList)Schema.Current.Field(mListProperty);
 
-            return new SignumTable<MListElement<E, V>>(DbQueryProvider.Single, list.TableMList);
+            var mlistTable = Schema.Current.TableMList(mListProperty);
+
+            return new SignumTable<MListElement<E, V>>(DbQueryProvider.Single, mlistTable);
         }
 
         class MListQueryExpander : IMethodExpander
@@ -694,7 +692,7 @@ namespace Signum.Engine
 
                 var entity = arguments[0];
 
-                if(entity.Type.IsLite())
+                if (entity.Type.IsLite())
                     prop = Expression.Call(miToLite.MakeGenericMethod(prop.Type), prop);
 
                 var lambda = Expression.Lambda(Expression.Equal(prop, entity), p);
@@ -817,7 +815,7 @@ namespace Signum.Engine
             where T : Entity
         {
             if (message != null)
-                return SafeConsole.WaitRows(message == "auto" ? $"Deleting {typeof(T).TypeName()}" : message, 
+                return SafeConsole.WaitRows(message == "auto" ? $"Deleting {typeof(T).TypeName()}" : message,
                     () => query.UnsafeDelete(message: null));
 
 
@@ -863,7 +861,7 @@ namespace Signum.Engine
         public static int UnsafeDeleteChunks<T>(this IQueryable<T> query, int chunkSize = 10000, int maxQueries = int.MaxValue)
          where T : Entity
         {
-            int total = 0;            
+            int total = 0;
             for (int i = 0; i < maxQueries; i++)
             {
                 int num = query.Take(chunkSize).UnsafeDelete();
@@ -985,7 +983,7 @@ namespace Signum.Engine
             }
         }
 
-         
+
         public static int UnsafeInsertMList<T, E, V>(this IQueryable<T> query, Expression<Func<E, MList<V>>> mListProperty, Expression<Func<T, MListElement<E, V>>> constructor, string message = null)
                where E : Entity
         {
@@ -1042,9 +1040,9 @@ namespace Signum.Engine
 
     public interface IUpdateable
     {
-        IQueryable Query{ get; }
+        IQueryable Query { get; }
         LambdaExpression PartSelector { get; }
-        IEnumerable<SetterExpressions> SetterExpressions{ get; }
+        IEnumerable<SetterExpressions> SetterExpressions { get; }
 
         Type EntityType { get; }
 
@@ -1064,9 +1062,9 @@ namespace Signum.Engine
     }
 
     class UpdateablePart<A, T> : IUpdateablePart<A, T>
-    { 
+    {
         IQueryable<A> query;
-        Expression<Func<A, T>> partSelector; 
+        Expression<Func<A, T>> partSelector;
         ReadOnlyCollection<SetterExpressions> settersExpressions;
 
         public UpdateablePart(IQueryable<A> query, Expression<Func<A, T>> partSelector, IEnumerable<SetterExpressions> setters)
@@ -1180,7 +1178,7 @@ namespace Signum.Engine
 
 
             this.PropertyExpression = propertyExpression;
-            this.ValueExpression = valueExpression; 
+            this.ValueExpression = valueExpression;
         }
     }
 

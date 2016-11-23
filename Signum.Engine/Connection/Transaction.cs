@@ -13,8 +13,8 @@ using System.Linq;
 namespace Signum.Engine
 {
     /// <summary>
-    /// Allows easy nesting of transaction using 'using' statement
-    /// Keeps an implicit stack of Transaction objects over the StackTrace of the current Thread
+    /// Allows easy nesting of transaction by making use of 'using' statement
+    /// Keeps an implicit stack of Transaction objects over the call stack of the current Thread
     /// and an explicit stack of RealTransaction objects on thread variable.
     /// Usually, just the first Transaccion creates a RealTransaction, but you can create more using 
     /// forceNew = true

@@ -63,7 +63,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
                             <a title={EntityControlMessage.Create.niceToString()}
                                 className="sf-line-button sf-create"
                                 onClick={this.handleCreateClick}>
-                                <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }}/>{EntityControlMessage.Create.niceToString()}
+                                <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
                             </a> )
                     }
                 </div>

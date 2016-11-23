@@ -4,7 +4,9 @@ import { classes, Dic } from '../Globals'
 
 
 export interface TypeaheadProps {
-
+    value?: string;
+    onChange?: (newValue: string) => void;
+    onBlur?: () => void;
     getItems: (query: string) => Promise<any[]>;
     getItemsTimeout?: number;
     minLength?: number;
@@ -109,6 +111,9 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         const val = this.props.onSelect!(this.state.items![this.state.selectedIndex || 0], e);
 
         this.input.value = val || "";
+        if (this.props.onChange)
+            this.props.onChange(this.input.value);
+
         this.setState({ shown: false });
         return val != null;
     }
@@ -134,6 +139,8 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
         if (!this.mouseover && this.state.shown)
             this.setState({ shown: false });
+        if (this.props.onBlur)
+            this.props.onBlur();
     }
 
 
@@ -226,7 +233,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     input: HTMLInputElement;
 
 
-    onMenuLoad = (elem: HTMLElement) => {
+    handlePopupLoaded = (elem: HTMLElement) => {
         if (!this.input)
             return;
 
@@ -243,15 +250,22 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         }
     }
 
+    handleOnChange = () => {
+        if (this.props.onChange)
+            this.props.onChange(this.input.value);
+    }
+
     render() {
 
         return (
             <span {...this.props.spanAttrs} className={classes(this.props.spanAttrs && this.props.spanAttrs.className, "sf-typeahead")}>
                 <input type="text" autoComplete="off" ref={inp => this.input = inp} {...this.props.inputAttrs}
+                    value={this.props.value}
                     onFocus={this.handleFocus}
                     onBlur={this.handleBlur}
                     onKeyUp={this.handleKeyUp}
                     onKeyDown={this.handleKeyDown}
+                    onChange={this.handleOnChange}
                     />
                 <span>{/*placeholder for rouded borders*/}</span>
                 {
@@ -262,7 +276,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     }
 
     renderDefaultList() {
-        return (<ul className="typeahead dropdown-menu" ref={this.onMenuLoad}>
+        return (<ul className="typeahead dropdown-menu" ref={this.handlePopupLoaded}>
             {
                 !this.state.items!.length ? <li className="no-results"><a><small>{this.props.noResultsMessage}</small></a></li> :
                     this.state.items!.map((item, i) => <li key={i} className={i == this.state.selectedIndex ? "active" : undefined} data-index={i}

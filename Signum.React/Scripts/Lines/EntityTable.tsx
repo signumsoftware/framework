@@ -24,8 +24,8 @@ export interface EntityTableColumn<T> {
     property?: (a: T) => any;
     header?: React.ReactNode | null;
     headerProps?: React.HTMLProps<any>;
-    cellProps?: React.HTMLProps<any>;
-    template?: (ctx: TypeContext<T>, row: EntityTableRow) => React.ReactChild | null;
+    cellProps?:(ctx: TypeContext<T>, row: EntityTableRow, rowIndex: number) => React.HTMLProps<any> | null | undefined;
+    template?: (ctx: TypeContext<T>, row: EntityTableRow, rowIndex: number) => React.ReactChild | null | undefined;
 
 }
 
@@ -83,6 +83,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                         {
                             mlistItemContext(ctx).map((mlec, i) =>
                                 (<EntityTableRow key={i}
+                                    index={i}
                                     onRemove={this.state.remove && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
                                     onMoveDown ={this.state.move && !readOnly ? e => this.moveDown(i) : undefined}
                                     onMoveUp ={this.state.move && !readOnly ? e => this.moveUp(i) : undefined}
@@ -97,7 +98,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                                         <a title={EntityControlMessage.Create.niceToString()}
                                             className="sf-line-button sf-create"
                                             onClick={this.handleCreateClick}>
-                                            <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }}/>{EntityControlMessage.Create.niceToString()}
+                                            <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
                                         </a>}
                                 </td>
                             </tr>
@@ -112,6 +113,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
 
 export interface EntityTableRowProps {
     ctx: TypeContext<ModifiableEntity>;
+    index: number;
     columns: EntityTableColumn<ModifiableEntity>[],
     onRemove?: (event: React.MouseEvent) => void;
     onMoveUp?: (event: React.MouseEvent) => void;
@@ -145,7 +147,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { entit
                         </a>}
                     </div>
                 </td>
-                {this.props.columns.map((c, i) => <td key={i} {...c.cellProps}>{this.getTemplate(c)}</td>)}
+                {this.props.columns.map((c, i) => <td key={i} {...c.cellProps && c.cellProps(ctx, this, this.props.index)}>{this.getTemplate(c)}</td>)}
             </tr>
         );
     }
@@ -157,7 +159,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { entit
             return null;
 
         if (col.template !== undefined)
-            return col.template(this.props.ctx, this);
+            return col.template(this.props.ctx, this, this.props.index);
 
         if (col.property == null)
             throw new Error("Column has no property and no template");

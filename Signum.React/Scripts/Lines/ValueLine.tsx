@@ -16,9 +16,10 @@ export interface ValueLineProps extends LineBaseProps, React.Props<ValueLine> {
     formatText?: string;
     autoTrim?: boolean;
     inlineCheckbox?: boolean;
-    comboBoxItems?: { name: string, niceName: string }[];
+    comboBoxItems?: ({ name: string, niceName: string } | string)[];
     onTextboxBlur?: (val: any) => void;
-    valueHtmlProps?: React.HTMLAttributes;
+    valueHtmlProps?: React.HTMLAttributes;    
+    extraButtons?: (vl : ValueLine) => React.ReactNode
 }
 
 
@@ -41,7 +42,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
         state.valueLineType = ValueLine.getValueLineType(state.type!);
 
         if (state.valueLineType == undefined)
-            throw new Error(`No value line found for '${state.type!.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
+            throw new Error(`No ValueLine found for '${state.type!.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
     }
 
 
@@ -95,14 +96,15 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
 
     }
 
-    static withUnit(unit: React.ReactNode | undefined, input: JSX.Element): JSX.Element {
-        if (!unit)
+    static withItemGroup(vl: ValueLine, input: JSX.Element): JSX.Element {
+        if (!vl.state.unitText && !vl.state.extraButtons)
             return input;
 
         return (
             <div className="input-group">
                 {input}
-                <span className="input-group-addon">{unit}</span>
+                {vl.state.unitText && <span className="input-group-addon">{vl.state.unitText}</span>}
+                {vl.state.extraButtons && <span className="input-group-btn">{vl.state.extraButtons(vl)}</span>}
             </div>
         );
     }
@@ -180,7 +182,8 @@ ValueLine.renderers[ValueLineType.Enum as any] = (vl) => {
 function internalComboBox(vl: ValueLine, typeInfo: TypeInfo, parseValue: (str: string) => any, toStringValue: (val: any) => string) {
 
     const s = vl.state;
-    let items = s.comboBoxItems || Dic.getValues(typeInfo.members);
+    let items = s.comboBoxItems ? s.comboBoxItems.map(a => typeof a == "string" ? typeInfo.members[a] : a) :
+        Dic.getValues(typeInfo.members);
 
     if (!s.type!.isNotNullable || s.ctx.value == undefined)
         items = [{ name: "", niceName: " - " }].concat(items);
@@ -188,7 +191,7 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo, parseValue: (str: s
     if (s.ctx.readOnly)
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-                {ValueLine.withUnit(s.unitText,
+                {ValueLine.withItemGroup(vl,
                     <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx}>
                            {s.ctx.value == undefined ? undefined : items.filter(a => a.name == toStringValue(s.ctx.value)).single().niceName}
                     </FormControlStatic>) }
@@ -203,7 +206,7 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo, parseValue: (str: s
 
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-            { ValueLine.withUnit(s.unitText,
+            { ValueLine.withItemGroup(vl,
                 <select {...vl.state.valueHtmlProps} value={s.ctx.value == undefined ? "" : toStringValue(s.ctx.value)} className={addClass(vl.state.valueHtmlProps, "form-control") } onChange={ handleEnumOnChange } >
                         {items.map((mi, i) => <option key={i} value={mi.name}>{mi.niceName}</option>) } 
                 </select>)
@@ -213,6 +216,8 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo, parseValue: (str: s
 
 }
 
+
+
 ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
 
     const s = vl.state;
@@ -220,7 +225,7 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
     if (s.ctx.readOnly)
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-                {ValueLine.withUnit(s.unitText, <FormControlStatic htmlProps={vl.state.valueHtmlProps}  ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
+                {ValueLine.withItemGroup(vl, <FormControlStatic htmlProps={vl.state.valueHtmlProps}  ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
             </FormGroup>
         );
 
@@ -244,7 +249,7 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
 
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-            { ValueLine.withUnit(s.unitText,
+            { ValueLine.withItemGroup(vl,
                 <input type="text" {...vl.state.valueHtmlProps}
                     className={addClass(vl.state.valueHtmlProps, "form-control") }
                     value={s.ctx.value || ""}
@@ -271,7 +276,7 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
     if (s.ctx.readOnly)
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-                {ValueLine.withUnit(s.unitText, <FormControlStatic htmlProps={vl.state.valueHtmlProps}  ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
+                {ValueLine.withItemGroup(vl, <FormControlStatic htmlProps={vl.state.valueHtmlProps}  ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
             </FormGroup>
         );
 
@@ -319,7 +324,7 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) 
     if (s.ctx.readOnly)
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-                { ValueLine.withUnit(s.unitText,
+                { ValueLine.withItemGroup(vl,
                     <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx} className="numeric">
                         {s.ctx.value == null ? "" : numbro(s.ctx.value).format(numbroFormat) }
                     </FormControlStatic>) }
@@ -336,7 +341,7 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) 
 
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-            { ValueLine.withUnit(s.unitText,
+            { ValueLine.withItemGroup(vl,
                 <NumericTextBox
                     htmlProps={htmlProps}
                     value={s.ctx.value}
@@ -408,7 +413,7 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
     if (s.ctx.readOnly)
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-                {ValueLine.withUnit(s.unitText, <FormControlStatic htmlProps={vl.state.valueHtmlProps}  ctx={s.ctx}>{m && m.format(momentFormat) }</FormControlStatic>) }
+                {ValueLine.withItemGroup(vl, <FormControlStatic htmlProps={vl.state.valueHtmlProps}  ctx={s.ctx}>{m && m.format(momentFormat) }</FormControlStatic>) }
             </FormGroup>
         );
 
@@ -424,7 +429,7 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
     
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-            { ValueLine.withUnit(s.unitText,
+            { ValueLine.withItemGroup(vl,
                 <DateTimePicker value={m && m.toDate() } onChange={handleDatePickerOnChange} format={momentFormat} time={showTime} defaultCurrentDate={currentDate.toDate() }  />
             ) }
         </FormGroup>
@@ -447,7 +452,9 @@ function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler)
         const d = s.ctx.value ? moment.duration(s.ctx.value / ticksPerMillisecond) : undefined;
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
+                 { ValueLine.withItemGroup(vl,
                 <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx} className={addClass(vl.state.valueHtmlProps, "numeric") }>{d && d.format(durationFormat) }</FormControlStatic>
+                )}
             </FormGroup>
         );
     }
@@ -462,7 +469,9 @@ function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler)
 
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
+            { ValueLine.withItemGroup(vl,
             <DurationTextBox htmlProps={htmlProps} value={s.ctx.value} onChange={handleOnChange} validateKey={validateKey} format={durationFormat} />
+            )}
         </FormGroup>
     );
 }

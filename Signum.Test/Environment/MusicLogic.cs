@@ -136,7 +136,7 @@ namespace Signum.Test.Environment
                     });
 
 
-                dqm.RegisterQuery(typeof(IAuthorEntity), () => DynamicQuery.Manual((request, descriptions) =>
+                dqm.RegisterQuery(typeof(IAuthorEntity), () => DynamicQueryCore.Manual((request, descriptions) =>
                     {
                         var one = (from a in Database.Query<ArtistEntity>()
                                    select new

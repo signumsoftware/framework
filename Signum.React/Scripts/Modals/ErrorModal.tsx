@@ -93,15 +93,17 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
 
 
     renderValidationTitle(ve: ValidationError) {
-        return <h4 className="modal-title text-danger"><span className="glyphicon glyphicon-alert"></span> {NormalWindowMessage.ThereAreErrors.niceToString()} </h4>;
+        return <h4 className="modal-title text-danger">
+            <span className="glyphicon glyphicon-alert"></span> {NormalWindowMessage.ThereAreErrors.niceToString()}
+        </h4>;
     }
 
     renderServiceMessage(se: ServiceError) {
         return (
             <div>
-                {se.httpError.Message && <p className="text-danger">{se.httpError.Message}</p>}
-                {se.httpError.ExceptionMessage && <p className="text-danger">{se.httpError.ExceptionMessage}</p>}
-                {se.httpError.MessageDetail && <p className="text-danger">{se.httpError.MessageDetail}</p>}
+                {textDanger(se.httpError.Message)}
+                {textDanger(se.httpError.ExceptionMessage)}
+                {textDanger(se.httpError.MessageDetail)}
             </div>
         );
     }
@@ -109,18 +111,28 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
     renderValidationeMessage(ve: ValidationError) {
         return (
             <div>
-                {<p className="text-danger">{Dic.getValues(ve.modelState).join("\n")}</p>}
+                {textDanger(Dic.getValues(ve.modelState).join("\n"))}
             </div>
         );
     }
 
     renderMessage(e: any) {
-        return <p className="text-danger"> {e.message ? e.message : e}</p>;
+        return textDanger(e.message ? e.message : e);
     }
+
 
     static showError(error: any): Promise<void> {
         return openModal<void>(<ErrorModal error={error}/>);
     }
+}
+
+
+function textDanger(message: string | null | undefined): React.ReactFragment | null | undefined {
+
+    if (typeof message == "string")
+        return message.split("\n").map((s, i) => <p key={i} className="text-danger">{s}</p>);
+
+    return message;
 }
 
 

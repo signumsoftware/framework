@@ -6,14 +6,14 @@ Not having to pass the connectionString and the `Schema` as a parameter all the 
 
 
 ### Connector class
-You can think in a Connector class like the container that has all the information to access a specific database in a database server:
+You can think in a Connector class like the container that has all the information to access a specific database in a DBMS:
 
 * The `connectionString`.
 * The `Schema`.
 
 Internally, Connection class is also the only gateway to access the database, it's not intended to be used by client code. [Executor](Executor.md) static class is what should be used if you want low-level ADO.Net access through the current connection. 
 
-You can also think of Connector class as a factory of Connections. It's also an abstract factory: 
+You can also think of Connector class as a abstract factory of Connections: 
 
 * **Connector:** abstract base class, 
 	* **SqConnector:** The only supported implementation, works with Microsoft SQL Server. Contains:
@@ -35,7 +35,7 @@ Typically, you application has just one main `Connector` and is set using `Conne
 public static IDisposable Override(Connector connection)
 ```
 
-**Note:** It's uncommon to use more than one `Connector` using Signum.Engine for something different that simple loading scenarios. Don't expect any module to work as expected using a non-default `Connector`. 
+**Note:** It's uncommon to use more than one `Connector` using Signum.Engine for something different that simple loading scenarios. Don't expect every module to work as expected using a non-default `Connector`. 
 
 ### Connector.CommandTimeoutScope
 

@@ -30,14 +30,13 @@ namespace Signum.Engine.Basics
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<PropertyRouteEntity>();
-
-                sb.AddUniqueIndex<PropertyRouteEntity>(p => new { p.Path, p.RootType }); 
+                sb.Include<PropertyRouteEntity>()
+                    .WithUniqueIndex(p => new { p.Path, p.RootType }); 
 
                 sb.Schema.Synchronizing += SynchronizeProperties;
 
                 Properties = sb.GlobalLazy(() => Database.Query<PropertyRouteEntity>().AgGroupToDictionary(a => a.RootType, gr => gr.ToDictionary(a => a.Path)),
-                    new InvalidateWith(typeof(PropertyRouteEntity)));
+                    new InvalidateWith(typeof(PropertyRouteEntity)), Schema.Current.InvalidateMetadata);
             }
         }
 
@@ -49,9 +48,9 @@ namespace Signum.Engine.Basics
         public const string PropertiesFor = "Properties For:{0}";
         static SqlPreCommand SynchronizeProperties(Replacements rep)
         {
-            var current = Administrator.TryRetrieveAll<PropertyRouteEntity>(rep).AgGroupToDictionary(a => a.RootType.FullClassName, g => g.ToDictionary(f => f.Path, "PropertyEntity in the database with path"));
+            var current = Administrator.TryRetrieveAll<PropertyRouteEntity>(rep).AgGroupToDictionary(a => a.RootType.FullClassName, g => g.ToDictionaryEx(f => f.Path, "PropertyEntity in the database with path"));
 
-            var should = TypeLogic.TryEntityToType(rep).SelectDictionary(dn => dn.FullClassName, (dn, t) => GenerateProperties(t, dn).ToDictionary(f => f.Path, "PropertyEntity in the database with path"));
+            var should = TypeLogic.TryEntityToType(rep).SelectDictionary(dn => dn.FullClassName, (dn, t) => GenerateProperties(t, dn).ToDictionaryEx(f => f.Path, "PropertyEntity in the database with path"));
 
             Table table = Schema.Current.Table<PropertyRouteEntity>();
 

@@ -228,7 +228,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             <a className={classes("sf-line-button", "sf-create", btn ? "btn btn-default" : undefined) }
                 onClick={this.handleCreateClick}
                 title={EntityControlMessage.Create.niceToString() }>
-                <span className="glyphicon glyphicon-plus"/>
+                <span className="glyphicon glyphicon-plus sf-create"/>
             </a>
         );
     }

@@ -1167,32 +1167,66 @@ namespace Signum.Utilities
 
             var extra = currentDictionary.Keys.Where(k => !shouldDictionary.ContainsKey(k)).ToList();
             var missing = shouldDictionary.Keys.Where(k => !currentDictionary.ContainsKey(k)).ToList();
-
-
             
-            string errorMessage = GetErrorMessage(action, extra, missing);
-            if (errorMessage != null)
+            string differences = GetDifferences(extra, missing);
+            if (differences != null)
             {
-                //if you're Synchronizing, just continue!
-                throw new InvalidOperationException(errorMessage);
+                throw new InvalidOperationException($@"Mismatches {action}:
+{differences}");
             }
 
             return currentDictionary.Select(p => resultSelector(p.Value, shouldDictionary[p.Key]));
         }
 
-        private static string GetErrorMessage<K>(string action, List<K> extra, List<K> missing)
+        public static IEnumerable<R> JoinRelaxed<K, C, S, R>(
+          IEnumerable<C> currentCollection,
+          IEnumerable<S> shouldCollection,
+          Func<C, K> currentKeySelector,
+          Func<S, K> shouldKeySelector,
+          Func<C, S, R> resultSelector, string action)
+        {
+
+            var currentDictionary = currentCollection.ToDictionary(currentKeySelector);
+            var shouldDictionary = shouldCollection.ToDictionary(shouldKeySelector);
+
+            var extra = currentDictionary.Keys.Where(k => !shouldDictionary.ContainsKey(k)).ToList();
+            var missing = shouldDictionary.Keys.Where(k => !currentDictionary.ContainsKey(k)).ToList();
+
+            string differences = GetDifferences(extra, missing);
+            if (differences != null)
+            {
+                try
+                {
+                    throw new InvalidOperationException($@"Mismatches {action}:
+{differences}
+Trying to continue (optimistically) with the common keys. Consider Synchronize.");
+                }
+                catch
+                {
+                    //This try { throw } catch is here to alert developers.
+                    //In production, in some cases its OK to attempt starting an application with a slightly different schema (dynamic entities, green-blue deployments).  
+                    //In development, consider synchronize.  
+                }
+            }
+
+            var commonKeys = currentDictionary.Keys.Intersect(shouldDictionary.Keys);
+
+            return commonKeys.Select(k => resultSelector(currentDictionary[k], shouldDictionary[k]));
+        }
+
+        private static string GetDifferences<K>(List<K> extra, List<K> missing)
         {
             if (extra.Count != 0)
             {
                 if (missing.Count != 0)
-                    return "Error {0}\r\n Extra: {1}\r\n Missing: {2}".FormatWith(action, extra.ToString(", "), missing.ToString(", "));
+                    return $" Extra: {extra.ToString(", ")}\r\n Missing: {missing.ToString(", ")}";
                 else
-                    return "Error {0}\r\n Extra: {1}".FormatWith(action, extra.ToString(", "));
+                    return $" Extra: {extra.ToString(", ")}";
             }
             else
             {
                 if (missing.Count != 0)
-                    return "Error {0}\r\n Missing: {1}".FormatWith(action, missing.ToString(", "));
+                    return $" Missing: {missing.ToString(", ")}";
                 else
                     return null;
             }

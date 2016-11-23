@@ -17,6 +17,7 @@ import ColumnEditor from './ColumnEditor'
 import MultipliedMessage from './MultipliedMessage'
 import { renderContextualItems, ContextualItemsContext, MarkedRowsDictionary, MarkedRow } from './ContextualItems'
 import ContextMenu from './ContextMenu'
+import { ContextMenuPosition } from './ContextMenu'
 import SelectorModal from '../SelectorModal'
 import { ISimpleFilterBuilder } from './SearchControl'
 
@@ -34,6 +35,7 @@ export interface SearchControlLoadedProps {
     onResult?: (table: ResultTable) => void;
     hideFullScreenButton?: boolean;
     showBarExtension?: boolean;
+    extraButtons?: (searchControl: SearchControlLoaded) => React.ReactNode
 }
 
 export interface SearchControlLoadedState {
@@ -50,7 +52,7 @@ export interface SearchControlLoadedState {
     currentMenuItems?: React.ReactElement<any>[];
 
     contextualMenu?: {
-        position: { pageX: number, pageY: number };
+        position: ContextMenuPosition;
         columnIndex: number | null;
         columnOffset?: number ;
         rowIndex: number | null;
@@ -200,13 +202,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         const rowIndex = tr.getAttribute("data-row-index") ? parseInt(tr.getAttribute("data-row-index") !) : null;
 
 
-        const op = DomUtils.offsetParent(this.refs["container"] as HTMLElement);
-
         this.state.contextualMenu = {
-            position: {
-                pageX: event.clientX - (op ? op.getBoundingClientRect().left : 0),
-                pageY: event.clientY - (op ? op.getBoundingClientRect().top : 0)
-            },
+            position: ContextMenu.getPosition(event, this.refs["container"] as HTMLElement),
             columnIndex,
             rowIndex,
             columnOffset: td.tagName == "TH" ? this.getOffset(event.pageX, td.getBoundingClientRect(), Number.MAX_VALUE) : undefined
@@ -339,7 +336,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     title={fo.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="glyphicon glyphicon glyphicon-filter"></span></a >}
                 <button className={"sf-query-button sf-search btn btn-primary" + (this.state.loading ? " disabled" : "")} onClick={this.handleSearchClick}>{SearchMessage.Search.niceToString()} </button>
                 {fo.create && <a className="sf-query-button btn btn-default sf-line-button sf-create" title={this.createTitle()} onClick={this.handleCreate}>
-                    <span className="glyphicon glyphicon-plus"></span>
+                    <span className="glyphicon glyphicon-plus sf-create"></span>
                 </a>}
                 {this.props.showContextMenu != false && this.renderSelecterButton()}
                 {Finder.ButtonBarQuery.getButtonBarElements({ findOptions: fo, searchControl: this }).map((a, i) => React.cloneElement(a, { key: i }))}
@@ -347,6 +344,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     <a className="sf-query-button btn btn-default" href="#" onClick={this.handleFullScreenClick} >
                         <span className="glyphicon glyphicon-new-window"></span>
                     </a>}
+                {this.props.extraButtons && this.props.extraButtons(this)}
             </div>
         );
     }
@@ -854,7 +852,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     }
 
                     {columns.map((c, j) =>
-                        <td key={j} data-column-index={j} style={{ textAlign: c.cellFormatter && c.cellFormatter.textAllign }}>
+                        <td key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
                             {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex])}
                         </td>)}
                 </tr>

@@ -64,8 +64,9 @@ namespace Signum.Engine.Basics
                     current.typeCachesLazy.Load();
                 };
 
-                current.typeCachesLazy = sb.GlobalLazy(() => new TypeCaches(current), 
-                    new InvalidateWith(typeof(TypeEntity)));
+                current.typeCachesLazy = sb.GlobalLazy(() => new TypeCaches(current),
+                    new InvalidateWith(typeof(TypeEntity)),
+                    Schema.Current.InvalidateMetadata);
 
                 dqm.RegisterQuery(typeof(TypeEntity), () =>
                     from t in Database.Query<TypeEntity>()
@@ -96,10 +97,10 @@ namespace Signum.Engine.Basics
         {
             Table table = Schema.Current.Table<TypeEntity>();
 
-            Dictionary<string, TypeEntity> should = GenerateSchemaTypes().ToDictionary(s => s.TableName, "tableName in memory");
+            Dictionary<string, TypeEntity> should = GenerateSchemaTypes().ToDictionaryEx(s => s.TableName, "tableName in memory");
 
             Dictionary<string, TypeEntity> current = replacements.ApplyReplacementsToOldCleaning(
-                Administrator.TryRetrieveAll<TypeEntity>(replacements).ToDictionary(c => c.TableName, "tableName in database"), Replacements.KeyTables);
+                Administrator.TryRetrieveAll<TypeEntity>(replacements).ToDictionaryEx(c => c.TableName, "tableName in database"), Replacements.KeyTables);
 
             using (replacements.WithReplacedDatabaseName())
                 return Synchronizer.SynchronizeScript(
@@ -195,13 +196,13 @@ namespace Signum.Engine.Basics
 
         public TypeCaches(Schema current)
         {
-            TypeToEntity = EnumerableExtensions.JoinStrict(
+            TypeToEntity = EnumerableExtensions.JoinRelaxed(
                     Database.RetrieveAll<TypeEntity>(),
                     current.Tables.Keys,
                     t => t.FullClassName,
                     t => (EnumEntity.Extract(t) ?? t).FullName,
                     (typeEntity, type) => new { typeEntity, type },
-                     "caching {0}. Consider synchronize".FormatWith(current.Table(typeof(TypeEntity)).Name)
+                     "caching {0}".FormatWith(current.Table(typeof(TypeEntity)).Name)
                     ).ToDictionary(a => a.type, a => a.typeEntity);
 
             DnToType = TypeToEntity.Inverse();
