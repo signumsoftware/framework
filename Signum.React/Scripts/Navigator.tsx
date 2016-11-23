@@ -691,19 +691,18 @@ String.prototype.formatHtml = function (this: string) {
     return React.createElement("span", undefined, ...result);
 };
 
-function fixBaseName<T>(baseFunction: (location?: HistoryModule.LocationDescriptorObject | string) => T, baseName: string): (location?: HistoryModule.LocationDescriptorObject | string) => T {
+export function fixUrl(url: string): string {
+    if (url && url.startsWith("~/"))
+        return window.__baseUrl + url.after("~/");
 
-    function fixUrl(url: string): string {
-        if (url && url.startsWith("~/"))
-            return baseName + url.after("~/");
-
-        if (url.startsWith(baseName) || url.startsWith("http"))
-            return url;
-
-        console.warn(url);
+    if (url.startsWith(window.__baseUrl) || url.startsWith("http"))
         return url;
-    }
 
+    console.warn(url);
+    return url;
+}
+
+function fixBaseName<T>(baseFunction: (location?: HistoryModule.LocationDescriptorObject | string) => T): (location?: HistoryModule.LocationDescriptorObject | string) => T {
     return (location) => {
         if (typeof location === "string") {
             return baseFunction(fixUrl(location));
@@ -714,12 +713,12 @@ function fixBaseName<T>(baseFunction: (location?: HistoryModule.LocationDescript
     };
 }
 
-export function useAppRelativeBasename(history: HistoryModule.History, baseName: string) {
-    history.push = fixBaseName(history.push, baseName);
-    history.replace = fixBaseName(history.replace, baseName);
-    history.createHref = fixBaseName(history.createHref, baseName);
-    history.createPath = fixBaseName(history.createPath, baseName);
-    history.createLocation = fixBaseName(history.createLocation, baseName);
+export function useAppRelativeBasename(history: HistoryModule.History) {
+    history.push = fixBaseName(history.push);
+    history.replace = fixBaseName(history.replace);
+    history.createHref = fixBaseName(history.createHref);
+    history.createPath = fixBaseName(history.createPath);
+    history.createLocation = fixBaseName(history.createLocation);
 }
 
 export function tryConvert(value: any, type: TypeReference): Promise<any> | undefined {
