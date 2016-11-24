@@ -208,7 +208,7 @@ namespace Signum.React.Facades
             if (lambdaExpression == null)
                 return null;
 
-            var body = ToJavascriptBody(lambdaExpression.Parameters.Single(), lambdaExpression.Body);
+            var body = ToJavascript(lambdaExpression.Parameters.Single(), lambdaExpression.Body);
 
             if (body == null)
                 return null;
@@ -216,25 +216,42 @@ namespace Signum.React.Facades
             return "function(e){ return " + body + "; }"; 
         }
 
-        private static string ToJavascriptBody(ParameterExpression param, Expression body)
+        static Dictionary<string, string> replacements = new Dictionary<string, string>
         {
-            if (param == body)
+            { "\t", "\\t"},
+            { "\n", "\\n"},
+            { "\r", ""},
+        };
+
+        private static string ToJavascript(ParameterExpression param, Expression expr)
+        {
+            if (param == expr)
                 return "e";
 
-            if (body.NodeType == ExpressionType.MemberAccess)
+            if(expr.NodeType == ExpressionType.Constant && expr.Type == typeof(string))
             {
-                var a = ToJavascriptBody(param, ((MemberExpression)body).Expression);
+                var str = (string)((ConstantExpression)expr).Value;
+
+                if (!str.HasText())
+                    return "\"\"";
+
+                return "\"" + str.Replace(replacements) + "\"";
+            }
+
+            if (expr.NodeType == ExpressionType.MemberAccess)
+            {
+                var a = ToJavascript(param, ((MemberExpression)expr).Expression);
 
                 if (a == null)
                     return null;
 
-                return a + "." + ((MemberExpression)body).Member.Name.FirstLower();
+                return a + "." + ((MemberExpression)expr).Member.Name.FirstLower();
             }
 
-            if (body.NodeType == ExpressionType.Add)
+            if (expr.NodeType == ExpressionType.Add)
             {
-                var a = ToJavascriptBody(param, ((BinaryExpression)body).Left);
-                var b = ToJavascriptBody(param, ((BinaryExpression)body).Right);
+                var a = ToJavascriptToString(param, ((BinaryExpression)expr).Left);
+                var b = ToJavascriptToString(param, ((BinaryExpression)expr).Right);
 
                 if (a != null && b != null)
                     return "(" + a + " + " + b + ")";
@@ -242,17 +259,33 @@ namespace Signum.React.Facades
                 return null;
             }
 
-            if (body.NodeType == ExpressionType.Call && ((MethodCallExpression)body).Method.Name == "ToString")
+            if (expr.NodeType == ExpressionType.Call && ((MethodCallExpression)expr).Method.Name == "ToString")
             {
-                var a = ToJavascriptBody(param, ((MethodCallExpression)body).Object);
+                return ToJavascriptToString(param, ((MethodCallExpression)expr).Object);
+            }
 
-                if (a == null)
-                    return null;
-
-                return a + ".toString()";
+            if(expr.NodeType == ExpressionType.Convert)
+            {
+                return ToJavascriptToString(param, ((UnaryExpression)expr).Operand);
             }
 
             return null;
+        }
+
+        private static string ToJavascriptToString(ParameterExpression param, Expression expr)
+        {
+            var r = ToJavascript(param, expr);
+
+            if (r == null)
+                return null;
+            
+            if (expr.NodeType != ExpressionType.MemberAccess)
+                return r;
+
+            if (typeof(ModifiableEntity).IsAssignableFrom(expr.Type))
+                return "getToString(" + r + ")";
+
+            return "valToString(" + r + ")";
         }
 
         static string GetTypeNiceName(Type type)

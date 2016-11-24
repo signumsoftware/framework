@@ -81,7 +81,13 @@ function getOrCreateToStringFunction(type: string)  {
 
 	const ti = getTypeInfo(type);
 
-	try {
+    const getToString2 = getToString;
+    const valToString2 = valToString;
+
+    try {
+        const getToString = getToString2;
+        const valToString = valToString2;
+
 		f = ti && ti.toStringFunction ? eval("(" + ti.toStringFunction + ")") : null;
 	} catch (e) {
 		f = null;
@@ -92,8 +98,17 @@ function getOrCreateToStringFunction(type: string)  {
 	return f;
 }
 
-export function getToString(entityOrLite: ModifiableEntity | Lite<Entity>): string
-{
+export function valToString(val: any) {
+    if (val == null)
+        return "";
+
+    return val.toString();
+}
+
+export function getToString(entityOrLite: ModifiableEntity | Lite<Entity> | undefined): string {
+    if (entityOrLite == null)
+        return "";
+
 	const lite = entityOrLite as Lite<Entity>;
     if (lite.EntityType)
         return lite.entity ? getToString(lite.entity) : (lite.toStr || lite.EntityType);
