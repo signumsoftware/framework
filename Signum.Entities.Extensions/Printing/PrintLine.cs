@@ -9,6 +9,7 @@ using Signum.Entities.Processes;
 using Signum.Entities.Basics;
 using Signum.Entities;
 using Signum.Entities.Files;
+using System.Reflection;
 
 namespace Signum.Entities.Printing
 {
@@ -17,6 +18,8 @@ namespace Signum.Entities.Printing
     {
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
+        [NotNullable]
+        [NotNullValidator]
         public EmbeddedFilePathEntity File { get; set; }
 
         public Lite<PrintPackageEntity> Package { get; set; }
@@ -27,6 +30,32 @@ namespace Signum.Entities.Printing
         public Lite<Entity> Referred { get; set; }
 
         public Lite<ExceptionEntity> Exception { get; set; }
+
+        public PrintLineState State { get; set; }
+
+        static StateValidator<PrintLineEntity, PrintLineState> stateValidator =
+            new StateValidator<PrintLineEntity, PrintLineState>
+            (n => n.State, n => n.Exception, n => n.PrintedOn)
+            {
+                { PrintLineState.ReadyToPrint,   false,           false  },
+                { PrintLineState.Printed,        false,           true   },
+                { PrintLineState.Error,          true,           false   },
+            };
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            return stateValidator.Validate(this, pi) ?? base.PropertyValidation(pi);
+        }
+    }
+    public enum PrintLineState
+    {
+        ReadyToPrint,
+        Printed,
+        Error
     }
 
+    public static class PrintLineOperation
+    {
+        public static ExecuteSymbol<PrintLineEntity> Print;
+        public static ExecuteSymbol<PrintLineEntity> RePrint;
+    }
 }

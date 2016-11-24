@@ -139,6 +139,7 @@
     <Compile Include="Isolation\IIsolationServer.cs" />
     <Compile Include="Isolation\IsolationEntity.cs" />
     <Compile Include="Printing\PrintLine.cs" />
+    <Compile Include="Printing\PrintLogic.cs" />
     <Compile Include="Printing\PrintPackages.cs" />
     <Compile Include="RestLog\RestLog.cs" />
     <Compile Include="Mailing\EmailMasterTemplate.cs" />
@@ -234,6 +235,10 @@
     <Compile Include="Workflow\WorkflowPool.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj">
+      <Project>{7F2DB6FE-C109-4057-B207-C62A767F905D}</Project>
+      <Name>Signum.Engine</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj">
       <Project>{F2B51D08-498D-4C9F-8112-9521A7762B02}</Project>
       <Name>Signum.Entities</Name>
