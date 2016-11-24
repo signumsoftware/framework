@@ -10,10 +10,11 @@ using Signum.Entities.Basics;
 using Signum.Entities;
 using Signum.Entities.Files;
 using System.Reflection;
+using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Printing
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class PrintLineEntity : Entity, IProcessLineDataEntity
     {
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
@@ -56,6 +57,19 @@ namespace Signum.Entities.Printing
     public static class PrintLineOperation
     {
         public static ExecuteSymbol<PrintLineEntity> Print;
-        public static ExecuteSymbol<PrintLineEntity> RePrint;
+        public static ExecuteSymbol<PrintLineEntity> Retry;
     }
+
+    [AutoInit]
+    public static class PrintPackageProcess
+    {
+        public static readonly ProcessAlgorithmSymbol PrintPackage;
+    }
+
+    [AutoInit]
+    public static class PrintPermission
+    {
+        public static PermissionSymbol ViewPrintPanel;
+    }
+
 }

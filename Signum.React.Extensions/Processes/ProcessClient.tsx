@@ -18,9 +18,7 @@ import * as AuthClient from '../Authorization/AuthClient'
 require("!style!css!./Processes.css");
 
 export function start(options: { routes: JSX.Element[], packages: boolean, packageOperations: boolean }) {
-    options.routes.push(<Route path="processes">
-        <Route path="view" getComponent={(loc, cb) => require(["./ProcessPanelPage"], (Comp) => cb(undefined, Comp.default))}/>
-    </Route>);
+  
 
     Navigator.addSettings(new EntitySettings(ProcessEntity, e => new ViewPromise(resolve => require(['./Templates/Process'], resolve))));
 
@@ -36,6 +34,9 @@ export function start(options: { routes: JSX.Element[], packages: boolean, packa
         Navigator.addSettings(new EntitySettings(PackageOperationEntity, e => new ViewPromise(resolve => require(['./Templates/PackageOperation'], resolve))));
     }
 
+    options.routes.push(<Route path="processes">
+        <Route path="view" getComponent={(loc, cb) => require(["./ProcessPanelPage"], (Comp) => cb(undefined, Comp.default))} />
+    </Route>);
     
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(ProcessPermission.ViewProcessPanel),
