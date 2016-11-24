@@ -85,14 +85,11 @@ function getOrCreateToStringFunction(type: string)  {
 	return f;
 }
 
-export function getToString(entityOrLite: ModifiableEntity | Lite<Entity>): string | undefined
+export function getToString(entityOrLite: ModifiableEntity | Lite<Entity>): string
 {
-	if (entityOrLite == undefined)
-		return undefined;
-
 	const lite = entityOrLite as Lite<Entity>;
-	if (lite.EntityType) 
-		return lite.entity ? getToString(lite.entity) : lite.toStr;
+    if (lite.EntityType)
+        return lite.entity ? getToString(lite.entity) : (lite.toStr || lite.EntityType);
 
 	const entity = entityOrLite as ModifiableEntity;
 	const toStr = getOrCreateToStringFunction(entity.Type);
