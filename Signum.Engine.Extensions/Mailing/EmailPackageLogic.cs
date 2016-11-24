@@ -49,7 +49,13 @@ namespace Signum.Engine.Mailing
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<EmailPackageEntity>();
+                sb.Include<EmailPackageEntity>()
+                    .WithQuery(dqm, e => new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.Name,
+                    });
 
                 dqm.RegisterExpression((EmailPackageEntity ep) => ep.Messages(), () => EmailMessageMessage.Messages.NiceToString());
                 dqm.RegisterExpression((EmailPackageEntity ep) => ep.RemainingMessages(), () => EmailMessageMessage.RemainingMessages.NiceToString());
@@ -88,15 +94,6 @@ namespace Signum.Engine.Mailing
                         return ProcessLogic.Create(EmailMessageProcess.SendEmails, emailPackage);
                     }
                 }.Register();
-
-                dqm.RegisterQuery(typeof(EmailPackageEntity), () =>
-                    from e in Database.Query<EmailPackageEntity>()
-                    select new
-                    {
-                        Entity = e,
-                        e.Id,
-                        e.Name,
-                    });
             }
         }
 

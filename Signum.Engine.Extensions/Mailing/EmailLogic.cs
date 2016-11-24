@@ -74,13 +74,8 @@ namespace Signum.Engine.Mailing
 
                 Schema.Current.WhenIncluded<ProcessEntity>(() => EmailPackageLogic.Start(sb, dqm));
 
-                sb.Include<EmailMessageEntity>();
-
-                PermissionAuthLogic.RegisterPermissions(AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel);
-
-                dqm.RegisterQuery(typeof(EmailMessageEntity), () =>
-                    from e in Database.Query<EmailMessageEntity>()
-                    select new
+                sb.Include<EmailMessageEntity>()
+                    .WithQuery(dqm, e => new
                     {
                         Entity = e,
                         e.Id,
@@ -93,6 +88,8 @@ namespace Signum.Engine.Mailing
                         e.Exception,
                     });
 
+                PermissionAuthLogic.RegisterPermissions(AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel);
+                
                 SenderManager = new EmailSenderManager();
 
                 EmailGraph.Register();

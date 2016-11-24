@@ -29,11 +29,8 @@ namespace Signum.Engine.Mailing
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<SendEmailTaskEntity>();
-
-                dqm.RegisterQuery(typeof(SendEmailTaskEntity), () =>
-                    from e in Database.Query<SendEmailTaskEntity>()
-                    select new
+                sb.Include<SendEmailTaskEntity>()
+                    .WithQuery(dqm, e => new
                     {
                         Entity = e,
                         e.Id,
@@ -41,7 +38,7 @@ namespace Signum.Engine.Mailing
                         e.EmailTemplate,
                         e.UniqueTarget,
                     });
-
+                
                 Validator.PropertyValidator((SendEmailTaskEntity er) => er.UniqueTarget).StaticPropertyValidation += (er, pi) =>
                 {
                     if (er.UniqueTarget != null && er.TargetsFromUserQuery != null)

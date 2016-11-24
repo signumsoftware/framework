@@ -40,11 +40,9 @@ namespace Signum.Engine.Basics
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<CultureInfoEntity>();
-
-                dqm.RegisterQuery(typeof(CultureInfoEntity), () =>
-                    from c in Database.Query<CultureInfoEntity>()
-                    select new
+                sb.Include<CultureInfoEntity>()
+                    .WithSave(CultureInfoOperation.Save)
+                    .WithQuery(dqm, c => new
                     {
                         Entity = c,
                         c.Id,
@@ -52,7 +50,7 @@ namespace Signum.Engine.Basics
                         c.EnglishName,
                         c.NativeName,
                     });
-
+                
                 CultureInfoToEntity = sb.GlobalLazy(() => Database.Query<CultureInfoEntity>().ToDictionary(ci => ci.Name,
                     ci => ci),
                     invalidateWith: new InvalidateWith(typeof(CultureInfoEntity)));
@@ -60,14 +58,7 @@ namespace Signum.Engine.Basics
                 CultureInfoDNToCultureInfo = sb.GlobalLazy(() => Database.Query<CultureInfoEntity>().ToDictionary(ci => ci, 
                     ci => CultureInfoModifier(CultureInfo.GetCultureInfo(ci.Name))),
                     invalidateWith: new InvalidateWith(typeof(CultureInfoEntity)));
-
-                new Graph<CultureInfoEntity>.Execute(CultureInfoOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (ci, _) => { },
-                }.Register();
-
+                
                 sb.Schema.Synchronizing += Schema_Synchronizing;
             }
         }

@@ -90,12 +90,12 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                     },
                     ctx.value.type == "DecisionTask" ? {
                         property: wav => wav.onAccept,
-                        cellProps: () => ({ style: { verticalAlign: "middle" } })  ,                  
+                        cellProps: ctx => ({ style: { verticalAlign: "middle" } }),                  
                         template: ctx => <ValueLine ctx={ctx.subCtx(wav => wav.onAccept)} formGroupStyle="None" valueHtmlProps={{ style: { margin: "0 auto" } }} />,
                     } : null,
                     ctx.value.type == "DecisionTask" ? {
                         property: wav => wav.onDecline,
-                        cellProps: ()=> ({ style: { verticalAlign: "middle" } }),
+                        cellProps: ctx => ({ style: { verticalAlign: "middle" } }),
                         template: ctx => <ValueLine ctx={ctx.subCtx(wav => wav.onDecline)} formGroupStyle="None" valueHtmlProps={{ style: { margin: "0 auto" } }} />,
                     } : null,
                 ])}/>

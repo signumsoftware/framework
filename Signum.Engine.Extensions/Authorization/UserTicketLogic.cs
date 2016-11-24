@@ -30,11 +30,8 @@ namespace Signum.Engine.Authorization
                 IsStarted = true;
 
                 AuthLogic.AssertStarted(sb);
-                sb.Include<UserTicketEntity>();
-
-                dqm.RegisterQuery(typeof(UserTicketEntity), () =>
-                    from ut in Database.Query<UserTicketEntity>()
-                    select new
+                sb.Include<UserTicketEntity>()
+                    .WithQuery(dqm, ut => new
                     {
                         Entity = ut,
                         ut.Id,
@@ -43,7 +40,7 @@ namespace Signum.Engine.Authorization
                         ut.ConnectionDate,
                         ut.Device,
                     });
-
+                
                 dqm.RegisterExpression((UserEntity u) => u.UserTickets(), () => typeof(UserTicketEntity).NicePluralName());
 
                 sb.Schema.EntityEvents<UserEntity>().Saving += UserTicketLogic_Saving; 

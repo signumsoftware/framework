@@ -39,11 +39,10 @@ namespace Signum.Engine.UserQueries
                 sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += e =>
                     Administrator.UnsafeDeletePreCommand(Database.Query<UserQueryEntity>().Where(a => a.Query == e));
 
-                sb.Include<UserQueryEntity>();
-
-                dqm.RegisterQuery(typeof(UserQueryEntity), () =>
-                    from uq in Database.Query<UserQueryEntity>()
-                    select new
+                sb.Include<UserQueryEntity>()
+                    .WithSave(UserQueryOperation.Save)
+                    .WithDelete(UserQueryOperation.Delete)
+                    .WithQuery(dqm, uq => new
                     {
                         Entity = uq,
                         uq.Query,
@@ -51,22 +50,9 @@ namespace Signum.Engine.UserQueries
                         uq.DisplayName,
                         uq.EntityType,
                     });
-
+                
                 sb.Schema.EntityEvents<UserQueryEntity>().Retrieved += UserQueryLogic_Retrieved;
-
-                new Graph<UserQueryEntity>.Execute(UserQueryOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (uq, _) => { }
-                }.Register();
-
-                new Graph<UserQueryEntity>.Delete(UserQueryOperation.Delete)
-                {
-                    Lite = true,
-                    Delete = (uq, _) => uq.Delete()
-                }.Register();
-
+                
                 UserQueries = sb.GlobalLazy(() => Database.Query<UserQueryEntity>().ToDictionary(a => a.ToLite()),
                     new InvalidateWith(typeof(UserQueryEntity)));
 
