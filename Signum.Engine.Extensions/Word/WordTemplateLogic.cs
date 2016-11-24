@@ -51,15 +51,9 @@ namespace Signum.Engine.Word
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<WordTemplateEntity>();
-                SystemWordTemplateLogic.Start(sb, dqm);
-
-                SymbolLogic<WordTransformerSymbol>.Start(sb, dqm, () => Transformers.Keys.ToHashSet());
-                SymbolLogic<WordConverterSymbol>.Start(sb, dqm, () => Converters.Keys.ToHashSet());
-
-                dqm.RegisterQuery(typeof(WordTemplateEntity), ()=>
-                    from e in Database.Query<WordTemplateEntity>()
-                    select new
+                sb.Include<WordTemplateEntity>()
+                    .WithSave(WordTemplateOperation.Save)
+                    .WithQuery(dqm, e => new
                     {
                         Entity = e,
                         e.Id,
@@ -67,17 +61,20 @@ namespace Signum.Engine.Word
                         e.Template.Entity.FileName
                     });
 
-                dqm.RegisterQuery(typeof(WordTransformerSymbol), () =>
-                    from f in Database.Query<WordTransformerSymbol>()
-                    select new
-                    {
-                        Entity = f,
-                        f.Key
-                    });
+                SystemWordTemplateLogic.Start(sb, dqm);
 
-                dqm.RegisterQuery(typeof(WordConverterSymbol), () =>
-                    from f in Database.Query<WordConverterSymbol>()
-                    select new
+                SymbolLogic<WordTransformerSymbol>.Start(sb, dqm, () => Transformers.Keys.ToHashSet());
+                SymbolLogic<WordConverterSymbol>.Start(sb, dqm, () => Converters.Keys.ToHashSet());
+
+                sb.Include<WordTransformerSymbol>()
+                .WithQuery(dqm, f => new
+                {
+                    Entity = f,
+                    f.Key
+                });
+
+                sb.Include<WordConverterSymbol>()
+                    .WithQuery(dqm, f => new
                     {
                         Entity = f,
                         f.Key
@@ -85,13 +82,7 @@ namespace Signum.Engine.Word
 
                 dqm.RegisterExpression((SystemWordTemplateEntity e) => e.WordTemplates(), () => typeof(WordTemplateEntity).NiceName());
 
-                new Graph<WordTemplateEntity>.Execute(WordTemplateOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (e, _) => { }
-                }.Register();
-
+                
                 new Graph<WordTemplateEntity>.Execute(WordTemplateOperation.CreateWordReport)
                 {
                     CanExecute = et =>

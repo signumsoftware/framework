@@ -49,15 +49,8 @@ namespace Signum.Engine.Files
             {
                 FileTypeLogic.Start(sb, dqm);
 
-                sb.Include<FilePathEntity>();
-
-                FilePathEntity.CalculatePrefixPair = CalculatePrefixPair;
-                sb.Schema.EntityEvents<FilePathEntity>().PreSaving += FilePath_PreSaving;
-                sb.Schema.EntityEvents<FilePathEntity>().PreUnsafeDelete += new PreUnsafeDeleteHandler<FilePathEntity>(FilePathLogic_PreUnsafeDelete);
-
-                dqm.RegisterQuery(typeof(FilePathEntity), () =>
-                    from p in Database.Query<FilePathEntity>()
-                    select new
+                sb.Include<FilePathEntity>()
+                    .WithQuery(dqm, p => new
                     {
                         Entity = p,
                         p.Id,
@@ -66,6 +59,10 @@ namespace Signum.Engine.Files
                         p.Suffix
                     });
 
+                FilePathEntity.CalculatePrefixPair = CalculatePrefixPair;
+                sb.Schema.EntityEvents<FilePathEntity>().PreSaving += FilePath_PreSaving;
+                sb.Schema.EntityEvents<FilePathEntity>().PreUnsafeDelete += new PreUnsafeDeleteHandler<FilePathEntity>(FilePathLogic_PreUnsafeDelete);
+                
                 new Graph<FilePathEntity>.Execute(FilePathOperation.Save)
                 {
                     AllowsNew = true,

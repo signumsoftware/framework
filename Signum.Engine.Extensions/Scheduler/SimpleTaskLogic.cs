@@ -33,15 +33,13 @@ namespace Signum.Engine.Scheduler
                     return func();
                 });
 
-
-                dqm.RegisterQuery(typeof(SimpleTaskSymbol), ()=>
-                      from ct in Database.Query<SimpleTaskSymbol>()
-                       select new
-                       {
-                           Entity = ct,
-                           ct.Id,
-                           ct.Key,
-                       });
+                sb.Include<SimpleTaskSymbol>()
+                    .WithQuery(dqm, ct => new
+                    {
+                        Entity = ct,
+                        ct.Id,
+                        ct.Key,
+                    });
             }
         }
 

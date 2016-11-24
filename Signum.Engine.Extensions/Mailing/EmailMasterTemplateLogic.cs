@@ -28,17 +28,14 @@ namespace Signum.Engine.Mailing
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<EmailMasterTemplateEntity>();
-
-                dqm.RegisterQuery(typeof(EmailMasterTemplateEntity), () =>
-                    from t in Database.Query<EmailMasterTemplateEntity>()
-                    select new
+                sb.Include<EmailMasterTemplateEntity>()
+                    .WithQuery(dqm, t => new
                     {
                         Entity = t,
                         t.Id,
                         t.Name,
                     });
-
+                
                 EmailMasterTemplateGraph.Register();
 
                 Validator.PropertyValidator<EmailMasterTemplateEntity>(et => et.Messages).StaticPropertyValidation += (et, pi) =>

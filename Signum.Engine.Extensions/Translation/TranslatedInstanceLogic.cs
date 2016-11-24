@@ -36,17 +36,9 @@ namespace Signum.Engine.Translation
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<TranslatedInstanceEntity>();
-                sb.AddUniqueIndex<TranslatedInstanceEntity>(ti => new { ti.Culture, ti.PropertyRoute, ti.Instance, ti.RowId });
-
-                if (defaultCulture == null)
-                    throw new ArgumentNullException("defaultCulture");
-
-                TranslatedInstanceLogic.getDefaultCulture = defaultCulture;
-
-                dqm.RegisterQuery(typeof(TranslatedInstanceEntity), () =>
-                    from e in Database.Query<TranslatedInstanceEntity>()
-                    select new
+                sb.Include<TranslatedInstanceEntity>()
+                    .WithUniqueIndex(ti => new { ti.Culture, ti.PropertyRoute, ti.Instance, ti.RowId })
+                    .WithQuery(dqm, e => new
                     {
                         Entity = e,
                         e.Id,
@@ -56,6 +48,11 @@ namespace Signum.Engine.Translation
                         e.TranslatedText,
                         e.OriginalText,
                     });
+                
+                if (defaultCulture == null)
+                    throw new ArgumentNullException("defaultCulture");
+
+                TranslatedInstanceLogic.getDefaultCulture = defaultCulture;
 
                 LocalizationCache = sb.GlobalLazy(() =>
                     Database.Query<TranslatedInstanceEntity>()

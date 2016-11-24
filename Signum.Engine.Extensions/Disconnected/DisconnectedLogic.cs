@@ -52,13 +52,8 @@ namespace Signum.Engine.Disconnected
             {
                 ServerSeed = serverSeed;
 
-                sb.Include<DisconnectedMachineEntity>();
-                sb.Include<DisconnectedExportEntity>();
-                sb.Include<DisconnectedImportEntity>();
-
-                dqm.RegisterQuery(typeof(DisconnectedMachineEntity), () =>
-                    from dm in Database.Query<DisconnectedMachineEntity>()
-                    select new
+                sb.Include<DisconnectedMachineEntity>()
+                    .WithQuery(dqm, dm => new
                     {
                         Entity = dm,
                         dm.MachineName,
@@ -67,9 +62,8 @@ namespace Signum.Engine.Disconnected
                         dm.SeedMax,
                     });
 
-                dqm.RegisterQuery(typeof(DisconnectedExportEntity), () =>
-                    from dm in Database.Query<DisconnectedExportEntity>()
-                    select new
+                sb.Include<DisconnectedExportEntity>()
+                    .WithQuery(dqm, dm => new
                     {
                         Entity = dm,
                         dm.CreationDate,
@@ -79,9 +73,8 @@ namespace Signum.Engine.Disconnected
                         dm.Exception,
                     });
 
-                dqm.RegisterQuery(typeof(DisconnectedImportEntity), () =>
-                    from dm in Database.Query<DisconnectedImportEntity>()
-                    select new
+                sb.Include<DisconnectedImportEntity>()
+                    .WithQuery(dqm, dm => new
                     {
                         Entity = dm,
                         dm.CreationDate,
@@ -90,7 +83,7 @@ namespace Signum.Engine.Disconnected
                         dm.Total,
                         dm.Exception,
                     });
-
+                
                 dqm.RegisterExpression((DisconnectedMachineEntity dm) => dm.Imports(), () => DisconnectedMessage.Imports.NiceToString());
                 dqm.RegisterExpression((DisconnectedMachineEntity dm) => dm.Exports(), () => DisconnectedMessage.Exports.NiceToString());
 
