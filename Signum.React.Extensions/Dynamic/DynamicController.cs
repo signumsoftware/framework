@@ -199,7 +199,7 @@ namespace Signum.React.Dynamic
 
             return new TypeHelpTS
             {
-                type = (isEnum ? typeName : type.Name),
+                type = (isEnum ? EnumEntity.Extract(type).Name : type.Name),
                 cleanTypeName = typeName,
                 isEnum = isEnum,
                 members = members

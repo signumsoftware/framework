@@ -207,13 +207,9 @@ namespace Signum.Entities.Dashboard
     {
         CreateNewPart,
 
-
         [Description("Title must be specified for {0}")]
         DashboardDN_TitleMustBeSpecifiedFor0,
-        [Description("Counter list")]
-        CountSearchControlPartEntity,
-        [Description("Counter")]
-        CountUserQueryElement,
+
         Preview,
         [Description("{0} is {1} (instead of {2}) in {3}")]
         _0Is1InstedOf2In3,
