@@ -25,6 +25,7 @@ export interface ValueSearchControlProps extends React.Props<ValueSearchControl>
     avoidAutoRefresh?: boolean;
     onValueChange?: (value: any) => void;
     onTokenLoaded?: () => void;
+    initialValue? : any;
 }
 
 export interface ValueSearchControlState {
@@ -54,8 +55,12 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     }
 
     componentDidMount() {
-        this.loadToken(this.props);
-        this.refreshCount(this.props);
+        if(this.props.initialValue !== undefined)
+              this.setState({ value: this.props.initialValue });
+        else{
+            this.loadToken(this.props);
+            this.refreshCount(this.props);
+        }
     }
 
     componentWillReceiveProps(newProps: ValueSearchControlProps) {
