@@ -35,8 +35,6 @@ export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetE
 export module DashboardMessage {
     export const CreateNewPart = new MessageKey("DashboardMessage", "CreateNewPart");
     export const DashboardDN_TitleMustBeSpecifiedFor0 = new MessageKey("DashboardMessage", "DashboardDN_TitleMustBeSpecifiedFor0");
-    export const CountSearchControlPartEntity = new MessageKey("DashboardMessage", "CountSearchControlPartEntity");
-    export const CountUserQueryElement = new MessageKey("DashboardMessage", "CountUserQueryElement");
     export const Preview = new MessageKey("DashboardMessage", "Preview");
     export const _0Is1InstedOf2In3 = new MessageKey("DashboardMessage", "_0Is1InstedOf2In3");
     export const Part0IsTooLarge = new MessageKey("DashboardMessage", "Part0IsTooLarge");
