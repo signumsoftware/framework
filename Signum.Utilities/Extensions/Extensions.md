@@ -21,6 +21,7 @@ public static short? ToShort(this string str)
 public static float? ToFloat(this string str)
 public static double? ToDouble(this string str)
 public static decimal? ToDecimal(this string str)
+public static bool? ToBool(this string str)
 ```
 
 And the equivalent overloads that throw a new FormatException with your
@@ -33,6 +34,7 @@ public static short ToShort(this string str, string error)
 public static float ToFloat(this string str, string error)
 public static double ToDouble(this string str, string error)
 public static decimal ToDecimal(this string str, string error)
+public static bool ToBool(this string str, string error)
 ```
 
 ### Mod and DivMod
