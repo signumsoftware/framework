@@ -153,7 +153,7 @@ namespace Signum.Engine
         /// Executes an action for each element in the collection in paralel and transactionally, and showing the progress in the Console.
         /// <param name="action">Use LogWriter to write in the Console and the file at the same time</param>
         /// </summary>
-        public static void ProgressForeachParallel<T>(this IEnumerable<T> collection, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
+        public static void ProgressForeachParallel<T>(this IEnumerable<T> collection, Func<T, string> elementID, string fileName, Action<T, LogWriter> action, ParallelOptions paralelOptions = null)
         {
             using (StreamWriter log = TryOpenAutoFlush(fileName))
             {
@@ -169,32 +169,34 @@ namespace Signum.Engine
                         SafeConsole.WriteSameLine(pi.ToString());
 
                     Exception stopException = null;
-                    Parallel.ForEach(col, (item, state) =>
-                    {
-                        using (HeavyProfiler.Log("ProgressForeach", () => elementID(item)))
-                            try
-                            {
-                                using (Transaction tr = Transaction.ForceNew())
+
+                    using (ExecutionContext.SuppressFlow())
+                        Parallel.ForEach(col, paralelOptions, (item, state) =>
+                        {
+                            using (HeavyProfiler.Log("ProgressForeach", () => elementID(item)))
+                                try
                                 {
-                                    action(item, writer);
-                                    tr.Commit();
+                                    using (Transaction tr = Transaction.ForceNew())
+                                    {
+                                        action(item, writer);
+                                        tr.Commit();
+                                    }
                                 }
-                            }
-                            catch (Exception e)
-                            {
-                                writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
-                                writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
+                                catch (Exception e)
+                                {
+                                    writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
+                                    writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
 
-                                if (StopOnException != null && StopOnException(elementID(item), fileName, e))
-                                    stopException = e;
-                            }
-                        lock (SafeConsole.SyncKey)
-                            SafeConsole.WriteSameLine(pi.ToString());
+                                    if (StopOnException != null && StopOnException(elementID(item), fileName, e))
+                                        stopException = e;
+                                }
+                            lock (SafeConsole.SyncKey)
+                                SafeConsole.WriteSameLine(pi.ToString());
 
-                        if (stopException != null)
-                            state.Break();
+                            if (stopException != null)
+                                state.Break();
 
-                    });
+                        });
 
                     if (stopException != null)
                         throw stopException;
