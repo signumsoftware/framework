@@ -239,7 +239,6 @@
     <TypeScriptCompile Include="Printing\Signum.Entities.Printing.ts">
       <DependentUpon>Signum.Entities.Printing.t4s</DependentUpon>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="Printing\Templates\PackageLine.tsx" />
     <TypeScriptCompile Include="Workflow\bpmn-js.d.ts" />
     <TypeScriptCompile Include="Workflow\Signum.Entities.Workflow.ts">
       <DependentUpon>Signum.Entities.Workflow.t4s</DependentUpon>

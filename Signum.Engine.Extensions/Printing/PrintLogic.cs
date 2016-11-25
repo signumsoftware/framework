@@ -5,9 +5,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Engine.Processes;
-using Signum.Entities;
 using Signum.Entities.Files;
-using Signum.Entities.Mailing;
 using Signum.Entities.Processes;
 using Signum.Utilities;
 using System;
@@ -15,8 +13,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Signum.Entities.Printing
 {
@@ -43,6 +39,7 @@ namespace Signum.Entities.Printing
                         Entity = p,
                         p.CreationDate,
                         p.File,
+                        p.State,
                         p.Package,
                         p.PrintedOn,
                         p.Referred,
@@ -109,17 +106,25 @@ namespace Signum.Entities.Printing
             return ProcessLogic.Create(PrintPackageProcess.PrintPackage, package); 
         }
 
-        public static Dictionary<FileTypeSymbol, int> GetReadyToPrintStats()
+        public static List<PrintStat> GetReadyToPrintStats()
         {
             return Database.Query<PrintLineEntity>()
-               .Where(a => a.Package == null && a.State == PrintLineState.Printed)
-               .GroupBy(a => a.File.FileType)
-               .Select(gr => KVP.Create(gr.Key, gr.Count()))
-               .ToDictionary();
+                .Where(a => a.Package == null && a.State == PrintLineState.ReadyToPrint)
+                .GroupBy(a => a.File.FileType)
+                .Select(gr => new PrintStat
+                {
+                    fileType = gr.Key,
+                    count = gr.Count()
+                }).ToList();            
+        }
+
+        public class PrintStat
+        {
+            public FileTypeSymbol fileType;
+            public int count; 
         }
     }
     
-
     public class PrintLineGraph : Graph<PrintLineEntity, PrintLineState>
     {
         public static void Register()

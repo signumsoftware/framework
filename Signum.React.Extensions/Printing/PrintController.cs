@@ -5,49 +5,19 @@ using Signum.Entities.Processes;
 using Signum.React.ApiControllers;
 using Signum.React.Facades;
 using Signum.React.Filters;
+using System.Collections.Generic;
 using System.Threading;
 using System.Web.Http;
+using static Signum.Entities.Printing.PrintLogic;
 
 namespace Signum.React.Processes
 {
     public class PrintController : ApiController
     {
-        [Route("api/printing/constructFromMany"), HttpPost, ValidateModelFilter]
-        public EntityPackTS ConstructFromMany(OperationController.MultiOperationRequest request)
+        [Route("api/printing/stats"), HttpGet]
+        public List<PrintStat> Stats()
         {
-            var type = request.type == null ? null : TypeLogic.GetType(request.type);
-
-            var entity = PackageLogic.CreatePackageOperation(request.lites, request.operarionSymbol, request.args);
-
-            return SignumServer.GetEntityPack(entity);
+            return GetReadyToPrintStats();           
         }
-
-        [Route("api/printing/view"), HttpGet]
-        public ProcessLogicState View()
-        {
-            ProcessLogicState state = ProcessRunnerLogic.ExecutionState();
-
-            return state;
-        }
-
-        [Route("api/printing/start"), HttpPost]
-        public void Start()
-        {
-            ProcessPermission.ViewProcessPanel.AssertAuthorized();
-
-            ProcessRunnerLogic.StartRunningProcesses();
-
-            Thread.Sleep(1000);
-        }
-
-        //[Route("api/printing/stop"), HttpPost]
-        //public void Stop()
-        //{
-            //ProcessPermission.ViewProcessPanel.AssertAuthorized();
-
-            //ProcessRunnerLogic.Stop();
-
-            //Thread.Sleep(1000);
-        //}
     }
 }
