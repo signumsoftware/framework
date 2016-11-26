@@ -115,6 +115,7 @@
     <Compile Include="DiffLog\DiffLogMixin.cs" />
     <Compile Include="DiffLog\Services.cs" />
     <Compile Include="Dynamic\Dynamic.cs" />
+    <Compile Include="Toolbar\Toolbar.cs" />
     <Compile Include="Dynamic\DynamicSqlMigration.cs" />
     <Compile Include="Dynamic\DynamicType.cs" />
     <Compile Include="Dynamic\DynamicExpression.cs" />

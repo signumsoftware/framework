@@ -37,6 +37,11 @@ namespace Signum.Engine.UserAssets
                 return content.Guid;
             }
 
+            public Guid Include(Lite<IUserAssetEntity> content)
+            {
+                return this.Include(content.Retrieve());
+            }
+
             public string TypeToName(Lite<TypeEntity> type)
             {
                 return TypeLogic.GetCleanName(TypeLogic.DnToType.GetOrThrow(type.Retrieve()));

@@ -167,6 +167,8 @@
     <Compile Include="RestLog\RestLogFilter.cs" />
     <Compile Include="Mailing\MailingController.cs" />
     <Compile Include="Mailing\MailingServer.cs" />
+    <Compile Include="Toolbar\ToolbarController.cs" />
+    <Compile Include="Toolbar\WordServer.cs" />
     <Compile Include="Workflow\WorkflowServer.cs" />
     <Compile Include="Workflow\WorkflowController.cs" />
     <TypeScriptCompile Include="Dynamic\DynamicClient.tsx" />
@@ -232,6 +234,14 @@
     <Compile Include="UserQueries\UserQueryServer.cs" />
     <Compile Include="Word\WordServer.cs" />
     <Compile Include="Word\WordController.cs" />
+    <TypeScriptCompile Include="Toolbar\Signum.Entities.Toolbar.ts">
+      <DependentUpon>Signum.Entities.Toolbar.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Toolbar\Templates\ToolbarRenderer.tsx" />
+    <TypeScriptCompile Include="Toolbar\Templates\ToolbarElement.tsx" />
+    <TypeScriptCompile Include="Toolbar\Templates\ToolbarMenu.tsx" />
+    <TypeScriptCompile Include="Word\Templates\WordTemplate.tsx" />
+    <TypeScriptCompile Include="Word\WordClient.tsx" />
     <TypeScriptCompile Include="Workflow\bpmn-js.d.ts" />
     <TypeScriptCompile Include="Workflow\Signum.Entities.Workflow.ts">
       <DependentUpon>Signum.Entities.Workflow.t4s</DependentUpon>
@@ -528,8 +538,8 @@
     <TypeScriptCompile Include="ViewLog\Signum.Entities.ViewLog.ts">
       <DependentUpon>Signum.Entities.ViewLog.t4s</DependentUpon>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="Word\Templates\WordTemplate.tsx" />
-    <TypeScriptCompile Include="Word\WordClient.tsx" />
+    <TypeScriptCompile Include="Toolbar\Templates\Toolbar.tsx" />
+    <TypeScriptCompile Include="Toolbar\ToolbarClient.tsx" />
     <TypeScriptCompile Include="Word\Signum.Entities.Word.ts">
       <DependentUpon>Signum.Entities.Word.t4s</DependentUpon>
     </TypeScriptCompile>
@@ -570,6 +580,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Workflow\Signum.Entities.Workflow.t4s" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Toolbar\Signum.Entities.Toolbar.t4s" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
