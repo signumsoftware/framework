@@ -24,11 +24,9 @@ namespace Signum.Engine.Chart
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<ChartScriptEntity>();
-
-                dqm.RegisterQuery(typeof(ChartScriptEntity), () =>
-                    from uq in Database.Query<ChartScriptEntity>()
-                    select new
+                sb.Include<ChartScriptEntity>()
+                    .WithSave(ChartScriptOperation.Save)
+                    .WithQuery(dqm, uq => new
                     {
                         Entity = uq,
                         uq.Id,
@@ -54,13 +52,6 @@ namespace Signum.Engine.Chart
 
         private static void RegisterOperations()
         {
-            new Graph<ChartScriptEntity>.Execute(ChartScriptOperation.Save)
-            {
-                AllowsNew = true,
-                Lite = false,
-                Execute = (cs, _) => { }
-            }.Register();
-
             new Graph<ChartScriptEntity>.ConstructFrom<ChartScriptEntity>(ChartScriptOperation.Clone)
             {
                 Construct = (cs, _) => new ChartScriptEntity

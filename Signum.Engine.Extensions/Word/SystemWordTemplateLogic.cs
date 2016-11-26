@@ -86,16 +86,13 @@ namespace Signum.Engine.Word
             {
                 sb.Schema.Generating += Schema_Generating;
                 sb.Schema.Synchronizing += Schema_Synchronizing;
-                sb.Include<SystemWordTemplateEntity>();
-
-                dqm.RegisterQuery(typeof(SystemWordTemplateEntity), () =>
-                    (from se in Database.Query<SystemWordTemplateEntity>()
-                     select new
-                     {
-                         Entity = se,
-                         se.Id,
-                         se.FullClassName,
-                     }));
+                sb.Include<SystemWordTemplateEntity>()
+                    .WithQuery(dqm, se => new
+                    {
+                        Entity = se,
+                        se.Id,
+                        se.FullClassName,
+                    });
                 
                 new Graph<WordTemplateEntity>.ConstructFrom<SystemWordTemplateEntity>(WordTemplateOperation.CreateWordTemplateFromSystemWordTemplate)
                 {

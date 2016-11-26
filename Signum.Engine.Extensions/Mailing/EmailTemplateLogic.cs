@@ -83,25 +83,22 @@ namespace Signum.Engine.Mailing
 
                 GetSmtpConfiguration = getSmtpConfiguration;
 
-                sb.Include<EmailTemplateEntity>();       
-
-                EmailTemplatesLazy = sb.GlobalLazy(() => Database.Query<EmailTemplateEntity>()
-                    .ToDictionary(et => et.ToLite()), new InvalidateWith(typeof(EmailTemplateEntity)));
-
-                SystemEmailLogic.Start(sb, dqm);
-                EmailMasterTemplateLogic.Start(sb, dqm);
-
-                dqm.RegisterQuery(typeof(EmailTemplateEntity), () =>
-                    from t in Database.Query<EmailTemplateEntity>()
-                    select new
+                sb.Include<EmailTemplateEntity>()
+                    .WithQuery(dqm, t => new
                     {
                         Entity = t,
                         t.Id,
                         t.Name,
                         Active = t.IsActiveNow(),
                         t.IsBodyHtml
-                    });
+                    });       
 
+                EmailTemplatesLazy = sb.GlobalLazy(() => Database.Query<EmailTemplateEntity>()
+                    .ToDictionary(et => et.ToLite()), new InvalidateWith(typeof(EmailTemplateEntity)));
+
+                SystemEmailLogic.Start(sb, dqm);
+                EmailMasterTemplateLogic.Start(sb, dqm);
+                
                 sb.Schema.EntityEvents<EmailTemplateEntity>().PreSaving += new PreSavingEventHandler<EmailTemplateEntity>(EmailTemplate_PreSaving);
                 sb.Schema.EntityEvents<EmailTemplateEntity>().Retrieved += EmailTemplateLogic_Retrieved;
 

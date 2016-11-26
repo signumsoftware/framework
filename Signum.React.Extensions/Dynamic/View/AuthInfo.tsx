@@ -1,6 +1,7 @@
 ﻿import * as React from 'react'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
+import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
 import { Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -31,6 +32,6 @@ export class AuthInfo {
     }
 
     operationAllowed(operationKey: string) {
-        return AuthClient.isOperationAuthorized(operationKey);
+        return Operations.isOperationAllowed(operationKey);
     }
 }

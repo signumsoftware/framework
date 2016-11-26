@@ -89,15 +89,13 @@ namespace Signum.Engine.Mailing
             {
                 sb.Schema.Generating += Schema_Generating;
                 sb.Schema.Synchronizing += Schema_Synchronizing;
-
-                dqm.RegisterQuery(typeof(SystemEmailEntity), () =>
-                    (from se in Database.Query<SystemEmailEntity>()
-                     select new
-                     {
-                         Entity = se,
-                         se.Id,
-                         se.FullClassName,
-                     }));
+                sb.Include<SystemEmailEntity>()
+                    .WithQuery(dqm, se => new
+                    {
+                        Entity = se,
+                        se.Id,
+                        se.FullClassName,
+                    });
 
                 new Graph<EmailTemplateEntity>.ConstructFrom<SystemEmailEntity>(EmailTemplateOperation.CreateEmailTemplateFromSystemEmail)
                 {

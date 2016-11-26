@@ -88,23 +88,8 @@ namespace Signum.Engine.Scheduler
                 ExecuteTask.Register((ITaskEntity t) => { throw new NotImplementedException("SchedulerLogic.ExecuteTask not registered for {0}".FormatWith(t.GetType().Name)); });
 
                 SimpleTaskLogic.Start(sb, dqm);
-                sb.Include<ScheduledTaskEntity>();
-                sb.Include<ScheduledTaskLogEntity>();
-
-                dqm.RegisterQuery(typeof(HolidayCalendarEntity), () =>
-                     from st in Database.Query<HolidayCalendarEntity>()
-                     select new
-                     {
-                         Entity = st,
-                         st.Id,
-                         st.Name,
-                         Holidays = st.Holidays.Count,
-                     });
-
-
-                dqm.RegisterQuery(typeof(ScheduledTaskEntity), () =>
-                    from st in Database.Query<ScheduledTaskEntity>()
-                    select new
+                sb.Include<ScheduledTaskEntity>()
+                    .WithQuery(dqm, st => new
                     {
                         Entity = st,
                         st.Id,
@@ -115,9 +100,8 @@ namespace Signum.Engine.Scheduler
                         st.ApplicationName
                     });
 
-                dqm.RegisterQuery(typeof(ScheduledTaskLogEntity), () =>
-                    from cte in Database.Query<ScheduledTaskLogEntity>()
-                    select new
+                sb.Include<ScheduledTaskLogEntity>()
+                    .WithQuery(dqm, cte => new
                     {
                         Entity = cte,
                         cte.Id,
@@ -130,6 +114,15 @@ namespace Signum.Engine.Scheduler
                         cte.User,
                         cte.Exception,
 
+                    });
+
+                sb.Include<HolidayCalendarEntity>()
+                    .WithQuery(dqm, st => new
+                    {
+                        Entity = st,
+                        st.Id,
+                        st.Name,
+                        Holidays = st.Holidays.Count,
                     });
 
                 dqm.RegisterExpression((ITaskEntity ct) => ct.Executions(), () => TaskMessage.Executions.NiceToString());

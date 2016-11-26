@@ -34,15 +34,12 @@ namespace Signum.Engine.Files
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 SymbolLogic<FileTypeSymbol>.Start(sb,dqm, () => FileTypes.Keys.ToHashSet());
-
-                dqm.RegisterQuery(typeof(FileTypeSymbol), () =>
-                    from f in Database.Query<FileTypeSymbol>()
-                    select new
+                sb.Include<FileTypeSymbol>()
+                    .WithQuery(dqm, f => new
                     {
                         Entity = f,
                         f.Key
                     });
-
 
                 sb.Schema.SchemaCompleted += Schema_SchemaCompleted;
             }

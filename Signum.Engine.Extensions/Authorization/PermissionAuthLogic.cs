@@ -17,7 +17,6 @@ using System.Xml.Linq;
 
 namespace Signum.Engine.Authorization
 {
-
     public static class PermissionAuthLogic
     {
         static HashSet<PermissionSymbol> permissions = new HashSet<PermissionSymbol>();
