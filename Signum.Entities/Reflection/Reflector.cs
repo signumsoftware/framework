@@ -1,20 +1,16 @@
-﻿using System;
-using System.Collections;
+﻿using Signum.Utilities;
+using Signum.Utilities.DataStructures;
+using Signum.Utilities.ExpressionTrees;
+using Signum.Utilities.Reflection;
+using System;
+using System.CodeDom.Compiler;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Signum.Entities;
-using Signum.Utilities;
-using Signum.Utilities.Reflection;
-using Signum.Utilities.DataStructures;
-using System.ComponentModel;
-using System.Collections.ObjectModel;
-using System.Globalization;
-using Signum.Utilities.ExpressionTrees;
 using System.Text.RegularExpressions;
-using System.Collections.Concurrent;
-using System.CodeDom.Compiler;
 
 namespace Signum.Entities.Reflection
 {
@@ -76,7 +72,7 @@ namespace Signum.Entities.Reflection
 
         static DescriptionOptions? DescriptionManager_IsIEntity(Type t)
         {
-             return t.IsInterface && typeof(IEntity).IsAssignableFrom(t) ? DescriptionOptions.Members : (DescriptionOptions?)null;
+            return t.IsInterface && typeof(IEntity).IsAssignableFrom(t) ? DescriptionOptions.Members : (DescriptionOptions?)null;
         }
 
         static DescriptionOptions? DescriptionManager_IsQuery(Type t)
@@ -86,7 +82,7 @@ namespace Signum.Entities.Reflection
 
         static DescriptionOptions? DescriptionManager_IsSymbolContainer(Type t)
         {
-            return t.IsAbstract && t.IsSealed && 
+            return t.IsAbstract && t.IsSealed &&
                 t.GetFields(BindingFlags.Static | BindingFlags.Public)
                 .Any(a => typeof(Symbol).IsAssignableFrom(a.FieldType) || typeof(IOperationSymbolContainer).IsAssignableFrom(a.FieldType)) ? DescriptionOptions.Members : (DescriptionOptions?)null;
         }
@@ -179,14 +175,14 @@ namespace Signum.Entities.Reflection
 
         public static PropertyInfo[] PublicInstancePropertiesInOrder(Type type)
         {
-            Dictionary<string, PropertyInfo> properties = new Dictionary<string,PropertyInfo>();
+            Dictionary<string, PropertyInfo> properties = new Dictionary<string, PropertyInfo>();
 
             foreach (var t in type.Follow(t => t.BaseType).Reverse())
             {
                 foreach (var pi in PublicInstanceDeclaredPropertiesInOrder(t))
-	            {
+                {
                     properties[pi.Name] = pi;
-	            }
+                }
             }
 
             return properties.Values.ToArray();
@@ -240,24 +236,24 @@ namespace Signum.Entities.Reflection
             switch (e.NodeType)
             {
                 case ExpressionType.MemberAccess:
-                {
-                    MemberExpression me = (MemberExpression)e;
-                    if (me.Member.DeclaringType.IsLite() && !me.Member.Name.StartsWith("Entity"))
-                        throw new InvalidOperationException("Members of Lite not supported"); 
+                    {
+                        MemberExpression me = (MemberExpression)e;
+                        if (me.Member.DeclaringType.IsLite() && !me.Member.Name.StartsWith("Entity"))
+                            throw new InvalidOperationException("Members of Lite not supported");
 
-                    return me.Member;
-                }
+                        return me.Member;
+                    }
                 case ExpressionType.Call:
-                {
-                    MethodCallExpression mce = (MethodCallExpression)e;
+                    {
+                        MethodCallExpression mce = (MethodCallExpression)e;
 
-                    var parent = mce.Method.IsExtensionMethod() ? mce.Arguments.FirstEx() : mce.Object; 
+                        var parent = mce.Method.IsExtensionMethod() ? mce.Arguments.FirstEx() : mce.Object;
 
-                    if(parent != null && parent.Type.ElementType() == e.Type)
-                        return parent.Type.GetProperty("Item");
+                        if (parent != null && parent.Type.ElementType() == e.Type)
+                            return parent.Type.GetProperty("Item");
 
-                    return mce.Method;
-                }
+                        return mce.Method;
+                    }
                 case ExpressionType.Convert: return ((UnaryExpression)e).Type;
                 case ExpressionType.Parameter: return null;
                 default: throw new InvalidCastException("Not supported {0}".FormatWith(e.NodeType));
@@ -319,7 +315,7 @@ namespace Signum.Entities.Reflection
             const BindingFlags flags = BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
             string propertyName = null;
-            if(fi.Name.StartsWith("<"))
+            if (fi.Name.StartsWith("<"))
             {
                 CheckSignumProcessed(fi);
                 propertyName = fi.Name.After('<').Before('>');
@@ -342,7 +338,7 @@ namespace Signum.Entities.Reflection
 
             return null;
         }
-        
+
 
         public static bool QueryableProperty(Type type, PropertyInfo pi)
         {
@@ -405,6 +401,9 @@ namespace Signum.Entities.Reflection
                 if (stringCase != null)
                     return stringCase.TextCase == StringCase.Lowercase ? "L" : "U";
             }
+
+            if (route.IsId() && IsNumber(PrimaryKey.Type(route.RootType)))
+                return "D";
 
             return FormatString(route.Type);
         }
@@ -502,7 +501,7 @@ namespace Signum.Entities.Reflection
         {
             var str = (0.0).ToString(format).TryAfter('.');
 
-            if(str == null)
+            if (str == null)
                 return 0;
 
             return str.Length;

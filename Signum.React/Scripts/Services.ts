@@ -244,24 +244,30 @@ export class ValidationError extends Error {
     }
 }
 
+//localStorage: Domain+Browser
+//sessionStorage: Browser tab
 
 var _appName: string = "";
 
-export function setAppName(appName: string) {
+export function setAppNameAndRequestSessionStorage(appName: string) {
     _appName = appName;
+    if (!sessionStorage.length) {
+        localStorage.setItem('requestSessionStorage' + _appName, new Date().toString());
+        localStorage.removeItem('requestSessionStorage' + _appName);
+    }
 }
 
 //http://blog.guya.net/2015/06/12/sharing-sessionstorage-between-tabs-for-secure-multi-tab-authentication/
 //To share session storage between tabs
 window.addEventListener("storage", se => {
 
-    if (se.key == 'getSessionStorage' + _appName) {
+    if (se.key == 'requestSessionStorage' + _appName) {
         // Some tab asked for the sessionStorage -> send it
 
-        localStorage.setItem('sessionStorage' + _appName, JSON.stringify(sessionStorage));
-        localStorage.removeItem('sessionStorage' + _appName);
+        localStorage.setItem('responseSessionStorage' + _appName, JSON.stringify(sessionStorage));
+        localStorage.removeItem('responseSessionStorage' + _appName);
 
-    } else if (se.key == ('sessionStorage' + _appName) && !sessionStorage.length) {
+    } else if (se.key == ('responseSessionStorage' + _appName) && !sessionStorage.length) {
         // sessionStorage is empty -> fill it
 
         if (se.newValue) {
@@ -273,12 +279,6 @@ window.addEventListener("storage", se => {
         }
     }
 });
-
-if (!sessionStorage.length) {
-    // Ask other tabs for session storage
-    localStorage.setItem('getSessionStorage' + _appName, new Date().toString());
-};
-
 
 
 export function makeAbortable<T>(makeCall: (abortController: FetchAbortController) => Promise<T>): () => Promise<T | undefined> {

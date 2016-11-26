@@ -68,9 +68,8 @@ namespace Signum.Engine.Basics
                     new InvalidateWith(typeof(TypeEntity)),
                     Schema.Current.InvalidateMetadata);
 
-                dqm.RegisterQuery(typeof(TypeEntity), () =>
-                    from t in Database.Query<TypeEntity>()
-                    select new
+                sb.Include<TypeEntity>()
+                    .WithQuery(dqm, t => new
                     {
                         Entity = t,
                         t.Id,
@@ -79,7 +78,7 @@ namespace Signum.Engine.Basics
                         t.ClassName,
                         t.Namespace,
                     });
-
+                
                 TypeEntity.SetTypeDNCallbacks(
                     t => TypeToEntity.GetOrThrow(t),
                     t => DnToType.GetOrThrow(t));
