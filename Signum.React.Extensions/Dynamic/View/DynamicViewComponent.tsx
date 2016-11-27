@@ -95,7 +95,7 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
                 }
             </div>
             <div className={classes("design-content", this.state.isDesignerOpen && "open")}>
-                {NodeUtils.render(rootNode, this.props.ctx)}
+                {NodeUtils.renderWithViewOverrides(rootNode, this.props.ctx)}
             </div>
         </div>);
     }
@@ -156,6 +156,7 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { vi
     handleSave = () => {
 
         this.props.dynamicView.viewContent = JSON.stringify(this.props.rootNode.node);
+        this.props.dynamicView.modified = true; 
 
         Operations.API.executeEntity(this.props.dynamicView, DynamicViewOperation.Save)
             .then(pack => { this.reload(pack.entity); return EntityOperations.notifySuccess(); })

@@ -3,6 +3,7 @@ import { Tabs, Tab } from 'react-bootstrap'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityDetail, EntityStrip } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ModifiableEntity, isLite, isEntity, External } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
+import { ViewReplacer } from '../../../../Framework/Signum.React/Scripts/Frames/ReactVisitor'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import {
@@ -128,6 +129,23 @@ export function treeNodeKindField(dn: DesignerNode<LineBaseNode>) {
 
 export function treeNodeTableColumnProperty(dn: DesignerNode<EntityTableColumnNode>) {
     return <span><small>ETColumn:</small> <strong>{dn.node.property}</strong></span>;
+}
+
+
+export function renderWithViewOverrides(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>) {
+    
+    var result = render(dn, parentCtx);
+    if (result == null)
+        return null;
+
+    const es = Navigator.getSettings(parentCtx.propertyRoute.typeReference().name);
+    if (es && es.viewOverrides && es.viewOverrides.length) {
+        const replacer = new ViewReplacer(result, parentCtx);
+        es.viewOverrides.forEach(vo => vo(replacer));
+        return replacer.result;
+    } else {
+        return result;
+    }   
 }
 
 export function render(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>) {
