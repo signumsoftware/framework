@@ -13,13 +13,15 @@ export interface ToolbarElementEntity extends Entities.EmbeddedEntity {
     type?: ToolbarElementType;
     label?: string | null;
     iconName?: string | null;
+    iconColor?: string | null;
     content?: Entities.Lite<Entities.Entity> | null;
 }
 
 export const ToolbarElementType = new EnumType<ToolbarElementType>("ToolbarElementType");
 export type ToolbarElementType =
     "Link" |
-    "LinkWithIcon" |
+    "Menu" |
+    "Header" |
     "Divider";
 
 export const ToolbarEntity = new Type<ToolbarEntity>("Toolbar");

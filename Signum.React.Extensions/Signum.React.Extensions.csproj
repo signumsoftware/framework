@@ -171,6 +171,8 @@
     <Compile Include="Toolbar\WordServer.cs" />
     <Compile Include="Workflow\WorkflowServer.cs" />
     <Compile Include="Workflow\WorkflowController.cs" />
+    <TypeScriptCompile Include="Chart\UserChartToolbarConfig.ts" />
+    <TypeScriptCompile Include="Dashboard\DashboardToolbarConfig.ts" />
     <TypeScriptCompile Include="Dynamic\DynamicClient.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicTypeClient.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicExpressionClient.tsx" />
@@ -234,12 +236,16 @@
     <Compile Include="UserQueries\UserQueryServer.cs" />
     <Compile Include="Word\WordServer.cs" />
     <Compile Include="Word\WordController.cs" />
+    <TypeScriptCompile Include="Toolbar\QueryToolbarConfig.ts" />
     <TypeScriptCompile Include="Toolbar\Signum.Entities.Toolbar.ts">
       <DependentUpon>Signum.Entities.Toolbar.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Toolbar\Templates\IconTypeahead.tsx" />
+    <TypeScriptCompile Include="Toolbar\Templates\ColorTypeahead.tsx" />
     <TypeScriptCompile Include="Toolbar\Templates\ToolbarRenderer.tsx" />
     <TypeScriptCompile Include="Toolbar\Templates\ToolbarElement.tsx" />
     <TypeScriptCompile Include="Toolbar\Templates\ToolbarMenu.tsx" />
+    <TypeScriptCompile Include="UserQueries\UserQueryToolbarConfig.tsx" />
     <TypeScriptCompile Include="Word\Templates\WordTemplate.tsx" />
     <TypeScriptCompile Include="Word\WordClient.tsx" />
     <TypeScriptCompile Include="Workflow\bpmn-js.d.ts" />

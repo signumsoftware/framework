@@ -155,7 +155,7 @@ namespace Signum.Engine.Toolbar
 
             return new ToolbarResponse
             {
-                type = ToolbarElementType.Link,
+                type = ToolbarElementType.Menu,
                 lite = curr.ToLite(),
                 label = curr.Name,
                 elements = responses,
@@ -186,6 +186,8 @@ namespace Signum.Engine.Toolbar
                 type = element.Type,
                 lite = element.Content,
                 label = element.Label,
+                iconName = element.IconName,
+                iconColor = element.IconColor,
             };
 
             if (element.Content is Lite<ToolbarMenuEntity>)
@@ -225,5 +227,7 @@ namespace Signum.Engine.Toolbar
         public string label;
         public Lite<Entity> lite;
         public List<ToolbarResponse> elements;
+        public string iconName;
+        public string iconColor;
     }
 }

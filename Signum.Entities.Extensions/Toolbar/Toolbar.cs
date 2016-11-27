@@ -29,7 +29,9 @@ namespace Signum.Entities.Toolbar
         public string Name { get; set; }
 
         public int? Priority { get; set; }
-
+        
+        [NotNullable, PreserveOrder]
+        [NotNullValidator, NoRepeatValidator]
         public MList<ToolbarElementEntity> Elements { get; set; } = new MList<ToolbarElementEntity>();
 
         [UniqueIndex]
@@ -82,8 +84,10 @@ namespace Signum.Entities.Toolbar
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string IconName { get; set; }
 
-        [NotNullable]
-        [NotNullValidator]
+        [SqlDbType(Size = 100)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
+        public string IconColor { get; set; }
+        
         [ImplementedBy(typeof(ToolbarMenuEntity), typeof(UserQueryEntity), typeof(UserChartEntity), typeof(QueryEntity), typeof(DashboardEntity))]
         public Lite<Entity> Content { get; set; }
 
@@ -158,6 +162,8 @@ namespace Signum.Entities.Toolbar
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
+        [NotNullable, PreserveOrder]
+        [NotNullValidator, NoRepeatValidator]
         public MList<ToolbarElementEntity> Elements { get; set; } = new MList<ToolbarElementEntity>();
 
         public XElement ToXml(IToXmlContext ctx)

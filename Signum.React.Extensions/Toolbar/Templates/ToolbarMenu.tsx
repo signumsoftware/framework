@@ -7,10 +7,6 @@ import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search
 import { getToString, getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { ToolbarMenuEntity } from '../Signum.Entities.Toolbar'
-import { TemplateTokenMessage } from '../../Templating/Signum.Entities.Templating'
-import FileLine from '../../Files/FileLine'
-import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
-
 
 export default class ToolbarMenu extends React.Component<{ ctx: TypeContext<ToolbarMenuEntity> }, void> {
 
