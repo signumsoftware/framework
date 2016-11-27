@@ -443,6 +443,11 @@ String.prototype.replaceAll = function (this: string, from: string, to: string) 
 };
 
 String.prototype.before = function (separator) {
+String.prototype.indent = function (this: string, numChars: number) {
+    const indent = " ".repeat(numChars);
+    return this.split("\n").map(a => indent + a).join("\n");
+};
+
     const index = this.indexOf(separator);
     if (index == -1)
         throw Error("{0} not found".formatWith(separator));
