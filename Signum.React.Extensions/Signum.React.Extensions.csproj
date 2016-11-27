@@ -195,6 +195,7 @@
     <TypeScriptCompile Include="Dynamic\View\DynamicViewComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\View\Designer.tsx" />
     <TypeScriptCompile Include="Dynamic\View\AuthInfo.tsx" />
+    <TypeScriptCompile Include="Dynamic\View\ShowCodeModal.tsx" />
     <TypeScriptCompile Include="Dynamic\View\StyleOptionsComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\View\HtmlAttributesComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\View\StyleOptionsExpression.tsx" />

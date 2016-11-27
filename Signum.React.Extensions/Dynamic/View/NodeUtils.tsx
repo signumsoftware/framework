@@ -11,7 +11,7 @@ import {
     KindOfType, PropertyRoute, PropertyRouteType, LambdaMemberType, isTypeEntity, isTypeModel, isModifiableEntity
 } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { TypeContext, StyleOptions, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { EntityBase, EntityBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines/EntityBase'
 import { EntityListBase, EntityListBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines/EntityListBase'
 import { DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
@@ -28,7 +28,7 @@ import { StyleOptionsLine } from './StyleOptionsComponent'
 export type ExpressionOrValue<T> = T | Expression<T>;
 
 //ctx -> value
-export type Expression<T> = { code: string };
+export type Expression<T> = { __code__: string };
 
 export interface NodeOptions<N extends BaseNode> {
     kind: string;
@@ -38,6 +38,7 @@ export interface NodeOptions<N extends BaseNode> {
     hasEntity?: boolean;
     hasCollection?: boolean;
     render: (node: DesignerNode<N>, parentCtx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+    renderCode?: (node: N, ctx: CodeContext) => string;
     renderTreeNode: (node: DesignerNode<N>) => React.ReactElement<any>;
     renderDesigner: (node: DesignerNode<N>) => React.ReactElement<any>;
     validate?: (node: DesignerNode<N>, parentCtx: TypeContext<ModifiableEntity> | undefined) => string | null | undefined;
@@ -46,6 +47,84 @@ export interface NodeOptions<N extends BaseNode> {
     avoidHighlight?: boolean;
     initialize?: (node: N, parentNode: DesignerNode<ContainerNode>) => void
 }
+
+export class CodeContext {
+    ctxName: string;
+    usedNames: { [name: string]: string };
+
+
+    subCtx(field?: string, options?: StyleOptions): CodeContext {
+        if (!field && !options)
+            return this;
+
+        var newName = "ctx" + (Dic.getKeys(this.usedNames).length + 1);
+
+        this.usedNames[newName] = this.subCtxCode(field, options);
+        var result = new CodeContext();
+        result.ctxName = newName;
+        result.usedNames = this.usedNames;
+        return result;
+    }
+
+    subCtxCode(field?: string, options?: StyleOptions): string {
+
+        if (!field && !options)
+            return "ctx";
+
+        var propStr = field && "a => a." + field;
+        var optionsStr = options && this.stringifyObject(options);
+
+        return this.ctxName + "subCtx(" + propStr + (propStr && optionsStr ? ", " : "") + optionsStr + ")";
+    }
+
+    stringifyObject(expressionOrValue: ExpressionOrValue<any>): string {
+        if ((expressionOrValue as Object).hasOwnProperty("__code__"))
+            return (expressionOrValue as Expression<any>).__code__.replace("ctx", this.ctxName);
+
+        return JSON.stringify(expressionOrValue, (k, v) => {
+            if ((v as Object).hasOwnProperty("__code__"))
+                return (v as Expression<any>).__code__.replace("ctx", this.ctxName);
+            return v;
+        });
+    }
+
+
+    elementCode(type: string, props: any, ...children: (string | undefined)[]) {
+
+        var propsStr = props && Dic.map(props, (k, v) => v == undefined ? "" :
+            (k + "=" + (typeof (v) == "string" ? `"${v}"` : `"${this.stringifyObject(v)}"`)));
+        
+        if (children && children.length) {
+            var childrenString = children.join("\n").indent(4);
+
+            return (`<${type}${propsStr ? " " : ""}${propsStr}>
+${childrenString}
+</${type}>
+`);
+
+        } else {
+            return (`<${type}${propsStr ? " " : ""}${propsStr}/>`);
+        }
+    }
+
+    elementCodeWithChildren(type: string, props: any, node: ContainerNode) {
+
+        var childrensCode = node.children.map(c => renderCode(c, this));
+
+        return this.elementCode(type, props, ...childrensCode);
+    }
+
+    elementCodeWithChildrenSubCtx(type: string, props: any, node: ContainerNode) {
+
+        var ctx = this.subCtx((node as any).field, (node as any).styleOptions);
+
+        var childrensCode = node.children.map(c => renderCode(c, ctx));
+
+        return this.elementCode(type, props, ...childrensCode);
+    }
+   
+}
+
 
 export interface DesignerContext {
     refreshView: () => void;
@@ -148,6 +227,24 @@ export function renderWithViewOverrides(dn: DesignerNode<BaseNode>, parentCtx: T
     }   
 }
 
+
+export function renderCode(node: BaseNode, ctx: CodeContext) {
+
+    try {
+        var no = registeredNodes[node.kind];
+
+        var result = no.renderCode!(node, ctx);
+        
+        if (node.visible)
+            return `{ ${ctx.stringifyObject(node.visible)} && ${result}}`
+
+        return result;
+
+    } catch (e) {
+        return `/*ERROR ${(e as Error).message}*/`;
+    }
+}
+
 export function render(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>) {
     try {
         if (evaluateAndValidate(parentCtx, dn.node, n => n.visible, isBooleanOrNull) == false)
@@ -190,10 +287,10 @@ export function renderDesigner(dn: DesignerNode<BaseNode>) {
 }
 
 export function asFunction(expression: Expression<any>, getFieldName: () => string): (e: TypeContext<ModifiableEntity>, auth: AuthInfo) => any {
-    let code = expression.code;
+    let code = expression.__code__;
 
     if (!code.contains(";") && !code.contains("return"))
-        code = "return " + expression.code + ";";
+        code = "return " + expression.__code__ + ";";
 
     code = "(function(ctx, auth){ " + code + "})";
 
@@ -226,10 +323,10 @@ export function evaluateUntyped(parentCtx: TypeContext<ModifiableEntity>, expres
         return undefined;
 
     var ex = expressionOrValue as Expression<any>;
-    if (!(ex as Object).hasOwnProperty("code"))
+    if (!(ex as Object).hasOwnProperty("__code__"))
         return expressionOrValue as any;
 
-    if (!ex.code)
+    if (!ex.__code__)
         return undefined;
 
     var f = asFunction(ex, getFieldName);

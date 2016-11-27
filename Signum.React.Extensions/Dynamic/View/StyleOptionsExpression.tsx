@@ -50,15 +50,8 @@ export function toStyleOptions(ctx: TypeContext<ModifiableEntity>, soe: StyleOpt
         formGroupSize: NodeUtils.evaluateAndValidate(ctx, soe, s => s.formGroupSize, val => NodeUtils.isInListOrNull(val, formGroupSize)),
         placeholderLabels: NodeUtils.evaluateAndValidate(ctx, soe, s => s.placeholderLabels, NodeUtils.isBooleanOrNull),
         formControlClassReadonly: NodeUtils.evaluateAndValidate(ctx, soe, s => s.formControlClassReadonly, NodeUtils.isStringOrNull),
-        labelColumns: toBsColumns(NodeUtils.evaluateAndValidate(ctx, soe, s => s.labelColumns, NodeUtils.isNumberOrNull)),
-        valueColumns: toBsColumns(NodeUtils.evaluateAndValidate(ctx, soe, s => s.valueColumns, NodeUtils.isNumberOrNull)),
+        labelColumns: NodeUtils.evaluateAndValidate(ctx, soe, s => s.labelColumns, NodeUtils.isNumberOrNull),
+        valueColumns: NodeUtils.evaluateAndValidate(ctx, soe, s => s.valueColumns, NodeUtils.isNumberOrNull),
         readOnly: NodeUtils.evaluateAndValidate(ctx, soe, s => s.readOnly, NodeUtils.isBooleanOrNull),
     };
-}
-
-function toBsColumns(number: number | undefined): BsColumns | undefined {
-    if (number == undefined)
-        return undefined;
-
-    return { sm: number };
 }
