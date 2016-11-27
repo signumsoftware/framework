@@ -70,7 +70,7 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
                 p.binding.deleteValue();
         }
         else
-            p.binding.setValue({ code: "" } as Expression<any>);
+            p.binding.setValue({ __code__: "" } as Expression<any>);
 
         (p.refreshView || p.dn.context.refreshView)();
     }
@@ -193,7 +193,7 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         return (
             <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px" }}>{"(ctx: TypeContext<" + typeName + ">, auth) =>"}</pre>
-                <JavascriptCodeMirror code={expression.code} onChange={newCode => { expression.code = newCode; this.props.dn.context.refreshView() } } />
+                <JavascriptCodeMirror code={expression.__code__} onChange={newCode => { expression.__code__ = newCode; this.props.dn.context.refreshView() } } />
             </div>
         );
         

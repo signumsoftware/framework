@@ -50,6 +50,7 @@ NodeUtils.register<DivNode>({
     order: 0,
     isContainer: true,
     renderTreeNode: NodeUtils.treeNodeKind,
+    renderCode: (node, cc) => cc.elementCodeWithChildrenSubCtx("div", node.htmlAttributes, node),
     render: (dn, parentCtx) => NodeUtils.withChildrensSubCtx(dn, parentCtx, <div {...toHtmlAttributes(parentCtx, dn.node.htmlAttributes) } />),
     renderDesigner: dn => (<div>
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
@@ -72,6 +73,7 @@ NodeUtils.register<RowNode>({
     isContainer: true,
     validChild: "Column",
     renderTreeNode: NodeUtils.treeNodeKind, 
+    renderCode: (node, cc) => cc.elementCodeWithChildrenSubCtx("div", withClassName(node.htmlAttributes, "row"), node),
     render: (dn, parentCtx) => NodeUtils.withChildrensSubCtx(dn, parentCtx, <div {...withClassName(toHtmlAttributes(parentCtx, dn.node.htmlAttributes), "row") } />),
     renderDesigner: dn => (<div>
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
@@ -201,11 +203,12 @@ NodeUtils.register<FieldsetNode>({
     render: (dn, parentCtx) => {
         return (
             <fieldset {...toHtmlAttributes(parentCtx, dn.node.htmlAttributes) }>
-            <legend {...toHtmlAttributes(parentCtx, dn.node.legendHtmlAttributes) }>
-                    {NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.legend, NodeUtils.isString)}
-            </legend>
+                <legend {...toHtmlAttributes(parentCtx, dn.node.legendHtmlAttributes) }>
+                        {NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.legend, NodeUtils.isString)}
+                </legend>
             {NodeUtils.withChildrensSubCtx(dn,  parentCtx, <div />)}
-        </fieldset>)
+            </fieldset>
+        )
     },
     renderDesigner: (dn) => (<div>
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
@@ -231,7 +234,7 @@ NodeUtils.register<TextNode>({
     group: "Container",
     order: 4,
     initialize: dn => { dn.message = "My message"; },
-    renderTreeNode: dn => <span><small>{dn.node.kind}:</small> <strong>{dn.node.message ? (typeof dn.node.message == "string" ? dn.node.message : (dn.node.message.code || "")).etc(20) : ""}</strong></span>,
+    renderTreeNode: dn => <span><small>{dn.node.kind}:</small> <strong>{dn.node.message ? (typeof dn.node.message == "string" ? dn.node.message : (dn.node.message.__code__ || "")).etc(20) : ""}</strong></span>,
     render: (dn, ctx) => React.createElement(
         NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.tagName, NodeUtils.isStringOrNull) || "p",
         toHtmlAttributes(ctx, dn.node.htmlAttributes),

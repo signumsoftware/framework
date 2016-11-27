@@ -57,7 +57,7 @@ export class FindOptionsLine extends React.Component<FindOptionsLineProps, void>
                 .then(sfo => ({
                     queryKey: sfo && sfo.queryKey,
                     parentColumn: sfo && sfo.parentColumn,
-                    parentValue: sfo && { code: "ctx.value" } as Expression<ModifiableEntity>
+                    parentValue: sfo && { __code__: "ctx.value" } as Expression<ModifiableEntity>
                 } as FindOptionsExpr));
 
         promise.then(fo => this.modifyFindOptions(fo)).done();

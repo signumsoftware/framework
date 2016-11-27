@@ -131,7 +131,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
                     </div>
                 </div>
                 <div className="design-content open">
-                    {this.state.exampleEntity && NodeUtils.render(root, exampleCtx as TypeContext<Entity>)}
+                    {this.state.exampleEntity && NodeUtils.renderWithViewOverrides(root, exampleCtx as TypeContext<Entity>)}
                 </div>
             </div>);
     }
