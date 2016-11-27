@@ -166,9 +166,14 @@ namespace Signum.Engine.Toolbar
         {
             var result = elements.Select(a => ToResponse(a)).NotNull().ToList();
 
-            var toRemove = result.Where((a, i) => a.type == ToolbarElementType.Divider && (i == 0 || result[i -1].type == ToolbarElementType.Divider || i == result.Count)).ToList();
+            retry:
+                var extraDividers = result.Where((a, i) => a.type == ToolbarElementType.Divider && (i == 0 || result[i - 1].type == ToolbarElementType.Divider || i == result.Count)).ToList();
+                result.RemoveAll(extraDividers.Contains);
+                var extraHeaders = result.Where((a, i) => a.type == ToolbarElementType.Header && (i == result.Count || result[i + 1].type == ToolbarElementType.Header || result[i + 1].type == ToolbarElementType.Divider)).ToList();
+                result.RemoveAll(extraHeaders.Contains);
 
-            result.RemoveAll(toRemove.Contains);
+            if (extraDividers.Any() || extraHeaders.Any())
+                goto retry;
 
             return result;
         }
