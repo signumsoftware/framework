@@ -77,6 +77,7 @@ interface String {
     forGenderAndNumber(this: string, gender: string | undefined): string;
     forGenderAndNumber(this: string, gender: any , number?: number): string;
     replaceAll(this: string, from: string, to: string): string;
+    indent(this: string, numChars: number): string;
     after(this: string, separator: string): string;
     before(this: string, separator: string): string;
     tryAfter(this: string, separator: string): string | undefined;
