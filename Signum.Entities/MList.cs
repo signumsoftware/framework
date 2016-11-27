@@ -713,8 +713,9 @@ namespace Signum.Entities
             if (newList.Count != innerList.Count)
                 return false;
 
-            if (innerList.Any(a => a.RowId == null))
-                throw new InvalidOperationException("The MList instance should have RowIds (retrieved from the Database) to use IsEqualsTo");
+            if (innerList.Any(a => a.RowId == null) ||
+                newList.Any(a => a.RowId == null))
+                return false;
 
             if (orderMatters)
             {
