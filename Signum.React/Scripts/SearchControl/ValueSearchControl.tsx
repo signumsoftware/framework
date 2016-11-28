@@ -25,7 +25,9 @@ export interface ValueSearchControlProps extends React.Props<ValueSearchControl>
     avoidAutoRefresh?: boolean;
     onValueChange?: (value: any) => void;
     onTokenLoaded?: () => void;
-    initialValue? : any;
+    initialValue?: any;
+    customClass?: string;
+    customStyle?: React.CSSProperties;
 }
 
 export interface ValueSearchControlState {
@@ -109,29 +111,33 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     }
 
     render() {
-        if (!Finder.isFindable(this.props.findOptions.queryName))
+
+        const p = this.props;
+
+        if (!Finder.isFindable(p.findOptions.queryName))
             return null;
 
         let className = classes(
-            this.props.valueToken == undefined && "count-search",
-            this.props.valueToken == undefined && this.state.value > 0 ? "count-with-results" : "count-no-results",
-            this.props.formControlClass,
-            this.props.formControlClass && this.isNumeric() && "numeric",
-            this.props.isBadge == true || (this.props.isBadge == "MoreThanZero" && this.state.value > 0) ? "badge" : "",
+           p.valueToken == undefined && "count-search",
+           p.valueToken == undefined && this.state.value > 0 ? "count-with-results" : "count-no-results",
+           p.formControlClass,
+           p.formControlClass && this.isNumeric() && "numeric",
+           p.isBadge == true || (p.isBadge == "MoreThanZero" && this.state.value > 0) ? "badge" : "",
+           p.customClass
         );
 
-        if (this.props.formControlClass)
-            return <p className={className}>{this.renderValue()}</p> 
+        if (p.formControlClass)
+            return <p className={className} style={p.customStyle}>{this.renderValue()}</p> 
 
-        if (this.props.isLink) {
+        if (p.isLink) {
             return (
-                <a className={className} onClick={this.handleClick} href="">
+                <a className={className} onClick={this.handleClick} href="" style={p.customStyle}>
                     {this.renderValue()}
                 </a>
             );
         }
 
-        return <span className={className}>{this.renderValue()}</span> 
+        return <span className={className} style={p.customStyle}>{this.renderValue()}</span> 
     }
 
     renderValue() {

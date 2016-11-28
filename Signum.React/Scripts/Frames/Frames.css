@@ -29,16 +29,29 @@
     margin-bottom: 6px;
 }
 
+.nav li a span.icon {
+    margin-left: -8px;
+    margin-right: 8px;
+    font-size: 11px;
+}
+
+.rtl-mode .nav li a span.icon {
+    margin-left: 8px;
+    margin-right: -8px;
+}
+
+
 ul.dropdown-menu li a span.icon {
     margin-left: -10px;
     margin-right: 10px;
     font-size: 11px;
 }
 
-div.rtl-mode ul.dropdown-menu li a span.icon {
+.rtl-mode ul.dropdown-menu li a span.icon {
     margin-left: 10px;
     margin-right: -10px;
 }
+
 
 a.expand-window {
     cursor: pointer;
