@@ -129,17 +129,29 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
             const cr = this.props.chartRequest;
 
             const filters = cr.filterOptions.filter(a => !hasAggregate(a.token));
+            const columns: ColumnOption[] = [];
 
             const obj = val!.split("&").filter(a => !!a).toObject(a => a.before("="), a => a.after("="));
 
             cr.columns.map((a, i) => {
-                if (obj.hasOwnProperty("c" + i))
+
+                const token = a.element.token!.token!;
+
+                if (obj.hasOwnProperty("c" + i)) {
                     filters.push({
-                        token: a.element.token!.token,
+                        token: token,
                         operation: "EqualTo",
-                        value: obj["c" + i],
+                        value: obj["c" + i] == "null" ? null : obj["c" + i],
                         frozen: false
                     } as FilterOptionParsed);
+                }
+
+                if (token.parent != undefined) //Avoid Count and simple Columns that are already added
+                {
+                    columns.push({
+                        columnName: token.queryTokenType == "Aggregate" ? token.parent.fullKey : token.fullKey
+                    });
+                }
             });
 
             window.open(Finder.findOptionsPath({
@@ -149,7 +161,8 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
                     operation: fop.operation,
                     value: fop.value,
                     frozen: fop.frozen,
-                }) as FilterOption)
+                }) as FilterOption),
+                columnOptions: columns,
             }));
         }
     }
