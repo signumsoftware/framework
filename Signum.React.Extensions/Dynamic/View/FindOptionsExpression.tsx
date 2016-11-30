@@ -18,7 +18,7 @@ import * as NodeUtils from './NodeUtils'
 
 
 export interface FindOptionsExpr {
-    queryKey?: string;
+    queryName?: string;
     parentColumn?: string;
     parentToken?: QueryToken;
     parentValue?: ExpressionOrValue<any>;
@@ -67,7 +67,7 @@ export interface ColumnOptionExpr {
 
 export function toFindOptions(ctx: TypeContext<ModifiableEntity>, foe: FindOptionsExpr): FindOptions{
     return {
-        queryName: foe.queryKey!,
+        queryName: foe.queryName!,
         parentColumn: foe.parentColumn,
         parentValue: NodeUtils.evaluate(ctx, foe, f => f.parentValue),
 

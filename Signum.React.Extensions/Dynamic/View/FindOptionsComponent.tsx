@@ -55,7 +55,7 @@ export class FindOptionsLine extends React.Component<FindOptionsLineProps, void>
                     display: sfo => <div><strong>{sfo.queryKey}</strong><br /><small>(by <code>{sfo.parentColumn}</code>)</small></div>
                 }))
                 .then(sfo => ({
-                    queryKey: sfo && sfo.queryKey,
+                    queryName: sfo && sfo.queryKey,
                     parentColumn: sfo && sfo.parentColumn,
                     parentValue: sfo && { __code__: "ctx.value" } as Expression<ModifiableEntity>
                 } as FindOptionsExpr));
@@ -120,7 +120,7 @@ export class FindOptionsLine extends React.Component<FindOptionsLineProps, void>
             fo.filterOptions && fo.filterOptions.length && fo.filterOptions.length + " filters"]
             .filter(a => !!a).join(", ");
 
-        return `${fo.queryKey} (${filters || "No filter"})`.trim();
+        return `${fo.queryName} (${filters || "No filter"})`.trim();
     }
 }
 
@@ -187,7 +187,7 @@ export class QueryTokenLine extends React.Component<QueryTokenLineProps, QueryTo
             fo.filterOptions && fo.filterOptions.length && fo.filterOptions.length + " filters"]
             .filter(a => !!a).join(", ");
 
-        return `${fo.queryKey} (${filters || "No filter"})`.trim();
+        return `${fo.queryName} (${filters || "No filter"})`.trim();
     }
 }
 
@@ -202,7 +202,7 @@ export class FindOptionsComponent extends React.Component<FindOptionsComponentPr
 
     handleChangeQueryKey = (queryKey: string) => {
         const fo = this.props.findOptions;
-        fo.queryKey = queryKey;
+        fo.queryName = queryKey;
         delete fo.parentColumn;
         delete fo.parentToken;
         delete fo.parentValue;
@@ -223,14 +223,14 @@ export class FindOptionsComponent extends React.Component<FindOptionsComponentPr
         const fo = this.props.findOptions;
         return (
             <div className="form-sm filter-options code-container">
-                <QueryKeyLine queryKey={fo.queryKey} label="queryKey" onChange={this.handleChangeQueryKey} />
+                <QueryKeyLine queryKey={fo.queryName} label="queryKey" onChange={this.handleChangeQueryKey} />
 
-                {fo.queryKey &&
+                {fo.queryName &&
                     <div>
                         <div className="row">
                             <div className="col-sm-6">
                             <QueryTokenBuilderString label="parentColumn" token={fo.parentToken} columnName={fo.parentColumn} 
-                                    onChange={this.handleChangeParentColumn} queryKey={fo.queryKey} subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />
+                                    onChange={this.handleChangeParentColumn} queryKey={fo.queryName} subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />
                             </div>
                             <div className="col-sm-6">
                             {fo.parentToken &&
@@ -240,12 +240,12 @@ export class FindOptionsComponent extends React.Component<FindOptionsComponentPr
                         </div>
 
 
-                        <FilterOptionsComponent dn={dn} binding={Binding.create(fo, f => f.filterOptions)} queryKey={fo.queryKey} refreshView={() => this.forceUpdate()} />
+                        <FilterOptionsComponent dn={dn} binding={Binding.create(fo, f => f.filterOptions)} queryKey={fo.queryName} refreshView={() => this.forceUpdate()} />
 
                         <ExpressionOrValueComponent dn={dn} binding={Binding.create(fo, f => f.columnOptionsMode)} refreshView={() => this.forceUpdate()} type="string" options={ColumnOptionsMode.values()} defaultValue={"Add" as ColumnOptionsMode} />
-                        <ColumnOptionsComponent dn={dn} binding={Binding.create(fo, f => f.columnOptions)} queryKey={fo.queryKey} refreshView={() => this.forceUpdate()} />
+                        <ColumnOptionsComponent dn={dn} binding={Binding.create(fo, f => f.columnOptions)} queryKey={fo.queryName} refreshView={() => this.forceUpdate()} />
 
-                        <OrderOptionsComponent dn={dn} binding={Binding.create(fo, f => f.orderOptions)} queryKey={fo.queryKey} refreshView={() => this.forceUpdate()} />
+                        <OrderOptionsComponent dn={dn} binding={Binding.create(fo, f => f.orderOptions)} queryKey={fo.queryName} refreshView={() => this.forceUpdate()} />
                         <PaginationComponent dn={dn} findOptions={fo} refreshView={() => this.forceUpdate()} />
 
                         <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(fo, f => f.searchOnLoad)} type="boolean" defaultValue={null} />

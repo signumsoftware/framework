@@ -63,7 +63,7 @@ function renderFile(typeName: string, node: BaseNode): string {
     ctx.usedNames = {};
     ctx.ctxName = "ctx";
 
-    var text = NodeUtils.renderCode(node, ctx);
+    var text = NodeUtils.renderCode(node, ctx).indent(12);
 
     return (
         `
@@ -79,7 +79,6 @@ export default class ${typeName} extends React.Component<{ ctx: TypeContext<${ty
         var ctx = this.props.ctx;
         return (
 ${text}
-}
         );
     }
 }`

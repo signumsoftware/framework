@@ -30,6 +30,10 @@ export type ExpressionOrValue<T> = T | Expression<T>;
 //ctx -> value
 export type Expression<T> = { __code__: string };
 
+export function isExpression(value: any): value is Expression<any> {
+    return (value as Object).hasOwnProperty("__code__");
+}
+
 export interface NodeOptions<N extends BaseNode> {
     kind: string;
     group: "Container" | "Property" | "Collection" | "Search" | null;
@@ -38,7 +42,7 @@ export interface NodeOptions<N extends BaseNode> {
     hasEntity?: boolean;
     hasCollection?: boolean;
     render: (node: DesignerNode<N>, parentCtx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
-    renderCode?: (node: N, ctx: CodeContext) => string;
+    renderCode?: (node: N, cc: CodeContext) => string;
     renderTreeNode: (node: DesignerNode<N>) => React.ReactElement<any>;
     renderDesigner: (node: DesignerNode<N>) => React.ReactElement<any>;
     validate?: (node: DesignerNode<N>, parentCtx: TypeContext<ModifiableEntity> | undefined) => string | null | undefined;
@@ -50,10 +54,12 @@ export interface NodeOptions<N extends BaseNode> {
 
 export class CodeContext {
     ctxName: string;
-    usedNames: { [name: string]: string };
+    usedNames: { [name: string]: Expression<any> };
 
 
-    subCtx(field?: string, options?: StyleOptions): CodeContext {
+
+
+    subCtx(field?: string, options?: StyleOptionsExpression): CodeContext {
         if (!field && !options)
             return this;
 
@@ -66,61 +72,125 @@ export class CodeContext {
         return result;
     }
 
-    subCtxCode(field?: string, options?: StyleOptions): string {
+    subCtxCode(field?: string, options?: StyleOptionsExpression): Expression<any> {
 
         if (!field && !options)
-            return "ctx";
+            return { __code__: "ctx" };
 
-        var propStr = field && "a => a." + field;
+        var propStr = field && "e => e." + field.split(".").map(m => m.firstLower()).join(".");
         var optionsStr = options && this.stringifyObject(options);
 
-        return this.ctxName + "subCtx(" + propStr + (propStr && optionsStr ? ", " : "") + optionsStr + ")";
+        return { __code__: this.ctxName + ".subCtx(" + (propStr || "") + (propStr && optionsStr ? ", " : "") + (optionsStr ||"") + ")" };
     }
 
     stringifyObject(expressionOrValue: ExpressionOrValue<any>): string {
-        if ((expressionOrValue as Object).hasOwnProperty("__code__"))
-            return (expressionOrValue as Expression<any>).__code__.replace("ctx", this.ctxName);
+        if (isExpression(expressionOrValue))
+            return expressionOrValue.__code__.replace(/\bctx\b/, this.ctxName);
 
-        return JSON.stringify(expressionOrValue, (k, v) => {
-            if ((v as Object).hasOwnProperty("__code__"))
-                return (v as Expression<any>).__code__.replace("ctx", this.ctxName);
+        var result =  JSON.stringify(expressionOrValue, (k, v) => {
+            if (v != undefined && isExpression(v))
+                return "%<%" + v.__code__.replace(/\bctx\b/, this.ctxName) + "%>%";
             return v;
+        }, 1);
+
+        result = result.replace(/\"([^(\")"]+)\":/g, "$1:");
+        result = result.replace(/"%<%(.*?)%>%"/g, s => {
+            var bla = (JSON.parse(s) as string);
+            return bla.substr(3, bla.length - 6);
         });
+        return result;
     }
 
 
+    evaluateOnChange(redrawOnChange?: boolean): ExpressionOrValue<any> {
+
+        if (!redrawOnChange)
+            return null;
+
+        return { __code__: "()=>this.forceUpdate()" };
+    }
+
     elementCode(type: string, props: any, ...children: (string | undefined)[]) {
 
-        var propsStr = props && Dic.map(props, (k, v) => v == undefined ? "" :
-            (k + "=" + (typeof (v) == "string" ? `"${v}"` : `"${this.stringifyObject(v)}"`)));
+        var propsStr = props && Dic.map(props, (k, v) => v == undefined ? null :
+            (k + "=" + (typeof (v) == "string" ? `"${v}"` : `{${this.stringifyObject(v)}}`)))
+            .filter(a => a != null)
+            .map(a => a!)
+            .groupsOf(120, a => a.length)
+            .map(gr => gr.join(" "))
+            .join("    \r\n");
         
         if (children && children.length) {
             var childrenString = children.join("\n").indent(4);
 
-            return (`<${type}${propsStr ? " " : ""}${propsStr}>
+            return (`<${type}${propsStr ? " " : ""}${propsStr || ""}>
 ${childrenString}
-</${type}>
-`);
+</${type}>`);
 
         } else {
-            return (`<${type}${propsStr ? " " : ""}${propsStr}/>`);
+            return (`<${type}${propsStr ? " " : ""}${propsStr || ""} />`);
         }
     }
 
-    elementCodeWithChildren(type: string, props: any, node: ContainerNode) {
+    elementCodeWithChildren(type: string, props: any, node: ContainerNode): string {
 
         var childrensCode = node.children.map(c => renderCode(c, this));
 
         return this.elementCode(type, props, ...childrensCode);
     }
 
-    elementCodeWithChildrenSubCtx(type: string, props: any, node: ContainerNode) {
+    elementCodeWithChildrenSubCtx(type: string, props: any, node: ContainerNode): string{
 
         var ctx = this.subCtx((node as any).field, (node as any).styleOptions);
 
         var childrensCode = node.children.map(c => renderCode(c, ctx));
 
         return this.elementCode(type, props, ...childrensCode);
+    }
+
+    getEntityBasePropsEx(node: EntityBaseNode, options: { showAutoComplete?: boolean, showMove?: boolean, avoidGetComponent?: boolean }): any/*: EntityBaseProps Expr*/ {
+
+        var result/*: EntityBaseProps*/ = {
+            ctx: this.subCtxCode(node.field, node.styleOptions),
+            labelText: node.labelText,
+            labelHtmlProps: node.labelHtmlAttributes,
+            formGroupHtmlProps: node.formGroupHtmlAttributes,
+            visible: node.visible,
+            readOnly: node.readOnly,
+            create: node.create,
+            remove: node.remove,
+            find: node.find,
+            view: node.view,
+            viewOnCreate: node.viewOnCreate,
+            onChange: this.evaluateOnChange(node.redrawOnChange),
+            findOptions: node.findOptions,
+            getComponent: options.avoidGetComponent == true ? undefined : this.getGetComponentEx(node),
+        };
+
+
+        if (options.showAutoComplete)
+            result = Dic.extend(result, {
+                autoComplete: (node as EntityLineNode).autoComplete == undefined ? undefined :
+                    bindExpr(ac => ac == false ? null : undefined, (node as EntityLineNode).autoComplete)
+            });
+
+        if (options.showMove)
+            result = Dic.extend(result, { move: (node as EntityListBaseNode).move });
+
+        return result;
+    }
+
+    getGetComponentEx(node: ContainerNode): Expression<any> | undefined {
+        if (!node.children || !node.children.length)
+            return undefined;
+
+        var cc = new CodeContext();
+        cc.ctxName = "ctx" + (Dic.getKeys(this.usedNames).length + 1);
+        cc.usedNames = this.usedNames; 
+
+        var div = cc.elementCodeWithChildren("div", null, node)
+
+        return { __code__: `(${cc.ctxName} /*: YourEntity*/) => (${div})` };
     }
    
 }
@@ -228,15 +298,15 @@ export function renderWithViewOverrides(dn: DesignerNode<BaseNode>, parentCtx: T
 }
 
 
-export function renderCode(node: BaseNode, ctx: CodeContext) {
+export function renderCode(node: BaseNode, cc: CodeContext) {
 
     try {
         var no = registeredNodes[node.kind];
 
-        var result = no.renderCode!(node, ctx);
+        var result = no.renderCode!(node, cc);
         
         if (node.visible)
-            return `{ ${ctx.stringifyObject(node.visible)} && ${result}}`
+            return `{ ${cc.stringifyObject(node.visible)} && ${result}}`
 
         return result;
 
@@ -322,14 +392,13 @@ export function evaluateUntyped(parentCtx: TypeContext<ModifiableEntity>, expres
     if (expressionOrValue == null)
         return undefined;
 
-    var ex = expressionOrValue as Expression<any>;
-    if (!(ex as Object).hasOwnProperty("__code__"))
+    if (!isExpression(expressionOrValue))
         return expressionOrValue as any;
 
-    if (!ex.__code__)
+    if (!expressionOrValue.__code__)
         return undefined;
 
-    var f = asFunction(ex, getFieldName);
+    var f = asFunction(expressionOrValue, getFieldName);
 
     try {
         return f(parentCtx, new AuthInfo());
@@ -493,7 +562,7 @@ export function validateTableColumnProperty(dn: DesignerNode<EntityTableColumnNo
 
 
 export function validateFindOptions(foe: FindOptionsExpr, parentCtx: TypeContext<ModifiableEntity> | undefined) : string | undefined {
-    if (!foe.queryKey)
+    if (!foe.queryName)
         return DynamicViewValidationMessage._0RequiresA1.niceToString("findOptions", "queryKey");
 
     if (parentCtx) {
@@ -554,7 +623,7 @@ export function addBreakLines(breakLines: boolean, message: string): React.React
     return message.split("\n").flatMap((e, i) => i == 0 ? [e] : [<br />, e]);
 }
 
-export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: TypeContext<ModifiableEntity>, options: { showAutoComplete?: boolean, showMove?: boolean }): EntityBaseProps {
+export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: TypeContext<ModifiableEntity>, options: { showAutoComplete?: boolean, showMove?: boolean, avoidGetComponent?: boolean }): EntityBaseProps {
 
     var result: EntityBaseProps = {
         ctx: parentCtx.subCtx(asFieldFunction(dn.node.field)),
@@ -570,9 +639,8 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
         viewOnCreate: evaluateAndValidate(parentCtx, dn.node, n => n.viewOnCreate, isBooleanOrNull),
         onChange: evaluateOnChange(parentCtx, dn),
         findOptions: dn.node.findOptions && toFindOptions(parentCtx, dn.node.findOptions),
-        getComponent: getGetComponent(dn),
+        getComponent: options.avoidGetComponent  == true ? undefined : getGetComponent(dn),
     };
-
 
     if (options.showAutoComplete)
         result = Dic.extend(result, { autoComplete: evaluateAndValidate(parentCtx, dn.node, (n: EntityLineNode) => n.autoComplete, isBooleanOrNull) == false ? null : undefined});
@@ -582,6 +650,8 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
 
     return result;
 }
+
+
 
 
 export function getGetComponent(dn: DesignerNode<ContainerNode>) {
@@ -613,4 +683,41 @@ export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { is
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.redrawOnChange)} type="boolean" defaultValue={null} />
         </div>
     );
+}
+
+
+
+export function withClassNameEx(attrs: HtmlAttributesExpression | undefined, className: ExpressionOrValue<string>): HtmlAttributesExpression {
+    if (attrs == undefined)
+        return { className: className };
+
+    attrs["className"] = bindExpr((c, a) => classes(c, a), className, attrs["className"]);
+
+    return attrs;
+}
+
+
+export function toCodeEx(expr: ExpressionOrValue<string>) {
+    return isExpression(expr) ? "(" + expr.__code__ + ")":
+        expr == null ? "null" : 
+        ("\"" + expr + "\"");
+}
+
+var lambdaBody = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*(\s*,\s*[$a-zA-Z_][0-9a-zA-Z_$]*\s*)*)\s*\)\s*{\s*(\"use strict\"\;)?\s*return\s*([^;]*)\s*;?\s*}$/
+export function bindExpr(lambda: (...params: any[]) => any, ...parameters: ExpressionOrValue<any>[]): ExpressionOrValue<any> {
+    if (parameters.every(a => a == null || !isExpression(a)))
+        return lambda(...parameters);
+
+
+    var parts = lambda.toString().match(lambdaBody) !;
+    var params = parts[1].split(",").map(a => a.trim());
+    var body = parts[4];
+
+    var newBody = body.replace(/\b[$a-zA-Z_][0-9a-zA-Z_$]*\b/g, str => params.contains(str) ? toCodeEx(parameters[params.indexOf(str)]) : str);
+
+
+    return {
+        __code__: newBody
+    }
+
 }
