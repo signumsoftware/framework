@@ -69,7 +69,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
 
         var token = this.valueSearchControl && this.valueSearchControl.state.token;
 
-        let isQuery = this.props.valueToken == undefined || token && token.queryTokenType == QueryTokenType.Aggregate;
+        let isQuery = this.props.valueToken == undefined || token && token.queryTokenType == "Aggregate";
 
         let isBadge = coallesce(this.props.isBadge, this.props.valueToken == undefined);
         let isFormControl = coallesce(this.props.isFormControl, this.props.valueToken != undefined);
