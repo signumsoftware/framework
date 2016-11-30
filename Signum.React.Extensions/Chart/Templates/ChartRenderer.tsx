@@ -133,24 +133,27 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
 
             const obj = val!.split("&").filter(a => !!a).toObject(a => a.before("="), a => a.after("="));
 
-            cr.columns.map((a, i) => {
+            cr.columns.map((a, i) => {                
 
-                const token = a.element.token!.token!;
+                const t = a.element.token;
 
                 if (obj.hasOwnProperty("c" + i)) {
                     filters.push({
-                        token: token,
+                        token: t!.token!,
                         operation: "EqualTo",
                         value: obj["c" + i] == "null" ? null : obj["c" + i],
                         frozen: false
                     } as FilterOptionParsed);
                 }
 
-                if (token.parent != undefined) //Avoid Count and simple Columns that are already added
+                if (t && t.token && t.token.parent != undefined) //Avoid Count and simple Columns that are already added
                 {
-                    columns.push({
-                        columnName: token.queryTokenType == "Aggregate" ? token.parent.fullKey : token.fullKey
-                    });
+                    var col = t.token.queryTokenType == "Aggregate" ? t.token.parent : t.token
+
+                    if (col.parent)
+                        columns.push({
+                            columnName: col.fullKey
+                        });
                 }
             });
 
