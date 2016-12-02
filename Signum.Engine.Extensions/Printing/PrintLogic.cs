@@ -1,4 +1,5 @@
-﻿using Signum.Engine;
+﻿using Signum.Engine.Files;
+using Signum.Engine;
 using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
@@ -78,12 +79,19 @@ namespace Signum.Entities.Printing
             return CreateLine(referred, new EmbeddedFilePathEntity(fileType, fileName, content));
         }
 
-        public static PrintLineEntity CreateLine(Entity referred, EmbeddedFilePathEntity file)
+        public static PrintLineEntity CreateLine(Entity referred, EmbeddedFilePathEntity file )
         {
             return new PrintLineEntity
             {
                 Referred = referred.ToLite(),
                 File = file,
+                Exception = null,
+                State = PrintLineState.ReadyToPrint,
+                CreationDate = DateTime.Now,
+                Package = new PrintPackageEntity
+                {
+                    Name = file.FileName,  
+                }.ToLite(),
             }.Save();
         }
 
@@ -182,7 +190,7 @@ namespace Signum.Entities.Printing
                             tr.Commit();
                         }
                     }
-                    catch { } //error updating state for email  
+                    catch { } 
 
                     throw;
                 }
