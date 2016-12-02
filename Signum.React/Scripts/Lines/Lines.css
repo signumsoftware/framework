@@ -247,9 +247,12 @@ ul.nav-tabs {
 }
 
 
-.form-xs .form-control:not(textarea),
-.form-xs .form-control-static {
+.form-xs .form-control:not(textarea) {
     height: 20px;
+    min-height: inherit;
+}
+
+.form-xs .form-control-static {
     min-height: inherit;
 }
 
@@ -348,9 +351,12 @@ ul.nav-tabs {
     padding: 3px 6px;
 }
 
-.form-sm .form-control:not(textarea),
-.form-sm .form-control-static {
+.form-sm .form-control:not(textarea) {
     height: 26px;
+    min-height: inherit;
+}
+
+.form-sm .form-control-static {
     min-height: inherit;
 }
 

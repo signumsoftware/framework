@@ -139,6 +139,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
         if (!this.mouseover && this.state.shown)
             this.setState({ shown: false });
+
         if (this.props.onBlur)
             this.props.onBlur();
     }

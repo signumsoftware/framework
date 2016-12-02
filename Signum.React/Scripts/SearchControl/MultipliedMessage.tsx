@@ -20,7 +20,7 @@ export default class MultipliedMessage extends React.Component<{ findOptions: Fi
             .concat(fo.orderOptions.map(a=> a.token))
             .filter(a=> a != undefined)
             .flatMap(a=> getTokenParents(a))
-            .filter(a=> a.queryTokenType == QueryTokenType.Element)
+            .filter(a=> a.queryTokenType == "Element")
             .toObjectDistinct(a=> a.fullKey);
 
         const tokens = Dic.getValues(tokensObj);

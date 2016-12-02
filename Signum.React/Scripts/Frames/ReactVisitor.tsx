@@ -82,7 +82,8 @@ export class ViewReplacer<T> {
     remove(pr: (entity: T) => any): this {
         this.result = new ReplaceVisitor(
             e => hasPropertyRoute(e, this.ctx.propertyRoute.add(pr)),
-            e => []).visit(this.result);
+            e => [])
+            .visit(this.result);
 
         return this;
     }
@@ -90,7 +91,8 @@ export class ViewReplacer<T> {
     insertAfter(pr: (entity: T) => any, ...newElements: React.ReactElement<any>[]): this {
         this.result = new ReplaceVisitor(
             e => hasPropertyRoute(e, this.ctx.propertyRoute.add(pr)),
-            e => [e, ...newElements]).visit(this.result);
+            e => [e, ...newElements])
+            .visit(this.result);
 
         return this;
     }
@@ -98,7 +100,8 @@ export class ViewReplacer<T> {
     insertBefore(pr: (entity: T) => any, ...newElements: React.ReactElement<any>[]): this {
         this.result = new ReplaceVisitor(
             e => hasPropertyRoute(e, this.ctx.propertyRoute.add(pr)),
-            e => [...newElements, e]).visit(this.result);
+            e => [...newElements, e])
+            .visit(this.result);
 
         return this;
     }
@@ -107,7 +110,8 @@ export class ViewReplacer<T> {
     removeTab(eventKey: string): this {
         this.result = new ReplaceVisitor(
             e => e.type == Tab && e.props.eventKey == eventKey,
-            e => []).visit(this.result);
+            e => [])
+            .visit(this.result);
 
         return this;
     }
@@ -115,7 +119,8 @@ export class ViewReplacer<T> {
     insertTabAfter(eventKey: string, ...newTabs: Tab[]): this {
         this.result = new ReplaceVisitor(
             e => e.type == Tab && e.props.eventKey == eventKey,
-            e => [e, newTabs]).visit(this.result);
+            e => [e, newTabs])
+            .visit(this.result);
 
         return this;
     }
@@ -123,7 +128,8 @@ export class ViewReplacer<T> {
     insertTabBefore(eventKey: string, ...newTabs: Tab[]): this {
         this.result = new ReplaceVisitor(
             e => e.type == Tab && e.props.eventKey == eventKey,
-            e => [newTabs, e]).visit(this.result);
+            e => [newTabs, e])
+            .visit(this.result);
 
         return this;
     }

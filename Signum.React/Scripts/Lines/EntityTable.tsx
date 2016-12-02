@@ -17,21 +17,26 @@ import { RenderEntity } from './RenderEntity'
 
 export interface EntityTableProps extends EntityListBaseProps {
     createAsLink?: boolean | ((er: EntityTable) => React.ReactElement<any>);
-    columns: EntityTableColumn<ModifiableEntity>[],
+    columns: EntityTableColumn<ModifiableEntity, any>[],
+    fetchRowState?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow) => Promise<any>;
+    rowProps?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow, rowState: any) => React.HTMLProps<any> | null | undefined;
 }
 
-export interface EntityTableColumn<T> {
+export interface EntityTableColumn<T, RS> {
     property?: (a: T) => any;
     header?: React.ReactNode | null;
     headerProps?: React.HTMLProps<any>;
-    cellProps?:(ctx: TypeContext<T>, row: EntityTableRow, rowIndex: number) => React.HTMLProps<any> | null | undefined;
-    template?: (ctx: TypeContext<T>, row: EntityTableRow, rowIndex: number) => React.ReactChild | null | undefined;
-
+    cellProps?:(ctx: TypeContext<T>, row: EntityTableRow, rowState: RS) => React.HTMLProps<any> | null | undefined;
+    template?: (ctx: TypeContext<T>, row: EntityTableRow, rowState: RS) => React.ReactChild | null | undefined;
 }
 
 export class EntityTable extends EntityListBase<EntityTableProps, EntityTableProps> {
 
-    static typedColumns<T extends ModifiableEntity>(type: Type<T>, columns: (EntityTableColumn<T> | null | undefined)[]): EntityTableColumn<T>[]{
+    static typedColumns<T extends ModifiableEntity>(columns: (EntityTableColumn<T, any> | null | undefined)[]): EntityTableColumn<T, any>[] {
+        return columns.filter(a => a != null).map(a => a!);
+    }
+
+    static typedColumnsWithRowState<T extends ModifiableEntity, RS>(columns: (EntityTableColumn<T, RS> | null | undefined)[]): EntityTableColumn<T, RS>[]{
         return columns.filter(a => a != null).map(a => a!);
     }
 
@@ -82,8 +87,9 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                     <tbody>
                         {
                             mlistItemContext(ctx).map((mlec, i) =>
-                                (<EntityTableRow key={i}
-                                    index={i}
+                                (<EntityTableRow key={i} index={i}
+                                    rowProps={this.props.rowProps}
+                                    fetchRowState={this.props.fetchRowState}
                                     onRemove={this.state.remove && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
                                     onMoveDown ={this.state.move && !readOnly ? e => this.moveDown(i) : undefined}
                                     onMoveUp ={this.state.move && !readOnly ? e => this.moveUp(i) : undefined}
@@ -114,18 +120,32 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
 export interface EntityTableRowProps {
     ctx: TypeContext<ModifiableEntity>;
     index: number;
-    columns: EntityTableColumn<ModifiableEntity>[],
+    columns: EntityTableColumn<ModifiableEntity, any>[],
     onRemove?: (event: React.MouseEvent) => void;
     onMoveUp?: (event: React.MouseEvent) => void;
     onMoveDown?: (event: React.MouseEvent) => void;
+    fetchRowState?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow) => Promise<any>; 
+    rowProps?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow, rowState: any) => React.HTMLProps<any> | null | undefined;
 }
 
-export class EntityTableRow extends React.Component<EntityTableRowProps, { entity: ModifiableEntity }> {
+export class EntityTableRow extends React.Component<EntityTableRowProps, { rowState?: any }> {
+
+    constructor(props: EntityTableRowProps) {
+        super(props);
+
+        this.state = {}; 
+
+        if (props.fetchRowState)
+            props.fetchRowState(this.props.ctx, this)
+                .then(val => this.setState({ rowState: val }))
+                .done();
+    }
 
     render() {
         var ctx = this.props.ctx;
+        var rowAtts = this.props.rowProps && this.props.rowProps(ctx, this, this.state.rowState);
         return (
-            <tr>
+            <tr style={{ backgroundColor: rowAtts && rowAtts.style && rowAtts.style.backgroundColor }}>
                 <td>
                     <div className="item-group">
                         {this.props.onRemove && <a className={classes("sf-line-button", "sf-remove")}
@@ -147,19 +167,19 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { entit
                         </a>}
                     </div>
                 </td>
-                {this.props.columns.map((c, i) => <td key={i} {...c.cellProps && c.cellProps(ctx, this, this.props.index)}>{this.getTemplate(c)}</td>)}
+                {this.props.columns.map((c, i) => <td key={i} {...c.cellProps && c.cellProps(ctx, this, this.state.rowState) }>{this.getTemplate(c)}</td>)}
             </tr>
         );
     }
 
 
-    getTemplate(col: EntityTableColumn<ModifiableEntity>): React.ReactChild | undefined | null {
+    getTemplate(col: EntityTableColumn<ModifiableEntity, any>): React.ReactChild | undefined | null {
 
         if (col.template === null)
             return null;
 
         if (col.template !== undefined)
-            return col.template(this.props.ctx, this, this.props.index);
+            return col.template(this.props.ctx, this, this.state.rowState);
 
         if (col.property == null)
             throw new Error("Column has no property and no template");

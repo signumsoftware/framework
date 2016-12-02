@@ -188,15 +188,25 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo, parseValue: (str: s
     if (!s.type!.isNotNullable || s.ctx.value == undefined)
         items = [{ name: "", niceName: " - " }].concat(items);
 
-    if (s.ctx.readOnly)
+    if (s.ctx.readOnly) {
+
+        var value = null;
+        if (s.ctx.value) {
+
+            var item = items.filter(a => a.name == toStringValue(s.ctx.value)).singleOrNull(); 
+
+            value = item ? item.niceName : s.ctx.value;
+        }
+
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
+            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps)} labelProps={s.labelHtmlProps}>
                 {ValueLine.withItemGroup(vl,
                     <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx}>
-                           {s.ctx.value == undefined ? undefined : items.filter(a => a.name == toStringValue(s.ctx.value)).single().niceName}
-                    </FormControlStatic>) }
+                        {value}
+                    </FormControlStatic>)}
             </FormGroup>
         );
+    }
 
     const handleEnumOnChange = (e: React.SyntheticEvent) => {
         const input = e.currentTarget as HTMLInputElement;
