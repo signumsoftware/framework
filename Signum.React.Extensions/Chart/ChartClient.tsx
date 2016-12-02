@@ -346,7 +346,7 @@ export module Decoder {
                         cr.chartScript = query.script == undefined ? scripts.first("ChartScript").first() :
                             scripts.flatMap(a => a).filter(cs => cs.name == query.script).single(`ChartScript '${query.queryKey}'`);
                         cr.queryKey = getQueryKey(queryName);
-                        cr.groupResults = query.groupResults;
+                        cr.groupResults = query.groupResults == "true";
                         cr.filterOptions = fos.map(fo => ({ token: completer.get(fo.columnName), operation: fo.operation, value: fo.value, frozen: fo.frozen }) as FilterOptionParsed);
                         cr.orderOptions = oos.map(oo => ({ token: completer.get(oo.columnName), orderType: oo.orderType }) as OrderOptionParsed);
                         cr.columns = cols;
