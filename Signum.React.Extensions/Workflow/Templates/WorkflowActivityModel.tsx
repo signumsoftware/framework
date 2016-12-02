@@ -76,7 +76,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                     }
                 </FormGroup>
 
-                <EntityTable ctx={ctx.subCtx(d => d.validationRules)} columns={EntityTable.typedColumns(WorkflowActivityValidationEntity, [
+                <EntityTable ctx={ctx.subCtx(d => d.validationRules)} columns={EntityTable.typedColumns<WorkflowActivityValidationEntity>([
                     {
                         property: wav => wav.rule,
                         headerProps: { style: { width: "100%" } },

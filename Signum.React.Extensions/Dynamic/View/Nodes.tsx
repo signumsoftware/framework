@@ -557,7 +557,7 @@ NodeUtils.register<EntityTableColumnNode>({
         headerProps: toHtmlAttributes(ctx, dn.node.headerHtmlAttributes),
         cellProps: toHtmlAttributes(ctx, dn.node.cellHtmlAttributes),
         template: dn.node.children && dn.node.children.length > 0 ? NodeUtils.getGetComponent(dn) : undefined
-    }) as EntityTableColumn<ModifiableEntity> as any, //HACK
+    }) as EntityTableColumn<ModifiableEntity, any> as any, //HACK
     renderDesigner: dn => <div>
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.property)} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.header)} type="string" defaultValue={null} />
