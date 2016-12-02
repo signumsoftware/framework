@@ -1,22 +1,17 @@
-﻿using System;
+﻿using Signum.Utilities.DataStructures;
+using Signum.Utilities.ExpressionTrees;
+using Signum.Utilities.Reflection;
+using Signum.Utilities.Synchronization;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Data;
+using System.IO;
 using System.Linq;
-using System.Text;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.IO;
-using System.Threading;
-using System.Globalization;
-using Signum.Utilities.Synchronization;
-using Signum.Utilities.DataStructures;
-using Signum.Utilities.Reflection;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Data;
-using System.Text.RegularExpressions;
-using System.Collections;
-using Signum.Utilities.ExpressionTrees;
-using System.ComponentModel;
+using System.Text;
 
 namespace Signum.Utilities
 {
@@ -158,7 +153,7 @@ namespace Signum.Utilities
             if (forEndUser)
                 return new ApplicationException(message);
             else
-                return new InvalidOperationException(message); 
+                return new InvalidOperationException(message);
         }
 
         [MethodExpander(typeof(UniqueExExpander))]
@@ -770,7 +765,7 @@ namespace Signum.Utilities
                         result.Clear();
                     result.Add(item);
                     max = val;
-                }               
+                }
             }
             return result;
         }
@@ -1167,7 +1162,7 @@ namespace Signum.Utilities
 
             var extra = currentDictionary.Keys.Where(k => !shouldDictionary.ContainsKey(k)).ToList();
             var missing = shouldDictionary.Keys.Where(k => !currentDictionary.ContainsKey(k)).ToList();
-            
+
             string differences = GetDifferences(extra, missing);
             if (differences != null)
             {
@@ -1347,5 +1342,125 @@ Trying to continue (optimistically) with the common keys. Consider Synchronize."
         public int Position { get { return position; } }
         public bool IsEven { get { return position % 2 == 0; } }
         public bool IsOdd { get { return position % 1 == 0; } }
+    }
+
+    public static class StandartDeviationExtensions
+    {
+        static IEnumerable<T> SmartNotNull<T>(IEnumerable<T?> enumerable)
+            where T : struct
+        {
+            var result = enumerable.NotNull();
+
+            return result.IsEmpty() ? null : result;
+        }
+
+        public static float StdDev(this IEnumerable<float> source)
+        {
+            int count = source.Count();
+            if (count <= 1)
+                return 0;
+
+            double avg = source.Average();
+            double sum = source.Sum(d => (d - avg) * (d - avg));
+            return (float)Math.Sqrt(sum / count);
+        }
+
+        public static double? StdDev(this IEnumerable<long?> source) => SmartNotNull(source)?.Select(a => (double)a).StdDev();
+
+        public static float? StdDev(this IEnumerable<float?> source) => SmartNotNull(source)?.StdDev();
+
+        public static double StdDev(this IEnumerable<double> source)
+        {
+            int count = source.Count();
+            if (count <= 1)
+                return 0;
+
+            double avg = source.Average();
+            double sum = source.Sum(d => (d - avg) * (d - avg));
+            return Math.Sqrt(sum / count);
+        }
+
+        public static double StdDev(this IEnumerable<int> source) => source.Select(a => (double)a).StdDev();
+
+        public static decimal StdDev(this IEnumerable<decimal> source)
+        {
+            int count = source.Count();
+            if (count <= 1)
+                return 0;
+
+            decimal avg = source.Average();
+            decimal sum = source.Sum(d => (d - avg) * (d - avg));
+            return (decimal)Math.Sqrt((double)(sum / count));
+        }
+
+        public static decimal? StdDev(this IEnumerable<decimal?> source) => SmartNotNull(source)?.StdDev();
+
+        public static double StdDev(this IEnumerable<long> source) => source.Select(a => (double)a).StdDev();
+
+        public static double? StdDev(this IEnumerable<double?> source) => SmartNotNull(source)?.StdDev();
+
+        public static double? StdDev(this IEnumerable<int?> source) => SmartNotNull(source)?.StdDev();
+
+        public static decimal StdDev<TSource>(this IEnumerable<TSource> source, Func<TSource, decimal> selector) => source.Select(selector).StdDev();
+
+        public static decimal? StdDev<TSource>(this IEnumerable<TSource> source, Func<TSource, decimal?> selector) => source.Select(selector).StdDev();
+
+        public static double? StdDev<TSource>(this IEnumerable<TSource> source, Func<TSource, int?> selector) => source.Select(selector).StdDev();
+
+        public static double StdDev<TSource>(this IEnumerable<TSource> source, Func<TSource, long> selector) => source.Select(selector).StdDev();
+
+        public static double? StdDev<TSource>(this IEnumerable<TSource> source, Func<TSource, long?> selector) => source.Select(selector).StdDev();
+
+        public static float StdDev<TSource>(this IEnumerable<TSource> source, Func<TSource, float> selector) => source.Select(selector).StdDev();
+
+        public static float? StdDev<TSource>(this IEnumerable<TSource> source, Func<TSource, float?> selector) => source.Select(selector).StdDev();
+
+        public static double StdDev<TSource>(this IEnumerable<TSource> source, Func<TSource, double> selector) => source.Select(selector).StdDev();
+
+        public static double? StdDev<TSource>(this IEnumerable<TSource> source, Func<TSource, double?> selector) => source.Select(selector).StdDev();
+
+        public static double StdDev<TSource>(this IEnumerable<TSource> source, Func<TSource, int> selector) => source.Select(selector).StdDev();
+
+
+        public static decimal StdDev(this IQueryable<decimal> source) => source.Provider.Execute<decimal>(Expression.Call((Expression)null, (MethodInfo)MethodInfo.GetCurrentMethod(), source.Expression));
+
+        public static double StdDev(this IQueryable<double> source) => source.Provider.Execute<double>(Expression.Call((Expression)null, (MethodInfo)MethodInfo.GetCurrentMethod(), source.Expression));
+
+        public static double StdDev(this IQueryable<int> source) => source.Provider.Execute<double>(Expression.Call((Expression)null, (MethodInfo)MethodInfo.GetCurrentMethod(), source.Expression));
+
+        public static double StdDev(this IQueryable<long> source) => source.Provider.Execute<double>(Expression.Call((Expression)null, (MethodInfo)MethodInfo.GetCurrentMethod(), source.Expression));
+
+        public static decimal? StdDev(this IQueryable<decimal?> source) => source.Provider.Execute<decimal?>(Expression.Call((Expression)null, (MethodInfo)MethodInfo.GetCurrentMethod(), source.Expression));
+
+        public static double? StdDev(this IQueryable<double?> source) => source.Provider.Execute<double?>(Expression.Call((Expression)null, (MethodInfo)MethodInfo.GetCurrentMethod(), source.Expression));
+
+        public static double? StdDev(this IQueryable<int?> source) => source.Provider.Execute<double?>(Expression.Call((Expression)null, (MethodInfo)MethodInfo.GetCurrentMethod(), source.Expression));
+
+        public static double? StdDev(this IQueryable<long?> source) => source.Provider.Execute<double?>(Expression.Call((Expression)null, (MethodInfo)MethodInfo.GetCurrentMethod(), source.Expression));
+
+        public static float StdDev(this IQueryable<float> source) => source.Provider.Execute<float>(Expression.Call((Expression)null, (MethodInfo)MethodInfo.GetCurrentMethod(), source.Expression));
+
+        public static float? StdDev(this IQueryable<float?> source) => source.Provider.Execute<float?>(Expression.Call((Expression)null, (MethodInfo)MethodInfo.GetCurrentMethod(), source.Expression));
+
+
+        public static decimal StdDev<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, decimal>> selector) => source.Provider.Execute<decimal>(Expression.Call((Expression)null, (MethodInfo)MethodInfo.GetCurrentMethod(), source.Expression, Expression.Quote(selector)));
+
+        public static double StdDev<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, double>> selector) => source.Provider.Execute<double>(Expression.Call((Expression)null, (MethodInfo)MethodInfo.GetCurrentMethod(), source.Expression, Expression.Quote(selector)));
+
+        public static double StdDev<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, int>> selector) => source.Provider.Execute<double>(Expression.Call((Expression)null, (MethodInfo)MethodInfo.GetCurrentMethod(), source.Expression, Expression.Quote(selector)));
+
+        public static double StdDev<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, long>> selector) => source.Provider.Execute<double>(Expression.Call((Expression)null, (MethodInfo)MethodInfo.GetCurrentMethod(), source.Expression, Expression.Quote(selector)));
+
+        public static decimal? StdDev<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, decimal?>> selector) => source.Provider.Execute<decimal?>(Expression.Call((Expression)null, (MethodInfo)MethodInfo.GetCurrentMethod(), source.Expression, Expression.Quote(selector)));
+
+        public static double? StdDev<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, double?>> selector) => source.Provider.Execute<double?>(Expression.Call((Expression)null, (MethodInfo)MethodInfo.GetCurrentMethod(), source.Expression, Expression.Quote(selector)));
+
+        public static double? StdDev<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, int?>> selector) => source.Provider.Execute<double?>(Expression.Call((Expression)null, (MethodInfo)MethodInfo.GetCurrentMethod(), source.Expression, Expression.Quote(selector)));
+
+        public static double? StdDev<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, long?>> selector) => source.Provider.Execute<double?>(Expression.Call((Expression)null, (MethodInfo)MethodInfo.GetCurrentMethod(), source.Expression, Expression.Quote(selector)));
+
+        public static float? StdDev<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, float?>> selector) => source.Provider.Execute<float?>(Expression.Call((Expression)null, (MethodInfo)MethodInfo.GetCurrentMethod(), source.Expression, Expression.Quote(selector)));
+
+        public static float StdDev<TSource>(this IQueryable<TSource> source, Expression<Func<TSource, float>> selector) => source.Provider.Execute<float>(Expression.Call((Expression)null, (MethodInfo)MethodInfo.GetCurrentMethod(), source.Expression, Expression.Quote(selector)));
     }
 }

@@ -1,19 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Linq;
-using System.Text;
-using System.Data.SqlClient;
-using System.Reflection;
+﻿using Signum.Engine.Maps;
+using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Utilities.DataStructures;
-using Signum.Entities;
 using Signum.Utilities.Reflection;
+using System;
+using System.Collections.Generic;
 using System.Data;
-using Signum.Engine.Maps;
-using Signum.Entities.DynamicQuery;
 using System.Data.Common;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Text;
 
 namespace Signum.Engine.Linq
 {
@@ -35,12 +32,12 @@ namespace Signum.Engine.Linq
         class DbParameterPair
         {
             internal DbParameter Parameter;
-            internal string Name; 
+            internal string Name;
         }
 
-        Dictionary<Expression, DbParameterPair> parameterExpressions = new Dictionary<Expression, DbParameterPair>(); 
+        Dictionary<Expression, DbParameterPair> parameterExpressions = new Dictionary<Expression, DbParameterPair>();
 
-        int parameter = 0; 
+        int parameter = 0;
 
         public string GetNextParamAlias()
         {
@@ -66,12 +63,12 @@ namespace Signum.Engine.Linq
             {
                 Parameter = pb.CreateParameter(name, typePair.SqlDbType, typePair.UserDefinedTypeName, nullable, value.Value ?? DBNull.Value),
                 Name = name
-            }; 
+            };
         }
 
         ObjectNameOptions objectNameOptions;
 
-        private QueryFormatter() 
+        private QueryFormatter()
         {
             objectNameOptions = ObjectName.CurrentOptions;
         }
@@ -158,7 +155,7 @@ namespace Signum.Engine.Linq
                 Visit(b.Left);
                 sb.Append(",");
                 Visit(b.Right);
-                sb.Append(")"); 
+                sb.Append(")");
             }
             else if (b.NodeType == ExpressionType.Equal || b.NodeType == ExpressionType.NotEqual)
             {
@@ -240,7 +237,7 @@ namespace Signum.Engine.Linq
                 if (exp.OrderType != OrderType.Ascending)
                     sb.Append(" DESC");
             }
-            sb.Append(")"); 
+            sb.Append(")");
             return rowNumber;
         }
 
@@ -251,12 +248,12 @@ namespace Signum.Engine.Linq
             AppendNewLine(Indentation.Inner);
             for (int i = 0, n = cex.Whens.Count; i < n; i++)
             {
-                When when = cex.Whens[i]; 
+                When when = cex.Whens[i];
                 sb.Append("WHEN ");
                 Visit(when.Condition);
                 sb.Append(" THEN ");
                 Visit(when.Value);
-                AppendNewLine(Indentation.Same); 
+                AppendNewLine(Indentation.Same);
             }
             if (cex.DefaultValue != null)
             {
@@ -267,7 +264,7 @@ namespace Signum.Engine.Linq
             sb.Append("END");
             AppendNewLine(Indentation.Outer);
 
-            return cex; 
+            return cex;
         }
 
         protected internal override Expression VisitLike(LikeExpression like)
@@ -361,7 +358,7 @@ namespace Signum.Engine.Linq
                 if (!Schema.Current.Settings.IsDbType(c.Value.GetType().UnNullify()))
                     throw new NotSupportedException(string.Format("The constant for {0} is not supported", c.Value));
 
-                var pi = parameterExpressions.GetOrCreate(c, ()=> this.CreateParameter(c));
+                var pi = parameterExpressions.GetOrCreate(c, () => this.CreateParameter(c));
 
                 sb.Append(pi.Name);
             }
@@ -417,7 +414,7 @@ namespace Signum.Engine.Linq
             {
                 sb.Append("TOP (");
                 Visit(select.Top);
-                sb.Append(") "); 
+                sb.Append(") ");
             }
 
             if (select.Columns.Count == 0)
@@ -507,6 +504,7 @@ namespace Signum.Engine.Linq
         Dictionary<AggregateFunction, string> dic = new Dictionary<AggregateFunction, string>
         {
             {AggregateFunction.Average, "AVG"},
+            {AggregateFunction.StdDev, "STDEV"},
             {AggregateFunction.Count, "COUNT"},
             {AggregateFunction.Max, "MAX"},
             {AggregateFunction.Min, "MIN"},
@@ -523,7 +521,7 @@ namespace Signum.Engine.Linq
                 Visit(aggregate.Expression);
             sb.Append(")");
 
-            return aggregate; 
+            return aggregate;
         }
 
         protected internal override Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
@@ -569,7 +567,7 @@ namespace Signum.Engine.Linq
 
             if (column.Name.HasText() && (c == null || c.Name != column.Name))
             {
-                
+
                 sb.Append(column.Name.SqlEscape());
                 sb.Append(" = ");
                 this.Visit(column.Expression);
@@ -604,7 +602,7 @@ namespace Signum.Engine.Linq
                 sb.Append(((SourceWithAliasExpression)source).Alias.Name.SqlEscape());
 
                 var ta = source as TableExpression;
-                if(ta != null && ta.WithHint != null)
+                if (ta != null && ta.WithHint != null)
                 {
                     sb.Append(" WITH(" + ta.WithHint + ")");
                 }
@@ -722,10 +720,10 @@ namespace Signum.Engine.Linq
             sb.Append(update.Table.Name.ToString());
             sb.Append(" SET");
             this.AppendNewLine(Indentation.Inner);
-           
+
             for (int i = 0, n = update.Assigments.Count; i < n; i++)
             {
-                ColumnAssignment assignment= update.Assigments[i];
+                ColumnAssignment assignment = update.Assigments[i];
                 if (i > 0)
                 {
                     sb.Append(",");
@@ -744,7 +742,7 @@ namespace Signum.Engine.Linq
                 sb.Append("WHERE ");
                 Visit(update.Where);
             }
-            return update; 
+            return update;
 
         }
 
@@ -787,7 +785,7 @@ namespace Signum.Engine.Linq
         protected internal override Expression VisitSelectRowCount(SelectRowCountExpression src)
         {
             sb.Append("SELECT @@rowcount");
-            return src; 
+            return src;
         }
 
         protected internal override Expression VisitCommandAggregate(CommandAggregateExpression cea)
@@ -797,7 +795,7 @@ namespace Signum.Engine.Linq
                 CommandExpression command = cea.Commands[i];
                 if (i > 0)
                 {
-                    sb.Append(";"); 
+                    sb.Append(";");
                     this.AppendNewLine(Indentation.Same);
                 }
                 this.Visit(command);
@@ -896,7 +894,7 @@ namespace Signum.Engine.Linq
             throw InvalidSqlExpression(nex);
         }
 
-      
+
 
         protected override Expression VisitNewArray(NewArrayExpression na)
         {
@@ -937,7 +935,7 @@ namespace Signum.Engine.Linq
         {
             return new InvalidOperationException("Unexepected expression on sql {0}".FormatWith(expression.ToString()));
         }
-        
+
     }
 
 

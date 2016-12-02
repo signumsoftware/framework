@@ -1,17 +1,10 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Signum.Engine;
 using Signum.Entities;
-using System.Diagnostics;
-using System.IO;
-using Signum.Utilities;
-using Signum.Engine.Linq;
-using System.Data.SqlTypes;
-using Signum.Utilities.ExpressionTrees;
 using Signum.Test.Environment;
+using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
+using System.Linq;
 
 namespace Signum.Test.LinqProvider
 {
@@ -36,22 +29,22 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void GroupStringByEnum()
         {
-            var list = Database.Query<ArtistEntity>().GroupBy(a => a.Sex, a => a.Name).ToList(); 
+            var list = Database.Query<ArtistEntity>().GroupBy(a => a.Sex, a => a.Name).ToList();
         }
 
         [TestMethod]
         public void GroupStringByEnumSimilar()
         {
             var queryA = (from a in Database.Query<ArtistEntity>()
-                         group a.Name by a.Sex into g
-                         select g).QueryText();
+                          group a.Name by a.Sex into g
+                          select g).QueryText();
 
             var queryN = Database.Query<ArtistEntity>().GroupBy(a => a.Sex, a => a.Name).QueryText();
 
             Assert.AreEqual(queryN, queryA);
         }
 
-          [TestMethod]
+        [TestMethod]
         public void GroupMultiAggregate()
         {
             var sexos = from a in Database.Query<ArtistEntity>()
@@ -59,10 +52,12 @@ namespace Signum.Test.LinqProvider
                         select new
                         {
                             Key = g.Key,
+                            Count = g.Count(),
                             Sum = g.Sum(),
                             Min = g.Min(),
                             Max = g.Max(),
-                            Avg = g.Average()
+                            Avg = g.Average(),
+                            StdDev = (double?)g.StdDev(),
                         };
             sexos.ToList();
         }
@@ -91,7 +86,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void WhereGroup()
         {
-            var list = Database.Query<ArtistEntity>().Where(a=>a.Dead).GroupBy(a => a.Sex).ToList();
+            var list = Database.Query<ArtistEntity>().Where(a => a.Dead).GroupBy(a => a.Sex).ToList();
         }
 
         [TestMethod]
@@ -99,7 +94,7 @@ namespace Signum.Test.LinqProvider
         {
             var list = (from a in Database.Query<ArtistEntity>()
                         group a by a.Sex into g
-                        select new { Sex = g.Key, DeadArtists = g.Where(a => a.Dead).ToList() }).ToList();        
+                        select new { Sex = g.Key, DeadArtists = g.Where(a => a.Dead).ToList() }).ToList();
         }
 
         [TestMethod]
@@ -184,7 +179,7 @@ namespace Signum.Test.LinqProvider
         {
             var songsAlbum = (from a in Database.Query<ArtistEntity>()
                               group a by a.Sex into g
-                              select new { Sex = g.Key, Avg = g.Average(a=>a.Name.Length) }).ToList();
+                              select new { Sex = g.Key, Avg = g.Average(a => a.Name.Length) }).ToList();
         }
 
         [TestMethod]
@@ -362,7 +357,7 @@ namespace Signum.Test.LinqProvider
                           {
                               Album = a.ToLite(),
                               Count = count
-                          }).ToList(); 
+                          }).ToList();
         }
 
         [TestMethod]
@@ -383,7 +378,7 @@ namespace Signum.Test.LinqProvider
             var first = Database.Query<ArtistEntity>().GroupBy(a => a.Status).Select(gr => gr.Sum(b => b.Friends.Sum(m => (int)m.Id.Object)));
         }
 
-      
+
 
         [TestMethod]
         public void MinMax()
@@ -452,7 +447,7 @@ namespace Signum.Test.LinqProvider
                             Artist = a.ToLite(),
                             Friends = friend.Count(), // will also be expanded but then simplified
                             FemaleFriends = friend.Count(f => f.Entity.Sex == Sex.Female)
-                        }).ToList(); 
+                        }).ToList();
         }
 
         [TestMethod]
@@ -472,7 +467,7 @@ namespace Signum.Test.LinqProvider
         {
             var list = Database.Query<AlbumEntity>()
                 .GroupBy(a => a.Songs.Count)
-                .Select(gr => new { NumSongs =  gr.Key, Count = gr.Count() })
+                .Select(gr => new { NumSongs = gr.Key, Count = gr.Count() })
                 .ToList();
         }
     }
