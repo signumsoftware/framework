@@ -4,6 +4,7 @@ using Signum.Entities;
 using Signum.Test.Environment;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Signum.Test.LinqProvider
@@ -57,11 +58,41 @@ namespace Signum.Test.LinqProvider
                             Min = g.Min(),
                             Max = g.Max(),
                             Avg = g.Average(),
-                            StdDev = (double?)g.StdDev(),
                         };
             sexos.ToList();
+
+
+
         }
 
+
+        [TestMethod]
+        public void GroupStdDev()
+        {
+            var sexos = from a in Database.Query<ArtistEntity>()
+                        group a.Name.Length by a.Sex into g
+                        select new
+                        {
+                            Key = g.Key,
+                            StdDev = (double?)g.StdDev(),
+                            StdDevInMemory = GetStdDev(g.ToList()),
+                            StdDevP = (double?)g.StdDevP(),
+                            StdDevPInMemory = GetStdDevP(g.ToList()),
+                        };
+            var list = sexos.ToList();
+            list.ForEach(a => Assert2.AreSimilar(a.StdDev, a.StdDevInMemory));
+            list.ForEach(a => Assert2.AreSimilar(a.StdDevP, a.StdDevPInMemory));
+        }
+
+        private double? GetStdDev(List<int> list)
+        {
+            return list.StdDev();
+        }
+
+        private double? GetStdDevP(List<int> list)
+        {
+            return list.StdDevP();
+        }
 
         [TestMethod]
         public void GroupEntityByEnum()

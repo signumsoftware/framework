@@ -286,6 +286,7 @@ namespace Signum.Engine.Linq
     {
         Average,
         StdDev,
+        StdDevP,
         Count,
         Min,
         Max,

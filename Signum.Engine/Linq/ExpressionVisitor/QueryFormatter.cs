@@ -505,6 +505,7 @@ namespace Signum.Engine.Linq
         {
             {AggregateFunction.Average, "AVG"},
             {AggregateFunction.StdDev, "STDEV"},
+            {AggregateFunction.StdDevP, "STDEVP"},
             {AggregateFunction.Count, "COUNT"},
             {AggregateFunction.Max, "MAX"},
             {AggregateFunction.Min, "MIN"},

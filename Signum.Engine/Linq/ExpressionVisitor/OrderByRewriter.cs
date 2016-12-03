@@ -230,7 +230,8 @@ namespace Signum.Engine.Linq
             return aggExp.AggregateFunction == AggregateFunction.Count ||
                 aggExp.AggregateFunction == AggregateFunction.Sum ||
                 aggExp.AggregateFunction == AggregateFunction.Average ||
-                aggExp.AggregateFunction == AggregateFunction.StdDev;
+                aggExp.AggregateFunction == AggregateFunction.StdDev || 
+                aggExp.AggregateFunction == AggregateFunction.StdDevP;
         }
 
         protected internal override Expression VisitJoin(JoinExpression join)

@@ -61,7 +61,8 @@ namespace Signum.Engine.Linq
             if (m.Method.DeclaringType == typeof(Queryable) ||
                 m.Method.DeclaringType == typeof(Enumerable) ||
                 m.Method.DeclaringType == typeof(EnumerableUniqueExtensions) ||
-                m.Method.DeclaringType == typeof(StandartDeviationExtensions))
+                m.Method.DeclaringType == typeof(StandartDeviationExtensions) ||
+                m.Method.DeclaringType == typeof(StandartDeviationPopulationExtensions))
             {
                 switch (m.Method.Name)
                 {
@@ -104,6 +105,7 @@ namespace Signum.Engine.Linq
                     case "Max":
                     case "Average":
                     case "StdDev":
+                    case "StdDevP":
                         return this.BindAggregate(m.Type, m.Method.Name.ToEnum<AggregateFunction>(),
                             m.GetArgument("source"), m.TryGetArgument("selector").StripQuotes(), m == root);
                     case "First":
