@@ -310,7 +310,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
         if (qd.columns[defaultOrder]) {
             fo.orderOptions = [{
                 columnName: defaultOrder,
-                orderType: tis.some(a => a.entityData == "Transactional") ? "Descending" as OrderType : "Ascending" as OrderType
+                orderType: qs && qs.defaultOrderType || (tis.some(a => a.entityData == "Transactional") ? "Descending" as OrderType : "Ascending" as OrderType)
             }];
         }
     }
@@ -758,6 +758,7 @@ export interface QuerySettings {
     queryName: PseudoType | QueryKey;
     pagination?: Pagination;
     defaultOrderColumn?: string;
+    defaultOrderType?: OrderType;
     hiddenColumns?: ColumnOption[];
     formatters?: { [columnName: string]: CellFormatter };
     rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes | undefined;
