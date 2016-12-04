@@ -654,7 +654,8 @@ export class ViewPromise<T extends ModifiableEntity> {
         this.promise = this.promise.then(func => {
             return (ctx: TypeContext<T>) => {
                 var result = func(ctx);
-                applyViewOverrides(setting, result.type as React.ComponentClass<{ ctx: TypeContext<T> }>);
+                var component = result.type as React.ComponentClass<{ ctx: TypeContext<T> }>;
+                monkeyPatchComponent(component, setting);
                 return result;
             };
         });
@@ -669,17 +670,16 @@ export class ViewPromise<T extends ModifiableEntity> {
     }
 }
 
-function applyViewOverrides<T extends ModifiableEntity>(setting: EntitySettings<T>, component: React.ComponentClass<{ ctx: TypeContext<T> }>) {
+function monkeyPatchComponent<T extends ModifiableEntity>(component: React.ComponentClass<{ ctx: TypeContext<T> }>, setting: EntitySettings<T>) {
 
     if (!component.prototype.render)
         throw new Error("render function not defined in " + component);
 
     if (setting.viewOverrides == undefined || setting.viewOverrides.length == 0)
-        return component;
-
+        return;
 
     if (component.prototype.render.withViewOverrides)
-        return component;
+        return;
 
     const baseRender = component.prototype.render as () => void;
 
@@ -695,8 +695,6 @@ function applyViewOverrides<T extends ModifiableEntity>(setting: EntitySettings<
     };
 
     component.prototype.render.withViewOverrides = true;
-
-    return component;
 }
 
 
