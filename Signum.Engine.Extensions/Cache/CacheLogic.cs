@@ -800,7 +800,7 @@ namespace Signum.Engine.Cache
 
         internal static bool IsAssumedMassiveChangeAsInvalidation<T>()
         {
-            var asssumeAsInvalidation = CacheLogic.assumeMassiveChangesAsInvalidations.Value.TryGetS(typeof(T));
+            var asssumeAsInvalidation = CacheLogic.assumeMassiveChangesAsInvalidations.Value?.TryGetS(typeof(T));
 
             if (asssumeAsInvalidation == null)
                 throw new InvalidOperationException("Impossible to determine if the massive operation will affect the semi-cached instances of {1}. Execute CacheLogic.AssumeMassiveChangesAsInvalidations to desanbiguate.");
