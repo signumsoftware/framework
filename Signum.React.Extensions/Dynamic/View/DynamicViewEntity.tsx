@@ -6,6 +6,7 @@ import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 import { ValueLine, EntityLine, TypeContext } from '../../../../Framework/Signum.React/Scripts/Lines'
+
 import { ModifiableEntity, Entity, Lite, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { getTypeInfo, Binding, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal'
@@ -14,6 +15,8 @@ import { DynamicViewInspector, CollapsableTypeHelp } from './Designer'
 import { NodeConstructor, BaseNode } from './Nodes'
 import { DesignerNode, DesignerContext } from './NodeUtils'
 import * as NodeUtils from './NodeUtils'
+import ShowCodeModal from './ShowCodeModal'
+import { ButtonsContext, IRenderButtons } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 
 require("!style!css!./DynamicView.css");
 
@@ -27,13 +30,21 @@ interface DynamicViewEntityComponentState {
     selectedNode?: DesignerNode<BaseNode>;
 }
 
-
-export default class DynamicViewEntityComponent extends React.Component<DynamicViewEntityComponentProps, DynamicViewEntityComponentState> {
+export default class DynamicViewEntityComponent extends React.Component<DynamicViewEntityComponentProps, DynamicViewEntityComponentState> implements IRenderButtons {
 
     constructor(props: DynamicViewEntityComponentProps) {
         super(props);
-
         this.state = {};
+    }
+
+    handleShowCode = () => {
+        ShowCodeModal.showCode(this.props.ctx.value.entityType!.cleanName, this.state.rootNode!);
+    }
+
+    renderButtons(bc: ButtonsContext) {
+        return [
+            <button key="showCode" type="button" className="btn btn-success pull-right" disabled={!this.state.rootNode} onClick={this.handleShowCode}>Show code</button>
+        ];
     }
 
     componentWillMount() {
@@ -52,19 +63,24 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
 
     updateRoot() {
 
-        const ctx = this.props.ctx;
+        const ctx = this.props.ctx;      
 
         if (ctx.value.viewContent == null) {
-            this.changeState(s => { s.rootNode = undefined; s.selectedNode = undefined; });
-            return;
+            this.changeState(s => {
+                s.rootNode = undefined;
+                s.selectedNode = undefined;
+            });
+
+        } else {
+            const rootNode = JSON.parse(ctx.value.viewContent) as BaseNode;
+
+            this.changeState(s => {
+                s.rootNode = rootNode;
+                s.selectedNode = this.getZeroNode().createChild(rootNode);
+            });
         }
 
-        const rootNode = JSON.parse(ctx.value.viewContent) as BaseNode;
-
-        this.changeState(s => {
-            s.rootNode = rootNode;
-            s.selectedNode = this.getZeroNode().createChild(rootNode);
-        });
+        ctx.frame!.frameComponent.forceUpdate();
     }
 
     getZeroNode() {
@@ -77,16 +93,19 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
         return DesignerNode.zero(context, this.props.ctx.value.entityType!.cleanName);
     }
 
-
     handleTypeChange = () => {
+
         this.state = {};
+        
         var dve = this.props.ctx.value;
+
         if (dve.entityType == null) {
             dve.viewContent = null;
             this.changeState(s => s.exampleEntity = undefined);
         } else {
             dve.viewContent = JSON.stringify(NodeConstructor.createDefaultNode(getTypeInfo(dve.entityType.cleanName)));
         }
+      
         this.updateRoot();
     }
 
@@ -110,10 +129,8 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
         );
     }
 
-
     renderDesigner() {
         const root = this.getZeroNode().createChild(this.state.rootNode!);
-
 
         const ctx = this.props.ctx;
 

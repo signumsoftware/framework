@@ -20,6 +20,8 @@ namespace Signum.Engine.Dynamic
     public static class DynamicViewLogic
     {
         public static ResetLazy<Dictionary<Type, List<DynamicViewEntity>>> DynamicViews;
+        public static ResetLazy<Dictionary<Type, DynamicViewSelectorEntity>> DynamicViewSelectors;
+        public static ResetLazy<Dictionary<Type, DynamicViewOverrideEntity>> DynamicViewOverrides;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -66,6 +68,24 @@ namespace Signum.Engine.Dynamic
                         e.Id,
                         e.EntityType,
                     });
+
+                DynamicViewSelectors = sb.GlobalLazy(() =>
+                    Database.Query<DynamicViewSelectorEntity>().ToDictionary(a => a.EntityType.ToType()),
+                    new InvalidateWith(typeof(DynamicViewSelectorEntity)));
+
+                sb.Include<DynamicViewOverrideEntity>()
+                   .WithSave(DynamicViewOverrideOperation.Save)
+                   .WithDelete(DynamicViewOverrideOperation.Delete)
+                   .WithQuery(dqm, e => new
+                   {
+                       Entity = e,
+                       e.Id,
+                       e.EntityType,
+                   });
+
+                DynamicViewOverrides = sb.GlobalLazy(() =>
+                 Database.Query<DynamicViewOverrideEntity>().ToDictionary(a => a.EntityType.ToType()),
+                 new InvalidateWith(typeof(DynamicViewOverrideEntity)));
             }
         }
 

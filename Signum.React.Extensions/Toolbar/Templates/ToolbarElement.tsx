@@ -26,6 +26,7 @@ export default class ToolbarElement extends React.Component<{ ctx: TypeContext<T
 
         const ctx4 = ctx.subCtx({ labelColumns: 4 });
         const ctx2 = ctx.subCtx({ labelColumns: 2 });
+        const bgColor = (ctx4.value.iconColor && ctx4.value.iconColor.toLowerCase() == "white" ? "black" : undefined);
 
         return (
             <div>
@@ -44,7 +45,7 @@ export default class ToolbarElement extends React.Component<{ ctx: TypeContext<T
                         {ctx4.value.type != "Divider" && <ColorTypeaheadLine ctx={ctx4.subCtx(t => t.iconColor)} onChange={() => this.forceUpdate()}/>}
                     </div>
                     <div className="col-sm-1">
-                        {ctx4.value.iconName && <span className={ctx4.value.iconName} style={{ color: ctx4.value.iconColor, fontSize: "25px", marginTop: "17px" }} />}
+                        {ctx4.value.iconName && <span className={ctx4.value.iconName} style={{ backgroundColor: bgColor, color: ctx4.value.iconColor, fontSize: "25px", marginTop: "17px" }} />}
                     </div>
                     <div className="col-sm-5">
                         {ctx2.value.type != "Divider" && <ValueLine ctx={ctx2.subCtx(t => t.label)} valueHtmlProps={{ placeholder: ctx2.value.content && ctx2.value.content.toStr || undefined }} />}

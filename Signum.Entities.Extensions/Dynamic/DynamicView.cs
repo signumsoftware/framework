@@ -64,7 +64,35 @@ namespace Signum.Entities.Dynamic
         public static readonly DeleteSymbol<DynamicViewSelectorEntity> Delete;
     }
 
+
+
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    public class DynamicViewOverrideEntity : Entity
+    {
+        [NotNullable]
+        [NotNullValidator, UniqueIndex]
+        public TypeEntity EntityType { get; set; }
+
+        [SqlDbType(Size = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
+        public string Script { get; set; }
+
+        static Expression<Func<DynamicViewOverrideEntity, string>> ToStringExpression = @this => "StaticViewOverride " + @this.EntityType;
+        [ExpressionField]
+        public override string ToString()
+        {
+            return ToStringExpression.Evaluate(this);
+        }
+    }
     
+    [AutoInit]
+    public static class DynamicViewOverrideOperation
+    {
+        public static readonly ExecuteSymbol<DynamicViewOverrideEntity> Save;
+        public static readonly DeleteSymbol<DynamicViewOverrideEntity> Delete;
+    }
+
+
     public enum DynamicViewMessage
     {
         AddChild,

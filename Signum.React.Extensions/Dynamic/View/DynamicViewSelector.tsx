@@ -143,7 +143,7 @@ export default class DynamicViewSelectorEntityComponent extends React.Component<
         const dvs = this.props.ctx.value;
         let func: (e: Entity, auth: AuthInfo) => any;
         try {
-            func = DynamicViewClient.asFunction(dvs);
+            func = DynamicViewClient.asSelectorFunction(dvs);
         } catch (e) {
             this.changeState(s => {
                 s.syntaxError = (e as Error).message;
@@ -179,8 +179,8 @@ export default class DynamicViewSelectorEntityComponent extends React.Component<
         const ctx = this.props.ctx;
         return (
             <div className="code-container">
-                <pre style={{ border: "0px", margin: "0px", color: "Green" }}>Return {this.allViewNames().map(vn => '"' + vn + '"').joinComma(" or ")}</pre>
-                <pre style={{ border: "0px", margin: "0px" }}>{"(e: " + ctx.value.entityType!.className + ", auth) =>"}</pre>
+                <pre style={{ border: "0px", margin: "0px", color: "Green" }}>//Return {this.allViewNames().map(vn => '"' + vn + '"').joinComma(" or ")}</pre>
+                <pre style={{ border: "0px", margin: "0px" }}>{"(e: " + ctx.value.entityType!.className + ", auth: AuthInfo) =>"}</pre>
                 <JavascriptCodeMirror code={ctx.value.script || ""} onChange={this.handleCodeChange} />
                 {this.state.syntaxError && <div className="alert alert-danger">{this.state.syntaxError}</div>}
             </div>

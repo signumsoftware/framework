@@ -48,7 +48,15 @@ namespace Signum.React.Dynamic
         [Route("api/dynamic/selector/{typeName}"), HttpGet]
         public DynamicViewSelectorEntity GetDynamicViewSelector(string typeName)
         {
-            return Database.Query<DynamicViewSelectorEntity>().SingleOrDefaultEx(a => a.EntityType.CleanName == typeName);
+            Type type = TypeLogic.GetType(typeName);
+            return DynamicViewLogic.DynamicViewSelectors.Value.TryGetC(type);
+        }
+
+        [Route("api/dynamic/override/{typeName}"), HttpGet]
+        public DynamicViewOverrideEntity GetDynamicViewOverride(string typeName)
+        {
+            Type type = TypeLogic.GetType(typeName);
+            return DynamicViewLogic.DynamicViewOverrides.Value.TryGetC(type);
         }
     }
 }

@@ -190,6 +190,7 @@
     <TypeScriptCompile Include="Codemirror\SqlCodeMirror.tsx" />
     <TypeScriptCompile Include="Dynamic\Type\ValueComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\Type\DynamicTypeEntity.tsx" />
+    <TypeScriptCompile Include="Dynamic\View\DynamicViewOverride.tsx" />
     <TypeScriptCompile Include="Dynamic\View\DynamicViewSelector.tsx" />
     <TypeScriptCompile Include="Dynamic\View\DynamicViewTree.tsx" />
     <TypeScriptCompile Include="Dynamic\View\DynamicViewComponent.tsx" />

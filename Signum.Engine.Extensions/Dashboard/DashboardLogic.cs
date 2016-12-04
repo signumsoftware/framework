@@ -46,7 +46,8 @@ namespace Signum.Engine.Dashboard
                         cp.Id,
                         cp.DisplayName,
                         cp.EntityType,
-                        Related = cp.Owner,
+                        cp.Owner,
+                        cp.DashboardPriority,
                     });
 
                 sb.Include<LinkListPartEntity>()

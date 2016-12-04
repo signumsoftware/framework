@@ -169,6 +169,18 @@ export module DynamicViewOperation {
     export const Delete : Entities.DeleteSymbol<DynamicViewEntity> = registerSymbol("Operation", "DynamicViewOperation.Delete");
 }
 
+export const DynamicViewOverrideEntity = new Type<DynamicViewOverrideEntity>("DynamicViewOverride");
+export interface DynamicViewOverrideEntity extends Entities.Entity {
+    Type: "DynamicViewOverride";
+    entityType?: Basics.TypeEntity | null;
+    script?: string | null;
+}
+
+export module DynamicViewOverrideOperation {
+    export const Save : Entities.ExecuteSymbol<DynamicViewOverrideEntity> = registerSymbol("Operation", "DynamicViewOverrideOperation.Save");
+    export const Delete : Entities.DeleteSymbol<DynamicViewOverrideEntity> = registerSymbol("Operation", "DynamicViewOverrideOperation.Delete");
+}
+
 export const DynamicViewSelectorEntity = new Type<DynamicViewSelectorEntity>("DynamicViewSelector");
 export interface DynamicViewSelectorEntity extends Entities.Entity {
     Type: "DynamicViewSelector";

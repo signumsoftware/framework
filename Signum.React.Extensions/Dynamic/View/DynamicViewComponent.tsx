@@ -212,7 +212,7 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { vi
         return (
             <div className="btn-group btn-group-sm" role="group" style={{ marginBottom: "5px"}}>
                 {operations[DynamicViewOperation.Save.key] && <button type="button" className="btn btn-primary" onClick={this.handleSave}>{operations[DynamicViewOperation.Save.key].niceName}</button>}
-                <button type="button" className="btn btn-default" onClick={this.handleShowCode}>Show code</button>
+                <button type="button" className="btn btn-success" onClick={this.handleShowCode}>Show code</button>
                 <DropdownButton title=" … " id="bg-nested-dropdown" onToggle={this.handleOnToggle} bsSize="sm">
                     {operations[DynamicViewOperation.Create.key] && <MenuItem eventKey="create" onSelect={this.handleCreate}>{operations[DynamicViewOperation.Create.key].niceName}</MenuItem>}
                     {operations[DynamicViewOperation.Clone.key] && !this.props.dynamicView.isNew && <MenuItem eventKey="clone" onSelect={this.handleClone}>{operations[DynamicViewOperation.Clone.key].niceName}</MenuItem>}
