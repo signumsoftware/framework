@@ -282,7 +282,7 @@ namespace Signum.React.Facades
             if (expr.NodeType != ExpressionType.MemberAccess)
                 return r;
 
-            if (typeof(ModifiableEntity).IsAssignableFrom(expr.Type))
+            if (expr.Type.IsModifiableEntity() || expr.Type.IsLite())
                 return "getToString(" + r + ")";
 
             return "valToString(" + r + ")";

@@ -171,7 +171,7 @@ namespace Signum.Engine
                     Exception stopException = null;
 
                     using (ExecutionContext.SuppressFlow())
-                        Parallel.ForEach(col, paralelOptions, (item, state) =>
+                        Parallel.ForEach(col, paralelOptions ?? new ParallelOptions {  MaxDegreeOfParallelism = Environment.ProcessorCount }, (item, state) =>
                         {
                             using (HeavyProfiler.Log("ProgressForeach", () => elementID(item)))
                                 try
