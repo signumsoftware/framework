@@ -20,6 +20,9 @@ export function start(...configs: ToolbarConfig<any>[]) {
     Navigator.addSettings(new EntitySettings(ToolbarMenuEntity, t => new ViewPromise(resolve => require(['./Templates/ToolbarMenu'], resolve))));
     Navigator.addSettings(new EntitySettings(ToolbarElementEntity, t => new ViewPromise(resolve => require(['./Templates/ToolbarElement'], resolve))));   
 
+
+    Finder.addSettings({ queryName: ToolbarEntity, defaultOrderColumn: "Priority", defaultOrderType: "Descending" });
+
     Constructor.registerConstructor(ToolbarElementEntity, tn => ToolbarElementEntity.New(e => e.type = "Link"));
 
     configs.forEach(c => registerConfig(c));
