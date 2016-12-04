@@ -3,7 +3,8 @@ import * as ReactDOM from 'react-dom'
 import * as d3 from 'd3'
 import { DomUtils } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { is, SearchMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
+import { is, SearchMessage, parseLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as ChartUtils from "./ChartUtils"
 import { ResultTable, FindOptions, FilterOptionParsed, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption, hasAggregate } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity, ChartRequest, GroupByChart, ChartMessage,
@@ -126,31 +127,59 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
         {
             const val = element.getAttribute("data-click");
 
-            const cr = this.props.chartRequest;
-
-            const filters = cr.filterOptions.filter(a => !hasAggregate(a.token));
-
             const obj = val!.split("&").filter(a => !!a).toObject(a => a.before("="), a => a.after("="));
 
-            cr.columns.map((a, i) => {
-                if (obj.hasOwnProperty("c" + i))
-                    filters.push({
-                        token: a.element.token!.token,
-                        operation: "EqualTo",
-                        value: obj["c" + i],
-                        frozen: false
-                    } as FilterOptionParsed);
-            });
+            const cr = this.props.chartRequest;
 
-            window.open(Finder.findOptionsPath({
-                queryName: cr.queryKey,
-                filterOptions: filters.map(fop => ({
-                    columnName: fop.token!.fullKey,
-                    operation: fop.operation,
-                    value: fop.value,
-                    frozen: fop.frozen,
-                }) as FilterOption)
-            }));
+            if (cr.groupResults == false) {
+
+                var lite = parseLite(obj["entity"]);
+
+                window.open(Navigator.navigateRoute(lite));
+
+            } else {
+
+
+                const filters = cr.filterOptions.filter(a => !hasAggregate(a.token));
+                const columns: ColumnOption[] = [];
+
+             
+
+                cr.columns.map((a, i) => {
+
+                    const t = a.element.token;
+
+                    if (obj.hasOwnProperty("c" + i)) {
+                        filters.push({
+                            token: t!.token!,
+                            operation: "EqualTo",
+                            value: obj["c" + i] == "null" ? null : obj["c" + i],
+                            frozen: false
+                        } as FilterOptionParsed);
+                    }
+
+                    if (t && t.token && t.token.parent != undefined) //Avoid Count and simple Columns that are already added
+                    {
+                        var col = t.token.queryTokenType == "Aggregate" ? t.token.parent : t.token
+
+                        if (col.parent)
+                            columns.push({
+                                columnName: col.fullKey
+                            });
+                    }
+                });
+
+                window.open(Finder.findOptionsPath({
+                    queryName: cr.queryKey,
+                    filterOptions: filters.map(fop => ({
+                        columnName: fop.token!.fullKey,
+                        operation: fop.operation,
+                        value: fop.value,
+                        frozen: fop.frozen,
+                    }) as FilterOption),
+                    columnOptions: columns,
+                }));
+            }
         }
     }
 

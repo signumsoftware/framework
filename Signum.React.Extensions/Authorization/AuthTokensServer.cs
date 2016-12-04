@@ -5,9 +5,7 @@ using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.React.Filters;
 using Signum.Utilities;
-using Signum.Utilities.Reflection;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -17,7 +15,6 @@ using System.Runtime.Serialization;
 using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Text;
-using System.Web;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 
@@ -27,10 +24,10 @@ namespace Signum.React.Authorization
     {
         static Func<AuthTokenConfigurationEntity> Configuration;
 
-        public static void Start(Func<AuthTokenConfigurationEntity> tokenConfig, string hasheableEncriptationKey)
+        public static void Start(Func<AuthTokenConfigurationEntity> tokenConfig, string hashableEncryptionKey)
         {
             Configuration = tokenConfig;
-            EncriptationKey = new MD5CryptoServiceProvider().Using(p => p.ComputeHash(UTF8Encoding.UTF8.GetBytes(hasheableEncriptationKey)));
+            CryptoKey = new MD5CryptoServiceProvider().Using(p => p.ComputeHash(UTF8Encoding.UTF8.GetBytes(hashableEncryptionKey)));
 
             SignumAuthenticationAndProfilerAttribute.Authenticate += Authenticate;
         }
@@ -63,7 +60,7 @@ namespace Signum.React.Authorization
 
             if (requiresRefresh)
             {
-                ctx.Response = ctx.Request.CreateResponse<HttpError>(HttpStatusCode.UpgradeRequired, 
+                ctx.Response = ctx.Request.CreateResponse<HttpError>(HttpStatusCode.UpgradeRequired,
                     new HttpError(new NewTokenRequiredException("Please upgrade the token to continue using the service"), includeErrorDetail: true)); //Avoid annoying exception
                 return null;
             }
@@ -140,7 +137,7 @@ namespace Signum.React.Authorization
             using (HeavyProfiler.LogNoStackTrace("SerializeToken"))
             {
                 var array = new MemoryStream().Using(ms =>
-                {   
+                {
                     using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Compress))
                         formatter.Serialize(ds, entity);
 
@@ -153,14 +150,14 @@ namespace Signum.React.Authorization
             }
         }
 
-        static byte[] EncriptationKey;
+        static byte[] CryptoKey;
 
         //http://stackoverflow.com/questions/8041451/good-aes-initialization-vector-practice
         static byte[] Encrypt(byte[] toEncryptBytes)
         {
             using (var provider = new AesCryptoServiceProvider())
             {
-                provider.Key = EncriptationKey;
+                provider.Key = CryptoKey;
                 provider.Mode = CipherMode.CBC;
                 provider.Padding = PaddingMode.PKCS7;
                 using (var encryptor = provider.CreateEncryptor(provider.Key, provider.IV))
@@ -183,7 +180,7 @@ namespace Signum.React.Authorization
         {
             using (var provider = new AesCryptoServiceProvider())
             {
-                provider.Key = EncriptationKey;
+                provider.Key = CryptoKey;
                 using (var ms = new MemoryStream(encryptedString))
                 {
                     // Read the first 16 bytes which is the IV.

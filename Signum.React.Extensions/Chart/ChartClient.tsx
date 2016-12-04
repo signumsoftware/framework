@@ -96,7 +96,7 @@ export function isCompatibleWith(chartScript: ChartScriptEntity, chartBase: ICha
             if (!isChartColumnType(c.token.token, s.columnType!))
                 return false;
 
-            if (c.token.token!.queryTokenType == QueryTokenType.Aggregate)
+            if (c.token.token!.queryTokenType == "Aggregate")
                 return !s.isGroupKey;
             else
                 return s.isGroupKey || !chartBase.groupResults;
@@ -238,7 +238,7 @@ export function synchronizeColumns(chart: IChartBase) {
     }
 
     chart.columns.map(mle => mle.element).forEach((cc, i) => {
-        if (cc.token && cc.token.token!.queryTokenType == QueryTokenType.Aggregate) {
+        if (cc.token && cc.token.token!.queryTokenType == "Aggregate") {
 
             const sc = chart.chartScript!.columns![i]
             if (chart.groupResults == false || sc && sc.element.isGroupKey) {
@@ -258,9 +258,9 @@ export function synchronizeColumns(chart: IChartBase) {
 
         cr.orderOptions = cr.orderOptions!.filter(o => {
             if (chart.groupResults)
-                return o.token!.queryTokenType == QueryTokenType.Aggregate || keys.contains(o.token!.fullKey);
+                return o.token!.queryTokenType == "Aggregate" || keys.contains(o.token!.fullKey);
             else
-                return o.token!.queryTokenType != QueryTokenType.Aggregate;
+                return o.token!.queryTokenType != "Aggregate";
         });
     }
 }
@@ -346,7 +346,7 @@ export module Decoder {
                         cr.chartScript = query.script == undefined ? scripts.first("ChartScript").first() :
                             scripts.flatMap(a => a).filter(cs => cs.name == query.script).single(`ChartScript '${query.queryKey}'`);
                         cr.queryKey = getQueryKey(queryName);
-                        cr.groupResults = query.groupResults;
+                        cr.groupResults = query.groupResults == "true";
                         cr.filterOptions = fos.map(fo => ({ token: completer.get(fo.columnName), operation: fo.operation, value: fo.value, frozen: fo.frozen }) as FilterOptionParsed);
                         cr.orderOptions = oos.map(oo => ({ token: completer.get(oo.columnName), orderType: oo.orderType }) as OrderOptionParsed);
                         cr.columns = cols;
