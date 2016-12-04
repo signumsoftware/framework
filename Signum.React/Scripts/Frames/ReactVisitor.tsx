@@ -63,11 +63,47 @@ export class ReplaceVisitor extends ReactVisitor {
 
     visitElement(element: React.ReactElement<any>) {
 
-        if (this.predicate(element))
-            return this.replacement(element);
+        if (this.predicate(element)) {
+
+            var node = this.replacement(element);
+            if (Array.isArray(node))
+                node = React.createElement("div", {}, ...node);
+
+            return new ReactValidator().visitChild(node as React.ReactChild);
+        }
 
         return super.visitElement(element);
     }    
+}
+
+export class ReactValidator extends ReactVisitor {
+    visitElement(element: React.ReactElement<any>) {
+
+        var error = this.getError(element);
+        if (error) {
+            return <div className="alert alert-danger">{error}</div>;
+        }
+
+        return super.visitElement(element);
+    }  
+
+    static validTagRegex = /^[a-zA-Z][a-zA-Z:_\.\-\d]*$/
+
+    getError(element: React.ReactElement<any>) {
+
+        if (typeof element.type === 'function')
+            return undefined;
+
+        if (typeof element.type === 'string') {
+            if (!ReactValidator.validTagRegex.exec(element.type))
+                return "Invalid tag: " + element.type;
+
+            return undefined;
+        }
+
+        return "React.createElement: type should not be null, undefined, boolean, or number. It should be a string (for DOM elements) or a ReactClass (for composite components).";
+    }
+
 }
 
 export class ViewReplacer<T> {
@@ -79,27 +115,27 @@ export class ViewReplacer<T> {
     }
 
 
-    remove(pr: (entity: T) => any): this {
+    remove(propertyRoute: (entity: T) => any): this {
         this.result = new ReplaceVisitor(
-            e => hasPropertyRoute(e, this.ctx.propertyRoute.add(pr)),
+            e => hasPropertyRoute(e, this.ctx.propertyRoute.add(propertyRoute)),
             e => [])
             .visit(this.result);
 
         return this;
     }
 
-    insertAfter(pr: (entity: T) => any, ...newElements: React.ReactElement<any>[]): this {
+    insertAfter(propertyRoute: (entity: T) => any, ...newElements: React.ReactElement<any>[]): this {
         this.result = new ReplaceVisitor(
-            e => hasPropertyRoute(e, this.ctx.propertyRoute.add(pr)),
+            e => hasPropertyRoute(e, this.ctx.propertyRoute.add(propertyRoute)),
             e => [e, ...newElements])
             .visit(this.result);
 
         return this;
     }
 
-    insertBefore(pr: (entity: T) => any, ...newElements: React.ReactElement<any>[]): this {
+    insertBefore(propertyRoute: (entity: T) => any, ...newElements: React.ReactElement<any>[]): this {
         this.result = new ReplaceVisitor(
-            e => hasPropertyRoute(e, this.ctx.propertyRoute.add(pr)),
+            e => hasPropertyRoute(e, this.ctx.propertyRoute.add(propertyRoute)),
             e => [...newElements, e])
             .visit(this.result);
 

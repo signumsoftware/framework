@@ -565,6 +565,7 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
 
 
 const functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*(\"use strict\"\;)?\s*return\s*([^;]*)\s*;?\s*}$/;
+const lambdaRegex = /^\s*\(?\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)?\s*=>\s*{?\s*(return\s+)?([^;]*)\s*;?\s*}?$/;
 const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
 const memberIndexerRegex = /^(.*)\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; //Necessary for some crazy minimizers
 const indexRegex = /^(.*)\[(\d+)\]$/;
@@ -572,8 +573,10 @@ const mixinRegex = /^(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*
 const partialMixinRegex = /(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)/
 
 export function getLambdaMembers(lambda: Function): LambdaMember[]{
-    
-    const lambdaMatch = functionRegex.exec((lambda as any).toString());
+
+    var lambdaStr = (lambda as any).toString();
+
+    const lambdaMatch = functionRegex.exec(lambdaStr) || lambdaRegex.exec(lambdaStr);
 
     if (lambdaMatch == undefined)
         throw Error("invalid function");

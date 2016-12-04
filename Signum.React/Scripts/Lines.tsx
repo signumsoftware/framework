@@ -127,7 +127,7 @@ export function taskSetHtmlProperties(lineBase: LineBase<any, any>, state: LineB
 
         var member = pr.member!;
 
-        if (member.maxLength != undefined) {
+        if (member.maxLength != undefined && !s.ctx.readOnly) {
 
             if (!s.valueHtmlProps)
                 s.valueHtmlProps = {};
