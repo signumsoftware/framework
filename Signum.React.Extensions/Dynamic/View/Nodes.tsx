@@ -72,7 +72,11 @@ NodeUtils.register<RowNode>({
     order: 1,
     isContainer: true,
     validChild: "Column",
-    renderTreeNode: NodeUtils.treeNodeKind, 
+    renderTreeNode: NodeUtils.treeNodeKind,
+    validate: (dn, parentCtx) => parentCtx && dn.node.children.filter(c => c.kind == "Column").map(col =>
+        NodeUtils.evaluate(parentCtx, col, f => (f as ColumnNode).width) +
+        (NodeUtils.evaluate(parentCtx, col, f => (f as ColumnNode).offset) || 0)
+    ).sum() > 12 ? "Sum of Column.width/offset should <= 12" : null,
     renderCode: (node, cc) => cc.elementCodeWithChildrenSubCtx("div", withClassNameEx(node.htmlAttributes, "row"), node),
     render: (dn, parentCtx) => NodeUtils.withChildrensSubCtx(dn, parentCtx, <div {...withClassName(toHtmlAttributes(parentCtx, dn.node.htmlAttributes), "row") } />),
     renderDesigner: dn => (<div>
@@ -313,7 +317,7 @@ NodeUtils.register<ValueLineNode>({
         onChange: cc.evaluateOnChange(node.redrawOnChange)
     }),
     render: (dn, ctx) => (<ValueLine
-        ctx={ctx.subCtx(NodeUtils.asFieldFunction(dn.node.field))}
+        ctx={ctx.subCtx(NodeUtils.asFieldFunction(dn.node.field), toStyleOptions(ctx, dn.node.styleOptions))}
         labelText={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
         labelHtmlProps={toHtmlAttributes(ctx, dn.node.labelHtmlAttributes)}
         formGroupHtmlProps={toHtmlAttributes(ctx, dn.node.formGroupHtmlAttributes)}
@@ -430,7 +434,7 @@ NodeUtils.register<EnumCheckboxListNode>({
         onChange: cc.evaluateOnChange(node.redrawOnChange),
     }),
     render: (dn, ctx) => (<EnumCheckboxList
-        ctx={ctx.subCtx(NodeUtils.asFieldFunction(dn.node.field))}
+        ctx={ctx.subCtx(NodeUtils.asFieldFunction(dn.node.field), toStyleOptions(ctx, dn.node.styleOptions))}
         labelText={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
         readOnly={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
         columnCount={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.columnCount, NodeUtils.isNumberOrNull)}

@@ -91,7 +91,7 @@ export class CodeContext {
             if (v != undefined && isExpression(v))
                 return "%<%" + v.__code__.replace(/\bctx\b/, this.ctxName) + "%>%";
             return v;
-        }, 1);
+        }, 3);
 
         result = result.replace(/\"([^(\")"]+)\":/g, "$1:");
         result = result.replace(/"%<%(.*?)%>%"/g, s => {
@@ -626,7 +626,7 @@ export function addBreakLines(breakLines: boolean, message: string): React.React
 export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: TypeContext<ModifiableEntity>, options: { showAutoComplete?: boolean, showMove?: boolean, avoidGetComponent?: boolean }): EntityBaseProps {
 
     var result: EntityBaseProps = {
-        ctx: parentCtx.subCtx(asFieldFunction(dn.node.field)),
+        ctx: parentCtx.subCtx(asFieldFunction(dn.node.field), toStyleOptions(parentCtx, dn.node.styleOptions)),
         labelText: evaluateAndValidate(parentCtx, dn.node, n => n.labelText, isStringOrNull),
         labelHtmlProps: toHtmlAttributes(parentCtx, dn.node.labelHtmlAttributes),
         formGroupHtmlProps: toHtmlAttributes(parentCtx, dn.node.formGroupHtmlAttributes),

@@ -10,10 +10,11 @@ import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 import { TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
 import { isTypeEntity, getTypeInfo, } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { Entity, ModifiableEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
 import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal'
+import ButtonBar from '../../../Framework/Signum.React/Scripts/Frames/ButtonBar';
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import { DynamicViewEntity, DynamicViewSelectorEntity, DynamicViewMessage, DynamicViewOperation } from './Signum.Entities.Dynamic'
@@ -24,7 +25,7 @@ import { DynamicViewComponentProps } from './View/DynamicViewComponent'
 import { AuthInfo } from './View/AuthInfo'
 
 export function start(options: { routes: JSX.Element[] }) {
-
+    
     Navigator.addSettings(new EntitySettings(DynamicViewEntity, w => new ViewPromise(resolve => require(['./View/DynamicViewEntity'], resolve))));
     Navigator.addSettings(new EntitySettings(DynamicViewSelectorEntity, w => new ViewPromise(resolve => require(['./View/DynamicViewSelector'], resolve))));
 
@@ -39,32 +40,53 @@ export function start(options: { routes: JSX.Element[] }) {
         }
     }));
 
-    Navigator.setFallbackViewPromise(mod => {
-        if (!isTypeEntity(mod.Type))
-            return new ViewPromise(resolve => require(['../../../Framework/Signum.React/Scripts/Lines/DynamicComponent'], resolve));
+    Navigator.setViewDispatcher(new DynamicViewViewDispatcher());
+}
 
-        var promise = getSeletor(mod.Type).then(sel => {
+export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
+
+    hasView(typeName: string) {
+        return true;
+    }
+
+    getView(entity: ModifiableEntity) {
+
+        if (!isTypeEntity(entity.Type))
+            return this.fallback(entity);
+
+        return ViewPromise.flat(getSeletor(entity.Type).then(sel => {
 
             if (!sel)
-                return chooseDynamicView(mod.Type);
+                return this.fallback(entity);
 
-            var viewName = sel(mod as Entity, new AuthInfo());
+            var viewName = sel(entity as Entity, new AuthInfo());
 
             if (viewName == "STATIC")
-                throw new Error("STATIC not implemented");
+                return this.fallback(entity);
 
             if (viewName == "NEW")
-                return createDefaultDynamicView(mod.Type);
+                return ViewPromise.flat(createDefaultDynamicView(entity.Type).then(dv => this.dynamicComponent(dv)));
 
             if (viewName == "CHOOSE")
-                return chooseDynamicView(mod.Type, true);
+                return ViewPromise.flat(chooseDynamicView(entity.Type, true).then(dv => this.dynamicComponent(dv)));
 
-            return API.getDynamicView(mod.Type, viewName);
-        });
+            return ViewPromise.flat(API.getDynamicView(entity.Type, viewName).then(dv => this.dynamicComponent(dv)));
+        }));
+    }
 
+    dynamicComponent(promiseDv: DynamicViewEntity): ViewPromise<ModifiableEntity>  {
         return new ViewPromise(resolve => require(['./View/DynamicViewComponent'], resolve))
-            .withProps(promise.then(dv => ({ initialDynamicView: dv })));
-    });
+            .withProps({ initialDynamicView: promiseDv});
+    }
+
+    fallback(entity: ModifiableEntity): ViewPromise<ModifiableEntity> {
+        const settings = Navigator.getSettings(entity.Type) as EntitySettings<ModifiableEntity>;
+
+        if (!settings || !settings.getViewPromise)
+            return new ViewPromise<ModifiableEntity>(resolve => require(['./Lines/DynamicViewComponent'], resolve));
+
+        return settings.getViewPromise(entity).applyViewOverrides(settings);
+    }
 }
 
 export function getSeletor(typeName: string): Promise<((e: Entity, auth: AuthInfo) => any) | undefined> {
