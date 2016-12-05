@@ -42,6 +42,11 @@ namespace Signum.Engine.Isolation
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+
+
+                SchemaBuilder.GlobalLazySurround = () => IsolationEntity.Disable();
+
+
                 sb.Include<IsolationEntity>();
 
                 dqm.RegisterQuery(typeof(IsolationEntity), () =>
