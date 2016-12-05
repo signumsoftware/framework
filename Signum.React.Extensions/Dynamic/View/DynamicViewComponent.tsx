@@ -39,7 +39,7 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
     constructor(props: DynamicViewComponentProps) {
         super(props);
         
-        const rootNode = JSON.parse(props.initialDynamicView.viewContent!) as BaseNode;;
+        const rootNode = JSON.parse(props.initialDynamicView.viewContent!) as BaseNode;
         this.state = {
             dynamicView: props.initialDynamicView,
             isDesignerOpen: false,
@@ -228,3 +228,44 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { vi
     }
 }
 
+export interface DynamicViewPartProps {
+    ctx: TypeContext<ModifiableEntity>;
+    viewName: string;
+}
+
+export interface DynamicViewPartState {
+    rootNode?: BaseNode;
+}
+
+export class DynamicViewPart extends React.Component<DynamicViewPartProps, DynamicViewPartState> {
+
+    constructor(props: DynamicViewPartProps) {
+        super(props);
+        this.state = {};
+    }
+
+    componentWillMount() {
+        DynamicViewClient.API.getDynamicView(this.props.ctx.value.Type, this.props.viewName)
+            .then(dv => this.setState({ rootNode: JSON.parse(dv.viewContent!) as BaseNode }))
+            .done();
+    }
+
+    render() {
+        if (!this.state.rootNode)
+            return null;
+
+        var ctx = this.props.ctx;
+
+        var rootNode = DesignerNode.zero({
+            onClose: () => {},
+            refreshView: () => {},
+            getSelectedNode: () => undefined,
+            setSelectedNode: () => {},
+        }, ctx.value.Type).createChild(this.state.rootNode);
+
+        return (
+            <div className="design-content">
+                {NodeUtils.renderWithViewOverrides(rootNode, ctx)}
+            </div>);
+    }
+}
