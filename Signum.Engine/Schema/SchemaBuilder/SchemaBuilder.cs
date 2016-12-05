@@ -814,13 +814,22 @@ namespace Signum.Engine.Maps
             GlobalLazyManager = manager;
         }
 
+        public static Func<IDisposable> GlobalLazySurround;
+
         public ResetLazy<T> GlobalLazy<T>(Func<T> func, InvalidateWith invalidateWith, Action onInvalidated = null, LazyThreadSafetyMode mode = LazyThreadSafetyMode.ExecutionAndPublication) where T : class
         {
             var result = Signum.Engine.GlobalLazy.WithoutInvalidations(() =>
             {
                 GlobalLazyManager.OnLoad(this, invalidateWith);
 
-                return func();
+                if (GlobalLazySurround == null)
+                    return func();
+                else
+                    using (GlobalLazySurround())
+                    {
+                        return func();
+                    }
+
             });
 
             GlobalLazyManager.AttachInvalidations(this, invalidateWith, (sender, args) =>
