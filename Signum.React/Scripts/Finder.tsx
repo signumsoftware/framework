@@ -6,7 +6,7 @@ import { Dic } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
 import {
-    QueryDescription, CountQueryRequest, QueryRequest, QueryEntitiesRequest, FindOptions, 
+    QueryDescription, QueryCountRequest, QueryRequest, QueryEntitiesRequest, FindOptions, 
     FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, CountOptionsParsed,
     QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination, ResultColumn,
     ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest
@@ -310,7 +310,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
         if (qd.columns[defaultOrder]) {
             fo.orderOptions = [{
                 columnName: defaultOrder,
-                orderType: tis.some(a => a.entityData == "Transactional") ? "Descending" as OrderType : "Ascending" as OrderType
+                orderType: qs && qs.defaultOrderType || (tis.some(a => a.entityData == "Transactional") ? "Descending" as OrderType : "Ascending" as OrderType)
             }];
         }
     }
@@ -364,6 +364,8 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
     });
 }
 
+export function fetchEntitiesWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: FilterOption[], count: number): Promise<Lite<T>[]>;
+export function fetchEntitiesWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], count: number): Promise<Lite<Entity>[]>;
 export function fetchEntitiesWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], count: number) : Promise<Lite<Entity>[]> {
     return getQueryDescription(queryName).then(qd => {
         return parseFilterOptions(filterOptions, qd).then(fop => {
@@ -580,8 +582,8 @@ export module API {
     export function executeQuery(request: QueryRequest): Promise<ResultTable> {
         return ajaxPost<ResultTable>({ url: "~/api/query/executeQuery" }, request);
     }
-    
-    export function queryCount(request: CountQueryRequest): Promise<number> {
+
+    export function queryCount(request: QueryCountRequest): Promise<number> {
         return ajaxPost<number>({ url: "~/api/query/queryCount" }, request);
     }
 
@@ -756,6 +758,7 @@ export interface QuerySettings {
     queryName: PseudoType | QueryKey;
     pagination?: Pagination;
     defaultOrderColumn?: string;
+    defaultOrderType?: OrderType;
     hiddenColumns?: ColumnOption[];
     formatters?: { [columnName: string]: CellFormatter };
     rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes | undefined;

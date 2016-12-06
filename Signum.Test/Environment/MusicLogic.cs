@@ -25,17 +25,8 @@ namespace Signum.Test.Environment
                     sb.Settings.FieldAttributes((AlbumEntity a) => a.BonusTrack.Duration).Add(new Signum.Entities.IgnoreAttribute());
                 }
 
-                sb.Include<AlbumEntity>();
-                sb.Include<NoteWithDateEntity>();
-                sb.Include<PersonalAwardEntity>();
-                sb.Include<AwardNominationEntity>();
-                sb.Include<ConfigEntity>();
-
-                MinimumExtensions.IncludeFunction(sb.Schema.Assets);
-
-                dqm.RegisterQuery(typeof(AlbumEntity), ()=> 
-                    from a in Database.Query<AlbumEntity>()
-                    select new
+                sb.Include<AlbumEntity>()
+                    .WithQuery(dqm, a => new
                     {
                         Entity = a,
                         a.Id,
@@ -45,9 +36,8 @@ namespace Signum.Test.Environment
                         a.Year
                     });
 
-                dqm.RegisterQuery(typeof(NoteWithDateEntity), ()=> 
-                    from a in Database.Query<NoteWithDateEntity>()
-                    select new
+                sb.Include<NoteWithDateEntity>()
+                    .WithQuery(dqm, a => new
                     {
                         Entity = a,
                         a.Id,
@@ -56,9 +46,13 @@ namespace Signum.Test.Environment
                         a.CreationTime,
                     });
 
-                dqm.RegisterQuery(typeof(ArtistEntity), ()=> 
-                    from a in Database.Query<ArtistEntity>()
-                    select new
+                sb.Include<PersonalAwardEntity>();
+                sb.Include<AwardNominationEntity>();
+                sb.Include<ConfigEntity>();
+
+                MinimumExtensions.IncludeFunction(sb.Schema.Assets);
+                sb.Include<ArtistEntity>()
+                    .WithQuery(dqm, a => new
                     {
                         Entity = a,
                         a.Id,
@@ -68,12 +62,11 @@ namespace Signum.Test.Environment
                         a.Dead,
                         a.LastAward,
                     });
-
+                
                 dqm.RegisterExpression((IAuthorEntity au) => Database.Query<AlbumEntity>().Where(a => a.Author == au), () => typeof(AlbumEntity).NicePluralName(), "Albums");
 
-                dqm.RegisterQuery(typeof(BandEntity), ()=> 
-                    from a in Database.Query<BandEntity>()
-                    select new
+                sb.Include<BandEntity>()
+                    .WithQuery(dqm, a => new
                     {
                         Entity = a,
                         a.Id,
@@ -81,20 +74,16 @@ namespace Signum.Test.Environment
                         a.LastAward,
                     });
 
-
-                dqm.RegisterQuery(typeof(LabelEntity), ()=> 
-                    from a in Database.Query<LabelEntity>()
-                    select new
+                sb.Include<LabelEntity>()
+                    .WithQuery(dqm, a => new
                     {
                         Entity = a,
                         a.Id,
                         a.Name,
                     });
 
-
-                dqm.RegisterQuery(typeof(AmericanMusicAwardEntity), ()=> 
-                    from a in Database.Query<AmericanMusicAwardEntity>()
-                    select new
+                sb.Include<AmericanMusicAwardEntity>()
+                    .WithQuery(dqm, a => new
                     {
                         Entity = a,
                         a.Id,
@@ -103,9 +92,8 @@ namespace Signum.Test.Environment
                         a.Result,
                     });
 
-                dqm.RegisterQuery(typeof(GrammyAwardEntity), ()=> 
-                    from a in Database.Query<GrammyAwardEntity>()
-                    select new
+                sb.Include<GrammyAwardEntity>()
+                    .WithQuery(dqm, a => new
                     {
                         Entity = a,
                         a.Id,
@@ -114,9 +102,8 @@ namespace Signum.Test.Environment
                         a.Result
                     });
 
-                dqm.RegisterQuery(typeof(PersonalAwardEntity), ()=> 
-                    from a in Database.Query<PersonalAwardEntity>()
-                    select new
+                sb.Include<PersonalAwardEntity>()
+                    .WithQuery(dqm, a => new
                     {
                         Entity = a,
                         a.Id,
@@ -125,9 +112,8 @@ namespace Signum.Test.Environment
                         a.Result
                     });
 
-                dqm.RegisterQuery(typeof(AwardNominationEntity), ()=> 
-                    from a in Database.Query<AwardNominationEntity>()
-                    select new
+                sb.Include<AwardNominationEntity>()
+                    .WithQuery(dqm, a => new
                     {
                         Entity = a,
                         a.Id,
@@ -135,8 +121,7 @@ namespace Signum.Test.Environment
                         a.Author
                     });
 
-
-                dqm.RegisterQuery(typeof(IAuthorEntity), () => DynamicQuery.Manual((request, descriptions) =>
+                dqm.RegisterQuery(typeof(IAuthorEntity), () => DynamicQueryCore.Manual((request, descriptions) =>
                     {
                         var one = (from a in Database.Query<ArtistEntity>()
                                    select new

@@ -68,9 +68,8 @@ namespace Signum.Engine.Basics
                     new InvalidateWith(typeof(TypeEntity)),
                     Schema.Current.InvalidateMetadata);
 
-                dqm.RegisterQuery(typeof(TypeEntity), () =>
-                    from t in Database.Query<TypeEntity>()
-                    select new
+                sb.Include<TypeEntity>()
+                    .WithQuery(dqm, t => new
                     {
                         Entity = t,
                         t.Id,
@@ -79,7 +78,7 @@ namespace Signum.Engine.Basics
                         t.ClassName,
                         t.Namespace,
                     });
-
+                
                 TypeEntity.SetTypeDNCallbacks(
                     t => TypeToEntity.GetOrThrow(t),
                     t => DnToType.GetOrThrow(t));
@@ -97,10 +96,10 @@ namespace Signum.Engine.Basics
         {
             Table table = Schema.Current.Table<TypeEntity>();
 
-            Dictionary<string, TypeEntity> should = GenerateSchemaTypes().ToDictionary(s => s.TableName, "tableName in memory");
+            Dictionary<string, TypeEntity> should = GenerateSchemaTypes().ToDictionaryEx(s => s.TableName, "tableName in memory");
 
             Dictionary<string, TypeEntity> current = replacements.ApplyReplacementsToOldCleaning(
-                Administrator.TryRetrieveAll<TypeEntity>(replacements).ToDictionary(c => c.TableName, "tableName in database"), Replacements.KeyTables);
+                Administrator.TryRetrieveAll<TypeEntity>(replacements).ToDictionaryEx(c => c.TableName, "tableName in database"), Replacements.KeyTables);
 
             using (replacements.WithReplacedDatabaseName())
                 return Synchronizer.SynchronizeScript(

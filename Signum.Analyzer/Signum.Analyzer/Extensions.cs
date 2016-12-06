@@ -52,9 +52,9 @@ namespace Signum.Analyzer
 
         public static INamedTypeSymbol GetLiteEntityType(this TypeInfo e)
         {
-            var namedSymbol = (INamedTypeSymbol)e.Type;
-
-            return (INamedTypeSymbol)namedSymbol.TypeArguments.FirstOrDefault();
+            var namedSymbol = e.Type as INamedTypeSymbol;
+            
+            return namedSymbol?.TypeArguments.FirstOrDefault() as INamedTypeSymbol; 
         }
 
         public static bool IsEntity(this TypeInfo e)

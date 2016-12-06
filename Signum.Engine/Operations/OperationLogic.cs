@@ -86,22 +86,8 @@ namespace Signum.Engine.Operations
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<OperationLogEntity>();
-
-                SymbolLogic<OperationSymbol>.Start(sb, dqm, () => RegisteredOperations);
-
-                dqm.RegisterQuery(typeof(OperationSymbol), () =>
-                    from os in Database.Query<OperationSymbol>()
-                    select new
-                    {
-                        Entity = os,
-                        os.Id,
-                        os.Key
-                    });
-
-                dqm.RegisterQuery(typeof(OperationLogEntity), () =>
-                    from lo in Database.Query<OperationLogEntity>()
-                    select new
+                sb.Include<OperationLogEntity>()
+                    .WithQuery(dqm, lo => new
                     {
                         Entity = lo,
                         lo.Id,
@@ -111,6 +97,16 @@ namespace Signum.Engine.Operations
                         lo.Start,
                         lo.End,
                         lo.Exception
+                    });
+
+                SymbolLogic<OperationSymbol>.Start(sb, dqm, () => RegisteredOperations);
+
+                sb.Include<OperationSymbol>()
+                    .WithQuery(dqm, os => new
+                    {
+                        Entity = os,
+                        os.Id,
+                        os.Key
                     });
 
                 dqm.RegisterExpression((OperationSymbol o) => o.Logs(), () => OperationMessage.Logs.NiceToString());

@@ -1,23 +1,22 @@
-﻿using System;
+﻿using Microsoft.SqlServer.Server;
+using Signum.Engine.Basics;
+using Signum.Engine.Maps;
+using Signum.Entities;
+using Signum.Entities.Basics;
+using Signum.Entities.DynamicQuery;
+using Signum.Entities.Reflection;
+using Signum.Utilities;
+using Signum.Utilities.DataStructures;
+using Signum.Utilities.ExpressionTrees;
+using Signum.Utilities.Reflection;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
-using System.Diagnostics;
-using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Entities;
-using Signum.Utilities.DataStructures;
-using Signum.Utilities.Reflection;
-using Signum.Engine.Maps;
-using Signum.Entities.Reflection;
-using Signum.Entities.DynamicQuery;
-using System.Collections.ObjectModel;
-using Microsoft.SqlServer.Server;
-using Signum.Engine.Basics;
-using Signum.Entities.Basics;
 
 namespace Signum.Engine.Linq
 {
@@ -61,7 +60,9 @@ namespace Signum.Engine.Linq
         {
             if (m.Method.DeclaringType == typeof(Queryable) ||
                 m.Method.DeclaringType == typeof(Enumerable) ||
-                m.Method.DeclaringType == typeof(EnumerableUniqueExtensions))
+                m.Method.DeclaringType == typeof(EnumerableUniqueExtensions) ||
+                m.Method.DeclaringType == typeof(StandartDeviationExtensions) ||
+                m.Method.DeclaringType == typeof(StandartDeviationPopulationExtensions))
             {
                 switch (m.Method.Name)
                 {
@@ -103,6 +104,8 @@ namespace Signum.Engine.Linq
                     case "Min":
                     case "Max":
                     case "Average":
+                    case "StdDev":
+                    case "StdDevP":
                         return this.BindAggregate(m.Type, m.Method.Name.ToEnum<AggregateFunction>(),
                             m.GetArgument("source"), m.TryGetArgument("selector").StripQuotes(), m == root);
                     case "First":
@@ -439,8 +442,8 @@ namespace Signum.Engine.Linq
             return new SqlFunctionExpression(typeof(string), null, SqlFunction.STUFF.ToString(), new Expression[]
             {
                 new ScalarExpression(typeof(string), select),
-                new SqlConstantExpression(1), 
-                new SqlConstantExpression(value.Length), 
+                new SqlConstantExpression(1),
+                new SqlConstantExpression(value.Length),
                 new SqlConstantExpression("")
             });
         }
@@ -510,7 +513,7 @@ namespace Signum.Engine.Linq
 
         private Type GetBasicType(Expression nominated)
         {
-            if(nominated == null)
+            if (nominated == null)
                 return typeof(int);
 
             if (nominated.Type.UnNullify().IsEnum)
@@ -763,7 +766,7 @@ namespace Signum.Engine.Linq
 
             Expression key = GroupEntityCleaner.Clean(MapVisitExpand(keySelector, projection));
             ProjectedColumns keyPC = ColumnProjector.ProjectColumns(key, alias, isGroupKey: true, selectTrivialColumns: true);  // Use ProjectColumns to get group-by expressions from key expression
-            
+
             var select = projection.Select;
 
             if (keyPC.Columns.Any(c => ContainsAggregateVisitor.ContainsAggregate(c.Expression))) //SQL Server doesn't like to use aggregates (like Count) as grouping keys, and a intermediate query is necessary
@@ -905,7 +908,7 @@ namespace Signum.Engine.Linq
                 {
                     expr = ExtractTypeId(expr);
                 }
-                
+
                 if (expr.Type.UnNullify() == typeof(PrimaryKey))
                 {
                     expr = SmartEqualizer.UnwrapPrimaryKey(expr);
@@ -1113,7 +1116,7 @@ namespace Signum.Engine.Linq
                 }
             }
 
-            if(m.Method.Name == "ToString" && m.Method.GetParameters().Length == 0)
+            if (m.Method.Name == "ToString" && m.Method.GetParameters().Length == 0)
             {
                 if (source is EntityExpression)
                 {
@@ -1209,7 +1212,7 @@ namespace Signum.Engine.Linq
                 return result;
             }
 
-            if(source.IsNull())
+            if (source.IsNull())
             {
                 return Expression.Constant(null, m.Type.Nullify()).TryConvert(m.Type);
             }
@@ -1251,11 +1254,11 @@ namespace Signum.Engine.Linq
                             {
                                 int index = nex.Constructor.GetParameters().IndexOf(p => p.Name.Equals(m.Member.Name, StringComparison.InvariantCultureIgnoreCase));
 
-                                if(index == -1)
+                                if (index == -1)
                                     throw new InvalidOperationException("Impossible to bind '{0}' on '{1}'".FormatWith(m.Member.Name, nex.Constructor.ConstructorSignature()));
 
                                 return nex.Arguments[index].TryConvert(m.Member.ReturningType());
-                            }   
+                            }
 
                             PropertyInfo pi = (PropertyInfo)m.Member;
                             return nex.Members.Zip(nex.Arguments).SingleEx(p => ReflectionTools.PropertyEquals((PropertyInfo)p.Item1, pi)).Item2;
@@ -1308,7 +1311,7 @@ namespace Signum.Engine.Linq
 
                                         PropertyInfo pi = m.Member as PropertyInfo;
                                         if (pi.Name == "MainEntity")
-                                            return mee.FieldMixin.MainEntityTable.GetProjectorExpression(mee.MainEntityAlias, this); 
+                                            return mee.FieldMixin.MainEntityTable.GetProjectorExpression(mee.MainEntityAlias, this);
 
                                         FieldInfo fi = m.Member as FieldInfo ?? Reflector.FindFieldInfo(mee.Type, (PropertyInfo)m.Member);
 
@@ -1700,7 +1703,7 @@ namespace Signum.Engine.Linq
             if (unary.Operand.NodeType == ExpressionType.Convert)
             {
                 var newOperant = SimplifyRedundandConverts((UnaryExpression)unary.Operand);
-                unary = Expression.Convert(newOperant, unary.Type); 
+                unary = Expression.Convert(newOperant, unary.Type);
             }
 
             //(int)(object)3 --> 3
@@ -1737,7 +1740,12 @@ namespace Signum.Engine.Linq
                 return operand;
 
             if (operand.Type.IsLite() != uType.IsLite())
+            {
+                if (uType.IsAssignableFrom(operand.Type)) //(object)
+                    return null;
+
                 throw new InvalidCastException("Impossible to convert {0} to {1}".FormatWith(operand.Type.TypeName(), uType.TypeName()));
+            }
 
             if (operand is EntityExpression)
             {
@@ -1944,7 +1952,7 @@ namespace Signum.Engine.Linq
                 throw new InvalidOperationException("Update not supported for {0}".FormatWith(entity.GetType().TypeName()));
 
             var result = new CommandAggregateExpression(new CommandExpression[]
-            { 
+            {
                 new UpdateExpression(table, pr.Select, condition, assignments),
                 new SelectRowCountExpression()
             });
@@ -1971,7 +1979,7 @@ namespace Signum.Engine.Linq
                 map.Add(param, pr.Projector);
                 map.Add(toInsertParam, toInsert);
                 var cleanedConstructor = DbQueryProvider.Clean(constructor.Body, false, null);
-                FillColumnAssigments(assignments, toInsertParam, cleanedConstructor, e=>
+                FillColumnAssigments(assignments, toInsertParam, cleanedConstructor, e =>
                 {
                     var cleaned = DbQueryProvider.Clean(e, true, null);
                     Expression expression = Visit(cleaned);
@@ -1982,13 +1990,13 @@ namespace Signum.Engine.Linq
             }
 
             var entityTable = table as Table;
-            if(entityTable != null && entityTable.Ticks != null && assignments.None(b => b.Column == entityTable.Ticks.Name))
+            if (entityTable != null && entityTable.Ticks != null && assignments.None(b => b.Column == entityTable.Ticks.Name))
             {
                 assignments.Add(new ColumnAssignment(entityTable.Ticks.Name, Expression.Constant(0L, typeof(long))));
             }
 
             var result = new CommandAggregateExpression(new CommandExpression[]
-            { 
+            {
                 new InsertSelectExpression(table, pr.Select, assignments),
                 new SelectRowCountExpression()
             });
@@ -2001,7 +2009,7 @@ namespace Signum.Engine.Linq
 
         public void FillColumnAssigments(List<ColumnAssignment> assignments, ParameterExpression toInsert, Expression body, Func<Expression, Expression> visitValue)
         {
-            if(body is ParameterExpression)
+            if (body is ParameterExpression)
             {
                 body = this.map.GetOrThrow((ParameterExpression)body);
                 visitValue = e => e;
@@ -2029,7 +2037,7 @@ namespace Signum.Engine.Linq
                     var mi = ReflectionTools.BaseMemberInfo(mce.Arguments[1].StripQuotes());
 
                     Expression mixin = Expression.Call(toInsert, MixinDeclarations.miMixin.MakeGenericMethod(mixinType));
-                    
+
                     Expression colExpression = Visit(Expression.MakeMemberAccess(mixin, mi));
                     Expression expression = visitValue(mce.Arguments[2]);
                     assignments.AddRange(AdaptAssign(colExpression, expression));
@@ -2115,7 +2123,7 @@ namespace Signum.Engine.Linq
             else if (colExpression is EntityExpression && expression is EntityExpression)
             {
                 return new[] { AssignColumn(
-                        ((EntityExpression)colExpression).ExternalId.Value, 
+                        ((EntityExpression)colExpression).ExternalId.Value,
                         ((EntityExpression)expression).ExternalId.Value) };
 
             }
@@ -2325,7 +2333,7 @@ namespace Signum.Engine.Linq
             {
                 ImplementedByExpression ib = (ImplementedByExpression)expression;
 
-                var type = ib.Implementations.Select(imp=>imp.Value.ExternalId.ValueType.Nullify()).Distinct().SingleOrDefaultEx() ?? typeof(int?);
+                var type = ib.Implementations.Select(imp => imp.Value.ExternalId.ValueType.Nullify()).Distinct().SingleOrDefaultEx() ?? typeof(int?);
 
                 var aggregate = new PrimaryKeyExpression(Coalesce(type, ib.Implementations.Select(imp => imp.Value.ExternalId.Value)));
 
@@ -2973,7 +2981,7 @@ namespace Signum.Engine.Linq
             if (colExpression is EntityExpression)
                 return Combiner<EntityExpression>(left, right, (col, l, r) =>
                     new EntityExpression(col.Type, new PrimaryKeyExpression(CoallesceFlexible(
-                        l.ExternalId.Value.Nullify(), 
+                        l.ExternalId.Value.Nullify(),
                         r.ExternalId.Value.Nullify())), null, null, null, false));
 
             if (colExpression is ImplementedByExpression)
@@ -2998,7 +3006,7 @@ namespace Signum.Engine.Linq
                    new EmbeddedEntityExpression(col.Type,
                        Expression.Or(l.HasValue, r.HasValue),
                        col.Bindings.Select(bin => GetBinding(bin.FieldInfo, Expression.Coalesce(
-                           l.GetBinding(bin.FieldInfo).Nullify(), 
+                           l.GetBinding(bin.FieldInfo).Nullify(),
                            r.GetBinding(bin.FieldInfo).Nullify()), bin.Binding)),
                        col.FieldEmbedded));
 
@@ -3090,7 +3098,7 @@ namespace Signum.Engine.Linq
                     return ib;
 
                 return new ImplementedByExpression(colId.Type, ib.Strategy, colId.Implementations.ToDictionary(kvp => kvp.Key, kvp =>
-                    ib.Implementations.TryGetC(kvp.Key) ?? 
+                    ib.Implementations.TryGetC(kvp.Key) ??
                     new EntityExpression(kvp.Key, new PrimaryKeyExpression(Expression.Constant(null, PrimaryKey.Type(kvp.Key).Nullify())), null, null, null, false)));
             }
 

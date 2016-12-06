@@ -59,7 +59,8 @@ namespace Signum.Analyzer
                 var tLeft = left.GetLiteEntityType();
                 var tRight = right.GetLiteEntityType();
 
-                if (
+                if (tLeft != null && 
+                    tRight != null &&
                     !tLeft.IsAbstract &&
                     !tRight.IsAbstract &&
                     !tLeft.GetBaseTypesAndThis().Contains(tRight) &&

@@ -56,7 +56,7 @@ AdventureWorks>Data Source=MyServer;Initial Catalog=AdventureWorks;User ID=sa;Pa
 
 Before generating the entities, makes sense that we comment out any module that could be registering their own tables in the database, complicating the situation.
 
-In `Start` method of `Starter` class, comment out everything every line between
+In `Start` method of `Starter` class, comment out every line between
 
 ```
 OperationLogic.Start(sb, dqm);
@@ -84,11 +84,11 @@ sb.Schema.Settings.OverrideAttributes((OperationLogEntity ua) => ua.User, new Im
 
 ### Step 4: Adapting the legacy Schema
 
-If you run the `AdventureWorks.Load` application and choose `[G]enerate` -> `[E]ntities` and exception will be thrown. 
+If you run the `AdventureWorks.Load` application and choose `[G]enerate` -> `[E]ntities` and exception will be thrown. We'll need to fix that.
 
 Unfortunately is not that easy, we have to override `EntityCodeGenerator` to teach the code generator about the singularities of `AdventureWorks` and how to adapt them to the requirements of Signum Framework. This is the most complicated step. 
 
-* First you need to have some knowledge of how Signum Framework represents [`Entity` and `EmbeddedEntity`](../../Signum.Entities/BaseEntities.md), [`MList<T>`](../../Signum.Entities/MList.md), [`Lite<T>`](../../Signum.Entities/Lite.md), etc... in the databe and what are the benefits of using each one. It's recomended to have some previous experience with the framework or make some module manually to get used. 
+* First you need to have some knowledge of how Signum Framework represents [`Entity` and `EmbeddedEntity`](../../Signum.Entities/BaseEntities.md), [`MList<T>`](../../Signum.Entities/MList.md), [`Lite<T>`](../../Signum.Entities/Lite.md), etc... in the database and what are the benefits of using each one. It's recomended to have some previous experience with the framework or make some module manually to get used. 
 
 * Then you need to take a look at the source code of [EntityCodeGenerator](EntityCodeGenerator.md) to see how it generates the entities code, is a self-contained piece of code relatively easy to understand. 
 
@@ -286,7 +286,7 @@ Generating the logic will be more straight forward. If we run `[G]enerate` -> `[
     {
         protected override IEnumerable<Module> GetModules()
         {
-            return GroupByNamespace(CandiateTypes(), this.SolutionName + ".Entities");
+            return GroupByNamespace(CandidateTypes(), this.SolutionName + ".Entities");
         }
 
         public static IEnumerable<Module> GroupByNamespace(List<Type> candidates, string baseNamespace)

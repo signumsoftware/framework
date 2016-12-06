@@ -442,15 +442,12 @@ String.prototype.replaceAll = function (this: string, from: string, to: string) 
     return this.split(from).join(to)
 };
 
-String.prototype.before = function (separator) {
-    const index = this.indexOf(separator);
-    if (index == -1)
-        throw Error("{0} not found".formatWith(separator));
-
-    return this.substring(0, index);
+String.prototype.indent = function (this: string, numChars: number) {
+    const indent = " ".repeat(numChars);
+    return this.split("\n").map(a => indent + a).join("\n");
 };
 
-String.prototype.after = function (separator) {
+String.prototype.after = function (this: string, separator: string) {
     const index = this.indexOf(separator);
     if (index == -1)
         throw Error("{0} not found".formatWith(separator));
@@ -458,15 +455,15 @@ String.prototype.after = function (separator) {
     return this.substring(index + separator.length);
 };
 
-String.prototype.tryBefore = function (separator) {
+String.prototype.before = function (this: string, separator: string) {
     const index = this.indexOf(separator);
     if (index == -1)
-        return undefined;
+        throw Error("{0} not found".formatWith(separator));
 
     return this.substring(0, index);
 };
 
-String.prototype.tryAfter = function (separator) {
+String.prototype.tryAfter = function (this: string, separator: string) {
     const index = this.indexOf(separator);
     if (index == -1)
         return undefined;
@@ -474,7 +471,15 @@ String.prototype.tryAfter = function (separator) {
     return this.substring(index + separator.length);
 };
 
-String.prototype.beforeLast = function (separator) {
+String.prototype.tryBefore = function (this: string, separator: string) {
+    const index = this.indexOf(separator);
+    if (index == -1)
+        return undefined;
+
+    return this.substring(0, index);
+};
+
+String.prototype.beforeLast = function (this: string, separator: string) {
     const index = this.lastIndexOf(separator);
     if (index == -1)
         throw Error("{0} not found".formatWith(separator));
@@ -482,7 +487,7 @@ String.prototype.beforeLast = function (separator) {
     return this.substring(0, index);
 };
 
-String.prototype.afterLast = function (separator) {
+String.prototype.afterLast = function (this: string, separator: string) {
     const index = this.lastIndexOf(separator);
     if (index == -1)
         throw Error("{0} not found".formatWith(separator));
@@ -490,7 +495,7 @@ String.prototype.afterLast = function (separator) {
     return this.substring(index + separator.length);
 };
 
-String.prototype.tryBeforeLast = function (separator) {
+String.prototype.tryBeforeLast = function (this: string, separator: string) {
     const index = this.lastIndexOf(separator);
     if (index == -1)
         return undefined;
@@ -498,7 +503,7 @@ String.prototype.tryBeforeLast = function (separator) {
     return this.substring(0, index);
 };
 
-String.prototype.tryAfterLast = function (separator) {
+String.prototype.tryAfterLast = function (this: string, separator: string) {
     const index = this.lastIndexOf(separator);
     if (index == -1)
         return undefined;

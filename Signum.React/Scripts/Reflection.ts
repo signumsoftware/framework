@@ -120,19 +120,19 @@ export function toNumbroFormat(format: string | undefined) {
     const f = format.toUpperCase();
 
     if (f.startsWith("C"))
-        return "0." + "0".repeat(parseInt(f.after("C")));
+        return "0." + "0".repeat(parseInt(f.after("C") || "2"));
 
     if (f.startsWith("N"))
-        return "0,0." + "0".repeat(parseInt(f.after("N")));
+        return "0,0." + "0".repeat(parseInt(f.after("N") || "2"));
 
     if (f.startsWith("D"))
-        return "0".repeat(parseInt(f.after("D")));
+        return "0".repeat(parseInt(f.after("D") || "1"));
 
     if (f.startsWith("E"))
-        return "0." + "0".repeat(parseInt(f.after("E")));
+        return "0." + "0".repeat(parseInt(f.after("E") || "2"));
 
     if (f.startsWith("P"))
-        return "0." + "0".repeat(parseInt(f.after("P"))) + "%";
+        return "0." + "0".repeat(parseInt(f.after("P") || "2")) + "%";
 
     return format;
 }
@@ -547,7 +547,7 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
     body = body.replace(partialMixinRegex,
         (...m: string[]) => `${m[2]}.mixins["${m[4]}"]`);
 
-    const m = memberRegex.exec(body);
+    const m = memberRegex.exec(body) || memberIndexerRegex.exec(body);;
 
     if (m == undefined) {
         const realParentValue = eval(`(function(${parameter}){ return ${body};})`)(parentValue);
@@ -565,14 +565,18 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
 
 
 const functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*(\"use strict\"\;)?\s*return\s*([^;]*)\s*;?\s*}$/;
+const lambdaRegex = /^\s*\(?\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)?\s*=>\s*{?\s*(return\s+)?([^;]*)\s*;?\s*}?$/;
 const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
+const memberIndexerRegex = /^(.*)\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; //Necessary for some crazy minimizers
 const indexRegex = /^(.*)\[(\d+)\]$/;
 const mixinRegex = /^(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)$/
 const partialMixinRegex = /(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)/
 
 export function getLambdaMembers(lambda: Function): LambdaMember[]{
-    
-    const lambdaMatch = functionRegex.exec((lambda as any).toString());
+
+    var lambdaStr = (lambda as any).toString();
+
+    const lambdaMatch = functionRegex.exec(lambdaStr) || lambdaRegex.exec(lambdaStr);
 
     if (lambdaMatch == undefined)
         throw Error("invalid function");
@@ -583,7 +587,7 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
 
     while (body != parameter) {
         let m: RegExpExecArray | null;
-        if (m = memberRegex.exec(body)) {
+        if (m = memberRegex.exec(body) || memberIndexerRegex.exec(body)) {
             result.push({ name: m[2], type: "Member" });
             body = m[1];
         }
@@ -864,10 +868,6 @@ export class PropertyRoute {
         return current;
     }
 
-    findRootType(): TypeInfo {
-        return this.rootType || this.parent!.findRootType();
-    }
-
     typeReference(): TypeReference {
         switch (this.propertyRouteType) {
             case "Root": return { name: this.rootType!.name };
@@ -883,13 +883,13 @@ export class PropertyRoute {
         return getTypeInfo(this.typeReference().name);
     }
 
-    rootTypeInfo(): TypeInfo {
+    findRootType(): TypeInfo {
         switch (this.propertyRouteType) {
             case "Root": return this.rootType!;
-            case "Field": return this.parent!.rootTypeInfo();
-            case "Mixin": return this.parent!.rootTypeInfo();
-            case "MListItem": return this.parent!.rootTypeInfo();
-            case "LiteEntity": return this.parent!.rootTypeInfo();
+            case "Field": return this.parent!.findRootType();
+            case "Mixin": return this.parent!.findRootType();
+            case "MListItem": return this.parent!.findRootType();
+            case "LiteEntity": return this.parent!.findRootType();
             default: throw new Error("Unexpected propertyRouteType");
         }
     }
@@ -946,7 +946,7 @@ export class PropertyRoute {
                 this.propertyRouteType == "MListItem" ? this.propertyPath() + member.name.firstUpper() :
                     this.propertyPath() + "." + member.name.firstUpper();
 
-            const m = this.rootTypeInfo().members[memberName];
+            const m = this.findRootType().members[memberName];
             if (!m)
                 throw new Error(`member '${memberName}' not found`)
 
@@ -993,8 +993,8 @@ export class PropertyRoute {
         
 
         switch (this.propertyRouteType) {
-            case "Root": return simpleMembersAfter(this.rootTypeInfo(), "");
-            case "Mixin": return simpleMembersAfter(this.rootTypeInfo(), this.propertyPath());                
+            case "Root": return simpleMembersAfter(this.findRootType(), "");
+            case "Mixin": return simpleMembersAfter(this.findRootType(), this.propertyPath());                
             case "LiteEntity": return simpleMembersAfter(this.typeReferenceInfo(), "");
             case "Field":
             case "MListItem": 
@@ -1003,7 +1003,7 @@ export class PropertyRoute {
                     if (ti && isTypeEntity(ti))
                         return simpleMembersAfter(ti, "");
                     else
-                        return simpleMembersAfter(this.rootTypeInfo(), this.propertyPath() + (this.propertyRouteType == "Field" ? "." : ""));
+                        return simpleMembersAfter(this.findRootType(), this.propertyPath() + (this.propertyRouteType == "Field" ? "." : ""));
                 }
             default: throw new Error("Unexpected propertyRouteType");
 

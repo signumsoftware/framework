@@ -265,7 +265,7 @@ namespace Signum.Engine.Maps
             return mixins;
         }
 
-        HashSet<string> loadedModules = new HashSet<string>();
+        public HashSet<Tuple<Type, string>> LoadedModules = new HashSet<Tuple<Type, string>>();
         public bool NotDefined(MethodBase methodBase)
         {
             var should = methodBase.DeclaringType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
@@ -279,15 +279,15 @@ namespace Signum.Engine.Maps
                 should.Where(a => a == f.Name).SingleEx(() => "Methods for {0}".FormatWith(f.Name));
 
 
-            return loadedModules.Add(methodBase.DeclaringType.FullName + "." + methodBase.Name);
+            return LoadedModules.Add(Tuple.Create(methodBase.DeclaringType, methodBase.Name));
         }
 
         public void AssertDefined(MethodBase methodBase)
         {
-            string name = methodBase.DeclaringType.FullName + "." + methodBase.Name;
+            var tulpe = Tuple.Create(methodBase.DeclaringType, methodBase.Name);
 
-            if (!loadedModules.Contains(name))
-                throw new ApplicationException("Call {0} first".FormatWith(name));
+            if (!LoadedModules.Contains(tulpe))
+                throw new ApplicationException("Call {0} first".FormatWith(tulpe));
         }
 
         #region Field Generator

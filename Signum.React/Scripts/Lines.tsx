@@ -58,8 +58,8 @@ import { EnumCheckboxList } from  './Lines/EnumCheckboxList'
 export { EnumCheckboxList };
 
 
-import { EntityTable } from './Lines/EntityTable'
-export { EntityTable };
+import { EntityTable, EntityTableColumn, EntityTableRow } from './Lines/EntityTable'
+export { EntityTable, EntityTableColumn, EntityTableRow };
 
 tasks.push(taskSetNiceName);
 export function taskSetNiceName(lineBase: LineBase<any, any>, state: LineBaseProps) {
@@ -127,7 +127,7 @@ export function taskSetHtmlProperties(lineBase: LineBase<any, any>, state: LineB
 
         var member = pr.member!;
 
-        if (member.maxLength != undefined) {
+        if (member.maxLength != undefined && !s.ctx.readOnly) {
 
             if (!s.valueHtmlProps)
                 s.valueHtmlProps = {};

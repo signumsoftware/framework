@@ -1,21 +1,18 @@
-﻿using System;
-using System.Linq;
-using System.Linq.Expressions;
+﻿using Signum.Engine.Linq;
 using Signum.Engine.Maps;
+using Signum.Engine.SchemaInfoTables;
 using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
-using System.Data;
-using System.Collections.Generic;
-using Signum.Utilities.DataStructures;
-using Signum.Engine.SchemaInfoTables;
-using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
-using System.Reflection;
+using System;
 using System.Collections.Concurrent;
-using Signum.Engine.Linq;
+using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
+using System.Linq;
+using System.Linq.Expressions;
 
 namespace Signum.Engine
 {
@@ -72,7 +69,7 @@ namespace Signum.Engine
             return ExistTable(Schema.Current.Table(type));
         }
 
-        public static bool ExistTable(Table table)
+        public static bool ExistTable(ITable table)
         {
             SchemaName schema = table.Name.Schema;
 
@@ -114,7 +111,7 @@ namespace Signum.Engine
 
        
 
-    
+
 
         public static IDisposable DisableIdentity<T>()
             where T : Entity
@@ -199,14 +196,20 @@ namespace Signum.Engine
         public static SqlPreCommandSimple UnsafeDeletePreCommand<T>(IQueryable<T> query)
             where T : Entity
         {
+            if (!Administrator.ExistTable<T>() || !query.Any())
+                return null;
+
             var prov = ((DbQueryProvider)query.Provider);
 
             return prov.Delete<SqlPreCommandSimple>(query, cm => cm, removeSelectRowCount: true);
         }
 
-        public static SqlPreCommandSimple UnsafeDeletePreCommand<E, V>(IQueryable<MListElement<E, V>> query)
+        public static SqlPreCommandSimple UnsafeDeletePreCommand<E, V>(Expression<Func<E, MList<V>>> mListProperty, IQueryable<MListElement<E, V>> query)
             where E : Entity
         {
+            if (!Administrator.ExistTable(Schema.Current.TableMList(mListProperty)) || !query.Any())
+                return null;
+
             var prov = ((DbQueryProvider)query.Provider);
 
             return prov.Delete<SqlPreCommandSimple>(query, cm => cm, removeSelectRowCount: true);
@@ -258,9 +261,9 @@ namespace Signum.Engine
 
         public static void UpdateToString<T>(T entity) where T : Entity, new()
         {
-                entity.InDB().UnsafeUpdate()
-                    .Set(e => e.toStr, e => entity.ToString())
-                    .Execute();
+            entity.InDB().UnsafeUpdate()
+                .Set(e => e.toStr, e => entity.ToString())
+                .Execute();
         }
 
         public static void UpdateToString<T>(T entity, Expression<Func<T, string>> expression) where T : Entity, new()
@@ -403,7 +406,7 @@ namespace Signum.Engine
             if (oldEntity.GetType() != newEntity.GetType())
                 throw new ArgumentException("oldEntity and newEntity should have the same type");
 
-            if(oldEntity.Is(newEntity))
+            if (oldEntity.Is(newEntity))
                 throw new ArgumentException("oldEntity and newEntity should not be the same ");
 
             Schema s = Schema.Current;
@@ -463,7 +466,7 @@ namespace Signum.Engine
             {
                 Validate<T>(list);
             }
-            
+
             var t = Schema.Current.Table<T>();
             using (Transaction tr = new Transaction())
             {
@@ -546,14 +549,15 @@ namespace Signum.Engine
             return dt;
         }
 
-        public static int BulkInsertMListFromEntities<E, V>(List<E> entities, 
+        public static int BulkInsertMListFromEntities<E, V>(List<E> entities,
             Expression<Func<E, MList<V>>> mListProperty,
             SqlBulkCopyOptions options = SqlBulkCopyOptions.Default,
             int? timeout = null,
             string message = null)
             where E : Entity
         {
-            try {
+            try
+            {
                 var func = mListProperty.Compile();
 
                 var mlists = (from e in entities
@@ -567,7 +571,7 @@ namespace Signum.Engine
 
                 return Administrator.BulkInsertMList(mListProperty, mlists, options, timeout, message);
             }
-            catch(InvalidOperationException e) when (e.Message.Contains("has no Id"))
+            catch (InvalidOperationException e) when (e.Message.Contains("has no Id"))
             {
                 throw new InvalidOperationException($"{nameof(BulkInsertMListFromEntities)} requires that you set the Id of the entities manually using {nameof(UnsafeEntityExtensions.SetId)}");
 
@@ -579,8 +583,8 @@ namespace Signum.Engine
 
         public static int BulkInsertMList<E, V>(Expression<Func<E, MList<V>>> mListProperty,
             IEnumerable<MListElement<E, V>> entities,
-            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default, 
-            int? timeout = null, 
+            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default,
+            int? timeout = null,
             string message = null)
             where E : Entity
         {
@@ -614,7 +618,7 @@ namespace Signum.Engine
             }
         }
 
-        public static T GetSetTicks<T>(this T entity) where T :Entity
+        public static T GetSetTicks<T>(this T entity) where T : Entity
         {
             entity.Ticks = entity.InDBEntity(e => e.Ticks);
             return entity;

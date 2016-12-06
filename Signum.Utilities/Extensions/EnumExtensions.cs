@@ -130,7 +130,7 @@ namespace Signum.Utilities
             if (!type.IsEnum)
                 throw new ArgumentException("{0} is not an Enum".FormatWith(type));
 
-            return enumCache.GetOrAdd(type, t => t.GetFields(flags).ToDictionary(fi => (Enum)fi.GetValue(null), fi => fi));
+            return enumCache.GetOrAdd(type, t => t.GetFields(flags).ToDictionaryEx(fi => (Enum)fi.GetValue(null), fi => fi));
         }
     }
 

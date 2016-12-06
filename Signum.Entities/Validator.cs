@@ -99,6 +99,24 @@ namespace Signum.Entities
 
             return validators.GetValue(type);
         }
+
+        public static void AllValidatorsApplicable<T>(Func<T, bool> condition)
+            where T : ModifiableEntity
+        {
+
+            foreach (PropertyValidator<T> item in Validator.GetPropertyValidators(typeof(T)).Values)
+            {
+                if (item.IsAplicable == null)
+                    item.IsAplicable = condition;
+                else
+                {
+                    var old = item.IsAplicable;
+                    item.IsAplicable = m => old(m) && condition(m);
+                }
+            }
+
+            
+        }
     }
 
     public interface IPropertyValidator
