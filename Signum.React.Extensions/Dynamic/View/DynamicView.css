@@ -48,11 +48,12 @@ span.design-default {
     }
 
         div.design-main .design-left.open {
-            width: 40%;
-            min-width:300px;
+            flex: 1;
         }
 
-   
+        div.design-main .design-content {
+            flex: 2;
+        }
 }
 
 

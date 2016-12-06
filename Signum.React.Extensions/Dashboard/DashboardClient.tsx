@@ -52,6 +52,8 @@ export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(UserChartPartEntity, e => new ViewPromise(resolve => require(['./Admin/UserChartPart'], resolve))));
     Navigator.addSettings(new EntitySettings(UserQueryPartEntity, e => new ViewPromise(resolve => require(['./Admin/UserQueryPart'], resolve))));
 
+    Finder.addSettings({ queryName: DashboardEntity, defaultOrderColumn: "DashboardPriority", defaultOrderType: "Descending" });
+
     options.routes.push(<Route path="dashboard">
         <Route path=":dashboardId" getComponent={ (loc, cb) => require(["./View/DashboardPage"], (Comp) => cb(undefined, Comp.default)) } />
     </Route>);

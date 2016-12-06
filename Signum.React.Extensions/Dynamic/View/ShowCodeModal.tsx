@@ -38,7 +38,7 @@ export default class ShowCodeModal extends React.Component<ShowCodeModalProps, {
             <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-selector-modal">
                 <Modal.Header closeButton={true}>
                     <h4 className="modal-title">
-                        {this.props.typeName}
+                        {this.props.typeName + "Component code"}
                     </h4>
                 </Modal.Header>
 
@@ -63,7 +63,7 @@ function renderFile(typeName: string, node: BaseNode): string {
     ctx.usedNames = {};
     ctx.ctxName = "ctx";
 
-    var text = NodeUtils.renderCode(node, ctx);
+    var text = NodeUtils.renderCode(node, ctx).indent(12);
 
     return (
         `
@@ -73,13 +73,12 @@ import { ${typeName}Entity } from '../[your namespace]'
 import { ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, EntityTable } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl, ValueSearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 
-export default class ${typeName} extends React.Component<{ ctx: TypeContext<${typeName}Entity> }, void> {
+export default class ${typeName}Component extends React.Component<{ ctx: TypeContext<${typeName}Entity> }, void> {
 
     render() {
         var ctx = this.props.ctx;
         return (
 ${text}
-}
         );
     }
 }`

@@ -62,7 +62,7 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         var p = this.props;
         var value = p.binding.getValue();
 
-        if (value instanceof Object && (value as Object).hasOwnProperty("code"))
+        if (value instanceof Object && (value as Object).hasOwnProperty("__code__"))
         {
             if (p.avoidDelete)
                 p.binding.setValue(undefined);
@@ -79,7 +79,7 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         const p = this.props;
         const value = p.binding.getValue();
         
-        const expr = value instanceof Object && (value as Object).hasOwnProperty("code") ? value as Expression<any> : null;
+        const expr = value instanceof Object && (value as Object).hasOwnProperty("__code__") ? value as Expression<any> : null;
 
         const expressionIcon = this.props.allowsExpression != false && < i className={classes("fa fa-calculator fa-1 formula", expr && "active")} onClick={this.handleToggleExpression}></i>;
 
