@@ -72,7 +72,9 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
             return;
 
         this.loadToken(newProps);
-        this.refreshCount(newProps);
+
+        if (newProps.initialValue == undefined)
+            this.refreshCount(newProps);
     }
 
     loadToken(props: ValueSearchControlProps) {
@@ -163,12 +165,10 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
             case "Decimal":
                 const numbroFormat = toNumbroFormat(this.props.format || token.format);
                 return numbro(value).format(numbroFormat);
-
-
-            case "String": return value;
-            case "DateTime":  
+            case "DateTime":
                 const momentFormat = toMomentFormat(this.props.format || token.format);
-                return moment(value).format(momentFormat)
+                return moment(value).format(momentFormat);
+            case "String": return value;
             case "Lite": return (value as Lite<Entity>).toStr;
             case "Embedded": return getToString(value as EmbeddedEntity);
             case "Boolean": return <input type="checkbox" disabled={true} checked={value} />
