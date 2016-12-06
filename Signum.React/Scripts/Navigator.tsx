@@ -106,35 +106,53 @@ export function getSettings(type: PseudoType): EntitySettings<ModifiableEntity> 
     return entitySettings[typeName];
 }
 
-export function setFallbackViewPromise(newFallback: (entity: ModifiableEntity) => ViewPromise<ModifiableEntity>) {
-    fallbackViewPromise = newFallback;
+export function setViewDispatcher(newDispatcher: ViewDispatcher) {
+    viewDispatcher = newDispatcher;
 }
 
-export let fallbackViewPromise: (entity: ModifiableEntity) => ViewPromise<ModifiableEntity> =
-    e => new ViewPromise<ModifiableEntity>(resolve => require(['./Lines/DynamicComponent'], resolve));
-
-export function getViewPromise<T extends ModifiableEntity>(entity: T): ViewPromise<ModifiableEntity> {
-
-    const settings = getSettings(entity.Type) as EntitySettings<T>;
-
-    if (settings == undefined) {
-        if (fallbackViewPromise)
-            return fallbackViewPromise(entity);
-
-        throw new Error(`No settings for '${entity.Type}'`);
-    }
-
-    if (settings.getViewPromise == undefined) {
-        if (fallbackViewPromise)
-            return fallbackViewPromise(entity);
-
-        throw new Error(`No getComponent set for settings for '${entity.Type}'`);
-    }
-
-    return settings.getViewPromise(entity).applyViewOverrides(settings);
+export interface ViewDispatcher {
+    hasView(typeName: string): boolean;
+    getView(entity: ModifiableEntity): ViewPromise<ModifiableEntity>;
 }
 
+export class BasicViewDispatcher implements ViewDispatcher {
+    hasView(typeName: string) {
+        const settings = getSettings(typeName) as EntitySettings<ModifiableEntity>;
 
+        return (settings && settings.getViewPromise) != null;
+    }
+    getView(entity: ModifiableEntity) {
+        const settings = getSettings(entity.Type) as EntitySettings<ModifiableEntity>;
+
+        if (!settings)
+            throw new Error(`No EntitySettings registered for ${entity.Type}`);
+
+        if (!settings.getViewPromise)
+            throw new Error(`The EntitySettings registered for ${entity.Type} has not getViewPromise`);
+
+        return settings.getViewPromise(entity).applyViewOverrides(settings);
+    }
+}
+
+export class DynamicComponentViewDispatcher implements ViewDispatcher {
+    hasView(typeName: string) {
+        return true;
+    }
+    getView(entity: ModifiableEntity) {
+        const settings = getSettings(entity.Type) as EntitySettings<ModifiableEntity>;
+
+        if (!settings || !settings.getViewPromise)
+            return new ViewPromise<ModifiableEntity>(resolve => require(['./Lines/DynamicComponent'], resolve));
+
+        return settings.getViewPromise(entity).applyViewOverrides(settings);
+    }
+}
+
+export let viewDispatcher: ViewDispatcher = new DynamicComponentViewDispatcher();
+
+export function getViewPromise<T extends ModifiableEntity>(entity: T): ViewPromise<T> {
+    return viewDispatcher.getView(entity);
+}
 
 export const isCreableEvent: Array<(typeName: string) => boolean> = [];
 
@@ -144,7 +162,7 @@ export function isCreable(type: PseudoType, customView = false, isSearch = false
 
     const baseIsCreable = checkFlag(typeIsCreable(typeName), isSearch);
 
-    const hasView = customView || hasRegisteredViewPromise(typeName);
+    const hasView = customView || viewDispatcher.hasView(typeName);
 
     const hasConstructor = hasAllowedConstructor(typeName);
 
@@ -301,15 +319,11 @@ export function isViewable(typeOrEntity: PseudoType | EntityPack<ModifiableEntit
 
     const baseIsViewable = typeIsViewable(typeName);
 
-    const hasView = customView || hasRegisteredViewPromise(typeName);
+    const hasView = customView || viewDispatcher.hasView(typeName);
 
     return baseIsViewable && hasView && isViewableEvent.every(f => f(typeName, entityPack));
 }
 
-function hasRegisteredViewPromise(typeName: string) {
-    const es = entitySettings[typeName];
-    return es && !!es.getViewPromise || !!fallbackViewPromise;
-}
 
 function typeIsViewable(typeName: string): boolean {
 
@@ -346,12 +360,10 @@ export function isNavigable(typeOrEntity: PseudoType | EntityPack<ModifiableEnti
 
     const baseTypeName = checkFlag(typeIsNavigable(typeName), isSearch);
 
-    const hasView = customComponent || hasRegisteredViewPromise(typeName);
+    const hasView = customComponent || viewDispatcher.hasView(typeName);
 
     return baseTypeName && hasView && isViewableEvent.every(f => f(typeName, entityPack));
 }
-
-
 
 function typeIsNavigable(typeName: string): EntityWhen {
 
@@ -624,42 +636,50 @@ export class ViewPromise<T extends ModifiableEntity> {
         return result;
     }
 
-    withProps(componentParams: {} | Promise<{}>): ViewPromise<T> {
-        this.promise = this.promise.then(func =>
-            Promise.resolve(componentParams).then(params => {
-                return (ctx: TypeContext<T>) => {
-                    var result = func(ctx);
-                    return React.cloneElement(result, params);
-                };
-            }));
+    withProps(props: {}): ViewPromise<T> {
 
-        return this;
+        var result = new ViewPromise<T>();
+
+        result.promise = this.promise.then(func => {
+            return (ctx: TypeContext<T>) => {
+                var result = func(ctx);
+                return React.cloneElement(result, props);
+            };
+        });
+
+        return result;
     }
 
     applyViewOverrides(setting: EntitySettings<T>): ViewPromise<T> {
         this.promise = this.promise.then(func => {
             return (ctx: TypeContext<T>) => {
                 var result = func(ctx);
-                applyViewOverrides(setting, result.type as React.ComponentClass<{ ctx: TypeContext<T> }>);
+                var component = result.type as React.ComponentClass<{ ctx: TypeContext<T> }>;
+                monkeyPatchComponent(component, setting);
                 return result;
             };
         });
 
         return this;
     }
+
+    static flat<T extends ModifiableEntity>(promise: Promise<ViewPromise<T>>): ViewPromise<T> {
+        var result = new ViewPromise<T>();
+        result.promise = promise.then(vp => vp.promise);
+        return result;
+    }
 }
 
-function applyViewOverrides<T extends ModifiableEntity>(setting: EntitySettings<T>, component: React.ComponentClass<{ ctx: TypeContext<T> }>) {
+function monkeyPatchComponent<T extends ModifiableEntity>(component: React.ComponentClass<{ ctx: TypeContext<T> }>, setting: EntitySettings<T>) {
 
     if (!component.prototype.render)
         throw new Error("render function not defined in " + component);
 
     if (setting.viewOverrides == undefined || setting.viewOverrides.length == 0)
-        return component;
-
+        return;
 
     if (component.prototype.render.withViewOverrides)
-        return component;
+        return;
 
     const baseRender = component.prototype.render as () => void;
 
@@ -675,8 +695,6 @@ function applyViewOverrides<T extends ModifiableEntity>(setting: EntitySettings<
     };
 
     component.prototype.render.withViewOverrides = true;
-
-    return component;
 }
 
 
