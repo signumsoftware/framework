@@ -20,7 +20,8 @@ export interface ChartColumnProps {
     chartBase: IChartBase;
     queryKey: string;
     onToggleInfo: () => void;
-    onInvalidate: () => void;
+    onTokenChange: () => void;
+    onGroupChange: () => void;
 }
 
 
@@ -39,7 +40,7 @@ export class ChartColumn extends React.Component<ChartColumnProps, { }> {
         this.props.chartBase.groupResults = (e.currentTarget as HTMLInputElement).checked;
         ChartClient.synchronizeColumns(this.props.chartBase);
 
-        this.props.onInvalidate();
+        this.props.onGroupChange();
     }
 
     render() {
@@ -64,7 +65,7 @@ export class ChartColumn extends React.Component<ChartColumnProps, { }> {
                         <QueryTokenEntityBuilder
                             ctx={this.props.ctx.subCtx(a => a.token, { formGroupStyle: "None" }) }
                             queryKey={this.props.queryKey}
-                            subTokenOptions={subTokenOptions} />
+                            subTokenOptions={subTokenOptions} onTokenChanged={() => this.props.onTokenChange()} />
                     </div>
                     <a className="sf-chart-token-config-trigger" onClick={this.handleExpanded}>{ ChartMessage.Chart_ToggleInfo.niceToString() } </a>
                 </td>
