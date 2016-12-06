@@ -1,10 +1,10 @@
 ﻿## LINQ `Join` differences
 
-We tried to make Linq to Signum as easy for the user as possible. One cool feature of Linq in general is that it provides a unified model for querying in memory objects and the database (sometimes, the hard thing is to know where you are).
+We tried to make Linq to Signum as easy for the user as possible. One cool feature of Linq in general is that it provides a unified model for querying in memory objects and the database (sometimes, the hardest part is to know where you are).
 
-On Joins, however, this idea of having an unified model has gone too far, making it hard to use. We have to follow a different approach. 
+On LINQ Joins, however, this idea of having an unified model has gone too far, making it hard to use. We had to follow a different approach. 
 
-Let's see how Linq to Sql does joins first: 
+Let's see how Linq to Sql/Entity Framework does joins first: 
 
 #### OUTER JOIN in LINQ to Objects / Linq to SQL
 
@@ -43,11 +43,11 @@ using(BugContext db = new BugContext())
 }
 ```
 
-It look to us that these method signatures were designed with Linq to Objects in mind. They promote hierarchical sequences (`GroupJoin`) and try to centralize the nasty `DefaultIfEmpty` method. When used in Linq to Sql is has some disadvantages though: 
+In our opinion, this method signatures were designed with Linq to Objects in mind. They promote hierarchical sequences (`GroupJoin`) and try to centralize the nasty `DefaultIfEmpty` method. When used in Linq to Sql is has some disadvantages though: 
 
 * It takes 3 operators to make a `LEFT OUTER JOIN`. In database, outer joins are so common that this is just not acceptable.
 * This approach doesn't work for `RIGHT OUTER JOIN`, neither for `FULL OUTER JOIN`.
-* The `GroupJoin` translation get's affected by why g is actually used. What if it is used twice, with and without the `DefaultIfEmpty` operator. 
+* The `GroupJoin` translation is affected by how g is actually used. What if it is used twice, with and without the `DefaultIfEmpty` operator?. 
 
 At the end, we found the Linq to Sql join strategy is over-complicated. They try too hard to keep the 'they are just objects' abstraction but instead of making it simpler (like with dot joins) they make it much more complex. That's why we are following a different path here.
 

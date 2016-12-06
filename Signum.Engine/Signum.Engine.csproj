@@ -172,6 +172,7 @@
     <Compile Include="Operations\OperationLogic.cs" />
     <Compile Include="Operations\Typle.cs" />
     <Compile Include="Retriever.cs" />
+    <Compile Include="Schema\FluentInclude.cs" />
     <Compile Include="Schema\ObjectName.cs" />
     <Compile Include="Schema\Schema.cs" />
     <Compile Include="Schema\Schema.Delete.cs" />
@@ -227,9 +228,9 @@
     <None Include="Linq\Linq.SelectMany.md" />
     <None Include="Linq\Linq.SqlFunctions.md" />
     <None Include="Linq\Linq.TypeMismatch.md" />
-    <None Include="Operations\Operations.cd" />
     <None Include="Operations\Operations.md" />
     <None Include="packages.config" />
+    <None Include="Schema\FluentInclude.md" />
     <None Include="Schema\EntityEvents.md" />
     <None Include="Schema\Schema.md" />
     <None Include="Schema\Schema.cd" />

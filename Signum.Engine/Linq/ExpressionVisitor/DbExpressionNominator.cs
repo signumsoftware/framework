@@ -1106,6 +1106,7 @@ namespace Signum.Engine.Linq
                 case "StringExtensions.Replicate": return TrySqlFunction(null, SqlFunction.REPLICATE, m.Type, m.GetArgument("str"), m.GetArgument("times"));
                 case "StringExtensions.Reverse": return TrySqlFunction(null, SqlFunction.REVERSE, m.Type, m.GetArgument("str"));
                 case "StringExtensions.Like": return TryLike(m.GetArgument("str"), m.GetArgument("pattern"));
+                case "StringExtensions.Etc": return TryEtc(m.GetArgument("str"), m.GetArgument("max"), m.TryGetArgument("etcString"));
 
                 case "DateTime.Add":
                 case "DateTime.Substract":
@@ -1155,13 +1156,12 @@ namespace Signum.Engine.Linq
                 case "Math.Min": return null; /* could be translates to something like 'case when a > b then a 
                                                *                                             when a < b then b 
                                                *                                             else null end 
-                                               * but looks to horrible */
+                                               * but looks too horrible */
                 case "LinqHints.InSql":
                     using (ForceFullNominate())
                     {
                         return Visit(m.GetArgument("value"));
                     }
-                case "StringExtensions.Etc": return TryEtc(m.GetArgument("str"), m.GetArgument("max"), m.TryGetArgument("etcString"));
 
 
                 case "decimal.Parse": return Add(new SqlCastExpression(typeof(decimal), m.GetArgument("s")));

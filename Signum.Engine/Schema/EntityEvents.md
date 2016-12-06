@@ -14,8 +14,8 @@ public class Schema
 }
 ```
 
-* `EntityEventsGlobal` property let's you attach/detach event for every `Entity`
-* `EntityEvents<T>` method let's you attach/detach event for one particular entity type `T`
+* `EntityEventsGlobal` property lets you attach/detach event for every `Entity`.
+* `EntityEvents<T>` method lets you attach/detach event for one particular entity type `T`.
 
 `EntityEvent<T>` class defines a bunch of events:  
 
@@ -110,13 +110,13 @@ public class FilterQueryResult<T> : IFilterQueryResult where T : Entity
 }
 ```
 
-Use `FilterQuery` to filter all the queries implicitly, the was Authorization module and Isolation module do it. 
+Use `FilterQuery` to filter all the queries implicitly, the way Authorization and Isolation module do it. 
 
 `FilterQuery` takes effects in all queries of the LINQ provider, including simple `Database.Retrieve`, `UnsafeDelete`, `UnsafeUpdate`, `UnsafeInsert`, etc..
 
 When executing `Database.MListQuery<E, V>()`, will be automatically filtered based in the `FilterQuery` event of the `Parent` property (generic argument `E`).
 
-`InMemoryFunction` is an in.memory     
+`InMemoryFunction` is a function that can be executed in-memory to test for whether a object is visible or not. This is usuefull for filtering out entities in in-memory caches. 
 
 ## PreUnsafeDelete
 

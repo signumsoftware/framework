@@ -53,6 +53,8 @@ var result = from b in Database.Query<BugEntity>()
              select (b.Discoverer as DeveloperEntity)?.Name; 
 ```
 
+++Note:** Unfortunately `?.` was not yet been implemented in C# for expression trees. 
+
 ```SQL
 SELECT bdn.Description
 FROM BugEntity AS bdn
