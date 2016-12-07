@@ -14,10 +14,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Signum.Entities.Printing;
+using Signum.Entities;
+using System.IO;
 
-namespace Signum.Entities.Printing
+namespace Signum.Engine.Printing
 {
-    public static class PrintLogic
+    public static class PrintingLogic
     {
         public static Action<PrintLineEntity> Print;
          
@@ -79,19 +82,13 @@ namespace Signum.Entities.Printing
             return CreateLine(referred, new EmbeddedFilePathEntity(fileType, fileName, content));
         }
 
-        public static PrintLineEntity CreateLine(Entity referred, EmbeddedFilePathEntity file )
+        public static PrintLineEntity CreateLine(Entity referred, EmbeddedFilePathEntity file)
         {
             return new PrintLineEntity
             {
                 Referred = referred.ToLite(),
-                File = file,
-                Exception = null,
                 State = PrintLineState.ReadyToPrint,
-                CreationDate = DateTime.Now,
-                Package = new PrintPackageEntity
-                {
-                    Name = file.FileName,  
-                }.ToLite(),
+                File = file,
             }.Save();
         }
 
@@ -131,6 +128,31 @@ namespace Signum.Entities.Printing
             public FileTypeSymbol fileType;
             public int count; 
         }
+
+        public static void DeletePrevious(Entity entity, FileTypeSymbol fileType)
+        {
+            var list = Database.Query<PrintLineEntity>().Where(a => a.Referred.RefersTo(entity) && a.File.FileType == fileType && a.State == PrintLineState.ReadyToPrint).ToList();
+
+            var filesToDelete = list.Select(a => a.File.FullPhysicalPath()).ToList();
+
+            Transaction.PreRealCommit += dic =>
+            {
+                foreach (var file in filesToDelete)
+                {
+                    try
+                    {
+                        if (File.Exists(file))
+                            File.Delete(file);
+
+                    }catch(Exception e)
+                    {
+                        e.LogException();
+                    }
+                }
+            };
+
+            Database.DeleteList(list);
+        }
     }
     
     public class PrintLineGraph : Graph<PrintLineEntity, PrintLineState>
@@ -167,7 +189,7 @@ namespace Signum.Entities.Printing
             {
                 try
                 {
-                    PrintLogic.Print(line);
+                    PrintingLogic.Print(line);
 
                     line.State = PrintLineState.Printed;
                     line.PrintedOn = TimeZoneManager.Now;
