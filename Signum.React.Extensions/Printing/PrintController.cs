@@ -1,5 +1,6 @@
 ﻿using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
+using Signum.Engine.Printing;
 using Signum.Engine.Processes;
 using Signum.Entities.Processes;
 using Signum.React.ApiControllers;
@@ -8,7 +9,6 @@ using Signum.React.Filters;
 using System.Collections.Generic;
 using System.Threading;
 using System.Web.Http;
-using static Signum.Entities.Printing.PrintLogic;
 
 namespace Signum.React.Processes
 {
@@ -17,7 +17,7 @@ namespace Signum.React.Processes
         [Route("api/printing/stats"), HttpGet]
         public List<PrintStat> Stats()
         {
-            return GetReadyToPrintStats();           
+            return PrintingLogic.GetReadyToPrintStats();           
         }
     }
 }

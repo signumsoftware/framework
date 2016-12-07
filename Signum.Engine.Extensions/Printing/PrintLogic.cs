@@ -123,12 +123,7 @@ namespace Signum.Engine.Printing
                 }).ToList();            
         }
 
-        public class PrintStat
-        {
-            public FileTypeSymbol fileType;
-            public int count; 
-        }
-
+       
         public static void CancelPrinting(Entity entity, FileTypeSymbol fileType)
         {
             var list = Database.Query<PrintLineEntity>().Where(a => a.Referred.RefersTo(entity) && a.File.FileType == fileType && a.State == PrintLineState.ReadyToPrint).ToList();
@@ -155,7 +150,12 @@ namespace Signum.Engine.Printing
             list.SaveList();
         }
     }
-    
+    public class PrintStat
+    {
+        public FileTypeSymbol fileType;
+        public int count;
+    }
+
     public class PrintLineGraph : Graph<PrintLineEntity, PrintLineState>
     {
         public static void Register()
