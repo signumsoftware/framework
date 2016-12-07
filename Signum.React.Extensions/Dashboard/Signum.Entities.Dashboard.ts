@@ -70,19 +70,6 @@ export interface LinkListPartEntity extends Entities.Entity, IPartEntity {
     requiresTitle?: boolean;
 }
 
-export const LinkPartEntity = new Type<LinkPartEntity>("LinkPart");
-export interface LinkPartEntity extends Entities.Entity, IPartEntity {
-    Type: "LinkPart";
-    link?: LinkElementEntity | null;
-    requiresTitle?: boolean;
-}
-
-export const OmniboxPanelPartEntity = new Type<OmniboxPanelPartEntity>("OmniboxPanelPart");
-export interface OmniboxPanelPartEntity extends Entities.Entity, IPartEntity {
-    Type: "OmniboxPanelPart";
-    requiresTitle?: boolean;
-}
-
 export const PanelPartEntity = new Type<PanelPartEntity>("PanelPartEntity");
 export interface PanelPartEntity extends Entities.EmbeddedEntity {
     Type: "PanelPartEntity";
@@ -132,15 +119,6 @@ export interface ValueUserQueryListPartEntity extends Entities.Entity, IPartEnti
     Type: "ValueUserQueryListPart";
     userQueries: Entities.MList<ValueUserQueryElementEntity>;
     requiresTitle?: boolean;
-}
-
-export const ValueUserQueryPartEntity = new Type<ValueUserQueryPartEntity>("ValueUserQueryPart");
-export interface ValueUserQueryPartEntity extends Entities.Entity, IPartEntity {
-    Type: "ValueUserQueryPart";
-    requiresTitle?: boolean;
-    userQuery?: Entities.Lite<UserQueries.UserQueryEntity> | null;
-    iconClass?: string | null;
-    showName?: boolean;
 }
 
 

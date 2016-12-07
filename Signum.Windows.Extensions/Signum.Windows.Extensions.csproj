@@ -201,15 +201,15 @@
     <Compile Include="Dashboard\PartView\LinkListPartView.xaml.cs">
       <DependentUpon>LinkListPartView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Dashboard\PartView\CountSearchControlPartView.xaml.cs">
-      <DependentUpon>CountSearchControlPartView.xaml</DependentUpon>
+    <Compile Include="Dashboard\PartView\ValueUserQueryListPartView.xaml.cs">
+      <DependentUpon>ValueUserQueryListPartView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Dashboard\DashboardOmniboxProvider.cs" />
     <Compile Include="Dashboard\PartView\UserQueryPartView.xaml.cs">
       <DependentUpon>UserQueryPartView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Dashboard\Admin\CountSearchControlPartEdit.xaml.cs">
-      <DependentUpon>CountSearchControlPartEdit.xaml</DependentUpon>
+    <Compile Include="Dashboard\Admin\ValueUserQueryListPartEdit.xaml.cs">
+      <DependentUpon>ValueUserQueryListPartEdit.xaml</DependentUpon>
     </Compile>
     <Compile Include="Dashboard\Admin\LinkListPartEdit.xaml.cs">
       <DependentUpon>LinkListPartEdit.xaml</DependentUpon>
@@ -592,7 +592,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Dashboard\PartView\CountSearchControlPartView.xaml">
+    <Page Include="Dashboard\PartView\ValueUserQueryListPartView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -600,7 +600,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Dashboard\Admin\CountSearchControlPartEdit.xaml">
+    <Page Include="Dashboard\Admin\ValueUserQueryListPartEdit.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

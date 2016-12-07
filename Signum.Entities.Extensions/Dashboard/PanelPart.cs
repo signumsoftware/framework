@@ -34,10 +34,7 @@ namespace Signum.Entities.Dashboard
             typeof(UserChartPartEntity),
             typeof(UserQueryPartEntity),
             typeof(ValueUserQueryListPartEntity),
-            typeof(LinkListPartEntity),
-            typeof(OmniboxPanelPartEntity),
-            typeof(LinkPartEntity),
-            typeof(ValueUserQueryPartEntity))]
+            typeof(LinkListPartEntity))]
         public IPartEntity Content { get; set; }
 
         public override string ToString()
@@ -323,88 +320,6 @@ namespace Signum.Entities.Dashboard
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
             Links.Synchronize(element.Elements().ToList(), (le, x) => le.FromXml(x));
-        }
-    }
-
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
-    public class LinkPartEntity : Entity, IPartEntity
-    {
-        public LinkElementEntity Link { get; set; }
-
-        public override string ToString()
-        {
-            return "{0} ({1})".FormatWith(Link.Label, Link.Link);
-        }
-
-        public bool RequiresTitle
-        {
-            get { return true; }
-        }
-
-        public IPartEntity Clone()
-        {
-            return new LinkPartEntity
-            {
-                Link = this.Link.Clone()
-            };
-        }
-
-        public XElement ToXml(IToXmlContext ctx)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void FromXml(XElement element, IFromXmlContext ctx)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
-    public class ValueUserQueryPartEntity : Entity, IPartEntity
-    {
-        public bool RequiresTitle { get; set; }
-
-        public Lite<UserQueryEntity> UserQuery { get; set; }
-
-        public string IconClass { get; set; }
-
-        public bool ShowName { get; set; }
-
-        public IPartEntity Clone()
-        {
-            return new UserQueryPartEntity();
-        }
-
-        public XElement ToXml(IToXmlContext ctx)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void FromXml(XElement element, IFromXmlContext ctx)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
-    public class OmniboxPanelPartEntity : Entity, IPartEntity
-    {
-        public bool RequiresTitle { get; set; }
-
-        public IPartEntity Clone()
-        {
-            return new OmniboxPanelPartEntity();
-        }
-
-        public XElement ToXml(IToXmlContext ctx)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void FromXml(XElement element, IFromXmlContext ctx)
-        {
-            throw new NotImplementedException();
         }
     }
 
