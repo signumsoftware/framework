@@ -129,7 +129,7 @@ namespace Signum.Engine.Printing
             public int count; 
         }
 
-        public static void DeletePrevious(Entity entity, FileTypeSymbol fileType)
+        public static void CancelPrinting(Entity entity, FileTypeSymbol fileType)
         {
             var list = Database.Query<PrintLineEntity>().Where(a => a.Referred.RefersTo(entity) && a.File.FileType == fileType && a.State == PrintLineState.ReadyToPrint).ToList();
 
@@ -151,7 +151,8 @@ namespace Signum.Engine.Printing
                 }
             };
 
-            Database.DeleteList(list);
+            list.ForEach(a => a.State = PrintLineState.Cancelled);
+            list.SaveList();
         }
     }
     
@@ -190,6 +191,9 @@ namespace Signum.Engine.Printing
                 try
                 {
                     PrintingLogic.Print(line);
+                    var file = line.File.FullPhysicalPath();
+                    if (File.Exists(file))
+                        File.Delete(file);
 
                     line.State = PrintLineState.Printed;
                     line.PrintedOn = TimeZoneManager.Now;

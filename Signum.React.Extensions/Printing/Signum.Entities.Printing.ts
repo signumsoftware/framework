@@ -26,6 +26,7 @@ export const PrintLineState = new EnumType<PrintLineState>("PrintLineState");
 export type PrintLineState =
     "ReadyToPrint" |
     "Printed" |
+    "Cancelled" |
     "Error";
 
 export const PrintPackageEntity = new Type<PrintPackageEntity>("PrintPackage");

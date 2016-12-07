@@ -51,6 +51,7 @@ namespace Signum.Entities.Printing
     {
         ReadyToPrint,
         Printed,
+        Cancelled,
         Error
     }
 
