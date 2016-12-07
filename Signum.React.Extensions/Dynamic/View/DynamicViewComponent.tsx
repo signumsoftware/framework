@@ -17,6 +17,7 @@ import * as DynamicViewClient from '../DynamicViewClient'
 import { DynamicViewInspector, CollapsableTypeHelp } from './Designer'
 import { DynamicViewTree } from './DynamicViewTree'
 import { AuthInfo } from './AuthInfo'
+import ShowCodeModal from './ShowCodeModal'
 import { DynamicViewEntity, DynamicViewOperation, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 
 require("!style!css!./DynamicView.css");
@@ -95,7 +96,7 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
                 }
             </div>
             <div className={classes("design-content", this.state.isDesignerOpen && "open")}>
-                {NodeUtils.render(rootNode, this.props.ctx)}
+                {NodeUtils.renderWithViewOverrides(rootNode, this.props.ctx)}
             </div>
         </div>);
     }
@@ -156,6 +157,7 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { vi
     handleSave = () => {
 
         this.props.dynamicView.viewContent = JSON.stringify(this.props.rootNode.node);
+        this.props.dynamicView.modified = true; 
 
         Operations.API.executeEntity(this.props.dynamicView, DynamicViewOperation.Save)
             .then(pack => { this.reload(pack.entity); return EntityOperations.notifySuccess(); })
@@ -198,6 +200,10 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { vi
                 .done();
     }
 
+    handleShowCode = () => {
+
+        ShowCodeModal.showCode(this.props.typeName, this.props.rootNode.node);
+    }
 
     renderButtonBar() {
 
@@ -206,7 +212,7 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { vi
         return (
             <div className="btn-group btn-group-sm" role="group" style={{ marginBottom: "5px"}}>
                 {operations[DynamicViewOperation.Save.key] && <button type="button" className="btn btn-primary" onClick={this.handleSave}>{operations[DynamicViewOperation.Save.key].niceName}</button>}
-
+                <button type="button" className="btn btn-success" onClick={this.handleShowCode}>Show code</button>
                 <DropdownButton title=" … " id="bg-nested-dropdown" onToggle={this.handleOnToggle} bsSize="sm">
                     {operations[DynamicViewOperation.Create.key] && <MenuItem eventKey="create" onSelect={this.handleCreate}>{operations[DynamicViewOperation.Create.key].niceName}</MenuItem>}
                     {operations[DynamicViewOperation.Clone.key] && !this.props.dynamicView.isNew && <MenuItem eventKey="clone" onSelect={this.handleClone}>{operations[DynamicViewOperation.Clone.key].niceName}</MenuItem>}

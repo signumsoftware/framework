@@ -13,7 +13,7 @@ import { EntityBase, EntityBaseProps } from '../../../../Framework/Signum.React/
 import { EntityTableColumn } from '../../../../Framework/Signum.React/Scripts/Lines/EntityTable'
 import { DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
 import { ExpressionOrValueComponent, FieldComponent } from './Designer'
-import { ExpressionOrValue } from './NodeUtils'
+import { ExpressionOrValue, Expression, isExpression } from './NodeUtils'
 import * as NodeUtils from './NodeUtils'
 
 export interface HtmlAttributesExpression {
@@ -38,7 +38,7 @@ export function toHtmlAttributes(parentCtx: TypeContext<ModifiableEntity>, hae: 
     return result;
 }
 
-export function withClassName(attrs: React.HTMLAttributes | undefined, className: string) {
+export function withClassName(attrs: React.HTMLAttributes | undefined, className: string): React.HTMLAttributes {
     if (attrs == undefined)
         return { className: className };
 

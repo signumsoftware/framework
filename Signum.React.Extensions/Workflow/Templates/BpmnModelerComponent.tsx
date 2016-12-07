@@ -123,7 +123,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         obj.preventDefault();
         obj.stopPropagation();
 
-        Navigator.view(model, { avoidPromptLooseChange: true }).then(me => {
+        Navigator.view(model).then(me => {
 
             if (me) {
                 this.props.entities[obj.element.id] = me;

@@ -62,7 +62,7 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         var p = this.props;
         var value = p.binding.getValue();
 
-        if (value instanceof Object && (value as Object).hasOwnProperty("code"))
+        if (value instanceof Object && (value as Object).hasOwnProperty("__code__"))
         {
             if (p.avoidDelete)
                 p.binding.setValue(undefined);
@@ -70,7 +70,7 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
                 p.binding.deleteValue();
         }
         else
-            p.binding.setValue({ code: "" } as Expression<any>);
+            p.binding.setValue({ __code__: "" } as Expression<any>);
 
         (p.refreshView || p.dn.context.refreshView)();
     }
@@ -79,7 +79,7 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         const p = this.props;
         const value = p.binding.getValue();
         
-        const expr = value instanceof Object && (value as Object).hasOwnProperty("code") ? value as Expression<any> : null;
+        const expr = value instanceof Object && (value as Object).hasOwnProperty("__code__") ? value as Expression<any> : null;
 
         const expressionIcon = this.props.allowsExpression != false && < i className={classes("fa fa-calculator fa-1 formula", expr && "active")} onClick={this.handleToggleExpression}></i>;
 
@@ -193,7 +193,7 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         return (
             <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px" }}>{"(ctx: TypeContext<" + typeName + ">, auth) =>"}</pre>
-                <JavascriptCodeMirror code={expression.code} onChange={newCode => { expression.code = newCode; this.props.dn.context.refreshView() } } />
+                <JavascriptCodeMirror code={expression.__code__} onChange={newCode => { expression.__code__ = newCode; this.props.dn.context.refreshView() } } />
             </div>
         );
         

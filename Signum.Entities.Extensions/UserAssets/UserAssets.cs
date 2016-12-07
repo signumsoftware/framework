@@ -62,6 +62,7 @@ namespace Signum.Entities.UserAssets
     public interface IToXmlContext
     {
         Guid Include(IUserAssetEntity content);
+        Guid Include(Lite<IUserAssetEntity> content);
 
         string TypeToName(Lite<TypeEntity> type);
 

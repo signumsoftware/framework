@@ -3,6 +3,7 @@ import { Tabs, Tab } from 'react-bootstrap'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityDetail, EntityStrip } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ModifiableEntity, isLite, isEntity, External } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
+import { ViewReplacer } from '../../../../Framework/Signum.React/Scripts/Frames/ReactVisitor'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import {
@@ -10,7 +11,7 @@ import {
     KindOfType, PropertyRoute, PropertyRouteType, LambdaMemberType, isTypeEntity, isTypeModel, isModifiableEntity
 } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { TypeContext, StyleOptions, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { EntityBase, EntityBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines/EntityBase'
 import { EntityListBase, EntityListBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines/EntityListBase'
 import { DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
@@ -27,7 +28,11 @@ import { StyleOptionsLine } from './StyleOptionsComponent'
 export type ExpressionOrValue<T> = T | Expression<T>;
 
 //ctx -> value
-export type Expression<T> = { code: string };
+export type Expression<T> = { __code__: string };
+
+export function isExpression(value: any): value is Expression<any> {
+    return (value as Object).hasOwnProperty("__code__");
+}
 
 export interface NodeOptions<N extends BaseNode> {
     kind: string;
@@ -37,6 +42,7 @@ export interface NodeOptions<N extends BaseNode> {
     hasEntity?: boolean;
     hasCollection?: boolean;
     render: (node: DesignerNode<N>, parentCtx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+    renderCode?: (node: N, cc: CodeContext) => string;
     renderTreeNode: (node: DesignerNode<N>) => React.ReactElement<any>;
     renderDesigner: (node: DesignerNode<N>) => React.ReactElement<any>;
     validate?: (node: DesignerNode<N>, parentCtx: TypeContext<ModifiableEntity> | undefined) => string | null | undefined;
@@ -45,6 +51,150 @@ export interface NodeOptions<N extends BaseNode> {
     avoidHighlight?: boolean;
     initialize?: (node: N, parentNode: DesignerNode<ContainerNode>) => void
 }
+
+export class CodeContext {
+    ctxName: string;
+    usedNames: { [name: string]: Expression<any> };
+
+
+
+
+    subCtx(field?: string, options?: StyleOptionsExpression): CodeContext {
+        if (!field && !options)
+            return this;
+
+        var newName = "ctx" + (Dic.getKeys(this.usedNames).length + 1);
+
+        this.usedNames[newName] = this.subCtxCode(field, options);
+        var result = new CodeContext();
+        result.ctxName = newName;
+        result.usedNames = this.usedNames;
+        return result;
+    }
+
+    subCtxCode(field?: string, options?: StyleOptionsExpression): Expression<any> {
+
+        if (!field && !options)
+            return { __code__: "ctx" };
+
+        var propStr = field && "e => e." + field.split(".").map(m => m.firstLower()).join(".");
+        var optionsStr = options && this.stringifyObject(options);
+
+        return { __code__: this.ctxName + ".subCtx(" + (propStr || "") + (propStr && optionsStr ? ", " : "") + (optionsStr ||"") + ")" };
+    }
+
+    stringifyObject(expressionOrValue: ExpressionOrValue<any>): string {
+        if (isExpression(expressionOrValue))
+            return expressionOrValue.__code__.replace(/\bctx\b/, this.ctxName);
+
+        var result =  JSON.stringify(expressionOrValue, (k, v) => {
+            if (v != undefined && isExpression(v))
+                return "%<%" + v.__code__.replace(/\bctx\b/, this.ctxName) + "%>%";
+            return v;
+        }, 3);
+
+        result = result.replace(/\"([^(\")"]+)\":/g, "$1:");
+        result = result.replace(/"%<%(.*?)%>%"/g, s => {
+            var bla = (JSON.parse(s) as string);
+            return bla.substr(3, bla.length - 6);
+        });
+        return result;
+    }
+
+
+    evaluateOnChange(redrawOnChange?: boolean): ExpressionOrValue<any> {
+
+        if (!redrawOnChange)
+            return null;
+
+        return { __code__: "()=>this.forceUpdate()" };
+    }
+
+    elementCode(type: string, props: any, ...children: (string | undefined)[]) {
+
+        var propsStr = props && Dic.map(props, (k, v) => v == undefined ? null :
+            (k + "=" + (typeof (v) == "string" ? `"${v}"` : `{${this.stringifyObject(v)}}`)))
+            .filter(a => a != null)
+            .map(a => a!)
+            .groupsOf(120, a => a.length)
+            .map(gr => gr.join(" "))
+            .join("    \r\n");
+        
+        if (children && children.length) {
+            var childrenString = children.join("\n").indent(4);
+
+            return (`<${type}${propsStr ? " " : ""}${propsStr || ""}>
+${childrenString}
+</${type}>`);
+
+        } else {
+            return (`<${type}${propsStr ? " " : ""}${propsStr || ""} />`);
+        }
+    }
+
+    elementCodeWithChildren(type: string, props: any, node: ContainerNode): string {
+
+        var childrensCode = node.children.map(c => renderCode(c, this));
+
+        return this.elementCode(type, props, ...childrensCode);
+    }
+
+    elementCodeWithChildrenSubCtx(type: string, props: any, node: ContainerNode): string{
+
+        var ctx = this.subCtx((node as any).field, (node as any).styleOptions);
+
+        var childrensCode = node.children.map(c => renderCode(c, ctx));
+
+        return this.elementCode(type, props, ...childrensCode);
+    }
+
+    getEntityBasePropsEx(node: EntityBaseNode, options: { showAutoComplete?: boolean, showMove?: boolean, avoidGetComponent?: boolean }): any/*: EntityBaseProps Expr*/ {
+
+        var result/*: EntityBaseProps*/ = {
+            ctx: this.subCtxCode(node.field, node.styleOptions),
+            labelText: node.labelText,
+            labelHtmlProps: node.labelHtmlAttributes,
+            formGroupHtmlProps: node.formGroupHtmlAttributes,
+            visible: node.visible,
+            readOnly: node.readOnly,
+            create: node.create,
+            remove: node.remove,
+            find: node.find,
+            view: node.view,
+            viewOnCreate: node.viewOnCreate,
+            onChange: this.evaluateOnChange(node.redrawOnChange),
+            findOptions: node.findOptions,
+            getComponent: options.avoidGetComponent == true ? undefined : this.getGetComponentEx(node),
+        };
+
+
+        if (options.showAutoComplete)
+            result = Dic.extend(result, {
+                autoComplete: (node as EntityLineNode).autoComplete == undefined ? undefined :
+                    bindExpr(ac => ac == false ? null : undefined, (node as EntityLineNode).autoComplete)
+            });
+
+        if (options.showMove)
+            result = Dic.extend(result, { move: (node as EntityListBaseNode).move });
+
+        return result;
+    }
+
+    getGetComponentEx(node: ContainerNode): Expression<any> | undefined {
+        if (!node.children || !node.children.length)
+            return undefined;
+
+        var cc = new CodeContext();
+        cc.ctxName = "ctx" + (Dic.getKeys(this.usedNames).length + 1);
+        cc.usedNames = this.usedNames; 
+
+        var div = cc.elementCodeWithChildren("div", null, node)
+
+        return { __code__: `(${cc.ctxName} /*: YourEntity*/) => (${div})` };
+    }
+   
+}
+
 
 export interface DesignerContext {
     refreshView: () => void;
@@ -130,6 +280,41 @@ export function treeNodeTableColumnProperty(dn: DesignerNode<EntityTableColumnNo
     return <span><small>ETColumn:</small> <strong>{dn.node.property}</strong></span>;
 }
 
+
+export function renderWithViewOverrides(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>) {
+    
+    var result = render(dn, parentCtx);
+    if (result == null)
+        return null;
+
+    const es = Navigator.getSettings(parentCtx.propertyRoute.typeReference().name);
+    if (es && es.viewOverrides && es.viewOverrides.length) {
+        const replacer = new ViewReplacer(result, parentCtx);
+        es.viewOverrides.forEach(vo => vo(replacer));
+        return replacer.result;
+    } else {
+        return result;
+    }   
+}
+
+
+export function renderCode(node: BaseNode, cc: CodeContext) {
+
+    try {
+        var no = registeredNodes[node.kind];
+
+        var result = no.renderCode!(node, cc);
+        
+        if (node.visible)
+            return `{ ${cc.stringifyObject(node.visible)} && ${result}}`
+
+        return result;
+
+    } catch (e) {
+        return `/*ERROR ${(e as Error).message}*/`;
+    }
+}
+
 export function render(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>) {
     try {
         if (evaluateAndValidate(parentCtx, dn.node, n => n.visible, isBooleanOrNull) == false)
@@ -172,10 +357,10 @@ export function renderDesigner(dn: DesignerNode<BaseNode>) {
 }
 
 export function asFunction(expression: Expression<any>, getFieldName: () => string): (e: TypeContext<ModifiableEntity>, auth: AuthInfo) => any {
-    let code = expression.code;
+    let code = expression.__code__;
 
     if (!code.contains(";") && !code.contains("return"))
-        code = "return " + expression.code + ";";
+        code = "return " + expression.__code__ + ";";
 
     code = "(function(ctx, auth){ " + code + "})";
 
@@ -207,14 +392,13 @@ export function evaluateUntyped(parentCtx: TypeContext<ModifiableEntity>, expres
     if (expressionOrValue == null)
         return undefined;
 
-    var ex = expressionOrValue as Expression<any>;
-    if (!(ex as Object).hasOwnProperty("code"))
+    if (!isExpression(expressionOrValue))
         return expressionOrValue as any;
 
-    if (!ex.code)
+    if (!expressionOrValue.__code__)
         return undefined;
 
-    var f = asFunction(ex, getFieldName);
+    var f = asFunction(expressionOrValue, getFieldName);
 
     try {
         return f(parentCtx, new AuthInfo());
@@ -378,7 +562,7 @@ export function validateTableColumnProperty(dn: DesignerNode<EntityTableColumnNo
 
 
 export function validateFindOptions(foe: FindOptionsExpr, parentCtx: TypeContext<ModifiableEntity> | undefined) : string | undefined {
-    if (!foe.queryKey)
+    if (!foe.queryName)
         return DynamicViewValidationMessage._0RequiresA1.niceToString("findOptions", "queryKey");
 
     if (parentCtx) {
@@ -439,10 +623,10 @@ export function addBreakLines(breakLines: boolean, message: string): React.React
     return message.split("\n").flatMap((e, i) => i == 0 ? [e] : [<br />, e]);
 }
 
-export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: TypeContext<ModifiableEntity>, options: { showAutoComplete?: boolean, showMove?: boolean }): EntityBaseProps {
+export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: TypeContext<ModifiableEntity>, options: { showAutoComplete?: boolean, showMove?: boolean, avoidGetComponent?: boolean }): EntityBaseProps {
 
     var result: EntityBaseProps = {
-        ctx: parentCtx.subCtx(asFieldFunction(dn.node.field)),
+        ctx: parentCtx.subCtx(asFieldFunction(dn.node.field), toStyleOptions(parentCtx, dn.node.styleOptions)),
         labelText: evaluateAndValidate(parentCtx, dn.node, n => n.labelText, isStringOrNull),
         labelHtmlProps: toHtmlAttributes(parentCtx, dn.node.labelHtmlAttributes),
         formGroupHtmlProps: toHtmlAttributes(parentCtx, dn.node.formGroupHtmlAttributes),
@@ -455,9 +639,8 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
         viewOnCreate: evaluateAndValidate(parentCtx, dn.node, n => n.viewOnCreate, isBooleanOrNull),
         onChange: evaluateOnChange(parentCtx, dn),
         findOptions: dn.node.findOptions && toFindOptions(parentCtx, dn.node.findOptions),
-        getComponent: getGetComponent(dn),
+        getComponent: options.avoidGetComponent  == true ? undefined : getGetComponent(dn),
     };
-
 
     if (options.showAutoComplete)
         result = Dic.extend(result, { autoComplete: evaluateAndValidate(parentCtx, dn.node, (n: EntityLineNode) => n.autoComplete, isBooleanOrNull) == false ? null : undefined});
@@ -467,6 +650,8 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
 
     return result;
 }
+
+
 
 
 export function getGetComponent(dn: DesignerNode<ContainerNode>) {
@@ -498,4 +683,41 @@ export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { is
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.redrawOnChange)} type="boolean" defaultValue={null} />
         </div>
     );
+}
+
+
+
+export function withClassNameEx(attrs: HtmlAttributesExpression | undefined, className: ExpressionOrValue<string>): HtmlAttributesExpression {
+    if (attrs == undefined)
+        return { className: className };
+
+    attrs["className"] = bindExpr((c, a) => classes(c, a), className, attrs["className"]);
+
+    return attrs;
+}
+
+
+export function toCodeEx(expr: ExpressionOrValue<string>) {
+    return isExpression(expr) ? "(" + expr.__code__ + ")":
+        expr == null ? "null" : 
+        ("\"" + expr + "\"");
+}
+
+var lambdaBody = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*(\s*,\s*[$a-zA-Z_][0-9a-zA-Z_$]*\s*)*)\s*\)\s*{\s*(\"use strict\"\;)?\s*return\s*([^;]*)\s*;?\s*}$/
+export function bindExpr(lambda: (...params: any[]) => any, ...parameters: ExpressionOrValue<any>[]): ExpressionOrValue<any> {
+    if (parameters.every(a => a == null || !isExpression(a)))
+        return lambda(...parameters);
+
+
+    var parts = lambda.toString().match(lambdaBody) !;
+    var params = parts[1].split(",").map(a => a.trim());
+    var body = parts[4];
+
+    var newBody = body.replace(/\b[$a-zA-Z_][0-9a-zA-Z_$]*\b/g, str => params.contains(str) ? toCodeEx(parameters[params.indexOf(str)]) : str);
+
+
+    return {
+        __code__: newBody
+    }
+
 }

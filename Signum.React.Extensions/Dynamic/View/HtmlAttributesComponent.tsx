@@ -14,7 +14,7 @@ import { FilterOperation, PaginationMode } from '../../../../Framework/Signum.Re
 import { ExpressionOrValueComponent, FieldComponent, DesignerModal } from './Designer'
 import * as Nodes from './Nodes'
 import * as NodeUtils from './NodeUtils'
-import { DesignerNode, Expression, ExpressionOrValue } from './NodeUtils'
+import { DesignerNode, Expression, ExpressionOrValue, isExpression } from './NodeUtils'
 import { FindOptionsComponent } from './FindOptionsComponent'
 import { BaseNode } from './Nodes'
 import { HtmlAttributesExpression } from './HtmlAttributesExpression'
@@ -110,7 +110,8 @@ export class HtmlAttributesLine extends React.Component<HtmlAttributesLineProps,
         var keys = Dic.map(cleanHae, (key, value) => key + ":" + value);
 
         if (haeStyle.style)
-            keys.push("style: {\n" + Dic.map(haeStyle.style, (key, value) => "   " + key + ":" + value).join("\n") + "\n}");
+            keys.push("style: {\n" + Dic.map(haeStyle.style, (key, value) => "   " +
+                key + ":" + (isExpression(value) ? "{" + value.__code__ + "}" : value)).join("\n") + "\n}");
 
         return keys.join("\n");
     }

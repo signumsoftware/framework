@@ -19,7 +19,7 @@ import { EntityBase, EntityBaseProps } from '../../../../Framework/Signum.React/
 import { EntityTableColumn } from '../../../../Framework/Signum.React/Scripts/Lines/EntityTable'
 import { DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
 import { ExpressionOrValueComponent, FieldComponent } from './Designer'
-import { ExpressionOrValue } from './NodeUtils'
+import { ExpressionOrValue, Expression, bindExpr, toCodeEx, withClassNameEx} from './NodeUtils'
 import { FindOptionsLine, QueryTokenLine } from './FindOptionsComponent'
 import { HtmlAttributesLine } from './HtmlAttributesComponent'
 import { StyleOptionsLine } from './StyleOptionsComponent'
@@ -50,6 +50,7 @@ NodeUtils.register<DivNode>({
     order: 0,
     isContainer: true,
     renderTreeNode: NodeUtils.treeNodeKind,
+    renderCode: (node, cc) => cc.elementCodeWithChildrenSubCtx("div", node.htmlAttributes, node),
     render: (dn, parentCtx) => NodeUtils.withChildrensSubCtx(dn, parentCtx, <div {...toHtmlAttributes(parentCtx, dn.node.htmlAttributes) } />),
     renderDesigner: dn => (<div>
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
@@ -71,7 +72,12 @@ NodeUtils.register<RowNode>({
     order: 1,
     isContainer: true,
     validChild: "Column",
-    renderTreeNode: NodeUtils.treeNodeKind, 
+    renderTreeNode: NodeUtils.treeNodeKind,
+    validate: (dn, parentCtx) => parentCtx && dn.node.children.filter(c => c.kind == "Column").map(col =>
+        NodeUtils.evaluate(parentCtx, col, f => (f as ColumnNode).width) +
+        (NodeUtils.evaluate(parentCtx, col, f => (f as ColumnNode).offset) || 0)
+    ).sum() > 12 ? "Sum of Column.width/offset should <= 12" : null,
+    renderCode: (node, cc) => cc.elementCodeWithChildrenSubCtx("div", withClassNameEx(node.htmlAttributes, "row"), node),
     render: (dn, parentCtx) => NodeUtils.withChildrensSubCtx(dn, parentCtx, <div {...withClassName(toHtmlAttributes(parentCtx, dn.node.htmlAttributes), "row") } />),
     renderDesigner: dn => (<div>
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
@@ -100,6 +106,13 @@ NodeUtils.register<ColumnNode>({
     validate: dn => NodeUtils.mandatory(dn, n => n.width),
     initialize: dn => dn.width = 6,
     renderTreeNode: NodeUtils.treeNodeKind, 
+    renderCode: (node, cc) => {
+        const className = node.offset == null ?
+            bindExpr(column => "col-sm-" + column, node.width) :
+            bindExpr((column, offset) => classes("col-sm-" + column, offset != undefined && "col-sm-offset-" + offset), node.width, node.offset);
+
+        return cc.elementCodeWithChildrenSubCtx("div", withClassNameEx(node.htmlAttributes, className), node);
+    },
     render: (dn, parentCtx) => {
         const column = NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.width, NodeUtils.isNumber);
         const offset = NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.offset, NodeUtils.isNumberOrNull);
@@ -131,7 +144,11 @@ NodeUtils.register<TabsNode>({
     isContainer: true,
     validChild: "Tab",
     initialize: dn => dn.id = "tabs", 
-    renderTreeNode: NodeUtils.treeNodeKind, 
+    renderTreeNode: NodeUtils.treeNodeKind,
+    renderCode: (node, cc) => cc.elementCodeWithChildrenSubCtx("Tabs", {
+        id: { __code__: cc.ctxName  + ".compose(" + toCodeEx(node.id) + ")" } as Expression<string>, 
+        defaultActiveKey: node.defaultActiveKey
+    }, node),
     render: (dn, parentCtx) => {
         return NodeUtils.withChildrensSubCtx(dn, parentCtx, <Tabs
             id={parentCtx.compose(NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.id, NodeUtils.isString) !)}
@@ -170,8 +187,14 @@ NodeUtils.register<TabNode>({
     },
     renderTreeNode: dn => <span><small>{dn.node.kind}:</small> <strong>{dn.node.title}</strong></span>,
     validate: dn => NodeUtils.mandatory(dn, n => n.eventKey),
+    renderCode: (node, cc) => cc.elementCodeWithChildrenSubCtx("Tab", {
+        title: node.title,
+        eventKey: node.eventKey
+    }, node),
     render: (dn, parentCtx) => {
-        return NodeUtils.withChildrensSubCtx(dn, parentCtx, <Tab title={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.title, NodeUtils.isString)} eventKey={dn.node.eventKey} />);
+        return NodeUtils.withChildrensSubCtx(dn, parentCtx, <Tab
+            title={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.title, NodeUtils.isString)}
+            eventKey={dn.node.eventKey} />);
     },
     renderDesigner: (dn) => (<div>
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
@@ -198,14 +221,19 @@ NodeUtils.register<FieldsetNode>({
     isContainer: true,
     initialize: dn => dn.legend = "My Fieldset",
     renderTreeNode: NodeUtils.treeNodeKind,
+    renderCode: (node, cc) => cc.elementCode("fieldset", node.htmlAttributes,
+        cc.elementCode("legend", node.legendHtmlAttributes, toCodeEx(node.legend)),
+        cc.elementCodeWithChildrenSubCtx("div", null, node)
+    ),
     render: (dn, parentCtx) => {
         return (
             <fieldset {...toHtmlAttributes(parentCtx, dn.node.htmlAttributes) }>
-            <legend {...toHtmlAttributes(parentCtx, dn.node.legendHtmlAttributes) }>
-                    {NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.legend, NodeUtils.isString)}
-            </legend>
+                <legend {...toHtmlAttributes(parentCtx, dn.node.legendHtmlAttributes) }>
+                        {NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.legend, NodeUtils.isString)}
+                </legend>
             {NodeUtils.withChildrensSubCtx(dn,  parentCtx, <div />)}
-        </fieldset>)
+            </fieldset>
+        )
     },
     renderDesigner: (dn) => (<div>
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
@@ -231,7 +259,10 @@ NodeUtils.register<TextNode>({
     group: "Container",
     order: 4,
     initialize: dn => { dn.message = "My message"; },
-    renderTreeNode: dn => <span><small>{dn.node.kind}:</small> <strong>{dn.node.message ? (typeof dn.node.message == "string" ? dn.node.message : (dn.node.message.code || "")).etc(20) : ""}</strong></span>,
+    renderTreeNode: dn => <span><small>{dn.node.kind}:</small> <strong>{dn.node.message ? (typeof dn.node.message == "string" ? dn.node.message : (dn.node.message.__code__ || "")).etc(20) : ""}</strong></span>,
+    renderCode: (node, cc) => cc.elementCode(bindExpr(tagName => tagName || "p", node.tagName), node.htmlAttributes,
+        toCodeEx(node.message)
+    ),
     render: (dn, ctx) => React.createElement(
         NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.tagName, NodeUtils.isStringOrNull) || "p",
         toHtmlAttributes(ctx, dn.node.htmlAttributes),
@@ -272,8 +303,21 @@ NodeUtils.register<ValueLineNode>({
     order: 0,
     validate: (dn) => NodeUtils.validateFieldMandatory(dn),
     renderTreeNode: NodeUtils.treeNodeKindField, 
+    renderCode: (node, cc) => cc.elementCode("ValueLine", {
+        ctx: cc.subCtxCode(node.field, node.styleOptions),
+        labelText: node.labelText,
+        labelHtmlProps: node.labelHtmlAttributes,
+        formGroupHtmlProps: node.formGroupHtmlAttributes,
+        unitText: node.unitText,
+        formatText: node.formatText,
+        readOnly: node.readOnly,
+        inlineCheckbox: node.inlineCheckbox,
+        valueLineType: node.textArea && bindExpr(ta => ta ? ValueLineType.TextArea : undefined, node.textArea),
+        autoTrim: node.autoTrim,
+        onChange: cc.evaluateOnChange(node.redrawOnChange)
+    }),
     render: (dn, ctx) => (<ValueLine
-        ctx={ctx.subCtx(NodeUtils.asFieldFunction(dn.node.field))}
+        ctx={ctx.subCtx(NodeUtils.asFieldFunction(dn.node.field), toStyleOptions(ctx, dn.node.styleOptions))}
         labelText={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
         labelHtmlProps={toHtmlAttributes(ctx, dn.node.labelHtmlAttributes)}
         formGroupHtmlProps={toHtmlAttributes(ctx, dn.node.formGroupHtmlAttributes)}
@@ -327,6 +371,7 @@ NodeUtils.register<EntityLineNode>({
     hasEntity: true,
     validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
     renderTreeNode: NodeUtils.treeNodeKindField,
+    renderCode: (node, cc) => cc.elementCode("EntityLine", cc.getEntityBasePropsEx(node, { showAutoComplete: true })),
     render: (dn, ctx) => (<EntityLine {...NodeUtils.getEntityBaseProps(dn, ctx, { showAutoComplete : true }) } />),
     renderDesigner: dn => NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: true, showAutoComplete: true }),
 });
@@ -344,6 +389,7 @@ NodeUtils.register<EntityComboNode>({
     hasEntity: true,
     validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
     renderTreeNode: NodeUtils.treeNodeKindField,
+    renderCode: (node, cc) => cc.elementCode("EntityCombo", cc.getEntityBasePropsEx(node, { })),
     render: (dn, ctx) => (<EntityCombo {...NodeUtils.getEntityBaseProps(dn, ctx, {}) } />),
     renderDesigner: dn => NodeUtils.designEntityBase(dn, { isCreable: false, isFindable: false, isViewable: false, showAutoComplete: false }),
 });
@@ -360,6 +406,7 @@ NodeUtils.register<EntityDetailNode>({
     hasEntity: true,
     validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
     renderTreeNode: NodeUtils.treeNodeKindField,
+    renderCode: (node, cc) => cc.elementCode("EntityDetail", cc.getEntityBasePropsEx(node, {})),
     render: (dn, ctx) => (<EntityDetail {...NodeUtils.getEntityBaseProps(dn, ctx, {}) } />),
     renderDesigner: dn => NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: false, showAutoComplete: false }),
 });
@@ -378,8 +425,16 @@ NodeUtils.register<EnumCheckboxListNode>({
     hasCollection: true,
     validate: (dn) => NodeUtils.validateFieldMandatory(dn),
     renderTreeNode: NodeUtils.treeNodeKindField,
+    renderCode: (node, cc) => cc.elementCode("EnumCheckboxList", {
+        ctx: cc.subCtxCode(node.field, node.styleOptions),
+        labelText: node.labelText,
+        readOnly: node.readOnly,
+        columnCount: node.columnCount,
+        columnWidth: node.columnWidth,
+        onChange: cc.evaluateOnChange(node.redrawOnChange),
+    }),
     render: (dn, ctx) => (<EnumCheckboxList
-        ctx={ctx.subCtx(NodeUtils.asFieldFunction(dn.node.field))}
+        ctx={ctx.subCtx(NodeUtils.asFieldFunction(dn.node.field), toStyleOptions(ctx, dn.node.styleOptions))}
         labelText={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
         readOnly={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
         columnCount={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.columnCount, NodeUtils.isNumberOrNull)}
@@ -417,6 +472,10 @@ NodeUtils.register<EntityCheckboxListNode>({
     hasCollection: true,
     validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
     renderTreeNode: NodeUtils.treeNodeKindField,
+    renderCode: (node, cc) => cc.elementCode("EntityCheckboxList", Dic.extend(cc.getEntityBasePropsEx(node, { showMove: false }), {
+        columnCount: node.columnCount,
+        columnWidth: node.columnWidth,
+    })),
     render: (dn, ctx) => (<EntityCheckboxList {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: false }) }
         columnCount={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.columnCount, NodeUtils.isNumberOrNull)}
         columnWidth={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.columnWidth, NodeUtils.isNumberOrNull)}
@@ -441,6 +500,7 @@ NodeUtils.register<EntityListNode>({
     hasCollection: true,
     validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
     renderTreeNode: NodeUtils.treeNodeKindField,
+    renderCode: (node, cc) => cc.elementCode("EntityList",cc.getEntityBasePropsEx(node, { showMove: true })),
     render: (dn, ctx) => (<EntityList {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: true }) } />),
     renderDesigner: dn => NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: true, showAutoComplete: false, showMove: true })
 });
@@ -461,6 +521,9 @@ NodeUtils.register<EntityStripNode>({
     hasCollection: true,
     validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
     renderTreeNode: NodeUtils.treeNodeKindField,
+    renderCode: (node, cc) => cc.elementCode("EntityStrip", Dic.extend(cc.getEntityBasePropsEx(node, { showAutoComplete: true, showMove: false }), {
+        vertical: node.vertical,
+    })),
     render: (dn, ctx) => (<EntityStrip
         {...NodeUtils.getEntityBaseProps(dn, ctx, { showAutoComplete: true, showMove: false }) }
         vertical={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.vertical, NodeUtils.isBooleanOrNull)}
@@ -486,6 +549,7 @@ NodeUtils.register<EntityRepeaterNode>({
     hasCollection: true,
     validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
     renderTreeNode: NodeUtils.treeNodeKindField,
+    renderCode: (node, cc) => cc.elementCode("EntityRepeater",cc.getEntityBasePropsEx(node, { showMove: true })),
     render: (dn, ctx) => (<EntityRepeater {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: true }) } />),
     renderDesigner: dn => NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: false, showAutoComplete: false, showMove: true })
 });
@@ -503,6 +567,7 @@ NodeUtils.register<EntityTabRepeaterNode>({
     hasCollection: true,
     validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
     renderTreeNode: NodeUtils.treeNodeKindField,
+    renderCode: (node, cc) => cc.elementCode("EntityTabRepeater", cc.getEntityBasePropsEx(node, { showMove: true })),
     render: (dn, ctx) => (<EntityTabRepeater {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: true }) } />),
     renderDesigner: dn => NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: false, showAutoComplete: false, showMove: true })
 });
@@ -521,10 +586,12 @@ NodeUtils.register<EntityTableNode>({
     validChild: "EntityTableColumn",
     validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
     renderTreeNode: NodeUtils.treeNodeKindField,
-
+    renderCode: (node, cc) => cc.elementCode("EntityTable", Dic.extend(cc.getEntityBasePropsEx(node, { showMove: true, avoidGetComponent: true }), {
+        columns: node.children.map((col: EntityTableColumnNode) => ({ __code__: NodeUtils.renderCode(col, cc) }))
+    })),
     render: (dn, ctx) => (<EntityTable
         columns={dn.node.children.filter(c => NodeUtils.validate(dn.createChild(c), ctx) == null).map((col: EntityTableColumnNode) => NodeUtils.render(dn.createChild(col), ctx) as any)}
-        {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: true }) } />),
+        {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: true, avoidGetComponent: true }) } />),
 
     renderDesigner: dn => <div>
         {NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: false, showAutoComplete: false, showMove: true })}
@@ -548,13 +615,20 @@ NodeUtils.register<EntityTableColumnNode>({
     validParent: "EntityTable",
     validate: (dn) => dn.node.property ? NodeUtils.validateTableColumnProperty(dn) : NodeUtils.mandatory(dn, n => n.header),
     renderTreeNode: NodeUtils.treeNodeTableColumnProperty,
+    renderCode: (node, cc) => cc.stringifyObject({
+        property: node.property && { __code__: "a => a." + node.property },
+        header: node.header,
+        headerProps: node.headerHtmlAttributes,
+        cellProps: node.cellHtmlAttributes,
+        template: cc.getGetComponentEx(node)
+    }),
     render: (dn, ctx) => ({
         property: dn.node.property && NodeUtils.asFieldFunction(dn.node.property),
         header: NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.header, NodeUtils.isStringOrNull),
         headerProps: toHtmlAttributes(ctx, dn.node.headerHtmlAttributes),
         cellProps: toHtmlAttributes(ctx, dn.node.cellHtmlAttributes),
-        template: dn.node.children && dn.node.children.length > 0 ? NodeUtils.getGetComponent(dn) : undefined
-    }) as EntityTableColumn<ModifiableEntity> as any, //HACK
+        template: NodeUtils.getGetComponent(dn) 
+    }) as EntityTableColumn<ModifiableEntity, any> as any, //HACK
     renderDesigner: dn => <div>
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.property)} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.header)} type="string" defaultValue={null} />
@@ -573,8 +647,11 @@ NodeUtils.register<SearchControlNode>({
     group: "Search",
     order: 1,
     validate: (dn, ctx) => NodeUtils.mandatory(dn, n => n.findOptions) || dn.node.findOptions && NodeUtils.validateFindOptions(dn.node.findOptions, ctx),
-    renderTreeNode: dn => <span><small>SearchControl:</small> <strong>{dn.node.findOptions && dn.node.findOptions.queryKey || " - " }</strong></span>,
-    render: (dn, ctx) => <div><SearchControl findOptions={toFindOptions(ctx, dn.node.findOptions!)} /> </div>,
+    renderTreeNode: dn => <span><small>SearchControl:</small> <strong>{dn.node.findOptions && dn.node.findOptions.queryName || " - " }</strong></span>,
+    renderCode: (node, cc) => cc.elementCode("SearchControl", {
+        findOptions: node.findOptions
+    }),
+    render: (dn, ctx) => <SearchControl findOptions={toFindOptions(ctx, dn.node.findOptions!)} />,
     renderDesigner: dn => <div>
         <FindOptionsLine dn={dn} binding={Binding.create(dn.node, a => a.findOptions)} />
     </div>
@@ -605,9 +682,22 @@ NodeUtils.register<ValueSearchControlLineNode>({
         ,
     renderTreeNode: dn => <span><small>ValueSearchControlLine:</small> <strong>{
         dn.node.valueToken ? dn.node.valueToken :
-            dn.node.findOptions ? dn.node.findOptions.queryKey : " - "
+            dn.node.findOptions ? dn.node.findOptions.queryName : " - "
     }</strong></span>,
-    render: (dn, ctx) => <div><ValueSearchControlLine ctx={ctx}
+    renderCode: (node, cc) => cc.elementCode("ValueSearchControlLine", {
+        ctx: cc.subCtxCode(),
+        findOptions: node.findOptions,
+        valueToken: node.valueToken,
+        labelText: node.labelText,
+        isBadge: node.isBadge,
+        isLink: node.isLink,
+        isFormControl: node.isFormControl,
+        findButton: node.findButton,
+        viewEntityButton: node.viewEntityButton,
+        labelProps: node.labelHtmlAttributes,
+        formGroupHtmlProps: node.formGroupHtmlAttributes,
+    }),
+    render: (dn, ctx) => <ValueSearchControlLine ctx={ctx}
         findOptions={dn.node.findOptions && toFindOptions(ctx, dn.node.findOptions!)}
         valueToken={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.valueToken, NodeUtils.isStringOrNull)}
         labelText={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
@@ -618,9 +708,9 @@ NodeUtils.register<ValueSearchControlLineNode>({
         viewEntityButton={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.viewEntityButton, NodeUtils.isBooleanOrNull)}
         labelProps={toHtmlAttributes(ctx, dn.node.labelHtmlAttributes)}
         formGroupHtmlProps={toHtmlAttributes(ctx, dn.node.formGroupHtmlAttributes)}
-        /> </div>,
+        />,
     renderDesigner: dn => <div>
-        <QueryTokenLine dn={dn} binding={Binding.create(dn.node, a => a.valueToken)} queryKey={dn.node.findOptions && dn.node.findOptions.queryKey || dn.route!.findRootType().name}
+        <QueryTokenLine dn={dn} binding={Binding.create(dn.node, a => a.valueToken)} queryKey={dn.node.findOptions && dn.node.findOptions.queryName || dn.route!.findRootType().name}
             subTokenOptions={SubTokensOptions.CanAggregate | SubTokensOptions.CanElement} />
         <FindOptionsLine dn={dn} binding={Binding.create(dn.node, a => a.findOptions)} />
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
