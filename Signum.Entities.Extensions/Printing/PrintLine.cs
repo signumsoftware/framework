@@ -40,7 +40,8 @@ namespace Signum.Entities.Printing
             {
                 { PrintLineState.ReadyToPrint,   false,           false  },
                 { PrintLineState.Printed,        false,           true   },
-                { PrintLineState.Error,          true,           false   },
+                { PrintLineState.Error,          true,            false  },
+                { PrintLineState.Cancelled,      false,           false  }   
             };
         protected override string PropertyValidation(PropertyInfo pi)
         {
