@@ -2,7 +2,7 @@
 
 `Schema` class is a data structure that stays between classes and tables, between fields and columns, between references and foreign keys. 
 
-This structure is the only authority any time the engine needs mapping information like... What is the column name of a field?
+This structure is the only authority any time the engine needs mapping information, like... What is the column name of a field?
 
 
 The main source of information for generating this mapping are your entities themselves. `SchemaBuilder` is the class that takes your entities as an input and generates a `Schema` as an output. 
@@ -20,7 +20,7 @@ public static void Start(string connectionString)
 
 ## Using SchemaBuilder
 
-`SchemaBuilder` is just a utility class you just use to fill with some of your entities to be able to use the engine on them. The process can be resumed in three simple steps: 
+`SchemaBuilder` is just a utility class you just use to fill with some of your entities to be able to use the engine on them. The process can be summarized in three simple steps: 
 
 * Create a `SchemaBuilder`.
 * Fill the builder with some entities using some of the `Include` methods. A `Schema` embryo will be growing inside.
@@ -32,8 +32,16 @@ There are however two overloads of `Include` method:
 ```C#
 public class SchemaBuilder
 {
-    public Table Include<T>() where T : Entity //strongly typed
-    public virtual Table Include(Type type) // weakly typed
+    public FluentInclude<T> Include<T>() where T : Entity
+    {
+        var table = Include(typeof(T), null);
+        return new FluentInclude<T>(table, this);
+    }
+
+    public virtual Table Include(Type type)
+    {
+        return Include(type, null);
+    }
 }
 ```
 
@@ -43,11 +51,11 @@ Only non-abstract classes can be included.
 
 The process above is OK when you want normal mapping of your entities, but if the default table or column names doesn't follow your company standards, or you want to override some entities from another project, we provide three ways to change the default Schema mapping. 
 
-### SchemaBuilderSettings: Override your entities Attributes
+### 1. SchemaBuilderSettings: Override your entities Attributes
 
-To remove duplication and centralize related information, Signum Framework uses attributes and the field declaration to provide database schema information. 
+To remove duplication and centralize related information, Signum Framework uses attributes and the property/field declaration to provide database schema information. 
 
-However, if the entity is reused in many project and you can not modify it, this solution is not very flexible.
+However, if the entity is re-used in many project and you can not modify it, this solution is not very flexible.
 
 `SchemaBuilderSettings` allows you to add or remove [field attributes](../Signum.Entities/FieldAttributes.md) on fields at run-time to customize entities that you don't own. 
 
@@ -61,20 +69,11 @@ public class ExceptionEntity : Entity
 {    
     //...
     [SqlDbType(Size = 100)]
-    string controllerName;
     [StringLengthValidator(AllowNulls = true, Max = 100)]
-    public string ControllerName
-    {
-        get { return controllerName; }
-        set { Set(ref controllerName, value); }
-    }
+    public string ControllerName { get; set; }
+    
 
-    Lite<IUserEntity> user;
-    public Lite<IUserEntity> User
-    {
-        get { return user; }
-        set { Set(ref user, value); }
-    }
+    public Lite<IUserEntity> User { get; set; }
     //...
 }
 ``` 
@@ -97,43 +96,31 @@ Some things to remember:
 * Once afield is overridden, it overrides all the attributes, so if there are 3 attributes and you want to override just one, remember to copy the other two.
 * This technique also allows you to change attributes on an inherited field for a particular subclass, something that is not available in the CLR. 
 
-## Change the generated Schema (Advanced)
+### 2. Override SchemaBuilder behaviour
 
-Once you have finished including entities in the SchemaBuilder, you have a new Schema in the Schema property. 
+Another posibility is to implemente your own `CustomSchemaBuilder` and use it in your Starter class, overriding some virtual methods.
 
-You can change whatever you want in this structure, and it will be reflected whenever you use the engine (thought Database or Administrator). 
+``C#
+public class CustomSchemaBuilder : SchemaBuilder
+{
+    //Override methods to change conventions
+}
 
-Internally, a `Schema` is just a `Dictionary<Type, Table>`. 
-
-`Table` is the class that maps an `Entity` to database table. Contains a `Type`, a `Name`, an `Identitiy` flag, and two dictionaries, one for Fields and one for Columns. 
-
-Usually, the underlying objects of these dictionaries are the same, depending of the Field's Type:
-
-* `PrimaryKeyField` is a field and also `IColumns`. 
-* `ValueField` is a field and also `IColumns`.
-* `RefenrenceField` is a field and also `IColumns`.
-* `ImplementedByField` contains a `ImplementationColumn` for each implementation.  
-* `ImplementedByAllField` contain two `IColumn`.
-* `EmbeddedField` contains a nested `Dictionary` of `Fields` (with their own `IColumns`).
-* `MListField` has no `IColumn` at all, instead has a `MListTable` object. 
-
-> **Important Note:** There's just no validation on Schema data structure, make modifications at your own risk and don't expect a nice exception message to be thrown if you do something silly.
-
-```C#
-Schema s = sb.Schema;
-
-((ValueField)s.Field((BillEntity b) => b.Lines.First().Quantity)).SqlDbType = SqlDbType.SmallInt;;
-
-ConnectionScope.Default = new Connection(connectionString, s);
+SchemaBuilder sb = new CustomSchemaBuilder();
+//include modules 
+Connector.Current = sb.Schema; 
 ```
 
-### Moving tables to other databases
+
+Two common usages os this technique are:
+* Determine the SQL Database Schema of each table from the Entity namespace. 
+* Move log tables to another database. 
 
 For big applications with lots of requests, the RDBMS tends to end up being the bottleneck. 
 
 Microsoft SQL Server has no support for sharding (horizontal partitioning), but we can move some tables to other databases/database servers to improve performance. 
 
-Another good strategy that we use often is moving the log tables (i.e.: `OperationLogEntity`, `ExceptionEntity`, `EmailMEssageEntity`...) to a log database that we can backup less often, keeping the important data in principal database that we can move easily. 
+One good strategy that we use often is moving the log tables (i.e.: `OperationLogEntity`, `ExceptionEntity`, `EmailMEssageEntity`...) to a log database that we can backup less often, keeping the important data in principal database that we can move easily. 
 
 In order to do this, `Table` and `MListTable` classes have a `Name` property of type `ObjectName`, that represents a [four-part name](http://msdn.microsoft.com/en-us/library/ms177563.aspx).  
 
@@ -169,40 +156,75 @@ public class ServerName : IEquatable<ServerName>
 }
 ```
 
-And `Table` also has some helper methods `ToSchema`, to change the schema, and `ToDatabase` to change the database (that could also be in another `ServerName` using linked servers). 
+There are two methods in `SchemaBuilder`that are responsible of generating `ObjectNames`: `GenerateTableName`and `GenerateTableNameCollection` (for MLists). 
+
+The following example overrides both methods to enable a multi-database and multi-schema configuration: 
 
 ```C#
-/// <summary>
-/// Use this method also to change the Server
-/// </summary>
-public void ToDatabase(DatabaseName databaseName)
+public class CustomSchemaBuilder : SchemaBuilder
 {
-    this.Name = this.Name.OnDatabase(databaseName);
+    public string LogDatabaseName;
 
-    foreach (var item in TablesMList())
-        item.ToDatabase(databaseName);
-}
+    public override ObjectName GenerateTableName(Type type, TableNameAttribute tn)
+    {
+        return base.GenerateTableName(type, tn).OnSchema(GetSchemaName(type));
+    }
 
-public void ToSchema(SchemaName schemaName)
-{
-    this.Name = this.Name.OnSchema(schemaName);
+    public override ObjectName GenerateTableNameCollection(Table table, NameSequence name, TableNameAttribute tn)
+    {
+        return base.GenerateTableNameCollection(table, name, tn).OnSchema(GetSchemaName(table.Type));
+    }
 
-    foreach (var item in TablesMList())
-        item.ToSchema(schemaName);
-}
-``` 
+    SchemaName GetSchemaName(Type type)
+    {
+        return new SchemaName(this.GetDatabaseName(type), GetSchemaNameName(type) ?? "dbo");
+    }
 
+    public Type[] InLogDatabase = new Type[]
+    {
+        typeof(OperationLogEntity),
+        typeof(ExceptionEntity),
+    };
+    DatabaseName GetDatabaseName(Type type)
+    {
+        if (this.LogDatabaseName == null)
+            return null;
 
-Example: 
+        if (InLogDatabase.Contains(type))
+            return new DatabaseName(null, this.LogDatabaseName);
 
-```C#
-//Called at the end of `Starter.Start` method: 
-public static void SetLogDatabase(Schema schema, DatabaseName logDatabaseName)
-{
-    schema.Table<OperationLogEntity>().ToDatabase(logDatabaseName);
-    schema.Table<ExceptionEntity>().ToDatabase(logDatabaseName);
+        return null;
+    }
+
+    static string GetSchemaNameName(Type type)
+    {
+        type = EnumEntity.Extract(type) ?? type;
+
+        if (type == typeof(ColumnOptionsMode) || type == typeof(FilterOperation) || type == typeof(PaginationMode) || type == typeof(OrderType))
+            type = typeof(UserQueryEntity);
+
+        if (type == typeof(SmtpDeliveryFormat) || type == typeof(SmtpDeliveryMethod))
+            type = typeof(EmailMessageEntity);
+
+        if (type == typeof(DayOfWeek))
+            type = typeof(ScheduledTaskEntity);
+
+        if (type.Assembly == typeof(ApplicationConfigurationEntity).Assembly)
+            return null;
+
+        if (type.Assembly == typeof(UserChartEntity).Assembly)
+            return "extensions";
+
+        if (type.Assembly == typeof(Entity).Assembly)
+            return "framework";
+
+        throw new InvalidOperationException("Impossible to determine SchemaName for {0}".FormatWith(type.FullName));
+    }
 }
 ```
+
+And then in our Starter we use `CustomSchemaBuilder` instead of `SchemaBuilder`. 
+
 
 Finally, is a common pattern to specify the name of both tables in the connection string, like this: 
 
@@ -210,22 +232,51 @@ Finally, is a common pattern to specify the name of both tables in the connectio
 Data Source=localhost\SQLEXPRESS2012;Initial Catalog=Southwind+_Log;User ID=sa;Password=sa
 ```
 
-And use `Connector.TryExtractCatalogPostfix` to clean this connection string. 
+With this convention we're saying that our application will use `Southwind` and `Southwind_Log` databases. 
+
+We can use `Connector.TryExtractDatabaseNameWithPostfix` to split clean the `_Log` prefix from the connection string and get `Southwind_Log` database name. 
 
 ```C#
 public static void Start(string connectionString)
 {
    //At the very beginning of Starter.Start
    string logDatabase = Connector.TryExtractDatabaseNameWithPostfix(ref connectionString, "_Log");
-
-   //....
-
-   //At the very end of Starter.Start
-   if (logDatabase.HasText())
-       SetLogDatabase(sb.Schema, new DatabaseName(null, logDatabase));
+   SchemaBuilder sb = new CustomSchemaBuilder { LogDatabaseName = logDatabase };
 }
 ```
 
-## Override SchemaBuilder behaviour
+Note > The example application Southwind already contains a similar code in its Starter class. Feel free to customize it.  
 
-The last way of customizing the Schema is to inherit from `SchemaBuilder` and create your own `CustomSchemaBuilder` class and override any virtual method to customize types or names. 
+
+### 3. Change the generated Schema (Advanced)
+
+The lass way (and least recommended) of customizing the Schema is manually modify it after is generated..
+
+Once you have finished including entities in the SchemaBuilder, you have a new Schema in the Schema property. 
+
+You can change whatever you want in this structure, and it will be reflected whenever you use the engine (thought Database or Administrator). 
+
+Internally, a `Schema` is like a `Dictionary<Type, Table>`. 
+
+`Table` is the class that maps an `Entity` to database table. Contains a `Type`, a `Name`, an `Identitiy` flag, and two dictionaries, one for Fields and one for Columns. 
+
+Usually, the underlying objects of these dictionaries are the same, depending of the Field's Type:
+
+* `PrimaryKeyField` is a field and also `IColumns`. 
+* `ValueField` is a field and also `IColumns`.
+* `RefenrenceField` is a field and also `IColumns`.
+* `ImplementedByField` contains a `ImplementationColumn` for each implementation.  
+* `ImplementedByAllField` contain two `IColumn`.
+* `EmbeddedField` contains a nested `Dictionary` of `Fields` (with their own `IColumns`).
+* `MListField` has no `IColumn` at all, instead has a `MListTable` object. 
+
+> **Important Note:** There's just no validation on Schema data structure, make modifications at your own risk and don't expect a nice exception message to be thrown if you do something silly.
+
+```C#
+Schema s = sb.Schema;
+
+((ValueField)s.Field((BillEntity b) => b.Lines.First().Quantity)).SqlDbType = SqlDbType.SmallInt;;
+
+ConnectionScope.Default = new Connection(connectionString, s);
+```
+

@@ -1,6 +1,6 @@
 ﻿## LINQ `SelectMany` differences
 
-`SelectMany` is a very simple operator, however, it creates some problems for people to grasp. You can see more about how `SelectMany` is meant to work [here](http://www.hookedonlinq.com/SelectManyOperator.ashx). 
+`SelectMany` is a very simple operator, however, is sometimes hard to grasp for beginners. You can see more about how `SelectMany` is meant to work [here](http://www.hookedonlinq.com/SelectManyOperator.ashx). 
 
 
 On important difference of the implementation `SelectMany` in LINQ to Signum over Linq to SQL is that a big part of Linq to Sql code base is, in [words of Matt Warren](http://blogs.msdn.com/b/mattwar/archive/2007/09/04/linq-building-an-iqueryable-provider-part-vii.aspx):
@@ -38,7 +38,7 @@ LEFT OUTER JOIN DeveloperEntity AS ddn
 
 If someone wants LINQ to Signum to work on other DBMS, like PostgreSQL, MySQL or Oracle, this will be a difficult part.
 
-The second difference is not an implementation detail like the firs one:
+The second difference is not an implementation detail like the firts one:
 
 We support `OUTER APPLY` by adding `DefaultIfEmpty` at the end of the selector lambda.
 

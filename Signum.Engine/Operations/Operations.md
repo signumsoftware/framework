@@ -4,23 +4,23 @@ Signum Framework provides an standardized way of writing your business logic to 
 
 Operations don't let you do anything new that you couldn't do before, but they formalize a standard pattern and bring to your business logic a certain level of homogeneity that other parts of the framework can take advantage of.
 
-By using operations, a smooth ramp from a 
+Operations scale gracefully with the complexity of your application, from a simple Save button, to a complex state machine. 
 
 ### Advantages
 
 By using operations, instead of plain methods, to Create / Modify / Delete your entities you get a lot of benefits: 
 
-* **Automatic buttons**: Operations are defined in the server but Signum.Windows and Signum.Web show a button in the user interface of the associated entity type. Also in the SearchControl the operations are available using a context menu. Of course the buttons can be hidden if necessary. 
+* **Automatic UI**: Operations are defined in the server but Signum.Windows, Signum.Web, and Signum.React show a button in the user interface of the associated entity type. Also in the SearchControl the operations are available using a context menu. Of course the buttons can be hidden if necessary. 
 
-* **Preconditions**: Some operations have a precondition that returns an string with the error and is asserted before executing the operation. More important, the precondition is also evaluated when the automatic buttons are shown, disabling and adding a tool-tip to the operation buttons that do not satisfy the precondition.
+* **Preconditions**: Some operations have a precondition that returns an string with the error and are asserted before executing the operation. More important, the preconditions are also evaluated when the automatic buttons are shown, disabling and adding a tool-tip to the operation buttons that do not satisfy the precondition.
 
-* **Automatic logging**: Every time an operation is executed, an `OperationLogEntity` is saved in the database indicting the entity, operation, user, start and end time and possible exception. Even more, sing DiffLog module also a dump of the initial and final state of the entity is saved. 
+* **Automatic logging**: Every time an operation is executed, an `OperationLogEntity` is saved in the database indicting the entity, operation, user, start and end time and possible exception. Even more, using DiffLog module also a dump of the initial and final state of the entity is saved, so you can have a full history of the entity with diffs. 
 
 * **Inheritance support**: If you have complex hierarchies of entities, you can have polymorphic behavior using operations as well, even if they are defined outside of the entity, because internally they are implemented using `Polymorphic<T>`.      
 
-* **Extension point**: Each operation implementation, defined in a module, can e easily replaced by a custom definition if necessary. By using operations for your business logic you're automatically introducing many extension points. 
+* **Extension point**: Each operation implementation, defined in a module, can be easily replaced by a custom implementation if necessary. By using operations for your business logic you're automatically introducing many extension points. 
 
-* **Common facades**: All the operation share a common set of Web Service Operations (Windows) or Controller Actions (Web) saving you code.
+* **Common facades**: All the operation share a common set of Web Service Operations (Windows) or Controller Actions (Web / React) saving you hours of code.
 
 * **Transactional**: Your operation implementation is transactional.
 
@@ -28,14 +28,15 @@ By using operations, instead of plain methods, to Create / Modify / Delete your 
 
 * **Operations + Processes module**: When using Processes module, they can easily be executed for multiple entities at once, using a context menu in the search dialog. 
 
+
 ## Types of operations
 
 There are five types of operations: 
 
 * `Construct`: Create a new entity with no additional context *(e.g., Create new Invoice)*
 * `ConstructFrom`: Create a new entity from another one *(e.g., Create Invoice from Customer)*
-* `ConstructFromMany`: Create a new entity from many others *(e.g., Create Invoice from Customer)*
-* `Execute`: Modify an entity* (e.g., Authorize Invoice, Cancel Invoice)*
+* `ConstructFromMany`: Create a new entity from many others *(e.g., Create Invoice from a list of Products)*
+* `Execute`: Modify an entity *(e.g., Authorize Invoice, Cancel Invoice)*
 * `Delete`: Delete an entity from the database *(e.g., Delete Order)*
 
 Additionally, some operations can be embedded in a graph. 
@@ -53,11 +54,12 @@ public class OperationSymbol : Symbol
 }
 ```
 
-But we don't use raw `OperationSymbol` for Operations, instead we pass strongly-typed containers that give information to the compiler about the type of the operation (`Construct`, `ConstructFrom`, `ConstructFromMany`, `Execute`, `Delete`...) and the entity type (`BugEntity`, `EmployeeEntity`, ...).
+But we don't defined or invoke operations use a raw `OperationSymbol`, instead we use strongly-typed containers that give information to the compiler about the type of the operation (`Construct`, `ConstructFrom`, `ConstructFromMany`, `Execute`, `Delete`...) and the entity type (`BugEntity`, `EmployeeEntity`, ...).
 
 Example for `Execute` and `Delete`: 
 
 ```C#
+[AutoInit]
 public static class AlbumOperation
 {
     public static ExecuteSymbol<OrderEntity> SaveNew;
@@ -69,7 +71,7 @@ public static class AlbumOperation
 }
 ```
 
-> Notice how we can not create `ExecuteSymbol` or `DeleteSymbol` directly using `new` and instead we use factory methods defined in `OperationSymbol` class. The reason is because they are declared as an `interface` in order to be contravariant, so an `ExecuteSymbol<AnimalEntity>` can be assigned in an `ExecuteSymbol<DogEntity>` variable.
+> Note: As you see, the syntax is verdy declarative, resembling an enum, but we're actually declaring fields in a static class that will be automatically initialized by Signum.MSBuildTask. The `AutoInitAttribute` enables this magic. 
 
 Declaring `Construct`, `ConstructFrom` and `ConstructFromMany` is a bit more complex, example:  
 
@@ -84,16 +86,17 @@ public static class AlbumOperation
 
 > By using inner types we can differentiate the two types of a `ConstructFrom` and `ConstructFromMany` operation. 
 
-Operations **should be declared in the Entities assembly**, so they can also be used in a Windows .
+Operations **should be declared in the Entities assembly**, so they can also be used in a Windows application.
 
-Each declared operation field name will be used as the label for the UI buttons, accept the `Description` attribute and can be localized. Even more, the framework recognizes the pattern 'CreateXXXFromYYY' in a `ConstructFrom`, simplifying the names in the user interface. 
+Each declared operation field name will be used as the label for the UI buttons, accepts the `Description` attribute and can be localized. 
 
+Even more, the framework recognizes the pattern 'CreateXXXFromYYY' in a `ConstructFrom`, simplifying the names in the user interface. 
 
 ## Implementing Operations
 
 Operations are **declared** in the entities assembly, using the static factory methods in `OperationSymbol`.
 
-But operations are **implemented** in the logic assembly, by instantiating objects of the inner classes inside `Graph<T>` (simple) and `Graph<T, S>` (with state) and registering them in `OperationLogic` class. 
+But operations are **implemented** in the logic assembly, by instantiating an objects of some inner classes inside `Graph<T>` (simple) and `Graph<T, S>` (with state) and registering them in `OperationLogic` class with `Register` extension method. 
 
 ```C#
 public static class OperationLogic
@@ -208,13 +211,13 @@ In the **UI** this operations are shown as buttons in the top of the entity cont
 It has the following members: 
 
 * **Execute:** An `Action<T, object[]>` to be executed when the operation is invoked. The action will be surrounded in a transaction and the entity will also be implicitly saved at the end.
-* **CanExecute:** A function that returns whether a method could be executed in the current state of the entity or not. If there is a problem it returns an `string` with the explanation, otherwise `null`. 
+* **CanExecute:** A function that returns whether a method could be executed in the current state of the entity or not. If there is a problem it returns a `string` with the explanation, otherwise `null`. 
 * **AllowNew:** A bool controlling whether the operation can be executed over new entities or not. By default `false` and is typically set to `true` for `Save` operations.
-* **Lite:** When `true`, the database version of the entity is taken, otherwise the user entity is used (possibly with some changes). By default `false` and is typically set to `true` for `Save` operations.
+* **Lite:** When `true`, the database version of the entity is taken, otherwise the user entity is used (possibly with some changes). By default `true` and is typically set to `false` for `Save` operations.
 
 And, only for `Graph<T, S>`: 
 * **FromStates:** The states of the entity from which the operation can be executed. 
-* **ToState:** the state the entity should be at the end of the execution.
+* **ToStates:** The valid states the entity could end up at the end of the execution.
 
 Example implementing some `Execute` operations:
 
@@ -283,7 +286,7 @@ In the **UI** this operations are shown as buttons in the top of the entity cont
 
 * **Delete:** An `Action<T, object[]> ` that deletes the entity, usually by calling `Database.Delete`. The entity is **not** implicitly deleted.  
 * **CanDelete:** A function that returns whether the entity can be deleted in the current state. If there is a problem returns an `string` with the explanation, otherwise `null`. 
-* **Lite:** When `true`, the database version of the entity is taken, otherwise the user entity is used (possibly with some changes). By default `false` and is typically set to `true` for `Save` operations.
+* **Lite:** When `true`, the database version of the entity is taken, otherwise the UI entity is used (possibly with some changes). By default `true`.
 
 And, only for `Graph<T, S>`: 
 * **FromStates:** The states of the entity from which can be deleted. 
@@ -315,14 +318,14 @@ order.ToLite().Delete(OrderOperation.Delete); //Entity will be retrieved from th
 order.Delete(OrderOperation.Ship); //Also works if entity is clean
 ```
 
-Not to confuse with the low-level `Database.Delete` extension method, that will not save any log, evaluate CanExecute, etc...
+< NOTE: Do not confuse with the low-level `Database.Delete` extension method, that will not save any log, evaluate CanExecute, etc...
 
 ```C#
 order.Delete(); 
 ```
 
 ### Construct
-`Graph<T>.Construct` and `Graph<T, S>.Construct` are used to create new entities from nothing. The returned entity is usual new (`IsNew=true`) but returning saved entities is also useful in some scenarios. 
+`Graph<T>.Construct` and `Graph<T, S>.Construct` are used to create new entities from nothing. The returned entity is usual new (`IsNew = true`) but returning saved entities is also useful in some scenarios. 
 
 In the **UI**, this operations will automatically invoked in the UI when the user press the plus (+) button in the SearchControl or EntityLines. A chooser will be shown if more than one `Construct` is registered. 
 
@@ -361,9 +364,9 @@ OrderEntity order = OperationLogic.Construct(OrderOperation.Create); //Type infe
 ```
 
 ### ConstructFrom
-`Graph<T>.ConstructFrom<F>` and `Graph<T, S>.ConstructFrom<F>` are used to create new entities from other entities. The returned entity is usual new (`IsNew=true`) but returning saved entities is also useful in some scenarios. 
+`Graph<T>.ConstructFrom<F>` and `Graph<T, S>.ConstructFrom<F>` are used to create new entities from other entities. The returned entity is usual new (`IsNew = true`) but returning saved entities is also useful in some scenarios. 
 
-In the **UI** this operations are shown as menu items grouped in the top of the **from** entity control, inside of the `Create...` button, or context menus in the search control.
+In the **UI** this operations are shown as menu items grouped in the top of the main view of the **from** entity, inside of the `Create...` button, or as context menus in the search control for **from** entities.
 
 It has the following members: 
 
@@ -406,7 +409,7 @@ OrderEntity order = customer.ConstructFrom(OrderOperation.CreateOrderFromCustome
 ### ConstructFromMany
 `Graph<T>.ConstructFromMany` and `Graph<T, S>.ConstructFromMany` are used to create new entities from a bunch of other entities. The returned entity is usual new (`IsNew=true`) but returning saved entities is also useful in some scenarios. 
 
-In the **UI** this operations are shown only as context menus in the search control.
+In the **UI** this operations are shown only as context menus in the search control of the **from** entities.
 
 It has the following members: 
 
@@ -468,8 +471,8 @@ new Execute(OrderOperation.Ship)
     (...)
     Execute = (o, args) =>
     {
-        o.ShippedDate = DateTime.Now;
-        o.State = args.TryGetArgS<DateTime>() ?? OrderState.Shipped;
+        o.ShippedDate = args.TryGetArgS<DateTime>() ?? DateTime.Now;
+        o.State = OrderState.Shipped;
     }
 }.Register(); 
 ```
@@ -503,11 +506,30 @@ public class DatePair
 }
 ```
 
+This family of methos also try to dynamically cast any `List<object>` into a typed list. This is usefull for simplifying invocations from Json REST services that do not provice type information. Example: 
+
+
+```C#
+order.Execute(OrderOperations.Ship, new List<object>{ DateTime.Now });
+
+
+new Execute(OrderOperation.Ship) 
+{
+    (...)
+    Execute = (o, args) =>
+    {
+	    //The List<object> is dynamically converted to a List<DateTime>
+        o.ShippedDate = args.TryGetArgS<List<DateTime>>().FirstOrDefault() ?? DateTime.Now;
+        o.State = args OrderState.Shipped;
+    }
+}.Register(); 
+```
+
 ## Inheritance
 
 In the case of complex entity hierarchies, Operations behave using polymoprhism. 
 
-So, if you declare the property just once:
+So, if you declare the operation just once:
 
 ```C#
 public static class AnimalOperation
@@ -599,3 +621,5 @@ Example:
 Graph<OrderEntity, OrderState>.ToDGML()
 Graph<OrderEntity, OrderState>.ToDirectedGraph()
 ```
+
+>> Note: Signum.Extensions contains a `Map` module that can show the same state machine diagram when writing `map Order` in the Omnibox.  

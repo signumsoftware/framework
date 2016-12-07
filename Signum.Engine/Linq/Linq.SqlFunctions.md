@@ -27,6 +27,7 @@ There are some .Net functions that are supported by Linq to Signum and will be t
 | a.Replicate(n)*	| REPLICATE( a, n )
 | a.Reverse()*		| REVERSE(a)
 | a.Like(b)*		| a LIKE b
+| a.Etc(max, "...")	| a
  
 
 * Extension methods defined in Signum.Utilities. They work in-memory code too. 
@@ -105,4 +106,11 @@ There are some .Net functions that are supported by Linq to Signum and will be t
 | Math.Log(a)	      |Log(a)
 | Math.Ceiling(a)	  |CEILING(a)
 | Math.Round(a)	      |ROUND(a)
-| Math.Truncate(a)	  |Truncate(a) 
+| Math.Truncate(a)	  |Truncate(a)
+| decimal.Parse(a)	  |CAST(a as Decimal)
+| double.Parse(a)	  |CAST(a as Double)
+| float.Parse(a)	  |CAST(a as Float)
+| byte.Parse(a)	      |CAST(a as Byte)
+| short.Parse(a)	  |CAST(a as Short)
+| int.Parse(a)	      |CAST(a as Int) 
+| long.Parse(a)	      |CAST(a as Long) 

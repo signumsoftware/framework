@@ -352,8 +352,7 @@ namespace Signum.Engine
 
             int startingIndex = 0;
             Console.WriteLine();
-            SafeConsole.WriteLineColor(ConsoleColor.DarkRed, "   '{0}' has been renamed in {1}?".FormatWith(oldValue, replacementsKey));
-            Console.WriteLine();
+            SafeConsole.WriteLineColor(ConsoleColor.White, "   '{0}' has been renamed in {1}?".FormatWith(oldValue, replacementsKey));
             retry:
             int maxElement = Console.LargestWindowHeight - 7;
 
