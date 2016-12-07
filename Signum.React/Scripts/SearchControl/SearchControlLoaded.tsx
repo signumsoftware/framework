@@ -881,7 +881,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     wrapError(mark: MarkedRow | undefined, index: number, tr: React.ReactChild | undefined) {
-        if (!mark || mark.message == "")
+        if (!mark || !mark.message)
             return tr;
 
         const tooltip = <Tooltip id={"mark_" + index} >{mark.message}</Tooltip>;
