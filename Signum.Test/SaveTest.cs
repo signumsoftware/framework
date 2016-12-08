@@ -358,7 +358,7 @@ namespace Signum.Test
                     Parent = a,
                 }).ToList();
 
-                Administrator.BulkInsertMList((AlbumEntity a) => a.Songs, list);
+                Administrator.BulkInsertMListTable((AlbumEntity a) => a.Songs, list);
 
                 Database.MListQuery((AlbumEntity a) => a.Songs).Where(a => a.RowId > max).UnsafeDeleteMList();
 
