@@ -117,7 +117,12 @@ namespace Signum.Entities
             string val = (string)value;
 
             if (string.IsNullOrEmpty(val))
-                return AllowNulls ? null : ValidationMessage._0IsNotSet.NiceToString();
+            {
+                if (AllowNulls)
+                    return null;
+
+                return ValidationMessage._0IsNotSet.NiceToString();
+            }
 
             if(!MultiLine && (val.Contains('\n') || val.Contains('\r')))
                 return ValidationMessage._0ShouldHaveJustOneLine.NiceToString();
