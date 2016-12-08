@@ -169,8 +169,9 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
                 (a.x / s.width).toPrecision(4) + "," +
                 (a.y / s.height).toPrecision(4));
 
-
-        const query = Dic.extend(tables, { filter: s.filter, color: s.color });
+        const query = {
+            ...tables, filter: s.filter, color: s.color
+        };
 
         const url = Navigator.currentHistory.createHref({ pathname: "~/map", query: query });
 

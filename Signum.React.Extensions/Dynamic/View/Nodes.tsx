@@ -472,10 +472,10 @@ NodeUtils.register<EntityCheckboxListNode>({
     hasCollection: true,
     validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
     renderTreeNode: NodeUtils.treeNodeKindField,
-    renderCode: (node, cc) => cc.elementCode("EntityCheckboxList", Dic.extend(cc.getEntityBasePropsEx(node, { showMove: false }), {
+    renderCode: (node, cc) => cc.elementCode("EntityCheckboxList", {...cc.getEntityBasePropsEx(node, { showMove: false }),
         columnCount: node.columnCount,
         columnWidth: node.columnWidth,
-    })),
+    }),
     render: (dn, ctx) => (<EntityCheckboxList {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: false }) }
         columnCount={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.columnCount, NodeUtils.isNumberOrNull)}
         columnWidth={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.columnWidth, NodeUtils.isNumberOrNull)}
@@ -521,9 +521,9 @@ NodeUtils.register<EntityStripNode>({
     hasCollection: true,
     validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
     renderTreeNode: NodeUtils.treeNodeKindField,
-    renderCode: (node, cc) => cc.elementCode("EntityStrip", Dic.extend(cc.getEntityBasePropsEx(node, { showAutoComplete: true, showMove: false }), {
+    renderCode: (node, cc) => cc.elementCode("EntityStrip", {...cc.getEntityBasePropsEx(node, { showAutoComplete: true, showMove: false }),
         vertical: node.vertical,
-    })),
+    }),
     render: (dn, ctx) => (<EntityStrip
         {...NodeUtils.getEntityBaseProps(dn, ctx, { showAutoComplete: true, showMove: false }) }
         vertical={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.vertical, NodeUtils.isBooleanOrNull)}
@@ -586,9 +586,9 @@ NodeUtils.register<EntityTableNode>({
     validChild: "EntityTableColumn",
     validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
     renderTreeNode: NodeUtils.treeNodeKindField,
-    renderCode: (node, cc) => cc.elementCode("EntityTable", Dic.extend(cc.getEntityBasePropsEx(node, { showMove: true, avoidGetComponent: true }), {
+    renderCode: (node, cc) => cc.elementCode("EntityTable", {...cc.getEntityBasePropsEx(node, { showMove: true, avoidGetComponent: true }), 
         columns: node.children.map((col: EntityTableColumnNode) => ({ __code__: NodeUtils.renderCode(col, cc) }))
-    })),
+    }),
     render: (dn, ctx) => (<EntityTable
         columns={dn.node.children.filter(c => NodeUtils.validate(dn.createChild(c), ctx) == null).map((col: EntityTableColumnNode) => NodeUtils.render(dn.createChild(col), ctx) as any)}
         {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: true, avoidGetComponent: true }) } />),
