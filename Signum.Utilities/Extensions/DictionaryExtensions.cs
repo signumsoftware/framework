@@ -1,18 +1,14 @@
-﻿using System;
+﻿using Signum.Utilities.ExpressionTrees;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Diagnostics;
-using System.Collections.Specialized;
-using Signum.Utilities.Reflection;
-using Signum.Utilities.ExpressionTrees;
-using System.Collections.Concurrent;
 
 namespace Signum.Utilities
 {
     public static class DictionaryExtensions
     {
-        public static V TryGet<K, V>(this IDictionary<K, V> dictionary, K key, V defaultValue)
+        public static V TryGet<K, V>(this IReadOnlyDictionary<K, V> dictionary, K key, V defaultValue)
         {
             V result;
             if (dictionary.TryGetValue(key, out result))
@@ -20,7 +16,7 @@ namespace Signum.Utilities
             return defaultValue;
         }
 
-        public static V TryGetC<K, V>(this IDictionary<K, V> dictionary, K key) where V : class
+        public static V TryGetC<K, V>(this IReadOnlyDictionary<K, V> dictionary, K key) where V : class
         {
             V result;
             if (dictionary.TryGetValue(key, out result))
@@ -28,7 +24,7 @@ namespace Signum.Utilities
             return null;
         }
 
-        public static V? TryGetS<K, V>(this IDictionary<K, V> dictionary, K key) where V : struct
+        public static V? TryGetS<K, V>(this IReadOnlyDictionary<K, V> dictionary, K key) where V : struct
         {
             V result;
             if (dictionary.TryGetValue(key, out result))
@@ -36,11 +32,8 @@ namespace Signum.Utilities
             return null;
         }
 
-        public static V? TryGetS<K, V>(this IDictionary<K, V?> dictionary, K key) where V : struct
+        public static V? TryGetS<K, V>(this IReadOnlyDictionary<K, V?> dictionary, K key) where V : struct
         {
-            if (dictionary == null)
-                return null;
-
             V? result;
             if (dictionary.TryGetValue(key, out result))
                 return result;
@@ -98,7 +91,7 @@ namespace Signum.Utilities
             V result;
             if (!dictionary.TryGetValue(key, out result))
                 throw new KeyNotFoundException(messageWithFormat.FormatWith(key));
-           return result;
+            return result;
         }
 
         public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key)
@@ -168,7 +161,7 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static Dictionary<K, V> ToDictionaryEx<T, K, V>(this IEnumerable<T> source, Func<T, K> keySelector, Func<T, V> elementSelector, string errorContext= null)
+        public static Dictionary<K, V> ToDictionaryEx<T, K, V>(this IEnumerable<T> source, Func<T, K> keySelector, Func<T, V> elementSelector, string errorContext = null)
         {
             Dictionary<K, V> result = new Dictionary<K, V>();
             result.AddRange(source, keySelector, elementSelector, errorContext ?? typeof(K).TypeName());
@@ -219,7 +212,7 @@ namespace Signum.Utilities
                     throw new InvalidOperationException("Error {0}\r\n Extra: {1}".FormatWith(errorContext, currentOnly.ToString(", ")));
             else
                 if (shouldOnly.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Missing: {1}".FormatWith(errorContext, shouldOnly.ToString(", ")));
+                throw new InvalidOperationException("Error {0}\r\n Missing: {1}".FormatWith(errorContext, shouldOnly.ToString(", ")));
 
             return currentDictionary.ToDictionaryEx(kvp => kvp.Key, kvp => resultSelector(kvp.Value, shouldDictionary[kvp.Key]));
         }
@@ -250,7 +243,7 @@ namespace Signum.Utilities
                     throw new InvalidOperationException("Error {0}\r\n Extra: {1}".FormatWith(errorContext, currentOnly.ToString(", ")));
             else
                 if (shouldOnly.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Lacking: {1}".FormatWith(errorContext, shouldOnly.ToString(", ")));
+                throw new InvalidOperationException("Error {0}\r\n Lacking: {1}".FormatWith(errorContext, shouldOnly.ToString(", ")));
 
             foreach (var kvp in currentDictionary)
             {
@@ -258,7 +251,7 @@ namespace Signum.Utilities
             }
         }
 
-        public static Dictionary<K, R> OuterJoinDictionaryCC<K, V1, V2, R>(this IDictionary<K, V1> dic1, IDictionary<K, V2> dic2, Func<K, V1, V2, R> mixer)
+        public static Dictionary<K, R> OuterJoinDictionaryCC<K, V1, V2, R>(this IReadOnlyDictionary<K, V1> dic1, IReadOnlyDictionary<K, V2> dic2, Func<K, V1, V2, R> mixer)
             where V1 : class
             where V2 : class
         {
@@ -269,7 +262,7 @@ namespace Signum.Utilities
             return set.ToDictionaryEx(k => k, k => mixer(k, dic1.TryGetC(k), dic2.TryGetC(k)));
         }
 
-        public static Dictionary<K, R> OuterJoinDictionarySC<K, V1, V2, R>(this IDictionary<K, V1> dic1, IDictionary<K, V2> dic2, Func<K, V1?, V2, R> mixer)
+        public static Dictionary<K, R> OuterJoinDictionarySC<K, V1, V2, R>(this IReadOnlyDictionary<K, V1> dic1, IReadOnlyDictionary<K, V2> dic2, Func<K, V1?, V2, R> mixer)
             where V1 : struct
             where V2 : class
         {
@@ -280,7 +273,7 @@ namespace Signum.Utilities
             return set.ToDictionaryEx(k => k, k => mixer(k, dic1.TryGetS(k), dic2.TryGetC(k)));
         }
 
-        public static Dictionary<K, V3> OuterJoinDictionarySC<K, V1, V2, V3>(this IDictionary<K, V1?> dic1, IDictionary<K, V2> dic2, Func<K, V1?, V2, V3> mixer)
+        public static Dictionary<K, V3> OuterJoinDictionarySC<K, V1, V2, V3>(this IReadOnlyDictionary<K, V1?> dic1, IReadOnlyDictionary<K, V2> dic2, Func<K, V1?, V2, V3> mixer)
             where V1 : struct
             where V2 : class
         {
@@ -291,7 +284,7 @@ namespace Signum.Utilities
             return set.ToDictionaryEx(k => k, k => mixer(k, dic1.TryGetS(k), dic2.TryGetC(k)));
         }
 
-        public static Dictionary<K, R> OuterJoinDictionaryCS<K, V1, V2, R>(this IDictionary<K, V1> dic1, IDictionary<K, V2> dic2, Func<K, V1, V2?, R> mixer)
+        public static Dictionary<K, R> OuterJoinDictionaryCS<K, V1, V2, R>(this IReadOnlyDictionary<K, V1> dic1, IReadOnlyDictionary<K, V2> dic2, Func<K, V1, V2?, R> mixer)
             where V1 : class
             where V2 : struct
         {
@@ -302,7 +295,7 @@ namespace Signum.Utilities
             return set.ToDictionaryEx(k => k, k => mixer(k, dic1.TryGetC(k), dic2.TryGetS(k)));
         }
 
-        public static Dictionary<K, R> OuterJoinDictionaryCS<K, V1, V2, R>(this IDictionary<K, V1> dic1, IDictionary<K, V2?> dic2, Func<K, V1, V2?, R> mixer)
+        public static Dictionary<K, R> OuterJoinDictionaryCS<K, V1, V2, R>(this IReadOnlyDictionary<K, V1> dic1, IReadOnlyDictionary<K, V2?> dic2, Func<K, V1, V2?, R> mixer)
             where V1 : class
             where V2 : struct
         {
@@ -313,7 +306,7 @@ namespace Signum.Utilities
             return set.ToDictionaryEx(k => k, k => mixer(k, dic1.TryGetC(k), dic2.TryGetS(k)));
         }
 
-        public static Dictionary<K, R> OuterJoinDictionarySS<K, V1, V2, R>(this IDictionary<K, V1> dic1, IDictionary<K, V2> dic2, Func<K, V1?, V2?, R> mixer)
+        public static Dictionary<K, R> OuterJoinDictionarySS<K, V1, V2, R>(this IReadOnlyDictionary<K, V1> dic1, IReadOnlyDictionary<K, V2> dic2, Func<K, V1?, V2?, R> mixer)
             where V1 : struct
             where V2 : struct
         {
@@ -324,7 +317,7 @@ namespace Signum.Utilities
             return set.ToDictionaryEx(k => k, k => mixer(k, dic1.TryGetS(k), dic2.TryGetS(k)));
         }
 
-        public static Dictionary<K, R> OuterJoinDictionarySS<K, V1, V2, R>(this IDictionary<K, V1?> dic1, IDictionary<K, V2?> dic2, Func<K, V1?, V2?, R> mixer)
+        public static Dictionary<K, R> OuterJoinDictionarySS<K, V1, V2, R>(this IReadOnlyDictionary<K, V1?> dic1, IReadOnlyDictionary<K, V2?> dic2, Func<K, V1?, V2?, R> mixer)
             where V1 : struct
             where V2 : struct
         {
@@ -343,7 +336,7 @@ namespace Signum.Utilities
 
         public static void AddRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys, IEnumerable<V> values, string errorContext)
         {
-            dictionary.AddRange(keys.ZipStrict(values), t=>t.Item1, t=>t.Item2);
+            dictionary.AddRange(keys.ZipStrict(values), t => t.Item1, t => t.Item2);
         }
 
         public static void AddRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<KeyValuePair<K, V>> collection)
