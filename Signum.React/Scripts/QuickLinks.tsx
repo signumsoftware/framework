@@ -213,7 +213,7 @@ export abstract class QuickLink {
     constructor(name: string, options?: QuickLinkOptions) {
         this.name = name;
 
-        Dic.extend(this, { isVisible: true, text: "", order: 0 } as QuickLinkOptions, options);
+        Dic.assign(this, { isVisible: true, text: "", order: 0, ...options });
     }
 
     abstract toMenuItem(key: any): React.ReactElement<any>;
@@ -285,10 +285,11 @@ export class QuickLinkExplore extends QuickLink {
     findOptions: FindOptions;
 
     constructor(findOptions: FindOptions, options?: QuickLinkOptions) {
-        super(getQueryKey(findOptions.queryName), Dic.extend({
+        super(getQueryKey(findOptions.queryName), {
             isVisible: Finder.isFindable(findOptions.queryName),
             text: getQueryNiceName(findOptions.queryName),
-        }, options));
+            ...options
+        });
 
         this.findOptions = findOptions;
     }
@@ -315,10 +316,11 @@ export class QuickLinkNavigate extends QuickLink {
     lite: Lite<Entity>;
 
     constructor(lite: Lite<Entity>, options?: QuickLinkOptions) {
-        super(lite.EntityType, Dic.extend({
+        super(lite.EntityType, {
             isVisible: Navigator.isNavigable(lite.EntityType),
             text: getTypeInfo(lite.EntityType).niceName,
-        }, options));
+            ...options
+        });
 
         this.lite = lite;
     }

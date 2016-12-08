@@ -613,7 +613,7 @@ export class EntitySettings<T extends ModifiableEntity> {
         this.type = type;
         this.getViewPromise = getViewPromise;
 
-        Dic.extend(this, options);
+        Dic.assign(this, options);
     }
 }
 

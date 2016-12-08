@@ -87,7 +87,7 @@ export class ConstructorOperationSettings<T extends Entity> extends OperationSet
     constructor(operationSymbol: ConstructSymbol_Simple<T>, options: ConstructorOperationOptions<T>) {
         super(operationSymbol);
 
-        Dic.extend(this, options);
+        Dic.assign(this, options);
     }
 }
 
@@ -120,7 +120,7 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
     constructor(operationSymbol: ConstructSymbol_FromMany<any, T>, options: ContextualOperationOptions<T>) {
         super(operationSymbol);
 
-        Dic.extend(this, options);
+        Dic.assign(this, options);
     }
 }
 
@@ -170,7 +170,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
     constructor(operationSymbol: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>, options: EntityOperationOptions<T>) {
         super(operationSymbol)
 
-        Dic.extend(this, options);
+        Dic.assign(this, options);
 
         this.contextual = options.contextual ? new ContextualOperationSettings(operationSymbol as any, options.contextual) : undefined;
         this.contextualFromMany = options.contextualFromMany ? new ContextualOperationSettings(operationSymbol as any, options.contextualFromMany) : undefined;

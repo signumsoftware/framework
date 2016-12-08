@@ -31,9 +31,8 @@ export default class ContextMenu extends React.Component<ContextMenuProps, {}> {
 
 
     render() {
-
-        const { position, onHide } = this.props;
-        const props = Dic.without(this.props, { position, onHide, ref: undefined });
+        
+        const { position, onHide, ref, ...props } = this.props;
 
         const style: React.CSSProperties = { zIndex: 999, display: "block", position: "absolute" };
 

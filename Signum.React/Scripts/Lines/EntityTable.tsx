@@ -66,7 +66,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
         const elementPr = ctx.propertyRoute.add(a => a[0].element);
 
         return (
-            <fieldset className={classes("SF-table-field SF-control-container", ctx.errorClass)} {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
+            <fieldset className={classes("SF-table-field SF-control-container", ctx.errorClass)} {...this.baseHtmlProps() } {...this.state.formGroupHtmlProps}>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>

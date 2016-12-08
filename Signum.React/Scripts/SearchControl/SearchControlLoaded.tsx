@@ -450,7 +450,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     markRows = (dic: MarkedRowsDictionary) => {
-        this.setState({ markedRows: Dic.extend(this.state.markedRows, dic) });
+        this.setState({ markedRows: { ...this.state.markedRows, ...dic } });
     }
 
     renderSelecterButton() {
