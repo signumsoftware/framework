@@ -126,7 +126,7 @@ namespace Signum.Engine.Printing
        
         public static void CancelPrinting(Entity entity, FileTypeSymbol fileType)
         {
-            var list = Database.Query<PrintLineEntity>().Where(a => a.Referred.RefersTo(entity) && a.File.FileType == fileType && a.State == PrintLineState.ReadyToPrint).ToList();
+            var list = ReadyToPrint(entity, fileType).ToList();
 
             var filesToDelete = list.Select(a => a.File.FullPhysicalPath()).ToList();
 
@@ -139,7 +139,8 @@ namespace Signum.Engine.Printing
                         if (File.Exists(file))
                             File.Delete(file);
 
-                    }catch(Exception e)
+                    }
+                    catch (Exception e)
                     {
                         e.LogException();
                     }
@@ -148,6 +149,11 @@ namespace Signum.Engine.Printing
 
             list.ForEach(a => a.State = PrintLineState.Cancelled);
             list.SaveList();
+        }
+
+        public static IQueryable<PrintLineEntity> ReadyToPrint(Entity entity, FileTypeSymbol fileType)
+        {
+            return Database.Query<PrintLineEntity>().Where(a => a.Referred.RefersTo(entity) && a.File.FileType == fileType && a.State == PrintLineState.ReadyToPrint);
         }
     }
     public class PrintStat
