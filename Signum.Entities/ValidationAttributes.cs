@@ -1037,7 +1037,5 @@ namespace Signum.Entities
         _0ShouldNotBeOfType1,
         [Description("{0} and {1} can not be set at the same time")]
         _0And1CanNotBeSetAtTheSameTime,
-        [Description("Manufacturer for Type {0} is not Set")]
-        ManufacturerForType0IsNotSet,
     }
 }
