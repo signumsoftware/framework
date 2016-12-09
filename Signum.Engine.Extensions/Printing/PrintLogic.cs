@@ -47,7 +47,6 @@ namespace Signum.Engine.Printing
                         p.Package,
                         p.PrintedOn,
                         p.Referred,
-                        p.Exception,
                     });
                 
                 sb.Include<PrintPackageEntity>()
@@ -70,7 +69,7 @@ namespace Signum.Engine.Printing
             {
                 PrintPackageEntity package = (PrintPackageEntity)executingProcess.Data;
 
-                executingProcess.ForEachLine(package.Lines().Where(a => a.State == PrintLineState.ReadyToPrint), line =>
+                executingProcess.ForEachLine(package.Lines().Where(a => a.State != PrintLineState.Printed), line =>
                 {
                     PrintLineGraph.Print(line);
                 });
@@ -95,7 +94,7 @@ namespace Signum.Engine.Printing
         public static ProcessEntity CreateProcess(FileTypeSymbol fileType = null)
         {
             var query = Database.Query<PrintLineEntity>()
-                .Where(a => a.Package == null && a.State == PrintLineState.Printed);
+                .Where(a => a.Package == null && a.State == PrintLineState.ReadyToPrint);
 
             if (fileType != null)
                 query = query.Where(a => a.File.FileType == fileType);
@@ -108,7 +107,7 @@ namespace Signum.Engine.Printing
 
             query.UnsafeUpdate().Set(a => a.Package, a => package.ToLite()).Execute();
 
-            return ProcessLogic.Create(PrintPackageProcess.PrintPackage, package); 
+            return ProcessLogic.Create(PrintPackageProcess.PrintPackage, package).Save(); 
         }
 
         public static List<PrintStat> GetReadyToPrintStats()
@@ -185,7 +184,7 @@ namespace Signum.Engine.Printing
                 Execute = (e, _) =>
                 {
                     e.State = PrintLineState.ReadyToPrint;
-                    e.Exception = null;
+                    e.Package = null;
                 }
             }.Register();
         }
@@ -216,7 +215,6 @@ namespace Signum.Engine.Printing
                     {
                         using (Transaction tr = Transaction.ForceNew())
                         {
-                            line.Exception = exLog;
                             line.State = PrintLineState.Error;
                             line.Save();
                             tr.Commit();

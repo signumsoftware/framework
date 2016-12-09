@@ -4,7 +4,6 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import * as Processes from '../Processes/Signum.Entities.Processes'
 import * as Files from '../Files/Signum.Entities.Files'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
@@ -18,7 +17,6 @@ export interface PrintLineEntity extends Entities.Entity, Processes.IProcessLine
     package?: Entities.Lite<PrintPackageEntity> | null;
     printedOn?: string | null;
     referred?: Entities.Lite<Entities.Entity> | null;
-    exception?: Entities.Lite<Basics.ExceptionEntity> | null;
     state?: PrintLineState;
 }
 

@@ -240,11 +240,14 @@
     <Compile Include="UserQueries\UserQueryServer.cs" />
     <Compile Include="Word\WordServer.cs" />
     <Compile Include="Word\WordController.cs" />
+    <TypeScriptCompile Include="Printing\Package.tsx" />
     <TypeScriptCompile Include="Printing\PrintClient.tsx" />
     <TypeScriptCompile Include="Printing\PrintPanelPage.tsx" />
     <TypeScriptCompile Include="Printing\Signum.Entities.Printing.ts">
       <DependentUpon>Signum.Entities.Printing.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Printing\Templates\PrintPackage.tsx" />
+    <TypeScriptCompile Include="Printing\Templates\PrintLine.tsx" />
     <TypeScriptCompile Include="Toolbar\QueryToolbarConfig.ts" />
     <TypeScriptCompile Include="Toolbar\Signum.Entities.Toolbar.ts">
       <DependentUpon>Signum.Entities.Toolbar.t4s</DependentUpon>
@@ -288,7 +291,6 @@
     <Content Include="Map\Operation\operationMap.css" />
     <Content Include="Map\Schema\schemaMap.css" />
     <Content Include="packages.config" />
-    <Content Include="Printing\Printing.css" />
     <Content Include="Workflow\Templates\InitialWorkflow.xml">
       <SubType>Designer</SubType>
     </Content>

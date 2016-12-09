@@ -30,18 +30,16 @@ namespace Signum.Entities.Printing
         [ImplementedBy()]
         public Lite<Entity> Referred { get; set; }
 
-        public Lite<ExceptionEntity> Exception { get; set; }
-
         public PrintLineState State { get; set; }
 
         static StateValidator<PrintLineEntity, PrintLineState> stateValidator =
             new StateValidator<PrintLineEntity, PrintLineState>
-            (n => n.State, n => n.Exception, n => n.PrintedOn)
+            (n => n.State, n => n.PrintedOn)
             {
-                { PrintLineState.ReadyToPrint,   false,           false  },
-                { PrintLineState.Printed,        false,           true   },
-                { PrintLineState.Error,          true,            false  },
-                { PrintLineState.Cancelled,      false,           false  }   
+                { PrintLineState.ReadyToPrint,  false  },
+                { PrintLineState.Printed,       true   },
+                { PrintLineState.Error,         false  },
+                { PrintLineState.Cancelled,     false  }   
             };
         protected override string PropertyValidation(PropertyInfo pi)
         {

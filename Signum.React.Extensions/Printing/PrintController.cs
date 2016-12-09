@@ -2,6 +2,7 @@
 using Signum.Engine.Basics;
 using Signum.Engine.Printing;
 using Signum.Engine.Processes;
+using Signum.Entities.Files;
 using Signum.Entities.Processes;
 using Signum.React.ApiControllers;
 using Signum.React.Facades;
@@ -18,6 +19,12 @@ namespace Signum.React.Processes
         public List<PrintStat> Stats()
         {
             return PrintingLogic.GetReadyToPrintStats();           
+        }
+
+        [Route("api/printing/createProcess"), HttpPost]
+        public ProcessEntity Stats(FileTypeSymbol fileType)
+        {
+            return PrintingLogic.CreateProcess(fileType);
         }
     }
 }

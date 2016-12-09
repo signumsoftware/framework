@@ -3,12 +3,18 @@ import { Link } from 'react-router'
 import * as numbro from 'numbro'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import EntityLink from '../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
-import { ValueSearchControl, SearchControl } from '../../../Framework/Signum.React/Scripts/Search'
+import { ValueSearchControl, SearchControl, ValueSearchControlLine } from '../../../Framework/Signum.React/Scripts/Search'
 import { QueryDescription, SubTokensOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
+import { StyleContext } from '../../../Framework/Signum.React/Scripts/Lines'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { API, PrintStat } from './PrintClient'
-import { PrintPackageEntity, PrintLineState, PrintLineEntity } from './Signum.Entities.Printing'
+import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
+import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
+import { PrintPackageEntity, PrintLineState, PrintLineEntity, PrintPackageProcess,  } from './Signum.Entities.Printing'
+import { FileTypeSymbol } from '../Files/Signum.Entities.Files'
+import { ProcessEntity } from '../Processes/Signum.Entities.Processes'
+import { Type } from '../../../Framework/Signum.React/Scripts/Reflection'
 
 
 
@@ -30,34 +36,69 @@ export default class PrintPanelPage extends React.Component<{}, PrintPanelPageSt
         }).done();
     }
 
-
     render() {
-
+        var ctx = new StyleContext(undefined, undefined);
         return (
+         
             <div>
                 <h2>PrintPanel</h2>
-                <div>
-                    {this.state.stats.map((s, i) => <p key={i}>{s.fileTypeSymbol.key} {s.count}</p>)}
+
+                <div className="form-horizontal">
+                    <fieldset>
+                        <legend>Ready To Print</legend>
+                        {this.state.stats.map((s, i) =>
+                            <ValueSearchControlLine ctx={ctx}  key={i} initialValue={s.count}
+                                labelText={s.fileType.toStr.after(".")}
+                                extraButtons={vsc => this.renderStateButton(vsc, s.fileType)}
+                                findOptions={{
+                                queryName: PrintLineEntity,
+                                searchOnLoad: true,
+                                showFilters: true,
+                                showFilterButton: true,
+                                filterOptions: [
+                                    { columnName: "State", value: "ReadyToPrint" as PrintLineState },
+                                    { columnName: "File.FileType", value: s.fileType }, 
+                                ]}} />)
+                        }               
+                    </fieldset>
                 </div>
-                <h3>{PrintLineState.niceName("ReadyToPrint")}</h3>
+
+                <h3>{ProcessEntity.nicePluralName()}</h3>
                 <SearchControl findOptions={{
-                    queryName: PrintLineEntity,
-                    orderOptions: [{ columnName: "CreationDate", orderType: "Descending" }],
-                    searchOnLoad: false,
-                    showFilters: true,
-                    filterOptions: [{ columnName: "State", value: "ReadyToPrint" }],
+                    queryName: ProcessEntity,
+                    filterOptions: [{ columnName: "Entity.Data.(PrintPackage)", operation: "DistinctTo", value: undefined }],
+                    searchOnLoad: true,
+                    showFilters: false
                 }} />
-
-
+                
                 <h3>{PrintLineState.niceName("Printed")}</h3>
                 <SearchControl findOptions={{
                     queryName: PrintLineEntity,
                     orderOptions: [{ columnName: "PrintedOn", orderType: "Descending" }],
                     filterOptions: [{ columnName: "State", value: "Printed" }],
-                    searchOnLoad: false,
-                    showFilters: true
+                    searchOnLoad: true,
+                    showFilters: false
                 }} />
             </div>
         );
     }
+
+    renderStateButton(vsc: ValueSearchControl, fileType : FileTypeSymbol) {
+        if (vsc.state.value == undefined || vsc.state.value == 0)
+            return undefined;
+
+        return (
+            <a className="sf-line-button" title="Print" onClick={() => this.handlePrintClick(fileType, vsc)}>
+                <span className="glyphicon glyphicon-print"></span>
+            </a>
+        );
+    }
+
+    handlePrintClick = (fileType: FileTypeSymbol, vsc: ValueSearchControl) => {
+        API.createPrintProcess(fileType)
+            .then(p => p && Navigator.navigate(p))
+            .then(p => vsc.refreshCount())
+            .done();
+    }
+   
 }
