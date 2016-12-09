@@ -11,8 +11,6 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Signum.Engine
 {
@@ -46,8 +44,8 @@ namespace Signum.Engine
 
         /// <param name="keySelector">Unique key to retrieve ids</param>
         /// <param name="isNewPredicate">Optional filter to query only the recently inseted entities</param>
-        public static int BulkInsertQueryIds<T, K>(this IEnumerable<T> entities, 
-            Expression<Func<T, K>> keySelector, 
+        public static int BulkInsertQueryIds<T, K>(this IEnumerable<T> entities,
+            Expression<Func<T, K>> keySelector,
             Expression<Func<T, bool>> isNewPredicate = null,
             SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
             bool validateFirst = false,
@@ -57,14 +55,14 @@ namespace Signum.Engine
         {
             var t = Schema.Current.Table(typeof(T));
 
-            if (t.TablesMList().Any())
-                throw new InvalidOperationException($"Table {typeof(T)} contains no MList, use just BulkInsert");
-
             var list = entities.ToList();
 
+            if (isNewPredicate == null)
+                isNewPredicate = GetFilterAutomatic<T>(t);
+
             var rowNum = BulkInsertTable<T>(list, copyOptions, validateFirst, false, timeout, message);
-   
-            var dictionary = Database.Query<T>().Where(isNewPredicate ?? GetFilterAutomatic<T>(t)).Select(a => KVP.Create(keySelector.Evaluate(a), a.Id)).ToDictionaryEx();
+
+            var dictionary = Database.Query<T>().Where(isNewPredicate).Select(a => KVP.Create(keySelector.Evaluate(a), a.Id)).ToDictionaryEx();
 
             var getKeyFunc = keySelector.Compile();
 
@@ -177,7 +175,7 @@ namespace Signum.Engine
         }
 
         public static int BulkInsertMListTable<E, V>(
-            List<E> entities, 
+            List<E> entities,
             Expression<Func<E, MList<V>>> mListProperty,
             SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
             int? timeout = null,
