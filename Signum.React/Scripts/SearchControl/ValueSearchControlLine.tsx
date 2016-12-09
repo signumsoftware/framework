@@ -20,6 +20,7 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
     labelText?: React.ReactChild;
     labelProps?: React.HTMLAttributes;
     formGroupHtmlProps?: React.HTMLAttributes;
+    initialValue?: any;
     isLink?: boolean;
     isBadge?: boolean | "MoreThanZero";
     isFormControl?: boolean;
@@ -27,7 +28,7 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
     onViewEntity?: (entity: Lite<Entity>)=> void;
     viewEntityButton?: boolean;
     avoidAutoRefresh?: boolean;
-    extraButtons?: (valueSearchControl: ValueSearchControl) => React.ReactNode
+    extraButtons?: (valueSearchControl: ValueSearchControl) => React.ReactNode | undefined
 }
 
 
@@ -58,6 +59,10 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
             };
 
         throw new Error("Impossible to determine 'findOptions' because 'ctx' is not a 'TypeContext<Entity>'. Set it explicitly");
+    }
+
+    refreshValue() {
+        this.valueSearchControl && this.valueSearchControl.refreshValue()
     }
 
     render() {
@@ -104,6 +109,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
                     <ValueSearchControl
                         ref={this.handleValueSearchControlLoaded}
                         findOptions={fo}
+                        initialValue={this.props.initialValue}
                         isBadge={isBadge}
                         isLink={this.props.isLink}
                         formControlClass={isFormControl ? this.props.ctx.formControlClassReadonly : undefined}
