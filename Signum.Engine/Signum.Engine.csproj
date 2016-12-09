@@ -94,6 +94,7 @@
     <Compile Include="Basics\PropertyRouteLogic.cs" />
     <Compile Include="Basics\QueryLogic.cs" />
     <Compile Include="Basics\SemiSymbolLogic.cs" />
+    <Compile Include="BulkInserter.cs" />
     <Compile Include="CodeGeneration\CodeGenerator.cs" />
     <Compile Include="CodeGeneration\ReactCodeConverter.cs" />
     <Compile Include="CodeGeneration\ReactCodeGenerator.cs" />
