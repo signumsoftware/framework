@@ -15,8 +15,6 @@ div.sf-dynamic-type-help-bar{
     padding: 5px;
 }
 
-
-
 ul.sf-dynamic-members {
     font-family: monospace;
     font-size: 13px;
@@ -60,4 +58,8 @@ span.sf-dynamic-member-collection {
 
 span.sf-dynamic-member-others {
     color: #808080;
+}
+
+span.sf-dynamic-member-click {
+    cursor: pointer;
 }

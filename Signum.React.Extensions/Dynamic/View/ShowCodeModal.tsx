@@ -70,7 +70,8 @@ function renderFile(typeName: string, node: BaseNode): string {
 import * as React from 'react'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { ${typeName}Entity } from '../[your namespace]'
-import { ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, EntityTable } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip, 
+         EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, EntityTable } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl, ValueSearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 
 export default class ${typeName}Component extends React.Component<{ ctx: TypeContext<${typeName}Entity> }, void> {
