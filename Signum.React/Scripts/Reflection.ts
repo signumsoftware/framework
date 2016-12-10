@@ -533,7 +533,10 @@ export class ReadonlyBinding<T> implements IBinding<T> {
 
 export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBinding<T> {
 
-    const lambdaMatch = functionRegex.exec((lambda as any).toString());
+    var lambdaStr = (lambda as any).toString();
+
+    const lambdaMatch = functionRegex.exec(lambdaStr) || lambdaRegex.exec(lambdaStr);
+    //const lambdaMatch = functionRegex.exec((lambda as any).toString());
 
     if (lambdaMatch == undefined)
         throw Error("invalid function");
