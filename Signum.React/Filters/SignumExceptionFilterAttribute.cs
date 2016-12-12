@@ -5,20 +5,15 @@ using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Authentication;
 using System.ServiceModel.Channels;
-using System.Text;
 using System.Web;
 using System.Web.Http;
-using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
-using System.Web.Http.Routing;
 
 namespace Signum.React.Filters
 {
@@ -27,7 +22,7 @@ namespace Signum.React.Filters
         static Func<HttpActionExecutedContext, bool> IncludeErrorDetails = ctx => true;
 
         public static readonly List<Type> IgnoreExceptions = new List<Type> { typeof(OperationCanceledException) };
-        
+
         public override void OnException(HttpActionExecutedContext ctx)
         {
             if (!IgnoreExceptions.Contains(ctx.Exception.GetType()))
@@ -48,7 +43,7 @@ namespace Signum.React.Filters
                     e.UserHostAddress = GetClientIp(req);
                     e.UserHostName = GetClientName(req);
                     e.QueryString = ExceptionEntity.Dump(req.RequestUri.ParseQueryString());
-                    e.Form = (string)req.Properties.TryGetC(SignumAuthenticationAndProfilerAttribute.SavedRequestKey);
+                    e.Form = (string)(req.Properties.ContainsKey(SignumAuthenticationAndProfilerAttribute.SavedRequestKey) ? req.Properties[SignumAuthenticationAndProfilerAttribute.SavedRequestKey] : null);
                     e.Session = GetSession(req);
                 });
 
@@ -124,7 +119,7 @@ namespace Signum.React.Filters
         {
             if (request.Properties.ContainsKey("MS_HttpContext"))
             {
-                var ses =  ((HttpContextWrapper)request.Properties["MS_HttpContext"]).Session;
+                var ses = ((HttpContextWrapper)request.Properties["MS_HttpContext"]).Session;
                 return ses == null ? "[No Session]" : ses.Cast<string>().ToString(key => key + ": " + ses[key].Dump(), "\r\n");
             }
             else if (HttpContext.Current != null)

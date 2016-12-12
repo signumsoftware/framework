@@ -299,7 +299,7 @@ namespace Signum.Engine.Maps
         internal abstract IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables();
 
         internal abstract IEnumerable<TableMList> TablesMList();
-        internal abstract void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter); 
+        internal abstract void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter);
     }
 
     public static class FieldExtensions
