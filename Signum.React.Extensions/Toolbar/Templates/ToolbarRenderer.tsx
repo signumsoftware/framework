@@ -34,7 +34,7 @@ export default class ToolbarRenderer extends React.Component<void, ToolbarRender
 
     componentWillMount() {
         ToolbarClient.API.getCurrentToolbar()
-            .then(res => this.changeState(s => s.response = res))
+            .then(res => this.setState({ response: res }))
             .done();
     }
 

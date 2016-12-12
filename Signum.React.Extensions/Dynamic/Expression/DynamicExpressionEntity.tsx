@@ -105,13 +105,13 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
     handleEvaluate = () => {
 
         if (this.state.exampleEntity == undefined)
-            this.changeState(s => { s.response = undefined; });
+            this.setState({ response: undefined });
         else {
             API.expressionTest({
                 dynamicExpression: this.props.ctx.value,
                 exampleEntity: this.state.exampleEntity,
             })
-                .then(r => this.changeState(s => s.response = r))
+                .then(r => this.setState({ response: r }))
                 .done();
         }
     }

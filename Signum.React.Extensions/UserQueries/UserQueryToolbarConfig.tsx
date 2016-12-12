@@ -56,7 +56,7 @@ export class CountUserQueryIcon extends React.Component<CountUserQueryIconProps,
     componentWillMount() {
         Navigator.API.fetchAndForget(this.props.userQuery)
             .then(uq => UserQueryClient.Converter.toFindOptions(uq, undefined))
-            .then(fo => this.changeState(s => s.findOptions = fo))
+            .then(fo => this.setState({ findOptions: fo }))
             .done();
     }
 

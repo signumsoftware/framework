@@ -49,7 +49,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
     handleTabSelect = (eventKey: any /*string*/)=> {
         if (this.props.typeName && eventKey == "query")
             DynamicTypeClient.API.expressionNames(this.props.typeName + "Entity")
-                .then(exprNames => this.changeState(s => s.expressionsNames = exprNames))
+                .then(exprNames => this.setState({ expressionsNames: exprNames}))
                 .done();
     }
 
@@ -270,7 +270,7 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
         this.props.properties.removeAt(index);
 
         if (this.state.activeIndex == index)
-            this.changeState(s => s.activeIndex == undefined);
+            this.setState({ activeIndex: undefined });
 
         this.props.dc.refreshView();
 
@@ -284,9 +284,9 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
         const newIndex = this.props.properties.moveUp(index);
         if (newIndex != index) {
             if (index == this.state.activeIndex)
-                this.changeState(s => s.activeIndex--);
+                this.setState({ activeIndex: this.state.activeIndex-- });
             else if (newIndex == this.state.activeIndex)
-                this.changeState(s => s.activeIndex++);
+                this.setState({ activeIndex: this.state.activeIndex++ });
         }
 
         this.props.dc.refreshView();
@@ -299,9 +299,9 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
 
         if (newIndex != index) {
             if (index == this.state.activeIndex)
-                this.changeState(s => s.activeIndex++);
+                this.setState({ activeIndex: this.state.activeIndex + 1 });
             else if (newIndex == this.state.activeIndex)
-                this.changeState(s => s.activeIndex--);
+                this.setState({ activeIndex: this.state.activeIndex - 1 });
         }
 
         this.props.dc.refreshView();
@@ -316,7 +316,7 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
         } as DynamicProperty;
         autoFix(p);
         this.props.properties.push(p);
-        this.changeState(s => s.activeIndex = this.props.properties.length - 1);
+        this.setState({ activeIndex: this.props.properties.length - 1 });
         this.props.dc.refreshView();
 
         fetchPropertyType(p, this.props.dc);

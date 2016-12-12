@@ -49,29 +49,31 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
 
 
     goTo(type: string) {
-        this.changeState(s => {
-            while (s.history.length - 1 > s.historyIndex)
-                s.history.removeAt(s.history.length - 1);
-            s.history.push(type);
-            s.historyIndex++;
+        var s = this.state;
+        while (s.history.length - 1 > s.historyIndex)
+            s.history.removeAt(s.history.length - 1);
+        s.history.push(type);
+
+        this.setState({
+            historyIndex: s.historyIndex + 1
         });
         this.loadMembers(type);
     }
 
     loadMembers(typeName: string) {
-        this.changeState(s => s.help = undefined);
+        this.setState({ help: undefined });
         DynamicClient.API.typeHelp(typeName, this.props.mode)
             .then(th => {
 
                 if (th.cleanTypeName == this.currentType())
-                    this.changeState(s => s.help = th);
+                    this.setState({ help: th });
             })
             .done();
     }
 
     handleGoHistory = (e: React.MouseEvent, newIndex: number) => {
         e.preventDefault();
-        this.changeState(s => s.historyIndex = newIndex);
+        this.setState({ historyIndex: newIndex });
         this.loadMembers(this.state.history[newIndex]);
     }
 
@@ -97,7 +99,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
     }
 
     handleSelect = (item: string) => {
-        this.changeState(s => s.tempQuery = undefined);
+        this.setState({ tempQuery: undefined });
         this.goTo(item);
         return item;
     }
@@ -133,8 +135,8 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
                             inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
                             getItems={this.handleGetItems}
                             value={this.state.tempQuery == undefined ? this.currentType() : this.state.tempQuery}
-                            onBlur={() => this.changeState(s => s.tempQuery = undefined)}
-                            onChange={newValue => this.changeState(s => s.tempQuery = newValue)}
+                            onBlur={() => this.setState({ tempQuery: undefined })}
+                            onChange={newValue => this.setState({ tempQuery: newValue })}
                             onSelect={this.handleSelect} />
                     </div>
                 </div>

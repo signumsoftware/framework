@@ -53,10 +53,10 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
        
 
         this.props.rootNode.context.setSelectedNode(n);
-        this.changeState(s => {
-            s.contextualMenu = {
+        this.setState({
+            contextualMenu : {
                 position: ContextMenu.getPosition(e, this.treeContainer)
-            };
+            }
         });
     }
 
@@ -106,7 +106,7 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
     }
 
     handleContextOnHide = () => {
-        this.changeState(s => s.contextualMenu = undefined);
+        this.setState({ contextualMenu: undefined });
     }
 
     handleAddChildren = () => {
@@ -197,7 +197,7 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
     }
 
     handleIconClick = () => {
-        this.changeState(s => s.isOpened = !s.isOpened);
+        this.setState({ isOpened: !this.state.isOpened });
     }
 
     renderIcon() {
@@ -215,7 +215,7 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
     handleDragStart = (e: React.DragEvent) => {
         e.dataTransfer.setData('text', "start"); //cannot be empty string
         e.dataTransfer.effectAllowed = "move";
-        this.props.dynamicTreeView.changeState(s => s.draggedNode = this.props.node);
+        this.props.dynamicTreeView.setState({ draggedNode: this.props.node });
     }
 
     handleDragOver = (e: React.DragEvent) => {
@@ -234,25 +234,25 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
             s.draggedOver.position != newPosition ||
             s.draggedOver.error != newError) {
 
-            this.props.dynamicTreeView.changeState(s => {
-                s.draggedOver = {
+            this.props.dynamicTreeView.setState({
+                draggedOver : {
                     dn: dn,
                     position: newPosition,
                     error: newError
-                };
+                }
             });
         }
     }
 
     handleDragEnd = (e: React.DragEvent) => {
-        this.props.dynamicTreeView.changeState(s => { s.draggedNode = undefined; s.draggedOver = undefined; });
+        this.props.dynamicTreeView.setState({ draggedNode: undefined, draggedOver: undefined });
     }
     
     handleDrop = (e: React.DragEvent) => {
         const dragged = this.props.dynamicTreeView.state.draggedNode!;
         const over = this.props.dynamicTreeView.state.draggedOver!;
 
-        this.props.dynamicTreeView.changeState(s => { s.draggedNode = undefined; s.draggedOver = undefined; });
+        this.props.dynamicTreeView.setState({ draggedNode: undefined, draggedOver: undefined });
 
         if (over.error == "Error")
             return;

@@ -48,8 +48,8 @@ export default class DynamicTypeEntityComponent extends React.Component<DynamicT
             { baseType: "Entity", entityData: "Transactional", entityKind: "Main", properties: [], queryFields: ["Id"], registerSave: true, registerDelete: true } as DynamicTypeClient.DynamicTypeDefinition :
             JSON.parse(ctx.value.typeDefinition) as DynamicTypeClient.DynamicTypeDefinition;
 
-        this.changeState(s => {
-            s.typeDefinition = def;
+        this.setState({
+            typeDefinition: def
         });
     }
 
