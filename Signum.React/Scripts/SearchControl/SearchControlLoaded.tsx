@@ -590,7 +590,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         if (!this.state.resultTable)
             return;
 
-        this.changeState(s => s.selectedRows = !this.allSelected() ? this.state.resultTable!.rows.clone() : []);
+        this.setState({ selectedRows: !this.allSelected() ? this.state.resultTable!.rows.clone() : [] });
         this.notifySelectedRowsChanged();
     }
 

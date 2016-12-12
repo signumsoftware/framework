@@ -61,13 +61,16 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
             if (newEntity == null) {
                 if (this.state.currentItem)
-                    this.changeState(s => s.currentItem = undefined);
+                    this.setState({ currentItem: undefined });
             } else {
                 if (!this.state.currentItem || this.state.currentItem.entity !== newEntity) {
                     var ci = { entity: newEntity!, item: undefined }
-                    this.changeState(s => s.currentItem = ci);
+                    this.setState({ currentItem: ci });
                     this.state.autoComplete.getItemFromEntity(newEntity)
-                        .then(item => this.changeState(s => ci.item = item))
+                        .then(item => {
+                            ci.item = item;
+                            this.forceUpdate()
+                        })
                         .done();
                 }
             }
@@ -86,7 +89,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
         this.convert(lite)
             .then(entity => {
-                this.changeState(s => s.currentItem = { entity: entity, item: item }); //Optimization
+                this.setState({ currentItem: { entity: entity, item: item } }); //Optimization
                 this.setValue(entity);
             })
             .done();

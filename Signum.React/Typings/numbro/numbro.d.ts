@@ -44,9 +44,9 @@ interface Numbro {
     difference(value: any): number;
 }
 
-declare var numbro: Numbro;
 
 declare module "numbro" {
+    var numbro: Numbro;
     export = numbro;
 
 } 

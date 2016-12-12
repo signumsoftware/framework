@@ -162,9 +162,12 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
             var newEntity = props.ctx.value;
             if (!this.state.currentItem || this.state.currentItem.entity !== newEntity) {
                 var ci = { entity: newEntity!, item: undefined }
-                this.changeState(s => s.currentItem = ci);
+                this.setState({ currentItem: ci });
                 this.props.autoComplete.getItemFromEntity(newEntity)
-                    .then(item => this.changeState(s => ci.item = item))
+                    .then(item => {
+                        ci.item = item;
+                        this.forceUpdate();
+                    })
                     .done();
             }
         }
