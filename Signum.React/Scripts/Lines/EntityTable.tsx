@@ -90,7 +90,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                                 (<EntityTableRow key={i} index={i}
                                     rowProps={this.props.rowProps}
                                     fetchRowState={this.props.fetchRowState}
-                                    onRemove={this.state.remove && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
+                                    onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
                                     onMoveDown ={this.state.move && !readOnly ? e => this.moveDown(i) : undefined}
                                     onMoveUp ={this.state.move && !readOnly ? e => this.moveUp(i) : undefined}
                                     columns={this.props.columns}

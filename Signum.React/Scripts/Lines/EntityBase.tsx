@@ -19,7 +19,7 @@ export interface EntityBaseProps extends LineBaseProps {
     navigate?: boolean;
     create?: boolean;
     find?: boolean;
-    remove?: boolean;
+    remove?: boolean | ((item: ModifiableEntity) => boolean);
 
     onView?: (entity: ModifiableEntity | Lite<Entity>, pr: PropertyRoute) => Promise<ModifiableEntity | undefined> | undefined;
     onCreate?: () => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined;
@@ -36,9 +36,8 @@ export interface EntityBaseState extends LineBaseProps {
     viewOnCreate?: boolean;
     create?: boolean;
     find?: boolean;
-    remove?: boolean;
+    remove?: boolean | ((item: ModifiableEntity) => boolean);
 }
-
 
 export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBaseState> extends LineBase<T, S>
 {
@@ -305,7 +304,18 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             </a>
         );
     }
+
+    canRemove(item: ModifiableEntity): boolean | undefined {
+
+        const remove = this.state.remove;
+
+        if (remove == undefined)
+            return undefined;
+
+        if (typeof remove === "function")
+            return remove(item);
+
+        return remove;
+    }
 }
-
-
 
