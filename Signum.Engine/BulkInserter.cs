@@ -89,7 +89,10 @@ namespace Signum.Engine
         {
             if (table.PrimaryKey.Identity)
             {
-                var max = ExecutionMode.Global().Using(_ => Database.Query<T>().Max(a => a.Id));
+                var max = ExecutionMode.Global().Using(_ => Database.Query<T>().Max(a => (PrimaryKey?)a.Id));
+                if (max == null)
+                    return a => true;
+
                 return a => a.Id > max;
             }
 
