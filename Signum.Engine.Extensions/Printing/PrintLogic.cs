@@ -60,6 +60,7 @@ namespace Signum.Engine.Printing
                 ProcessLogic.AssertStarted(sb);
                 ProcessLogic.Register(PrintPackageProcess.PrintPackage, new PrintPackageAlgorithm());
                 PermissionAuthLogic.RegisterPermissions(PrintPermission.ViewPrintPanel);
+                PrintLineGraph.Register();
             }
         }
 

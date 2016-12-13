@@ -75,7 +75,7 @@ export default class PrintPanelPage extends React.Component<{}, PrintPanelPageSt
                 <SearchControl findOptions={{
                     queryName: PrintLineEntity,
                     orderOptions: [{ columnName: "PrintedOn", orderType: "Descending" }],
-                    filterOptions: [{ columnName: "State", value: "Printed" }],
+                    filterOptions: [{ columnName: "State", operation: "DistinctTo", value: "ReadyToPrint" }],
                     searchOnLoad: true,
                     showFilters: false
                 }} />
@@ -97,7 +97,7 @@ export default class PrintPanelPage extends React.Component<{}, PrintPanelPageSt
     handlePrintClick = (fileType: FileTypeSymbol, vsc: ValueSearchControl) => {
         API.createPrintProcess(fileType)
             .then(p => p && Navigator.navigate(p))
-            .then(p => vsc.refreshCount())
+            .then(p => vsc.refreshValue())
             .done();
     }
    

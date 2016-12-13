@@ -240,7 +240,6 @@
     <Compile Include="UserQueries\UserQueryServer.cs" />
     <Compile Include="Word\WordServer.cs" />
     <Compile Include="Word\WordController.cs" />
-    <TypeScriptCompile Include="Printing\Package.tsx" />
     <TypeScriptCompile Include="Printing\PrintClient.tsx" />
     <TypeScriptCompile Include="Printing\PrintPanelPage.tsx" />
     <TypeScriptCompile Include="Printing\Signum.Entities.Printing.ts">

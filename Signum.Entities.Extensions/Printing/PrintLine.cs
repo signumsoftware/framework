@@ -54,6 +54,7 @@ namespace Signum.Entities.Printing
         Error
     }
 
+    [AutoInit]
     public static class PrintLineOperation
     {
         public static ExecuteSymbol<PrintLineEntity> Print;
