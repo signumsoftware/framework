@@ -4,7 +4,7 @@ import {
     FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityTable,
     EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip
 } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { ModifiableEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { ModifiableEntity, Entity, Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
@@ -352,8 +352,8 @@ NodeUtils.register<ValueLineNode>({
 export interface EntityBaseNode extends LineBaseNode, ContainerNode {
     create?: ExpressionOrValue<boolean>;
     find?: ExpressionOrValue<boolean>;
-    remove?: ExpressionOrValue<boolean>;
-    view?: ExpressionOrValue<boolean>;
+    remove?: ExpressionOrValue<boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean)>;
+    view?: ExpressionOrValue<boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean)>;
     viewOnCreate?: ExpressionOrValue<boolean>;
     findOptions?: FindOptionsExpr;
 }
@@ -455,7 +455,7 @@ NodeUtils.register<EnumCheckboxListNode>({
 });
 
 export interface EntityListBaseNode extends EntityBaseNode {
-    move?: ExpressionOrValue<boolean>;
+    move?: ExpressionOrValue<boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean)>;
 }
 
 export interface EntityCheckboxListNode extends EntityListBaseNode {
