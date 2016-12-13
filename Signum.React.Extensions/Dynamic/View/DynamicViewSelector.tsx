@@ -42,10 +42,10 @@ export default class DynamicViewSelectorEntityComponent extends React.Component<
     }
 
     updateViewNames(props: DynamicViewSelectorEntityComponentProps) {
-        this.changeState(s => s.viewNames = undefined);
+        this.setState({ viewNames: undefined });
         if (props.ctx.value.entityType)
             DynamicViewClient.API.getDynamicViewNames(props.ctx.value.entityType!.cleanName)
-                .then(viewNames => this.changeState(s => s.viewNames = viewNames))
+                .then(viewNames => this.setState({ viewNames: viewNames }))
                 .done();
     }
 
@@ -128,16 +128,16 @@ export default class DynamicViewSelectorEntityComponent extends React.Component<
         if (dvs.script != newCode) {
             dvs.script = newCode;
             dvs.modified = true;
-            this.changeState(s => s.scriptChanged = true);
+            this.setState({ scriptChanged: true });
             this.evaluateTest();
         };
     }
 
     evaluateTest() {
 
-        this.changeState(s => {
-            s.syntaxError = undefined;
-            s.testResult = undefined;
+        this.setState({
+            syntaxError : undefined,
+            testResult: undefined
         });
 
         const dvs = this.props.ctx.value;
@@ -145,8 +145,8 @@ export default class DynamicViewSelectorEntityComponent extends React.Component<
         try {
             func = DynamicViewClient.asSelectorFunction(dvs);
         } catch (e) {
-            this.changeState(s => {
-                s.syntaxError = (e as Error).message;
+            this.setState({
+                syntaxError : (e as Error).message
             });
             return;
         }
@@ -154,15 +154,15 @@ export default class DynamicViewSelectorEntityComponent extends React.Component<
 
         if (this.state.exampleEntity) {
             try {
-                this.changeState(s => {
-                    s.testResult = {
+                this.setState({
+                    testResult : {
                         type: "RESULT",
                         result: func(this.state.exampleEntity!, new AuthInfo())
                     }
                 });
             } catch (e) {
-                this.changeState(s => {
-                    s.testResult = {
+                this.setState({
+                    testResult: {
                         type: "ERROR",
                         error: (e as Error).message
                     }

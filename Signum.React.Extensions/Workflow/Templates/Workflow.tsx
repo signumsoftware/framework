@@ -45,9 +45,9 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
     }
 
     updateState(model: WorkflowModel) {
-        this.changeState(s => {
-            s.initialXmlDiagram = model.diagramXml;
-            s.entities = model.entities.toObject(mle => mle.element.bpmnElementId, mle => mle.element.model);
+        this.setState({
+            initialXmlDiagram: model.diagramXml,
+            entities: model.entities.toObject(mle => mle.element.bpmnElementId, mle => mle.element.model)
         });
     }
 

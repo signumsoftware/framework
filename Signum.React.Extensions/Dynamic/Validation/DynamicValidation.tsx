@@ -31,9 +31,9 @@ export default class DynamicValidation extends React.Component<DynamicValidation
 
     handleEntityTypeChange = () => {
         this.props.ctx.value.propertyRoute = null;
-        this.changeState(s => {
-            s.exampleEntity = undefined;
-            s.response = undefined;
+        this.setState({
+            exampleEntity: undefined,
+            response: undefined
         });
     }
 
@@ -80,13 +80,13 @@ export default class DynamicValidation extends React.Component<DynamicValidation
     handeEvaluate = () => {
 
         if (this.state.exampleEntity == undefined)
-            this.changeState(s => s.response = undefined);
+            this.setState({ response: undefined });
         else {
             API.validationTest({
                 dynamicValidation: this.props.ctx.value,
                 exampleEntity: this.state.exampleEntity,
             })
-                .then(r => this.changeState(s => s.response = r))
+                .then(r => this.setState({ response: r }))
                 .done();
         }
     }

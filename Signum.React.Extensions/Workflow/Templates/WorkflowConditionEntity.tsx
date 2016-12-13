@@ -27,10 +27,10 @@ export default class WorkflowConditionComponent extends React.Component<Workflow
 
     handleMainEntityTypeChange = () => {
         this.props.ctx.value.eval!.script = "";
-        this.changeState(s => {
-            s.exampleEntity = undefined;
-            s.decisionResult = "Approve";
-            s.response = undefined
+        this.setState({
+            exampleEntity: undefined,
+            decisionResult: "Approve",
+            response: undefined
         });
     }
 
@@ -73,14 +73,14 @@ export default class WorkflowConditionComponent extends React.Component<Workflow
     handleEvaluate = () => {
 
         if (this.state.exampleEntity == undefined)
-            this.changeState(s => { s.response = undefined; });
+            this.setState({ response : undefined });
         else {
             API.conditionTest({
                 workflowCondition: this.props.ctx.value,
                 exampleEntity: this.state.exampleEntity,
                 decisionResult: this.state.decisionResult
             })
-                .then(r => this.changeState(s => s.response = r))
+                .then(r => this.setState({ response: r }))
                 .done();
         }
     }

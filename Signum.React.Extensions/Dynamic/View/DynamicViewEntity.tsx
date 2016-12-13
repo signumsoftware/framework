@@ -52,7 +52,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
     }
 
     updateStateSelectedNode(newNode: DesignerNode<BaseNode>) {
-        this.changeState(s => s.selectedNode = newNode);
+        this.setState({ selectedNode: newNode });
     }
 
     beforeSave() {
@@ -66,17 +66,17 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
         const ctx = this.props.ctx;      
 
         if (ctx.value.viewContent == null) {
-            this.changeState(s => {
-                s.rootNode = undefined;
-                s.selectedNode = undefined;
+            this.setState({
+                rootNode : undefined,
+                selectedNode : undefined
             });
 
         } else {
             const rootNode = JSON.parse(ctx.value.viewContent) as BaseNode;
 
-            this.changeState(s => {
-                s.rootNode = rootNode;
-                s.selectedNode = this.getZeroNode().createChild(rootNode);
+            this.setState({
+                rootNode: rootNode,
+                selectedNode: this.getZeroNode().createChild(rootNode)
             });
         }
 
@@ -101,7 +101,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
 
         if (dve.entityType == null) {
             dve.viewContent = null;
-            this.changeState(s => s.exampleEntity = undefined);
+            this.setState({ exampleEntity: undefined });
         } else {
             dve.viewContent = JSON.stringify(NodeConstructor.createDefaultNode(getTypeInfo(dve.entityType.cleanName)));
         }

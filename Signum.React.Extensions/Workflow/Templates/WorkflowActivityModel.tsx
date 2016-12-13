@@ -39,7 +39,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                         registeredViews[dv] = "Dynamic";
                 });
                 
-                this.changeState(s => s.viewInfo = registeredViews);
+                this.setState({ viewInfo: registeredViews });
             }).done();
     }
 

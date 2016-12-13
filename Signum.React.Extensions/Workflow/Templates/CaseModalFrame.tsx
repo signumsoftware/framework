@@ -64,18 +64,18 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     }
 
     setPack(pack: WorkflowClient.CaseEntityPack): void {
-        this.changeState(s => s.pack = pack);
+        this.setState({ pack: pack });
     }
 
     loadComponent(): Promise<void> {
         const a = this.state.pack!.activity;
         if (a.workflowActivity) {
             return WorkflowClient.getViewPromise(a.case.mainEntity, a.workflowActivity.viewName!).promise
-                .then(c => this.changeState(s => s.getComponent = c));
+                .then(c => this.setState({ getComponent: c }));
         }
         else {
             return Navigator.getViewPromise(a.case.mainEntity).promise
-                .then(c => this.changeState(s => s.getComponent = c));
+                .then(c => this.setState({ getComponent: c }));
         }
     }
 
