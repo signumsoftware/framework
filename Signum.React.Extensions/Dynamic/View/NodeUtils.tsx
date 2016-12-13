@@ -452,6 +452,10 @@ export function isBoolean(val: any) {
     return typeof val == "boolean" ? null : `The returned value (${JSON.stringify(val)}) should be a boolean`;
 }
 
+export function isBooleanOrFunction(val: any) {
+    return (typeof val == "boolean" || typeof val == "function") ? null : `The returned value (${JSON.stringify(val)}) should be a boolean or function`;
+}
+
 export function isFindOptions(val: any) {
     return typeof val == "Object" ? null : `The returned value (${JSON.stringify(val)}) should be a valid findOptions`;
 }
@@ -482,6 +486,10 @@ export function isNumberOrNull(val: any) {
 
 export function isBooleanOrNull(val: any) {
     return val == null || typeof val == "boolean" ? null : `The returned value (${JSON.stringify(val)}) should be a boolean or null`;
+}
+
+export function isBooleanOrFunctionOrNull(val: any) {
+    return val == null || typeof val == "boolean" || typeof val == "function" ? null : `The returned value (${JSON.stringify(val)}) should be a boolean or function or null`;
 }
 
 export function isFindOptionsOrNull(val: any) {
@@ -633,9 +641,9 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
         visible: evaluateAndValidate(parentCtx, dn.node, n => n.visible, isBooleanOrNull),
         readOnly: evaluateAndValidate(parentCtx, dn.node, n => n.readOnly, isBooleanOrNull),
         create: evaluateAndValidate(parentCtx, dn.node, n => n.create, isBooleanOrNull),
-        remove: evaluateAndValidate(parentCtx, dn.node, n => n.remove, isBooleanOrNull),
+        remove: evaluateAndValidate(parentCtx, dn.node, n => n.remove, isBooleanOrFunctionOrNull),
         find: evaluateAndValidate(parentCtx, dn.node, n => n.find, isBooleanOrNull),
-        view: evaluateAndValidate(parentCtx, dn.node, n => n.view, isBooleanOrNull),
+        view: evaluateAndValidate(parentCtx, dn.node, n => n.view, isBooleanOrFunctionOrNull),
         viewOnCreate: evaluateAndValidate(parentCtx, dn.node, n => n.viewOnCreate, isBooleanOrNull),
         onChange: evaluateOnChange(parentCtx, dn),
         findOptions: dn.node.findOptions && toFindOptions(parentCtx, dn.node.findOptions),
@@ -646,7 +654,7 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
         result = Dic.extend(result, { autoComplete: evaluateAndValidate(parentCtx, dn.node, (n: EntityLineNode) => n.autoComplete, isBooleanOrNull) == false ? null : undefined});
 
     if (options.showMove)
-        result = Dic.extend(result, { move: evaluateAndValidate(parentCtx, dn.node, (n: EntityListBaseNode) => n.move, isBooleanOrNull) });
+        result = Dic.extend(result, { move: evaluateAndValidate(parentCtx, dn.node, (n: EntityListBaseNode) => n.move, isBooleanOrFunctionOrNull) });
 
     return result;
 }
