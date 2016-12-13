@@ -450,7 +450,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     markRows = (dic: MarkedRowsDictionary) => {
-        this.setState({ markedRows: Dic.extend(this.state.markedRows, dic) });
+        this.setState({ markedRows: { ...this.state.markedRows, ...dic } });
     }
 
     renderSelecterButton() {
@@ -590,7 +590,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         if (!this.state.resultTable)
             return;
 
-        this.changeState(s => s.selectedRows = !this.allSelected() ? this.state.resultTable!.rows.clone() : []);
+        this.setState({ selectedRows: !this.allSelected() ? this.state.resultTable!.rows.clone() : [] });
         this.notifySelectedRowsChanged();
     }
 

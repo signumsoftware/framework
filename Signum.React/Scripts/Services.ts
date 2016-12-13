@@ -39,9 +39,10 @@ export function ajaxGetRaw(options: AjaxOptions) : Promise<Response> {
     return wrapRequest(options, () =>
         fetchWithAbortModule.fetch(baseUrl(options), {
             method: "GET",
-            headers: Dic.extend({
+            headers: {
                 'Accept': 'application/json',
-            }, options.headers),
+                ...options.headers
+            },
             mode: options.mode,
             credentials: options.credentials || "same-origin",
             cache: options.cache,
@@ -64,10 +65,11 @@ export function ajaxPostRaw(options: AjaxOptions, data: any): Promise<Response> 
         fetchWithAbortModule.fetch(baseUrl(options), {
             method: "POST",
             credentials: options.credentials || "same-origin",
-            headers: Dic.extend({
+            headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }, options.headers),
+                'Content-Type': 'application/json',
+                 ...options.headers
+            },
             mode: options.mode,
             cache: options.cache,
             body: JSON.stringify(data),

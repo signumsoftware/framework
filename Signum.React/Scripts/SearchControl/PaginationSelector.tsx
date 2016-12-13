@@ -86,12 +86,12 @@ export default class PaginationSelector extends React.Component<PaginationSelect
     }
 
     handleElementsPerPage = (e: React.SyntheticEvent) => {
-        const p = Dic.extend({}, this.props.pagination, { elementsPerPage: parseInt((e.currentTarget as HTMLInputElement).value) });
+        const p: Pagination = { ...this.props.pagination, elementsPerPage: parseInt((e.currentTarget as HTMLInputElement).value) };
         this.props.onPagination(p);
     }
 
     handlePageClick = (eventKey: any, e: React.SyntheticEvent) => {
-        const p = Dic.extend({}, this.props.pagination, { currentPage: eventKey });
+        const p: Pagination = { ...this.props.pagination, currentPage: eventKey };
         this.props.onPagination(p);
     }
 

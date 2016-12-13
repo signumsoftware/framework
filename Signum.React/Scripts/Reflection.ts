@@ -533,7 +533,10 @@ export class ReadonlyBinding<T> implements IBinding<T> {
 
 export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBinding<T> {
 
-    const lambdaMatch = functionRegex.exec((lambda as any).toString());
+    var lambdaStr = (lambda as any).toString();
+
+    const lambdaMatch = functionRegex.exec(lambdaStr) || lambdaRegex.exec(lambdaStr);
+    //const lambdaMatch = functionRegex.exec((lambda as any).toString());
 
     if (lambdaMatch == undefined)
         throw Error("invalid function");
@@ -873,8 +876,8 @@ export class PropertyRoute {
             case "Root": return { name: this.rootType!.name };
             case "Field": return this.member!.type;
             case "Mixin": throw new Error("mixins can not be used alone");
-            case "MListItem": return Dic.extend({}, this.parent!.typeReference(), { isCollection: false });
-            case "LiteEntity": return Dic.extend({}, this.parent!.typeReference(), { isLite: false });
+            case "MListItem": return { ...this.parent!.typeReference(), isCollection: false };
+            case "LiteEntity": return { ...this.parent!.typeReference(), isLite: false };
             default: throw new Error("Unexpected propertyRouteType");
         }
     }
@@ -1034,10 +1037,10 @@ export class GraphExplorer {
     static setModelState(e: ModifiableEntity, modelState: ModelState | undefined, initialPrefix: string) {
         const ge = new GraphExplorer();
         ge.modelStateMode = "set";
-        ge.modelState = modelState == undefined ? {} : Dic.copy(modelState);
+        ge.modelState = modelState == undefined ? {} : { ...modelState };
         ge.isModifiableObject(e, initialPrefix);
         if (Dic.getValues(ge.modelState).length) //Assign remaining
-            e.error = Dic.extend(e.error || {}, ge.modelState);
+            e.error = { ...e.error, ...ge.modelState };
     }
 
     static collectModelState(e: ModifiableEntity, initialPrefix: string): ModelState {

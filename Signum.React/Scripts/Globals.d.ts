@@ -9,7 +9,7 @@
 /// <reference path="../typings/react-router-bootstrap/react-router-bootstrap.d.ts" />
 /// <reference path="../typings/react-widgets/react-widgets.d.ts" />
 /// <reference path="../typings/numbro/numbro.d.ts" />
-/// <reference path="../typings/moment/moment.d.ts" />
+/// <reference path="../typings/moment/moment-node.d.ts" />
 /// <reference path="../typings/moment-duration-format/moment-duration-format.d.ts"/>
 /// <reference path="../typings/es6-promise/es6-promise.d.ts" />
 
@@ -106,12 +106,6 @@ declare module moment {
 
     interface MomentStatic {
         smartNow(this: moment.Moment): Moment;
-    }
-}
-
-declare namespace __React {
-    interface Component<P, S> {
-        changeState(func: (state: S) => void): void;
     }
 }
 

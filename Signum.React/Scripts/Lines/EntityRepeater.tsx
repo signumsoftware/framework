@@ -40,7 +40,8 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
         const readOnly = this.state.ctx.readOnly;
 
         return (
-            <fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass) } {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
+            <fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass)}
+                {...{ ...this.baseHtmlProps(), ...this.state.formGroupHtmlProps }}>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>

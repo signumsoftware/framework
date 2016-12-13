@@ -144,29 +144,25 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
 
     calculateState(props: P): S {
 
-        const so = {
-            formControlClassReadonly: undefined,
-            formGroupSize: undefined,
-            formGroupStyle: undefined,
-            labelColumns: undefined,
-            placeholderLabels: undefined,
-            readOnly: undefined,
-            valueColumns: undefined,
-        } as StyleOptions;
+        const { type, ctx,
+            formControlClassReadonly, formGroupSize, formGroupStyle, labelColumns, placeholderLabels, readOnly, valueColumns,
+            ...otherProps
+        } = props as LineBaseProps;
 
-        const cleanProps = Dic.without(props, so);
+        const so: StyleOptions = { formControlClassReadonly, formGroupSize, formGroupStyle, labelColumns, placeholderLabels, readOnly, valueColumns };
 
-        const state = { ctx: cleanProps.ctx.subCtx(so), type: (cleanProps.type || cleanProps.ctx.propertyRoute.member!.type) } as LineBaseProps as S;
+        const state = { ctx: ctx.subCtx(so), type: (type || ctx.propertyRoute.member!.type) } as LineBaseProps as S;
+
         this.calculateDefaultState(state);
         runTasks(this, state);
-        const overridenProps = Dic.without(cleanProps, { ctx: undefined, type: undefined }) as LineBaseProps as S;
-        this.overrideProps(state, overridenProps);
+
+        this.overrideProps(state, otherProps as S);
         return state;
     }
     
     overrideProps(state: S, overridenProps: S) {
-        const labelHtmlProps = Dic.extendUndefined(state.labelHtmlProps, overridenProps.labelHtmlProps);
-        Dic.extendUndefined(state, overridenProps);
+        const labelHtmlProps = { ...state.labelHtmlProps, ...Dic.simplify(overridenProps.labelHtmlProps) };
+        Dic.assign(state, Dic.simplify(overridenProps))
         state.labelHtmlProps = labelHtmlProps;
     }
 

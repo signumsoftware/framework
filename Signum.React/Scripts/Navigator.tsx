@@ -17,10 +17,6 @@ import { FindOptions } from './FindOptions'
 
 
 Dic.skipClasses.push(React.Component);
-React.Component.prototype.changeState = function (this: React.Component<any, any>, func: (state: any) => void) {
-    func(this.state);
-    this.forceUpdate();
-}
 
 export let currentUser: IUserEntity | undefined;
 export function setCurrentUser(user: IUserEntity | undefined) {
@@ -613,7 +609,7 @@ export class EntitySettings<T extends ModifiableEntity> {
         this.type = type;
         this.getViewPromise = getViewPromise;
 
-        Dic.extend(this, options);
+        Dic.assign(this, options);
     }
 }
 

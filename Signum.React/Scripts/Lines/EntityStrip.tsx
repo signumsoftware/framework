@@ -39,7 +39,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         const s = this.state;
 
         return (
-            <FormGroup ctx={s.ctx!} labelText={s.labelText} labelProps={s.labelHtmlProps} {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
+            <FormGroup ctx={s.ctx!} labelText={s.labelText} labelProps={s.labelHtmlProps} {...{ ...this.baseHtmlProps(), ...this.state.formGroupHtmlProps } }>
                 <div className="SF-entity-strip SF-control-container">
                     <ul className={classes("sf-strip", this.props.vertical ? "sf-strip-vertical" : "sf-strip-horizontal") }>
                         {
@@ -162,9 +162,12 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
             var newEntity = props.ctx.value;
             if (!this.state.currentItem || this.state.currentItem.entity !== newEntity) {
                 var ci = { entity: newEntity!, item: undefined }
-                this.changeState(s => s.currentItem = ci);
+                this.setState({ currentItem: ci });
                 this.props.autoComplete.getItemFromEntity(newEntity)
-                    .then(item => this.changeState(s => ci.item = item))
+                    .then(item => {
+                        ci.item = item;
+                        this.forceUpdate();
+                    })
                     .done();
             }
         }
