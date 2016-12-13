@@ -1,5 +1,6 @@
 ﻿import * as React from 'react'
 import { Link } from 'react-router'
+import * as d3 from 'd3'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
