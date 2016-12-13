@@ -33,8 +33,8 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
         const buttons = (
             <span className="pull-right">
                 {!hasValue && this.renderCreateButton(false) }
-                {!hasValue && this.renderFindButton(false) }
-                {hasValue && this.renderRemoveButton(false) }
+                {!hasValue && this.renderFindButton(false)}
+                {hasValue && this.renderRemoveButton(false, s.ctx.value!)}
             </span>
         );
 

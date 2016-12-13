@@ -51,9 +51,9 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
                     {
                         mlistItemContext(ctx).map((mlec, i) =>
                             (<EntityRepeaterElement key={i}
-                                onRemove={this.state.remove && !readOnly? e => this.handleRemoveElementClick(e, i) : undefined}
-                                onMoveDown ={this.state.move && !readOnly? e => this.moveDown(i) : undefined}
-                                onMoveUp ={this.state.move && !readOnly? e => this.moveUp(i) : undefined}
+                                onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
+                                onMoveDown={this.canMove(mlec.value) && !readOnly ? e => this.moveDown(i) : undefined}
+                                onMoveUp={this.canMove(mlec.value) && !readOnly ? e => this.moveUp(i) : undefined}
                                 ctx={mlec}
                                 getComponent={this.props.getComponent} />))
                     }

@@ -14,12 +14,12 @@ import SelectorModal from '../SelectorModal'
 
 
 export interface EntityBaseProps extends LineBaseProps {
-    view?: boolean;
+    view?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
     viewOnCreate?: boolean;
     navigate?: boolean;
     create?: boolean;
     find?: boolean;
-    remove?: boolean | ((item: ModifiableEntity) => boolean);
+    remove?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
 
     onView?: (entity: ModifiableEntity | Lite<Entity>, pr: PropertyRoute) => Promise<ModifiableEntity | undefined> | undefined;
     onCreate?: () => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined;
@@ -32,11 +32,11 @@ export interface EntityBaseProps extends LineBaseProps {
 
 
 export interface EntityBaseState extends LineBaseProps {
-    view?: boolean;
+    view?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
     viewOnCreate?: boolean;
     create?: boolean;
     find?: boolean;
-    remove?: boolean | ((item: ModifiableEntity) => boolean);
+    remove?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
 }
 
 export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBaseState> extends LineBase<T, S>
@@ -145,8 +145,9 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         }
     }
 
-    renderViewButton(btn: boolean) {
-        if (!this.state.view)
+    renderViewButton(btn: boolean, item: ModifiableEntity | Lite<Entity>) {
+
+        if (!this.canView(item))
             return undefined;
 
         return (
@@ -292,8 +293,8 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             }).done();
     };
 
-    renderRemoveButton(btn: boolean) {
-        if (!this.state.remove || this.state.ctx.readOnly)
+    renderRemoveButton(btn: boolean, item: ModifiableEntity | Lite<Entity>) {
+        if (!this.canRemove(item) || this.state.ctx.readOnly)
             return undefined;
 
         return (
@@ -305,7 +306,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         );
     }
 
-    canRemove(item: ModifiableEntity): boolean | undefined {
+    canRemove(item: ModifiableEntity | Lite<Entity>): boolean | undefined {
 
         const remove = this.state.remove;
 
@@ -316,6 +317,19 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             return remove(item);
 
         return remove;
+    }
+
+    canView(item: ModifiableEntity | Lite<Entity>): boolean | undefined {
+
+        const view = this.state.view;
+
+        if (view == undefined)
+            return undefined;
+
+        if (typeof view === "function")
+            return view(item);
+
+        return view;
     }
 }
 

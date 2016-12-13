@@ -62,12 +62,12 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
                             {list.map((e, i) => <option  key={i} title={this.getTitle(e.element)} {...EntityListBase.entityHtmlProps(e.element) }>{e.element.toStr}</option>)}
                         </select>
                         <span className="input-group-btn btn-group-vertical">
-                            { this.renderCreateButton(true) }
-                            { this.renderFindButton(true) }
-                            { hasSelected && this.renderViewButton(true) }
-                            { hasSelected && this.renderRemoveButton(true) }
-                            { hasSelected && this.state.move && s.selectedIndex > 0 && this.renderMoveUp(true, s.selectedIndex!) }
-                            { hasSelected && this.state.move && s.selectedIndex < list.length - 1 && this.renderMoveDown(true, s.selectedIndex!) }
+                            {this.renderCreateButton(true)}
+                            {this.renderFindButton(true)}
+                            {hasSelected && this.renderViewButton(true, list[s.selectedIndex!].element)}
+                            {hasSelected && this.renderRemoveButton(true, list[s.selectedIndex!].element)}
+                            {hasSelected && this.state.move && s.selectedIndex > 0 && this.renderMoveUp(true, s.selectedIndex!)}
+                            {hasSelected && this.state.move && s.selectedIndex < list.length - 1 && this.renderMoveDown(true, s.selectedIndex!)}
                         </span>
                     </div>
                 </div>

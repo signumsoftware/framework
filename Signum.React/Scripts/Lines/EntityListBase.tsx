@@ -14,7 +14,7 @@ import { EntityBase, EntityBaseProps} from './EntityBase'
 
 
 export interface EntityListBaseProps extends EntityBaseProps {
-    move?: boolean;
+    move?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
     onFindMany?: () => Promise<(ModifiableEntity | Lite<Entity>)[] | undefined>;
 
     ctx: TypeContext<MList<Lite<Entity> | ModifiableEntity>>;
@@ -45,7 +45,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
         this.setValue(list);
     }
     renderMoveUp(btn: boolean, index: number) {
-        if (!this.state.move || this.state.ctx.readOnly)
+        if (!this.canMove(this.state.ctx.value[index].element) || this.state.ctx.readOnly)
             return undefined;
 
         return (
@@ -64,7 +64,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     }
 
     renderMoveDown(btn: boolean, index: number) {
-        if (!this.state.move || this.state.ctx.readOnly)
+        if (!this.canMove(this.state.ctx.value[index].element) || this.state.ctx.readOnly)
             return undefined;
 
         return (
@@ -165,4 +165,16 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
             }).done();
     };
 
+    canMove(item: ModifiableEntity | Lite<Entity>): boolean | undefined {
+
+        const move = this.state.move;
+
+        if (move == undefined)
+            return undefined;
+
+        if (typeof move === "function")
+            return move(item);
+
+        return move;
+    }
 }

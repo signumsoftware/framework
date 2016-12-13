@@ -86,13 +86,12 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
 
         const hasValue = !!s.ctx.value;
 
-
         const buttons = (
             <span className="input-group-btn">
                 {!hasValue && this.renderCreateButton(true)}
                 {!hasValue && this.renderFindButton(true)}
-                {hasValue && this.renderViewButton(true)}
-                {hasValue && this.renderRemoveButton(true)}
+                {hasValue && this.renderViewButton(true, this.state.ctx.value!)}
+                {hasValue && this.renderRemoveButton(true, this.state.ctx.value!)}
             </span>
         );
 
