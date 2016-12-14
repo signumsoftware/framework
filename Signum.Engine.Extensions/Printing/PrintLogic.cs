@@ -180,12 +180,24 @@ namespace Signum.Engine.Printing
 
             new Execute(PrintLineOperation.Retry)
             {
-                FromStates = {PrintLineState.Error},
+                FromStates = {PrintLineState.Error, PrintLineState.Cancelled},
                 ToStates = {PrintLineState.ReadyToPrint },
                 Execute = (e, _) =>
                 {
                     e.State = PrintLineState.ReadyToPrint;
                     e.Package = null;
+                }
+            }.Register();
+
+            new Execute(PrintLineOperation.Cancel)
+            {
+                FromStates = { PrintLineState.ReadyToPrint, PrintLineState.Error },
+                ToStates = { PrintLineState.Cancelled },
+                Execute = (e, _) =>
+                {
+                    e.State = PrintLineState.Cancelled;
+                    e.Package = null;
+                    e.PrintedOn = null;
                 }
             }.Register();
         }

@@ -23,6 +23,7 @@ export interface PrintLineEntity extends Entities.Entity, Processes.IProcessLine
 export module PrintLineOperation {
     export const Print : Entities.ExecuteSymbol<PrintLineEntity> = registerSymbol("Operation", "PrintLineOperation.Print");
     export const Retry : Entities.ExecuteSymbol<PrintLineEntity> = registerSymbol("Operation", "PrintLineOperation.Retry");
+    export const Cancel : Entities.ExecuteSymbol<PrintLineEntity> = registerSymbol("Operation", "PrintLineOperation.Cancel");
 }
 
 export const PrintLineState = new EnumType<PrintLineState>("PrintLineState");

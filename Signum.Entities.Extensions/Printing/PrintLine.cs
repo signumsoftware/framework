@@ -59,6 +59,7 @@ namespace Signum.Entities.Printing
     {
         public static ExecuteSymbol<PrintLineEntity> Print;
         public static ExecuteSymbol<PrintLineEntity> Retry;
+        public static ExecuteSymbol<PrintLineEntity> Cancel;
     }
 
     [AutoInit]
