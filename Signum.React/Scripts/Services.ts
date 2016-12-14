@@ -197,12 +197,11 @@ export function b64toBlob(b64Data: string, contentType: string = "", sliceSize =
     return blob;
 }
 
-export class ServiceError extends Error {
+export class ServiceError {
     constructor(
         public statusText: string,
         public status: number,
         public httpError: WebApiHttpError) {
-        super(httpError.ExceptionMessage)
     }
 
     get defaultIcon() {
@@ -215,7 +214,7 @@ export class ServiceError extends Error {
     }
 
     toString() {
-        return this.message;
+        return this.httpError.Message;
     }
 }
 
@@ -229,12 +228,11 @@ export interface WebApiHttpError {
     ExceptionID?: string;
 }
 
-export class ValidationError extends Error {
+export class ValidationError  {
     modelState: ModelState;
     message: string;
 
     constructor(public statusText: string, json: WebApiHttpError) {
-        super(statusText)
         this.message = json.Message || "";
         this.modelState = json.ModelState!;
     }
