@@ -1079,26 +1079,41 @@ namespace Signum.Engine.Linq
                         return result;
 
                     }
-                case "string.ToLower": return TrySqlFunction(null, SqlFunction.LOWER, m.Type, m.Object);
-                case "string.ToUpper": return TrySqlFunction(null, SqlFunction.UPPER, m.Type, m.Object);
-                case "string.TrimStart": return TrySqlFunction(null, SqlFunction.LTRIM, m.Type, m.Object);
-                case "string.TrimEnd": return TrySqlFunction(null, SqlFunction.RTRIM, m.Type, m.Object);
-                case "string.Trim": return TrySqlTrim(m.Object);
-                case "string.Replace": return TrySqlFunction(null, SqlFunction.REPLACE, m.Type, m.Object, m.GetArgument("oldValue"), m.GetArgument("newValue"));
-                case "string.Substring": return TrySqlFunction(null, SqlFunction.SUBSTRING, m.Type, m.Object, Expression.Add(m.GetArgument("startIndex"), new SqlConstantExpression(1)), m.TryGetArgument("length") ?? new SqlConstantExpression(int.MaxValue));
-                case "string.Contains": return TryCharIndex(m.GetArgument("value"), m.Object, index => Expression.GreaterThanOrEqual(index, new SqlConstantExpression(1)));
-                case "string.StartsWith": return TryCharIndex(m.GetArgument("value"), m.Object, index => Expression.Equal(index, new SqlConstantExpression(1)));
+                case "string.ToLower":
+                    return TrySqlFunction(null, SqlFunction.LOWER, m.Type, m.Object);
+                case "string.ToUpper":
+                    return TrySqlFunction(null, SqlFunction.UPPER, m.Type, m.Object);
+                case "string.TrimStart":
+                    return m.TryGetArgument("value") == null ? TrySqlFunction(null, SqlFunction.LTRIM, m.Type, m.Object) : null;
+                case "string.TrimEnd":
+                    return m.TryGetArgument("value") == null ? TrySqlFunction(null, SqlFunction.RTRIM, m.Type, m.Object) : null;
+                case "string.Trim":
+                    return m.Arguments.Any() ? null : TrySqlTrim(m.Object);
+                case "string.Replace":
+                    return TrySqlFunction(null, SqlFunction.REPLACE, m.Type, m.Object, m.GetArgument("oldValue"), m.GetArgument("newValue"));
+                case "string.Substring":
+                    return TrySqlFunction(null, SqlFunction.SUBSTRING, m.Type, m.Object, Expression.Add(m.GetArgument("startIndex"), new SqlConstantExpression(1)), m.TryGetArgument("length") ?? new SqlConstantExpression(int.MaxValue));
+                case "string.Contains":
+                    return TryCharIndex(m.GetArgument("value"), m.Object, index => Expression.GreaterThanOrEqual(index, new SqlConstantExpression(1)));
+                case "string.StartsWith":
+                    return TryCharIndex(m.GetArgument("value"), m.Object, index => Expression.Equal(index, new SqlConstantExpression(1)));
                 case "string.EndsWith":
                     return TryCharIndex(
                         TrySqlFunction(null, SqlFunction.REVERSE, m.Type, m.GetArgument("value")),
                         TrySqlFunction(null, SqlFunction.REVERSE, m.Type, m.Object),
                         index => Expression.Equal(index, new SqlConstantExpression(1)));
-                case "StringExtensions.Start": return TrySqlFunction(null, SqlFunction.LEFT, m.Type, m.GetArgument("str"), m.GetArgument("numChars"));
-                case "StringExtensions.End": return TrySqlFunction(null, SqlFunction.RIGHT, m.Type, m.GetArgument("str"), m.GetArgument("numChars"));
-                case "StringExtensions.Replicate": return TrySqlFunction(null, SqlFunction.REPLICATE, m.Type, m.GetArgument("str"), m.GetArgument("times"));
-                case "StringExtensions.Reverse": return TrySqlFunction(null, SqlFunction.REVERSE, m.Type, m.GetArgument("str"));
-                case "StringExtensions.Like": return TryLike(m.GetArgument("str"), m.GetArgument("pattern"));
-                case "StringExtensions.Etc": return TryEtc(m.GetArgument("str"), m.GetArgument("max"), m.TryGetArgument("etcString"));
+                case "StringExtensions.Start":
+                    return TrySqlFunction(null, SqlFunction.LEFT, m.Type, m.GetArgument("str"), m.GetArgument("numChars"));
+                case "StringExtensions.End":
+                    return TrySqlFunction(null, SqlFunction.RIGHT, m.Type, m.GetArgument("str"), m.GetArgument("numChars"));
+                case "StringExtensions.Replicate":
+                    return TrySqlFunction(null, SqlFunction.REPLICATE, m.Type, m.GetArgument("str"), m.GetArgument("times"));
+                case "StringExtensions.Reverse":
+                    return TrySqlFunction(null, SqlFunction.REVERSE, m.Type, m.GetArgument("str"));
+                case "StringExtensions.Like":
+                    return TryLike(m.GetArgument("str"), m.GetArgument("pattern"));
+                case "StringExtensions.Etc": 
+                    return TryEtc(m.GetArgument("str"), m.GetArgument("max"), m.TryGetArgument("etcString"));
 
                 case "DateTime.Add":
                 case "DateTime.Substract":
