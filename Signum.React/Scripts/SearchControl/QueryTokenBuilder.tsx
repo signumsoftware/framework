@@ -22,22 +22,49 @@ interface QueryTokenBuilderProps extends React.Props<QueryTokenBuilder> {
     className?: string;
 }
 
-export default class QueryTokenBuilder extends React.Component<QueryTokenBuilderProps, {}>  {
-    render() {
+export default class QueryTokenBuilder extends React.Component<QueryTokenBuilderProps, void>  {
 
+    lastTokenChanged: string | undefined;
+
+    static copiedToken: { fullKey: string, queryKey: string } | undefined; 
+
+    render() {
         const tokenList = [...getTokenParents(this.props.queryToken), undefined];
 
         return (
-            <div className={classes("sf-query-token-builder", this.props.className) }>
-                {tokenList.map((a, i) => <QueryTokenPart key={i}
+            <div className={classes("sf-query-token-builder", this.props.className)} onKeyDown={this.handleKeyDown}>
+                {tokenList.map((a, i) => <QueryTokenPart key={a ? a.fullKey : i > 0 ? tokenList[i - 1]!.fullKey + "_new" : "_first_" }
                     queryKey={this.props.queryKey}
                     readOnly={this.props.readOnly}
-                    onTokenSelected={this.props.onTokenChange}
+                    onTokenSelected={qt => {
+                        this.lastTokenChanged = qt && qt.fullKey;
+                        this.props.onTokenChange && this.props.onTokenChange(qt);
+                    } }
+                    defaultOpen={this.lastTokenChanged && i > 0 && this.lastTokenChanged == tokenList[i - 1]!.fullKey ? true : false}
                     subTokenOptions={this.props.subTokenOptions}
                     parentToken={i == 0 ? undefined : tokenList[i - 1]}
-                    selectedToken={a} />) }
+                    selectedToken={a} />)}
             </div>
         );
+    }
+
+    handleKeyDown = (e: React.KeyboardEvent) => {
+
+        if (e.ctrlKey) {
+            if (e.key == "c") {
+                QueryTokenBuilder.copiedToken = this.props.queryToken ? {
+                    fullKey: this.props.queryToken.fullKey,
+                    queryKey: this.props.queryKey
+                } : undefined;
+            }
+            else if (e.key == "v" && QueryTokenBuilder.copiedToken && QueryTokenBuilder.copiedToken.queryKey == this.props.queryKey) {
+                Finder.parseSingleToken(this.props.queryKey, QueryTokenBuilder.copiedToken.fullKey, this.props.subTokenOptions)
+                    .then(a => this.props.onTokenChange(a))
+                    .done();
+            }
+
+        }
+
     }
 }
 
@@ -49,6 +76,7 @@ interface QueryTokenPartProps extends React.Props<QueryTokenPart> {
     queryKey: string;
     subTokenOptions: SubTokensOptions;
     readOnly: boolean;
+    defaultOpen: boolean;
 }
 
 export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?: (QueryToken | null)[] }>
@@ -86,9 +114,10 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
     handleOnChange = (value: any) => {
         this.props.onTokenSelected(value || this.props.parentToken);
     }
+    
 
     render() {
-
+        
         if (this.state.data != undefined && this.state.data.length == 0)
             return null;
         
@@ -104,6 +133,7 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
                     textField="toString"
                     valueComponent={QueryTokenItem}
                     itemComponent={QueryTokenOptionalItem}
+                    defaultOpen={this.props.defaultOpen}
                     busy={!this.props.readOnly && this.state.data == undefined}
                     />
             </div>

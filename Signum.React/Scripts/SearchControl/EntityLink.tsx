@@ -15,7 +15,7 @@ export interface EntityLinkProps extends React.HTMLAttributes, React.Props<Entit
 export default class EntityLink extends React.Component<EntityLinkProps, void>{
 
     render() {
-        const { lite, inSearch, ref, key, children, ...htmlAtts} = this.props;
+        const { lite, inSearch, children, ...htmlAtts} = this.props;
 
         if (!Navigator.isNavigable(lite.EntityType, undefined, this.props.inSearch || false))
             return <span data-entity={liteKey(lite) }>{this.props.children || lite.toStr}</span>;
@@ -27,8 +27,8 @@ export default class EntityLink extends React.Component<EntityLinkProps, void>{
                 title={lite.toStr}
                 onClick={this.handleClick}
                 data-entity={liteKey(lite)}
-                {...htmlAtts}>
-                {this.props.children || lite.toStr}                
+                {...(htmlAtts as React.HTMLAttributes) }>
+                {children || lite.toStr}                
             </Link>
         );
     }
