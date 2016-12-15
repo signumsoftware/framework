@@ -3079,6 +3079,14 @@ namespace Signum.Engine.Linq
             return ee;
         }
 
+        protected internal override Expression VisitEmbeddedEntity(EmbeddedEntityExpression eee)
+        {
+            if (colExpression is EmbeddedEntityExpression)
+                return eee;
+
+            throw new NotImplementedException();
+        }
+
         protected internal override Expression VisitImplementedBy(ImplementedByExpression ib)
         {
             if (colExpression is ImplementedByAllExpression)
