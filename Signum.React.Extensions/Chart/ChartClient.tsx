@@ -294,6 +294,7 @@ export module Encoder {
         const query = {
             script: cr.chartScript && cr.chartScript.name,
             groupResults: cr.groupResults,
+            ...extra
         };
 
         Finder.Encoder.encodeFilters(query, cr.filterOptions.map(a => ({ columnName: a.token!.fullKey, operation: a.operation, value: a.value, frozen: a.frozen } as FilterOption)));
@@ -301,9 +302,7 @@ export module Encoder {
         encodeParameters(query, cr.parameters);
 
         encodeColumn(query, cr.columns);
-
-        Dic.extend(query, extra);
-
+        
         return Navigator.currentHistory.createPath({ pathname: "~/Chart/" + cr.queryKey, query: query });
     }
 
@@ -395,7 +394,7 @@ export module API {
 
 
     export function cleanedChartRequest(request: ChartRequest) {
-        const clone = Dic.copy(request);
+        const clone = {...request };
 
         clone.orders = clone.orderOptions!.map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType }) as OrderRequest);
         delete clone.orderOptions;

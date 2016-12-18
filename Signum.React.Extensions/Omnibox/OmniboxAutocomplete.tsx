@@ -45,7 +45,7 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
 
     render() {
 
-        let inputAttr = Dic.extend({ tabIndex: -1, placeholder: OmniboxMessage.Search.niceToString() }, this.props.inputAttrs);
+        let inputAttr = { tabIndex: -1, placeholder: OmniboxMessage.Search.niceToString(), ...this.props.inputAttrs };
         
         const result = (
             <Typeahead ref={ta => this.typeahead = ta} getItems={OmniboxClient.API.getResults} 

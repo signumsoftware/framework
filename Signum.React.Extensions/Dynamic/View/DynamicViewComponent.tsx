@@ -54,29 +54,29 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
 
         var context = {
             onClose: this.handleClose,
-            refreshView: () => { this.changeState(s => s.selectedNode = s.selectedNode.reCreateNode()); },
+            refreshView: () => { this.setState({ selectedNode: this.state.selectedNode.reCreateNode() }); },
             getSelectedNode: () => this.state.isDesignerOpen ? this.state.selectedNode : undefined,
-            setSelectedNode: (newNode) => this.changeState(s => s.selectedNode = newNode)
+            setSelectedNode: (newNode) => this.setState({ selectedNode: newNode })
         } as DesignerContext;
         
         return DesignerNode.zero(context, typeName);
     }
 
     handleReload = (dynamicView: DynamicViewEntity) => {
-        
-        this.changeState(s => {
-            s.dynamicView = dynamicView;
-            s.rootNode = JSON.parse(dynamicView.viewContent!) as BaseNode;
-            s.selectedNode = this.getZeroNode().createChild(s.rootNode);
+
+        this.setState({
+            dynamicView: dynamicView,
+            rootNode: JSON.parse(dynamicView.viewContent!) as BaseNode,
+            selectedNode: this.getZeroNode().createChild(this.state.rootNode)
         });
     }
 
     handleOpen= () => {
-        this.changeState(s => s.isDesignerOpen = true);
+        this.setState({ isDesignerOpen: true });
     }
 
     handleClose = () => {
-        this.changeState(s => s.isDesignerOpen = false);
+        this.setState({ isDesignerOpen: false });
     }
 
     render() {
@@ -150,7 +150,7 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { vi
 
 
     reload(entity: DynamicViewEntity) {
-        this.changeState(s => s.viewNames = undefined);
+        this.setState({ viewNames: undefined });
         this.props.onReload(entity);
     }
 
@@ -196,7 +196,7 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { vi
     handleOnToggle = (isOpen: boolean) => {
         if (isOpen && !this.state.viewNames)
             DynamicViewClient.API.getDynamicViewNames(this.props.typeName)
-                .then(viewNames => this.changeState(s => s.viewNames = viewNames))
+                .then(viewNames => this.setState({ viewNames: viewNames }))
                 .done();
     }
 

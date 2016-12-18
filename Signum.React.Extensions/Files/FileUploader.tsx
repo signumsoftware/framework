@@ -49,21 +49,21 @@ export default class FileUploader extends React.Component<FileUploaderProps, Fil
     handleDragOver = (e: React.DragEvent) => {
         e.stopPropagation();
         e.preventDefault();
-        this.changeState(s => s.isOver = true);
+        this.setState({ isOver: true });
     }
 
     handleDragLeave = (e: React.DragEvent) => {
         e.stopPropagation();
         e.preventDefault();
-        this.changeState(s => s.isOver = false);
+        this.setState({ isOver: false });
     }
 
     handleDrop = (e: React.DragEvent) => {
         e.stopPropagation();
         e.preventDefault();
-        this.changeState(s => {
-            s.isOver = false;
-            s.isLoading = true;
+        this.setState({
+            isOver : false,
+            isLoading : true
         });
 
         for (var i = 0; i < e.dataTransfer.files.length; i++) {
@@ -73,9 +73,9 @@ export default class FileUploader extends React.Component<FileUploaderProps, Fil
 
     handleFileChange = (e: React.FormEvent) => {
         e.preventDefault();
-        this.changeState(s => {
-            s.isOver = false;
-            s.isLoading = true;
+        this.setState({
+            isOver: false,
+            isLoading: true
         });
 
 
@@ -97,7 +97,7 @@ export default class FileUploader extends React.Component<FileUploaderProps, Fil
             if (this.props.fileType)
                 (newEntity as any as IFilePath).fileType = this.props.fileType;
 
-            this.changeState(s => s.isLoading = false);
+            this.setState({ isLoading: false });
 
             this.props.onFileLoaded(newEntity); 
         };

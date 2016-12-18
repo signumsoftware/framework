@@ -27,9 +27,9 @@ export default class DynamicTypeConditionComponent extends React.Component<Dynam
 
     handleEntityTypeChange = () => {
         this.props.ctx.value.eval!.script = "";
-        this.changeState(s => {
-            s.exampleEntity = undefined;
-            s.response = undefined
+        this.setState({
+            exampleEntity : undefined,
+            response : undefined
         });
     }
 
@@ -73,13 +73,13 @@ export default class DynamicTypeConditionComponent extends React.Component<Dynam
     handleEvaluate = () => {
 
         if (this.state.exampleEntity == undefined)
-            this.changeState(s => { s.response = undefined; });
+            this.setState({ response: undefined });
         else {
             API.typeConditionTest({
                 dynamicTypeCondition: this.props.ctx.value,
                 exampleEntity: this.state.exampleEntity,
             })
-                .then(r => this.changeState(s => s.response = r))
+                .then(r => this.setState({ response: r }))
                 .done();
         }
     }

@@ -194,9 +194,62 @@
     <Member Name="AutomaticUpgradeOfProperties" Description="Automatische Aktualisierung von Eigenschaften" />
     <Member Name="AutomaticUpgradeOfQueries" Description="Automatische Aktualisierung von Abfragen" />
   </Type>
+  <Type Name="BpmnEntityPair" Description="BPMN Entitätspaar">
+    <Member Name="BpmnElementId" Description="BPMN Element-id" />
+    <Member Name="Model" Description="Modell" />
+  </Type>
   <Type Name="CachePermission">
     <Member Name="InvalidateCache" Description="Cache ungültig" />
     <Member Name="ViewCache" Description="Cache sehen" />
+  </Type>
+  <Type Name="CaseActivityEntity" Description="Fall-Aktivität">
+    <Member Name="Case" Description="Fall" />
+    <Member Name="DoneBy" Description="Abgeschlossen durch" />
+    <Member Name="DoneDate" Description="Abschlussdatum" />
+    <Member Name="OriginalWorkflowActivityName" Description="Ursprünglicher Name der Workflow-Aktivität" />
+    <Member Name="StartDate" Description="Startdatum" />
+    <Member Name="WorkflowActivity" Description="Workflow-Aktivität" />
+  </Type>
+  <Type Name="CaseActivityMessage">
+    <Member Name="ActivityAlreadyRegistered" Description="Aktivität ist bereits registriert" />
+    <Member Name="AlreadyDone" Description="Bereits getan" />
+    <Member Name="CaseContainsOtherActivities" Description="Fall enthält andere Aktivitäten" />
+    <Member Name="NoNextConnectionThatSatisfiesTheConditionsFound" Description="Keine nächste Verbindung gefunden, die der Bedingung entspricht" />
+    <Member Name="OnlyFor0Activites" Description="Nur für {0} Aktivitäten" />
+  </Type>
+  <Type Name="CaseActivityOperation">
+    <Member Name="Approve" Description="Genehmigen" />
+    <Member Name="Create" Description="Erstellen" />
+    <Member Name="Decline" Description="Rückgang" />
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Next" Description="Nächstes" />
+    <Member Name="Register" Description="Anlegen" />
+  </Type>
+  <Type Name="CaseActivityQuery">
+    <Member Name="Inbox" Description="Posteingang" />
+  </Type>
+  <Type Name="CaseEntity" Description="Fall">
+    <Member Name="Description" Description="Beschreibung" />
+    <Member Name="FinishDate" Description="Fertigstellungsdatum" />
+    <Member Name="MainEntity" Description="Hauptentität" />
+    <Member Name="StartDate" Description="Startdatum" />
+    <Member Name="Workflow" Description="Workflow" />
+  </Type>
+  <Type Name="CaseJunctionEntity" Description="Fall Zusammenführung">
+    <Member Name="Direction" Description="Richtung" />
+    <Member Name="From" Description="Von" />
+    <Member Name="To" Description="An" />
+  </Type>
+  <Type Name="CaseNotificationEntity" Description="Fall Benachrichtigung">
+    <Member Name="CaseActivity" Description="Fall-Aktivität" />
+    <Member Name="State" Description="Zustand" />
+    <Member Name="User" Description="Benutzer" />
+  </Type>
+  <Type Name="CaseNotificationState" Description="Fall Benachrichtigungszustand">
+    <Member Name="Done" Description="Abgeschlossen" />
+    <Member Name="InProgress" Description="In Bearbeitung" />
+    <Member Name="New" Description="Neu" />
+    <Member Name="Opened" Description="Geöffnet" />
   </Type>
   <Type Name="CertFileType" Description="Zertifikationsdateityp">
     <Member Name="CertFile" Description="Zertiikationsdatei" />
@@ -315,15 +368,6 @@
     <Member Name="CertFileType" Description="Zertifikationsdateityp" />
     <Member Name="FullFilePath" Description="Vollständiger Pfad" />
   </Type>
-  <Type Name="CountSearchControlPartEntity" Description="Benutzeranfragezählerteil" PluralDescription="Benutzeranfragezählerteile">
-    <Member Name="RequiresTitle" Description="Erfordert Titel" />
-    <Member Name="UserQueries" Description="Benutzerabfragen" />
-  </Type>
-  <Type Name="CountUserQueryElementEntity" Description="Benutzerabfragezählerelement">
-    <Member Name="Href" Description="Href" />
-    <Member Name="Label" Description="Etikett" />
-    <Member Name="UserQuery" Description="Benutzer-Abfrage" />
-  </Type>
   <Type Name="CSharpMigrationEntity" Description="C-sharp-Migration">
     <Member Name="ExecutionDate" Description="Ausführungsdatum" />
     <Member Name="UniqueName" Description="Einzigartiger Name" />
@@ -355,8 +399,6 @@
   </Type>
   <Type Name="DashboardMessage">
     <Member Name="_0Is1InstedOf2In3" Description="{0} ist {1} (statt {2}) in {3}" />
-    <Member Name="CountSearchControlPartEntity" Description="Zählerliste" />
-    <Member Name="CountUserQueryElement" Description="Zähler" />
     <Member Name="CreateNewPart" Description="Neues Teil erstellen" />
     <Member Name="DashboardDN_TitleMustBeSpecifiedFor0" Description="Titel muss angegeben werden für {0}" />
     <Member Name="Part0IsTooLarge" Description="Teil {0} ist zu groß" />
@@ -372,10 +414,20 @@
   <Type Name="DashboardPermission">
     <Member Name="ViewDashboard" Description="Dashboard anzeigen" />
   </Type>
+  <Type Name="DateFilterRange" Description="Datumsbereichs filtern">
+    <Member Name="All" Description="Alle" />
+    <Member Name="CurrentYear" Description="Dieses Jahr" />
+    <Member Name="LastMonth" Description="Letzten Monat" />
+    <Member Name="LastWeek" Description="Letzte Woche" />
+  </Type>
   <Type Name="DateSpanEntity" Description="Zeitraum">
     <Member Name="Days" Description="Tage" />
     <Member Name="Months" Description="Monate" />
     <Member Name="Years" Description="Jahre" />
+  </Type>
+  <Type Name="DecisionResult" Description="Ergebnis der Entscheidung">
+    <Member Name="Approve" Description="Genehmigen" />
+    <Member Name="Decline" Description="Rückgang" />
   </Type>
   <Type Name="DefaultState">
     <Member Name="All" Description="Alle" />
@@ -585,9 +637,11 @@
     <Member Name="ClearChildren" Description="Lösche children" />
     <Member Name="ExampleEntity" Description="Beispiel-Entität" />
     <Member Name="GenerateChildren" Description="Erstellte children" />
+    <Member Name="HideHelp" Description="Hilfe verstecken" />
     <Member Name="Remove" Description="Entfernen" />
     <Member Name="SelectANodeFirst" Description="Wählen Sie zuerst einen Knoten" />
     <Member Name="SelectATypeOfComponent" Description="Wählen Sie einen Komponententyp" />
+    <Member Name="ShowHelp" Description="Hilfe anzeigen" />
     <Member Name="SinceThereIsNoDynamicViewSelectorYouNeedToChooseAViewManually" Description="Da gibt es keinen DynamicViewSelector daher, müssen Sie eine Ansicht manuell wählen:" />
     <Member Name="SuggestedFindOptions" Description="Vorgeschlagene Suchoptionen" />
     <Member Name="TheFollowingQueriesReference0" Description="Die folgenden Abfragen verweisen {0}:" />
@@ -596,6 +650,14 @@
   <Type Name="DynamicViewOperation">
     <Member Name="Clone" Description="Klonen" />
     <Member Name="Create" Description="Erstellen" />
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="DynamicViewOverrideEntity" Description="Dynamische Ansicht überschreiben">
+    <Member Name="EntityType" Description="Entitätstyp" />
+    <Member Name="Script" Description="Skript" />
+  </Type>
+  <Type Name="DynamicViewOverrideOperation">
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
@@ -609,6 +671,7 @@
   </Type>
   <Type Name="DynamicViewValidationMessage">
     <Member Name="_0RequiresA1" Description="{0} erfordert eine {1}" />
+    <Member Name="AggregateIsMandatoryFor01" Description="Aggregat ist obligatorisch für &quot;{0}&quot; ({1})." />
     <Member Name="CollectionOfEntities" Description="Sammlung von Entitäten" />
     <Member Name="CollectionOfEnums" Description="Sammlung von Enumerationen" />
     <Member Name="Entity" Description="Entität" />
@@ -1012,8 +1075,18 @@
   <Type Name="IAttachmentGeneratorEntity">
     <Member Name="Template" Description="Vorlage" />
   </Type>
+  <Type Name="ICaseMainEntity" />
   <Type Name="IEmailOwnerEntity">
     <Member Name="EmailOwnerData" Description="E-Mailbesitzerdaten" />
+  </Type>
+  <Type Name="InboxFilterModel" Description="Posteingangs-filter">
+    <Member Name="FromDate" Description="Vom Datum" />
+    <Member Name="Range" Description="Bereich" />
+    <Member Name="States" Description="Status" />
+    <Member Name="ToDate" Description="Bis zum Datum" />
+  </Type>
+  <Type Name="InboxFilterModelMessage">
+    <Member Name="Clear" Description="entfernen" />
   </Type>
   <Type Name="IPartEntity">
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
@@ -1039,6 +1112,14 @@
   <Type Name="IUserAssetEntity">
     <Member Name="Guid" Description="Guid" />
   </Type>
+  <Type Name="IWorkflowConnectionEntity" />
+  <Type Name="IWorkflowNodeEntity">
+    <Member Name="Lane" Description="Fahrbahn" />
+  </Type>
+  <Type Name="IWorkflowObjectEntity">
+    <Member Name="Name" Description="Name" />
+    <Member Name="Xml" Description="XML" />
+  </Type>
   <Type Name="LastAuthRulesImportEntity" Description="Letzte Authregeln importieren" Gender="f">
     <Member Name="Date" Description="Datum" />
   </Type>
@@ -1048,10 +1129,6 @@
   </Type>
   <Type Name="LinkListPartEntity" Description="Link-Listenelement">
     <Member Name="Links" Description="Links" />
-    <Member Name="RequiresTitle" Description="Erfordert Titel" />
-  </Type>
-  <Type Name="LinkPartEntity" Description="Link Teil" Gender="m">
-    <Member Name="Link" Description="Link" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
   </Type>
   <Type Name="MapMessage">
@@ -1169,9 +1246,6 @@
     <Member Name="Unknown" Description="Unbekannt" />
     <Member Name="Yes" Description="Ja" />
   </Type>
-  <Type Name="OmniboxPanelPartEntity" Description="Omnibox Panel Teil" Gender="m">
-    <Member Name="RequiresTitle" Description="Erfordert Titel" />
-  </Type>
   <Type Name="OperationAllowed">
     <Member Name="Allow" Description="Erlauben" />
     <Member Name="DBOnly" Description="Nur DB" />
@@ -1260,6 +1334,17 @@
   <Type Name="Pop3ReceptionExceptionEntity" Description="POP3-Empfang-Ausnahme" PluralDescription="POP3-Empfang-Ausnahmen" Gender="f">
     <Member Name="Exception" Description="Ausnahme" />
     <Member Name="Reception" Description="Empfang" />
+  </Type>
+  <Type Name="PrintLineEntity" Description="Zeile drucken">
+    <Member Name="CreationDate" Description="Erstellungsdatum" />
+    <Member Name="Exception" Description="Ausnahme" />
+    <Member Name="File" Description="Datei" />
+    <Member Name="Package" Description="Paket" />
+    <Member Name="PrintedOn" Description="Gedruckt auf" />
+    <Member Name="Referred" Description="Verbunden" />
+  </Type>
+  <Type Name="PrintPackageEntity" Description="Druckpaket">
+    <Member Name="Name" Description="Name" />
   </Type>
   <Type Name="ProcessAlgorithmSymbol" Description="Prozess-Algorithmus" PluralDescription="Prozess-Algorithmen" Gender="m" />
   <Type Name="ProcessEntity" Description="Prozess" PluralDescription="Prozesse" Gender="m">
@@ -1662,6 +1747,39 @@
     <Member Name="YouCanOnlyAddForeachBlocksWithCollectionFields" Description="Sie können nur Foreach-Blöcke mit Collection-Feldern hinzufügen" />
     <Member Name="YouHaveToAddTheElementTokenToUseForeachOnCollectionFields" Description="Sie müssen das Element Token zur Verwendung von Foreach in einem Collection-Feld hinzufügen" />
   </Type>
+  <Type Name="ToolbarElementEntity" Description="Symbolleisten-element">
+    <Member Name="Content" Description="Inhalt" />
+    <Member Name="IconColor" Description="Symbolfarbe" />
+    <Member Name="IconName" Description="Symbolname" />
+    <Member Name="Label" Description="Etikett" />
+    <Member Name="Type" Description="Typ" />
+  </Type>
+  <Type Name="ToolbarElementType" Description="Symbolleiste-Elementtyp">
+    <Member Name="Divider" Description="Teiler" />
+    <Member Name="Header" Description="Kopfzeile" />
+    <Member Name="Link" Description="Link" />
+    <Member Name="Menu" Description="Menü" />
+  </Type>
+  <Type Name="ToolbarEntity" Description="Symbolleiste">
+    <Member Name="Elements" Description="Elemente" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="Owner" Description="Eigentümer" />
+    <Member Name="Priority" Description="Priorität" />
+  </Type>
+  <Type Name="ToolbarMenuEntity" Description="Toolbar-Menü">
+    <Member Name="Elements" Description="Elemente" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="Name" Description="Name" />
+  </Type>
+  <Type Name="ToolbarMenuOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="ToolbarOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
   <Type Name="TranslatedCultureAction" Description="Übersetzte Kultur-Aktion">
     <Member Name="Read" Description="Lesen" />
     <Member Name="Translate" Description="Übersetzen" />
@@ -1835,12 +1953,6 @@
     <Member Name="SaveNew" Description="Speichern" />
     <Member Name="SetPassword" Description="Passwort festlegen" />
   </Type>
-  <Type Name="UserQueryCountPartEntity" Description="Benutzer Abfrage Zähler Bereich">
-    <Member Name="IconClass" Description="Symbol-Klasse" />
-    <Member Name="RequiresTitle" Description="Erfordert Titel" />
-    <Member Name="ShowName" Description="Name anzeigen" />
-    <Member Name="UserQuery" Description="Benutzer-Abfrage" />
-  </Type>
   <Type Name="UserQueryEntity" Description="Benutzer-Abfrage">
     <Member Name="Columns" Description="Spalten" />
     <Member Name="ColumnsMode" Description="Spalten-Modus" />
@@ -1894,6 +2006,15 @@
     <Member Name="Ticket" Description="Ticket" />
     <Member Name="User" Description="Benutzer" />
   </Type>
+  <Type Name="ValueUserQueryElementEntity" Description="Benutzerwert Abfragenelement">
+    <Member Name="Href" Description="Href" />
+    <Member Name="Label" Description="Etikett" />
+    <Member Name="UserQuery" Description="Benutzer-Abfrage" />
+  </Type>
+  <Type Name="ValueUserQueryListPartEntity" Description="Benutzerwert Abfragelisten-stück">
+    <Member Name="RequiresTitle" Description="Erfordert Titel" />
+    <Member Name="UserQueries" Description="Benutzer-Abfragen" />
+  </Type>
   <Type Name="ViewLogEntity" Description="Anzeigerotokoll" PluralDescription="Anzeigerotokolle" Gender="n">
     <Member Name="Data" Description="Daten" />
     <Member Name="Duration" Description="Dauer" />
@@ -1940,4 +2061,166 @@
     <Member Name="GenerateReport" Description="Bericht generieren" />
   </Type>
   <Type Name="WordTransformerSymbol" Description="Word-Transformator" PluralDescription="Word-Transformatoren" />
+  <Type Name="WorkflowActivityEntity" Description="Workflow-Aktivität">
+    <Member Name="Description" Description="Beschreibung" />
+    <Member Name="Lane" Description="Fahrbahn" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="Thread" Description="Thread" />
+    <Member Name="Type" Description="Typ" />
+    <Member Name="ValidationRules" Description="Validierungsregeln" />
+    <Member Name="ViewName" Description="Ansichtsname" />
+    <Member Name="Xml" Description="XML" />
+  </Type>
+  <Type Name="WorkflowActivityMessage">
+    <Member Name="DuplicateViewNameFound0" Description="Doppelter Ansichtsname gefunden: {0}" />
+  </Type>
+  <Type Name="WorkflowActivityModel" Description="Workflow-Aktivität">
+    <Member Name="Description" Description="Beschreibung" />
+    <Member Name="MainEntityType" Description="Haupt-Entitätstyp" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="Type" Description="Typ" />
+    <Member Name="ValidationRules" Description="Validierungsregeln" />
+    <Member Name="ViewName" Description="Ansichtsname" />
+  </Type>
+  <Type Name="WorkflowActivityOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="WorkflowActivityType" Description="Workflow-Aktivitäts-Typ">
+    <Member Name="DecisionTask" Description="Entscheidungsaufgabe" />
+    <Member Name="Task" Description="Aufgabe" />
+  </Type>
+  <Type Name="WorkflowActivityValidationEntity" Description="Workflow-Aktivitäts-Validierung">
+    <Member Name="OnAccept" Description="Akzeptanz" />
+    <Member Name="OnDecline" Description="Auf Rückzug" />
+    <Member Name="Rule" Description="Regel" />
+  </Type>
+  <Type Name="WorkflowConditionEntity" Description="Workflow-Bedingung">
+    <Member Name="Eval" Description="Auswertung" />
+    <Member Name="MainEntityType" Description="Haupt-Entitätstyp" />
+    <Member Name="Name" Description="Name" />
+  </Type>
+  <Type Name="WorkflowConditionOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="WorkflowConnectionEntity" Description="Workflow-Verbindung">
+    <Member Name="Condition" Description="Bedingung" />
+    <Member Name="DecisonResult" Description="Beschluß-Ergebnis" />
+    <Member Name="From" Description="Von" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="Order" Description="Bestellung" />
+    <Member Name="To" Description="An" />
+    <Member Name="Xml" Description="XML" />
+  </Type>
+  <Type Name="WorkflowConnectionEval" Description="Workflow-Verbindungsauswertung">
+    <Member Name="Parent" Description="Übergeordnete" />
+  </Type>
+  <Type Name="WorkflowConnectionModel" Description="Workflow-Verbindung">
+    <Member Name="Condition" Description="Bedingung" />
+    <Member Name="DecisonResult" Description="Beschluß-Ergebnis" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="Order" Description="Bestellung" />
+  </Type>
+  <Type Name="WorkflowConnectionOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="WorkflowEntity" Description="Workflow" Gender="m">
+    <Member Name="FullDiagramXml" Description="Vollständiges XML Diagramm" />
+    <Member Name="MainEntityType" Description="Haupt-Entitätstyp" />
+    <Member Name="Name" Description="Name" />
+  </Type>
+  <Type Name="WorkflowEventEntity" Description="Workflow-event">
+    <Member Name="Lane" Description="Fahrbahn" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="Thread" Description="Thread" />
+    <Member Name="Type" Description="Typ" />
+    <Member Name="Xml" Description="XML" />
+  </Type>
+  <Type Name="WorkflowEventModel" Description="Workflow-event">
+    <Member Name="Name" Description="Name" />
+    <Member Name="Type" Description="Typ" />
+  </Type>
+  <Type Name="WorkflowEventOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="WorkflowEventType" Description="Workflow-Event-Typ">
+    <Member Name="Finish" Description="Abschließen" />
+    <Member Name="Start" Description="Start" />
+  </Type>
+  <Type Name="WorkflowGatewayDirection" Description="Workflow-Gateway-Richtung">
+    <Member Name="Join" Description="Verbinden" />
+    <Member Name="Split" Description="Aufteilen" />
+  </Type>
+  <Type Name="WorkflowGatewayEntity" Description="Workflow-gateway">
+    <Member Name="Direction" Description="Richtung" />
+    <Member Name="Lane" Description="Fahrbahn" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="Thread" Description="Thread" />
+    <Member Name="Type" Description="Typ" />
+    <Member Name="Xml" Description="XML" />
+  </Type>
+  <Type Name="WorkflowGatewayModel" Description="Workflow-gateway">
+    <Member Name="Direction" Description="Richtung" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="Type" Description="Typ" />
+  </Type>
+  <Type Name="WorkflowGatewayOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="WorkflowGatewayType" Description="Workflow-Gateway-Typ">
+    <Member Name="Exclusive" Description="Exklusive" />
+    <Member Name="Inclusive" Description="Inklusive" />
+    <Member Name="Parallel" Description="Parallel" />
+  </Type>
+  <Type Name="WorkflowLaneEntity" Description="Workflowstrasse">
+    <Member Name="Name" Description="Name" />
+    <Member Name="Pool" Description="Pool" />
+    <Member Name="UserOrRoles" Description="Benutzer oder Rollen" />
+    <Member Name="Xml" Description="XML" />
+  </Type>
+  <Type Name="WorkflowLaneModel" Description="Workflowstrasse">
+    <Member Name="Name" Description="Name" />
+    <Member Name="UserOrRoles" Description="Benutzer oder Rollen" />
+  </Type>
+  <Type Name="WorkflowLaneOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="WorkflowMessage">
+    <Member Name="_0BelongsToADifferentWorkflow" Description="{0} gehört zu  einem anderem Arbeitsablauf" />
+    <Member Name="Condition0IsDefinedFor1Not2" Description="Zustand {0} ist für {1} definiert, nicht für {2}" />
+  </Type>
+  <Type Name="WorkflowModel" Description="Workflow">
+    <Member Name="DiagramXml" Description="XML Diagramm" />
+    <Member Name="Entities" Description="Entitäten" />
+  </Type>
+  <Type Name="WorkflowOperation">
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="WorkflowPoolEntity" Description="Workflow-pool">
+    <Member Name="Name" Description="Name" />
+    <Member Name="Workflow" Description="Workflow" />
+    <Member Name="Xml" Description="XML" />
+  </Type>
+  <Type Name="WorkflowPoolModel" Description="Workflow-pool">
+    <Member Name="Name" Description="Name" />
+  </Type>
+  <Type Name="WorkflowPoolOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="WorkflowReplacementItemEntity" Description="Workflow-Ersatzteil">
+    <Member Name="NewTask" Description="Neue Aufgabe" />
+    <Member Name="OldTask" Description="Alte Aufgabe" />
+  </Type>
+  <Type Name="WorkflowReplacementModel" Description="Workflow-Ersatz">
+    <Member Name="Replacements" Description="Ersatz" />
+  </Type>
+  <Type Name="WorkflowXmlEntity" Description="XML Workflow">
+    <Member Name="DiagramXml" Description="XML Diagramm" />
+  </Type>
 </Translations>

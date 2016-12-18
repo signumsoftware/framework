@@ -32,7 +32,7 @@ export default class IFrameRenderer extends React.Component<IFrameRendererProps,
 
     render() {
 
-        var props = Dic.without(this.props, { html: null });
+        var props = { ...this.props, html: null };
 
         return (<iframe {...props} ref={e => this.iframe = e}></iframe>);
     }

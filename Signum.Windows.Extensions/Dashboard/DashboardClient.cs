@@ -40,7 +40,7 @@ namespace Signum.Windows.Dashboard
                 {
                     new EntitySettings<DashboardEntity>() { View = e => new DashboardEdit(), Icon = ExtensionsImageLoader.GetImageSortName("dashboard.png") },
 
-                    new EntitySettings<CountSearchControlPartEntity>() { View = e => new CountSearchControlPartEdit() },
+                    new EntitySettings<ValueUserQueryListPartEntity>() { View = e => new ValueUserQueryListPartEntityEdit() },
                     new EntitySettings<LinkListPartEntity>() { View = e => new LinkListPartEdit() },
                     new EntitySettings<UserQueryPartEntity>() { View = e => new UserQueryPartEdit() },                
                     new EntitySettings<UserChartPartEntity>() { View = e => new UserChartPartEdit() }
@@ -74,7 +74,7 @@ namespace Signum.Windows.Dashboard
                     }
                 });
 
-                PartViews.Add(typeof(CountSearchControlPartEntity), new PartView
+                PartViews.Add(typeof(ValueUserQueryListPartEntity), new PartView
                 {
                     ViewControl = () => new CountSearchControlPartView()
                 });

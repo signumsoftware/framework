@@ -54,14 +54,14 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
         if (!is(this.props.ctx.value.entityType, newProps.ctx.value.entityType)) {
             this.updateViewNames(newProps);
             this.updateTypeHelp(newProps);
-        }
+    }
     }
 
     updateViewNames(props: DynamicViewOverrideComponentProps) {
-        this.changeState(s => s.viewNames = undefined);
+        this.setState({ viewNames: undefined });
         if (props.ctx.value.entityType)
             DynamicViewClient.API.getDynamicViewNames(props.ctx.value.entityType!.cleanName)
-                .then(viewNames => this.changeState(s => s.viewNames = viewNames))
+                .then(viewNames => this.setState({ viewNames: viewNames }))
                 .done();
     }
 
@@ -191,7 +191,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
         if (dvo.script != newCode) {
             dvo.script = newCode;
             dvo.modified = true;
-            this.changeState(s => s.scriptChanged = true);
+            this.setState({ scriptChanged: true });
             this.compileFunction();
         };
     }
@@ -220,21 +220,21 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
 
     compileFunction() {
 
-        this.changeState(s => {
-            s.syntaxError = undefined; 
-            s.viewOverride = undefined;
+        this.setState({
+            syntaxError: undefined,
+            viewOverride: undefined,
         });
 
         const dvo = this.props.ctx.value;
         let func: (rep: ViewReplacer<Entity>, auth: AuthInfo) => void;
         try {
             func = DynamicViewClient.asOverrideFunction(dvo);
-            this.changeState(s => {
-                s.viewOverride = func
+            this.setState({
+                viewOverride : func
             });
         } catch (e) {
-            this.changeState(s => {
-                s.syntaxError = (e as Error).message;
+            this.setState({
+                syntaxError : (e as Error).message
             });
             return;
         }

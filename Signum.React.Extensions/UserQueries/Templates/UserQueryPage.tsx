@@ -48,7 +48,7 @@ export default class UserQueryPage extends React.Component<UserQueryPageProps, {
                 return UserQueryClient.Converter.toFindOptions(uc, lite)
             })
             .then(fo => {
-                this.setState({ findOptions: Dic.extend({ showFilters: true }, fo) });
+                this.setState({ findOptions: { showFilters: true, ...fo } });
             })
             .done();
     }

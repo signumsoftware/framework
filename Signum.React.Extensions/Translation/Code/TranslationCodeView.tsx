@@ -248,7 +248,7 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
                 <th className="leftCell">{ loc.culture }</th>
                 <th className="smallCell monospaceCell">
                     {type.hasGender && (edit ?
-                        <select value={td.gender || ""} onChange={(e) => td.gender = (e.currentTarget as HTMLSelectElement).value }>
+                        <select value={td.gender || ""} onChange={(e) => { td.gender = (e.currentTarget as HTMLSelectElement).value; this.forceUpdate(); }}>
                             { initialElementIf(td.gender == undefined).concat(
                                 pronoms.map(a => <option key={a.Gender} value={a.Gender}>{a.Singular}</option>)) }
                         </select> :

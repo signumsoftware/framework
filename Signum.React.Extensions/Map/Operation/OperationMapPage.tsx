@@ -133,12 +133,14 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
         const tables = s.operationMapInfo!.allNodes.filter(a => a.fixed)
             .toObject(a => a.key, a =>
                 (a.x / s.width).toPrecision(4) + "," +
-                (a.y / s.height).toPrecision(4));
+                (a.y / s.height).toPrecision(4));        
 
+        var query = { ...tables, color: s.color };
 
-        const query = Dic.extend(tables, { color: s.color });
-
-        const url = Navigator.currentHistory.createHref({ pathname: "~/map/" + this.props.routeParams!.type, query: query });
+        const url = Navigator.currentHistory.createHref({
+            pathname: "~/map/" + this.props.routeParams!.type,
+            query: query
+        });
 
         window.open(url);
     }

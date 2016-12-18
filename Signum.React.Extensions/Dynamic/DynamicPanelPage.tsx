@@ -73,7 +73,7 @@ export class CompileStep extends React.Component<void, DynamicCompileStepState>{
     handleCompile = (e: React.MouseEvent) => {
         e.preventDefault();
         API.getCompilationErrors()
-            .then(errors => this.changeState(s => { s.complationErrors = errors; s.selectedErrorIndex = undefined; }))
+            .then(errors => this.setState({ complationErrors: errors, selectedErrorIndex: undefined }))
             .done();
     }
 
@@ -129,7 +129,7 @@ export class CompileStep extends React.Component<void, DynamicCompileStepState>{
                         {
                             errors.map((e, i) =>
                                 <tr key={i}
-                                    onClick={() => this.changeState(s => s.selectedErrorIndex = i)}
+                                    onClick={() => this.setState({ selectedErrorIndex: i })}
                                     className={classes("dynamic-error-line", i == this.state.selectedErrorIndex ? "active" : undefined)}>
                                     <td>{e.errorNumber}</td>
                                     <td>{e.errorText}</td>
@@ -167,11 +167,11 @@ export class RestartServerStep extends React.Component<{}, RestartServerStepStat
         e.preventDefault();
         API.restartServer()
             .then(() => {
-                this.changeState(s => s.serverRestarting = moment());
+                this.setState({ serverRestarting: moment() });
                 API.pingServer()
-                    .then(() => { this.changeState(s => s.serverRestarting = undefined); })
+                    .then(() => this.setState({ serverRestarting: undefined }))
                     .catch(error => {
-                        this.changeState(s => s.serverRestarting = undefined);
+                        this.setState({ serverRestarting: undefined });
                         throw error;
                     })
                     .done();

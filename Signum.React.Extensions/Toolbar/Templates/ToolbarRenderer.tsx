@@ -34,7 +34,7 @@ export default class ToolbarRenderer extends React.Component<void, ToolbarRender
 
     componentWillMount() {
         ToolbarClient.API.getCurrentToolbar()
-            .then(res => this.changeState(s => s.response = res))
+            .then(res => this.setState({ response: res }))
             .done();
     }
 
@@ -149,7 +149,7 @@ export default class ToolbarRenderer extends React.Component<void, ToolbarRender
                 var config = ToolbarClient.configs[res.lite!.EntityType]
 
                 if (!config)
-                    return [<MenuItem style={Dic.extend({ color: "red" }, style)}> { res.lite!.EntityType + "ToolbarConfig not registered" }</MenuItem>];
+                    return [<MenuItem style={{ color: "red", ...style }}> { res.lite!.EntityType + "ToolbarConfig not registered" }</MenuItem>];
 
                 return [
                     <MenuItem onClick={e => config.handleNavigateClick(e, res)} style={style}>

@@ -150,7 +150,7 @@ ${childrenString}
 
     getEntityBasePropsEx(node: EntityBaseNode, options: { showAutoComplete?: boolean, showMove?: boolean, avoidGetComponent?: boolean }): any/*: EntityBaseProps Expr*/ {
 
-        var result/*: EntityBaseProps*/ = {
+        var result : any/*: EntityBaseProps*/ = {
             ctx: this.subCtxCode(node.field, node.styleOptions),
             labelText: node.labelText,
             labelHtmlProps: node.labelHtmlAttributes,
@@ -169,13 +169,11 @@ ${childrenString}
 
 
         if (options.showAutoComplete)
-            result = Dic.extend(result, {
-                autoComplete: (node as EntityLineNode).autoComplete == undefined ? undefined :
-                    bindExpr(ac => ac == false ? null : undefined, (node as EntityLineNode).autoComplete)
-            });
+            result.autoComplete = (node as EntityLineNode).autoComplete == undefined ? undefined :
+                    bindExpr(ac => ac == false ? null : undefined, (node as EntityLineNode).autoComplete);
 
         if (options.showMove)
-            result = Dic.extend(result, { move: (node as EntityListBaseNode).move });
+            result.move = (node as EntityListBaseNode).move;
 
         return result;
     }
@@ -651,10 +649,10 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
     };
 
     if (options.showAutoComplete)
-        result = Dic.extend(result, { autoComplete: evaluateAndValidate(parentCtx, dn.node, (n: EntityLineNode) => n.autoComplete, isBooleanOrNull) == false ? null : undefined});
+        (result as any).autoComplete = evaluateAndValidate(parentCtx, dn.node, (n: EntityLineNode) => n.autoComplete, isBooleanOrNull) == false ? null : undefined;
 
     if (options.showMove)
-        result = Dic.extend(result, { move: evaluateAndValidate(parentCtx, dn.node, (n: EntityListBaseNode) => n.move, isBooleanOrFunctionOrNull) });
+        (result as any).move = evaluateAndValidate(parentCtx, dn.node, (n: EntityListBaseNode) => n.move, isBooleanOrFunctionOrNull);
 
     return result;
 }
