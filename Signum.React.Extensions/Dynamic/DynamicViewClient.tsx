@@ -19,6 +19,7 @@ import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructo
 import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal'
 import { ViewReplacer } from '../../../Framework/Signum.React/Scripts/Frames/ReactVisitor';
 import * as Lines from '../../../Framework/Signum.React/Scripts/Lines'
+import * as FileLineModule from '../Files/FileLine'
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import { DynamicViewEntity, DynamicViewSelectorEntity, DynamicViewOverrideEntity, DynamicViewMessage, DynamicViewOperation } from './Signum.Entities.Dynamic'
 import DynamicViewEntityComponent from './View/DynamicViewEntity' //Just Typing
@@ -257,6 +258,9 @@ export function asOverrideFunction(dvr: DynamicViewOverrideEntity): (e: ViewRepl
     var EntityTabRepeater = Lines.EntityTabRepeater;
     var EntityStrip = Lines.EntityStrip;
     var EntityTable = Lines.EntityTable;
+    var FormGroup = Lines.FormGroup;
+    var FormControlStatic = Lines.FormControlStatic;
+    var FileLine = FileLineModule.default;
 
     // Search
     var ValueSearchControlLine = Search.ValueSearchControlLine;
@@ -274,7 +278,6 @@ export function asOverrideFunction(dvr: DynamicViewOverrideEntity): (e: ViewRepl
     var DropdownButton = ReactBootstrap.DropdownButton;
     var DropdownMenu = ReactBootstrap.DropdownMenu;
     var DropdownToggle = ReactBootstrap.DropdownToggle;
-    var FormGroup = ReactBootstrap.FormGroup;
     var Image = ReactBootstrap.Image;
     var Label = ReactBootstrap.Label;
     var ListGroup = ReactBootstrap.ListGroup;
