@@ -13,7 +13,11 @@ interface SearchPageProps extends ReactRouter.RouteComponentProps<{}, { queryNam
 
 }
 
-export default class SearchPage extends React.Component<SearchPageProps, { findOptions: FindOptions, }> {
+interface SearchControlState {
+    findOptions: FindOptions;
+}
+
+export default class SearchPage extends React.Component<SearchPageProps, SearchControlState> {
 
     constructor(props: SearchPageProps) {
         super(props);
@@ -26,9 +30,9 @@ export default class SearchPage extends React.Component<SearchPageProps, { findO
         this.setState(this.calculateState(nextProps));
     }
 
-    calculateState(props: SearchPageProps) {
+    calculateState(props: SearchPageProps): SearchControlState {
         return {
-            findOptions: Dic.extend({ showFilters: true }, Finder.parseFindOptionsPath(props.routeParams!.queryName, props.location!.query)),
+            findOptions: { showFilters: true, ...Finder.parseFindOptionsPath(props.routeParams!.queryName, props.location!.query) },
         };
     }
 

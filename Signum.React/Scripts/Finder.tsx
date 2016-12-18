@@ -1,4 +1,4 @@
-﻿import * as React from "react"
+﻿import * as React from "react";
 import * as moment from "moment"
 import * as numbro from "numbro"
 import { Router, Route, Redirect, IndexRoute } from "react-router"
@@ -118,13 +118,12 @@ export function findOptionsPath(fo: FindOptions, extra?: any): string {
         paginationMode: fo.pagination && fo.pagination.mode,
         elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,
         currentPage: fo.pagination && fo.pagination.currentPage,
+        ...extra
     };
     
     Encoder.encodeFilters(query, fo.filterOptions);
     Encoder.encodeOrders(query, fo.orderOptions);
     Encoder.encodeColumns(query, fo.columnOptions);
-
-    Dic.extend(query, extra);
 
     return currentHistory.createPath({ pathname: "~/find/" + getQueryKey(fo.queryName), query: query });
 }
@@ -294,7 +293,7 @@ export function setFilters(e: Entity, filterOptionsParsed: FilterOptionParsed[])
 
 export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription): Promise<FindOptionsParsed> {
 
-    const fo = Dic.extend({}, findOptions) as FindOptions;
+    const fo: FindOptions= { ...findOptions };
 
     expandParentColumn(fo);
 
@@ -795,7 +794,7 @@ export function getCellFormatter(qs: QuerySettings, co: ColumnOptionParsed): Cel
 
     const rule = formatRules.filter(a => a.isApplicable(co)).last("FormatRules");
     
-    return rule.formatter(co)
+    return rule.formatter(co);
 }
 
 export const registeredPropertyFormatters: { [typeAndProperty: string]: CellFormatter } = {};

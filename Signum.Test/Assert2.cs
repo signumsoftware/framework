@@ -1,11 +1,9 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Signum.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Signum.Utilities;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq.Expressions;
-using System.IO;
 
 namespace Signum.Test
 {
@@ -36,7 +34,7 @@ namespace Signum.Test
             }
             catch (E ex)
             {
-                if(!ex.Message.Contains(messageToContain))
+                if (!ex.Message.Contains(messageToContain))
                     throw new AssertFailedException("No {0} has been thrown with message {0}".FormatWith(typeof(E).Name, ex.Message));
 
                 return;
@@ -70,7 +68,7 @@ namespace Signum.Test
             foreach (var item in collection)
             {
                 if (!func(item))
-                    Assert.Fail("'{0}' fails on '{1}'".FormatWith(item, predicate.ToString())); 
+                    Assert.Fail("'{0}' fails on '{1}'".FormatWith(item, predicate.ToString()));
             }
         }
 
@@ -81,7 +79,7 @@ namespace Signum.Test
             string notFound = elements.Where(a => !hs.Contains(a)).CommaAnd();
 
             if (notFound.HasText())
-                Assert.Fail("{0} not found".FormatWith(notFound)); 
+                Assert.Fail("{0} not found".FormatWith(notFound));
         }
 
         public static void AssertNotContains<T>(this IEnumerable<T> collection, params T[] elements)
@@ -94,6 +92,15 @@ namespace Signum.Test
                 Assert.Fail("{0}  found".FormatWith(found));
         }
 
+        internal static void AreSimilar(double? a, double? b, double epsilon = 0.0001)
+        {
+            if (a == null && b == null)
+                return;
+
+            if (b == null || Math.Abs(a.Value - b.Value) > epsilon)
+                throw new AssertFailedException("Values {0} and {1} are too different".FormatWith(a, b));
+        }
+
         public static void AssertExactly<T>(this IEnumerable<T> collection, params T[] elements)
         {
             var hs = collection.ToHashSet();
@@ -104,7 +111,7 @@ namespace Signum.Test
             if (notFound.HasText() && exceeded.HasText())
                 Assert.Fail("{0} not found and {1} exceeded".FormatWith(notFound, exceeded));
 
-            if(notFound.HasText())
+            if (notFound.HasText())
                 Assert.Fail("{0} not found".FormatWith(notFound));
 
             if (exceeded.HasText())

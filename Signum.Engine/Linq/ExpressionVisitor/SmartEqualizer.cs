@@ -59,6 +59,10 @@ namespace Signum.Engine.Linq
             result = PrimaryKeyEquals(exp1, exp2);
             if (result != null)
                 return result;
+            
+            result = ObjectEquals(exp1, exp2);
+            if (result != null)
+                return result;
 
             result = ConditionalEquals(exp1, exp2);
             if (result != null)
@@ -96,6 +100,59 @@ namespace Signum.Engine.Linq
 
                 return EqualNullable(left.Nullify(), right.Nullify());
             }
+
+            return null;
+        }
+
+        public static Expression ObjectEquals(Expression expr1, Expression expr2)
+        {
+            if (expr1.Type == typeof(object) && expr2.Type == typeof(object))
+            {
+                var left = UncastObject(expr1);
+                var right = UncastObject(expr2);
+
+                if (left == null && right == null)
+                    return null;
+
+                left = left ?? ChangeConstant(expr1, right.Type);
+                right = right ?? ChangeConstant(expr2, left.Type);
+
+                if (left == null || right == null)
+                    return null;
+
+                return PolymorphicEqual(left, right);
+            }
+
+            return null;
+        }
+
+        private static Expression ChangeConstant(Expression exp, Type type)
+        {
+            if (exp.NodeType == ExpressionType.Constant)
+            {
+                var val = ((ConstantExpression)exp).Value;
+
+                if (val == null)
+                {
+                    if (type.IsNullable() || !type.IsValueType)
+                        return Expression.Constant(val, type);
+                    else
+                        return null;
+                }
+
+                if (type.IsAssignableFrom(val.GetType()))
+                    return Expression.Constant(val, type);
+
+                return null;
+            }
+
+            return null;
+        }
+
+        private static Expression UncastObject(Expression expr)
+        {
+            if (expr.NodeType == ExpressionType.Convert)
+                return ((UnaryExpression)expr).Operand;
 
             return null;
         }

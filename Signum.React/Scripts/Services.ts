@@ -39,9 +39,10 @@ export function ajaxGetRaw(options: AjaxOptions) : Promise<Response> {
     return wrapRequest(options, () =>
         fetchWithAbortModule.fetch(baseUrl(options), {
             method: "GET",
-            headers: Dic.extend({
+            headers: {
                 'Accept': 'application/json',
-            }, options.headers),
+                ...options.headers
+            },
             mode: options.mode,
             credentials: options.credentials || "same-origin",
             cache: options.cache,
@@ -64,10 +65,11 @@ export function ajaxPostRaw(options: AjaxOptions, data: any): Promise<Response> 
         fetchWithAbortModule.fetch(baseUrl(options), {
             method: "POST",
             credentials: options.credentials || "same-origin",
-            headers: Dic.extend({
+            headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }, options.headers),
+                'Content-Type': 'application/json',
+                 ...options.headers
+            },
             mode: options.mode,
             cache: options.cache,
             body: JSON.stringify(data),
@@ -197,12 +199,11 @@ export function b64toBlob(b64Data: string, contentType: string = "", sliceSize =
     return blob;
 }
 
-export class ServiceError extends Error {
+export class ServiceError {
     constructor(
         public statusText: string,
         public status: number,
         public httpError: WebApiHttpError) {
-        super(httpError.ExceptionMessage)
     }
 
     get defaultIcon() {
@@ -215,7 +216,7 @@ export class ServiceError extends Error {
     }
 
     toString() {
-        return this.message;
+        return this.httpError.Message;
     }
 }
 
@@ -229,12 +230,11 @@ export interface WebApiHttpError {
     ExceptionID?: string;
 }
 
-export class ValidationError extends Error {
+export class ValidationError  {
     modelState: ModelState;
     message: string;
 
     constructor(public statusText: string, json: WebApiHttpError) {
-        super(statusText)
         this.message = json.Message || "";
         this.modelState = json.ModelState!;
     }

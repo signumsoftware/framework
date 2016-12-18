@@ -320,8 +320,44 @@ namespace Signum.Test
             }
         }
 
+
+
         [TestMethod]
-        public void BulkInsert()
+        public void BulkInsertWithMList()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                var max = Database.Query<AlbumEntity>().Select(a => a.Id).ToList().Max();
+                var count = Database.MListQuery<AlbumEntity, SongEntity>(a => a.Songs).Count();
+
+                var list = Database.Query<AlbumEntity>().ToList().Select(a => new AlbumEntity
+                {
+                    Name = "Copy of " + a.Name,
+                    Author = a.Author,
+                    Label = a.Label,
+                    State = a.State,
+                    Songs = a.Songs.Select(s => new SongEntity
+                    {
+                        Name = s.Name,
+                        Seconds = s.Seconds,
+                    }).ToMList()
+                }).ToList();
+
+                list.BulkInsertQueryIds(keySelector: a => a.Name, isNewPredicate: a => a.Id > max);
+
+                Assert.AreNotEqual(count, Database.MListQuery<AlbumEntity, SongEntity>(a => a.Songs).Count());
+
+                Database.Query<AlbumEntity>().Where(a => a.Id > max).UnsafeDelete();
+
+                Assert.AreEqual(count, Database.MListQuery<AlbumEntity, SongEntity>(a => a.Songs).Count());
+
+                tr.Commit();
+            }
+        }
+
+
+        [TestMethod]
+        public void BulkInsertTable()
         {
             using (Transaction tr = new Transaction())
             {
@@ -334,7 +370,7 @@ namespace Signum.Test
                     Target = a
                 }).ToList();
 
-                Administrator.BulkInsert(list);
+                BulkInserter.BulkInsertTable(list);
 
                 Database.Query<NoteWithDateEntity>().Where(a => a.Id > max).UnsafeDelete(); 
 
@@ -353,12 +389,12 @@ namespace Signum.Test
 
                 var list = Database.Query<AlbumEntity>().Select(a => new MListElement<AlbumEntity, SongEntity>
                 {
-                    Order = 100,
-                    Element = new SongEntity { Duration = TimeSpan.FromMinutes(1), Name = "Bonus - " + a.Name },
                     Parent = a,
+                    Element = new SongEntity { Duration = TimeSpan.FromMinutes(1), Name = "Bonus - " + a.Name },
+                    Order = 100,
                 }).ToList();
 
-                Administrator.BulkInsertMList((AlbumEntity a) => a.Songs, list);
+                BulkInserter.BulkInsertMListTable((AlbumEntity a) => a.Songs, list);
 
                 Database.MListQuery((AlbumEntity a) => a.Songs).Where(a => a.RowId > max).UnsafeDeleteMList();
 

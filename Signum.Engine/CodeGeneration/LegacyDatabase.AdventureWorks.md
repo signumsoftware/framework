@@ -116,7 +116,7 @@ If you take a look at the [Adventure Works database diagram](http://merc.tv/img/
 
 4. `SpecialOfferProduct` is the only that is referred that has multiple primary keys. In this case we'll need to remove the foreign key manually and replace them by a simple foreign key, or refer to `SpecialOffer` and `Product` directly. *(Well, actually is not necessary because the FKs are gone in AdventureWorks2012 for some reason!!)*.
 
-After this analysis, we can override `CleanDiffTable` to make some modifications in the retrieved database schema before any code is generated. This one will work for example: 
+After this analysis, we can override `GetTables` to make some modifications in the retrieved database schema before any code is generated. This one will work for example: 
 
 ```C#
 public class AdventureWorksEntityCodeGenerator : EntityCodeGenerator
@@ -171,7 +171,7 @@ public class AdventureWorksEntityCodeGenerator : EntityCodeGenerator
             }
         }
 
-        base.CleanDiffTables(tables);
+        return tables;
     }
 
     ...

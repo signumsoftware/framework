@@ -165,45 +165,49 @@ namespace Signum.Engine
 
                     var col = collection.ToProgressEnumerator(out pi);
 
-                    lock (SafeConsole.SyncKey)
-                        SafeConsole.WriteSameLine(pi.ToString());
+                    if (!Console.IsOutputRedirected)
+                        lock (SafeConsole.SyncKey)
+                            SafeConsole.WriteSameLine(pi.ToString());
 
                     Exception stopException = null;
 
                     using (ExecutionContext.SuppressFlow())
-                        Parallel.ForEach(col, paralelOptions ?? new ParallelOptions {  MaxDegreeOfParallelism = Environment.ProcessorCount }, (item, state) =>
-                        {
-                            using (HeavyProfiler.Log("ProgressForeach", () => elementID(item)))
-                                try
-                                {
-                                    using (Transaction tr = Transaction.ForceNew())
-                                    {
-                                        action(item, writer);
-                                        tr.Commit();
-                                    }
-                                }
-                                catch (Exception e)
-                                {
-                                    writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
-                                    writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
+                        Parallel.ForEach(col, paralelOptions ?? new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, (item, state) =>
+                       {
+                           using (HeavyProfiler.Log("ProgressForeach", () => elementID(item)))
+                               try
+                               {
+                                   using (Transaction tr = Transaction.ForceNew())
+                                   {
+                                       action(item, writer);
+                                       tr.Commit();
+                                   }
+                               }
+                               catch (Exception e)
+                               {
+                                   writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
+                                   writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
 
-                                    if (StopOnException != null && StopOnException(elementID(item), fileName, e))
-                                        stopException = e;
-                                }
-                            lock (SafeConsole.SyncKey)
-                                SafeConsole.WriteSameLine(pi.ToString());
+                                   if (StopOnException != null && StopOnException(elementID(item), fileName, e))
+                                       stopException = e;
+                               }
 
-                            if (stopException != null)
-                                state.Break();
+                           if (!Console.IsOutputRedirected)
+                               lock (SafeConsole.SyncKey)
+                                   SafeConsole.WriteSameLine(pi.ToString());
 
-                        });
+                           if (stopException != null)
+                               state.Break();
+
+                       });
 
                     if (stopException != null)
                         throw stopException;
                 }
                 finally
                 {
-                    SafeConsole.ClearSameLine();
+                    if (!Console.IsOutputRedirected)
+                        SafeConsole.ClearSameLine();
                 }
             }
         }
@@ -244,7 +248,8 @@ namespace Signum.Engine
             finally
             {
                 table.IdentityBehaviour = true;
-                SafeConsole.ClearSameLine();
+                if (!Console.IsOutputRedirected)
+                    SafeConsole.ClearSameLine();
             }
         }
 
@@ -319,7 +324,9 @@ namespace Signum.Engine
                         logStreamWriter.WriteLine(f);
                     lock (SafeConsole.SyncKey)
                     {
-                        SafeConsole.ClearSameLine();
+                        if (!Console.IsOutputRedirected)
+                            SafeConsole.ClearSameLine();
+
                         if (parameters.IsNullOrEmpty())
                             SafeConsole.WriteLineColor(color, str);
                         else
@@ -333,7 +340,9 @@ namespace Signum.Engine
                 {
                     lock (SafeConsole.SyncKey)
                     {
-                        SafeConsole.ClearSameLine();
+                        if (!Console.IsOutputRedirected)
+                            SafeConsole.ClearSameLine();
+
                         if (parameters.IsNullOrEmpty())
                             SafeConsole.WriteLineColor(color, str);
                         else

@@ -42,20 +42,19 @@ export default class ValueLineModal extends React.Component<ValueLinePopupModal,
     
         const ctx = new TypeContext(undefined, undefined, undefined as any, Binding.create(this.state, s => s.value));
 
-        const o = { title: undefined, message: undefined, initialValue: undefined };
-        const valueLineProps = Dic.without(this.props.options, o);
+        const { title, message, initialValue, ...valueLineProps } = this.props.options;
 
         return <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited}>
 
             <Modal.Header closeButton={true}>
                 <h4 className="modal-title">
-                    {o.title === undefined ? SelectorMessage.ChooseAValue.niceToString() : o.title}
+                    {title === undefined ? SelectorMessage.ChooseAValue.niceToString() : title}
                 </h4>
             </Modal.Header>
 
             <Modal.Body>
                 <p>
-                    {o.message === undefined ? SelectorMessage.PleaseChooseAValueToContinue.niceToString() : o.message}
+                    {message === undefined ? SelectorMessage.PleaseChooseAValueToContinue.niceToString() : message}
                 </p>
                 <ValueLine
                     ctx={ctx}
@@ -84,6 +83,5 @@ export interface ValueLinePopupOptions {
     format?: string;
     unit?: string;
 }
-
 
 

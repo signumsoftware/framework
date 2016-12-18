@@ -625,6 +625,16 @@ export module Dic {
         return akeys.every(k => equals((objA as any)[k], (objB as any)[k], deep, depth + 1, visited));
     }
 
+    export function assign<O extends P, P>(obj: O, other: P) {
+        if (!other)
+            return;
+
+        for (const key in other) {
+            if (other.hasOwnProperty(key))
+                (obj as any)[key] = other[key];
+        }
+    }
+
 
     export function getValues<V>(obj: { [key: string]: V }): V[] {
         const result: V[] = [];
@@ -678,79 +688,16 @@ export module Dic {
         dic[key] = value;
     }
 
-    export function copy<T>(object: T): T {
-        const objectCopy: any = {};
+    export function simplify<T>(a: T) : T {
+        if (a == null)
+            return a;
 
-        for (const key in object) {
-            if (object.hasOwnProperty(key)) {
-                objectCopy[key] = (object as any)[key];
-            }
+        var result : T = {} as any;
+        for (const key in a) {
+            if (a.hasOwnProperty(key) && a[key] !== undefined)
+                result[key] = a[key];
         }
-
-        return objectCopy as T;
-    }
-
-    export function extend<O>(out: O): O;
-    export function extend<O, U>(out: O, arg1: U): O & U;
-    export function extend<O, U, V>(out: O, arg1: U, arg2: V): O & U & V;
-    export function extend<O, U, V>(out: O, ...args: Object[]): any;
-    export function extend(out: any) {
-        out = out || {};
-
-        for (let i = 1; i < arguments.length; i++) {
-
-            const a = arguments[i];
-
-            if (!a)
-                continue;
-
-            for (const key in a) {
-                if (a.hasOwnProperty(key))
-                    out[key] = a[key];
-            }
-        }
-
-        return out;
-    };
-
-    export function extendUndefined<O>(out: O): O;
-    export function extendUndefined<O, U>(out: O, arg1: U): O & U;
-    export function extendUndefined<O, U, V>(out: O, arg1: U, arg2: V): O & U & V;
-    export function extendUndefined<O, U, V>(out: O, ...args: Object[]): any;
-    export function extendUndefined(out: any) {
-        out = out || {};
-
-        for (let i = 1; i < arguments.length; i++) {
-
-            const a = arguments[i];
-
-            if (!a)
-                continue;
-
-            for (const key in a) {
-                if (a.hasOwnProperty(key) && a[key] !== undefined)
-                    out[key] = a[key];
-            }
-        }
-
-        return out;
-    };
-    
-
-   
-
-    /**  Waiting for https://github.com/Microsoft/TypeScript/issues/2103 */
-    export function without<T>(obj: T, toRemove: {}): T {
-        const result: any = {};
-
-        for (const key in obj) {
-            if (!toRemove.hasOwnProperty(key))
-                result[key] = (obj as any)[key];
-            else
-                (toRemove as any)[key] = (obj as any)[key];
-        }
-
-        return result as T;
+        return result;
     }
 }
 
@@ -795,7 +742,7 @@ export function areEqual<T>(a: T | undefined, b: T | undefined, field: (value: T
     return field(a) == field(b);
 }
 
-export function ifError<E extends Error, T>(ErrorClass: { new (...args: any[]): E }, onError: (error: E) => T): (error: any) => T {
+export function ifError<E, T>(ErrorClass: { new (...args: any[]): E }, onError: (error: E) => T): (error: any) => T {
     return error => {
         if (error instanceof ErrorClass)
             return onError((error as E));

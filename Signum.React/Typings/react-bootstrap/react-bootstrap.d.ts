@@ -96,7 +96,7 @@ declare namespace ReactBootstrap {
     }
     type ButtonToolbar = React.ClassicComponent<ButtonToolbarProps, {}>;
     var ButtonToolbar: React.ClassicComponentClass<ButtonToolbarProps>;
-
+    
 
     // <ButtonGroup />
     interface ButtonGroupProps extends React.HTMLProps<ButtonGroup> {

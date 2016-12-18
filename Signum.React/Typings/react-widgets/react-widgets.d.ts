@@ -22,7 +22,7 @@ declare module 'react-widgets/lib/Combobox' {
         emptyFilter: string | ((props: ComboBoxProps) => string);
     }
 
-    interface ComboBoxProps extends __React.Props<ComboBoxClass> {
+    interface ComboBoxProps extends __React.Props<ComboBox> {
         /**
          * The current value of the Combobox. This can be an object (such as a member of the data
          * array) or a primitive value, hinted to by the valueField. The widget value does not need
@@ -114,6 +114,8 @@ declare module 'react-widgets/lib/Combobox' {
          * has reached a minimum length.
          */
         minLength?: number;
+
+        defaultOpen?: boolean;
         /**
          * Whether or not the Combobox is open. When unset (undefined) the Combobox will handle the
          * opening and closing internally. The defaultOpen prop can be used to set an initialization
@@ -147,7 +149,7 @@ declare module 'react-widgets/lib/Combobox' {
         messages?: ComboBoxMessages;
     }
 
-    interface ComboBox extends __React.ReactElement<ComboBoxProps> { }
+    interface ComboBox extends __React.ClassicComponent<ComboBoxProps, {}> { }
     interface ComboBoxClass extends __React.ComponentClass<ComboBoxProps> { }
     var ComboBox: ComboBoxClass;
     export = ComboBox;
@@ -155,7 +157,7 @@ declare module 'react-widgets/lib/Combobox' {
 
 declare module 'react-widgets/lib/DateTimePicker' {
 
-    interface DateTimePickerProps extends __React.Props<DateTimePickerClass> {
+    interface DateTimePickerProps extends __React.Props<DateTimePicker> {
         /**
          * Whether to show the date picker button. 
          * @default true
@@ -248,6 +250,7 @@ declare module 'react-widgets/lib/DateTimePicker' {
          * changed.
          */
         onSelect?: (date?: Date) => void;
+        defaultOpen?: boolean;
         /**
          * Whether or not the DateTimePicker is open. When unset (undefined) the DateTimePicker will
          * handle the opening and closing internally. The defaultOpen prop can be used to set an
@@ -290,14 +293,14 @@ declare module 'react-widgets/lib/DateTimePicker' {
         timeButton?: string;
     }
 
-    interface DateTimePicker extends __React.ReactElement<DateTimePickerProps> { }
+    interface DateTimePicker extends __React.ClassicComponent<DateTimePickerProps, {}> { }
     interface DateTimePickerClass extends __React.ComponentClass<DateTimePickerProps> { }
     var DateTimePicker: DateTimePickerClass;
     export = DateTimePicker;
 }
 
 declare module 'react-widgets/lib/Multiselect' {
-    interface MultiselectProps extends __React.Props<MultiselectClass> {
+    interface MultiselectProps extends __React.Props<Multiselect> {
         /**
          * The current values of the Multiselect. The value should can null, or an array of
          * valueField values, or an array of objects (such as a few items in the data array)
@@ -380,6 +383,7 @@ declare module 'react-widgets/lib/Multiselect' {
          * onSearch should be used when the searchTerm prop is set.
          */
         onSearch?: (searchTerm: string) => void;
+        defaultOpen?: boolean;
         /**
          * Whether or not the Multiselect is open. When unset (undefined) the Multiselect will
          * handle the opening and closing internally. The defaultOpen prop can be used to set an
@@ -466,14 +470,14 @@ declare module 'react-widgets/lib/Multiselect' {
         emptyFilter?: string | ((props: MultiselectProps) => string);
     }
 
-    interface Multiselect extends __React.ReactElement<MultiselectProps> { }
+    interface Multiselect extends __React.ClassicComponent<MultiselectProps, {}> { }
     interface MultiselectClass extends __React.ComponentClass<MultiselectProps> { }
     var Multiselect: MultiselectClass;
     export = Multiselect;
 }
 
 declare module 'react-widgets/lib/NumberPicker' {
-    interface NumberPickerProps extends __React.Props<NumberPickerClass> {
+    interface NumberPickerProps extends __React.Props<NumberPicker> {
         /**
          * The current value of the NumberPicker.
          */
@@ -545,14 +549,14 @@ declare module 'react-widgets/lib/NumberPicker' {
         decrement?: string;
     }
 
-    interface NumberPicker extends __React.ReactElement<NumberPickerProps> { }
+    interface NumberPicker extends __React.ClassicComponent<NumberPickerProps, {}> { }
     interface NumberPickerClass extends __React.ComponentClass<NumberPickerProps> { }
     var NumberPicker: NumberPickerClass;
     export = NumberPicker;
 }
 
 declare module 'react-widgets/lib/SelectList' {
-    interface SelectListProps extends __React.Props<SelectListClass> {
+    interface SelectListProps extends __React.Props<SelectList> {
         /**
          * The current value or values of the SelectList. This can be an object (such as a member of
          * the data array) or a primitive value, hinted to by the valueField. The widget value does
@@ -653,14 +657,14 @@ declare module 'react-widgets/lib/SelectList' {
         emptyList?: string | ((props: SelectListProps) => string)
     }
 
-    interface SelectList extends __React.ReactElement<SelectListProps> { }
+    interface SelectList extends __React.ClassicComponent<SelectListProps, {}> { }
     interface SelectListClass extends __React.ComponentClass<SelectListProps> { }
     var SelectList: SelectListClass;
     export = SelectList;
 }
 
 declare module 'react-widgets/lib/Calendar' {
-    interface CalendarProps extends __React.Props<CalendarClass> {
+    interface CalendarProps extends __React.Props<Calendar> {
         /**
          * The current selected date, should be a Date object or null.
          */
@@ -779,14 +783,14 @@ declare module 'react-widgets/lib/Calendar' {
         moveForward?: string;
     }
 
-    interface Calendar extends __React.ReactElement<CalendarProps> { }
+    interface Calendar extends __React.ClassicComponent<CalendarProps, {}> { }
     interface CalendarClass extends __React.ComponentClass<CalendarProps> { }
     var Calendar: CalendarClass;
     export = Calendar;
 }
 
 declare module 'react-widgets/lib/DropdownList' {
-    interface DropdownListProps extends __React.Props<DropdownListClass> {
+    interface DropdownListProps extends __React.Props<DropdownList> {
         /**
          * The current value of the DropdownList. This can be an object (such as a member of the
          * data array) or a primitive value, hinted to by the valueField. The widget value does not
@@ -871,6 +875,7 @@ declare module 'react-widgets/lib/DropdownList' {
          * onSearch should be used when the searchTerm prop is set.
          */
         onSearch?: (searchTerm: string) => void;
+        defaultOpen?: boolean;
         /**
          * Whether or not the DropdownList is open. When unset (undefined) the DropdownList will
          * handle the opening and closing internally. The defaultOpen prop can be used to set an
@@ -948,7 +953,7 @@ declare module 'react-widgets/lib/DropdownList' {
         emptyFilter?: string | ((props: DropdownListProps) => string);
     }
 
-    interface DropdownList extends __React.ReactElement<DropdownListProps> { }
+    interface DropdownList extends __React.ClassicComponent<DropdownListProps, {}> { }
     interface DropdownListClass extends __React.ComponentClass<DropdownListProps> { }
     var DropdownList: DropdownListClass;
     export = DropdownList;
