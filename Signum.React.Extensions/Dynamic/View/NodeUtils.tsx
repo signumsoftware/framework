@@ -164,7 +164,7 @@ ${childrenString}
             viewOnCreate: node.viewOnCreate,
             onChange: this.evaluateOnChange(node.redrawOnChange),
             findOptions: node.findOptions,
-            getComponent: options.avoidGetComponent == true ? undefined : this.getGetComponentEx(node),
+            getComponent: options.avoidGetComponent == true ? undefined : this.getGetComponentEx(node, true),
         };
 
 
@@ -178,17 +178,19 @@ ${childrenString}
         return result;
     }
 
-    getGetComponentEx(node: ContainerNode): Expression<any> | undefined {
+    getGetComponentEx(node: ContainerNode, withComment: boolean): Expression<any> | undefined {
         if (!node.children || !node.children.length)
             return undefined;
 
         var cc = new CodeContext();
         cc.ctxName = "ctx" + (Dic.getKeys(this.usedNames).length + 1);
-        cc.usedNames = this.usedNames; 
+        cc.usedNames = this.usedNames;
 
         var div = cc.elementCodeWithChildren("div", null, node)
-
-        return { __code__: `(${cc.ctxName} /*: YourEntity*/) => (${div})` };
+        if (withComment)
+            return { __code__: `(${cc.ctxName} /*: YourEntity*/) => (${div})` };
+        else
+            return { __code__: `${cc.ctxName} => (${div})` };
     }
    
 }
