@@ -648,9 +648,11 @@ namespace Signum.Engine.Maps
             }
         }
 
+        public Func<DatabaseName, bool> IsExternalDatabase = db => false;
+
         public List<DatabaseName> DatabaseNames()
         {
-            return GetDatabaseTables().Select(a => a.Name.Schema?.Database).Distinct().ToList();
+            return GetDatabaseTables().Select(a => a.Name.Schema?.Database).Where(a => !IsExternalDatabase(a)).Distinct().ToList();
         }
 
         public DirectedEdgedGraph<Table, RelationInfo> ToDirectedGraph()
