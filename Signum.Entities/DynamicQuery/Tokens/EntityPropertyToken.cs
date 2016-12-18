@@ -86,7 +86,7 @@ namespace Signum.Entities.DynamicQuery
                         .OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefaultEx();
                     if (att != null)
                     {
-                        return DateTimeProperties(this, att.Precision);
+                        return DateTimeProperties(this, att.Precision).AndHasValue(this);
                     }
                 }
             }
@@ -103,12 +103,12 @@ namespace Signum.Entities.DynamicQuery
                         .OfType<DecimalsValidatorAttribute>().SingleOrDefaultEx();
                     if (att != null)
                     {
-                        return StepTokens(this, att.DecimalPlaces);
+                        return StepTokens(this, att.DecimalPlaces).AndHasValue(this);
                     }
 
                     var format = Reflector.FormatString(route);
                     if (format != null)
-                        return StepTokens(this, Reflector.NumDecimals(format));
+                        return StepTokens(this, Reflector.NumDecimals(format)).AndHasValue(this);
                 }
             }
 
