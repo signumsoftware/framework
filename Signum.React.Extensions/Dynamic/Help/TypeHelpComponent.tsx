@@ -189,7 +189,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
         }
 
         return (
-            <li>
+            <li key={index}>
                 {h.isEnum ?
                     <span className={className} onClick={onClick} onContextMenu={onContextMenu}>{m.name}</span>
                     :
