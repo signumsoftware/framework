@@ -66,10 +66,10 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
     }
 
     updateTypeHelp(props: DynamicViewOverrideComponentProps) {
-        this.changeState(s => s.typeHelp = undefined);
+        this.setState({ typeHelp: undefined });
         if (props.ctx.value.entityType)
             DynamicClient.API.typeHelp(props.ctx.value.entityType!.cleanName, "CSharp")
-                .then(th => this.changeState(s => s.typeHelp = th))
+                .then(th => this.setState({ typeHelp: th }))
                 .done();
     }
 
@@ -88,17 +88,17 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
         e.preventDefault();
         e.stopPropagation();
 
-        this.changeState(s => {
-            s.selectedMemberName = name,
-            s.contextualMenu = {
+        this.setState({
+            selectedMemberName: name,
+            contextualMenu: {
                 position: ContextMenu.getPosition(e, this.typeHelpContainer)
-            };
+            }
         });
     }
 
     handleContextOnHide = () => {
-        this.changeState(s => {
-            s.contextualMenu = undefined;
+        this.setState({
+            contextualMenu: undefined
         });
     }
 
@@ -296,8 +296,8 @@ auth: AuthInfo) =>`}</pre>
 
         window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
 
-        this.changeState(s => {
-            s.selectedMemberName = undefined;
+        this.setState({
+            selectedMemberName: undefined
         });
     }
 }
