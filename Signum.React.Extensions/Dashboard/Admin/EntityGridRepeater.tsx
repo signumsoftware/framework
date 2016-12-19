@@ -74,7 +74,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
                                 index: i
                             }))
                             .groupBy(p => p.ctx.value.row.toString())
-                            .orderBy(gr => gr.key)
+                            .orderBy(gr => parseInt(gr.key))
                             .flatMap((gr, i, groups) => [
                                 this.renderSeparator(parseInt(gr.key)),
                                 <div className="row items-row" key={"row" + gr.key} onDragOver={e => this.handleItemsRowDragOver(e, parseInt(gr.key)) }>
@@ -139,10 +139,11 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
 
         const c = this.state.currentItem!.value;
 
-        list.filter(a => a != c && a.row >= row).forEach(a => a.row++);
+        list.filter(a => a != c && a.row >= row).forEach(a => { a.row++; a.modified = true; });
         c.row = row;
         c.startColumn = 0;
         c.columns = 12;
+        c.modified = true;
 
         const s = this.state;
         s.dragMode = undefined;
