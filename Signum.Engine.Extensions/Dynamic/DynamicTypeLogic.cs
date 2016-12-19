@@ -334,7 +334,7 @@ namespace Signum.Engine.Dynamic
 
             StringBuilder sb = new StringBuilder();
 
-            string inititalizer = property.IsMList ? $" = new {type}()": null;
+            string inititalizer = property.IsMList != null ? $" = new {type}()": null;
             string fieldName = property.Name.FirstLower();
 
             WriteAttributeTag(sb, GetFieldAttributes(property));
@@ -423,7 +423,7 @@ namespace Signum.Engine.Dynamic
             if (property.IsLite)
                 result = "Lite<" + result + ">";
             
-            if (property.IsMList)
+            if (property.IsMList != null)
                 result = "MList<" + result + ">";
 
             return result;
