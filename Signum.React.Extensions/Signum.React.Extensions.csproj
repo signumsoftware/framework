@@ -184,12 +184,12 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="Dynamic\Help\TypeHelpComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\TypeCondition\DynamicTypeCondition.tsx" />
-    <TypeScriptCompile Include="Dynamic\Type\DynamicSqlMigrationEntity.tsx" />
+    <TypeScriptCompile Include="Dynamic\Type\DynamicSqlMigration.tsx" />
     <TypeScriptCompile Include="Dynamic\Type\DynamicTypeDefinitionComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicPanelPage.tsx" />
     <TypeScriptCompile Include="Codemirror\SqlCodeMirror.tsx" />
     <TypeScriptCompile Include="Dynamic\Type\ValueComponent.tsx" />
-    <TypeScriptCompile Include="Dynamic\Type\DynamicTypeEntity.tsx" />
+    <TypeScriptCompile Include="Dynamic\Type\DynamicType.tsx" />
     <TypeScriptCompile Include="Dynamic\View\DynamicViewOverride.tsx" />
     <TypeScriptCompile Include="Dynamic\View\DynamicViewSelector.tsx" />
     <TypeScriptCompile Include="Dynamic\View\DynamicViewTree.tsx" />

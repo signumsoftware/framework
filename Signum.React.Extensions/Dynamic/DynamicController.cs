@@ -167,7 +167,9 @@ namespace Signum.React.Dynamic
         [Route("api/dynamic/typeHelp/{typeName}/{mode}"), HttpGet]
         public TypeHelpTS GetTypeHelp(string typeName, TypeHelpMode mode)
         {
-            Type type = TypeLogic.GetType(typeName);
+            Type type = TypeLogic.TryGetType(typeName);
+            if (type == null)
+                return null;
 
             var isEnum = EnumEntity.IsEnumEntity(type);
 

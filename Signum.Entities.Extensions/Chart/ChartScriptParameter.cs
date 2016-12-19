@@ -209,13 +209,16 @@ namespace Signum.Entities.Chart
 
             internal string Validate(string parameter, QueryToken token)
             {
+                if (token == null)
+                    return null; //?
+
                 var enumValue = this.SingleOrDefault(a => a.Name == parameter);
 
                 if (enumValue == null)
                     return "{0} is not in the list".FormatWith(parameter);
 
                 if (!enumValue.CompatibleWith(token))
-                    return "{0} is not compatible with {1}".FormatWith(parameter, token.NiceName());
+                    return "{0} is not compatible with {1}".FormatWith(parameter, token?.NiceName());
 
                 return null;
             }

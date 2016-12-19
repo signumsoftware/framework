@@ -11,11 +11,11 @@ import { getTypeInfo, Binding, PropertyRoute } from '../../../../Framework/Signu
 import SqlCodeMirror from '../../Codemirror/SqlCodeMirror'
 
 
-interface DynamicSqlMigrationEntityComponentProps {
+interface DynamicSqlMigrationComponentProps {
     ctx: TypeContext<DynamicSqlMigrationEntity>;
 }
 
-export default class DynamicSqlMigrationEntityComponent extends React.Component<DynamicSqlMigrationEntityComponentProps, void> {
+export default class DynamicSqlMigrationComponent extends React.Component<DynamicSqlMigrationComponentProps, void> {
 
     handleScriptChange = (newScript: string) => {
 

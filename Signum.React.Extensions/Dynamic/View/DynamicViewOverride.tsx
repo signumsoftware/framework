@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import { MenuItem } from 'react-bootstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
 import { DynamicViewOverrideEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
@@ -7,47 +8,68 @@ import { Entity, JavascriptMessage, is } from '../../../../Framework/Signum.Reac
 import { getTypeInfo, Binding, PropertyRoute, ReadonlyBinding } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
 import * as DynamicViewClient from '../DynamicViewClient'
+import * as DynamicClient from '../DynamicClient'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { ViewReplacer } from '../../../../Framework/Signum.React/Scripts/Frames/ReactVisitor';
 import TypeHelpComponent from '../Help/TypeHelpComponent'
 import { AuthInfo } from './AuthInfo'
+import ContextMenu from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
+import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
 
 
-interface DynamicViewOverrideEntityComponentProps {
+interface DynamicViewOverrideComponentProps {
     ctx: TypeContext<DynamicViewOverrideEntity>;
 }
 
-interface DynamicViewOverrideEntityComponentState {
+interface DynamicViewOverrideComponentState {
     exampleEntity?: Entity;
     componentClass?: React.ComponentClass<{ ctx: TypeContext<Entity> }> | null;
     syntaxError?: string;
     viewOverride?: (e: ViewReplacer<Entity>, authInfo: AuthInfo) => void;
     scriptChanged?: boolean;
     viewNames?: string[];
+    typeHelp?: DynamicClient.TypeHelp;
+    selectedMemberName?: string;
+    contextualMenu?: {
+        position: ContextMenuPosition;
+    };
 }
 
-export default class DynamicViewOverrideEntityComponent extends React.Component<DynamicViewOverrideEntityComponentProps, DynamicViewOverrideEntityComponentState> {
+export default class DynamicViewOverrideComponent extends React.Component<DynamicViewOverrideComponentProps, DynamicViewOverrideComponentState> {
 
-    constructor(props: DynamicViewOverrideEntityComponentProps) {
+    constructor(props: DynamicViewOverrideComponentProps) {
         super(props);
 
         this.state = {};
     }
 
+    typeHelpContainer: HTMLElement;
+
     componentWillMount() {
         this.updateViewNames(this.props);
+        this.updateTypeHelp(this.props);
     }
 
-    componentWillReceiveProps(newProps: DynamicViewOverrideEntityComponentProps) {
-        if (!is(this.props.ctx.value.entityType, newProps.ctx.value.entityType))
+    componentWillReceiveProps(newProps: DynamicViewOverrideComponentProps) {
+        if (!is(this.props.ctx.value.entityType, newProps.ctx.value.entityType)) {
             this.updateViewNames(newProps);
+            this.updateTypeHelp(newProps);
+    }
     }
 
-    updateViewNames(props: DynamicViewOverrideEntityComponentProps) {
+    updateViewNames(props: DynamicViewOverrideComponentProps) {
         this.setState({ viewNames: undefined });
         if (props.ctx.value.entityType)
             DynamicViewClient.API.getDynamicViewNames(props.ctx.value.entityType!.cleanName)
                 .then(viewNames => this.setState({ viewNames: viewNames }))
+                .done();
+    }
+
+    updateTypeHelp(props: DynamicViewOverrideComponentProps) {
+        this.setState({ typeHelp: undefined });
+        if (props.ctx.value.entityType)
+            DynamicClient.API.typeHelp(props.ctx.value.entityType!.cleanName, "CSharp")
+                .then(th => this.setState({ typeHelp: th }))
                 .done();
     }
 
@@ -60,6 +82,51 @@ export default class DynamicViewOverrideEntityComponent extends React.Component<
             return Promise.resolve(confirm(JavascriptMessage.loseCurrentChanges.niceToString()));
 
         return Promise.resolve(true);
+    }
+
+    handleTypeHelpContextMenu = (name: string, e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        this.setState({
+            selectedMemberName: name,
+            contextualMenu: {
+                position: ContextMenu.getPosition(e, this.typeHelpContainer)
+            }
+        });
+    }
+
+    handleContextOnHide = () => {
+        this.setState({
+            contextualMenu: undefined
+        });
+    }
+
+    handleRemoveClick = () => {
+        setTimeout(() => this.showPropmt(`vr.remove(e => e.${this.state.selectedMemberName!})`), 0);
+    }
+
+    handleInsertBeforeClick = () => {
+        setTimeout(() => this.showPropmt(`vr.insertBefore(e => e.${this.state.selectedMemberName!}, yourElement);`), 0);
+    }
+
+    handleInsertAfterClick = () => {
+        setTimeout(() => this.showPropmt(`vr.insertAfter(e => e.${this.state.selectedMemberName!}, yourElement);`), 0);
+    }
+
+    renderContextualMenu() {
+        const cm = this.state.contextualMenu!;
+        const member = this.state.selectedMemberName!;
+
+        return (
+            <ContextMenu position={cm.position} onHide={this.handleContextOnHide}>
+                <MenuItem header>{member}</MenuItem>
+                <MenuItem divider />
+                <MenuItem onClick={this.handleRemoveClick}><i className="fa fa-trash" aria-hidden="true" />&nbsp; Remove</MenuItem>
+                <MenuItem onClick={this.handleInsertBeforeClick}><i className="glyphicon glyphicon-menu-left" aria-hidden="true" />&nbsp; Insert Before</MenuItem>
+                <MenuItem onClick={this.handleInsertAfterClick}><i className="glyphicon glyphicon-menu-right" aria-hidden="true" />&nbsp; Insert After</MenuItem>
+            </ContextMenu>
+        );
     }
 
     render() {
@@ -77,8 +144,9 @@ export default class DynamicViewOverrideEntityComponent extends React.Component<
                                 {this.renderExampleEntity(ctx.value.entityType!.cleanName)}
                                 {this.renderEditor()}
                             </div>
-                            <div className="col-sm-5">
-                                <TypeHelpComponent initialType={ctx.value.entityType.cleanName} mode="Typescript" />
+                            <div className="col-sm-5" ref={(th) => { this.typeHelpContainer = th } }>
+                            <TypeHelpComponent initialType={ctx.value.entityType.cleanName} mode="Typescript" onContextMenu={this.handleTypeHelpContextMenu} />
+                            {this.state.contextualMenu && this.renderContextualMenu()}
                                 <br />
                             </div>
                         </div>
@@ -145,9 +213,9 @@ export default class DynamicViewOverrideEntityComponent extends React.Component<
                     var tempCtx = new TypeContext(undefined, undefined, PropertyRoute.root(entity.Type), new ReadonlyBinding(entity, "example"));
                     var re = func(tempCtx);
                     this.setState({ componentClass: re.type as React.ComponentClass<{ ctx: TypeContext<Entity> }> });
+                    this.compileFunction();
                 });
         }
-
     }
 
     compileFunction() {
@@ -172,21 +240,65 @@ export default class DynamicViewOverrideEntityComponent extends React.Component<
         }
     }
 
-    allViewNames() {
-        return this.state.viewNames || [];
-    }
-
     renderEditor() {
 
         const ctx = this.props.ctx;
         return (
             <div className="code-container">
+                {this.renderViewNameButtons()}
+                <br />
+                {this.renderExpressionsButtons()}
                 <pre style={{ border: "0px", margin: "0px" }}>{`(vr: ViewReplacer<${ctx.value.entityType!.className}>, 
 auth: AuthInfo) =>`}</pre>
                 <JavascriptCodeMirror code={ctx.value.script || ""} onChange={this.handleCodeChange} />
                 {this.state.syntaxError && <div className="alert alert-danger">{this.state.syntaxError}</div>}
             </div>
         );
+    }
+
+    allViewNames() {
+        return this.state.viewNames || [];
+    }
+
+    handleViewNameClick = (viewName: string) => {
+        this.showPropmt(`React.createElement(DynamicViewPart, {ctx: vr.ctx, viewName:"${viewName}"})`);
+    }
+
+    renderViewNameButtons() {
+        return (<div className="btn-group" style={{ marginBottom: "3px" }}>
+            {this.allViewNames().map((vn, i) =>
+                <input key={i} type="button" className="btn btn-success btn-xs sf-button" value={vn} onClick={() => this.handleViewNameClick(vn)} />)}
+        </div>);
+    }
+
+    allExpressions() {
+
+        var typeHelp = this.state.typeHelp;
+        if (!typeHelp)
+            return [];
+
+        return typeHelp.members.filter(m => m.name && m.isExpression == true);
+    }
+
+    handleExpressionClick = (member: DynamicClient.TypeMemberHelp) => {
+        var paramValue = member.cleanTypeName ? `queryName : "${member.cleanTypeName}Entity"` : `valueToken: "Entity.${member.name}"`;
+        this.showPropmt(`React.createElement(ValueSearchControlLine, {ctx: vr.ctx, ${paramValue}})`);
+    }
+       
+    renderExpressionsButtons() {
+        return (<div className="btn-group" style={{ marginBottom: "3px" }}>
+            {this.allExpressions().map((m, i) =>
+                <input key={i} type="button" className="btn btn-warning btn-xs sf-button" value={m.name} onClick={() => this.handleExpressionClick(m)} />)}
+        </div>);
+    }
+
+    showPropmt(text: string) {
+
+        window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
+
+        this.setState({
+            selectedMemberName: undefined
+        });
     }
 }
 

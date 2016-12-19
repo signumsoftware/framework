@@ -21,7 +21,7 @@ namespace Signum.Entities.Dynamic
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string TypeName { get; set; }
-        
+
         [SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = false, Min = 3)]
         public string TypeDefinition { get; set; }
@@ -65,6 +65,52 @@ namespace Signum.Entities.Dynamic
         RemoveSaveOperation,
     }
 
+    public class DynamicTypePrimaryKeyDefinition
+    {
+        [JsonProperty(PropertyName = "name", NullValueHandling = NullValueHandling.Ignore)]
+        public string Name;
+
+        [JsonProperty(PropertyName = "type", NullValueHandling = NullValueHandling.Ignore)]
+        public string Type;
+
+        [JsonProperty(PropertyName = "identity", NullValueHandling = NullValueHandling.Ignore)]
+        public bool Identity;
+        
+        [JsonProperty(PropertyName = "identityBehaviour", NullValueHandling = NullValueHandling.Ignore)]
+        public bool IdentityBehaviour;
+    }
+
+    public class DynamicTypeTicksDefinition
+    {
+        [JsonProperty(PropertyName = "hasTicks", NullValueHandling = NullValueHandling.Ignore)]
+        public bool HasTicks;
+
+        [JsonProperty(PropertyName = "name", NullValueHandling = NullValueHandling.Ignore)]
+        public string Name;
+
+        [JsonProperty(PropertyName = "type", NullValueHandling = NullValueHandling.Ignore)]
+        public string Type;
+    }
+
+    public class DynamicTypeBackMListDefinition
+    {
+        //TableNameAttribute
+        [JsonProperty(PropertyName = "tableName", NullValueHandling = NullValueHandling.Ignore)]
+        public string TableName;
+
+        //PreserverOrderAttribute
+        [JsonProperty(PropertyName = "preserveOrder")]
+        public bool PreserveOrder;
+
+        [JsonProperty(PropertyName = "orderName", NullValueHandling = NullValueHandling.Ignore)]
+        public string OrderName;
+        //
+
+        //BackReferenceAttribute
+        [JsonProperty(PropertyName = "backReferenceName", NullValueHandling = NullValueHandling.Ignore)]
+        public string BackReferenceName;
+    }
+
     public class DynamicTypeDefinition
     {
         [JsonProperty(PropertyName = "baseType")]
@@ -75,6 +121,15 @@ namespace Signum.Entities.Dynamic
 
         [JsonProperty(PropertyName = "entityData", NullValueHandling = NullValueHandling.Ignore)]
         public EntityData? EntityData;
+
+        [JsonProperty(PropertyName = "tableName", NullValueHandling = NullValueHandling.Ignore)]
+        public string TableName;
+
+        [JsonProperty(PropertyName = "primaryKey", NullValueHandling = NullValueHandling.Ignore)]
+        DynamicTypePrimaryKeyDefinition PrimaryKey;
+
+        [JsonProperty(PropertyName = "ticks", NullValueHandling = NullValueHandling.Ignore)]
+        DynamicTypeTicksDefinition Ticks;
 
         [JsonProperty(PropertyName = "properties")]
         public List<DynamicProperty> Properties;
@@ -145,23 +200,26 @@ namespace Signum.Entities.Dynamic
         [JsonProperty(PropertyName = "name")]
         public string Name;
 
+        [JsonProperty(PropertyName = "columnName", NullValueHandling = NullValueHandling.Ignore)]
+        public string ColumnName;
+
         [JsonProperty(PropertyName = "type")]
         public string Type;
+
+        [JsonProperty(PropertyName = "columnType")]
+        public string ColumnType;
 
         [JsonProperty(PropertyName = "isNullable")]
         public IsNullable IsNullable;
 
-        [JsonProperty(PropertyName = "uniqueIndex")]
+        [JsonProperty(PropertyName = "uniqueIndex", DefaultValueHandling = DefaultValueHandling.Include)]
         public UniqueIndex UniqueIndex;
 
         [JsonProperty(PropertyName = "isLite", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool IsLite;
 
         [JsonProperty(PropertyName = "isMList", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public bool IsMList;
-
-        [JsonProperty(PropertyName = "preserveOrder", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public bool PreserveOrder;
+        public DynamicTypeBackMListDefinition IsMList;
 
         [JsonProperty(PropertyName = "size", NullValueHandling = NullValueHandling.Ignore)]
         public int? Size;
