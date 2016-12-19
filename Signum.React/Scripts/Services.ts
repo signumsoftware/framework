@@ -312,7 +312,7 @@ export function makeAbortable<A,Q>(makeCall: (abortController: FetchAbortControl
             return result;
         }, (error: TypeError) => {
             if (error.message == "Aborted request")
-                return undefined;
+                return new Promise(resolve => { /*never*/ });
 
             throw error
         });
