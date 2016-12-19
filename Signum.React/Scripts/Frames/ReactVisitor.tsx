@@ -66,10 +66,10 @@ export class ReplaceVisitor extends ReactVisitor {
         if (this.predicate(element)) {
 
             var node = this.replacement(element);
-            if (Array.isArray(node))
-                node = React.createElement("div", {}, ...node);
 
-            return new ReactValidator().visitChild(node as React.ReactChild);
+            var validatedNode = React.Children.map(node, c => new ReactValidator().visitChild(c));
+
+            return validatedNode;
         }
 
         return super.visitElement(element);
@@ -155,7 +155,7 @@ export class ViewReplacer<T> {
     insertTabAfter(eventKey: string, ...newTabs: Tab[]): this {
         this.result = new ReplaceVisitor(
             e => e.type == Tab && e.props.eventKey == eventKey,
-            e => [e, newTabs])
+            e => [e, ...newTabs])
             .visit(this.result);
 
         return this;
@@ -164,7 +164,7 @@ export class ViewReplacer<T> {
     insertTabBefore(eventKey: string, ...newTabs: Tab[]): this {
         this.result = new ReplaceVisitor(
             e => e.type == Tab && e.props.eventKey == eventKey,
-            e => [newTabs, e])
+            e => [...newTabs, e])
             .visit(this.result);
 
         return this;

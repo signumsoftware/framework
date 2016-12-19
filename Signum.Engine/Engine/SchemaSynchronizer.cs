@@ -22,11 +22,13 @@ namespace Signum.Engine
 
         public static SqlPreCommand SynchronizeTablesScript(Replacements replacements)
         {
-            Dictionary<string, ITable> model = Schema.Current.GetDatabaseTables().ToDictionaryEx(a => a.Name.ToString(), "schema tables");
-            HashSet<SchemaName> modelSchemas = Schema.Current.GetDatabaseTables().Select(a => a.Name.Schema).Where(a => !SqlBuilder.SystemSchemas.Contains(a.Name)).ToHashSet();
+            Schema s = Schema.Current;
 
-            Dictionary<string, DiffTable> database = DefaultGetDatabaseDescription(Schema.Current.DatabaseNames());
-            HashSet<SchemaName> databaseSchemas = DefaultGetSchemas(Schema.Current.DatabaseNames());
+            Dictionary<string, ITable> model = s.GetDatabaseTables().Where(t => !s.IsExternalDatabase(t.Name.Schema.Database)).ToDictionaryEx(a => a.Name.ToString(), "schema tables");
+            HashSet<SchemaName> modelSchemas = model.Values.Select(a => a.Name.Schema).Where(a => !SqlBuilder.SystemSchemas.Contains(a.Name)).ToHashSet();
+
+            Dictionary<string, DiffTable> database = DefaultGetDatabaseDescription(s.DatabaseNames());
+            HashSet<SchemaName> databaseSchemas = DefaultGetSchemas(s.DatabaseNames());
 
             if (SimplifyDiffTables != null) 
                 SimplifyDiffTables(database);

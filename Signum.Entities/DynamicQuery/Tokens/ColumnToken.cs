@@ -75,11 +75,11 @@ namespace Signum.Entities.DynamicQuery
                         .Select(dtp => dtp?.Precision).Distinct().Only();
 
                     if (precission != null)
-                        return DateTimeProperties(this, precission.Value);
+                        return DateTimeProperties(this, precission.Value).AndHasValue(this);
                 }
 
                 if (Column.Format == "d")
-                    return DateTimeProperties(this, DateTimePrecision.Days);
+                    return DateTimeProperties(this, DateTimePrecision.Days).AndHasValue(this);
             }
 
             if (Column.Type.UnNullify() == typeof(double) || 
@@ -94,11 +94,11 @@ namespace Signum.Entities.DynamicQuery
                         .Select(dtp => dtp?.DecimalPlaces).Distinct().Only();
 
                     if (decimalPlaces != null)
-                        return StepTokens(this, decimalPlaces.Value);
+                        return StepTokens(this, decimalPlaces.Value).AndHasValue(this);
                 }
 
                 if (Column.Format != null)
-                    return StepTokens(this, Reflector.NumDecimals(Column.Format));
+                    return StepTokens(this, Reflector.NumDecimals(Column.Format)).AndHasValue(this);
             }
 
             return SubTokensBase(Column.Type, options, Column.Implementations);
