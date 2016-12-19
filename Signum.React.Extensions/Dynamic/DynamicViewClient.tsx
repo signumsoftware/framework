@@ -72,16 +72,16 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
                 return this.static(entity);
 
             if (viewName == "NEW")
-                return ViewPromise.flat(createDefaultDynamicView(entity.Type).then(dv => this.dynamicComponent(dv)));
+                return ViewPromise.flat(createDefaultDynamicView(entity.Type).then(dv => this.dynamicViewComponent(dv)));
 
             if (viewName == "CHOOSE")
-                return ViewPromise.flat(this.chooseDynamicView(entity.Type, true).then(dv => this.dynamicComponent(dv)));
+                return ViewPromise.flat(this.chooseDynamicView(entity.Type, true).then(dv => this.dynamicViewComponent(dv)));
 
-            return ViewPromise.flat(API.getDynamicView(entity.Type, viewName).then(dv => this.dynamicComponent(dv)));
+            return ViewPromise.flat(API.getDynamicView(entity.Type, viewName).then(dv => this.dynamicViewComponent(dv)));
         }));
     }
 
-    dynamicComponent(promiseDv: DynamicViewEntity): ViewPromise<ModifiableEntity> {
+    dynamicViewComponent(promiseDv: DynamicViewEntity): ViewPromise<ModifiableEntity> {
         return new ViewPromise(resolve => require(['./View/DynamicViewComponent'], resolve))
             .withProps({ initialDynamicView: promiseDv });
     }
@@ -89,8 +89,13 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
     fallback(entity: ModifiableEntity): ViewPromise<ModifiableEntity> {
         const settings = Navigator.getSettings(entity.Type) as EntitySettings<ModifiableEntity>;
 
-        if (!settings || !settings.getViewPromise)
-            return ViewPromise.flat(this.chooseDynamicView(entity.Type, true).then(dv => this.dynamicComponent(dv)));
+        if (!settings || !settings.getViewPromise) {
+
+            if (!isTypeEntity(entity.Type))
+               return new ViewPromise(resolve => require(['../../../Framework/Signum.React/Scripts/Lines/DynamicComponent'], resolve));
+
+            return ViewPromise.flat(this.chooseDynamicView(entity.Type, true).then(dv => this.dynamicViewComponent(dv)));
+        }
 
         var staticViewPromise = settings.getViewPromise(entity).applyViewOverrides(settings);
 
