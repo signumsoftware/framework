@@ -281,13 +281,13 @@ window.addEventListener("storage", se => {
 });
 
 
-export function makeAbortable<T>(makeCall: (abortController: FetchAbortController) => Promise<T>): () => Promise<T | undefined> {
+export function makeAbortable<A,Q>(makeCall: (abortController: FetchAbortController, query: Q) => Promise<A>): (query: Q) => Promise<A | undefined> {
 
     let requestIndex = 0;
     let responseIndex = 0;
     let abortController: FetchAbortController | undefined = undefined;
 
-    return () => {
+    return (query) => {
 
         if (abortController) {
             if (abortController.abort) {
@@ -302,7 +302,7 @@ export function makeAbortable<T>(makeCall: (abortController: FetchAbortControlle
 
         abortController = {};
 
-        return makeCall(abortController).then(result => {
+        return makeCall(abortController, query).then(result => {
 
             if (myIndex <= responseIndex) //request is too old
                 return undefined;
