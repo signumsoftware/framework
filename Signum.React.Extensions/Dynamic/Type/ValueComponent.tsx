@@ -10,6 +10,7 @@ export interface ValueComponentProps {
     dc: DynamicTypeDesignContext;
     type: "number" | "string" | "boolean" | "textArea" | null;
     options?: (string | number)[];
+    labelClass?: string;
     defaultValue: number | string | boolean | null;
     avoidDelete?: boolean;
     hideLabel?: boolean;
@@ -70,7 +71,7 @@ export default class ValueComponent extends React.Component<ValueComponentProps,
 
         return (
             <div className="form-group form-sm" style={opacity}>
-                <label className={classes("control-label", "col-sm-" + (lc == null ? 2 : lc))}>
+                <label className={classes("control-label", this.props.labelClass,  "col-sm-" + (lc == null ? 2 : lc))}>
                     {this.props.binding.member}
                 </label>
                 <div className={"col-sm-" + (lc == null ? 10 : 12 -lc)}>

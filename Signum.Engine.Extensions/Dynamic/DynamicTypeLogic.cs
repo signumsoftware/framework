@@ -13,6 +13,7 @@ using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -304,6 +305,21 @@ namespace Signum.Engine.Dynamic
 
             atts.Add("EntityKind(EntityKind." + Def.EntityKind.Value + ", EntityData." + Def.EntityData.Value + ")");
 
+            if (Def.TableName.HasText())
+            {
+                var objName = ObjectName.Parse(Def.TableName);
+
+                var parts = new List<string>
+                {
+                     Literal(objName.Name),
+                     objName.Schema != null ? "SchemaName =" + Literal(objName.Schema.Name) : null,
+                     objName.Schema.Database != null ? "DatabaseName =" + Literal(objName.Schema.Database.Name) : null,
+                     objName.Schema.Database.Server != null ? "ServerName =" + Literal(objName.Schema.Database.Server.Name) : null,
+                }.NotNull().ToString(", ");
+
+                atts.Add("TableName(" + parts + ")");
+            }
+
             return atts;
         }
 
@@ -366,14 +382,21 @@ namespace Signum.Engine.Dynamic
 
             if (property.Size != null || property.Scale != null)
             {
+                SqlDbType dbType;
                 var props = new[]
                 {
                     property.Size != null ? "Size = " + Literal(property.Size) : null,
                     property.Scale != null ? "Scale = " + Literal(property.Scale) : null,
+                    property.ColumnType.HasText() ?  "SqlDbType = " +Literal(Enum.TryParse<SqlDbType>(property.ColumnType, out dbType)? dbType : SqlDbType.Udt) : null,
+                    property.ColumnType.HasText() && !Enum.TryParse<SqlDbType>(property.ColumnType, out dbType) ?  "UserDefinedTypeName = " + Literal(property.ColumnType) : null,
+                     
                 }.NotNull().ToString(", ");
 
                 atts.Add($"SqlDbType({props})");
             }
+
+            if (property.ColumnName.HasText())
+                atts.Add("ColumnName(" + Literal(property.ColumnName) + ")");
 
             switch (property.UniqueIndex)
             {

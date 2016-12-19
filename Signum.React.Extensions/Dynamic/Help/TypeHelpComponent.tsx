@@ -29,7 +29,7 @@ interface TypeHelpComponentProps {
 interface TypeHelpComponentState {
     history: string[];
     historyIndex: number;
-    help?: DynamicClient.TypeHelp;
+    help?: DynamicClient.TypeHelp | false;
     tempQuery?: string;
 }
 
@@ -67,8 +67,9 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
         this.setState({ help: undefined });
         DynamicClient.API.typeHelp(typeName, this.props.mode)
             .then(th => {
-
-                if (th.cleanTypeName == this.currentType())
+                if (!th)
+                    this.setState({ help: false });
+                else if (th.cleanTypeName == this.currentType())
                     this.setState({ help: th });
             })
             .done();
@@ -86,7 +87,9 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
         return (
             <div className="sf-dynamic-type-help">
                 {this.renderHeader()}
-                {this.state.help == undefined ? <h4>Loading {this.currentType()}…</h4> : this.renderHelp(this.state.help)}
+                {this.state.help == undefined ? <h4>Loading {this.currentType()}…</h4> : 
+                    this.state.help == false ? <h4>Not found {this.currentType()}</h4> :
+                        this.renderHelp(this.state.help)}
             </div>
         );
     }

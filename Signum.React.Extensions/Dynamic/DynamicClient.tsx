@@ -66,8 +66,8 @@ export namespace API {
         return ajaxPost<string[]>({ url: "~/api/dynamic/autocompleteType" }, request);
     }
 
-    export function typeHelp(typeName: string, mode: TypeHelpMode): Promise<TypeHelp> {
-        return ajaxGet<TypeHelp>({ url: `~/api/dynamic/typeHelp/${typeName}/${mode}` });
+    export function typeHelp(typeName: string, mode: TypeHelpMode): Promise<TypeHelp | undefined> {
+        return ajaxGet<TypeHelp | undefined>({ url: `~/api/dynamic/typeHelp/${typeName}/${mode}` });
     }
 }
 
