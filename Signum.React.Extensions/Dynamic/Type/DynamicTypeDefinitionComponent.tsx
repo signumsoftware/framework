@@ -69,7 +69,6 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
     handleEntityKindChange = () => {
         this.fixSaveOperation();
         this.forceUpdate();
-
     }
 
     fixSaveOperation() {
@@ -93,6 +92,8 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
 
     render() {
         const def = this.props.definition;
+        const primaryKey = def.primaryKey!;
+        const ticks = def.ticks!;
 
         var propNames = def.properties.map(p => "e." + p.name);
 
@@ -103,7 +104,36 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
         return (
             <div>
                 {this.props.showDatabaseMapping &&
-                    <ValueComponent dc={this.props.dc} labelColumns={2} binding={Binding.create(def, d => d.tableName)} type="string" defaultValue={null} labelClass="database-mapping" />
+                    <div>
+                        <ValueComponent dc={this.props.dc} labelColumns={2} binding={Binding.create(def, d => d.tableName)} type="string" defaultValue={null} labelClass="database-mapping" />
+                        <div className="row">
+                            <div className="col-sm-6">
+                                {this.renderFieldSet<DynamicTypeClient.DynamicTypePrimaryKeyDefinition>(Binding.create(def, d => d.primaryKey), {
+                                    title: "Primary Key",
+                                    onCreate: () => ({ name: "Id", type: "int", identity: true }),
+                                    renderContent: primaryKey => (
+                                        <div>
+                                            <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(primaryKey, p => p.name)} type="string" defaultValue={null} />
+                                            <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(primaryKey, p => p.type)} type="string" defaultValue={null} options={["int", "long", "short", "string", "Guid"]} />
+                                            <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(primaryKey, p => p.identity)} type="boolean" defaultValue={null} />
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                            <div className="col-sm-6">
+                                {this.renderFieldSet<DynamicTypeClient.DynamicTypeTicksDefinition>(Binding.create(def, d => d.ticks), {
+                                    title: "Ticks",
+                                    onCreate: () => ({ name: 'ticks', type: 'int' }),
+                                    renderContent: ticks => (
+                                        <div>
+                                            <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(ticks, t => t.name)} type="string" defaultValue={null} />
+                                            <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(ticks, t => t.type)} type="string" defaultValue={null} options={["int", "Guid", "DateTime"]} />
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        </div>
+                    </div>
                 }
                 <div className="row">
                     <div className="col-sm-6">
@@ -127,14 +157,14 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                                         <ComboBoxRepeaterComponent options={propNames} list={mci.fields} />
                                     </div>
                                     <div className="col-sm-6">
-                                        <CSharpExpressionCodeMirror binding={Binding.create(mci, d => d.where)} title="Where" signature={"(" + dt.typeName + "Entity e) =>"} />
+                                        <CSharpExpressionCodeMirror binding={Binding.create(mci, d => d.where)} title="Where" signature={"(" + (dt.typeName || "") + "Entity e) =>"} />
                                     </div>
                                 </div>
                             )
                         })}
                         <fieldset>
                             <legend>ToString expression</legend>
-                            <CSharpExpressionCodeMirror binding={Binding.create(def, d => d.toStringExpression)} signature={"(" + dt.typeName + "Entity e) =>"} />
+                            <CSharpExpressionCodeMirror binding={Binding.create(def, d => d.toStringExpression)} signature={"(" + (dt.typeName || "") + "Entity e) =>"} />
                         </fieldset>
                     </Tab>
                     <Tab eventKey="query" title="Query">
@@ -447,8 +477,6 @@ export class PropertyComponent extends React.Component<PropertyComponentProps, v
                         <ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.isMList)} type="boolean" defaultValue={null} onChange={this.handleAutoFix} />
 
                         {p.type && <div>
-                            {p.isMList && < ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.preserveOrder)} type="boolean" defaultValue={null} />}
-
                             {isEntity(p.type) && <ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.isLite)} type="boolean" defaultValue={null} onChange={this.handleAutoFix} />}
 
                             {allowsSize(p.type) &&
@@ -514,9 +542,6 @@ function autoFix(p: DynamicProperty) {
 
     if (p.isLite != undefined && !isEntity(p.type))
         p.isLite = undefined;
-
-    if (p.preserveOrder != undefined && !p.isMList)
-        p.preserveOrder = undefined;
 
     if (p.size != undefined && !allowsSize(p.type))
         p.size = undefined;
@@ -781,7 +806,7 @@ export function registerValidator<T extends Validators.DynamicValidator>(options
     registeredValidators[options.name] = options;
 }
 
-registerValidator<Validators.DynamicValidator>({ name: "NotNull", allowed: p => p.isMList == true || !isString(p.type) && (p.isNullable == "No" && isReferenceType(p.type) || p.isNullable == "OnlyInMemory") });
+registerValidator<Validators.DynamicValidator>({ name: "NotNull", allowed: p => p.isMList != null || !isString(p.type) && (p.isNullable == "No" && isReferenceType(p.type) || p.isNullable == "OnlyInMemory") });
 
 registerValidator<Validators.StringLength>({
     name: "StringLength",
@@ -820,10 +845,10 @@ registerValidator<Validators.DynamicValidator>({ name: "URL", allowed: p => !p.i
 registerValidator<Validators.DynamicValidator>({ name: "FileName", allowed: p => !p.isMList && isString(p.type) });
 registerValidator<Validators.DynamicValidator>({ name: "Ip", allowed: p => !p.isMList && isString(p.type) });
 
-registerValidator<Validators.DynamicValidator>({ name: "NoRepeat", allowed: p => p.isMList == true });
+registerValidator<Validators.DynamicValidator>({ name: "NoRepeat", allowed: p => p.isMList != null });
 registerValidator<Validators.CountIs>({
     name: "CountIs",
-    allowed: p => p.isMList == true,
+    allowed: p => p.isMList != null,
     render: (val, dc) =>
         <div className="row">
             <div className="col-sm-6">

@@ -73,18 +73,12 @@ namespace Signum.Entities.Dynamic
         [JsonProperty(PropertyName = "type", NullValueHandling = NullValueHandling.Ignore)]
         public string Type;
 
-        [JsonProperty(PropertyName = "identity", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty(PropertyName = "identity", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool Identity;
-        
-        [JsonProperty(PropertyName = "identityBehaviour", NullValueHandling = NullValueHandling.Ignore)]
-        public bool IdentityBehaviour;
     }
 
     public class DynamicTypeTicksDefinition
     {
-        [JsonProperty(PropertyName = "hasTicks", NullValueHandling = NullValueHandling.Ignore)]
-        public bool HasTicks;
-
         [JsonProperty(PropertyName = "name", NullValueHandling = NullValueHandling.Ignore)]
         public string Name;
 
@@ -98,7 +92,7 @@ namespace Signum.Entities.Dynamic
         [JsonProperty(PropertyName = "tableName", NullValueHandling = NullValueHandling.Ignore)]
         public string TableName;
 
-        //PreserverOrderAttribute
+        //PreserveOrderAttribute
         [JsonProperty(PropertyName = "preserveOrder")]
         public bool PreserveOrder;
 
@@ -206,7 +200,7 @@ namespace Signum.Entities.Dynamic
         [JsonProperty(PropertyName = "type")]
         public string Type;
 
-        [JsonProperty(PropertyName = "columnType")]
+        [JsonProperty(PropertyName = "columnType", NullValueHandling = NullValueHandling.Ignore)]
         public string ColumnType;
 
         [JsonProperty(PropertyName = "isNullable")]
