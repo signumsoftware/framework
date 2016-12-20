@@ -46,8 +46,8 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                             mlistItemContext(s.ctx).map((mlec, i) =>
                                 (<EntityStripElement key={i}
                                     ctx={mlec} autoComplete={s.autoComplete}
-                                    onRemove={this.state.remove ? e => this.handleRemoveElementClick(e, i) : undefined}
-                                    onView={this.state.view ? e => this.handleViewElement(e, i) : undefined}
+                                    onRemove={this.canRemove(mlec.value) ? e => this.handleRemoveElementClick(e, i) : undefined}
+                                    onView={this.canView(mlec.value) ? e => this.handleViewElement(e, i) : undefined}
                                     />))
                         }
                         <li className="sf-strip-input input-group">

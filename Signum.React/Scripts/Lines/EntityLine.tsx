@@ -106,9 +106,9 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         const buttons = (
             <span className="input-group-btn">
                 {!hasValue && this.renderCreateButton(true) }
-                {!hasValue && this.renderFindButton(true) }
-                {hasValue && this.renderViewButton(true) }
-                {hasValue && this.renderRemoveButton(true) }
+                {!hasValue && this.renderFindButton(true)}
+                {hasValue && this.renderViewButton(true, s.ctx.value!)}
+                {hasValue && this.renderRemoveButton(true, s.ctx.value!) }
             </span>
         );
         

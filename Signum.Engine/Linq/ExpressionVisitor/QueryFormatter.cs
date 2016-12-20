@@ -390,7 +390,7 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitColumn(ColumnExpression column)
         {
-            sb.Append(column.Alias.Name.SqlEscape());
+            sb.Append(column.Alias.ToString());
             sb.Append(".");
             sb.Append(column.Name.SqlEscape());
 
@@ -600,7 +600,7 @@ namespace Signum.Engine.Linq
                 }
 
                 sb.Append(" AS ");
-                sb.Append(((SourceWithAliasExpression)source).Alias.Name.SqlEscape());
+                sb.Append(((SourceWithAliasExpression)source).Alias.ToString());
 
                 var ta = source as TableExpression;
                 if (ta != null && ta.WithHint != null)

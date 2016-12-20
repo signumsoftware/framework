@@ -286,7 +286,7 @@ namespace Signum.Entities.DynamicQuery
 
                 dictonary.Add(entity.Key, entity);
 
-                foreach (var item in entity.SubTokensInternal(options).OrderBy(a => a.ToString()))
+                foreach (var item in entity.SubTokensInternal(options).OrderByDescending(a=>a.Priority).ThenBy(a => a.ToString()))
                 {
                     if (!dictonary.ContainsKey(item.Key))
                     {

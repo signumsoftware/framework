@@ -83,7 +83,8 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
             return Promise.resolve(undefined);
 
         if (e == undefined) {
-            this.setState({ getComponent: undefined, lastLoadedType: undefined });
+            if (this.state.getComponent != undefined || this.state.lastLoadedType != undefined)
+                this.setState({ getComponent: undefined, lastLoadedType: undefined });
             return Promise.resolve(undefined);
         }
         
