@@ -340,6 +340,7 @@ declare namespace ReactBootstrap {
         onExited?: (node: HTMLElement) => any;
         onExiting?: (node: HTMLElement) => any;
         show?: boolean;
+        bsClass?: string;
     }
     interface ModalClass extends React.ClassicComponentClass<ModalProps> {
         Body: typeof ModalBody;
@@ -708,6 +709,7 @@ declare namespace ReactBootstrap {
 
     // <Grid />
     interface GridProps extends React.HTMLProps<Grid> {
+        bsClass?: string;
         componentClass?: React.ReactType;
         fluid?: boolean;
     }
@@ -717,6 +719,7 @@ declare namespace ReactBootstrap {
     // <Row />
     interface RowProps extends React.HTMLProps<Row> {
         componentClass?: React.ReactType;
+        bsClass?: string;
     }
     type Row = React.ClassicComponent<RowProps, {}>;
     var Row: React.ClassicComponentClass<RowProps>;
@@ -724,6 +727,7 @@ declare namespace ReactBootstrap {
     // <Col />
     interface ColProps extends React.HTMLProps<Col> {
         componentClass?: React.ReactType;
+        bsClass?: string;
         lg?: number;
         lgHidden?: boolean;
         lgOffset?: number;
