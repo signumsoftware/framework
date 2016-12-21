@@ -88,7 +88,7 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineProps> {
                             htmlProps={{ className: "form-control file-control" }} />
                 }
                 <span className="input-group-btn">
-                    {this.renderRemoveButton(true) }
+                    {this.renderRemoveButton(true, val) }
                 </span>
             </div>
         );
