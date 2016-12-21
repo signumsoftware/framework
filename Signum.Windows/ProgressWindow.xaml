@@ -6,7 +6,8 @@
         WindowStyle="ToolWindow" 
         Closing="Window_Closing" 
         x:Name="me" 
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+    	FlowDirection="{DynamicResource FlowDirection}">
     <StackPanel>
         <TextBlock Margin="4" Text="{Binding Message, ElementName=me}"/>
         <ProgressBar Height="15" IsIndeterminate="True" Margin="5"/>
