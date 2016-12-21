@@ -13,7 +13,8 @@
 	Icon="..\Images\keysicon.png"
     Background="#000000FF" AllowsTransparency="True" WindowStyle="None" BorderThickness="10"
     MouseLeftButtonDown="window_MouseLeftButtonDown"
-	>
+	FlowDirection="{DynamicResource FlowDirection}"
+    >
     <Window.Effect>
         <DropShadowEffect ShadowDepth="0" BlurRadius="8" Opacity="0.405"/>
     </Window.Effect>
