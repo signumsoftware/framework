@@ -160,7 +160,7 @@ namespace Signum.Engine
                                     tabCol.SqlDbType == SqlDbType.NVarChar && difCol.SqlDbType == SqlDbType.NChar ? SqlBuilder.UpdateTrim(tab, tabCol) : null),
                                 difCol.DefaultEquals(tabCol) ? null : SqlPreCommand.Combine(Spacing.Simple,
                                     difCol.Default != null ? SqlBuilder.DropDefaultConstraint(tab.Name, tabCol.Name) : null,
-                                    tabCol.Default != null ? SqlBuilder.AddDefaultConstraint(tab.Name, tabCol.Name, tabCol.Default) : null),
+                                    tabCol.Default != null ? SqlBuilder.AddDefaultConstraint(tab.Name, tabCol.Name, tabCol.Default, tabCol.SqlDbType) : null),
                                 UpdateByFkChange(tn, difCol, tabCol, ChangeName)),
                             Spacing.Simple)),
                      Spacing.Double);
