@@ -79,6 +79,9 @@ namespace Signum.Entities.Dynamic
 
     public class DynamicTypeTicksDefinition
     {
+        [JsonProperty(PropertyName = "hasTicks", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public bool HasTicks;
+
         [JsonProperty(PropertyName = "name", NullValueHandling = NullValueHandling.Ignore)]
         public string Name;
 
@@ -120,10 +123,10 @@ namespace Signum.Entities.Dynamic
         public string TableName;
 
         [JsonProperty(PropertyName = "primaryKey", NullValueHandling = NullValueHandling.Ignore)]
-        DynamicTypePrimaryKeyDefinition PrimaryKey;
+        public DynamicTypePrimaryKeyDefinition PrimaryKey;
 
         [JsonProperty(PropertyName = "ticks", NullValueHandling = NullValueHandling.Ignore)]
-        DynamicTypeTicksDefinition Ticks;
+        public DynamicTypeTicksDefinition Ticks;
 
         [JsonProperty(PropertyName = "properties")]
         public List<DynamicProperty> Properties;

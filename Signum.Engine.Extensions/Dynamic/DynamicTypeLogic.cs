@@ -320,6 +320,27 @@ namespace Signum.Engine.Dynamic
                 atts.Add("TableName(" + parts + ")");
             }
 
+            if (Def.PrimaryKey != null)
+            {
+                var name = Def.PrimaryKey.Name;
+                var type = Def.PrimaryKey.Type;
+                var identity = Def.PrimaryKey.Identity;
+
+                atts.Add($"PrimaryKey(typeof({ (type.HasText() ? type.GetType().TypeName() : "int") }), { (name.HasText() ? '"' + name + '"' : "\"ID\"") }, Identity = {identity.ToString().ToLower()})");
+            }
+
+            if (Def.Ticks != null)
+            {
+                var hasTicks = Def.Ticks.HasTicks;
+                var name = Def.Ticks.Name;
+                var type = Def.Ticks.Type;
+
+                if (!hasTicks)
+                    atts.Add("TicksColumn(false)");
+                else
+                    atts.Add($"TicksColumn({hasTicks}, Name = { (name.HasText() ? name : "int") }, Type = typeof({ (type.HasText() ? type : "int") }))");
+            }
+
             return atts;
         }
 

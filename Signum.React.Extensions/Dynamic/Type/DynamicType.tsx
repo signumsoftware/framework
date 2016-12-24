@@ -34,17 +34,9 @@ export default class DynamicTypeComponent extends React.Component<DynamicTypeCom
         this.parseDefinition();
     }
 
-    fixTypeDefinition() {
-        this.state.typeDefinition!.properties.forEach(a => delete a._propertyType_);
-        if (!this.state.showDatabaseMapping) {
-            this.state.typeDefinition!.primaryKey = undefined;
-            this.state.typeDefinition!.ticks = undefined;
-        }
-    }
-
     beforeSave() {
-        this.fixTypeDefinition();
         const ctx = this.props.ctx;
+        this.state.typeDefinition!.properties.forEach(a => delete a._propertyType_);
         ctx.value.typeDefinition = JSON.stringify(this.state.typeDefinition);
         ctx.value.modified = true;
     }

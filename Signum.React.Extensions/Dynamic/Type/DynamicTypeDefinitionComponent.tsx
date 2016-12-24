@@ -71,6 +71,17 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
         this.forceUpdate();
     }
 
+    handleHasTickChanged = () => {
+        var ticks = this.props.definition.ticks;
+
+        if (ticks)
+            this.props.definition.ticks = {
+                hasTicks: ticks.hasTicks,
+                name: ticks.hasTicks ? "Ticks" : undefined,
+                type: ticks.hasTicks ? "int" : undefined,
+            };
+    }
+
     fixSaveOperation() {
         const def = this.props.definition;
         var requiresSave = def.entityKind != undefined && DynamicTypeDefinitionComponent.requiresSave.contains(def.entityKind)
@@ -104,37 +115,9 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
         return (
             <div>
                 {this.props.showDatabaseMapping &&
-                    <div>
-                        <ValueComponent dc={this.props.dc} labelColumns={2} binding={Binding.create(def, d => d.tableName)} type="string" defaultValue={null} labelClass="database-mapping" />
-                        <div className="row">
-                            <div className="col-sm-6">
-                                {this.renderFieldSet<DynamicTypeClient.DynamicTypePrimaryKeyDefinition>(Binding.create(def, d => d.primaryKey), {
-                                    title: "Primary Key",
-                                    onCreate: () => ({ name: "Id", type: "int", identity: true }),
-                                    renderContent: primaryKey => (
-                                        <div>
-                                            <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(primaryKey, p => p.name)} type="string" defaultValue={null} />
-                                            <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(primaryKey, p => p.type)} type="string" defaultValue={null} options={["int", "long", "short", "string", "Guid"]} />
-                                            <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(primaryKey, p => p.identity)} type="boolean" defaultValue={null} />
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                            <div className="col-sm-6">
-                                {this.renderFieldSet<DynamicTypeClient.DynamicTypeTicksDefinition>(Binding.create(def, d => d.ticks), {
-                                    title: "Ticks",
-                                    onCreate: () => ({ name: 'ticks', type: 'int' }),
-                                    renderContent: ticks => (
-                                        <div>
-                                            <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(ticks, t => t.name)} type="string" defaultValue={null} />
-                                            <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(ticks, t => t.type)} type="string" defaultValue={null} options={["int", "Guid", "DateTime"]} />
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        </div>
-                    </div>
+                    <ValueComponent dc={this.props.dc} labelColumns={2} binding={Binding.create(def, d => d.tableName)} type="string" defaultValue={null} labelClass="database-mapping" />
                 }
+
                 <div className="row">
                     <div className="col-sm-6">
                         <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.entityKind)} type="string" defaultValue={null} options={EntityKindValues} onChange={this.handleEntityKindChange} />
@@ -144,24 +127,61 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                     </div>
                 </div>
 
+                {this.props.showDatabaseMapping &&
+                    <div className="row database-mapping">
+                        <div className="col-sm-6">
+                            <PrimaryKeyFieldsetComponent
+                                dc={this.props.dc}
+                                binding={Binding.create(def, d => d.primaryKey)}
+                                title="Primary Key"
+                                onCreate={() => ({ name: "Id", type: "int", identity: true }) }
+                                renderContent={item =>
+                                    <div>
+                                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.name)} type="string" defaultValue={null} />
+                                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.type)} type="string" defaultValue={null} options={["int", "long", "short", "string", "Guid"]} />
+                                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.identity)} type="boolean" defaultValue={null} />
+                                    </div>
+                                }
+                            />
+                        </div>
+                        <div className="col-sm-6">
+                            <TicksFieldsetComponent
+                                dc={this.props.dc}
+                                binding={Binding.create(def, d => d.ticks)}
+                                onCreate={() => ({ hasTicks: false })}
+                                renderContent={item => 
+                                    <div>
+                                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.hasTicks)} type="boolean" defaultValue={null} onChange={this.handleHasTickChanged} />
+                                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.name)} type="string" defaultValue={null} />
+                                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.type)} type="string" defaultValue={null} options={["int", "Guid", "DateTime"]} />
+                                    </div>
+                                }
+                            />
+                        </div>
+                    </div>
+                }
+
                 <Tabs defaultActiveKey="properties" id="DynamicTypeTabs" onSelect={this.handleTabSelect}>
                     <Tab eventKey="properties" title="Properties">
                         <PropertyRepeaterComponent dc={this.props.dc} properties={def.properties} onRemove={this.handlePropertyRemoved} showDatabaseMapping={this.props.showDatabaseMapping} />
 
-                        {this.renderFieldSet<DynamicTypeClient.MultiColumnUniqueIndex>(Binding.create(def, d => d.multiColumnUniqueIndex), {
-                            title: "Multi-column Unique Index",
-                            onCreate: () => ({ fields: [""] }),
-                            renderContent: mci => (
+                        <MultiColumnUniqueIndexFieldsetComponent
+                            dc={this.props.dc}
+                            binding={Binding.create(def, d => d.multiColumnUniqueIndex)}
+                            title="Multi-Column Unique Index"
+                            onCreate={() => ({ fields: [""] })}
+                            renderContent={item => 
                                 <div className="row">
                                     <div className="col-sm-6">
-                                        <ComboBoxRepeaterComponent options={propNames} list={mci.fields} />
+                                        <ComboBoxRepeaterComponent options={propNames} list={item.fields} />
                                     </div>
                                     <div className="col-sm-6">
-                                        <CSharpExpressionCodeMirror binding={Binding.create(mci, d => d.where)} title="Where" signature={"(" + (dt.typeName || "") + "Entity e) =>"} />
+                                        <CSharpExpressionCodeMirror binding={Binding.create(item, i => i.where)} title="Where" signature={"(" + (dt.typeName || "") + "Entity e) =>"} />
                                     </div>
                                 </div>
-                            )
-                        })}
+                                }
+                            />
+
                         <fieldset>
                             <legend>ToString expression</legend>
                             <CSharpExpressionCodeMirror binding={Binding.create(def, d => d.toStringExpression)} signature={"(" + (dt.typeName || "") + "Entity e) =>"} />
@@ -174,36 +194,41 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                     <Tab eventKey="operations" title="Operations">
                         <div className="row">
                             <div className="col-sm-7">
-                            {this.renderFieldSet<DynamicTypeClient.OperationConstruct>(Binding.create(def, d => d.operationCreate), {
-                                title: "Create",
-                                onCreate: () => ({
-                                    construct: "return new " + dt.typeName + "Entity\r\n{\r\n" +
-                                    def.properties.map(p => "    " + p.name + " = null").join(", \r\n") +
-                                    "\r\n};"
-                                }),
-                                renderContent: oc =>
-                                    <CSharpExpressionCodeMirror binding={Binding.create(oc, d => d.construct)} signature={"(object[] args) =>"} />
-                            })}
+                                <CreateOperationFieldsetComponent
+                                    dc={this.props.dc}
+                                    binding={Binding.create(def, d => d.operationCreate)}
+                                    title="Create"
+                                    onCreate={() => ({
+                                        construct: "return new " + dt.typeName + "Entity\r\n{\r\n" +
+                                        def.properties.map(p => "    " + p.name + " = null").join(", \r\n") +
+                                        "\r\n};"
+                                    })}
+                                    renderContent={oc => <CSharpExpressionCodeMirror binding={Binding.create(oc, d => d.construct)} signature={"(object[] args) =>"} />}
+                                    />
 
-                            {this.renderFieldSet<DynamicTypeClient.OperationExecute>(Binding.create(def, d => d.operationSave), {
-                                title: "Save",
-                                onCreate: () => ({ execute: "" }),
-                                renderContent: oe =>
-                                    <div>
-                                        <CSharpExpressionCodeMirror binding={Binding.create(oe, d => d.canExecute)} title="CanSave" signature={"string (" + dt.typeName + "Entity e) =>"} />
-                                        <CSharpExpressionCodeMirror binding={Binding.create(oe, d => d.execute)} title="OperationSave" signature={"(" + dt.typeName + "Entity e, object[] args) =>"} />
-                                    </div>
-                            })}
+                                <SaveOperationFieldsetComponent
+                                    dc={this.props.dc}
+                                    binding={Binding.create(def, d => d.operationSave)}
+                                    title="Save"
+                                    onCreate={() => ({ execute: "" })}
+                                    renderContent={oe =>
+                                        <div>
+                                            <CSharpExpressionCodeMirror binding={Binding.create(oe, d => d.canExecute)} title="CanSave" signature={"string (" + dt.typeName + "Entity e) =>"} />
+                                            <CSharpExpressionCodeMirror binding={Binding.create(oe, d => d.execute)} title="OperationSave" signature={"(" + dt.typeName + "Entity e, object[] args) =>"} />
+                                        </div>}
+                                    />
 
-                            {this.renderFieldSet<DynamicTypeClient.OperationDelete>(Binding.create(def, d => d.operationDelete), {
-                                title: "Delete",
-                                onCreate: () => ({ delete: "" }),
-                                renderContent: od =>
-                                    <div>
-                                        <CSharpExpressionCodeMirror binding={Binding.create(od, d => d.canDelete)} title="CanDelete" signature={"string (" + dt.typeName + "Entity e) =>"} />
-                                        <CSharpExpressionCodeMirror binding={Binding.create(od, d => d.delete)} title="OperationDelete" signature={"(" + dt.typeName + "Entity e, object[] args) =>"} />
-                                    </div>
-                            })}
+                                <DeleteOperationFieldsetComponent
+                                    dc={this.props.dc}
+                                    binding={Binding.create(def, d => d.operationDelete)}
+                                    title="Delete"
+                                    onCreate={() => ({ delete: "" })}
+                                    renderContent={od =>
+                                        <div>
+                                            <CSharpExpressionCodeMirror binding={Binding.create(od, d => d.canDelete)} title="CanDelete" signature={"string (" + dt.typeName + "Entity e) =>"} />
+                                            <CSharpExpressionCodeMirror binding={Binding.create(od, d => d.delete)} title="OperationDelete" signature={"(" + dt.typeName + "Entity e, object[] args) =>"} />
+                                        </div>}
+                                    />
                             </div>
                             <div className="col-sm-5">
                                 {!dt.isNew &&
@@ -225,33 +250,6 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
     renderOthers() {
         var ctx = new StyleContext(undefined, { labelColumns: 3 });
         return React.createElement("div", {}, ...DynamicClient.Options.onGetDynamicLineForType.map(f => f(ctx, this.props.dynamicType.typeName!)));
-    }
-
-    renderFieldSet<T>(
-        binding: Binding<T | undefined>,
-        options: {
-            title: React.ReactChild,
-            renderContent: (item: T) => React.ReactElement<any>,
-            onCreate: () => T
-        }) {
-
-        let value = binding.getValue();
-
-        let handleChecked = () => {
-            if (value)
-                binding.deleteValue();
-            else
-                binding.setValue(options.onCreate());
-            this.forceUpdate();
-        }
-
-        return (
-            <fieldset>
-                <legend><input type="checkbox" checked={!!value} onChange={handleChecked} /> {options.title}</legend>
-                {value && options.renderContent(value)}
-            </fieldset>
-        );
-
     }
 }
 
@@ -281,6 +279,62 @@ export class CSharpExpressionCodeMirror extends React.Component<CSharpExpression
         );
     }
 }
+
+export interface CustomFieldsetComponentProps<T> {
+    dc: DynamicTypeDesignContext;
+    binding: Binding<T | undefined>;
+    title?: React.ReactChild;
+    renderContent: (item: T) => React.ReactElement<any>;
+    onCreate: () => T;
+    onChange?: () => void;
+}
+
+export class CustomFieldsetComponent<T> extends React.Component<CustomFieldsetComponentProps<T>, void> {
+
+    handleChecked = (e: React.FormEvent) => {
+        let val = this.props.binding.getValue();
+        if (val)
+            this.props.binding.deleteValue();
+        else
+            this.props.binding.setValue(this.props.onCreate());
+
+        this.forceUpdate();
+
+        if (this.props.onChange)
+            this.props.onChange();
+    }
+
+    render() {
+        let value = this.props.binding.getValue();
+        return (
+            <fieldset style={{ marginTop: "-12px" }}>
+                <legend><input type="checkbox" checked={!!value} onChange={this.handleChecked} /> {this.props.title || this.props.binding.member.toString().firstUpper()}</legend>
+                {value && this.props.renderContent(value)}
+            </fieldset>
+        );
+    }
+}
+
+type PrimaryKeyFieldsetComponent = new () => CustomFieldsetComponent<DynamicTypeClient.DynamicTypePrimaryKeyDefinition>;
+const PrimaryKeyFieldsetComponent = CustomFieldsetComponent as PrimaryKeyFieldsetComponent;
+
+type TicksFieldsetComponent = new () => CustomFieldsetComponent<DynamicTypeClient.DynamicTypeTicksDefinition>;
+const TicksFieldsetComponent = CustomFieldsetComponent as TicksFieldsetComponent;
+
+type MultiColumnUniqueIndexFieldsetComponent = new () => CustomFieldsetComponent<DynamicTypeClient.MultiColumnUniqueIndex>;
+const MultiColumnUniqueIndexFieldsetComponent = CustomFieldsetComponent as MultiColumnUniqueIndexFieldsetComponent;
+
+type CreateOperationFieldsetComponent = new () => CustomFieldsetComponent<DynamicTypeClient.OperationConstruct>;
+const CreateOperationFieldsetComponent = CustomFieldsetComponent as CreateOperationFieldsetComponent;
+
+type DeleteOperationFieldsetComponent = new () => CustomFieldsetComponent<DynamicTypeClient.OperationDelete>;
+const DeleteOperationFieldsetComponent = CustomFieldsetComponent as DeleteOperationFieldsetComponent;
+
+type SaveOperationFieldsetComponent = new () => CustomFieldsetComponent<DynamicTypeClient.OperationExecute>;
+const SaveOperationFieldsetComponent = CustomFieldsetComponent as SaveOperationFieldsetComponent;
+
+type IsMListFieldsetComponent = new () => CustomFieldsetComponent<DynamicTypeClient.DynamicTypeBackMListDefinition>;
+const IsMListFieldsetComponent = CustomFieldsetComponent as IsMListFieldsetComponent;
 
 export interface PropertyRepeaterComponentProps {
     properties: DynamicProperty[];
@@ -462,7 +516,7 @@ export class PropertyComponent extends React.Component<PropertyComponentProps, v
         return (
             <div>
                 <div className="row">
-                    <div className="col-sm-8">
+                    <div className="col-sm-7">
                         <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.name)} type="string" defaultValue={null} />
                         {this.props.showDatabaseMapping &&
                             <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.columnName)} type="string" defaultValue={null} labelClass="database-mapping"  />
@@ -473,8 +527,25 @@ export class PropertyComponent extends React.Component<PropertyComponentProps, v
                         }
                         <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.isNullable)} type="string" defaultValue={null} options={DynamicTypeClient.IsNullableValues} onChange={this.handleAutoFix} />
                     </div>
-                    <div className="col-sm-4">
-                        <ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.isMList)} type="boolean" defaultValue={null} onChange={this.handleAutoFix} />
+                    <div className="col-sm-5">
+                        <IsMListFieldsetComponent
+                            dc={this.props.dc}
+                            binding={Binding.create(p, d => d.isMList)}
+                            title="Is MList"
+                            onCreate={() => ({ preserveOrder: true })}
+                            renderContent={mle =>
+                                <div className="database-mapping">
+                                    <ValueComponent dc={this.props.dc} labelColumns={6} binding={Binding.create(mle, d => d.preserveOrder)} type="boolean" defaultValue={null} />
+                                    <ValueComponent dc={this.props.dc} labelColumns={6} binding={Binding.create(mle, d => d.tableName)} type="string" defaultValue={null} />
+                                    <ValueComponent dc={this.props.dc} labelColumns={6} binding={Binding.create(mle, d => d.orderName)} type="string" defaultValue={null} />
+                                    <ValueComponent dc={this.props.dc} labelColumns={6} binding={Binding.create(mle, d => d.backReferenceName)} type="string" defaultValue={null} />
+                                </div>
+                            }
+                            onChange={() => {
+                                fetchPropertyType(p, this.props.dc);
+                                this.handleAutoFix();
+                            } }
+                        />
 
                         {p.type && <div>
                             {isEntity(p.type) && <ValueComponent dc={this.props.dc} labelColumns={5} binding={Binding.create(p, d => d.isLite)} type="boolean" defaultValue={null} onChange={this.handleAutoFix} />}

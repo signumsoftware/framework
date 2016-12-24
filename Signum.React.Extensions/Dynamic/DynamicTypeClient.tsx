@@ -111,6 +111,7 @@ export interface DynamicTypePrimaryKeyDefinition {
 }
 
 export interface DynamicTypeTicksDefinition {
+    hasTicks: boolean;
     name?: string;
     type?: string;
 }
