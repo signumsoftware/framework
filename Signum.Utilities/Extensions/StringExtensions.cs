@@ -745,6 +745,11 @@ namespace Signum.Utilities
             return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
         }
 
+        public static string ToQuoted(this string str)
+        {
+            return "\"" + str + "\"";
+        }
+
         public static string ToComputerSize(this long value)
         {
             return ToComputerSize(value, false);
