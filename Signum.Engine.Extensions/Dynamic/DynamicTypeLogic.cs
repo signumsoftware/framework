@@ -307,38 +307,29 @@ namespace Signum.Engine.Dynamic
 
             if (Def.TableName.HasText())
             {
-                var objName = ObjectName.Parse(Def.TableName);
-
-                var parts = new List<string>
-                {
-                     Literal(objName.Name),
-                     objName.Schema != null ? "SchemaName =" + Literal(objName.Schema.Name) : null,
-                     objName.Schema.Database != null ? "DatabaseName =" + Literal(objName.Schema.Database.Name) : null,
-                     objName.Schema.Database.Server != null ? "ServerName =" + Literal(objName.Schema.Database.Server.Name) : null,
-                }.NotNull().ToString(", ");
-
+                var parts = ParseTableName(Def.TableName);
                 atts.Add("TableName(" + parts + ")");
             }
 
             if (Def.PrimaryKey != null)
             {
-                var name = Def.PrimaryKey.Name;
-                var type = Def.PrimaryKey.Type;
+                var name = Def.PrimaryKey.Name ?? "ID";
+                var type = Def.PrimaryKey.Type ?? "int";
                 var identity = Def.PrimaryKey.Identity;
 
-                atts.Add($"PrimaryKey(typeof({ (type.HasText() ? type.GetType().TypeName() : "int") }), { (name.HasText() ? '"' + name + '"' : "\"ID\"") }, Identity = {identity.ToString().ToLower()})");
+                atts.Add($"PrimaryKey(typeof({type}), {Literal(name)}, Identity = {identity.ToString().ToLower()})");
             }
 
             if (Def.Ticks != null)
             {
                 var hasTicks = Def.Ticks.HasTicks;
-                var name = Def.Ticks.Name;
-                var type = Def.Ticks.Type;
+                var name = Def.Ticks.Name ?? "Ticks";
+                var type = Def.Ticks.Type ?? "int";
 
                 if (!hasTicks)
                     atts.Add("TicksColumn(false)");
                 else
-                    atts.Add($"TicksColumn({hasTicks}, Name = { (name.HasText() ? name : "int") }, Type = typeof({ (type.HasText() ? type : "int") }))");
+                    atts.Add($"TicksColumn(true, Name = {Literal(name)}, Type = typeof({type}))");
             }
 
             return atts;
@@ -401,14 +392,14 @@ namespace Signum.Engine.Dynamic
             if (property.IsNullable != IsNullable.Yes)
                 atts.Add("NotNullable");
 
-            if (property.Size != null || property.Scale != null)
+            if (property.Size != null || property.Scale != null || property.ColumnType.HasText())
             {
                 SqlDbType dbType;
                 var props = new[]
                 {
                     property.Size != null ? "Size = " + Literal(property.Size) : null,
                     property.Scale != null ? "Scale = " + Literal(property.Scale) : null,
-                    property.ColumnType.HasText() ?  "SqlDbType = " +Literal(Enum.TryParse<SqlDbType>(property.ColumnType, out dbType)? dbType : SqlDbType.Udt) : null,
+                    property.ColumnType.HasText() ?  "SqlDbType = " + Literal(Enum.TryParse<SqlDbType>(property.ColumnType, out dbType) ? dbType : SqlDbType.Udt) : null,
                     property.ColumnType.HasText() && !Enum.TryParse<SqlDbType>(property.ColumnType, out dbType) ?  "UserDefinedTypeName = " + Literal(property.ColumnType) : null,
                      
                 }.NotNull().ToString(", ");
@@ -426,7 +417,36 @@ namespace Signum.Engine.Dynamic
                 case Entities.Dynamic.UniqueIndex.YesAllowNull: atts.Add("UniqueIndex(AllowMultipleNulls = true)"); break;
             }
 
+            if (property.IsMList != null) {
+
+                var mlist = property.IsMList;
+                if (mlist.PreserveOrder)
+                    atts.Add("PreserveOrder" + (mlist.OrderName.HasText() ? "(" + Literal(mlist.OrderName) + ")" : ""));
+
+                if (mlist.TableName.HasText()) {
+                    var parts = ParseTableName(mlist.TableName);
+                    atts.Add("TableName(" + parts + ")");
+                }
+
+                if (mlist.BackReferenceName.HasText())
+                    atts.Add($"BackReferenceColumnName({Literal(mlist.BackReferenceName)})");
+            }
+
             return atts;
+        }
+
+        private string ParseTableName(string value)
+        {
+
+            var objName = ObjectName.Parse(Def.TableName);
+
+            return new List<string>
+                {
+                     Literal(objName.Name),
+                     objName.Schema != null ? "SchemaName =" + Literal(objName.Schema.Name) : null,
+                     objName.Schema.Database != null ? "DatabaseName =" + Literal(objName.Schema.Database.Name) : null,
+                     objName.Schema.Database.Server != null ? "ServerName =" + Literal(objName.Schema.Database.Server.Name) : null,
+                }.NotNull().ToString(", ");
         }
 
         public virtual string GetPropertyType(DynamicProperty property)

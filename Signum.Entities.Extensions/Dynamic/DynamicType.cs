@@ -103,7 +103,7 @@ namespace Signum.Entities.Dynamic
         public string OrderName;
         //
 
-        //BackReferenceAttribute
+        //BackReferenceColumnNameAttribute
         [JsonProperty(PropertyName = "backReferenceName", NullValueHandling = NullValueHandling.Ignore)]
         public string BackReferenceName;
     }

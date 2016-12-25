@@ -378,11 +378,11 @@ namespace Signum.Logic.Workflow
     {
         public XmlEntity(T entity)
         {
-            var finalXml = @"<bpmn:definitions xmlns:xsi = " + ToQuoted(WorkflowBuilder.xsi.ToString()) + " " +
-                          @"xmlns:bpmn = " + ToQuoted(WorkflowBuilder.bpmn.ToString()) + " " +
-                          @"xmlns:bpmndi = " + ToQuoted(WorkflowBuilder.bpmndi.ToString()) + " " +
-                          @"xmlns:dc = " + ToQuoted(WorkflowBuilder.dc.ToString()) + " " +
-                          @"xmlns:di = " + ToQuoted(WorkflowBuilder.di.ToString()) + @" id = ""Definitions_1"" targetNamespace = " + ToQuoted(WorkflowBuilder.targetNamespace) + " > " +
+            var finalXml = @"<bpmn:definitions xmlns:xsi = " + WorkflowBuilder.xsi.ToString().ToQuoted() + " " +
+                          @"xmlns:bpmn = " + WorkflowBuilder.bpmn.ToString().ToQuoted() + " " +
+                          @"xmlns:bpmndi = " + WorkflowBuilder.bpmndi.ToString() + " " +
+                          @"xmlns:dc = " + WorkflowBuilder.dc.ToString().ToQuoted() + " " +
+                          @"xmlns:di = " + WorkflowBuilder.di.ToString().ToQuoted() + @" id = ""Definitions_1"" targetNamespace = " + WorkflowBuilder.targetNamespace.ToQuoted() + " > " +
                           @"<bpmndi:BPMNDiagram id = ""BPMNDiagram_1"" >"
                            + entity.Xml.DiagramXml +
                           @"</bpmndi:BPMNDiagram>" +
@@ -392,11 +392,6 @@ namespace Signum.Logic.Workflow
             Document = XDocument.Parse(finalXml);
             Element = Document.Root.Element(WorkflowBuilder.bpmndi + "BPMNDiagram").Elements().First();
             bpmnElementId = Element.Attribute("bpmnElement").Value;
-        }
-
-        static string ToQuoted(string str)
-        {
-            return "\"" + str + "\"";
         }
 
         public XDocument Document;

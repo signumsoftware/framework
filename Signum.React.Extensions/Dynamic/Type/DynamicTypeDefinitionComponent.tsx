@@ -536,8 +536,8 @@ export class PropertyComponent extends React.Component<PropertyComponentProps, v
                             renderContent={mle =>
                                 <div className="database-mapping">
                                     <ValueComponent dc={this.props.dc} labelColumns={6} binding={Binding.create(mle, d => d.preserveOrder)} type="boolean" defaultValue={null} />
-                                    <ValueComponent dc={this.props.dc} labelColumns={6} binding={Binding.create(mle, d => d.tableName)} type="string" defaultValue={null} />
                                     <ValueComponent dc={this.props.dc} labelColumns={6} binding={Binding.create(mle, d => d.orderName)} type="string" defaultValue={null} />
+                                    <ValueComponent dc={this.props.dc} labelColumns={6} binding={Binding.create(mle, d => d.tableName)} type="string" defaultValue={null} />
                                     <ValueComponent dc={this.props.dc} labelColumns={6} binding={Binding.create(mle, d => d.backReferenceName)} type="string" defaultValue={null} />
                                 </div>
                             }
