@@ -730,9 +730,14 @@ namespace Signum.Windows
         #endregion
 
         public static readonly RoutedEvent ChangeDataContextEvent = EventManager.RegisterRoutedEvent("ChangeDataContext", RoutingStrategy.Bubble, typeof(ChangeDataContextHandler), typeof(Common));
+        public static readonly RoutedEvent CloseFormEvent = EventManager.RegisterRoutedEvent("CloseForm", RoutingStrategy.Bubble, typeof(CloseFormHandler), typeof(Common));
         public static void AddChangeDataContextHandler(DependencyObject d, ChangeDataContextHandler handler)
         {
             ((UIElement)d).AddHandler(ChangeDataContextEvent, handler);
+        }
+        public static void AddCloseFormHandler(DependencyObject d, CloseFormHandler handler)
+        {
+            ((UIElement)d).AddHandler(CloseFormEvent, handler);
         }
         public static void RemoveChangeDataContextHandler(DependencyObject d, ChangeDataContextHandler handler)
         {
@@ -748,6 +753,7 @@ namespace Signum.Windows
     }
 
     public delegate void ChangeDataContextHandler(object sender, ChangeDataContextEventArgs e);
+    public delegate void CloseFormHandler(object sender, CloseFormEventArgs e);
 
     public class ChangeDataContextEventArgs : RoutedEventArgs
     {
@@ -765,6 +771,11 @@ namespace Signum.Windows
         {
             this.Refresh = true;
         }
+    }
+
+    public class CloseFormEventArgs : RoutedEventArgs
+    {
+        public CloseFormEventArgs() : base(Common.CloseFormEvent) { }
     }
 
     public delegate void CommonRouteTask(FrameworkElement fe, string route, PropertyRoute context);

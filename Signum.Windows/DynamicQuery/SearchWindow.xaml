@@ -9,7 +9,8 @@
 	ResizeMode="CanResizeWithGrip"
 	WindowStartupLocation="CenterScreen"
     m:Monitors.AdjustToMonitor="true"
-    m:Monitors.CenterOnSizedToContent="true">
+    m:Monitors.CenterOnSizedToContent="true"
+	FlowDirection="{DynamicResource FlowDirection}">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

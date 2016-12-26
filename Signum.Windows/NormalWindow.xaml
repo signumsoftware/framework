@@ -12,7 +12,8 @@
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     m:Common.AutomationItemStatusFromDataContext="True"
-    Title="{Binding ToStringProperty}">
+    Title="{Binding ToStringProperty}"
+    FlowDirection="{DynamicResource FlowDirection}">
     <DockPanel>
         <m:ButtonBar x:Name="buttonBar" DockPanel.Dock="Top" OkClick="Ok_Click" ReloadClick="Reload_Click" ReloadVisible="true"/>
         <m:WidgetPanel x:Name="widgetPanel" DockPanel.Dock="Left" MainControl="{Binding Path=MainControl, ElementName=win}" ExpandedCollapsed="widgetPanel_ExpandedCollapsed" />

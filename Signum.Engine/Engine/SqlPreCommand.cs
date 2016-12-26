@@ -117,7 +117,7 @@ namespace Signum.Engine
         {
             string content = command.PlainSql();
 
-            File.WriteAllText(fileName, content, Encoding.GetEncoding(1252));
+            File.WriteAllText(fileName, content, Encoding.Unicode);
         }
     }
 

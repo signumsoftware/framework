@@ -82,6 +82,7 @@ namespace Signum.Windows
             this.DataContextChanged += new DependencyPropertyChangedEventHandler(NormalWindow_DataContextChanged);
 
             Common.AddChangeDataContextHandler(this, ChangeDataContext_Handler);
+            Common.AddCloseFormHandler(this, CloseForm_Handler);
 
             RefreshEnabled();
         }
@@ -144,7 +145,11 @@ namespace Signum.Windows
 
             spBottom.Children.Clear();
             foreach (var w in widgets.Where(w => w.Position == EmbeddedWidgetPostion.Bottom).OrderBy(a => a.Order))
-                spBottom.Children.Add(w.Control); 
+                spBottom.Children.Add(w.Control);
+        }
+        private void CloseForm_Handler(object sender, CloseFormEventArgs closeFormEventArgs)
+        {
+            Close();
         }
 
         private void Ok_Click(object sender, RoutedEventArgs e)
