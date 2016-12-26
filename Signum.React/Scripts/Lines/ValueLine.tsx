@@ -45,7 +45,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
             throw new Error(`No ValueLine found for '${state.type!.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
     }
 
-
+    inputElement?: HTMLElement;
 
     static getValueLineType(t: TypeReference): ValueLineType | undefined {
         
@@ -267,7 +267,8 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
                     onBlur={handleBlur}
                     onChange={handleTextOnChange} //https://github.com/facebook/react/issues/7211
                     onInput={handleTextOnChange}
-                    placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : undefined}/>)
+                    placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : undefined}
+                    ref={elment => vl.inputElement = elment} />)
             }
         </FormGroup>
     );
@@ -314,7 +315,8 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
                 onChange={handleTextOnChange} //https://github.com/facebook/react/issues/7211
                 onInput={handleTextOnChange} 
                 onBlur={handleBlur}
-                placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : undefined}/>
+                placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : undefined}
+                ref={elment => vl.inputElement = elment} />
         </FormGroup>
     );
 };
