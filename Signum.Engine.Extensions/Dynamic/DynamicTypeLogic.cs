@@ -557,6 +557,8 @@ namespace Signum.Engine.Dynamic
                 sb.AppendLine($"    }}");
             }
 
+            var hasEvents = (this.Def.Events != null && !string.IsNullOrWhiteSpace(this.Def.Events.Code));
+
             sb.AppendLine($"    public static class {this.TypeName}Logic");
             sb.AppendLine($"    {{");
             sb.AppendLine($"        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)");
@@ -572,8 +574,21 @@ namespace Signum.Engine.Dynamic
             if (complexOperations != null)
                 sb.AppendLine(complexOperations.Indent(16));
 
+            if (hasEvents)
+                sb.AppendLine("EntityEvents(sb, dqm);".Indent(16));
+
             sb.AppendLine($"            }}");
             sb.AppendLine($"        }}");
+
+            if (hasEvents)
+            {
+                sb.AppendLine();
+                sb.AppendLine($"        private static void EntityEvents(SchemaBuilder sb, DynamicQueryManager dqm)");
+                sb.AppendLine($"        {{");
+                sb.AppendLine(this.Def.Events.Code.Indent(12));
+                sb.AppendLine($"        }}");
+            }
+
             sb.AppendLine($"    }}");
             sb.AppendLine($"}}");
 

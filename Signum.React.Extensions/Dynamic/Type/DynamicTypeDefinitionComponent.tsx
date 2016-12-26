@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { Combobox } from 'react-widgets'
-import { PanelGroup, Panel, Tabs, Tab } from 'react-bootstrap'
+import { PanelGroup, Panel, Tabs, Tab, MenuItem } from 'react-bootstrap'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
@@ -21,6 +21,9 @@ import { Validators, DynamicTypeDefinition, DynamicProperty } from '../DynamicTy
 import ValueComponent from './ValueComponent';
 import TypeHelpComponent from '../Help/TypeHelpComponent'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror';
+import ContextMenu from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
+import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
+import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
 require("!style!css!./DynamicType.css");
 
@@ -237,6 +240,38 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                             </div>
                         </div>
                     </Tab>
+
+                    <Tab eventKey="events" title="Events">
+                        <div className="row">
+                            <div className="col-sm-7">
+                                <EventFieldsetComponent
+                                    dc={this.props.dc}
+                                    binding={Binding.create(def, d => d.events)}
+                                    title="Events"
+                                    onCreate={() => ({ code: "private static void EntityEvents(SchemaBuilder sb, DynamicQueryManager dqm) {\n\n}" })}
+                                    renderContent={e =>
+                                        <div>
+                                            <div className="btn-group" style={{ marginBottom: "3px" }}>
+                                                <input type="button" className="btn btn-warning btn-xs sf-button" value="PreSaving" onClick={this.handlePreSavingClick} />
+                                                <input type="button" className="btn btn-success btn-xs sf-button" value="PostRetrieved" onClick={this.handlePostRetrievedClick} />
+                                                <input type="button" className="btn btn-danger btn-xs sf-button" value="Property Validator" onClick={this.handlePropertyValidatorClick} />
+                                            </div>
+                                            <div className="code-container">
+                                                <pre style={{ border: "0px", margin: "0px", fontSize: "13px", color: "#e40d0d" }}>Note: EntityEvents method is mandotary for compiling.</pre> 
+                                                <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
+                                            </div>
+                                        </div>
+                                        }
+                                    />
+                            </div>
+                            <div className="col-sm-5">
+                                {!dt.isNew &&
+                                    <TypeHelpComponent initialType={dt.typeName!} mode="CSharp" />
+                                }
+                            </div>
+                        </div>
+                    </Tab>
+
                     {!dt.isNew &&
                         <Tab eventKey="other" title="Other">
                             {this.renderOthers()}
@@ -246,7 +281,38 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
             </div>
         );
     }
-    
+
+    handlePreSavingClick = () => {
+        let typeName = this.props.dynamicType.typeName;
+        window.prompt("Copy to clipboard: Ctrl+C, Enter", `sb.Schema.EntityEvents<${typeName}Entity>().PreSaving += ${typeName}EntityPreSaving;
+private static void ${typeName}PreSaving(${typeName}Entity e, ref bool graphModified)
+{
+    // Your custom code ...
+}`);
+    }
+
+    handlePostRetrievedClick = () => {
+        let entityName = `${this.props.dynamicType.typeName}Entity`;
+        ValueLineModal.show({
+            type: { name: "string" },
+            initialValue: `sb.Schema.EntityEvents<${entityName}>().Retrieved += (e) => Your custom code;`,
+            valueLineType: ValueLineType.TextArea,
+            title: `${entityName} -> PostRetrieved`,
+            message: "Copy to clipboard: Ctrl+C",
+            initiallyFocused: true,
+        });
+        //window.prompt("Copy to clipboard: Ctrl+C, Enter", `sb.Schema.EntityEvents<${this.props.dynamicType.typeName}Entity>().Retrieved += (e) => Your custom code;`);
+    }
+
+    handlePropertyValidatorClick = () => {
+        let text = `Validator.PropertyValidator<${this.props.dynamicType.typeName}Entity>(e => e.Your member}).StaticPropertyValidation = (e, pi) => {
+//    if (e.Name == "AAA")
+//        return "AAA is an special name and can not be used";
+    return null;
+};`;
+        window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
+    }
+
     renderOthers() {
         var ctx = new StyleContext(undefined, { labelColumns: 3 });
         return React.createElement("div", {}, ...DynamicClient.Options.onGetDynamicLineForType.map(f => f(ctx, this.props.dynamicType.typeName!)));
@@ -266,9 +332,9 @@ export class CSharpExpressionCodeMirror extends React.Component<CSharpExpression
 
         return (
             <div>
-                <h5><strong>{this.props.title || ""}</strong></h5>
+                {this.props.title && <h5> <strong>{this.props.title}</strong></h5>}
                 <div className="code-container">
-                    <pre style={{ border: "0px", margin: "0px" }}>{this.props.signature || ""}</pre>
+                    {this.props.signature && <pre style={{ border: "0px", margin: "0px" }}>{this.props.signature}</pre>}
                     <div className="small-codemirror">
                         <CSharpCodeMirror
                             script={val || ""}
@@ -335,6 +401,9 @@ const SaveOperationFieldsetComponent = CustomFieldsetComponent as SaveOperationF
 
 type IsMListFieldsetComponent = new () => CustomFieldsetComponent<DynamicTypeClient.DynamicTypeBackMListDefinition>;
 const IsMListFieldsetComponent = CustomFieldsetComponent as IsMListFieldsetComponent;
+
+type EventFieldsetComponent = new () => CustomFieldsetComponent<DynamicTypeClient.DynamicTypeEvent>;
+const EventFieldsetComponent = CustomFieldsetComponent as EventFieldsetComponent;
 
 export interface PropertyRepeaterComponentProps {
     properties: DynamicProperty[];

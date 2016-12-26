@@ -140,6 +140,9 @@ namespace Signum.Entities.Dynamic
         [JsonProperty(PropertyName = "operationDelete")]
         public OperationDelete OperationDelete;
 
+        [JsonProperty(PropertyName = "events")]
+        public DynamicTypeEvent Events;
+
         [JsonProperty(PropertyName = "queryFields")]
         public List<string> QueryFields;
 
@@ -182,6 +185,12 @@ namespace Signum.Entities.Dynamic
 
         [JsonProperty(PropertyName = "delete")]
         public string Delete;
+    }
+
+    public class DynamicTypeEvent
+    {
+        [JsonProperty(PropertyName = "code")]
+        public string Code;
     }
 
     public enum DynamicBaseType
