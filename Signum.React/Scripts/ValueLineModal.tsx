@@ -24,19 +24,6 @@ export default class ValueLineModal extends React.Component<ValueLinePopupModal,
         };
     }
 
-    valueLineComponent: ValueLine;
-
-    componentDidMount() {
-        let element = this.valueLineComponent.inputElement;
-        if (element) {
-            if (element instanceof HTMLInputElement)
-                element.setSelectionRange(0, element.value.length)
-            else if (element instanceof HTMLTextAreaElement)
-                element.setSelectionRange(0, element.value.length);
-            element.focus();
-        }
-    }
-
     selectedValue: any;
     handleOkClick = () => {
         this.selectedValue = this.state.value;
@@ -71,8 +58,7 @@ export default class ValueLineModal extends React.Component<ValueLinePopupModal,
                 </p>
                 <ValueLine
                     ctx={ctx}
-                    formGroupStyle={valueLineProps.labelText ? "Basic" : "SrOnly"} {...valueLineProps}
-                    ref={vl => this.valueLineComponent = vl} />
+                    formGroupStyle={valueLineProps.labelText ? "Basic" : "SrOnly"} {...valueLineProps} />
             </Modal.Body>
             <Modal.Footer>
                 <button className ="btn btn-primary sf-entity-button sf-close-button sf-ok-button" onClick={this.handleOkClick}>
@@ -97,6 +83,7 @@ export interface ValueLinePopupOptions {
     format?: string;
     unit?: string;
     initiallyFocused?: boolean;
+    valueHtmlProps?: React.HTMLAttributes;
 }
 
 
