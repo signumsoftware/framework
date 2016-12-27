@@ -11,12 +11,18 @@ import { TemplateTokenMessage } from '../../Templating/Signum.Entities.Templatin
 import FileLine from '../../Files/FileLine'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import TemplateControls from '../../Templating/TemplateControls'
-
+import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
 export default class WordTemplate extends React.Component<{ ctx: TypeContext<WordTemplateEntity> }, void> {
 
     handleOnInsert = (newCode: string) => {
-        window.prompt("Copy to clipboard: Ctrl+C, Enter", newCode);
+        ValueLineModal.show({
+            type: { name: "string" },
+            initialValue: newCode,
+            title: "Template",
+            message: "Copy to clipboard: Ctrl+C, ESC",
+            initiallyFocused: true,
+        });
     }
 
     render() {

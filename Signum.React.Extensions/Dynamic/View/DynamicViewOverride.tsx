@@ -3,7 +3,7 @@ import { MenuItem } from 'react-bootstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
 import { DynamicViewOverrideEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
-import { EntityLine, TypeContext } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { EntityLine, TypeContext, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { Entity, JavascriptMessage, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { getTypeInfo, Binding, PropertyRoute, ReadonlyBinding } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
@@ -15,6 +15,7 @@ import TypeHelpComponent from '../Help/TypeHelpComponent'
 import { AuthInfo } from './AuthInfo'
 import ContextMenu from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
 import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
+import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
 
 interface DynamicViewOverrideComponentProps {
@@ -51,10 +52,10 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
     }
 
     componentWillReceiveProps(newProps: DynamicViewOverrideComponentProps) {
-        if (!is(this.props.ctx.value.entityType, newProps.ctx.value.entityType)) {
+        if (newProps.ctx.value.entityType && this.props.ctx.value.entityType && !is(this.props.ctx.value.entityType, newProps.ctx.value.entityType)) {
             this.updateViewNames(newProps);
             this.updateTypeHelp(newProps);
-    }
+        }
     }
 
     updateViewNames(props: DynamicViewOverrideComponentProps) {
@@ -75,6 +76,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
 
     handleTypeChange = () => {
         this.updateViewNames(this.props);
+        this.updateTypeHelp(this.props);
     }
 
     handleTypeRemove = () => {
@@ -103,15 +105,15 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
     }
 
     handleRemoveClick = () => {
-        setTimeout(() => this.showPropmt(`vr.remove(e => e.${this.state.selectedMemberName!})`), 0);
+        setTimeout(() => this.showPropmt("Remove", `vr.remove(e => e.${this.state.selectedMemberName!})`), 0);
     }
 
     handleInsertBeforeClick = () => {
-        setTimeout(() => this.showPropmt(`vr.insertBefore(e => e.${this.state.selectedMemberName!}, yourElement);`), 0);
+        setTimeout(() => this.showPropmt("InsertBefore", `vr.insertBefore(e => e.${this.state.selectedMemberName!}, yourElement);`), 0);
     }
 
     handleInsertAfterClick = () => {
-        setTimeout(() => this.showPropmt(`vr.insertAfter(e => e.${this.state.selectedMemberName!}, yourElement);`), 0);
+        setTimeout(() => this.showPropmt("InsertAfter", `vr.insertAfter(e => e.${this.state.selectedMemberName!}, yourElement);`), 0);
     }
 
     renderContextualMenu() {
@@ -245,9 +247,9 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
         const ctx = this.props.ctx;
         return (
             <div className="code-container">
-                {this.renderViewNameButtons()}
-                <br />
-                {this.renderExpressionsButtons()}
+                {this.allViewNames().length > 0 && this.renderViewNameButtons()}
+                {this.allExpressions().length > 0 && <br />}
+                {this.allExpressions().length > 0 && this.renderExpressionsButtons()}
                 <pre style={{ border: "0px", margin: "0px" }}>{`(vr: ViewReplacer<${ctx.value.entityType!.className}>, 
 auth: AuthInfo) =>`}</pre>
                 <JavascriptCodeMirror code={ctx.value.script || ""} onChange={this.handleCodeChange} />
@@ -261,18 +263,18 @@ auth: AuthInfo) =>`}</pre>
     }
 
     handleViewNameClick = (viewName: string) => {
-        this.showPropmt(`React.createElement(DynamicViewPart, {ctx: vr.ctx, viewName:"${viewName}"})`);
+        this.showPropmt("View", `React.createElement(DynamicViewPart, {ctx: vr.ctx, viewName:"${viewName}"})`);
     }
 
     renderViewNameButtons() {
-        return (<div className="btn-group" style={{ marginBottom: "3px" }}>
-            {this.allViewNames().map((vn, i) =>
-                <input key={i} type="button" className="btn btn-success btn-xs sf-button" value={vn} onClick={() => this.handleViewNameClick(vn)} />)}
-        </div>);
+        return (
+            <div className="btn-group" style={{ marginBottom: "3px" }}>
+                {this.allViewNames().map((vn, i) =>
+                    <input key={i} type="button" className="btn btn-success btn-xs sf-button" value={vn} onClick={() => this.handleViewNameClick(vn)} />)}
+            </div>);
     }
 
     allExpressions() {
-
         var typeHelp = this.state.typeHelp;
         if (!typeHelp)
             return [];
@@ -282,7 +284,7 @@ auth: AuthInfo) =>`}</pre>
 
     handleExpressionClick = (member: DynamicClient.TypeMemberHelp) => {
         var paramValue = member.cleanTypeName ? `queryName : "${member.cleanTypeName}Entity"` : `valueToken: "Entity.${member.name}"`;
-        this.showPropmt(`React.createElement(ValueSearchControlLine, {ctx: vr.ctx, ${paramValue}})`);
+        this.showPropmt("Expression", `React.createElement(ValueSearchControlLine, {ctx: vr.ctx, ${paramValue}})`);
     }
        
     renderExpressionsButtons() {
@@ -292,12 +294,19 @@ auth: AuthInfo) =>`}</pre>
         </div>);
     }
 
-    showPropmt(text: string) {
-
-        window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
+    showPropmt(title: string, text: string) {
 
         this.setState({
             selectedMemberName: undefined
+        });
+
+        ValueLineModal.show({
+            type: { name: "string" },
+            initialValue: text,
+            valueLineType: ValueLineType.TextArea,
+            title: title,
+            message: "Copy to clipboard: Ctrl+C",
+            initiallyFocused: true,
         });
     }
 }

@@ -283,34 +283,41 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
     }
 
     handlePreSavingClick = () => {
-        let typeName = this.props.dynamicType.typeName;
-        window.prompt("Copy to clipboard: Ctrl+C, Enter", `sb.Schema.EntityEvents<${typeName}Entity>().PreSaving += ${typeName}EntityPreSaving;
-private static void ${typeName}PreSaving(${typeName}Entity e, ref bool graphModified)
+        let entityName = `${this.props.dynamicType.typeName}Entity`;
+        let text = `sb.Schema.EntityEvents<${entityName}>().PreSaving += ${entityName}PreSaving;
+private static void ${entityName}PreSaving(${entityName} e, ref bool graphModified)
 {
     // Your custom code ...
-}`);
+}`;
+        this.popupEventsTemplate(entityName, "PreSaving", text);
     }
 
     handlePostRetrievedClick = () => {
         let entityName = `${this.props.dynamicType.typeName}Entity`;
-        ValueLineModal.show({
-            type: { name: "string" },
-            initialValue: `sb.Schema.EntityEvents<${entityName}>().Retrieved += (e) => Your custom code;`,
-            valueLineType: ValueLineType.TextArea,
-            title: `${entityName} -> PostRetrieved`,
-            message: "Copy to clipboard: Ctrl+C",
-            initiallyFocused: true,
-        });
-        //window.prompt("Copy to clipboard: Ctrl+C, Enter", `sb.Schema.EntityEvents<${this.props.dynamicType.typeName}Entity>().Retrieved += (e) => Your custom code;`);
+        let text = `sb.Schema.EntityEvents<${entityName}>().Retrieved += (e) => Your custom code;`;
+        this.popupEventsTemplate(entityName, "PostRetrieved", text);
     }
 
     handlePropertyValidatorClick = () => {
-        let text = `Validator.PropertyValidator<${this.props.dynamicType.typeName}Entity>(e => e.Your member}).StaticPropertyValidation = (e, pi) => {
+        let entityName = `${this.props.dynamicType.typeName}Entity`;
+        let text = `Validator.PropertyValidator<${entityName}>(e => e.Your member}).StaticPropertyValidation = (e, pi) => {
 //    if (e.Name == "AAA")
 //        return "AAA is an special name and can not be used";
     return null;
 };`;
-        window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
+        this.popupEventsTemplate(entityName, "PropertyValidator", text);
+    }
+
+    popupEventsTemplate(entityName: string, eventName: string, text: string) {
+        ValueLineModal.show({
+            type: { name: "string" },
+            initialValue: text,
+            valueLineType: ValueLineType.TextArea,
+            title: `${entityName} -> ${eventName}`,
+            message: "Copy to clipboard: Ctrl+C",
+            initiallyFocused: true,
+            valueHtmlProps: { style: { height: "115px" } },
+        });
     }
 
     renderOthers() {
