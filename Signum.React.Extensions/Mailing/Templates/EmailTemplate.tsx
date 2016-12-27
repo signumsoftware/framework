@@ -13,7 +13,7 @@ import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntity
 import TemplateControls from '../../Templating/TemplateControls'
 import HtmlCodemirror from './HtmlCodemirror'
 import IFrameRenderer from './IFrameRenderer'
-
+import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
 
 export default class EmailTemplate extends React.Component<{ ctx: TypeContext<EmailTemplateEntity> }, void> {
@@ -192,6 +192,12 @@ export class EmailTemplateMessageComponent extends React.Component<EmailTemplate
     }
 
     handleOnInsert = (newCode: string) => {
-        window.prompt("Copy to clipboard: Ctrl+C, Enter", newCode);
+        ValueLineModal.show({
+            type: { name: "string" },
+            initialValue: newCode,
+            title: "Template",
+            message: "Copy to clipboard: Ctrl+C, ESC",
+            initiallyFocused: true,
+        });
     }
 }

@@ -46,7 +46,7 @@ export default class DynamicTypeComponent extends React.Component<DynamicTypeCom
         const ctx = this.props.ctx;
 
         const def = !ctx.value.typeDefinition ?
-            { baseType: "Entity", entityData: "Transactional", entityKind: "Main", properties: [], queryFields: ["Id"], registerSave: true, registerDelete: true } as DynamicTypeClient.DynamicTypeDefinition :
+            { baseType: "Entity", entityData: "Transactional", entityKind: "Main", properties: [], queryFields: ["e.Id"], registerSave: true, registerDelete: true } as DynamicTypeClient.DynamicTypeDefinition :
             JSON.parse(ctx.value.typeDefinition) as DynamicTypeClient.DynamicTypeDefinition;
 
         this.setState({
@@ -55,8 +55,6 @@ export default class DynamicTypeComponent extends React.Component<DynamicTypeCom
         });
     }
 
-   
- 
     render() {
         const ctx = this.props.ctx;
         const dc = { refreshView: () => this.forceUpdate() };
@@ -69,7 +67,7 @@ export default class DynamicTypeComponent extends React.Component<DynamicTypeCom
                     </div>
                     <div className="col-sm-4">
                         <button className={classes("btn btn-xs btn-success pull-right", this.state.showDatabaseMapping && "active")}
-                            onClick={() => this.setState({ showDatabaseMapping: !this.state.showDatabaseMapping })} >
+                            onClick={() => this.setState({ showDatabaseMapping: !this.state.showDatabaseMapping })}>
                             Show Database Mapping
                         </button>
                     </div>

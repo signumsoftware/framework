@@ -73,16 +73,13 @@ namespace Signum.Entities.Dynamic
         [JsonProperty(PropertyName = "type", NullValueHandling = NullValueHandling.Ignore)]
         public string Type;
 
-        [JsonProperty(PropertyName = "identity", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty(PropertyName = "identity", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool Identity;
-        
-        [JsonProperty(PropertyName = "identityBehaviour", NullValueHandling = NullValueHandling.Ignore)]
-        public bool IdentityBehaviour;
     }
 
     public class DynamicTypeTicksDefinition
     {
-        [JsonProperty(PropertyName = "hasTicks", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty(PropertyName = "hasTicks", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool HasTicks;
 
         [JsonProperty(PropertyName = "name", NullValueHandling = NullValueHandling.Ignore)]
@@ -98,7 +95,7 @@ namespace Signum.Entities.Dynamic
         [JsonProperty(PropertyName = "tableName", NullValueHandling = NullValueHandling.Ignore)]
         public string TableName;
 
-        //PreserverOrderAttribute
+        //PreserveOrderAttribute
         [JsonProperty(PropertyName = "preserveOrder")]
         public bool PreserveOrder;
 
@@ -106,7 +103,7 @@ namespace Signum.Entities.Dynamic
         public string OrderName;
         //
 
-        //BackReferenceAttribute
+        //BackReferenceColumnNameAttribute
         [JsonProperty(PropertyName = "backReferenceName", NullValueHandling = NullValueHandling.Ignore)]
         public string BackReferenceName;
     }
@@ -126,10 +123,10 @@ namespace Signum.Entities.Dynamic
         public string TableName;
 
         [JsonProperty(PropertyName = "primaryKey", NullValueHandling = NullValueHandling.Ignore)]
-        DynamicTypePrimaryKeyDefinition PrimaryKey;
+        public DynamicTypePrimaryKeyDefinition PrimaryKey;
 
         [JsonProperty(PropertyName = "ticks", NullValueHandling = NullValueHandling.Ignore)]
-        DynamicTypeTicksDefinition Ticks;
+        public DynamicTypeTicksDefinition Ticks;
 
         [JsonProperty(PropertyName = "properties")]
         public List<DynamicProperty> Properties;
@@ -142,6 +139,9 @@ namespace Signum.Entities.Dynamic
 
         [JsonProperty(PropertyName = "operationDelete")]
         public OperationDelete OperationDelete;
+
+        [JsonProperty(PropertyName = "events")]
+        public DynamicTypeEvent Events;
 
         [JsonProperty(PropertyName = "queryFields")]
         public List<string> QueryFields;
@@ -187,6 +187,12 @@ namespace Signum.Entities.Dynamic
         public string Delete;
     }
 
+    public class DynamicTypeEvent
+    {
+        [JsonProperty(PropertyName = "code")]
+        public string Code;
+    }
+
     public enum DynamicBaseType
     {
         Entity,
@@ -206,7 +212,7 @@ namespace Signum.Entities.Dynamic
         [JsonProperty(PropertyName = "type")]
         public string Type;
 
-        [JsonProperty(PropertyName = "columnType")]
+        [JsonProperty(PropertyName = "columnType", NullValueHandling = NullValueHandling.Ignore)]
         public string ColumnType;
 
         [JsonProperty(PropertyName = "isNullable")]

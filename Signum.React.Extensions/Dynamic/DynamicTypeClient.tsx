@@ -73,6 +73,8 @@ export namespace API {
 export type DynamicBaseType = "Entity";
 
 export interface DynamicTypeDefinition {
+    primaryKey?: DynamicTypePrimaryKeyDefinition;
+    ticks?: DynamicTypeTicksDefinition;
     tableName?: string;
     baseType: DynamicBaseType;
     entityKind?: EntityKind;
@@ -80,6 +82,7 @@ export interface DynamicTypeDefinition {
     operationCreate?: OperationConstruct;
     operationSave?: OperationExecute;
     operationDelete?: OperationDelete;
+    events?: DynamicTypeEvent;
     queryFields: string[];
     multiColumnUniqueIndex?: MultiColumnUniqueIndex; 
     properties: DynamicProperty[];
@@ -95,12 +98,30 @@ export interface DynamicProperty {
     isNullable: string;
     uniqueIndex: string;
     isLite?: boolean;
-    isMList?: boolean;
-    preserveOrder?: boolean;
+    isMList?: DynamicTypeBackMListDefinition;
     size?: number;
     scale?: number;
     _propertyType_?: string;
     validators?: Validators.DynamicValidator[];
+}
+
+export interface DynamicTypePrimaryKeyDefinition {
+    name?: string;
+    type?: string;
+    identity: boolean;
+}
+
+export interface DynamicTypeTicksDefinition {
+    hasTicks: boolean;
+    name?: string;
+    type?: string;
+}
+
+export interface DynamicTypeBackMListDefinition {
+    tableName?: string;
+    preserveOrder: boolean;
+    orderName?: string;
+    backReferenceName?: string;
 }
 
 export interface MultiColumnUniqueIndex {
@@ -120,6 +141,10 @@ export interface OperationExecute {
 export interface OperationDelete {
     canDelete?: string;
     delete: string;
+}
+
+export interface DynamicTypeEvent {
+    code?: string;
 }
 
 export namespace Validators {

@@ -136,6 +136,7 @@ namespace Signum.Engine.Dynamic
                 CompilerParameters parameters = new CompilerParameters();
 
                 parameters.ReferencedAssemblies.Add("System.dll");
+                parameters.ReferencedAssemblies.Add("System.Data.dll");
                 parameters.ReferencedAssemblies.Add("System.Core.dll");
                 foreach (var ass in Assemblies)
                 {
