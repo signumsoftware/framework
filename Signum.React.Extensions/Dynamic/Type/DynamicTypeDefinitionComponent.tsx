@@ -314,7 +314,7 @@ private static void ${entityName}PreSaving(${entityName} e, ref bool graphModifi
             initialValue: text,
             valueLineType: ValueLineType.TextArea,
             title: `${entityName} -> ${eventName}`,
-            message: "Copy to clipboard: Ctrl+C",
+            message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
             valueHtmlProps: { style: { height: "115px" } },
         });

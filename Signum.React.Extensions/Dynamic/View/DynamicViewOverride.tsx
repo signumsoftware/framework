@@ -305,7 +305,7 @@ auth: AuthInfo) =>`}</pre>
             initialValue: text,
             valueLineType: ValueLineType.TextArea,
             title: title,
-            message: "Copy to clipboard: Ctrl+C",
+            message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
         });
     }

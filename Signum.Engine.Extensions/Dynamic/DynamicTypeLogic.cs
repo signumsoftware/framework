@@ -540,11 +540,9 @@ namespace Signum.Engine.Dynamic
             foreach (var item in this.Usings)
                 sb.AppendLine("using {0};".FormatWith(item));
 
-
             sb.AppendLine();
             sb.AppendLine($"namespace {this.Namespace}");
             sb.AppendLine($"{{");
-
 
             var complexFields = this.Def.QueryFields.EmptyIfNull().Select(a => GetComplexQueryField(a)).NotNull().ToList();
             var complexNotTranslated = complexFields.Where(a => this.AlreadyTranslated?.TryGetC(a) == null).ToList();
@@ -557,7 +555,7 @@ namespace Signum.Engine.Dynamic
                 sb.AppendLine($"    }}");
             }
 
-            var hasEvents = (this.Def.Events != null && !string.IsNullOrWhiteSpace(this.Def.Events.Code));
+            var hasEvents = (this.Def.Events != null);
 
             sb.AppendLine($"    public static class {this.TypeName}Logic");
             sb.AppendLine($"    {{");
@@ -583,10 +581,7 @@ namespace Signum.Engine.Dynamic
             if (hasEvents)
             {
                 sb.AppendLine();
-                sb.AppendLine($"        private static void EntityEvents(SchemaBuilder sb, DynamicQueryManager dqm)");
-                sb.AppendLine($"        {{");
-                sb.AppendLine(this.Def.Events.Code.Indent(12));
-                sb.AppendLine($"        }}");
+                sb.AppendLine(this.Def.Events.Code.Indent(8));
             }
 
             sb.AppendLine($"    }}");
