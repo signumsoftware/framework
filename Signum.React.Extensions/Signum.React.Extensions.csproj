@@ -185,6 +185,7 @@
     <TypeScriptCompile Include="Dynamic\Help\TypeHelpComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\TypeCondition\DynamicTypeCondition.tsx" />
     <TypeScriptCompile Include="Dynamic\Type\DynamicSqlMigration.tsx" />
+    <TypeScriptCompile Include="Dynamic\Type\DynamicMixinConnection.tsx" />
     <TypeScriptCompile Include="Dynamic\Type\DynamicTypeDefinitionComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicPanelPage.tsx" />
     <TypeScriptCompile Include="Codemirror\SqlCodeMirror.tsx" />
