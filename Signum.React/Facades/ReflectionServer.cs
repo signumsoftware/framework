@@ -297,7 +297,9 @@ namespace Signum.React.Facades
 
         public static bool IsId(PropertyRoute p)
         {
-            return p.PropertyInfo.Name == nameof(Entity.Id) && p.Parent.PropertyRouteType == PropertyRouteType.Root;
+            return p.PropertyRouteType == PropertyRouteType.FieldOrProperty &&
+                p.PropertyInfo.Name == nameof(Entity.Id) && 
+                p.Parent.PropertyRouteType == PropertyRouteType.Root;
         }
 
         public static Dictionary<string, TypeInfoTS> GetEnums(IEnumerable<Type> allTypes)
