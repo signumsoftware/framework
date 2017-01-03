@@ -33,16 +33,7 @@ namespace Signum.Engine.Dynamic
                         Entity = e,
                         e.Id,
                         e.TypeName,
-                    });
-
-                sb.Include<DynamicMixinConnectionEntity>()
-                    .WithSave(DynamicMixinConnectionOperation.Save)
-                    .WithDelete(DynamicMixinConnectionOperation.Delete)
-                    .WithQuery(dqm, e => new {
-                        Entity = e,
-                        e.Id,
-                        e.Type,
-                        e.DynamicMixin,
+                        e.BaseType,
                     });
 
                 DynamicTypeGraph.Register();
@@ -111,7 +102,7 @@ namespace Signum.Engine.Dynamic
 
         public static string GetPropertyType(DynamicProperty property)
         {
-            var generator = new DynamicTypeCodeGenerator(DynamicLogic.CodeGenEntitiesNamespace, null, DynamicBaseType.Entity, null, new HashSet<string>());
+            var generator = new DynamicTypeCodeGenerator(DynamicCode.CodeGenEntitiesNamespace, null, DynamicBaseType.Entity, null, new HashSet<string>());
 
             return generator.GetPropertyType(property);
         }
@@ -150,7 +141,7 @@ namespace Signum.Engine.Dynamic
             {
                 var def = dt.GetDefinition();
 
-                var dcg = new DynamicTypeCodeGenerator(DynamicLogic.CodeGenEntitiesNamespace, dt.TypeName, dt.BaseType, def, DynamicLogic.Namespaces);
+                var dcg = new DynamicTypeCodeGenerator(DynamicCode.CodeGenEntitiesNamespace, dt.TypeName, dt.BaseType, def, DynamicCode.Namespaces);
 
                 var content = dcg.GetFileCode();
                 return new CodeFile
@@ -164,7 +155,7 @@ namespace Signum.Engine.Dynamic
             {
                 var def = dt.GetDefinition();
 
-                var dlg = new DynamicTypeLogicGenerator(DynamicLogic.CodeGenEntitiesNamespace, dt.TypeName, dt.BaseType, def, DynamicLogic.Namespaces)
+                var dlg = new DynamicTypeLogicGenerator(DynamicCode.CodeGenEntitiesNamespace, dt.TypeName, dt.BaseType, def, DynamicCode.Namespaces)
                 {
                     AlreadyTranslated = alreadyTranslatedExpressions?.TryGetC(dt.TypeName + "Entity"),
                 };

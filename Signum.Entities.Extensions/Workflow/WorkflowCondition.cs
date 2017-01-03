@@ -4,6 +4,7 @@ using Signum.Entities.Dynamic;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -75,8 +76,8 @@ namespace Signum.Entities.Workflow
             script = script.Contains(';') ? script : ("return " + script + ";");
             var WorkflowEntityTypeName = this.Parent.MainEntityType.ToType().FullName;
 
-            return Compile(Eval.BasicAssemblies,
-                Eval.CreateUsings(Eval.BasicNamespaces) +
+            return Compile(DynamicCode.GetAssemblies(),
+                DynamicCode.GetNamespaces() +
                     @"
                     namespace Signum.Entities.IMMS
                     {
@@ -104,10 +105,6 @@ namespace Signum.Entities.Workflow
     public class WorkflowEvaluationContext
     {
         public CaseActivityEntity CaseActivity;
-
         public DecisionResult? DecisionResult;
     }
-
-
-    
 }

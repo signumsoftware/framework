@@ -3,6 +3,7 @@ using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -43,17 +44,14 @@ namespace Signum.Entities.Dynamic
 
     public class DynamicTypeConditionEval : EvalEntity<IDynamicTypeConditionEvaluator>
     {
-        static Func<DynamicTypeConditionEval, IEnumerable<string>> GetAllowedAssemblies = de => Eval.BasicAssemblies;
-        static Func<DynamicTypeConditionEval, IEnumerable<string>> GetAllowedNamespaces = de => Eval.BasicNamespaces;
-        
         protected override CompilationResult Compile()
         {
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");
             var entityTypeName = ((DynamicTypeConditionEntity)this.GetParentEntity()).EntityType.ToType().FullName;
 
-            return Compile(GetAllowedAssemblies(this).ToArray(),
-                Eval.CreateUsings(GetAllowedNamespaces(this)) +
+            return Compile(DynamicCode.GetAssemblies(),
+                DynamicCode.GetNamespaces() +
 @"
 namespace Signum.Entities.Dynamic
 {

@@ -46,32 +46,6 @@ namespace Signum.Entities.Dynamic
         }
     }
 
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class DynamicMixinConnectionEntity : Entity
-    {
-        [NotNullable]
-        [NotNullValidator]
-        public Lite<TypeEntity> Type { get; set; }
-
-        [NotNullable]
-        [NotNullValidator]
-        public Lite<DynamicTypeEntity> DynamicMixin { get; set; }
-
-        static Expression<Func<DynamicMixinConnectionEntity, string>> ToStringExpression = @this => @this.Type + " - " + @this.DynamicMixin;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
-    }
-
-    [AutoInit]
-    public static class DynamicMixinConnectionOperation
-    {
-        public static readonly ExecuteSymbol<DynamicMixinConnectionEntity> Save;
-        public static readonly DeleteSymbol<DynamicMixinConnectionEntity> Delete;
-    }
-
     [AutoInit]
     public static class DynamicTypeOperation
     {

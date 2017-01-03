@@ -51,6 +51,7 @@ export function start(options: { routes: JSX.Element[] }) {
         }));
 
     DynamicClient.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
+    DynamicClient.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicMixinConnectionEntity }} />);
     DynamicClient.Options.getDynaicMigrationsStep = () =>
         <Tab eventKey="migrations" title="Migrations" >
             <h3>{DynamicSqlMigrationEntity.nicePluralName()}</h3>

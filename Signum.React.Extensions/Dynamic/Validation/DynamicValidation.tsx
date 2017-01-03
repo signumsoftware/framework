@@ -17,7 +17,7 @@ interface DynamicValidationProps {
 interface DynamicValidationState {
     exampleEntity?: Entity;
     response?: DynamicValidationTestResponse;
-
+    parentType?: string;
 }
 
 export default class DynamicValidation extends React.Component<DynamicValidationProps, DynamicValidationState> {
@@ -44,6 +44,15 @@ export default class DynamicValidation extends React.Component<DynamicValidation
         this.forceUpdate();
     }
 
+    handleChange = () => {
+        if (!this.props.ctx.value.propertyRoute)
+            this.setState({ parentType: undefined });
+        else
+            API.parentType(this.props.ctx.value.propertyRoute)
+                .then(parentType => this.setState({ parentType }))
+                .done();
+    }
+
     render() {
         var ctx = this.props.ctx;
 
@@ -51,7 +60,7 @@ export default class DynamicValidation extends React.Component<DynamicValidation
             <div>
                 <EntityLine ctx={ctx.subCtx(d => d.entityType)} onChange={this.handleEntityTypeChange} />
                 <FormGroup ctx={ctx.subCtx(d => d.propertyRoute)}>
-                    {ctx.value.entityType && <PropertyRouteCombo ctx={ctx.subCtx(d => d.propertyRoute)} type={ctx.value.entityType} onChange={() => this.forceUpdate()} />}
+                    {ctx.value.entityType && <PropertyRouteCombo ctx={ctx.subCtx(d => d.propertyRoute)} type={ctx.value.entityType} onChange={this.handleChange} />}
                 </FormGroup>
                 <ValueLine ctx={ctx.subCtx(d => d.name)} />
                 <ValueLine ctx={ctx.subCtx(d => d.isGlobalyEnabled)} inlineCheckbox={true} />
@@ -62,7 +71,7 @@ export default class DynamicValidation extends React.Component<DynamicValidation
                             <div className="col-sm-7">
                                 {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handeEvaluate}><i className="fa fa-play" aria-hidden="true"></i> Evaluate</button>}
                                 <div className="code-container">
-                                    <pre style={{ border: "0px", margin: "0px" }}>{"string PropertyValidate(" + (!ctx.value.entityType ? "Entity" : ctx.value.entityType.className) + " e, PropertyInfo pi)\n{"}</pre>
+                                    <pre style={{ border: "0px", margin: "0px" }}>{"string PropertyValidate(" + (this.state.parentType || "ModifiableEntity") + " e, PropertyInfo pi)\n{"}</pre>
                                     <CSharpCodeMirror script={ctx.value.eval.script || ""} onChange={this.handleCodeChange} />
                                     <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
                                 </div>

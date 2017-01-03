@@ -8,9 +8,9 @@ import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { PropertyRouteEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
 import * as DynamicClient from './DynamicClient'
-
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import { DynamicValidationEntity, DynamicValidationOperation, DynamicValidationEval } from './Signum.Entities.Dynamic'
 
@@ -26,6 +26,10 @@ export function start(options: { routes: JSX.Element[] }) {
 export namespace API {
     export function validationTest(request: DynamicValidationTestRequest): Promise<DynamicValidationTestResponse> {
         return ajaxPost<DynamicValidationTestResponse>({ url: `~/api/dynamic/validation/test` }, request);
+    }
+
+    export function parentType(request: PropertyRouteEntity): Promise<string> {
+        return ajaxPost<string>({ url: `~/api/dynamic/validation/parentType` }, request);
     }
 }
 
