@@ -54,9 +54,9 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
     loadXml(w: WorkflowEntity) {
         if (w.isNew)
         {
-            var model = WorkflowModel.New(wm => {
-                wm.diagramXml = require<string>("raw!./InitialWorkflow.xml"),
-                wm.entities = []
+            var model = WorkflowModel.New({
+                diagramXml : require<string>("raw!./InitialWorkflow.xml"),
+                entities : [],
             });
 
             this.updateState(model);
