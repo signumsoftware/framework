@@ -265,9 +265,9 @@ export function autoLogin(): Promise<UserEntity> {
 export function logout() {
 
     Api.logout().then(() => {
-        Options.onLogout();
         setAuthToken(undefined);
         setCurrentUser(undefined);
+        Options.onLogout();
     }).done();
 }
 
