@@ -656,12 +656,12 @@ export interface IType {
 
 export class Type<T extends ModifiableEntity> implements IType {
 
-    New(modify?: (entity: T) => void): T {
+    New(props?:  Partial<T>): T {
 
         const result =  basicConstruct(this.typeName) as T;
 
-        if (modify)
-            modify(result);
+        if (props)
+            Dic.assign(result, props);
 
         return result;
     }
