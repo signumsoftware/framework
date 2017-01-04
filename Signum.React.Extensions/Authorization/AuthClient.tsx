@@ -164,16 +164,16 @@ export function currentUser(): UserEntity {
     return Navigator.currentUser as UserEntity;
 }
 
-export const onCurrentUserChanged: Array<(newUser: UserEntity | undefined) => void> = [];
+export const onCurrentUserChanged: Array<(newUser: UserEntity | undefined, avoidReRender?: boolean) => void> = [];
 
-export function setCurrentUser(user: UserEntity | undefined) {
+export function setCurrentUser(user: UserEntity | undefined, avoidReRender?: boolean) {
 
     const changed = !is(Navigator.currentUser, user, true);
 
     Navigator.setCurrentUser(user);
 
     if (changed)
-        onCurrentUserChanged.forEach(f => f(user));
+        onCurrentUserChanged.forEach(f => f(user, avoidReRender));
 }
 
 export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Promise<Response>): Promise<Response> {
