@@ -1,5 +1,6 @@
 ﻿import * as React from 'react'
 import { Route } from 'react-router'
+import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { ajaxPost, ajaxGet } from '../../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings, ViewPromise } from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
@@ -21,12 +22,14 @@ require("!style!css!./TypeHelpComponent.css");
 interface TypeHelpComponentProps {
     initialType?: string;
     mode: DynamicClient.TypeHelpMode;
+    onMemberClick?: (name: string) => void;
+    onContextMenu?: (name: string, e: React.MouseEvent) => void;
 }
 
 interface TypeHelpComponentState {
     history: string[];
     historyIndex: number;
-    help?: DynamicClient.TypeHelp;
+    help?: DynamicClient.TypeHelp | false;
     tempQuery?: string;
 }
 
@@ -64,8 +67,9 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
         this.setState({ help: undefined });
         DynamicClient.API.typeHelp(typeName, this.props.mode)
             .then(th => {
-
-                if (th.cleanTypeName == this.currentType())
+                if (!th)
+                    this.setState({ help: false });
+                else if (th.cleanTypeName == this.currentType())
                     this.setState({ help: th });
             })
             .done();
@@ -83,7 +87,9 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
         return (
             <div className="sf-dynamic-type-help">
                 {this.renderHeader()}
-                {this.state.help == undefined ? <h4>Loading {this.currentType()}…</h4> : this.renderHelp(this.state.help)}
+                {this.state.help == undefined ? <h4>Loading {this.currentType()}…</h4> : 
+                    this.state.help == false ? <h4>Not found {this.currentType()}</h4> :
+                        this.renderHelp(this.state.help)}
             </div>
         );
     }
@@ -150,27 +156,58 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
                 <h4>{h.type}</h4>
 
                 <ul className="sf-dynamic-members" style={{ paddingLeft: "0px" }}>
-                    {h.members.map((m, i) => this.renderMember(h, m, i))}
+                    {h.members.map((m, i) => this.renderMember(h, m, i, true))}
                 </ul>
             </div>
         );
     }
 
-    renderMember(h: DynamicClient.TypeHelp, m: DynamicClient.TypeMemberHelp, index: number): React.ReactChild {
+    handleOnMemberClick = (name: string | undefined) => {
+
+        if (name && this.props.onMemberClick)
+            this.props.onMemberClick(name);
+    }
+
+    handleOnContextMenuClick = (name: string | undefined, e: React.MouseEvent) => {
+
+        if (name && this.props.onContextMenu)
+            this.props.onContextMenu(name, e);
+    }
+
+    renderMember(h: DynamicClient.TypeHelp, m: DynamicClient.TypeMemberHelp, index: number, considerOnMemberClick: boolean): React.ReactChild {
+
+        var className = "sf-dynamic-member-name";
+        var onClick: React.MouseEventHandler | undefined;
+        var onContextMenu: React.MouseEventHandler | undefined;
+
+        if (considerOnMemberClick) {
+            if (this.props.onMemberClick) {
+                className = classes(className, "sf-dynamic-member-click");
+                onClick = () => this.handleOnMemberClick(m.name);
+            }
+
+            if (this.props.onContextMenu) {
+                onContextMenu = (e) => this.handleOnContextMenuClick(m.name, e);
+            }
+        }
 
         return (
-            <li>
+            <li key={index}>
                 {h.isEnum ?
-                    <span className="sf-dynamic-member-name">{m.name}</span>
+                    <span className={className} onClick={onClick} onContextMenu={onContextMenu}>{m.name}</span>
                     :
                     <div>
                         {this.props.mode == "CSharp" ?
-                            <span>{this.renderType(m.type, m.cleanTypeName)}{" "}<span className="sf-dynamic-member-name">{m.name}{m.name && (m.isExpression ? "()" : "")}</span></span> :
-                            <span><span className="sf-dynamic-member-name">{m.name}</span>{": "}{this.renderType(m.type, m.cleanTypeName)}</span>}
+                            <span>
+                                {this.renderType(m.type, m.cleanTypeName)}{" "}<span className={className} onClick={onClick} onContextMenu={onContextMenu}>{m.name}{m.name && (m.isExpression ? "()" : "")}</span>
+                            </span> :
+                            <span>
+                                <span className={className} onClick={onClick} onContextMenu={onContextMenu}>{m.name}</span>{": "}{this.renderType(m.type, m.cleanTypeName)}
+                            </span>}
 
                         {m.subMembers.length > 0 &&
                             <ul className="sf-dynamic-members">
-                                {m.subMembers.map((sm, i) => this.renderMember(h, sm, i))}
+                                {m.subMembers.map((sm, i) => this.renderMember(h, sm, i, false))}
                             </ul>}
                     </div>}
             </li>

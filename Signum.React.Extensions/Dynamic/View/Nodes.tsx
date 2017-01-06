@@ -4,7 +4,7 @@ import {
     FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityTable,
     EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip
 } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { ModifiableEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { ModifiableEntity, Entity, Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
@@ -352,8 +352,8 @@ NodeUtils.register<ValueLineNode>({
 export interface EntityBaseNode extends LineBaseNode, ContainerNode {
     create?: ExpressionOrValue<boolean>;
     find?: ExpressionOrValue<boolean>;
-    remove?: ExpressionOrValue<boolean>;
-    view?: ExpressionOrValue<boolean>;
+    remove?: ExpressionOrValue<boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean)>;
+    view?: ExpressionOrValue<boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean)>;
     viewOnCreate?: ExpressionOrValue<boolean>;
     findOptions?: FindOptionsExpr;
 }
@@ -455,7 +455,7 @@ NodeUtils.register<EnumCheckboxListNode>({
 });
 
 export interface EntityListBaseNode extends EntityBaseNode {
-    move?: ExpressionOrValue<boolean>;
+    move?: ExpressionOrValue<boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean)>;
 }
 
 export interface EntityCheckboxListNode extends EntityListBaseNode {
@@ -586,8 +586,9 @@ NodeUtils.register<EntityTableNode>({
     validChild: "EntityTableColumn",
     validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
     renderTreeNode: NodeUtils.treeNodeKindField,
-    renderCode: (node, cc) => cc.elementCode("EntityTable", {...cc.getEntityBasePropsEx(node, { showMove: true, avoidGetComponent: true }), 
-        columns: node.children.map((col: EntityTableColumnNode) => ({ __code__: NodeUtils.renderCode(col, cc) }))
+    renderCode: (node, cc) => cc.elementCode("EntityTable", {
+        ...cc.getEntityBasePropsEx(node, { showMove: true, avoidGetComponent: true }),
+        columns: ({ __code__: "EntityTable.typedColumns<YourEntityHere>(" + cc.stringifyObject(node.children.map((col: EntityTableColumnNode) => ({ __code__: NodeUtils.renderCode(col, cc) }))) + ")" })
     }),
     render: (dn, ctx) => (<EntityTable
         columns={dn.node.children.filter(c => NodeUtils.validate(dn.createChild(c), ctx) == null).map((col: EntityTableColumnNode) => NodeUtils.render(dn.createChild(col), ctx) as any)}
@@ -620,7 +621,7 @@ NodeUtils.register<EntityTableColumnNode>({
         header: node.header,
         headerProps: node.headerHtmlAttributes,
         cellProps: node.cellHtmlAttributes,
-        template: cc.getGetComponentEx(node)
+        template: cc.getGetComponentEx(node, false)
     }),
     render: (dn, ctx) => ({
         property: dn.node.property && NodeUtils.asFieldFunction(dn.node.property),

@@ -19,18 +19,18 @@ import { StyleContext } from '../../../Framework/Signum.React/Scripts/TypeContex
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import { DynamicTypeEntity, DynamicTypeOperation, DynamicSqlMigrationEntity, DynamicRenameEntity, DynamicTypeMessage, DynamicPanelPermission } from './Signum.Entities.Dynamic'
-import DynamicTypeEntityComponent from './Type/DynamicTypeEntity'
+import DynamicTypeComponent from './Type/DynamicType' //typings only
 import * as DynamicClient from './DynamicClient'
 import * as AuthClient from '../Authorization/AuthClient'
 
 export function start(options: { routes: JSX.Element[] }) {
 
-    Navigator.addSettings(new EntitySettings(DynamicTypeEntity, w => new ViewPromise(resolve => require(['./Type/DynamicTypeEntity'], resolve))));
-    Navigator.addSettings(new EntitySettings(DynamicSqlMigrationEntity, w => new ViewPromise(resolve => require(['./Type/DynamicSqlMigrationEntity'], resolve))));
+    Navigator.addSettings(new EntitySettings(DynamicTypeEntity, w => new ViewPromise(resolve => require(['./Type/DynamicType'], resolve))));
+    Navigator.addSettings(new EntitySettings(DynamicSqlMigrationEntity, w => new ViewPromise(resolve => require(['./Type/DynamicSqlMigration'], resolve))));
 
     Operations.addSettings(new EntityOperationSettings(DynamicTypeOperation.Save, {
         onClick: eoc => {
-            (eoc.frame.entityComponent as DynamicTypeEntityComponent).beforeSave();
+            (eoc.frame.entityComponent as DynamicTypeComponent).beforeSave();
 
             Operations.API.executeEntity(eoc.entity, eoc.operationInfo.key)
                 .then(pack => { eoc.frame.onReload(pack); EntityOperations.notifySuccess(); })
@@ -73,12 +73,16 @@ export namespace API {
 export type DynamicBaseType = "Entity";
 
 export interface DynamicTypeDefinition {
+    primaryKey?: DynamicTypePrimaryKeyDefinition;
+    ticks?: DynamicTypeTicksDefinition;
+    tableName?: string;
     baseType: DynamicBaseType;
     entityKind?: EntityKind;
     entityData?: EntityData;
     operationCreate?: OperationConstruct;
     operationSave?: OperationExecute;
     operationDelete?: OperationDelete;
+    events?: DynamicTypeEvent;
     queryFields: string[];
     multiColumnUniqueIndex?: MultiColumnUniqueIndex; 
     properties: DynamicProperty[];
@@ -88,16 +92,36 @@ export interface DynamicTypeDefinition {
 export interface DynamicProperty {
     uid: string;
     name: string;
+    columnName?: string;
     type: string;
+    columnType?: string;
     isNullable: string;
     uniqueIndex: string;
     isLite?: boolean;
-    isMList?: boolean;
-    preserveOrder?: boolean;
+    isMList?: DynamicTypeBackMListDefinition;
     size?: number;
     scale?: number;
     _propertyType_?: string;
     validators?: Validators.DynamicValidator[];
+}
+
+export interface DynamicTypePrimaryKeyDefinition {
+    name?: string;
+    type?: string;
+    identity: boolean;
+}
+
+export interface DynamicTypeTicksDefinition {
+    hasTicks: boolean;
+    name?: string;
+    type?: string;
+}
+
+export interface DynamicTypeBackMListDefinition {
+    tableName?: string;
+    preserveOrder: boolean;
+    orderName?: string;
+    backReferenceName?: string;
 }
 
 export interface MultiColumnUniqueIndex {
@@ -117,6 +141,10 @@ export interface OperationExecute {
 export interface OperationDelete {
     canDelete?: string;
     delete: string;
+}
+
+export interface DynamicTypeEvent {
+    code?: string;
 }
 
 export namespace Validators {

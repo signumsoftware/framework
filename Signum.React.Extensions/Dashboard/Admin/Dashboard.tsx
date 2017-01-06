@@ -69,9 +69,9 @@ export default class Dashboard extends React.Component<{ ctx: TypeContext<Dashbo
                 if (ti == undefined)
                     return undefined;
 
-                return PanelPartEntity.New(p => {
-                    p.content = basicConstruct(ti.name) as any as IPartEntity;
-                    p.style = "Default";
+                return PanelPartEntity.New({
+                    content : basicConstruct(ti.name) as any as IPartEntity,
+                    style : "Default"
                 });
             });
     }

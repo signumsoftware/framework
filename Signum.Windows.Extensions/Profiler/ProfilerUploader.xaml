@@ -1,7 +1,8 @@
 ﻿<Window x:Class="Signum.Windows.Profiler.ProfilerUploader"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="ProfilerUploader" SizeToContent="WidthAndHeight" WindowStyle="ToolWindow">
+        Title="ProfilerUploader" SizeToContent="WidthAndHeight" WindowStyle="ToolWindow"
+        FlowDirection="{DynamicResource FlowDirection}">
     <StackPanel>
         <Button x:Name="start" Content="Start" Width="200" Height="50" Margin="5" Click="start_Click_1"/>
         <Button x:Name="stop" Content="Stop and Push" Width="200" Height="50" Margin="5" Click="stop_Click_1"/>

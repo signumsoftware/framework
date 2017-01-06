@@ -394,11 +394,6 @@ namespace Signum.Logic.Workflow
             bpmnElementId = Element.Attribute("bpmnElement").Value;
         }
 
-        static string ToQuoted(string str)
-        {
-            return "\"" + str + "\"";
-        }
-
         public XDocument Document;
 
         private XElement element;
@@ -411,6 +406,11 @@ namespace Signum.Logic.Workflow
         public KeyValuePair<string, ModelEntity> ToModelKVP() => new KeyValuePair<string, ModelEntity>(bpmnElementId, Entity.GetModel());
 
         public override string ToString() => $"{bpmnElementId} {Entity.GetType().Name} {Entity.Name}";
+
+        public string ToQuoted(string str)
+        {
+            return "\"" + str + "\"";
+        }
     }
 
     public enum WorkflowBuilderMessage

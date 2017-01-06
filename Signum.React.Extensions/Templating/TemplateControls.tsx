@@ -47,7 +47,7 @@ export default class TemplateControls extends React.Component<TemplateControlsPr
                         `@foreach[${token}] @endforeach`) }
                     {this.renderButton("any", this.canElement(), token => this.props.forHtml ?
                         `<!--@any[${token}]--> <!--@notany--> <!--@endany-->` :
-                        `@any[${token}] @notany @end`) }
+                        `@any[${token}] @notany @endany`) }
                 </div>
             </div>
         );

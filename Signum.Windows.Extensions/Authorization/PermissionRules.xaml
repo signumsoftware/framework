@@ -11,7 +11,8 @@
     TextOptions.TextFormattingMode="Display"
     UseLayoutRounding="True" 
     WindowStartupLocation="CenterOwner"
-    x:Name="me" MinWidth="500" MinHeight="300" m:Common.TypeContext="{x:Type d:PermissionRulePack}">
+    x:Name="me" MinWidth="500" MinHeight="300" m:Common.TypeContext="{x:Type d:PermissionRulePack}"
+    FlowDirection="{DynamicResource FlowDirection}">
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>

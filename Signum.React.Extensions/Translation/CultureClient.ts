@@ -13,20 +13,20 @@ import { reloadTypes } from '../../../Framework/Signum.React/Scripts/Reflection'
 export let currentCulture: CultureInfoEntity;
 
 
-export const onCultureLoaded: Array<(culture: CultureInfoEntity) => void> = [];
-export function loadCurrentCulture() : Promise<void> {
+export const onCultureLoaded: Array<(culture: CultureInfoEntity, avoidReRender?: boolean) => void> = [];
+export function loadCurrentCulture(avoidReRender?: boolean) : Promise<void> {
     return API.fetchCurrentCulture()
         .then(ci => {
             currentCulture = ci;
-            onCultureLoaded.forEach(f => f(ci));
+            onCultureLoaded.forEach(f => f(ci, avoidReRender));
         }); 
 }
 
-export function changeCurrentCulture(newCulture: Lite<CultureInfoEntity>) {
+export function changeCurrentCulture(newCulture: Lite<CultureInfoEntity>, avoidReRender?: boolean) {
     API.setCurrentCulture(newCulture)
         .then(() => reloadTypes())
         .then(() => Finder.clearQueryDescriptionCache())
-        .then(() => loadCurrentCulture())
+        .then(() => loadCurrentCulture(avoidReRender))
         .done();
 }
 

@@ -13,17 +13,18 @@ import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorMo
 import * as DynamicTypeClient from '../DynamicTypeClient'
 import { DynamicTypeDefinitionComponent, PropertyRepeaterComponent } from './DynamicTypeDefinitionComponent'
 
-interface DynamicTypeEntityComponentProps {
+interface DynamicTypeComponentProps {
     ctx: TypeContext<DynamicTypeEntity>;
 }
 
-interface DynamicTypeEntityComponentState {
+interface DynamicTypeComponentState {
     typeDefinition?: DynamicTypeClient.DynamicTypeDefinition;
+    showDatabaseMapping?: boolean;
 }
 
-export default class DynamicTypeEntityComponent extends React.Component<DynamicTypeEntityComponentProps, DynamicTypeEntityComponentState> {
+export default class DynamicTypeComponent extends React.Component<DynamicTypeComponentProps, DynamicTypeComponentState> {
 
-    constructor(props: DynamicTypeEntityComponentProps) {
+    constructor(props: DynamicTypeComponentProps) {
         super(props);
 
         this.state = {};
@@ -45,28 +46,38 @@ export default class DynamicTypeEntityComponent extends React.Component<DynamicT
         const ctx = this.props.ctx;
 
         const def = !ctx.value.typeDefinition ?
-            { baseType: "Entity", entityData: "Transactional", entityKind: "Main", properties: [], queryFields: ["Id"], registerSave: true, registerDelete: true } as DynamicTypeClient.DynamicTypeDefinition :
+            { baseType: "Entity", entityData: "Transactional", entityKind: "Main", properties: [], queryFields: ["e.Id"], registerSave: true, registerDelete: true } as DynamicTypeClient.DynamicTypeDefinition :
             JSON.parse(ctx.value.typeDefinition) as DynamicTypeClient.DynamicTypeDefinition;
 
         this.setState({
-            typeDefinition: def
+            typeDefinition: def,
+            showDatabaseMapping: !!def.tableName || def.properties.some(p => !!p.columnName || !!p.columnType)
         });
     }
 
-   
- 
     render() {
         const ctx = this.props.ctx;
         const dc = { refreshView: () => this.forceUpdate() };
 
         return (
             <div>
-                <ValueLine ctx={ctx.subCtx(dt => dt.typeName)} onChange={() => this.forceUpdate()} unitText="Entity" />
-
-                {this.state.typeDefinition &&
-                    <div>
-                        <DynamicTypeDefinitionComponent dc={dc} definition={this.state.typeDefinition} typeName={ctx.value.typeName || ""} />
+                <div className="row">
+                    <div className="col-sm-8">
+                        <ValueLine ctx={ctx.subCtx(dt => dt.typeName)} labelColumns={3} onChange={() => this.forceUpdate()} unitText="Entity" />
                     </div>
+                    <div className="col-sm-4">
+                        <button className={classes("btn btn-xs btn-success pull-right", this.state.showDatabaseMapping && "active")}
+                            onClick={() => this.setState({ showDatabaseMapping: !this.state.showDatabaseMapping })}>
+                            Show Database Mapping
+                        </button>
+                    </div>
+                </div>
+                {this.state.typeDefinition &&
+                    <DynamicTypeDefinitionComponent dc={dc}
+                        dynamicType={ctx.value}
+                        definition={this.state.typeDefinition}
+                        showDatabaseMapping={this.state.showDatabaseMapping!}
+                        />
                 }
             </div>
         );

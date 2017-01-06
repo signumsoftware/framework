@@ -4,7 +4,8 @@
         xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
         xmlns:seuq="clr-namespace:Signum.Entities.UserAssets;assembly=Signum.Entities.Extensions"
         SizeToContent="WidthAndHeight"
-        Title="{m:Loc {x:Static seuq:UserAssetMessage.ImportUserAssets}}" x:Name="me" m:Common.TypeContext="{x:Type seuq:UserAssetPreviewModel}">
+        Title="{m:Loc {x:Static seuq:UserAssetMessage.ImportUserAssets}}" x:Name="me" m:Common.TypeContext="{x:Type seuq:UserAssetPreviewModel}"
+        FlowDirection="{DynamicResource FlowDirection}">
     <DockPanel>
         <TextBlock Text="{m:Loc {x:Static seuq:UserAssetMessage.SelectTheEntitiesToOverride}}" DockPanel.Dock="Top" Margin="10"/>
         <m:OkCancelBar OkClicked="OkCancelBar_OkClicked" CancelClicked="OkCancelBar_CancelClicked"  DockPanel.Dock="Bottom" />

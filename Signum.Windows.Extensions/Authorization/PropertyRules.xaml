@@ -12,7 +12,8 @@
     TextOptions.TextFormattingMode="Display"
     UseLayoutRounding="True" 
     WindowStartupLocation="CenterOwner"
-    x:Name="me" MinWidth="300" MinHeight="300" m:Common.TypeContext="{x:Type d:PropertyRulePack}">
+    x:Name="me" MinWidth="300" MinHeight="300" m:Common.TypeContext="{x:Type d:PropertyRulePack}"
+    FlowDirection="{DynamicResource FlowDirection}">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -33,7 +34,7 @@
             </ListView.ItemContainerStyle>
             <ListView.View>
                 <GridView AllowsColumnReorder="False">
-                    <GridViewColumn Header="{m:LocType {x:Type seb2:PropertyRouteEntity}}" DisplayMemberBinding="{Binding Resource}" />
+                    <GridViewColumn Header="{m:LocType {x:Type seb:PropertyRouteEntity}}" DisplayMemberBinding="{Binding Resource}" />
                     <GridViewColumn Header="{m:Loc {x:Static d:PropertyAllowed.Modify}}" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>

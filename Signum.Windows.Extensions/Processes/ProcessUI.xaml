@@ -5,7 +5,8 @@
     xmlns:m2="clr-namespace:Signum.Windows.Extensions"
     xmlns:d="clr-namespace:Signum.Entities.Processes;assembly=Signum.Entities.Extensions"
     m:Common.TypeContext="{x:Type d:ProcessEntity}"
-    MinWidth="300">
+    MinWidth="300"
+	FlowDirection="{DynamicResource FlowDirection}">
     <StackPanel m:Common.IsReadOnly="True" m:Common.MinLabelWidth="105">
         <m:ValueLine m:Common.Route="State" />
         <m:EntityLine m:Common.Route="Algorithm" />

@@ -23,7 +23,7 @@ export function start(...configs: ToolbarConfig<any>[]) {
 
     Finder.addSettings({ queryName: ToolbarEntity, defaultOrderColumn: "Priority", defaultOrderType: "Descending" });
 
-    Constructor.registerConstructor(ToolbarElementEntity, tn => ToolbarElementEntity.New(e => e.type = "Link"));
+    Constructor.registerConstructor(ToolbarElementEntity, tn => ToolbarElementEntity.New({ type : "Link" }));
 
     configs.forEach(c => registerConfig(c));
 }

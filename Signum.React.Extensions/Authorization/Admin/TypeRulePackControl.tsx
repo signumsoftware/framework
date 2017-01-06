@@ -108,9 +108,9 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                 if (!tc)
                     return;
 
-                taac.conditions.push(TypeConditionRule.New(tcr => {
-                    tcr.typeCondition = tc!;
-                    tcr.allowed = "None";
+                taac.conditions.push(TypeConditionRule.New({
+                    typeCondition : tc!,
+                    allowed : "None"
                 }));
 
                 this.forceUpdate();

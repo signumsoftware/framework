@@ -33,3 +33,7 @@ div.validators .panel-group {
 .small-codemirror .CodeMirror {
     height: auto;
 }
+
+.database-mapping {
+    color: #439b43;
+}

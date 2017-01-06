@@ -1,7 +1,10 @@
 
 import * as React from 'react'
 import { Route } from 'react-router'
+import * as ReactBootstrap from 'react-bootstrap'
+import * as ReactRouterBootstrap from 'react-router-bootstrap'
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
+import * as Search from '../../../Framework/Signum.React/Scripts/Search'
 import { ValueSearchControlLine } from '../../../Framework/Signum.React/Scripts/Search'
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -15,13 +18,15 @@ import { TypeEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entit
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
 import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal'
 import { ViewReplacer } from '../../../Framework/Signum.React/Scripts/Frames/ReactVisitor';
-
+import * as Lines from '../../../Framework/Signum.React/Scripts/Lines'
+import * as FileLineModule from '../Files/FileLine'
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import { DynamicViewEntity, DynamicViewSelectorEntity, DynamicViewOverrideEntity, DynamicViewMessage, DynamicViewOperation } from './Signum.Entities.Dynamic'
 import DynamicViewEntityComponent from './View/DynamicViewEntity' //Just Typing
 import * as DynamicClient from './DynamicClient'
 
-import { DynamicViewComponentProps } from './View/DynamicViewComponent'
+import * as DynamicViewComponent from './View/DynamicViewComponent'
+import { DynamicViewComponentProps, DynamicViewPart } from './View/DynamicViewComponent'
 import { AuthInfo } from './View/AuthInfo'
 import * as Nodes from './View/Nodes' //Typings-only
 
@@ -67,16 +72,16 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
                 return this.static(entity);
 
             if (viewName == "NEW")
-                return ViewPromise.flat(createDefaultDynamicView(entity.Type).then(dv => this.dynamicComponent(dv)));
+                return ViewPromise.flat(createDefaultDynamicView(entity.Type).then(dv => this.dynamicViewComponent(dv)));
 
             if (viewName == "CHOOSE")
-                return ViewPromise.flat(this.chooseDynamicView(entity.Type, true).then(dv => this.dynamicComponent(dv)));
+                return ViewPromise.flat(this.chooseDynamicView(entity.Type, true).then(dv => this.dynamicViewComponent(dv)));
 
-            return ViewPromise.flat(API.getDynamicView(entity.Type, viewName).then(dv => this.dynamicComponent(dv)));
+            return ViewPromise.flat(API.getDynamicView(entity.Type, viewName).then(dv => this.dynamicViewComponent(dv)));
         }));
     }
 
-    dynamicComponent(promiseDv: DynamicViewEntity): ViewPromise<ModifiableEntity> {
+    dynamicViewComponent(promiseDv: DynamicViewEntity): ViewPromise<ModifiableEntity> {
         return new ViewPromise(resolve => require(['./View/DynamicViewComponent'], resolve))
             .withProps({ initialDynamicView: promiseDv });
     }
@@ -84,8 +89,13 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
     fallback(entity: ModifiableEntity): ViewPromise<ModifiableEntity> {
         const settings = Navigator.getSettings(entity.Type) as EntitySettings<ModifiableEntity>;
 
-        if (!settings || !settings.getViewPromise)
-            return ViewPromise.flat(this.chooseDynamicView(entity.Type, true).then(dv => this.dynamicComponent(dv)));
+        if (!settings || !settings.getViewPromise) {
+
+            if (!isTypeEntity(entity.Type))
+               return new ViewPromise(resolve => require(['../../../Framework/Signum.React/Scripts/Lines/DynamicComponent'], resolve));
+
+            return ViewPromise.flat(this.chooseDynamicView(entity.Type, true).then(dv => this.dynamicViewComponent(dv)));
+        }
 
         var staticViewPromise = settings.getViewPromise(entity).applyViewOverrides(settings);
 
@@ -241,7 +251,58 @@ export function getViewOverride(typeName: string): Promise<((rep: ViewReplacer<E
 export function asOverrideFunction(dvr: DynamicViewOverrideEntity): (e: ViewReplacer<Entity>, auth: AuthInfo) => string {
     let code = dvr.script!;
 
-    var ValueLine: any = ValueLine;
+    // Lines
+    var ValueLine = Lines.ValueLine;
+    var EntityLine = Lines.EntityLine;
+    var EntityCombo = Lines.EntityCombo;
+    var EnumCheckboxList = Lines.EnumCheckboxList;
+    var EntityCheckboxList = Lines.EntityCheckboxList;
+    var EntityDetail = Lines.EntityDetail;
+    var EntityList = Lines.EntityList;
+    var EntityRepeater = Lines.EntityRepeater;
+    var EntityTabRepeater = Lines.EntityTabRepeater;
+    var EntityStrip = Lines.EntityStrip;
+    var EntityTable = Lines.EntityTable;
+    var FormGroup = Lines.FormGroup;
+    var FormControlStatic = Lines.FormControlStatic;
+    var FileLine = FileLineModule.default;
+
+    // Search
+    var ValueSearchControlLine = Search.ValueSearchControlLine;
+
+    // ReactBootstrap
+    var Accordion = ReactBootstrap.Accordion;
+    var Badge = ReactBootstrap.Badge;
+    var Button = ReactBootstrap.Button;
+    var ButtonGroup = ReactBootstrap.ButtonGroup;
+    var ButtonToolbar = ReactBootstrap.ButtonToolbar;
+    var Carousel = ReactBootstrap.Carousel;
+    var Checkbox = ReactBootstrap.Checkbox;
+    var Collapse = ReactBootstrap.Collapse;
+    var Dropdown = ReactBootstrap.Dropdown;
+    var DropdownButton = ReactBootstrap.DropdownButton;
+    var DropdownMenu = ReactBootstrap.DropdownMenu;
+    var DropdownToggle = ReactBootstrap.DropdownToggle;
+    var Image = ReactBootstrap.Image;
+    var Label = ReactBootstrap.Label;
+    var ListGroup = ReactBootstrap.ListGroup;
+    var MenuItem = ReactBootstrap.MenuItem;
+    var Nav = ReactBootstrap.Nav;
+    var NavbarBrand = ReactBootstrap.NavbarBrand;
+    var NavDropdown = ReactBootstrap.NavDropdown;
+    var Overlay = ReactBootstrap.Overlay;
+    var Tabs = ReactBootstrap.Tabs;
+    var Tab = ReactBootstrap.Tab;
+    var Tooltip = ReactBootstrap.Tooltip;
+    var ProgressBar = ReactBootstrap.ProgressBar;
+
+    // ReactRouterBootstrap
+    var LinkContainer = ReactRouterBootstrap.LinkContainer;
+    var IndexLinkContainer = ReactRouterBootstrap.IndexLinkContainer;
+
+    // Custom
+    var DynamicViewPart = DynamicViewComponent.DynamicViewPart;
+
     code = "(function(vr, auth){ " + code + "})";
 
     try {
@@ -251,14 +312,12 @@ export function asOverrideFunction(dvr: DynamicViewOverrideEntity): (e: ViewRepl
     }
 }
 
-
 export function createDefaultDynamicView(typeName: string): Promise<DynamicViewEntity> {
     return loadNodes().then(nodes =>
-        Navigator.API.getType(typeName).then(t => DynamicViewEntity.New(dv => {
-            dv.entityType = t;
-            dv.viewName = "My View";
-            const node = nodes.NodeConstructor.createDefaultNode(getTypeInfo(typeName));
-            dv.viewContent = JSON.stringify(node);
+        Navigator.API.getType(typeName).then(t => DynamicViewEntity.New({
+            entityType : t,
+            viewName : "My View",
+            viewContent: JSON.stringify(nodes.NodeConstructor.createDefaultNode(getTypeInfo(typeName))),
         })));
 }
 
