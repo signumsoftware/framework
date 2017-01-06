@@ -198,7 +198,7 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
                 return Api.refreshToken(token).then(resp => {
                     setAuthToken(resp.token);
                     setCurrentUser(resp.userEntity)
-
+                    
                     options.headers!["Authorization"] = "Bearer " + resp.token;
 
                     return makeCall();
@@ -234,6 +234,7 @@ export function autoLogin(): Promise<UserEntity> {
     if (getAuthToken())
         return Api.fetchCurrentUser().then(u => {
             setCurrentUser(u);
+            Navigator.resetUI();
             return u;
         });
 
@@ -243,6 +244,7 @@ export function autoLogin(): Promise<UserEntity> {
                 Api.fetchCurrentUser()
                     .then(u => {
                         setCurrentUser(u);
+                        Navigator.resetUI();
                         resolve(u);
                     });
             } else {
@@ -254,6 +256,7 @@ export function autoLogin(): Promise<UserEntity> {
                         } else {
                             setAuthToken(respo.token);
                             setCurrentUser(respo.userEntity);
+                            Navigator.resetUI();
                             resolve(respo.userEntity);
                         }
                     });
