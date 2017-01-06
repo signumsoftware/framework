@@ -28,6 +28,11 @@ export function setCurrentHistory(history: HistoryModule.History) {
     currentHistory = history;
 }
 
+export let resetUI: () => void = () => { }; //Override in your Layout
+export function setResetUI(reset: () => void) {
+    resetUI = reset;
+}
+
 export namespace Expander {
     export let getExpanded: () => boolean;
     export let setExpanded: (isExpanded: boolean) => void;
