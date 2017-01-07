@@ -848,6 +848,27 @@ export class PropertyRoute {
         return new PropertyRoute(parent, "LiteEntity", undefined, undefined, undefined);
     }
 
+    
+
+    static parse(rootType: PseudoType, propertyString: string): PropertyRoute {
+        let result = PropertyRoute.root(rootType);
+        const parts = propertyString.replaceAll("/", ".&&.").trimEnd(".").split(".").map((p): LambdaMember =>
+        {
+            if (p == "&&")
+                return { type: "Indexer", name: "0" };
+
+
+            if (p.startsWith("[") && p.endsWith("]"))
+                return { type: "Mixin", name: p.trimStart("[").trimEnd("]") };
+
+            return { type: "Member", name: p };
+        });
+
+        parts.forEach(p => result = result.addMember(p));
+
+        return result;
+    }
+
     constructor(
         parent: PropertyRoute | undefined,
         propertyRouteType: PropertyRouteType,
