@@ -47,15 +47,25 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
         this.state = { history: [], historyIndex: -1 };
     }
 
-    static getExpression(pr: PropertyRoute, mode: DynamicClient.TypeHelpMode) : string {
-        return pr.propertyPath().split(".").map(a => {
-            if (a.trimStart("[") && a.endsWith("]"))
-                return mode == "Typescript" ?
-                    `mixins["${a.trimStart("[").trimEnd("]")}"]` :
-                    `Mixin<${a.trimStart("[").trimEnd("]")}>()`;
+    static getExpression(initial: string, pr: PropertyRoute | string, mode: DynamicClient.TypeHelpMode, options?: { stronglyTypedMixinTS?: boolean }): string {
+
+        if (pr instanceof PropertyRoute)
+            pr = pr.propertyPath();
+
+        return pr.split(".").reduce((prev, curr) => {
+            if (curr.trimStart("[") && curr.endsWith("]")) {
+                const mixin = curr.trimStart("[").trimEnd("]");
+                return mode == "CSharp" ?
+                    `${prev}.Mixin<${mixin}>()` :
+                    options && options.stronglyTypedMixinTS ?
+                        `getMixin(${prev}, ${mixin})` :
+                        `${prev}.mixins["${mixin}"]`;
+            }
             else
-                return mode == "Typescript" ? a.firstLower() : a;
-        }).join(".");
+                return mode == "Typescript" ?
+                    `${prev}.${curr.firstLower()}` :
+                    `${prev}.${curr}`;
+        }, initial);
     }
 
     componentWillMount() {

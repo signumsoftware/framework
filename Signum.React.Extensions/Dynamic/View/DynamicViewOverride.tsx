@@ -79,27 +79,27 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
         return Promise.resolve(true);
     }
 
-    handleRemoveClick = (expression: string) => {
-        setTimeout(() => this.showPropmt("Remove", `vr.remove(e => e.${expression})`), 0);
+    handleRemoveClick = (lambda: string) => {
+        setTimeout(() => this.showPropmt("Remove", `vr.remove(${lambda})`), 0);
     }
 
-    handleInsertBeforeClick = (expression: string) => {
-        setTimeout(() => this.showPropmt("InsertBefore", `vr.insertBefore(e => e.${expression}))}, yourElement);`), 0);
+    handleInsertBeforeClick = (lambda: string) => {
+        setTimeout(() => this.showPropmt("InsertBefore", `vr.insertBefore(${lambda}))}, yourElement);`), 0);
     }
 
-    handleInsertAfterClick = (expression: string) => {
-        setTimeout(() => this.showPropmt("InsertAfter", `vr.insertAfter(e => e.${expression}, yourElement);`), 0);
+    handleInsertAfterClick = (lambda: string) => {
+        setTimeout(() => this.showPropmt("InsertAfter", `vr.insertAfter(${lambda}, yourElement);`), 0);
     }
 
     handleRenderContextualMenu = (pr: PropertyRoute) => {
-        const expression = TypeHelpComponent.getExpression(pr, "Typescript");
+        const lambda = "e => " + TypeHelpComponent.getExpression("e", pr, "Typescript");
         return (
             <MenuItem>
                 <MenuItem header>{pr.propertyPath()}</MenuItem>
                 <MenuItem divider />
-                <MenuItem onClick={() => this.handleRemoveClick(expression)}><i className="fa fa-trash" aria-hidden="true" />&nbsp; Remove</MenuItem>
-                <MenuItem onClick={() => this.handleInsertBeforeClick(expression)}><i className="glyphicon glyphicon-menu-left" aria-hidden="true" />&nbsp; Insert Before</MenuItem>
-                <MenuItem onClick={() => this.handleInsertAfterClick(expression)}><i className="glyphicon glyphicon-menu-right" aria-hidden="true" />&nbsp; Insert After</MenuItem>
+                <MenuItem onClick={() => this.handleRemoveClick(lambda)}><i className="fa fa-trash" aria-hidden="true" />&nbsp; Remove</MenuItem>
+                <MenuItem onClick={() => this.handleInsertBeforeClick(lambda)}><i className="glyphicon glyphicon-menu-left" aria-hidden="true" />&nbsp; Insert Before</MenuItem>
+                <MenuItem onClick={() => this.handleInsertAfterClick(lambda)}><i className="glyphicon glyphicon-menu-right" aria-hidden="true" />&nbsp; Insert After</MenuItem>
             </MenuItem>
         );
     }
