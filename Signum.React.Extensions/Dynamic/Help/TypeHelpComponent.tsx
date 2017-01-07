@@ -4,7 +4,7 @@ import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { ajaxPost, ajaxGet } from '../../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings, ViewPromise } from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { EntityData, EntityKind, isTypeEnum } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { EntityData, EntityKind, isTypeEnum, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { EntityOperationSettings } from '../../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
 import * as EntityOperations from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
@@ -16,14 +16,16 @@ import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahea
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { DynamicTypeEntity, DynamicTypeOperation, DynamicPanelPermission, DynamicSqlMigrationEntity } from '../Signum.Entities.Dynamic'
 import * as DynamicClient from '../DynamicClient'
+import ContextMenu from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
+import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
 
 require("!style!css!./TypeHelpComponent.css");
 
 interface TypeHelpComponentProps {
     initialType?: string;
     mode: DynamicClient.TypeHelpMode;
-    onMemberClick?: (name: string) => void;
-    onContextMenu?: (name: string, e: React.MouseEvent) => void;
+    onMemberClick?: (pr?: PropertyRoute) => void;
+    renderContextMenu?: (pr?: PropertyRoute) => React.ReactElement<any>;
 }
 
 interface TypeHelpComponentState {
@@ -31,6 +33,11 @@ interface TypeHelpComponentState {
     historyIndex: number;
     help?: DynamicClient.TypeHelp | false;
     tempQuery?: string;
+
+    selected?: PropertyRoute;
+    contextualMenu?: {
+        position: ContextMenuPosition;
+    };
 }
 
 export default class TypeHelpComponent extends React.Component<TypeHelpComponentProps, TypeHelpComponentState> {
@@ -38,6 +45,17 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
     constructor(props: TypeHelpComponentProps) {
         super(props);
         this.state = { history: [], historyIndex: -1 };
+    }
+
+    static getExpression(pr: PropertyRoute, mode: DynamicClient.TypeHelpMode) : string {
+        return pr.propertyPath().split(".").map(a => {
+            if (a.trimStart("[") && a.endsWith("]"))
+                return mode == "Typescript" ?
+                    `mixins["${a.trimStart("[").trimEnd("]")}"]` :
+                    `Mixin<${a.trimStart("[").trimEnd("]")}>()`;
+            else
+                return mode == "Typescript" ? a.firstLower() : a;
+        }).join(".");
     }
 
     componentWillMount() {
@@ -85,13 +103,29 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
 
     render() {
         return (
-            <div className="sf-dynamic-type-help">
+            <div className="sf-dynamic-type-help" ref={(th) => { this.typeHelpContainer = th } }>
                 {this.renderHeader()}
                 {this.state.help == undefined ? <h4>Loading {this.currentType()}…</h4> : 
                     this.state.help == false ? <h4>Not found {this.currentType()}</h4> :
                         this.renderHelp(this.state.help)}
+                {this.state.contextualMenu && this.renderContextualMenu()}
             </div>
         );
+    }
+
+    renderContextualMenu() {
+        let menu = this.props.renderContextMenu!(this.state.selected!);
+        return (menu && <ContextMenu position={this.state.contextualMenu!.position} onHide={this.handleContextOnHide}>
+            {menu.props.children}
+        </ContextMenu>)
+    }
+
+
+    handleContextOnHide = () => {
+        this.setState({
+            selected: undefined,
+            contextualMenu: undefined
+        });
     }
 
     input: HTMLInputElement;
@@ -149,47 +183,59 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
             </div>
         );
     }
+    typeHelpContainer: HTMLElement;
 
     renderHelp(h: DynamicClient.TypeHelp) {
         return (
             <div>
                 <h4>{h.type}</h4>
-
+             
                 <ul className="sf-dynamic-members" style={{ paddingLeft: "0px" }}>
-                    {h.members.map((m, i) => this.renderMember(h, m, i, true))}
+                    {h.members.map((m, i) => this.renderMember(h, m, i))}
                 </ul>
             </div>
         );
     }
 
-    handleOnMemberClick = (name: string | undefined) => {
-
-        if (name && this.props.onMemberClick)
-            this.props.onMemberClick(name);
+    handleOnMemberClick = (m: DynamicClient.TypeMemberHelp) => {
+        if (this.props.onMemberClick && m.propertyString) {
+            var pr = PropertyRoute.parse((this.state.help as DynamicClient.TypeHelp).cleanTypeName, m.propertyString);
+            this.props.onMemberClick(pr);
+        }
     }
 
-    handleOnContextMenuClick = (name: string | undefined, e: React.MouseEvent) => {
+    handleOnContextMenuClick = (m: DynamicClient.TypeMemberHelp, e: React.MouseEvent) => {
 
-        if (name && this.props.onContextMenu)
-            this.props.onContextMenu(name, e);
+        if (!m.propertyString)
+            return;
+
+        e.preventDefault();
+        e.stopPropagation();
+        var pr = PropertyRoute.parse((this.state.help as DynamicClient.TypeHelp).cleanTypeName, m.propertyString);
+
+        this.setState({
+            selected: pr,
+            contextualMenu: {
+                position: ContextMenu.getPosition(e, this.typeHelpContainer)
+            }
+        });
     }
 
-    renderMember(h: DynamicClient.TypeHelp, m: DynamicClient.TypeMemberHelp, index: number, considerOnMemberClick: boolean): React.ReactChild {
+    renderMember(h: DynamicClient.TypeHelp, m: DynamicClient.TypeMemberHelp, index: number): React.ReactChild {
 
         var className = "sf-dynamic-member-name";
         var onClick: React.MouseEventHandler | undefined;
         var onContextMenu: React.MouseEventHandler | undefined;
 
-        if (considerOnMemberClick) {
+        
             if (this.props.onMemberClick) {
                 className = classes(className, "sf-dynamic-member-click");
-                onClick = () => this.handleOnMemberClick(m.name);
+                onClick = () => this.handleOnMemberClick(m);
             }
 
-            if (this.props.onContextMenu) {
-                onContextMenu = (e) => this.handleOnContextMenuClick(m.name, e);
+            if (this.props.renderContextMenu) {
+                onContextMenu = (e) => this.handleOnContextMenuClick(m, e);
             }
-        }
 
         return (
             <li key={index}>
@@ -202,12 +248,12 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
                                 {this.renderType(m.type, m.cleanTypeName)}{" "}<span className={className} onClick={onClick} onContextMenu={onContextMenu}>{m.name}{m.name && (m.isExpression ? "()" : "")}</span>
                             </span> :
                             <span>
-                                <span className={className} onClick={onClick} onContextMenu={onContextMenu}>{m.name}</span>{": "}{this.renderType(m.type, m.cleanTypeName)}
+                                <span className={className} onClick={onClick} onContextMenu={onContextMenu}>{m.name ? m.name + ": " : ""}</span>{this.renderType(m.type, m.cleanTypeName)}
                             </span>}
 
                         {m.subMembers.length > 0 &&
                             <ul className="sf-dynamic-members">
-                                {m.subMembers.map((sm, i) => this.renderMember(h, sm, i, false))}
+                                {m.subMembers.map((sm, i) => this.renderMember(h, sm, i))}
                             </ul>}
                     </div>}
             </li>

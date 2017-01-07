@@ -226,6 +226,7 @@ namespace Signum.React.Dynamic
 
     public class TypeMemberHelpTS
     {
+        public string propertyString;
         public string name; 
         public string type;
         public string cleanTypeName;
@@ -237,7 +238,7 @@ namespace Signum.React.Dynamic
         public TypeMemberHelpTS(Node<PropertyRoute> node, TypeHelpMode mode)
         {
             var pr = node.Value;
-
+            this.propertyString = pr.PropertyString();
             this.name = mode == TypeHelpMode.Typescript ? 
                 pr.PropertyInfo?.Name.FirstLower() : 
                 pr.PropertyInfo?.Name;

@@ -96,6 +96,7 @@ export interface TypeHelp {
 }
 
 export interface TypeMemberHelp {
+    propertyString: string;
     name?: string; //Mixins, MListElements
     type: string;
     isExpression: boolean;
