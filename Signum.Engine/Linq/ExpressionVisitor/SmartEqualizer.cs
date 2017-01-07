@@ -49,8 +49,14 @@ namespace Signum.Engine.Linq
 
         public static Expression PolymorphicEqual(Expression exp1, Expression exp2)
         {
-            if (exp1.NodeType == ExpressionType.New && exp2.NodeType == ExpressionType.New)
+            if (exp1.NodeType == ExpressionType.New || exp2.NodeType == ExpressionType.New)
             {
+                if (exp1.IsNull() || exp2.IsNull())
+                    return Expression.Constant(false);
+
+                exp1 = ConstanToNewExpression(exp1) ?? exp1;
+                exp2 = ConstanToNewExpression(exp2) ?? exp2;
+
                 return (exp1 as NewExpression).Arguments.ZipStrict(
                        (exp2 as NewExpression).Arguments, (o, i) => SmartEqualizer.PolymorphicEqual(o, i)).AggregateAnd();
             }
@@ -89,6 +95,25 @@ namespace Signum.Engine.Linq
                 return result;
 
             return EqualNullable(exp1, exp2);
+        }
+
+        private static Expression ConstanToNewExpression(Expression exp)
+        {
+            var ce = exp as ConstantExpression;
+
+            if (ce == null)
+                return null;
+
+            var type = ce.Value.GetType();
+
+            if (!type.IsAnonymous())
+                return null;
+
+            var values = type.GetProperties().ToDictionary(a => a.Name, a => a.GetValue(ce.Value));
+
+            var ci = type.GetConstructors().SingleEx();
+
+            return Expression.New(ci, ci.GetParameters().Select(p => Expression.Constant(values.GetOrThrow(p.Name), p.ParameterType)));
         }
 
         public static Expression PrimaryKeyEquals(Expression exp1, Expression exp2)

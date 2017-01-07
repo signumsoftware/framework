@@ -142,6 +142,8 @@ namespace Signum.Windows.Operations
                                 IEntity newIdent = Server.Return((IOperationServer s) => s.ExecuteOperationLite(lite, eoc.OperationInfo.OperationSymbol, null));
                                 if (eoc.OperationInfo.Returns)
                                     eoc.EntityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
+                                if (eoc.OperationSettings != null && eoc.OperationSettings.AutoClose)
+                                     eoc.EntityControl.RaiseEvent(new CloseFormEventArgs());
                             }
                         }
                     }
@@ -151,10 +153,12 @@ namespace Signum.Windows.Operations
                         {
                             try
                             {
-
                                 IEntity newIdent = Server.Return((IOperationServer s) => s.ExecuteOperation(ident, eoc.OperationInfo.OperationSymbol, null));
                                 if (eoc.OperationInfo.Returns)
                                     eoc.EntityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
+                                if (eoc.OperationSettings != null && eoc.OperationSettings.AutoClose)
+                                    eoc.EntityControl.RaiseEvent(new CloseFormEventArgs());
+
                             }
                             catch (IntegrityCheckException e)
                             {
@@ -209,7 +213,7 @@ namespace Signum.Windows.Operations
                     {
                         Lite<Entity> lite = ident.ToLite();
                         Server.Execute((IOperationServer s) => s.DeleteLite(lite, eoc.OperationInfo.OperationSymbol, null));
-                        Window.GetWindow(eoc.EntityControl).Close();
+                        eoc.EntityControl.RaiseEvent(new CloseFormEventArgs());
                     }
                 }
             }

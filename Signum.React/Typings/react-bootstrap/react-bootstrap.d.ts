@@ -340,6 +340,7 @@ declare namespace ReactBootstrap {
         onExited?: (node: HTMLElement) => any;
         onExiting?: (node: HTMLElement) => any;
         show?: boolean;
+        bsClass?: string;
     }
     interface ModalClass extends React.ClassicComponentClass<ModalProps> {
         Body: typeof ModalBody;
@@ -507,6 +508,20 @@ declare namespace ReactBootstrap {
     type NavbarHeader = React.ClassicComponent<NavbarHeaderProps, {}>;
     var NavbarHeader: React.ClassicComponentClass<NavbarHeaderProps>;
 
+    // <Navbar.Text />
+    interface NavbarTextProps extends React.HTMLProps<NavbarText> {
+        pullRight?: boolean;
+    }
+    type NavbarText = React.ClassicComponent<NavbarTextProps, {}>;
+    var NavbarText: React.ClassicComponentClass<NavbarTextProps>;
+
+    // <Navbar.Link />
+    interface NavbarLinkProps extends React.HTMLProps<NavbarLink> {
+        pullRight?: boolean;
+    }
+    type NavbarLink = React.ClassicComponent<NavbarLinkProps, {}>;
+    var NavbarLink: React.ClassicComponentClass<NavbarLinkProps>;
+
     // <Navbar.Toggle />
     interface NavbarToggleProps {
     }
@@ -535,6 +550,8 @@ declare namespace ReactBootstrap {
         Collapse: typeof NavbarCollapse;
         Header: typeof NavbarHeader;
         Toggle: typeof NavbarToggle;
+        Text: typeof NavbarText;
+        Link: typeof NavbarLink;
     }
     type Navbar = React.ClassicComponent<NavbarProps, {}>;
     var Navbar: NavbarClass;
@@ -708,6 +725,7 @@ declare namespace ReactBootstrap {
 
     // <Grid />
     interface GridProps extends React.HTMLProps<Grid> {
+        bsClass?: string;
         componentClass?: React.ReactType;
         fluid?: boolean;
     }
@@ -717,6 +735,7 @@ declare namespace ReactBootstrap {
     // <Row />
     interface RowProps extends React.HTMLProps<Row> {
         componentClass?: React.ReactType;
+        bsClass?: string;
     }
     type Row = React.ClassicComponent<RowProps, {}>;
     var Row: React.ClassicComponentClass<RowProps>;
@@ -724,6 +743,7 @@ declare namespace ReactBootstrap {
     // <Col />
     interface ColProps extends React.HTMLProps<Col> {
         componentClass?: React.ReactType;
+        bsClass?: string;
         lg?: number;
         lgHidden?: boolean;
         lgOffset?: number;
