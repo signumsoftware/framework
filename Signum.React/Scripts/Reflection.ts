@@ -573,6 +573,7 @@ const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
 const memberIndexerRegex = /^(.*)\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; //Necessary for some crazy minimizers
 const indexRegex = /^(.*)\[(\d+)\]$/;
 const mixinRegex = /^(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)$/
+const mixinIndexerRegex = /^(.*).mixins\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; 
 const partialMixinRegex = /(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)/
 
 export function getLambdaMembers(lambda: Function): LambdaMember[]{
@@ -590,7 +591,11 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
 
     while (body != parameter) {
         let m: RegExpExecArray | null;
-        if (m = memberRegex.exec(body) || memberIndexerRegex.exec(body)) {
+        if (m = mixinIndexerRegex.exec(body)) {
+            result.push({ name: m[2], type: "Mixin" });
+            body = m[1];
+        }
+        else if (m = memberRegex.exec(body) || memberIndexerRegex.exec(body)) {
             result.push({ name: m[2], type: "Member" });
             body = m[1];
         }
@@ -601,7 +606,8 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
         else if (m = mixinRegex.exec(body)) {
             result.push({ name: m[4], type: "Mixin" });
             body = m[2];
-        } else {
+        }
+        else {
             throw new Error(`Unexpected body in Property Route ${body}`);
         }
     }
