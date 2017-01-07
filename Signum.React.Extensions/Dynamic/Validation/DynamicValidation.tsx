@@ -121,7 +121,7 @@ export default class DynamicValidation extends React.Component<DynamicValidation
 
         ValueLineModal.show({
             type: { name: "string" },
-            initialValue: prefix + "." + TypeHelpComponent.getExpression(pr, "CSharp"),
+            initialValue: TypeHelpComponent.getExpression(prefix, pr, "CSharp"),
             valueLineType: ValueLineType.TextArea,
             title: "Mixin Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
@@ -198,7 +198,7 @@ class PropertyRouteCombo extends React.Component<PropertyRouteComboProps, void> 
 
     handleChange = (e: React.FormEvent) => {
         var currentValue = (e.currentTarget as HTMLSelectElement).value;
-        this.props.ctx.value = currentValue ? PropertyRouteEntity.New({ path : currentValue, rootType : this.props.type }) : null;
+        this.props.ctx.value = currentValue ? PropertyRouteEntity.New(e => { e.path = currentValue; e.rootType = this.props.type; }) : null;
         this.forceUpdate();
         if (this.props.onChange)
             this.props.onChange();
