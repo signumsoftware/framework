@@ -243,9 +243,9 @@ export function synchronizeColumns(chart: IChartBase) {
             const sc = chart.chartScript!.columns![i]
             if (chart.groupResults == false || sc && sc.element.isGroupKey) {
                 const parentToken = cc.token.token!.parent;
-                cc.token = parentToken == undefined ? undefined : QueryTokenEntity.New(t => {
-                    t.tokenString = parentToken && parentToken.fullKey;
-                    t.token = parentToken;
+                cc.token = parentToken == undefined ? undefined : QueryTokenEntity.New({
+                    tokenString : parentToken && parentToken.fullKey,
+                    token : parentToken
                 });
             }
         }
@@ -341,15 +341,15 @@ export module Decoder {
 
                     cols.filter(a => a.element.token != null).forEach(a => a.element.token!.token = completer.get(a.element.token!.tokenString));
 
-                    const chartRequest = ChartRequest.New(cr => {
-                        cr.chartScript = query.script == undefined ? scripts.first("ChartScript").first() :
-                            scripts.flatMap(a => a).filter(cs => cs.name == query.script).single(`ChartScript '${query.queryKey}'`);
-                        cr.queryKey = getQueryKey(queryName);
-                        cr.groupResults = query.groupResults == "true";
-                        cr.filterOptions = fos.map(fo => ({ token: completer.get(fo.columnName), operation: fo.operation, value: fo.value, frozen: fo.frozen }) as FilterOptionParsed);
-                        cr.orderOptions = oos.map(oo => ({ token: completer.get(oo.columnName), orderType: oo.orderType }) as OrderOptionParsed);
-                        cr.columns = cols;
-                        cr.parameters = Decoder.decodeParameters(query);
+                    const chartRequest = ChartRequest.New({
+                        chartScript : query.script == undefined ? scripts.first("ChartScript").first() :
+                            scripts.flatMap(a => a).filter(cs => cs.name == query.script).single(`ChartScript '${query.queryKey}'`),
+                        queryKey : getQueryKey(queryName),
+                        groupResults : query.groupResults == "true",
+                        filterOptions : fos.map(fo => ({ token: completer.get(fo.columnName), operation: fo.operation, value: fo.value, frozen: fo.frozen }) as FilterOptionParsed),
+                        orderOptions : oos.map(oo => ({ token: completer.get(oo.columnName), orderType: oo.orderType }) as OrderOptionParsed),
+                        columns : cols,
+                        parameters : Decoder.decodeParameters(query),
                     });
 
                     return Finder.parseFilterValues(chartRequest.filterOptions)
@@ -364,25 +364,27 @@ export module Decoder {
     const valuesInOrder = Finder.Decoder.valuesInOrder;
 
     export function decodeColumns(query: any): MList<ChartColumnEntity> {
-        return valuesInOrder(query, "column").map(val => ({
-            rowId: null,
-            element: ChartColumnEntity.New(cc => {
-                const ts = (val.contains("~") ? val.before("~") : val).trim();
+        return valuesInOrder(query, "column").map(val => {
+            const ts = (val.contains("~") ? val.before("~") : val).trim();
 
-                cc.token = !!ts ? QueryTokenEntity.New(qte => {
-                    qte.tokenString = ts;
-                }) : undefined;
-                cc.displayName = unscapeTildes(val.tryAfter("~"));
-            })
-        }));
+            return ({
+                rowId: null,
+                element: ChartColumnEntity.New({
+                    token: !!ts ? QueryTokenEntity.New({
+                        tokenString: ts,
+                    }) : undefined,
+                    displayName: unscapeTildes(val.tryAfter("~")),
+                })
+            });
+        });
     }
 
     export function decodeParameters(query: any): MList<ChartParameterEntity> {
         return valuesInOrder(query, "param").map(val => ({
             rowId: null,
-            element: ChartParameterEntity.New(cp => {
-                cp.name = unscapeTildes(val.before("~"));
-                cp.value = unscapeTildes(val.after("~"));
+            element: ChartParameterEntity.New({
+                name : unscapeTildes(val.before("~")),
+                value : unscapeTildes(val.after("~")),
             })
         }));
     }

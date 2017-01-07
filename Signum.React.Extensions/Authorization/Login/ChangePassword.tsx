@@ -30,6 +30,7 @@ export default class ChangePassword extends React.Component<{}, { modelState?: M
         AuthClient.Api.changePassword(request)
             .then(user => {
                 AuthClient.setCurrentUser(user);
+                Navigator.resetUI();
                 this.setState({ success: true });
             })
             .catch((e: ValidationError) => {

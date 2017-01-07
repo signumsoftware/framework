@@ -75,7 +75,7 @@ export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(WorkflowActivityModel, w => new ViewPromise(m => require(['./Templates/WorkflowActivityModel'], m))));
     Navigator.addSettings(new EntitySettings(WorkflowReplacementModel, w => new ViewPromise(m => require(['./Templates/WorkflowReplacementComponent'], m))));
     Navigator.addSettings(new EntitySettings(WorkflowConditionEntity, w => new ViewPromise(m => require(['./Templates/WorkflowConditionEntity'], m))));
-    Constructor.registerConstructor(WorkflowConditionEntity, () => WorkflowConditionEntity.New(f => f.eval = WorkflowConnectionEval.New()));
+    Constructor.registerConstructor(WorkflowConditionEntity, () => WorkflowConditionEntity.New({ eval: WorkflowConnectionEval.New() }));
    
 }
 
@@ -84,9 +84,12 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Entit
     let wf = eoc.frame.entityComponent as Workflow;
     wf.getXml()
         .then(xml => {
-            var model = WorkflowModel.New(wm => {
-                wm.diagramXml = xml;
-                wm.entities = Dic.map(wf.state.entities!, (bpmnId, model) => newMListElement(BpmnEntityPair.New(p => { p.bpmnElementId = bpmnId; p.model = model; })));
+            var model = WorkflowModel.New({
+                diagramXml : xml,
+                entities: Dic.map(wf.state.entities!, (bpmnId, model) => newMListElement(BpmnEntityPair.New({
+                    bpmnElementId: bpmnId,
+                    model: model
+                })))
             });
 
             var promise = eoc.entity.isNew ?

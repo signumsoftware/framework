@@ -61,9 +61,9 @@ export function start(options: { routes: JSX.Element[] }) {
             }).done();
         }, { isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery) }));
 
-    Constructor.registerConstructor<QueryFilterEntity>(QueryFilterEntity, () => QueryFilterEntity.New(f => f.token = QueryTokenEntity.New()));
-    Constructor.registerConstructor<QueryOrderEntity>(QueryOrderEntity, () => QueryOrderEntity.New(o => o.token = QueryTokenEntity.New()));
-    Constructor.registerConstructor<QueryColumnEntity>(QueryColumnEntity, () => QueryColumnEntity.New(c => c.token = QueryTokenEntity.New()));
+    Constructor.registerConstructor<QueryFilterEntity>(QueryFilterEntity, () => QueryFilterEntity.New({ token: QueryTokenEntity.New() }));
+    Constructor.registerConstructor<QueryOrderEntity>(QueryOrderEntity, () => QueryOrderEntity.New({token : QueryTokenEntity.New() }));
+    Constructor.registerConstructor<QueryColumnEntity>(QueryColumnEntity, () => QueryColumnEntity.New({ token : QueryTokenEntity.New() }));
 
     Navigator.addSettings(new EntitySettings(UserQueryEntity, e => new ViewPromise(resolve => require(['./Templates/UserQuery'], resolve)), { isCreable: "Never" }));
 }

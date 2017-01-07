@@ -48,7 +48,7 @@ export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelRe
 
     handleCreate = () => {
         Finder.API.fetchQueryEntity(this.props.searchControl.props.findOptions.queryKey)
-            .then(qe => ExcelReportEntity.New(er => er.query = qe))
+            .then(qe => ExcelReportEntity.New({ query: qe }))
             .then(er => Navigator.view(er))
             .then(() => this.reloadList())
             .done();

@@ -13,7 +13,8 @@
 	Icon="..\Images\keysicon.png"
     Background="#000000FF" AllowsTransparency="True" WindowStyle="None" BorderThickness="10"
     MouseLeftButtonDown="window_MouseLeftButtonDown"
-	>
+	FlowDirection="{DynamicResource FlowDirection}"
+    >
     <Window.Effect>
         <DropShadowEffect ShadowDepth="0" BlurRadius="8" Opacity="0.405"/>
     </Window.Effect>
@@ -75,7 +76,8 @@
 
          
 
-            <Button x:Name="btLogin" Margin="0,22,8,0" Content="Login" Grid.Column="2" Grid.Row="9" IsDefault="True" Click="btLogin_Click" VerticalAlignment="Top" Height="25" HorizontalAlignment="Right" Width="80" />
+            <Button x:Name="btLogin" Margin="0,22,8,0" Content="{x:Static d:AuthMessage.Login}" Grid.Column="2" Grid.Row="9" IsDefault="True" Click="btLogin_Click" VerticalAlignment="Top" Height="25" HorizontalAlignment="Right" Width="80" />
+
             <!--<Button x:Name="btSalir" Content="Salir" Grid.Column="2" Grid.Row="4" HorizontalAlignment="Right" Width="80" IsCancel="True" Height="25" VerticalAlignment="Top" Margin="0,22,8,0" Click="btSalir_Click" />-->
             <TextBlock Name="tbCompanyName" Text="{Binding CompanyName}" FontSize="21.333" Grid.Row="1" Grid.ColumnSpan="2" Grid.Column="1"/>
             <TextBlock Name="tbProductName" Text="{Binding ProductName}" FontSize="32" FontFamily="Calibri" Grid.Row="2" Grid.ColumnSpan="2" Grid.Column="1" Margin="0,-3,0,0"/>

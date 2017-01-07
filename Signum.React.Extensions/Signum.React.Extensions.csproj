@@ -564,7 +564,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Chart\ChartColor\" />
-    <Folder Include="Requests\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Map\Signum.Entities.Map.t4s" />
