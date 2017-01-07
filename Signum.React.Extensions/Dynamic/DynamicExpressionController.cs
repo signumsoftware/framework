@@ -44,7 +44,7 @@ namespace Signum.Entities.Dynamic
         //[ExpressionField]
         public static {de.ReturnType} {de.Name}({de.FromType} e)
         {{
-            return {de.Name}Expression.Evaluate(e);
+            return {de.Name}Expression.Compile().Invoke(e);
         }}
 
         public object EvaluateUntyped(Entity e){{
