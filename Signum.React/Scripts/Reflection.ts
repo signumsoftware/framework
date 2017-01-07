@@ -1020,10 +1020,19 @@ export class PropertyRoute {
                 })
                 .toObject(m => m.name.substring(path.length))
         }
+
+        function mixinMembers(type: TypeInfo) {
+            var mixins = Dic.getValues(type.members).filter(a => a.name.startsWith("[")).groupBy(a => a.name.after("[").before("]")).map(a => a.key);
+
+            return mixins.flatMap(mn => Dic.getValues(simpleMembersAfter(type, `[${mn}].`))).toObject(a => a.name);
+        }
         
 
         switch (this.propertyRouteType) {
-            case "Root": return simpleMembersAfter(this.findRootType(), "");
+            case "Root": return {
+                ...simpleMembersAfter(this.findRootType(), ""),
+                ...mixinMembers(this.findRootType())
+            };
             case "Mixin": return simpleMembersAfter(this.findRootType(), this.propertyPath());                
             case "LiteEntity": return simpleMembersAfter(this.typeReferenceInfo(), "");
             case "Field":
