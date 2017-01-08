@@ -54,18 +54,15 @@ namespace Signum.React.Dynamic
             System.Web.HttpRuntime.UnloadAppDomain();
         }
 
-        [Route("api/dynamic/pingServer"), HttpPost]
-        public HttpResponseMessage PingServer()
+        [Route("api/dynamic/startErrors"), HttpGet]
+        public List<HttpError> GetStartErrors()
         {
-            if (DynamicLogic.CodeGenError != null)
-            {
-                var error = new HttpError(DynamicLogic.CodeGenError, true);
-                error.ExceptionMessage = DynamicTypeMessage.ServerRestartedWithErrorsInDynamicCodeFixErrorsAndRestartAgain.NiceToString() + "\r\n\r\n" + error.ExceptionMessage;
-                return Request.CreateResponse<HttpError>(HttpStatusCode.InternalServerError, error);
-            }
-
-            return Request.CreateResponse(HttpStatusCode.NoContent);
+            return StartParameters.IgnoredCodeErrors.EmptyIfNull()
+                .PreAnd(DynamicLogic.CodeGenError).NotNull()
+                .Select(e => new HttpError(e, true))
+                .ToList();
         }
+
 
         [Route("api/dynamic/autocompleteEntityCleanType"), HttpPost]
         public List<string> AutocompleteEntityCleanType(AutocompleteEntityCleanTypeRequest request)

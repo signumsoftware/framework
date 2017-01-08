@@ -1,7 +1,7 @@
 
 import * as React from 'react'
 import { Route } from 'react-router'
-import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
+import { ajaxPost, ajaxGet, WebApiHttpError } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { EntityData, EntityKind } from '../../../Framework/Signum.React/Scripts/Reflection'
@@ -54,8 +54,8 @@ export namespace API {
         return ajaxPost<void>({ url: `~/api/dynamic/restartServer` }, null);
     }
 
-    export function pingServer(): Promise<void> {
-        return ajaxPost<void>({ url: `~/api/dynamic/pingServer` }, null);
+    export function getStartErrors(): Promise<WebApiHttpError[]> {
+        return ajaxGet<WebApiHttpError[]>({ url: `~/api/dynamic/startErrors` });
     }
     
     export function autocompleteEntityCleanType(request: AutocompleteEntityCleanType): Promise<string[]> {
