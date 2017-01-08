@@ -13,8 +13,6 @@ import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator
 import { ViewReplacer } from '../../../../Framework/Signum.React/Scripts/Frames/ReactVisitor';
 import TypeHelpComponent from '../Help/TypeHelpComponent'
 import { AuthInfo } from './AuthInfo'
-import ContextMenu from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
-import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
 
@@ -30,10 +28,6 @@ interface DynamicViewOverrideComponentState {
     scriptChanged?: boolean;
     viewNames?: string[];
     typeHelp?: DynamicClient.TypeHelp;
-    selectedMemberName?: string;
-    contextualMenu?: {
-        position: ContextMenuPosition;
-    };
 }
 
 export default class DynamicViewOverrideComponent extends React.Component<DynamicViewOverrideComponentProps, DynamicViewOverrideComponentState> {
@@ -44,7 +38,6 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
         this.state = {};
     }
 
-    typeHelpContainer: HTMLElement;
 
     componentWillMount() {
         this.updateViewNames(this.props);
@@ -86,48 +79,28 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
         return Promise.resolve(true);
     }
 
-    handleTypeHelpContextMenu = (name: string, e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        this.setState({
-            selectedMemberName: name,
-            contextualMenu: {
-                position: ContextMenu.getPosition(e, this.typeHelpContainer)
-            }
-        });
+    handleRemoveClick = (lambda: string) => {
+        setTimeout(() => this.showPropmt("Remove", `vr.remove(${lambda})`), 0);
     }
 
-    handleContextOnHide = () => {
-        this.setState({
-            contextualMenu: undefined
-        });
+    handleInsertBeforeClick = (lambda: string) => {
+        setTimeout(() => this.showPropmt("InsertBefore", `vr.insertBefore(${lambda}))}, yourElement);`), 0);
     }
 
-    handleRemoveClick = () => {
-        setTimeout(() => this.showPropmt("Remove", `vr.remove(e => e.${this.state.selectedMemberName!})`), 0);
+    handleInsertAfterClick = (lambda: string) => {
+        setTimeout(() => this.showPropmt("InsertAfter", `vr.insertAfter(${lambda}, yourElement);`), 0);
     }
 
-    handleInsertBeforeClick = () => {
-        setTimeout(() => this.showPropmt("InsertBefore", `vr.insertBefore(e => e.${this.state.selectedMemberName!}, yourElement);`), 0);
-    }
-
-    handleInsertAfterClick = () => {
-        setTimeout(() => this.showPropmt("InsertAfter", `vr.insertAfter(e => e.${this.state.selectedMemberName!}, yourElement);`), 0);
-    }
-
-    renderContextualMenu() {
-        const cm = this.state.contextualMenu!;
-        const member = this.state.selectedMemberName!;
-
+    handleRenderContextualMenu = (pr: PropertyRoute) => {
+        const lambda = "e => " + TypeHelpComponent.getExpression("e", pr, "Typescript");
         return (
-            <ContextMenu position={cm.position} onHide={this.handleContextOnHide}>
-                <MenuItem header>{member}</MenuItem>
+            <MenuItem>
+                <MenuItem header>{pr.propertyPath()}</MenuItem>
                 <MenuItem divider />
-                <MenuItem onClick={this.handleRemoveClick}><i className="fa fa-trash" aria-hidden="true" />&nbsp; Remove</MenuItem>
-                <MenuItem onClick={this.handleInsertBeforeClick}><i className="glyphicon glyphicon-menu-left" aria-hidden="true" />&nbsp; Insert Before</MenuItem>
-                <MenuItem onClick={this.handleInsertAfterClick}><i className="glyphicon glyphicon-menu-right" aria-hidden="true" />&nbsp; Insert After</MenuItem>
-            </ContextMenu>
+                <MenuItem onClick={() => this.handleRemoveClick(lambda)}><i className="fa fa-trash" aria-hidden="true" />&nbsp; Remove</MenuItem>
+                <MenuItem onClick={() => this.handleInsertBeforeClick(lambda)}><i className="glyphicon glyphicon-menu-left" aria-hidden="true" />&nbsp; Insert Before</MenuItem>
+                <MenuItem onClick={() => this.handleInsertAfterClick(lambda)}><i className="glyphicon glyphicon-menu-right" aria-hidden="true" />&nbsp; Insert After</MenuItem>
+            </MenuItem>
         );
     }
 
@@ -146,9 +119,8 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
                                 {this.renderExampleEntity(ctx.value.entityType!.cleanName)}
                                 {this.renderEditor()}
                             </div>
-                            <div className="col-sm-5" ref={(th) => { this.typeHelpContainer = th } }>
-                            <TypeHelpComponent initialType={ctx.value.entityType.cleanName} mode="Typescript" onContextMenu={this.handleTypeHelpContextMenu} />
-                            {this.state.contextualMenu && this.renderContextualMenu()}
+                            <div className="col-sm-5">
+                                <TypeHelpComponent initialType={ctx.value.entityType.cleanName} mode="Typescript" renderContextMenu={this.handleRenderContextualMenu} />
                                 <br />
                             </div>
                         </div>
@@ -250,8 +222,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
                 {this.allViewNames().length > 0 && this.renderViewNameButtons()}
                 {this.allExpressions().length > 0 && <br />}
                 {this.allExpressions().length > 0 && this.renderExpressionsButtons()}
-                <pre style={{ border: "0px", margin: "0px" }}>{`(vr: ViewReplacer<${ctx.value.entityType!.className}>, 
-auth: AuthInfo) =>`}</pre>
+                <pre style={{ border: "0px", margin: "0px" }}>{`(vr: ViewReplacer<${ctx.value.entityType!.className}>, auth: AuthInfo) =>`}</pre>
                 <JavascriptCodeMirror code={ctx.value.script || ""} onChange={this.handleCodeChange} />
                 {this.state.syntaxError && <div className="alert alert-danger">{this.state.syntaxError}</div>}
             </div>
@@ -295,10 +266,6 @@ auth: AuthInfo) =>`}</pre>
     }
 
     showPropmt(title: string, text: string) {
-
-        this.setState({
-            selectedMemberName: undefined
-        });
 
         ValueLineModal.show({
             type: { name: "string" },

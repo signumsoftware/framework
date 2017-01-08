@@ -229,7 +229,7 @@ namespace Signum.Logic.Workflow
         static void InsertCaseActivityNotifications(CaseActivityEntity caseActivity)
         {
             Database.Query<UserEntity>()
-            .Where(u => caseActivity.WorkflowActivity.Lane.UserOrRoles.Contains(u.ToLite()) || caseActivity.WorkflowActivity.Lane.UserOrRoles.Contains(u.Role))
+            .Where(u => WorkflowLogic.IsLaneForCurrentUser.Evaluate(caseActivity.WorkflowActivity.Lane))
             .UnsafeInsert(u => new CaseNotificationEntity
             {
                 CaseActivity = caseActivity.ToLite(),

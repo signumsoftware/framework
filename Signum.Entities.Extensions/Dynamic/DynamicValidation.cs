@@ -3,6 +3,7 @@ using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -26,6 +27,8 @@ namespace Signum.Entities.Dynamic
         [NotNullValidator]
         public PropertyRouteEntity PropertyRoute { get; set; }
 
+        public static Func<DynamicValidationEntity, Type> GetMainType; 
+
         public bool IsGlobalyEnabled { get; set; }
 
         [NotNullable]
@@ -48,17 +51,14 @@ namespace Signum.Entities.Dynamic
 
     public class DynamicValidationEval : EvalEntity<IDynamicValidationEvaluator>
     {
-        static Func<DynamicValidationEval, IEnumerable<string>> GetAllowedAssemblies = de => Eval.BasicAssemblies;
-        static Func<DynamicValidationEval, IEnumerable<string>> GetAllowedNamespaces = de => Eval.BasicNamespaces;
-        
         protected override CompilationResult Compile()
         {
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");
-            var entityTypeName = ((DynamicValidationEntity)this.GetParentEntity()).EntityType.ToType().FullName;
+            var entityTypeName = DynamicValidationEntity.GetMainType((DynamicValidationEntity)this.GetParentEntity()).FullName;
 
-            return Compile(GetAllowedAssemblies(this).ToArray(),
-                Eval.CreateUsings(GetAllowedNamespaces(this)) +
+            return Compile(DynamicCode.GetAssemblies(),
+                DynamicCode.GetNamespaces() +
 @"
 namespace Signum.Entities.Dynamic
 {

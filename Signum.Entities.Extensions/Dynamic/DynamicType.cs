@@ -18,6 +18,8 @@ namespace Signum.Entities.Dynamic
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class DynamicTypeEntity : Entity
     {
+        public DynamicBaseType BaseType { set; get; }
+
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string TypeName { get; set; }
@@ -110,9 +112,6 @@ namespace Signum.Entities.Dynamic
 
     public class DynamicTypeDefinition
     {
-        [JsonProperty(PropertyName = "baseType")]
-        public DynamicBaseType BaseType;
-
         [JsonProperty(PropertyName = "entityKind", NullValueHandling = NullValueHandling.Ignore)]
         public EntityKind? EntityKind;
 
@@ -196,6 +195,7 @@ namespace Signum.Entities.Dynamic
     public enum DynamicBaseType
     {
         Entity,
+        Mixin
     }
 
     public class DynamicProperty

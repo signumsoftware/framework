@@ -69,6 +69,7 @@ function renderFile(typeName: string, node: BaseNode): string {
         `
 import * as React from 'react'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
+import { getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { ${typeName}Entity } from '../[your namespace]'
 import { ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip, 
          EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, EntityTable } from '../../../../Framework/Signum.React/Scripts/Lines'

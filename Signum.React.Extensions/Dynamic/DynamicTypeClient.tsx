@@ -18,7 +18,7 @@ import { StyleContext } from '../../../Framework/Signum.React/Scripts/TypeContex
 
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
-import { DynamicTypeEntity, DynamicTypeOperation, DynamicSqlMigrationEntity, DynamicRenameEntity, DynamicTypeMessage, DynamicPanelPermission } from './Signum.Entities.Dynamic'
+import { DynamicTypeEntity, DynamicMixinConnectionEntity, DynamicTypeOperation, DynamicSqlMigrationEntity, DynamicRenameEntity, DynamicTypeMessage, DynamicPanelPermission } from './Signum.Entities.Dynamic'
 import DynamicTypeComponent from './Type/DynamicType' //typings only
 import * as DynamicClient from './DynamicClient'
 import * as AuthClient from '../Authorization/AuthClient'
@@ -26,6 +26,7 @@ import * as AuthClient from '../Authorization/AuthClient'
 export function start(options: { routes: JSX.Element[] }) {
 
     Navigator.addSettings(new EntitySettings(DynamicTypeEntity, w => new ViewPromise(resolve => require(['./Type/DynamicType'], resolve))));
+    Navigator.addSettings(new EntitySettings(DynamicMixinConnectionEntity, w => new ViewPromise(resolve => require(['./Type/DynamicMixinConnection'], resolve))));
     Navigator.addSettings(new EntitySettings(DynamicSqlMigrationEntity, w => new ViewPromise(resolve => require(['./Type/DynamicSqlMigration'], resolve))));
 
     Operations.addSettings(new EntityOperationSettings(DynamicTypeOperation.Save, {
@@ -50,6 +51,7 @@ export function start(options: { routes: JSX.Element[] }) {
         }));
 
     DynamicClient.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
+    DynamicClient.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicMixinConnectionEntity }} />);
     DynamicClient.Options.getDynaicMigrationsStep = () =>
         <Tab eventKey="migrations" title="Migrations" >
             <h3>{DynamicSqlMigrationEntity.nicePluralName()}</h3>
@@ -70,13 +72,12 @@ export namespace API {
     }
 }
 
-export type DynamicBaseType = "Entity";
+export type DynamicBaseType = "Entity" | "Mixin";
 
 export interface DynamicTypeDefinition {
     primaryKey?: DynamicTypePrimaryKeyDefinition;
     ticks?: DynamicTypeTicksDefinition;
     tableName?: string;
-    baseType: DynamicBaseType;
     entityKind?: EntityKind;
     entityData?: EntityData;
     operationCreate?: OperationConstruct;

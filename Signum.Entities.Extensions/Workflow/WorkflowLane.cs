@@ -27,7 +27,7 @@ namespace Signum.Entities.Workflow
 
         [NotNullable, ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
         [NotNullValidator, NoRepeatValidator, CountIsValidator(ComparisonType.GreaterThan, 0)]
-        public MList<Lite<Entity>> UserOrRoles { get; set; } = new MList<Lite<Entity>>();
+        public MList<Lite<Entity>> Actors { get; set; } = new MList<Lite<Entity>>();
 
         static Expression<Func<WorkflowLaneEntity, string>> ToStringExpression = @this => @this.Name;
         [ExpressionField]
@@ -39,7 +39,7 @@ namespace Signum.Entities.Workflow
         public ModelEntity GetModel()
         {
             var model = new WorkflowLaneModel();
-            model.UserOrRoles.AssignMList(this.UserOrRoles);
+            model.Actors.AssignMList(this.Actors);
             model.Name = this.Name;
             return model;
         }
@@ -48,7 +48,7 @@ namespace Signum.Entities.Workflow
         {
             var wModel = (WorkflowLaneModel)model;
             this.Name = wModel.Name;
-            this.UserOrRoles.AssignMList(wModel.UserOrRoles);
+            this.Actors.AssignMList(wModel.Actors);
         }
     }
 
@@ -68,6 +68,6 @@ namespace Signum.Entities.Workflow
 
         [NotNullable, ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
         [NotNullValidator, NoRepeatValidator, CountIsValidator(ComparisonType.GreaterThan, 0)]
-        public MList<Lite<Entity>> UserOrRoles { get; set; } = new MList<Lite<Entity>>();
+        public MList<Lite<Entity>> Actors { get; set; } = new MList<Lite<Entity>>();
     }
 }

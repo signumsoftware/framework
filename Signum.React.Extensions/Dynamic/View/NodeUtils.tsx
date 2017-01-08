@@ -24,6 +24,7 @@ import { toHtmlAttributes, HtmlAttributesExpression, withClassName } from './Htm
 import { toStyleOptions, StyleOptionsExpression, subCtx } from './StyleOptionsExpression'
 import { HtmlAttributesLine } from './HtmlAttributesComponent'
 import { StyleOptionsLine } from './StyleOptionsComponent'
+import TypeHelpComponent from '../Help/TypeHelpComponent'
 
 export type ExpressionOrValue<T> = T | Expression<T>;
 
@@ -77,7 +78,7 @@ export class CodeContext {
         if (!field && !options)
             return { __code__: "ctx" };
 
-        var propStr = field && "e => e." + field.split(".").map(m => m.firstLower()).join(".");
+        var propStr = field && "e => " + TypeHelpComponent.getExpression("e", field, "Typescript", { stronglyTypedMixinTS: true });
         var optionsStr = options && this.stringifyObject(options);
 
         return { __code__: this.ctxName + ".subCtx(" + (propStr || "") + (propStr && optionsStr ? ", " : "") + (optionsStr ||"") + ")" };
@@ -372,9 +373,9 @@ export function asFunction(expression: Expression<any>, getFieldName: () => stri
 }
 
 export function asFieldFunction(field: string): (e: ModifiableEntity) => any {
-    const fixedRoute = field.split(".").map(m => m.firstLower()).join(".");
+    const fixedRoute = TypeHelpComponent.getExpression("e", field, "Typescript");
 
-    const code = "(function(e){ return e." + fixedRoute + ";})";
+    const code = "(function(e){ return " + fixedRoute + ";})";
 
     try {
         return eval(code);
