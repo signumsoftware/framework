@@ -111,11 +111,7 @@ namespace Signum.React.Facades
 
             return oi;
         }
-
-
-
-
-
+        
 
         internal static Dictionary<string, TypeInfoTS> GetTypeInfoTS()
         {
@@ -331,32 +327,39 @@ namespace Signum.React.Facades
         public static Dictionary<string, TypeInfoTS> GetSymbolContainers(IEnumerable<Type> allTypes)
         {
             SymbolLogic.LoadAll();
-            
+
             var result = (from type in allTypes
                           where type.IsStaticClass() && type.HasAttribute<AutoInitAttribute>()
                           select KVP.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
                           {
                               Kind = KindOfType.SymbolContainer,
-                              Members = type.GetFields(staticFlags).Where(f => GetSymbol(f).IdOrNull.HasValue).ToDictionary(fi => fi.Name, fi => OnAddFieldInfoExtension(new MemberInfoTS
-                              {
-                                  NiceName = fi.NiceName(),
-                                  Id = GetSymbol(fi).Id.Object
-                              }, fi))
-                          }, type))).ToDictionaryEx("symbols");
+                              Members = type.GetFields(staticFlags)
+                                  .Select(f => GetSymbol(f))
+                                  .Where(s =>
+                                  s.FieldInfo != null && /*Duplicated like in Dynamic*/
+                                  s.IdOrNull.HasValue /*Not registered*/)
+                                  .ToDictionary(s => s.FieldInfo.Name, s => OnAddFieldInfoExtension(new MemberInfoTS
+                                  {
+                                      NiceName = s.FieldInfo.NiceName(),
+                                      Id = s.Id.Object
+                                  }, s.FieldInfo))
+                          }, type)))
+                          .Where(a => a.Value.Members.Any())
+                          .ToDictionaryEx("symbols");
 
             return result;
         }
 
         private static Symbol GetSymbol(FieldInfo m)
         {
-            var v = m.GetValue(null);
-
+            object v = m.GetValue(null);          
             if (v is IOperationSymbolContainer)
                 v = ((IOperationSymbolContainer)v).Symbol;
 
             var s = ((Symbol)v);
 
             return s;
+
         }
 
 
