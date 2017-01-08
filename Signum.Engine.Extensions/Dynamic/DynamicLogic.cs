@@ -21,13 +21,17 @@ namespace Signum.Engine.Dynamic
 {
     public static class DynamicLogic
     {
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, string codeGenDirectory)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 PermissionAuthLogic.RegisterTypes(typeof(DynamicPanelPermission));
                 DynamicLogic.GetCodeFiles += GetCodeGenStarter;
                 AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(AssemblyResolveHandler);
+
+                DynamicCode.CodeGenEntitiesNamespace = "Signum.Entities.CodeGen";
+                DynamicCode.CodeGenDirectory = codeGenDirectory;
+                DynamicCode.CodeGenAssembly = "DynamicAssembly.dll";
             }
         }
 
@@ -43,15 +47,13 @@ namespace Signum.Engine.Dynamic
         public static Action<StringBuilder, int> OnWriteDynamicStarter;
         public static Exception CodeGenError;
 
-        public static void CompileDynamicCode() {
+        public static void CompileDynamicCode()
+        {
             try
             {
                 Dictionary<string, CodeFile> codeFiles = GetCodeFilesDictionary();
 
                 var cr = Compile(codeFiles, inMemory: false);
-
-                if (cr == null)
-                    return;
 
                 if (cr.Errors.Count != 0)
                     throw new InvalidOperationException("Errors compiling  dynamic assembly:\r\n" + cr.Errors.Cast<CompilerError>().ToString("\r\n").Indent(4));
@@ -60,29 +62,58 @@ namespace Signum.Engine.Dynamic
             }
             catch (Exception e)
             {
-                e.LogException();
                 CodeGenError = e;
-
-                Console.WriteLine();
-                SafeConsole.WriteLineColor(ConsoleColor.Red, "IMPORTANT!: Starting without Dynamic Entities.");
-                SafeConsole.WriteLineColor(ConsoleColor.Yellow, "   Error:" + e.Message);
-                SafeConsole.WriteLineColor(ConsoleColor.Red, "Synchronizing will try to DROP dynamic types. Clean the script manually!");
-                Console.WriteLine();
             }
         }
 
-        public static void RegisterMixins() {
-            Assembly assembly = Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath);
-            Type type = assembly.GetTypes().Where(a => a.Name == "DynamicMixinLogic").SingleEx();
-            MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static);
-            mi.Invoke(null, null);
+        public static void RegisterExceptionIfAny()
+        {
+            var e = CodeGenError;
+            if (e == null)
+                return;
+
+            e.LogException();
+            Console.WriteLine();
+            SafeConsole.WriteLineColor(ConsoleColor.Red, "IMPORTANT!: Starting without Dynamic Entities.");
+            SafeConsole.WriteLineColor(ConsoleColor.Yellow, "   Error:" + e.Message);
+            SafeConsole.WriteLineColor(ConsoleColor.Red, "Synchronizing will try to DROP dynamic types. Clean the script manually!");
+            Console.WriteLine();
         }
 
-        public static void StartDynamicModules(SchemaBuilder sb, DynamicQueryManager dqm) {
-            Assembly assembly = Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath);
-            Type type = assembly.GetTypes().Where(a => a.Name == "CodeGenStarter").SingleEx();
-            MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static);
-            mi.Invoke(null, new object[] { sb, dqm });
+        public static void RegisterMixins()
+        {
+            if (CodeGenError != null)
+                return;
+
+            try
+            {
+                Assembly assembly = Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath);
+                Type type = assembly.GetTypes().Where(a => a.Name == "CodeGenMixinLogic").SingleEx();
+                MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static);
+                mi.Invoke(null, null);
+            }
+            catch (Exception e)
+            {
+                CodeGenError = e.InnerException;
+            }
+        }
+
+        public static void StartDynamicModules(SchemaBuilder sb, DynamicQueryManager dqm)
+        {
+            if (CodeGenError != null)
+                return;
+
+            try
+            {
+                Assembly assembly = Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath);
+                Type type = assembly.GetTypes().Where(a => a.Name == "CodeGenStarter").SingleEx();
+                MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static);
+                mi.Invoke(null, new object[] { sb, dqm });
+            }
+            catch (Exception e)
+            {
+                CodeGenError = e.InnerException;
+            }
         }
 
         public static Dictionary<string, CodeFile> GetCodeFilesDictionary()
@@ -111,9 +142,6 @@ namespace Signum.Engine.Dynamic
                 else
                     parameters.OutputAssembly = Path.Combine(DynamicCode.CodeGenDirectory, DynamicCode.CodeGenAssembly);
 
-                if (codeFiles.Count == 0)
-                    return null;
-
                 Directory.CreateDirectory(DynamicCode.CodeGenDirectory);
                 Directory.EnumerateFiles(DynamicCode.CodeGenDirectory).Where(a => !inMemory || a != DynamicCode.CodeGenAssemblyPath).ToList().ForEach(a => File.Delete(a));
 
@@ -127,9 +155,6 @@ namespace Signum.Engine.Dynamic
 
         private static List<CodeFile> GetCodeGenStarter()
         {
-            if (!Administrator.ExistTable<DynamicTypeEntity>())
-                return new List<CodeFile>();
-
             var dscg = new DynamicStarterCodeGenerator(DynamicCode.CodeGenEntitiesNamespace, DynamicCode.Namespaces);
 
             var code = dscg.GetFileCode();

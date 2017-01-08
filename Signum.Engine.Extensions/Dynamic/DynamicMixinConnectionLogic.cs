@@ -62,7 +62,7 @@ namespace Signum.Engine.Dynamic
                 var content = dlg.GetFileCode();
                 result.Add(new CodeFile
                 {
-                    FileName = "DynamicMixinLogic.cs",
+                    FileName = "CodeGenMixinLogic.cs",
                     FileContent = content
                 });
             }
@@ -99,7 +99,7 @@ namespace Signum.Engine.Dynamic
             sb.AppendLine();
             sb.AppendLine($"namespace {this.Namespace}");
             sb.AppendLine($"{{");
-            sb.AppendLine($"    public static class DynamicMixinLogic");
+            sb.AppendLine($"    public static class CodeGenMixinLogic");
             sb.AppendLine($"    {{");
             sb.AppendLine($"        public static void Start()");
             sb.AppendLine($"        {{");
