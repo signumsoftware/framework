@@ -79,7 +79,7 @@ namespace Signum.Engine.Maps
         };
 
         public AttributeCollection FieldAttributes<T, S>(Expression<Func<T, S>> propertyRoute)
-            where T : Entity
+            where T : IRootEntity
         {
             return FieldAttributes(PropertyRoute.Construct(propertyRoute));
         }
