@@ -293,14 +293,14 @@ export interface WorkflowLaneEntity extends Entities.Entity, IWorkflowObjectEnti
     name?: string | null;
     xml?: WorkflowXmlEntity | null;
     pool?: WorkflowPoolEntity | null;
-    userOrRoles: Entities.MList<Entities.Lite<Entities.Entity>>;
+    actors: Entities.MList<Entities.Lite<Entities.Entity>>;
 }
 
 export const WorkflowLaneModel = new Type<WorkflowLaneModel>("WorkflowLaneModel");
 export interface WorkflowLaneModel extends Entities.ModelEntity {
     Type: "WorkflowLaneModel";
     name?: string | null;
-    userOrRoles: Entities.MList<Entities.Lite<Entities.Entity>>;
+    actors: Entities.MList<Entities.Lite<Entities.Entity>>;
 }
 
 export module WorkflowLaneOperation {
