@@ -7,16 +7,17 @@ import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions, QueryToken, filterOperations, OrderType, ColumnOptionsMode } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, Binding, EntityDataValues, EntityKindValues, EntityKind } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
+import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { StyleContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import QueryTokenBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/QueryTokenBuilder'
-import { ModifiableEntity, JavascriptMessage, EntityControlMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { ModifiableEntity, JavascriptMessage, EntityControlMessage, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { QueryEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { FilterOperation, PaginationMode } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.DynamicQuery'
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal';
 import * as DynamicTypeClient from '../DynamicTypeClient';
 import * as DynamicClient from '../DynamicClient';
-import { DynamicTypeMessage, DynamicTypeEntity } from '../Signum.Entities.Dynamic';
+import { DynamicTypeMessage, DynamicTypeEntity, DynamicMixinConnectionEntity } from '../Signum.Entities.Dynamic';
 import { Validators, DynamicTypeDefinition, DynamicProperty } from '../DynamicTypeClient';
 import ValueComponent from './ValueComponent';
 import TypeHelpComponent from '../Help/TypeHelpComponent'
@@ -50,6 +51,11 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
         this.state = {};
 
         if (props.dynamicType.isNew)
+            this.fixSaveOperation();
+    }
+
+    componentWillReceiveProps(nextProps: DynamicTypeDefinitionComponentProps) {
+        if (nextProps.dynamicType.isNew)
             this.fixSaveOperation();
     }
 
@@ -87,7 +93,9 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
 
     fixSaveOperation() {
         const def = this.props.definition;
-        var requiresSave = def.entityKind != undefined && DynamicTypeDefinitionComponent.requiresSave.contains(def.entityKind)
+        var requiresSave = this.props.dynamicType.baseType == "Entity" &&
+            def.entityKind != undefined &&
+            DynamicTypeDefinitionComponent.requiresSave.contains(def.entityKind);
 
         if (requiresSave && !def.operationSave) {
             def.operationSave = { execute: "" };
@@ -117,50 +125,54 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
 
         return (
             <div>
-                {this.props.showDatabaseMapping &&
-                    <ValueComponent dc={this.props.dc} labelColumns={2} binding={Binding.create(def, d => d.tableName)} type="string" defaultValue={null} labelClass="database-mapping" />
-                }
+                {dt.baseType == "Entity" &&
+                    <div>
+                        {this.props.showDatabaseMapping &&
+                            <ValueComponent dc={this.props.dc} labelColumns={2} binding={Binding.create(def, d => d.tableName)} type="string" defaultValue={null} labelClass="database-mapping" />
+                        }
 
-                <div className="row">
-                    <div className="col-sm-6">
-                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.entityKind)} type="string" defaultValue={null} options={EntityKindValues} onChange={this.handleEntityKindChange} />
-                    </div>
-                    <div className="col-sm-6">
-                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.entityData)} type="string" defaultValue={null} options={EntityDataValues} />
-                    </div>
-                </div>
+                        < div className="row">
+                            <div className="col-sm-6">
+                                <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.entityKind)} type="string" defaultValue={null} options={EntityKindValues} onChange={this.handleEntityKindChange} />
+                            </div>
+                            <div className="col-sm-6">
+                                <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(def, d => d.entityData)} type="string" defaultValue={null} options={EntityDataValues} />
+                            </div>
+                        </div>
 
-                {this.props.showDatabaseMapping &&
-                    <div className="row database-mapping">
-                        <div className="col-sm-6">
-                            <PrimaryKeyFieldsetComponent
-                                dc={this.props.dc}
-                                binding={Binding.create(def, d => d.primaryKey)}
-                                title="Primary Key"
-                                onCreate={() => ({ name: "Id", type: "int", identity: true }) }
-                                renderContent={item =>
-                                    <div>
-                                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.name)} type="string" defaultValue={null} />
-                                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.type)} type="string" defaultValue={null} options={["int", "long", "short", "string", "Guid"]} />
-                                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.identity)} type="boolean" defaultValue={null} />
-                                    </div>
-                                }
-                            />
-                        </div>
-                        <div className="col-sm-6">
-                            <TicksFieldsetComponent
-                                dc={this.props.dc}
-                                binding={Binding.create(def, d => d.ticks)}
-                                onCreate={() => ({ hasTicks: false })}
-                                renderContent={item => 
-                                    <div>
-                                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.hasTicks)} type="boolean" defaultValue={null} onChange={this.handleHasTickChanged} />
-                                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.name)} type="string" defaultValue={null} />
-                                        <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.type)} type="string" defaultValue={null} options={["int", "Guid", "DateTime"]} />
-                                    </div>
-                                }
-                            />
-                        </div>
+                        {this.props.showDatabaseMapping &&
+                            <div className="row database-mapping">
+                                <div className="col-sm-6">
+                                    <PrimaryKeyFieldsetComponent
+                                        dc={this.props.dc}
+                                        binding={Binding.create(def, d => d.primaryKey)}
+                                        title="Primary Key"
+                                        onCreate={() => ({ name: "Id", type: "int", identity: true })}
+                                        renderContent={item =>
+                                            <div>
+                                                <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.name)} type="string" defaultValue={null} />
+                                                <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.type)} type="string" defaultValue={null} options={["int", "long", "short", "string", "Guid"]} />
+                                                <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.identity)} type="boolean" defaultValue={null} />
+                                            </div>
+                                        }
+                                        />
+                                </div>
+                                <div className="col-sm-6">
+                                    <TicksFieldsetComponent
+                                        dc={this.props.dc}
+                                        binding={Binding.create(def, d => d.ticks)}
+                                        onCreate={() => ({ hasTicks: false })}
+                                        renderContent={item =>
+                                            <div>
+                                                <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.hasTicks)} type="boolean" defaultValue={null} onChange={this.handleHasTickChanged} />
+                                                <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.name)} type="string" defaultValue={null} />
+                                                <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.type)} type="string" defaultValue={null} options={["int", "Guid", "DateTime"]} />
+                                            </div>
+                                        }
+                                        />
+                                </div>
+                            </div>
+                        }
                     </div>
                 }
 
@@ -168,78 +180,85 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                     <Tab eventKey="properties" title="Properties">
                         <PropertyRepeaterComponent dc={this.props.dc} properties={def.properties} onRemove={this.handlePropertyRemoved} showDatabaseMapping={this.props.showDatabaseMapping} />
 
-                        <MultiColumnUniqueIndexFieldsetComponent
-                            dc={this.props.dc}
-                            binding={Binding.create(def, d => d.multiColumnUniqueIndex)}
-                            title="Multi-Column Unique Index"
-                            onCreate={() => ({ fields: [""] })}
-                            renderContent={item => 
-                                <div className="row">
-                                    <div className="col-sm-6">
-                                        <ComboBoxRepeaterComponent options={propNames} list={item.fields} />
+                        {dt.baseType == "Entity" &&
+                            <MultiColumnUniqueIndexFieldsetComponent
+                                dc={this.props.dc}
+                                binding={Binding.create(def, d => d.multiColumnUniqueIndex)}
+                                title="Multi-Column Unique Index"
+                                onCreate={() => ({ fields: [""] })}
+                                renderContent={item =>
+                                    <div className="row">
+                                        <div className="col-sm-6">
+                                            <ComboBoxRepeaterComponent options={propNames} list={item.fields} />
+                                        </div>
+                                        <div className="col-sm-6">
+                                            <CSharpExpressionCodeMirror binding={Binding.create(item, i => i.where)} title="Where" signature={"(" + (dt.typeName || "") + "Entity e) =>"} />
+                                        </div>
                                     </div>
-                                    <div className="col-sm-6">
-                                        <CSharpExpressionCodeMirror binding={Binding.create(item, i => i.where)} title="Where" signature={"(" + (dt.typeName || "") + "Entity e) =>"} />
-                                    </div>
-                                </div>
                                 }
-                            />
+                                />
+                        }
 
                         <fieldset>
                             <legend>ToString expression</legend>
-                            <CSharpExpressionCodeMirror binding={Binding.create(def, d => d.toStringExpression)} signature={"(" + (dt.typeName || "") + "Entity e) =>"} />
+                            <CSharpExpressionCodeMirror binding={Binding.create(def, d => d.toStringExpression)} signature={"(" + (dt.typeName || "") + dt.baseType + " e) =>"} />
                         </fieldset>
                     </Tab>
-                    <Tab eventKey="query" title="Query">
-                        <ComboBoxRepeaterComponent options={["e.Id"].concat(propNames).concat(expressionNames)} list={def.queryFields} />
-                    </Tab>
 
-                    <Tab eventKey="operations" title="Operations">
-                        <div className="row">
-                            <div className="col-sm-7">
-                                <CreateOperationFieldsetComponent
-                                    dc={this.props.dc}
-                                    binding={Binding.create(def, d => d.operationCreate)}
-                                    title="Create"
-                                    onCreate={() => ({
-                                        construct: "return new " + dt.typeName + "Entity\r\n{\r\n" +
-                                        def.properties.map(p => "    " + p.name + " = null").join(", \r\n") +
-                                        "\r\n};"
-                                    })}
-                                    renderContent={oc => <CSharpExpressionCodeMirror binding={Binding.create(oc, d => d.construct)} signature={"(object[] args) =>"} />}
-                                    />
+                    {dt.baseType == "Entity" &&
+                        <Tab eventKey="query" title="Query">
+                            <ComboBoxRepeaterComponent options={["e.Id"].concat(propNames).concat(expressionNames)} list={def.queryFields} />
+                        </Tab>
+                    }
 
-                                <SaveOperationFieldsetComponent
-                                    dc={this.props.dc}
-                                    binding={Binding.create(def, d => d.operationSave)}
-                                    title="Save"
-                                    onCreate={() => ({ execute: "" })}
-                                    renderContent={oe =>
-                                        <div>
-                                            <CSharpExpressionCodeMirror binding={Binding.create(oe, d => d.canExecute)} title="CanSave" signature={"string (" + dt.typeName + "Entity e) =>"} />
-                                            <CSharpExpressionCodeMirror binding={Binding.create(oe, d => d.execute)} title="OperationSave" signature={"(" + dt.typeName + "Entity e, object[] args) =>"} />
-                                        </div>}
-                                    />
+                    {dt.baseType == "Entity" &&
+                        <Tab eventKey="operations" title="Operations">
+                            <div className="row">
+                                <div className="col-sm-7">
+                                    <CreateOperationFieldsetComponent
+                                        dc={this.props.dc}
+                                        binding={Binding.create(def, d => d.operationCreate)}
+                                        title="Create"
+                                        onCreate={() => ({
+                                            construct: "return new " + dt.typeName + "Entity\r\n{\r\n" +
+                                            def.properties.map(p => "    " + p.name + " = null").join(", \r\n") +
+                                            "\r\n};"
+                                        })}
+                                        renderContent={oc => <CSharpExpressionCodeMirror binding={Binding.create(oc, d => d.construct)} signature={"(object[] args) =>"} />}
+                                        />
 
-                                <DeleteOperationFieldsetComponent
-                                    dc={this.props.dc}
-                                    binding={Binding.create(def, d => d.operationDelete)}
-                                    title="Delete"
-                                    onCreate={() => ({ delete: "" })}
-                                    renderContent={od =>
-                                        <div>
-                                            <CSharpExpressionCodeMirror binding={Binding.create(od, d => d.canDelete)} title="CanDelete" signature={"string (" + dt.typeName + "Entity e) =>"} />
-                                            <CSharpExpressionCodeMirror binding={Binding.create(od, d => d.delete)} title="OperationDelete" signature={"(" + dt.typeName + "Entity e, object[] args) =>"} />
-                                        </div>}
-                                    />
+                                    <SaveOperationFieldsetComponent
+                                        dc={this.props.dc}
+                                        binding={Binding.create(def, d => d.operationSave)}
+                                        title="Save"
+                                        onCreate={() => ({ execute: "" })}
+                                        renderContent={oe =>
+                                            <div>
+                                                <CSharpExpressionCodeMirror binding={Binding.create(oe, d => d.canExecute)} title="CanSave" signature={"string (" + dt.typeName + "Entity e) =>"} />
+                                                <CSharpExpressionCodeMirror binding={Binding.create(oe, d => d.execute)} title="OperationSave" signature={"(" + dt.typeName + "Entity e, object[] args) =>"} />
+                                            </div>}
+                                        />
+
+                                    <DeleteOperationFieldsetComponent
+                                        dc={this.props.dc}
+                                        binding={Binding.create(def, d => d.operationDelete)}
+                                        title="Delete"
+                                        onCreate={() => ({ delete: "" })}
+                                        renderContent={od =>
+                                            <div>
+                                                <CSharpExpressionCodeMirror binding={Binding.create(od, d => d.canDelete)} title="CanDelete" signature={"string (" + dt.typeName + "Entity e) =>"} />
+                                                <CSharpExpressionCodeMirror binding={Binding.create(od, d => d.delete)} title="OperationDelete" signature={"(" + dt.typeName + "Entity e, object[] args) =>"} />
+                                            </div>}
+                                        />
+                                </div>
+                                <div className="col-sm-5">
+                                    {!dt.isNew &&
+                                        <TypeHelpComponent initialType={dt.typeName!} mode="CSharp" />
+                                    }
+                                </div>
                             </div>
-                            <div className="col-sm-5">
-                                {!dt.isNew &&
-                                    <TypeHelpComponent initialType={dt.typeName!} mode="CSharp" />
-                                }
-                            </div>
-                        </div>
-                    </Tab>
+                        </Tab>
+                    }
 
                     <Tab eventKey="events" title="Events">
                         <div className="row">
@@ -257,11 +276,11 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                                                 <input type="button" className="btn btn-danger btn-xs sf-button" value="Property Validator" onClick={this.handlePropertyValidatorClick} />
                                             </div>
                                             <div className="code-container">
-                                                <pre style={{ border: "0px", margin: "0px", fontSize: "13px", color: "#e40d0d" }}>Note: EntityEvents method is mandotary for compiling.</pre> 
+                                                <pre style={{ border: "0px", margin: "0px", fontSize: "13px", color: "#e40d0d" }}>Note: EntityEvents method is mandotary for compiling.</pre>
                                                 <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
                                             </div>
                                         </div>
-                                        }
+                                    }
                                     />
                             </div>
                             <div className="col-sm-5">
@@ -272,7 +291,17 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                         </div>
                     </Tab>
 
-                    {!dt.isNew &&
+                    {!dt.isNew && dt.baseType == "Mixin" &&
+                        <Tab eventKey="connections" title="Connections">
+                            <SearchControl findOptions={{
+                                queryName: DynamicMixinConnectionEntity,
+                                parentColumn: "DynamicMixin",
+                                parentValue: this.props.dynamicType
+                            }} />
+                        </Tab>
+                    }
+
+                    {!dt.isNew && dt.baseType == "Entity" &&
                         <Tab eventKey="other" title="Other">
                             {this.renderOthers()}
                         </Tab>
@@ -380,7 +409,7 @@ export class CustomFieldsetComponent<T> extends React.Component<CustomFieldsetCo
     render() {
         let value = this.props.binding.getValue();
         return (
-            <fieldset style={{ marginTop: "-12px" }}>
+            <fieldset style={{ marginTop: "-5px" }}>
                 <legend><input type="checkbox" checked={!!value} onChange={this.handleChecked} /> {this.props.title || this.props.binding.member.toString().firstUpper()}</legend>
                 {value && this.props.renderContent(value)}
             </fieldset>

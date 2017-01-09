@@ -7,6 +7,7 @@ import { StyleContext } from '../../../Framework/Signum.React/Scripts/TypeContex
 import { ajaxPost } from '../../../Framework/Signum.React/Scripts/Services'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
+import { WebApiHttpError } from '../../../Framework/Signum.React/Scripts/Services'
 import { ValueSearchControl, SearchControl } from '../../../Framework/Signum.React/Scripts/Search'
 import EntityLink from '../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
 import { QueryDescription, SubTokensOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
@@ -22,10 +23,31 @@ require("!style!css!./DynamicPanelPage.css");
 interface DynamicPanelProps extends ReactRouter.RouteComponentProps<{}, {}> {
 }
 
-export default class DynamicPanelPage extends React.Component<DynamicPanelProps, void> {
+interface DynamicPanelState {
+    startErrors?: WebApiHttpError[];
+}
+
+export default class DynamicPanelPage extends React.Component<DynamicPanelProps, DynamicPanelState> {
 
     handleSelect = (key: any /*string*/) => {
         Navigator.currentHistory.push("~/dynamic/panel?step=" + key);
+    }
+
+    handleErrorClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        this.handleSelect("restartServer");
+    }
+
+    constructor(props: DynamicPanelProps) {
+        super(props);
+
+        this.state = {};
+    }
+
+    componentWillMount() {
+        API.getStartErrors()
+            .then(errors => this.setState({ startErrors: errors }))
+            .done();
     }
 
     render() {
@@ -33,26 +55,39 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
 
         let step = this.props.location.query["step"] as "compile" | "restartServer" | "migrations" | "refreshClients" | undefined;
 
+        const errors = this.state.startErrors
         return (
-            <Tabs defaultActiveKey={step || "compile"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} onSelect={this.handleSelect}>
-                <Tab eventKey="compile" title="1. Check">
-                    <CompileStep />
-                </Tab>
-        
-                <Tab eventKey="restartServer" title="2. Restart Server">
-                    <RestartServerStep />
-                </Tab>
-
-                {Options.getDynaicMigrationsStep &&
-
-                    <Tab eventKey="migrations" title="3. Sql Migrations">
-                        {Options.getDynaicMigrationsStep()}
-                    </Tab>
+            <div>
+                {errors && errors.length > 0 &&
+                    <div role="alert" className="alert alert-danger" style={{ marginTop: "20px" }}>
+                        <p>
+                        <span className="glyphicon glyphicon-warning-sign"></span>
+                        {" "}The server started, but there {errors.length > 1 ? "are" : "is"} <a href="" onClick={this.handleErrorClick}>{errors.length} {errors.length > 1 ? "errors" : "error"}</a>.
+                        </p>
+                    </div>
                 }
-                <Tab eventKey="refreshClients" title={(Options.getDynaicMigrationsStep ? "4." : "3.") + " Refresh Clients"}>
-                    <RefreshClientsStep />
-                </Tab>
-            </Tabs>
+                <Tabs activeKey={step || "compile"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} onSelect={this.handleSelect}>
+                    <Tab eventKey="compile" title="1. Edit and Compile">
+                        <CompileStep />
+                    </Tab>
+
+                    <Tab eventKey="restartServer" title="2. Restart Server">
+                        <RestartServerStep
+                            startErrors={this.state.startErrors}
+                            setStartErrors={errors => this.setState({ startErrors: errors })} />
+                    </Tab>
+
+                    {Options.getDynaicMigrationsStep &&
+
+                        <Tab eventKey="migrations" title="3. Sql Migrations">
+                            {Options.getDynaicMigrationsStep()}
+                        </Tab>
+                    }
+                    <Tab eventKey="refreshClients" title={(Options.getDynaicMigrationsStep ? "4." : "3.") + " Refresh Clients"}>
+                        <RefreshClientsStep />
+                    </Tab>
+                </Tabs>
+            </div>
         );
     }
 }
@@ -100,14 +135,14 @@ export class CompileStep extends React.Component<void, DynamicCompileStepState>{
 
         return (
             <div>
-                <br/>
+                <br />
                 <div className={`alert alert-${errors.length == 0 ? "success" : "danger"}`} role="alert">
                     <strong>{errors.length} Errors!</strong> {errors.length == 0 ?
                         "The dynamic code compiled successfully" :
                         "Please fix this errors in the dynamic entities"}
                 </div>
                 <br />
-                {errors.length > 0 && this.renderErrorTable(errors) }
+                {errors.length > 0 && this.renderErrorTable(errors)}
             </div>
         );
     }
@@ -152,11 +187,16 @@ export class CompileStep extends React.Component<void, DynamicCompileStepState>{
     }
 }
 
+interface RestartServerStepProps {
+    setStartErrors: (startErrors?: WebApiHttpError[]) => void;
+    startErrors?: WebApiHttpError[];
+}
+
 interface RestartServerStepState {
     serverRestarting?: moment.Moment;
 }
 
-export class RestartServerStep extends React.Component<{}, RestartServerStepState>{
+export class RestartServerStep extends React.Component<RestartServerStepProps, RestartServerStepState>{
 
     constructor(props: any) {
         super(props);
@@ -165,11 +205,16 @@ export class RestartServerStep extends React.Component<{}, RestartServerStepStat
 
     handleRestartApplication = (e: React.MouseEvent) => {
         e.preventDefault();
+
         API.restartServer()
             .then(() => {
                 this.setState({ serverRestarting: moment() });
-                API.pingServer()
-                    .then(() => this.setState({ serverRestarting: undefined }))
+                this.props.setStartErrors(undefined);
+                API.getStartErrors()
+                    .then(errors => {
+                        this.props.setStartErrors(errors);
+                        this.setState({ serverRestarting: undefined });
+                    })
                     .catch(error => {
                         this.setState({ serverRestarting: undefined });
                         throw error;
@@ -180,14 +225,17 @@ export class RestartServerStep extends React.Component<{}, RestartServerStepStat
     }
 
     render() {
+
+        if (this.state.serverRestarting)
+            return this.renderProgress(this.state.serverRestarting);
+
         return (
             <div>
                 {
-                    this.state.serverRestarting ?
-                        this.renderProgress(this.state.serverRestarting) :
-                        AuthClient.isPermissionAuthorized(DynamicPanelPermission.RestartApplication) &&
-                        <a href="#" className="sf-button btn btn-danger" onClick={this.handleRestartApplication}>Restart Server</a>
+                    AuthClient.isPermissionAuthorized(DynamicPanelPermission.RestartApplication) &&
+                    <a href="#" className="sf-button btn btn-danger" onClick={this.handleRestartApplication}>Restart Server</a>
                 }
+                {this.props.startErrors && this.props.startErrors.map((e, i) => <ErrorBlock key={i} error={e} />)}
             </div>
         );
     }
@@ -203,6 +251,46 @@ export class RestartServerStep extends React.Component<{}, RestartServerStepStat
         );
     }
 
+}
+
+export class ErrorBlock extends React.Component<{ error: WebApiHttpError }, { showDetails: boolean }>{
+
+    constructor(props: any) {
+        super(props);
+
+        this.state = {
+            showDetails: false,
+        };
+    }
+
+    handleShowStackTrace = (e: React.MouseEvent) => {
+        e.preventDefault();
+        this.setState({ showDetails: !this.state.showDetails });
+    }
+    render() {
+        var he = this.props.error;
+        return (
+            <div className="alert alert-danger error-block" style={{ marginTop: "20px" }}>
+                <div >
+                    <h3>{he.ExceptionType}</h3>
+                    {textDanger(he.ExceptionMessage)}
+                </div >
+                <div>
+                    <a href="#" onClick={this.handleShowStackTrace}>StackTrace</a>
+                    {this.state.showDetails && <pre>{he.StackTrace}</pre>}
+                </div>
+            </div>
+
+        );
+    }
+}
+
+function textDanger(message: string | null | undefined): React.ReactFragment | null | undefined {
+
+    if (typeof message == "string")
+        return message.split("\n").map((s, i) => <p key={i} className="text-danger">{s}</p>);
+
+    return message;
 }
 
 interface RefreshClientsStepState {
@@ -224,9 +312,4 @@ export class RefreshClientsStep extends React.Component<{}, RefreshClientsStepSt
             </div>
         );
     }
-
 }
-
-
-
-

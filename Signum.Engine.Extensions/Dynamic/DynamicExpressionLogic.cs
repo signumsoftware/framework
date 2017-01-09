@@ -93,7 +93,7 @@ namespace Signum.Engine.Dynamic
 
                     var expressions = Database.Query<DynamicExpressionEntity>().ToList();
 
-                    var dtcg = new DynamicExpressionCodeGenerator(DynamicLogic.CodeGenEntitiesNamespace, expressions, DynamicLogic.Namespaces);
+                    var dtcg = new DynamicExpressionCodeGenerator(DynamicCode.CodeGenEntitiesNamespace, expressions, DynamicCode.Namespaces);
 
                     var content = dtcg.GetFileCode();
                     result.Add(new CodeFile

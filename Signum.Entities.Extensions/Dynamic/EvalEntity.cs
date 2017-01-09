@@ -79,7 +79,9 @@ namespace Signum.Entities.Dynamic
                         CompilerParameters parameters = new CompilerParameters();
 
                         parameters.ReferencedAssemblies.Add("System.dll");
+                        parameters.ReferencedAssemblies.Add("System.Data.dll");
                         parameters.ReferencedAssemblies.Add("System.Core.dll");
+                        
                         foreach (var ass in assemblies)
                         {
                             parameters.ReferencedAssemblies.Add(ass);
@@ -140,35 +142,5 @@ namespace Signum.Entities.Dynamic
                 Notify(() => Compiled);
             }
         }
-    }
-
-    public static class Eval
-    {
-        public static string AssemblyDirectory = Path.GetDirectoryName(new Uri(typeof(Entity).Assembly.CodeBase).LocalPath);
-
-        public static HashSet<string> BasicNamespaces = new HashSet<string>
-        {
-            "System",
-            "System.Linq",
-            "System.Reflection",
-            "System.Collections.Generic",
-            "System.Linq.Expressions",
-            "Signum.Entities",
-            "Signum.Utilities"
-        };
-
-        public static string CreateUsings(IEnumerable<string> namespaces )
-        {
-            return namespaces.ToString(ns => "using {0};\r\n".FormatWith(ns), "");
-        }
-
-        public static HashSet<string> BasicAssemblies = new HashSet<string>
-        {
-            "Signum.Engine.dll",
-            "Signum.Entities.dll",
-            "Signum.Utilities.dll",
-            "Signum.Entities.Extensions.dll",
-            "Signum.Engine.Extensions.dll"
-        };
     }
 }

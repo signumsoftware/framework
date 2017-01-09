@@ -340,13 +340,16 @@ namespace Signum.Logic.Workflow
             return WorkflowLogic.Conditions.Value.GetOrThrow(wc);
         }
 
+        public static Expression<Func<WorkflowLaneEntity, bool>> IsLaneForCurrentUser = lane =>
+            lane.Actors.Contains(UserEntity.Current.ToLite()) ||
+            lane.Actors.Contains(UserEntity.Current.Role);
+
         public static List<Lite<WorkflowEntity>> GetAllowedStarts()
         {
             return (from w in Database.Query<WorkflowEntity>()
                     let s = w.WorkflowEvents().Single(a => a.Type == WorkflowEventType.Start)
                     let a = (WorkflowActivityEntity)s.NextConnections().Single().To
-                    where a.Lane.UserOrRoles.Contains(UserEntity.Current.ToLite()) ||
-                            a.Lane.UserOrRoles.Contains(UserEntity.Current.Role)
+                    where IsLaneForCurrentUser.Evaluate(a.Lane)
                     select w.ToLite())
                     .ToList();
         }
