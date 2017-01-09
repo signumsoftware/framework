@@ -8,14 +8,14 @@ import { FormGroupStyle, TypeContext } from './TypeContext'
 import { ValueLineType, ValueLine } from './Lines/ValueLine'
 
 
-interface ValueLinePopupModal extends React.Props<ValueLineModal>, IModalProps {
+interface ValueLineModalProps extends React.Props<ValueLineModal>, IModalProps {
 
-    options: ValueLinePopupOptions;
+    options: ValueLineModalOptions;
 }
 
-export default class ValueLineModal extends React.Component<ValueLinePopupModal, { show: boolean; value?: any }>  {
+export default class ValueLineModal extends React.Component<ValueLineModalProps, { show: boolean; value?: any }>  {
 
-    constructor(props: ValueLinePopupModal) {
+    constructor(props: ValueLineModalProps) {
         super(props);
 
         this.state = {
@@ -68,12 +68,12 @@ export default class ValueLineModal extends React.Component<ValueLinePopupModal,
         </Modal>;
     }
 
-    static show(options: ValueLinePopupOptions): Promise<any> {
+    static show(options: ValueLineModalOptions): Promise<any> {
         return openModal<any>(<ValueLineModal options={options}/>);
     }
 }
 
-export interface ValueLinePopupOptions {
+export interface ValueLineModalOptions {
     type: TypeReference
     valueLineType?: ValueLineType;
     initialValue?: any
