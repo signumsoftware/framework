@@ -18,6 +18,7 @@ import { FindOptions } from './FindOptions'
 
 Dic.skipClasses.push(React.Component);
 
+
 export let currentUser: IUserEntity | undefined;
 export function setCurrentUser(user: IUserEntity | undefined) {
     currentUser = user;
@@ -26,6 +27,11 @@ export function setCurrentUser(user: IUserEntity | undefined) {
 export let currentHistory: HistoryModule.History;
 export function setCurrentHistory(history: HistoryModule.History) {
     currentHistory = history;
+}
+
+export let resetUI: () => void = () => { };
+export function setResetUI(reset: () => void) {
+    resetUI = reset;
 }
 
 export namespace Expander {

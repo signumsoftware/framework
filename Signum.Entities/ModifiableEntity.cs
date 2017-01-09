@@ -219,7 +219,7 @@ namespace Signum.Entities
         [field: NonSerialized, Ignore]
         public event PropertyChangedEventHandler PropertyChanged;
 
-        [field: NonSerialized, Ignore]
+        [NonSerialized, Ignore]
         ModifiableEntity parentEntity;
 
         public ModifiableEntity GetParentEntity()

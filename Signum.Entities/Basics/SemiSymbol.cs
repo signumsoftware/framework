@@ -40,6 +40,19 @@ namespace Signum.Entities.Basics
                 throw new InvalidOperationException(string.Format("No field with name {0} found in {1}", fieldName, mi.DeclaringType.Name));
 
             this.Key = mi.DeclaringType.Name + "." + fieldName;
+            
+            try
+            {
+                Symbols.GetOrCreate(this.GetType()).Add(this.Key, this);
+            }
+            catch (Exception e) when (StartParameters.IgnoredCodeErrors != null)
+            {
+                //Could happend if Dynamic code has a duplicated name
+                this.fieldInfo = null;
+                this.Key = null;
+                StartParameters.IgnoredCodeErrors.Add(e);
+                return;
+            }
 
             var dic = Ids.TryGetC(this.GetType());
             if (dic != null)
@@ -48,7 +61,6 @@ namespace Signum.Entities.Basics
                 if (tup != null)
                     this.SetIdAndName(tup);
             }
-            Symbols.GetOrCreate(this.GetType()).Add(this.Key, this);
         }
 
         private static bool IsStaticClass(Type type)

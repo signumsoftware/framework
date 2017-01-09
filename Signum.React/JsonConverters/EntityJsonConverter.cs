@@ -116,8 +116,17 @@ namespace Signum.React.Json
         {
             var pr = JsonSerializerExtensions.CurrentPropertyRoute;
 
-            if (pr == null || typeof(IRootEntity).IsAssignableFrom(pr.Type))
+            if (value is IRootEntity)
                 pr = PropertyRoute.Root(value.GetType());
+            if (pr == null)
+            {
+                var embedded = (EmbeddedEntity)value;
+
+                if (embedded.FromPropertyRoute == null)
+                    throw new InvalidOperationException($"Impossible to determine PropertyRoute for {value.GetType().Name}. Consider setting {nameof(embedded.FromPropertyRoute)} on the EmbeddedEntity.");
+
+                pr = embedded.FromPropertyRoute;
+            }
             else if (pr.Type.ElementType() == value.GetType())
                 pr = pr.Add("Item");
 

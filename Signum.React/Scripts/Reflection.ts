@@ -573,6 +573,7 @@ const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
 const memberIndexerRegex = /^(.*)\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; //Necessary for some crazy minimizers
 const indexRegex = /^(.*)\[(\d+)\]$/;
 const mixinRegex = /^(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)$/
+const mixinIndexerRegex = /^(.*).mixins\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; 
 const partialMixinRegex = /(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)/
 
 export function getLambdaMembers(lambda: Function): LambdaMember[]{
@@ -590,7 +591,11 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
 
     while (body != parameter) {
         let m: RegExpExecArray | null;
-        if (m = memberRegex.exec(body) || memberIndexerRegex.exec(body)) {
+        if (m = mixinIndexerRegex.exec(body)) {
+            result.push({ name: m[2], type: "Mixin" });
+            body = m[1];
+        }
+        else if (m = memberRegex.exec(body) || memberIndexerRegex.exec(body)) {
             result.push({ name: m[2], type: "Member" });
             body = m[1];
         }
@@ -601,7 +606,8 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
         else if (m = mixinRegex.exec(body)) {
             result.push({ name: m[4], type: "Mixin" });
             body = m[2];
-        } else {
+        }
+        else {
             throw new Error(`Unexpected body in Property Route ${body}`);
         }
     }
@@ -848,6 +854,27 @@ export class PropertyRoute {
         return new PropertyRoute(parent, "LiteEntity", undefined, undefined, undefined);
     }
 
+    
+
+    static parse(rootType: PseudoType, propertyString: string): PropertyRoute {
+        let result = PropertyRoute.root(rootType);
+        const parts = propertyString.replaceAll("/", ".&&.").trimEnd(".").split(".").map((p): LambdaMember =>
+        {
+            if (p == "&&")
+                return { type: "Indexer", name: "0" };
+
+
+            if (p.startsWith("[") && p.endsWith("]"))
+                return { type: "Mixin", name: p.trimStart("[").trimEnd("]") };
+
+            return { type: "Member", name: p };
+        });
+
+        parts.forEach(p => result = result.addMember(p));
+
+        return result;
+    }
+
     constructor(
         parent: PropertyRoute | undefined,
         propertyRouteType: PropertyRouteType,
@@ -993,10 +1020,19 @@ export class PropertyRoute {
                 })
                 .toObject(m => m.name.substring(path.length))
         }
+
+        function mixinMembers(type: TypeInfo) {
+            var mixins = Dic.getValues(type.members).filter(a => a.name.startsWith("[")).groupBy(a => a.name.after("[").before("]")).map(a => a.key);
+
+            return mixins.flatMap(mn => Dic.getValues(simpleMembersAfter(type, `[${mn}].`))).toObject(a => a.name);
+        }
         
 
         switch (this.propertyRouteType) {
-            case "Root": return simpleMembersAfter(this.findRootType(), "");
+            case "Root": return {
+                ...simpleMembersAfter(this.findRootType(), ""),
+                ...mixinMembers(this.findRootType())
+            };
             case "Mixin": return simpleMembersAfter(this.findRootType(), this.propertyPath());                
             case "LiteEntity": return simpleMembersAfter(this.typeReferenceInfo(), "");
             case "Field":
