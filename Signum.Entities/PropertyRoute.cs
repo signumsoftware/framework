@@ -685,6 +685,4 @@ namespace Signum.Entities
         LiteEntity,
         MListItems,
     }
-
-
 }
