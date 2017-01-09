@@ -40,7 +40,7 @@ export type DynamicExpressionTranslation =
 export const DynamicMixinConnectionEntity = new Type<DynamicMixinConnectionEntity>("DynamicMixinConnection");
 export interface DynamicMixinConnectionEntity extends Entities.Entity {
     Type: "DynamicMixinConnection";
-    type?: Entities.Lite<Basics.TypeEntity> | null;
+    entityType?: Entities.Lite<Basics.TypeEntity> | null;
     dynamicMixin?: Entities.Lite<DynamicTypeEntity> | null;
 }
 
