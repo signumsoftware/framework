@@ -154,9 +154,9 @@ Consider the following options:
     * Change the EntityKind to a more appropiated one. 
     * Exceptionally, override the property EntityTypeAttribute.RequiresSaveOperation for your particular entity.");
             }
-            catch
+            catch (Exception e) when (StartParameters.IgnoredCodeErrors != null)
             {
-                //Just to notify the developer
+                StartParameters.IgnoredCodeErrors.Add(e);
             }
         }
 

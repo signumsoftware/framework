@@ -68,8 +68,8 @@ export interface OperationLogEntity extends Entities.Entity {
 export const PropertyRouteEntity = new Type<PropertyRouteEntity>("PropertyRoute");
 export interface PropertyRouteEntity extends Entities.Entity {
     Type: "PropertyRoute";
-    path?: string | null;
-    rootType?: TypeEntity | null;
+    path: string;
+    rootType: TypeEntity;
 }
 
 export const QueryEntity = new Type<QueryEntity>("Query");

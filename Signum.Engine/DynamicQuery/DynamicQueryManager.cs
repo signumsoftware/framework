@@ -283,6 +283,18 @@ namespace Signum.Engine.DynamicQuery
             return fi;
         }
 
+        public static FluentInclude<T> WithQuery<T, Q>(this FluentInclude<T> fi, DynamicQueryManager dqm, Expression<Func<T, Q>> simpleQuerySelector, Action<AutoDynamicQueryCore<Q>> modifyQuery)
+            where T : Entity
+        {
+            dqm.RegisterQuery<Q>(typeof(T), () =>
+            {
+                var autoQuery = DynamicQueryCore.Auto(Database.Query<T>().Select(simpleQuerySelector));
+                modifyQuery(autoQuery);
+                return autoQuery;
+            });
+            return fi;
+        }
+
         /// <summary>
         /// Uses NicePluralName as niceName
         /// </summary>

@@ -17,7 +17,6 @@ namespace Signum.Entities
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false), InTypeScript(Undefined = false)]
     public abstract class Symbol : Entity
     {
-
         static Dictionary<Type, Dictionary<string, Symbol>> Symbols = new Dictionary<Type, Dictionary<string, Symbol>>();
         static Dictionary<Type, Dictionary<string, PrimaryKey>> Ids = new Dictionary<Type, Dictionary<string, PrimaryKey>>();
 
@@ -34,6 +33,19 @@ namespace Signum.Entities
                 throw new InvalidOperationException(string.Format("No field with name {0} found in {1}", fieldName, declaringType.Name));
 
             this.Key = declaringType.Name + "." + fieldName;
+            
+            try
+            {
+                Symbols.GetOrCreate(this.GetType()).Add(this.Key, this);
+            }
+            catch (Exception e) when (StartParameters.IgnoredCodeErrors != null)
+            {
+                //Could happend if Dynamic code has a duplicated name
+                this.fieldInfo = null;
+                this.Key = null;
+                StartParameters.IgnoredCodeErrors.Add(e);
+                return;
+            }
 
             var dic = Ids.TryGetC(this.GetType());
             if (dic != null)
@@ -42,8 +54,6 @@ namespace Signum.Entities
                 if (id != null)
                     this.SetId(id.Value);
             }
-
-            Symbols.GetOrCreate(this.GetType()).Add(this.Key, this);
         }
 
         private static bool IsStaticClass(Type type)

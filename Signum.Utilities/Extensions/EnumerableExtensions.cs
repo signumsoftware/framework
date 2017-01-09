@@ -1194,13 +1194,14 @@ namespace Signum.Utilities
                 {
                     throw new InvalidOperationException($@"Mismatches {action}:
 {differences}
-Trying to continue (optimistically) with the common keys. Consider Synchronize.");
+Consider Synchronize.");
                 }
-                catch
+                catch (Exception e) when (StartParameters.IgnoredDatabaseMismatches != null)
                 {
                     //This try { throw } catch is here to alert developers.
                     //In production, in some cases its OK to attempt starting an application with a slightly different schema (dynamic entities, green-blue deployments).  
                     //In development, consider synchronize.  
+                    StartParameters.IgnoredDatabaseMismatches.Add(e);
                 }
             }
 

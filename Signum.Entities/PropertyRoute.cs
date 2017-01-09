@@ -354,7 +354,6 @@ namespace Signum.Entities
 
         public Implementations? TryGetImplementations()
         {
-
             if (this.Type.CleanType().IsIEntity() && PropertyRouteType != Entities.PropertyRouteType.Root)
                 return GetImplementations();
 
