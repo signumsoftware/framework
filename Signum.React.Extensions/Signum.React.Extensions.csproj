@@ -178,7 +178,7 @@
     <TypeScriptCompile Include="Dynamic\DynamicExpressionClient.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicTypeConditionClient.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicViewClient.tsx" />
-    <TypeScriptCompile Include="Dynamic\Expression\DynamicExpressionEntity.tsx" />
+    <TypeScriptCompile Include="Dynamic\Expression\DynamicExpression.tsx" />
     <TypeScriptCompile Include="Dynamic\Signum.Entities.Dynamic.ts">
       <DependentUpon>Signum.Entities.Dynamic.t4s</DependentUpon>
     </TypeScriptCompile>
@@ -213,7 +213,7 @@
     <TypeScriptCompile Include="Dynamic\View\NodeSelectorModal.tsx" />
     <TypeScriptCompile Include="Files\FileUploader.tsx" />
     <TypeScriptCompile Include="Files\FileDownloader.tsx" />
-    <TypeScriptCompile Include="Dynamic\View\DynamicViewEntity.tsx" />
+    <TypeScriptCompile Include="Dynamic\View\DynamicView.tsx" />
     <TypeScriptCompile Include="Mailing\Templates\IFrameRenderer.tsx" />
     <Compile Include="Map\MapServer.cs" />
     <Compile Include="Map\MapController.cs" />
