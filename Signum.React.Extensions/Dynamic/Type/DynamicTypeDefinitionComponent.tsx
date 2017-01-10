@@ -11,7 +11,7 @@ import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search
 import { StyleContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import QueryTokenBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/QueryTokenBuilder'
-import { ModifiableEntity, JavascriptMessage, EntityControlMessage, is, Lite, Entity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { ModifiableEntity, JavascriptMessage, EntityControlMessage, is, Lite, Entity, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { QueryEntity, TypeEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { FilterOperation, PaginationMode } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.DynamicQuery'
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal';
@@ -62,12 +62,8 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
         if (props.dynamicType.isNew)
             this.fixSaveOperation()
         else if (props.dynamicType.baseType == "Entity")
-            Finder.API.findLiteLike({
-                types: TypeEntity.typeName,
-                subString: props.dynamicType.typeName!,
-                count: 1
-            })
-                .then(e => this.setState({ entity: e.length > 0 ? e.first() : undefined }))
+            Navigator.API.getType(props.dynamicType.typeName!)
+                .then(te => this.setState({ entity: toLite(te) }))
                 .done();
     }
 

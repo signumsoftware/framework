@@ -74,7 +74,8 @@ export default class DynamicTypeComponent extends React.Component<DynamicTypeCom
                     </div>
                 </div>
                 {this.state.typeDefinition &&
-                    <DynamicTypeDefinitionComponent dc={dc}
+                    <DynamicTypeDefinitionComponent
+                        dc={dc}
                         dynamicType={ctx.value}
                         definition={this.state.typeDefinition}
                         showDatabaseMapping={this.state.showDatabaseMapping!}
