@@ -17,23 +17,19 @@ interface DynamicMixinConnectionComponentProps {
 
 export default class DynamicMixinConnectionComponent extends React.Component<DynamicMixinConnectionComponentProps, void> {
 
-    componentWillMount() {
-
-    }
-
     render() {
         const ctx = this.props.ctx;
 
         return (
             <div>
-                <EntityLine ctx={ctx.subCtx(dt => dt.type)} />
                 <EntityLine ctx={ctx.subCtx(dt => dt.dynamicMixin)}
                     findOptions={{
                         queryName: DynamicTypeEntity,
                         filterOptions: [
-                            //{ columnName: "Entity", operation: "DistinctTo", value: ctx.value.type },
                             { columnName: "Entity.BaseType", operation: "EqualTo", value: "Mixin" },
-                        ]  }} />
+                        ]
+                    }} />
+                <EntityLine ctx={ctx.subCtx(dt => dt.entityType)} />
             </div>
         );
     }

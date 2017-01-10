@@ -5,7 +5,7 @@ import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constru
 import { DynamicViewOverrideEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 import { EntityLine, TypeContext, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { Entity, JavascriptMessage, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { getTypeInfo, Binding, PropertyRoute, ReadonlyBinding } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { getTypeInfo, Binding, PropertyRoute, ReadonlyBinding, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
 import * as DynamicViewClient from '../DynamicViewClient'
 import * as DynamicClient from '../DynamicClient'
@@ -14,6 +14,7 @@ import { ViewReplacer } from '../../../../Framework/Signum.React/Scripts/Frames/
 import TypeHelpComponent from '../Help/TypeHelpComponent'
 import { AuthInfo } from './AuthInfo'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
+import * as Nodes from '../../../../Extensions/Signum.React.Extensions/Dynamic/View/Nodes';
 
 
 interface DynamicViewOverrideComponentProps {
@@ -104,6 +105,27 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
         );
     }
 
+    handleTypeHelpClick = (pr: PropertyRoute | undefined) => {
+        if (!pr || !pr.member || !pr.parent || pr.parent.propertyRouteType != "Mixin")
+            return;
+
+        var node = Nodes.NodeConstructor.appropiateComponent(pr.member, pr.propertyPath());
+        if (!node)
+            return;
+
+        const expression = TypeHelpComponent.getExpression("o", pr, "Typescript");
+        const text = `React.createElement(${node.kind}, { ctx: vr.ctx.subCtx(o => ${expression}) })`;
+
+        ValueLineModal.show({
+            type: { name: "string" },
+            initialValue: text,
+            valueLineType: ValueLineType.TextArea,
+            title: "Mixin Template",
+            message: "Copy to clipboard: Ctrl+C, ESC",
+            initiallyFocused: true,
+        });
+    }
+
     render() {
         const ctx = this.props.ctx;
 
@@ -120,7 +142,11 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
                                 {this.renderEditor()}
                             </div>
                             <div className="col-sm-5">
-                                <TypeHelpComponent initialType={ctx.value.entityType.cleanName} mode="Typescript" renderContextMenu={this.handleRenderContextualMenu} />
+                            <TypeHelpComponent
+                                initialType={ctx.value.entityType.cleanName}
+                                mode="Typescript"
+                                renderContextMenu={this.handleRenderContextualMenu}
+                                onMemberClick={this.handleTypeHelpClick} />
                                 <br />
                             </div>
                         </div>

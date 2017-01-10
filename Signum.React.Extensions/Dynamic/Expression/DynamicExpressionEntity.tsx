@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { ValueLine, EntityLine, TypeContext, FormGroup } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { ValueLine, EntityLine, TypeContext, FormGroup, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { PropertyRoute, Binding, isTypeEntity } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import CSharpCodeMirror from '../../../../Extensions/Signum.React.Extensions/Codemirror/CSharpCodeMirror'
@@ -9,6 +9,7 @@ import { DynamicExpressionEntity } from '../Signum.Entities.Dynamic'
 import { DynamicExpressionTestResponse, API } from '../DynamicExpressionClient'
 import * as DynamicClient from '../DynamicClient';
 import TypeHelpComponent from '../Help/TypeHelpComponent'
+import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
 interface DynamicExpressionComponentProps {
     ctx: TypeContext<DynamicExpressionEntity>;
@@ -31,6 +32,20 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
         entity.body = newScript;
         entity.modified = true;
         this.forceUpdate();
+    }
+
+    handleTypeHelpClick = (pr: PropertyRoute | undefined) => {
+        if (!pr)
+            return;
+
+        ValueLineModal.show({
+            type: { name: "string" },
+            initialValue: TypeHelpComponent.getExpression("e", pr, "CSharp"),
+            valueLineType: ValueLineType.TextArea,
+            title: "Property Template",
+            message: "Copy to clipboard: Ctrl+C, ESC",
+            initiallyFocused: true,
+        });
     }
 
     render() {
@@ -60,7 +75,7 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
                         {ctx.value.body && cleanFromType && this.renderTest(cleanFromType)}
                     </div>
                     <div className="col-sm-5">
-                        <TypeHelpComponent initialType={cleanFromType} mode="CSharp" />
+                        <TypeHelpComponent initialType={cleanFromType} mode="CSharp" onMemberClick={this.handleTypeHelpClick} />
                     </div>
                 </div>
             </div>
