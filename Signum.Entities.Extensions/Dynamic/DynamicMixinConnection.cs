@@ -20,13 +20,13 @@ namespace Signum.Entities.Dynamic
     {
         [NotNullable]
         [NotNullValidator]
-        public Lite<TypeEntity> Type { get; set; }
+        public Lite<TypeEntity> EntityType { get; set; }
 
         [NotNullable]
         [NotNullValidator]
         public Lite<DynamicTypeEntity> DynamicMixin { get; set; }
 
-        static Expression<Func<DynamicMixinConnectionEntity, string>> ToStringExpression = @this => @this.Type + " - " + @this.DynamicMixin;
+        static Expression<Func<DynamicMixinConnectionEntity, string>> ToStringExpression = @this => @this.EntityType + " - " + @this.DynamicMixin;
         [ExpressionField]
         public override string ToString()
         {

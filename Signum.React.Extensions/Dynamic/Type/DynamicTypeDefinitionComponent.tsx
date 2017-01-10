@@ -5,7 +5,7 @@ import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, Ent
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions, QueryToken, filterOperations, OrderType, ColumnOptionsMode } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, Binding, EntityDataValues, EntityKindValues, EntityKind } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { getQueryNiceName, Binding, EntityDataValues, EntityKindValues, EntityKind, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { StyleContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -111,6 +111,20 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
     }
 
     static requiresSave: EntityKind[] = ["Main", "Shared", "String", "Relational"];
+
+    handleTypeHelpClick = (pr: PropertyRoute | undefined) => {
+        if (!pr)
+            return;
+
+        ValueLineModal.show({
+            type: { name: "string" },
+            initialValue: TypeHelpComponent.getExpression("e", pr, "CSharp"),
+            valueLineType: ValueLineType.TextArea,
+            title: "Property Template",
+            message: "Copy to clipboard: Ctrl+C, ESC",
+            initiallyFocused: true,
+        });
+    }
 
     render() {
         const def = this.props.definition;
@@ -252,8 +266,8 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                                         />
                                 </div>
                                 <div className="col-sm-5">
-                                    {!dt.isNew &&
-                                        <TypeHelpComponent initialType={dt.typeName!} mode="CSharp" />
+                                {!dt.isNew &&
+                                    <TypeHelpComponent initialType={dt.typeName!} mode="CSharp" onMemberClick={this.handleTypeHelpClick} />
                                     }
                                 </div>
                             </div>
@@ -285,17 +299,17 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                             </div>
                             <div className="col-sm-5">
                                 {!dt.isNew &&
-                                    <TypeHelpComponent initialType={dt.typeName!} mode="CSharp" />
+                                    <TypeHelpComponent initialType={dt.typeName!} mode="CSharp" onMemberClick={this.handleTypeHelpClick} />
                                 }
                             </div>
                         </div>
                     </Tab>
 
-                    {!dt.isNew && dt.baseType == "Mixin" &&
-                        <Tab eventKey="connections" title="Connections">
+                    {!dt.isNew && 
+                        <Tab eventKey="connections" title={dt.baseType == "Mixin" ? "Apply To" : "Mixin Connections"}>
                             <SearchControl findOptions={{
                                 queryName: DynamicMixinConnectionEntity,
-                                parentColumn: "DynamicMixin",
+                                parentColumn: dt.baseType == "Mixin" ? "DynamicMixin" : "EntityType",
                                 parentValue: this.props.dynamicType
                             }} />
                         </Tab>
@@ -311,8 +325,12 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
         );
     }
 
+    getDynamicTypeFullName() {
+        return `${this.props.dynamicType.typeName}${this.props.dynamicType.baseType}`;
+    }
+
     handlePreSavingClick = () => {
-        let entityName = `${this.props.dynamicType.typeName}Entity`;
+        let entityName = this.getDynamicTypeFullName();
         let text = `sb.Schema.EntityEvents<${entityName}>().PreSaving += ${entityName}PreSaving;
 private static void ${entityName}PreSaving(${entityName} e, ref bool graphModified)
 {
@@ -322,13 +340,13 @@ private static void ${entityName}PreSaving(${entityName} e, ref bool graphModifi
     }
 
     handlePostRetrievedClick = () => {
-        let entityName = `${this.props.dynamicType.typeName}Entity`;
+        let entityName = this.getDynamicTypeFullName();
         let text = `sb.Schema.EntityEvents<${entityName}>().Retrieved += (e) => Your custom code;`;
         this.popupEventsTemplate(entityName, "PostRetrieved", text);
     }
 
     handlePropertyValidatorClick = () => {
-        let entityName = `${this.props.dynamicType.typeName}Entity`;
+        let entityName = this.getDynamicTypeFullName();
         let text = `Validator.PropertyValidator<${entityName}>(e => e.Your member}).StaticPropertyValidation = (e, pi) => {
 //    if (e.Name == "AAA")
 //        return "AAA is an special name and can not be used";

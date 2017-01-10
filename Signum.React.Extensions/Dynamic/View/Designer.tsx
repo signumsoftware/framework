@@ -15,6 +15,7 @@ import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynami
 import { Modal, ModalProps, ModalClass, ButtonToolbar, Button } from 'react-bootstrap'
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
 import TypeHelpComponent from '../Help/TypeHelpComponent'
+import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
 export interface ExpressionOrValueProps {
     binding: Binding<any>;
@@ -330,6 +331,20 @@ export class CollapsableTypeHelp extends React.Component<{ initialTypeName?: str
         });
     }
 
+    handleTypeHelpClick = (pr: PropertyRoute | undefined) => {
+        if (!pr)
+            return;
+
+        ValueLineModal.show({
+            type: { name: "string" },
+            initialValue: TypeHelpComponent.getExpression("e", pr, "Typescript"),
+            valueLineType: ValueLineType.TextArea,
+            title: "Property Template",
+            message: "Copy to clipboard: Ctrl+C, ESC",
+            initiallyFocused: true,
+        });
+    }
+
     render() {
         return (
             <div>
@@ -338,7 +353,11 @@ export class CollapsableTypeHelp extends React.Component<{ initialTypeName?: str
                         DynamicViewMessage.HideHelp.niceToString() :
                         DynamicViewMessage.ShowHelp.niceToString()}
                 </a>
-                {this.state.open && <TypeHelpComponent initialType={this.props.initialTypeName} mode="Typescript" />}
+                {this.state.open &&
+                    <TypeHelpComponent
+                        initialType={this.props.initialTypeName}
+                        mode="Typescript"
+                        onMemberClick={this.handleTypeHelpClick} />}
             </div>
         );
     }
