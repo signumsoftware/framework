@@ -2,26 +2,15 @@
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Signum.Engine.DynamicQuery;
-using Signum.Engine.Mailing;
 using Signum.Engine.Templating;
-using Signum.Engine.Translation;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
-using Signum.Entities.Reflection;
-using Signum.Entities.UserAssets;
-using Signum.Entities.Word;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Xml;
 
 namespace Signum.Engine.Word
 {
@@ -165,7 +154,7 @@ namespace Signum.Engine.Word
                     var token = m.Groups["token"].Value;
                     var keyword = m.Groups["keyword"].Value;
                     var dec = m.Groups["dec"].Value;
-                    
+
                     switch (keyword)
                     {
                         case "":
@@ -175,10 +164,10 @@ namespace Signum.Engine.Word
                             else
                             {
                                 var vp = TryParseValueProvider(type, s.Value.Token, dec);
-                                
+
                                 matchNode.Parent.ReplaceChild(new TokenNode(vp, s.Value.Format)
                                 {
-                                    RunProperties = matchNode.RunProperties?.Do(d => d.Remove()) 
+                                    RunProperties = matchNode.RunProperties?.Do(d => d.Remove())
                                 }, matchNode);
 
                                 DeclareVariable(vp);
@@ -190,7 +179,7 @@ namespace Signum.Engine.Word
 
                                 matchNode.Parent.ReplaceChild(new DeclareNode(vp, this.AddError)
                                 {
-                                    RunProperties = matchNode.RunProperties?.Do(d => d.Remove()) 
+                                    RunProperties = matchNode.RunProperties?.Do(d => d.Remove())
                                 }, matchNode);
 
                                 DeclareVariable(vp);
@@ -287,7 +276,7 @@ namespace Signum.Engine.Word
                             {
                                 var vp = TryParseValueProvider(type, token, dec);
                                 var fn = new ForeachNode(vp) { ForeachToken = new MatchNodePair(matchNode) };
-                                stack.Push(fn);
+                                PushBlock(fn);
 
                                 DeclareVariable(vp);
                                 break;
