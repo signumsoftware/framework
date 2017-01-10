@@ -16,7 +16,7 @@ import { DynamicExpressionEntity } from './Signum.Entities.Dynamic'
 
 export function start(options: { routes: JSX.Element[] }) {
 
-    Navigator.addSettings(new EntitySettings(DynamicExpressionEntity, w => new ViewPromise(resolve => require(['./Expression/DynamicExpressionEntity'], resolve))));
+    Navigator.addSettings(new EntitySettings(DynamicExpressionEntity, w => new ViewPromise(resolve => require(['./Expression/DynamicExpression'], resolve))));
     DynamicClient.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicExpressionEntity }} />);
     DynamicClient.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicExpressionEntity, parentColumn: "FromType", parentValue: type + "Entity" }} />);
 }

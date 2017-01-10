@@ -11,8 +11,8 @@ import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search
 import { StyleContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import QueryTokenBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/QueryTokenBuilder'
-import { ModifiableEntity, JavascriptMessage, EntityControlMessage, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { QueryEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import { ModifiableEntity, JavascriptMessage, EntityControlMessage, is, Lite, Entity, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { QueryEntity, TypeEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { FilterOperation, PaginationMode } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.DynamicQuery'
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal';
 import * as DynamicTypeClient from '../DynamicTypeClient';
@@ -42,6 +42,7 @@ interface DynamicTypeDefinitionComponentProps {
 interface DynamicTypeDefinitionComponentState
 {
     expressionsNames?: string[];
+    entity?: Lite<Entity>;
 }
 
 export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeDefinitionComponentProps, DynamicTypeDefinitionComponentState> {
@@ -50,13 +51,20 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
         super(props);
         this.state = {};
 
-        if (props.dynamicType.isNew)
-            this.fixSaveOperation();
+        this.initialize(props);
     }
 
     componentWillReceiveProps(nextProps: DynamicTypeDefinitionComponentProps) {
-        if (nextProps.dynamicType.isNew)
-            this.fixSaveOperation();
+        this.initialize(nextProps);
+    }
+
+    initialize(props: DynamicTypeDefinitionComponentProps) {
+        if (props.dynamicType.isNew)
+            this.fixSaveOperation()
+        else if (props.dynamicType.baseType == "Entity")
+            Navigator.API.getType(props.dynamicType.typeName!)
+                .then(te => this.setState({ entity: toLite(te) }))
+                .done();
     }
 
     handleTabSelect = (eventKey: any /*string*/) => {
@@ -305,12 +313,12 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                         </div>
                     </Tab>
 
-                    {!dt.isNew && 
+                    {!dt.isNew && (dt.baseType == "Mixin" || this.state.entity) &&
                         <Tab eventKey="connections" title={dt.baseType == "Mixin" ? "Apply To" : "Mixin Connections"}>
                             <SearchControl findOptions={{
                                 queryName: DynamicMixinConnectionEntity,
                                 parentColumn: dt.baseType == "Mixin" ? "DynamicMixin" : "EntityType",
-                                parentValue: this.props.dynamicType
+                                parentValue: dt.baseType == "Mixin" ? dt : this.state.entity!
                             }} />
                         </Tab>
                     }
