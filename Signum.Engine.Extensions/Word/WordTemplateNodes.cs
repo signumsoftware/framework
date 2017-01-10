@@ -2,25 +2,16 @@
 using DocumentFormat.OpenXml.Wordprocessing;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Templating;
-using Signum.Engine.Translation;
-using Signum.Entities;
 using Signum.Entities.DynamicQuery;
-using Signum.Entities.Reflection;
 using Signum.Entities.UserAssets;
-using Signum.Entities.Word;
 using Signum.Utilities;
+using Signum.Utilities.DataStructures;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Xml;
-using System.Globalization;
-using Signum.Utilities.DataStructures;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace Signum.Engine.Word
 {
@@ -31,6 +22,17 @@ namespace Signum.Engine.Word
         public MatchNode(Match match)
         {
             this.Match = match;
+        }
+
+        internal MatchNode(MatchNode original)
+        {
+            this.Match = original.Match;
+
+            this.SetAttributes(original.GetAttributes().ToList());
+            foreach (var item in original.ChildElements)
+            {
+                this.AppendChild(item.CloneNode(true));
+            }
         }
 
         public override string ToString()
@@ -50,6 +52,11 @@ namespace Signum.Engine.Word
             this.AppendChild(tempText);
             base.WriteTo(xmlWriter);
             this.RemoveChild(tempText);
+        }
+
+        public override OpenXmlElement CloneNode(bool deep)
+        {
+            return new MatchNode(this);
         }
     }
 
@@ -186,7 +193,7 @@ namespace Signum.Engine.Word
 
         protected internal override void RenderNode(WordTemplateParameters p)
         {
-            if (this.Parent is Paragraph && !this.Parent.ChildElements.Any(a => BlockContainerNode.IsImportant (a) && a != this))
+            if (this.Parent is Paragraph && !this.Parent.ChildElements.Any(a => BlockContainerNode.IsImportant(a) && a != this))
                 this.Parent.Remove();
             else
                 this.Remove();
@@ -237,12 +244,12 @@ namespace Signum.Engine.Word
             var parent = this.Parent;
             int index = parent.ChildElements.IndexOf(this);
             parent.RemoveChild(this);
-  
+
             foreach (var item in this.ChildElements.ToList())
             {
                 item.Remove();
                 parent.InsertAt(item, index++);
-            }   
+            }
         }
 
         protected internal override void RenderTemplate(ScopedDictionary<string, ValueProviderBase> variables)
@@ -332,7 +339,7 @@ namespace Signum.Engine.Word
                 if (text != null && string.IsNullOrWhiteSpace(text.Text))
                     return false;
 
-                return true; 
+                return true;
             }
 
             if (c is BaseNode)
@@ -357,7 +364,7 @@ namespace Signum.Engine.Word
             return childs;
         }
 
-        
+
     }
 
     public class ForeachNode : BlockContainerNode
@@ -419,13 +426,13 @@ namespace Signum.Engine.Word
         protected internal override void RenderNode(WordTemplateParameters p)
         {
             var parent = this.Parent;
-            
+
             this.ValueProvider.Foreach(p, () =>
             {
                 var clone = (BlockNode)this.ForeachBlock.CloneNode(true);
 
                 var index = parent.ChildElements.IndexOf(this);
-                
+
                 parent.InsertAt(clone, index);
 
                 clone.RenderNode(p);
@@ -484,10 +491,22 @@ namespace Signum.Engine.Word
 
         public MatchNodePair CloneNode()
         {
-            var clone = this.AscendantNode.CloneNode(true);
-            var match = clone.Descendants<MatchNode>().SingleEx();
+            if (this.AscendantNode != null)
+            {
+                var ascClone = this.AscendantNode.CloneNode(true);
+                var match = ascClone as MatchNode ?? ascClone.Descendants<MatchNode>().SingleEx();
 
-            return new MatchNodePair(match) { AscendantNode = clone };
+                return new MatchNodePair(match) { AscendantNode = ascClone };
+            }
+            else if (this.MatchNode != null)
+            {
+                var clone = this.MatchNode.CloneNode(true);
+                return new MatchNodePair((MatchNode)clone);
+            }
+            else
+            {
+                return default(MatchNodePair);
+            }
         }
 
         internal OpenXmlElement ReplaceMatchNode(string text)
@@ -773,9 +792,9 @@ namespace Signum.Engine.Word
 
             if (this.ElseBlock != null)
                 this.AppendChild(this.ElseBlock);
-         
+
             base.WriteTo(xmlWriter);
-            
+
             if (this.ElseBlock != null)
                 this.RemoveChild(this.ElseBlock);
 
