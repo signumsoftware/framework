@@ -225,6 +225,8 @@ namespace Signum.Engine.Mailing.Pop3
                                     {
                                         var email = client.GetMessage(mi, reception.ToLite());
 
+                                        email.Subject = email.Subject.Replace('\n', ' ').Replace('\r', ' ');
+
                                         if (email.Recipients.IsEmpty())
                                         {
                                             email.Recipients.Add(new EmailRecipientEntity
