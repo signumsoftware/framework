@@ -847,7 +847,7 @@ export const formatRules: FormatRule[] = [
         isApplicable: col => (col.token!.filterType == "Integer" || col.token!.filterType == "Decimal") && !!col.token!.unit,
         formatter: col => {
             const numbroFormat = toNumbroFormat(col.token!.format);
-            return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat) + " " + col.token!.unit}</span>, "numeric-cell");
+            return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat) + "\u00a0" + col.token!.unit}</span>, "numeric-cell");
         }
     },
     {
