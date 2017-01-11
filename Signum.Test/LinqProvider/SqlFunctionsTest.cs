@@ -223,6 +223,38 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void EnumToString()
+        {
+            var sexs = Database.Query<ArtistEntity>().Select(a => a.Sex.ToString()).ToList();
+        }
+
+        [TestMethod]
+        public void NullableEnumToString()
+        {   
+            var sexs = Database.Query<ArtistEntity>().Select(a => a.Status.ToString()).ToList();
+        }
+
+        [TestMethod]
+        public void ConcatenateStringNullableNominate()
+        {
+            var list2 = Database.Query<ArtistEntity>().Select(a => a.Name + " is " + a.Status).ToList();
+        }
+
+        [TestMethod]
+        public void ConcatenateStringNullableEntity()
+        {
+            var list1 = Database.Query<AlbumEntity>().Select(a => a.Name + " is published by " + a.Label).ToList();
+        }
+
+        [TestMethod]
+        public void ConcatenateStringFullNominate()
+        {
+            var list = Database.Query<ArtistEntity>().Where(a => (a + "").Contains("Michael")).ToList();
+
+            Assert.IsTrue(list.Count == 1);
+        }
+
+        [TestMethod]
         public void Etc()
         {
             Assert.IsTrue(Enumerable.SequenceEqual(

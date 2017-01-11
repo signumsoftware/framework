@@ -458,7 +458,10 @@ namespace Signum.Engine.Linq
             if (expression.Type == typeof(string))
                 return expression;
 
-            return Expression.Call(expression, miToString); 
+            return Expression.Condition(
+                Expression.Equal(expression, Expression.Constant(null, expression.Type.Nullify())),
+                Expression.Constant(null, typeof(string)),
+                Expression.Call(expression, miToString)); 
         }
 
         public static bool ExtractDefaultIfEmpty(ref Expression expression)
