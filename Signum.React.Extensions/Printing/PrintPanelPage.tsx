@@ -69,16 +69,8 @@ export default class PrintPanelPage extends React.Component<{}, PrintPanelPageSt
                     filterOptions: [{ columnName: "Entity.Data.(PrintPackage)", operation: "DistinctTo", value: undefined }],
                     searchOnLoad: true,
                     showFilters: false
-                }} />
-                
-                <h3>{PrintLineState.niceName("Printed")}</h3>
-                <SearchControl findOptions={{
-                    queryName: PrintLineEntity,
-                    orderOptions: [{ columnName: "PrintedOn", orderType: "Descending" }],
-                    filterOptions: [{ columnName: "State", operation: "DistinctTo", value: "ReadyToPrint" }],
-                    searchOnLoad: true,
-                    showFilters: false
-                }} />
+                }} />               
+               
             </div>
         );
     }
