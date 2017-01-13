@@ -116,9 +116,9 @@ namespace Signum.Engine.Processes
                     {
                         Entity = p,
                         p.Id,
-                        Summary = p.ToString(),
-                        Process = p.Algorithm,
-                        State = p.State,
+                        p.Algorithm,
+                        p.Data,
+                        p.State,
                         p.MachineName,
                         p.ApplicationName,
                         p.CreationDate,

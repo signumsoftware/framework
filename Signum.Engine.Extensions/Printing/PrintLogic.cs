@@ -103,8 +103,10 @@ namespace Signum.Engine.Printing
             if (query.Count() == 0)
                 return null;
 
-            var package = new PrintPackageEntity();
-            package.Save();
+            var package = new PrintPackageEntity()
+            {
+                Name = fileType?.ToString() + " (" + query.Count() + ")"
+            }.Save();
 
             query.UnsafeUpdate().Set(a => a.Package, a => package.ToLite()).Execute();
 
