@@ -5,6 +5,7 @@ using System.Text;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
 using System.Threading;
+using System.Diagnostics;
 
 namespace Signum.Utilities
 {
@@ -13,7 +14,18 @@ namespace Signum.Utilities
         void Reset();
         void Load();
         Type DeclaringType { get; }
+        ResetLazyStats Stats();
     }
+
+    public class ResetLazyStats
+    {
+        public Type Type;
+        public int Loads;
+        public int Invalidations;
+        public int Hits;
+        public TimeSpan SumLoadTime;
+    }
+
 
     [ComVisible(false)]
     [HostProtection(Action = SecurityAction.LinkDemand, Resources = HostProtectionResource.Synchronization | HostProtectionResource.SharedState)]
@@ -42,6 +54,11 @@ namespace Signum.Utilities
         LazyThreadSafetyMode mode; 
         Func<T> valueFactory;
 
+        public int Loads;
+        public int Hits;
+        public int Invalidations;
+        public TimeSpan SumLoadtime;  
+
         object syncLock = new object();
 
         Box box;
@@ -58,7 +75,10 @@ namespace Signum.Utilities
             {
                 var b1 = this.box;
                 if (b1 != null)
+                {
+                    Interlocked.Increment(ref Hits);
                     return b1.Value;
+                }
 
                 if (mode == LazyThreadSafetyMode.ExecutionAndPublication)
                 {
@@ -68,7 +88,7 @@ namespace Signum.Utilities
                         if (b2 != null)
                             return b2.Value;
 
-                        this.box = new Box(valueFactory());
+                        this.box = new Box(InternalLoaded());
 
                         return box.Value;
                     }
@@ -76,7 +96,7 @@ namespace Signum.Utilities
 
                 else if (mode == LazyThreadSafetyMode.PublicationOnly)
                 {
-                    var newValue = valueFactory(); 
+                    var newValue = InternalLoaded(); 
 
                     lock (syncLock)
                     {
@@ -91,12 +111,22 @@ namespace Signum.Utilities
                 }
                 else
                 {
-                    var b = new Box(valueFactory());
+                    var b = new Box(InternalLoaded());
                     this.box = b;
                     return b.Value;
                 }
             }
         }
+
+        T InternalLoaded()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+            var result = valueFactory();
+            sw.Stop();
+            this.SumLoadtime += sw.Elapsed;
+            Interlocked.Increment(ref Loads);
+            return result;
+        } 
 
 
         public void Load()
@@ -124,8 +154,21 @@ namespace Signum.Utilities
 
             }
 
+            Interlocked.Increment(ref Invalidations);
             if (OnReset != null)
                 OnReset(this, null);
+        }
+
+        ResetLazyStats IResetLazy.Stats()
+        {
+            return new ResetLazyStats
+            {
+                SumLoadTime = this.SumLoadtime,
+                Hits = this.Hits,
+                Loads = this.Loads,
+                Invalidations = this.Invalidations,
+                Type = typeof(T)
+            };
         }
 
         public event EventHandler OnReset; 
