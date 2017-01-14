@@ -41,7 +41,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
 
     calculateState(props: PageFrameProps) {
 
-        return { componentClass: undefined, pack: undefined } as PageFrameState;
+        return { getComponent: undefined, pack: undefined } as PageFrameState;
     }
 
 
