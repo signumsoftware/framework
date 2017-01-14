@@ -7,7 +7,7 @@ import ButtonBar from './ButtonBar'
 
 import { ValidationError } from '../Services'
 import { ifError, Dic } from '../Globals'
-import { TypeContext, StyleOptions, EntityFrame, IRenderButtons } from '../TypeContext'
+import { TypeContext, StyleOptions, EntityFrame, IRenderButtons, IHasChanges } from '../TypeContext'
 import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, toLite, getToString, EntityPack, ModelState, entityInfo, isEntityPack, isLite } from '../Signum.Entities'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel, parseId } from '../Reflection'
 import ValidationErrors from './ValidationErrors'
@@ -156,6 +156,10 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     }
 
     hasChanges() {
+
+        var hc = this.entityComponent as IHasChanges;
+        if (hc.componentHasChanges)
+            return hc.componentHasChanges();
 
         const entity = this.state.pack!.entity;
 
