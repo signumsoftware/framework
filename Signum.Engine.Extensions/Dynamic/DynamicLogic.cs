@@ -5,6 +5,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
+using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
@@ -72,7 +73,9 @@ namespace Signum.Engine.Dynamic
             if (e == null)
                 return;
 
-            e.LogException();
+            if (Administrator.ExistsTable<ExceptionEntity>())
+                e.LogException();
+
             Console.WriteLine();
             SafeConsole.WriteLineColor(ConsoleColor.Red, "IMPORTANT!: Starting without Dynamic Entities.");
             SafeConsole.WriteLineColor(ConsoleColor.Yellow, "   Error:" + e.Message);

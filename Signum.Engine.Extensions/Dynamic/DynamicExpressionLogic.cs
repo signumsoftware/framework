@@ -62,6 +62,9 @@ namespace Signum.Engine.Dynamic
                     CacheLogic.GloballyDisabled = true;
                     try
                     {
+                        if (!Administrator.ExistsTable<DynamicExpressionEntity>())
+                            return new Dictionary<string, Dictionary<string, string>>();
+
                         using (ExecutionMode.Global())
                             return Database.Query<DynamicExpressionEntity>()
                             .Where(a => a.Translation == DynamicExpressionTranslation.TranslateExpressionName)
@@ -91,7 +94,9 @@ namespace Signum.Engine.Dynamic
                 {
                     var result = new List<CodeFile>();
 
-                    var expressions = Database.Query<DynamicExpressionEntity>().ToList();
+                    var expressions = !Administrator.ExistsTable<DynamicExpressionEntity>() ? 
+                        new List<DynamicExpressionEntity>() :
+                        Database.Query<DynamicExpressionEntity>().ToList();
 
                     var dtcg = new DynamicExpressionCodeGenerator(DynamicCode.CodeGenEntitiesNamespace, expressions, DynamicCode.Namespaces);
 

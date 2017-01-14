@@ -112,6 +112,9 @@ namespace Signum.Engine.Dynamic
             CacheLogic.GloballyDisabled = true;
             try
             {
+                if (!Administrator.ExistsTable<DynamicTypeEntity>())
+                    return new List<DynamicTypeEntity>();
+
                 return ExecutionMode.Global().Using(a => Database.Query<DynamicTypeEntity>().ToList());
             }
             finally
@@ -131,9 +134,6 @@ namespace Signum.Engine.Dynamic
 
         public static List<CodeFile> GetCodeFiles()
         {
-            if (!Administrator.ExistTable<DynamicTypeEntity>())
-                return new List<CodeFile>();
-
             List<DynamicTypeEntity> types = GetTypes();
             var alreadyTranslatedExpressions = GetAlreadyTranslatedExpressions?.Invoke();
 
