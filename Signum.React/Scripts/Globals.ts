@@ -630,7 +630,7 @@ export module Dic {
             return;
 
         for (const key in other) {
-            if (other.hasOwnProperty(key))
+            if (other.hasOwnProperty == null || other.hasOwnProperty(key))
                 (obj as any)[key] = other[key];
         }
     }
@@ -640,7 +640,7 @@ export module Dic {
         const result: V[] = [];
 
         for (const name in obj) {
-            if (obj.hasOwnProperty(name)) {
+            if (obj.hasOwnProperty == null || obj.hasOwnProperty(name)) {
                 result.push(obj[name]);
             }
         }
@@ -652,7 +652,7 @@ export module Dic {
         const result: string[] = [];
 
         for (const name in obj) {
-            if (obj.hasOwnProperty(name)) {
+            if (obj.hasOwnProperty == null || obj.hasOwnProperty(name)) {
                 result.push(name);
             }
         }
@@ -664,7 +664,7 @@ export module Dic {
         let index = 0;
         const result: R[] = [];
         for (const name in obj) {
-            if (obj.hasOwnProperty(name)) {
+            if (obj.hasOwnProperty == null || obj.hasOwnProperty(name)) {
                 result.push(selector(name, obj[name], index++));
             }
         }
@@ -674,7 +674,7 @@ export module Dic {
     export function foreach<V>(obj: { [key: string]: V }, action: (key: string, value: V) => void) {
 
         for (const name in obj) {
-            if (obj.hasOwnProperty(name)) {
+            if (obj.hasOwnProperty == null || obj.hasOwnProperty(name)) {
                 action(name, obj[name]);
             }
         }
@@ -694,7 +694,7 @@ export module Dic {
 
         var result : T = {} as any;
         for (const key in a) {
-            if (a.hasOwnProperty(key) && a[key] !== undefined)
+            if ((a.hasOwnProperty == null || a.hasOwnProperty(key)) && a[key] !== undefined)
                 result[key] = a[key];
         }
         return result;
