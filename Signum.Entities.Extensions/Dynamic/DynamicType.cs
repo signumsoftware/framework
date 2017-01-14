@@ -65,6 +65,8 @@ namespace Signum.Entities.Dynamic
 
         [Description("Remove Save Operation?")]
         RemoveSaveOperation,
+
+        TheEntityShouldBeSynchronizedToApplyMixins,
     }
 
     public class DynamicTypePrimaryKeyDefinition

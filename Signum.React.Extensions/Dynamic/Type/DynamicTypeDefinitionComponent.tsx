@@ -42,7 +42,7 @@ interface DynamicTypeDefinitionComponentProps {
 interface DynamicTypeDefinitionComponentState
 {
     expressionsNames?: string[];
-    entity?: Lite<Entity>;
+    typeEntity?: Lite<TypeEntity> | false;
 }
 
 export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeDefinitionComponentProps, DynamicTypeDefinitionComponentState> {
@@ -60,11 +60,19 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
 
     initialize(props: DynamicTypeDefinitionComponentProps) {
         if (props.dynamicType.isNew)
-            this.fixSaveOperation()
-        else if (props.dynamicType.baseType == "Entity")
-            Navigator.API.getType(props.dynamicType.typeName!)
-                .then(te => this.setState({ entity: toLite(te) }))
-                .done();
+            this.fixSaveOperation();
+
+        if (props.dynamicType.baseType == "Entity") {
+            if (props.dynamicType.isNew)
+                this.setState({ typeEntity: undefined });
+            else
+                Navigator.API.getType(props.dynamicType.typeName!)
+                    .then(te => this.setState({ typeEntity: toLite(te) }))
+                    .catch(e => this.setState({ typeEntity: false }))
+                    .done();
+        } else {
+            this.setState({ typeEntity: undefined });
+        }
     }
 
     handleTabSelect = (eventKey: any /*string*/) => {
@@ -313,13 +321,25 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                         </div>
                     </Tab>
 
-                    {!dt.isNew && (dt.baseType == "Mixin" || this.state.entity) &&
-                        <Tab eventKey="connections" title={dt.baseType == "Mixin" ? "Apply To" : "Mixin Connections"}>
+                    {!dt.isNew && dt.baseType == "Mixin" &&
+                        <Tab eventKey="connections" title="Apply To">
                             <SearchControl findOptions={{
                                 queryName: DynamicMixinConnectionEntity,
-                                parentColumn: dt.baseType == "Mixin" ? "DynamicMixin" : "EntityType",
-                                parentValue: dt.baseType == "Mixin" ? dt : this.state.entity!
+                                parentColumn:  "DynamicMixin",
+                                parentValue:  dt
                             }} />
+                        </Tab>
+                    }
+
+                    {!dt.isNew && dt.baseType == "Entity" && this.state.typeEntity != null &&
+                        <Tab eventKey="connections" title="Mixins">
+                        {this.state.typeEntity == false ? <p className="alert alert-warning">{DynamicTypeMessage.TheEntityShouldBeSynchronizedToApplyMixins.niceToString()}</p> :
+                            <SearchControl findOptions={{
+                                queryName: DynamicMixinConnectionEntity,
+                                parentColumn: "EntityType",
+                                parentValue: this.state.typeEntity
+                            }} />
+                        }
                         </Tab>
                     }
 

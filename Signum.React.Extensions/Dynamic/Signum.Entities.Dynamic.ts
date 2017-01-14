@@ -126,6 +126,7 @@ export module DynamicTypeMessage {
     export const DynamicType0SucessfullySavedGoToDynamicPanelNow = new MessageKey("DynamicTypeMessage", "DynamicType0SucessfullySavedGoToDynamicPanelNow");
     export const ServerRestartedWithErrorsInDynamicCodeFixErrorsAndRestartAgain = new MessageKey("DynamicTypeMessage", "ServerRestartedWithErrorsInDynamicCodeFixErrorsAndRestartAgain");
     export const RemoveSaveOperation = new MessageKey("DynamicTypeMessage", "RemoveSaveOperation");
+    export const TheEntityShouldBeSynchronizedToApplyMixins = new MessageKey("DynamicTypeMessage", "TheEntityShouldBeSynchronizedToApplyMixins");
 }
 
 export module DynamicTypeOperation {
