@@ -106,7 +106,7 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
         return result;
     }
 
-    static extract(fo: FindOptionsParsed) {
+    static extract(fo: FindOptionsParsed): InboxFilterModel | null {
         var filters = fo.filterOptions.clone();
 
         var extract = (columnName: string, operation: FilterOperation) => {
@@ -118,14 +118,21 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
             return f.value;
         }
 
-        var result = filters.length == 0 ?
-            InboxFilter.resetModel(InboxFilterModel.New()) :
-            InboxFilterModel.New({
+        var result: InboxFilterModel;
+        
+        if (filters.length == 0) {
+            result = InboxFilterModel.New();
+            InboxFilter.resetModel(result);
+            return result;
+
+        } else {
+            result = InboxFilterModel.New({
                 range: extract("Range", "EqualTo"),
                 states: (extract("State", "IsIn") as CaseNotificationState[] || []).map(b => newMListElement(b)),
                 fromDate: extract("StartDate", "GreaterThanOrEqual"),
                 toDate: extract("StartDate", "LessThanOrEqual"),
             });
+        }
 
         if (filters.length)
             return null;

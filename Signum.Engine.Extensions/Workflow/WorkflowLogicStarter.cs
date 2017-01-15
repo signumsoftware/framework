@@ -11,7 +11,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Signum.Logic.Workflow
+namespace Signum.Engine.Workflow
 {
 
     public static class WorkflowLogicStarter

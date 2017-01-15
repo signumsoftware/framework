@@ -157,7 +157,10 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
             return WorkflowPoolModel.New({ name : elementName });
 
         if (this.isLane(elementType))
-            return WorkflowLaneModel.New({name : elementName });
+            return WorkflowLaneModel.New({
+                mainEntityType: this.getMainType(),
+                name: elementName
+            });
 
         if (this.isTask(elementType) || this.isUserTask(elementType))
             return WorkflowActivityModel.New({

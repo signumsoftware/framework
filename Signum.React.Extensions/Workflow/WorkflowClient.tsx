@@ -18,12 +18,13 @@ import * as DynamicViewClient from '../../../Extensions/Signum.React.Extensions/
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import { WorkflowConnectionEval, DecisionResult } from './Signum.Entities.Workflow'
 import CaseModalFrame from './Templates/CaseModalFrame'
+import CasePageFrame from './Templates/CasePageFrame'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
 
 import {
     WorkflowEntity, WorkflowLaneEntity, WorkflowActivityEntity, WorkflowConnectionEntity, WorkflowConditionEntity, CaseActivityQuery, CaseActivityEntity,
-    CaseActivityOperation, CaseEntity, CaseNotificationEntity, CaseNotificationState, InboxFilterModel, WorkflowOperation,
-    WorkflowActivityOperation, WorkflowReplacementModel, WorkflowModel, BpmnEntityPair, WorkflowActivityModel, ICaseMainEntity
+    CaseActivityOperation, CaseEntity, CaseNotificationEntity, CaseNotificationState, InboxFilterModel, WorkflowOperation, WorkflowPoolEntity,
+    WorkflowActivityOperation, WorkflowReplacementModel, WorkflowModel, BpmnEntityPair, WorkflowActivityModel, ICaseMainEntity, WorkflowGatewayEntity, WorkflowEventEntity, WorkflowLaneModel
 } from './Signum.Entities.Workflow'
 
 import InboxFilter from './Templates/InboxFilter'
@@ -42,7 +43,8 @@ export function start(options: { routes: JSX.Element[] }) {
             { columnName: "State" },
             { columnName: "User" },
         ],
-        entityFormatter: row => <CaseEntityLink lite={ row.entity as Lite<CaseActivityEntity> } inSearch={ true }> { EntityControlMessage.View.niceToString() } </CaseEntityLink>, 
+        entityFormatter: row => <CaseEntityLink lite={row.entity as Lite<CaseActivityEntity>} inSearch={true}> {EntityControlMessage.View.niceToString()} </CaseEntityLink>,
+        onDoubleClick: (e, row) => navigateCase(row.entity as Lite<CaseActivityEntity>),
         rowAttributes: (row, columns) => {
             var rowState = row.columns[columns.indexOf("State")] as CaseNotificationState;
             switch (rowState) {
@@ -72,11 +74,22 @@ export function start(options: { routes: JSX.Element[] }) {
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { style: "primary", onClick: executeWorkflowSave }));
 
     Navigator.addSettings(new EntitySettings(WorkflowEntity, w => new ViewPromise(m => require(['./Templates/Workflow'], m)), { avoidPopup: true }));
+    hide(WorkflowPoolEntity);
+    hide(WorkflowLaneEntity);
+    hide(WorkflowActivityEntity);
+    hide(WorkflowGatewayEntity);
+    hide(WorkflowEventEntity);
+    hide(WorkflowConnectionEntity);
     Navigator.addSettings(new EntitySettings(WorkflowActivityModel, w => new ViewPromise(m => require(['./Templates/WorkflowActivityModel'], m))));
     Navigator.addSettings(new EntitySettings(WorkflowReplacementModel, w => new ViewPromise(m => require(['./Templates/WorkflowReplacementComponent'], m))));
     Navigator.addSettings(new EntitySettings(WorkflowConditionEntity, w => new ViewPromise(m => require(['./Templates/WorkflowConditionEntity'], m))));
+    Navigator.addSettings(new EntitySettings(WorkflowLaneModel, w => new ViewPromise(m => require(['./Templates/WorkflowLaneModel'], m))));
     Constructor.registerConstructor(WorkflowConditionEntity, () => WorkflowConditionEntity.New({ eval: WorkflowConnectionEval.New() }));
    
+}
+
+function hide<T extends Entity>(type: Type<T>) {
+    Navigator.addSettings(new EntitySettings(type, undefined, { isNavigable: "Never", isViewable: false, isCreable: "Never" }));
 }
 
 export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Entity>) {
@@ -110,14 +123,12 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Entit
         }).done();
 }
 
-export function executeAndClose(eoc: Operations.EntityOperationContext<Entity>) {
+export function executeAndClose(eoc: Operations.EntityOperationContext<CaseActivityEntity>) {
 
     if (!confirmInNecessary(eoc))
         return;
-
-    var activity = (eoc.frame.frameComponent as CaseModalFrame).state.pack!.activity;
     
-    Operations.API.executeEntity(eoc.entity, eoc.operationInfo.key, activity ? toLite(activity) : undefined)
+    Operations.API.executeEntity(eoc.entity, eoc.operationInfo.key)
         .then(pack => { eoc.frame.onClose(); return notifySuccess(); })
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
         .done();
@@ -178,27 +189,28 @@ export function registerActivityView<T extends ICaseMainEntity>(settings: Activi
     tvDic[settings.activityViewName] = settings;
 }
 
-export function getSettings(typeName: string, activityViewName: string): ActivityViewSettings<ICaseMainEntity> {
+export function getSettings(typeName: string, activityViewName: string): ActivityViewSettings<ICaseMainEntity> | undefined {
 
     const dict = registeredActivityViews[typeName];
 
-    if (dict) {
-        var settings = dict[activityViewName];
-        if (settings)
-            return settings;
-    }
+    if (!dict)
+        return undefined;
 
-    const promise = DynamicViewClient.API.getDynamicView(typeName, activityViewName);
-    return {
-        type: (new Type(typeName) as Type<ICaseMainEntity>),
-        activityViewName: activityViewName,
-        getViewPromise: e => new ViewPromise(resolve => require(['../../../Extensions/Signum.React.Extensions/Dynamic/View/DynamicViewComponent'], resolve))
-            .withProps(promise.then(dv => ({ initialDynamicView: dv })))
-    }
+    return dict[activityViewName];
 }
 
-export function getViewPromise<T extends ICaseMainEntity>(entity: T, activityViewName: string): ViewPromise<T> {
-    return getSettings(entity.Type, activityViewName).getViewPromise(entity);
+export function getViewPromise<T extends ICaseMainEntity>(entity: T, activityViewName: string | undefined | null): ViewPromise<T> {
+
+    var settings = activityViewName && getSettings(entity.Type, activityViewName);
+    if (settings)
+        return settings.getViewPromise(entity);
+
+    const promise = activityViewName == undefined ?
+        DynamicViewClient.createDefaultDynamicView(entity.Type) :
+        DynamicViewClient.API.getDynamicView(entity.Type, activityViewName);
+
+    return ViewPromise.flat(promise.then(dv => new ViewPromise(resolve => require(['../../../Extensions/Signum.React.Extensions/Dynamic/View/DynamicViewComponent'], resolve))
+        .withProps({ initialDynamicView: dv })));
 }
 
 export function getViewNames(typeName: string) {

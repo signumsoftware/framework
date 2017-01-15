@@ -33,8 +33,7 @@ namespace Signum.Entities.Workflow
 
         public WorkflowActivityType Type { get; set; }
 
-        [NotNullable]
-        [NotNullValidator]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 255)]
         public string ViewName { get; set; }
 
         [NotNullable]
@@ -117,8 +116,7 @@ namespace Signum.Entities.Workflow
         [NotNullValidator, NoRepeatValidator]
         public MList<WorkflowActivityValidationEntity> ValidationRules { get; set; } = new MList<WorkflowActivityValidationEntity>();
 
-        [NotNullable]
-        [NotNullValidator]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 255)]
         public string ViewName { get; set; }
 
         [SqlDbType(Size = 400)]
