@@ -16,9 +16,9 @@ export interface MListTableInfo extends ITableInfo {
 export interface ITableInfo extends d3.layout.force.Node, Rectangle {
     tableName: string;
     niceName: string;
-    rows: number;
+    rows: number | null;
     columns: number;
-    total_size_kb: number;
+    total_size_kb: number | null;
     entityKind: EntityKind;
     entityData: EntityData;
     entityBaseType: EntityBaseType;

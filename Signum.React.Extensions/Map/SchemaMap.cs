@@ -32,14 +32,14 @@ namespace Signum.React.Maps
                              entityKind = EntityKindCache.GetEntityKind(t.Type),
                              entityBaseType = GetEntityBaseType(t.Type),
                              @namespace = type.Namespace,
-                             rows = getStats.GetOrThrow(t.Name).rows,
-                             total_size_kb = getStats.GetOrThrow(t.Name).total_size_kb,
+                             rows = getStats.TryGetC(t.Name)?.rows,
+                             total_size_kb = getStats.TryGetC(t.Name)?.total_size_kb,
                              mlistTables = t.TablesMList().Select(ml => new MListTableInfo
                              {
                                  niceName = ml.Route.PropertyInfo.NiceName(),
                                  tableName = ml.Name.ToString(),
-                                 rows = getStats.GetOrThrow(t.Name).rows,
-                                 total_size_kb = getStats.GetOrThrow(t.Name).total_size_kb,
+                                 rows = getStats.TryGetC(ml.Name)?.rows,
+                                 total_size_kb = getStats.TryGetC(ml.Name)?.total_size_kb,
                                  columns = ml.Columns.Count,
                              }).ToList()
                          }).ToList();
@@ -153,8 +153,8 @@ namespace Signum.React.Maps
         public EntityBaseType entityBaseType;
         public string @namespace;
         public int columns;
-        public int rows;
-        public int total_size_kb;
+        public int? rows;
+        public int? total_size_kb;
         public Dictionary<string, object> extra = new Dictionary<string, object>();
 
         public List<MListTableInfo> mlistTables;
@@ -174,9 +174,9 @@ namespace Signum.React.Maps
     {
         public string niceName;
         public string tableName;
-        public int rows;
+        public int? rows;
         public int columns;
-        public int total_size_kb;
+        public int? total_size_kb;
 
         public Dictionary<string, object> extra = new Dictionary<string, object>();
     }

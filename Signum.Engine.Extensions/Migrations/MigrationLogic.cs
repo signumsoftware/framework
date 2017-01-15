@@ -49,7 +49,7 @@ namespace Signum.Engine.Migrations
         {
             using (Transaction tr = new Transaction())
             {
-                if (Administrator.ExistTable<T>())
+                if (Administrator.ExistsTable<T>())
                     return;
 
                 var table = Schema.Current.Table<T>();

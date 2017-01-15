@@ -1,5 +1,6 @@
 
 interface IWorkflowEvaluator {}
+interface IWorkflowLaneActorsEvaluator {}
 
 
 export interface WorkflowEntitiesDictionary {

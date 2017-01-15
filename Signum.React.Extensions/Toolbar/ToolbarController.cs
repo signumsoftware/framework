@@ -1,5 +1,5 @@
 ﻿using Signum.Entities.Workflow;
-using Signum.Logic.Workflow;
+using Signum.Engine.Workflow;
 using Signum.Engine;
 using Signum.Engine.Operations;
 using Signum.Entities;

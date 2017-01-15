@@ -39,10 +39,10 @@ export default function getDefaultProviders(info: SchemaMapInfo): ClientColorPro
         getTooltip: t => t.entityData
     };
 
-    const rowsColor = colorScaleSqr(info.tables.map(a => a.rows).max());
+    const rowsColor = colorScaleSqr(info.tables.filter(a => a.rows != null).map(a => a.rows!).max());
     const rows: ClientColorProvider = {
         name: "rows",
-        getFill: t => <any>rowsColor(t.rows),
+        getFill: t => t.rows == null ? "blue" : <any>rowsColor(t.rows),
         getTooltip: t => t.rows + " " + MapMessage.Rows.niceToString()
     };
 
@@ -53,10 +53,10 @@ export default function getDefaultProviders(info: SchemaMapInfo): ClientColorPro
         getTooltip: t => t.columns + " " + MapMessage.Columns.niceToString()
     };
 
-    const tableSizeColor = colorScaleSqr(info.tables.map(a => a.total_size_kb).max());
+    const tableSizeColor = colorScaleSqr(info.tables.filter(a => a.total_size_kb != null).map(a => a.total_size_kb!).max());
     const tableSize: ClientColorProvider = {
         name: "tableSize",
-        getFill: t => <any>tableSizeColor(t.total_size_kb),
+        getFill: t => t.total_size_kb == null ? "blue" : <any>tableSizeColor(t.total_size_kb),
         getTooltip: t => t.total_size_kb + " KB"
     };
 

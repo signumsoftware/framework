@@ -15,6 +15,7 @@ import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperat
 import * as WorkflowClient from '../WorkflowClient'
 
 require("!style!css!../../../../Framework/Signum.React/Scripts/Frames/Frames.css");
+require("!style!css!./Case.css");
 
 interface ModalFrameProps extends React.Props<ModalFrame>, IModalProps {
     title?: string;
@@ -70,7 +71,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     loadComponent(): Promise<void> {
         const a = this.state.pack!.activity;
         if (a.workflowActivity) {
-            return WorkflowClient.getViewPromise(a.case.mainEntity, a.workflowActivity.viewName!).promise
+            return WorkflowClient.getViewPromise(a.case.mainEntity, a.workflowActivity.viewName).promise
                 .then(c => this.setState({ getComponent: c }));
         }
         else {
@@ -152,7 +153,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-activity-entity={entityInfo(pack.activity) }>
                     { this.renderMainEntity() }
                 </div>
-                { this.entityComponent && <ButtonBar frame={activityFrame} pack={activityPack} showOperations={true} /> }
+                {this.entityComponent && <div className="workflow-buttons"><ButtonBar frame={activityFrame} pack={activityPack} showOperations={true} /></div> }
             </Modal.Body>
         );
     }

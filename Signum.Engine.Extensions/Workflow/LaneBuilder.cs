@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Signum.Entities.Reflection;
 
-namespace Signum.Logic.Workflow
+namespace Signum.Engine.Workflow
 {
     public partial class WorkflowBuilder
     {

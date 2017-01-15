@@ -112,6 +112,9 @@ namespace Signum.Engine.Dynamic
             CacheLogic.GloballyDisabled = true;
             try
             {
+                if (!Administrator.ExistsTable<DynamicTypeEntity>())
+                    return new List<DynamicTypeEntity>();
+
                 return ExecutionMode.Global().Using(a => Database.Query<DynamicTypeEntity>().ToList());
             }
             finally
@@ -131,9 +134,6 @@ namespace Signum.Engine.Dynamic
 
         public static List<CodeFile> GetCodeFiles()
         {
-            if (!Administrator.ExistTable<DynamicTypeEntity>())
-                return new List<CodeFile>();
-
             List<DynamicTypeEntity> types = GetTypes();
             var alreadyTranslatedExpressions = GetAlreadyTranslatedExpressions?.Invoke();
 
@@ -210,6 +210,9 @@ namespace Signum.Engine.Dynamic
                 }
             }
 
+            if (this.Def.CustomTypes != null)
+                sb.AppendLine(this.Def.CustomTypes.Code);
+
             sb.AppendLine("}");
 
             return sb.ToString();
@@ -238,6 +241,9 @@ namespace Signum.Engine.Dynamic
                     sb.AppendLine();
                 }
             }
+
+            if (this.Def.CustomEntityMembers != null)
+                sb.AppendLine(this.Def.CustomEntityMembers.Code.Indent(4));
 
             string toString = GetToString();
             if (toString != null)
@@ -287,6 +293,9 @@ namespace Signum.Engine.Dynamic
 
         private string GetEntityBaseClass(DynamicBaseType baseType)
         {
+            if (this.Def.CustomInheritance != null)
+                return this.Def.CustomInheritance.Code;
+
             switch (baseType)
             {
                 case DynamicBaseType.Entity: return "Entity";
@@ -571,7 +580,6 @@ namespace Signum.Engine.Dynamic
                 sb.AppendLine($"    }}");
             }
 
-            var hasEvents = (this.Def.Events != null);
 
             sb.AppendLine($"    public static class {this.TypeName}Logic");
             sb.AppendLine($"    {{");
@@ -592,17 +600,14 @@ namespace Signum.Engine.Dynamic
                     sb.AppendLine(complexOperations.Indent(16));
             }
 
-            if (hasEvents)
-                sb.AppendLine("EntityEvents(sb, dqm);".Indent(16));
+            if (this.Def.CustomStartCode != null)
+                sb.AppendLine(this.Def.CustomStartCode.Code.Indent(16));
 
             sb.AppendLine($"            }}");
             sb.AppendLine($"        }}");
 
-            if (hasEvents)
-            {
-                sb.AppendLine();
-                sb.AppendLine(this.Def.Events.Code.Indent(8));
-            }
+            if (this.Def.CustomLogicMembers != null)
+                sb.AppendLine(this.Def.CustomLogicMembers.Code.Indent(8));
 
             sb.AppendLine($"    }}");
             sb.AppendLine($"}}");
@@ -613,7 +618,7 @@ namespace Signum.Engine.Dynamic
         private string GetInclude()
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"sb.Include<{this.TypeName}Entity>()");
+            sb.AppendLine($"var fi = sb.Include<{this.TypeName}Entity>()");
 
             if (this.Def.OperationSave != null && string.IsNullOrWhiteSpace(this.Def.OperationSave.Execute.Trim()))
                 sb.AppendLine($"    .WithSave({this.TypeName}Operation.Save)");

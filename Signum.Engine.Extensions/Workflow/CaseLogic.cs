@@ -18,7 +18,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static Signum.Engine.Maps.SchemaBuilder;
 
-namespace Signum.Logic.Workflow
+namespace Signum.Engine.Workflow
 {
     public static class CaseLogic
     {
@@ -137,42 +137,41 @@ namespace Signum.Logic.Workflow
             public Func<ICaseMainEntity> Constructor;
             public Action<ICaseMainEntity> SaveEntity;
         }
-
-        public static FluentInclude<T> WithWorkflow<T>(this FluentInclude<T> fi, WorkflowOptions options)
-           where T : Entity, ICaseMainEntity
-        {
-            Options[typeof(T)] = options;
-            return fi;
-        }
-
-        public static FluentInclude<T> WithWorkflowSave<T>(this FluentInclude<T> fi, Func<T> constructor, ExecuteSymbol<T> save)
+        
+        public static FluentInclude<T> WithWorkflow<T>(this FluentInclude<T> fi, Func<T> constructor, Action<T> save)
             where T: Entity, ICaseMainEntity
         {
-            new Graph<T>.Execute(save)
+            fi.SchemaBuilder.Schema.EntityEvents<T>().Saved += (e, args)=>
             {
-                AllowsNew = true,
-                Lite = false,
-                Execute = (e, args) => 
-                {
-                    args.TryGetArgC<Lite<CaseActivityEntity>>()?.NotifyInProgress();
-                    e.Save();
-                },
-            }.Register();
-            
-            fi.WithWorkflow(new WorkflowOptions
+                if (AvoidNotifyInProgressVariable.Value == true)
+                    return;
+
+                e.NotifyInProgress();
+            };
+
+            Options[typeof(T)] = new WorkflowOptions
             {
                 Constructor = constructor,
-                SaveEntity = e => ((T)e).Execute(save)
-            });
+                SaveEntity = e => save((T)e)
+            };
 
             return fi; 
         }
 
-        public static int NotifyInProgress(this Lite<CaseActivityEntity> lite)
+        static IDisposable AvoidNotifyInProgress()
+        {
+            var old = AvoidNotifyInProgressVariable.Value;
+            AvoidNotifyInProgressVariable.Value = true;
+            return new Disposable(() => AvoidNotifyInProgressVariable.Value = old);
+        }
+        
+        static ThreadVariable<bool> AvoidNotifyInProgressVariable = Statics.ThreadVariable<bool>("avoidNotifyInProgress");
+
+        public static int NotifyInProgress(this ICaseMainEntity mainEntity)
         {
             return Database.Query<CaseNotificationEntity>()
-                .Where(n => n.CaseActivity == lite && n.User == UserEntity.Current.ToLite())
-                .Where(n => n.State == CaseNotificationState.New || n.State == CaseNotificationState.Opened)
+                .Where(n => n.CaseActivity.Entity.Case.MainEntity == mainEntity && n.CaseActivity.Entity.DoneDate == null)
+                .Where(n => n.User == UserEntity.Current.ToLite() && (n.State == CaseNotificationState.New || n.State == CaseNotificationState.Opened))
                 .UnsafeUpdate()
                 .Set(n => n.State, n => CaseNotificationState.InProgress)
                 .Execute();
@@ -209,7 +208,8 @@ namespace Signum.Logic.Workflow
         static void SaveEntity(ICaseMainEntity mainEntity)
         {
             var options = CaseLogic.Options.GetOrThrow(mainEntity.GetType());
-            options.SaveEntity(mainEntity);
+            using (AvoidNotifyInProgress())
+                options.SaveEntity(mainEntity);
         }
 
         public static CaseActivityEntity RetrieveForViewing(Lite<CaseActivityEntity> lite)
@@ -228,14 +228,23 @@ namespace Signum.Logic.Workflow
 
         static void InsertCaseActivityNotifications(CaseActivityEntity caseActivity)
         {
+            var lane = caseActivity.WorkflowActivity.Lane;
+            var actors = lane.Actors.ToList();
+            if (lane.ActorsEval != null)
+                actors.AddRange(lane.ActorsEval.Algorithm.GetActors(caseActivity.Case.MainEntity).EmptyIfNull().NotNull());
+
+            var notifications = actors.SelectMany(a =>
             Database.Query<UserEntity>()
-            .Where(u => WorkflowLogic.IsLaneForCurrentUser.Evaluate(caseActivity.WorkflowActivity.Lane))
-            .UnsafeInsert(u => new CaseNotificationEntity
+            .Where(u => WorkflowLogic.IsCurrentUserActor.Evaluate(a, u))
+            .Select(u => new CaseNotificationEntity
             {
                 CaseActivity = caseActivity.ToLite(),
+                Actor = a,
                 State = CaseNotificationState.New,
                 User = u.ToLite()
-            });
+            })).ToList();
+
+            notifications.BulkInsert();
         }
 
         class CaseActivityGraph : Graph<CaseActivityEntity>
