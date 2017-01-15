@@ -174,7 +174,6 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                             <div className="row database-mapping">
                                 <div className="col-sm-6">
                                     <PrimaryKeyFieldsetComponent
-                                        dc={this.props.dc}
                                         binding={Binding.create(def, d => d.primaryKey)}
                                         title="Primary Key"
                                         onCreate={() => ({ name: "Id", type: "int", identity: true })}
@@ -189,7 +188,6 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                                 </div>
                                 <div className="col-sm-6">
                                     <TicksFieldsetComponent
-                                        dc={this.props.dc}
                                         binding={Binding.create(def, d => d.ticks)}
                                         onCreate={() => ({ hasTicks: false })}
                                         renderContent={item =>
@@ -212,7 +210,6 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
 
                         {dt.baseType == "Entity" &&
                             <MultiColumnUniqueIndexFieldsetComponent
-                                dc={this.props.dc}
                                 binding={Binding.create(def, d => d.multiColumnUniqueIndex)}
                                 title="Multi-Column Unique Index"
                                 onCreate={() => ({ fields: [""] })}
@@ -246,7 +243,6 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                             <div className="row">
                                 <div className="col-sm-7">
                                     <CreateOperationFieldsetComponent
-                                        dc={this.props.dc}
                                         binding={Binding.create(def, d => d.operationCreate)}
                                         title="Create"
                                         onCreate={() => ({
@@ -258,7 +254,6 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                                         />
 
                                     <SaveOperationFieldsetComponent
-                                        dc={this.props.dc}
                                         binding={Binding.create(def, d => d.operationSave)}
                                         title="Save"
                                         onCreate={() => ({ execute: "" })}
@@ -270,7 +265,6 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                                         />
 
                                     <DeleteOperationFieldsetComponent
-                                        dc={this.props.dc}
                                         binding={Binding.create(def, d => d.operationDelete)}
                                         title="Delete"
                                         onCreate={() => ({ delete: "" })}
@@ -290,35 +284,8 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                         </Tab>
                     }
 
-                    <Tab eventKey="events" title="Events">
-                        <div className="row">
-                            <div className="col-sm-7">
-                                <EventFieldsetComponent
-                                    dc={this.props.dc}
-                                    binding={Binding.create(def, d => d.events)}
-                                    title="Events"
-                                    onCreate={() => ({ code: "private static void EntityEvents(SchemaBuilder sb, DynamicQueryManager dqm) {\n\n}" })}
-                                    renderContent={e =>
-                                        <div>
-                                            <div className="btn-group" style={{ marginBottom: "3px" }}>
-                                                <input type="button" className="btn btn-warning btn-xs sf-button" value="PreSaving" onClick={this.handlePreSavingClick} />
-                                                <input type="button" className="btn btn-success btn-xs sf-button" value="PostRetrieved" onClick={this.handlePostRetrievedClick} />
-                                                <input type="button" className="btn btn-danger btn-xs sf-button" value="Property Validator" onClick={this.handlePropertyValidatorClick} />
-                                            </div>
-                                            <div className="code-container">
-                                                <pre style={{ border: "0px", margin: "0px", fontSize: "13px", color: "#e40d0d" }}>Note: EntityEvents method is mandotary for compiling.</pre>
-                                                <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
-                                            </div>
-                                        </div>
-                                    }
-                                    />
-                            </div>
-                            <div className="col-sm-5">
-                                {!dt.isNew &&
-                                    <TypeHelpComponent initialType={dt.typeName!} mode="CSharp" onMemberClick={this.handleTypeHelpClick} />
-                                }
-                            </div>
-                        </div>
+                    <Tab eventKey="customCode" title="Custom Code">
+                        <CustomCodeTab definition={def} dynamicType={dt} />
                     </Tab>
 
                     {!dt.isNew && dt.baseType == "Mixin" &&
@@ -353,34 +320,167 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
         );
     }
 
+
+    renderOthers() {
+        var ctx = new StyleContext(undefined, { labelColumns: 3 });
+        return React.createElement("div", {}, ...DynamicClient.Options.onGetDynamicLineForType.map(f => f(ctx, this.props.dynamicType.typeName!)));
+    }
+}
+
+
+export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefinition, dynamicType: DynamicTypeEntity }, void>{
+
+    render() {
+        const def = this.props.definition;
+        const dt = this.props.dynamicType;
+        const entityName = this.getDynamicTypeFullName();
+        return (
+            <div className="row">
+                <div className="col-sm-7">
+                    <CustomCodeFieldsetComponent
+                        binding={Binding.create(def, d => d.customInheritance)}
+                        title="Custom Inheritance"
+                        onCreate={() => ({ code: dt.baseType })}
+                        renderContent={e =>
+                            <div>
+                                <div className="code-container">
+                                    <pre style={{ border: "0px", margin: "0px" }}>{`public class ${entityName}:`}</pre>
+                                    <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
+                                </div>
+                            </div>
+                        }
+                        />
+                    <CustomCodeFieldsetComponent
+                        binding={Binding.create(def, d => d.customEntityMembers)}
+                        title="Entity Members"
+                        onCreate={() => ({ code: "" })}
+                        renderContent={e =>
+                            <div>
+                                <div className="btn-group" style={{ marginBottom: "3px" }}>
+                                    <input type="button" className="btn btn-warning btn-xs sf-button" value="PreSaving" onClick={this.handlePreSavingClick} />
+                                    <input type="button" className="btn btn-success btn-xs sf-button" value="PostRetrieved" onClick={this.handlePostRetrievedClick} />
+                                    <input type="button" className="btn btn-danger btn-xs sf-button" value="Property Validator" onClick={this.handlePropertyValidatorClick} />
+                                </div>
+                                <div className="code-container">
+                                    <pre style={{ border: "0px", margin: "0px" }}>{`public class ${entityName}
+{`}</pre>
+                                    <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
+                                    <pre style={{ border: "0px", margin: "0px" }}>{`}`}</pre>
+                                </div>
+                            </div>
+                        }
+                        />
+                    <CustomCodeFieldsetComponent
+                        binding={Binding.create(def, d => d.customStartCode)}
+                        title="StartCode"
+                        onCreate={() => ({ code: "" })}
+                        renderContent={e =>
+                            <div>
+                                <div className="btn-group" style={{ marginBottom: "3px" }}>
+                                    {dt.baseType == "Entity" &&
+                                        <input type="button" className="btn btn-danger btn-xs sf-button" value="Workflow" onClick={this.handleWithWorkflowClick} />}
+                                </div>
+                                <div className="code-container">
+                                    <pre style={{ border: "0px", margin: "0px" }}>{`SchemaBuilder sb, DynamicQueryManager dqm, FluentInclude<${entityName}> fi`}</pre>
+                                    <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
+                                </div>
+                            </div>
+                        }
+                        />
+                    <CustomCodeFieldsetComponent
+                        binding={Binding.create(def, d => d.customLogicMembers)}
+                        title="Logic Members"
+                        onCreate={() => ({ code: "" })}
+                        renderContent={e =>
+                            <div>
+
+                                <div className="code-container">
+                                    <pre style={{ border: "0px", margin: "0px" }}>{`public static class ${dt.typeName}Logic
+{`}</pre>
+                                    <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
+                                    <pre style={{ border: "0px", margin: "0px" }}>{`}`}</pre>
+                                </div>
+                            </div>
+                        }
+                        />
+
+                    <CustomCodeFieldsetComponent
+                        binding={Binding.create(def, d => d.customTypes)}
+                        title="Types"
+                        onCreate={() => ({ code: "" })}
+                        renderContent={e =>
+                            <div>
+
+                                <div className="code-container">
+                                    <pre style={{ border: "0px", margin: "0px" }}>{`public namespace Signum.Entities.CodeGen
+{`}</pre>
+                                    <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
+                                    <pre style={{ border: "0px", margin: "0px" }}>{`}`}</pre>
+                                </div>
+                            </div>
+                        }
+                        />
+                </div>
+                <div className="col-sm-5">
+                    {!dt.isNew &&
+                        <TypeHelpComponent initialType={dt.typeName!} mode="CSharp" />
+                    }
+                </div>
+            </div>
+        );
+    }
+
     getDynamicTypeFullName() {
         return `${this.props.dynamicType.typeName}${this.props.dynamicType.baseType}`;
     }
 
     handlePreSavingClick = () => {
         let entityName = this.getDynamicTypeFullName();
-        let text = `sb.Schema.EntityEvents<${entityName}>().PreSaving += ${entityName}PreSaving;
-private static void ${entityName}PreSaving(${entityName} e, ref bool graphModified)
+        let text = `protected internal override void PreSaving(ref bool graphModified)
 {
-    // Your custom code ...
+    //Your code here
+    base.PreSaving(ref graphModified);
 }`;
         this.popupEventsTemplate(entityName, "PreSaving", text);
     }
 
     handlePostRetrievedClick = () => {
         let entityName = this.getDynamicTypeFullName();
-        let text = `sb.Schema.EntityEvents<${entityName}>().Retrieved += (e) => Your custom code;`;
+        let text = `protected internal override void PostRetrieving()
+{
+    base.PostRetriving();
+}`;
         this.popupEventsTemplate(entityName, "PostRetrieved", text);
     }
 
     handlePropertyValidatorClick = () => {
         let entityName = this.getDynamicTypeFullName();
-        let text = `Validator.PropertyValidator<${entityName}>(e => e.Your member}).StaticPropertyValidation = (e, pi) => {
-//    if (e.Name == "AAA")
-//        return "AAA is an special name and can not be used";
-    return null;
+        let text = `protected override string PropertyValidation(PropertyInfo pi)
+{
+    if (pi.Name == nameof(YourProperty))
+    {
+        if(this.YourProperty == "AAA")
+            return "AAA is not a valid value";
+    }
+ 
+    return base.PropertyValidation(pi);
 };`;
         this.popupEventsTemplate(entityName, "PropertyValidator", text);
+    }
+
+    handleWithWorkflowClick = () => {
+        let entityName = this.props.dynamicType.typeName!;
+        var os = this.props.definition.operationSave;
+
+        let text = os ?
+            `fi.WithWorkflowSave(()=> new ${entityName}Entity(), ${entityName}Operation.Save);` :
+            `fi.WithWorkflow(new WorkflowOptions
+            {
+                Constructor = () => new ${entityName}Entity(),
+                SaveEntity = e => e.Execute()
+            }));`;
+
+        this.popupEventsTemplate(entityName + "Entity", "WithWorkflow", text);
     }
 
     popupEventsTemplate(entityName: string, eventName: string, text: string) {
@@ -395,10 +495,6 @@ private static void ${entityName}PreSaving(${entityName} e, ref bool graphModifi
         });
     }
 
-    renderOthers() {
-        var ctx = new StyleContext(undefined, { labelColumns: 3 });
-        return React.createElement("div", {}, ...DynamicClient.Options.onGetDynamicLineForType.map(f => f(ctx, this.props.dynamicType.typeName!)));
-    }
 }
 
 export interface CSharpExpressionCodeMirrorProps {
@@ -429,7 +525,6 @@ export class CSharpExpressionCodeMirror extends React.Component<CSharpExpression
 }
 
 export interface CustomFieldsetComponentProps<T> {
-    dc: DynamicTypeDesignContext;
     binding: Binding<T | undefined>;
     title?: React.ReactChild;
     renderContent: (item: T) => React.ReactElement<any>;
@@ -484,8 +579,8 @@ const SaveOperationFieldsetComponent = CustomFieldsetComponent as SaveOperationF
 type IsMListFieldsetComponent = new () => CustomFieldsetComponent<DynamicTypeClient.DynamicTypeBackMListDefinition>;
 const IsMListFieldsetComponent = CustomFieldsetComponent as IsMListFieldsetComponent;
 
-type EventFieldsetComponent = new () => CustomFieldsetComponent<DynamicTypeClient.DynamicTypeEvent>;
-const EventFieldsetComponent = CustomFieldsetComponent as EventFieldsetComponent;
+type CustomCodeFieldsetComponent = new () => CustomFieldsetComponent<DynamicTypeClient.DynamicTypeCustomCode>;
+const CustomCodeFieldsetComponent = CustomFieldsetComponent as CustomCodeFieldsetComponent;
 
 export interface PropertyRepeaterComponentProps {
     properties: DynamicProperty[];
@@ -680,7 +775,6 @@ export class PropertyComponent extends React.Component<PropertyComponentProps, v
                     </div>
                     <div className="col-sm-5">
                         <IsMListFieldsetComponent
-                            dc={this.props.dc}
                             binding={Binding.create(p, d => d.isMList)}
                             title="Is MList"
                             onCreate={() => ({ preserveOrder: true })}

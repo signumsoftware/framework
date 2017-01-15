@@ -141,8 +141,20 @@ namespace Signum.Entities.Dynamic
         [JsonProperty(PropertyName = "operationDelete")]
         public OperationDelete OperationDelete;
 
-        [JsonProperty(PropertyName = "events")]
-        public DynamicTypeEvent Events;
+        [JsonProperty(PropertyName = "customInheritance")]
+        public DynamicTypeCustomCode CustomInheritance;
+        
+        [JsonProperty(PropertyName = "customEntityMembers")]
+        public DynamicTypeCustomCode CustomEntityMembers;
+
+        [JsonProperty(PropertyName = "customStartCode")]
+        public DynamicTypeCustomCode CustomStartCode;
+
+        [JsonProperty(PropertyName = "customLogicMembers")]
+        public DynamicTypeCustomCode CustomLogicMembers;
+
+        [JsonProperty(PropertyName = "customTypes")]
+        public DynamicTypeCustomCode CustomTypes;
 
         [JsonProperty(PropertyName = "queryFields")]
         public List<string> QueryFields;
@@ -188,11 +200,12 @@ namespace Signum.Entities.Dynamic
         public string Delete;
     }
 
-    public class DynamicTypeEvent
+    public class DynamicTypeCustomCode
     {
         [JsonProperty(PropertyName = "code")]
         public string Code;
     }
+ 
 
     public enum DynamicBaseType
     {

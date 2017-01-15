@@ -81,9 +81,9 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
         }));
     }
 
-    dynamicViewComponent(promiseDv: DynamicViewEntity): ViewPromise<ModifiableEntity> {
+    dynamicViewComponent(dynamicView: DynamicViewEntity): ViewPromise<ModifiableEntity> {
         return new ViewPromise(resolve => require(['./View/DynamicViewComponent'], resolve))
-            .withProps({ initialDynamicView: promiseDv });
+            .withProps({ initialDynamicView: dynamicView });
     }
 
     fallback(entity: ModifiableEntity): ViewPromise<ModifiableEntity> {
