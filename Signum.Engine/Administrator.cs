@@ -60,18 +60,18 @@ namespace Signum.Engine
             return new Disposable(() => sysViewDatabase.Value = old);
         }
 
-        public static bool ExistTable<T>()
+        public static bool ExistsTable<T>()
             where T : Entity
         {
-            return ExistTable(Schema.Current.Table<T>());
+            return ExistsTable(Schema.Current.Table<T>());
         }
 
-        public static bool ExistTable(Type type)
+        public static bool ExistsTable(Type type)
         {
-            return ExistTable(Schema.Current.Table(type));
+            return ExistsTable(Schema.Current.Table(type));
         }
 
-        public static bool ExistTable(ITable table)
+        public static bool ExistsTable(ITable table)
         {
             SchemaName schema = table.Name.Schema;
 
@@ -105,7 +105,7 @@ namespace Signum.Engine
             using (Synchronizer.RenameTable(table, replacements))
             using (ExecutionMode.DisableCache())
             {
-                if (ExistTable(table))
+                if (ExistsTable(table))
                     return Database.RetrieveAll(type);
                 return new List<Entity>();
             }
@@ -198,7 +198,7 @@ namespace Signum.Engine
         public static SqlPreCommandSimple UnsafeDeletePreCommand<T>(IQueryable<T> query)
             where T : Entity
         {
-            if (!Administrator.ExistTable<T>() || !query.Any())
+            if (!Administrator.ExistsTable<T>() || !query.Any())
                 return null;
 
             var prov = ((DbQueryProvider)query.Provider);
@@ -209,7 +209,7 @@ namespace Signum.Engine
         public static SqlPreCommandSimple UnsafeDeletePreCommand<E, V>(Expression<Func<E, MList<V>>> mListProperty, IQueryable<MListElement<E, V>> query)
             where E : Entity
         {
-            if (!Administrator.ExistTable(Schema.Current.TableMList(mListProperty)) || !query.Any())
+            if (!Administrator.ExistsTable(Schema.Current.TableMList(mListProperty)) || !query.Any())
                 return null;
 
             var prov = ((DbQueryProvider)query.Provider);

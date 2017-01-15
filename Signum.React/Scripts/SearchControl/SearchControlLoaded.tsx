@@ -785,6 +785,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             return;
         }
 
+        if (this.props.querySettings.onDoubleClick) {
+            e.preventDefault();
+            this.props.querySettings.onDoubleClick(e, row);
+            return;
+        }
+
         if (!Navigator.isNavigable(row.entity.EntityType))
             return;
 

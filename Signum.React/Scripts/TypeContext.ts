@@ -288,6 +288,10 @@ export interface IRenderButtons {
     renderButtons(ctx: ButtonsContext): React.ReactElement<any>[];
 }
 
+export interface IHasChanges {
+    componentHasChanges?: ()=> boolean;
+}
+
 export interface EntityFrame<T extends ModifiableEntity> {
     frameComponent: React.Component<any, any>;
     entityComponent: React.Component<any, any>;
