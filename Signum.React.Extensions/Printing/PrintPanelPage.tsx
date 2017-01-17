@@ -32,7 +32,8 @@ export default class PrintPanelPage extends React.Component<{}, PrintPanelPageSt
 
     componentWillMount() {
         API.getStats().then(stats => {
-            this.setState(stats = stats);
+            this.state.stats = stats;
+            this.forceUpdate();
         }).done();
     }
 
