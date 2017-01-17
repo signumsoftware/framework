@@ -153,6 +153,7 @@
     <Compile Include="Help\HelpTools.cs" />
     <Compile Include="Help\HelpUtilities.cs" />
     <Compile Include="Isolation\IsolationLogic.cs" />
+    <Compile Include="Printing\PrintLogic.cs" />
     <Compile Include="RestLog\RestLogLogic.cs" />
     <Compile Include="Mailing\AsyncEmailSenderLogic.cs" />
     <Compile Include="Map\MapLogic.cs" />
