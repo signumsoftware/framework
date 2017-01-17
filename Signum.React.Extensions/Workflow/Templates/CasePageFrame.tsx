@@ -13,6 +13,7 @@ import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperat
 import * as WorkflowClient from '../WorkflowClient'
 
 require("!style!css!../../../../Framework/Signum.React/Scripts/Frames/Frames.css");
+require("!style!css!./Case.css");
 
 interface CasePageFrameProps extends ReactRouter.RouteComponentProps<{}, { workflowId: string; caseActivityId?: string }> {
 }
@@ -68,7 +69,7 @@ export default class CasePageFrame extends React.Component<CasePageFrameProps, C
     loadComponent(): Promise<void> {
         const a = this.state.pack!.activity;
         if (a.workflowActivity) {
-            return WorkflowClient.getViewPromise(a.case.mainEntity, a.workflowActivity.viewName!).promise
+            return WorkflowClient.getViewPromise(a.case.mainEntity, a.workflowActivity.viewName).promise
                 .then(c => this.setState({ getComponent: c }));
         }
         else {
@@ -131,7 +132,7 @@ export default class CasePageFrame extends React.Component<CasePageFrameProps, C
                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-activity-entity={entityInfo(pack.activity) }>
                     {this.renderMainEntity() }
                 </div>
-                { this.entityComponent && <ButtonBar frame={activityFrame} pack={activityPack} showOperations={true} /> }
+                {this.entityComponent && <div className="workflow-buttons"><ButtonBar frame={activityFrame} pack={activityPack} showOperations={true} /></div> }
             </div>
         );
     }

@@ -50,14 +50,11 @@ namespace Signum.Engine.Dynamic
         public static List<CodeFile> GetCodeFiles()
         {
             var result = new List<CodeFile>();
-
-            if (!Administrator.ExistTable<DynamicMixinConnectionEntity>())
-                return result;
-
+             
             CacheLogic.GloballyDisabled = true;
             try
             {
-                var mixins = ExecutionMode.Global().Using(a => Database.Query<DynamicMixinConnectionEntity>().ToList());
+                var mixins = !Administrator.ExistsTable<DynamicMixinConnectionEntity>()?  new List<DynamicMixinConnectionEntity>() : ExecutionMode.Global().Using(a => Database.Query<DynamicMixinConnectionEntity>().ToList());
                 var dlg = new DynamicMixinConnectionLogicGenerator(DynamicCode.CodeGenEntitiesNamespace, mixins, DynamicCode.Namespaces);
                 var content = dlg.GetFileCode();
                 result.Add(new CodeFile

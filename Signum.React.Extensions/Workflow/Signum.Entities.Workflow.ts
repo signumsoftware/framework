@@ -10,6 +10,7 @@ import * as Dynamic from '../Dynamic/Signum.Entities.Dynamic'
 
 
 interface IWorkflowEvaluator {}
+interface IWorkflowLaneActorsEvaluator {}
 
 
 export interface WorkflowEntitiesDictionary {
@@ -78,6 +79,7 @@ export interface CaseNotificationEntity extends Entities.Entity {
     Type: "CaseNotification";
     caseActivity?: Entities.Lite<CaseActivityEntity> | null;
     user?: Entities.Lite<Authorization.UserEntity> | null;
+    actor?: Entities.Lite<Entities.Entity> | null;
     state?: CaseNotificationState;
 }
 
@@ -287,6 +289,11 @@ export type WorkflowGatewayType =
     "Inclusive" |
     "Parallel";
 
+export const WorkflowLaneActorsEval = new Type<WorkflowLaneActorsEval>("WorkflowLaneActorsEval");
+export interface WorkflowLaneActorsEval extends Dynamic.EvalEntity<IWorkflowLaneActorsEvaluator> {
+    Type: "WorkflowLaneActorsEval";
+}
+
 export const WorkflowLaneEntity = new Type<WorkflowLaneEntity>("WorkflowLane");
 export interface WorkflowLaneEntity extends Entities.Entity, IWorkflowObjectEntity {
     Type: "WorkflowLane";
@@ -294,13 +301,16 @@ export interface WorkflowLaneEntity extends Entities.Entity, IWorkflowObjectEnti
     xml?: WorkflowXmlEntity | null;
     pool?: WorkflowPoolEntity | null;
     actors: Entities.MList<Entities.Lite<Entities.Entity>>;
+    actorsEval?: WorkflowLaneActorsEval | null;
 }
 
 export const WorkflowLaneModel = new Type<WorkflowLaneModel>("WorkflowLaneModel");
 export interface WorkflowLaneModel extends Entities.ModelEntity {
     Type: "WorkflowLaneModel";
+    mainEntityType: Basics.TypeEntity;
     name?: string | null;
     actors: Entities.MList<Entities.Lite<Entities.Entity>>;
+    actorsEval?: WorkflowLaneActorsEval | null;
 }
 
 export module WorkflowLaneOperation {

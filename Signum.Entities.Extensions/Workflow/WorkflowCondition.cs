@@ -22,31 +22,8 @@ namespace Signum.Entities.Workflow
         public TypeEntity MainEntityType { get; set; }
 
         [NotNullable]
-        WorkflowConnectionEval eval;
-
-        [NotNullValidator]
-        public WorkflowConnectionEval Eval
-        {
-            get { return eval; }
-            set
-            {
-                if (eval != null)
-                    eval.Parent = null;
-
-                eval = value;
-
-                if (eval != null)
-                    eval.Parent = this;
-            }
-        }
-
-        protected override void PostRetrieving()
-        {
-            if (this.Eval != null)
-                this.Eval.Parent = this;
-
-            base.PostRetrieving();
-        }
+        [NotNullValidator, NotifyChildProperty]
+        public WorkflowConnectionEval Eval { get; set; }
 
         static Expression<Func<WorkflowConditionEntity, string>> ToStringExpression = @this => @this.Name;
         [ExpressionField]
@@ -66,20 +43,18 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowConnectionEval : EvalEntity<IWorkflowEvaluator>
     {
-        [Ignore]
-        [InTypeScript(false)]
-        public WorkflowConditionEntity Parent { get; set; }
-
         protected override CompilationResult Compile()
         {
+            var parent = (WorkflowConditionEntity)this.GetParentEntity();
+
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");
-            var WorkflowEntityTypeName = this.Parent.MainEntityType.ToType().FullName;
+            var WorkflowEntityTypeName = parent.MainEntityType.ToType().FullName;
 
             return Compile(DynamicCode.GetAssemblies(),
                 DynamicCode.GetNamespaces() +
                     @"
-                    namespace Signum.Entities.IMMS
+                    namespace Signum.Entities.Workflow
                     {
                         class MyWorkflowEvaluator : IWorkflowEvaluator
                         {

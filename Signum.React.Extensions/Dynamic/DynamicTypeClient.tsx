@@ -83,7 +83,11 @@ export interface DynamicTypeDefinition {
     operationCreate?: OperationConstruct;
     operationSave?: OperationExecute;
     operationDelete?: OperationDelete;
-    events?: DynamicTypeEvent;
+    customInheritance?: DynamicTypeCustomCode;
+    customEntityMembers?: DynamicTypeCustomCode;
+    customStartCode?: DynamicTypeCustomCode;
+    customLogicMembers?: DynamicTypeCustomCode;
+    customTypes?: DynamicTypeCustomCode;
     queryFields: string[];
     multiColumnUniqueIndex?: MultiColumnUniqueIndex; 
     properties: DynamicProperty[];
@@ -144,9 +148,10 @@ export interface OperationDelete {
     delete: string;
 }
 
-export interface DynamicTypeEvent {
+export interface DynamicTypeCustomCode {
     code?: string;
 }
+
 
 export namespace Validators {
 

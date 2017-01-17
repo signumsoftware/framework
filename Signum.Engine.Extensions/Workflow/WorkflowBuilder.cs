@@ -12,7 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace Signum.Logic.Workflow
+namespace Signum.Engine.Workflow
 {
     public partial class WorkflowBuilder
     {

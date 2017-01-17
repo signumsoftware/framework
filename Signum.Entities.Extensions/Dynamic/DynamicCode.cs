@@ -30,6 +30,7 @@ namespace Signum.Entities.Dynamic
             "Signum.Engine.Maps",
             "Signum.Engine.Basics",
             "Signum.Engine.Operations",
+            "Signum.Engine.Workflow",
             "Signum.Utilities",
             "Signum.Engine.Authorization",
             "Signum.Engine.Cache",
@@ -65,6 +66,7 @@ namespace Signum.Entities.Dynamic
             "Signum.Entities.UserQueries",
             "Signum.Entities.ViewLog",
             "Signum.Entities.Word",
+            "Signum.Entities.Workflow",
         };
 
         public static HashSet<string> Assemblies = new HashSet<string>

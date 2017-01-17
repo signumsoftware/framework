@@ -16,7 +16,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace Signum.Logic.Workflow
+namespace Signum.Engine.Workflow
 {
 
     public static class WorkflowLogic
@@ -340,16 +340,16 @@ namespace Signum.Logic.Workflow
             return WorkflowLogic.Conditions.Value.GetOrThrow(wc);
         }
 
-        public static Expression<Func<WorkflowLaneEntity, bool>> IsLaneForCurrentUser = lane =>
-            lane.Actors.Contains(UserEntity.Current.ToLite()) ||
-            lane.Actors.Contains(UserEntity.Current.Role);
+        public static Expression<Func<Lite<Entity>, UserEntity,  bool>> IsCurrentUserActor = (actor, user) =>
+            actor.RefersTo(user) ||
+            actor.Is(user.Role);
 
         public static List<Lite<WorkflowEntity>> GetAllowedStarts()
         {
             return (from w in Database.Query<WorkflowEntity>()
                     let s = w.WorkflowEvents().Single(a => a.Type == WorkflowEventType.Start)
                     let a = (WorkflowActivityEntity)s.NextConnections().Single().To
-                    where IsLaneForCurrentUser.Evaluate(a.Lane)
+                    where a.Lane.Actors.Any(a => IsCurrentUserActor.Evaluate(a, UserEntity.Current))
                     select w.ToLite())
                     .ToList();
         }

@@ -28,10 +28,13 @@ namespace Signum.React.Cache
 
             var tables = CacheLogic.Statistics().Select(ctb => new CacheTableTS(ctb)).ToList();
 
+            var lazies = GlobalLazy.Statistics().Select(ctb => new ResetLazyStatsTS(ctb)).ToList();
+
             return new CacheStateTS
             {
                 isEnabled = !CacheLogic.GloballyDisabled,
-                tables = tables
+                tables = tables,
+                lazies = lazies
             };
         }
 
@@ -64,10 +67,29 @@ namespace Signum.React.Cache
         }
     }
 
+    public class ResetLazyStatsTS
+    {
+        public string typeName;
+        public int hits;
+        public int invalidations;
+        public int loads;
+        public string sumLoadTime;
+
+        public ResetLazyStatsTS(ResetLazyStats rls)
+        {
+            this.typeName = rls.Type.TypeName();
+            this.hits = rls.Hits;
+            this.invalidations = rls.Invalidations;
+            this.loads = rls.Loads;
+            this.sumLoadTime = rls.SumLoadTime.NiceToString();
+        }
+    }
+
     public class CacheStateTS
     {
         public bool isEnabled;
         public List<CacheTableTS> tables;
+        public List<ResetLazyStatsTS> lazies;
     }
 
     public class CacheTableTS
