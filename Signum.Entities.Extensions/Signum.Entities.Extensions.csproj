@@ -229,6 +229,7 @@
     <Compile Include="Workflow\CaseNotification.cs" />
     <Compile Include="Workflow\Workflow.cs" />
     <Compile Include="Workflow\WorkflowActivity.cs" />
+    <Compile Include="Workflow\WorkflowAction.cs" />
     <Compile Include="Workflow\WorkflowCondition.cs" />
     <Compile Include="Workflow\WorkflowConnection.cs" />
     <Compile Include="Workflow\WorkflowEvent.cs" />

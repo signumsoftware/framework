@@ -262,8 +262,9 @@
     <TypeScriptCompile Include="Workflow\Templates\InboxFilter.tsx" />
     <TypeScriptCompile Include="Workflow\Templates\Workflow.tsx" />
     <TypeScriptCompile Include="Workflow\Templates\WorkflowActivityModel.tsx" />
+    <TypeScriptCompile Include="Workflow\Templates\WorkflowAction.tsx" />
     <TypeScriptCompile Include="Workflow\Templates\WorkflowLaneModel.tsx" />
-    <TypeScriptCompile Include="Workflow\Templates\WorkflowConditionEntity.tsx" />
+    <TypeScriptCompile Include="Workflow\Templates\WorkflowCondition.tsx" />
     <TypeScriptCompile Include="Workflow\Templates\WorkflowDropdown.tsx" />
     <TypeScriptCompile Include="Workflow\Templates\WorkflowReplacementComponent.tsx" />
     <TypeScriptCompile Include="Workflow\WorkflowClient.tsx" />

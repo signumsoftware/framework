@@ -9,7 +9,8 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 import * as Dynamic from '../Dynamic/Signum.Entities.Dynamic'
 
 
-interface IWorkflowEvaluator {}
+interface IWorkflowConditionEvaluator {}
+interface IWorkflowActionEvaluator {}
 interface IWorkflowLaneActorsEvaluator {}
 
 
@@ -130,6 +131,24 @@ export interface IWorkflowObjectEntity extends Entities.Entity {
     name?: string | null;
 }
 
+export const WorkflowActionEntity = new Type<WorkflowActionEntity>("WorkflowAction");
+export interface WorkflowActionEntity extends Entities.Entity {
+    Type: "WorkflowAction";
+    name?: string | null;
+    mainEntityType?: Basics.TypeEntity | null;
+    eval?: WorkflowActionEval | null;
+}
+
+export const WorkflowActionEval = new Type<WorkflowActionEval>("WorkflowActionEval");
+export interface WorkflowActionEval extends Dynamic.EvalEntity<IWorkflowActionEvaluator> {
+    Type: "WorkflowActionEval";
+}
+
+export module WorkflowActionOperation {
+    export const Save : Entities.ExecuteSymbol<WorkflowActionEntity> = registerSymbol("Operation", "WorkflowActionOperation.Save");
+    export const Delete : Entities.DeleteSymbol<WorkflowActionEntity> = registerSymbol("Operation", "WorkflowActionOperation.Delete");
+}
+
 export const WorkflowActivityEntity = new Type<WorkflowActivityEntity>("WorkflowActivity");
 export interface WorkflowActivityEntity extends Entities.Entity, IWorkflowNodeEntity, IWorkflowObjectEntity {
     Type: "WorkflowActivity";
@@ -181,7 +200,12 @@ export interface WorkflowConditionEntity extends Entities.Entity {
     Type: "WorkflowCondition";
     name?: string | null;
     mainEntityType?: Basics.TypeEntity | null;
-    eval?: WorkflowConnectionEval | null;
+    eval?: WorkflowConditionEval | null;
+}
+
+export const WorkflowConditionEval = new Type<WorkflowConditionEval>("WorkflowConditionEval");
+export interface WorkflowConditionEval extends Dynamic.EvalEntity<IWorkflowConditionEvaluator> {
+    Type: "WorkflowConditionEval";
 }
 
 export module WorkflowConditionOperation {
@@ -197,13 +221,9 @@ export interface WorkflowConnectionEntity extends Entities.Entity, IWorkflowConn
     name?: string | null;
     decisonResult?: DecisionResult | null;
     condition?: Entities.Lite<WorkflowConditionEntity> | null;
+    action?: Entities.Lite<WorkflowActionEntity> | null;
     order?: number;
     xml?: WorkflowXmlEntity | null;
-}
-
-export const WorkflowConnectionEval = new Type<WorkflowConnectionEval>("WorkflowConnectionEval");
-export interface WorkflowConnectionEval extends Dynamic.EvalEntity<IWorkflowEvaluator> {
-    Type: "WorkflowConnectionEval";
 }
 
 export const WorkflowConnectionModel = new Type<WorkflowConnectionModel>("WorkflowConnectionModel");
@@ -212,6 +232,7 @@ export interface WorkflowConnectionModel extends Entities.ModelEntity {
     name?: string | null;
     decisonResult?: DecisionResult | null;
     condition?: Entities.Lite<WorkflowConditionEntity> | null;
+    action?: Entities.Lite<WorkflowActionEntity> | null;
     order?: number;
 }
 

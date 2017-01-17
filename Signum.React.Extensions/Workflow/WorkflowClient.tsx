@@ -16,13 +16,13 @@ import { UserEntity } from '../../../Extensions/Signum.React.Extensions/Authoriz
 import * as DynamicViewClient from '../../../Extensions/Signum.React.Extensions/Dynamic/DynamicViewClient'
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
-import { WorkflowConnectionEval, DecisionResult } from './Signum.Entities.Workflow'
+import { WorkflowConditionEval, WorkflowActionEval, DecisionResult } from './Signum.Entities.Workflow'
 import CaseModalFrame from './Templates/CaseModalFrame'
 import CasePageFrame from './Templates/CasePageFrame'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
 
 import {
-    WorkflowEntity, WorkflowLaneEntity, WorkflowActivityEntity, WorkflowConnectionEntity, WorkflowConditionEntity, CaseActivityQuery, CaseActivityEntity,
+    WorkflowEntity, WorkflowLaneEntity, WorkflowActivityEntity, WorkflowConnectionEntity, WorkflowConditionEntity, WorkflowActionEntity, CaseActivityQuery, CaseActivityEntity,
     CaseActivityOperation, CaseEntity, CaseNotificationEntity, CaseNotificationState, InboxFilterModel, WorkflowOperation, WorkflowPoolEntity,
     WorkflowActivityOperation, WorkflowReplacementModel, WorkflowModel, BpmnEntityPair, WorkflowActivityModel, ICaseMainEntity, WorkflowGatewayEntity, WorkflowEventEntity, WorkflowLaneModel
 } from './Signum.Entities.Workflow'
@@ -74,18 +74,22 @@ export function start(options: { routes: JSX.Element[] }) {
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { style: "primary", onClick: executeWorkflowSave }));
 
     Navigator.addSettings(new EntitySettings(WorkflowEntity, w => new ViewPromise(m => require(['./Templates/Workflow'], m)), { avoidPopup: true }));
+
     hide(WorkflowPoolEntity);
     hide(WorkflowLaneEntity);
     hide(WorkflowActivityEntity);
     hide(WorkflowGatewayEntity);
     hide(WorkflowEventEntity);
     hide(WorkflowConnectionEntity);
+
     Navigator.addSettings(new EntitySettings(WorkflowActivityModel, w => new ViewPromise(m => require(['./Templates/WorkflowActivityModel'], m))));
     Navigator.addSettings(new EntitySettings(WorkflowReplacementModel, w => new ViewPromise(m => require(['./Templates/WorkflowReplacementComponent'], m))));
-    Navigator.addSettings(new EntitySettings(WorkflowConditionEntity, w => new ViewPromise(m => require(['./Templates/WorkflowConditionEntity'], m))));
+    Navigator.addSettings(new EntitySettings(WorkflowConditionEntity, w => new ViewPromise(m => require(['./Templates/WorkflowCondition'], m))));
+    Navigator.addSettings(new EntitySettings(WorkflowActionEntity, w => new ViewPromise(m => require(['./Templates/WorkflowAction'], m))));
     Navigator.addSettings(new EntitySettings(WorkflowLaneModel, w => new ViewPromise(m => require(['./Templates/WorkflowLaneModel'], m))));
-    Constructor.registerConstructor(WorkflowConditionEntity, () => WorkflowConditionEntity.New({ eval: WorkflowConnectionEval.New() }));
-   
+
+    Constructor.registerConstructor(WorkflowConditionEntity, () => WorkflowConditionEntity.New({ eval: WorkflowConditionEval.New() }));
+    Constructor.registerConstructor(WorkflowActionEntity, () => WorkflowActionEntity.New({ eval: WorkflowActionEval.New() }));
 }
 
 function hide<T extends Entity>(type: Type<T>) {

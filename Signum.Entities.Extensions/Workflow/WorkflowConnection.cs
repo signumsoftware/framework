@@ -31,6 +31,8 @@ namespace Signum.Entities.Workflow
 
         public Lite<WorkflowConditionEntity> Condition { get; set; }
 
+        public Lite<WorkflowActionEntity> Action { get; set; }
+        
         public int Order { get; set; }
 
         [NotNullable]
@@ -43,6 +45,7 @@ namespace Signum.Entities.Workflow
             model.Name = this.Name;
             model.DecisonResult = this.DecisonResult;
             model.Condition = this.Condition;
+            model.Action = this.Action;
             model.Order = this.Order;
             return model;
         }
@@ -53,6 +56,7 @@ namespace Signum.Entities.Workflow
             this.Name = wModel.Name;
             this.DecisonResult = wModel.DecisonResult;
             this.Condition = wModel.Condition;
+            this.Action = wModel.Action;
             this.Order = wModel.Order;
         }
     }
@@ -78,7 +82,11 @@ namespace Signum.Entities.Workflow
         public string Name { get; set; }
 
         public DecisionResult? DecisonResult { get; set; }
+
         public Lite<WorkflowConditionEntity> Condition { get; set; }
+
+        public Lite<WorkflowActionEntity> Action { get; set; }
+
         public int Order { get; set; }
     }
 }

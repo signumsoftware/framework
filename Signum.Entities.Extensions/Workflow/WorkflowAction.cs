@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace Signum.Entities.Workflow
 {
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
-    public class WorkflowConditionEntity : Entity
+    public class WorkflowActionEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
@@ -23,9 +23,9 @@ namespace Signum.Entities.Workflow
 
         [NotNullable]
         [NotNullValidator, NotifyChildProperty]
-        public WorkflowConditionEval Eval { get; set; }
+        public WorkflowActionEval Eval { get; set; }
 
-        static Expression<Func<WorkflowConditionEntity, string>> ToStringExpression = @this => @this.Name;
+        static Expression<Func<WorkflowActionEntity, string>> ToStringExpression = @this => @this.Name;
         [ExpressionField]
         public override string ToString()
         {
@@ -34,21 +34,20 @@ namespace Signum.Entities.Workflow
     }
 
     [AutoInit]
-    public static class WorkflowConditionOperation
+    public static class WorkflowActionOperation
     {
-        public static readonly ExecuteSymbol<WorkflowConditionEntity> Save;
-        public static readonly DeleteSymbol<WorkflowConditionEntity> Delete;
+        public static readonly ExecuteSymbol<WorkflowActionEntity> Save;
+        public static readonly DeleteSymbol<WorkflowActionEntity> Delete;
     }
 
     [Serializable]
-    public class WorkflowConditionEval : EvalEntity<IWorkflowConditionEvaluator>
+    public class WorkflowActionEval : EvalEntity<IWorkflowActionEvaluator>
     {
         protected override CompilationResult Compile()
         {
-            var parent = (WorkflowConditionEntity)this.GetParentEntity();
+            var parent = (WorkflowActionEntity)this.GetParentEntity();
 
             var script = this.Script.Trim();
-            script = script.Contains(';') ? script : ("return " + script + ";");
             var WorkflowEntityTypeName = parent.MainEntityType.ToType().FullName;
 
             return Compile(DynamicCode.GetAssemblies(),
@@ -56,14 +55,14 @@ namespace Signum.Entities.Workflow
                     @"
                     namespace Signum.Entities.Workflow
                     {
-                        class MyWorkflowConditionEvaluator : IWorkflowConditionEvaluator
+                        class MyWorkflowActionEvaluator : IWorkflowActionEvaluator
                         {
-                            public bool EvaluateUntyped(ICaseMainEntity mainEntity, WorkflowEvaluationContext ctx)
+                            public void EvaluateUntyped(ICaseMainEntity mainEntity, WorkflowEvaluationContext ctx)
                             {
-                                return this.Evaluate((" + WorkflowEntityTypeName + @")mainEntity, ctx);
+                                this.Evaluate((" + WorkflowEntityTypeName + @")mainEntity, ctx);
                             }
 
-                            bool Evaluate(" + WorkflowEntityTypeName + @" e, WorkflowEvaluationContext ctx)
+                            void Evaluate(" + WorkflowEntityTypeName + @" e, WorkflowEvaluationContext ctx)
                             {
                                 " + script + @"
                             }
@@ -72,8 +71,8 @@ namespace Signum.Entities.Workflow
         }
     }
 
-    public interface IWorkflowConditionEvaluator
+    public interface IWorkflowActionEvaluator
     {
-        bool EvaluateUntyped(ICaseMainEntity mainEntity, WorkflowEvaluationContext ctx);
+        void EvaluateUntyped(ICaseMainEntity mainEntity, WorkflowEvaluationContext ctx);
     }
 }

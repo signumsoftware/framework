@@ -183,6 +183,7 @@ namespace Signum.Engine.Workflow
             public CaseActivityEntity CaseActivity;
             public List<CaseActivityEntity> ParallelFroms = new List<CaseActivityEntity>();
             public List<WorkflowActivityEntity> To = new List<WorkflowActivityEntity>();
+            public List<WorkflowConnectionEntity> Applicable = new List<WorkflowConnectionEntity>();
         }
 
         static bool Applicable(this WorkflowConnectionEntity wc, WorkflowContext ctx)
@@ -199,10 +200,31 @@ namespace Signum.Engine.Workflow
                     DecisionResult = ctx.DecisionResult,
                 });
 
+                if (result)
+                    ctx.Applicable.Add(wc);
+
                 return result;
             }
 
+            ctx.Applicable.Add(wc);
             return true;
+        }
+
+        static void WorkflowAction(this WorkflowConnectionEntity wc, WorkflowContext ctx)
+        {
+            var wectx = new WorkflowEvaluationContext
+            {
+                CaseActivity = ctx.CaseActivity,
+                DecisionResult = ctx.DecisionResult,
+            };
+
+            WorkflowLogic.OnTransition(ctx.CaseActivity.Case.MainEntity, wectx);
+
+            if (wc.Action != null)
+            {
+                var alg = wc.Action.RetrieveFromCache().Eval.Algorithm;
+                alg.EvaluateUntyped(ctx.CaseActivity.Case.MainEntity, wectx);
+            };
         }
 
         static void SaveEntity(ICaseMainEntity mainEntity)
@@ -347,8 +369,6 @@ namespace Signum.Engine.Workflow
 
             private static void ExecuteStep(CaseActivityEntity ca, object[] args, DecisionResult? decisionResult)
             {
-                if (decisionResult == null)
-
                 using (DynamicValidationLogic.EnabledRulesExplicitely(ca.WorkflowActivity.ValidationRules
                             .Where(a => decisionResult == null || (decisionResult == DecisionResult.Approve ? a.OnAccept : a.OnDecline))
                             .Select(a => a.Rule)
@@ -404,6 +424,8 @@ namespace Signum.Engine.Workflow
                                 InsertCaseActivityNotifications(nca);
                             }
                         }
+
+                        ctx.Applicable.ForEach(wc => WorkflowAction(wc, ctx));
                     }
                 }
             }

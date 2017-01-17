@@ -21,6 +21,8 @@ namespace Signum.Engine.Workflow
 
     public static class WorkflowLogic
     {
+        public static Action<ICaseMainEntity, WorkflowEvaluationContext> OnTransition;
+
         static Expression<Func<WorkflowEntity, IQueryable<WorkflowPoolEntity>>> WorkflowPoolsExpression =
             e => Database.Query<WorkflowPoolEntity>().Where(a => a.Workflow == e);
         [ExpressionField]
@@ -330,14 +332,35 @@ namespace Signum.Engine.Workflow
 
                 Conditions = sb.GlobalLazy(() => Database.Query<WorkflowConditionEntity>().ToDictionary(a => a.ToLite()),
                     new InvalidateWith(typeof(WorkflowConditionEntity)));
+
+                sb.Include<WorkflowActionEntity>()
+                   .WithSave(WorkflowActionOperation.Save)
+                   .WithDelete(WorkflowActionOperation.Delete)
+                   .WithQuery(dqm, e => new
+                   {
+                       Entity = e,
+                       e.Id,
+                       e.Name,
+                       e.MainEntityType,
+                       e.Eval.Script
+                   });
+
+                Actions = sb.GlobalLazy(() => Database.Query<WorkflowActionEntity>().ToDictionary(a => a.ToLite()),
+                    new InvalidateWith(typeof(WorkflowActionEntity)));
             }
         }
 
         public static ResetLazy<Dictionary<Lite<WorkflowConditionEntity>, WorkflowConditionEntity>> Conditions;
+        public static ResetLazy<Dictionary<Lite<WorkflowActionEntity>, WorkflowActionEntity>> Actions;
 
         public static WorkflowConditionEntity RetrieveFromCache(this Lite<WorkflowConditionEntity> wc)
         {
             return WorkflowLogic.Conditions.Value.GetOrThrow(wc);
+        }
+
+        public static WorkflowActionEntity RetrieveFromCache(this Lite<WorkflowActionEntity> wa)
+        {
+            return WorkflowLogic.Actions.Value.GetOrThrow(wa);
         }
 
         public static Expression<Func<Lite<Entity>, UserEntity,  bool>> IsCurrentUserActor = (actor, user) =>
