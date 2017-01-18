@@ -7,7 +7,10 @@
         width: 33%;
     }
 
-
+.btn-toolbar-small .btn{
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
 
 table.sf-search-results > thead {
     white-space: nowrap;
@@ -19,7 +22,7 @@ table.sf-search-results > tbody > tr > td {
     vertical-align: middle;
 }
 
-.sf-query-button-bar {
+.sf-query-button-bar:not(.btn-toolbar-small) {
     margin-bottom: 10px;
 }
 
