@@ -28,10 +28,12 @@ export default class ProcessPanelPage extends React.Component<ProcessPanelProps,
     }
 
     handleStop = (e: React.MouseEvent) => {
+        e.preventDefault();
         API.stop().then(() => this.loadState()).done();
     }
 
     handleStart = (e: React.MouseEvent) => {
+        e.preventDefault();
         API.start().then(() => this.loadState()).done();
     }
 
