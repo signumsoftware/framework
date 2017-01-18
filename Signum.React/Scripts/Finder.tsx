@@ -762,6 +762,7 @@ export interface QuerySettings {
     formatters?: { [columnName: string]: CellFormatter };
     rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes | undefined;
     entityFormatter?: EntityFormatter;
+    onDoubleClick?: (e: React.MouseEvent, row: ResultRow) => void;
     simpleFilterBuilder?: (qd: QueryDescription, initialFindOptions: FindOptionsParsed) => React.ReactElement<any> | undefined;
 }
 
