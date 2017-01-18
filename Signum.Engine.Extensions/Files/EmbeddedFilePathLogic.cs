@@ -39,8 +39,7 @@ namespace Signum.Engine.Files
         {
             return WebDownloadExpression.Evaluate(fp, fileType);
         }
-
-
+        
         public static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmbeddedFilePathLogic.Start(null, null)));
@@ -82,6 +81,12 @@ namespace Signum.Engine.Files
             return efp;
         }
 
-        
+        public static void DeleteFileOnCommit(this EmbeddedFilePathEntity efp)
+        {
+            Transaction.PostRealCommit += dic =>
+            {
+                FileTypeLogic.FileTypes[efp.FileType].DeleteFiles(new List<IFilePath> { efp });
+            };
+        }
     }
 }
