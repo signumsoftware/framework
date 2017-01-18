@@ -1,17 +1,14 @@
 ﻿using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Drawing.Wordprocessing;
-using DocumentFormat.OpenXml.Office.Drawing;
 using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Signum.Utilities;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing.Drawing2D;
 
 namespace Signum.Engine.Word
 {
@@ -19,6 +16,7 @@ namespace Signum.Engine.Word
     {
         public static bool AvoidAdaptSize = false; //Jpeg compression creates different images in TeamCity
 
+        /// <param name="title">Word Image -> Right Click -> Format Picture -> Alt Text -> Title </param>
         public static void ReplaceImage(WordprocessingDocument doc, string title, Bitmap bitmap, string newImagePartId, bool adaptSize = false, ImagePartType imagePartType = ImagePartType.Png)
         {
             Blip blip = FindBlip(doc, title);
@@ -71,7 +69,7 @@ namespace Signum.Engine.Word
 
         static Blip FindBlip(WordprocessingDocument doc, string alternativeTitle)
         {
-            var drawing = doc.MainDocumentPart.Document.Descendants<Drawing>().SingleEx(r =>
+            var drawing = doc.MainDocumentPart.Document.Descendants().OfType<Drawing>().SingleEx(r =>
             {
                 var prop = r.Descendants<DocProperties>().SingleOrDefault();
 
@@ -85,9 +83,9 @@ namespace Signum.Engine.Word
     public static class ImageResizer
     {
         //http://stackoverflow.com/a/10445101/38670
-        public static Bitmap Resize(Bitmap image, int width, int height)
+        internal static Bitmap Resize(Bitmap image, int width, int height)
         {
-            var brush = new SolidBrush(Color.White);
+            var brush = new SolidBrush(System.Drawing.Color.White);
 
             float scale = Math.Min(width / (float)image.Width, height / (float)image.Height);
 
