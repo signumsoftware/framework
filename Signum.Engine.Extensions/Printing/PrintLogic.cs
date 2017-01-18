@@ -200,6 +200,8 @@ namespace Signum.Engine.Printing
                     e.State = PrintLineState.Cancelled;
                     e.Package = null;
                     e.PrintedOn = null;
+                    if (File.Exists(e.File.FullPhysicalPath()))
+                        File.Delete(e.File.FullPhysicalPath());
                 }
             }.Register();
         }
