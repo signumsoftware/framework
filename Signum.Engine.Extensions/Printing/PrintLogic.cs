@@ -129,27 +129,11 @@ namespace Signum.Engine.Printing
         public static void CancelPrinting(Entity entity, FileTypeSymbol fileType)
         {
             var list = ReadyToPrint(entity, fileType).ToList();
-
-            var filesToDelete = list.Select(a => a.File.FullPhysicalPath()).ToList();
-
-            Transaction.PreRealCommit += dic =>
+            list.ForEach(a =>
             {
-                foreach (var file in filesToDelete)
-                {
-                    try
-                    {
-                        if (File.Exists(file))
-                            File.Delete(file);
-
-                    }
-                    catch (Exception e)
-                    {
-                        e.LogException();
-                    }
-                }
-            };
-
-            list.ForEach(a => a.State = PrintLineState.Cancelled);
+                a.State = PrintLineState.Cancelled;
+                a.File.DeleteFileOnCommit();
+            });
             list.SaveList();
         }
 
@@ -200,8 +184,7 @@ namespace Signum.Engine.Printing
                     e.State = PrintLineState.Cancelled;
                     e.Package = null;
                     e.PrintedOn = null;
-                    if (File.Exists(e.File.FullPhysicalPath()))
-                        File.Delete(e.File.FullPhysicalPath());
+                    e.File.DeleteFileOnCommit();
                 }
             }.Register();
         }
@@ -213,9 +196,7 @@ namespace Signum.Engine.Printing
                 try
                 {
                     PrintingLogic.Print(line);
-                    var file = line.File.FullPhysicalPath();
-                    if (File.Exists(file))
-                        File.Delete(file);
+                    line.File.DeleteFileOnCommit();
 
                     line.State = PrintLineState.Printed;
                     line.PrintedOn = TimeZoneManager.Now;
