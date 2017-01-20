@@ -53,6 +53,7 @@ namespace Signum.Engine.Word
             {
                 sb.Include<WordTemplateEntity>()
                     .WithSave(WordTemplateOperation.Save)
+                    .WithDelete(WordTemplateOperation.Delete)
                     .WithQuery(dqm, e => new
                     {
                         Entity = e,
