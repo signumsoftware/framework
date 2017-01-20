@@ -279,8 +279,8 @@ export namespace Options {
         Navigator.currentHistory.push("~/");
     }
 
-    export let onLogin = () => {
-        Navigator.currentHistory.push("~/");
+    export let onLogin = (url?: string) => {
+        Navigator.currentHistory.push(url || "~/");
     }
 }
 
