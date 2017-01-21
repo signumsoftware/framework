@@ -129,7 +129,7 @@ function createDefaultButton(eoc: EntityOperationContext<Entity>, group: EntityO
 
     const tooltip = <Tooltip id={"tooltip_" + eoc.operationInfo.key.replace(".", "_") }>{eoc.canExecute}</Tooltip>;
 
-    return <OverlayTrigger placement="bottom" overlay={tooltip}>{btn}</OverlayTrigger>;
+    return <OverlayTrigger placement="bottom" overlay={tooltip} key={key}>{btn}</OverlayTrigger>;
 }
 
 function onClick(eoc: EntityOperationContext<Entity>, event: React.MouseEvent): void{

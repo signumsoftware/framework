@@ -1401,27 +1401,17 @@ namespace Signum.Engine.Maps
             if (HasValue != null)
             {
                 trios.Add(new Table.Trio(HasValue, Expression.NotEqual(value, Expression.Constant(null, FieldType)), suffix));
-
-                assigments.Add(Expression.Assign(embedded, Expression.Convert(value, this.FieldType)));
-
-                foreach (var ef in EmbeddedFields.Values)
-                {
-                    ef.Field.CreateParameter(trios, assigments,
-                        Expression.Condition(
-                            Expression.Equal(embedded, Expression.Constant(null, this.FieldType)),
-                            Expression.Constant(null, ef.FieldInfo.FieldType.Nullify()),
-                            Expression.Field(embedded, ef.FieldInfo).Nullify()), forbidden, suffix);
-                }
             }
-            else
-            {
 
-                assigments.Add(Expression.Assign(embedded, Expression.Convert(value.NodeType == ExpressionType.Conditional ? value : Expression.Call(Expression.Constant(this), miCheckNull, value), this.FieldType)));
-                foreach (var ef in EmbeddedFields.Values)
-                {
-                    ef.Field.CreateParameter(trios, assigments,
-                        Expression.Field(embedded, ef.FieldInfo), forbidden, suffix);
-                }
+            assigments.Add(Expression.Assign(embedded, Expression.Convert(value, this.FieldType)));
+
+            foreach (var ef in EmbeddedFields.Values)
+            {
+                ef.Field.CreateParameter(trios, assigments,
+                    Expression.Condition(
+                        Expression.Equal(embedded, Expression.Constant(null, this.FieldType)),
+                        Expression.Constant(null, ef.FieldInfo.FieldType.Nullify()),
+                        Expression.Field(embedded, ef.FieldInfo).Nullify()), forbidden, suffix);
             }
         }
 

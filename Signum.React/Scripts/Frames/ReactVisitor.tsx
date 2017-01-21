@@ -116,8 +116,11 @@ export class ViewReplacer<T> {
 
 
     remove(propertyRoute: (entity: T) => any): this {
+
+        var pr = this.ctx.propertyRoute.add(propertyRoute);
+
         this.result = new ReplaceVisitor(
-            e => hasPropertyRoute(e, this.ctx.propertyRoute.add(propertyRoute)),
+            e => hasPropertyRoute(e, pr),
             e => [])
             .visit(this.result);
 
@@ -125,8 +128,11 @@ export class ViewReplacer<T> {
     }
 
     insertAfter(propertyRoute: (entity: T) => any, ...newElements: React.ReactElement<any>[]): this {
+
+        var pr = this.ctx.propertyRoute.add(propertyRoute);
+
         this.result = new ReplaceVisitor(
-            e => hasPropertyRoute(e, this.ctx.propertyRoute.add(propertyRoute)),
+            e => hasPropertyRoute(e, pr),
             e => [e, ...newElements])
             .visit(this.result);
 
@@ -134,8 +140,11 @@ export class ViewReplacer<T> {
     }
 
     insertBefore(propertyRoute: (entity: T) => any, ...newElements: React.ReactElement<any>[]): this {
+
+        var pr = this.ctx.propertyRoute.add(propertyRoute);
+
         this.result = new ReplaceVisitor(
-            e => hasPropertyRoute(e, this.ctx.propertyRoute.add(propertyRoute)),
+            e => hasPropertyRoute(e, pr),
             e => [...newElements, e])
             .visit(this.result);
 

@@ -106,6 +106,7 @@ namespace Signum.React.Json
 
     public class EntityJsonConverter : JsonConverter
     {
+        public static Dictionary<Type, PropertyRoute> DefaultPropertyRoutes = new Dictionary<Type, PropertyRoute>();
 
         public override bool CanConvert(Type objectType)
         {
@@ -114,12 +115,7 @@ namespace Signum.React.Json
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            var pr = JsonSerializerExtensions.CurrentPropertyRoute;
-
-            if (pr == null || typeof(IRootEntity).IsAssignableFrom(pr.Type))
-                pr = PropertyRoute.Root(value.GetType());
-            else if (pr.Type.ElementType() == value.GetType())
-                pr = pr.Add("Item");
+            PropertyRoute pr = GetCurrentPropertyRoute(value);
 
             ModifiableEntity mod = (ModifiableEntity)value;
 
@@ -151,13 +147,13 @@ namespace Signum.React.Json
                 writer.WritePropertyName("Type");
                 writer.WriteValue(mod.GetType().Name);
             }
-            
+
             if (!(mod is MixinEntity))
             {
                 writer.WritePropertyName("toStr");
                 writer.WriteValue(mod.ToString());
             }
-            
+
             writer.WritePropertyName("modified");
             writer.WriteValue(mod.Modified == ModifiedState.Modified || mod.Modified == ModifiedState.SelfModified);
 
@@ -174,7 +170,7 @@ namespace Signum.React.Json
                 foreach (var m in entity.Mixins)
                 {
                     var prm = pr.Add(m.GetType());
-                  
+
                     using (JsonSerializerExtensions.SetCurrentPropertyRoute(prm))
                     {
                         writer.WritePropertyName(m.GetType().Name);
@@ -188,6 +184,26 @@ namespace Signum.React.Json
             writer.WriteEndObject();
         }
 
+        private static PropertyRoute GetCurrentPropertyRoute(object value)
+        {
+            var pr = JsonSerializerExtensions.CurrentPropertyRoute;
+
+            if (value is IRootEntity)
+                pr = PropertyRoute.Root(value.GetType());
+            if (pr == null)
+            {
+                var embedded = (EmbeddedEntity)value;
+                var hpr = DefaultPropertyRoutes.TryGetC(embedded.GetType());
+
+                if (hpr == null)
+                    throw new InvalidOperationException($"Impossible to determine PropertyRoute for {value.GetType().Name}. Consider adding a new value to {nameof(EntityJsonConverter)}.{nameof(EntityJsonConverter.DefaultPropertyRoutes)}.");
+
+                pr = hpr;
+            }
+            else if (pr.Type.ElementType() == value.GetType())
+                pr = pr.Add("Item"); //We habe a custom MListConverter but not for other simple collections
+            return pr;
+        }
 
         public static Func<PropertyRoute, string> CanReadPropertyRoute;
 
@@ -241,12 +257,8 @@ namespace Signum.React.Json
 
                 bool markedAsModified;
                 ModifiableEntity mod = GetEntity(reader, objectType, existingValue, serializer, out markedAsModified);
-                
-                var pr = JsonSerializerExtensions.CurrentPropertyRoute;
-                if (pr == null || mod is IRootEntity)
-                    pr = PropertyRoute.Root(mod.GetType());
-                else if (pr.Type.ElementType() == objectType)
-                    pr = pr.Add("Item"); //Because we have a custom MListJsonConverter but not for other simpler collections
+
+                var pr = GetCurrentPropertyRoute(mod);
 
                 var dic = PropertyConverter.GetPropertyConverters(mod.GetType());
 

@@ -35,6 +35,8 @@ export interface SearchControlLoadedProps {
     onResult?: (table: ResultTable) => void;
     hideFullScreenButton?: boolean;
     showBarExtension?: boolean;
+    largeToolbarButtons?: boolean;
+    avoidAutoRefresh?: boolean;
     extraButtons?: (searchControl: SearchControlLoaded) => React.ReactNode
 }
 
@@ -87,7 +89,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         }
 
         if (fo.searchOnLoad)
-            this.doSearch();
+            this.doSearch().done();
     }
 
 
@@ -127,13 +129,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         if (fo.pagination.mode == "Paginate")
             fo.pagination.currentPage = 1;
 
-        this.doSearch();
+        this.doSearch().done();
     };
 
-    doSearch() {
-        this.getFindOptionsWithSFB().then(fo => {
+    doSearch() : Promise<void> {
+        return this.getFindOptionsWithSFB().then(fo => {
             this.setState({ loading: false, editingColumn: undefined });
-            Finder.API.executeQuery(this.getQueryRequest()).then(rt => {
+            return Finder.API.executeQuery(this.getQueryRequest()).then(rt => {
                 this.setState({
                     resultTable: rt,
                     selectedRows: [],
@@ -147,7 +149,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
                 this.notifySelectedRowsChanged();
                 this.forceUpdate();
-            }).done();
+            });
         });
     }
 
@@ -185,7 +187,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         this.setState({ resultTable: undefined });
 
         if (this.props.findOptions.pagination.mode != "All")
-            this.doSearch();
+            this.doSearch().done();
     }
 
 
@@ -329,7 +331,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         const fo = this.props.findOptions;
         return (
-            <div className="sf-query-button-bar btn-toolbar">
+            <div className={classes("sf-query-button-bar btn-toolbar", !this.props.largeToolbarButtons && "btn-toolbar-small")}>
                 {fo.showFilterButton && <a
                     className={"sf-query-button sf-filters-header btn btn-default" + (fo.showFilters ? " active" : "")}
                     onClick={this.handleToggleFilters}
@@ -380,7 +382,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                         return;
 
                     Finder.setFilters(e.entity as Entity, this.props.findOptions.filterOptions)
-                        .then(() => Navigator.navigate(e!));
+                        .then(() => Navigator.navigate(e!))
+                        .then(() => this.props.avoidAutoRefresh ? undefined : this.doSearch())
+                        .done();
                 }).done();
             }
         }).done();
@@ -450,7 +454,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     markRows = (dic: MarkedRowsDictionary) => {
-        this.setState({ markedRows: { ...this.state.markedRows, ...dic } });
+        var promise = this.props.avoidAutoRefresh ? Promise.resolve(undefined) :
+            this.doSearch();
+
+        promise.then(() => this.setState({ markedRows: { ...this.state.markedRows, ...dic } })).done();
+            
     }
 
     renderSelecterButton() {
@@ -590,8 +598,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         if (!this.state.resultTable)
             return;
 
-        this.setState({ selectedRows: !this.allSelected() ? this.state.resultTable!.rows.clone() : [] });
-        this.notifySelectedRowsChanged();
+        this.setState({ selectedRows: !this.allSelected() ? this.state.resultTable!.rows.clone() : [] }, () => {
+            this.notifySelectedRowsChanged()
+        });
     }
 
     handleHeaderClick = (e: React.MouseEvent) => {

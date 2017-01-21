@@ -30,7 +30,7 @@ export function setCurrentHistory(history: HistoryModule.History) {
 }
 
 export let resetUI: () => void = () => { };
-export function setResetUI(reset: () => void ) {
+export function setResetUI(reset: () => void) {
     resetUI = reset;
 }
 
@@ -430,11 +430,11 @@ export interface ViewOptions {
     extraComponentProps?: {};
 }
 
-export function view<T extends ModifiableEntity>(options: EntityPack<T>, viewOptions?: ViewOptions): Promise<T>;
-export function view<T extends ModifiableEntity>(entity: T, viewOptions?: ViewOptions): Promise<T>;
-export function view<T extends Entity>(entity: Lite<T>, viewOptions?: ViewOptions): Promise<T>
-export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions): Promise<ModifiableEntity>;
-export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions): Promise<ModifiableEntity> {
+export function view<T extends ModifiableEntity>(options: EntityPack<T>, viewOptions?: ViewOptions): Promise<T | undefined>;
+export function view<T extends ModifiableEntity>(entity: T, viewOptions?: ViewOptions): Promise<T | undefined>;
+export function view<T extends Entity>(entity: Lite<T>, viewOptions?: ViewOptions): Promise<T | undefined>
+export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions): Promise<ModifiableEntity | undefined>;
+export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions): Promise<ModifiableEntity | undefined> {
     return new Promise<ModifiableEntity>((resolve, reject) => {
         require(["./Frames/ModalFrame"], function (NP: { default: typeof ModalFrame }) {
             NP.default.openView(entityOrPack, viewOptions || {}).then(resolve, reject);

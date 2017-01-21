@@ -22,6 +22,7 @@ namespace Signum.Engine.Linq
         public static readonly FieldInfo IdField = ReflectionTools.GetFieldInfo((Entity ei) =>ei.id);
         public static readonly FieldInfo ToStrField = ReflectionTools.GetFieldInfo((Entity ie) =>ie.toStr);
         public static readonly MethodInfo ToStringMethod = ReflectionTools.GetMethodInfo((object o) => o.ToString());
+        public static readonly PropertyInfo IdOrNullProperty = ReflectionTools.GetPropertyInfo((Entity ei) => ei.IdOrNull);
 
         public readonly Table Table;
         public readonly PrimaryKeyExpression ExternalId;
@@ -32,6 +33,7 @@ namespace Signum.Engine.Linq
         public readonly ReadOnlyCollection<MixinEntityExpression> Mixins;
 
         public readonly bool AvoidExpandOnRetrieving;
+
 
         public EntityExpression(Type type, PrimaryKeyExpression externalId, Alias tableAlias, IEnumerable<FieldBinding> bindings, IEnumerable<MixinEntityExpression> mixins, bool avoidExpandOnRetrieving)
             : base(DbExpressionType.Entity, type)

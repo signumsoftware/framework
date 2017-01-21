@@ -52,6 +52,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchC
                     throwIfNotFindable={true}
                     showBarExtension={true}
                     hideFullScreenButton={true}
+                    largeToolbarButtons={true}
                     findOptions={fo} />
             </div>
         );

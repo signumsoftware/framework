@@ -38,6 +38,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     onResult?: (table: ResultTable) => void;
     hideFullScreenButton?: boolean;
     showBarExtension?: boolean;
+    largeToolbarButtons?: boolean; 
     throwIfNotFindable?: boolean;
     extraButtons?: (searchControl: SearchControlLoaded) => React.ReactNode
 }
@@ -123,6 +124,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             hideFullScreenButton={this.props.hideFullScreenButton}
             showBarExtension={this.props.showBarExtension}
             extraButtons={this.props.extraButtons}
+            largeToolbarButtons={this.props.largeToolbarButtons} 
             findOptions={fo}
             queryDescription={this.state.queryDescription!}
             querySettings={Finder.getQuerySettings(fo.queryKey)}

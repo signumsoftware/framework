@@ -1275,12 +1275,16 @@ namespace Signum.Engine.Linq
                                 case DbExpressionType.Entity:
                                     {
                                         EntityExpression ee = (EntityExpression)source;
-                                        FieldInfo fi = m.Member as FieldInfo ?? Reflector.TryFindFieldInfo(ee.Type, (PropertyInfo)m.Member);
+                                        var pi = m.Member as PropertyInfo;
+                                        if (pi != null && ReflectionTools.PropertyEquals(pi, EntityExpression.IdOrNullProperty))
+                                            return ee.ExternalId;
+
+                                        FieldInfo fi = m.Member as FieldInfo ?? Reflector.TryFindFieldInfo(ee.Type, pi);
 
                                         if (fi == null)
-                                            throw new InvalidOperationException("The member {0} of {1} is not accesible on queries".FormatWith(m.Member.Name, ee.Type.TypeName()));
+                                            throw new InvalidOperationException("The member {0} of {1} is not accessible on queries".FormatWith(m.Member.Name, ee.Type.TypeName()));
 
-                                        if (fi != null && fi.FieldEquals((Entity ie) => ie.id))
+                                        if (fi != null && ReflectionTools.FieldEquals(fi, EntityExpression.IdField))
                                             return ee.ExternalId.UnNullify();
 
                                         Expression result = Completed(ee).GetBinding(fi);
