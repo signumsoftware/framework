@@ -7,6 +7,7 @@
         width: 33%;
     }
 
+
 .btn-toolbar-small .btn{
     padding-top: 1px;
     padding-bottom: 1px;
@@ -185,6 +186,13 @@ td.centered-cell{
     margin-bottom: 0px;
 }
 
+.empty-icon {
+    display: inline-block;
+    width: 1.2em;
+    height: 1.2em;
+    border-radius: 2px;
+    content: "&nbsp;"
+}
 
 /* check box */
 

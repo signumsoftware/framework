@@ -1,6 +1,7 @@
 ﻿import * as React from 'react'
 import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, LambdaMemberType, Type, PseudoType, getTypeName } from './Reflection'
 import { ModelState, MList, ModifiableEntity, EntityPack, Entity } from './Signum.Entities'
+import { EntityOperationContext } from './Operations'
 
 export type FormGroupStyle =
     "None" |  /// Unaffected by FormGroupSize     
@@ -280,12 +281,16 @@ export class TypeContext<T> extends StyleContext {
 export interface ButtonsContext {
     pack: EntityPack<ModifiableEntity>;
     frame: EntityFrame<ModifiableEntity>;
-    showOperations: boolean;
+    isOperationVisible?: (eoc: EntityOperationContext<Entity>) => boolean;
     tag?: string;
 }
 
 export interface IRenderButtons {
     renderButtons(ctx: ButtonsContext): React.ReactElement<any>[];
+}
+
+export interface IOperationVisible {
+    isOperationVisible(eoc: EntityOperationContext<Entity>): boolean;
 }
 
 export interface IHasChanges {

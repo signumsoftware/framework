@@ -422,7 +422,7 @@ export interface ViewOptions {
     title?: string;
     propertyRoute?: PropertyRoute;
     readOnly?: boolean;
-    showOperations?: boolean;
+    isOperationVisible?: (eoc: Operations.EntityOperationContext<Entity>) => boolean;
     validate?: boolean;
     requiresSaveOperation?: boolean;
     avoidPromptLooseChange?: boolean;
@@ -479,7 +479,7 @@ export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.Mouse
 }
 
 
-export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, showOperations: boolean): Promise<EntityPack<ModifiableEntity>> {
+export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>): Promise<EntityPack<ModifiableEntity>> {
     if ((entityOrEntityPack as EntityPack<ModifiableEntity>).canExecute)
         return Promise.resolve(entityOrEntityPack);
 
@@ -490,7 +490,7 @@ export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity
     if (entity == undefined)
         return API.fetchEntityPack(entityOrEntityPack as Lite<Entity>);
 
-    if (!showOperations || !needsCanExecute(entity))
+    if (!needsCanExecute(entity))
         return Promise.resolve({ entity: cloneEntity(entity), canExecute: {} });
 
     return API.fetchCanExecute(entity as Entity);
