@@ -182,7 +182,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
     }
 
     handleOnView = (exampleEntity: Entity) => {
-        return Navigator.view(exampleEntity, { requiresSaveOperation: false, showOperations: false });
+        return Navigator.view(exampleEntity, { requiresSaveOperation: false });
     }
 
     handleCodeChange = (newCode: string) => {

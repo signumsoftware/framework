@@ -426,6 +426,24 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                             </div>
                         }
                         />
+            
+
+                    <CustomCodeFieldsetComponent
+                        binding={Binding.create(def, d => d.customBeforeSchema)}
+                        title="Before Schema"
+                        onCreate={() => ({ code: "sb.Schema.Settings.FieldAttributes((StaticType ua) => ua.Property).Replace(new ImplementedByAttribute(typeof(YourDynamicTypeEntity)));" })}
+                        renderContent={e =>
+                            <div>
+
+                                <div className="code-container">
+                                    <pre style={{ border: "0px", margin: "0px" }}>{`public void OverrideSchema(SchemaBuilder sb)
+{`}</pre>
+                                    <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
+                                    <pre style={{ border: "0px", margin: "0px" }}>{`}`}</pre>
+                                </div>
+                            </div>
+                        }
+                        />
                 </div>
                 <div className="col-sm-5">
                     {!dt.isNew &&
