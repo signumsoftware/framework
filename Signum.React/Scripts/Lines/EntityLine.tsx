@@ -111,16 +111,22 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
                 {hasValue && this.renderRemoveButton(true, s.ctx.value!) }
             </span>
         );
-        
+
+        var linkOrAutocomplete = hasValue ? this.renderLink() : this.renderAutoComplete();
+
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText}
                 htmlProps={{ ...this.baseHtmlProps(), ...EntityBase.entityHtmlProps(s.ctx.value!), ...s.formGroupHtmlProps }}
                 labelProps={s.labelHtmlProps}>
                 <div className="SF-entity-line">
-                    <div className={EntityBase.hasChildrens(buttons) ? "input-group" : undefined}>
-                        {hasValue ? this.renderLink() : this.renderAutoComplete()}
-                        {EntityBase.hasChildrens(buttons) ? buttons : undefined}
-                    </div>
+                    {
+                        !EntityBase.hasChildrens(buttons) ?
+                            <div style={{ position: "relative" }}>{linkOrAutocomplete}</div>:
+                            <div className="input-group">
+                                {linkOrAutocomplete}
+                                {buttons}
+                            </div>
+                    }
                 </div>
             </FormGroup>
         );
