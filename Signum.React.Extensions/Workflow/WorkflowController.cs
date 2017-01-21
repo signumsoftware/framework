@@ -12,6 +12,8 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Xml.Linq;
 using Signum.Entities.Basics;
+using Signum.Engine.DynamicQuery;
+using Signum.Engine.Basics;
 
 namespace Signum.React.Workflow
 {
@@ -65,11 +67,11 @@ namespace Signum.React.Workflow
         [Route("api/workflow/findMainEntityType"), HttpGet]
         public List<Lite<TypeEntity>> FindMainEntityType(string subString, int count)
         {
-            return Database.Query<TypeEntity>()
-                .Where(t => t.CleanName.Contains(subString) && t.ToType().GetInterfaces().Any(a => a == typeof(ICaseMainEntity)))
-                .Take(count)
-                .Select(t => t.ToLite())
-                .ToList();
+            var list = TypeLogic.TypeToEntity
+                .Where(kvp => typeof(ICaseMainEntity).IsAssignableFrom(kvp.Key))
+                .Select(kvp => kvp.Value.ToLite());
+
+            return AutocompleteUtils.Autocomplete(list, subString, count);
         }
 
         [Route("api/workflow/condition/test"), HttpPost]

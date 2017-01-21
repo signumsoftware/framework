@@ -238,6 +238,12 @@ export namespace API {
         return ajaxPost<PreviewResult>({ url: `~/api/workflow/previewChanges/${workflowId} ` }, model);
     }
 
+    export function findMainEntityType(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {
+        return ajaxGet<Lite<TypeEntity>[]>({
+            url: Navigator.currentHistory.createHref({ pathname: "~/api/workflow/findMainEntityType", query: request })
+        });
+    }
+
     export function conditionTest(request: WorkflowConditionTestRequest): Promise<WorkflowConditionTestResponse> {
         return ajaxPost<WorkflowConditionTestResponse>({ url: `~/api/workflow/condition/test` }, request);
     }

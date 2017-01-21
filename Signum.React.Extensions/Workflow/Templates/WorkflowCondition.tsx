@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { ValueLine, EntityLine, TypeContext, FormGroup, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { ValueLine, EntityLine, TypeContext, FormGroup, ValueLineType, LiteAutocompleteConfig } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { PropertyRoute, Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import CSharpCodeMirror from '../../../../Extensions/Signum.React.Extensions/Codemirror/CSharpCodeMirror'
@@ -47,7 +47,11 @@ export default class WorkflowConditionComponent extends React.Component<Workflow
         return (
             <div>
                 <ValueLine ctx={ctx.subCtx(wc => wc.name)} />
-                <EntityLine ctx={ctx.subCtx(wc => wc.mainEntityType)} onChange={this.handleMainEntityTypeChange} />
+                <EntityLine ctx={ctx.subCtx(wc => wc.mainEntityType)}
+                    onChange={this.handleMainEntityTypeChange}
+                    autoComplete={new LiteAutocompleteConfig(str => API.findMainEntityType({ subString: str, count: 5 }), false)}
+                    find={false}
+                    />
                 {ctx.value.mainEntityType &&
                     <div>
                         <br />
