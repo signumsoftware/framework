@@ -123,4 +123,12 @@ namespace Signum.Entities.Workflow
         [NotNullValidator]
         public string NewTask { get; set; }
     }
+
+    public class WorkflowEvaluationContext
+    {
+        public CaseActivityEntity CaseActivity { get; internal set; }
+        public DecisionResult? DecisionResult { get; internal set; }
+        public WorkflowConnectionEntity Connection { get; internal set; }
+        public CaseEntity Case { get; internal set; }
+    }
 }

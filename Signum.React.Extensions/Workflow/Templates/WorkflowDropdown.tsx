@@ -4,6 +4,7 @@ import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { TypeContext, StyleOptions, EntityFrame  } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
+import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
 import { EntityPack, Entity, Lite, JavascriptMessage, entityInfo, getToString } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from '../../../../Framework/Signum.React/Scripts/Frames/Widgets'
@@ -29,9 +30,19 @@ export default class WorkflowDropdown extends React.Component<void, { starts: Ar
     }
 
     render() {
+
+        const inboxUrl = Finder.findOptionsPath({
+            queryName: CaseActivityQuery.Inbox,
+            filterOptions: [{
+                columnName: "State",
+                operation: "IsIn",
+                value: ["New", "Opened", "InProgress"]
+            }]
+        });
+        
         return (
             <NavDropdown title={ WorkflowEntity.nicePluralName() } id= "workflow-dropdown" >
-                <IndexLinkContainer to="~/find/inbox"><MenuItem>{ CaseActivityQuery.Inbox.niceName() }</MenuItem></IndexLinkContainer>
+                <IndexLinkContainer to={inboxUrl}><MenuItem>{ CaseActivityQuery.Inbox.niceName() }</MenuItem></IndexLinkContainer>
                 { this.state.starts.length > 0 && <MenuItem divider /> }
                 { this.state.starts.length > 0 && <MenuItem disabled>{ JavascriptMessage.create.niceToString() }</MenuItem> }
                 { this.state.starts.map((w, i) => <LinkContainer key={i} to={ `~/workflow/new/${w.id}` }><MenuItem>{ w.toStr }</MenuItem></LinkContainer>) }

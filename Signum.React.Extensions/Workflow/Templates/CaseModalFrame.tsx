@@ -153,7 +153,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-activity-entity={entityInfo(pack.activity) }>
                     { this.renderMainEntity() }
                 </div>
-                {this.entityComponent && <div className="workflow-buttons"><ButtonBar frame={activityFrame} pack={activityPack} showOperations={true} /></div> }
+                {this.entityComponent && <div className="workflow-buttons"><ButtonBar frame={activityFrame} pack={activityPack} /></div> }
             </Modal.Body>
         );
     }
@@ -203,7 +203,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         return (
             <div className="sf-main-entity" data-main-entity={entityInfo(mainEntity)}>
                 {renderWidgets(wc)}
-                {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy && < ButtonBar frame={mainFrame} pack={mainPack} showOperations={true} />}
+                {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy && <ButtonBar frame={mainFrame} pack={mainPack} />}
                 <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve} />
                 {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any>) => this.setComponent(c) })}
             </div>

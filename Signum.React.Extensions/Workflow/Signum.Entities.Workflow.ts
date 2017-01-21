@@ -9,7 +9,8 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 import * as Dynamic from '../Dynamic/Signum.Entities.Dynamic'
 
 
-interface IWorkflowEvaluator {}
+interface IWorkflowConditionEvaluator {}
+interface IWorkflowActionExecutor {}
 interface IWorkflowLaneActorsEvaluator {}
 
 
@@ -36,9 +37,6 @@ export interface CaseActivityEntity extends Entities.Entity {
 }
 
 export module CaseActivityMessage {
-    export const OnlyFor0Activites = new MessageKey("CaseActivityMessage", "OnlyFor0Activites");
-    export const AlreadyDone = new MessageKey("CaseActivityMessage", "AlreadyDone");
-    export const ActivityAlreadyRegistered = new MessageKey("CaseActivityMessage", "ActivityAlreadyRegistered");
     export const CaseContainsOtherActivities = new MessageKey("CaseActivityMessage", "CaseContainsOtherActivities");
     export const NoNextConnectionThatSatisfiesTheConditionsFound = new MessageKey("CaseActivityMessage", "NoNextConnectionThatSatisfiesTheConditionsFound");
 }
@@ -50,6 +48,7 @@ export module CaseActivityOperation {
     export const Next : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Next");
     export const Approve : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Approve");
     export const Decline : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Decline");
+    export const FixCaseDescriptions : Entities.ExecuteSymbol<Dynamic.DynamicTypeEntity> = registerSymbol("Operation", "CaseActivityOperation.FixCaseDescriptions");
 }
 
 export module CaseActivityQuery {
@@ -130,6 +129,24 @@ export interface IWorkflowObjectEntity extends Entities.Entity {
     name?: string | null;
 }
 
+export const WorkflowActionEntity = new Type<WorkflowActionEntity>("WorkflowAction");
+export interface WorkflowActionEntity extends Entities.Entity {
+    Type: "WorkflowAction";
+    name?: string | null;
+    mainEntityType?: Basics.TypeEntity | null;
+    eval?: WorkflowActionEval | null;
+}
+
+export const WorkflowActionEval = new Type<WorkflowActionEval>("WorkflowActionEval");
+export interface WorkflowActionEval extends Dynamic.EvalEntity<IWorkflowActionExecutor> {
+    Type: "WorkflowActionEval";
+}
+
+export module WorkflowActionOperation {
+    export const Save : Entities.ExecuteSymbol<WorkflowActionEntity> = registerSymbol("Operation", "WorkflowActionOperation.Save");
+    export const Delete : Entities.DeleteSymbol<WorkflowActionEntity> = registerSymbol("Operation", "WorkflowActionOperation.Delete");
+}
+
 export const WorkflowActivityEntity = new Type<WorkflowActivityEntity>("WorkflowActivity");
 export interface WorkflowActivityEntity extends Entities.Entity, IWorkflowNodeEntity, IWorkflowObjectEntity {
     Type: "WorkflowActivity";
@@ -181,7 +198,12 @@ export interface WorkflowConditionEntity extends Entities.Entity {
     Type: "WorkflowCondition";
     name?: string | null;
     mainEntityType?: Basics.TypeEntity | null;
-    eval?: WorkflowConnectionEval | null;
+    eval?: WorkflowConditionEval | null;
+}
+
+export const WorkflowConditionEval = new Type<WorkflowConditionEval>("WorkflowConditionEval");
+export interface WorkflowConditionEval extends Dynamic.EvalEntity<IWorkflowConditionEvaluator> {
+    Type: "WorkflowConditionEval";
 }
 
 export module WorkflowConditionOperation {
@@ -197,22 +219,21 @@ export interface WorkflowConnectionEntity extends Entities.Entity, IWorkflowConn
     name?: string | null;
     decisonResult?: DecisionResult | null;
     condition?: Entities.Lite<WorkflowConditionEntity> | null;
-    order?: number;
+    action?: Entities.Lite<WorkflowActionEntity> | null;
+    order?: number | null;
     xml?: WorkflowXmlEntity | null;
-}
-
-export const WorkflowConnectionEval = new Type<WorkflowConnectionEval>("WorkflowConnectionEval");
-export interface WorkflowConnectionEval extends Dynamic.EvalEntity<IWorkflowEvaluator> {
-    Type: "WorkflowConnectionEval";
 }
 
 export const WorkflowConnectionModel = new Type<WorkflowConnectionModel>("WorkflowConnectionModel");
 export interface WorkflowConnectionModel extends Entities.ModelEntity {
     Type: "WorkflowConnectionModel";
+    mainEntityType: Basics.TypeEntity;
     name?: string | null;
+    isBranching?: boolean;
     decisonResult?: DecisionResult | null;
     condition?: Entities.Lite<WorkflowConditionEntity> | null;
-    order?: number;
+    action?: Entities.Lite<WorkflowActionEntity> | null;
+    order?: number | null;
 }
 
 export module WorkflowConnectionOperation {

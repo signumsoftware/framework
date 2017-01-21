@@ -88,6 +88,7 @@ export interface DynamicTypeDefinition {
     customStartCode?: DynamicTypeCustomCode;
     customLogicMembers?: DynamicTypeCustomCode;
     customTypes?: DynamicTypeCustomCode;
+    customBeforeSchema?: DynamicTypeCustomCode;
     queryFields: string[];
     multiColumnUniqueIndex?: MultiColumnUniqueIndex; 
     properties: DynamicProperty[];

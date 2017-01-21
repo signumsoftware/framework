@@ -19,7 +19,7 @@ namespace Signum.Engine.Workflow
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             WorkflowLogic.Start(sb, dqm);
-            CaseLogic.Start(sb, dqm);
+            CaseActivityLogic.Start(sb, dqm);
         }
     }
 }

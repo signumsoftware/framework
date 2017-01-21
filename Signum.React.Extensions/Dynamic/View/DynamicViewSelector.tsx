@@ -134,7 +134,7 @@ export default class DynamicViewSelectorComponent extends React.Component<Dynami
     }
 
     handleOnView = (exampleEntity: Entity) => {
-        return Navigator.view(exampleEntity, { requiresSaveOperation: false, showOperations: false });
+        return Navigator.view(exampleEntity, { requiresSaveOperation: false });
     }
 
     handleCodeChange = (newCode: string) => {
