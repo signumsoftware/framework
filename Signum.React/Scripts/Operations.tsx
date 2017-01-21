@@ -149,7 +149,6 @@ export interface EntityOperationContext<T extends Entity> {
     tag?: string;
     entity: T;
     operationInfo: OperationInfo;
-    showOperations: boolean;
     settings: EntityOperationSettings<T>;
     canExecute: string | undefined;
 }
