@@ -794,9 +794,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             return;
         }
 
-        if (this.props.querySettings.onDoubleClick) {
+        var qs = this.props.querySettings;
+        if (qs && qs.onDoubleClick) {
             e.preventDefault();
-            this.props.querySettings.onDoubleClick(e, row);
+            qs.onDoubleClick(e, row);
             return;
         }
 
