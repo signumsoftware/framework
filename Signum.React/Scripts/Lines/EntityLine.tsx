@@ -97,6 +97,11 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         return lite.toStr || "";
     }
 
+    setValue(val: any) {
+        super.setValue(val);
+        this.refreshItem(this.props);
+    }
+
     renderInternal() {
 
         const s = this.state;
