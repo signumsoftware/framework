@@ -24,7 +24,7 @@ namespace Signum.React.Workflow
         {
             var lite = Lite.ParsePrimaryKey<CaseActivityEntity>(caseActivityId);
 
-            var activity = CaseLogic.RetrieveForViewing(lite);
+            var activity = CaseActivityLogic.RetrieveForViewing(lite);
 
             return new EntityPackWorkflow
             {

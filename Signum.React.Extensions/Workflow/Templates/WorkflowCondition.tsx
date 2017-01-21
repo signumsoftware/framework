@@ -137,7 +137,7 @@ export default class WorkflowConditionComponent extends React.Component<Workflow
     }
 
     handleOnView = (exampleEntity: ICaseMainEntity) => {
-        return Navigator.view(exampleEntity, { requiresSaveOperation: false, showOperations: false });
+        return Navigator.view(exampleEntity, { requiresSaveOperation: false });
     }
 
     renderMessage(res: WorkflowConditionTestResponse) {

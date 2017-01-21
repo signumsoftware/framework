@@ -3,7 +3,7 @@ import { Route, Link } from 'react-router'
 import { ifError, Dic } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
-import { EntityPack, Lite, toLite, JavascriptMessage, EntityControlMessage, newMListElement, liteKey, getMixin, Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { EntityPack, Lite, toLite, JavascriptMessage, EntityControlMessage, newMListElement, liteKey, getMixin, Entity, ExecuteSymbol } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { Type, PropertyRoute } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -74,10 +74,10 @@ export function start(options: { routes: JSX.Element[] }) {
     });
 
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { hideOnCanExecute: true, style: "primary" }));
-    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Delete, { hideOnCanExecute: true }));
-    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Next, { hideOnCanExecute: true, style: "primary", onClick: executeAndClose }));
-    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Approve, { hideOnCanExecute: true, style: "success", onClick: executeAndClose }));
-    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Decline, { hideOnCanExecute: true, style: "warning", onClick: executeAndClose }));
+    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Delete, { hideOnCanExecute: true, contextualFromMany: { isVisible: ctx => false } }));
+    caseActivityOperation(CaseActivityOperation.Next, "primary");
+    caseActivityOperation(CaseActivityOperation.Approve, "success");
+    caseActivityOperation(CaseActivityOperation.Decline, "warning");
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { style: "primary", onClick: executeWorkflowSave }));
 
     Navigator.addSettings(new EntitySettings(WorkflowEntity, w => new ViewPromise(m => require(['./Templates/Workflow'], m)), { avoidPopup: true }));
@@ -98,6 +98,16 @@ export function start(options: { routes: JSX.Element[] }) {
 
     Constructor.registerConstructor(WorkflowConditionEntity, () => WorkflowConditionEntity.New({ eval: WorkflowConditionEval.New() }));
     Constructor.registerConstructor(WorkflowActionEntity, () => WorkflowActionEntity.New({ eval: WorkflowActionEval.New() }));
+}
+
+function caseActivityOperation(operation: ExecuteSymbol<CaseActivityEntity>, style: Operations.BsStyle) {
+    Operations.addSettings(new EntityOperationSettings(operation, {
+        hideOnCanExecute: true,
+        style: style,
+        onClick: executeAndClose,
+        contextual: { isVisible: ctx => true, style: style },
+        contextualFromMany: { isVisible: ctx => true, style: style },
+    }));
 }
 
 function hide<T extends Entity>(type: Type<T>) {

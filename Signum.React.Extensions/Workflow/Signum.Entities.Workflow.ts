@@ -37,9 +37,6 @@ export interface CaseActivityEntity extends Entities.Entity {
 }
 
 export module CaseActivityMessage {
-    export const OnlyFor0Activites = new MessageKey("CaseActivityMessage", "OnlyFor0Activites");
-    export const AlreadyDone = new MessageKey("CaseActivityMessage", "AlreadyDone");
-    export const ActivityAlreadyRegistered = new MessageKey("CaseActivityMessage", "ActivityAlreadyRegistered");
     export const CaseContainsOtherActivities = new MessageKey("CaseActivityMessage", "CaseContainsOtherActivities");
     export const NoNextConnectionThatSatisfiesTheConditionsFound = new MessageKey("CaseActivityMessage", "NoNextConnectionThatSatisfiesTheConditionsFound");
 }
@@ -51,6 +48,7 @@ export module CaseActivityOperation {
     export const Next : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Next");
     export const Approve : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Approve");
     export const Decline : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Decline");
+    export const FixCaseDescriptions : Entities.ExecuteSymbol<Dynamic.DynamicTypeEntity> = registerSymbol("Operation", "CaseActivityOperation.FixCaseDescriptions");
 }
 
 export module CaseActivityQuery {
