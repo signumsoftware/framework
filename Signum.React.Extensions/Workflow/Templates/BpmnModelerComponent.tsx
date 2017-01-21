@@ -82,7 +82,6 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         return this.isTask(elementType) || this.isUserTask(elementType);
     }
 
-
     private isTask(elementType: string): boolean {
         return (elementType == "bpmn:Task");
     }
@@ -105,21 +104,21 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
 
     handleElementDoubleClick = (obj: BPMN.Event) => {
 
-        if (this.isConnection(obj.element.type))
-            if (!this.isGateway((obj.element.businessObject as BPMN.ConnectionModdleElemnet).sourceRef.$type))
-                return;
-
         var model = this.props.entities[obj.element.id] as (ModelEntity | undefined);
         if (!model) {
-            model = this.newModel(obj.element.type, obj.element.businessObject.name);
+            model = this.newModel(obj.element);
             if (!model)
                 return;
 
             this.props.entities[obj.element.id] = model;
         }
-        else
+        else {
             (model as any).name = obj.element.businessObject.name;
 
+            if (this.isConnection(obj.element.type))
+                (model as WorkflowConnectionModel).isBranching = this.isGateway((obj.element.businessObject as BPMN.ConnectionModdleElemnet).sourceRef.$type);
+        }
+ 
         obj.preventDefault();
         obj.stopPropagation();
 
@@ -151,7 +150,10 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         return result;
     }
 
-    newModel(elementType: string, elementName: string): ModelEntity | undefined {
+    newModel(element: BPMN.DiElement): ModelEntity | undefined {
+
+        const elementType = element.type;
+        const elementName = element.businessObject.name;
 
         if (this.isPool(elementType))
             return WorkflowPoolModel.New({ name : elementName });
@@ -170,7 +172,11 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
             });
 
         if (this.isConnection(elementType))
-            return WorkflowConnectionModel.New({ name: elementName });
+            return WorkflowConnectionModel.New({
+                mainEntityType: this.getMainType(),
+                name: elementName,
+                isBranching: this.isGateway((element.businessObject as BPMN.ConnectionModdleElemnet).sourceRef.$type)
+            });
 
         return undefined;
     }

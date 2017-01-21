@@ -261,6 +261,7 @@
     <TypeScriptCompile Include="Workflow\Templates\CasePageFrame.tsx" />
     <TypeScriptCompile Include="Workflow\Templates\InboxFilter.tsx" />
     <TypeScriptCompile Include="Workflow\Templates\Workflow.tsx" />
+    <TypeScriptCompile Include="Workflow\Templates\WorkflowConnectionModel.tsx" />
     <TypeScriptCompile Include="Workflow\Templates\WorkflowActivityModel.tsx" />
     <TypeScriptCompile Include="Workflow\Templates\WorkflowAction.tsx" />
     <TypeScriptCompile Include="Workflow\Templates\WorkflowLaneModel.tsx" />

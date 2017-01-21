@@ -33,7 +33,7 @@ namespace Signum.Entities.Workflow
 
         public Lite<WorkflowActionEntity> Action { get; set; }
         
-        public int Order { get; set; }
+        public int? Order { get; set; }
 
         [NotNullable]
         [NotNullValidator]
@@ -42,6 +42,7 @@ namespace Signum.Entities.Workflow
         public ModelEntity GetModel()
         {
             var model = new WorkflowConnectionModel();
+            model.MainEntityType = this.From.Lane.Pool.Workflow.MainEntityType;
             model.Name = this.Name;
             model.DecisonResult = this.DecisonResult;
             model.Condition = this.Condition;
@@ -77,9 +78,15 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowConnectionModel : ModelEntity
     {
+        [NotNullable]
+        [NotNullValidator, InTypeScript(Undefined = false, Null = false)]
+        public TypeEntity MainEntityType { get; set; }
+
         [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string Name { get; set; }
+
+        public bool IsBranching { get; set; }
 
         public DecisionResult? DecisonResult { get; set; }
 
@@ -87,6 +94,6 @@ namespace Signum.Entities.Workflow
 
         public Lite<WorkflowActionEntity> Action { get; set; }
 
-        public int Order { get; set; }
+        public int? Order { get; set; }
     }
 }

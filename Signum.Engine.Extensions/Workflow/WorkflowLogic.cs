@@ -351,13 +351,12 @@ namespace Signum.Engine.Workflow
         }
 
         public static ResetLazy<Dictionary<Lite<WorkflowConditionEntity>, WorkflowConditionEntity>> Conditions;
-        public static ResetLazy<Dictionary<Lite<WorkflowActionEntity>, WorkflowActionEntity>> Actions;
-
         public static WorkflowConditionEntity RetrieveFromCache(this Lite<WorkflowConditionEntity> wc)
         {
             return WorkflowLogic.Conditions.Value.GetOrThrow(wc);
         }
 
+        public static ResetLazy<Dictionary<Lite<WorkflowActionEntity>, WorkflowActionEntity>> Actions;
         public static WorkflowActionEntity RetrieveFromCache(this Lite<WorkflowActionEntity> wa)
         {
             return WorkflowLogic.Actions.Value.GetOrThrow(wa);

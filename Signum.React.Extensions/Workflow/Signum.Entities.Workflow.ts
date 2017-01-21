@@ -10,7 +10,7 @@ import * as Dynamic from '../Dynamic/Signum.Entities.Dynamic'
 
 
 interface IWorkflowConditionEvaluator {}
-interface IWorkflowActionEvaluator {}
+interface IWorkflowActionExecutor {}
 interface IWorkflowLaneActorsEvaluator {}
 
 
@@ -140,7 +140,7 @@ export interface WorkflowActionEntity extends Entities.Entity {
 }
 
 export const WorkflowActionEval = new Type<WorkflowActionEval>("WorkflowActionEval");
-export interface WorkflowActionEval extends Dynamic.EvalEntity<IWorkflowActionEvaluator> {
+export interface WorkflowActionEval extends Dynamic.EvalEntity<IWorkflowActionExecutor> {
     Type: "WorkflowActionEval";
 }
 
@@ -222,18 +222,20 @@ export interface WorkflowConnectionEntity extends Entities.Entity, IWorkflowConn
     decisonResult?: DecisionResult | null;
     condition?: Entities.Lite<WorkflowConditionEntity> | null;
     action?: Entities.Lite<WorkflowActionEntity> | null;
-    order?: number;
+    order?: number | null;
     xml?: WorkflowXmlEntity | null;
 }
 
 export const WorkflowConnectionModel = new Type<WorkflowConnectionModel>("WorkflowConnectionModel");
 export interface WorkflowConnectionModel extends Entities.ModelEntity {
     Type: "WorkflowConnectionModel";
+    mainEntityType: Basics.TypeEntity;
     name?: string | null;
+    isBranching?: boolean;
     decisonResult?: DecisionResult | null;
     condition?: Entities.Lite<WorkflowConditionEntity> | null;
     action?: Entities.Lite<WorkflowActionEntity> | null;
-    order?: number;
+    order?: number | null;
 }
 
 export module WorkflowConnectionOperation {

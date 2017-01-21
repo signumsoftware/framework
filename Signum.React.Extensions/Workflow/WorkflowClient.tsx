@@ -4,6 +4,7 @@ import { ifError, Dic } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import { EntityPack, Lite, toLite, JavascriptMessage, EntityControlMessage, newMListElement, liteKey, getMixin, Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { TypeEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { Type, PropertyRoute } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
@@ -17,14 +18,20 @@ import * as DynamicViewClient from '../../../Extensions/Signum.React.Extensions/
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import { WorkflowConditionEval, WorkflowActionEval, DecisionResult } from './Signum.Entities.Workflow'
+
 import CaseModalFrame from './Templates/CaseModalFrame'
-import CasePageFrame from './Templates/CasePageFrame'
+export { CaseModalFrame };
+
+import CasePageFrame from './Templates/CaseModalFrame'
+export { CasePageFrame };
+
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
 
 import {
     WorkflowEntity, WorkflowLaneEntity, WorkflowActivityEntity, WorkflowConnectionEntity, WorkflowConditionEntity, WorkflowActionEntity, CaseActivityQuery, CaseActivityEntity,
     CaseActivityOperation, CaseEntity, CaseNotificationEntity, CaseNotificationState, InboxFilterModel, WorkflowOperation, WorkflowPoolEntity,
-    WorkflowActivityOperation, WorkflowReplacementModel, WorkflowModel, BpmnEntityPair, WorkflowActivityModel, ICaseMainEntity, WorkflowGatewayEntity, WorkflowEventEntity, WorkflowLaneModel
+    WorkflowActivityOperation, WorkflowReplacementModel, WorkflowModel, BpmnEntityPair, WorkflowActivityModel, ICaseMainEntity, WorkflowGatewayEntity, WorkflowEventEntity,
+    WorkflowLaneModel, WorkflowConnectionModel
 } from './Signum.Entities.Workflow'
 
 import InboxFilter from './Templates/InboxFilter'
@@ -83,6 +90,7 @@ export function start(options: { routes: JSX.Element[] }) {
     hide(WorkflowConnectionEntity);
 
     Navigator.addSettings(new EntitySettings(WorkflowActivityModel, w => new ViewPromise(m => require(['./Templates/WorkflowActivityModel'], m))));
+    Navigator.addSettings(new EntitySettings(WorkflowConnectionModel, w => new ViewPromise(m => require(['./Templates/WorkflowConnectionModel'], m))));
     Navigator.addSettings(new EntitySettings(WorkflowReplacementModel, w => new ViewPromise(m => require(['./Templates/WorkflowReplacementComponent'], m))));
     Navigator.addSettings(new EntitySettings(WorkflowConditionEntity, w => new ViewPromise(m => require(['./Templates/WorkflowCondition'], m))));
     Navigator.addSettings(new EntitySettings(WorkflowActionEntity, w => new ViewPromise(m => require(['./Templates/WorkflowAction'], m))));

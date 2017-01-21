@@ -41,7 +41,7 @@ namespace Signum.Entities.Workflow
     }
 
     [Serializable]
-    public class WorkflowActionEval : EvalEntity<IWorkflowActionEvaluator>
+    public class WorkflowActionEval : EvalEntity<IWorkflowActionExecutor>
     {
         protected override CompilationResult Compile()
         {
@@ -55,14 +55,14 @@ namespace Signum.Entities.Workflow
                     @"
                     namespace Signum.Entities.Workflow
                     {
-                        class MyWorkflowActionEvaluator : IWorkflowActionEvaluator
+                        class MyWorkflowActionEvaluator : IWorkflowActionExecutor
                         {
-                            public void EvaluateUntyped(ICaseMainEntity mainEntity, WorkflowEvaluationContext ctx)
+                            public void ExecuteUntyped(ICaseMainEntity mainEntity, WorkflowEvaluationContext ctx)
                             {
-                                this.Evaluate((" + WorkflowEntityTypeName + @")mainEntity, ctx);
+                                this.Execute((" + WorkflowEntityTypeName + @")mainEntity, ctx);
                             }
 
-                            void Evaluate(" + WorkflowEntityTypeName + @" e, WorkflowEvaluationContext ctx)
+                            void Execute(" + WorkflowEntityTypeName + @" e, WorkflowEvaluationContext ctx)
                             {
                                 " + script + @"
                             }
@@ -71,8 +71,8 @@ namespace Signum.Entities.Workflow
         }
     }
 
-    public interface IWorkflowActionEvaluator
+    public interface IWorkflowActionExecutor
     {
-        void EvaluateUntyped(ICaseMainEntity mainEntity, WorkflowEvaluationContext ctx);
+        void ExecuteUntyped(ICaseMainEntity mainEntity, WorkflowEvaluationContext ctx);
     }
 }

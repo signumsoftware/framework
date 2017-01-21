@@ -367,6 +367,12 @@ namespace Signum.Engine.Workflow
                 wc.SetModel(model);
             wc.Name = flow.Attribute("name")?.Value;
             wc.Xml.DiagramXml = locator.GetDiagram(bpmnElementId).ToString();
+            if (!(wc.From is WorkflowGatewayEntity))
+            {
+                wc.DecisonResult = null;
+                wc.Condition = null;
+                wc.Order = null;
+            }
             if (GraphExplorer.HasChanges(wc))
                 wc.Execute(WorkflowConnectionOperation.Save);
             return wc;

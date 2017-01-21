@@ -1,6 +1,6 @@
 
 interface IWorkflowConditionEvaluator {}
-interface IWorkflowActionEvaluator {}
+interface IWorkflowActionExecutor {}
 interface IWorkflowLaneActorsEvaluator {}
 
 
