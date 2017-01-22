@@ -8,6 +8,9 @@ declare namespace BPMN {
         moddleExtensions?: any;
         modules?: any[];
         additionalModules?: any[];
+        keyboard?: {
+            bindTo?: Node;
+        }
     }
 
     interface SaveOptions {
@@ -19,12 +22,37 @@ declare namespace BPMN {
     }
 
     interface Event {
+
+    }
+
+    interface DoubleClickEvent extends Event {
         element: DiElement;
         gfx: Gfx;
         originalEvent: MouseEvent;
+
         type: string;
         stopPropagation(): void;
         preventDefault(): void;
+    }
+
+    interface AddClickEvent extends Event {
+        element: DiElement;
+    }
+
+    interface PasteEvent extends Event {
+        createdElements: { [oldId: string]: CreatedElement };
+        descriptor: Descriptor;
+    }
+
+    interface CreatedElement {
+        descriptor: Descriptor;
+        element: DiElement;
+    }
+
+    interface Descriptor {
+        id: string;
+        name: string;
+        type: string;
     }
 
     interface DiElement {

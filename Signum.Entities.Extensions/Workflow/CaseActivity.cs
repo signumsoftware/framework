@@ -26,6 +26,8 @@ namespace Signum.Entities.Workflow
         public string OriginalWorkflowActivityName { get; set; }
 
         public DateTime StartDate { get; set; } = TimeZoneManager.Now;
+        public Lite<CaseActivityEntity> Previous { get; set; }
+
         public DateTime? DoneDate { get; set; }
         public Lite<UserEntity> DoneBy { get; set; }
 

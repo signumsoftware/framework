@@ -50,14 +50,6 @@ namespace Signum.Engine.Workflow
             return CaseActivitiesFromCaseExpression.Evaluate(e);
         }
 
-        static Expression<Func<CaseActivityEntity, CaseActivityEntity>> PreviousInThreadExpression =
-                   ca => ca.Case.CaseActivities().Where(a => a.WorkflowActivity.Thread == ca.WorkflowActivity.Thread && a.StartDate < ca.StartDate).OrderByDescending(a => a.StartDate).FirstOrDefault();
-        [ExpressionField]
-        public static CaseActivityEntity PreviousInThread(this CaseActivityEntity entity)
-        {
-            return PreviousInThreadExpression.Evaluate(entity);
-        }
-
         static Expression<Func<CaseActivityEntity, IQueryable<CaseNotificationEntity>>> NotificationsExpression =
             e => Database.Query<CaseNotificationEntity>().Where(a => a.CaseActivity.RefersTo(e));
         [ExpressionField]
@@ -89,7 +81,7 @@ namespace Signum.Engine.Workflow
                         e.StartDate,
                         e.DoneDate,
                         e.DoneBy,
-                        Previous = e.PreviousInThread(),
+                        e.Previous,
                         e.Case,
                         e.WorkflowActivity,
                     });
@@ -111,12 +103,12 @@ namespace Signum.Engine.Workflow
                         from qn in Database.Query<CaseNotificationEntity>()
                         where qn.User == UserEntity.Current.ToLite()
                         let ca = qn.CaseActivity.Entity
-                        let sender = ca.PreviousInThread().DoneBy.Entity
+                        let sender = ca.Previous.Entity.DoneBy.Entity
                         select new
                         {
                             Entity = qn.CaseActivity,
                             ca.WorkflowActivity.Name,
-                            Sender = sender.ToLite(sender.UserName + " (" + sender.Role + ")"),
+                            Sender = sender.ToLite(sender.UserName + " (" + qn.Actor.ToString() + ")"),
                             ca.Case.Description,
                             ca.StartDate,
                             ca.DoneBy,
@@ -427,6 +419,7 @@ namespace Signum.Engine.Workflow
                             var nca = new CaseActivityEntity
                             {
                                 StartDate = ca.DoneDate.Value,
+                                Previous = ca.ToLite(),
                                 WorkflowActivity = t,
                                 OriginalWorkflowActivityName = t.Name,
                                 Case = ca.Case
@@ -441,6 +434,7 @@ namespace Signum.Engine.Workflow
                                 var nca = new CaseActivityEntity
                                 {
                                     StartDate = ca.DoneDate.Value,
+                                    Previous = ca.ToLite(),
                                     WorkflowActivity = t2,
                                     OriginalWorkflowActivityName = t2.Name,
                                     Case = ca.Case

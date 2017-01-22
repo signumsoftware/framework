@@ -32,6 +32,7 @@ export interface CaseActivityEntity extends Entities.Entity {
     workflowActivity: WorkflowActivityEntity | null;
     originalWorkflowActivityName: string;
     startDate: string;
+    previous: Entities.Lite<CaseActivityEntity> | null;
     doneDate: string | null;
     doneBy: Entities.Lite<Authorization.UserEntity> | null;
 }
@@ -151,7 +152,6 @@ export const WorkflowActivityEntity = new Type<WorkflowActivityEntity>("Workflow
 export interface WorkflowActivityEntity extends Entities.Entity, IWorkflowNodeEntity, IWorkflowObjectEntity {
     Type: "WorkflowActivity";
     lane?: WorkflowLaneEntity | null;
-    thread?: number;
     name?: string | null;
     description?: string | null;
     type?: WorkflowActivityType;
@@ -252,7 +252,6 @@ export const WorkflowEventEntity = new Type<WorkflowEventEntity>("WorkflowEvent"
 export interface WorkflowEventEntity extends Entities.Entity, IWorkflowNodeEntity, IWorkflowObjectEntity {
     Type: "WorkflowEvent";
     name?: string | null;
-    thread?: number;
     lane?: WorkflowLaneEntity | null;
     type?: WorkflowEventType;
     xml?: WorkflowXmlEntity | null;
@@ -284,7 +283,6 @@ export const WorkflowGatewayEntity = new Type<WorkflowGatewayEntity>("WorkflowGa
 export interface WorkflowGatewayEntity extends Entities.Entity, IWorkflowNodeEntity, IWorkflowObjectEntity {
     Type: "WorkflowGateway";
     lane?: WorkflowLaneEntity | null;
-    thread?: number;
     name?: string | null;
     type?: WorkflowGatewayType;
     direction?: WorkflowGatewayDirection;
@@ -352,7 +350,9 @@ export interface WorkflowModel extends Entities.ModelEntity {
 }
 
 export module WorkflowOperation {
+    export const Clone : Entities.ConstructSymbol_From<WorkflowEntity, WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Clone");
     export const Save : Entities.ExecuteSymbol<WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Save");
+    export const Delete : Entities.DeleteSymbol<WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Delete");
 }
 
 export const WorkflowPoolEntity = new Type<WorkflowPoolEntity>("WorkflowPool");

@@ -157,13 +157,15 @@ namespace Signum.Engine.Workflow
             return WorkflowGraphLazy.Value.GetOrThrow(e.Lane.Pool.Workflow.ToLite()).PreviousGraph.RelatedTo(e).Values;
         }
 
-        public class WorkflowGraph
+        public class WorkflowNodeGraph
+
         {
             public DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity> NextGraph;
             public DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity> PreviousGraph;
         }
 
-        static ResetLazy<Dictionary<Lite<WorkflowEntity>, WorkflowGraph>> WorkflowGraphLazy;
+        static ResetLazy<Dictionary<Lite<WorkflowEntity>, WorkflowNodeGraph
+>> WorkflowGraphLazy;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -176,18 +178,12 @@ namespace Signum.Engine.Workflow
                         e.Id,
                         e.Name
                     });
-
-                new Graph<WorkflowEntity>.Execute(WorkflowOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (e, args) => 
-                    {
-                        WorkflowLogic.ApplyDocument(e, args.GetArg<WorkflowModel>(), args.TryGetArgC<WorkflowReplacementModel>());
-                    }
-                }.Register();
+                
+                WorkflowGraph.Register();
+                
 
                 sb.Include<WorkflowPoolEntity>()
+                    .WithUniqueIndex(wp => new { wp.Workflow, wp.Name })
                     .WithSave(WorkflowPoolOperation.Save)
                     .WithDelete(WorkflowPoolOperation.Delete)
                     .WithExpressionFrom(dqm, (WorkflowEntity p) => p.WorkflowPools())
@@ -200,6 +196,7 @@ namespace Signum.Engine.Workflow
                     });
 
                 sb.Include<WorkflowLaneEntity>()
+                    .WithUniqueIndex(wp => new { wp.Pool, wp.Name })
                     .WithSave(WorkflowLaneOperation.Save)
                     .WithDelete(WorkflowLaneOperation.Delete)
                     .WithExpressionFrom(dqm, (WorkflowPoolEntity p) => p.WorkflowLanes())
@@ -213,7 +210,7 @@ namespace Signum.Engine.Workflow
                     });
 
                 sb.Include<WorkflowActivityEntity>()
-                    .WithIndex(w => new { w.Lane, w.Name })
+                    .WithUniqueIndex(w => new { w.Lane, w.Name })
                     .WithSave(WorkflowActivityOperation.Save)
                     .WithDelete(WorkflowActivityOperation.Delete)
                     .WithExpressionFrom(dqm, (WorkflowEntity p) => p.WorkflowActivities())
@@ -293,7 +290,8 @@ namespace Signum.Engine.Workflow
                              activities.TryGetC(w).EmptyIfNull().ToList().ForEach(a => graph.Add(a));
                              connections.TryGetC(w).EmptyIfNull().ToList().ForEach(c => graph.Add(c.From, c.To, c));
 
-                             return new WorkflowGraph
+                             return new WorkflowNodeGraph
+
                              {
                                  NextGraph = graph,
                                  PreviousGraph = graph.Inverse(),
@@ -347,6 +345,35 @@ namespace Signum.Engine.Workflow
 
                 Actions = sb.GlobalLazy(() => Database.Query<WorkflowActionEntity>().ToDictionary(a => a.ToLite()),
                     new InvalidateWith(typeof(WorkflowActionEntity)));
+            }
+        }
+
+
+        public class WorkflowGraph : Graph<WorkflowEntity>
+        {
+            public static void Register()
+            {
+                new Execute(WorkflowOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (e, args) =>
+                    {
+                        WorkflowLogic.ApplyDocument(e, args.GetArg<WorkflowModel>(), args.TryGetArgC<WorkflowReplacementModel>());
+                    }
+                }.Register();
+
+                new ConstructFrom<WorkflowEntity>(WorkflowOperation.Clone)
+                {
+                    Construct = (w, args) =>
+                    {
+                        WorkflowBuilder wb = new WorkflowBuilder(w);
+
+                        var result = wb.Clone();
+
+                        return result;
+                    }
+                }.Register();
             }
         }
 
