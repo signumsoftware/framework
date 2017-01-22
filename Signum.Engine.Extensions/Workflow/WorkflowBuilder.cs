@@ -246,7 +246,7 @@ namespace Signum.Engine.Workflow
                 NewTasks = newElements.Select(a => new PreviewTask
                 {
                     BpmnId = a.Key,
-                    Name = a.Value.Attribute("name").Value,
+                    Name = a.Value.Attribute("name")?.Value,
                 }).ToList(),
             };
         }
@@ -411,7 +411,7 @@ namespace Signum.Engine.Workflow
             var model = locator.GetModelEntity<WorkflowActivityModel>(bpmnElementId);
             if (model != null)
                 wa.SetModel(model);
-            wa.Name = activity.Attribute("name").Value;
+            wa.Name = activity.Attribute("name")?.Value;
             wa.Xml.DiagramXml = locator.GetDiagram(bpmnElementId).ToString();
             if (GraphExplorer.HasChanges(wa))
                 wa.Execute(WorkflowActivityOperation.Save);

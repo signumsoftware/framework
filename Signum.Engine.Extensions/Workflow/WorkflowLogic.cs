@@ -318,7 +318,6 @@ namespace Signum.Engine.Workflow
 
                 sb.Include<WorkflowConditionEntity>()
                    .WithSave(WorkflowConditionOperation.Save)
-                   .WithDelete(WorkflowConditionOperation.Delete)
                    .WithQuery(dqm, e => new
                    {
                        Entity = e,
@@ -327,13 +326,24 @@ namespace Signum.Engine.Workflow
                        e.MainEntityType,
                        e.Eval.Script
                    });
+
+
+                new Graph<WorkflowConditionEntity>.Delete(WorkflowConditionOperation.Delete)
+                {
+                    Delete = (e, _) =>
+                    {
+                        ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Condition == e.ToLite()), e);
+                        e.Delete();
+                    },
+                }.Register();
+
+ 
 
                 Conditions = sb.GlobalLazy(() => Database.Query<WorkflowConditionEntity>().ToDictionary(a => a.ToLite()),
                     new InvalidateWith(typeof(WorkflowConditionEntity)));
 
                 sb.Include<WorkflowActionEntity>()
                    .WithSave(WorkflowActionOperation.Save)
-                   .WithDelete(WorkflowActionOperation.Delete)
                    .WithQuery(dqm, e => new
                    {
                        Entity = e,
@@ -343,11 +353,33 @@ namespace Signum.Engine.Workflow
                        e.Eval.Script
                    });
 
+                new Graph<WorkflowActionEntity>.Delete(WorkflowActionOperation.Delete)
+                {
+                    Delete = (e, _) =>
+                    {
+                        ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Action == e.ToLite()), e);
+                        e.Delete();
+                    },
+                }.Register();
+
                 Actions = sb.GlobalLazy(() => Database.Query<WorkflowActionEntity>().ToDictionary(a => a.ToLite()),
                     new InvalidateWith(typeof(WorkflowActionEntity)));
             }
         }
 
+        private static void ThrowConnectionError(IQueryable<WorkflowConnectionEntity> queryable, Entity toDelete)
+        {
+            if (queryable.Count() == 0)
+                return;
+
+            var errors = queryable.Select(a => new { Connection = a.ToLite(), From = a.From.ToLite(), To = a.To.ToLite(), Workflow = a.From.Lane.Pool.Workflow.ToLite() }).ToList();
+
+            var formattedErrors = errors.GroupBy(a => a.Workflow).ToString(gr => $"Workflow '{gr.Key}':" +
+                  gr.ToString(a => $"Connection {a.Connection.Id} ({a.Connection}): {a.From} -> {a.To}", "\r\n").Indent(4),
+                "\r\n\r\n").Indent(4);
+
+            throw new ApplicationException($"Impossible to delete '{toDelete}' because is used in some connections: \r\n" + formattedErrors);
+        }
 
         public class WorkflowGraph : Graph<WorkflowEntity>
         {
