@@ -54,7 +54,7 @@ namespace Signum.Engine.Mailing
 
         public static Func<EmailMessageEntity, SmtpClient> GetSmtpClient;
         
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailConfigurationEntity> getConfiguration, Func<EmailTemplateEntity, SmtpConfigurationEntity> getSmtpConfiguration,  Func<EmailMessageEntity, SmtpClient> getSmtpClient = null, FileTypeAlgorithm attachment = null)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailConfigurationEntity> getConfiguration, Func<EmailTemplateEntity, SmtpConfigurationEntity> getSmtpConfiguration,  Func<EmailMessageEntity, SmtpClient> getSmtpClient = null, IFileTypeAlgorithm attachment = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {   
@@ -322,14 +322,14 @@ namespace Signum.Engine.Mailing
             AlternateView view = AlternateView.CreateAlternateViewFromString(email.Body, null, email.IsBodyHtml ? "text/html" : "text/plain");
             view.LinkedResources.AddRange(email.Attachments
                 .Where(a => a.Type == EmailAttachmentType.LinkedResource)
-                .Select(a => new LinkedResource(a.File.FullPhysicalPath(), MimeMapping.GetMimeMapping(a.File.FileName))
+                .Select(a => new LinkedResource(a.File.OpenRead(), MimeMapping.GetMimeMapping(a.File.FileName))
                 {
                     ContentId = a.ContentId,
                 }));
 
             message.Attachments.AddRange(email.Attachments
                 .Where(a => a.Type == EmailAttachmentType.Attachment)
-                .Select(a => new Attachment(a.File.FullPhysicalPath(), MimeMapping.GetMimeMapping(a.File.FileName))
+                .Select(a => new Attachment(a.File.OpenRead(), MimeMapping.GetMimeMapping(a.File.FileName))
                 {
                     ContentId = a.ContentId,
                     Name = a.File.FileName,

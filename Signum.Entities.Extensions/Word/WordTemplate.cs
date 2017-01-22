@@ -81,6 +81,7 @@ namespace Signum.Entities.Word
     public static class WordTemplateOperation
     {
         public static ExecuteSymbol<WordTemplateEntity> Save;
+        public static DeleteSymbol<WordTemplateEntity> Delete;
         public static ExecuteSymbol<WordTemplateEntity> CreateWordReport;
 
         public static ConstructSymbol<WordTemplateEntity>.From<SystemWordTemplateEntity> CreateWordTemplateFromSystemWordTemplate;

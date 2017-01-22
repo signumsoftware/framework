@@ -153,6 +153,7 @@
     <Compile Include="Help\HelpTools.cs" />
     <Compile Include="Help\HelpUtilities.cs" />
     <Compile Include="Isolation\IsolationLogic.cs" />
+    <Compile Include="Printing\PrintLogic.cs" />
     <Compile Include="RestLog\RestLogLogic.cs" />
     <Compile Include="Mailing\AsyncEmailSenderLogic.cs" />
     <Compile Include="Map\MapLogic.cs" />
@@ -205,6 +206,7 @@
     <Compile Include="UserAssets\UserAssetsExporterImporter.cs" />
     <Compile Include="WikiMarkup\WikiParserExtensions.cs" />
     <Compile Include="Word\SystemWordTemplateLogic.cs" />
+    <Compile Include="Word\WordImageReplacer.cs" />
     <Compile Include="Word\WordTemplateLogic.cs" />
     <Compile Include="Word\WordTemplateNodes.cs" />
     <Compile Include="Word\WordTemplateParser.cs" />

@@ -164,6 +164,8 @@
     <Compile Include="Files\FilesController.cs" />
     <Compile Include="Files\FilesServer.cs" />
     <Compile Include="Isolation\IsolationServer.cs" />
+    <Compile Include="Printing\PrintController.cs" />
+    <Compile Include="Printing\PrintServer.cs" />
     <Compile Include="RestLog\RestLogFilter.cs" />
     <Compile Include="Mailing\MailingController.cs" />
     <Compile Include="Mailing\MailingServer.cs" />
@@ -239,6 +241,13 @@
     <Compile Include="UserQueries\UserQueryServer.cs" />
     <Compile Include="Word\WordServer.cs" />
     <Compile Include="Word\WordController.cs" />
+    <TypeScriptCompile Include="Printing\PrintClient.tsx" />
+    <TypeScriptCompile Include="Printing\PrintPanelPage.tsx" />
+    <TypeScriptCompile Include="Printing\Signum.Entities.Printing.ts">
+      <DependentUpon>Signum.Entities.Printing.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Printing\Templates\PrintPackage.tsx" />
+    <TypeScriptCompile Include="Printing\Templates\PrintLine.tsx" />
     <TypeScriptCompile Include="Toolbar\QueryToolbarConfig.ts" />
     <TypeScriptCompile Include="Toolbar\Signum.Entities.Toolbar.ts">
       <DependentUpon>Signum.Entities.Toolbar.t4s</DependentUpon>
@@ -594,6 +603,7 @@
     <Content Include="Workflow\Signum.Entities.Workflow.t4s" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Printing\Signum.Entities.Printing.t4s" />
     <Content Include="Toolbar\Signum.Entities.Toolbar.t4s" />
   </ItemGroup>
   <PropertyGroup>

@@ -373,7 +373,7 @@ namespace Signum.React.Selenium
             get { return this.Element.WithLocator(By.CssSelector("table.sf-search-results")); }
         }
 
-        public WebElementLocator RowsElement
+        public WebElementLocator RowsLocator
         {
             get { return this.Element.WithLocator(By.CssSelector("table.sf-search-results > tbody > tr")); }
         }
@@ -386,6 +386,14 @@ namespace Signum.React.Selenium
         public WebElementLocator RowElement(Lite<IEntity> lite)
         {
             return this.Element.WithLocator(By.CssSelector("tr[data-entity='{0}']".FormatWith(lite.Key())));
+        }
+
+        public List<Lite<IEntity>> SelectedEntities()
+        {
+            return RowsLocator.FindElements()
+                .Where(tr => tr.IsElementPresent(By.CssSelector("input.sf-td-selection:checked")))
+                .Select(a => Lite.Parse<IEntity>(a.GetAttribute("data-entity")))
+                .ToList();
         }
 
         public WebElementLocator CellElement(int rowIndex, string token)
@@ -625,9 +633,17 @@ namespace Signum.React.Selenium
             SearchControl.WaitContextMenu().FindElement(By.ClassName("sf-remove-header")).Click();
         }
 
-        public void WaitActiveSuccess()
+        public void WaitSuccess(Lite<IEntity> lite) => WaitSuccess(new List<Lite<IEntity>> { lite });
+        public void WaitSuccess(List<Lite<IEntity>> lites)
         {
-            RowsElement.CombineCss(".sf-entity-ctxmenu-success").WaitVisible();
+            lites.ForEach(lite => RowElement(lite).CombineCss(".sf-entity-ctxmenu-success").WaitVisible());
+        }
+
+        public void WaitNoVisible(Lite<IEntity> lite) => WaitNoVisible(new List<Lite<IEntity>> { lite });
+  
+        public void WaitNoVisible(List<Lite<IEntity>> lites)
+        {
+            lites.ForEach(lite => RowElement(lite).WaitNoVisible());
         }
     }
 
@@ -673,22 +689,32 @@ namespace Signum.React.Selenium
             return new SearchPopupProxy(popup);
         }
 
-        public void ExecuteClick(IOperationSymbolContainer symbolContainer, bool consumeConfirmation = false)
+        public void ExecuteClick(IOperationSymbolContainer symbolContainer, bool consumeConfirmation = false, bool shouldDisapear = false)
         {
+            var lites = ResultTable.SelectedEntities();
+
             Operation(symbolContainer).WaitVisible().Click();
             if (consumeConfirmation)
                 this.ResultTable.Selenium.ConsumeAlert();
 
-            ResultTable.WaitActiveSuccess();
+            if (shouldDisapear)
+                ResultTable.WaitNoVisible(lites);
+            else
+                ResultTable.WaitSuccess(lites);
         }
 
-        public void DeleteClick(IOperationSymbolContainer symbolContainer, bool consumeConfirmation = true)
+        public void DeleteClick(IOperationSymbolContainer symbolContainer, bool consumeConfirmation = true, bool shouldDisapear = true)
         {
+            var lites = ResultTable.SelectedEntities();
+
             Operation(symbolContainer).WaitVisible().Click();
             if (consumeConfirmation)
-                this.ResultTable.Selenium.ConsumeAlert();
+                ResultTable.Selenium.ConsumeAlert();
 
-            ResultTable.WaitActiveSuccess();
+            if (shouldDisapear)
+                ResultTable.WaitNoVisible(lites);
+            else
+                ResultTable.WaitSuccess(lites);
         }
 
         public PopupFrame<ProcessEntity> DeleteProcessClick(IOperationSymbolContainer operationSymbol)
