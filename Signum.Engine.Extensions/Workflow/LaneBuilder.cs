@@ -167,6 +167,8 @@ namespace Signum.Engine.Workflow
                 return (!this.GetActivities().Any() && !this.GetEvents().Any() && !this.GetGateways().Any());
             }
 
+    
+
             internal string GetBpmnElementId(IWorkflowNodeEntity node)
             {
                 return (node is WorkflowEventEntity) ? events.Values.Single(a => a.Entity.Is(node)).bpmnElementId :
@@ -299,6 +301,53 @@ namespace Signum.Engine.Workflow
                 }
 
                 ac.Delete(WorkflowActivityOperation.Delete);
+            }
+
+            internal void Clone(WorkflowPoolEntity pool, Dictionary<IWorkflowNodeEntity, IWorkflowNodeEntity> nodes)
+            {
+                var oldLane = this.lane.Entity;
+                WorkflowLaneEntity newLane = new WorkflowLaneEntity
+                {
+                    Pool = pool,
+                    Name = oldLane.Name,
+                    Actors = oldLane.Actors.ToMList(),
+                    ActorsEval = oldLane.ActorsEval,
+                    Xml = oldLane.Xml,
+                }.Save();
+
+                var newActivities = this.activities.Values.Select(a=>a.Entity).ToDictionary(a => a, a => new WorkflowActivityEntity
+                {
+                    Lane = newLane,
+                    Name = a.Name,
+                    Description = a.Description,
+                    Type = a.Type,
+                    ValidationRules = a.ValidationRules.Select(vr => vr.Clone()).ToMList(),
+                    ViewName = a.ViewName,
+                    Xml = a.Xml,
+                });
+                newActivities.Values.SaveList();
+                nodes.AddRange(newActivities.ToDictionary(kvp => (IWorkflowNodeEntity)kvp.Key, kvp => (IWorkflowNodeEntity)kvp.Value));
+
+                var newEvents = this.events.Values.Select(e => e.Entity).ToDictionary(e => e, e => new WorkflowEventEntity
+                {
+                    Lane = newLane,
+                    Name = e.Name,
+                    Type = e.Type,
+                    Xml = e.Xml,
+                });
+                newEvents.Values.SaveList();
+                nodes.AddRange(newEvents.ToDictionary(kvp => (IWorkflowNodeEntity)kvp.Key, kvp => (IWorkflowNodeEntity)kvp.Value));
+
+                var newGateways = this.gateways.Values.Select(g => g.Entity).ToDictionary(g => g, g => new WorkflowGatewayEntity
+                {
+                    Lane = newLane,
+                    Name = g.Name,
+                    Type = g.Type,
+                    Direction = g.Direction,
+                    Xml = g.Xml,
+                });
+                newGateways.Values.SaveList();
+                nodes.AddRange(newGateways.ToDictionary(kvp => (IWorkflowNodeEntity)kvp.Key, kvp => (IWorkflowNodeEntity)kvp.Value));
             }
         }
     }

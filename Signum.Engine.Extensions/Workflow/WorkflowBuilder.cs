@@ -24,22 +24,44 @@ namespace Signum.Engine.Workflow
         public static readonly string targetNamespace = "http://bpmn.io/schema/bpmn";
 
         private Dictionary<Lite<WorkflowPoolEntity>, PoolBuilder> pools;
-        private List<XmlEntity<WorkflowConnectionEntity>> messageFlows;
+        private List<XmlEntity<WorkflowConnectionEntity>> messageFlows; //Contains the connections that cross two different Pools EXCLUDING the connections internal to each pool
         private WorkflowEntity workflow;
 
-        public WorkflowBuilder(WorkflowEntity wf)
+        public WorkflowBuilder(WorkflowEntity wf, bool useCache = true)
         {
             using (HeavyProfiler.Log("WorkflowBuilder"))
             using (new EntityCache())
             {
                 this.workflow = wf;
 
-                var connections = wf.IsNew ? Enumerable.Empty<WorkflowConnectionEntity>().ToList() : wf.WorkflowConnectionsFromCache().Select(a => a.ToLite()).RetrieveFromListOfLite().ToList();
-                var xmlConnections = connections.Select(a => new XmlEntity<WorkflowConnectionEntity>(a)).ToList();
+                List<WorkflowConnectionEntity> connections;
+                List<WorkflowEventEntity> events;
+                List<WorkflowActivityEntity> activities;
+                List<WorkflowGatewayEntity> gateways;
 
-                var events = wf.IsNew ? Enumerable.Empty<WorkflowEventEntity>().ToList() : wf.WorkflowEventsFromCache().Select(a => a.ToLite()).RetrieveFromListOfLite().ToList(); ;
-                var activities = wf.IsNew ? Enumerable.Empty<WorkflowActivityEntity>().ToList() : wf.WorkflowActivitiesFromCache().Select(a => a.ToLite()).RetrieveFromListOfLite().ToList();
-                var gateways = wf.IsNew ? Enumerable.Empty<WorkflowGatewayEntity>().ToList() : wf.WorkflowGatewaysFromCache().Select(a => a.ToLite()).RetrieveFromListOfLite().ToList();
+                if (wf.IsNew)
+                {
+                    connections = new List<WorkflowConnectionEntity>();
+                    events = new List<WorkflowEventEntity>();
+                    activities = new List<WorkflowActivityEntity>();
+                    gateways = new List<WorkflowGatewayEntity>();
+                }
+                else if (useCache)
+                {
+                    connections = wf.WorkflowConnectionsFromCache().Select(a => a.ToLite()).RetrieveFromListOfLite().ToList();
+                    events = wf.WorkflowEventsFromCache().Select(a => a.ToLite()).RetrieveFromListOfLite().ToList();
+                    activities = wf.WorkflowActivitiesFromCache().Select(a => a.ToLite()).RetrieveFromListOfLite().ToList();
+                    gateways = wf.WorkflowGatewaysFromCache().Select(a => a.ToLite()).RetrieveFromListOfLite().ToList();
+                }
+                else
+                {
+                    connections = wf.WorkflowConnections().ToList();
+                    events = wf.WorkflowEvents().ToList();
+                    activities = wf.WorkflowActivities().ToList();
+                    gateways = wf.WorkflowGateways().ToList();
+                }
+
+                var xmlConnections = connections.Select(a => new XmlEntity<WorkflowConnectionEntity>(a)).ToList();
                 var nodes = events.Cast<IWorkflowNodeEntity>().Concat(activities).Concat(gateways).ToList();
 
                 this.pools = (from n in nodes
@@ -227,6 +249,58 @@ namespace Signum.Engine.Workflow
                     Name = a.Value.Attribute("name").Value,
                 }).ToList(),
             };
+        }
+
+        internal WorkflowEntity Clone()
+        {
+            var newName = 0.To(1000).Select(i => $"Copy{(i == 0 ? "" : $" ({i})")} of {this.workflow.Name}").FirstEx(s => !Database.Query<WorkflowEntity>().Any(w => w.Name == s));
+
+            WorkflowEntity newWorkflow = new WorkflowEntity
+            {
+                Name = newName,
+                MainEntityType = this.workflow.MainEntityType,
+            }.Save();
+
+            Dictionary<IWorkflowNodeEntity, IWorkflowNodeEntity> nodes = new Dictionary<IWorkflowNodeEntity, IWorkflowNodeEntity>();
+
+            using (OperationLogic.AllowSave<WorkflowPoolEntity>())
+            using (OperationLogic.AllowSave<WorkflowLaneEntity>())
+            using (OperationLogic.AllowSave<WorkflowActivityEntity>())
+            using (OperationLogic.AllowSave<WorkflowGatewayEntity>())
+            using (OperationLogic.AllowSave<WorkflowEventEntity>())
+            {
+                foreach (var pb in this.pools.Values)
+                {
+                    pb.Clone(newWorkflow, nodes);
+                }
+            }
+
+            using (OperationLogic.AllowSave<WorkflowConnectionEntity>())
+            {
+                var allConnections = GetAllConnections().ToDictionaryEx(a => a.bpmnElementId);
+                allConnections.Values.Select(c => new WorkflowConnectionEntity
+                {
+                    Name = c.Entity.Name,
+                    Action = c.Entity.Action,
+                    Condition = c.Entity.Condition,
+                    DecisonResult = c.Entity.DecisonResult,
+                    Order = c.Entity.Order,
+                    Xml = c.Entity.Xml,
+                    From = nodes.GetOrThrow(c.Entity.From),
+                    To = nodes.GetOrThrow(c.Entity.To),
+                }).SaveList();
+            }
+
+            WorkflowBuilder wb = new WorkflowBuilder(newWorkflow, useCache: false);
+            newWorkflow.FullDiagramXml = new WorkflowXmlEntity { DiagramXml = wb.GetXDocument().ToString() };
+            newWorkflow.Save();
+
+            return newWorkflow;
+        }
+
+        private IEnumerable<XmlEntity<WorkflowConnectionEntity>> GetAllConnections()
+        {
+            return this.messageFlows.Concat(this.pools.Values.SelectMany(p => p.GetSequenceFlows()));
         }
     }
 
