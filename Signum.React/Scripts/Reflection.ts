@@ -207,7 +207,7 @@ export function isTypeEmbeddedOrValue(type: PseudoType): boolean {
     return !ti;
 }
 
-export function isModifiableEntity(type: TypeReference): boolean {
+export function isTypeModifiableEntity(type: TypeReference): boolean {
     return type.isEmbedded == true || getTypeInfos(type).every(ti => ti != undefined && (isTypeEntity(ti) || isTypeModel(ti)));
 }
 
@@ -662,7 +662,7 @@ export interface IType {
 
 export class Type<T extends ModifiableEntity> implements IType {
 
-    New(props?:  Partial<T>): T {
+    New(props?: Partial<T>): T {
 
         const result =  basicConstruct(this.typeName) as T;
 
@@ -727,6 +727,10 @@ export class Type<T extends ModifiableEntity> implements IType {
             throw new Error(`no nicePropertyName found for ${member.name}`);
 
         return member.niceName;
+    }
+
+    isInstance(obj: any): obj is T {
+        return obj && (obj as ModifiableEntity).Type == this.typeName;
     }
 }
 
