@@ -255,7 +255,7 @@ namespace Signum.Engine.Workflow
             private IEnumerable<XElement> GetConnections(Lite<IWorkflowNodeEntity> lite)
             {
                 List<XElement> result = new List<XElement>();
-                result.AddRange(incoming.TryGetC(lite).EmptyIfNull().Select(c => new XElement(bpmn + "incomming", c.bpmnElementId)));
+                result.AddRange(incoming.TryGetC(lite).EmptyIfNull().Select(c => new XElement(bpmn + "incoming", c.bpmnElementId)));
                 result.AddRange(outgoing.TryGetC(lite).EmptyIfNull().Select(c => new XElement(bpmn + "outgoing", c.bpmnElementId)));
                 return result;
             }
