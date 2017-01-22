@@ -483,7 +483,12 @@ namespace Signum.Engine.Workflow
                         case WorkflowGatewayType.Exclusive:
                             if (gateway.Direction == WorkflowGatewayDirection.Split)
                             {
-                                var connection = gateway.NextConnectionsFromCache().OrderBy(c => c.Order).ToList().FirstEx(c => c.Applicable(ctx));
+                                var connection = gateway.NextConnectionsFromCache()
+                                    .GroupBy(c => c.Order)
+                                    .OrderBy(gr => gr.Key)
+                                    .Select(gr => gr.SingleOrDefaultEx(c => c.Applicable(ctx)))
+                                    .NotNull()
+                                    .FirstEx();
                                 ctx.Connections.Add(connection);
                                 return FindNext(connection.To, ctx);
                             }
