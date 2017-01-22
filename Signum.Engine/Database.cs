@@ -384,7 +384,7 @@ namespace Signum.Engine
                 {
                     var retrieved = RetrieveFromDatabaseOrCache<T>(remainingIds).ToDictionary(a => a.Id);
 
-                    var missing = ids.Except(retrieved.Keys);
+                    var missing = remainingIds.Except(retrieved.Keys);
 
                     if (missing.Any())
                         throw new EntityNotFoundException(typeof(T), missing.ToArray());
