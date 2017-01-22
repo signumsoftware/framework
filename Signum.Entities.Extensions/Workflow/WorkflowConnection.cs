@@ -60,6 +60,14 @@ namespace Signum.Entities.Workflow
             this.Action = wModel.Action;
             this.Order = wModel.Order;
         }
+
+
+        static Expression<Func<WorkflowConnectionEntity, string>> ToStringExpression = @this => @this.Name ?? "Connection";
+        [ExpressionField]
+        public override string ToString()
+        {
+            return ToStringExpression.Evaluate(this);
+        }
     }
 
     public enum DecisionResult
