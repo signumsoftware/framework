@@ -86,7 +86,7 @@ namespace Signum.Engine.Files
 
         public FileTypeAlgorithm()
         {
-            WeakFileReference = true;
+            WeakFileReference = false;
             CalculateSufix = FileName_Sufix;
 
             RenameOnCollision = true;
@@ -134,23 +134,23 @@ namespace Signum.Engine.Files
             using (new EntityCache(EntityCacheType.ForceNew))
             {
                 if (WeakFileReference)
+                    return;
+
+                string sufix = CalculateSufix(fp);
+                if (!sufix.HasText())
+                    throw new InvalidOperationException("Sufix not set");
+
+                fp.SetPrefixPair(GetPrefixPair(fp));
+
+                int i = 2;
+                fp.Suffix = sufix;
+                while (RenameOnCollision && File.Exists(fp.FullPhysicalPath()))
                 {
-                    string sufix = CalculateSufix(fp);
-                    if (!sufix.HasText())
-                        throw new InvalidOperationException("Sufix not set");
-
-                    fp.SetPrefixPair(GetPrefixPair(fp));
-
-                    int i = 2;
-                    fp.Suffix = sufix;
-                    while (RenameOnCollision && File.Exists(fp.FullPhysicalPath()))
-                    {
-                        fp.Suffix = RenameAlgorithm(sufix, i);
-                        i++;
-                    }
-
-                    SaveFileInDisk(fp);
+                    fp.Suffix = RenameAlgorithm(sufix, i);
+                    i++;
                 }
+
+                SaveFileInDisk(fp);
             }
         }
 
@@ -187,20 +187,20 @@ namespace Signum.Engine.Files
 
         public virtual void MoveFile(IFilePath ofp, IFilePath fp)
         {
-            if (this.WeakFileReference)
-            {
-                System.IO.File.Move(ofp.FullPhysicalPath(), fp.FullPhysicalPath());
-            }
+            if (WeakFileReference)
+                return;
+
+            System.IO.File.Move(ofp.FullPhysicalPath(), fp.FullPhysicalPath());
         }
-        
+
         public virtual void DeleteFiles(IEnumerable<IFilePath> files)
         {
-            if (this.WeakFileReference)
+            if (WeakFileReference)
+                return;
+
+            foreach (var f in files)
             {
-                foreach (var f in files)
-                {
-                    File.Delete(f.FullPhysicalPath());
-                }
+                File.Delete(f.FullPhysicalPath());
             }
         }
 
