@@ -93,10 +93,11 @@ function monkeyPatchCreateContextualMenuItem(){
             (me: React.MouseEvent) => defaultClick(coc, me);
 
         const menuItem = <MenuItem
-            className={classes("btn-" + bsStyle, disabled ? "disabled" : undefined) }
+            className={disabled ? "disabled" : undefined}
             onClick={disabled ? undefined : onClick}
             data-operation={coc.operationInfo.key}
             key={key}>
+            {bsStyle && <span className={"icon empty-icon btn-" + bsStyle}></span>}
             {text}
             <span className="glyphicon glyphicon-cog process-contextual-icon" aria-hidden={true} onClick={me =>defaultConstructFromMany(coc, me)}></span>
             </MenuItem>;

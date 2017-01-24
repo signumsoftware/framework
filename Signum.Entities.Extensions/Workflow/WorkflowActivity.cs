@@ -19,9 +19,6 @@ namespace Signum.Entities.Workflow
         [NotNullable]
         [NotNullValidator]
         public WorkflowLaneEntity Lane { get; set; }
-        
-        [NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
-        public int Thread { get; set; }
 
         [SqlDbType(Size = 100), NotNullable]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
@@ -97,6 +94,16 @@ namespace Signum.Entities.Workflow
 
         public bool OnAccept { get; set; }
         public bool OnDecline { get; set; }
+
+        public WorkflowActivityValidationEntity Clone()
+        {
+            return new WorkflowActivityValidationEntity
+            {
+                Rule = this.Rule,
+                OnAccept = this.OnAccept,
+                OnDecline = this.OnDecline
+            };
+        }
     }
 
     [Serializable]

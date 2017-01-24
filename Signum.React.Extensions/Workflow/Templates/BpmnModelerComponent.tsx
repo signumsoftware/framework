@@ -82,7 +82,6 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         return this.isTask(elementType) || this.isUserTask(elementType);
     }
 
-
     private isTask(elementType: string): boolean {
         return (elementType == "bpmn:Task");
     }
@@ -103,45 +102,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         return (elementType == "label");
     }
 
-    handleElementDoubleClick = (obj: BPMN.Event) => {
 
-        if (this.isConnection(obj.element.type))
-            if (!this.isGateway((obj.element.businessObject as BPMN.ConnectionModdleElemnet).sourceRef.$type))
-                return;
-
-        var model = this.props.entities[obj.element.id] as (ModelEntity | undefined);
-        if (!model) {
-            model = this.newModel(obj.element.type, obj.element.businessObject.name);
-            if (!model)
-                return;
-
-            this.props.entities[obj.element.id] = model;
-        }
-        else
-            (model as any).name = obj.element.businessObject.name;
-
-        obj.preventDefault();
-        obj.stopPropagation();
-
-        Navigator.view(model).then(me => {
-
-            if (me) {
-                this.props.entities[obj.element.id] = me;
-                obj.element.businessObject.name = (me as any).name;
-
-                if (this.isTaskAnyway(obj.element.type))
-                    obj.element.type = (me as WorkflowActivityModel).type == "DecisionTask" ? "bpmn:UserTask" : "bpmn:Task";
-
-                this.fireElementChanged(obj.element);
-
-                if (obj.element.label)
-                {
-                    var labelObj = this.elementRegistry.get(obj.element.label.id);
-                    this.fireElementChanged(labelObj);
-                };
-            };
-        }).done();
-    }
 
     getMainType() {
         var result = this.props.workflow.mainEntityType;
@@ -151,7 +112,10 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         return result;
     }
 
-    newModel(elementType: string, elementName: string): ModelEntity | undefined {
+    newModel(element: BPMN.DiElement): ModelEntity | undefined {
+
+        const elementType = element.type;
+        const elementName = element.businessObject.name;
 
         if (this.isPool(elementType))
             return WorkflowPoolModel.New({ name : elementName });
@@ -170,16 +134,104 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
             });
 
         if (this.isConnection(elementType))
-            return WorkflowConnectionModel.New({ name: elementName });
+            return WorkflowConnectionModel.New({
+                mainEntityType: this.getMainType(),
+                name: elementName,
+                isBranching: this.isGateway((element.businessObject as BPMN.ConnectionModdleElemnet).sourceRef.$type)
+            });
 
         return undefined;
     }
 
     componentDidMount() {
-        this.modeler = new Modeler({ container: this.divArea, height: 1000 });
+        this.modeler = new Modeler({
+            container: this.divArea,
+            height: 1000,
+            keyboard: {
+                bindTo: document
+            },
+        });
         this.elementRegistry = this.modeler.get('elementRegistry');
         this.modeler.on('element.dblclick', 1500, this.handleElementDoubleClick);
+        this.modeler.on('element.paste', 1500, this.handleElementPaste);
+        this.modeler.on('shape.add', 1500, this.handleAddShapeOrConnection);
+        this.modeler.on('connection.add', 1500, this.handleAddShapeOrConnection);
+        this.modeler.on('label.add', 1500, () => this.lastPasted = undefined);
         this.modeler.importXML(this.props.diagramXML, this.handleOnModelError)
+    }
+
+    handleElementDoubleClick = (obj: BPMN.DoubleClickEvent) => {
+        console.log(obj);
+        var model = this.props.entities[obj.element.id] as (ModelEntity | undefined);
+        if (!model) {
+            model = this.newModel(obj.element);
+            if (!model)
+                return;
+
+            this.props.entities[obj.element.id] = model;
+        }
+        else {
+            (model as any).name = obj.element.businessObject.name;
+
+            if (this.isConnection(obj.element.type))
+                (model as WorkflowConnectionModel).isBranching = this.isGateway((obj.element.businessObject as BPMN.ConnectionModdleElemnet).sourceRef.$type);
+        }
+
+        obj.preventDefault();
+        obj.stopPropagation();
+
+        Navigator.view(model).then(me => {
+
+            if (me) {
+                this.props.entities[obj.element.id] = me;
+                obj.element.businessObject.name = (me as any).name;
+
+                if (this.isTaskAnyway(obj.element.type))
+                    obj.element.type = (me as WorkflowActivityModel).type == "DecisionTask" ? "bpmn:UserTask" : "bpmn:Task";
+
+                this.fireElementChanged(obj.element);
+
+                if (obj.element.label) {
+                    var labelObj = this.elementRegistry.get(obj.element.label.id);
+                    this.fireElementChanged(labelObj);
+                };
+            };
+        }).done();
+    }
+
+    lastPasted?: { id: string; name?: string };
+    handleElementPaste = (obj: BPMN.PasteEvent) => {
+        if (this.lastPasted) {
+            console.error("lastPasted not consumed: " + this.lastPasted.id);
+        }
+
+        if (obj.descriptor.type != "label")
+            this.lastPasted = {
+                id: obj.descriptor.id,
+                name: obj.descriptor.name
+            };
+    }
+
+    handleAddShapeOrConnection = (obj: BPMN.AddClickEvent) => {
+        if (this.lastPasted) {
+            console.log("Pasted", this.lastPasted, obj.element.id);
+            var model = this.props.entities[this.lastPasted.id];
+            if (model) {
+                var clone: ModelEntity = JSON.parse(JSON.stringify(model));
+                if (WorkflowLaneModel.isInstance(clone))
+                    clone.actors.forEach(a => a.rowId = null);
+
+                if (WorkflowActivityModel.isInstance(clone))
+                    clone.validationRules.forEach(a => a.rowId = null);
+
+                this.props.entities[obj.element.id] = clone ;
+            }
+
+            if (this.lastPasted.name)
+                obj.element.businessObject.name = this.lastPasted.name;
+
+            this.lastPasted = undefined;
+        }
     }
 
     componentWillUnmount() {

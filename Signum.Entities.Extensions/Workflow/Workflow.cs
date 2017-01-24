@@ -40,7 +40,9 @@ namespace Signum.Entities.Workflow
     [AutoInit]
     public static class WorkflowOperation
     {
+        public static readonly ConstructSymbol<WorkflowEntity>.From<WorkflowEntity> Clone;
         public static readonly ExecuteSymbol<WorkflowEntity> Save;
+        public static readonly DeleteSymbol<WorkflowEntity> Delete;
     }
 
     [Serializable, InTypeScript(Undefined = false)]
@@ -122,5 +124,13 @@ namespace Signum.Entities.Workflow
         
         [NotNullValidator]
         public string NewTask { get; set; }
+    }
+
+    public class WorkflowEvaluationContext
+    {
+        public CaseActivityEntity CaseActivity { get; internal set; }
+        public DecisionResult? DecisionResult { get; internal set; }
+        public WorkflowConnectionEntity Connection { get; internal set; }
+        public CaseEntity Case { get; internal set; }
     }
 }

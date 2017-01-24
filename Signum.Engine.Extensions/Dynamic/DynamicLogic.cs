@@ -101,6 +101,24 @@ namespace Signum.Engine.Dynamic
             }
         }
 
+        public static void BeforeSchema(SchemaBuilder sb)
+        {
+            if (CodeGenError != null)
+                return;
+
+            try
+            {
+                Assembly assembly = Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath);
+                Type type = assembly.GetTypes().Where(a => a.Name == "CodeGenBeforeSchemaLogic").SingleEx();
+                MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static);
+                mi.Invoke(null, new[] { sb });
+            }
+            catch (Exception e)
+            {
+                CodeGenError = e.InnerException;
+            }
+        }
+
         public static void StartDynamicModules(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (CodeGenError != null)

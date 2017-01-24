@@ -25,17 +25,29 @@ namespace Signum.Entities.Dynamic
         public string TypeName { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
+        string typeDefinition;
         [StringLengthValidator(AllowNulls = false, Min = 3)]
-        public string TypeDefinition { get; set; }
+        public string TypeDefinition
+        {
+            get { return this.Get(typeDefinition); }
+            set
+            {
+                if (this.Set(ref typeDefinition, value))
+                    this.definition = null;
+            }
+        }
 
+        [Ignore]
+        DynamicTypeDefinition definition; 
         public DynamicTypeDefinition GetDefinition()
         {
-            return JsonConvert.DeserializeObject<DynamicTypeDefinition>(this.TypeDefinition);
+            return definition ?? JsonConvert.DeserializeObject<DynamicTypeDefinition>(this.TypeDefinition);
         }
 
         public void SetDefinition(DynamicTypeDefinition definition)
         {
             this.TypeDefinition = JsonConvert.SerializeObject(definition);
+            this.definition = definition;
         }
         
         static Expression<Func<DynamicTypeEntity, string>> ToStringExpression = @this => @this.TypeName;
@@ -152,9 +164,12 @@ namespace Signum.Entities.Dynamic
 
         [JsonProperty(PropertyName = "customLogicMembers")]
         public DynamicTypeCustomCode CustomLogicMembers;
-
+        
         [JsonProperty(PropertyName = "customTypes")]
         public DynamicTypeCustomCode CustomTypes;
+
+        [JsonProperty(PropertyName = "customBeforeSchema")]
+        public DynamicTypeCustomCode CustomBeforeSchema;
 
         [JsonProperty(PropertyName = "queryFields")]
         public List<string> QueryFields;

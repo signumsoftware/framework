@@ -8,7 +8,7 @@ import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import {
     getQueryNiceName, TypeInfo, MemberInfo, getTypeInfo, EntityData, EntityKind, getTypeInfos, Binding, EnumType,
-    KindOfType, PropertyRoute, PropertyRouteType, LambdaMemberType, isTypeEntity, isTypeModel, isModifiableEntity
+    KindOfType, PropertyRoute, PropertyRouteType, LambdaMemberType, isTypeEntity, isTypeModel, isTypeModifiableEntity
 } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, StyleOptions, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -538,11 +538,11 @@ export function validateField(dn: DesignerNode<LineBaseNode>) {
 
     const options = registeredNodes[dn.node.kind]
 
-    const entity = isModifiableEntity(m.type);
+    const isEntity = isTypeModifiableEntity(m.type);
 
     const DVVM = DynamicViewValidationMessage;
 
-    if ((entity || false) != (options.hasEntity || false) ||
+    if ((isEntity || false) != (options.hasEntity || false) ||
         (m.type.isCollection || false) != (options.hasCollection || false))
         return DVVM._0RequiresA1.niceToString(dn.node.kind,
             (options.hasEntity ?

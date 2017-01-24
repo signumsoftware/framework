@@ -320,7 +320,6 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
         );
     }
 
-
     renderOthers() {
         var ctx = new StyleContext(undefined, { labelColumns: 3 });
         return React.createElement("div", {}, ...DynamicClient.Options.onGetDynamicLineForType.map(f => f(ctx, this.props.dynamicType.typeName!)));
@@ -343,6 +342,10 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                         onCreate={() => ({ code: dt.baseType })}
                         renderContent={e =>
                             <div>
+                                <div className="btn-group" style={{ marginBottom: "3px" }}>
+                                    {dt.baseType == "Entity" &&
+                                        <input type="button" className="btn btn-success btn-xs sf-button" value="Workflow" onClick={this.handleWorkflowCustomInheritanceClick} />}
+                                </div>
                                 <div className="code-container">
                                     <pre style={{ border: "0px", margin: "0px" }}>{`public class ${entityName}:`}</pre>
                                     <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
@@ -350,6 +353,7 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                             </div>
                         }
                         />
+
                     <CustomCodeFieldsetComponent
                         binding={Binding.create(def, d => d.customEntityMembers)}
                         title="Entity Members"
@@ -370,15 +374,16 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                             </div>
                         }
                         />
+
                     <CustomCodeFieldsetComponent
                         binding={Binding.create(def, d => d.customStartCode)}
-                        title="StartCode"
+                        title="Start Code"
                         onCreate={() => ({ code: "" })}
                         renderContent={e =>
                             <div>
                                 <div className="btn-group" style={{ marginBottom: "3px" }}>
                                     {dt.baseType == "Entity" &&
-                                        <input type="button" className="btn btn-danger btn-xs sf-button" value="Workflow" onClick={this.handleWithWorkflowClick} />}
+                                        <input type="button" className="btn btn-success btn-xs sf-button" value="Workflow" onClick={this.handleWithWorkflowClick} />}
                                 </div>
                                 <div className="code-container">
                                     <pre style={{ border: "0px", margin: "0px" }}>{`SchemaBuilder sb, DynamicQueryManager dqm, FluentInclude<${entityName}> fi`}</pre>
@@ -387,6 +392,7 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                             </div>
                         }
                         />
+
                     <CustomCodeFieldsetComponent
                         binding={Binding.create(def, d => d.customLogicMembers)}
                         title="Logic Members"
@@ -420,6 +426,24 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                             </div>
                         }
                         />
+            
+
+                    <CustomCodeFieldsetComponent
+                        binding={Binding.create(def, d => d.customBeforeSchema)}
+                        title="Before Schema"
+                        onCreate={() => ({ code: "sb.Schema.Settings.FieldAttributes((StaticType ua) => ua.Property).Replace(new ImplementedByAttribute(typeof(YourDynamicTypeEntity)));" })}
+                        renderContent={e =>
+                            <div>
+
+                                <div className="code-container">
+                                    <pre style={{ border: "0px", margin: "0px" }}>{`public void OverrideSchema(SchemaBuilder sb)
+{`}</pre>
+                                    <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
+                                    <pre style={{ border: "0px", margin: "0px" }}>{`}`}</pre>
+                                </div>
+                            </div>
+                        }
+                        />
                 </div>
                 <div className="col-sm-5">
                     {!dt.isNew &&
@@ -432,6 +456,12 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
 
     getDynamicTypeFullName() {
         return `${this.props.dynamicType.typeName}${this.props.dynamicType.baseType}`;
+    }
+
+    handleWorkflowCustomInheritanceClick = () => {
+        let entityName = this.getDynamicTypeFullName();
+        let text = "ICaseMainEntity";
+        this.popupEventsTemplate(entityName, "Workflow Inheritance", text);
     }
 
     handlePreSavingClick = () => {
@@ -471,14 +501,12 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
     handleWithWorkflowClick = () => {
         let entityName = this.props.dynamicType.typeName!;
         var os = this.props.definition.operationSave;
+        var oc = this.props.definition.operationCreate;
 
-        let text = os ?
-            `fi.WithWorkflowSave(()=> new ${entityName}Entity(), ${entityName}Operation.Save);` :
-            `fi.WithWorkflow(new WorkflowOptions
-            {
-                Constructor = () => new ${entityName}Entity(),
-                SaveEntity = e => e.Execute()
-            }));`;
+        let text = `fi.WithWorkflow(
+constructor: () => ${oc ? `{ ${oc.construct} }` : `new ${entityName}Entity()`}, 
+save: e => ${os ? `e.Execute(${entityName}Operation.Save)` : "e.Save()"}
+);`;
 
         this.popupEventsTemplate(entityName + "Entity", "WithWorkflow", text);
     }
@@ -494,7 +522,6 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
             valueHtmlProps: { style: { height: "115px" } },
         });
     }
-
 }
 
 export interface CSharpExpressionCodeMirrorProps {

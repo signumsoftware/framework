@@ -120,7 +120,7 @@ export default class DynamicTypeConditionComponent extends React.Component<Dynam
     }
 
     handleOnView = (exampleEntity: Entity) => {
-        return Navigator.view(exampleEntity, { requiresSaveOperation: false, showOperations: false });
+        return Navigator.view(exampleEntity, { requiresSaveOperation: false });
     }
 
     renderMessage(res: DynamicTypeConditionTestResponse) {

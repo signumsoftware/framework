@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { WorkflowEntity, WorkflowModel, WorkflowEntitiesDictionary, BpmnEntityPair, WorkflowOperation } from '../Signum.Entities.Workflow'
-import { TypeContext, ValueLine, EntityLine } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { TypeContext, ValueLine, EntityLine, LiteAutocompleteConfig } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { is, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { createEntityOperationContext } from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 import * as Entities from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -72,7 +72,9 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
         return (
             <div>
                 <ValueLine ctx={ctx.subCtx(d => d.name)} />
-                <EntityLine ctx={ctx.subCtx(d => d.mainEntityType)} />
+                <EntityLine ctx={ctx.subCtx(d => d.mainEntityType)}
+                    autoComplete={new LiteAutocompleteConfig(str => API.findMainEntityType({ subString: str, count: 5 }), false)}
+                    find={false}  />
                
                 <fieldset>
                     {this.state.initialXmlDiagram ?

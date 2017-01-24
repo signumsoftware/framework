@@ -137,6 +137,8 @@ namespace Signum.Engine.Dynamic
             List<DynamicTypeEntity> types = GetTypes();
             var alreadyTranslatedExpressions = GetAlreadyTranslatedExpressions?.Invoke();
 
+            var result = new List<CodeFile>();
+
             var entities =  types.Select(dt =>
             {
                 var def = dt.GetDefinition();
@@ -150,6 +152,7 @@ namespace Signum.Engine.Dynamic
                     FileContent = content
                 };
             }).ToList();
+            result.AddRange(entities);
 
             var logics = types.Select(dt =>
             {
@@ -167,8 +170,16 @@ namespace Signum.Engine.Dynamic
                     FileContent = content
                 };
             }).ToList();
+            result.AddRange(logics);
 
-            return entities.Concat(logics).ToList();
+            var bs = new DynamicBeforeSchemaGenerator(DynamicCode.CodeGenEntitiesNamespace, types.Select(a => a.GetDefinition().CustomBeforeSchema).NotNull().ToList(), DynamicCode.Namespaces);
+            result.Add(new CodeFile
+            {
+                FileName = "CodeGenBeforeSchema.cs",
+                FileContent = bs.GetFileCode()
+            });
+
+            return result;
         }
     }
 
@@ -732,4 +743,43 @@ namespace Signum.Engine.Dynamic
         }
     }
 
+    public class DynamicBeforeSchemaGenerator
+    {
+        public HashSet<string> Usings { get; private set; }
+        public string Namespace { get; private set; }
+        public List<DynamicTypeCustomCode> BeforeSchema { get; private set; }
+
+        public Dictionary<string, string> AlreadyTranslated { get; set; }
+
+        public DynamicBeforeSchemaGenerator(string @namespace, List<DynamicTypeCustomCode> beforeSchema, HashSet<string> usings)
+        {
+            this.Usings = usings;
+            this.Namespace = @namespace;
+            this.BeforeSchema = beforeSchema;
+        }
+
+        public string GetFileCode()
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var item in this.Usings)
+                sb.AppendLine("using {0};".FormatWith(item));
+
+            sb.AppendLine();
+            sb.AppendLine($"namespace {this.Namespace}");
+            sb.AppendLine($"{{");
+            sb.AppendLine($"    public static class CodeGenBeforeSchemaLogic");
+            sb.AppendLine($"    {{");
+            sb.AppendLine($"        public static void Start(SchemaBuilder sb)");
+            sb.AppendLine($"        {{");
+
+            if (this.BeforeSchema != null && this.BeforeSchema.Count > 0)
+                this.BeforeSchema.ForEach(bs => sb.AppendLine(bs.Code.Indent(12)));
+
+            sb.AppendLine($"        }}");
+            sb.AppendLine($"    }}");
+            sb.AppendLine($"}}");
+
+            return sb.ToString();
+        }
+    }
 }

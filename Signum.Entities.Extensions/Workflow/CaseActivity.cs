@@ -8,6 +8,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using Signum.Entities.Dynamic;
 
 namespace Signum.Entities.Workflow
 {
@@ -25,8 +26,27 @@ namespace Signum.Entities.Workflow
         public string OriginalWorkflowActivityName { get; set; }
 
         public DateTime StartDate { get; set; } = TimeZoneManager.Now;
+        public Lite<CaseActivityEntity> Previous { get; set; }
+
         public DateTime? DoneDate { get; set; }
         public Lite<UserEntity> DoneBy { get; set; }
+
+
+        static Expression<Func<CaseActivityEntity, CaseActivityState>> StateExpression =
+        @this => @this.DoneDate.HasValue ? CaseActivityState.Done :
+        @this.WorkflowActivity.Type == WorkflowActivityType.DecisionTask ? CaseActivityState.PendingDecision : 
+        CaseActivityState.PendingNext;
+        [ExpressionField("StateExpression")]
+        public CaseActivityState State
+        {
+            get
+            {
+                if (this.IsNew)
+                    return CaseActivityState.New;
+
+                return StateExpression.Evaluate(this);
+            }
+        }
 
         static Expression<Func<CaseActivityEntity, string>> ToStringExpression = @this => @this.WorkflowActivity + " " + @this.DoneBy;
         [ExpressionField]
@@ -34,6 +54,15 @@ namespace Signum.Entities.Workflow
         {
             return ToStringExpression.Evaluate(this);
         }
+    }
+
+    public enum CaseActivityState
+    {
+        [Ignore]
+        New,
+        PendingNext,
+        PendingDecision,
+        Done,
     }
 
 
@@ -46,14 +75,12 @@ namespace Signum.Entities.Workflow
         public static readonly ExecuteSymbol<CaseActivityEntity> Next;
         public static readonly ExecuteSymbol<CaseActivityEntity> Approve;
         public static readonly ExecuteSymbol<CaseActivityEntity> Decline;
+
+        public static readonly ExecuteSymbol<DynamicTypeEntity> FixCaseDescriptions;
     }
 
     public enum CaseActivityMessage
     {
-        [Description("Only for {0} activities")]
-        OnlyFor0Activites,
-        AlreadyDone,
-        ActivityAlreadyRegistered,
         CaseContainsOtherActivities,
         NoNextConnectionThatSatisfiesTheConditionsFound
     }

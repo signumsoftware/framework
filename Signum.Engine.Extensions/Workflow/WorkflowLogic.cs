@@ -21,6 +21,8 @@ namespace Signum.Engine.Workflow
 
     public static class WorkflowLogic
     {
+        public static Action<ICaseMainEntity, WorkflowEvaluationContext> OnTransition;
+
         static Expression<Func<WorkflowEntity, IQueryable<WorkflowPoolEntity>>> WorkflowPoolsExpression =
             e => Database.Query<WorkflowPoolEntity>().Where(a => a.Workflow == e);
         [ExpressionField]
@@ -155,13 +157,15 @@ namespace Signum.Engine.Workflow
             return WorkflowGraphLazy.Value.GetOrThrow(e.Lane.Pool.Workflow.ToLite()).PreviousGraph.RelatedTo(e).Values;
         }
 
-        public class WorkflowGraph
+        public class WorkflowNodeGraph
+
         {
             public DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity> NextGraph;
             public DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity> PreviousGraph;
         }
 
-        static ResetLazy<Dictionary<Lite<WorkflowEntity>, WorkflowGraph>> WorkflowGraphLazy;
+        static ResetLazy<Dictionary<Lite<WorkflowEntity>, WorkflowNodeGraph
+>> WorkflowGraphLazy;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -174,18 +178,12 @@ namespace Signum.Engine.Workflow
                         e.Id,
                         e.Name
                     });
-
-                new Graph<WorkflowEntity>.Execute(WorkflowOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (e, args) => 
-                    {
-                        WorkflowLogic.ApplyDocument(e, args.GetArg<WorkflowModel>(), args.TryGetArgC<WorkflowReplacementModel>());
-                    }
-                }.Register();
+                
+                WorkflowGraph.Register();
+                
 
                 sb.Include<WorkflowPoolEntity>()
+                    .WithUniqueIndex(wp => new { wp.Workflow, wp.Name })
                     .WithSave(WorkflowPoolOperation.Save)
                     .WithDelete(WorkflowPoolOperation.Delete)
                     .WithExpressionFrom(dqm, (WorkflowEntity p) => p.WorkflowPools())
@@ -198,6 +196,7 @@ namespace Signum.Engine.Workflow
                     });
 
                 sb.Include<WorkflowLaneEntity>()
+                    .WithUniqueIndex(wp => new { wp.Pool, wp.Name })
                     .WithSave(WorkflowLaneOperation.Save)
                     .WithDelete(WorkflowLaneOperation.Delete)
                     .WithExpressionFrom(dqm, (WorkflowPoolEntity p) => p.WorkflowLanes())
@@ -211,7 +210,7 @@ namespace Signum.Engine.Workflow
                     });
 
                 sb.Include<WorkflowActivityEntity>()
-                    .WithIndex(w => new { w.Lane, w.Name })
+                    .WithUniqueIndex(w => new { w.Lane, w.Name })
                     .WithSave(WorkflowActivityOperation.Save)
                     .WithDelete(WorkflowActivityOperation.Delete)
                     .WithExpressionFrom(dqm, (WorkflowEntity p) => p.WorkflowActivities())
@@ -291,7 +290,8 @@ namespace Signum.Engine.Workflow
                              activities.TryGetC(w).EmptyIfNull().ToList().ForEach(a => graph.Add(a));
                              connections.TryGetC(w).EmptyIfNull().ToList().ForEach(c => graph.Add(c.From, c.To, c));
 
-                             return new WorkflowGraph
+                             return new WorkflowNodeGraph
+
                              {
                                  NextGraph = graph,
                                  PreviousGraph = graph.Inverse(),
@@ -318,7 +318,6 @@ namespace Signum.Engine.Workflow
 
                 sb.Include<WorkflowConditionEntity>()
                    .WithSave(WorkflowConditionOperation.Save)
-                   .WithDelete(WorkflowConditionOperation.Delete)
                    .WithQuery(dqm, e => new
                    {
                        Entity = e,
@@ -328,16 +327,98 @@ namespace Signum.Engine.Workflow
                        e.Eval.Script
                    });
 
+
+                new Graph<WorkflowConditionEntity>.Delete(WorkflowConditionOperation.Delete)
+                {
+                    Delete = (e, _) =>
+                    {
+                        ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Condition == e.ToLite()), e);
+                        e.Delete();
+                    },
+                }.Register();
+
+ 
+
                 Conditions = sb.GlobalLazy(() => Database.Query<WorkflowConditionEntity>().ToDictionary(a => a.ToLite()),
                     new InvalidateWith(typeof(WorkflowConditionEntity)));
+
+                sb.Include<WorkflowActionEntity>()
+                   .WithSave(WorkflowActionOperation.Save)
+                   .WithQuery(dqm, e => new
+                   {
+                       Entity = e,
+                       e.Id,
+                       e.Name,
+                       e.MainEntityType,
+                       e.Eval.Script
+                   });
+
+                new Graph<WorkflowActionEntity>.Delete(WorkflowActionOperation.Delete)
+                {
+                    Delete = (e, _) =>
+                    {
+                        ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Action == e.ToLite()), e);
+                        e.Delete();
+                    },
+                }.Register();
+
+                Actions = sb.GlobalLazy(() => Database.Query<WorkflowActionEntity>().ToDictionary(a => a.ToLite()),
+                    new InvalidateWith(typeof(WorkflowActionEntity)));
+            }
+        }
+
+        private static void ThrowConnectionError(IQueryable<WorkflowConnectionEntity> queryable, Entity toDelete)
+        {
+            if (queryable.Count() == 0)
+                return;
+
+            var errors = queryable.Select(a => new { Connection = a.ToLite(), From = a.From.ToLite(), To = a.To.ToLite(), Workflow = a.From.Lane.Pool.Workflow.ToLite() }).ToList();
+
+            var formattedErrors = errors.GroupBy(a => a.Workflow).ToString(gr => $"Workflow '{gr.Key}':" +
+                  gr.ToString(a => $"Connection {a.Connection.Id} ({a.Connection}): {a.From} -> {a.To}", "\r\n").Indent(4),
+                "\r\n\r\n").Indent(4);
+
+            throw new ApplicationException($"Impossible to delete '{toDelete}' because is used in some connections: \r\n" + formattedErrors);
+        }
+
+        public class WorkflowGraph : Graph<WorkflowEntity>
+        {
+            public static void Register()
+            {
+                new Execute(WorkflowOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (e, args) =>
+                    {
+                        WorkflowLogic.ApplyDocument(e, args.GetArg<WorkflowModel>(), args.TryGetArgC<WorkflowReplacementModel>());
+                    }
+                }.Register();
+
+                new ConstructFrom<WorkflowEntity>(WorkflowOperation.Clone)
+                {
+                    Construct = (w, args) =>
+                    {
+                        WorkflowBuilder wb = new WorkflowBuilder(w);
+
+                        var result = wb.Clone();
+
+                        return result;
+                    }
+                }.Register();
             }
         }
 
         public static ResetLazy<Dictionary<Lite<WorkflowConditionEntity>, WorkflowConditionEntity>> Conditions;
-
         public static WorkflowConditionEntity RetrieveFromCache(this Lite<WorkflowConditionEntity> wc)
         {
             return WorkflowLogic.Conditions.Value.GetOrThrow(wc);
+        }
+
+        public static ResetLazy<Dictionary<Lite<WorkflowActionEntity>, WorkflowActionEntity>> Actions;
+        public static WorkflowActionEntity RetrieveFromCache(this Lite<WorkflowActionEntity> wa)
+        {
+            return WorkflowLogic.Actions.Value.GetOrThrow(wa);
         }
 
         public static Expression<Func<Lite<Entity>, UserEntity,  bool>> IsCurrentUserActor = (actor, user) =>

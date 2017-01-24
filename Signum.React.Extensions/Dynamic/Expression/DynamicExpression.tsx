@@ -153,7 +153,7 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
     }
 
     handleOnView = (exampleEntity: Entity) => {
-        return Navigator.view(exampleEntity, { requiresSaveOperation: false, showOperations: false });
+        return Navigator.view(exampleEntity, { requiresSaveOperation: false });
     }
 
     renderMessage(res: DynamicExpressionTestResponse) {

@@ -36,7 +36,7 @@ export default class CasePageFrame extends React.Component<CasePageFrameProps, C
     }
     
     calculateState(props: CasePageFrameProps) {
-        return {  } as CasePageFrameState;
+        return { getComponent: undefined } as CasePageFrameState;
     }
     
     componentWillReceiveProps(newProps: CasePageFrameProps) {
@@ -132,7 +132,7 @@ export default class CasePageFrame extends React.Component<CasePageFrameProps, C
                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-activity-entity={entityInfo(pack.activity) }>
                     {this.renderMainEntity() }
                 </div>
-                {this.entityComponent && <div className="workflow-buttons"><ButtonBar frame={activityFrame} pack={activityPack} showOperations={true} /></div> }
+                {this.entityComponent && <div className="workflow-buttons"><ButtonBar frame={activityFrame} pack={activityPack} /></div> }
             </div>
         );
     }
@@ -198,7 +198,7 @@ export default class CasePageFrame extends React.Component<CasePageFrameProps, C
         return (
             <div className="sf-main-entity" data-main-entity={entityInfo(mainEntity) }>
                 { renderWidgets(wc) }
-                { this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy && <ButtonBar frame={mainFrame} pack={mainPack} showOperations={true} /> }
+                { this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy && <ButtonBar frame={mainFrame} pack={mainPack} /> }
                 <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve}/>
                 {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any>) => this.setComponent(c) })}
             </div>
