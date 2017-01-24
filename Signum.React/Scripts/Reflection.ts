@@ -453,7 +453,7 @@ export class Binding<T> implements IBinding<T> {
     }
 
     get suffix() {
-        return this.member.toString();
+        return this.member == null ? "--unknown--" : this.member.toString();
     }
 
     getValue(): T {
