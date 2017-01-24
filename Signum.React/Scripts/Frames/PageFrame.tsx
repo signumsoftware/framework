@@ -162,7 +162,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
             <div className="normal-control">
                 { this.renderTitle() }
                 { renderWidgets(wc) }
-                { this.entityComponent && <ButtonBar frame={frame} pack={this.state.pack} showOperations={true} /> }
+                { this.entityComponent && <ButtonBar frame={frame} pack={this.state.pack} /> }
                 <ValidationErrors entity={this.state.pack.entity} ref={ve => this.validationErrors = ve}/>
                 { embeddedWidgets.top }
                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-main-entity={entityInfo(ctx.value) }>

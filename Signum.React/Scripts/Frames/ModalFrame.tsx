@@ -13,6 +13,7 @@ import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, i
 import ValidationErrors from './ValidationErrors'
 import { renderWidgets, WidgetContext } from './Widgets'
 import { needsCanExecute } from '../Operations/EntityOperations'
+import { EntityOperationContext } from '../Operations'
 
 require("!style!css!./Frames.css");
 
@@ -20,7 +21,7 @@ interface ModalFrameProps extends React.Props<ModalFrame>, IModalProps {
     title?: string;
     entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>;
     propertyRoute?: PropertyRoute;
-    showOperations?: boolean;
+    isOperationVisible?: (eoc: EntityOperationContext<Entity>) => boolean;
     validate?: boolean;
     requiresSaveOperation?: boolean;
     avoidPromptLooseChange?: boolean;
@@ -42,7 +43,7 @@ let modalCount = 0;
 export default class ModalFrame extends React.Component<ModalFrameProps, ModalFrameState>  {
 
     static defaultProps: ModalFrameProps = {
-        showOperations: true,
+        isOperationVisible: undefined,
         viewPromise: undefined,
         entityOrPack: null as any
     }
@@ -54,7 +55,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     }
 
     componentWillMount() {
-        Navigator.toEntityPack(this.props.entityOrPack, this.props.showOperations!)
+        Navigator.toEntityPack(this.props.entityOrPack)
             .then(ep => this.setPack(ep))
             .then(() => this.loadComponent())
             .done();
@@ -63,7 +64,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     componentWillReceiveProps(props: ModalFrameProps) {
         this.setState(this.calculateState(props));
 
-        Navigator.toEntityPack(props.entityOrPack, this.props.showOperations!)
+        Navigator.toEntityPack(props.entityOrPack)
             .then(ep => this.setPack(ep))
             .then(() => this.loadComponent())
             .done();
@@ -224,8 +225,8 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
         return (
             <Modal.Body>
-                {renderWidgets({ ctx: ctx, pack: pack }) }
-                { this.entityComponent && <ButtonBar frame={frame} pack={pack} showOperations={this.props.showOperations!} />}
+                {renderWidgets({ ctx: ctx, pack: pack })}
+                {this.entityComponent && <ButtonBar frame={frame} pack={pack} isOperationVisible={this.props.isOperationVisible} />}
                 <ValidationErrors entity={pack.entity} ref={ve => this.validationErrors = ve}/>
                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-main-entity={entityInfo(ctx.value) }>
                     { this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any,any>) => this.setComponent(c) }) }
@@ -291,7 +292,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             readOnly={options.readOnly}
             propertyRoute={options.propertyRoute}
             viewPromise={options.viewPromise}
-            showOperations={options.showOperations}
+            isOperationVisible={options.isOperationVisible}
             requiresSaveOperation={options.requiresSaveOperation}
             avoidPromptLooseChange={options.avoidPromptLooseChange}
             validate={options.validate == undefined ? ModalFrame.isModelEntity(entityOrPack) : options.validate }
@@ -313,7 +314,6 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             readOnly={options.readOnly}
             propertyRoute={undefined}
             viewPromise={options.viewPromise}
-            showOperations={true}
             requiresSaveOperation={undefined}
             avoidPromptLooseChange={options.avoidPromptLooseChange}
             isNavigate={true}/>);

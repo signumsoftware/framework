@@ -7,7 +7,7 @@ import {
 } from '../Signum.Entities';
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationInfo, OperationType, LambdaMemberType, GraphExplorer } from '../Reflection';
 import { classes, ifError } from '../Globals';
-import { ButtonsContext } from '../TypeContext';
+import { ButtonsContext, IOperationVisible } from '../TypeContext';
 import * as Navigator from '../Navigator';
 import Notify from '../Frames/Notify';
 import { ajaxPost, ValidationError }  from '../Services';
@@ -33,15 +33,23 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
                 tag: ctx.tag,
                 canExecute: ctx.pack.canExecute[oi.key],
                 operationInfo: oi,
-                showOperations: ctx.showOperations, 
                 settings: eos
             };
 
-            if (eos && eos.isVisible ? eos.isVisible(eoc) : ctx.showOperations)
-                if (eoc.settings == undefined || !eoc.settings.hideOnCanExecute || eoc.canExecute == undefined)
-                    return eoc;
+            if (ctx.isOperationVisible && !ctx.isOperationVisible(eoc))
+                return undefined;
 
-            return undefined;
+            var ov = ctx.frame.entityComponent as any as IOperationVisible;
+            if (ov.isOperationVisible && !ov.isOperationVisible(eoc))
+                return undefined;
+
+            if (eos && eos.isVisible && !eos.isVisible(eoc))
+                return undefined;
+
+            if (eoc.settings && eoc.settings.hideOnCanExecute && eoc.canExecute)
+                return undefined;
+
+            return eoc;
         })
         .filter(eoc => eoc != undefined)
         .map(eoc => eoc!);
@@ -94,7 +102,6 @@ export function createEntityOperationContext<T extends Entity>(ctx: TypeContext<
         entity: ctx.value,
         settings: getSettings(operation) as EntityOperationSettings<T>,
         operationInfo: getTypeInfo(ctx.value.Type).operations![operation.key!],
-        showOperations: true,
         canExecute: undefined,
     };
 }

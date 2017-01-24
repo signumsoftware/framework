@@ -7,6 +7,7 @@
         width: 33%;
     }
 
+
 .btn-toolbar-small .btn{
     padding-top: 1px;
     padding-bottom: 1px;
@@ -170,6 +171,17 @@ td.centered-cell{
     text-align: center;
 }
 
+.tooltip.error-tooltip .tooltip-inner {
+    background-color: #ebcccc;
+    color: #860000;
+    max-width: initial;
+    text-align: initial;
+}
+
+.tooltip.error-tooltip .tooltip-arrow {
+   border-bottom-color: #ebcccc;
+}
+
 /*  Search Popup */
 
 .sf-search-popup .modal-footer {
@@ -185,6 +197,13 @@ td.centered-cell{
     margin-bottom: 0px;
 }
 
+.empty-icon {
+    display: inline-block;
+    width: 1.2em;
+    height: 1.2em;
+    border-radius: 2px;
+    content: "&nbsp;"
+}
 
 /* check box */
 
