@@ -71,11 +71,11 @@ namespace Signum.Analyzer
             if (field.AttributeLists.Any(al => al.Attributes.Any(a => AvoidAttributes.Contains(LastName(a.Name)))))
                 return false;
 
-            var getter = property.AccessorList.Accessors.SingleOrDefault(a => a.Kind() == SyntaxKind.GetAccessorDeclaration);
+            var getter = property.AccessorList.Accessors.Where(a => a.Kind() == SyntaxKind.GetAccessorDeclaration).Only();
             if (getter == null || !IsValidGetter(getter, field))
                 return false;
 
-            var setter = property.AccessorList.Accessors.SingleOrDefault(a => a.Kind() == SyntaxKind.SetAccessorDeclaration);
+            var setter = property.AccessorList.Accessors.Where(a => a.Kind() == SyntaxKind.SetAccessorDeclaration).Only();
             if (setter == null || !IsValidSetter(setter, field))
                 return false;
 

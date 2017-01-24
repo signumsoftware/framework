@@ -199,10 +199,11 @@ export namespace MenuItemConstructor { //To allow monkey patching
             (me: React.MouseEvent) => defaultClick(coc, me)
 
         const menuItem = <MenuItem
-            className={classes("btn-" + bsStyle, disabled ? "disabled" : undefined)}
+            className={disabled ? "disabled" : undefined}
             onClick={disabled ? undefined : onClick}
             data-operation={coc.operationInfo.key}
             key={key}>
+            {bsStyle && <span className={"icon empty-icon btn-" + bsStyle}></span>}
             {text}
         </MenuItem>;
 

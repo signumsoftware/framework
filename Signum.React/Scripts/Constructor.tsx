@@ -24,7 +24,7 @@ export function construct(type: string | Type<any>): Promise<EntityPack<Modifiab
                 return undefined;
 
             assertCorrect(e);
-            return Navigator.toEntityPack(e, true);
+            return Navigator.toEntityPack(e);
         });
 
     const ti = getTypeInfo(typeName);
@@ -66,7 +66,7 @@ export function construct(type: string | Type<any>): Promise<EntityPack<Modifiab
 
     assertCorrect(result);
 
-    return Navigator.toEntityPack(result, true);
+    return Navigator.toEntityPack(result);
 }
 
 

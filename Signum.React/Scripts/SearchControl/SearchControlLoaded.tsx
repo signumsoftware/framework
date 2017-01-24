@@ -6,7 +6,8 @@ import { Dic, DomUtils, classes } from '../Globals'
 import * as Finder from '../Finder'
 import {
     ResultTable, ResultRow, FindOptionsParsed, FindOptions, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnOptionsMode, ColumnDescription,
-    toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest } from '../FindOptions'
+    toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest
+} from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, is, isEntity, isLite, toLite } from '../Signum.Entities'
 import { getTypeInfos, getTypeInfo, TypeReference, IsByAll, getQueryKey, TypeInfo, EntityData, QueryKey, PseudoType, isTypeModel } from '../Reflection'
 import * as Navigator from '../Navigator'
@@ -56,7 +57,7 @@ export interface SearchControlLoadedState {
     contextualMenu?: {
         position: ContextMenuPosition;
         columnIndex: number | null;
-        columnOffset?: number ;
+        columnOffset?: number;
         rowIndex: number | null;
     };
 
@@ -69,11 +70,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     constructor(props: SearchControlLoadedProps) {
         super(props);
-        this.state = { };
+        this.state = {};
     }
 
     componentWillMount() {
-        
+
         const fo = this.props.findOptions;
         const qs = Finder.getQuerySettings(fo.queryKey);
         const qd = this.props.queryDescription;
@@ -121,7 +122,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             pagination: fo.pagination,
         };
     }
-    
+
     // MAIN
     doSearchPage1() {
         const fo = this.props.findOptions;
@@ -132,7 +133,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         this.doSearch().done();
     };
 
-    doSearch() : Promise<void> {
+    doSearch(): Promise<void> {
         return this.getFindOptionsWithSFB().then(fo => {
             this.setState({ loading: false, editingColumn: undefined });
             return Finder.API.executeQuery(this.getQueryRequest()).then(rt => {
@@ -272,22 +273,22 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                             fo.showFilters ? <FilterBuilder
                                 queryDescription={qd}
                                 filterOptions={fo.filterOptions}
-                                lastToken ={this.state.lastToken}
+                                lastToken={this.state.lastToken}
                                 subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement}
-                                onTokenChanged= {this.handleFilterTokenChanged}
-                                onFiltersChanged={this.handleFiltersChanged}/> :
+                                onTokenChanged={this.handleFilterTokenChanged}
+                                onFiltersChanged={this.handleFiltersChanged} /> :
                                 sfb && <div className="simple-filter-builder">{sfb}</div>
                         }
                     </div>
                 }
                 {fo.showHeader && this.renderToolBar()}
-                {<MultipliedMessage findOptions={fo} mainType={this.entityColumn().type}/>}
+                {<MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
                 {this.state.editingColumn && <ColumnEditor
                     columnOption={this.state.editingColumn}
                     onChange={this.handleColumnChanged}
                     queryDescription={qd}
                     subTokensOptions={SubTokensOptions.CanElement}
-                    close={this.handleColumnClose}/>}
+                    close={this.handleColumnClose} />}
                 <div className="sf-search-results-container table-responsive" >
                     <table className="sf-search-results table table-hover table-condensed" onContextMenu={this.handleOnContextMenu} >
                         <thead>
@@ -298,7 +299,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                         </tbody>
                     </table>
                 </div>
-                {fo.showFooter && <PaginationSelector pagination={fo.pagination} onPagination={this.handlePagination} resultTable={this.state.resultTable}/>}
+                {fo.showFooter && <PaginationSelector pagination={fo.pagination} onPagination={this.handlePagination} resultTable={this.state.resultTable} />}
                 {this.state.contextualMenu && this.renderContextualMenu()}
             </div>
         );
@@ -307,7 +308,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     // TOOLBAR
     handleToggleFilters = () => {
-        
+
         this.props.findOptions.showFilters = !this.props.findOptions.showFilters;
 
         if (!this.state.simpleFilterBuilder)
@@ -374,7 +375,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
             var s = Navigator.getSettings(tn);
 
-            if (isWindowsOpen || (s != null && s.avoidPopup))  {
+            if (isWindowsOpen || (s != null && s.avoidPopup)) {
                 window.open(Navigator.createRoute(tn));
             } else {
                 Constructor.construct(tn).then(e => {
@@ -388,14 +389,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 }).done();
             }
         }).done();
-    }   
+    }
 
     handleFullScreenClick = (ev: React.MouseEvent) => {
 
         ev.preventDefault();
 
         const fo = this.props.findOptions;
-        
+
         const pair = Finder.smartColumns(fo.columnOptions, Dic.getValues(this.props.queryDescription.columns));
 
         const qs = Finder.getQuerySettings(fo.queryKey);
@@ -421,7 +422,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             Navigator.currentHistory.push(path);
     };
 
-   
+
 
     createTitle() {
 
@@ -458,7 +459,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             this.doSearch();
 
         promise.then(() => this.setState({ markedRows: { ...this.state.markedRows, ...dic } })).done();
-            
+
     }
 
     renderSelecterButton() {
@@ -491,7 +492,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         const fo = this.props.findOptions;
 
         const token = fo.columnOptions[cm.columnIndex!].token;
-        
+
         const fops = token ? filterOperations[token.filterType as any] : undefined;
 
         const rt = this.state.resultTable!;
@@ -561,7 +562,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         if (cm.rowIndex == undefined || fo.allowChangeColumns) {
 
             if (menuItems.length)
-                menuItems.push(<MenuItem divider/>);
+                menuItems.push(<MenuItem divider />);
 
             menuItems.push(<MenuItem className="sf-insert-header" onClick={this.handleInsertColumn}>{JavascriptMessage.insertColumn.niceToString()}</MenuItem>);
             menuItems.push(<MenuItem className="sf-edit-header" onClick={this.handleEditColumn}>{JavascriptMessage.editColumn.niceToString()}</MenuItem>);
@@ -574,7 +575,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 menuItems.push(<MenuItem header>{JavascriptMessage.loading.niceToString()}</MenuItem>);
             } else {
                 if (menuItems.length && this.state.currentMenuItems.length)
-                    menuItems.push(<MenuItem divider/>);
+                    menuItems.push(<MenuItem divider />);
 
                 menuItems.splice(menuItems.length, 0, ...this.state.currentMenuItems);
             }
@@ -636,7 +637,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     handleHeaderDragStart = (de: React.DragEvent) => {
         de.dataTransfer.setData('text', "start"); //cannot be empty string
         de.dataTransfer.effectAllowed = "move";
-        const dragIndex = parseInt((de.currentTarget as HTMLElement).getAttribute("data-column-index")!);
+        const dragIndex = parseInt((de.currentTarget as HTMLElement).getAttribute("data-column-index") !);
         this.setState({ dragColumnIndex: dragIndex });
     }
 
@@ -669,7 +670,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         const size = th.scrollWidth;
 
-        const columnIndex = parseInt(th.getAttribute("data-column-index")!);
+        const columnIndex = parseInt(th.getAttribute("data-column-index") !);
 
         const offset = this.getOffset((de.nativeEvent as DragEvent).pageX, th.getBoundingClientRect(), 50);
 
@@ -705,7 +706,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         return (
             <tr>
                 {this.props.allowSelection && <th className="sf-th-selection">
-                    <input type="checkbox" id="cbSelectAll" onClick={this.handleToggleAll} checked={this.allSelected()}/>
+                    <input type="checkbox" id="cbSelectAll" onClick={this.handleToggleAll} checked={this.allSelected()} />
                 </th>
                 }
                 {this.props.findOptions.navigate && <th className="sf-th-entity" data-column-name="Entity"></th>}
@@ -713,8 +714,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     <th draggable={true}
                         style={i == this.state.dragColumnIndex ? { opacity: 0.5 } : undefined}
                         className={classes(
-                            co == this.state.editingColumn  && "sf-current-column",
-                            !this.canOrder(co) && "noOrder" ,
+                            co == this.state.editingColumn && "sf-current-column",
+                            !this.canOrder(co) && "noOrder",
                             co == this.state.editingColumn && co.token && co.token.type.isCollection && "error",
                             i == this.state.dropBorderIndex ? "drag-left " :
                                 i == this.state.dropBorderIndex - 1 ? "drag-right " : undefined)}
@@ -727,7 +728,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                         onDragOver={this.handlerHeaderDragOver}
                         onDragEnter={this.handlerHeaderDragOver}
                         onDrop={this.handleHeaderDrop}>
-                        <span className={"sf-header-sort " + this.orderClassName(co)}/>
+                        <span className={"sf-header-sort " + this.orderClassName(co)} />
                         <span> {co.displayName}</span></th>
                 )}
             </tr>
@@ -764,7 +765,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         const cb = (event.currentTarget) as HTMLInputElement;
 
-        const index = parseInt(cb.getAttribute("data-index")!);
+        const index = parseInt(cb.getAttribute("data-index") !);
 
         const row = this.state.resultTable!.rows[index];
 
@@ -794,9 +795,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             return;
         }
 
-        if (this.props.querySettings.onDoubleClick) {
+        var qs = this.props.querySettings;
+        if (qs && qs.onDoubleClick) {
             e.preventDefault();
-            this.props.querySettings.onDoubleClick(e, row);
+            qs.onDoubleClick(e, row);
             return;
         }
 
@@ -823,7 +825,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         const columnsCount = this.props.findOptions.columnOptions.length +
             (this.props.allowSelection ? 1 : 0) +
             (this.props.findOptions.navigate ? 1 : 0);
-        
+
 
         if (!this.state.resultTable) {
             return <tr><td colSpan={columnsCount}>{JavascriptMessage.searchForResults.niceToString()}</td></tr>;
@@ -856,7 +858,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     {...rowAttributes ? rowAttributes(row, resultTable.columns) : undefined}>
                     {this.props.allowSelection &&
                         <td style={{ textAlign: "center" }}>
-                            <input type="checkbox" className="sf-td-selection" checked={this.state.selectedRows!.contains(row)} onChange={this.handleChecked} data-index={i}/>
+                            <input type="checkbox" className="sf-td-selection" checked={this.state.selectedRows!.contains(row)} onChange={this.handleChecked} data-index={i} />
                         </td>
                     }
 
@@ -899,7 +901,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         if (!mark || !mark.message)
             return tr;
 
-        const tooltip = <Tooltip id={"mark_" + index} >{mark.message}</Tooltip>;
+        const tooltip = <Tooltip id={"mark_" + index} className="error-tooltip">
+            {mark.message.split("\n").map((s, i) => <p key={i}>{s}</p>)}
+        </Tooltip>;
 
         return <OverlayTrigger placement="bottom" overlay={tooltip}>{tr}</OverlayTrigger>;
     }

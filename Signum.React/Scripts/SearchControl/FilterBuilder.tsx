@@ -1,5 +1,7 @@
 ﻿
 import * as React from 'react'
+import * as numbro from 'numbro'
+import * as moment from 'moment'
 import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
 import * as Finder from '../Finder'
 import { Dic, areEqual } from '../Globals'
@@ -7,7 +9,7 @@ import { openModal, IModalProps } from '../Modals';
 import { FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, FilterType, isList, FilterOperation } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
 import { ValueLine, EntityLine, EntityCombo } from '../Lines'
-import { Binding, IsByAll, getTypeInfos } from '../Reflection'
+import { Binding, IsByAll, getTypeInfos, toNumbroFormat, toMomentFormat } from '../Reflection'
 import { TypeContext, FormGroupStyle } from '../TypeContext'
 import QueryTokenBuilder from './QueryTokenBuilder'
 
@@ -125,6 +127,9 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
                 f.operation = newToken.filterType && filterOperations[newToken.filterType].first();
                 f.value = f.operation && isList(f.operation) ? [undefined] : undefined;
             }
+            else if (f.token && f.token.filterType == "DateTime" && newToken.filterType == "DateTime" && newToken.format && f.token.format != newToken.format) {
+                f.value = f.value && this.trimDateToFormat(f.value, toMomentFormat(newToken.format));
+            }
         }
         f.token = newToken;
 
@@ -133,6 +138,15 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
         this.props.onFilterChanged(this.props.filter);
 
         this.forceUpdate();
+    }
+
+    trimDateToFormat(date: string, momentFormat: string | undefined) {
+
+        if (!momentFormat)
+            return date;
+
+        const formatted = moment(date).format( momentFormat);
+        return moment(formatted, momentFormat).format();
     }
     
 
