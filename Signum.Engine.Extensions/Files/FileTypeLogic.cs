@@ -80,13 +80,13 @@ namespace Signum.Engine.Files
         public Func<IFilePath, string> CalculateSufix { get; set; }
 
         public bool RenameOnCollision { get; set; }
-        public bool TakesOwnership { get; set; }
+        public bool WeakFileReference { get; set; }
 
         public Func<string, int, string> RenameAlgorithm { get; set; }
 
         public FileTypeAlgorithm()
         {
-            TakesOwnership = true;
+            WeakFileReference = true;
             CalculateSufix = FileName_Sufix;
 
             RenameOnCollision = true;
@@ -117,7 +117,7 @@ namespace Signum.Engine.Files
             if (GetPrefixPair == null)
                 error = "GetPrefixPair";
 
-            if (TakesOwnership && CalculateSufix == null)
+            if (WeakFileReference && CalculateSufix == null)
                 error = ", ".CombineIfNotEmpty(error, "CalculateSufix");
 
             if (RenameOnCollision && RenameAlgorithm == null)
@@ -133,7 +133,7 @@ namespace Signum.Engine.Files
         {
             using (new EntityCache(EntityCacheType.ForceNew))
             {
-                if (TakesOwnership)
+                if (WeakFileReference)
                 {
                     string sufix = CalculateSufix(fp);
                     if (!sufix.HasText())
@@ -187,7 +187,7 @@ namespace Signum.Engine.Files
 
         public virtual void MoveFile(IFilePath ofp, IFilePath fp)
         {
-            if (this.TakesOwnership)
+            if (this.WeakFileReference)
             {
                 System.IO.File.Move(ofp.FullPhysicalPath(), fp.FullPhysicalPath());
             }
@@ -195,7 +195,7 @@ namespace Signum.Engine.Files
         
         public virtual void DeleteFiles(IEnumerable<IFilePath> files)
         {
-            if (this.TakesOwnership)
+            if (this.WeakFileReference)
             {
                 foreach (var f in files)
                 {
