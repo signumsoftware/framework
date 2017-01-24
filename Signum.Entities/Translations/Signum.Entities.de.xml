@@ -152,7 +152,7 @@
     <Member Name="find" Description="Finden" />
     <Member Name="hideFilters" Description="Filter ausblenden" />
     <Member Name="insertColumn" Description="Spalte einfügen" />
-    <Member Name="loading" Description="Läd gerade..." />
+    <Member Name="loading" Description="Lädt gerade..." />
     <Member Name="loseCurrentChanges" Description="Änderungen verlieren?" />
     <Member Name="moveDown" Description="Nach unten" />
     <Member Name="moveUp" Description="Nach oben" />

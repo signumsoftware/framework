@@ -21,6 +21,18 @@ namespace Signum.Utilities
             return (T)Enum.Parse(typeof(T), str, ignoreCase);
         }
 
+        public static T? TryToEnum<T>(this string str) where T : struct
+        {
+            T result; 
+            return Enum.TryParse(str, out result) ? result : (T?)null;
+        }
+
+        public static T? TryToEnum<T>(this string str, bool ignoreCase) where T : struct
+        {
+            T result;
+            return Enum.TryParse(str, ignoreCase, out result) ? result : (T?)null;
+        }
+
         public static T[] GetValues<T>()
         {
             return (T[])Enum.GetValues(typeof(T));
