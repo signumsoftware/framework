@@ -1133,7 +1133,7 @@ export class GraphExplorer {
             return (obj as Array<any>).map((o, i) => this.isModified(o, modelStatePrefix + "[" + i + "]")).some(a => a);
 
         const mle = obj as MListElement<any>;
-        if (mle.hasOwnProperty("rowId"))
+        if (mle.hasOwnProperty && mle.hasOwnProperty("rowId"))
             return this.isModified(mle.element, dot(modelStatePrefix, "element")) || mle.rowId == undefined;
 
         const lite = obj as Lite<Entity>
@@ -1144,7 +1144,7 @@ export class GraphExplorer {
         if (mod.Type == undefined) {
             let result = false;
             for (const p in obj) {
-                if (obj.hasOwnProperty(p)) {
+                if (obj.hasOwnProperty == null || obj.hasOwnProperty(p)) {
                     const propertyPrefix = dot(modelStatePrefix, p);
                     result = this.isModified(obj[p], propertyPrefix) || result;
                 }
