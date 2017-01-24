@@ -310,7 +310,61 @@ namespace Signum.Engine.Mailing
 
         public static Func<EmailMessageEntity, MailMessage> CustomCreateMailMessage;
 
-        public MailMessage CreateMailMessage(EmailMessageEntity email)
+
+        public virtual void Send(EmailMessageEntity email)
+        {
+            using (OperationLogic.AllowSave<EmailMessageEntity>())
+            {
+                if (!EmailLogic.Configuration.SendEmails)
+                {
+                    email.State = EmailMessageState.Sent;
+                    email.Sent = TimeZoneManager.Now;
+                    email.Save();
+                    return;
+                }
+
+                try
+                {
+                    SendInternal(email);
+
+                    email.State = EmailMessageState.Sent;
+                    email.Sent = TimeZoneManager.Now;
+                    email.Save();
+                }
+                catch (Exception ex)
+                {
+                    if (Transaction.InTestTransaction) //Transaction.IsTestTransaction
+                        throw;
+
+                    var exLog = ex.LogException().ToLite();
+
+                    try
+                    {
+                        using (Transaction tr = Transaction.ForceNew())
+                        {
+                            email.Exception = exLog;
+                            email.State = EmailMessageState.SentException;
+                            email.Save();
+                            tr.Commit();
+                        }
+                    }
+                    catch { } //error updating state for email  
+
+                    throw;
+                }
+            }
+        }
+
+        protected virtual void SendInternal(EmailMessageEntity email)
+        {
+            MailMessage message = CustomCreateMailMessage != null ? CustomCreateMailMessage(email) : CreateMailMessage(email);
+
+            using (HeavyProfiler.Log("SMTP-Send"))
+                EmailLogic.GetSmtpClient(email).Send(message);
+        }
+
+
+        protected virtual MailMessage CreateMailMessage(EmailMessageEntity email)
         {
             MailMessage message = new MailMessage()
             {
@@ -342,53 +396,6 @@ namespace Signum.Engine.Mailing
             message.Bcc.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.Bcc).Select(r => r.ToMailAddress()).ToList());
 
             return message;
-        }
-
-        public virtual void Send(EmailMessageEntity email)
-        {
-            using (OperationLogic.AllowSave<EmailMessageEntity>())
-            {
-                if (!EmailLogic.Configuration.SendEmails)
-                {
-                    email.State = EmailMessageState.Sent;
-                    email.Sent = TimeZoneManager.Now;
-                    email.Save();
-                    return;
-                }
-
-                try
-                {
-                    MailMessage message = CustomCreateMailMessage != null ? CustomCreateMailMessage(email) : CreateMailMessage(email);
-
-                    using (HeavyProfiler.Log("SMTP-Send"))
-                        EmailLogic.GetSmtpClient(email).Send(message);
-
-                    email.State = EmailMessageState.Sent;
-                    email.Sent = TimeZoneManager.Now;
-                    email.Save();
-                }
-                catch (Exception ex)
-                {
-                    if (Transaction.InTestTransaction) //Transaction.IsTestTransaction
-                        throw;
-
-                    var exLog = ex.LogException().ToLite();
-
-                    try
-                    {
-                        using (Transaction tr = Transaction.ForceNew())
-                        {
-                            email.Exception = exLog;
-                            email.State = EmailMessageState.SentException;
-                            email.Save();
-                            tr.Commit();
-                        }
-                    }
-                    catch { } //error updating state for email  
-
-                    throw;
-                }
-            }
         }
     }
 }
