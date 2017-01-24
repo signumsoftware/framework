@@ -69,7 +69,7 @@
     <Member Name="ThereAre0ThatReferThisEntity" Description="Es gibt '{0}', die auf diese Entität verweisen" />
     <Member Name="ThereAreRecordsIn0PointingToThisTableByColumn1" Description="Gibt es Datensätze in '{0}', die druch die Spalte '{1}' auf diese Tabelle verweisen" />
     <Member Name="TheresAlreadyA0With1EqualsTo2_G" Description="Es gibt bereits [m:einen|f:eine|n:ein] {0} mit {1}, [m:der|f:die|n:das] &quot;{2}&quot; entspricht" />
-    <Member Name="UnauthorizedAccessTo0Because1" Description="Nicht zuläassiger Zugang zu {0}, weil {1}" />
+    <Member Name="UnauthorizedAccessTo0Because1" Description="Nicht zulässiger Zugriff auf {0}, weil {1}" />
   </Type>
   <Type Name="Entity" Description="Entität" />
   <Type Name="EntityControlMessage">
