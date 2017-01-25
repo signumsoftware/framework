@@ -51,7 +51,10 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
                 return result;
         }
         
-        const tis = getTypeInfos(tr);
+        let tis = getTypeInfos(tr);
+
+        if (tis.length == 1 && tis[0] == undefined)
+            tis = []; 
 
         if (tr.isCollection) {
             if (tr.isEmbedded || tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
