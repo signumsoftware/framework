@@ -40,13 +40,13 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
                 return undefined;
 
             var ov = ctx.frame.entityComponent as any as IOperationVisible;
-            if (ov.isOperationVisible && !ov.isOperationVisible(eoc))
+            if (ov && ov.isOperationVisible && !ov.isOperationVisible(eoc))
                 return undefined;
 
             if (eos && eos.isVisible && !eos.isVisible(eoc))
                 return undefined;
 
-            if (eoc.settings && eoc.settings.hideOnCanExecute && eoc.canExecute)
+            if (eos && eos.hideOnCanExecute && eoc.canExecute)
                 return undefined;
 
             return eoc;
