@@ -94,29 +94,38 @@ namespace Signum.Engine.Printing
 
         public static ProcessEntity CreateProcess(FileTypeSymbol fileType = null)
         {
-            var query = Database.Query<PrintLineEntity>()
-                .Where(a => a.Package == null && a.State == PrintLineState.ReadyToPrint);
-
-            if (fileType != null)
-                query = query.Where(a => a.File.FileType == fileType);
-
-            if (query.Count() == 0)
-                return null;
-
-            var package = new PrintPackageEntity()
+            using (Transaction tr = new Transaction())
             {
-                Name = fileType?.ToString() + " (" + query.Count() + ")"
-            }.Save();
+                var query = Database.Query<PrintLineEntity>()
+                        .Where(a => a.State == PrintLineState.ReadyToPrint);
 
-            query.UnsafeUpdate().Set(a => a.Package, a => package.ToLite()).Execute();
+                if (fileType != null)
+                    query = query.Where(a => a.File.FileType == fileType);
 
-            return ProcessLogic.Create(PrintPackageProcess.PrintPackage, package).Save(); 
+                if (query.Count() == 0)
+                    return null;
+
+                var package = new PrintPackageEntity()
+                {
+                    Name = fileType?.ToString() + " (" + query.Count() + ")"
+                }.Save();
+
+                query.UnsafeUpdate()
+                    .Set(a => a.Package, a => package.ToLite())
+                    .Set(a => a.State, a => PrintLineState.Enqueued)
+                    .Execute();
+
+                var result =  ProcessLogic.Create(PrintPackageProcess.PrintPackage, package).Save();
+
+                return tr.Commit(result);
+            }
+
         }
 
         public static List<PrintStat> GetReadyToPrintStats()
         {
             return Database.Query<PrintLineEntity>()
-                .Where(a => a.Package == null && a.State == PrintLineState.ReadyToPrint)
+                .Where(a => a.State == PrintLineState.ReadyToPrint)
                 .GroupBy(a => a.File.FileType)
                 .Select(gr => new PrintStat
                 {

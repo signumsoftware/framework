@@ -34,12 +34,13 @@ namespace Signum.Entities.Printing
 
         static StateValidator<PrintLineEntity, PrintLineState> stateValidator =
             new StateValidator<PrintLineEntity, PrintLineState>
-            (n => n.State, n => n.PrintedOn)
+            (n => n.State, n => n.PrintedOn, n=>n.Package)
             {
-                { PrintLineState.ReadyToPrint,  false  },
-                { PrintLineState.Printed,       true   },
-                { PrintLineState.Error,         false  },
-                { PrintLineState.Cancelled,     false  }   
+                { PrintLineState.ReadyToPrint,  false, false },
+                { PrintLineState.Enqueued,      false, true  },
+                { PrintLineState.Printed,       true,  null  },
+                { PrintLineState.Error,         false, null  },
+                { PrintLineState.Cancelled,     false, null  }   
             };
         protected override string PropertyValidation(PropertyInfo pi)
         {
@@ -49,9 +50,10 @@ namespace Signum.Entities.Printing
     public enum PrintLineState
     {
         ReadyToPrint,
+        Enqueued,
         Printed,
         Cancelled,
-        Error
+        Error,
     }
 
     [AutoInit]
