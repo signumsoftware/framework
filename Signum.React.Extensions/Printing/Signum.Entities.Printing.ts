@@ -29,6 +29,7 @@ export module PrintLineOperation {
 export const PrintLineState = new EnumType<PrintLineState>("PrintLineState");
 export type PrintLineState =
     "ReadyToPrint" |
+    "Enqueued" |
     "Printed" |
     "Cancelled" |
     "Error";
