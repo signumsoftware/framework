@@ -151,6 +151,7 @@ export interface EntityOperationContext<T extends Entity> {
     operationInfo: OperationInfo;
     settings: EntityOperationSettings<T>;
     canExecute: string | undefined;
+    closeRequested?: boolean;
 }
 
 export class EntityOperationSettings<T extends Entity> extends OperationSettings {
@@ -165,6 +166,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
     group?: EntityOperationGroup | null;
     order?: number;
     style?: BsStyle;
+    withClose?: boolean;
 
     constructor(operationSymbol: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>, options: EntityOperationOptions<T>) {
         super(operationSymbol)
@@ -185,7 +187,7 @@ export interface EntityOperationOptions<T extends Entity> {
     text?: () => string;
     isVisible?: (ctx: EntityOperationContext<T>) => boolean;
     confirmMessage?: (ctx: EntityOperationContext<T>) => string;
-    onClick?: (ctx: EntityOperationContext<T>, event: React.MouseEvent) => void;
+    onClick?: (ctx: EntityOperationContext<T>, event: React.MouseEvent, closeRequested: boolean) => void;
     hideOnCanExecute?: boolean;
     group?: EntityOperationGroup | null;
     order?: number;
