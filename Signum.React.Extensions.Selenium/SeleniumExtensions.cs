@@ -230,6 +230,8 @@ namespace Signum.React.Selenium
 
         public static void ConsumeAlert(this RemoteWebDriver selenium)
         {
+            var alertPresent = selenium.Wait(() => selenium.IsAlertPresent());
+
             var alert = selenium.Wait(() => selenium.SwitchTo().Alert());
             
             alert.Accept();
