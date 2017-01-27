@@ -17,11 +17,14 @@ using System.Reflection;
 using Signum.Entities.Printing;
 using Signum.Entities;
 using System.IO;
+using Signum.Engine.Scheduler;
 
 namespace Signum.Engine.Printing
 {
     public static class PrintingLogic
     {
+        public static int DeleteFilesAfter = 24 * 60; //Minutes
+
         public static Action<PrintLineEntity> Print;
          
         static Expression<Func<PrintPackageEntity, IQueryable<PrintLineEntity>>> LinesExpression =
@@ -61,6 +64,31 @@ namespace Signum.Engine.Printing
                 ProcessLogic.Register(PrintPackageProcess.PrintPackage, new PrintPackageAlgorithm());
                 PermissionAuthLogic.RegisterPermissions(PrintPermission.ViewPrintPanel);
                 PrintLineGraph.Register();
+
+                SimpleTaskLogic.Register(PrintTask.RemoveOldFiles, () =>
+                {
+                    var lines = Database.Query<PrintLineEntity>().Where(a => a.State == PrintLineState.Printed).Where(b => b.CreationDate <= DateTime.Now.AddMinutes(-DeleteFilesAfter));
+                    foreach (var line in lines)
+                    {
+                        try
+                        {
+                            using (Transaction tr = new Transaction())
+                            {
+                                line.File.DeleteFileOnCommit();
+                                line.State = PrintLineState.PrintedAndDeleted;
+                                using (OperationLogic.AllowSave<PackageLineEntity>())
+                                    line.Save();
+
+                                tr.Commit();
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            e.LogException();
+                        }
+                    }
+                    return null;
+                });
             }
         }
 
@@ -205,8 +233,7 @@ namespace Signum.Engine.Printing
                 try
                 {
                     PrintingLogic.Print(line);
-                    line.File.DeleteFileOnCommit();
-
+                    
                     line.State = PrintLineState.Printed;
                     line.PrintedOn = TimeZoneManager.Now;
                     line.Save();

@@ -11,6 +11,7 @@ using Signum.Entities;
 using Signum.Entities.Files;
 using System.Reflection;
 using Signum.Entities.Authorization;
+using Signum.Entities.Scheduler;
 
 namespace Signum.Entities.Printing
 {
@@ -36,11 +37,12 @@ namespace Signum.Entities.Printing
             new StateValidator<PrintLineEntity, PrintLineState>
             (n => n.State, n => n.PrintedOn, n=>n.Package)
             {
-                { PrintLineState.ReadyToPrint,  false, false },
-                { PrintLineState.Enqueued,      false, true  },
-                { PrintLineState.Printed,       true,  null  },
-                { PrintLineState.Error,         false, null  },
-                { PrintLineState.Cancelled,     false, null  }   
+                { PrintLineState.ReadyToPrint,      false, false },
+                { PrintLineState.Enqueued,          false, true  },
+                { PrintLineState.Printed,           true,  null  },
+                { PrintLineState.Error,             false, null  },
+                { PrintLineState.Cancelled,         false, null  },
+                { PrintLineState.PrintedAndDeleted, true,  null  }  
             };
         protected override string PropertyValidation(PropertyInfo pi)
         {
@@ -54,6 +56,7 @@ namespace Signum.Entities.Printing
         Printed,
         Cancelled,
         Error,
+        PrintedAndDeleted
     }
 
     [AutoInit]
@@ -74,6 +77,12 @@ namespace Signum.Entities.Printing
     public static class PrintPermission
     {
         public static PermissionSymbol ViewPrintPanel;
+    }
+
+    [AutoInit]
+    public static class PrintTask
+    {
+        public static SimpleTaskSymbol RemoveOldFiles;
     }
 
 }
