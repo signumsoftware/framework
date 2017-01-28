@@ -2,8 +2,10 @@
 import * as React from 'react'
 import { WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEntity } from '../Signum.Entities.Workflow'
 import Modeler = require("bpmn-js/lib/Modeler");
-import { ModelEntity, ValidationMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { ModelEntity, ValidationMessage, parseLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
+import * as connectionIcons from './ConnectionIcons'
+import * as customRenderer from './CustomRenderer'
 
 require("!style!css!bpmn-js/assets/bpmn-font/css/bpmn-embedded.css");
 require("!style!css!diagram-js/assets/diagram-js.css");
@@ -15,10 +17,17 @@ export interface BpmnModelerComponentProps {
     entities: WorkflowEntitiesDictionary;
 }
 
+class CustomModeler extends Modeler {
+
+}
+
+CustomModeler.prototype._modules =
+    CustomModeler.prototype._modules.concat([customRenderer]);
+
 export default class BpmnModelerComponent extends React.Component<BpmnModelerComponentProps, void> {
 
     private modeler: Modeler;
-    private elementRegistry: BPMN.DiModule;
+    private elementRegistry: BPMN.ElementRegistry;
     private divArea: HTMLDivElement; 
 
     constructor(props: any) {
@@ -28,7 +37,30 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     private handleOnModelError = (err : string) => {
         if (err) {
             throw new Error('Error rendering the model ' + err);
+        } else {
+            this.configureModules();
+        }            
+    }
+
+    configureModules() {
+        var conIcons = this.modeler.get<connectionIcons.ConnectionIcons>('connectionIcons');
+        conIcons.hasAction = con => {
+            var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
+            return mod && mod.action || undefined;
         };
+
+        conIcons.hasCondition = con => {
+            var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
+            return mod && mod.condition || undefined;
+        };
+
+        var cusRenderer = this.modeler.get<customRenderer.CustomRenderer>('customRenderer');
+        cusRenderer.getDecisionResult = con => {
+            var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
+            return mod && mod.decisonResult || undefined;
+        }
+
+        conIcons.show();
     }
 
     private saveXmlAsync(options: BPMN.SaveOptions): Promise<string> {
@@ -63,8 +95,12 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
 
     private fireElementChanged(element: Object) {
 
-        this.modeler._emit('element.changed', { element });
+        this.modeler._emit('elements.changed', { elements: [element] });
     }
+
+    //private fireElementsChanged() {
+    //    this.modeler._emit("elements.changed", {});
+    //}
 
     private isPool(elementType: string): boolean {
         return (elementType == "bpmn:Participant");
@@ -144,14 +180,18 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     }
 
     componentDidMount() {
-        this.modeler = new Modeler({
+        this.modeler = new CustomModeler({
             container: this.divArea,
             height: 1000,
             keyboard: {
                 bindTo: document
             },
+            additionalModules: [
+                connectionIcons,                
+            ],
         });
-        this.elementRegistry = this.modeler.get('elementRegistry');
+        this.configureModules();
+        this.elementRegistry = this.modeler.get<BPMN.ElementRegistry>('elementRegistry');
         this.modeler.on('element.dblclick', 1500, this.handleElementDoubleClick);
         this.modeler.on('element.paste', 1500, this.handleElementPaste);
         this.modeler.on('shape.add', 1500, this.handleAddShapeOrConnection);
@@ -194,7 +234,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                 if (obj.element.label) {
                     var labelObj = this.elementRegistry.get(obj.element.label.id);
                     this.fireElementChanged(labelObj);
-                };
+                };           
             };
         }).done();
     }
@@ -246,7 +286,26 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         }
     }
 
+    setDiv = (div: HTMLDivElement) => {
+        if (this.divArea)
+            this.divArea.removeEventListener("click", this.clickConnectionIconEvent);
+
+        this.divArea = div;
+
+        if (this.divArea)
+            this.divArea.addEventListener("click", this.clickConnectionIconEvent);
+    }
+
+    clickConnectionIconEvent = (e: MouseEvent) => {
+        var d = e.target as HTMLDivElement;
+
+        if (d.classList && d.classList.contains("connection-icon")) {
+            const lite = parseLite(d.dataset["key"]);
+            Navigator.navigate(lite).done();
+        }
+    }
+
     render() {
-        return (<div ref={ de => this.divArea = de } />);
+        return (<div ref={this.setDiv} />);
     }
 }
