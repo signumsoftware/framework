@@ -39,7 +39,7 @@ namespace Signum.Entities.Chart
         public MList<ChartScriptParameterEntity> Parameters { get; set; } = new MList<ChartScriptParameterEntity>();
 
         [NotNullable, SqlDbType(Size = 100)]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string ColumnsStructure { get; set; }
 
         static Expression<Func<ChartScriptEntity, string>> ToStringExpression = e => e.Name;

@@ -73,9 +73,12 @@
   <Type Name="DisconnectedMachineState" />
   <Type Name="DisconnectedMessage" />
   <Type Name="DisconnectedSubsetMixin" />
+  <Type Name="DynamicBaseType" />
   <Type Name="DynamicExpressionEntity" />
   <Type Name="DynamicExpressionOperation" />
   <Type Name="DynamicExpressionTranslation" />
+  <Type Name="DynamicMixinConnectionEntity" />
+  <Type Name="DynamicMixinConnectionOperation" />
   <Type Name="DynamicPanelPermission" />
   <Type Name="DynamicRenameEntity" />
   <Type Name="DynamicSqlMigrationEntity" />
@@ -213,7 +216,11 @@
   <Type Name="Pop3ReceptionEntity" />
   <Type Name="Pop3ReceptionExceptionEntity" />
   <Type Name="PrintLineEntity" />
+  <Type Name="PrintLineOperation" />
+  <Type Name="PrintLineState" />
   <Type Name="PrintPackageEntity" />
+  <Type Name="PrintPackageProcess" />
+  <Type Name="PrintPermission" />
   <Type Name="ProcessAlgorithmSymbol" />
   <Type Name="ProcessEntity" />
   <Type Name="ProcessExceptionLineEntity" />
@@ -356,6 +363,7 @@
   <Type Name="WorkflowGatewayModel" />
   <Type Name="WorkflowGatewayOperation" />
   <Type Name="WorkflowGatewayType" />
+  <Type Name="WorkflowLaneActorsEval" />
   <Type Name="WorkflowLaneEntity" />
   <Type Name="WorkflowLaneModel" />
   <Type Name="WorkflowLaneOperation" />
