@@ -16,6 +16,8 @@ namespace Signum.Entities.Workflow
         [NotNullValidator]
         public WorkflowEntity Workflow { get; set; }
 
+        public Lite<CaseEntity> ParentCase { get; set; }
+
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Description { get; set; }

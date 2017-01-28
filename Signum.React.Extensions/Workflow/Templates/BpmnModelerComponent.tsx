@@ -115,7 +115,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     }
 
     private isTaskAnyway(elementType: string): boolean {
-        return this.isTask(elementType) || this.isUserTask(elementType);
+        return this.isTask(elementType) || this.isUserTask(elementType) || this.isCallActivity(elementType);
     }
 
     private isTask(elementType: string): boolean {
@@ -124,6 +124,10 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
 
     private isUserTask(elementType: string): boolean {
         return (elementType == "bpmn:UserTask");
+    }
+
+    private isCallActivity(elementType: string): boolean {
+        return (elementType == "bpmn:CallActivity");
     }
 
     private isGateway(elementType: string): boolean {
@@ -162,11 +166,13 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                 name: elementName
             });
 
-        if (this.isTask(elementType) || this.isUserTask(elementType))
+        if (this.isTaskAnyway(elementType))
             return WorkflowActivityModel.New({
-                    mainEntityType : this.getMainType(),
-                    name : elementName,
-                    type : (this.isUserTask(elementType) ? "DecisionTask" : "Task")
+                mainEntityType: this.getMainType(),
+                name: elementName,
+                type: (this.isCallActivity(elementType) ? "DecompositionTask" :
+                    this.isUserTask(elementType) ? "DecisionTask" :
+                        "Task")
             });
 
         if (this.isConnection(elementType))
@@ -226,8 +232,11 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                 this.props.entities[obj.element.id] = me;
                 obj.element.businessObject.name = (me as any).name;
 
-                if (this.isTaskAnyway(obj.element.type))
-                    obj.element.type = (me as WorkflowActivityModel).type == "DecisionTask" ? "bpmn:UserTask" : "bpmn:Task";
+                if (this.isTaskAnyway(obj.element.type)) {
+                    var dt = (me as WorkflowActivityModel).type;
+                    obj.element.type = dt == "DecompositionTask" ? "bpmn:CallActivity" :
+                        dt == "DecisionTask" ? "bpmn:UserTask" : "bpmn:Task";
+                }
 
                 this.fireElementChanged(obj.element);
 

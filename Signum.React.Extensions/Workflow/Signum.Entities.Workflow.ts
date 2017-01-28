@@ -12,7 +12,7 @@ import * as Dynamic from '../Dynamic/Signum.Entities.Dynamic'
 interface IWorkflowConditionEvaluator {}
 interface IWorkflowActionExecutor {}
 interface IWorkflowLaneActorsEvaluator {}
-
+interface ISubEntitiesEvaluator{}
 
 export interface WorkflowEntitiesDictionary {
     [bpmnElementId: string]: Entities.ModelEntity
@@ -102,6 +102,13 @@ export type DecisionResult =
     "Approve" |
     "Decline";
 
+export const DecompositionEntity = new Type<DecompositionEntity>("DecompositionEntity");
+export interface DecompositionEntity extends Entities.EmbeddedEntity {
+    Type: "DecompositionEntity";
+    workflow?: WorkflowEntity | null;
+    subEntitiesEval?: SubEntitiesEval | null;
+}
+
 export interface ICaseMainEntity extends Entities.Entity {
 }
 
@@ -128,6 +135,11 @@ export interface IWorkflowNodeEntity extends IWorkflowObjectEntity, Entities.Ent
 export interface IWorkflowObjectEntity extends Entities.Entity {
     xml?: WorkflowXmlEntity | null;
     name?: string | null;
+}
+
+export const SubEntitiesEval = new Type<SubEntitiesEval>("SubEntitiesEval");
+export interface SubEntitiesEval extends Dynamic.EvalEntity<ISubEntitiesEvaluator> {
+    Type: "SubEntitiesEval";
 }
 
 export const WorkflowActionEntity = new Type<WorkflowActionEntity>("WorkflowAction");
@@ -158,6 +170,7 @@ export interface WorkflowActivityEntity extends Entities.Entity, IWorkflowNodeEn
     viewName?: string | null;
     validationRules: Entities.MList<WorkflowActivityValidationEntity>;
     xml?: WorkflowXmlEntity | null;
+    decomposition?: DecompositionEntity | null;
 }
 
 export module WorkflowActivityMessage {
@@ -173,6 +186,7 @@ export interface WorkflowActivityModel extends Entities.ModelEntity {
     validationRules: Entities.MList<WorkflowActivityValidationEntity>;
     viewName?: string | null;
     description?: string | null;
+    decomposition?: DecompositionEntity | null;
 }
 
 export module WorkflowActivityOperation {
@@ -183,7 +197,8 @@ export module WorkflowActivityOperation {
 export const WorkflowActivityType = new EnumType<WorkflowActivityType>("WorkflowActivityType");
 export type WorkflowActivityType =
     "Task" |
-    "DecisionTask";
+    "DecisionTask" |
+    "DecompositionTask";
 
 export const WorkflowActivityValidationEntity = new Type<WorkflowActivityValidationEntity>("WorkflowActivityValidationEntity");
 export interface WorkflowActivityValidationEntity extends Entities.EmbeddedEntity {

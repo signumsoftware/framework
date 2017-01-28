@@ -57,6 +57,7 @@ export class WorkflowReplacementItemCombo extends React.Component<{ ctx: TypeCon
         const ctx = this.props.ctx;
         return (
             <select value={ctx.value || ""} className="form-control" onChange={this.handleChange}>
+                <option value="">{" - "}</option>
                 {this.props.previewTasks.map(pt => <option value={pt.BpmnId}>{pt.Name}</option>)}
             </select>
         );
