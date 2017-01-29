@@ -37,7 +37,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
     renderInternal() {
 
         const s = this.state;
-
+        const readOnly = this.state.ctx.readOnly;
         return (
             <FormGroup ctx={s.ctx!} labelText={s.labelText} labelProps={s.labelHtmlProps} {...{ ...this.baseHtmlProps(), ...this.state.formGroupHtmlProps } }>
                 <div className="SF-entity-strip SF-control-container">
@@ -46,7 +46,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                             mlistItemContext(s.ctx).map((mlec, i) =>
                                 (<EntityStripElement key={i}
                                     ctx={mlec} autoComplete={s.autoComplete}
-                                    onRemove={this.canRemove(mlec.value) ? e => this.handleRemoveElementClick(e, i) : undefined}
+                                    onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
                                     onView={this.canView(mlec.value) ? e => this.handleViewElement(e, i) : undefined}
                                     />))
                         }
