@@ -864,7 +864,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
                     {this.props.findOptions.navigate &&
                         <td>
-                            {((qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row)).last("EntityFormatRules").formatter)(row, resultTable.columns)}
+                            {((qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row)).last("EntityFormatRules").formatter)(row, resultTable.columns, this)}
                         </td>
                     }
 
@@ -877,6 +877,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
             return this.wrapError(mark, i, tr);
         });
+    }
+
+    handleOnNavigated = (lite: Lite<Entity>) => {
+        if (this.props.avoidAutoRefresh)
+            return;
+
+        this.doSearch();
     }
 
     getMarkedRow(entity: Lite<Entity>): MarkedRow | undefined {

@@ -865,13 +865,13 @@ export interface EntityFormatRule {
 }
 
 
-export type EntityFormatter = (row: ResultRow, columns: string[]) => React.ReactChild | undefined;
+export type EntityFormatter = (row: ResultRow, columns: string[], sc: SearchControl) => React.ReactChild | undefined;
 
 export const entityFormatRules: EntityFormatRule[] = [
     {
         name: "View",
         isApplicable: row=> true,
-        formatter: row => !row.entity || !isNavigable(row.entity.EntityType, undefined, true) ? undefined :
-            <EntityLink lite={row.entity} inSearch={true}>{EntityControlMessage.View.niceToString() }</EntityLink>
+        formatter: (row, columns, sc) => !row.entity || !isNavigable(row.entity.EntityType, undefined, true) ? undefined :
+            <EntityLink lite={row.entity} inSearch={true} onNavigated={sc.handleContextOnHide}>{EntityControlMessage.View.niceToString()}</EntityLink>
     },
 ];
