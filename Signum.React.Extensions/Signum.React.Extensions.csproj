@@ -216,6 +216,7 @@
     <TypeScriptCompile Include="Files\FileUploader.tsx" />
     <TypeScriptCompile Include="Files\FileDownloader.tsx" />
     <TypeScriptCompile Include="Dynamic\View\DynamicView.tsx" />
+    <TypeScriptCompile Include="HtmlEditor\HtmlEditor.tsx" />
     <TypeScriptCompile Include="Mailing\Templates\IFrameRenderer.tsx" />
     <Compile Include="Map\MapServer.cs" />
     <Compile Include="Map\MapController.cs" />
@@ -248,6 +249,7 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="Printing\Templates\PrintPackage.tsx" />
     <TypeScriptCompile Include="Printing\Templates\PrintLine.tsx" />
+    <TypeScriptCompile Include="HtmlEditor\react-rte.d.ts" />
     <TypeScriptCompile Include="Toolbar\QueryToolbarConfig.ts" />
     <TypeScriptCompile Include="Toolbar\Signum.Entities.Toolbar.ts">
       <DependentUpon>Signum.Entities.Toolbar.t4s</DependentUpon>
