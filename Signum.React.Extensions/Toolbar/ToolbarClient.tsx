@@ -50,7 +50,7 @@ export abstract class ToolbarConfig<T extends Entity> {
     abstract navigateTo(element: ToolbarResponse<T>): Promise<string>;
 
 
-    handleNavigateClick(e: React.MouseEvent, res: ToolbarResponse<any>) {
+    handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {
 
         var openWindow = e.ctrlKey || e.button == 1;
 

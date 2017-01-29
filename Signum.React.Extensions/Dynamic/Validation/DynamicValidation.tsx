@@ -196,7 +196,7 @@ interface PropertyRouteComboProps {
 
 class PropertyRouteCombo extends React.Component<PropertyRouteComboProps, void> {
 
-    handleChange = (e: React.FormEvent) => {
+    handleChange = (e: React.FormEvent<any>) => {
         var currentValue = (e.currentTarget as HTMLSelectElement).value;
         this.props.ctx.value = currentValue ? PropertyRouteEntity.New({ path : currentValue, rootType : this.props.type }) : null;
         this.forceUpdate();

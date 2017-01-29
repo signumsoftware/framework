@@ -47,17 +47,17 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         (p.refreshView || p.dn.context.refreshView)();
     }
 
-    handleChangeCheckbox = (e: React.MouseEvent) => {
+    handleChangeCheckbox = (e: React.ChangeEvent<any>) => {
         var sender = (e.currentTarget as HTMLInputElement);
         this.updateValue(sender.checked);
     }
 
-    handleChangeSelectOrInput = (e: React.MouseEvent) => {
+    handleChangeSelectOrInput = (e: React.ChangeEvent<any>) => {
         var sender = (e.currentTarget as HTMLSelectElement | HTMLInputElement);
         this.updateValue(sender.value);
     }
 
-    handleToggleExpression = (e: React.MouseEvent) => {
+    handleToggleExpression = (e: React.MouseEvent<any>) => {
         e.preventDefault();
         e.stopPropagation();
         var p = this.props;
@@ -218,7 +218,7 @@ export class NullableCheckBox extends React.Component<NullableCheckBoxProps, voi
         }
     }
 
-    handleClick = (e: React.MouseEvent) => {
+    handleClick = (e: React.MouseEvent<any>) => {
         e.preventDefault();
         switch (this.props.value) {
             case true: this.props.onChange(false); break;
@@ -245,7 +245,7 @@ export interface FieldComponentProps  {
 
 export class FieldComponent extends React.Component<FieldComponentProps, void> {
     
-    handleChange = (e: React.MouseEvent) => {
+    handleChange = (e: React.ChangeEvent<any>) => {
         var sender = (e.currentTarget as HTMLSelectElement);
 
         const node = this.props.dn.node;
@@ -324,7 +324,7 @@ export class CollapsableTypeHelp extends React.Component<{ initialTypeName?: str
         this.state = { open: false };
     }
 
-    handleHelpClick = (e: React.FormEvent) => {
+    handleHelpClick = (e: React.FormEvent<any>) => {
         e.preventDefault();
         this.setState({
             open: !this.state.open

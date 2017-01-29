@@ -46,7 +46,7 @@ export default class ImportAssetsPage extends React.Component<ImportAssetsPagePr
         );
     }
 
-    handleInputChange = (e: React.FormEvent) => {
+    handleInputChange = (e: React.FormEvent<any>) => {
         let f = (e.currentTarget as HTMLInputElement).files![0];
         let fileReader = new FileReader();
         fileReader.onerror = e => { setTimeout(() => { throw (e as any).error; }, 0); };

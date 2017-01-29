@@ -118,13 +118,13 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
         );
     }
 
-    handleSetColor = (e: React.FormEvent) => {
+    handleSetColor = (e: React.FormEvent<any>) => {
         this.setState({
             color: (e.currentTarget as HTMLInputElement).value
         });
     }
 
-    handleFullscreenClick = (e: React.MouseEvent) => {
+    handleFullscreenClick = (e: React.MouseEvent<any>) => {
 
         e.preventDefault();
 

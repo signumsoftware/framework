@@ -40,15 +40,15 @@ export default class CacheStatisticsPage extends React.Component<CacheStatistics
             }));
     }
 
-    handleDisabled = (e: React.MouseEvent) => {
+    handleDisabled = (e: React.MouseEvent<any>) => {
         API.disable().then(() => this.loadState()).done();
     }
 
-    handleEnabled = (e: React.MouseEvent) => {
+    handleEnabled = (e: React.MouseEvent<any>) => {
         API.enable().then(() => this.loadState()).done();
     }
 
-    handleClear = (e: React.MouseEvent) => {
+    handleClear = (e: React.MouseEvent<any>) => {
         API.clear().then(() => this.loadState()).done();
     }
 

@@ -561,7 +561,7 @@ export interface CustomFieldsetComponentProps<T> {
 
 export class CustomFieldsetComponent<T> extends React.Component<CustomFieldsetComponentProps<T>, void> {
 
-    handleChecked = (e: React.FormEvent) => {
+    handleChecked = (e: React.FormEvent<any>) => {
         let val = this.props.binding.getValue();
         if (val)
             this.props.binding.deleteValue();
@@ -639,7 +639,7 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
         this.setState({ activeIndex });
     }
 
-    handleOnRemove = (event: React.MouseEvent, index: number) => {
+    handleOnRemove = (event: React.MouseEvent<any>, index: number) => {
         event.preventDefault();
         event.stopPropagation();
         var old = this.props.properties[index];
@@ -654,21 +654,21 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
             this.props.onRemove(old);
     }
 
-    handleOnMoveUp = (event: React.MouseEvent, index: number) => {
+    handleOnMoveUp = (event: React.MouseEvent<any>, index: number) => {
         event.preventDefault();
         event.stopPropagation();
         const newIndex = this.props.properties.moveUp(index);
         if (newIndex != index) {
             if (index == this.state.activeIndex)
-                this.setState({ activeIndex: this.state.activeIndex-- });
+                this.setState({ activeIndex: this.state.activeIndex-1 });
             else if (newIndex == this.state.activeIndex)
-                this.setState({ activeIndex: this.state.activeIndex++ });
+                this.setState({ activeIndex: this.state.activeIndex+1 });
         }
 
         this.props.dc.refreshView();
     }
 
-    handleOnMoveDown = (event: React.MouseEvent, index: number) => {
+    handleOnMoveDown = (event: React.MouseEvent<any>, index: number) => {
         event.preventDefault();
         event.stopPropagation();
         const newIndex = this.props.properties.moveDown(index);
@@ -683,7 +683,7 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
         this.props.dc.refreshView();
     }
 
-    handleCreateClick = (event: React.SyntheticEvent) => {
+    handleCreateClick = (event: React.SyntheticEvent<any>) => {
         var p = {
             uid: this.createGuid(),
             name: "Name",
@@ -938,27 +938,27 @@ export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterC
         this.forceUpdate();
     }
 
-    handleCreateClick = (event: React.SyntheticEvent) => {
+    handleCreateClick = (event: React.SyntheticEvent<any>) => {
         event.preventDefault();
         this.props.list.push("");
         this.forceUpdate();
     }
 
-    handleOnRemove = (event: React.MouseEvent, index: number) => {
+    handleOnRemove = (event: React.MouseEvent<any>, index: number) => {
         event.preventDefault();
         event.stopPropagation();
         this.props.list.removeAt(index);
         this.forceUpdate();
     }
 
-    handleOnMoveUp = (event: React.MouseEvent, index: number) => {
+    handleOnMoveUp = (event: React.MouseEvent<any>, index: number) => {
         event.preventDefault();
         event.stopPropagation();
         this.props.list.moveUp(index);
         this.forceUpdate();
     }
 
-    handleOnMoveDown = (event: React.MouseEvent, index: number) => {
+    handleOnMoveDown = (event: React.MouseEvent<any>, index: number) => {
         event.preventDefault();
         event.stopPropagation();
         this.props.list.moveDown(index);
@@ -1030,7 +1030,7 @@ export interface ValidatorRepeaterComponentProps {
 export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeaterComponentProps, void> {
 
 
-    handleOnRemove = (event: React.MouseEvent, index: number) => {
+    handleOnRemove = (event: React.MouseEvent<any>, index: number) => {
         event.preventDefault();
         var list = this.props.property.validators!;
         list.removeAt(index);
@@ -1039,7 +1039,7 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
         this.props.dc.refreshView();
     }
 
-    handleCreateClick = (event: React.SyntheticEvent) => {
+    handleCreateClick = (event: React.SyntheticEvent<any>) => {
 
         let val = this.props.property.validators!;
         if (val == null)

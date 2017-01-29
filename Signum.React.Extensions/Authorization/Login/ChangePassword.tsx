@@ -18,7 +18,7 @@ export default class ChangePassword extends React.Component<{}, { modelState?: M
     }
     
 
-    handleSubmit(e: React.FormEvent) {
+    handleSubmit(e: React.FormEvent<any>) {
 
         e.preventDefault();
 
@@ -49,7 +49,7 @@ export default class ChangePassword extends React.Component<{}, { modelState?: M
         return this.state.modelState && this.state.modelState[field];
     }
 
-    handlePasswordBlur = (event: React.SyntheticEvent) => {
+    handlePasswordBlur = (event: React.SyntheticEvent<any>) => {
         
         if (this.newPassword.value && this.newPassword2.value && this.newPassword2.value != this.newPassword.value)
             this.setState({ modelState: { ["newPassword"]: AuthMessage.PasswordsAreDifferent.niceToString() } });

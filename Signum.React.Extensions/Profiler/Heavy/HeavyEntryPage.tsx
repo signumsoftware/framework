@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import * as d3 from 'd3'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
+import { } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
@@ -188,7 +189,7 @@ export class HeavyProfilerDetailsD3 extends React.Component<{entries: HeavyProfi
 
     chartContainer:HTMLDivElement;
 
-    handleWeel = (e: React.WheelEvent)=>{
+    handleWeel = (e: React.WheelEvent<any>)=>{
 
         e.preventDefault();
 

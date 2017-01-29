@@ -8,7 +8,11 @@
     "noImplicitAny": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,
-    "strictNullChecks": true
-  },
-  "exclude": [ "node_modules" ]
+    "strictNullChecks": true,
+    "baseUrl": ".",
+    "paths": {
+      "moment": [ "../../Framework/Signum.React/node_modules/moment" ],
+      "*": [ "../../Framework/Signum.React/node_modules/@types/*", "*" ]
+    }
+  }
 }

@@ -281,7 +281,7 @@ function isActive(allowed: TypeAllowed | null, basicAllowed: TypeAllowedBasic) {
 }
 
 
-function select(current: TypeAllowed | null, basicAllowed: TypeAllowedBasic, e: React.MouseEvent) {
+function select(current: TypeAllowed | null, basicAllowed: TypeAllowedBasic, e: React.MouseEvent<any>) {
     if (!e.shiftKey || current == null)
         return basicAllowed as TypeAllowedBasic;
 

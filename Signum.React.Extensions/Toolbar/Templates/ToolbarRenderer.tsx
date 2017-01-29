@@ -107,7 +107,7 @@ export default class ToolbarRenderer extends React.Component<void, ToolbarRender
         }
     }
 
-    handleClick = (e: React.MouseEvent, res: ToolbarClient.ToolbarResponse<any>, topRes: ToolbarClient.ToolbarResponse<any>) => {
+    handleClick = (e: React.MouseEvent<any>, res: ToolbarClient.ToolbarResponse<any>, topRes: ToolbarClient.ToolbarResponse<any>) => {
 
         this.state.avoidCollapse.push(topRes);
 

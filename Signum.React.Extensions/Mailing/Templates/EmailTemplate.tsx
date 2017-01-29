@@ -154,7 +154,7 @@ export class EmailTemplateMessageComponent extends React.Component<EmailTemplate
         this.state = { showPreview: false }
     }
 
-    handlePreviewClick = (e: React.FormEvent) => {
+    handlePreviewClick = (e: React.FormEvent<any>) => {
         e.preventDefault();
         this.setState({
             showPreview: !this.state.showPreview

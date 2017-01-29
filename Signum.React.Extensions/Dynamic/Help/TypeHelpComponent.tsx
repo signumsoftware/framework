@@ -103,7 +103,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
             .done();
     }
 
-    handleGoHistory = (e: React.MouseEvent, newIndex: number) => {
+    handleGoHistory = (e: React.MouseEvent<any>, newIndex: number) => {
         e.preventDefault();
         this.setState({ historyIndex: newIndex });
         this.loadMembers(this.state.history[newIndex]);
@@ -214,7 +214,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
         }
     }
 
-    handleOnContextMenuClick = (m: DynamicClient.TypeMemberHelp, e: React.MouseEvent) => {
+    handleOnContextMenuClick = (m: DynamicClient.TypeMemberHelp, e: React.MouseEvent<any>) => {
 
         if (!m.propertyString)
             return;
@@ -234,18 +234,16 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
     renderMember(h: DynamicClient.TypeHelp, m: DynamicClient.TypeMemberHelp, index: number): React.ReactChild {
 
         var className = "sf-dynamic-member-name";
-        var onClick: React.MouseEventHandler | undefined;
-        var onContextMenu: React.MouseEventHandler | undefined;
+        var onClick: React.MouseEventHandler<any> | undefined;
+        if (this.props.onMemberClick) {
+            className = classes(className, "sf-dynamic-member-click");
+            onClick = () => this.handleOnMemberClick(m);
+        }
 
-        
-            if (this.props.onMemberClick) {
-                className = classes(className, "sf-dynamic-member-click");
-                onClick = () => this.handleOnMemberClick(m);
-            }
-
-            if (this.props.renderContextMenu) {
-                onContextMenu = (e) => this.handleOnContextMenuClick(m, e);
-            }
+        var onContextMenu: React.MouseEventHandler<any> | undefined;
+        if (this.props.renderContextMenu) {
+            onContextMenu = (e) => this.handleOnContextMenuClick(m, e);
+        }
 
         return (
             <li key={index}>

@@ -146,19 +146,19 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
         );
     }
 
-    handleSetFilter = (e: React.FormEvent) => {
+    handleSetFilter = (e: React.FormEvent<any>) => {
         this.setState({
             filter: (e.currentTarget as HTMLInputElement).value
         });
     }
 
-    handleSetColor = (e: React.FormEvent) => {
+    handleSetColor = (e: React.FormEvent<any>) => {
         this.setState({
             color: (e.currentTarget as HTMLInputElement).value
         });
     }
 
-    handleFullscreenClick = (e: React.MouseEvent) => {
+    handleFullscreenClick = (e: React.MouseEvent<any>) => {
 
         e.preventDefault();
 

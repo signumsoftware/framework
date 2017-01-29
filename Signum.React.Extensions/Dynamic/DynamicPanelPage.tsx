@@ -33,7 +33,7 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
         Navigator.currentHistory.push("~/dynamic/panel?step=" + key);
     }
 
-    handleErrorClick = (e: React.MouseEvent) => {
+    handleErrorClick = (e: React.MouseEvent<any>) => {
         e.preventDefault();
         this.handleSelect("restartServer");
     }
@@ -105,7 +105,7 @@ export class CompileStep extends React.Component<void, DynamicCompileStepState>{
         this.state = {};
     }
 
-    handleCompile = (e: React.MouseEvent) => {
+    handleCompile = (e: React.MouseEvent<any>) => {
         e.preventDefault();
         API.getCompilationErrors()
             .then(errors => this.setState({ complationErrors: errors, selectedErrorIndex: undefined }))
@@ -203,7 +203,7 @@ export class RestartServerStep extends React.Component<RestartServerStepProps, R
         this.state = {};
     }
 
-    handleRestartApplication = (e: React.MouseEvent) => {
+    handleRestartApplication = (e: React.MouseEvent<any>) => {
         e.preventDefault();
 
         API.restartServer()
@@ -263,7 +263,7 @@ export class ErrorBlock extends React.Component<{ error: WebApiHttpError }, { sh
         };
     }
 
-    handleShowStackTrace = (e: React.MouseEvent) => {
+    handleShowStackTrace = (e: React.MouseEvent<any>) => {
         e.preventDefault();
         this.setState({ showDetails: !this.state.showDetails });
     }
@@ -299,7 +299,7 @@ interface RefreshClientsStepState {
 
 export class RefreshClientsStep extends React.Component<{}, RefreshClientsStepState>{
 
-    handleRefreshClient = (e: React.MouseEvent) => {
+    handleRefreshClient = (e: React.MouseEvent<any>) => {
         e.preventDefault();
         window.location.reload(true);
     }

@@ -119,7 +119,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
     }
 
 
-    handleRowDragOver = (e: React.DragEvent, row: number) => {
+    handleRowDragOver = (e: React.DragEvent<any>, row: number) => {
         e.dataTransfer.dropEffect = "move";
         e.preventDefault();
         if (this.state.currentRow != row) {
@@ -133,7 +133,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
         this.forceUpdate();
     }
 
-    handleRowDrop = (e: React.DragEvent, row: number) => {
+    handleRowDrop = (e: React.DragEvent<any>, row: number) => {
 
         const list = this.state.ctx.value!.map(a => a.element as ModifiableEntity & IGridEntity);
 
@@ -155,7 +155,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
     }
 
 
-    handleCreateClick = (event: React.SyntheticEvent) => {
+    handleCreateClick = (event: React.SyntheticEvent<any>) => {
 
         event.preventDefault();
 
@@ -187,7 +187,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
             }).done();
     };
 
-    handleOnDrop = (event: React.SyntheticEvent) => {
+    handleOnDrop = (event: React.SyntheticEvent<any>) => {
 
 
         const s = this.state;
@@ -201,7 +201,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
 
 
 
-    handleResizeDragStart = (resizer: "left" | "right", e: React.DragEvent, mlec: TypeContext<ModifiableEntity & IGridEntity>) => {
+    handleResizeDragStart = (resizer: "left" | "right", e: React.DragEvent<any>, mlec: TypeContext<ModifiableEntity & IGridEntity>) => {
         e.dataTransfer.effectAllowed = "move";
         const de = e.nativeEvent as DragEvent;
 
@@ -214,7 +214,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
         this.forceUpdate();
     }
 
-    handleMoveDragStart = (e: React.DragEvent, mlec: TypeContext<ModifiableEntity & IGridEntity>) => {
+    handleMoveDragStart = (e: React.DragEvent<any>, mlec: TypeContext<ModifiableEntity & IGridEntity>) => {
         e.dataTransfer.effectAllowed = "move";
         const de = e.nativeEvent as DragEvent;
 
@@ -227,7 +227,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
         this.forceUpdate();
     }
 
-    handleItemsRowDragOver = (e: React.DragEvent, row: number) => {
+    handleItemsRowDragOver = (e: React.DragEvent<any>, row: number) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = "move";
         const de = e.nativeEvent as DragEvent;
@@ -303,9 +303,9 @@ export interface EntityGridItemProps {
     bsStyle?: string;
     children?: React.ReactNode;
 
-    onResizerDragStart?: (resizer: "left" | "right", e: React.DragEvent) => void;
-    onTitleDragStart?: (e: React.DragEvent) => void;
-    onRemove?: (e: React.MouseEvent) => void;
+    onResizerDragStart?: (resizer: "left" | "right", e: React.DragEvent<any>) => void;
+    onTitleDragStart?: (e: React.DragEvent<any>) => void;
+    onRemove?: (e: React.MouseEvent<any>) => void;
 }
 
 

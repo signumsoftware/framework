@@ -37,13 +37,13 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
             .then(entries => this.setState({ entries }));
     }
 
-    handleClear = (e: React.MouseEvent) => {
+    handleClear = (e: React.MouseEvent<any>) => {
         API.Heavy.clear()
             .then(() => this.loadEntries())
             .done();
     }
 
-    handleUpdate = (e: React.MouseEvent) => {
+    handleUpdate = (e: React.MouseEvent<any>) => {
         this.loadEntries().done();
         this.loadIsEnabled().done();
     }
@@ -65,7 +65,7 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
         API.Heavy.download(undefined);
     }
 
-    handleInputChange = (e: React.FormEvent) => {
+    handleInputChange = (e: React.FormEvent<any>) => {
         let f = (e.currentTarget as HTMLInputElement).files![0];
         this.setState({ fileToUpload: f });
     }

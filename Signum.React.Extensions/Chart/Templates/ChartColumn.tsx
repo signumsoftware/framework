@@ -35,7 +35,7 @@ export class ChartColumn extends React.Component<ChartColumnProps, { }> {
         this.props.onToggleInfo();
     }
 
-    handleGroupChecked = (e: React.FormEvent) => {
+    handleGroupChecked = (e: React.FormEvent<any>) => {
 
         this.props.chartBase.groupResults = (e.currentTarget as HTMLInputElement).checked;
         ChartClient.synchronizeColumns(this.props.chartBase);
