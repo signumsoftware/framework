@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using static Signum.Engine.Maps.SchemaBuilder;
 using Signum.Entities.Dynamic;
 using Signum.Engine.Basics;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Engine.Workflow
 {
@@ -99,22 +100,35 @@ namespace Signum.Engine.Workflow
                     });
 
 
+                new Graph<CaseNotificationEntity>.Execute(CaseNotificationOperation.SetRemarks)
+                {
+                    Execute = (e, args) =>
+                    {
+                        e.Remarks = args.GetArg<string>();
+                    },
+                }.Register();
+
+
                 dqm.RegisterQuery(CaseActivityQuery.Inbox, () =>
-                        from qn in Database.Query<CaseNotificationEntity>()
-                        where qn.User == UserEntity.Current.ToLite()
-                        let ca = qn.CaseActivity.Entity
-                        let sender = ca.Previous.Entity.DoneBy.Entity
+                        from cn in Database.Query<CaseNotificationEntity>()
+                        where cn.User == UserEntity.Current.ToLite()
+                        let ca = cn.CaseActivity.Entity
+                        let previous = ca.Previous.Entity
                         select new
                         {
-                            Entity = qn.CaseActivity,
-                            ca.WorkflowActivity.Name,
-                            Sender = sender.ToLite(sender.UserName + " (" + qn.Actor.ToString() + ")"),
-                            ca.Case.Description,
+                            Entity = cn.CaseActivity,
                             ca.StartDate,
-                            ca.DoneBy,
-                            ca.DoneDate,
-                            qn.State,
-                            qn.User,
+                            Activity = new ActivityWithRemarks
+                            {
+                                activity = ca.WorkflowActivity.ToLite(),
+                                notification = cn.ToLite(),
+                                remarks = cn.Remarks
+                            },
+                            Case = ca.Case.Description,
+                            Sender = previous.DoneBy,
+                            SenderNote = previous.Note,
+                            cn.State,
+                            cn.Actor,
                         });
 
                 sb.Schema.WhenIncluded<DynamicTypeEntity>(() =>
@@ -131,6 +145,13 @@ namespace Signum.Engine.Workflow
 
                 CaseActivityGraph.Register();
             }
+        }
+
+        public class ActivityWithRemarks : IQueryTokenBag
+        {
+            public Lite<WorkflowActivityEntity> activity { get; set; }
+            public Lite<CaseNotificationEntity> notification { get; set; }
+            public string remarks { get; set; }
         }
 
         static readonly GenericInvoker<Action> giFixCaseDescriptions = new GenericInvoker<Action>(() => FixCaseDescriptions<Entity>());
@@ -458,7 +479,8 @@ namespace Signum.Engine.Workflow
                 if(Database.Query<CaseEntity>().Where(a => a.ParentCase.RefersTo(parentCase)).All(a => a.FinishDate.HasValue))
                 {
                     var decompositionCaseActivity = parentCase.CaseActivities().Where(ca => ca.WorkflowActivity.Decomposition != null && ca.WorkflowActivity.Decomposition.Workflow.Is(childWorkflow) && ca.DoneDate == null).SingleEx();
-                    
+                    var lastActivities = Database.Query<CaseEntity>().Where(c => c.ParentCase.RefersTo(parentCase)).Select(c => c.CaseActivities().OrderByDescending(ca => ca.DoneDate).FirstOrDefault()).ToList();
+                    decompositionCaseActivity.Note = lastActivities.NotNull().Where(ca => ca.Note.HasText()).ToString(a => $"{a.DoneBy}: {a.Note}", "\r\n");
                     ExecuteStep(decompositionCaseActivity, null);
                 }
             }
@@ -485,6 +507,7 @@ namespace Signum.Engine.Workflow
                     foreach (var se in subEntities)
                     {
                         var caseActivity = subWorkflow.ConstructFrom(CaseActivityOperation.CreateCaseFromWorkflow, se, ca.Case.ToLite());
+                        caseActivity.Previous = ca.ToLite();
                         caseActivity.Execute(CaseActivityOperation.Register);
                     }
                 }

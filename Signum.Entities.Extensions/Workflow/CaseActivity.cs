@@ -30,6 +30,10 @@ namespace Signum.Entities.Workflow
         public DateTime StartDate { get; set; } = TimeZoneManager.Now;
         public Lite<CaseActivityEntity> Previous { get; set; }
 
+        [SqlDbType(Size = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = true, MultiLine = true)]
+        public string Note { get; set; }
+
         public DateTime? DoneDate { get; set; }
         public Lite<UserEntity> DoneBy { get; set; }
 
@@ -86,7 +90,12 @@ namespace Signum.Entities.Workflow
         CaseContainsOtherActivities,
         NoNextConnectionThatSatisfiesTheConditionsFound,
         [Description("Case is a decomposition of {0}")]
-        CaseIsADecompositionOf0
+        CaseIsADecompositionOf0,
+        [Description("From {0} on {1}")]
+        From0On1,
+        [Description("Done by {0} on {1}")]
+        DoneBy0On1,
+        PersonalRemarksForThisNotification,
     }
 
 
