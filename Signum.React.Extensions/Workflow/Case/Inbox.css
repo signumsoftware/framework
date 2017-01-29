@@ -16,3 +16,16 @@
 .done-by-other-row {
     color: brown;
 }
+
+.case-remarks:focus{
+    outline:none;
+}
+
+.case-remarks-pencil {
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+tr:hover .case-remarks-pencil{
+    opacity: 1;
+}

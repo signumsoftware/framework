@@ -9,7 +9,7 @@ import * as customRenderer from './CustomRenderer'
 
 require("!style!css!bpmn-js/assets/bpmn-font/css/bpmn-embedded.css");
 require("!style!css!diagram-js/assets/diagram-js.css");
-require("!style!css!./Workflow.css");
+require("!style!css!./Bpmn.css");
 
 export interface BpmnModelerComponentProps {
     workflow: WorkflowEntity;

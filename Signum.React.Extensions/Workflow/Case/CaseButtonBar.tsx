@@ -1,0 +1,49 @@
+﻿
+import * as React from 'react'
+import * as moment from 'moment'
+import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
+import { Modal, ModalProps, ModalClass, ButtonToolbar, Button } from 'react-bootstrap'
+import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals'
+import { TypeContext, StyleOptions, EntityFrame  } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines'
+import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
+import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
+import { EntityPack, Entity, Lite, JavascriptMessage, NormalWindowMessage, entityInfo, getToString, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from '../../../../Framework/Signum.React/Scripts/Frames/Widgets'
+import ValidationErrors from '../../../../Framework/Signum.React/Scripts/Frames/ValidationErrors'
+import ButtonBar from '../../../../Framework/Signum.React/Scripts/Frames/ButtonBar'
+import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperation, CaseActivityMessage } from '../Signum.Entities.Workflow'
+import * as WorkflowClient from '../WorkflowClient'
+
+interface CaseButtonBarProps {
+    frame: EntityFrame<CaseActivityEntity>;
+    pack: EntityPack<CaseActivityEntity>;
+}
+
+export default class CaseButtonBar extends React.Component<CaseButtonBarProps, void>{
+
+    render() {
+
+        var a = this.props.pack.entity;
+
+        if (a.doneDate != null) {
+            return (
+                <div className="workflow-buttons">
+                    {CaseActivityMessage.DoneBy0On1.niceToString().formatHtml(
+                        <strong>{a.doneBy && a.doneBy.toStr}</strong>,
+                        a.doneDate && <strong>{moment(a.doneDate).format("L LT")} ({moment(a.doneDate).fromNow()})</strong>)
+                    }
+                </div>
+            );
+        }
+
+        const ctx = new TypeContext(undefined, undefined, PropertyRoute.root(CaseActivityEntity), new ReadonlyBinding(a, "act"));
+        return (
+            <div className="workflow-buttons">
+                <ButtonBar frame={this.props.frame} pack={this.props.pack} />
+                <ValueLine ctx={ctx.subCtx(a => a.note)} formGroupStyle="None" placeholderLabels={true} />
+            </div>
+        );
+    }
+}

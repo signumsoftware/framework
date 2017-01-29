@@ -33,6 +33,7 @@ export interface CaseActivityEntity extends Entities.Entity {
     originalWorkflowActivityName: string;
     startDate: string;
     previous: Entities.Lite<CaseActivityEntity> | null;
+    note: string | null;
     doneDate: string | null;
     doneBy: Entities.Lite<Authorization.UserEntity> | null;
 }
@@ -41,6 +42,9 @@ export module CaseActivityMessage {
     export const CaseContainsOtherActivities = new MessageKey("CaseActivityMessage", "CaseContainsOtherActivities");
     export const NoNextConnectionThatSatisfiesTheConditionsFound = new MessageKey("CaseActivityMessage", "NoNextConnectionThatSatisfiesTheConditionsFound");
     export const CaseIsADecompositionOf0 = new MessageKey("CaseActivityMessage", "CaseIsADecompositionOf0");
+    export const From0On1 = new MessageKey("CaseActivityMessage", "From0On1");
+    export const DoneBy0On1 = new MessageKey("CaseActivityMessage", "DoneBy0On1");
+    export const PersonalRemarksForThisNotification = new MessageKey("CaseActivityMessage", "PersonalRemarksForThisNotification");
 }
 
 export module CaseActivityOperation {
@@ -82,7 +86,12 @@ export interface CaseNotificationEntity extends Entities.Entity {
     caseActivity?: Entities.Lite<CaseActivityEntity> | null;
     user?: Entities.Lite<Authorization.UserEntity> | null;
     actor?: Entities.Lite<Entities.Entity> | null;
+    remarks?: string | null;
     state?: CaseNotificationState;
+}
+
+export module CaseNotificationOperation {
+    export const SetRemarks : Entities.ExecuteSymbol<CaseNotificationEntity> = registerSymbol("Operation", "CaseNotificationOperation.SetRemarks");
 }
 
 export const CaseNotificationState = new EnumType<CaseNotificationState>("CaseNotificationState");

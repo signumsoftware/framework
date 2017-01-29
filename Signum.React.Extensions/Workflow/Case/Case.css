@@ -8,3 +8,14 @@ div.workflow-buttons {
     div.workflow-buttons .btn-toolbar {
         margin-bottom: -5px;
     }
+
+
+.case-main-entity .sf-widgets {
+    margin-top: initial;
+}
+
+.case-alert{
+    margin-bottom:5px;
+    padding: 5px;
+    white-space: pre;
+}
