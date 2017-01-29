@@ -50,7 +50,7 @@ export function start(options: { routes: JSX.Element[] }) {
             { columnName: "State" },
             { columnName: "User" },
         ],
-        entityFormatter: row => <CaseEntityLink lite={row.entity as Lite<CaseActivityEntity>} inSearch={true}> {EntityControlMessage.View.niceToString()} </CaseEntityLink>,
+        entityFormatter: (row, columns, sc) => <CaseEntityLink lite={row.entity as Lite<CaseActivityEntity>} inSearch={true} onNavigated={sc.handleOnNavigated}> {EntityControlMessage.View.niceToString()} </CaseEntityLink>,
         onDoubleClick: (e, row) => navigateCase(row.entity as Lite<CaseActivityEntity>),
         rowAttributes: (row, columns) => {
             var rowState = row.columns[columns.indexOf("State")] as CaseNotificationState;
@@ -59,7 +59,8 @@ export function start(options: { routes: JSX.Element[] }) {
                 case "Opened": return { className: "opened-row" };
                 case "InProgress": return { className: "in-progress-row" };
                 case "Done": return { className: "done-row" };
-                default: return { className: "default-color-row" };
+                case "DoneByOther": return { className: "done-by-other-row" };
+                default: return {};
             };
         },
         defaultOrderColumn: "StartDate",
@@ -98,6 +99,17 @@ export function start(options: { routes: JSX.Element[] }) {
 
     Constructor.registerConstructor(WorkflowConditionEntity, () => WorkflowConditionEntity.New({ eval: WorkflowConditionEval.New() }));
     Constructor.registerConstructor(WorkflowActionEntity, () => WorkflowActionEntity.New({ eval: WorkflowActionEval.New() }));
+}
+
+export function getDefaultInboxUrl() {
+    return Finder.findOptionsPath({
+        queryName: CaseActivityQuery.Inbox,
+        filterOptions: [{
+            columnName: "State",
+            operation: "IsIn",
+            value: ["New", "Opened", "InProgress"]
+        }]
+    });
 }
 
 function caseActivityOperation(operation: ExecuteSymbol<CaseActivityEntity>, style: Operations.BsStyle) {
@@ -167,7 +179,7 @@ export function navigateCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivi
 
 export function createNewCase(workflowId: number | string): Promise<CaseEntityPack>{
     return Navigator.API.fetchEntity(WorkflowEntity, workflowId)
-        .then(wf => Operations.API.constructFromEntity(wf, CaseActivityOperation.Create))
+        .then(wf => Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseFromWorkflow))
         .then(ep => ({
             activity: ep.entity,
             canExecuteActivity: ep.canExecute,
@@ -299,7 +311,8 @@ export interface CaseEntityPack {
 
 export interface CaseEntityLinkProps extends React.Props<CaseEntityLink> {
     lite: Lite<CaseActivityEntity>;
-    inSearch?: boolean
+    inSearch?: boolean;
+    onNavigated?: (lite: Lite<Entity>) => void;
 }
 
 export default class CaseEntityLink extends React.Component<CaseEntityLinkProps, void>{
@@ -331,6 +344,8 @@ export default class CaseEntityLink extends React.Component<CaseEntityLinkProps,
             return;
 
         event.preventDefault();
-        navigateCase(lite);
+        navigateCase(lite).then(() => {
+            this.props.onNavigated && this.props.onNavigated(lite);
+        }).done();;
     }
 }

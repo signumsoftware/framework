@@ -19,6 +19,8 @@ namespace Signum.Entities.Workflow
         [NotNullValidator]
         public CaseEntity Case { get; set; }
         
+        [NotNullable]
+        [NotNullValidator]
         public WorkflowActivityEntity WorkflowActivity { get; set; }
 
         [NotNullable, SqlDbType(Size = 255)]
@@ -82,7 +84,9 @@ namespace Signum.Entities.Workflow
     public enum CaseActivityMessage
     {
         CaseContainsOtherActivities,
-        NoNextConnectionThatSatisfiesTheConditionsFound
+        NoNextConnectionThatSatisfiesTheConditionsFound,
+        [Description("Case is a decomposition of {0}")]
+        CaseIsADecompositionOf0
     }
 
 

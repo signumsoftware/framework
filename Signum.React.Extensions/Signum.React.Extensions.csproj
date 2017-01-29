@@ -296,6 +296,7 @@
     <Content Include="Map\Operation\operationMap.css" />
     <Content Include="Map\Schema\schemaMap.css" />
     <Content Include="packages.config" />
+    <Content Include="Workflow\Templates\Inbox.css" />
     <Content Include="Workflow\Templates\InitialWorkflow.xml">
       <SubType>Designer</SubType>
     </Content>

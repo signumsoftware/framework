@@ -131,7 +131,7 @@ namespace Signum.Entities.Workflow
         public WorkflowEvaluationContext(CaseActivityEntity ca, WorkflowConnectionEntity conn, DecisionResult? dr)
         {
             this.CaseActivity = ca;
-            this.Case = ca.Case;
+            this.Case = ca?.Case;
             this.Connection = conn;
             this.DecisionResult = dr;
         }

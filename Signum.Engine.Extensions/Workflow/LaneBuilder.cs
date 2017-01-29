@@ -297,8 +297,8 @@ namespace Signum.Engine.Workflow
                 {
                     ac.CaseActivities()
                          .UnsafeUpdate()
-                    .Set(a => a.WorkflowActivity, a => locator.GetReplacement(ac.ToLite()))
-                    .Execute();
+                        .Set(a => a.WorkflowActivity, a => locator.GetReplacement(ac.ToLite()))
+                        .Execute();
                 }
 
                 ac.Delete(WorkflowActivityOperation.Delete);

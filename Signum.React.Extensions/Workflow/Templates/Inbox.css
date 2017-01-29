@@ -1,0 +1,18 @@
+﻿.new-row {
+    font-weight:bold;
+}
+
+.opened-row {
+}
+
+.in-progress-row {
+    font-style:italic;
+}
+
+.done-row {
+    color: gray;
+}
+
+.done-by-other-row {
+    color: brown;
+}

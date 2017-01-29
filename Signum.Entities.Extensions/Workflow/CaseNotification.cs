@@ -34,6 +34,7 @@ namespace Signum.Entities.Workflow
         Opened,
         InProgress,
         Done,
+        DoneByOther,
     }
 
     [Serializable]

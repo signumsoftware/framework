@@ -255,7 +255,7 @@ namespace Signum.Engine.Workflow
             if (lane.ActorsEval != null)
                 actors.AddRange(lane.ActorsEval.Algorithm.GetActors(caseActivity.Case.MainEntity, new WorkflowEvaluationContext(caseActivity, null, null)).EmptyIfNull().NotNull());
 
-            var notifications = actors.SelectMany(a =>
+            var notifications = actors.Distinct().SelectMany(a =>
             Database.Query<UserEntity>()
             .Where(u => WorkflowLogic.IsCurrentUserActor.Evaluate(a, u))
             .Select(u => new CaseNotificationEntity
@@ -333,7 +333,9 @@ namespace Signum.Engine.Workflow
                 new Delete(CaseActivityOperation.Delete)
                 {
                     FromStates = { CaseActivityState.PendingDecision, CaseActivityState.PendingNext },
-                    CanDelete = ca => (ca.Case.CaseActivities().Any(a => a != ca) ? CaseActivityMessage.CaseContainsOtherActivities.NiceToString() : null),
+                    CanDelete = ca => ca.Case.ParentCase != null ? CaseActivityMessage.CaseIsADecompositionOf0.NiceToString(ca.Case.ParentCase) :
+                    ca.Case.CaseActivities().Any(a => a != ca) ? CaseActivityMessage.CaseContainsOtherActivities.NiceToString() : 
+                    null,
                     Delete = (ca, _) =>
                     {
                         var c = ca.Case;
@@ -393,9 +395,8 @@ namespace Signum.Engine.Workflow
                     ca.Save();
 
                     ca.Notifications()
-                       .Where(n => n.User == UserEntity.Current.ToLite())
                        .UnsafeUpdate()
-                       .Set(a => a.State, a => CaseNotificationState.Done)
+                       .Set(a => a.State, a => a.User == UserEntity.Current.ToLite() ? CaseNotificationState.Done: CaseNotificationState.DoneByOther)
                        .Execute();
 
                     var connection = ca.WorkflowActivity.NextConnectionsFromCache().SingleEx();
@@ -431,7 +432,7 @@ namespace Signum.Engine.Workflow
                             {
                                 if (t2.Type == WorkflowActivityType.DecompositionTask)
                                 {
-                                    Decompose(ca, t2, ctx.Connections.Single(a=>a.To == t2));
+                                    Decompose(ca, t2, ctx.Connections.Single(a=>a.To.Is(t2)));
                                 }
                                 else
                                 {
@@ -483,7 +484,7 @@ namespace Signum.Engine.Workflow
                     var subWorkflow = decActivity.Decomposition.Workflow;
                     foreach (var se in subEntities)
                     {
-                        var caseActivity = subWorkflow.ConstructFrom(CaseActivityOperation.CreateCaseFromWorkflow, se, ca.Case);
+                        var caseActivity = subWorkflow.ConstructFrom(CaseActivityOperation.CreateCaseFromWorkflow, se, ca.Case.ToLite());
                         caseActivity.Execute(CaseActivityOperation.Register);
                     }
                 }

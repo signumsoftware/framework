@@ -29,7 +29,7 @@ export const CaseActivityEntity = new Type<CaseActivityEntity>("CaseActivity");
 export interface CaseActivityEntity extends Entities.Entity {
     Type: "CaseActivity";
     case: CaseEntity;
-    workflowActivity: WorkflowActivityEntity | null;
+    workflowActivity: WorkflowActivityEntity;
     originalWorkflowActivityName: string;
     startDate: string;
     previous: Entities.Lite<CaseActivityEntity> | null;
@@ -40,10 +40,11 @@ export interface CaseActivityEntity extends Entities.Entity {
 export module CaseActivityMessage {
     export const CaseContainsOtherActivities = new MessageKey("CaseActivityMessage", "CaseContainsOtherActivities");
     export const NoNextConnectionThatSatisfiesTheConditionsFound = new MessageKey("CaseActivityMessage", "NoNextConnectionThatSatisfiesTheConditionsFound");
+    export const CaseIsADecompositionOf0 = new MessageKey("CaseActivityMessage", "CaseIsADecompositionOf0");
 }
 
 export module CaseActivityOperation {
-    export const Create : Entities.ConstructSymbol_From<CaseActivityEntity, WorkflowEntity> = registerSymbol("Operation", "CaseActivityOperation.Create");
+    export const CreateCaseFromWorkflow : Entities.ConstructSymbol_From<CaseActivityEntity, WorkflowEntity> = registerSymbol("Operation", "CaseActivityOperation.CreateCaseFromWorkflow");
     export const Register : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Register");
     export const Delete : Entities.DeleteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Delete");
     export const Next : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Next");
@@ -60,6 +61,7 @@ export const CaseEntity = new Type<CaseEntity>("Case");
 export interface CaseEntity extends Entities.Entity {
     Type: "Case";
     workflow: WorkflowEntity;
+    parentCase: Entities.Lite<CaseEntity> | null;
     description: string;
     mainEntity: ICaseMainEntity;
     startDate: string;
@@ -88,7 +90,8 @@ export type CaseNotificationState =
     "New" |
     "Opened" |
     "InProgress" |
-    "Done";
+    "Done" |
+    "DoneByOther";
 
 export const DateFilterRange = new EnumType<DateFilterRange>("DateFilterRange");
 export type DateFilterRange =

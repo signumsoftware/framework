@@ -79,7 +79,7 @@ export default class CasePageFrame extends React.Component<CasePageFrameProps, C
     }
 
     onClose() {
-        Navigator.currentHistory.push("~/find/inbox");
+        Navigator.currentHistory.push(WorkflowClient.getDefaultInboxUrl());
     }
 
     entityComponent: React.Component<any, any>;
