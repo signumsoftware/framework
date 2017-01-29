@@ -7,8 +7,11 @@ import { is, JavascriptMessage } from '../../../../Framework/Signum.React/Script
 import { TypeEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { DynamicValidationEntity } from '../../../../Extensions/Signum.React.Extensions/Dynamic/Signum.Entities.Dynamic'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
+import { Binding } from '../../../../Framework/Signum.React/Scripts/Reflection';
 import CSharpCodeMirror from '../../../../Extensions/Signum.React.Extensions/Codemirror/CSharpCodeMirror'
 import TypeHelpComponent from '../../Dynamic/Help/TypeHelpComponent'
+import HtmlEditor from '../../../../Extensions/Signum.React.Extensions/HtmlEditor/HtmlEditor'
+
 
 interface WorkflowActivityModelComponentProps {
     ctx: TypeContext<WorkflowActivityModel>;
@@ -16,6 +19,7 @@ interface WorkflowActivityModelComponentProps {
 
 interface WorkflowActivityModelComponentState {
     viewInfo: { [name: string]: "Static" | "Dynamic" };
+    
 }
 
 export default class WorkflowActivityModelComponent extends React.Component<WorkflowActivityModelComponentProps, WorkflowActivityModelComponentState> {
@@ -67,6 +71,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                 subEntitiesEval: SubEntitiesEval.New()
             });
             wa.viewName = null;
+            wa.requiresOpen = false;
             wa.validationRules = [];
         }
         else
@@ -79,7 +84,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
 
     render() {
         var ctx = this.props.ctx;
-
+        
         const mainEntityType = this.props.ctx.value.mainEntityType;
 
         return (
@@ -121,9 +126,14 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                                 template: ctx => <ValueLine ctx={ctx.subCtx(wav => wav.onDecline)} formGroupStyle="None" valueHtmlProps={{ style: { margin: "0 auto" } }} />,
                             } : null,
                         ])} />
+                        <ValueLine ctx={ctx.subCtx(a => a.requiresOpen)} />
+                        <fieldset>
+                            <legend>{WorkflowActivityModel.nicePropertyName(a => a.userHelp)}</legend>
+                            <HtmlEditor binding={Binding.create(ctx.value, a => a.userHelp)} />
+                        </fieldset>
+                        <ValueLine ctx={ctx.subCtx(d => d.comments)} />
                     </div>
                 }
-                <ValueLine ctx={ctx.subCtx(d => d.description)} />
                 {ctx.value.decomposition &&
                     <DecompositionComponent ctx={ctx.subCtx(a => a.decomposition!)} mainEntityType={ctx.value.mainEntityType} />}
             </div>

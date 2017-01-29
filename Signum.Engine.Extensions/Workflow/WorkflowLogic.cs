@@ -220,7 +220,7 @@ namespace Signum.Engine.Workflow
                         Entity = e,
                         e.Id,
                         e.Name,
-                        e.Description,
+                        e.Comments,
                         e.Lane,
                         e.Lane.Pool.Workflow,
                     });

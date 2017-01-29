@@ -374,6 +374,7 @@ namespace Signum.Engine.Workflow
                     Lite = false,
                     Execute = (ca, _) =>
                     {
+                        CheckRequiresOpen(ca);
                         ExecuteStep(ca, DecisionResult.Approve);
                     },
                 }.Register();
@@ -385,6 +386,7 @@ namespace Signum.Engine.Workflow
                     Lite = false,
                     Execute = (ca, _) =>
                     {
+                        CheckRequiresOpen(ca);
                         ExecuteStep(ca, DecisionResult.Decline);
                     },
                 }.Register();
@@ -396,11 +398,22 @@ namespace Signum.Engine.Workflow
                     Lite = false,
                     Execute = (ca, args) =>
                     {
+                        CheckRequiresOpen(ca);
                         ExecuteStep(ca, null);
                     },
                 }.Register();
             }
-            
+
+            private static void CheckRequiresOpen(CaseActivityEntity ca)
+            {
+                if (ca.WorkflowActivity.RequiresOpen)
+                {
+                    if (!ca.Notifications().Any(cn => cn.User == UserEntity.Current.ToLite() && cn.State != CaseNotificationState.New))
+                        throw new ApplicationException(CaseActivityMessage.TheActivity0RequiresToBeOpened.NiceToString(ca.WorkflowActivity));
+                }
+            }
+
+
             private static void ExecuteStep(CaseActivityEntity ca, DecisionResult? decisionResult)
             {
                 using (DynamicValidationLogic.EnabledRulesExplicitely(ca.WorkflowActivity.ValidationRules

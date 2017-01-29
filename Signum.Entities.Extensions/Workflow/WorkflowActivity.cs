@@ -28,9 +28,11 @@ namespace Signum.Entities.Workflow
 
         [SqlDbType(Size = 400)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 400, MultiLine = true)]
-        public string Description { get; set; }
+        public string Comments { get; set; }
 
         public WorkflowActivityType Type { get; set; }
+
+        public bool RequiresOpen { get; set; }
 
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 255)]
         public string ViewName { get; set; }
@@ -45,6 +47,10 @@ namespace Signum.Entities.Workflow
         
         [NotifyChildProperty]
         public DecompositionEntity Decomposition { get; set; }
+
+        [SqlDbType(Size = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = true, MultiLine = true)]
+        public string UserHelp { get; set; }
 
         static Expression<Func<WorkflowActivityEntity, string>> ToStringExpression = @this => @this.Name;
         [ExpressionField]
@@ -72,10 +78,12 @@ namespace Signum.Entities.Workflow
             model.MainEntityType = this.Lane.Pool.Workflow.MainEntityType;
             model.Name = this.Name;
             model.Type = this.Type;
+            model.RequiresOpen = this.RequiresOpen;
             model.ValidationRules.AssignMList(this.ValidationRules);
             model.ViewName = this.ViewName;
-            model.Description = this.Description;
+            model.UserHelp = this.UserHelp;
             model.Decomposition = this.Decomposition;
+            model.Comments = this.Comments;
             return model;
         }
 
@@ -84,9 +92,11 @@ namespace Signum.Entities.Workflow
             var wModel = (WorkflowActivityModel)model;
             this.Name = wModel.Name;
             this.Type = wModel.Type;
+            this.RequiresOpen = wModel.RequiresOpen;
             this.ValidationRules.AssignMList(wModel.ValidationRules);
             this.ViewName = wModel.ViewName;
-            this.Description = wModel.Description;
+            this.UserHelp = wModel.UserHelp;
+            this.Comments = wModel.Comments;
             this.Decomposition = wModel.Decomposition;
         }
     }
@@ -190,6 +200,8 @@ namespace Signum.Entities.Workflow
 
         public WorkflowActivityType Type { get; set; }
 
+        public bool RequiresOpen { get; set; }
+
         [NotNullable]
         [NotNullValidator, NoRepeatValidator]
         public MList<WorkflowActivityValidationEntity> ValidationRules { get; set; } = new MList<WorkflowActivityValidationEntity>();
@@ -199,7 +211,11 @@ namespace Signum.Entities.Workflow
 
         [SqlDbType(Size = 400)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 400, MultiLine = true)]
-        public string Description { get; set; }
+        public string Comments { get; set; }
+
+        [SqlDbType(Size = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = true, MultiLine = true)]
+        public string UserHelp { get; set; }
 
         public DecompositionEntity Decomposition { get; set; }
     }

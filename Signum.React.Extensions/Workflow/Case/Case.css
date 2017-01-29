@@ -19,3 +19,8 @@ div.workflow-buttons {
     padding: 5px;
     white-space: pre;
 }
+
+.case-help-button {
+    background: #ddd;
+    padding: 3px;
+}

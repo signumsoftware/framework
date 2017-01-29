@@ -51,7 +51,7 @@ export function start(options: { routes: JSX.Element[] }) {
         hiddenColumns: [
             { columnName: "State" },
         ],
-        entityFormatter: (row, columns, sc) => <CaseEntityLink lite={row.entity as Lite<CaseActivityEntity>} inSearch={true} onNavigated={sc && sc.handleOnNavigated}> {EntityControlMessage.View.niceToString()} </CaseEntityLink>,
+        entityFormatter: (row, columns, sc) => <CaseEntityLink lite={row.entity as Lite<CaseActivityEntity>} inSearch={true} onNavigated={sc && sc.handleOnNavigated}>{EntityControlMessage.View.niceToString()}</CaseEntityLink>,
         onDoubleClick: (e, row) => navigateCase(row.entity as Lite<CaseActivityEntity>),
         rowAttributes: (row, columns) => {
             var rowState = row.columns[columns.indexOf("State")] as CaseNotificationState;

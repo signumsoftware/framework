@@ -320,7 +320,7 @@ namespace Signum.Engine.Workflow
                 {
                     Lane = newLane,
                     Name = a.Name,
-                    Description = a.Description,
+                    Comments = a.Comments,
                     Type = a.Type,
                     ValidationRules = a.ValidationRules.Select(vr => vr.Clone()).ToMList(),
                     ViewName = a.ViewName,

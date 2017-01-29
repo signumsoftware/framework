@@ -96,6 +96,8 @@ namespace Signum.Entities.Workflow
         [Description("Done by {0} on {1}")]
         DoneBy0On1,
         PersonalRemarksForThisNotification,
+        [Description("The activity '{0}' requires to be opened")]
+        TheActivity0RequiresToBeOpened,
     }
 
 

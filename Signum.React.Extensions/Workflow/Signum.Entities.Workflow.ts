@@ -45,6 +45,7 @@ export module CaseActivityMessage {
     export const From0On1 = new MessageKey("CaseActivityMessage", "From0On1");
     export const DoneBy0On1 = new MessageKey("CaseActivityMessage", "DoneBy0On1");
     export const PersonalRemarksForThisNotification = new MessageKey("CaseActivityMessage", "PersonalRemarksForThisNotification");
+    export const TheActivity0RequiresToBeOpened = new MessageKey("CaseActivityMessage", "TheActivity0RequiresToBeOpened");
 }
 
 export module CaseActivityOperation {
@@ -177,12 +178,14 @@ export interface WorkflowActivityEntity extends Entities.Entity, IWorkflowNodeEn
     Type: "WorkflowActivity";
     lane?: WorkflowLaneEntity | null;
     name?: string | null;
-    description?: string | null;
+    comments?: string | null;
     type?: WorkflowActivityType;
+    requiresOpen?: boolean;
     viewName?: string | null;
     validationRules: Entities.MList<WorkflowActivityValidationEntity>;
     xml?: WorkflowXmlEntity | null;
     decomposition?: DecompositionEntity | null;
+    userHelp?: string | null;
 }
 
 export module WorkflowActivityMessage {
@@ -195,9 +198,11 @@ export interface WorkflowActivityModel extends Entities.ModelEntity {
     mainEntityType: Basics.TypeEntity;
     name?: string | null;
     type?: WorkflowActivityType;
+    requiresOpen?: boolean;
     validationRules: Entities.MList<WorkflowActivityValidationEntity>;
     viewName?: string | null;
-    description?: string | null;
+    comments?: string | null;
+    userHelp?: string | null;
     decomposition?: DecompositionEntity | null;
 }
 
