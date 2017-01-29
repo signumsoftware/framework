@@ -41,7 +41,7 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
         this.forceUpdate();
     }
 
-    handleOnSelect = (e: React.FormEvent) => {
+    handleOnSelect = (e: React.FormEvent<HTMLSelectElement>) => {
 
         this.state.selectedIndex = (e.currentTarget as HTMLSelectElement).selectedIndex;
         this.forceUpdate();
@@ -77,7 +77,7 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
         );
     }
 
-    handleRemoveClick = (event: React.SyntheticEvent) => {
+    handleRemoveClick = (event: React.SyntheticEvent<any>) => {
 
         event.preventDefault();
 
@@ -102,7 +102,7 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
             .done();
     };
 
-    handleViewClick = (event: React.MouseEvent) => {
+    handleViewClick = (event: React.MouseEvent<any>) => {
 
         event.preventDefault();
 

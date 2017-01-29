@@ -26,7 +26,7 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
         };
     }
 
-    handleShowStackTrace = (e: React.MouseEvent) => {
+    handleShowStackTrace = (e: React.MouseEvent<any>) => {
         e.preventDefault();
         this.setState({ showDetails: !this.state.showDetails });
     }

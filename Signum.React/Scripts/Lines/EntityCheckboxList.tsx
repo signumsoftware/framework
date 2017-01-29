@@ -53,8 +53,8 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
         super.componentWillReceiveProps(newProps, newContext);
     }
 
-    handleOnChange = (event: React.FormEvent, lite: Lite<Entity>) => {
-        const current = event.currentTarget as HTMLSelectElement;
+    handleOnChange = (event: React.ChangeEvent<HTMLInputElement>, lite: Lite<Entity>) => {
+        const current = event.currentTarget;
 
         const list = this.state.ctx.value!;
         const toRemove = list.filter(mle => is(mle.element as Lite<Entity> | Entity, lite))

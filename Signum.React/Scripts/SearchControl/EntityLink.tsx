@@ -6,7 +6,7 @@ import { Lite, Entity, liteKey } from '../Signum.Entities';
 import * as Navigator from '../Navigator';
 import { Link  } from 'react-router';
 
-export interface EntityLinkProps extends React.HTMLAttributes, React.Props<EntityLink> {
+export interface EntityLinkProps extends React.HTMLAttributes<Link>, React.Props<EntityLink> {
     lite: Lite<Entity>;
     inSearch?: boolean
 }
@@ -27,13 +27,13 @@ export default class EntityLink extends React.Component<EntityLinkProps, void>{
                 title={lite.toStr}
                 onClick={this.handleClick}
                 data-entity={liteKey(lite)}
-                {...(htmlAtts as React.HTMLAttributes) }>
+                {...(htmlAtts as React.HTMLAttributes<Link>) }>
                 {children || lite.toStr}                
             </Link>
         );
     }
 
-    handleClick = (event: React.MouseEvent) => {
+    handleClick = (event: React.MouseEvent<any>) => {
 
         const lite = this.props.lite;
 

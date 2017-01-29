@@ -139,7 +139,7 @@ function createDefaultButton(eoc: EntityOperationContext<Entity>, group: EntityO
     return <OverlayTrigger placement="bottom" overlay={tooltip} key={key}>{btn}</OverlayTrigger>;
 }
 
-function onClick(eoc: EntityOperationContext<Entity>, event: React.MouseEvent): void{
+function onClick(eoc: EntityOperationContext<Entity>, event: React.MouseEvent<any>): void{
 
     event.persist();
 
@@ -167,7 +167,7 @@ export function notifySuccess() {
     Notify.singletone.notifyTimeout({ text: JavascriptMessage.executed.niceToString(), type: "success" });
 }
 
-export function defaultConstructFromEntity(eoc: EntityOperationContext<Entity>, event: React.MouseEvent, ...args: any[]) {
+export function defaultConstructFromEntity(eoc: EntityOperationContext<Entity>, event: React.MouseEvent<any>, ...args: any[]) {
 
     if (!confirmInNecessary(eoc))
         return;
@@ -182,7 +182,7 @@ export function defaultConstructFromEntity(eoc: EntityOperationContext<Entity>, 
 
 }
 
-export function defaultConstructFromLite(eoc: EntityOperationContext<Entity>, event: React.MouseEvent, ...args: any[]) {
+export function defaultConstructFromLite(eoc: EntityOperationContext<Entity>, event: React.MouseEvent<any>, ...args: any[]) {
 
     if (!confirmInNecessary(eoc))
         return;

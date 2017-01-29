@@ -30,7 +30,7 @@ export interface SearchControlLoadedProps {
     queryDescription: QueryDescription;
     querySettings: Finder.QuerySettings;
     showContextMenu?: boolean;
-    onDoubleClick?: (e: React.MouseEvent, row: ResultRow) => void;
+    onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
     onSelectionChanged?: (entity: Lite<Entity>[]) => void;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
     onResult?: (table: ResultTable) => void;
@@ -192,7 +192,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
 
-    handleOnContextMenu = (event: React.MouseEvent) => {
+    handleOnContextMenu = (event: React.MouseEvent<any>) => {
 
         event.preventDefault();
         event.stopPropagation();
@@ -204,35 +204,34 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         const tr = td.parentNode as HTMLElement;
         const rowIndex = tr.getAttribute("data-row-index") ? parseInt(tr.getAttribute("data-row-index") !) : null;
 
-
-        this.state.contextualMenu = {
-            position: ContextMenu.getPosition(event, this.refs["container"] as HTMLElement),
-            columnIndex,
-            rowIndex,
-            columnOffset: td.tagName == "TH" ? this.getOffset(event.pageX, td.getBoundingClientRect(), Number.MAX_VALUE) : undefined
-        };
+        this.setState({
+            contextualMenu: {
+                position: ContextMenu.getPosition(event, this.refs["container"] as HTMLElement),
+                columnIndex,
+                rowIndex,
+                columnOffset: td.tagName == "TH" ? this.getOffset(event.pageX, td.getBoundingClientRect(), Number.MAX_VALUE) : undefined
+            }
+        });
 
         if (rowIndex != undefined) {
             const row = this.state.resultTable!.rows[rowIndex];
             if (!this.state.selectedRows!.contains(row)) {
-                this.state.selectedRows = [row];
-                this.state.currentMenuItems = undefined;
+                this.setState({
+                    selectedRows: [row],
+                    currentMenuItems: undefined
+                }, () => {
+                    this.loadMenuItems();
+                });
             }
 
             if (this.state.currentMenuItems == undefined)
                 this.loadMenuItems();
         }
-
-
-        this.forceUpdate();
     }
 
 
     handleColumnChanged = (token: QueryToken) => {
-        if (token)
-            this.state.lastToken = token;
-
-        this.forceUpdate();
+        this.setState({ lastToken: token });
     }
 
     handleColumnClose = () => {
@@ -249,7 +248,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             this.props.onFiltersChanged(this.props.findOptions.filterOptions);
     }
 
-    handleFiltersKeyUp = (e: React.KeyboardEvent) => {
+    handleFiltersKeyUp = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (e.keyCode == 13)
             this.doSearchPage1();
     }
@@ -320,7 +319,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         }).done();
     }
 
-    handleSearchClick = (ev: React.MouseEvent) => {
+    handleSearchClick = (ev: React.MouseEvent<any>) => {
         ev.preventDefault();
 
         this.doSearchPage1();
@@ -362,7 +361,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             .then(ti => ti ? ti.name : undefined);
     }
 
-    handleCreate = (ev: React.MouseEvent) => {
+    handleCreate = (ev: React.MouseEvent<any>) => {
 
         if (!this.props.findOptions.create)
             return;
@@ -391,7 +390,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         }).done();
     }
 
-    handleFullScreenClick = (ev: React.MouseEvent) => {
+    handleFullScreenClick = (ev: React.MouseEvent<any>) => {
 
         ev.preventDefault();
 
@@ -544,10 +543,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         const col = fo.columnOptions[cm.columnIndex!];
         fo.columnOptions.removeAt(cm.columnIndex!);
 
-        if (s.editingColumn == col)
-            s.editingColumn = undefined;
-
-        this.forceUpdate();
+        this.setState({ editingColumn: undefined });
     }
 
     renderContextualMenu() {
@@ -604,7 +600,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         });
     }
 
-    handleHeaderClick = (e: React.MouseEvent) => {
+    handleHeaderClick = (e: React.MouseEvent<any>) => {
 
         const token = (e.currentTarget as HTMLElement).getAttribute("data-column-name");
         const fo = this.props.findOptions;
@@ -634,14 +630,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     //HEADER DRAG AND DROP
 
-    handleHeaderDragStart = (de: React.DragEvent) => {
+    handleHeaderDragStart = (de: React.DragEvent<any>) => {
         de.dataTransfer.setData('text', "start"); //cannot be empty string
         de.dataTransfer.effectAllowed = "move";
         const dragIndex = parseInt((de.currentTarget as HTMLElement).getAttribute("data-column-index") !);
         this.setState({ dragColumnIndex: dragIndex });
     }
 
-    handleHeaderDragEnd = (de: React.DragEvent) => {
+    handleHeaderDragEnd = (de: React.DragEvent<any>) => {
         this.setState({ dragColumnIndex: undefined, dropBorderIndex: undefined });
     }
 
@@ -663,7 +659,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         return undefined;
     }
 
-    handlerHeaderDragOver = (de: React.DragEvent) => {
+    handlerHeaderDragOver = (de: React.DragEvent<any>) => {
         de.preventDefault();
 
         const th = de.currentTarget as HTMLElement;
@@ -685,7 +681,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             this.setState({ dropBorderIndex: dropBorderIndex });
     }
 
-    handleHeaderDrop = (de: React.DragEvent) => {
+    handleHeaderDrop = (de: React.DragEvent<any>) => {
 
         const columns = this.props.findOptions.columnOptions;
         const dragColumnIndex = this.state.dragColumnIndex!;
@@ -761,9 +757,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     //ROWS
 
-    handleChecked = (event: React.MouseEvent) => {
+    handleChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
 
-        const cb = (event.currentTarget) as HTMLInputElement;
+        const cb = event.currentTarget;
 
         const index = parseInt(cb.getAttribute("data-index") !);
 
@@ -777,14 +773,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         } else {
             selectedRows.remove(row);
         }
-
-        this.state.currentMenuItems = undefined;
-
+        
         this.notifySelectedRowsChanged();
-        this.forceUpdate();
+
+        this.setState({ currentMenuItems: undefined });
     }
 
-    handleDoubleClick = (e: React.MouseEvent, row: ResultRow) => {
+    handleDoubleClick = (e: React.MouseEvent<any>, row: ResultRow) => {
 
         if ((e.target as HTMLElement).parentElement != e.currentTarget) //directly in the td
             return;

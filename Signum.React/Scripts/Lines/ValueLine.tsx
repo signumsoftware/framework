@@ -18,7 +18,7 @@ export interface ValueLineProps extends LineBaseProps, React.Props<ValueLine> {
     inlineCheckbox?: boolean;
     comboBoxItems?: ({ name: string, niceName: string } | string)[];
     onTextboxBlur?: (val: any) => void;
-    valueHtmlProps?: React.HTMLAttributes;
+    valueHtmlProps?: React.HTMLAttributes<any>;
     extraButtons?: (vl: ValueLine) => React.ReactNode;
     initiallyFocused?: boolean;
 }
@@ -124,7 +124,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
         );
     }
 
-    static isNumber(e: React.KeyboardEvent) {
+    static isNumber(e: React.KeyboardEvent<any>) {
         const c = e.keyCode;
         return ((c >= 48 && c <= 57) /*0-9*/ ||
             (c >= 96 && c <= 105) /*NumPad 0-9*/ ||
@@ -143,7 +143,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
             (e.ctrlKey && c == 67) /*Ctrl + v*/);
     }
 
-    static isDecimal(e: React.KeyboardEvent) {
+    static isDecimal(e: React.KeyboardEvent<any>) {
         const c = e.keyCode;
         return (ValueLine.isNumber(e) ||
             (c == 110) /*NumPad Decimal*/ ||
@@ -151,7 +151,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
             (c == 188) /*,*/);
     }
 
-    static isDuration(e: React.KeyboardEvent) {
+    static isDuration(e: React.KeyboardEvent<any>) {
         const c = e.keyCode;
         return (ValueLine.isNumber(e) ||
             (c == 186) /*Colon*/);
@@ -161,7 +161,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
 ValueLine.renderers[ValueLineType.Boolean as any] = (vl) => {
     const s = vl.state;
 
-    const handleCheckboxOnChange = (e: React.SyntheticEvent) => {
+    const handleCheckboxOnChange = (e: React.SyntheticEvent<any>) => {
         const input = e.currentTarget as HTMLInputElement;
         vl.setValue(input.checked);
     };
@@ -223,7 +223,7 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo, parseValue: (str: s
         );
     }
 
-    const handleEnumOnChange = (e: React.SyntheticEvent) => {
+    const handleEnumOnChange = (e: React.SyntheticEvent<any>) => {
         const input = e.currentTarget as HTMLInputElement;
         const val = input.value;
         vl.setValue(val == "" ? null : parseValue(val));
@@ -254,14 +254,14 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
             </FormGroup>
         );
 
-    const handleTextOnChange = (e: React.SyntheticEvent) => {
+    const handleTextOnChange = (e: React.SyntheticEvent<any>) => {
         const input = e.currentTarget as HTMLInputElement;
         vl.setValue(input.value);
     };
 
-    let handleBlur: ((e: React.SyntheticEvent) => void) | undefined = undefined;
+    let handleBlur: ((e: React.SyntheticEvent<any>) => void) | undefined = undefined;
     if (s.autoTrim == undefined || s.autoTrim == true) {
-        handleBlur = (e: React.SyntheticEvent) => {
+        handleBlur = (e: React.SyntheticEvent<any>) => {
             const input = e.currentTarget as HTMLInputElement;
             if (input.value && input.value.trim() != input.value)
                 vl.setValue(input.value.trim());
@@ -306,14 +306,14 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
             </FormGroup>
         );
 
-    const handleTextOnChange = (e: React.SyntheticEvent) => {
+    const handleTextOnChange = (e: React.SyntheticEvent<any>) => {
         const input = e.currentTarget as HTMLInputElement;
         vl.setValue(input.value);
     };
 
-    let handleBlur: ((e: React.SyntheticEvent) => void) | undefined = undefined;
+    let handleBlur: ((e: React.SyntheticEvent<any>) => void) | undefined = undefined;
     if (s.autoTrim == true) {
-        handleBlur = (e: React.SyntheticEvent) => {
+        handleBlur = (e: React.SyntheticEvent<any>) => {
             const input = e.currentTarget as HTMLInputElement;
             if (input.value && input.value.trim() != input.value)
                 vl.setValue(input.value.trim());
@@ -343,7 +343,7 @@ ValueLine.renderers[ValueLineType.Decimal as any] = (vl) => {
     return numericTextBox(vl, ValueLine.isDecimal);
 };
 
-function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) {
+function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler<any>) {
     const s = vl.state
 
     const numbroFormat = toNumbroFormat(s.formatText);
@@ -365,7 +365,7 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) 
     const htmlProps = {
         placeholder: s.ctx.placeholderLabels ? asString(s.labelText) : undefined,
         ...vl.props.valueHtmlProps
-    } as React.HTMLAttributes;
+    } as React.HTMLAttributes<HTMLInputElement>;
 
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
@@ -385,9 +385,9 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) 
 export interface NumericTextBoxProps {
     value: number;
     onChange: (newValue: number | null) => void;
-    validateKey: React.KeyboardEventHandler;
+    validateKey: React.KeyboardEventHandler<any>;
     format?: string;
-    htmlProps: React.HTMLAttributes;
+    htmlProps: React.HTMLAttributes<HTMLInputElement>;
 }
 
 export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?: string }> {
@@ -411,19 +411,19 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?
 
     }
 
-    handleOnBlur = (e: React.SyntheticEvent) => {
+    handleOnBlur = (e: React.SyntheticEvent<any>) => {
         const input = e.currentTarget as HTMLInputElement;
         const result = input.value == undefined || input.value.length == 0 ? null : numbro(input.value).value();
         this.setState({ text: undefined });
         this.props.onChange(result);
     }
 
-    handleOnChange = (e: React.SyntheticEvent) => {
+    handleOnChange = (e: React.SyntheticEvent<any>) => {
         const input = e.currentTarget as HTMLInputElement;
         this.setState({ text: input.value });
     }
 
-    handleKeyDown = (e: React.KeyboardEvent) => {
+    handleKeyDown = (e: React.KeyboardEvent<any>) => {
         if (!this.props.validateKey(e))
             e.preventDefault();
     }
@@ -435,7 +435,7 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
 
     const momentFormat = toMomentFormat(s.formatText);
 
-    const m = s.ctx.value ? moment(s.ctx.value, moment.ISO_8601()) : undefined;
+    const m = s.ctx.value ? moment(s.ctx.value, moment.ISO_8601) : undefined;
     const showTime = momentFormat != "L" && momentFormat != "LL";
 
     if (s.ctx.readOnly)
@@ -448,7 +448,7 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
     const handleDatePickerOnChange = (date: Date, str: string) => {
 
         const m = moment(date);
-        vl.setValue(m.isValid() ? m.format(moment.ISO_8601()) : null);
+        vl.setValue(m.isValid() ? m.format() : null);
     };
 
     let currentDate = moment();
@@ -468,7 +468,7 @@ ValueLine.renderers[ValueLineType.TimeSpan as any] = (vl) => {
     return durationTextBox(vl, ValueLine.isDuration);
 };
 
-function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) {
+function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler<any>) {
 
     const s = vl.state;
 
@@ -496,7 +496,7 @@ function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler)
     const htmlProps = {
         placeholder: s.ctx.placeholderLabels ? asString(s.labelText) : undefined,
         ...vl.props.valueHtmlProps
-    } as React.HTMLAttributes;
+    } as React.HTMLAttributes<HTMLInputElement>;
 
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
@@ -510,9 +510,9 @@ function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler)
 export interface DurationTextBoxProps {
     value: number;
     onChange: (newValue: number | null) => void;
-    validateKey: React.KeyboardEventHandler;
+    validateKey: React.KeyboardEventHandler<any>;
     format?: string;
-    htmlProps: React.HTMLAttributes;
+    htmlProps: React.HTMLAttributes<HTMLInputElement>;
 }
 
 export class DurationTextBox extends React.Component<DurationTextBoxProps, { text?: string }> {
@@ -536,19 +536,19 @@ export class DurationTextBox extends React.Component<DurationTextBoxProps, { tex
 
     }
 
-    handleOnBlur = (e: React.SyntheticEvent) => {
+    handleOnBlur = (e: React.SyntheticEvent<any>) => {
         const input = e.currentTarget as HTMLInputElement;
         const result = input.value == undefined || input.value.length == 0 ? null : moment.duration(input.value).asMilliseconds();
         this.setState({ text: undefined });
         this.props.onChange(result);
     }
 
-    handleOnChange = (e: React.SyntheticEvent) => {
+    handleOnChange = (e: React.SyntheticEvent<any>) => {
         const input = e.currentTarget as HTMLInputElement;
         this.setState({ text: input.value });
     }
 
-    handleKeyDown = (e: React.KeyboardEvent) => {
+    handleKeyDown = (e: React.KeyboardEvent<any>) => {
         if (!this.props.validateKey(e))
             e.preventDefault();
     }

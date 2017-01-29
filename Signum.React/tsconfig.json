@@ -8,7 +8,10 @@
     "noImplicitAny": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,
-    "strictNullChecks": true
-  },
-  "exclude": [ "node_modules" ]
+    "strictNullChecks": true,
+    "baseUrl": ".",
+    "paths": {
+      "moment": [ "./node_modules/moment" ]
+    }
+  }
 }

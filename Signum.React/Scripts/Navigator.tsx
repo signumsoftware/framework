@@ -1,4 +1,5 @@
 ﻿import * as React from "react"
+import * as HistoryModule from "history"
 import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { Dic, } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
@@ -465,7 +466,7 @@ export function createInNewTab(pack: EntityPack<ModifiableEntity>) {
     var win = window.open(url);
 }
 
-export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.MouseEvent) {
+export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.MouseEvent<any>) {
     if (!pack || !pack.entity)
         return;
 

@@ -64,7 +64,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
 
     }
     
-    handleOnSelect = (lite: Lite<Entity>, event: React.SyntheticEvent) => {
+    handleOnSelect = (lite: Lite<Entity>, event: React.SyntheticEvent<any>) => {
         this.convert(lite)
             .then(e => this.addElement(e))
             .done();
@@ -72,7 +72,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
 
     }
 
-    handleViewElement = (event: React.MouseEvent, index: number) => {
+    handleViewElement = (event: React.MouseEvent<any>, index: number) => {
 
         event.preventDefault();
 
@@ -132,8 +132,8 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
 
 
 export interface EntityStripElementProps {
-    onRemove?: (event: React.MouseEvent) => void;
-    onView?: (event: React.MouseEvent) => void;
+    onRemove?: (event: React.MouseEvent<any>) => void;
+    onView?: (event: React.MouseEvent<any>) => void;
     ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
     autoComplete?: AutocompleteConfig<any> | null;
 }

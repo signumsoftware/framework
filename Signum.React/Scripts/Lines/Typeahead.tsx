@@ -12,11 +12,11 @@ export interface TypeaheadProps {
     minLength?: number;
     renderList?: (typeAhead: Typeahead) => React.ReactNode;
     renderItem?: (item: any, query: string) => React.ReactNode;
-    onSelect?: (item: any, e: React.SyntheticEvent) => string | null;
+    onSelect?: (item: any, e: React.SyntheticEvent<any>) => string | null;
     scrollHeight?: number;
-    spanAttrs?: React.HTMLAttributes;
-    inputAttrs?: React.HTMLAttributes;
-    liAttrs?: (item: any) => React.HTMLAttributes;
+    spanAttrs?: React.HTMLAttributes<HTMLSpanElement>;
+    inputAttrs?: React.HTMLAttributes<HTMLInputElement>;
+    liAttrs?: (item: any) => React.HTMLAttributes<HTMLLIElement>;
     loadingMessage?: string;
     noResultsMessage?: string;
 }
@@ -104,7 +104,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         })).done();
     }
 
-    select(e: React.SyntheticEvent): boolean {        
+    select(e: React.SyntheticEvent<any>): boolean {        
         if (this.state.items!.length == 0)
             return false;
 
@@ -149,7 +149,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         this.input.blur();
     }
 
-    handleKeyDown = (e: React.KeyboardEvent) => {
+    handleKeyDown = (e: React.KeyboardEvent<any>) => {
         if (!this.state.shown) return;
 
         switch (e.keyCode) {
@@ -178,7 +178,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         e.stopPropagation();
     }
 
-    handleKeyUp = (e: React.KeyboardEvent) => {
+    handleKeyUp = (e: React.KeyboardEvent<any>) => {
         switch (e.keyCode) {
             case 40: // down arrow
             case 38: // up arrow
@@ -210,21 +210,21 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     }
 
 
-    handleMenuClick = (e: React.MouseEvent) => {
+    handleMenuClick = (e: React.MouseEvent<any>) => {
         e.preventDefault();
         if (this.select(e))
             this.input.focus();
     }
 
     mouseover = true;
-    handleElementMouseEnter = (event: React.MouseEvent) => {
+    handleElementMouseEnter = (event: React.MouseEvent<any>) => {
         this.mouseover = true;
         this.setState({
             selectedIndex: parseInt((event.currentTarget as HTMLInputElement).getAttribute("data-index") !)
         });
     }
 
-    handleElementMouseLeave = (event: React.MouseEvent) => {
+    handleElementMouseLeave = (event: React.MouseEvent<any>) => {
         this.mouseover = false;
         this.setState({ selectedIndex: undefined });
         if (!this.focused && this.state.shown)

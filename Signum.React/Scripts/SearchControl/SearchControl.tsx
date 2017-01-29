@@ -31,7 +31,7 @@ export interface SimpleFilterBuilderProps {
 export interface SearchControlProps extends React.Props<SearchControl> {
     allowSelection?: boolean
     findOptions: FindOptions;
-    onDoubleClick?: (e: React.MouseEvent, row: ResultRow) => void;
+    onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
     showContextMenu?: boolean;
     onSelectionChanged?: (entity: Lite<Entity>[]) => void;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
@@ -101,7 +101,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
     searchControlLoaded: SearchControlLoaded;
 
-    handleFullScreenClick(ev: React.MouseEvent) {
+    handleFullScreenClick(ev: React.MouseEvent<any>) {
         this.searchControlLoaded.handleFullScreenClick(ev);
     }
 

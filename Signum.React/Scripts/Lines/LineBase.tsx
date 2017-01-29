@@ -13,8 +13,8 @@ export interface FormGroupProps extends React.Props<FormGroup> {
     labelText?: React.ReactChild;
     controlId?: string;
     ctx: StyleContext;
-    labelProps?: React.HTMLAttributes;
-    htmlProps?: React.HTMLAttributes;
+    labelProps?: React.HTMLAttributes<HTMLLabelElement>;
+    htmlProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
 export class FormGroup extends React.Component<FormGroupProps, {}> {
@@ -59,7 +59,7 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
 
 export interface FormControlStaticProps extends React.Props<FormControlStatic> {
     ctx: StyleContext;
-    htmlProps?: React.HTMLAttributes;
+    htmlProps?: React.HTMLAttributes<HTMLParagraphElement>;
     className?: string
 }
 
@@ -86,15 +86,16 @@ export interface LineBaseProps extends StyleOptions {
     hideIfNull?: boolean;
     onChange?: (val: any) => void;
     onValidate?: (val: any) => string;
-    labelHtmlProps?: React.HTMLAttributes;
-    formGroupHtmlProps?: React.HTMLAttributes;
+    labelHtmlProps?: React.HTMLAttributes<HTMLLabelElement>;
+    formGroupHtmlProps?: React.HTMLAttributes<any>;
 }
 
 export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps> extends React.Component<P, S> {
-
+    state: S;
+    props: P;
     constructor(props: P) {
         super(props);
-
+        
         this.state = this.calculateState(props);
     }
 
@@ -166,7 +167,7 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
         state.labelHtmlProps = labelHtmlProps;
     }
 
-    baseHtmlProps(): React.HTMLAttributes {
+    baseHtmlProps(): React.HTMLAttributes<any> {
         return {
             'data-propertyPath': this.state.ctx.propertyPath,
             'data-changes': this.changes

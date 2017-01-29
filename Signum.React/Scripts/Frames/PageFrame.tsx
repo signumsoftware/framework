@@ -59,7 +59,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
 
     loadEntity(props: PageFrameProps): Promise<void> {
 
-        if (this.props.location.query["waitData"]) {
+        if ((this.props.location!.query as any)["waitData"]) {
             if (window.opener.dataForChildWindow == undefined) {
                 throw new Error("No dataForChildWindow in parent found!")
             }

@@ -35,12 +35,12 @@ interface ModalFrameState {
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
     propertyRoute?: PropertyRoute;
     show?: boolean;
-    prefix?: string;
 }
 
 let modalCount = 0;
 
 export default class ModalFrame extends React.Component<ModalFrameProps, ModalFrameState>  {
+    prefix = "modal" + (modalCount++);
 
     static defaultProps: ModalFrameProps = {
         isOperationVisible: undefined,
@@ -51,7 +51,6 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     constructor(props: ModalFrameProps) {
         super(props);
         this.state = this.calculateState(props);
-        this.state.prefix = "modal" + (modalCount++);
     }
 
     componentWillMount() {
@@ -221,7 +220,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
         const pack = this.state.pack!;
 
-        const ctx = new TypeContext(undefined, styleOptions, this.state.propertyRoute!, new ReadonlyBinding(pack.entity, this.state.prefix!));
+        const ctx = new TypeContext(undefined, styleOptions, this.state.propertyRoute!, new ReadonlyBinding(pack.entity, this.prefix!));
 
         return (
             <Modal.Body>
@@ -273,7 +272,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         );
     }
 
-    handlePopupFullScreen = (e: React.MouseEvent) => {
+    handlePopupFullScreen = (e: React.MouseEvent<any>) => {
 
         if (e.ctrlKey || e.buttons) {
 

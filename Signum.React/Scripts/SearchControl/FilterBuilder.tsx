@@ -150,7 +150,7 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
     }
     
 
-    handleChangeOperation = (event: React.FormEvent) => {
+    handleChangeOperation = (event: React.FormEvent<HTMLSelectElement>) => {
         const operation = (event.currentTarget as HTMLSelectElement).value as any;
         if (isList(operation) != isList(this.props.filter.operation!))
             this.props.filter.value = isList(operation) ? [this.props.filter.value] : this.props.filter.value[0];

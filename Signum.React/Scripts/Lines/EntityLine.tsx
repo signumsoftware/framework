@@ -83,7 +83,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         this.typeahead!.writeInInput(query);
     }
 
-    handleOnSelect = (item: any, event: React.SyntheticEvent) => {
+    handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
 
         var lite = this.state.autoComplete!.getEntityFromItem(item);
 

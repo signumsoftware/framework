@@ -16,7 +16,7 @@ export default class ContainerToggleComponent extends React.Component<React.Prop
         Navigator.Expander.setExpanded = (isExpanded: boolean) => this.setState({ fluid: isExpanded });
     }
 
-    handleExpandToggle = (e: React.MouseEvent) => {
+    handleExpandToggle = (e: React.MouseEvent<any>) => {
         e.preventDefault();
         this.setState({ fluid: !this.state.fluid });
     }

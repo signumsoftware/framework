@@ -168,9 +168,9 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
     }
 }
 
-class QuickLinkToggle extends React.Component<{ bsRole: string, onClick?: (e: React.MouseEvent) => void, links: any[] | undefined }, void>{
+class QuickLinkToggle extends React.Component<{ bsRole: string, onClick?: (e: React.MouseEvent<any>) => void, links: any[] | undefined }, void>{
 
-    handleOnClick = (e: React.MouseEvent) => {
+    handleOnClick = (e: React.MouseEvent<any>) => {
         e.preventDefault();
 
         this.props.onClick!(e);
@@ -235,9 +235,9 @@ export abstract class QuickLink {
 }
 
 export class QuickLinkAction extends QuickLink {
-    action: (e: React.MouseEvent) => void;
+    action: (e: React.MouseEvent<any>) => void;
 
-    constructor(name: string, text: string, action: (e: React.MouseEvent) => void, options?: QuickLinkOptions) {
+    constructor(name: string, text: string, action: (e: React.MouseEvent<any>) => void, options?: QuickLinkOptions) {
         super(name, options);
         this.text = text;
         this.action = action;
@@ -273,7 +273,7 @@ export class QuickLinkLink extends QuickLink {
         );
     }
 
-    handleClick = (e: React.MouseEvent) => {
+    handleClick = (e: React.MouseEvent<any>) => {
         if (e.ctrlKey || e.button == 1)
             window.open(Navigator.currentHistory.createHref(this.url));
         else
@@ -303,7 +303,7 @@ export class QuickLinkExplore extends QuickLink {
         );
     }
 
-    exploreOrPopup = (e: React.MouseEvent) => {
+    exploreOrPopup = (e: React.MouseEvent<any>) => {
         if (e.ctrlKey || e.button == 1)
             window.open(Finder.findOptionsPath(this.findOptions));
         else
@@ -334,7 +334,7 @@ export class QuickLinkNavigate extends QuickLink {
         );
     }
 
-    navigateOrPopup = (e: React.MouseEvent) => {
+    navigateOrPopup = (e: React.MouseEvent<any>) => {
         if (e.ctrlKey || e.button == 1 || Navigator.getSettings(this.lite.EntityType).avoidPopup)
             window.open(Navigator.navigateRoute(this.lite));
         else
