@@ -22,6 +22,7 @@ namespace Signum.Entities.Workflow
 
         public WorkflowEventType Type { get; set; }
 
+
         [NotNullable]
         [NotNullValidator]
         public WorkflowXmlEntity Xml { get; set; }

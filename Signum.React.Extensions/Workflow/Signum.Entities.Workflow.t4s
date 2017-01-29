@@ -2,7 +2,7 @@
 interface IWorkflowConditionEvaluator {}
 interface IWorkflowActionExecutor {}
 interface IWorkflowLaneActorsEvaluator {}
-
+interface ISubEntitiesEvaluator{}
 
 export interface WorkflowEntitiesDictionary {
     [bpmnElementId: string]: Entities.ModelEntity

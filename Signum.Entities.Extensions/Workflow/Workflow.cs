@@ -128,6 +128,14 @@ namespace Signum.Entities.Workflow
 
     public class WorkflowEvaluationContext
     {
+        public WorkflowEvaluationContext(CaseActivityEntity ca, WorkflowConnectionEntity conn, DecisionResult? dr)
+        {
+            this.CaseActivity = ca;
+            this.Case = ca?.Case;
+            this.Connection = conn;
+            this.DecisionResult = dr;
+        }
+
         public CaseActivityEntity CaseActivity { get; internal set; }
         public DecisionResult? DecisionResult { get; internal set; }
         public WorkflowConnectionEntity Connection { get; internal set; }

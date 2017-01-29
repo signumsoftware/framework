@@ -19,6 +19,8 @@ namespace Signum.Entities.Workflow
         [NotNullValidator]
         public CaseEntity Case { get; set; }
         
+        [NotNullable]
+        [NotNullValidator]
         public WorkflowActivityEntity WorkflowActivity { get; set; }
 
         [NotNullable, SqlDbType(Size = 255)]
@@ -27,6 +29,10 @@ namespace Signum.Entities.Workflow
 
         public DateTime StartDate { get; set; } = TimeZoneManager.Now;
         public Lite<CaseActivityEntity> Previous { get; set; }
+
+        [SqlDbType(Size = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = true, MultiLine = true)]
+        public string Note { get; set; }
 
         public DateTime? DoneDate { get; set; }
         public Lite<UserEntity> DoneBy { get; set; }
@@ -69,7 +75,7 @@ namespace Signum.Entities.Workflow
     [AutoInit]
     public static class CaseActivityOperation
     {
-        public static readonly ConstructSymbol<CaseActivityEntity>.From<WorkflowEntity> Create;
+        public static readonly ConstructSymbol<CaseActivityEntity>.From<WorkflowEntity> CreateCaseFromWorkflow;
         public static readonly ExecuteSymbol<CaseActivityEntity> Register;
         public static readonly DeleteSymbol<CaseActivityEntity> Delete;
         public static readonly ExecuteSymbol<CaseActivityEntity> Next;
@@ -82,7 +88,16 @@ namespace Signum.Entities.Workflow
     public enum CaseActivityMessage
     {
         CaseContainsOtherActivities,
-        NoNextConnectionThatSatisfiesTheConditionsFound
+        NoNextConnectionThatSatisfiesTheConditionsFound,
+        [Description("Case is a decomposition of {0}")]
+        CaseIsADecompositionOf0,
+        [Description("From {0} on {1}")]
+        From0On1,
+        [Description("Done by {0} on {1}")]
+        DoneBy0On1,
+        PersonalRemarksForThisNotification,
+        [Description("The activity '{0}' requires to be opened")]
+        TheActivity0RequiresToBeOpened,
     }
 
 

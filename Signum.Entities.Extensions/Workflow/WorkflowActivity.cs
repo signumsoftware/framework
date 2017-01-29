@@ -10,6 +10,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.ComponentModel;
+using Signum.Entities.Workflow;
+using System.Reflection;
 
 namespace Signum.Entities.Workflow
 {
@@ -26,9 +28,11 @@ namespace Signum.Entities.Workflow
 
         [SqlDbType(Size = 400)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 400, MultiLine = true)]
-        public string Description { get; set; }
+        public string Comments { get; set; }
 
         public WorkflowActivityType Type { get; set; }
+
+        public bool RequiresOpen { get; set; }
 
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 255)]
         public string ViewName { get; set; }
@@ -40,6 +44,13 @@ namespace Signum.Entities.Workflow
         [NotNullable]
         [NotNullValidator]
         public WorkflowXmlEntity Xml { get; set; }
+        
+        [NotifyChildProperty]
+        public DecompositionEntity Decomposition { get; set; }
+
+        [SqlDbType(Size = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = true, MultiLine = true)]
+        public string UserHelp { get; set; }
 
         static Expression<Func<WorkflowActivityEntity, string>> ToStringExpression = @this => @this.Name;
         [ExpressionField]
@@ -48,15 +59,31 @@ namespace Signum.Entities.Workflow
             return ToStringExpression.Evaluate(this);
         }
 
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Name == nameof(Decomposition))
+            {
+                if (Decomposition != null && this.Type != WorkflowActivityType.DecompositionTask)
+                    return ValidationMessage._0ShouldBeNull.NiceToString(pi.NiceName());
+
+                if (Decomposition == null && this.Type == WorkflowActivityType.DecompositionTask)
+                    return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+            }
+            return base.PropertyValidation(pi);
+        }
+
         public ModelEntity GetModel()
         {
             var model = new WorkflowActivityModel();
             model.MainEntityType = this.Lane.Pool.Workflow.MainEntityType;
             model.Name = this.Name;
             model.Type = this.Type;
+            model.RequiresOpen = this.RequiresOpen;
             model.ValidationRules.AssignMList(this.ValidationRules);
             model.ViewName = this.ViewName;
-            model.Description = this.Description;
+            model.UserHelp = this.UserHelp;
+            model.Decomposition = this.Decomposition;
+            model.Comments = this.Comments;
             return model;
         }
 
@@ -65,17 +92,20 @@ namespace Signum.Entities.Workflow
             var wModel = (WorkflowActivityModel)model;
             this.Name = wModel.Name;
             this.Type = wModel.Type;
+            this.RequiresOpen = wModel.RequiresOpen;
             this.ValidationRules.AssignMList(wModel.ValidationRules);
             this.ViewName = wModel.ViewName;
-            this.Description = wModel.Description;
+            this.UserHelp = wModel.UserHelp;
+            this.Comments = wModel.Comments;
+            this.Decomposition = wModel.Decomposition;
         }
     }
 
     public enum WorkflowActivityType
     {
         Task,
-        //UserTask,
-        DecisionTask
+        DecisionTask,
+        DecompositionTask,
     }
 
     [AutoInit]
@@ -107,6 +137,57 @@ namespace Signum.Entities.Workflow
     }
 
     [Serializable]
+    public class DecompositionEntity : EmbeddedEntity
+    {
+        [NotNullable]
+        [NotNullValidator]
+        public WorkflowEntity Workflow { get; set; }
+
+        [NotNullable]
+        [NotNullValidator, NotifyChildProperty]
+        public SubEntitiesEval SubEntitiesEval { get; set; }
+    }
+
+    [Serializable]
+    public class SubEntitiesEval : EvalEntity<ISubEntitiesEvaluator>
+    {
+        protected override CompilationResult Compile()
+        {
+            var decomposition = (DecompositionEntity)this.GetParentEntity();
+            var activity = (WorkflowActivityEntity)decomposition.GetParentEntity();
+
+            var script = this.Script.Trim();
+            script = script.Contains(';') ? script : ("return " + script + ";");
+            var MainEntityTypeName = activity.Lane.Pool.Workflow.MainEntityType.ToType().FullName;
+            var SubEntityTypeName = decomposition.Workflow.MainEntityType.ToType().FullName;
+
+            return Compile(DynamicCode.GetAssemblies(),
+                DynamicCode.GetNamespaces() +
+                    @"
+                    namespace Signum.Entities.Workflow
+                    {
+                        class MySubEntitiesEvaluator : ISubEntitiesEvaluator
+                        {
+                            public List<ICaseMainEntity> GetSubEntities(ICaseMainEntity mainEntity, WorkflowEvaluationContext ctx)
+                            {
+                                return this.Evaluate((" + MainEntityTypeName + @")mainEntity, ctx).EmptyIfNull().Cast<ICaseMainEntity>().ToList();
+                            }
+
+                            IEnumerable<" + SubEntityTypeName + "> Evaluate(" + MainEntityTypeName + @" e, WorkflowEvaluationContext ctx)
+                            {
+                                " + script + @"
+                            }
+                        }                  
+                    }");
+        }
+    }
+
+    public interface ISubEntitiesEvaluator
+    {
+        List<ICaseMainEntity> GetSubEntities(ICaseMainEntity mainEntity, WorkflowEvaluationContext ctx);
+    }
+
+    [Serializable]
     public class WorkflowActivityModel : ModelEntity
     {
         [NotNullable]
@@ -119,6 +200,8 @@ namespace Signum.Entities.Workflow
 
         public WorkflowActivityType Type { get; set; }
 
+        public bool RequiresOpen { get; set; }
+
         [NotNullable]
         [NotNullValidator, NoRepeatValidator]
         public MList<WorkflowActivityValidationEntity> ValidationRules { get; set; } = new MList<WorkflowActivityValidationEntity>();
@@ -128,7 +211,13 @@ namespace Signum.Entities.Workflow
 
         [SqlDbType(Size = 400)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 400, MultiLine = true)]
-        public string Description { get; set; }
+        public string Comments { get; set; }
+
+        [SqlDbType(Size = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = true, MultiLine = true)]
+        public string UserHelp { get; set; }
+
+        public DecompositionEntity Decomposition { get; set; }
     }
 
     public enum WorkflowActivityMessage {

@@ -11,6 +11,8 @@ import ValidationErrors from '../../../../Framework/Signum.React/Scripts/Frames/
 import ButtonBar from '../../../../Framework/Signum.React/Scripts/Frames/ButtonBar'
 import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperation } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
+import CaseFromSenderInfo from './CaseFromSenderInfo'
+import CaseButtonBar from './CaseButtonBar'
 
 require("!style!css!../../../../Framework/Signum.React/Scripts/Frames/Frames.css");
 require("!style!css!./Case.css");
@@ -79,7 +81,7 @@ export default class CasePageFrame extends React.Component<CasePageFrameProps, C
     }
 
     onClose() {
-        Navigator.currentHistory.push("~/find/inbox");
+        Navigator.currentHistory.push(WorkflowClient.getDefaultInboxUrl());
     }
 
     entityComponent: React.Component<any, any>;
@@ -128,11 +130,12 @@ export default class CasePageFrame extends React.Component<CasePageFrameProps, C
       
         return (
             <div className="normal-control">
-                { this.renderTitle() }              
+                {this.renderTitle()}     
+                <CaseFromSenderInfo current={pack.activity} />         
                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-activity-entity={entityInfo(pack.activity) }>
                     {this.renderMainEntity() }
                 </div>
-                {this.entityComponent && <div className="workflow-buttons"><ButtonBar frame={activityFrame} pack={activityPack} /></div> }
+                {this.entityComponent && <CaseButtonBar frame={activityFrame} pack={activityPack} />}
             </div>
         );
     }
@@ -182,7 +185,7 @@ export default class CasePageFrame extends React.Component<CasePageFrameProps, C
         var ti = this.getMainTypeInfo();
 
         const styleOptions: StyleOptions = {
-            readOnly: Navigator.isReadOnly(ti),
+            readOnly: Navigator.isReadOnly(ti) || Boolean(pack.activity.doneDate),
             frame: mainFrame
         };
 
@@ -196,7 +199,7 @@ export default class CasePageFrame extends React.Component<CasePageFrameProps, C
         };
 
         return (
-            <div className="sf-main-entity" data-main-entity={entityInfo(mainEntity) }>
+            <div className="sf-main-entity case-main-entity" data-main-entity={entityInfo(mainEntity) }>
                 { renderWidgets(wc) }
                 { this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy && <ButtonBar frame={mainFrame} pack={mainPack} /> }
                 <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve}/>

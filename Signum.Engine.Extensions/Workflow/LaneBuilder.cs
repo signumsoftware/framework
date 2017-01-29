@@ -219,6 +219,7 @@ namespace Signum.Engine.Workflow
             {
                 {"task",WorkflowActivityType.Task },
                 {"userTask",WorkflowActivityType.DecisionTask },
+                {"callActivity",WorkflowActivityType.DecompositionTask },
             };
 
             public static Dictionary<string, WorkflowGatewayType> WorkflowGatewayTypes = new Dictionary<string, WorkflowGatewayType>()
@@ -296,8 +297,8 @@ namespace Signum.Engine.Workflow
                 {
                     ac.CaseActivities()
                          .UnsafeUpdate()
-                    .Set(a => a.WorkflowActivity, a => locator.GetReplacement(ac.ToLite()))
-                    .Execute();
+                        .Set(a => a.WorkflowActivity, a => locator.GetReplacement(ac.ToLite()))
+                        .Execute();
                 }
 
                 ac.Delete(WorkflowActivityOperation.Delete);
@@ -319,7 +320,7 @@ namespace Signum.Engine.Workflow
                 {
                     Lane = newLane,
                     Name = a.Name,
-                    Description = a.Description,
+                    Comments = a.Comments,
                     Type = a.Type,
                     ValidationRules = a.ValidationRules.Select(vr => vr.Clone()).ToMList(),
                     ViewName = a.ViewName,
