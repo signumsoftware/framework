@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Signum.Utilities.DataStructures
 {
@@ -9,7 +6,10 @@ namespace Signum.Utilities.DataStructures
     {
         public void Add(IEnumerable<T> collection)
         {
-            AddRange(collection);
+            if (collection != null)
+            {
+                AddRange(collection);
+            }
         }
     }
 }
