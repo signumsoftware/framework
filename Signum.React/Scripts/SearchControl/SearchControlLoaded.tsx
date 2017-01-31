@@ -852,10 +852,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
             const mark = this.getMarkedRow(row.entity);
 
+            var ra = rowAttributes ? rowAttributes(row, resultTable.columns) : undefined;
+
             const tr = (
                 <tr key={i} data-row-index={i} data-entity={liteKey(row.entity)} onDoubleClick={e => this.handleDoubleClick(e, row)}
-                    className={mark && mark.style}
-                    {...rowAttributes ? rowAttributes(row, resultTable.columns) : undefined}>
+                    {...ra}
+                    className={classes(mark && mark.className, ra && ra.className)}>
                     {this.props.allowSelection &&
                         <td style={{ textAlign: "center" }}>
                             <input type="checkbox" className="sf-td-selection" checked={this.state.selectedRows!.contains(row)} onChange={this.handleChecked} data-index={i} />
@@ -864,7 +866,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
                     {this.props.findOptions.navigate &&
                         <td>
-                            {((qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row)).last("EntityFormatRules").formatter)(row, resultTable.columns)}
+                            {((qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row)).last("EntityFormatRules").formatter)(row, resultTable.columns, this)}
                         </td>
                     }
 
@@ -879,6 +881,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         });
     }
 
+    handleOnNavigated = (lite: Lite<Entity>) => {
+        if (this.props.avoidAutoRefresh)
+            return;
+
+        this.doSearch();
+    }
+
     getMarkedRow(entity: Lite<Entity>): MarkedRow | undefined {
 
         if (!entity || !this.state.markedRows)
@@ -888,9 +897,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         if (typeof m === "string") {
             if (m == "")
-                return { style: "sf-entity-ctxmenu-success", message: undefined };
+                return { className: "sf-entity-ctxmenu-success", message: undefined };
             else
-                return { style: "danger", message: m };
+                return { className: "danger", message: m };
         }
         else {
             return m;

@@ -8,7 +8,8 @@ import { Link  } from 'react-router';
 
 export interface EntityLinkProps extends React.HTMLAttributes, React.Props<EntityLink> {
     lite: Lite<Entity>;
-    inSearch?: boolean
+    inSearch?: boolean;
+    onNavigated?: (lite: Lite<Entity>) => void;
 }
 
 
@@ -46,6 +47,8 @@ export default class EntityLink extends React.Component<EntityLinkProps, void>{
 
         event.preventDefault();
 
-        Navigator.navigate(lite);
+        Navigator.navigate(lite).then(() => {
+            this.props.onNavigated && this.props.onNavigated(lite);
+        }).done();
     }
 }
