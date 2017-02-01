@@ -118,7 +118,7 @@ namespace Signum.Windows
         public string EntityTypeTitle { get; set; }
         public string QueryNameTitle { get; set; }
 
-        internal abstract SearchMode GetSearchMode();
+        public abstract SearchMode GetSearchMode();
 
         public Action<SearchControl> InitializeSearchControl;
 
@@ -136,7 +136,7 @@ namespace Signum.Windows
             this.QueryName = queryName;
         }
 
-        internal override SearchMode GetSearchMode()
+        public override SearchMode GetSearchMode()
         {
             return SearchMode.Find;
         }
@@ -152,7 +152,7 @@ namespace Signum.Windows
 
         public bool ReturnIfOne { get; set; }
 
-        internal override SearchMode GetSearchMode()
+        public override SearchMode GetSearchMode()
         {
             return SearchMode.Find;
         }
@@ -176,7 +176,7 @@ namespace Signum.Windows
 
         public bool NavigateIfOne { get; set; }
 
-        internal override SearchMode GetSearchMode()
+        public override SearchMode GetSearchMode()
         {
             return SearchMode.Explore;
         }
