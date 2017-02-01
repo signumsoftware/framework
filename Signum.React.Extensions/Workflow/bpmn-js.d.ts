@@ -69,6 +69,12 @@ declare namespace BPMN {
         height: number;
         x: number;
         y: number;
+        incoming: Connection[];
+        outgoing: Connection[];
+    }
+
+    interface Connection extends DiElement {
+        waypoints: DiElement[];
     }
 
     interface ModdleElement {
@@ -88,8 +94,32 @@ declare namespace BPMN {
     interface Gfx {
     }
 
-    interface DiModule {
+    interface ElementRegistry {
         get(elementId: string): BPMN.DiElement;
+        forEach(action: (element: BPMN.DiElement) => void): void;
+    }
+
+    interface EventBus {
+        on(event: string, callback: (obj: BPMN.Event) => void, target?: BPMN.DiElement): void;
+        on(event: string, priority: number, callback: (obj: BPMN.Event) => void, target?: BPMN.DiElement): void;
+        off(event: string, callback: () => void): void;
+    }
+
+    interface Overlays {
+        add(element: BPMN.DiElement, type: string, overlay: Overlay): void
+        remove(condition: { type: string }) : void;
+    }
+
+    interface Overlay {
+        position: RelativePosition;
+        html: string;
+    }
+
+    interface RelativePosition {
+        top?: number;
+        bottom?: number;
+        left?: number;
+        right?: number 
     }
 }
 
@@ -106,7 +136,7 @@ declare module 'bpmn-js/lib/Viewer' {
         on(event: string, callback: (obj: BPMN.Event) => void, target?: BPMN.DiElement): void;
         on(event: string, priority: number, callback: (obj: BPMN.Event) => void, target?: BPMN.DiElement): void;
         off(event: string, callback: () => void): void;
-        get(module: string): BPMN.DiModule;
+        get<T>(module: string): T;
         _emit(event: string, element: Object): void;
     }
 
@@ -117,10 +147,23 @@ declare module 'bpmn-js/lib/Modeler' {
     import Viewer = require("bpmn-js/lib/Viewer");
 
     class Modeler extends Viewer {
+        _modules: any[];
         createDiagram(done: (error: string, warning: string[]) => void): void;
     }
 
     export = Modeler
+}
+
+declare module 'bpmn-js/lib/draw/BpmnRenderer' {
+
+    class BpmnRenderer {
+        constructor(eventBus: BPMN.EventBus, styles: any, pathMap: any, canvas: any, priority: number);
+
+        drawShape(visuals: any, element: BPMN.DiElement): any;
+        drawConnection(visuals: any, element: BPMN.DiElement): any;
+    }
+
+    export = BpmnRenderer
 }
 
 
