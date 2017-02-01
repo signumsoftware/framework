@@ -612,7 +612,7 @@ namespace Signum.Windows
 
         public event Func<ModifiableEntity, EntityButtonContext, EmbeddedWidget> OnGetEmbeddedWigets;
 
-        internal List<EmbeddedWidget> GetEmbeddedWigets(ModifiableEntity entity, EntityButtonContext ctx)
+        public List<EmbeddedWidget> GetEmbeddedWigets(ModifiableEntity entity, EntityButtonContext ctx)
         {
             List<EmbeddedWidget> elements = new List<EmbeddedWidget>();
 
