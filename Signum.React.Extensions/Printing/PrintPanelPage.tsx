@@ -68,10 +68,10 @@ export default class PrintPanelPage extends React.Component<{}, PrintPanelPageSt
                 <SearchControl findOptions={{
                     queryName: ProcessEntity,
                     filterOptions: [{ columnName: "Entity.Data.(PrintPackage)", operation: "DistinctTo", value: undefined }],
+                    pagination: { elementsPerPage: 10, mode: "Paginate", currentPage: 1},
                     searchOnLoad: true,
                     showFilters: false
                 }} />               
-               
             </div>
         );
     }
