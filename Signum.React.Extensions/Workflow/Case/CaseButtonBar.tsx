@@ -80,7 +80,7 @@ export class UserHelpComponent extends React.Component<UserHelpProps, { open: bo
         );
     }
 
-    handleHelpClick = (e: React.MouseEvent) => {
+    handleHelpClick = (e: React.MouseEvent<any>) => {
         e.preventDefault();
         this.setState({ open: !this.state.open });
     }

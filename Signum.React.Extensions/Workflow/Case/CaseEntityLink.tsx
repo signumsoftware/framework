@@ -37,7 +37,7 @@ export default class CaseEntityLink extends React.Component<CaseEntityLinkProps,
         );
     }
 
-    handleClick = (event: React.MouseEvent) => {
+    handleClick = (event: React.MouseEvent<any>) => {
 
         var lite = this.props.lite;
         var s = Navigator.getSettings(lite.EntityType)
