@@ -34,7 +34,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     findOptions: FindOptions;
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
     formatters?: { [columnName: string]: CellFormatter };
-    rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes | undefined;
+    rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
     entityFormatter?: EntityFormatter;
     showContextMenu?: boolean;
     onSelectionChanged?: (entity: Lite<Entity>[]) => void;

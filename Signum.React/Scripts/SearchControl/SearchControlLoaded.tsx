@@ -33,7 +33,7 @@ export interface SearchControlLoadedProps {
     showContextMenu?: boolean;
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
     formatters?: { [columnName: string]: CellFormatter };
-    rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes | undefined;
+    rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
     entityFormatter?: EntityFormatter;
     onSelectionChanged?: (entity: Lite<Entity>[]) => void;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
