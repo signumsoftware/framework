@@ -114,13 +114,13 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
         this.makeRequest(this.props);
     }
 
-    componentWillReceiveProps(newProps: { ctx: WidgetContext }) {
+    componentWillReceiveProps(newProps: QuickLinkWidgetProps) {
         if (!is(newProps.ctx.pack.entity as Entity, this.props.ctx.pack.entity as Entity)) {
             this.makeRequest(newProps);
         }
     }
 
-    makeRequest(props: { ctx: WidgetContext }) {
+    makeRequest(props: QuickLinkWidgetProps) {
         this.setState({ links: undefined });
 
         const entity = props.ctx.pack.entity;

@@ -4,6 +4,7 @@ import * as React from 'react'
 import { DropdownButton, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { Dic, DomUtils, classes } from '../Globals'
 import * as Finder from '../Finder'
+import { CellFormatter, EntityFormatter } from '../Finder'
 import {
     ResultTable, ResultRow, FindOptionsParsed, FindOptions, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnOptionsMode, ColumnDescription,
     toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest
@@ -31,6 +32,9 @@ export interface SearchControlLoadedProps {
     querySettings: Finder.QuerySettings;
     showContextMenu?: boolean;
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
+    formatters?: { [columnName: string]: CellFormatter };
+    rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes | undefined;
+    entityFormatter?: EntityFormatter;
     onSelectionChanged?: (entity: Lite<Entity>[]) => void;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
     onResult?: (table: ResultTable) => void;
@@ -337,7 +341,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     onClick={this.handleToggleFilters}
                     title={fo.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="glyphicon glyphicon glyphicon-filter"></span></a >}
                 <button className={"sf-query-button sf-search btn btn-primary" + (this.state.loading ? " disabled" : "")} onClick={this.handleSearchClick}>{SearchMessage.Search.niceToString()} </button>
-                {fo.create && <a className="sf-query-button btn btn-default sf-line-button sf-create" title={this.createTitle()} onClick={this.handleCreate}>
+                {fo.create && <a className="sf-query-button btn btn-default sf-search-button sf-create" title={this.createTitle()} onClick={this.handleCreate}>
                     <span className="glyphicon glyphicon-plus sf-create"></span>
                 </a>}
                 {this.props.showContextMenu != false && this.renderSelecterButton()}
@@ -836,21 +840,23 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         const columns = this.props.findOptions.columnOptions.map(co => ({
             columnOption: co,
-            cellFormatter: Finder.getCellFormatter(qs, co),
+            cellFormatter: (co.token && this.props.formatters && this.props.formatters[co.token.fullKey]) || Finder.getCellFormatter(qs, co),
             resultIndex: co.token == undefined ? -1 : resultTable.columns.indexOf(co.token.fullKey)
         }));
 
 
-        const rowAttributes = qs && qs.rowAttributes;
+        const rowAttributes = this.props.rowAttributes || qs && qs.rowAttributes;
 
         return this.state.resultTable.rows.map((row, i) => {
 
             const mark = this.getMarkedRow(row.entity);
 
+            var ra = rowAttributes ? rowAttributes(row, resultTable.columns) : undefined;
+
             const tr = (
                 <tr key={i} data-row-index={i} data-entity={liteKey(row.entity)} onDoubleClick={e => this.handleDoubleClick(e, row)}
-                    className={mark && mark.style}
-                    {...rowAttributes ? rowAttributes(row, resultTable.columns) : undefined}>
+                    {...ra}
+                    className={classes(mark && mark.className, ra && ra.className)}>
                     {this.props.allowSelection &&
                         <td style={{ textAlign: "center" }}>
                             <input type="checkbox" className="sf-td-selection" checked={this.state.selectedRows!.contains(row)} onChange={this.handleChecked} data-index={i} />
@@ -859,7 +865,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
                     {this.props.findOptions.navigate &&
                         <td>
-                            {((qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row)).last("EntityFormatRules").formatter)(row, resultTable.columns)}
+                            {(this.props.entityFormatter || (qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row)).last("EntityFormatRules").formatter)(row, resultTable.columns, this)}
                         </td>
                     }
 
@@ -874,6 +880,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         });
     }
 
+    handleOnNavigated = (lite: Lite<Entity>) => {
+        if (this.props.avoidAutoRefresh)
+            return;
+
+        this.doSearch();
+    }
+
     getMarkedRow(entity: Lite<Entity>): MarkedRow | undefined {
 
         if (!entity || !this.state.markedRows)
@@ -883,9 +896,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         if (typeof m === "string") {
             if (m == "")
-                return { style: "sf-entity-ctxmenu-success", message: undefined };
+                return { className: "sf-entity-ctxmenu-success", message: undefined };
             else
-                return { style: "danger", message: m };
+                return { className: "danger", message: m };
         }
         else {
             return m;

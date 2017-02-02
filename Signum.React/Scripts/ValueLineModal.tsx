@@ -24,7 +24,7 @@ export default class ValueLineModal extends React.Component<ValueLineModalProps,
         };
     }
 
-    selectedValue: any;
+    selectedValue: any = undefined;
     handleOkClick = () => {
         this.selectedValue = this.state.value;
         this.setState({ show: false });

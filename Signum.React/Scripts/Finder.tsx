@@ -26,7 +26,7 @@ import {
 import { navigateRoute, isNavigable, currentHistory, API as NavAPI, isCreable, tryConvert } from './Navigator';
 import SearchModal from './SearchControl/SearchModal';
 import EntityLink from './SearchControl/EntityLink';
-import SearchControl from './SearchControl/SearchControlLoaded';
+import SearchControlLoaded from './SearchControl/SearchControlLoaded';
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -732,7 +732,7 @@ export module Decoder {
 export module ButtonBarQuery {
 
     interface ButtonBarQueryContext {
-        searchControl: SearchControl;
+        searchControl: SearchControlLoaded;
         findOptions: FindOptionsParsed;
     }
 
@@ -865,13 +865,13 @@ export interface EntityFormatRule {
 }
 
 
-export type EntityFormatter = (row: ResultRow, columns: string[]) => React.ReactChild | undefined;
+export type EntityFormatter = (row: ResultRow, columns: string[], sc?: SearchControlLoaded) => React.ReactChild | undefined;
 
 export const entityFormatRules: EntityFormatRule[] = [
     {
         name: "View",
         isApplicable: row=> true,
-        formatter: row => !row.entity || !isNavigable(row.entity.EntityType, undefined, true) ? undefined :
-            <EntityLink lite={row.entity} inSearch={true}>{EntityControlMessage.View.niceToString() }</EntityLink>
+        formatter: (row, columns, sc) => !row.entity || !isNavigable(row.entity.EntityType, undefined, true) ? undefined :
+            <EntityLink lite={row.entity} inSearch={true} onNavigated={sc && sc.handleOnNavigated}>{EntityControlMessage.View.niceToString()}</EntityLink>
     },
 ];

@@ -25,6 +25,7 @@ interface ModalFrameProps extends React.Props<ModalFrame>, IModalProps {
     validate?: boolean;
     requiresSaveOperation?: boolean;
     avoidPromptLooseChange?: boolean;
+    extraComponentProps?: {}
     viewPromise?: Navigator.ViewPromise<ModifiableEntity>;
     isNavigate?: boolean;
     readOnly?: boolean;
@@ -107,12 +108,12 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
     loadComponent() {
 
-        if (this.props.viewPromise) {
-            return this.props.viewPromise.promise
-                .then(c => this.setState({ getComponent: c }));
-        }
+        var viewPromise = this.props.viewPromise || Navigator.getViewPromise(this.state.pack!.entity);
 
-        return Navigator.getViewPromise(this.state.pack!.entity).promise
+        if (this.props.extraComponentProps)
+            viewPromise = viewPromise.withProps(this.props.extraComponentProps);
+
+        return viewPromise.promise
             .then(c => this.setState({ getComponent: c }));
     }
 
@@ -294,6 +295,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             isOperationVisible={options.isOperationVisible}
             requiresSaveOperation={options.requiresSaveOperation}
             avoidPromptLooseChange={options.avoidPromptLooseChange}
+            extraComponentProps={options.extraComponentProps}
             validate={options.validate == undefined ? ModalFrame.isModelEntity(entityOrPack) : options.validate }
             title={options.title}
             isNavigate={false}/>);

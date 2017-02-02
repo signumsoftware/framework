@@ -17,7 +17,8 @@ namespace Signum.Windows
     public static class DynamicQueryServer
     {
         static ConcurrentDictionary<QueryToken, IEnumerable<QueryToken>> extensionCache = new ConcurrentDictionary<QueryToken, IEnumerable<QueryToken>>();
-        internal static IEnumerable<QueryToken> GetExtensionToken(QueryToken token)
+
+        public static IEnumerable<QueryToken> GetExtensionToken(QueryToken token)
         {
             var result = extensionCache.GetOrAdd(token, t => Server.Return((IDynamicQueryServer server) => server.ExternalQueryToken(t)));
             return result;
