@@ -262,7 +262,6 @@ export module EmailTemplateViewMessage {
 }
 
 export interface IAttachmentGeneratorEntity extends Entities.Entity {
-    template?: EmailTemplateEntity | null;
 }
 
 export interface IEmailOwnerEntity extends Entities.Entity {
