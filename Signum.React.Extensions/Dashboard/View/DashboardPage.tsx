@@ -37,24 +37,24 @@ export default class DashboardPage extends React.Component<DashboardPageProps, D
     }
 
     componentWillReceiveProps(nextProps: DashboardPageProps) {
-        if (this.props.routeParams.dashboardId != nextProps.routeParams.dashboardId)
+        if (this.props.routeParams!.dashboardId != nextProps.routeParams!.dashboardId)
             this.loadDashboard(nextProps);
 
-        if (this.props.location.query["entity"] != nextProps.location.query["entity"])
+        if ((this.props.location!.query as any)["entity"]  != (nextProps.location!.query as any)["entity"])
             this.loadEntity(nextProps);
     }
 
     loadDashboard(props: DashboardPageProps) {
         this.setState({ dashboard: undefined });
-        Navigator.API.fetchEntity(DashboardEntity, props.routeParams.dashboardId)
+        Navigator.API.fetchEntity(DashboardEntity, props.routeParams!.dashboardId)
             .then(d => this.setState({ dashboard: d }))
             .done();
     }
 
     loadEntity(props: DashboardPageProps) {
         this.setState({ entity: undefined });
-        if (props.location.query["entity"])
-            Navigator.API.fetchAndForget(parseLite(props.location.query["entity"]))
+        if ((props.location!.query as any)["entity"])
+            Navigator.API.fetchAndForget(parseLite((props.location!.query as any)["entity"]))
                 .then(e => this.setState({ entity: e }))
                 .done();
     }
@@ -64,7 +64,7 @@ export default class DashboardPage extends React.Component<DashboardPageProps, D
         const dashboard = this.state.dashboard;
         const entity = this.state.entity;
 
-        const withEntity = this.props.location.query["entity"];
+        const withEntity = (this.props.location!.query as any)["entity"];
 
         return (
             <div>

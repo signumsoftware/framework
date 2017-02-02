@@ -34,7 +34,7 @@ export default class TranslationCodeView extends React.Component<TranslationCode
 
     render() {
 
-        const {assembly, culture } = this.props.routeParams;
+        const {assembly, culture } = this.props.routeParams!;
 
         const message = TranslationMessage.View0In1.niceToString(assembly,
             culture == undefined ? TranslationMessage.AllLanguages.niceToString() :
@@ -53,7 +53,7 @@ export default class TranslationCodeView extends React.Component<TranslationCode
     }
 
     handleSearch = (filter: string) => {
-        const {assembly, culture} = this.props.routeParams;
+        const {assembly, culture} = this.props.routeParams!;
 
         return API.retrieve(assembly, culture || "", filter)
             .then(result => this.setState({ result: result }))
@@ -73,7 +73,7 @@ export default class TranslationCodeView extends React.Component<TranslationCode
 
         return (
             <div>
-                { Dic.getValues(this.state.result.types).map(type => <TranslationTypeTable key={type.type} type={type} result={result} currentCulture={this.props.routeParams.culture} />) }
+                { Dic.getValues(this.state.result.types).map(type => <TranslationTypeTable key={type.type} type={type} result={result} currentCulture={this.props.routeParams!.culture} />) }
                 <input type="submit" value={ TranslationMessage.Save.niceToString() } className="btn btn-primary" onClick={this.handleSave}/>
             </div>
         );
@@ -81,7 +81,7 @@ export default class TranslationCodeView extends React.Component<TranslationCode
 
     handleSave = (e: React.FormEvent<any>) => {
         e.preventDefault();
-        const params = this.props.routeParams;
+        const params = this.props.routeParams!;
         API.save(params.assembly, params.culture || "", this.state.result!).then(() => notifySuccess()).done();
     }
 }

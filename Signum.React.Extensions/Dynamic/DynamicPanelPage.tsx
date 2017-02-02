@@ -53,7 +53,7 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
     render() {
         AuthClient.asserPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel);
 
-        let step = this.props.location.query["step"] as "compile" | "restartServer" | "migrations" | "refreshClients" | undefined;
+        let step = (this.props.location!.query as any)["step"] as "compile" | "restartServer" | "migrations" | "refreshClients" | undefined;
 
         const errors = this.state.startErrors
         return (
