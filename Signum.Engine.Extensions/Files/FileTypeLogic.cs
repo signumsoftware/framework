@@ -117,7 +117,7 @@ namespace Signum.Engine.Files
             if (GetPrefixPair == null)
                 error = "GetPrefixPair";
 
-            if (WeakFileReference && CalculateSufix == null)
+            if (!WeakFileReference && CalculateSufix == null)
                 error = ", ".CombineIfNotEmpty(error, "CalculateSufix");
 
             if (RenameOnCollision && RenameAlgorithm == null)

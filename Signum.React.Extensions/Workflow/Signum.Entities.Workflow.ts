@@ -12,7 +12,7 @@ import * as Dynamic from '../Dynamic/Signum.Entities.Dynamic'
 interface IWorkflowConditionEvaluator {}
 interface IWorkflowActionExecutor {}
 interface IWorkflowLaneActorsEvaluator {}
-
+interface ISubEntitiesEvaluator{}
 
 export interface WorkflowEntitiesDictionary {
     [bpmnElementId: string]: Entities.ModelEntity
@@ -29,10 +29,11 @@ export const CaseActivityEntity = new Type<CaseActivityEntity>("CaseActivity");
 export interface CaseActivityEntity extends Entities.Entity {
     Type: "CaseActivity";
     case: CaseEntity;
-    workflowActivity: WorkflowActivityEntity | null;
+    workflowActivity: WorkflowActivityEntity;
     originalWorkflowActivityName: string;
     startDate: string;
     previous: Entities.Lite<CaseActivityEntity> | null;
+    note: string | null;
     doneDate: string | null;
     doneBy: Entities.Lite<Authorization.UserEntity> | null;
 }
@@ -40,10 +41,15 @@ export interface CaseActivityEntity extends Entities.Entity {
 export module CaseActivityMessage {
     export const CaseContainsOtherActivities = new MessageKey("CaseActivityMessage", "CaseContainsOtherActivities");
     export const NoNextConnectionThatSatisfiesTheConditionsFound = new MessageKey("CaseActivityMessage", "NoNextConnectionThatSatisfiesTheConditionsFound");
+    export const CaseIsADecompositionOf0 = new MessageKey("CaseActivityMessage", "CaseIsADecompositionOf0");
+    export const From0On1 = new MessageKey("CaseActivityMessage", "From0On1");
+    export const DoneBy0On1 = new MessageKey("CaseActivityMessage", "DoneBy0On1");
+    export const PersonalRemarksForThisNotification = new MessageKey("CaseActivityMessage", "PersonalRemarksForThisNotification");
+    export const TheActivity0RequiresToBeOpened = new MessageKey("CaseActivityMessage", "TheActivity0RequiresToBeOpened");
 }
 
 export module CaseActivityOperation {
-    export const Create : Entities.ConstructSymbol_From<CaseActivityEntity, WorkflowEntity> = registerSymbol("Operation", "CaseActivityOperation.Create");
+    export const CreateCaseFromWorkflow : Entities.ConstructSymbol_From<CaseActivityEntity, WorkflowEntity> = registerSymbol("Operation", "CaseActivityOperation.CreateCaseFromWorkflow");
     export const Register : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Register");
     export const Delete : Entities.DeleteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Delete");
     export const Next : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Next");
@@ -60,6 +66,7 @@ export const CaseEntity = new Type<CaseEntity>("Case");
 export interface CaseEntity extends Entities.Entity {
     Type: "Case";
     workflow: WorkflowEntity;
+    parentCase: Entities.Lite<CaseEntity> | null;
     description: string;
     mainEntity: ICaseMainEntity;
     startDate: string;
@@ -80,7 +87,12 @@ export interface CaseNotificationEntity extends Entities.Entity {
     caseActivity?: Entities.Lite<CaseActivityEntity> | null;
     user?: Entities.Lite<Authorization.UserEntity> | null;
     actor?: Entities.Lite<Entities.Entity> | null;
+    remarks?: string | null;
     state?: CaseNotificationState;
+}
+
+export module CaseNotificationOperation {
+    export const SetRemarks : Entities.ExecuteSymbol<CaseNotificationEntity> = registerSymbol("Operation", "CaseNotificationOperation.SetRemarks");
 }
 
 export const CaseNotificationState = new EnumType<CaseNotificationState>("CaseNotificationState");
@@ -88,7 +100,8 @@ export type CaseNotificationState =
     "New" |
     "Opened" |
     "InProgress" |
-    "Done";
+    "Done" |
+    "DoneByOther";
 
 export const DateFilterRange = new EnumType<DateFilterRange>("DateFilterRange");
 export type DateFilterRange =
@@ -101,6 +114,13 @@ export const DecisionResult = new EnumType<DecisionResult>("DecisionResult");
 export type DecisionResult =
     "Approve" |
     "Decline";
+
+export const DecompositionEntity = new Type<DecompositionEntity>("DecompositionEntity");
+export interface DecompositionEntity extends Entities.EmbeddedEntity {
+    Type: "DecompositionEntity";
+    workflow?: WorkflowEntity | null;
+    subEntitiesEval?: SubEntitiesEval | null;
+}
 
 export interface ICaseMainEntity extends Entities.Entity {
 }
@@ -130,6 +150,11 @@ export interface IWorkflowObjectEntity extends Entities.Entity {
     name?: string | null;
 }
 
+export const SubEntitiesEval = new Type<SubEntitiesEval>("SubEntitiesEval");
+export interface SubEntitiesEval extends Dynamic.EvalEntity<ISubEntitiesEvaluator> {
+    Type: "SubEntitiesEval";
+}
+
 export const WorkflowActionEntity = new Type<WorkflowActionEntity>("WorkflowAction");
 export interface WorkflowActionEntity extends Entities.Entity {
     Type: "WorkflowAction";
@@ -153,11 +178,14 @@ export interface WorkflowActivityEntity extends Entities.Entity, IWorkflowNodeEn
     Type: "WorkflowActivity";
     lane?: WorkflowLaneEntity | null;
     name?: string | null;
-    description?: string | null;
+    comments?: string | null;
     type?: WorkflowActivityType;
+    requiresOpen?: boolean;
     viewName?: string | null;
     validationRules: Entities.MList<WorkflowActivityValidationEntity>;
     xml?: WorkflowXmlEntity | null;
+    decomposition?: DecompositionEntity | null;
+    userHelp?: string | null;
 }
 
 export module WorkflowActivityMessage {
@@ -170,9 +198,12 @@ export interface WorkflowActivityModel extends Entities.ModelEntity {
     mainEntityType: Basics.TypeEntity;
     name?: string | null;
     type?: WorkflowActivityType;
+    requiresOpen?: boolean;
     validationRules: Entities.MList<WorkflowActivityValidationEntity>;
     viewName?: string | null;
-    description?: string | null;
+    comments?: string | null;
+    userHelp?: string | null;
+    decomposition?: DecompositionEntity | null;
 }
 
 export module WorkflowActivityOperation {
@@ -183,7 +214,8 @@ export module WorkflowActivityOperation {
 export const WorkflowActivityType = new EnumType<WorkflowActivityType>("WorkflowActivityType");
 export type WorkflowActivityType =
     "Task" |
-    "DecisionTask";
+    "DecisionTask" |
+    "DecompositionTask";
 
 export const WorkflowActivityValidationEntity = new Type<WorkflowActivityValidationEntity>("WorkflowActivityValidationEntity");
 export interface WorkflowActivityValidationEntity extends Entities.EmbeddedEntity {

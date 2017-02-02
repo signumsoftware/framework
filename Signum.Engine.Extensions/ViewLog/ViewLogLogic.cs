@@ -15,6 +15,7 @@ using Signum.Entities.DynamicQuery;
 using System.IO;
 using Signum.Utilities.ExpressionTrees;
 using System.Data.Common;
+using Signum.Engine;
 
 namespace Signum.Engine.ViewLog
 {
@@ -98,10 +99,16 @@ namespace Signum.Engine.ViewLog
             {
                 try
                 {
-                    viewLog.EndDate = TimeZoneManager.Now;
-                    viewLog.Data = request.QueryUrl + "\r\n\r\n" + sw.ToString();
-                    using (ExecutionMode.Global())
-                        viewLog.Save();
+                    using (Transaction tr = Transaction.ForceNew())
+                    {
+
+                        viewLog.EndDate = TimeZoneManager.Now;
+                        viewLog.Data = request.QueryUrl + "\r\n\r\n" + sw.ToString();
+                        using (ExecutionMode.Global())
+                            viewLog.Save();
+                        tr.Commit();
+                    }
+
                 }
                 finally
                 {

@@ -31,14 +31,7 @@ export default class WorkflowDropdown extends React.Component<void, { starts: Ar
 
     render() {
 
-        const inboxUrl = Finder.findOptionsPath({
-            queryName: CaseActivityQuery.Inbox,
-            filterOptions: [{
-                columnName: "State",
-                operation: "IsIn",
-                value: ["New", "Opened", "InProgress"]
-            }]
-        });
+        const inboxUrl = WorkflowClient.getDefaultInboxUrl();
         
         return (
             <NavDropdown title={ WorkflowEntity.nicePluralName() } id= "workflow-dropdown" >

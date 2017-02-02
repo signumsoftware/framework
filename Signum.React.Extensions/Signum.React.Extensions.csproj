@@ -216,6 +216,7 @@
     <TypeScriptCompile Include="Files\FileUploader.tsx" />
     <TypeScriptCompile Include="Files\FileDownloader.tsx" />
     <TypeScriptCompile Include="Dynamic\View\DynamicView.tsx" />
+    <TypeScriptCompile Include="HtmlEditor\HtmlEditor.tsx" />
     <TypeScriptCompile Include="Mailing\Templates\IFrameRenderer.tsx" />
     <Compile Include="Map\MapServer.cs" />
     <Compile Include="Map\MapController.cs" />
@@ -248,6 +249,7 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="Printing\Templates\PrintPackage.tsx" />
     <TypeScriptCompile Include="Printing\Templates\PrintLine.tsx" />
+    <TypeScriptCompile Include="HtmlEditor\react-rte.d.ts" />
     <TypeScriptCompile Include="Toolbar\QueryToolbarConfig.ts" />
     <TypeScriptCompile Include="Toolbar\Signum.Entities.Toolbar.ts">
       <DependentUpon>Signum.Entities.Toolbar.t4s</DependentUpon>
@@ -261,22 +263,28 @@
     <TypeScriptCompile Include="Word\Templates\WordTemplate.tsx" />
     <TypeScriptCompile Include="Word\WordClient.tsx" />
     <TypeScriptCompile Include="Workflow\bpmn-js.d.ts" />
+    <TypeScriptCompile Include="Workflow\Case\CaseButtonBar.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\ActivityWithRemarks.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\CaseFromSenderInfo.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\CaseEntityLink.tsx" />
     <TypeScriptCompile Include="Workflow\Signum.Entities.Workflow.ts">
       <DependentUpon>Signum.Entities.Workflow.t4s</DependentUpon>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="Workflow\Templates\BpmnModelerComponent.tsx" />
-    <TypeScriptCompile Include="Workflow\Templates\BpmnViewerComponent.tsx" />
-    <TypeScriptCompile Include="Workflow\Templates\CaseModalFrame.tsx" />
-    <TypeScriptCompile Include="Workflow\Templates\CasePageFrame.tsx" />
-    <TypeScriptCompile Include="Workflow\Templates\InboxFilter.tsx" />
-    <TypeScriptCompile Include="Workflow\Templates\Workflow.tsx" />
-    <TypeScriptCompile Include="Workflow\Templates\WorkflowConnectionModel.tsx" />
-    <TypeScriptCompile Include="Workflow\Templates\WorkflowActivityModel.tsx" />
-    <TypeScriptCompile Include="Workflow\Templates\WorkflowAction.tsx" />
-    <TypeScriptCompile Include="Workflow\Templates\WorkflowLaneModel.tsx" />
-    <TypeScriptCompile Include="Workflow\Templates\WorkflowCondition.tsx" />
-    <TypeScriptCompile Include="Workflow\Templates\WorkflowDropdown.tsx" />
-    <TypeScriptCompile Include="Workflow\Templates\WorkflowReplacementComponent.tsx" />
+    <TypeScriptCompile Include="Workflow\Bpmn\BpmnModelerComponent.tsx" />
+    <TypeScriptCompile Include="Workflow\Bpmn\BpmnViewerComponent.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\CaseModalFrame.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\CasePageFrame.tsx" />
+    <TypeScriptCompile Include="Workflow\Bpmn\CustomRenderer.ts" />
+    <TypeScriptCompile Include="Workflow\Bpmn\ConnectionIcons.ts" />
+    <TypeScriptCompile Include="Workflow\Case\InboxFilter.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\Workflow.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowConnectionModel.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowActivityModel.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowAction.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowLaneModel.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowCondition.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowDropdown.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowReplacementComponent.tsx" />
     <TypeScriptCompile Include="Workflow\WorkflowClient.tsx" />
   </ItemGroup>
   <ItemGroup>
@@ -294,11 +302,12 @@
     <Content Include="Map\Operation\operationMap.css" />
     <Content Include="Map\Schema\schemaMap.css" />
     <Content Include="packages.config" />
-    <Content Include="Workflow\Templates\InitialWorkflow.xml">
+    <Content Include="Workflow\Case\Inbox.css" />
+    <Content Include="Workflow\Workflow\InitialWorkflow.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Workflow\Templates\Case.css" />
-    <Content Include="Workflow\Templates\Workflow.css" />
+    <Content Include="Workflow\Case\Case.css" />
+    <Content Include="Workflow\Bpmn\Bpmn.css" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Processes\Processes.css" />

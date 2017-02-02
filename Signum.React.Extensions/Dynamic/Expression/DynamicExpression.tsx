@@ -151,7 +151,7 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
                 type={{ name: typeName }} labelText="Example Entity" />
         );
     }
-
+    
     handleOnView = (exampleEntity: Entity) => {
         return Navigator.view(exampleEntity, { requiresSaveOperation: false });
     }
