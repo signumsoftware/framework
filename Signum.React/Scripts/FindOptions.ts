@@ -235,7 +235,7 @@ export interface Pagination {
 
 export module PaginateMath {
     export function startElementIndex(p: Pagination) {
-        return (p.elementsPerPage * (p.currentPage - 1)) + 1;
+        return (p.elementsPerPage! * (p.currentPage! - 1)) + 1;
     }
 
     export function endElementIndex(p: Pagination, rows: number) {
@@ -243,11 +243,11 @@ export module PaginateMath {
     }
 
     export function totalPages(p: Pagination, totalElements: number) {
-        return Math.ceil(totalElements / p.elementsPerPage); //Round up
+        return Math.ceil(totalElements / p.elementsPerPage!); //Round up
     }
 
     export function maxElementIndex(p: Pagination) {
-        return (p.elementsPerPage * (p.currentPage + 1)) - 1;
+        return (p.elementsPerPage! * (p.currentPage! + 1)) - 1;
     }
 }
 

@@ -88,7 +88,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
     popupate() {
 
-        if (this.input.value.length < this.props.minLength) {
+        if (this.props.minLength == null || this.input.value.length < this.props.minLength) {
             this.setState({ shown: false, items: undefined, selectedIndex: undefined });
             return;
         }

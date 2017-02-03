@@ -31,13 +31,13 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
 
     moveUp(index: number) {
         super.moveUp(index);
-        this.state.selectedIndex = this.state.selectedIndex - 1;
+        this.state.selectedIndex = this.state.selectedIndex! - 1;
         this.forceUpdate();
     }
 
     moveDown(index: number) {
         super.moveDown(index);
-        this.state.selectedIndex = this.state.selectedIndex + 1;
+        this.state.selectedIndex = this.state.selectedIndex! + 1;
         this.forceUpdate();
     }
 
@@ -68,8 +68,8 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
                             {this.renderFindButton(true)}
                             {hasSelected && this.renderViewButton(true, list[s.selectedIndex!].element)}
                             {hasSelected && this.renderRemoveButton(true, list[s.selectedIndex!].element)}
-                            {hasSelected && this.state.move && s.selectedIndex > 0 && this.renderMoveUp(true, s.selectedIndex!)}
-                            {hasSelected && this.state.move && s.selectedIndex < list.length - 1 && this.renderMoveDown(true, s.selectedIndex!)}
+                            {hasSelected && this.state.move && s.selectedIndex != null && s.selectedIndex > 0 && this.renderMoveUp(true, s.selectedIndex!)}
+                            {hasSelected && this.state.move && s.selectedIndex != null && s.selectedIndex < list.length - 1 && this.renderMoveDown(true, s.selectedIndex!)}
                         </span>
                     </div>
                 </div>

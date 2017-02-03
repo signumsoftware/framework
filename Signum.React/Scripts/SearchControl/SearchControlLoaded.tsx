@@ -526,7 +526,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         const cm = this.state.contextualMenu!;
         this.setState({ editingColumn: newColumn });
-        this.props.findOptions.columnOptions.insertAt(cm.columnIndex + cm.columnOffset, newColumn);
+        this.props.findOptions.columnOptions.insertAt(cm.columnIndex! + cm.columnOffset!, newColumn);
 
         this.forceUpdate();
     }
@@ -676,7 +676,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         let dropBorderIndex = offset == undefined ? undefined : columnIndex + offset;
 
-        if (dropBorderIndex == this.state.dragColumnIndex || dropBorderIndex == this.state.dragColumnIndex + 1)
+        if (dropBorderIndex == this.state.dragColumnIndex || dropBorderIndex == this.state.dragColumnIndex! + 1)
             dropBorderIndex = undefined;
 
         //de.dataTransfer.dropEffect = dropBorderIndex == undefined ? "none" : "move";
@@ -717,8 +717,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                             co == this.state.editingColumn && "sf-current-column",
                             !this.canOrder(co) && "noOrder",
                             co == this.state.editingColumn && co.token && co.token.type.isCollection && "error",
-                            i == this.state.dropBorderIndex ? "drag-left " :
-                                i == this.state.dropBorderIndex - 1 ? "drag-right " : undefined)}
+                            this.state.dropBorderIndex != null && i == this.state.dropBorderIndex ? "drag-left " :
+                                this.state.dropBorderIndex != null && i == this.state.dropBorderIndex - 1 ? "drag-right " : undefined)}
                         data-column-name={co.token && co.token.fullKey}
                         data-column-index={i}
                         key={i}
