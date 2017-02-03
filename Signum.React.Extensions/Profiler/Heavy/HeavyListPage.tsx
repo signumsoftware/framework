@@ -18,7 +18,7 @@ interface HeavyListProps extends ReactRouter.RouteComponentProps<{}, {}> {
 
 }
 
-export default class HeavyList extends React.Component<HeavyListProps, { enabled?: boolean; entries?: HeavyProfilerEntry[], fileToUpload?: File, fileVer?: number }> {
+export default class HeavyList extends React.Component<HeavyListProps, { enabled?: boolean; entries?: HeavyProfilerEntry[], fileToUpload?: File, fileVer: number }> {
 
     constructor(props: HeavyListProps) {
         super(props);

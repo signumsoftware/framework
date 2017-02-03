@@ -239,9 +239,9 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
 
 
         if (s.dragMode == "move") {
-            const offset = de.pageX - s.initialPageX;
+            const offset = de.pageX - s.initialPageX!;
             const dCol = Math.round((offset / rect.width) * 12);
-            let newCol = s.originalStartColumn + dCol;
+            let newCol = s.originalStartColumn! + dCol;
             let start = list.filter(a => a != c && a.row == row && a.startColumn <= newCol).map(a => a.startColumn + a.columns).max();
             if (!isFinite(start))
                 start = 0;

@@ -20,7 +20,7 @@ interface ImportAssetsPageState {
     file?: API.FileUpload;
     model?: UserAssetPreviewModel;
     success?: boolean;
-    fileVer?: number;
+    fileVer: number;
 }
 
 
