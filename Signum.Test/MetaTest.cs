@@ -76,7 +76,8 @@ namespace Signum.Test
             Assert.IsInstanceOfType(dic["Name"], typeof(CleanMeta));
             Assert.IsInstanceOfType(dic["Sum"], typeof(DirtyMeta));
 
-            Assert.AreEqual(((DirtyMeta)dic["Sum"]).CleanMetas.Select(cm => cm.PropertyRoutes[0].ToString()).OrderBy().ToString(","), "(Album).Name,(Label).Name");
+            var metas = ((DirtyMeta)dic["Sum"]).CleanMetas;
+            Assert.AreEqual(metas.SelectMany(cm => cm.PropertyRoutes).Distinct().ToString(","), "(Album).Name,(Label).Name");
         }
 
         [TestMethod]
