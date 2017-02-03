@@ -60,46 +60,33 @@ namespace Signum.Utilities
             return ChooseTuple(ConsoleMessage.EnterYourSelection.NiceToString());
         }
 
-        public WithDescription<V> ChooseTuple(string endMessage)
+        public WithDescription<V> ChooseTuple(string endMessage, int? numberOfOptions = null)
         {
-        retry:
-            try
+            var noOfOptsPerScreen = numberOfOptions.GetValueOrDefault(Console.WindowHeight - 10);
+            PrintOptions(0, noOfOptsPerScreen);
+            var noOfOptsPrinted = noOfOptsPerScreen;
+            do
             {
-                var step = Console.WindowHeight - 10;
-
-                Console.WriteLine(welcomeMessage);
-                for (int i = 0; i < dictionary.Count; i += step)
+                var input = Console.ReadLine().Trim();
+                if (input == "+")
                 {
-                    PrintOptions(i, step);
-
-                    if (i + step < dictionary.Count)
-                    {
-                        SafeConsole.WriteColor(ConsoleColor.White, " +");
-                        Console.WriteLine(" - " + ConsoleMessage.More.NiceToString());
-                    }
-
-                    Console.WriteLine(endMessage);
-                    string line = Console.ReadLine();
-
-                    if (string.IsNullOrEmpty(line))
-                        return null;
-
-                    if (line.Trim() == "+")
-                        continue;
-
-                    Console.WriteLine();
-
-                    return GetValue(line.Trim());
+                    if (noOfOptsPrinted >= dictionary.Count) continue;
+                    PrintOptions(noOfOptsPrinted, noOfOptsPerScreen);
                 }
-
-                return null;             
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                goto retry;
-            }
+                else
+                {
+                    if (dictionary.ContainsKey(input)) return GetValue(input);
+                    if (string.IsNullOrWhiteSpace(input)) return null;
+                    SafeConsole.WriteLineColor(ConsoleColor.Red, "Plase choose a valid option!");
+                    noOfOptsPrinted = 0;
+                    PrintOptions(noOfOptsPrinted, noOfOptsPerScreen);
+                }
+                noOfOptsPrinted += noOfOptsPerScreen;
+            } while (true);
         }
+
+
+
 
         void PrintOptions(int skip, int take)
         {
@@ -119,6 +106,10 @@ namespace Signum.Utilities
                 SafeConsole.WriteColor(ConsoleColor.White, " " + keys[i]);
                 Console.WriteLine(" - " + dictionary[key].Description);
             }
+
+            if (skip + take >= dictionary.Count) return;
+            SafeConsole.WriteColor(ConsoleColor.White, " +");
+            Console.WriteLine(" - " + ConsoleMessage.More.NiceToString());
         }
 
         public V[] ChooseMultiple(string[] args = null)
@@ -148,7 +139,7 @@ namespace Signum.Utilities
             if (args != null)
                 return args.ToString(" ").SplitNoEmpty(',').SelectMany(GetValuesRange).ToArray();
 
-        retry:
+            retry:
             try
             {
                 Console.WriteLine(welcomeMessage);
