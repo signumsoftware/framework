@@ -132,8 +132,8 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
 
         const tables = s.operationMapInfo!.allNodes.filter(a => a.fixed)
             .toObject(a => a.key, a =>
-                (a.x / s.width).toPrecision(4) + "," +
-                (a.y / s.height).toPrecision(4));        
+                (a.x! / s.width!).toPrecision(4) + "," +
+                (a.y! / s.height!).toPrecision(4));        
 
         var query = { ...tables, color: s.color };
 

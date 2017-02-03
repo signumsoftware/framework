@@ -166,8 +166,8 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
         const tables = s.schemaMapInfo!.allNodes.filter(a => a.fixed)
             .toObject(a => a.tableName, a =>
-                (a.x / s.width).toPrecision(4) + "," +
-                (a.y / s.height).toPrecision(4));
+                (a.x! / s.width!).toPrecision(4) + "," +
+                (a.y! / s.height!).toPrecision(4));
 
         const query = {
             ...tables, filter: s.filter, color: s.color
