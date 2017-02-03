@@ -1137,16 +1137,13 @@ namespace Signum.Engine.Linq
 
                     return toStr;
                 }
-
-
-                var uSource = source.UnNullify();
-                if (uSource.NodeType == ExpressionType.Convert && uSource.Type.IsEnum)
+                else if (source.NodeType == ExpressionType.Convert && source.Type.UnNullify().IsEnum)
                 {
-                    var table = Schema.Current.Table(EnumEntity.Generate(uSource.Type));
+                    var table = Schema.Current.Table(EnumEntity.Generate(source.Type.UnNullify()));
 
                     if (table != null)
                     {
-                        var ee = new EntityExpression(EnumEntity.Generate(uSource.Type), new PrimaryKeyExpression(((UnaryExpression)uSource).Operand.Nullify()), null, null, null, false);
+                        var ee = new EntityExpression(EnumEntity.Generate(source.Type.UnNullify()), new PrimaryKeyExpression(((UnaryExpression)source).Operand.Nullify()), null, null, null, false);
 
                         return Completed(ee).GetBinding(EntityExpression.ToStrField);
                     }

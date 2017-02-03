@@ -232,7 +232,7 @@ namespace Signum.Engine.Linq
             var newExp = Visit(expression);
             if (Has(newExp) && IsFullNominateOrAggresive)
             {
-                if (type.IsEnum)
+                if (type.UnNullify().IsEnum)
                     throw new InvalidOperationException($"Impossible to get the ToString of {type.Name} because is not in the Schema");
 
                 var cast = new SqlCastExpression(type, newExp);
