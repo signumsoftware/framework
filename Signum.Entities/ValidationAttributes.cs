@@ -257,6 +257,34 @@ namespace Signum.Entities
         }
     }
 
+    public class IdentifierValidatorAttribute : RegexValidatorAttribute
+    {
+        public static Regex PascalAscii = new Regex(@"^[A-Z[_a-zA-Z0-9]*$");
+        public static Regex Ascii = new Regex(@"^[_a-zA-Z[_a-zA-Z0-9]*$");
+        public static Regex International = new Regex(@"^[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*$");
+
+        public IdentifierType type;
+        public IdentifierValidatorAttribute(IdentifierType type)
+               : base(
+                     type == IdentifierType.PascalAscii ? PascalAscii : 
+                     type == IdentifierType.Ascii ? Ascii: 
+                     type == IdentifierType.International ? International : 
+                     null
+                     )
+        {
+            this.type = type;
+        }
+
+        public override string FormatName => this.type.ToString();
+    }
+
+    public enum IdentifierType
+    {
+        PascalAscii,
+        Ascii,
+        International
+    }
+
     public class NumericTextValidatorAttribute : RegexValidatorAttribute
     {
         public static Regex NumericTextRegex = new Regex(@"^[\p{Nd}]*$");
