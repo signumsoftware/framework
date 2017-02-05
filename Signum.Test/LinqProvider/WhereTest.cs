@@ -244,6 +244,26 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void WhereEnumToString()
+        {
+            var females = Database.Query<ArtistEntity>().Count(a => a.Sex.ToString() == Sex.Female.ToString());
+            var females2 = Database.Query<ArtistEntity>().Count(a => a.Sex == Sex.Female);
+            Assert.AreEqual(females, females2);
+
+            var bla = Database.Query<ArtistEntity>().Count(a => a.Sex.ToString() == a.Name);
+            Assert.AreEqual(bla, 0);
+        }
+
+        [TestMethod]
+        public void WhereNullableEnumToString()
+        {
+            var females = Database.Query<ArtistEntity>().Count(a => a.Status.ToString() == Status.Married.ToString());
+            var females2 = Database.Query<ArtistEntity>().Count(a => a.Status == Status.Married);
+            Assert.AreEqual(females, females2);
+        }
+
+
+        [TestMethod]
         public void WhereEmbeddedNull()
         {
             var albumsWithBonusTrack = Database.Query<AlbumEntity>().Where(a => a.BonusTrack == null).ToList();

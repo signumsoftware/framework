@@ -1137,6 +1137,20 @@ namespace Signum.Engine.Linq
 
                     return toStr;
                 }
+
+
+                var uSource = source.UnNullify();
+                if (uSource.NodeType == ExpressionType.Convert && uSource.Type.IsEnum)
+                {
+                    var table = Schema.Current.Table(EnumEntity.Generate(uSource.Type));
+
+                    if (table != null)
+                    {
+                        var ee = new EntityExpression(EnumEntity.Generate(uSource.Type), new PrimaryKeyExpression(((UnaryExpression)uSource).Operand.Nullify()), null, null, null, false);
+
+                        return Completed(ee).GetBinding(EntityExpression.ToStrField);
+                    }
+                }
             }
 
             if (m.Method.Name == "Mixin" && source is EntityExpression && m.Method.GetParameters().Length == 0)

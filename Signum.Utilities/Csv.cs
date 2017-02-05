@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Reflection;
 using System.Collections.Concurrent;
+using System.Collections;
 
 namespace Signum.Utilities
 {
@@ -44,32 +45,57 @@ namespace Signum.Utilities
 
             string separator = culture.TextInfo.ListSeparator;
 
-            var columns = ColumnInfoCache<T>.Columns;
-            var members = columns.Select(c => c.MemberEntry).ToList();
-            var toString = columns.Select(c => GetToString(culture, c, toStringFactory)).ToList();
-
-            using (StreamWriter sw = new StreamWriter(stream, encoding) { AutoFlush = autoFlush })
+            if (typeof(IList).IsAssignableFrom(typeof(T)))
             {
-                if (writeHeaders)
-                    sw.WriteLine(members.ToString(m => HandleSpaces(m.Name), separator));
-
-                foreach (var item in collection)
+                using (StreamWriter sw = new StreamWriter(stream, encoding) { AutoFlush = autoFlush })
                 {
-                    for (int i = 0; i < members.Count; i++)
+                    foreach (IList row in collection)
                     {
-                        var obj = members[i].Getter(item); 
-                        
-                        var str = EncodeCsv(toString[i](obj), culture);
+                        for (int i = 0; i < row.Count; i++)
+                        {
+                            var obj = row[i];
 
-                        sw.Write(str);
-                        if(i < members.Count - 1)
-                            sw.Write(separator);
-                        else
-                            sw.WriteLine();
+                            var str = EncodeCsv(ConvertToString(obj, null, culture), culture);
+
+                            sw.Write(str);
+                            if (i < row.Count - 1)
+                                sw.Write(separator);
+                            else
+                                sw.WriteLine();
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var columns = ColumnInfoCache<T>.Columns;
+                var members = columns.Select(c => c.MemberEntry).ToList();
+                var toString = columns.Select(c => GetToString(culture, c, toStringFactory)).ToList();
+
+                using (StreamWriter sw = new StreamWriter(stream, encoding) { AutoFlush = autoFlush })
+                {
+                    if (writeHeaders)
+                        sw.WriteLine(members.ToString(m => HandleSpaces(m.Name), separator));
+
+                    foreach (var item in collection)
+                    {
+                        for (int i = 0; i < members.Count; i++)
+                        {
+                            var obj = members[i].Getter(item);
+
+                            var str = EncodeCsv(toString[i](obj), culture);
+
+                            sw.Write(str);
+                            if (i < members.Count - 1)
+                                sw.Write(separator);
+                            else
+                                sw.WriteLine();
+                        }
                     }
                 }
             }
         }
+
 
         static string EncodeCsv(string p, CultureInfo culture)
         {
