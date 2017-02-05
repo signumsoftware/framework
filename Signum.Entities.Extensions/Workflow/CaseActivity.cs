@@ -81,6 +81,8 @@ namespace Signum.Entities.Workflow
         public static readonly ExecuteSymbol<CaseActivityEntity> Next;
         public static readonly ExecuteSymbol<CaseActivityEntity> Approve;
         public static readonly ExecuteSymbol<CaseActivityEntity> Decline;
+        public static readonly ExecuteSymbol<CaseActivityEntity> MarkAsUnread;
+        public static readonly ExecuteSymbol<CaseActivityEntity> Undo;
 
         public static readonly ExecuteSymbol<DynamicTypeEntity> FixCaseDescriptions;
     }
@@ -98,6 +100,11 @@ namespace Signum.Entities.Workflow
         PersonalRemarksForThisNotification,
         [Description("The activity '{0}' requires to be opened")]
         TheActivity0RequiresToBeOpened,
+        NoOpenedOrInProgressNotificationsFound,
+        NextActivityAlreadyInProgress,
+        NextActivityOfDecompositionSurrogateAlreadyInProgress,
+        [Description("Only '{0}' can undo this operation")]
+        Only0CanUndoThisOperation,
     }
 
 
