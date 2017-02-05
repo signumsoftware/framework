@@ -5,12 +5,14 @@ import { Button, OverlayTrigger, Tooltip, MenuItem } from "react-bootstrap"
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
+import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From, registerToString, JavascriptMessage } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
-import { EmailMessageEntity, EmailTemplateMessageEntity, EmailMasterTemplateEntity, EmailMasterTemplateMessageEntity, EmailPackageEntity, EmailRecipientEntity, EmailConfigurationEntity, EmailTemplateEntity, AsyncEmailSenderPermission } from './Signum.Entities.Mailing'
+import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
+import { EmailMessageEntity, EmailTemplateMessageEntity, EmailMasterTemplateEntity, EmailMasterTemplateMessageEntity, EmailMessageOperation, EmailPackageEntity, EmailRecipientEntity, EmailConfigurationEntity, EmailTemplateEntity, AsyncEmailSenderPermission } from './Signum.Entities.Mailing'
 import { SmtpConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, Pop3ReceptionExceptionEntity, EmailAddressEntity } from './Signum.Entities.Mailing'
 import { NewsletterEntity, NewsletterDeliveryEntity, SendEmailTaskEntity } from './Signum.Entities.Mailing'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
@@ -40,6 +42,18 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
     Navigator.addSettings(new EntitySettings(EmailRecipientEntity, e => new ViewPromise(resolve => require(['./Templates/EmailRecipient'], resolve))));
     Navigator.addSettings(new EntitySettings(EmailAddressEntity, e => new ViewPromise(resolve => require(['./Templates/EmailAddress'], resolve))));
     Navigator.addSettings(new EntitySettings(EmailConfigurationEntity, e => new ViewPromise(resolve => require(['./Templates/EmailConfiguration'], resolve))));
+
+    Operations.addSettings(new EntityOperationSettings(EmailMessageOperation.CreateMailFromTemplate, {
+        onClick: (ctx,e) => {
+            Finder.find({ queryName: ctx.entity.query!.key }).then(lite => {
+                if (!lite)
+                    return;
+                Navigator.API.fetchAndForget(lite).then(entity =>
+                    EntityOperations.defaultConstructFromEntity(ctx, e, entity))
+                    .done();
+            }).done();
+        }
+    }));
 
     if (options.smtpConfig) {
         Navigator.addSettings(new EntitySettings(SmtpConfigurationEntity, e => new ViewPromise(resolve => require(['./Templates/SmtpConfiguration'], resolve))));

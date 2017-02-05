@@ -17,6 +17,11 @@ namespace Signum.Entities.Excel
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class ExcelAttachmentEntity : Entity, IAttachmentGeneratorEntity
     {
+        protected override void SetSelfModified()
+        {
+            base.SetSelfModified();
+        }
+
         [NotNullable, SqlDbType(Size = 100)]
         string fileName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), FileNameValidator]
@@ -56,11 +61,7 @@ namespace Signum.Entities.Excel
 
         [ImplementedByAll]
         public Lite<Entity> Related { get; set; }
-
-
-        [Ignore]
-        public EmailTemplateEntity Template { get; set; }
-
+        
         static Expression<Func<ExcelAttachmentEntity, string>> ToStringExpression = @this => @this.FileName;
         [ExpressionField]
         public override string ToString()

@@ -1,21 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using Signum.Engine;
+using Signum.Engine.Authorization;
+using Signum.Engine.Operations;
+using Signum.Entities.Authorization;
+using Signum.Entities.Basics;
+using Signum.Services;
+using Signum.Utilities;
+using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using Signum.Engine.Authorization;
-using Signum.Entities;
-using Signum.Entities.Authorization;
-using Signum.Services;
-using Signum.Utilities;
-using Signum.React.Facades;
-using Signum.React.Authorization;
-using Signum.Engine.Operations;
-using Signum.React.Filters;
-using Signum.Entities.Basics;
-using Signum.Engine;
 
 namespace Signum.React.Authorization
 {
@@ -62,7 +56,7 @@ namespace Signum.React.Authorization
                 {
                     throw ModelException("userName", AuthMessage.InvalidUsername.NiceToString());
                 }
-                else if(e is IncorrectPasswordException)
+                else if (e is IncorrectPasswordException)
                 {
                     throw ModelException("password", AuthMessage.InvalidPassword.NiceToString());
                 }
@@ -123,7 +117,7 @@ namespace Signum.React.Authorization
 
         [Route("api/auth/refreshToken"), HttpPost, AllowAnonymous]
         public LoginResponse RefreshToken([FromBody]string oldToken)
-        {   
+        {
             UserEntity user;
             var newToken = AuthTokenServer.RefreshToken(oldToken, out user);
 
@@ -146,7 +140,7 @@ namespace Signum.React.Authorization
                 throw ModelException("newPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
 
             var user = UserEntity.Current;
-            
+
             if (!user.PasswordHash.SequenceEqual(Security.EncodePassword(request.oldPassword)))
                 throw ModelException("oldPassword", AuthMessage.InvalidPassword.NiceToString());
 
@@ -156,11 +150,11 @@ namespace Signum.React.Authorization
 
             return user;
         }
-       
+
         private HttpResponseException ModelException(string field, string error)
         {
             ModelState.AddModelError(field, error);
             return new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, this.ModelState));
-        }     
+        }
     }
 }

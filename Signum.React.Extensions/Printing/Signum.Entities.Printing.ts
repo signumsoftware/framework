@@ -7,6 +7,7 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 import * as Processes from '../Processes/Signum.Entities.Processes'
 import * as Files from '../Files/Signum.Entities.Files'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
+import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler'
 
 
 export const PrintLineEntity = new Type<PrintLineEntity>("PrintLine");
@@ -29,9 +30,11 @@ export module PrintLineOperation {
 export const PrintLineState = new EnumType<PrintLineState>("PrintLineState");
 export type PrintLineState =
     "ReadyToPrint" |
+    "Enqueued" |
     "Printed" |
     "Cancelled" |
-    "Error";
+    "Error" |
+    "PrintedAndDeleted";
 
 export const PrintPackageEntity = new Type<PrintPackageEntity>("PrintPackage");
 export interface PrintPackageEntity extends Entities.Entity, Processes.IProcessDataEntity {
@@ -45,6 +48,10 @@ export module PrintPackageProcess {
 
 export module PrintPermission {
     export const ViewPrintPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "PrintPermission.ViewPrintPanel");
+}
+
+export module PrintTask {
+    export const RemoveOldFiles : Scheduler.SimpleTaskSymbol = registerSymbol("SimpleTask", "PrintTask.RemoveOldFiles");
 }
 
 
