@@ -15,7 +15,7 @@ namespace Signum.Entities.Dynamic
     public class DynamicExpressionEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100)]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), IdentifierValidator(IdentifierType.PascalAscii)]
         public string Name { get; set; }
 
         [NotNullable, SqlDbType(Size = 100)]

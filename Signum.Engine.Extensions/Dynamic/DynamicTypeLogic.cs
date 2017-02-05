@@ -664,7 +664,7 @@ namespace Signum.Engine.Dynamic
             if (fieldName == null)
                 return null;
 
-            if (!Reflector.ValidIdentifier(fieldName))
+            if (!IdentifierValidatorAttribute.International.IsMatch(fieldName))
                 return null;
 
             var lastProperty = field.After("=").TryAfterLast(".")?.Trim();
