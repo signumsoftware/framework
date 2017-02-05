@@ -36,7 +36,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
     }
 
     getTypeInfo(): TypeInfo {
-        return getTypeInfo(this.props.routeParams!.type);
+        return getTypeInfo(this.props.routeParams.type);
     }
 
     calculateState(props: PageFrameProps) {
@@ -59,7 +59,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
 
     loadEntity(props: PageFrameProps): Promise<void> {
 
-        if ((this.props.location!.query as any)["waitData"]) {
+        if (this.props.location.query.waitData) {
             if (window.opener.dataForChildWindow == undefined) {
                 throw new Error("No dataForChildWindow in parent found!")
             }
@@ -72,11 +72,11 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
 
         const ti = this.getTypeInfo();
 
-        if (this.props.routeParams!.id) {
+        if (this.props.routeParams.id) {
             
             const lite: Lite<Entity> = {
                 EntityType: ti.name,
-                id: parseId(ti, props.routeParams!.id!),
+                id: parseId(ti, props.routeParams.id!),
             };
 
             return Navigator.API.fetchEntityPack(lite)
