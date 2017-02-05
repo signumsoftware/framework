@@ -470,7 +470,7 @@ export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.Mouse
         return;
 
     const es = getSettings(pack.entity.Type);
-    if (es.avoidPopup || event.ctrlKey || event.button == 1) {
+    if (es && es.avoidPopup || event.ctrlKey || event.button == 1) {
         createInNewTab(pack);
     }
     else {
