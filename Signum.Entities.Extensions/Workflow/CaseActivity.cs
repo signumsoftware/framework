@@ -81,6 +81,7 @@ namespace Signum.Entities.Workflow
         public static readonly ExecuteSymbol<CaseActivityEntity> Next;
         public static readonly ExecuteSymbol<CaseActivityEntity> Approve;
         public static readonly ExecuteSymbol<CaseActivityEntity> Decline;
+        public static readonly ExecuteSymbol<CaseActivityEntity> Jump;
         public static readonly ExecuteSymbol<CaseActivityEntity> MarkAsUnread;
         public static readonly ExecuteSymbol<CaseActivityEntity> Undo;
 
@@ -105,6 +106,8 @@ namespace Signum.Entities.Workflow
         NextActivityOfDecompositionSurrogateAlreadyInProgress,
         [Description("Only '{0}' can undo this operation")]
         Only0CanUndoThisOperation,
+        [Description("Activity '{0}' has no jumps")]
+        Activity0HasNoJumps,
     }
 
 

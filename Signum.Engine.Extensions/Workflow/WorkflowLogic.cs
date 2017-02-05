@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.Workflow
 {
@@ -158,14 +159,33 @@ namespace Signum.Engine.Workflow
         }
 
         public class WorkflowNodeGraph
-
         {
-            public DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity> NextGraph;
-            public DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity> PreviousGraph;
+            public Lite<WorkflowEntity> Workflow { get; internal set; }
+            public DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity> NextGraph { get; internal set; }
+            public DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity> PreviousGraph { get; internal set; }
+
+            public Dictionary<Lite<WorkflowEventEntity>, WorkflowEventEntity> Events { get; internal set; }
+            public Dictionary<Lite<WorkflowActivityEntity>, WorkflowActivityEntity> Activities { get; internal set; }
+            public Dictionary<Lite<WorkflowGatewayEntity>, WorkflowGatewayEntity> Gateways{ get; internal set; }
+            public Dictionary<Lite<WorkflowConnectionEntity>, WorkflowConnectionEntity> Connections { get; internal set; }
+
+            internal List<Lite<IWorkflowNodeEntity>> Autocomplete(string subString, int count)
+            {
+                return AutocompleteUtils.Autocomplete(Events.Keys, subString, count).Cast<Lite<IWorkflowNodeEntity>>()
+                    .Concat(AutocompleteUtils.Autocomplete(Activities.Keys, subString, count))
+                    .Concat(AutocompleteUtils.Autocomplete(Gateways.Keys, subString, count))
+                    .OrderByDescending(a => a.ToString().Length)
+                    .Take(count)
+                    .ToList();
+            }
         }
 
-        static ResetLazy<Dictionary<Lite<WorkflowEntity>, WorkflowNodeGraph
->> WorkflowGraphLazy;
+        static ResetLazy<Dictionary<Lite<WorkflowEntity>, WorkflowNodeGraph>> WorkflowGraphLazy;
+
+        public static List<Lite<IWorkflowNodeEntity>> AutocompleteNodes(Lite<WorkflowEntity> workflow, string subString, int count)
+        {
+            return WorkflowGraphLazy.Value.GetOrThrow(workflow).Autocomplete(subString, count);
+        }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -282,21 +302,29 @@ namespace Signum.Engine.Workflow
                         var connections = Database.RetrieveAll<WorkflowConnectionEntity>().GroupToDictionary(a => a.From.Lane.Pool.Workflow.ToLite());
 
                         var result = Database.RetrieveAllLite<WorkflowEntity>().ToDictionary(w => w, w =>
-                         {
+                        {
+                             var nodeGraph = new WorkflowNodeGraph
+                             {
+                                 Workflow = w,
+                                 Events = events.TryGetC(w).EmptyIfNull().ToDictionary(e => e.ToLite()),
+                                 Gateways = gateways.TryGetC(w).EmptyIfNull().ToDictionary(g => g.ToLite()),
+                                 Activities = activities.TryGetC(w).EmptyIfNull().ToDictionary(a => a.ToLite()),
+                                 Connections = connections.TryGetC(w).EmptyIfNull().ToDictionary(c => c.ToLite()),
+
+                             };
+
                              var graph = new DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity>();
 
-                             events.TryGetC(w).EmptyIfNull().ToList().ForEach(e => graph.Add(e));
-                             gateways.TryGetC(w).EmptyIfNull().ToList().ForEach(g => graph.Add(g));
-                             activities.TryGetC(w).EmptyIfNull().ToList().ForEach(a => graph.Add(a));
-                             connections.TryGetC(w).EmptyIfNull().ToList().ForEach(c => graph.Add(c.From, c.To, c));
+                             foreach (var e in nodeGraph.Events.Values) graph.Add(e);
+                             foreach (var a in nodeGraph.Activities.Values) graph.Add(a);
+                             foreach (var g in nodeGraph.Gateways.Values) graph.Add(g);
+                             foreach (var c in nodeGraph.Connections.Values) graph.Add(c.From, c.To, c);
 
-                             return new WorkflowNodeGraph
+                             nodeGraph.NextGraph = graph;
+                             nodeGraph.PreviousGraph = graph.Inverse();
 
-                             {
-                                 NextGraph = graph,
-                                 PreviousGraph = graph.Inverse(),
-                             };
-                         });
+                             return nodeGraph;
+                        });
 
                         return result;
                     }

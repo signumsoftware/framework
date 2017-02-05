@@ -1,9 +1,12 @@
 ﻿import * as React from 'react'
-import { WorkflowActivityModel, WorkflowActivityValidationEntity, WorkflowActivityMessage, DecompositionEntity, SubEntitiesEval } from '../Signum.Entities.Workflow'
+import {
+    WorkflowActivityModel, WorkflowActivityValidationEntity, WorkflowActivityMessage, WorkflowConditionEntity, WorkflowActionEntity,
+    WorkflowJumpEntity, IWorkflowNodeEntity, DecompositionEntity, SubEntitiesEval
+} from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 import * as DynamicViewClient from '../../../../Extensions/Signum.React.Extensions/Dynamic/DynamicViewClient'
-import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityTable, FormGroup } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { is, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityTable, FormGroup, LiteAutocompleteConfig } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { is, JavascriptMessage, Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { DynamicValidationEntity } from '../../../../Extensions/Signum.React.Extensions/Dynamic/Signum.Entities.Dynamic'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
@@ -11,7 +14,8 @@ import { Binding } from '../../../../Framework/Signum.React/Scripts/Reflection';
 import CSharpCodeMirror from '../../../../Extensions/Signum.React.Extensions/Codemirror/CSharpCodeMirror'
 import TypeHelpComponent from '../../Dynamic/Help/TypeHelpComponent'
 import HtmlEditor from '../../../../Extensions/Signum.React.Extensions/HtmlEditor/HtmlEditor'
-
+import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
+import { API } from '../WorkflowClient'
 
 interface WorkflowActivityModelComponentProps {
     ctx: TypeContext<WorkflowActivityModel>;
@@ -126,6 +130,41 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                                 template: ctx => <ValueLine ctx={ctx.subCtx(wav => wav.onDecline)} formGroupStyle="None" valueHtmlProps={{ style: { margin: "0 auto" } }} />,
                             } : null,
                         ])} />
+                        <EntityTable ctx={ctx.subCtx(d => d.jumps)} columns={EntityTable.typedColumns<WorkflowJumpEntity>([
+                            {
+                                property: wj => wj.to,
+                                template: (jCtx, row, state) => {
+                                    return <EntityLine
+                                        ctx={jCtx.subCtx(wj => wj.to)}
+                                        autoComplete={new LiteAutocompleteConfig(str => API.findNode({ workflowId: ctx.value.workflow!.id, subString: str, count: 5 }), false)}
+                                        onChange={this.handleJumpToChanged}
+                                        find={false} />
+                                },
+                                headerProps: { width: "32%" }
+                            },
+                            {
+                                property: wj => wj.condition,
+                                headerProps: { width: "30%" },
+                                template: (jCtx, row, state) => {
+                                    return <EntityLine ctx={jCtx.subCtx(wj => wj.condition)} findOptions={{
+                                        queryName: WorkflowConditionEntity,
+                                        parentColumn: "Entity.MainEntityType",
+                                        parentValue: ctx.value.mainEntityType
+                                    }} />
+                                },
+                            },
+                            {
+                                property: wj => wj.action,
+                                headerProps: { width: "30%" },
+                                template: (jCtx, row, state) => {
+                                    return <EntityLine ctx={jCtx.subCtx(wj => wj.action)} findOptions={{
+                                        queryName: WorkflowActionEntity,
+                                        parentColumn: "Entity.MainEntityType",
+                                        parentValue: ctx.value.mainEntityType
+                                    }} />
+                                },
+                            },
+                        ])} />
                         <ValueLine ctx={ctx.subCtx(a => a.requiresOpen)} />
                         <fieldset>
                             <legend>{WorkflowActivityModel.nicePropertyName(a => a.userHelp)}</legend>
@@ -138,6 +177,10 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                     <DecompositionComponent ctx={ctx.subCtx(a => a.decomposition!)} mainEntityType={ctx.value.mainEntityType} />}
             </div>
         );
+    }
+
+    handleJumpToChanged = () => {
+
     }
 }
 

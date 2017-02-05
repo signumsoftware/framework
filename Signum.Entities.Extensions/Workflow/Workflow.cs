@@ -107,7 +107,12 @@ namespace Signum.Entities.Workflow
         WorkflowLaneEntity Lane { get; set; }
     }
 
-    public interface IWorkflowConnectionEntity : IWorkflowObjectEntity { }
+    public interface IWorkflowConnectionOrJump
+    {
+        Lite<WorkflowConditionEntity> Condition { get; set; }
+
+        Lite<WorkflowActionEntity> Action { get; set; }
+    }
 
     [Serializable]
     public class WorkflowReplacementModel: ModelEntity
@@ -128,7 +133,7 @@ namespace Signum.Entities.Workflow
 
     public class WorkflowEvaluationContext
     {
-        public WorkflowEvaluationContext(CaseActivityEntity ca, WorkflowConnectionEntity conn, DecisionResult? dr)
+        public WorkflowEvaluationContext(CaseActivityEntity ca, IWorkflowConnectionOrJump conn, DecisionResult? dr)
         {
             this.CaseActivity = ca;
             this.Case = ca?.Case;
@@ -138,7 +143,7 @@ namespace Signum.Entities.Workflow
 
         public CaseActivityEntity CaseActivity { get; internal set; }
         public DecisionResult? DecisionResult { get; internal set; }
-        public WorkflowConnectionEntity Connection { get; internal set; }
+        public IWorkflowConnectionOrJump Connection { get; internal set; }
         public CaseEntity Case { get; internal set; }
     }
 }

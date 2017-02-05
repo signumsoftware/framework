@@ -33,7 +33,7 @@ import {
     WorkflowEntity, WorkflowLaneEntity, WorkflowActivityEntity, WorkflowConnectionEntity, WorkflowConditionEntity, WorkflowActionEntity, CaseActivityQuery, CaseActivityEntity,
     CaseActivityOperation, CaseEntity, CaseNotificationEntity, CaseNotificationState, InboxFilterModel, WorkflowOperation, WorkflowPoolEntity,
     WorkflowActivityOperation, WorkflowReplacementModel, WorkflowModel, BpmnEntityPair, WorkflowActivityModel, ICaseMainEntity, WorkflowGatewayEntity, WorkflowEventEntity,
-    WorkflowLaneModel, WorkflowConnectionModel
+    WorkflowLaneModel, WorkflowConnectionModel, IWorkflowNodeEntity
 } from './Signum.Entities.Workflow'
 
 import InboxFilter from './Case/InboxFilter'
@@ -277,6 +277,12 @@ export namespace API {
     export function findMainEntityType(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {
         return ajaxGet<Lite<TypeEntity>[]>({
             url: Navigator.currentHistory.createHref({ pathname: "~/api/workflow/findMainEntityType", query: request })
+        });
+    }
+
+    export function findNode(request: { workflowId: string | number, subString: string, count: number }): Promise<Lite<IWorkflowNodeEntity>[]> {
+        return ajaxGet<Lite<IWorkflowNodeEntity>[]>({
+            url: Navigator.currentHistory.createHref({ pathname: "~/api/workflow/findNode", query: request })
         });
     }
 
