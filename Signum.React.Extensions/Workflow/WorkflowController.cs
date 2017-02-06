@@ -74,6 +74,14 @@ namespace Signum.React.Workflow
             return AutocompleteUtils.Autocomplete(list, subString, count);
         }
 
+        [Route("api/workflow/findNode"), HttpGet]
+        public List<Lite<IWorkflowNodeEntity>> FindNode(int workflowId, string subString, int count)
+        {
+            var workflow = Lite.Create<WorkflowEntity>(workflowId);
+            
+            return WorkflowLogic.AutocompleteNodes(workflow, subString, count);
+        }
+
         [Route("api/workflow/condition/test"), HttpPost]
         public WorkflowConditionTestResponse Test(WorkflowConditionTestRequest request)
         {

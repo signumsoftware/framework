@@ -13,7 +13,7 @@ namespace Signum.Entities.Workflow
 {
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class WorkflowConnectionEntity : Entity, IWorkflowConnectionEntity, IWithModel
+    public class WorkflowConnectionEntity : Entity, IWorkflowObjectEntity, IWithModel, IWorkflowConnectionOrJump
     {
         [ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity), typeof(WorkflowGatewayEntity))]
         //[NotNullValidator] needs to be disabled temporally

@@ -69,7 +69,7 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
                         <div className="code-container">
                             <pre style={{ border: "0px", margin: "0px", overflow: "visible" }}>
                                 {this.renderTypeAutocomplete(ctx.subCtx(dt => dt.returnType))} {this.renderInput(ctx.subCtx(dt => dt.name))}({this.renderTypeAutocomplete(ctx.subCtx(dt => dt.fromType))}e) =>
-                    </pre>
+                            </pre>
                             <CSharpCodeMirror script={ctx.value.body || ""} onChange={this.handleCodeChange} />
                         </div>
                         {ctx.value.body && cleanFromType && this.renderTest(cleanFromType)}

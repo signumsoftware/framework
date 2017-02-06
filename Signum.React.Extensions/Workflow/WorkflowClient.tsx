@@ -33,7 +33,7 @@ import {
     WorkflowEntity, WorkflowLaneEntity, WorkflowActivityEntity, WorkflowConnectionEntity, WorkflowConditionEntity, WorkflowActionEntity, CaseActivityQuery, CaseActivityEntity,
     CaseActivityOperation, CaseEntity, CaseNotificationEntity, CaseNotificationState, InboxFilterModel, WorkflowOperation, WorkflowPoolEntity,
     WorkflowActivityOperation, WorkflowReplacementModel, WorkflowModel, BpmnEntityPair, WorkflowActivityModel, ICaseMainEntity, WorkflowGatewayEntity, WorkflowEventEntity,
-    WorkflowLaneModel, WorkflowConnectionModel
+    WorkflowLaneModel, WorkflowConnectionModel, IWorkflowNodeEntity
 } from './Signum.Entities.Workflow'
 
 import InboxFilter from './Case/InboxFilter'
@@ -79,7 +79,9 @@ export function start(options: { routes: JSX.Element[] }) {
     });
 
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { hideOnCanExecute: true, style: "primary" }));
-    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Delete, { hideOnCanExecute: true, contextualFromMany: { isVisible: ctx => false } }));
+    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Delete, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
+    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Undo, { hideOnCanExecute: true, style: "danger" }));
+    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.MarkAsUnread, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
     caseActivityOperation(CaseActivityOperation.Next, "primary");
     caseActivityOperation(CaseActivityOperation.Approve, "success");
     caseActivityOperation(CaseActivityOperation.Decline, "warning");
@@ -121,8 +123,8 @@ function caseActivityOperation(operation: ExecuteSymbol<CaseActivityEntity>, sty
         hideOnCanExecute: true,
         style: style,
         onClick: executeAndClose,
-        contextual: { isVisible: ctx => true, style: style },
-        contextualFromMany: { isVisible: ctx => true, style: style },
+        contextual: { isVisible: ctx => true },
+        contextualFromMany: { isVisible: ctx => true },
     }));
 }
 
@@ -275,6 +277,12 @@ export namespace API {
     export function findMainEntityType(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {
         return ajaxGet<Lite<TypeEntity>[]>({
             url: Navigator.currentHistory.createHref({ pathname: "~/api/workflow/findMainEntityType", query: request })
+        });
+    }
+
+    export function findNode(request: { workflowId: string | number, subString: string, count: number }): Promise<Lite<IWorkflowNodeEntity>[]> {
+        return ajaxGet<Lite<IWorkflowNodeEntity>[]>({
+            url: Navigator.currentHistory.createHref({ pathname: "~/api/workflow/findNode", query: request })
         });
     }
 

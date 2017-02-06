@@ -41,6 +41,10 @@ namespace Signum.Entities.Workflow
         [NotNullValidator, NoRepeatValidator]
         public MList<WorkflowActivityValidationEntity> ValidationRules { get; set; } = new MList<WorkflowActivityValidationEntity>();
 
+        [NotNullable, PreserveOrder]
+        [NotNullValidator, NoRepeatValidator]
+        public MList<WorkflowJumpEntity> Jumps { get; set; } = new MList<WorkflowJumpEntity>();
+
         [NotNullable]
         [NotNullValidator]
         public WorkflowXmlEntity Xml { get; set; }
@@ -75,11 +79,13 @@ namespace Signum.Entities.Workflow
         public ModelEntity GetModel()
         {
             var model = new WorkflowActivityModel();
-            model.MainEntityType = this.Lane.Pool.Workflow.MainEntityType;
+            model.Workflow = this.Lane.Pool.Workflow;
+            model.MainEntityType = model.Workflow.MainEntityType;
             model.Name = this.Name;
             model.Type = this.Type;
             model.RequiresOpen = this.RequiresOpen;
             model.ValidationRules.AssignMList(this.ValidationRules);
+            model.Jumps.AssignMList(this.Jumps);
             model.ViewName = this.ViewName;
             model.UserHelp = this.UserHelp;
             model.Decomposition = this.Decomposition;
@@ -94,11 +100,23 @@ namespace Signum.Entities.Workflow
             this.Type = wModel.Type;
             this.RequiresOpen = wModel.RequiresOpen;
             this.ValidationRules.AssignMList(wModel.ValidationRules);
+            this.Jumps.AssignMList(wModel.Jumps);
             this.ViewName = wModel.ViewName;
             this.UserHelp = wModel.UserHelp;
             this.Comments = wModel.Comments;
             this.Decomposition = wModel.Decomposition;
         }
+    }
+
+    [Serializable]
+    public class WorkflowJumpEntity : EmbeddedEntity, IWorkflowConnectionOrJump
+    {
+        [ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity), typeof(WorkflowGatewayEntity))]
+        public Lite<IWorkflowNodeEntity> To { get; set; }
+
+        public Lite<WorkflowConditionEntity> Condition { get; set; }
+
+        public Lite<WorkflowActionEntity> Action { get; set; }
     }
 
     public enum WorkflowActivityType
@@ -190,6 +208,8 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowActivityModel : ModelEntity
     {
+        public WorkflowEntity Workflow { get; set; }
+
         [NotNullable]
         [NotNullValidator, InTypeScript(Undefined = false, Null = false)]
         public TypeEntity MainEntityType { get; set; }
@@ -205,6 +225,10 @@ namespace Signum.Entities.Workflow
         [NotNullable]
         [NotNullValidator, NoRepeatValidator]
         public MList<WorkflowActivityValidationEntity> ValidationRules { get; set; } = new MList<WorkflowActivityValidationEntity>();
+
+        [NotNullable, PreserveOrder]
+        [NotNullValidator, NoRepeatValidator]
+        public MList<WorkflowJumpEntity> Jumps { get; set; } = new MList<WorkflowJumpEntity>();
 
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 255)]
         public string ViewName { get; set; }
