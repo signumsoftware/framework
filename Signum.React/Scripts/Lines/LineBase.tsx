@@ -91,8 +91,7 @@ export interface LineBaseProps extends StyleOptions {
 }
 
 export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps> extends React.Component<P, S> {
-    state: S;
-    props: P;
+
     constructor(props: P) {
         super(props);
         
