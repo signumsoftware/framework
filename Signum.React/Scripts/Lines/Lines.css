@@ -151,6 +151,10 @@ ul.sf-strip-horizontal > li {
     margin-right: 10px;
 }
 
+body.rtl-mode ul.sf-strip-horizontal > li {
+    float: right;
+}
+
 ul.sf-strip-vertical > li {
     margin: 1px 0px;
 }
@@ -251,6 +255,11 @@ ul.nav-tabs {
     height: 20px;
     min-height: inherit;
 }
+
+.form-xs .input-group-btn .btn {
+    height: 20px;
+}
+
 
 .form-xs .form-control-static {
     min-height: inherit;
@@ -354,6 +363,10 @@ ul.nav-tabs {
 .form-sm .form-control:not(textarea) {
     height: 26px;
     min-height: inherit;
+}
+
+.form-sm .input-group-btn .btn {
+    height: 26px;
 }
 
 .form-sm .form-control-static {

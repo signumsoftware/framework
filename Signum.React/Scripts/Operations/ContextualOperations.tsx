@@ -190,7 +190,7 @@ export namespace MenuItemConstructor { //To allow monkey patching
             coc.entityOperationSettings && coc.entityOperationSettings.text ? coc.entityOperationSettings.text() :
                 coc.operationInfo.niceName;
 
-        const bsStyle = coc.settings && coc.settings.style || autoStyleFunction(coc.operationInfo);
+        const bsStyle = coc.settings && coc.settings.style || coc.entityOperationSettings && coc.entityOperationSettings.style || autoStyleFunction(coc.operationInfo);
 
         const disabled = !!coc.canExecute;
 

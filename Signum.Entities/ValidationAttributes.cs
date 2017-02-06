@@ -209,7 +209,7 @@ namespace Signum.Entities
 
     public class EMailValidatorAttribute : RegexValidatorAttribute
     {
-        public static readonly Regex EmailRegex = new Regex(
+        public static Regex EmailRegex = new Regex(
                           @"^(([^<>()[\]\\.,;:\s@\""]+"
                         + @"(\.[^<>()[\]\\.,;:\s@\""]+)*)|(\"".+\""))@"
                         + @"((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"
@@ -229,7 +229,7 @@ namespace Signum.Entities
 
     public class TelephoneValidatorAttribute : RegexValidatorAttribute
     {
-        public static readonly Regex TelephoneRegex = new Regex(@"^((\+|00)\d\d)? *(\([ 0-9]+\))? *[0-9][ \-\.0-9]+$");
+        public static Regex TelephoneRegex = new Regex(@"^((\+)\p{Nd}\p{Nd})? *(\([ \p{Nd}]+\))? *[\p{Nd}][ \-\.\p{Nd}]+$");
 
         public TelephoneValidatorAttribute()
             : base(TelephoneRegex)
@@ -244,7 +244,7 @@ namespace Signum.Entities
 
     public class MultipleTelephoneValidatorAttribute : RegexValidatorAttribute
     {
-        public static readonly Regex MultipleTelephoneRegex = new Regex(@"^((\+|00)\d\d)? *(\([ 0-9]+\))? *[0-9][ \-\.0-9]+(,\s*((\+|00)\d\d)? *(\([ 0-9]+\))? *[0-9][ \-\.0-9]+)*");
+        public static Regex MultipleTelephoneRegex = new Regex(@"^((\+)\p{Nd}\p{Nd})? *(\([ \p{Nd}]+\))? *[\p{Nd}][ \-\.\p{Nd}]+(,\s*((\+)\p{Nd}\p{Nd})? *(\([ \p{Nd}]+\))? *[\p{Nd}][ \-\.\p{Nd}]+)*");
 
         public MultipleTelephoneValidatorAttribute()
             : base(MultipleTelephoneRegex)
@@ -257,9 +257,37 @@ namespace Signum.Entities
         }
     }
 
+    public class IdentifierValidatorAttribute : RegexValidatorAttribute
+    {
+        public static Regex PascalAscii = new Regex(@"^[A-Z[_a-zA-Z0-9]*$");
+        public static Regex Ascii = new Regex(@"^[_a-zA-Z[_a-zA-Z0-9]*$");
+        public static Regex International = new Regex(@"^[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*$");
+
+        public IdentifierType type;
+        public IdentifierValidatorAttribute(IdentifierType type)
+               : base(
+                     type == IdentifierType.PascalAscii ? PascalAscii : 
+                     type == IdentifierType.Ascii ? Ascii: 
+                     type == IdentifierType.International ? International : 
+                     null
+                     )
+        {
+            this.type = type;
+        }
+
+        public override string FormatName => this.type.ToString();
+    }
+
+    public enum IdentifierType
+    {
+        PascalAscii,
+        Ascii,
+        International
+    }
+
     public class NumericTextValidatorAttribute : RegexValidatorAttribute
     {
-        public static readonly Regex NumericTextRegex = new Regex(@"^[0-9]*$");
+        public static Regex NumericTextRegex = new Regex(@"^[\p{Nd}]*$");
 
         public NumericTextValidatorAttribute()
             : base(NumericTextRegex)
@@ -274,7 +302,7 @@ namespace Signum.Entities
 
     public class URLValidatorAttribute : RegexValidatorAttribute
     {
-        public static readonly Regex AbsoluteUrlRegex = new Regex(
+        public static Regex AbsoluteUrlRegex = new Regex(
               "^(https?://)"
             + "?(([0-9a-z_!~*'().&=+$%-]+: )?[0-9a-z_!~*'().&=+$%-]+@)?" //user@ 
             + @"(([0-9]{1,3}\.){3}[0-9]{1,3}" // IP- 199.194.52.184 
@@ -286,14 +314,14 @@ namespace Signum.Entities
             + "((/?)|" // a slash isn't required if there is no file name 
             + "(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+/?)$", RegexOptions.IgnoreCase);
 
-        public static readonly Regex SiteRelativeRegex = new Regex(
+        public static Regex SiteRelativeRegex = new Regex(
             "^(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+$", RegexOptions.IgnoreCase);
 
-        public static readonly Regex AspNetRelativeRegex = new Regex(
+        public static Regex AspNetRelativeRegex = new Regex(
             "^~(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+$", RegexOptions.IgnoreCase);
 
 
-        public static readonly Regex DocumentRelativeRegex = new Regex(
+        public static Regex DocumentRelativeRegex = new Regex(
             "^[0-9a-z_!~*'().;?:@&=+$,%#-](/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+$", RegexOptions.IgnoreCase);
 
         public URLValidatorAttribute(bool absolute = true, bool siteRelative = false, bool aspNetSiteRelative = false, bool documentRelative = false)
@@ -314,9 +342,9 @@ namespace Signum.Entities
 
     public class FileNameValidatorAttribute : ValidatorAttribute
     {
-        public static readonly char[] InvalidCharts = Path.GetInvalidPathChars();
+        public static char[] InvalidCharts = Path.GetInvalidPathChars();
 
-        static readonly Regex invalidChartsRegex = new Regex("[" + Regex.Escape(new string(Path.GetInvalidFileNameChars())) + "]");
+        static Regex invalidChartsRegex = new Regex("[" + Regex.Escape(new string(Path.GetInvalidFileNameChars())) + "]");
 
         public FileNameValidatorAttribute()
         {
@@ -811,7 +839,7 @@ namespace Signum.Entities
 
     public class IpValidatorAttribute : RegexValidatorAttribute
     {
-        public static readonly Regex IpRegex = new Regex(@"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b");
+        public static Regex IpRegex = new Regex(@"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b");
 
         public IpValidatorAttribute()
             : base(IpRegex)
