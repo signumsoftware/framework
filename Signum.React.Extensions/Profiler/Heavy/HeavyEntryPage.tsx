@@ -34,7 +34,7 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
     }
 
     componentWillReceiveProps(newProps: HeavyEntryProps){
-        if(this.state.entries == undefined || !this.state.entries.some(a=>a.FullIndex == newProps.routeParams!.selectedIndex))
+        if(this.state.entries == undefined || !this.state.entries.some(a=>a.FullIndex == newProps.routeParams.selectedIndex))
             this.loadEntries(newProps);
 
         this.loadStackTrace(newProps);
@@ -42,7 +42,7 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
 
     loadEntries(props: HeavyEntryProps) {
 
-        let selectedIndex = props.routeParams!.selectedIndex;
+        let selectedIndex = props.routeParams.selectedIndex;
 
         return API.Heavy.details(selectedIndex.tryBefore(".") || selectedIndex)
             .then(entries => this.setState({entries}))
@@ -51,14 +51,14 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
 
 
     loadStackTrace(props: HeavyEntryProps){
-        return API.Heavy.stackTrace(props.routeParams!.selectedIndex)
+        return API.Heavy.stackTrace(props.routeParams.selectedIndex)
             .then(stackTrace => this.setState({stackTrace}))
             .done();
     }
     
     handleDownload = () => {
 
-        let selectedIndex = this.props.routeParams!.selectedIndex;
+        let selectedIndex = this.props.routeParams.selectedIndex;
 
         API.Heavy.download(selectedIndex.tryBefore(".") || selectedIndex);
     }
@@ -66,13 +66,13 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
 
     render() {
 
-        const index = this.props.routeParams!.selectedIndex;
+        const index = this.props.routeParams.selectedIndex;
 
         document.title = "Heavy Profiler > Entry " + index;
         if (this.state.entries == undefined)
             return <h3>Heavy Profiler > Entry {index} (loading...) </h3>;
 
-        let current = this.state.entries.filter(a => a.FullIndex == this.props.routeParams!.selectedIndex).single();
+        let current = this.state.entries.filter(a => a.FullIndex == this.props.routeParams.selectedIndex).single();
         return (
             <div>
                 <h2><Link to="~/profiler/heavy">Heavy Profiler</Link> > Entry {index}</h2>

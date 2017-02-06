@@ -90,7 +90,7 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
     
         const result: ParsedQueryString = { tables: {} };
 
-        const query = this.props.location!.query as { [name: string]: string };
+        const query = this.props.location.query as { [name: string]: string };
         if (!query)
             return result;
 

@@ -35,7 +35,7 @@ export default class ChartRequestPage extends React.Component<ChartRequestPagePr
     }
 
     load(props: ChartRequestPageProps) {
-        ChartClient.Decoder.parseChartRequest(props.routeParams!.queryName, props.location!.query).then(cr => {
+        ChartClient.Decoder.parseChartRequest(props.routeParams.queryName, props.location.query).then(cr => {
             this.setState({ chartRequest: cr });
         }).done();
     }
