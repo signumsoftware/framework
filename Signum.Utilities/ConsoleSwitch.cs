@@ -40,14 +40,14 @@ namespace Signum.Utilities
             dictionary.AddOrThrow(key.ToString(), new WithDescription<V>(value, description), "Key {0} already in ConsoleSwitch");
         }
 
-        public V Choose()
+        public V Choose(int? numberOfOptions = null)
         {
-            return Choose(ConsoleMessage.EnterYourSelection.NiceToString());
+            return Choose(ConsoleMessage.EnterYourSelection.NiceToString(), numberOfOptions);
         }
 
-        public V Choose(string endMessage)
+        public V Choose(string endMessage, int? numberOfOptions = null)
         {
-            var tuple = ChooseTuple(endMessage);
+            var tuple = ChooseTuple(endMessage, numberOfOptions);
 
             if (tuple == null)
                 return null;
