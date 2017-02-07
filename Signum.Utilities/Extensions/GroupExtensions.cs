@@ -86,26 +86,26 @@ namespace Signum.Utilities
                 .ToDictionaryEx(g => g.Key, g => g.Count());
         }
 
-        public static Dictionary<K, V> AgGroupToDictionary<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<IGrouping<K, T>, V> agregateSelector)
+        public static Dictionary<K, V> AgGroupToDictionary<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<IGrouping<K, T>, V> aggregateSelector)
         {
             return collection
                 .GroupBy(t => keySelector(t))
-                .ToDictionaryEx(g => g.Key, agregateSelector);
+                .ToDictionaryEx(g => g.Key, aggregateSelector);
         }
 
-        public static Dictionary<K, V> AgGroupToDictionary<T, K, V>(this IEnumerable<T> collection, IEnumerable<K> keys, Func<T, K> keySelector, Func<IGrouping<K, T>, V> agregateSelector)
+        public static Dictionary<K, V> AgGroupToDictionary<T, K, V>(this IEnumerable<T> collection, IEnumerable<K> keys, Func<T, K> keySelector, Func<IGrouping<K, T>, V> aggregateSelector)
         {
             return keys
                 .GroupJoin(collection, k => k, keySelector, (k, col) => (IGrouping<K, T>)new Grouping<K, T>(k, col))
-                .ToDictionaryEx(g => g.Key, agregateSelector);
+                .ToDictionaryEx(g => g.Key, aggregateSelector);
         }
 
-        public static Dictionary<K, V> AgGroupToDictionaryDescending<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<IGrouping<K, T>, V> agregateSelector)
+        public static Dictionary<K, V> AgGroupToDictionaryDescending<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<IGrouping<K, T>, V> aggregateSelector)
         {
             return collection
                 .GroupBy(t => keySelector(t))
                 .OrderByDescending(g => g.Count())
-                .ToDictionaryEx(g => g.Key, agregateSelector);
+                .ToDictionaryEx(g => g.Key, aggregateSelector);
         }
 
 
