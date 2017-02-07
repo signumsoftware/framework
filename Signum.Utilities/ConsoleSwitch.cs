@@ -55,9 +55,9 @@ namespace Signum.Utilities
             return tuple.Value;
         }
 
-        public WithDescription<V> ChooseTuple()
+        public WithDescription<V> ChooseTuple(int? numberOfOptions = null)
         {
-            return ChooseTuple(ConsoleMessage.EnterYourSelection.NiceToString());
+            return ChooseTuple(ConsoleMessage.EnterYourSelection.NiceToString(), numberOfOptions);
         }
 
         public WithDescription<V> ChooseTuple(string endMessage, int? numberOfOptions = null)
@@ -84,9 +84,6 @@ namespace Signum.Utilities
                 noOfOptsPrinted += noOfOptsPerScreen;
             } while (true);
         }
-
-
-
 
         void PrintOptions(int skip, int take)
         {
