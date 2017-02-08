@@ -27,7 +27,7 @@ namespace Signum.React.ApiControllers
 
             var entity = OperationLogic.ServiceConstruct(type, request.operarionSymbol, request.args);
 
-            return SignumServer.GetEntityPack(entity);
+            return entity == null ? null : SignumServer.GetEntityPack(entity);
         }
 
         [Route("api/operation/constructFromEntity"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
@@ -35,15 +35,14 @@ namespace Signum.React.ApiControllers
         {
             var entity = OperationLogic.ServiceConstructFrom(request.entity, request.operarionSymbol, request.args);
 
-            return SignumServer.GetEntityPack(entity);
+            return entity == null ? null: SignumServer.GetEntityPack(entity);
         }
 
         [Route("api/operation/constructFromLite"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
         public EntityPackTS ConstructFromLite(LiteOperationRequest request)
         {
             var entity = OperationLogic.ServiceConstructFromLite(request.lite, request.operarionSymbol, request.args);
-
-            return SignumServer.GetEntityPack(entity);
+            return entity == null ? null: SignumServer.GetEntityPack(entity);
         }
 
 
