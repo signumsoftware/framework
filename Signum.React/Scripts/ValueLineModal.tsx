@@ -77,9 +77,9 @@ export interface ValueLineModalOptions {
     type: TypeReference
     valueLineType?: ValueLineType;
     initialValue?: any
-    title?: string;
-    message?: string;
-    labelText?: string;
+    title?: React.ReactChild;
+    message?: React.ReactChild;
+    labelText?: React.ReactChild;
     format?: string;
     unit?: string;
     initiallyFocused?: boolean;
