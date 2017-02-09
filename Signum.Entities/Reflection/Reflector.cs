@@ -475,18 +475,7 @@ namespace Signum.Entities.Reflection
             return false;
         }
 
-        static readonly Regex validIdentifier = new Regex(@"^[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*$");
-        public static bool ValidIdentifier(string identifier)
-        {
-            return validIdentifier.IsMatch(identifier);
-        }
-
-        public static void AssertValidIdentifier(string step)
-        {
-            if (!ValidIdentifier(step))
-                throw new FormatException("'{0}' is not a valid identifier".FormatWith(step));
-        }
-
+ 
         public static PropertyInfo PropertyInfo<T>(this T entity, Expression<Func<T, object>> property) where T : ModifiableEntity
         {
             return ReflectionTools.GetPropertyInfo(property);

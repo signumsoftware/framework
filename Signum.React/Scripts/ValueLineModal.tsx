@@ -83,7 +83,7 @@ export interface ValueLineModalOptions {
     format?: string;
     unit?: string;
     initiallyFocused?: boolean;
-    valueHtmlProps?: React.HTMLAttributes;
+    valueHtmlProps?: React.HTMLAttributes<any>;
 }
 
 

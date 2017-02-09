@@ -31,6 +31,12 @@ table.sf-search-results > tbody > tr > td {
     display: table;
 }
 
+
+.sf-search-button {
+    cursor: pointer;
+    color: lightgray;
+}
+
 /*Drag and drop*/
 
 th.drag-left {

@@ -26,7 +26,7 @@ import {
 import { navigateRoute, isNavigable, currentHistory, API as NavAPI, isCreable, tryConvert } from './Navigator';
 import SearchModal from './SearchControl/SearchModal';
 import EntityLink from './SearchControl/EntityLink';
-import SearchControl from './SearchControl/SearchControlLoaded';
+import SearchControlLoaded from './SearchControl/SearchControlLoaded';
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -85,7 +85,7 @@ export function findMany(findOptions: FindOptions | Type<any>): Promise<Lite<Ent
     });
 }
 
-export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent) {
+export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent<any>) {
     if (e.ctrlKey || e.button == 2)
         window.open(findOptionsPath(findOptions));
     else
@@ -732,7 +732,7 @@ export module Decoder {
 export module ButtonBarQuery {
 
     interface ButtonBarQueryContext {
-        searchControl: SearchControl;
+        searchControl: SearchControlLoaded;
         findOptions: FindOptionsParsed;
     }
 
@@ -760,9 +760,9 @@ export interface QuerySettings {
     defaultOrderType?: OrderType;
     hiddenColumns?: ColumnOption[];
     formatters?: { [columnName: string]: CellFormatter };
-    rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes | undefined;
+    rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
     entityFormatter?: EntityFormatter;
-    onDoubleClick?: (e: React.MouseEvent, row: ResultRow) => void;
+    onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
     simpleFilterBuilder?: (qd: QueryDescription, initialFindOptions: FindOptionsParsed) => React.ReactElement<any> | undefined;
 }
 
@@ -865,13 +865,13 @@ export interface EntityFormatRule {
 }
 
 
-export type EntityFormatter = (row: ResultRow, columns: string[], sc?: SearchControl) => React.ReactChild | undefined;
+export type EntityFormatter = (row: ResultRow, columns: string[], sc?: SearchControlLoaded) => React.ReactChild | undefined;
 
 export const entityFormatRules: EntityFormatRule[] = [
     {
         name: "View",
         isApplicable: row=> true,
         formatter: (row, columns, sc) => !row.entity || !isNavigable(row.entity.EntityType, undefined, true) ? undefined :
-            <EntityLink lite={row.entity} inSearch={true} onNavigated={sc && sc.handleContextOnHide}>{EntityControlMessage.View.niceToString()}</EntityLink>
+            <EntityLink lite={row.entity} inSearch={true} onNavigated={sc && sc.handleOnNavigated}>{EntityControlMessage.View.niceToString()}</EntityLink>
     },
 ];

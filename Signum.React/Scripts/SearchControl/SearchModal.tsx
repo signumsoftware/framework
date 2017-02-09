@@ -46,7 +46,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
         this.props.onExited!(this.okPressed ? this.selectedEntites : undefined);
     }
 
-    handleDoubleClick = (e: React.MouseEvent, row: ResultRow) => {
+    handleDoubleClick = (e: React.MouseEvent<any>, row: ResultRow) => {
         e.preventDefault();
         this.selectedEntites = [row.entity];
         this.okPressed = true;

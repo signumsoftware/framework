@@ -4,6 +4,7 @@ import * as React from 'react'
 import { DropdownButton, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { Dic, DomUtils, classes } from '../Globals'
 import * as Finder from '../Finder'
+import { CellFormatter, EntityFormatter } from '../Finder'
 import {
     ResultTable, ResultRow, FindOptionsParsed, FindOptions, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnOptionsMode, ColumnDescription,
     toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest
@@ -30,7 +31,10 @@ export interface SearchControlLoadedProps {
     queryDescription: QueryDescription;
     querySettings: Finder.QuerySettings;
     showContextMenu?: boolean;
-    onDoubleClick?: (e: React.MouseEvent, row: ResultRow) => void;
+    onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
+    formatters?: { [columnName: string]: CellFormatter };
+    rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
+    entityFormatter?: EntityFormatter;
     onSelectionChanged?: (entity: Lite<Entity>[]) => void;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
     onResult?: (table: ResultTable) => void;
@@ -192,7 +196,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
 
-    handleOnContextMenu = (event: React.MouseEvent) => {
+    handleOnContextMenu = (event: React.MouseEvent<any>) => {
 
         event.preventDefault();
         event.stopPropagation();
@@ -204,35 +208,34 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         const tr = td.parentNode as HTMLElement;
         const rowIndex = tr.getAttribute("data-row-index") ? parseInt(tr.getAttribute("data-row-index") !) : null;
 
-
-        this.state.contextualMenu = {
-            position: ContextMenu.getPosition(event, this.refs["container"] as HTMLElement),
-            columnIndex,
-            rowIndex,
-            columnOffset: td.tagName == "TH" ? this.getOffset(event.pageX, td.getBoundingClientRect(), Number.MAX_VALUE) : undefined
-        };
+        this.setState({
+            contextualMenu: {
+                position: ContextMenu.getPosition(event, this.refs["container"] as HTMLElement),
+                columnIndex,
+                rowIndex,
+                columnOffset: td.tagName == "TH" ? this.getOffset(event.pageX, td.getBoundingClientRect(), Number.MAX_VALUE) : undefined
+            }
+        });
 
         if (rowIndex != undefined) {
             const row = this.state.resultTable!.rows[rowIndex];
             if (!this.state.selectedRows!.contains(row)) {
-                this.state.selectedRows = [row];
-                this.state.currentMenuItems = undefined;
+                this.setState({
+                    selectedRows: [row],
+                    currentMenuItems: undefined
+                }, () => {
+                    this.loadMenuItems();
+                });
             }
 
             if (this.state.currentMenuItems == undefined)
                 this.loadMenuItems();
         }
-
-
-        this.forceUpdate();
     }
 
 
     handleColumnChanged = (token: QueryToken) => {
-        if (token)
-            this.state.lastToken = token;
-
-        this.forceUpdate();
+        this.setState({ lastToken: token });
     }
 
     handleColumnClose = () => {
@@ -249,7 +252,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             this.props.onFiltersChanged(this.props.findOptions.filterOptions);
     }
 
-    handleFiltersKeyUp = (e: React.KeyboardEvent) => {
+    handleFiltersKeyUp = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (e.keyCode == 13)
             this.doSearchPage1();
     }
@@ -320,7 +323,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         }).done();
     }
 
-    handleSearchClick = (ev: React.MouseEvent) => {
+    handleSearchClick = (ev: React.MouseEvent<any>) => {
         ev.preventDefault();
 
         this.doSearchPage1();
@@ -338,7 +341,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     onClick={this.handleToggleFilters}
                     title={fo.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="glyphicon glyphicon glyphicon-filter"></span></a >}
                 <button className={"sf-query-button sf-search btn btn-primary" + (this.state.loading ? " disabled" : "")} onClick={this.handleSearchClick}>{SearchMessage.Search.niceToString()} </button>
-                {fo.create && <a className="sf-query-button btn btn-default sf-line-button sf-create" title={this.createTitle()} onClick={this.handleCreate}>
+                {fo.create && <a className="sf-query-button btn btn-default sf-search-button sf-create" title={this.createTitle()} onClick={this.handleCreate}>
                     <span className="glyphicon glyphicon-plus sf-create"></span>
                 </a>}
                 {this.props.showContextMenu != false && this.renderSelecterButton()}
@@ -362,7 +365,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             .then(ti => ti ? ti.name : undefined);
     }
 
-    handleCreate = (ev: React.MouseEvent) => {
+    handleCreate = (ev: React.MouseEvent<any>) => {
 
         if (!this.props.findOptions.create)
             return;
@@ -391,7 +394,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         }).done();
     }
 
-    handleFullScreenClick = (ev: React.MouseEvent) => {
+    handleFullScreenClick = (ev: React.MouseEvent<any>) => {
 
         ev.preventDefault();
 
@@ -523,7 +526,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         const cm = this.state.contextualMenu!;
         this.setState({ editingColumn: newColumn });
-        this.props.findOptions.columnOptions.insertAt(cm.columnIndex + cm.columnOffset, newColumn);
+        this.props.findOptions.columnOptions.insertAt(cm.columnIndex! + cm.columnOffset!, newColumn);
 
         this.forceUpdate();
     }
@@ -544,10 +547,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         const col = fo.columnOptions[cm.columnIndex!];
         fo.columnOptions.removeAt(cm.columnIndex!);
 
-        if (s.editingColumn == col)
-            s.editingColumn = undefined;
-
-        this.forceUpdate();
+        this.setState({ editingColumn: undefined });
     }
 
     renderContextualMenu() {
@@ -604,7 +604,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         });
     }
 
-    handleHeaderClick = (e: React.MouseEvent) => {
+    handleHeaderClick = (e: React.MouseEvent<any>) => {
 
         const token = (e.currentTarget as HTMLElement).getAttribute("data-column-name");
         const fo = this.props.findOptions;
@@ -634,14 +634,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     //HEADER DRAG AND DROP
 
-    handleHeaderDragStart = (de: React.DragEvent) => {
+    handleHeaderDragStart = (de: React.DragEvent<any>) => {
         de.dataTransfer.setData('text', "start"); //cannot be empty string
         de.dataTransfer.effectAllowed = "move";
         const dragIndex = parseInt((de.currentTarget as HTMLElement).getAttribute("data-column-index") !);
         this.setState({ dragColumnIndex: dragIndex });
     }
 
-    handleHeaderDragEnd = (de: React.DragEvent) => {
+    handleHeaderDragEnd = (de: React.DragEvent<any>) => {
         this.setState({ dragColumnIndex: undefined, dropBorderIndex: undefined });
     }
 
@@ -663,7 +663,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         return undefined;
     }
 
-    handlerHeaderDragOver = (de: React.DragEvent) => {
+    handlerHeaderDragOver = (de: React.DragEvent<any>) => {
         de.preventDefault();
 
         const th = de.currentTarget as HTMLElement;
@@ -676,7 +676,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         let dropBorderIndex = offset == undefined ? undefined : columnIndex + offset;
 
-        if (dropBorderIndex == this.state.dragColumnIndex || dropBorderIndex == this.state.dragColumnIndex + 1)
+        if (dropBorderIndex == this.state.dragColumnIndex || dropBorderIndex == this.state.dragColumnIndex! + 1)
             dropBorderIndex = undefined;
 
         //de.dataTransfer.dropEffect = dropBorderIndex == undefined ? "none" : "move";
@@ -685,7 +685,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             this.setState({ dropBorderIndex: dropBorderIndex });
     }
 
-    handleHeaderDrop = (de: React.DragEvent) => {
+    handleHeaderDrop = (de: React.DragEvent<any>) => {
 
         const columns = this.props.findOptions.columnOptions;
         const dragColumnIndex = this.state.dragColumnIndex!;
@@ -717,8 +717,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                             co == this.state.editingColumn && "sf-current-column",
                             !this.canOrder(co) && "noOrder",
                             co == this.state.editingColumn && co.token && co.token.type.isCollection && "error",
-                            i == this.state.dropBorderIndex ? "drag-left " :
-                                i == this.state.dropBorderIndex - 1 ? "drag-right " : undefined)}
+                            this.state.dropBorderIndex != null && i == this.state.dropBorderIndex ? "drag-left " :
+                                this.state.dropBorderIndex != null && i == this.state.dropBorderIndex - 1 ? "drag-right " : undefined)}
                         data-column-name={co.token && co.token.fullKey}
                         data-column-index={i}
                         key={i}
@@ -761,9 +761,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     //ROWS
 
-    handleChecked = (event: React.MouseEvent) => {
+    handleChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
 
-        const cb = (event.currentTarget) as HTMLInputElement;
+        const cb = event.currentTarget;
 
         const index = parseInt(cb.getAttribute("data-index") !);
 
@@ -777,14 +777,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         } else {
             selectedRows.remove(row);
         }
-
-        this.state.currentMenuItems = undefined;
-
+        
         this.notifySelectedRowsChanged();
-        this.forceUpdate();
+
+        this.setState({ currentMenuItems: undefined });
     }
 
-    handleDoubleClick = (e: React.MouseEvent, row: ResultRow) => {
+    handleDoubleClick = (e: React.MouseEvent<any>, row: ResultRow) => {
 
         if ((e.target as HTMLElement).parentElement != e.currentTarget) //directly in the td
             return;
@@ -841,12 +840,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         const columns = this.props.findOptions.columnOptions.map(co => ({
             columnOption: co,
-            cellFormatter: Finder.getCellFormatter(qs, co),
+            cellFormatter: (co.token && this.props.formatters && this.props.formatters[co.token.fullKey]) || Finder.getCellFormatter(qs, co),
             resultIndex: co.token == undefined ? -1 : resultTable.columns.indexOf(co.token.fullKey)
         }));
 
 
-        const rowAttributes = qs && qs.rowAttributes;
+        const rowAttributes = this.props.rowAttributes || qs && qs.rowAttributes;
 
         return this.state.resultTable.rows.map((row, i) => {
 
@@ -866,7 +865,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
                     {this.props.findOptions.navigate &&
                         <td>
-                            {((qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row)).last("EntityFormatRules").formatter)(row, resultTable.columns, this)}
+                            {(this.props.entityFormatter || (qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row)).last("EntityFormatRules").formatter)(row, resultTable.columns, this)}
                         </td>
                     }
 

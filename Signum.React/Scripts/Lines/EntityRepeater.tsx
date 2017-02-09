@@ -77,9 +77,9 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
 export interface EntityRepeaterElementProps {
     ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
-    onRemove?: (event: React.MouseEvent) => void;
-    onMoveUp?: (event: React.MouseEvent) => void;
-    onMoveDown?: (event: React.MouseEvent) => void;
+    onRemove?: (event: React.MouseEvent<any>) => void;
+    onMoveUp?: (event: React.MouseEvent<any>) => void;
+    onMoveDown?: (event: React.MouseEvent<any>) => void;
 }
 
 export class EntityRepeaterElement extends React.Component<EntityRepeaterElementProps, void>

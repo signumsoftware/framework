@@ -50,7 +50,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
         super.componentWillReceiveProps(newProps, newContext);
     }
 
-    handleOnChange = (event: React.FormEvent) => {
+    handleOnChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const current = event.currentTarget as HTMLSelectElement;
 
         if (current.value != this.getLiteKey()) {
