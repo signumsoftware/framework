@@ -1,15 +1,16 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
+import { Modal, ModalProps, ModalClass, ButtonToolbar, Sizes } from 'react-bootstrap'
 import { openModal, IModalProps } from './Modals';
 import { SelectorMessage } from './Signum.Entities'
 import { TypeInfo } from './Reflection'
 
 
 interface SelectorModalProps extends React.Props<SelectorModal>, IModalProps {
-    options: { value: any; displayName: React.ReactChild; name: string }[];
+    options: { value: any; displayName: React.ReactChild; name: string; }[];
     title: React.ReactChild;
     message: React.ReactChild;
+    size?: Sizes;
 }
 
 export default class SelectorModal extends React.Component<SelectorModalProps, { show: boolean }>  {
@@ -36,8 +37,9 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
         this.props.onExited!(this.selectedValue);
     }
 
+
     render() {
-        return <Modal bsSize="sm" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-selector-modal">
+        return <Modal bsSize={this.props.size ? this.props.size : "sm"} onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-selector-modal" >
             <Modal.Header closeButton={true}>
                 {this.props.title &&
                     <h4 className="modal-title">
@@ -54,10 +56,10 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
                         </p>
                     }
                     {this.props.options.map((o, i) =>
-                        <button key={i} type="button" onClick={() => this.handleButtonClicked(o.value) } name={o.value}
+                        <button key={i} type="button" onClick={() => this.handleButtonClicked(o.value)} name={o.value}
                             className="sf-chooser-button sf-close-button btn btn-default">
                             {o.displayName}
-                        </button>) }
+                        </button>)}
                 </div>
             </Modal.Body>
         </Modal>;
@@ -65,7 +67,7 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
 
     static chooseElement<T>(options: T[], config?: SelectorConfig<T>): Promise<T | undefined> {
 
-        const {display, name, title, message} = config!;
+        const {display, name, title, message, size} = config!;
 
         if (options.length == 1)
             return Promise.resolve(options.single());
@@ -79,8 +81,9 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
                 displayName: display ? display(a) : a.toString(),
                 name: name ? name(a) : a.toString()
             }))}
-            title={title || SelectorMessage.ChooseAValue.niceToString() }
-            message={message || SelectorMessage.PleaseChooseAValueToContinue.niceToString()}/>);
+            title={title || SelectorMessage.ChooseAValue.niceToString()}
+            message={message || SelectorMessage.PleaseChooseAValueToContinue.niceToString()}
+            size={size} />);
     }
 
     static chooseType(options: TypeInfo[]): Promise<TypeInfo> {
@@ -98,7 +101,8 @@ export interface SelectorConfig<T> {
     display?: (val: T) => React.ReactChild;
     name?: (val: T) => string; //For testing
     title?: React.ReactChild;
-    message?: React.ReactChild
+    message?: React.ReactChild;
+    size?: Sizes;
 }
 
 
