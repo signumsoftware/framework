@@ -11,6 +11,7 @@ interface SelectorModalProps extends React.Props<SelectorModal>, IModalProps {
     title: React.ReactChild;
     message: React.ReactChild;
     size?: Sizes;
+    dialogClassName?: string;
 }
 
 export default class SelectorModal extends React.Component<SelectorModalProps, { show: boolean }>  {
@@ -39,7 +40,7 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
 
 
     render() {
-        return <Modal bsSize={this.props.size ? this.props.size : "sm"} onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-selector-modal" >
+        return <Modal bsSize={this.props.size ? this.props.size : "sm"} onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-selector-modal" dialogClassName={this.props.dialogClassName}>
             <Modal.Header closeButton={true}>
                 {this.props.title &&
                     <h4 className="modal-title">
@@ -67,7 +68,7 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
 
     static chooseElement<T>(options: T[], config?: SelectorConfig<T>): Promise<T | undefined> {
 
-        const {display, name, title, message, size} = config!;
+        const {display, name, title, message, size, dialogClassName} = config!;
 
         if (options.length == 1)
             return Promise.resolve(options.single());
@@ -83,7 +84,8 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
             }))}
             title={title || SelectorMessage.ChooseAValue.niceToString()}
             message={message || SelectorMessage.PleaseChooseAValueToContinue.niceToString()}
-            size={size} />);
+            size={size}
+            dialogClassName={dialogClassName} />);
     }
 
     static chooseType(options: TypeInfo[]): Promise<TypeInfo> {
@@ -103,6 +105,7 @@ export interface SelectorConfig<T> {
     title?: React.ReactChild;
     message?: React.ReactChild;
     size?: Sizes;
+    dialogClassName?: string;
 }
 
 
