@@ -75,7 +75,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
             </a>);
     }
 
-    handleCreateClick = (event: React.SyntheticEvent) => {
+    handleCreateClick = (event: React.SyntheticEvent<any>) => {
 
         event.preventDefault();
 
@@ -132,7 +132,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     }
 
 
-    handleFindClick = (event: React.SyntheticEvent) => {
+    handleFindClick = (event: React.SyntheticEvent<any>) => {
 
         event.preventDefault();
 
@@ -148,7 +148,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
         }).done();
     };
 
-    handleRemoveElementClick = (event: React.SyntheticEvent, index: number) => {
+    handleRemoveElementClick = (event: React.SyntheticEvent<any>, index: number) => {
 
         event.preventDefault();
 

@@ -182,7 +182,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
         return value;
     }
 
-    handleClick = (e: React.MouseEvent) => {
+    handleClick = (e: React.MouseEvent<any>) => {
         e.preventDefault();
 
         if (e.ctrlKey || e.button == 2)

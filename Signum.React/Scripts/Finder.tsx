@@ -85,7 +85,7 @@ export function findMany(findOptions: FindOptions | Type<any>): Promise<Lite<Ent
     });
 }
 
-export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent) {
+export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent<any>) {
     if (e.ctrlKey || e.button == 2)
         window.open(findOptionsPath(findOptions));
     else
@@ -760,9 +760,9 @@ export interface QuerySettings {
     defaultOrderType?: OrderType;
     hiddenColumns?: ColumnOption[];
     formatters?: { [columnName: string]: CellFormatter };
-    rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes | undefined;
+    rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
     entityFormatter?: EntityFormatter;
-    onDoubleClick?: (e: React.MouseEvent, row: ResultRow) => void;
+    onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
     simpleFilterBuilder?: (qd: QueryDescription, initialFindOptions: FindOptionsParsed) => React.ReactElement<any> | undefined;
 }
 

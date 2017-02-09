@@ -9,14 +9,14 @@ export interface ContextMenuPosition {
     width: number; //Necessary for RTL
 }
 
-export interface ContextMenuProps extends React.Props<ContextMenu>, React.HTMLAttributes {
+export interface ContextMenuProps extends React.Props<ContextMenu>, React.HTMLAttributes<HTMLUListElement> {
     position: ContextMenuPosition;
     onHide: () => void;
 }
 
 export default class ContextMenu extends React.Component<ContextMenuProps, {}> {
 
-    static getPosition(e: React.MouseEvent, container: HTMLElement): ContextMenuPosition{
+    static getPosition(e: React.MouseEvent<any>, container: HTMLElement): ContextMenuPosition{
 
         const op = DomUtils.offsetParent(container);
 
@@ -46,7 +46,7 @@ export default class ContextMenu extends React.Component<ContextMenuProps, {}> {
             (c: React.ReactElement<any>) => c && React.cloneElement(c, { "onSelect": combineFunction(c.props.onSelect, onHide) }));
 
         const ul = (
-            <ul {...props as any}  className={classes(props.className, "dropdown-menu sf-context-menu") } style={style}>
+            <ul {...props as any} className={classes(props.className, "dropdown-menu sf-context-menu") } style={style}>
                 {childrens}
             </ul>
         );

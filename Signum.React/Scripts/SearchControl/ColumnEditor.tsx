@@ -29,8 +29,8 @@ export default class ColumnEditor extends React.Component<ColumnEditorProps, {}>
 
     }
 
-    handleOnChange = (event: React.FormEvent) => {
-        this.props.columnOption.displayName = (event.currentTarget as HTMLInputElement).value || undefined;
+    handleOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        this.props.columnOption.displayName = event.currentTarget.value || undefined;
         this.props.onChange(undefined);
     }
 

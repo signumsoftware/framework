@@ -18,8 +18,8 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
     findOptions?: FindOptions;
     valueToken?: string;
     labelText?: React.ReactChild;
-    labelProps?: React.HTMLAttributes;
-    formGroupHtmlProps?: React.HTMLAttributes;
+    labelProps?: React.HTMLAttributes<HTMLLabelElement>;
+    formGroupHtmlProps?: React.HTMLAttributes<HTMLDivElement>;
     initialValue?: any;
     isLink?: boolean;
     isBadge?: boolean | "MoreThanZero";
@@ -133,7 +133,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
         );
     }
 
-    handleViewEntityClick = (e: React.MouseEvent) => {
+    handleViewEntityClick = (e: React.MouseEvent<any>) => {
         e.preventDefault();
 
         var entity = this.valueSearchControl!.state.value as Lite<Entity>;

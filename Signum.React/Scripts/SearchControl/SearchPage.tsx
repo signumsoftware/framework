@@ -32,7 +32,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchC
 
     calculateState(props: SearchPageProps): SearchControlState {
         return {
-            findOptions: { showFilters: true, ...Finder.parseFindOptionsPath(props.routeParams!.queryName, props.location!.query) },
+            findOptions: { showFilters: true, ...Finder.parseFindOptionsPath(props.routeParams.queryName, props.location.query) },
         };
     }
 

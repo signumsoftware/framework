@@ -1,6 +1,6 @@
 ﻿
 import * as moment from "moment"
-import { setDateLocalizer } from "react-widgets"
+import * as ReactWidgets from "react-widgets"
 
 export function configure(){
 
@@ -63,20 +63,34 @@ export function configure(){
         }
     };
 
-    setDateLocalizer(localizer);
+    (ReactWidgets as any).setDateLocalizer(localizer);
 
 }
 
-export function asumeGlobalUtcMode(moment: moment.MomentStatic, utcMode: boolean) {
+declare module "moment" {
+
+    interface Moment {
+        fromUserInterface(this: moment.Moment): Moment;
+        toUserInterface(this: moment.Moment): Moment;
+    }
+
+    function smartNow(this: moment.Moment): Moment;
+
+    interface Duration {
+        format(template?: string, precision?: string, settings?: any): string;
+    }
+}
+
+export function asumeGlobalUtcMode(m: typeof moment, utcMode: boolean) {
     if (utcMode) {
-        moment.fn.fromUserInterface = function () { return this.utc(); };
-        moment.fn.toUserInterface = function () { return this.local(); };
-        moment.smartNow = function () { return moment.utc(); };
+        m.fn.fromUserInterface = function (this: moment.Moment) { return this.utc(); };
+        m.fn.toUserInterface = function (this: moment.Moment) { return this.local(); };
+        m.smartNow = function () { return moment.utc(); };
     }
 
     else {
-        moment.fn.fromUserInterface = function () { return this; };
-        moment.fn.toUserInterface = function () { return this; };
-        moment.smartNow = function () { return moment(); };
+        m.fn.fromUserInterface = function (this: moment.Moment) { return this; };
+        m.fn.toUserInterface = function (this: moment.Moment) { return this; };
+        m.smartNow = function () { return moment(); };
     }
 }

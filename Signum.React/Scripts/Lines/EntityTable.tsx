@@ -121,9 +121,9 @@ export interface EntityTableRowProps {
     ctx: TypeContext<ModifiableEntity>;
     index: number;
     columns: EntityTableColumn<ModifiableEntity, any>[],
-    onRemove?: (event: React.MouseEvent) => void;
-    onMoveUp?: (event: React.MouseEvent) => void;
-    onMoveDown?: (event: React.MouseEvent) => void;
+    onRemove?: (event: React.MouseEvent<any>) => void;
+    onMoveUp?: (event: React.MouseEvent<any>) => void;
+    onMoveDown?: (event: React.MouseEvent<any>) => void;
     fetchRowState?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow) => Promise<any>; 
     rowProps?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow, rowState: any) => React.HTMLProps<any> | null | undefined;
 }

@@ -1,17 +1,4 @@
-﻿/// <reference path="../typings/react/react.d.ts" />
-/// <reference path="../typings/react/react-dom.d.ts" />
-/// <reference path="../typings/react/react-addons-perf.d.ts" />
-/// <reference path="../typings/react/react-addons-transition-group.d.ts" />
-/// <reference path="../typings/react/react-addons-css-transition-group.d.ts" />
-/// <reference path="../typings/react-router/react-router.d.ts" />
-/// <reference path="../typings/react-router/history.d.ts" />
-/// <reference path="../typings/react-bootstrap/react-bootstrap.d.ts" />
-/// <reference path="../typings/react-router-bootstrap/react-router-bootstrap.d.ts" />
-/// <reference path="../typings/react-widgets/react-widgets.d.ts" />
-/// <reference path="../typings/numbro/numbro.d.ts" />
-/// <reference path="../typings/moment/moment-node.d.ts" />
-/// <reference path="../typings/moment-duration-format/moment-duration-format.d.ts"/>
-/// <reference path="../typings/es6-promise/es6-promise.d.ts" />
+﻿/// <reference path="../typings/es6-promise/es6-promise.d.ts" />
 
 declare const require: {
     <T>(path: string): T;
@@ -95,18 +82,6 @@ interface String {
     trimStart(this: string, char?: string): string;
 
     repeat(this: string, n: number): string;
-}
-
-declare module moment {
-    interface Moment {
-        fromUserInterface(this: moment.Moment): Moment;
-        toUserInterface(this: moment.Moment): Moment;
-
-    }
-
-    interface MomentStatic {
-        smartNow(this: moment.Moment): Moment;
-    }
 }
 
 interface FetchAbortController { //Signum patch

@@ -115,7 +115,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     }
 
 
-    handleViewClick = (event: React.MouseEvent) => {
+    handleViewClick = (event: React.MouseEvent<any>) => {
 
         event.preventDefault();
 
@@ -189,7 +189,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             });
     }
 
-    handleCreateClick = (event: React.SyntheticEvent) => {
+    handleCreateClick = (event: React.SyntheticEvent<any>) => {
 
         event.preventDefault();
 
@@ -233,7 +233,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         );
     }
 
-    static entityHtmlProps(entity: ModifiableEntity | Lite<Entity> | undefined | null): React.HTMLAttributes {
+    static entityHtmlProps(entity: ModifiableEntity | Lite<Entity> | undefined | null): React.HTMLAttributes<any> {
 
         return {
             'data-entity': entityInfo(entity)
@@ -251,7 +251,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             .then<ModifiableEntity | Lite<Entity> | undefined>(qn =>
                 qn == undefined ? undefined : Finder.find({ queryName: qn } as FindOptions));
     }
-    handleFindClick = (event: React.SyntheticEvent) => {
+    handleFindClick = (event: React.SyntheticEvent<any>) => {
 
         event.preventDefault();
 
@@ -280,7 +280,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         );
     }
 
-    handleRemoveClick = (event: React.SyntheticEvent) => {
+    handleRemoveClick = (event: React.SyntheticEvent<any>) => {
 
         event.preventDefault();
 

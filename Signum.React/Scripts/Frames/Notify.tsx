@@ -5,7 +5,8 @@ import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../Fin
 import { Entity, Lite, is, toLite, JavascriptMessage, getToString, EntityPack, ModelState, ModifiableEntity } from '../Signum.Entities'
 import { TypeContext, StyleOptions } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos } from '../Reflection'
-import Transition from 'react-overlays/lib/Transition'
+import { Transition } from 'react-overlays'
+
 
 require("!style!css!./Notify.css");
 
