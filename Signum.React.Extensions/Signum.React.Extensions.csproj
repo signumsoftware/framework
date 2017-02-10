@@ -173,6 +173,9 @@
     <Compile Include="Toolbar\WordServer.cs" />
     <Compile Include="Workflow\WorkflowServer.cs" />
     <Compile Include="Workflow\WorkflowController.cs" />
+    <TypeScriptCompile Include="Alerts\AlertsClient.tsx" />
+    <TypeScriptCompile Include="Alerts\Templates\AlertType.tsx" />
+    <TypeScriptCompile Include="Alerts\Templates\Alert.tsx" />
     <TypeScriptCompile Include="Chart\UserChartToolbarConfig.ts" />
     <TypeScriptCompile Include="Dashboard\DashboardToolbarConfig.ts" />
     <TypeScriptCompile Include="Dynamic\DynamicClient.tsx" />
@@ -242,6 +245,9 @@
     <Compile Include="UserQueries\UserQueryServer.cs" />
     <Compile Include="Word\WordServer.cs" />
     <Compile Include="Word\WordController.cs" />
+    <TypeScriptCompile Include="Notes\NotesClient.tsx" />
+    <TypeScriptCompile Include="Notes\Templates\NoteType.tsx" />
+    <TypeScriptCompile Include="Notes\Templates\Note.tsx" />
     <TypeScriptCompile Include="Printing\PrintClient.tsx" />
     <TypeScriptCompile Include="Printing\PrintPanelPage.tsx" />
     <TypeScriptCompile Include="Printing\Signum.Entities.Printing.ts">
