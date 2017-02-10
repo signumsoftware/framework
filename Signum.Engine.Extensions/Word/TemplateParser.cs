@@ -1,6 +1,8 @@
 ﻿using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Wordprocessing;
+using W = DocumentFormat.OpenXml.Wordprocessing;
+using D = DocumentFormat.OpenXml.Drawing;
+using M = DocumentFormat.OpenXml.Math;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Mailing;
 using Signum.Engine.Templating;
@@ -25,15 +27,15 @@ using System.Xml;
 
 namespace Signum.Engine.Word
 {
-    public class WordTemplateParser
+    public class TemplateParser
     {
         public List<TemplateError> Errors = new List<TemplateError>();
         QueryDescription queryDescription;
         ScopedDictionary<string, ValueProviderBase> variables = new ScopedDictionary<string, ValueProviderBase>(null);
         public readonly Type SystemWordTemplateType;
-        WordprocessingDocument document;
+        OpenXmlPackage document;
 
-        public WordTemplateParser(WordprocessingDocument document, QueryDescription queryDescription, Type systemWordTemplateType)
+        public TemplateParser(OpenXmlPackage document, QueryDescription queryDescription, Type systemWordTemplateType)
         {
             this.queryDescription = queryDescription;
             this.SystemWordTemplateType = systemWordTemplateType;
@@ -44,83 +46,97 @@ namespace Signum.Engine.Word
         {
             foreach (var p in document.RecursivePartsRootElements())
             {
-                var paragraphs = p.Descendants<Paragraph>();
-
-                foreach (var par in paragraphs)
+                var wordNP = new WordprocessingNodeProvider();
+                foreach (var par in p.Descendants<W.Paragraph>())
                 {
-                    string text = par.ChildElements.OfType<Run>().ToString(r => GetText(r), "");
+                    ReplaceRuns(par, wordNP);
+                }
 
-                    var matches = TemplateUtils.KeywordsRegex.Matches(text).Cast<Match>().ToList();
-
-                    if (matches.Any())
-                    {
-                        List<ElementInfo> infos = GetElementInfos(par.ChildElements);
-
-                        par.RemoveAllChildren();
-
-                        var stack = new Stack<ElementInfo>(infos.AsEnumerable().Reverse());
-
-                        foreach (var m in matches)
-                        {
-                            var interval = new Interval<int>(m.Index, m.Index + m.Length);
-
-                            //  [Before][Start][Ignore][Ignore][End]...[Remaining]
-                            //              [        Match       ]
-
-                            ElementInfo start = stack.Pop(); //Start
-                            while (start.Interval.Max <= interval.Min) //Before
-                            {
-                                par.Append(start.Element);
-                                start = stack.Pop();
-                            }
-
-                            Run startRun = (Run)start.Element;
-
-                            if (start.Interval.Min < interval.Min)
-                            {
-                                Run firstRunPart = new Run { RunProperties = startRun.RunProperties?.Let(r => (RunProperties)r.CloneNode(true)) };
-                                firstRunPart.AppendChild(new Text { Text = start.Text.Substring(0, m.Index - start.Interval.Min), Space = SpaceProcessingModeValues.Preserve });
-                                par.Append(firstRunPart);
-                            }
-
-                            par.Append(new MatchNode(m) { RunProperties = startRun.RunProperties?.Let(r => (RunProperties)r.CloneNode(true)) });
-
-                            ElementInfo end = start;
-                            while (end.Interval.Max < interval.Max) //Ignore
-                                end = stack.Pop();
-
-                            if (interval.Max < end.Interval.Max) //End
-                            {
-                                Run endRun = (Run)end.Element;
-
-                                var textPart = end.Text.Substring(interval.Max - end.Interval.Min);
-                                Run endRunPart = new Run { RunProperties = endRun.RunProperties?.Let(r => (RunProperties)r.CloneNode(true)) };
-                                endRunPart.AppendChild(new Text { Text = textPart, Space = SpaceProcessingModeValues.Preserve });
-
-                                stack.Push(new ElementInfo
-                                {
-                                    Element = endRunPart,
-                                    Text = textPart,
-                                    Interval = new Interval<int>(interval.Max, end.Interval.Max)
-                                });
-                            }
-                        }
-
-                        while (!stack.IsEmpty()) //Remaining
-                        {
-                            var pop = stack.Pop();
-                            par.Append(pop.Element);
-                        }
-                    }
+                var draNP = new DrawingNodeProvider();
+                foreach (var par in p.Descendants<D.Paragraph>())
+                {
+                    ReplaceRuns(par, wordNP);
                 }
             }
         }
 
-
-
-        private static List<ElementInfo> GetElementInfos(IEnumerable<OpenXmlElement> childrens)
+        private void ReplaceRuns(OpenXmlCompositeElement par, INodeProvider nodeProvider)
         {
-            var infos = childrens.Select(c => new ElementInfo { Element = c, Text = c is Run ? GetText((Run)c) : null }).ToList();
+            string text = par.ChildElements.Where(a=>nodeProvider.IsRun(a)).ToString(r => nodeProvider.GetText(r), "");
+
+            var matches = TemplateUtils.KeywordsRegex.Matches(text).Cast<Match>().ToList();
+
+            if (matches.Any())
+            {
+                List<ElementInfo> infos = GetElementInfos(par.ChildElements, nodeProvider);
+
+                par.RemoveAllChildren();
+
+                var stack = new Stack<ElementInfo>(infos.AsEnumerable().Reverse());
+
+                foreach (var m in matches)
+                {
+                    var interval = new Interval<int>(m.Index, m.Index + m.Length);
+
+                    //  [Before][Start][Ignore][Ignore][End]...[Remaining]
+                    //              [        Match       ]
+
+                    ElementInfo start = stack.Pop(); //Start
+                    while (start.Interval.Max <= interval.Min) //Before
+                    {
+                        par.Append(start.Element);
+                        start = stack.Pop();
+                    }
+
+                    var startRun = (OpenXmlCompositeElement)nodeProvider.CastRun(start.Element);
+
+                    if (start.Interval.Min < interval.Min)
+                    {
+                        var firstRunPart = nodeProvider.NewRun(
+                            nodeProvider.GetRunProperties(startRun)?.Let(r => (OpenXmlCompositeElement)r.CloneNode(true)),
+                             start.Text.Substring(0, m.Index - start.Interval.Min),
+                             SpaceProcessingModeValues.Preserve
+                            );
+                        par.Append(firstRunPart);
+                    }
+
+                    par.Append(new MatchNode(nodeProvider, m) { RunProperties = nodeProvider.GetRunProperties(startRun)?.Let(r => (OpenXmlCompositeElement)r.CloneNode(true)) });
+
+                    ElementInfo end = start;
+                    while (end.Interval.Max < interval.Max) //Ignore
+                        end = stack.Pop();
+
+                    if (interval.Max < end.Interval.Max) //End
+                    {
+                        var endRun = (OpenXmlCompositeElement)end.Element;
+
+                        var textPart = end.Text.Substring(interval.Max - end.Interval.Min);
+                        var endRunPart = nodeProvider.NewRun(
+                            nodeProvider.GetRunProperties(startRun)?.Let(r => (OpenXmlCompositeElement)r.CloneNode(true)),
+                            textPart,
+                             SpaceProcessingModeValues.Preserve
+                            );
+                 
+                        stack.Push(new ElementInfo
+                        {
+                            Element = endRunPart,
+                            Text = textPart,
+                            Interval = new Interval<int>(interval.Max, end.Interval.Max)
+                        });
+                    }
+                }
+
+                while (!stack.IsEmpty()) //Remaining
+                {
+                    var pop = stack.Pop();
+                    par.Append(pop.Element);
+                }
+            }
+        }
+
+        private static List<ElementInfo> GetElementInfos(IEnumerable<OpenXmlElement> childrens, INodeProvider nodeProvider)
+        {
+            var infos = childrens.Select(c => new ElementInfo { Element = c, Text = nodeProvider.IsRun(c) ? nodeProvider.GetText(c) : null }).ToList();
 
             int currentPosition = 0;
             foreach (ElementInfo ri in infos)
@@ -144,11 +160,7 @@ namespace Signum.Engine.Word
             }
         }
 
-        private static string GetText(Run r)
-        {
-            return r.ChildElements.OfType<Text>().SingleOrDefault()?.Text ?? "";
-        }
-
+   
         Stack<BlockContainerNode> stack = new Stack<BlockContainerNode>();
 
         public void CreateNodes()
@@ -176,9 +188,9 @@ namespace Signum.Engine.Word
                             {
                                 var vp = TryParseValueProvider(type, s.Value.Token, dec);
                                 
-                                matchNode.Parent.ReplaceChild(new TokenNode(vp, s.Value.Format)
+                                matchNode.Parent.ReplaceChild(new TokenNode(matchNode.NodeProvider, vp, s.Value.Format)
                                 {
-                                    RunProperties = matchNode.RunProperties?.Do(d => d.Remove()) 
+                                    RunProperties = matchNode.RunProperties//?.Do(d => d.Remove()) 
                                 }, matchNode);
 
                                 DeclareVariable(vp);
@@ -188,9 +200,9 @@ namespace Signum.Engine.Word
                             {
                                 var vp = TryParseValueProvider(type, token, dec);
 
-                                matchNode.Parent.ReplaceChild(new DeclareNode(vp, this.AddError)
+                                matchNode.Parent.ReplaceChild(new DeclareNode(matchNode.NodeProvider, vp, this.AddError)
                                 {
-                                    RunProperties = matchNode.RunProperties?.Do(d => d.Remove()) 
+                                    RunProperties = matchNode.RunProperties//?.Do(d => d.Remove()) 
                                 }, matchNode);
 
                                 DeclareVariable(vp);
@@ -204,14 +216,14 @@ namespace Signum.Engine.Word
                                 if (!filter.Success)
                                 {
                                     vp = TryParseValueProvider(type, token, dec);
-                                    any = new AnyNode(vp) { AnyToken = new MatchNodePair(matchNode) };
+                                    any = new AnyNode(matchNode.NodeProvider, vp) { AnyToken = new MatchNodePair(matchNode) };
                                 }
                                 else
                                 {
                                     vp = TryParseValueProvider(type, filter.Groups["token"].Value, dec);
                                     var comparer = filter.Groups["comparer"].Value;
                                     var value = filter.Groups["value"].Value;
-                                    any = new AnyNode(vp, comparer, value, this.AddError) { AnyToken = new MatchNodePair(matchNode) };
+                                    any = new AnyNode(matchNode.NodeProvider, vp, comparer, value, this.AddError) { AnyToken = new MatchNodePair(matchNode) };
                                 }
 
                                 PushBlock(any);
@@ -247,14 +259,14 @@ namespace Signum.Engine.Word
                                 if (!filter.Success)
                                 {
                                     vpb = TryParseValueProvider(type, token, dec);
-                                    ifn = new IfNode(vpb) { IfToken = new MatchNodePair(matchNode) };
+                                    ifn = new IfNode(matchNode.NodeProvider, vpb) { IfToken = new MatchNodePair(matchNode) };
                                 }
                                 else
                                 {
                                     vpb = TryParseValueProvider(type, filter.Groups["token"].Value, dec);
                                     var comparer = filter.Groups["comparer"].Value;
                                     var value = filter.Groups["value"].Value;
-                                    ifn = new IfNode(vpb, comparer, value, this.AddError) { IfToken = new MatchNodePair(matchNode) };
+                                    ifn = new IfNode(matchNode.NodeProvider, vpb, comparer, value, this.AddError) { IfToken = new MatchNodePair(matchNode) };
                                 }
 
                                 PushBlock(ifn);
@@ -286,7 +298,7 @@ namespace Signum.Engine.Word
                         case "foreach":
                             {
                                 var vp = TryParseValueProvider(type, token, dec);
-                                var fn = new ForeachNode(vp) { ForeachToken = new MatchNodePair(matchNode) };
+                                var fn = new ForeachNode(matchNode.NodeProvider, vp) { ForeachToken = new MatchNodePair(matchNode) };
                                 stack.Push(fn);
 
                                 DeclareVariable(vp);

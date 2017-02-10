@@ -12,15 +12,15 @@ using System.Threading.Tasks;
 
 namespace Signum.Engine.Word
 {
-    class WordTemplateRenderer
+    class TemplateRenderer
     {
-         WordprocessingDocument document;
+         OpenXmlPackage document;
          QueryDescription queryDescription;
          Entity entity;
          CultureInfo culture;
          ISystemWordTemplate systemWordTemplate;
 
-         public WordTemplateRenderer(WordprocessingDocument document, QueryDescription queryDescription, Entity entity, CultureInfo culture, ISystemWordTemplate systemWordTemplate)
+         public TemplateRenderer(OpenXmlPackage document, QueryDescription queryDescription, Entity entity, CultureInfo culture, ISystemWordTemplate systemWordTemplate)
          {
              this.document = document;
              this.entity = entity;
