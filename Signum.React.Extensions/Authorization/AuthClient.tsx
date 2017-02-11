@@ -164,16 +164,16 @@ export function currentUser(): UserEntity {
     return Navigator.currentUser as UserEntity;
 }
 
-export const onCurrentUserChanged: Array<(newUser: UserEntity | undefined) => void> = [];
+export const onCurrentUserChanged: Array<(newUser: UserEntity | undefined, avoidReRender?: boolean) => void> = [];
 
-export function setCurrentUser(user: UserEntity | undefined) {
+export function setCurrentUser(user: UserEntity | undefined, avoidReRender?: boolean) {
 
     const changed = !is(Navigator.currentUser, user, true);
 
     Navigator.setCurrentUser(user);
 
     if (changed)
-        onCurrentUserChanged.forEach(f => f(user));
+        onCurrentUserChanged.forEach(f => f(user, avoidReRender));
 }
 
 export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Promise<Response>): Promise<Response> {
@@ -198,7 +198,7 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
                 return Api.refreshToken(token).then(resp => {
                     setAuthToken(resp.token);
                     setCurrentUser(resp.userEntity)
-
+                    
                     options.headers!["Authorization"] = "Bearer " + resp.token;
 
                     return makeCall();
@@ -234,6 +234,7 @@ export function autoLogin(): Promise<UserEntity> {
     if (getAuthToken())
         return Api.fetchCurrentUser().then(u => {
             setCurrentUser(u);
+            Navigator.resetUI();
             return u;
         });
 
@@ -243,6 +244,7 @@ export function autoLogin(): Promise<UserEntity> {
                 Api.fetchCurrentUser()
                     .then(u => {
                         setCurrentUser(u);
+                        Navigator.resetUI();
                         resolve(u);
                     });
             } else {
@@ -254,6 +256,7 @@ export function autoLogin(): Promise<UserEntity> {
                         } else {
                             setAuthToken(respo.token);
                             setCurrentUser(respo.userEntity);
+                            Navigator.resetUI();
                             resolve(respo.userEntity);
                         }
                     });
@@ -265,9 +268,9 @@ export function autoLogin(): Promise<UserEntity> {
 export function logout() {
 
     Api.logout().then(() => {
-        Options.onLogout();
         setAuthToken(undefined);
         setCurrentUser(undefined);
+        Options.onLogout();
     }).done();
 }
 
@@ -276,8 +279,8 @@ export namespace Options {
         Navigator.currentHistory.push("~/");
     }
 
-    export let onLogin = () => {
-        Navigator.currentHistory.push("~/");
+    export let onLogin = (url?: string) => {
+        Navigator.currentHistory.push(url || "~/");
     }
 }
 

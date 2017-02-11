@@ -33,7 +33,7 @@ namespace Signum.React.Dynamic
             try
             {
                 var code = $@"
-{Eval.CreateUsings(DynamicLogic.Namespaces.And(DynamicLogic.CodeGenEntitiesNamespace))}
+{DynamicCode.GetNamespaces()}
 
 namespace Signum.Entities.Dynamic 
 {{
@@ -44,7 +44,7 @@ namespace Signum.Entities.Dynamic
         //[ExpressionField]
         public static {de.ReturnType} {de.Name}({de.FromType} e)
         {{
-            return {de.Name}Expression.Evaluate(e);
+            return {de.Name}Expression.Compile().Invoke(e);
         }}
 
         public object EvaluateUntyped(Entity e){{
@@ -53,13 +53,7 @@ namespace Signum.Entities.Dynamic
     }}                   
 }}";
 
-                var res = EvalEntity<IDynamicExpressionEvaluator>.Compile(
-                    DynamicLogic.Assemblies
-                        .Select(ass => Path.Combine(Eval.AssemblyDirectory, ass))
-                        .And(DynamicLogic.CodeGenAssemblyPath)
-                        .NotNull()
-                        .EmptyIfNull(),
-                    code);
+                var res = EvalEntity<IDynamicExpressionEvaluator>.Compile(DynamicCode.GetAssemblies(), code);
 
                 if (res.CompilationErrors.HasText())
                     throw new InvalidOperationException(res.CompilationErrors);

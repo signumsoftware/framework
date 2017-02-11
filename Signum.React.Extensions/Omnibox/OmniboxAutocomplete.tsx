@@ -9,15 +9,15 @@ import * as OmniboxClient from './OmniboxClient'
 import {  OmniboxMessage } from './Signum.Entities.Omnibox'
 
 export interface OmniboxAutocompleteProps {
-    spanAttrs?: React.HTMLAttributes;
-    inputAttrs?: React.HTMLAttributes;
+    spanAttrs?: React.HTMLAttributes<HTMLSpanElement>;
+    inputAttrs?: React.HTMLAttributes<HTMLInputElement>;
 }
 
 export default class OmniboxAutocomplete extends React.Component<OmniboxAutocompleteProps, void>
 {
-    handleOnSelect = (result: OmniboxClient.OmniboxResult, e: React.SyntheticEvent) => {
+    handleOnSelect = (result: OmniboxClient.OmniboxResult, e: React.SyntheticEvent<any>) => {
 
-        const ke = e as React.KeyboardEvent;
+        const ke = e as React.KeyboardEvent<any>;
 
         if (ke.keyCode && ke.keyCode == 9) {
             return OmniboxClient.toString(result);

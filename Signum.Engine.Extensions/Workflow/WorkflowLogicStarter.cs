@@ -11,7 +11,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Signum.Logic.Workflow
+namespace Signum.Engine.Workflow
 {
 
     public static class WorkflowLogicStarter
@@ -19,7 +19,7 @@ namespace Signum.Logic.Workflow
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             WorkflowLogic.Start(sb, dqm);
-            CaseLogic.Start(sb, dqm);
+            CaseActivityLogic.Start(sb, dqm);
         }
     }
 }

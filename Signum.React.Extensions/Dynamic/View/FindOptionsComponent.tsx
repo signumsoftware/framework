@@ -63,7 +63,7 @@ export class FindOptionsLine extends React.Component<FindOptionsLineProps, void>
         promise.then(fo => this.modifyFindOptions(fo)).done();
     }
 
-    handleView = (e: React.MouseEvent) => {
+    handleView = (e: React.MouseEvent<any>) => {
         e.preventDefault();
         var fo = JSON.parse(JSON.stringify(this.props.binding.getValue())) as FindOptionsExpr;
         this.modifyFindOptions(fo);
@@ -376,7 +376,7 @@ interface BaseOptionsComponentProps<T> {
 abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsComponentProps<T>, void>{
 
 
-    handleOnRemove = (event: React.MouseEvent, index: number) => {
+    handleOnRemove = (event: React.MouseEvent<any>, index: number) => {
         event.preventDefault();
         var array = this.props.binding.getValue()!;
         array.removeAt(index);
@@ -386,14 +386,14 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
         this.props.refreshView();
     }
 
-    handleOnMoveUp = (event: React.MouseEvent, index: number) => {
+    handleOnMoveUp = (event: React.MouseEvent<any>, index: number) => {
         event.preventDefault();
         const list = this.props.binding.getValue() !;
         list.moveUp(index);
         this.props.refreshView();
     }
 
-    handleOnMoveDown = (event: React.MouseEvent, index: number) => {
+    handleOnMoveDown = (event: React.MouseEvent<any>, index: number) => {
         event.preventDefault();
         const list = this.props.binding.getValue() !;
         list.moveDown(index);
@@ -401,7 +401,7 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
     }
 
 
-    handleCreateClick = (event: React.SyntheticEvent) => {
+    handleCreateClick = (event: React.SyntheticEvent<any>) => {
         var array = this.props.binding.getValue();
         if (array == undefined) {
             array = [];

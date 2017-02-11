@@ -1,5 +1,5 @@
 ﻿using Signum.Entities.Workflow;
-using Signum.Logic.Workflow;
+using Signum.Engine.Workflow;
 using Signum.Engine;
 using Signum.Engine.Operations;
 using Signum.Entities;
@@ -11,6 +11,9 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Xml.Linq;
+using Signum.Entities.Basics;
+using Signum.Engine.DynamicQuery;
+using Signum.Engine.Basics;
 
 namespace Signum.React.Workflow
 {
@@ -21,7 +24,7 @@ namespace Signum.React.Workflow
         {
             var lite = Lite.ParsePrimaryKey<CaseActivityEntity>(caseActivityId);
 
-            var activity = CaseLogic.RetrieveForViewing(lite);
+            var activity = CaseActivityLogic.RetrieveForViewing(lite);
 
             return new EntityPackWorkflow
             {
@@ -61,10 +64,28 @@ namespace Signum.React.Workflow
             return WorkflowLogic.PreviewChanges(wf, model);
         }
 
+        [Route("api/workflow/findMainEntityType"), HttpGet]
+        public List<Lite<TypeEntity>> FindMainEntityType(string subString, int count)
+        {
+            var list = TypeLogic.TypeToEntity
+                .Where(kvp => typeof(ICaseMainEntity).IsAssignableFrom(kvp.Key))
+                .Select(kvp => kvp.Value.ToLite());
+
+            return AutocompleteUtils.Autocomplete(list, subString, count);
+        }
+
+        [Route("api/workflow/findNode"), HttpGet]
+        public List<Lite<IWorkflowNodeEntity>> FindNode(int workflowId, string subString, int count)
+        {
+            var workflow = Lite.Create<WorkflowEntity>(workflowId);
+            
+            return WorkflowLogic.AutocompleteNodes(workflow, subString, count);
+        }
+
         [Route("api/workflow/condition/test"), HttpPost]
         public WorkflowConditionTestResponse Test(WorkflowConditionTestRequest request)
         {
-            IWorkflowEvaluator evaluator;
+            IWorkflowConditionEvaluator evaluator;
             try
             {
                 evaluator = request.workflowCondition.Eval.Algorithm;
@@ -81,7 +102,7 @@ namespace Signum.React.Workflow
             {
                 return new WorkflowConditionTestResponse
                 {
-                    validationResult = evaluator.EvaluateUntyped(request.exampleEntity, new WorkflowEvaluationContext { CaseActivity = null, DecisionResult = request.decisionResult })
+                    validationResult = evaluator.EvaluateUntyped(request.exampleEntity, new WorkflowEvaluationContext(null, null, request.decisionResult))
                 };
             }
             catch (Exception e)

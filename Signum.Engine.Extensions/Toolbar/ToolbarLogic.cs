@@ -42,6 +42,7 @@ namespace Signum.Engine.Toolbar
                     {
                         Entity = e,
                         e.Id,
+                        e.Name,
                         e.Owner,
                         e.Priority
                     });

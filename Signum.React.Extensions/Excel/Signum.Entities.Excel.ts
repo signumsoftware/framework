@@ -17,7 +17,6 @@ export interface ExcelAttachmentEntity extends Entities.Entity, Mailing.IAttachm
     title?: string | null;
     userQuery?: Entities.Lite<UserQueries.UserQueryEntity> | null;
     related?: Entities.Lite<Entities.Entity> | null;
-    template?: Mailing.EmailTemplateEntity | null;
 }
 
 export module ExcelMessage {

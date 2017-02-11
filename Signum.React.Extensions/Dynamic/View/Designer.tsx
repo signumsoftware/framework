@@ -15,6 +15,7 @@ import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynami
 import { Modal, ModalProps, ModalClass, ButtonToolbar, Button } from 'react-bootstrap'
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
 import TypeHelpComponent from '../Help/TypeHelpComponent'
+import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
 export interface ExpressionOrValueProps {
     binding: Binding<any>;
@@ -46,17 +47,17 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         (p.refreshView || p.dn.context.refreshView)();
     }
 
-    handleChangeCheckbox = (e: React.MouseEvent) => {
+    handleChangeCheckbox = (e: React.ChangeEvent<any>) => {
         var sender = (e.currentTarget as HTMLInputElement);
         this.updateValue(sender.checked);
     }
 
-    handleChangeSelectOrInput = (e: React.MouseEvent) => {
+    handleChangeSelectOrInput = (e: React.ChangeEvent<any>) => {
         var sender = (e.currentTarget as HTMLSelectElement | HTMLInputElement);
         this.updateValue(sender.value);
     }
 
-    handleToggleExpression = (e: React.MouseEvent) => {
+    handleToggleExpression = (e: React.MouseEvent<any>) => {
         e.preventDefault();
         e.stopPropagation();
         var p = this.props;
@@ -217,7 +218,7 @@ export class NullableCheckBox extends React.Component<NullableCheckBoxProps, voi
         }
     }
 
-    handleClick = (e: React.MouseEvent) => {
+    handleClick = (e: React.MouseEvent<any>) => {
         e.preventDefault();
         switch (this.props.value) {
             case true: this.props.onChange(false); break;
@@ -244,7 +245,7 @@ export interface FieldComponentProps  {
 
 export class FieldComponent extends React.Component<FieldComponentProps, void> {
     
-    handleChange = (e: React.MouseEvent) => {
+    handleChange = (e: React.ChangeEvent<any>) => {
         var sender = (e.currentTarget as HTMLSelectElement);
 
         const node = this.props.dn.node;
@@ -323,10 +324,24 @@ export class CollapsableTypeHelp extends React.Component<{ initialTypeName?: str
         this.state = { open: false };
     }
 
-    handleHelpClick = (e: React.FormEvent) => {
+    handleHelpClick = (e: React.FormEvent<any>) => {
         e.preventDefault();
         this.setState({
             open: !this.state.open
+        });
+    }
+
+    handleTypeHelpClick = (pr: PropertyRoute | undefined) => {
+        if (!pr)
+            return;
+
+        ValueLineModal.show({
+            type: { name: "string" },
+            initialValue: TypeHelpComponent.getExpression("e", pr, "Typescript"),
+            valueLineType: ValueLineType.TextArea,
+            title: "Property Template",
+            message: "Copy to clipboard: Ctrl+C, ESC",
+            initiallyFocused: true,
         });
     }
 
@@ -338,7 +353,11 @@ export class CollapsableTypeHelp extends React.Component<{ initialTypeName?: str
                         DynamicViewMessage.HideHelp.niceToString() :
                         DynamicViewMessage.ShowHelp.niceToString()}
                 </a>
-                {this.state.open && <TypeHelpComponent initialType={this.props.initialTypeName} mode="Typescript" />}
+                {this.state.open &&
+                    <TypeHelpComponent
+                        initialType={this.props.initialTypeName}
+                        mode="Typescript"
+                        onMemberClick={this.handleTypeHelpClick} />}
             </div>
         );
     }

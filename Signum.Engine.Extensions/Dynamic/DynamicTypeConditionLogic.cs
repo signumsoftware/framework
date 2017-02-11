@@ -81,10 +81,10 @@ namespace Signum.Engine.Dynamic
                 using (ExecutionMode.Global())
                 {
                     var result = new List<CodeFile>();
-                    var typeConditions = Database.Query<DynamicTypeConditionEntity>().ToList();
-                    var typeConditionSymbols = Database.Query<DynamicTypeConditionSymbolEntity>().ToList();
+                    var typeConditions = !Administrator.ExistsTable<DynamicTypeConditionEntity>() ? new List<DynamicTypeConditionEntity>()  : Database.Query<DynamicTypeConditionEntity>().ToList();
+                    var typeConditionSymbols = !Administrator.ExistsTable<DynamicTypeConditionSymbolEntity>() ? new List<DynamicTypeConditionSymbolEntity>() : Database.Query<DynamicTypeConditionSymbolEntity>().ToList();
 
-                    var dtcg = new DynamicTypeConditionCodeGenerator(DynamicLogic.CodeGenEntitiesNamespace, typeConditions, typeConditionSymbols, DynamicLogic.Namespaces);
+                    var dtcg = new DynamicTypeConditionCodeGenerator(DynamicCode.CodeGenEntitiesNamespace, typeConditions, typeConditionSymbols, DynamicCode.Namespaces);
 
                     var content = dtcg.GetFileCode();
                     result.Add(new CodeFile

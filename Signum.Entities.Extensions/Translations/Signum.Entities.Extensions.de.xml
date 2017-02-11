@@ -241,6 +241,7 @@
     <Member Name="To" Description="An" />
   </Type>
   <Type Name="CaseNotificationEntity" Description="Fall Benachrichtigung">
+    <Member Name="Actor" Description="Schauspieler" />
     <Member Name="CaseActivity" Description="Fall-Aktivität" />
     <Member Name="State" Description="Zustand" />
     <Member Name="User" Description="Benutzer" />
@@ -538,6 +539,10 @@
     <Member Name="DisconnectedMachine" Description="Getrennter Computer" />
     <Member Name="LastOnlineTicks" Description="Letzte Onlineticks" />
   </Type>
+  <Type Name="DynamicBaseType" Description="Dynamische Basistyp">
+    <Member Name="Entity" Description="Entität" />
+    <Member Name="Mixin" Description="Mixin" />
+  </Type>
   <Type Name="DynamicExpressionEntity" Description="Dynamischen Ausdruck" PluralDescription="Dynamischen Ausdrücke">
     <Member Name="Body" Description="Körper" />
     <Member Name="FromType" Description="Vom Typ" />
@@ -554,6 +559,14 @@
     <Member Name="NoTranslation" Description="Keine Übersetzung" />
     <Member Name="ReuseTranslationOfReturnType" Description="Übersetzung des Rückgabetyps wiederverwenden" />
     <Member Name="TranslateExpressionName" Description="Ausdrucksnamen übersetzen" />
+  </Type>
+  <Type Name="DynamicMixinConnectionEntity" Description="Dynamische mixinverbindung" PluralDescription="Dynamischen mixinverbindungen">
+    <Member Name="DynamicMixin" Description="Dynamische mixin" />
+    <Member Name="EntityType" Description="Entitätstyp" />
+  </Type>
+  <Type Name="DynamicMixinConnectionOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="DynamicPanelPermission">
     <Member Name="RestartApplication" Description="Anwendung neu starten" />
@@ -600,6 +613,7 @@
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="DynamicTypeEntity" Description="Dynamische Typ" PluralDescription="Dynamischen Typen">
+    <Member Name="BaseType" Description="Basistyp" />
     <Member Name="TypeDefinition" Description="Typendefinition" />
     <Member Name="TypeName" Description="Typname" />
   </Type>
@@ -1337,14 +1351,31 @@
   </Type>
   <Type Name="PrintLineEntity" Description="Zeile drucken">
     <Member Name="CreationDate" Description="Erstellungsdatum" />
-    <Member Name="Exception" Description="Ausnahme" />
     <Member Name="File" Description="Datei" />
     <Member Name="Package" Description="Paket" />
     <Member Name="PrintedOn" Description="Gedruckt auf" />
     <Member Name="Referred" Description="Verbunden" />
+    <Member Name="State" Description="Status" />
+  </Type>
+  <Type Name="PrintLineOperation">
+    <Member Name="Cancel" Description="Abbrechen" />
+    <Member Name="Print" Description="Drucken" />
+    <Member Name="Retry" Description="Nochmals versuchen" />
+  </Type>
+  <Type Name="PrintLineState" Description="Drucklinienstatus">
+    <Member Name="Cancelled" Description="Abgebrochen" />
+    <Member Name="Error" Description="Fehler" />
+    <Member Name="Printed" Description="Gedruckt" />
+    <Member Name="ReadyToPrint" Description="Bereit zum Drucken" />
   </Type>
   <Type Name="PrintPackageEntity" Description="Druckpaket">
     <Member Name="Name" Description="Name" />
+  </Type>
+  <Type Name="PrintPackageProcess">
+    <Member Name="PrintPackage" Description="Druckpaket" />
+  </Type>
+  <Type Name="PrintPermission">
+    <Member Name="ViewPrintPanel" Description="Druckerbedienfeld öffnen" />
   </Type>
   <Type Name="ProcessAlgorithmSymbol" Description="Prozess-Algorithmus" PluralDescription="Prozess-Algorithmen" Gender="m" />
   <Type Name="ProcessEntity" Description="Prozess" PluralDescription="Prozesse" Gender="m">
@@ -2055,6 +2086,7 @@
   <Type Name="WordTemplateOperation">
     <Member Name="CreateWordReport" Description="Word-Bericht erstellen" />
     <Member Name="CreateWordTemplateFromSystemWordTemplate" Description="Word-Vorlage aus System-Word-Vorlage erstellen" />
+    <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="WordTemplatePermission">
@@ -2113,9 +2145,7 @@
     <Member Name="To" Description="An" />
     <Member Name="Xml" Description="XML" />
   </Type>
-  <Type Name="WorkflowConnectionEval" Description="Workflow-Verbindungsauswertung">
-    <Member Name="Parent" Description="Übergeordnete" />
-  </Type>
+  <Type Name="WorkflowConnectionEval" Description="Workflow-Verbindungsauswertung" />
   <Type Name="WorkflowConnectionModel" Description="Workflow-Verbindung">
     <Member Name="Condition" Description="Bedingung" />
     <Member Name="DecisonResult" Description="Beschluß-Ergebnis" />
@@ -2176,15 +2206,17 @@
     <Member Name="Inclusive" Description="Inklusive" />
     <Member Name="Parallel" Description="Parallel" />
   </Type>
+  <Type Name="WorkflowLaneActorsEval" />
   <Type Name="WorkflowLaneEntity" Description="Workflowstrasse">
+    <Member Name="Actors" Description="Schauspieler" />
     <Member Name="Name" Description="Name" />
     <Member Name="Pool" Description="Pool" />
-    <Member Name="UserOrRoles" Description="Benutzer oder Rollen" />
     <Member Name="Xml" Description="XML" />
   </Type>
   <Type Name="WorkflowLaneModel" Description="Workflowstrasse">
+    <Member Name="Actors" Description="Schauspieler" />
+    <Member Name="MainEntityType" Description="Haupt-Entitätstyp" />
     <Member Name="Name" Description="Name" />
-    <Member Name="UserOrRoles" Description="Benutzer oder Rollen" />
   </Type>
   <Type Name="WorkflowLaneOperation">
     <Member Name="Delete" Description="Löschen" />

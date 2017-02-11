@@ -3,25 +3,16 @@ using W = DocumentFormat.OpenXml.Wordprocessing;
 using D = DocumentFormat.OpenXml.Drawing;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Templating;
-using Signum.Engine.Translation;
-using Signum.Entities;
 using Signum.Entities.DynamicQuery;
-using Signum.Entities.Reflection;
 using Signum.Entities.UserAssets;
-using Signum.Entities.Word;
 using Signum.Utilities;
+using Signum.Utilities.DataStructures;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Xml;
-using System.Globalization;
-using Signum.Utilities.DataStructures;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace Signum.Engine.Word
 {
@@ -136,6 +127,17 @@ namespace Signum.Engine.Word
             this.Match = match;
         }
 
+        internal MatchNode(MatchNode original)
+        {
+            this.Match = original.Match;
+
+            this.SetAttributes(original.GetAttributes().ToList());
+            foreach (var item in original.ChildElements)
+            {
+                this.AppendChild(item.CloneNode(true));
+            }
+        }
+
         public override string ToString()
         {
             return "Match " + Match.ToString();
@@ -154,6 +156,11 @@ namespace Signum.Engine.Word
             base.WriteTo(xmlWriter);
             this.RemoveChild(tempText);
         }
+
+        public override OpenXmlElement CloneNode(bool deep)
+        {
+            return new MatchNode(this);
+        }
     }
 
     public abstract class BaseNode : AlternateContent
@@ -162,7 +169,7 @@ namespace Signum.Engine.Word
         public OpenXmlCompositeElement RunProperties;
 
         public BaseNode(INodeProvider nodeProvider)
-        {
+    {
             this.NodeProvider = nodeProvider;
         }
 
@@ -596,10 +603,22 @@ namespace Signum.Engine.Word
 
         public MatchNodePair CloneNode()
         {
-            var clone = this.AscendantNode.CloneNode(true);
-            var match = clone.Descendants<MatchNode>().SingleEx();
+            if (this.AscendantNode != null)
+            {
+                var ascClone = this.AscendantNode.CloneNode(true);
+                var match = ascClone as MatchNode ?? ascClone.Descendants<MatchNode>().SingleEx();
 
-            return new MatchNodePair(match) { AscendantNode = clone };
+                return new MatchNodePair(match) { AscendantNode = ascClone };
+            }
+            else if (this.MatchNode != null)
+            {
+                var clone = this.MatchNode.CloneNode(true);
+                return new MatchNodePair((MatchNode)clone);
+            }
+            else
+            {
+                return default(MatchNodePair);
+            }
         }
 
         internal OpenXmlElement ReplaceMatchNode(string text)

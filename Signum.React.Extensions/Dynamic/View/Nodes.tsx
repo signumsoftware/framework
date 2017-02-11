@@ -74,7 +74,7 @@ NodeUtils.register<RowNode>({
     validChild: "Column",
     renderTreeNode: NodeUtils.treeNodeKind,
     validate: (dn, parentCtx) => parentCtx && dn.node.children.filter(c => c.kind == "Column").map(col =>
-        NodeUtils.evaluate(parentCtx, col, f => (f as ColumnNode).width) +
+        (NodeUtils.evaluate(parentCtx, col, f => (f as ColumnNode).width) || 0) +
         (NodeUtils.evaluate(parentCtx, col, f => (f as ColumnNode).offset) || 0)
     ).sum() > 12 ? "Sum of Column.width/offset should <= 12" : null,
     renderCode: (node, cc) => cc.elementCodeWithChildrenSubCtx("div", withClassNameEx(node.htmlAttributes, "row"), node),

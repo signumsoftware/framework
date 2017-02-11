@@ -23,7 +23,7 @@ export function start(...configs: ToolbarConfig<any>[]) {
 
     Finder.addSettings({ queryName: ToolbarEntity, defaultOrderColumn: "Priority", defaultOrderType: "Descending" });
 
-    Constructor.registerConstructor(ToolbarElementEntity, tn => ToolbarElementEntity.New(e => e.type = "Link"));
+    Constructor.registerConstructor(ToolbarElementEntity, tn => ToolbarElementEntity.New({ type : "Link" }));
 
     configs.forEach(c => registerConfig(c));
 }
@@ -50,7 +50,7 @@ export abstract class ToolbarConfig<T extends Entity> {
     abstract navigateTo(element: ToolbarResponse<T>): Promise<string>;
 
 
-    handleNavigateClick(e: React.MouseEvent, res: ToolbarResponse<any>) {
+    handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {
 
         var openWindow = e.ctrlKey || e.button == 1;
 

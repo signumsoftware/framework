@@ -47,7 +47,7 @@ export class HtmlAttributesLine extends React.Component<HtmlAttributesLineProps,
         this.modifyExpression({} as HtmlAttributesExpression);
     }
 
-    handleView = (e: React.MouseEvent) => {
+    handleView = (e: React.MouseEvent<any>) => {
         e.preventDefault();
         var hae = JSON.parse(JSON.stringify(this.props.binding.getValue())) as HtmlAttributesExpression;
         this.modifyExpression(hae);

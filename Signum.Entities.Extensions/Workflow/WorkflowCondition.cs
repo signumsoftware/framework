@@ -4,6 +4,7 @@ using Signum.Entities.Dynamic;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -21,31 +22,8 @@ namespace Signum.Entities.Workflow
         public TypeEntity MainEntityType { get; set; }
 
         [NotNullable]
-        WorkflowConnectionEval eval;
-
-        [NotNullValidator]
-        public WorkflowConnectionEval Eval
-        {
-            get { return eval; }
-            set
-            {
-                if (eval != null)
-                    eval.Parent = null;
-
-                eval = value;
-
-                if (eval != null)
-                    eval.Parent = this;
-            }
-        }
-
-        protected override void PostRetrieving()
-        {
-            if (this.Eval != null)
-                this.Eval.Parent = this;
-
-            base.PostRetrieving();
-        }
+        [NotNullValidator, NotifyChildProperty]
+        public WorkflowConditionEval Eval { get; set; }
 
         static Expression<Func<WorkflowConditionEntity, string>> ToStringExpression = @this => @this.Name;
         [ExpressionField]
@@ -63,24 +41,22 @@ namespace Signum.Entities.Workflow
     }
 
     [Serializable]
-    public class WorkflowConnectionEval : EvalEntity<IWorkflowEvaluator>
+    public class WorkflowConditionEval : EvalEntity<IWorkflowConditionEvaluator>
     {
-        [Ignore]
-        [InTypeScript(false)]
-        public WorkflowConditionEntity Parent { get; set; }
-
         protected override CompilationResult Compile()
         {
+            var parent = (WorkflowConditionEntity)this.GetParentEntity();
+
             var script = this.Script.Trim();
             script = script.Contains(';') ? script : ("return " + script + ";");
-            var WorkflowEntityTypeName = this.Parent.MainEntityType.ToType().FullName;
+            var WorkflowEntityTypeName = parent.MainEntityType.ToType().FullName;
 
-            return Compile(Eval.BasicAssemblies,
-                Eval.CreateUsings(Eval.BasicNamespaces) +
+            return Compile(DynamicCode.GetAssemblies(),
+                DynamicCode.GetNamespaces() +
                     @"
-                    namespace Signum.Entities.IMMS
+                    namespace Signum.Entities.Workflow
                     {
-                        class MyWorkflowEvaluator : IWorkflowEvaluator
+                        class MyWorkflowConditionEvaluator : IWorkflowConditionEvaluator
                         {
                             public bool EvaluateUntyped(ICaseMainEntity mainEntity, WorkflowEvaluationContext ctx)
                             {
@@ -96,18 +72,8 @@ namespace Signum.Entities.Workflow
         }
     }
 
-    public interface IWorkflowEvaluator
+    public interface IWorkflowConditionEvaluator
     {
         bool EvaluateUntyped(ICaseMainEntity mainEntity, WorkflowEvaluationContext ctx);
     }
-
-    public class WorkflowEvaluationContext
-    {
-        public CaseActivityEntity CaseActivity;
-
-        public DecisionResult? DecisionResult;
-    }
-
-
-    
 }

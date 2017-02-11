@@ -38,7 +38,7 @@ namespace Signum.React.Files
         {
             var filePath = Database.Retrieve<FilePathEntity>(PrimaryKey.Parse(filePathId, typeof(FilePathEntity)));
 
-            return GetHttpReponseMessage(File.OpenRead(filePath.FullPhysicalPath()), filePath.FileName);
+            return GetHttpReponseMessage(filePath.OpenRead(), filePath.FileName);
         }
 
         [Route("api/files/downloadEmbeddedFilePath/{fileTypeKey}"), HttpGet]
@@ -49,14 +49,10 @@ namespace Signum.React.Files
             var virtualFile = new EmbeddedFilePathEntity(fileType)
             {
                 Suffix = suffix,
-                FileName = fileName
+                FileName = fileName,
             };
-
-            var pair = FileTypeLogic.FileTypes.GetOrThrow(fileType).GetPrefixPair(virtualFile);
-
-            var fullPhysicalPath = Path.Combine(pair.PhysicalPrefix, suffix);
             
-            return GetHttpReponseMessage(File.OpenRead(fullPhysicalPath), fullPhysicalPath);
+            return GetHttpReponseMessage(virtualFile.OpenRead(), virtualFile.FileName);
         }
 
         

@@ -4,26 +4,15 @@ using W = DocumentFormat.OpenXml.Wordprocessing;
 using D = DocumentFormat.OpenXml.Drawing;
 using M = DocumentFormat.OpenXml.Math;
 using Signum.Engine.DynamicQuery;
-using Signum.Engine.Mailing;
 using Signum.Engine.Templating;
-using Signum.Engine.Translation;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
-using Signum.Entities.Reflection;
-using Signum.Entities.UserAssets;
-using Signum.Entities.Word;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Xml;
 
 namespace Signum.Engine.Word
 {
@@ -64,75 +53,75 @@ namespace Signum.Engine.Word
         {
             string text = par.ChildElements.Where(a=>nodeProvider.IsRun(a)).ToString(r => nodeProvider.GetText(r), "");
 
-            var matches = TemplateUtils.KeywordsRegex.Matches(text).Cast<Match>().ToList();
+                    var matches = TemplateUtils.KeywordsRegex.Matches(text).Cast<Match>().ToList();
 
-            if (matches.Any())
-            {
+                    if (matches.Any())
+                    {
                 List<ElementInfo> infos = GetElementInfos(par.ChildElements, nodeProvider);
 
-                par.RemoveAllChildren();
+                        par.RemoveAllChildren();
 
-                var stack = new Stack<ElementInfo>(infos.AsEnumerable().Reverse());
+                        var stack = new Stack<ElementInfo>(infos.AsEnumerable().Reverse());
 
-                foreach (var m in matches)
-                {
-                    var interval = new Interval<int>(m.Index, m.Index + m.Length);
+                        foreach (var m in matches)
+                        {
+                            var interval = new Interval<int>(m.Index, m.Index + m.Length);
 
-                    //  [Before][Start][Ignore][Ignore][End]...[Remaining]
-                    //              [        Match       ]
+                            //  [Before][Start][Ignore][Ignore][End]...[Remaining]
+                            //              [        Match       ]
 
-                    ElementInfo start = stack.Pop(); //Start
-                    while (start.Interval.Max <= interval.Min) //Before
-                    {
-                        par.Append(start.Element);
-                        start = stack.Pop();
-                    }
+                            ElementInfo start = stack.Pop(); //Start
+                            while (start.Interval.Max <= interval.Min) //Before
+                            {
+                                par.Append(start.Element);
+                                start = stack.Pop();
+                            }
 
                     var startRun = (OpenXmlCompositeElement)nodeProvider.CastRun(start.Element);
 
-                    if (start.Interval.Min < interval.Min)
-                    {
+                            if (start.Interval.Min < interval.Min)
+                            {
                         var firstRunPart = nodeProvider.NewRun(
                             nodeProvider.GetRunProperties(startRun)?.Let(r => (OpenXmlCompositeElement)r.CloneNode(true)),
                              start.Text.Substring(0, m.Index - start.Interval.Min),
                              SpaceProcessingModeValues.Preserve
                             );
-                        par.Append(firstRunPart);
-                    }
+                                par.Append(firstRunPart);
+                            }
 
                     par.Append(new MatchNode(nodeProvider, m) { RunProperties = nodeProvider.GetRunProperties(startRun)?.Let(r => (OpenXmlCompositeElement)r.CloneNode(true)) });
 
-                    ElementInfo end = start;
-                    while (end.Interval.Max < interval.Max) //Ignore
-                        end = stack.Pop();
+                            ElementInfo end = start;
+                            while (end.Interval.Max < interval.Max) //Ignore
+                                end = stack.Pop();
 
-                    if (interval.Max < end.Interval.Max) //End
-                    {
+                            if (interval.Max < end.Interval.Max) //End
+                            {
                         var endRun = (OpenXmlCompositeElement)end.Element;
 
-                        var textPart = end.Text.Substring(interval.Max - end.Interval.Min);
+                                var textPart = end.Text.Substring(interval.Max - end.Interval.Min);
                         var endRunPart = nodeProvider.NewRun(
                             nodeProvider.GetRunProperties(startRun)?.Let(r => (OpenXmlCompositeElement)r.CloneNode(true)),
                             textPart,
                              SpaceProcessingModeValues.Preserve
                             );
-                 
-                        stack.Push(new ElementInfo
+
+                                stack.Push(new ElementInfo
+                                {
+                                    Element = endRunPart,
+                                    Text = textPart,
+                                    Interval = new Interval<int>(interval.Max, end.Interval.Max)
+                                });
+                            }
+                        }
+
+                        while (!stack.IsEmpty()) //Remaining
                         {
-                            Element = endRunPart,
-                            Text = textPart,
-                            Interval = new Interval<int>(interval.Max, end.Interval.Max)
-                        });
+                            var pop = stack.Pop();
+                            par.Append(pop.Element);
+                        }
                     }
                 }
-
-                while (!stack.IsEmpty()) //Remaining
-                {
-                    var pop = stack.Pop();
-                    par.Append(pop.Element);
-                }
-            }
-        }
 
         private static List<ElementInfo> GetElementInfos(IEnumerable<OpenXmlElement> childrens, INodeProvider nodeProvider)
         {
@@ -160,7 +149,7 @@ namespace Signum.Engine.Word
             }
         }
 
-   
+
         Stack<BlockContainerNode> stack = new Stack<BlockContainerNode>();
 
         public void CreateNodes()
@@ -299,7 +288,7 @@ namespace Signum.Engine.Word
                             {
                                 var vp = TryParseValueProvider(type, token, dec);
                                 var fn = new ForeachNode(matchNode.NodeProvider, vp) { ForeachToken = new MatchNodePair(matchNode) };
-                                stack.Push(fn);
+                                PushBlock(fn);
 
                                 DeclareVariable(vp);
                                 break;

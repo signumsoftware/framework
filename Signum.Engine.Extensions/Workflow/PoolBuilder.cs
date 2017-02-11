@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace Signum.Logic.Workflow
+namespace Signum.Engine.Workflow
 {
     public partial class WorkflowBuilder
     {
@@ -19,7 +19,7 @@ namespace Signum.Logic.Workflow
         {
             public XmlEntity<WorkflowPoolEntity> pool;
             private Dictionary<Lite<WorkflowLaneEntity>, LaneBuilder> lanes;
-            private List<XmlEntity<WorkflowConnectionEntity>> sequenceFlows;
+            private List<XmlEntity<WorkflowConnectionEntity>> sequenceFlows; //Contains all the connections internal to the pool INCLUDING the internals to each lane
 
             public PoolBuilder(WorkflowPoolEntity p, IEnumerable<LaneBuilder> laneBuilders, IEnumerable<XmlEntity<WorkflowConnectionEntity>> sequenceFlows)
             {
@@ -165,6 +165,22 @@ namespace Signum.Logic.Workflow
             internal List<XmlEntity<WorkflowConnectionEntity>> GetSequenceFlows()
             {
                 return this.sequenceFlows;
+            }
+
+            internal void Clone(WorkflowEntity wf, Dictionary<IWorkflowNodeEntity, IWorkflowNodeEntity> nodes)
+            {
+                var oldPool = this.pool.Entity;
+                var newPool = new WorkflowPoolEntity
+                {
+                    Workflow = wf,
+                    Name = oldPool.Name,
+                    Xml = oldPool.Xml,
+                }.Save();
+
+                foreach (var lb in this.lanes.Values)
+                {
+                    lb.Clone(newPool, nodes);
+                }
             }
         }
     }

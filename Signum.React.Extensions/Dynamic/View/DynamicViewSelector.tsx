@@ -2,7 +2,7 @@
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
 import { DynamicViewSelectorEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
-import { EntityLine, TypeContext } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { EntityLine, TypeContext, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { Entity, JavascriptMessage, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { getTypeInfo, Binding, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
@@ -10,13 +10,14 @@ import * as DynamicViewClient from '../DynamicViewClient'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import TypeHelpComponent from '../Help/TypeHelpComponent'
 import { AuthInfo } from './AuthInfo'
+import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
 
-interface DynamicViewSelectorEntityComponentProps {
+interface DynamicViewSelectorComponentProps {
     ctx: TypeContext<DynamicViewSelectorEntity>;
 }
 
-interface DynamicViewSelectorEntityComponentState {
+interface DynamicViewSelectorComponentState {
     exampleEntity?: Entity;
     syntaxError?: string;
     testResult?: { type: "ERROR", error: string } | { type: "RESULT", result: string | undefined } | undefined;
@@ -24,9 +25,9 @@ interface DynamicViewSelectorEntityComponentState {
     viewNames?: string[];
 }
 
-export default class DynamicViewSelectorEntityComponent extends React.Component<DynamicViewSelectorEntityComponentProps, DynamicViewSelectorEntityComponentState> {
+export default class DynamicViewSelectorComponent extends React.Component<DynamicViewSelectorComponentProps, DynamicViewSelectorComponentState> {
 
-    constructor(props: DynamicViewSelectorEntityComponentProps) {
+    constructor(props: DynamicViewSelectorComponentProps) {
         super(props);
 
         this.state = {};
@@ -36,12 +37,12 @@ export default class DynamicViewSelectorEntityComponent extends React.Component<
         this.updateViewNames(this.props);
     }
 
-    componentWillReceiveProps(newProps: DynamicViewSelectorEntityComponentProps) {
+    componentWillReceiveProps(newProps: DynamicViewSelectorComponentProps) {
         if (!is(this.props.ctx.value.entityType, newProps.ctx.value.entityType))
             this.updateViewNames(newProps);
     }
 
-    updateViewNames(props: DynamicViewSelectorEntityComponentProps) {
+    updateViewNames(props: DynamicViewSelectorComponentProps) {
         this.setState({ viewNames: undefined });
         if (props.ctx.value.entityType)
             DynamicViewClient.API.getDynamicViewNames(props.ctx.value.entityType!.cleanName)
@@ -60,6 +61,20 @@ export default class DynamicViewSelectorEntityComponent extends React.Component<
         return Promise.resolve(true);
     }
 
+    handleTypeHelpClick = (pr: PropertyRoute | undefined) => {
+        if (!pr)
+            return;
+
+        ValueLineModal.show({
+            type: { name: "string" },
+            initialValue: TypeHelpComponent.getExpression("e", pr, "Typescript"),
+            valueLineType: ValueLineType.TextArea,
+            title: "Property Template",
+            message: "Copy to clipboard: Ctrl+C, ESC",
+            initiallyFocused: true,
+        });
+    }
+
     render() {
         const ctx = this.props.ctx;
 
@@ -76,7 +91,7 @@ export default class DynamicViewSelectorEntityComponent extends React.Component<
                                 {this.renderTest()}
                             </div>
                             <div className="col-sm-5">
-                                <TypeHelpComponent initialType={ctx.value.entityType.cleanName} mode="Typescript" />
+                            <TypeHelpComponent initialType={ctx.value.entityType.cleanName} mode="Typescript" onMemberClick={this.handleTypeHelpClick} />
                             </div>
                         </div>
                     </div>
@@ -119,7 +134,7 @@ export default class DynamicViewSelectorEntityComponent extends React.Component<
     }
 
     handleOnView = (exampleEntity: Entity) => {
-        return Navigator.view(exampleEntity, { requiresSaveOperation: false, showOperations: false });
+        return Navigator.view(exampleEntity, { requiresSaveOperation: false });
     }
 
     handleCodeChange = (newCode: string) => {

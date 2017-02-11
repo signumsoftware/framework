@@ -1,11 +1,7 @@
-﻿/// <reference path="../../../../Framework/Signum.React/typings/react/react.d.ts" />
-
-import * as React from 'react'
+﻿import * as React from 'react'
 import { AuthMessage, UserEntity } from '../Signum.Entities.Authorization'
 import { Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { ValueLine, ValueLineType, EntityLine, EntityCombo, FormGroup, TypeContext } from '../../../../Framework/Signum.React/Scripts/Lines'
-
-
 
 
 export default class User extends React.Component<{ ctx: TypeContext<UserEntity> }, { withPassword: boolean }> {
@@ -49,7 +45,7 @@ export default class User extends React.Component<{ ctx: TypeContext<UserEntity>
 
 class DoublePassword extends React.Component<{ ctx: TypeContext<string> }, void>{
 
-    handlePasswordBlur = (event: React.SyntheticEvent) => {
+    handlePasswordBlur = (event: React.SyntheticEvent<any>) => {
 
         const ctx = this.props.ctx;
 

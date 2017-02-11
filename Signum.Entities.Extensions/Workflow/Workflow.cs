@@ -40,7 +40,9 @@ namespace Signum.Entities.Workflow
     [AutoInit]
     public static class WorkflowOperation
     {
+        public static readonly ConstructSymbol<WorkflowEntity>.From<WorkflowEntity> Clone;
         public static readonly ExecuteSymbol<WorkflowEntity> Save;
+        public static readonly DeleteSymbol<WorkflowEntity> Delete;
     }
 
     [Serializable, InTypeScript(Undefined = false)]
@@ -105,7 +107,12 @@ namespace Signum.Entities.Workflow
         WorkflowLaneEntity Lane { get; set; }
     }
 
-    public interface IWorkflowConnectionEntity : IWorkflowObjectEntity { }
+    public interface IWorkflowConnectionOrJump
+    {
+        Lite<WorkflowConditionEntity> Condition { get; set; }
+
+        Lite<WorkflowActionEntity> Action { get; set; }
+    }
 
     [Serializable]
     public class WorkflowReplacementModel: ModelEntity
@@ -122,5 +129,21 @@ namespace Signum.Entities.Workflow
         
         [NotNullValidator]
         public string NewTask { get; set; }
+    }
+
+    public class WorkflowEvaluationContext
+    {
+        public WorkflowEvaluationContext(CaseActivityEntity ca, IWorkflowConnectionOrJump conn, DecisionResult? dr)
+        {
+            this.CaseActivity = ca;
+            this.Case = ca?.Case;
+            this.Connection = conn;
+            this.DecisionResult = dr;
+        }
+
+        public CaseActivityEntity CaseActivity { get; internal set; }
+        public DecisionResult? DecisionResult { get; internal set; }
+        public IWorkflowConnectionOrJump Connection { get; internal set; }
+        public CaseEntity Case { get; internal set; }
     }
 }

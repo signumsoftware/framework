@@ -18,24 +18,51 @@ namespace Signum.Entities.Dynamic
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class DynamicTypeEntity : Entity
     {
+        public DynamicBaseType BaseType { set; get; }
+
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), IdentifierValidator(IdentifierType.PascalAscii)]
         public string TypeName { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
+        string typeDefinition;
         [StringLengthValidator(AllowNulls = false, Min = 3)]
-        public string TypeDefinition { get; set; }
+        public string TypeDefinition
+        {
+            get { return this.Get(typeDefinition); }
+            set
+            {
+                if (this.Set(ref typeDefinition, value))
+                    this.definition = null;
+            }
+        }
 
+        [Ignore]
+        DynamicTypeDefinition definition; 
         public DynamicTypeDefinition GetDefinition()
         {
-            return JsonConvert.DeserializeObject<DynamicTypeDefinition>(this.TypeDefinition);
+            return definition ?? JsonConvert.DeserializeObject<DynamicTypeDefinition>(this.TypeDefinition);
         }
 
         public void SetDefinition(DynamicTypeDefinition definition)
         {
             this.TypeDefinition = JsonConvert.SerializeObject(definition);
+            this.definition = definition;
+        }
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Name == nameof(TypeDefinition))
+            {
+                var def = this.GetDefinition();
+
+                return def.Properties.Where(p => p.Name.HasText() && !IdentifierValidatorAttribute.PascalAscii.IsMatch(p.Name)).Select(p =>
+                  ValidationMessage._0DoesNotHaveAValid1Format.NiceToString(nameof(p.Name), IdentifierType.PascalAscii)).ToString("\r\n").DefaultText(null);
+            }
+            return base.PropertyValidation(pi);
         }
         
+
         static Expression<Func<DynamicTypeEntity, string>> ToStringExpression = @this => @this.TypeName;
         [ExpressionField]
         public override string ToString()
@@ -63,6 +90,8 @@ namespace Signum.Entities.Dynamic
 
         [Description("Remove Save Operation?")]
         RemoveSaveOperation,
+
+        TheEntityShouldBeSynchronizedToApplyMixins,
     }
 
     public class DynamicTypePrimaryKeyDefinition
@@ -110,9 +139,6 @@ namespace Signum.Entities.Dynamic
 
     public class DynamicTypeDefinition
     {
-        [JsonProperty(PropertyName = "baseType")]
-        public DynamicBaseType BaseType;
-
         [JsonProperty(PropertyName = "entityKind", NullValueHandling = NullValueHandling.Ignore)]
         public EntityKind? EntityKind;
 
@@ -140,8 +166,23 @@ namespace Signum.Entities.Dynamic
         [JsonProperty(PropertyName = "operationDelete")]
         public OperationDelete OperationDelete;
 
-        [JsonProperty(PropertyName = "events")]
-        public DynamicTypeEvent Events;
+        [JsonProperty(PropertyName = "customInheritance")]
+        public DynamicTypeCustomCode CustomInheritance;
+        
+        [JsonProperty(PropertyName = "customEntityMembers")]
+        public DynamicTypeCustomCode CustomEntityMembers;
+
+        [JsonProperty(PropertyName = "customStartCode")]
+        public DynamicTypeCustomCode CustomStartCode;
+
+        [JsonProperty(PropertyName = "customLogicMembers")]
+        public DynamicTypeCustomCode CustomLogicMembers;
+        
+        [JsonProperty(PropertyName = "customTypes")]
+        public DynamicTypeCustomCode CustomTypes;
+
+        [JsonProperty(PropertyName = "customBeforeSchema")]
+        public DynamicTypeCustomCode CustomBeforeSchema;
 
         [JsonProperty(PropertyName = "queryFields")]
         public List<string> QueryFields;
@@ -187,15 +228,17 @@ namespace Signum.Entities.Dynamic
         public string Delete;
     }
 
-    public class DynamicTypeEvent
+    public class DynamicTypeCustomCode
     {
         [JsonProperty(PropertyName = "code")]
         public string Code;
     }
+ 
 
     public enum DynamicBaseType
     {
         Entity,
+        Mixin
     }
 
     public class DynamicProperty

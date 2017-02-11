@@ -18,14 +18,14 @@ export interface ChartButtonProps {
 
 export default class ChartButton extends React.Component<ChartButtonProps, void> {
 
-    handleClick = (e: React.MouseEvent) => {
+    handleClick = (e: React.MouseEvent<any>) => {
 
         const fo = this.props.searchControl.props.findOptions;
 
-        const path = ChartClient.Encoder.chartRequestPath(ChartRequest.New(cr => {
-            cr.queryKey = fo.queryKey;
-            cr.orderOptions = [];
-            cr.filterOptions = fo.filterOptions;
+        const path = ChartClient.Encoder.chartRequestPath(ChartRequest.New({
+            queryKey : fo.queryKey,
+            orderOptions : [],
+            filterOptions : fo.filterOptions
         }));
 
         if (e.ctrlKey || e.button == 1)

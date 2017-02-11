@@ -1,5 +1,7 @@
 ﻿using Signum.Entities;
 using Signum.Entities.Authorization;
+using Signum.Entities.Basics;
+using Signum.Entities.Dynamic;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
@@ -26,8 +28,11 @@ namespace Signum.Entities.Workflow
         public WorkflowPoolEntity Pool { get; set; }
 
         [NotNullable, ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
-        [NotNullValidator, NoRepeatValidator, CountIsValidator(ComparisonType.GreaterThan, 0)]
-        public MList<Lite<Entity>> UserOrRoles { get; set; } = new MList<Lite<Entity>>();
+        [NotNullValidator, NoRepeatValidator]
+        public MList<Lite<Entity>> Actors { get; set; } = new MList<Lite<Entity>>();
+
+        [NotifyChildProperty]
+        public WorkflowLaneActorsEval ActorsEval { get; set; }
 
         static Expression<Func<WorkflowLaneEntity, string>> ToStringExpression = @this => @this.Name;
         [ExpressionField]
@@ -39,7 +44,9 @@ namespace Signum.Entities.Workflow
         public ModelEntity GetModel()
         {
             var model = new WorkflowLaneModel();
-            model.UserOrRoles.AssignMList(this.UserOrRoles);
+            model.MainEntityType = this.Pool.Workflow.MainEntityType;
+            model.Actors.AssignMList(this.Actors);
+            model.ActorsEval = this.ActorsEval;
             model.Name = this.Name;
             return model;
         }
@@ -48,8 +55,46 @@ namespace Signum.Entities.Workflow
         {
             var wModel = (WorkflowLaneModel)model;
             this.Name = wModel.Name;
-            this.UserOrRoles.AssignMList(wModel.UserOrRoles);
+            this.ActorsEval = wModel.ActorsEval;
+            this.Actors.AssignMList(wModel.Actors);
         }
+    }
+
+    [Serializable]
+    public class WorkflowLaneActorsEval : EvalEntity<IWorkflowLaneActorsEvaluator>
+    {
+        protected override CompilationResult Compile()
+        {
+            var parent = (WorkflowLaneEntity)this.GetParentEntity();
+
+            var script = this.Script.Trim();
+            script = script.Contains(';') ? script : ("return " + script + ";");
+            var WorkflowEntityTypeName = parent.Pool.Workflow.MainEntityType.ToType().FullName;
+
+            return Compile(DynamicCode.GetAssemblies(),
+                DynamicCode.GetNamespaces() +
+                    @"
+                    namespace Signum.Entities.Workflow
+                    {
+                        class MyWorkflowLaneActorEvaluator : IWorkflowLaneActorsEvaluator
+                        {
+                            public List<Lite<Entity>> GetActors(ICaseMainEntity mainEntity, WorkflowEvaluationContext ctx)
+                            {
+                                return this.Evaluate((" + WorkflowEntityTypeName + @")mainEntity, ctx);
+                            }
+
+                            List<Lite<Entity>> Evaluate(" + WorkflowEntityTypeName + @" e, WorkflowEvaluationContext ctx)
+                            {
+                                " + script + @"
+                            }
+                        }                  
+                    }");
+        }
+    }
+
+    public interface IWorkflowLaneActorsEvaluator
+    {
+        List<Lite<Entity>> GetActors(ICaseMainEntity mainEntity, WorkflowEvaluationContext ctx);
     }
 
     [AutoInit]
@@ -62,12 +107,18 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowLaneModel : ModelEntity
     {
+        [NotNullable]
+        [NotNullValidator, InTypeScript(Undefined = false, Null = false)]
+        public TypeEntity MainEntityType { get; set; }
+
         [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
         [NotNullable, ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
-        [NotNullValidator, NoRepeatValidator, CountIsValidator(ComparisonType.GreaterThan, 0)]
-        public MList<Lite<Entity>> UserOrRoles { get; set; } = new MList<Lite<Entity>>();
+        [NotNullValidator, NoRepeatValidator]
+        public MList<Lite<Entity>> Actors { get; set; } = new MList<Lite<Entity>>();
+
+        public WorkflowLaneActorsEval ActorsEval { get; set; }
     }
 }

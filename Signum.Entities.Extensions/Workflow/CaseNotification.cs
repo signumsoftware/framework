@@ -21,6 +21,14 @@ namespace Signum.Entities.Workflow
         [NotNullValidator]
         public Lite<UserEntity> User { get; set; }
 
+        [NotNullable, ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
+        [NotNullValidator]
+        public Lite<Entity> Actor { get; internal set; }
+
+        [SqlDbType(Size = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = true, MultiLine = true)]
+        public string Remarks { get; set; }
+
         public CaseNotificationState State { get; set; }
     }
 
@@ -30,6 +38,15 @@ namespace Signum.Entities.Workflow
         Opened,
         InProgress,
         Done,
+        DoneByOther,
+    }
+
+
+
+    [AutoInit]
+    public static class CaseNotificationOperation
+    {
+        public static readonly ExecuteSymbol<CaseNotificationEntity> SetRemarks;
     }
 
     [Serializable]

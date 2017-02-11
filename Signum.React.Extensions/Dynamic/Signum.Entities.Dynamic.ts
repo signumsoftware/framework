@@ -10,6 +10,11 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 interface IDynamicValidationEvaluator {}
 interface IDynamicTypeConditionEvaluator {}
 
+export const DynamicBaseType = new EnumType<DynamicBaseType>("DynamicBaseType");
+export type DynamicBaseType =
+    "Entity" |
+    "Mixin";
+
 export const DynamicExpressionEntity = new Type<DynamicExpressionEntity>("DynamicExpression");
 export interface DynamicExpressionEntity extends Entities.Entity {
     Type: "DynamicExpression";
@@ -31,6 +36,18 @@ export type DynamicExpressionTranslation =
     "TranslateExpressionName" |
     "ReuseTranslationOfReturnType" |
     "NoTranslation";
+
+export const DynamicMixinConnectionEntity = new Type<DynamicMixinConnectionEntity>("DynamicMixinConnection");
+export interface DynamicMixinConnectionEntity extends Entities.Entity {
+    Type: "DynamicMixinConnection";
+    entityType?: Entities.Lite<Basics.TypeEntity> | null;
+    dynamicMixin?: Entities.Lite<DynamicTypeEntity> | null;
+}
+
+export module DynamicMixinConnectionOperation {
+    export const Save : Entities.ExecuteSymbol<DynamicMixinConnectionEntity> = registerSymbol("Operation", "DynamicMixinConnectionOperation.Save");
+    export const Delete : Entities.DeleteSymbol<DynamicMixinConnectionEntity> = registerSymbol("Operation", "DynamicMixinConnectionOperation.Delete");
+}
 
 export module DynamicPanelPermission {
     export const ViewDynamicPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "DynamicPanelPermission.ViewDynamicPanel");
@@ -100,6 +117,7 @@ export module DynamicTypeConditionSymbolOperation {
 export const DynamicTypeEntity = new Type<DynamicTypeEntity>("DynamicType");
 export interface DynamicTypeEntity extends Entities.Entity {
     Type: "DynamicType";
+    baseType?: DynamicBaseType;
     typeName?: string | null;
     typeDefinition?: string | null;
 }
@@ -108,6 +126,7 @@ export module DynamicTypeMessage {
     export const DynamicType0SucessfullySavedGoToDynamicPanelNow = new MessageKey("DynamicTypeMessage", "DynamicType0SucessfullySavedGoToDynamicPanelNow");
     export const ServerRestartedWithErrorsInDynamicCodeFixErrorsAndRestartAgain = new MessageKey("DynamicTypeMessage", "ServerRestartedWithErrorsInDynamicCodeFixErrorsAndRestartAgain");
     export const RemoveSaveOperation = new MessageKey("DynamicTypeMessage", "RemoveSaveOperation");
+    export const TheEntityShouldBeSynchronizedToApplyMixins = new MessageKey("DynamicTypeMessage", "TheEntityShouldBeSynchronizedToApplyMixins");
 }
 
 export module DynamicTypeOperation {

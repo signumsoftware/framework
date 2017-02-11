@@ -22,7 +22,7 @@ import * as Lines from '../../../Framework/Signum.React/Scripts/Lines'
 import * as FileLineModule from '../Files/FileLine'
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import { DynamicViewEntity, DynamicViewSelectorEntity, DynamicViewOverrideEntity, DynamicViewMessage, DynamicViewOperation } from './Signum.Entities.Dynamic'
-import DynamicViewEntityComponent from './View/DynamicViewEntity' //Just Typing
+import DynamicViewEntityComponent from './View/DynamicView' //Just Typing
 import * as DynamicClient from './DynamicClient'
 
 import * as DynamicViewComponent from './View/DynamicViewComponent'
@@ -33,7 +33,7 @@ import * as Nodes from './View/Nodes' //Typings-only
 
 export function start(options: { routes: JSX.Element[] }) {
     
-    Navigator.addSettings(new EntitySettings(DynamicViewEntity, w => new ViewPromise(resolve => require(['./View/DynamicViewEntity'], resolve))));
+    Navigator.addSettings(new EntitySettings(DynamicViewEntity, w => new ViewPromise(resolve => require(['./View/DynamicView'], resolve))));
     Navigator.addSettings(new EntitySettings(DynamicViewSelectorEntity, w => new ViewPromise(resolve => require(['./View/DynamicViewSelector'], resolve))));
     Navigator.addSettings(new EntitySettings(DynamicViewOverrideEntity, w => new ViewPromise(resolve => require(['./View/DynamicViewOverride'], resolve))));
 
@@ -81,9 +81,9 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
         }));
     }
 
-    dynamicViewComponent(promiseDv: DynamicViewEntity): ViewPromise<ModifiableEntity> {
+    dynamicViewComponent(dynamicView: DynamicViewEntity): ViewPromise<ModifiableEntity> {
         return new ViewPromise(resolve => require(['./View/DynamicViewComponent'], resolve))
-            .withProps({ initialDynamicView: promiseDv });
+            .withProps({ initialDynamicView: dynamicView });
     }
 
     fallback(entity: ModifiableEntity): ViewPromise<ModifiableEntity> {
@@ -314,11 +314,10 @@ export function asOverrideFunction(dvr: DynamicViewOverrideEntity): (e: ViewRepl
 
 export function createDefaultDynamicView(typeName: string): Promise<DynamicViewEntity> {
     return loadNodes().then(nodes =>
-        Navigator.API.getType(typeName).then(t => DynamicViewEntity.New(dv => {
-            dv.entityType = t;
-            dv.viewName = "My View";
-            const node = nodes.NodeConstructor.createDefaultNode(getTypeInfo(typeName));
-            dv.viewContent = JSON.stringify(node);
+        Navigator.API.getType(typeName).then(t => DynamicViewEntity.New({
+            entityType : t,
+            viewName : "My View",
+            viewContent: JSON.stringify(nodes.NodeConstructor.createDefaultNode(getTypeInfo(typeName))),
         })));
 }
 

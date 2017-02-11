@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.2\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.2\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
+  <Import Project="..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props" Condition="Exists('..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props')" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -56,8 +56,8 @@
       <HintPath>..\..\packages\DocumentFormat.OpenXml.2.5\lib\DocumentFormat.OpenXml.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.2\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
+    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.SqlServer.Types, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
@@ -164,6 +164,8 @@
     <Compile Include="Files\FilesController.cs" />
     <Compile Include="Files\FilesServer.cs" />
     <Compile Include="Isolation\IsolationServer.cs" />
+    <Compile Include="Printing\PrintController.cs" />
+    <Compile Include="Printing\PrintServer.cs" />
     <Compile Include="RestLog\RestLogFilter.cs" />
     <Compile Include="Mailing\MailingController.cs" />
     <Compile Include="Mailing\MailingServer.cs" />
@@ -171,6 +173,9 @@
     <Compile Include="Toolbar\WordServer.cs" />
     <Compile Include="Workflow\WorkflowServer.cs" />
     <Compile Include="Workflow\WorkflowController.cs" />
+    <TypeScriptCompile Include="Alerts\AlertsClient.tsx" />
+    <TypeScriptCompile Include="Alerts\Templates\AlertType.tsx" />
+    <TypeScriptCompile Include="Alerts\Templates\Alert.tsx" />
     <TypeScriptCompile Include="Chart\UserChartToolbarConfig.ts" />
     <TypeScriptCompile Include="Dashboard\DashboardToolbarConfig.ts" />
     <TypeScriptCompile Include="Dynamic\DynamicClient.tsx" />
@@ -178,13 +183,14 @@
     <TypeScriptCompile Include="Dynamic\DynamicExpressionClient.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicTypeConditionClient.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicViewClient.tsx" />
-    <TypeScriptCompile Include="Dynamic\Expression\DynamicExpressionEntity.tsx" />
+    <TypeScriptCompile Include="Dynamic\Expression\DynamicExpression.tsx" />
     <TypeScriptCompile Include="Dynamic\Signum.Entities.Dynamic.ts">
       <DependentUpon>Signum.Entities.Dynamic.t4s</DependentUpon>
     </TypeScriptCompile>
     <TypeScriptCompile Include="Dynamic\Help\TypeHelpComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\TypeCondition\DynamicTypeCondition.tsx" />
     <TypeScriptCompile Include="Dynamic\Type\DynamicSqlMigration.tsx" />
+    <TypeScriptCompile Include="Dynamic\Type\DynamicMixinConnection.tsx" />
     <TypeScriptCompile Include="Dynamic\Type\DynamicTypeDefinitionComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicPanelPage.tsx" />
     <TypeScriptCompile Include="Codemirror\SqlCodeMirror.tsx" />
@@ -212,7 +218,8 @@
     <TypeScriptCompile Include="Dynamic\View\NodeSelectorModal.tsx" />
     <TypeScriptCompile Include="Files\FileUploader.tsx" />
     <TypeScriptCompile Include="Files\FileDownloader.tsx" />
-    <TypeScriptCompile Include="Dynamic\View\DynamicViewEntity.tsx" />
+    <TypeScriptCompile Include="Dynamic\View\DynamicView.tsx" />
+    <TypeScriptCompile Include="HtmlEditor\HtmlEditor.tsx" />
     <TypeScriptCompile Include="Mailing\Templates\IFrameRenderer.tsx" />
     <Compile Include="Map\MapServer.cs" />
     <Compile Include="Map\MapController.cs" />
@@ -238,6 +245,17 @@
     <Compile Include="UserQueries\UserQueryServer.cs" />
     <Compile Include="Word\WordServer.cs" />
     <Compile Include="Word\WordController.cs" />
+    <TypeScriptCompile Include="Notes\NotesClient.tsx" />
+    <TypeScriptCompile Include="Notes\Templates\NoteType.tsx" />
+    <TypeScriptCompile Include="Notes\Templates\Note.tsx" />
+    <TypeScriptCompile Include="Printing\PrintClient.tsx" />
+    <TypeScriptCompile Include="Printing\PrintPanelPage.tsx" />
+    <TypeScriptCompile Include="Printing\Signum.Entities.Printing.ts">
+      <DependentUpon>Signum.Entities.Printing.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Printing\Templates\PrintPackage.tsx" />
+    <TypeScriptCompile Include="Printing\Templates\PrintLine.tsx" />
+    <TypeScriptCompile Include="HtmlEditor\react-rte.d.ts" />
     <TypeScriptCompile Include="Toolbar\QueryToolbarConfig.ts" />
     <TypeScriptCompile Include="Toolbar\Signum.Entities.Toolbar.ts">
       <DependentUpon>Signum.Entities.Toolbar.t4s</DependentUpon>
@@ -251,19 +269,28 @@
     <TypeScriptCompile Include="Word\Templates\WordTemplate.tsx" />
     <TypeScriptCompile Include="Word\WordClient.tsx" />
     <TypeScriptCompile Include="Workflow\bpmn-js.d.ts" />
+    <TypeScriptCompile Include="Workflow\Case\CaseButtonBar.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\ActivityWithRemarks.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\CaseFromSenderInfo.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\CaseEntityLink.tsx" />
     <TypeScriptCompile Include="Workflow\Signum.Entities.Workflow.ts">
       <DependentUpon>Signum.Entities.Workflow.t4s</DependentUpon>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="Workflow\Templates\BpmnModelerComponent.tsx" />
-    <TypeScriptCompile Include="Workflow\Templates\BpmnViewerComponent.tsx" />
-    <TypeScriptCompile Include="Workflow\Templates\CaseModalFrame.tsx" />
-    <TypeScriptCompile Include="Workflow\Templates\CasePageFrame.tsx" />
-    <TypeScriptCompile Include="Workflow\Templates\InboxFilter.tsx" />
-    <TypeScriptCompile Include="Workflow\Templates\Workflow.tsx" />
-    <TypeScriptCompile Include="Workflow\Templates\WorkflowActivityModel.tsx" />
-    <TypeScriptCompile Include="Workflow\Templates\WorkflowConditionEntity.tsx" />
-    <TypeScriptCompile Include="Workflow\Templates\WorkflowDropdown.tsx" />
-    <TypeScriptCompile Include="Workflow\Templates\WorkflowReplacementComponent.tsx" />
+    <TypeScriptCompile Include="Workflow\Bpmn\BpmnModelerComponent.tsx" />
+    <TypeScriptCompile Include="Workflow\Bpmn\BpmnViewerComponent.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\CaseModalFrame.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\CasePageFrame.tsx" />
+    <TypeScriptCompile Include="Workflow\Bpmn\CustomRenderer.ts" />
+    <TypeScriptCompile Include="Workflow\Bpmn\ConnectionIcons.ts" />
+    <TypeScriptCompile Include="Workflow\Case\InboxFilter.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\Workflow.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowConnectionModel.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowActivityModel.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowAction.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowLaneModel.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowCondition.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowDropdown.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowReplacementComponent.tsx" />
     <TypeScriptCompile Include="Workflow\WorkflowClient.tsx" />
   </ItemGroup>
   <ItemGroup>
@@ -281,10 +308,12 @@
     <Content Include="Map\Operation\operationMap.css" />
     <Content Include="Map\Schema\schemaMap.css" />
     <Content Include="packages.config" />
-    <Content Include="Workflow\Templates\InitialWorkflow.xml">
+    <Content Include="Workflow\Case\Inbox.css" />
+    <Content Include="Workflow\Workflow\InitialWorkflow.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Workflow\Templates\Workflow.css" />
+    <Content Include="Workflow\Case\Case.css" />
+    <Content Include="Workflow\Bpmn\Bpmn.css" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Processes\Processes.css" />
@@ -589,6 +618,7 @@
     <Content Include="Workflow\Signum.Entities.Workflow.t4s" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Printing\Signum.Entities.Printing.t4s" />
     <Content Include="Toolbar\Signum.Entities.Toolbar.t4s" />
   </ItemGroup>
   <PropertyGroup>
@@ -644,7 +674,7 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props'))" />
-    <Error Condition="!Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.2\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.2\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
   </Target>
   <UsingTask TaskName="SignumTSGenerator" AssemblyFile="..\..\Framework\Signum.TSGenerator\Binaries\Signum.TSGenerator.dll" />
   <Target Name="GenerateSignumTS">

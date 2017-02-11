@@ -8,7 +8,7 @@ import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import {
     getQueryNiceName, TypeInfo, MemberInfo, getTypeInfo, EntityData, EntityKind, getTypeInfos, Binding, EnumType,
-    KindOfType, PropertyRoute, PropertyRouteType, LambdaMemberType, isTypeEntity, isTypeModel, isModifiableEntity
+    KindOfType, PropertyRoute, PropertyRouteType, LambdaMemberType, isTypeEntity, isTypeModel, isTypeModifiableEntity
 } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, StyleOptions, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -24,6 +24,7 @@ import { toHtmlAttributes, HtmlAttributesExpression, withClassName } from './Htm
 import { toStyleOptions, StyleOptionsExpression, subCtx } from './StyleOptionsExpression'
 import { HtmlAttributesLine } from './HtmlAttributesComponent'
 import { StyleOptionsLine } from './StyleOptionsComponent'
+import TypeHelpComponent from '../Help/TypeHelpComponent'
 
 export type ExpressionOrValue<T> = T | Expression<T>;
 
@@ -77,7 +78,7 @@ export class CodeContext {
         if (!field && !options)
             return { __code__: "ctx" };
 
-        var propStr = field && "e => e." + field.split(".").map(m => m.firstLower()).join(".");
+        var propStr = field && "e => " + TypeHelpComponent.getExpression("e", field, "Typescript", { stronglyTypedMixinTS: true });
         var optionsStr = options && this.stringifyObject(options);
 
         return { __code__: this.ctxName + ".subCtx(" + (propStr || "") + (propStr && optionsStr ? ", " : "") + (optionsStr ||"") + ")" };
@@ -372,9 +373,9 @@ export function asFunction(expression: Expression<any>, getFieldName: () => stri
 }
 
 export function asFieldFunction(field: string): (e: ModifiableEntity) => any {
-    const fixedRoute = field.split(".").map(m => m.firstLower()).join(".");
+    const fixedRoute = TypeHelpComponent.getExpression("e", field, "Typescript");
 
-    const code = "(function(e){ return e." + fixedRoute + ";})";
+    const code = "(function(e){ return " + fixedRoute + ";})";
 
     try {
         return eval(code);
@@ -537,11 +538,11 @@ export function validateField(dn: DesignerNode<LineBaseNode>) {
 
     const options = registeredNodes[dn.node.kind]
 
-    const entity = isModifiableEntity(m.type);
+    const isEntity = isTypeModifiableEntity(m.type);
 
     const DVVM = DynamicViewValidationMessage;
 
-    if ((entity || false) != (options.hasEntity || false) ||
+    if ((isEntity || false) != (options.hasEntity || false) ||
         (m.type.isCollection || false) != (options.hasCollection || false))
         return DVVM._0RequiresA1.niceToString(dn.node.kind,
             (options.hasEntity ?

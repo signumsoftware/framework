@@ -15,15 +15,13 @@ namespace Signum.Entities.Workflow
         [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string Name { get; set; }
-
-        [NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
-        public int Thread { get; set; }
-
+        
         [NotNullable]
         [NotNullValidator]
         public WorkflowLaneEntity Lane { get; set; }
 
         public WorkflowEventType Type { get; set; }
+
 
         [NotNullable]
         [NotNullValidator]

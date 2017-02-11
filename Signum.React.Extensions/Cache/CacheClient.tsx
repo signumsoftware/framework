@@ -47,10 +47,11 @@ export module API {
 
 export interface CacheState {
     isEnabled: boolean;
-    tables: CacheTable[];
+    tables: CacheTableStats[];
+    lazies: ResetLazyStats[];
 }
 
-export interface CacheTable {
+export interface CacheTableStats {
     tableName: string;
     typeName: string;
     count: number;
@@ -58,7 +59,15 @@ export interface CacheTable {
     invalidations: number;
     loads: number;
     sumLoadTime: string;
-    subTables: CacheTable[];
+    subTables: CacheTableStats[];
+}
+
+export interface ResetLazyStats {
+    typeName: string;
+    hits: number;
+    invalidations: number;
+    loads: number;
+    sumLoadTime: string;
 }
 
 

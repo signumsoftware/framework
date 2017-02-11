@@ -27,11 +27,11 @@ export default class AsyncEmailSenderPage extends React.Component<AsyncEmailSend
             .then(s => this.setState(s));
     }
 
-    handleStop = (e: React.MouseEvent) => {
+    handleStop = (e: React.MouseEvent<any>) => {
         API.stop().then(() => this.loadState()).done();
     }
 
-    handleStart = (e: React.MouseEvent) => {
+    handleStart = (e: React.MouseEvent<any>) => {
         API.start().then(() => this.loadState()).done();
     }
 

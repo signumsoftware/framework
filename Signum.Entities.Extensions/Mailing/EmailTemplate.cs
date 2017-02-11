@@ -55,14 +55,14 @@ namespace Signum.Entities.Mailing
         public MList<EmailTemplateRecipientEntity> Recipients { get; set; } = new MList<EmailTemplateRecipientEntity>();
 
         [NotNullable, PreserveOrder]
-        [NotNullValidator, NoRepeatValidator, ImplementedBy()]
+        [NotNullValidator, NoRepeatValidator, ImplementedBy(), NotifyChildProperty]
         public MList<IAttachmentGeneratorEntity> Attachments { get; set; } = new MList<IAttachmentGeneratorEntity>();
 
         public Lite<EmailMasterTemplateEntity> MasterTemplate { get; set; }
 
         public bool IsBodyHtml { get; set; } = true;
 
-        [NotifyCollectionChanged]
+        [NotifyCollectionChanged, NotifyChildProperty]
         public MList<EmailTemplateMessageEntity> Messages { get; set; } = new MList<EmailTemplateMessageEntity>();
 
         public bool Active { get; set; }
@@ -79,39 +79,6 @@ namespace Signum.Entities.Mailing
         public bool IsActiveNow()
         {
             return IsActiveNowExpression.Evaluate(this);
-        }
-
-        protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
-        {
-            if (sender == Messages)
-            {
-                if (args.OldItems != null)
-                    foreach (var item in args.OldItems.Cast<EmailTemplateMessageEntity>())
-                        item.Template = null;
-
-                if (args.NewItems != null)
-                    foreach (var item in args.NewItems.Cast<EmailTemplateMessageEntity>())
-                        item.Template = this;
-            }
-
-            if (sender == Attachments)
-            {
-                if (args.OldItems != null)
-                    foreach (var item in args.OldItems.Cast<IAttachmentGeneratorEntity>())
-                        item.Template = null;
-
-                if (args.NewItems != null)
-                    foreach (var item in args.NewItems.Cast<IAttachmentGeneratorEntity>())
-                        item.Template = this;
-            }
-        }
-
-        protected override void PreSaving(ref bool graphModified)
-        {
-            base.PreSaving(ref graphModified);
-
-            Attachments.ForEach(e => e.Template = this);
-            Messages.ForEach(e => e.Template = this);
         }
 
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
@@ -205,15 +172,6 @@ namespace Signum.Entities.Mailing
             this.CultureInfo = culture;
         }
 
-        [Ignore]
-        internal EmailTemplateEntity template;
-        [InTypeScript(false)]
-        public EmailTemplateEntity Template
-        {
-            get { return template; }
-            set { template = value; }
-        }
-
         [NotNullable]
         [NotNullValidator]
         public CultureInfoEntity CultureInfo { get; set; }
@@ -258,7 +216,6 @@ namespace Signum.Entities.Mailing
 
     public interface IAttachmentGeneratorEntity : IEntity
     {
-        EmailTemplateEntity Template { get; set; }
     }
 
     [AutoInit]

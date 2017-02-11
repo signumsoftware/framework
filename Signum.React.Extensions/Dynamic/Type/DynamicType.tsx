@@ -6,9 +6,10 @@ import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constru
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { DynamicTypeEntity, DynamicTypeMessage, DynamicSqlMigrationMessage, DynamicPanelPermission } from '../Signum.Entities.Dynamic'
+import { IHasChanges } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { ValueLine, EntityLine, TypeContext } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ModifiableEntity, Entity, Lite, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { getTypeInfo, Binding, PropertyRoute, symbolNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { getTypeInfo, Binding, PropertyRoute, symbolNiceName, GraphExplorer } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal'
 import * as DynamicTypeClient from '../DynamicTypeClient'
 import { DynamicTypeDefinitionComponent, PropertyRepeaterComponent } from './DynamicTypeDefinitionComponent'
@@ -22,7 +23,7 @@ interface DynamicTypeComponentState {
     showDatabaseMapping?: boolean;
 }
 
-export default class DynamicTypeComponent extends React.Component<DynamicTypeComponentProps, DynamicTypeComponentState> {
+export default class DynamicTypeComponent extends React.Component<DynamicTypeComponentProps, DynamicTypeComponentState> implements IHasChanges {
 
     constructor(props: DynamicTypeComponentProps) {
         super(props);
@@ -41,12 +42,22 @@ export default class DynamicTypeComponent extends React.Component<DynamicTypeCom
         ctx.value.modified = true;
     }
 
+    componentHasChanges() {
+        const entity = this.props.ctx.value;
+
+        GraphExplorer.propagateAll(entity);
+
+        var clone = JSON.parse(JSON.stringify(this.state.typeDefinition)) as DynamicTypeClient.DynamicTypeDefinition;
+        clone.properties.forEach(a => delete a._propertyType_);
+        return entity.modified || entity.typeDefinition != JSON.stringify(clone);
+    }
+
     parseDefinition() {
 
         const ctx = this.props.ctx;
 
         const def = !ctx.value.typeDefinition ?
-            { baseType: "Entity", entityData: "Transactional", entityKind: "Main", properties: [], queryFields: ["e.Id"], registerSave: true, registerDelete: true } as DynamicTypeClient.DynamicTypeDefinition :
+            { entityData: "Transactional", entityKind: "Main", properties: [], queryFields: ["e.Id"], registerSave: true, registerDelete: true } as DynamicTypeClient.DynamicTypeDefinition :
             JSON.parse(ctx.value.typeDefinition) as DynamicTypeClient.DynamicTypeDefinition;
 
         this.setState({
@@ -63,7 +74,8 @@ export default class DynamicTypeComponent extends React.Component<DynamicTypeCom
             <div>
                 <div className="row">
                     <div className="col-sm-8">
-                        <ValueLine ctx={ctx.subCtx(dt => dt.typeName)} labelColumns={3} onChange={() => this.forceUpdate()} unitText="Entity" />
+                        {ctx.value.isNew && <ValueLine ctx={ctx.subCtx(dt => dt.baseType)} labelColumns={3} onChange={() => this.forceUpdate()} />}
+                        <ValueLine ctx={ctx.subCtx(dt => dt.typeName)} labelColumns={3} onChange={() => this.forceUpdate()} unitText={ctx.value.baseType} />
                     </div>
                     <div className="col-sm-4">
                         <button className={classes("btn btn-xs btn-success pull-right", this.state.showDatabaseMapping && "active")}
@@ -73,7 +85,8 @@ export default class DynamicTypeComponent extends React.Component<DynamicTypeCom
                     </div>
                 </div>
                 {this.state.typeDefinition &&
-                    <DynamicTypeDefinitionComponent dc={dc}
+                    <DynamicTypeDefinitionComponent
+                        dc={dc}
                         dynamicType={ctx.value}
                         definition={this.state.typeDefinition}
                         showDatabaseMapping={this.state.showDatabaseMapping!}

@@ -5,6 +5,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
+using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
@@ -21,74 +22,33 @@ namespace Signum.Engine.Dynamic
 {
     public static class DynamicLogic
     {
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, string codeGenDirectory)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 PermissionAuthLogic.RegisterTypes(typeof(DynamicPanelPermission));
                 DynamicLogic.GetCodeFiles += GetCodeGenStarter;
                 AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(AssemblyResolveHandler);
+
+                DynamicCode.CodeGenEntitiesNamespace = "Signum.Entities.CodeGen";
+                DynamicCode.CodeGenDirectory = codeGenDirectory;
+                DynamicCode.CodeGenAssembly = "DynamicAssembly.dll";
             }
         }
 
         private static Assembly AssemblyResolveHandler(object sender, ResolveEventArgs args)
         {
-            if (args.Name.StartsWith(DynamicLogic.CodeGenAssembly.Before(".")))
-                return Assembly.LoadFrom(DynamicLogic.CodeGenAssemblyPath);
+            if (args.Name.StartsWith(DynamicCode.CodeGenAssembly.Before(".")))
+                return Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath);
 
             return null;
         }
-
-        public static void IncludeAllAssembliesAndNamespaces(SchemaBuilder sb)
-        {
-            var entitiesAndLogic = sb.Schema.Tables.Keys.Concat(sb.LoadedModules.Select(a => a.Item1));
-            Namespaces.AddRange(entitiesAndLogic.Select(a => a.Namespace).Distinct().OrderBy().ToList());
-
-            var assemblies = DirectedGraph<Assembly>.Generate(entitiesAndLogic.Select(a => a.Assembly).Distinct(), a => a.GetReferencedAssemblies().Select(ar => Assembly.Load(ar)));
-
-            var assemblyNames = assemblies.Distinct().Select(a => a.GetName().Name + ".dll").Where(a => File.Exists(Path.Combine(Eval.AssemblyDirectory, a))).ToList();
-
-            Assemblies.AddRange(assemblyNames);
-        }
-
-        public static HashSet<string> Namespaces = new HashSet<string>
-        {
-            "System",
-            "System.Linq",
-            "System.Reflection",
-            "System.Collections.Generic",
-            "System.Linq.Expressions",
-            "Signum.Engine",
-            "Signum.Entities",
-            "Signum.Entities.Basics",
-            "Signum.Engine.DynamicQuery",
-            "Signum.Engine.Maps",
-            "Signum.Engine.Basics",
-            "Signum.Engine.Operations",
-            "Signum.Utilities",
-        };
-        public static HashSet<string> Assemblies = new HashSet<string>
-        {
-            "Signum.Engine.dll",
-            "Signum.Entities.dll",
-            "Signum.Utilities.dll",
-            "Signum.Entities.Extensions.dll",
-            "Signum.Engine.Extensions.dll"
-        };
-
-        public static string CodeGenEntitiesNamespace = "Signum.Entities.CodeGen";
-        public static string CodeGenDirectory = "CodeGen";
-        public static string CodeGenAssembly = "DynamicAssembly.dll";
-        public static string CodeGenAssemblyPath;
 
         public static Func<List<CodeFile>> GetCodeFiles = null;
         public static Action<StringBuilder, int> OnWriteDynamicStarter;
         public static Exception CodeGenError;
 
-
-
-
-        public static void StartCodeGenStarter(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void CompileDynamicCode()
         {
             try
             {
@@ -96,29 +56,84 @@ namespace Signum.Engine.Dynamic
 
                 var cr = Compile(codeFiles, inMemory: false);
 
-                if (cr == null)
-                    return;
-
                 if (cr.Errors.Count != 0)
                     throw new InvalidOperationException("Errors compiling  dynamic assembly:\r\n" + cr.Errors.Cast<CompilerError>().ToString("\r\n").Indent(4));
 
-                CodeGenAssemblyPath = cr.PathToAssembly;
+                DynamicCode.CodeGenAssemblyPath = cr.PathToAssembly;
+            }
+            catch (Exception e)
+            {
+                CodeGenError = e;
+            }
+        }
 
-                Assembly assembly = cr.CompiledAssembly;
+        public static void RegisterExceptionIfAny()
+        {
+            var e = CodeGenError;
+            if (e == null)
+                return;
+
+            if (Administrator.ExistsTable<ExceptionEntity>())
+                e.LogException();
+
+            Console.WriteLine();
+            SafeConsole.WriteLineColor(ConsoleColor.Red, "IMPORTANT!: Starting without Dynamic Entities.");
+            SafeConsole.WriteLineColor(ConsoleColor.Yellow, "   Error:" + e.Message);
+            SafeConsole.WriteLineColor(ConsoleColor.Red, "Synchronizing will try to DROP dynamic types. Clean the script manually!");
+            Console.WriteLine();
+        }
+
+        public static void RegisterMixins()
+        {
+            if (CodeGenError != null)
+                return;
+
+            try
+            {
+                Assembly assembly = Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath);
+                Type type = assembly.GetTypes().Where(a => a.Name == "CodeGenMixinLogic").SingleEx();
+                MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static);
+                mi.Invoke(null, null);
+            }
+            catch (Exception e)
+            {
+                CodeGenError = e.InnerException;
+            }
+        }
+
+        public static void BeforeSchema(SchemaBuilder sb)
+        {
+            if (CodeGenError != null)
+                return;
+
+            try
+            {
+                Assembly assembly = Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath);
+                Type type = assembly.GetTypes().Where(a => a.Name == "CodeGenBeforeSchemaLogic").SingleEx();
+                MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static);
+                mi.Invoke(null, new[] { sb });
+            }
+            catch (Exception e)
+            {
+                CodeGenError = e.InnerException;
+            }
+        }
+
+        public static void StartDynamicModules(SchemaBuilder sb, DynamicQueryManager dqm)
+        {
+            if (CodeGenError != null)
+                return;
+
+            try
+            {
+                Assembly assembly = Assembly.LoadFrom(DynamicCode.CodeGenAssemblyPath);
                 Type type = assembly.GetTypes().Where(a => a.Name == "CodeGenStarter").SingleEx();
                 MethodInfo mi = type.GetMethod("Start", BindingFlags.Public | BindingFlags.Static);
                 mi.Invoke(null, new object[] { sb, dqm });
             }
             catch (Exception e)
             {
-                e.LogException();
-                CodeGenError = e;
-
-                Console.WriteLine();
-                SafeConsole.WriteLineColor(ConsoleColor.Red, "IMPORTANT!: Starting without Dynamic Entities.");
-                SafeConsole.WriteLineColor(ConsoleColor.Yellow, "   Error:" + e.Message);
-                SafeConsole.WriteLineColor(ConsoleColor.Red, "Synchronizing will try to DROP dynamic types. Clean the script manually!");
-                Console.WriteLine();
+                CodeGenError = e.InnerException;
             }
         }
 
@@ -138,27 +153,22 @@ namespace Signum.Engine.Dynamic
                 parameters.ReferencedAssemblies.Add("System.dll");
                 parameters.ReferencedAssemblies.Add("System.Data.dll");
                 parameters.ReferencedAssemblies.Add("System.Core.dll");
-                foreach (var ass in Assemblies)
+                foreach (var ass in DynamicCode.Assemblies)
                 {
-                    parameters.ReferencedAssemblies.Add(Path.Combine(Eval.AssemblyDirectory, ass));
+                    parameters.ReferencedAssemblies.Add(Path.Combine(DynamicCode.AssemblyDirectory, ass));
                 }
 
                 if (inMemory)
                     parameters.GenerateInMemory = true;
                 else
-                    parameters.OutputAssembly = Path.Combine(CodeGenDirectory, CodeGenAssembly);
+                    parameters.OutputAssembly = Path.Combine(DynamicCode.CodeGenDirectory, DynamicCode.CodeGenAssembly);
 
-              
+                Directory.CreateDirectory(DynamicCode.CodeGenDirectory);
+                Directory.EnumerateFiles(DynamicCode.CodeGenDirectory).Where(a => !inMemory || a != DynamicCode.CodeGenAssemblyPath).ToList().ForEach(a => File.Delete(a));
 
-                if (codeFiles.Count == 0)
-                    return null;
+                codeFiles.Values.ToList().ForEach(a => File.WriteAllText(Path.Combine(DynamicCode.CodeGenDirectory, a.FileName), a.FileContent));
 
-                Directory.CreateDirectory(CodeGenDirectory);
-                Directory.EnumerateFiles(CodeGenDirectory).Where(a => !inMemory || a != DynamicLogic.CodeGenAssemblyPath).ToList().ForEach(a => File.Delete(a));
-
-                codeFiles.Values.ToList().ForEach(a => File.WriteAllText(Path.Combine(CodeGenDirectory, a.FileName), a.FileContent));
-
-                CompilerResults compiled = supplier.CompileAssemblyFromFile(parameters, codeFiles.Values.Select(a => Path.Combine(CodeGenDirectory, a.FileName)).ToArray());
+                CompilerResults compiled = supplier.CompileAssemblyFromFile(parameters, codeFiles.Values.Select(a => Path.Combine(DynamicCode.CodeGenDirectory, a.FileName)).ToArray());
 
                 return compiled;
             }
@@ -166,10 +176,7 @@ namespace Signum.Engine.Dynamic
 
         private static List<CodeFile> GetCodeGenStarter()
         {
-            if (!Administrator.ExistTable<DynamicTypeEntity>())
-                return new List<CodeFile>();
-
-            var dscg = new DynamicStarterCodeGenerator(DynamicLogic.CodeGenEntitiesNamespace, Namespaces);
+            var dscg = new DynamicStarterCodeGenerator(DynamicCode.CodeGenEntitiesNamespace, DynamicCode.Namespaces);
 
             var code = dscg.GetFileCode();
 

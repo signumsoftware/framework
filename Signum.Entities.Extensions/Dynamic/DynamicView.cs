@@ -77,7 +77,7 @@ namespace Signum.Entities.Dynamic
         [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
         public string Script { get; set; }
 
-        static Expression<Func<DynamicViewOverrideEntity, string>> ToStringExpression = @this => "StaticViewOverride " + @this.EntityType;
+        static Expression<Func<DynamicViewOverrideEntity, string>> ToStringExpression = @this => "DynamicViewOverride " + @this.EntityType;
         [ExpressionField]
         public override string ToString()
         {

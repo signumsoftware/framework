@@ -103,12 +103,12 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
             .done();
     }
 
-    handleOnFullScreen = (e: React.MouseEvent) => {
+    handleOnFullScreen = (e: React.MouseEvent<any>) => {
         e.preventDefault();
         Navigator.currentHistory.push(ChartClient.Encoder.chartRequestPath(this.props.chartRequest!));
     }
 
-    handleEditScript = (e: React.MouseEvent) => {
+    handleEditScript = (e: React.MouseEvent<any>) => {
         window.open(Navigator.navigateRoute(this.props.chartRequest!.chartScript));
     }
 
