@@ -51,7 +51,6 @@ export module CaseActivityMessage {
     export const NextActivityOfDecompositionSurrogateAlreadyInProgress = new MessageKey("CaseActivityMessage", "NextActivityOfDecompositionSurrogateAlreadyInProgress");
     export const Only0CanUndoThisOperation = new MessageKey("CaseActivityMessage", "Only0CanUndoThisOperation");
     export const Activity0HasNoJumps = new MessageKey("CaseActivityMessage", "Activity0HasNoJumps");
-    export const RejectToDecompositionActivityIsNotAllowed = new MessageKey("CaseActivityMessage", "RejectToDecompositionActivityIsNotAllowed");
     export const RejectOperationIsNotAllowed = new MessageKey("CaseActivityMessage", "RejectOperationIsNotAllowed");
     export const ThereIsNoPreviousForRejectOperation = new MessageKey("CaseActivityMessage", "ThereIsNoPreviousForRejectOperation");
 }

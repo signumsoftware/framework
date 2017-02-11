@@ -168,7 +168,7 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Entit
         }).done();
 }
 
-export function executeWorkflowJumpContextual(coc: Operations.ContextualOperationContext<CaseActivityEntity>, event: React.MouseEvent) {
+export function executeWorkflowJumpContextual(coc: Operations.ContextualOperationContext<CaseActivityEntity>, event: React.MouseEvent<HTMLButtonElement>) {
 
     Navigator.API.fetchAndForget(coc.context.lites[0])
         .then(ca => {
