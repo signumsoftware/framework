@@ -33,7 +33,7 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
             .then(s => this.setState({times: s}));
     }
     
-    handleClear = (e: React.MouseEvent) => {
+    handleClear = (e: React.MouseEvent<any>) => {
         API.Times.clear().then(() => this.loadState()).done();
     }
 

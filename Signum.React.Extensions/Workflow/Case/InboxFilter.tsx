@@ -67,7 +67,7 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
             var yearUnit = isPersian ? "jYear" : "year";
             var now: Date = moment(Date.now()).toDate();
 
-            startOfYear = moment(now).startOf(yearUnit).toDate();
+            startOfYear = moment(now).startOf(yearUnit as any).toDate();
             switch (val.range) {
                 case "All":
                     break;

@@ -7,7 +7,7 @@ import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity,
 export default class ChartTable extends React.Component<{ resultTable: ResultTable, chartRequest: ChartRequest, onRedraw: () => void }, void> {
 
 
-    handleHeaderClick = (e: React.MouseEvent) => {
+    handleHeaderClick = (e: React.MouseEvent<any>) => {
 
         const tokenStr = (e.currentTarget as HTMLElement).getAttribute("data-column-name");
 

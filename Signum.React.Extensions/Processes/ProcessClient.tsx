@@ -57,7 +57,7 @@ function monkeyPatchCreateContextualMenuItem(){
 
     const base = ContextualOperations.MenuItemConstructor.createContextualMenuItem;
 
-    ContextualOperations.MenuItemConstructor.createContextualMenuItem = (coc: Operations.ContextualOperationContext<Entity>, defaultClick: (coc: Operations.ContextualOperationContext<Entity>, event: React.MouseEvent) => void, key: any) => {
+    ContextualOperations.MenuItemConstructor.createContextualMenuItem = (coc: Operations.ContextualOperationContext<Entity>, defaultClick: (coc: Operations.ContextualOperationContext<Entity>, event: React.MouseEvent<any>) => void, key: any) => {
         
         if(!Navigator.isViewable(PackageOperationEntity) )
             return base(coc, defaultClick, key);
@@ -89,8 +89,8 @@ function monkeyPatchCreateContextualMenuItem(){
         const disabled = !!coc.canExecute;
 
         const onClick = coc.settings && coc.settings.onClick ?
-            (me: React.MouseEvent) => coc.settings.onClick!(coc, me) :
-            (me: React.MouseEvent) => defaultClick(coc, me);
+            (me: React.MouseEvent<any>) => coc.settings.onClick!(coc, me) :
+            (me: React.MouseEvent<any>) => defaultClick(coc, me);
 
         const menuItem = <MenuItem
             className={disabled ? "disabled" : undefined}
@@ -113,7 +113,7 @@ function monkeyPatchCreateContextualMenuItem(){
     };
 }
 
-function defaultConstructFromMany(coc: Operations.ContextualOperationContext<Entity>, event: React.MouseEvent) {
+function defaultConstructFromMany(coc: Operations.ContextualOperationContext<Entity>, event: React.MouseEvent<any>) {
 
     event.preventDefault();
     event.stopPropagation();

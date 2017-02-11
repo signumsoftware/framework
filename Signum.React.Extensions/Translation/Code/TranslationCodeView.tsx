@@ -34,7 +34,7 @@ export default class TranslationCodeView extends React.Component<TranslationCode
 
     render() {
 
-        const {assembly, culture } = this.props.routeParams;
+        const {assembly, culture } = this.props.routeParams!;
 
         const message = TranslationMessage.View0In1.niceToString(assembly,
             culture == undefined ? TranslationMessage.AllLanguages.niceToString() :
@@ -53,7 +53,7 @@ export default class TranslationCodeView extends React.Component<TranslationCode
     }
 
     handleSearch = (filter: string) => {
-        const {assembly, culture} = this.props.routeParams;
+        const {assembly, culture} = this.props.routeParams!;
 
         return API.retrieve(assembly, culture || "", filter)
             .then(result => this.setState({ result: result }))
@@ -79,9 +79,9 @@ export default class TranslationCodeView extends React.Component<TranslationCode
         );
     }
 
-    handleSave = (e: React.FormEvent) => {
+    handleSave = (e: React.FormEvent<any>) => {
         e.preventDefault();
-        const params = this.props.routeParams;
+        const params = this.props.routeParams!;
         API.save(params.assembly, params.culture || "", this.state.result!).then(() => notifySuccess()).done();
     }
 }
@@ -90,12 +90,12 @@ export class TranslateSearchBox extends React.Component<{ search: (newValue: str
 {
     state = { filter: "" };
 
-    handleChange = (e: React.FormEvent) => {
+    handleChange = (e: React.FormEvent<any>) => {
         e.preventDefault();
         this.setState({ filter: (e.currentTarget as HTMLInputElement).value });
     }
 
-    handleSearch = (e: React.FormEvent) => {
+    handleSearch = (e: React.FormEvent<any>) => {
         e.preventDefault();
         this.props.search(this.state.filter);
     }
@@ -191,12 +191,12 @@ export class TranslationMember extends React.Component<{ type: LocalizableType, 
         );
     }
 
-    handleOnChange = (e: React.FormEvent) => {
+    handleOnChange = (e: React.FormEvent<any>) => {
         this.props.member.description = (e.currentTarget as HTMLSelectElement).value;
         this.forceUpdate();
     }
 
-    handleAvoidCombo = (e: React.FormEvent) => {
+    handleAvoidCombo = (e: React.FormEvent<any>) => {
         e.preventDefault();
         this.setState({ avoidCombo: true });
     }
@@ -248,7 +248,7 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
                 <th className="leftCell">{ loc.culture }</th>
                 <th className="smallCell monospaceCell">
                     {type.hasGender && (edit ?
-                        <select value={td.gender || ""} onChange={(e) => { td.gender = (e.currentTarget as HTMLSelectElement).value; this.forceUpdate(); }}>
+                        <select value={td.gender || ""} onChange={(e) => { td.gender = e.currentTarget.value; this.forceUpdate(); }}>
                             { initialElementIf(td.gender == undefined).concat(
                                 pronoms.map(a => <option key={a.Gender} value={a.Gender}>{a.Singular}</option>)) }
                         </select> :
@@ -267,7 +267,7 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
                 <th className="monospaceCell">
                     {
                         type.hasPluralDescription && (edit ?
-                            <textarea style={{ height: "24px", width: "90%" }} value={td.pluralDescription || ""} onChange={(e) => { td.pluralDescription = (e.currentTarget as HTMLSelectElement).value; this.forceUpdate(); } } /> :
+                            <textarea style={{ height: "24px", width: "90%" }} value={td.pluralDescription || ""} onChange={e => { td.pluralDescription = e.currentTarget.value; this.forceUpdate(); } } /> :
                             td.pluralDescription)
                     }
                 </th>
@@ -275,10 +275,10 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
         );
     }
 
-    handleOnChange = (e: React.FormEvent) => {
+    handleOnChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement>) => {
         const { loc } = this.props;
         const td = loc.typeDescription!;
-        td.description = (e.currentTarget as HTMLSelectElement).value;
+        td.description = e.currentTarget.value;
 
         API.pluralize(loc.culture, td.description).then(plural => {
             td.pluralDescription = plural;
@@ -293,7 +293,7 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
         this.forceUpdate();
     }
 
-    handleAvoidCombo = (e: React.FormEvent) => {
+    handleAvoidCombo = (e: React.FormEvent<any>) => {
         e.preventDefault();
         this.setState({ avoidCombo: true });
     }

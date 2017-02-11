@@ -2,6 +2,8 @@
 
 declare module 'react-rte' {
 
+    import * as React from "react"
+
     export type EditorFormat = "html" | "markdown";
     export interface EditorValue {
         toString(format: EditorFormat): string;
@@ -17,7 +19,7 @@ declare module 'react-rte' {
     }
 
 
-    export default class RichTextEditor extends __React.Component<RichTextEditorProps, {}>{
+    export default class RichTextEditor extends React.Component<RichTextEditorProps, {}>{
         static createEmptyValue(): EditorValue;
         static createValueFromString(markup: string, format: EditorFormat): EditorValue;
     }

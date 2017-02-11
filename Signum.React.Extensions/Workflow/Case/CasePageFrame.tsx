@@ -55,13 +55,14 @@ export default class CasePageFrame extends React.Component<CasePageFrameProps, C
 
     loadEntity(props: CasePageFrameProps): Promise<void> {
 
-        if (props.routeParams.caseActivityId) {
-            return WorkflowClient.API.fetchActivityForViewing(props.routeParams.caseActivityId)
+        const routeParams = props.routeParams!;
+        if (routeParams.caseActivityId) {
+            return WorkflowClient.API.fetchActivityForViewing(routeParams.caseActivityId!)
                 .then(pack => this.setState({ pack: pack  }));
 
-        } else if (props.routeParams.workflowId) {
+        } else if (routeParams.workflowId) {
             const ti = getTypeInfo(WorkflowEntity);
-            return WorkflowClient.createNewCase(parseId(ti, props.routeParams.workflowId))
+            return WorkflowClient.createNewCase(parseId(ti, routeParams.workflowId))
                 .then(pack => this.setState({ pack }));
 
         } else

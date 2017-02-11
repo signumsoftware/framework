@@ -1,8 +1,8 @@
 ﻿import d3 = require("d3")
 
 export interface Point {
-    x?: number;
-    y?: number;
+    x?: number; //Realy not nullable, but d3.d.ts
+    y?: number; //Realy not nullable, but d3.d.ts
 }
 
 
@@ -28,13 +28,13 @@ export function colorScaleSqr(max: number): d3.scale.Pow<string, string>{
 
 export function calculatePoint(rectangle: Rectangle, point: Point): Point {
 
-    const vector = { x: point.x - rectangle.x, y: point.y - rectangle.y };
+    const vector = { x: point.x! - rectangle.x!, y: point.y! - rectangle.y! };
 
     const v2 = { x: rectangle.width / 2, y: rectangle.height / 2 };
 
     const ratio = getRatio(vector, v2);
 
-    return { x: rectangle.x + vector.x * ratio, y: rectangle.y + vector.y * ratio };
+    return { x: rectangle.x! + vector.x * (ratio || 0), y: rectangle.y! + vector.y * (ratio || 0) };
 }
 
 
@@ -42,22 +42,22 @@ function getRatio(vOut: Point, vIn: Point) {
 
     const vOut2 = { x: vOut.x, y: vOut.y };
 
-    if (vOut2.x < 0)
-        vOut2.x = -vOut2.x;
+    if (vOut2.x! < 0)
+        vOut2.x = -vOut2.x!;
 
-    if (vOut2.y < 0)
-        vOut2.y = -vOut2.y;
+    if (vOut2.y! < 0)
+        vOut2.y = -vOut2.y!;
 
     if (vOut2.x == 0 && vOut2.y == 0)
         return undefined;
 
     if (vOut2.x == 0)
-        return vIn.y / vOut2.y;
+        return vIn.y! / vOut2.y!;
 
     if (vOut2.y == 0)
-        return vIn.x / vOut2.x;
+        return vIn.x! / vOut2.x!;
 
-    return Math.min(vIn.x / vOut2.x, vIn.y / vOut2.y);
+    return Math.min(vIn.x! / vOut2.x!, vIn.y! / vOut2.y!);
 }
 
 

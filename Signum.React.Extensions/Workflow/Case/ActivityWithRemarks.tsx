@@ -50,7 +50,7 @@ export default class ActivityWithRemarksComponent extends React.Component<Activi
         );
     }
 
-    handleClick = (e: React.MouseEvent) => {
+    handleClick = (e: React.MouseEvent<any>) => {
         e.preventDefault();
 
         ValueLineModal.show({

@@ -131,9 +131,9 @@ export default class WorkflowConditionComponent extends React.Component<Workflow
         );
     }
 
-    handleDecisionResultChange = (e: React.SyntheticEvent) => {
-        this.state.decisionResult = (e.currentTarget as HTMLSelectElement).value as DecisionResult;
-        this.handleEvaluate();
+    handleDecisionResultChange = (e: React.SyntheticEvent<HTMLSelectElement>) => {
+        this.setState({ decisionResult: e.currentTarget.value as DecisionResult }, () =>
+            this.handleEvaluate());
     }
 
     handleOnView = (exampleEntity: ICaseMainEntity) => {

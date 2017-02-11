@@ -25,12 +25,12 @@ export interface CssPropertiesExpression {
     [key: string]: ExpressionOrValue<any>;
 }
 
-export function toHtmlAttributes(parentCtx: TypeContext<ModifiableEntity>, hae: HtmlAttributesExpression | undefined): React.HTMLAttributes | undefined {
+export function toHtmlAttributes(parentCtx: TypeContext<ModifiableEntity>, hae: HtmlAttributesExpression | undefined): React.HTMLAttributes<any> | undefined {
 
     if (hae == undefined)
         return undefined;
 
-    var result: React.HTMLAttributes = {};
+    var result: React.HTMLAttributes<any> = {};
     Dic.getKeys(hae as any).filter(k => k != "style").forEach(key => (result as any)[toPascal(key)] = NodeUtils.evaluateUntyped(parentCtx, hae[key], () => key));
     if (hae.style)
         result.style = toCssProperties(parentCtx, hae.style);
@@ -38,7 +38,7 @@ export function toHtmlAttributes(parentCtx: TypeContext<ModifiableEntity>, hae: 
     return result;
 }
 
-export function withClassName(attrs: React.HTMLAttributes | undefined, className: string): React.HTMLAttributes {
+export function withClassName(attrs: React.HTMLAttributes<any> | undefined, className: string): React.HTMLAttributes<any> {
     if (attrs == undefined)
         return { className: className };
 

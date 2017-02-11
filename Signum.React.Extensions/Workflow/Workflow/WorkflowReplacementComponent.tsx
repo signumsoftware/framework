@@ -48,7 +48,7 @@ export default class WorkflowReplacementComponent extends React.Component<{ ctx:
 
 export class WorkflowReplacementItemCombo extends React.Component<{ ctx: TypeContext<string | null | undefined>, previewTasks: PreviewTask[] }, void> {
 
-    handleChange = (e: React.FormEvent) => {
+    handleChange = (e: React.FormEvent<any>) => {
         this.props.ctx.value = (e.currentTarget as HTMLSelectElement).value;
         this.forceUpdate();
     }

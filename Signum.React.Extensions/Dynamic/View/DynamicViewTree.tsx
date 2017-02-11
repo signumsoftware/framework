@@ -46,7 +46,7 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
         this.state = {};
     }
 
-    handleNodeTextContextMenu = (n: DesignerNode<BaseNode>, e: React.MouseEvent) => {
+    handleNodeTextContextMenu = (n: DesignerNode<BaseNode>, e: React.MouseEvent<any>) => {
         e.preventDefault();
         e.stopPropagation();
 
@@ -212,13 +212,13 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
             return <span onClick={this.handleIconClick} className="tree-icon fa fa-plus-square-o" />;
     }
 
-    handleDragStart = (e: React.DragEvent) => {
+    handleDragStart = (e: React.DragEvent<any>) => {
         e.dataTransfer.setData('text', "start"); //cannot be empty string
         e.dataTransfer.effectAllowed = "move";
         this.props.dynamicTreeView.setState({ draggedNode: this.props.node });
     }
 
-    handleDragOver = (e: React.DragEvent) => {
+    handleDragOver = (e: React.DragEvent<any>) => {
         e.preventDefault();
         const de = e.nativeEvent as DragEvent;
         const dn = this.props.node;
@@ -244,11 +244,11 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
         }
     }
 
-    handleDragEnd = (e: React.DragEvent) => {
+    handleDragEnd = (e: React.DragEvent<any>) => {
         this.props.dynamicTreeView.setState({ draggedNode: undefined, draggedOver: undefined });
     }
     
-    handleDrop = (e: React.DragEvent) => {
+    handleDrop = (e: React.DragEvent<any>) => {
         const dragged = this.props.dynamicTreeView.state.draggedNode!;
         const over = this.props.dynamicTreeView.state.draggedOver!;
 

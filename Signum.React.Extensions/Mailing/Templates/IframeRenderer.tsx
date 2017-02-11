@@ -8,7 +8,7 @@ import { getToString, Lite, is }  from '../../../../Framework/Signum.React/Scrip
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { SendEmailTaskEntity, EmailTemplateEntity } from '../Signum.Entities.Mailing'
 
-export interface IFrameRendererProps extends React.HTMLAttributes {
+export interface IFrameRendererProps extends React.HTMLAttributes<HTMLIFrameElement> {
     html: string | null | undefined;
 }
 

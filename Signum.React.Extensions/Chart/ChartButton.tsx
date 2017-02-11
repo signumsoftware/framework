@@ -18,7 +18,7 @@ export interface ChartButtonProps {
 
 export default class ChartButton extends React.Component<ChartButtonProps, void> {
 
-    handleClick = (e: React.MouseEvent) => {
+    handleClick = (e: React.MouseEvent<any>) => {
 
         const fo = this.props.searchControl.props.findOptions;
 

@@ -23,7 +23,7 @@ export interface FileDownloaderProps {
     entityOrLite: ModifiableEntity & IFile | Lite<IFile & Entity>;
     download?: DownloadBehaviour;
     configuration?: FileDownloaderConfiguration<IFile>;
-    htmlProps: React.HTMLAttributes;
+    htmlProps: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>
 }
 
 export default class FileDownloader extends React.Component<FileDownloaderProps, void> {
@@ -78,7 +78,7 @@ export default class FileDownloader extends React.Component<FileDownloaderProps,
 
 
 export interface FileDownloaderConfiguration<T extends IFile> {
-    downloadClick: (event: React.MouseEvent, file: T) => void;
+    downloadClick: (event: React.MouseEvent<any>, file: T) => void;
 }
 
 FileDownloader.configurtions[FileEntity.typeName] = {
@@ -102,7 +102,7 @@ FileDownloader.configurtions[EmbeddedFilePathEntity.typeName] = {
 } as FileDownloaderConfiguration<EmbeddedFilePathEntity>;
 
 
-function downloadUrl(e: React.MouseEvent, url: string) {
+function downloadUrl(e: React.MouseEvent<any>, url: string) {
     
     e.preventDefault();
     Services.ajaxGetRaw({ url: url })
@@ -110,7 +110,7 @@ function downloadUrl(e: React.MouseEvent, url: string) {
         .done();
 };
 
-function downloadBase64(e: React.MouseEvent, binaryFile: string, fileName: string) {
+function downloadBase64(e: React.MouseEvent<any>, binaryFile: string, fileName: string) {
     e.preventDefault();
 
     var blob = Services.b64toBlob(binaryFile);

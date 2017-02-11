@@ -41,12 +41,12 @@ export default class ValueComponent extends React.Component<ValueComponentProps,
         p.dc.refreshView();
     }
 
-    handleChangeCheckbox = (e: React.MouseEvent) => {
+    handleChangeCheckbox = (e: React.ChangeEvent<any>) => {
         var sender = (e.currentTarget as HTMLInputElement);
         this.updateValue(sender.checked);
     }
 
-    handleChangeSelectOrInput = (e: React.MouseEvent) => {
+    handleChangeSelectOrInput = (e: React.ChangeEvent<any>) => {
         var sender = (e.currentTarget as HTMLSelectElement | HTMLInputElement);
         this.updateValue(sender.value);
     }

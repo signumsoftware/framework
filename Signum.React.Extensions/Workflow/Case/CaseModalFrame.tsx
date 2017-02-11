@@ -37,11 +37,10 @@ interface ModalFrameState {
 var modalCount = 0;
 
 export default class ModalFrame extends React.Component<ModalFrameProps, ModalFrameState>  {
-
+    prefix = "caseModal" + (modalCount++)
     constructor(props: any) {
         super(props);
         this.state = this.calculateState(props);
-        this.state.prefix = "modal" + (modalCount++);
     }
 
     componentWillMount() {
@@ -194,7 +193,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             frame: mainFrame
         };
 
-        const ctx = new TypeContext<ICaseMainEntity>(undefined, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(mainEntity, ""));
+        const ctx = new TypeContext<ICaseMainEntity>(undefined, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(mainEntity, this.prefix));
 
         var mainPack = { entity: mainEntity, canExecute: pack.canExecuteMainEntity };
 
@@ -248,7 +247,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         );
     }
 
-    handlePopupFullScreen = (e: React.MouseEvent) => {
+    handlePopupFullScreen = (e: React.MouseEvent<any>) => {
 
         if (e.ctrlKey || e.buttons) {
 

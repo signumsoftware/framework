@@ -33,8 +33,8 @@ export interface PanelPartContentProps<T extends IPartEntity> {
 
 export interface PartRenderer<T extends IPartEntity>{
     component: () => Promise<React.ComponentClass<PanelPartContentProps<T>>>;
-    handleTitleClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent) => void;
-    handleFullScreenClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent) => void;
+    handleTitleClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent<any>) => void;
+    handleFullScreenClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent<any>) => void;
 }
 
 
@@ -130,7 +130,7 @@ export function dashboardUrl(lite: Lite<DashboardEntity>, entity?: Lite<Entity>)
     return "~/dashboard/" + lite.id + (!entity ? "" : "?entity=" + liteKey(entity)); 
 }
 
-function navigateOrWindowsOpen(e: React.MouseEvent, url: string){
+function navigateOrWindowsOpen(e: React.MouseEvent<any>, url: string){
     if (e.ctrlKey || e.button == 1) {
         window.open(url);
     } else {

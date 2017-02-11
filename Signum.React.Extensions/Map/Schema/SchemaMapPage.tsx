@@ -90,7 +90,7 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
     
         const result: ParsedQueryString = { tables: {} };
 
-        const query = this.props.location!.query as { [name: string]: string };
+        const query = this.props.location.query as { [name: string]: string };
         if (!query)
             return result;
 
@@ -146,19 +146,19 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
         );
     }
 
-    handleSetFilter = (e: React.FormEvent) => {
+    handleSetFilter = (e: React.FormEvent<any>) => {
         this.setState({
             filter: (e.currentTarget as HTMLInputElement).value
         });
     }
 
-    handleSetColor = (e: React.FormEvent) => {
+    handleSetColor = (e: React.FormEvent<any>) => {
         this.setState({
             color: (e.currentTarget as HTMLInputElement).value
         });
     }
 
-    handleFullscreenClick = (e: React.MouseEvent) => {
+    handleFullscreenClick = (e: React.MouseEvent<any>) => {
 
         e.preventDefault();
 
@@ -166,8 +166,8 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
         const tables = s.schemaMapInfo!.allNodes.filter(a => a.fixed)
             .toObject(a => a.tableName, a =>
-                (a.x / s.width).toPrecision(4) + "," +
-                (a.y / s.height).toPrecision(4));
+                (a.x! / s.width!).toPrecision(4) + "," +
+                (a.y! / s.height!).toPrecision(4));
 
         const query = {
             ...tables, filter: s.filter, color: s.color

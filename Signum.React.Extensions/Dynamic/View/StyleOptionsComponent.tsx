@@ -47,7 +47,7 @@ export class StyleOptionsLine extends React.Component<StyleOptionsLineProps, voi
         this.modifyExpression({} as StyleOptionsExpression);
     }
 
-    handleView = (e: React.MouseEvent) => {
+    handleView = (e: React.MouseEvent<any>) => {
         e.preventDefault();
         var hae = JSON.parse(JSON.stringify(this.props.binding.getValue())) as StyleOptionsExpression;
         this.modifyExpression(hae);
