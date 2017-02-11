@@ -592,7 +592,7 @@ namespace Signum.Engine.Workflow
                             var alg = jump.Condition.RetrieveFromCache().Eval.Algorithm;
                             var result = alg.EvaluateUntyped(ctx.CaseActivity.Case.MainEntity, jumpCtx);
                             if (!result)
-                                return;
+                                throw new ApplicationException(WorkflowMessage.JumpTo0FailedBecause1.NiceToString(jump.To, jump.Condition));
                         }
 
                         ctx.Connections.Add(jump);

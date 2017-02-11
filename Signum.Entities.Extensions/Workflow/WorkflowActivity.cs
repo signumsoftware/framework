@@ -78,13 +78,23 @@ namespace Signum.Entities.Workflow
                 if (Decomposition == null && this.Type == WorkflowActivityType.DecompositionTask)
                     return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
             }
+
+            if(pi.Name == nameof(Jumps))
+            {
+                var repated = NoRepeatValidatorAttribute.ByKey(Jumps, j => j.To);
+                if (repated.HasText())
+                    return ValidationMessage._0HasSomeRepeatedElements1.NiceToString(pi.NiceName(), repated);
+
+                if (Jumps.Any(j => j.To.RefersTo(this)))
+                    return WorkflowMessage.JumpsToSameActivityNotAllowed.NiceToString();
+            }
             return base.PropertyValidation(pi);
         }
 
         public ModelEntity GetModel()
         {
             var model = new WorkflowActivityModel();
-            model.ModelId = Int32.Parse(this.Id.ToString());
+            model.WorkflowActivity = this.ToLite();
             model.Workflow = this.Lane.Pool.Workflow;
             model.MainEntityType = model.Workflow.MainEntityType;
             model.Name = this.Name;
@@ -216,7 +226,7 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowActivityModel : ModelEntity
     {
-        public int ModelId { get; set; }
+        public Lite<WorkflowActivityEntity>  WorkflowActivity { get; set; }
         public WorkflowEntity Workflow { get; set; }
 
         [NotNullable]

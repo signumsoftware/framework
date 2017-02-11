@@ -173,14 +173,9 @@ export function executeWorkflowJumpContextual(coc: Operations.ContextualOperatio
     Navigator.API.fetchAndForget(coc.context.lites[0])
         .then(ca => {
             const jumps = ca.workflowActivity.jumps;
-            if (jumps.length == 0)
-                return;
-
-            if (jumps.length == 1)
-                defaultContextualClick(coc, event, jumps[0].element.to)
-            else
-                getWorkflowJumpSelector(jumps)
-                    .then(dest => dest && defaultContextualClick(coc, event, dest.to));
+      
+            getWorkflowJumpSelector(jumps)
+                .then(dest => dest && defaultContextualClick(coc, event, dest.to));
         })
         .done();
 }
@@ -188,15 +183,10 @@ export function executeWorkflowJumpContextual(coc: Operations.ContextualOperatio
 export function executeWorkflowJump(eoc: Operations.EntityOperationContext<CaseActivityEntity>) {
 
     var jumps = eoc.entity.workflowActivity.jumps;
-    if (jumps.length == 0)
-        return;
 
-    if (jumps.length == 1)
-        defaultExecuteEntity(eoc, jumps[0].element.to)
-    else
-        getWorkflowJumpSelector(jumps)
-            .then(dest => dest && defaultExecuteEntity(eoc, dest.to))
-            .done();
+    getWorkflowJumpSelector(jumps)
+        .then(dest => dest && defaultExecuteEntity(eoc, dest.to))
+        .done();
 }
 
 function getWorkflowJumpSelector(jumps: MListElement<WorkflowJumpEntity>[]): Promise<WorkflowJumpEntity | undefined> {
@@ -205,7 +195,8 @@ function getWorkflowJumpSelector(jumps: MListElement<WorkflowJumpEntity>[]): Pro
     return SelectorModal.chooseElement(opts,
         {
             display: a => a.to!.toStr || "",
-            title: WorkflowActivityMessage.ChooseADestinationForWorkflowJumping.niceToString()
+            title: WorkflowActivityMessage.ChooseADestinationForWorkflowJumping.niceToString(),
+            forceShow: true
         });
 }
 

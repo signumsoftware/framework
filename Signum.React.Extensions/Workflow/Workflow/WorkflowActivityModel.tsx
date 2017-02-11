@@ -183,8 +183,8 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
     {
         var result: Lite<IWorkflowNodeEntity>[] = [];
         var ctx = this.props.ctx;
-        if (!ctx.value.isNew)
-            result.push(({ EntityType: WorkflowActivityEntity.typeName, id: ctx.value.modelId }) as Lite<IWorkflowNodeEntity>);
+        if (ctx.value.workflowActivity)
+            result.push(ctx.value.workflowActivity);
         ctx.value.jumps.forEach(j => j.element.to && result.push(j.element.to));
         return result;
     }

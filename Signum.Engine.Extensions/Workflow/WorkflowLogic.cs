@@ -171,13 +171,19 @@ namespace Signum.Engine.Workflow
 
             internal List<Lite<IWorkflowNodeEntity>> Autocomplete(string subString, int count, List<Lite<IWorkflowNodeEntity>> excludes)
             {
-                return AutocompleteUtils.Autocomplete(Events.Keys, subString, count).Cast<Lite<IWorkflowNodeEntity>>()
-                    .Concat(AutocompleteUtils.Autocomplete(Activities.Keys, subString, count))
-                    .Concat(AutocompleteUtils.Autocomplete(Gateways.Keys, subString, count))
-                    .Except(excludes.EmptyIfNull())
-                    .OrderByDescending(a => a.ToString().Length)
-                    .Take(count)
-                    .ToList();
+                var events = AutocompleteUtils.Autocomplete(Events.Where(a => a.Value.Type == WorkflowEventType.Finish).Select(a => a.Key), subString, count);
+                var activities = AutocompleteUtils.Autocomplete(Activities.Keys, subString, count);
+                var gateways = AutocompleteUtils.Autocomplete(Gateways.Keys, subString, count);
+                return new Sequence<Lite<IWorkflowNodeEntity>>()
+                {
+                    events,
+                    activities,
+                    gateways
+                }
+                .Except(excludes.EmptyIfNull())
+                .OrderByDescending(a => a.ToString().Length)
+                .Take(count)
+                .ToList();
             }
         }
 
