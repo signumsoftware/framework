@@ -17,12 +17,15 @@ import { EntityBase, EntityBaseProps} from './EntityBase'
 export interface RenderEntityProps {
     ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+    viewPromise?: (typeName: string) => Navigator.ViewPromise<ModifiableEntity>;
 }
 
 export interface RenderEntityState {
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
     lastLoadedType?: string;
 }
+
+const FromProps = "__FromProps__";
 
 export class RenderEntity extends React.Component<RenderEntityProps, RenderEntityState> {
 
@@ -75,6 +78,8 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
         throw new Error("Unexpected value " + entityOrLite);
     }
 
+
+
     loadComponent(nextProps: RenderEntityProps): Promise<void> {
 
         const e = this.toEntity(nextProps.ctx.value);
@@ -87,9 +92,16 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
                 this.setState({ getComponent: undefined, lastLoadedType: undefined });
             return Promise.resolve(undefined);
         }
-        
-        if (this.state.lastLoadedType == e.Type)
+        if (this.state.lastLoadedType == (nextProps.viewPromise ? FromProps: e.Type))
             return Promise.resolve(undefined);
+
+        if (nextProps.viewPromise)
+            return nextProps.viewPromise(e.Type).promise.then(c => {
+                this.setState({
+                    getComponent: c,
+                    lastLoadedType: FromProps
+                });
+            });
 
         return Navigator.getViewPromise(e).promise.then(c => {
             this.setState({
@@ -117,7 +129,7 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
         let getComponent = this.props.getComponent;
 
         if (getComponent == undefined) {
-            if (entity.Type != this.state.lastLoadedType)
+            if (this.state.lastLoadedType != (this.props.viewPromise ? FromProps : entity.Type))
                 return null;
 
             getComponent = this.state.getComponent;
