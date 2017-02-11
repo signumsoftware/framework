@@ -51,6 +51,9 @@ export module CaseActivityMessage {
     export const NextActivityOfDecompositionSurrogateAlreadyInProgress = new MessageKey("CaseActivityMessage", "NextActivityOfDecompositionSurrogateAlreadyInProgress");
     export const Only0CanUndoThisOperation = new MessageKey("CaseActivityMessage", "Only0CanUndoThisOperation");
     export const Activity0HasNoJumps = new MessageKey("CaseActivityMessage", "Activity0HasNoJumps");
+    export const RejectToDecompositionActivityIsNotAllowed = new MessageKey("CaseActivityMessage", "RejectToDecompositionActivityIsNotAllowed");
+    export const RejectOperationIsNotAllowed = new MessageKey("CaseActivityMessage", "RejectOperationIsNotAllowed");
+    export const ThereIsNoPreviousForRejectOperation = new MessageKey("CaseActivityMessage", "ThereIsNoPreviousForRejectOperation");
 }
 
 export module CaseActivityOperation {
@@ -61,6 +64,7 @@ export module CaseActivityOperation {
     export const Approve : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Approve");
     export const Decline : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Decline");
     export const Jump : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Jump");
+    export const Reject : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Reject");
     export const MarkAsUnread : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.MarkAsUnread");
     export const Undo : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Undo");
     export const FixCaseDescriptions : Entities.ExecuteSymbol<Dynamic.DynamicTypeEntity> = registerSymbol("Operation", "CaseActivityOperation.FixCaseDescriptions");
@@ -153,6 +157,7 @@ export interface IWorkflowNodeEntity extends IWorkflowObjectEntity, Entities.Ent
 export interface IWorkflowObjectEntity extends Entities.Entity {
     xml?: WorkflowXmlEntity | null;
     name?: string | null;
+    bpmnElementId?: string | null;
 }
 
 export const SubEntitiesEval = new Type<SubEntitiesEval>("SubEntitiesEval");
@@ -183,9 +188,11 @@ export interface WorkflowActivityEntity extends Entities.Entity, IWorkflowNodeEn
     Type: "WorkflowActivity";
     lane?: WorkflowLaneEntity | null;
     name?: string | null;
+    bpmnElementId?: string | null;
     comments?: string | null;
     type?: WorkflowActivityType;
     requiresOpen?: boolean;
+    canReject?: boolean;
     viewName?: string | null;
     validationRules: Entities.MList<WorkflowActivityValidationEntity>;
     jumps: Entities.MList<WorkflowJumpEntity>;
@@ -196,16 +203,19 @@ export interface WorkflowActivityEntity extends Entities.Entity, IWorkflowNodeEn
 
 export module WorkflowActivityMessage {
     export const DuplicateViewNameFound0 = new MessageKey("WorkflowActivityMessage", "DuplicateViewNameFound0");
+    export const ChooseADestinationForWorkflowJumping = new MessageKey("WorkflowActivityMessage", "ChooseADestinationForWorkflowJumping");
 }
 
 export const WorkflowActivityModel = new Type<WorkflowActivityModel>("WorkflowActivityModel");
 export interface WorkflowActivityModel extends Entities.ModelEntity {
     Type: "WorkflowActivityModel";
+    modelId?: number;
     workflow?: WorkflowEntity | null;
     mainEntityType: Basics.TypeEntity;
     name?: string | null;
     type?: WorkflowActivityType;
     requiresOpen?: boolean;
+    canReject?: boolean;
     validationRules: Entities.MList<WorkflowActivityValidationEntity>;
     jumps: Entities.MList<WorkflowJumpEntity>;
     viewName?: string | null;
@@ -257,6 +267,7 @@ export interface WorkflowConnectionEntity extends Entities.Entity, IWorkflowObje
     from?: IWorkflowNodeEntity | null;
     to?: IWorkflowNodeEntity | null;
     name?: string | null;
+    bpmnElementId?: string | null;
     decisonResult?: DecisionResult | null;
     condition?: Entities.Lite<WorkflowConditionEntity> | null;
     action?: Entities.Lite<WorkflowActionEntity> | null;
@@ -292,6 +303,7 @@ export const WorkflowEventEntity = new Type<WorkflowEventEntity>("WorkflowEvent"
 export interface WorkflowEventEntity extends Entities.Entity, IWorkflowNodeEntity, IWorkflowObjectEntity {
     Type: "WorkflowEvent";
     name?: string | null;
+    bpmnElementId?: string | null;
     lane?: WorkflowLaneEntity | null;
     type?: WorkflowEventType;
     xml?: WorkflowXmlEntity | null;
@@ -324,6 +336,7 @@ export interface WorkflowGatewayEntity extends Entities.Entity, IWorkflowNodeEnt
     Type: "WorkflowGateway";
     lane?: WorkflowLaneEntity | null;
     name?: string | null;
+    bpmnElementId?: string | null;
     type?: WorkflowGatewayType;
     direction?: WorkflowGatewayDirection;
     xml?: WorkflowXmlEntity | null;
@@ -365,6 +378,7 @@ export const WorkflowLaneEntity = new Type<WorkflowLaneEntity>("WorkflowLane");
 export interface WorkflowLaneEntity extends Entities.Entity, IWorkflowObjectEntity {
     Type: "WorkflowLane";
     name?: string | null;
+    bpmnElementId?: string | null;
     xml?: WorkflowXmlEntity | null;
     pool?: WorkflowPoolEntity | null;
     actors: Entities.MList<Entities.Lite<Entities.Entity>>;
@@ -408,6 +422,7 @@ export interface WorkflowPoolEntity extends Entities.Entity, IWorkflowObjectEnti
     Type: "WorkflowPool";
     workflow?: WorkflowEntity | null;
     name?: string | null;
+    bpmnElementId?: string | null;
     xml?: WorkflowXmlEntity | null;
 }
 

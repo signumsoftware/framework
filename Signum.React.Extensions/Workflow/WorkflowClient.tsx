@@ -3,21 +3,23 @@ import { Route, Link } from 'react-router'
 import { ifError, Dic } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
-import { EntityPack, Lite, toLite, JavascriptMessage, EntityControlMessage, newMListElement, liteKey, getMixin, Entity, ExecuteSymbol } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { EntityPack, Lite, toLite, MListElement, JavascriptMessage, EntityControlMessage, newMListElement, liteKey, getMixin, Entity, ExecuteSymbol } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { Type, PropertyRoute } from '../../../Framework/Signum.React/Scripts/Reflection'
+import { EntityFrame } from '../../../Framework/Signum.React/Scripts/TypeContext'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { EntityOperationSettings, addSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { confirmInNecessary, notifySuccess, defaultExecuteEntity } from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
+import { defaultContextualClick } from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
 import { TypeContext } from '../../../Framework/Signum.React/Scripts/Lines'
 
 import { UserEntity } from '../../../Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization'
 import * as DynamicViewClient from '../../../Extensions/Signum.React.Extensions/Dynamic/DynamicViewClient'
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
-import { WorkflowConditionEval, WorkflowActionEval, DecisionResult } from './Signum.Entities.Workflow'
+import { WorkflowConditionEval, WorkflowActionEval, WorkflowJumpEntity, DecisionResult } from './Signum.Entities.Workflow'
 
 import CaseEntityLink from './Case/CaseEntityLink'
 import ActivityWithRemarks from './Case/ActivityWithRemarks'
@@ -28,22 +30,23 @@ import CasePageFrame from './Case/CaseModalFrame'
 export { CasePageFrame };
 
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
+import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal'
 
 import {
     WorkflowEntity, WorkflowLaneEntity, WorkflowActivityEntity, WorkflowConnectionEntity, WorkflowConditionEntity, WorkflowActionEntity, CaseActivityQuery, CaseActivityEntity,
     CaseActivityOperation, CaseEntity, CaseNotificationEntity, CaseNotificationState, InboxFilterModel, WorkflowOperation, WorkflowPoolEntity,
     WorkflowActivityOperation, WorkflowReplacementModel, WorkflowModel, BpmnEntityPair, WorkflowActivityModel, ICaseMainEntity, WorkflowGatewayEntity, WorkflowEventEntity,
-    WorkflowLaneModel, WorkflowConnectionModel, IWorkflowNodeEntity
+    WorkflowLaneModel, WorkflowConnectionModel, IWorkflowNodeEntity, WorkflowActivityMessage
 } from './Signum.Entities.Workflow'
 
 import InboxFilter from './Case/InboxFilter'
 import Workflow from './Workflow/Workflow'
 
 export function start(options: { routes: JSX.Element[] }) {
-    
+
     options.routes.push(<Route path="workflow">
-        <Route path="activity/:caseActivityId" getComponent={(loc, cb) => require(["./Case/CasePageFrame"], (Comp) => cb(null, Comp.default)) } />
-        <Route path="new/:workflowId" getComponent={(loc, cb) => require(["./Case/CasePageFrame"], (Comp) => cb(null, Comp.default)) } />
+        <Route path="activity/:caseActivityId" getComponent={(loc, cb) => require(["./Case/CasePageFrame"], (Comp) => cb(null, Comp.default))} />
+        <Route path="new/:workflowId" getComponent={(loc, cb) => require(["./Case/CasePageFrame"], (Comp) => cb(null, Comp.default))} />
     </Route>);
 
     Finder.addSettings({
@@ -74,13 +77,15 @@ export function start(options: { routes: JSX.Element[] }) {
             if (!model)
                 return undefined;
 
-            return <InboxFilter ctx={TypeContext.root(InboxFilterModel, model) }/>;
+            return <InboxFilter ctx={TypeContext.root(InboxFilterModel, model)} />;
         }
     });
 
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { hideOnCanExecute: true, style: "primary" }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Delete, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Undo, { hideOnCanExecute: true, style: "danger" }));
+    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Jump, { onClick: executeWorkflowJump, contextual: { isVisible: ctx => true, onClick: executeWorkflowJumpContextual } }));
+    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Reject, { contextual: { isVisible: ctx => true } }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.MarkAsUnread, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
     caseActivityOperation(CaseActivityOperation.Next, "primary");
     caseActivityOperation(CaseActivityOperation.Approve, "success");
@@ -161,6 +166,47 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Entit
                     }).done();
             }).done();
         }).done();
+}
+
+export function executeWorkflowJumpContextual(coc: Operations.ContextualOperationContext<CaseActivityEntity>, event: React.MouseEvent) {
+
+    Navigator.API.fetchAndForget(coc.context.lites[0])
+        .then(ca => {
+            const jumps = ca.workflowActivity.jumps;
+            if (jumps.length == 0)
+                return;
+
+            if (jumps.length == 1)
+                defaultContextualClick(coc, event, jumps[0].element.to)
+            else
+                getWorkflowJumpSelector(jumps)
+                    .then(dest => dest && defaultContextualClick(coc, event, dest.to));
+        })
+        .done();
+}
+
+export function executeWorkflowJump(eoc: Operations.EntityOperationContext<CaseActivityEntity>) {
+
+    var jumps = eoc.entity.workflowActivity.jumps;
+    if (jumps.length == 0)
+        return;
+
+    if (jumps.length == 1)
+        defaultExecuteEntity(eoc, jumps[0].element.to)
+    else
+        getWorkflowJumpSelector(jumps)
+            .then(dest => dest && defaultExecuteEntity(eoc, dest.to))
+            .done();
+}
+
+function getWorkflowJumpSelector(jumps: MListElement<WorkflowJumpEntity>[]): Promise<WorkflowJumpEntity | undefined> {
+
+    var opts = jumps.map(j => j.element);
+    return SelectorModal.chooseElement(opts,
+        {
+            display: a => a.to!.toStr || "",
+            title: WorkflowActivityMessage.ChooseADestinationForWorkflowJumping.niceToString()
+        });
 }
 
 export function executeAndClose(eoc: Operations.EntityOperationContext<CaseActivityEntity>) {
@@ -280,15 +326,20 @@ export namespace API {
         });
     }
 
-    export function findNode(request: { workflowId: string | number, subString: string, count: number }): Promise<Lite<IWorkflowNodeEntity>[]> {
-        return ajaxGet<Lite<IWorkflowNodeEntity>[]>({
-            url: Navigator.currentHistory.createHref({ pathname: "~/api/workflow/findNode", query: request })
-        });
+    export function findNode(request: WorkflowFindNodeRequest): Promise<Lite<IWorkflowNodeEntity>[]> {
+        return ajaxPost<Lite<IWorkflowNodeEntity>[]>({ url: "~/api/workflow/findNode" }, request);
     }
 
     export function conditionTest(request: WorkflowConditionTestRequest): Promise<WorkflowConditionTestResponse> {
         return ajaxPost<WorkflowConditionTestResponse>({ url: `~/api/workflow/condition/test` }, request);
     }
+}
+
+export interface WorkflowFindNodeRequest {
+    workflowId: number | string;
+    subString: string;
+    count: number;
+    excludes?: Lite<IWorkflowNodeEntity>[];
 }
 
 export interface WorkflowConditionTestRequest {

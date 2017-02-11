@@ -374,7 +374,8 @@ namespace Signum.Engine.Workflow
             if (model != null)
                 wp.SetModel(model);
             wp.Name = participant.Attribute("name").Value;
-            wp.Xml.DiagramXml = locator.GetDiagram(participant.Attribute("id").Value).ToString();
+            wp.BpmnElementId = bpmnElementId;
+            wp.Xml.DiagramXml = locator.GetDiagram(bpmnElementId).ToString();
             if (GraphExplorer.HasChanges(wp))
                 wp.Execute(WorkflowPoolOperation.Save);
             return wp;
@@ -387,6 +388,7 @@ namespace Signum.Engine.Workflow
             if (model != null)
                 wl.SetModel(model);
             wl.Name = lane.Attribute("name").Value;
+            wl.BpmnElementId = bpmnElementId;
             wl.Xml.DiagramXml = locator.GetDiagram(bpmnElementId).ToString();
             if (GraphExplorer.HasChanges(wl))
                 wl.Execute(WorkflowLaneOperation.Save);
@@ -396,9 +398,11 @@ namespace Signum.Engine.Workflow
 
         public static WorkflowEventEntity ApplyXml(this WorkflowEventEntity we, XElement @event, Locator locator)
         {
+            var bpmnElementId = @event.Attribute("id").Value;
             we.Name = @event.Attribute("name")?.Value;
+            we.BpmnElementId = bpmnElementId;
             we.Type = WorkflowBuilder.LaneBuilder.WorkflowEventTypes.GetOrThrow(@event.Name.LocalName);
-            we.Xml.DiagramXml = locator.GetDiagram(@event.Attribute("id").Value).ToString();
+            we.Xml.DiagramXml = locator.GetDiagram(bpmnElementId).ToString();
             if (GraphExplorer.HasChanges(we))
                 we.Execute(WorkflowEventOperation.Save);
 
@@ -411,7 +415,8 @@ namespace Signum.Engine.Workflow
             var model = locator.GetModelEntity<WorkflowActivityModel>(bpmnElementId);
             if (model != null)
                 wa.SetModel(model);
-            wa.Name = activity.Attribute("name")?.Value;
+            wa.Name = activity.Attribute("name")?.Value ?? bpmnElementId;
+            wa.BpmnElementId = bpmnElementId;
             wa.Xml.DiagramXml = locator.GetDiagram(bpmnElementId).ToString();
             if (GraphExplorer.HasChanges(wa))
                 wa.Execute(WorkflowActivityOperation.Save);
@@ -421,9 +426,11 @@ namespace Signum.Engine.Workflow
 
         public static WorkflowGatewayEntity ApplyXml(this WorkflowGatewayEntity wg, XElement gateway, Locator locator)
         {
+            var bpmnElementId = gateway.Attribute("id").Value;
             wg.Name = gateway.Attribute("name")?.Value;
+            wg.BpmnElementId = bpmnElementId;
             wg.Type = WorkflowBuilder.LaneBuilder.WorkflowGatewayTypes.GetOrThrow(gateway.Name.LocalName);
-            wg.Xml.DiagramXml = locator.GetDiagram(gateway.Attribute("id").Value).ToString();
+            wg.Xml.DiagramXml = locator.GetDiagram(bpmnElementId).ToString();
             if (GraphExplorer.HasChanges(wg))
                 wg.Execute(WorkflowGatewayOperation.Save);
 
@@ -440,6 +447,7 @@ namespace Signum.Engine.Workflow
             if (model != null)
                 wc.SetModel(model);
             wc.Name = flow.Attribute("name")?.Value;
+            wc.BpmnElementId = bpmnElementId;
             wc.Xml.DiagramXml = locator.GetDiagram(bpmnElementId).ToString();
             if (!(wc.From is WorkflowGatewayEntity))
             {

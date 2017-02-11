@@ -169,11 +169,12 @@ namespace Signum.Engine.Workflow
             public Dictionary<Lite<WorkflowGatewayEntity>, WorkflowGatewayEntity> Gateways{ get; internal set; }
             public Dictionary<Lite<WorkflowConnectionEntity>, WorkflowConnectionEntity> Connections { get; internal set; }
 
-            internal List<Lite<IWorkflowNodeEntity>> Autocomplete(string subString, int count)
+            internal List<Lite<IWorkflowNodeEntity>> Autocomplete(string subString, int count, List<Lite<IWorkflowNodeEntity>> excludes)
             {
                 return AutocompleteUtils.Autocomplete(Events.Keys, subString, count).Cast<Lite<IWorkflowNodeEntity>>()
                     .Concat(AutocompleteUtils.Autocomplete(Activities.Keys, subString, count))
                     .Concat(AutocompleteUtils.Autocomplete(Gateways.Keys, subString, count))
+                    .Except(excludes.EmptyIfNull())
                     .OrderByDescending(a => a.ToString().Length)
                     .Take(count)
                     .ToList();
@@ -182,9 +183,9 @@ namespace Signum.Engine.Workflow
 
         static ResetLazy<Dictionary<Lite<WorkflowEntity>, WorkflowNodeGraph>> WorkflowGraphLazy;
 
-        public static List<Lite<IWorkflowNodeEntity>> AutocompleteNodes(Lite<WorkflowEntity> workflow, string subString, int count)
+        public static List<Lite<IWorkflowNodeEntity>> AutocompleteNodes(Lite<WorkflowEntity> workflow, string subString, int count, List<Lite<IWorkflowNodeEntity>> excludes)
         {
-            return WorkflowGraphLazy.Value.GetOrThrow(workflow).Autocomplete(subString, count);
+            return WorkflowGraphLazy.Value.GetOrThrow(workflow).Autocomplete(subString, count, excludes);
         }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -212,6 +213,7 @@ namespace Signum.Engine.Workflow
                         Entity = e,
                         e.Id,
                         e.Name,
+                        e.BpmnElementId,
                         e.Workflow,
                     });
 
@@ -225,6 +227,7 @@ namespace Signum.Engine.Workflow
                         Entity = e,
                         e.Id,
                         e.Name,
+                        e.BpmnElementId,
                         e.Pool,
                         e.Pool.Workflow,
                     });
@@ -240,11 +243,13 @@ namespace Signum.Engine.Workflow
                         Entity = e,
                         e.Id,
                         e.Name,
+                        e.BpmnElementId,
                         e.Comments,
                         e.Lane,
                         e.Lane.Pool.Workflow,
                     });
 
+                sb.AddUniqueIndexMList((WorkflowActivityEntity a) => a.Jumps, mle => new { mle.Parent, mle.Element.To });
 
                 sb.Include<WorkflowEventEntity>()
                     .WithSave(WorkflowEventOperation.Save)
@@ -257,6 +262,7 @@ namespace Signum.Engine.Workflow
                         e.Id,
                         e.Type,
                         e.Name,
+                        e.BpmnElementId,
                         e.Lane,
                         e.Lane.Pool.Workflow,
                     });
@@ -272,6 +278,7 @@ namespace Signum.Engine.Workflow
                         e.Id,
                         e.Type,
                         e.Name,
+                        e.BpmnElementId,
                         e.Lane,
                         e.Lane.Pool.Workflow,
                     });
@@ -288,6 +295,8 @@ namespace Signum.Engine.Workflow
                     {
                         Entity = e,
                         e.Id,
+                        e.Name,
+                        e.BpmnElementId,
                         e.From,
                         e.To,
                     });

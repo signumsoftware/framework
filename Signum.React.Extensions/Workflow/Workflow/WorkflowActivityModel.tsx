@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import {
-    WorkflowActivityModel, WorkflowActivityValidationEntity, WorkflowActivityMessage, WorkflowConditionEntity, WorkflowActionEntity,
+    WorkflowActivityEntity, WorkflowActivityModel, WorkflowActivityValidationEntity, WorkflowActivityMessage, WorkflowConditionEntity, WorkflowActionEntity,
     WorkflowJumpEntity, IWorkflowNodeEntity, DecompositionEntity, SubEntitiesEval
 } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
@@ -93,7 +93,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
 
         return (
             <div>
-                <ValueLine ctx={ctx.subCtx(d => d.name)} />
+                <ValueLine ctx={ctx.subCtx(d => d.name)} onChange={() => this.forceUpdate()} />
                 <ValueLine ctx={ctx.subCtx(d => d.type)} onChange={this.handleTypeChange} />
 
                 {ctx.value.type != "DecompositionTask" &&
@@ -130,14 +130,13 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                                 template: ctx => <ValueLine ctx={ctx.subCtx(wav => wav.onDecline)} formGroupStyle="None" valueHtmlProps={{ style: { margin: "0 auto" } }} />,
                             } : null,
                         ])} />
-                        <EntityTable ctx={ctx.subCtx(d => d.jumps)} columns={EntityTable.typedColumns<WorkflowJumpEntity>([
+                        < EntityTable ctx={ctx.subCtx(d => d.jumps)} columns={EntityTable.typedColumns<WorkflowJumpEntity>([
                             {
                                 property: wj => wj.to,
                                 template: (jCtx, row, state) => {
                                     return <EntityLine
                                         ctx={jCtx.subCtx(wj => wj.to)}
-                                        autoComplete={new LiteAutocompleteConfig(str => API.findNode({ workflowId: ctx.value.workflow!.id, subString: str, count: 5 }), false)}
-                                        onChange={this.handleJumpToChanged}
+                                        autoComplete={new LiteAutocompleteConfig(str => API.findNode(({ workflowId: ctx.value.workflow!.id, subString: str, count: 5, excludes: this.getCurrentJumpsTo() })), false)}
                                         find={false} />
                                 },
                                 headerProps: { width: "32%" }
@@ -166,6 +165,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                             },
                         ])} />
                         <ValueLine ctx={ctx.subCtx(a => a.requiresOpen)} />
+                        <ValueLine ctx={ctx.subCtx(a => a.canReject)} />
                         <fieldset>
                             <legend>{WorkflowActivityModel.nicePropertyName(a => a.userHelp)}</legend>
                             <HtmlEditor binding={Binding.create(ctx.value, a => a.userHelp)} />
@@ -179,8 +179,14 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
         );
     }
 
-    handleJumpToChanged = () => {
-
+    getCurrentJumpsTo()
+    {
+        var result: Lite<IWorkflowNodeEntity>[] = [];
+        var ctx = this.props.ctx;
+        if (!ctx.value.isNew)
+            result.push(({ EntityType: WorkflowActivityEntity.typeName, id: ctx.value.modelId }) as Lite<IWorkflowNodeEntity>);
+        ctx.value.jumps.forEach(j => j.element.to && result.push(j.element.to));
+        return result;
     }
 }
 

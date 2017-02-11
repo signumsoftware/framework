@@ -100,6 +100,7 @@ namespace Signum.Entities.Workflow
     {
         WorkflowXmlEntity Xml { get; set; }
         string Name { get; set; }
+        string BpmnElementId { get; set; }
     }
 
     public interface IWorkflowNodeEntity : IWorkflowObjectEntity

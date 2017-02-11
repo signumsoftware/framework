@@ -27,6 +27,10 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string Name { get; set; }
 
+        [NotNullable, SqlDbType(Size = 100)]
+        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
+        public string BpmnElementId { get; set; }
+
         public DecisionResult? DecisonResult { get; set; }
 
         public Lite<WorkflowConditionEntity> Condition { get; set; }
@@ -62,7 +66,7 @@ namespace Signum.Entities.Workflow
         }
 
 
-        static Expression<Func<WorkflowConnectionEntity, string>> ToStringExpression = @this => @this.Name ?? "Connection";
+        static Expression<Func<WorkflowConnectionEntity, string>> ToStringExpression = @this => @this.Name ?? @this.BpmnElementId;
         [ExpressionField]
         public override string ToString()
         {

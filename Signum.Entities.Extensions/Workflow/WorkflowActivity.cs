@@ -26,6 +26,10 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
+        [NotNullable, SqlDbType(Size = 100)]
+        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
+        public string BpmnElementId { get; set; }
+
         [SqlDbType(Size = 400)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 400, MultiLine = true)]
         public string Comments { get; set; }
@@ -33,6 +37,7 @@ namespace Signum.Entities.Workflow
         public WorkflowActivityType Type { get; set; }
 
         public bool RequiresOpen { get; set; }
+        public bool CanReject { get; set; }
 
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 255)]
         public string ViewName { get; set; }
@@ -56,7 +61,7 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(AllowNulls = true, MultiLine = true)]
         public string UserHelp { get; set; }
 
-        static Expression<Func<WorkflowActivityEntity, string>> ToStringExpression = @this => @this.Name;
+        static Expression<Func<WorkflowActivityEntity, string>> ToStringExpression = @this => @this.Name ?? @this.BpmnElementId;
         [ExpressionField]
         public override string ToString()
         {
@@ -79,11 +84,13 @@ namespace Signum.Entities.Workflow
         public ModelEntity GetModel()
         {
             var model = new WorkflowActivityModel();
+            model.ModelId = Int32.Parse(this.Id.ToString());
             model.Workflow = this.Lane.Pool.Workflow;
             model.MainEntityType = model.Workflow.MainEntityType;
             model.Name = this.Name;
             model.Type = this.Type;
             model.RequiresOpen = this.RequiresOpen;
+            model.CanReject = this.CanReject;
             model.ValidationRules.AssignMList(this.ValidationRules);
             model.Jumps.AssignMList(this.Jumps);
             model.ViewName = this.ViewName;
@@ -99,6 +106,7 @@ namespace Signum.Entities.Workflow
             this.Name = wModel.Name;
             this.Type = wModel.Type;
             this.RequiresOpen = wModel.RequiresOpen;
+            this.CanReject = wModel.CanReject;
             this.ValidationRules.AssignMList(wModel.ValidationRules);
             this.Jumps.AssignMList(wModel.Jumps);
             this.ViewName = wModel.ViewName;
@@ -208,6 +216,7 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowActivityModel : ModelEntity
     {
+        public int ModelId { get; set; }
         public WorkflowEntity Workflow { get; set; }
 
         [NotNullable]
@@ -221,6 +230,7 @@ namespace Signum.Entities.Workflow
         public WorkflowActivityType Type { get; set; }
 
         public bool RequiresOpen { get; set; }
+        public bool CanReject { get; set; }
 
         [NotNullable]
         [NotNullValidator, NoRepeatValidator]
@@ -247,6 +257,7 @@ namespace Signum.Entities.Workflow
     public enum WorkflowActivityMessage {
         [Description("Duplicate view name found: {0}")]
         DuplicateViewNameFound0,
+        ChooseADestinationForWorkflowJumping,
     }
 
 }
