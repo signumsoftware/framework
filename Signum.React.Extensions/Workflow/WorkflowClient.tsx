@@ -109,6 +109,17 @@ export function start(options: { routes: JSX.Element[] }) {
 
     Constructor.registerConstructor(WorkflowConditionEntity, () => WorkflowConditionEntity.New({ eval: WorkflowConditionEval.New() }));
     Constructor.registerConstructor(WorkflowActionEntity, () => WorkflowActionEntity.New({ eval: WorkflowActionEval.New() }));
+
+    DynamicViewClient.registeredCustomContexts["caseActivity"] = {
+        getTypeContext: ctx => getCaseActivityContext(ctx.frame!),
+        getCodeContext: cc => cc.createNewContext("actx"),
+        getPropertyRoute: dn => PropertyRoute.root(CaseActivityEntity)
+    };
+}
+
+export function getCaseActivityContext(frame: EntityFrame<any>): TypeContext<CaseActivityEntity> | undefined {
+    var activity = (frame.frameComponent as any).getCaseActivity() as CaseActivityEntity;
+    return activity && TypeContext.root(activity);
 }
 
 export function getDefaultInboxUrl() {

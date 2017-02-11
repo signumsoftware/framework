@@ -19,12 +19,14 @@ import { ExpressionOrValueComponent, FieldComponent } from './Designer'
 import { FindOptionsLine } from './FindOptionsComponent'
 import { FindOptionsExpr, toFindOptions } from './FindOptionsExpression'
 import { AuthInfo } from './AuthInfo'
-import { BaseNode, LineBaseNode, EntityBaseNode, EntityListBaseNode, EntityLineNode, ContainerNode, EntityTableColumnNode } from './Nodes'
+import { BaseNode, LineBaseNode, EntityBaseNode, EntityListBaseNode, EntityLineNode, ContainerNode, EntityTableColumnNode, CustomContextNode } from './Nodes'
 import { toHtmlAttributes, HtmlAttributesExpression, withClassName } from './HtmlAttributesExpression'
 import { toStyleOptions, StyleOptionsExpression, subCtx } from './StyleOptionsExpression'
 import { HtmlAttributesLine } from './HtmlAttributesComponent'
 import { StyleOptionsLine } from './StyleOptionsComponent'
 import TypeHelpComponent from '../Help/TypeHelpComponent'
+import { getDynamicViewPromise, registeredCustomContexts } from '../DynamicViewClient'
+
 
 export type ExpressionOrValue<T> = T | Expression<T>;
 
@@ -42,7 +44,7 @@ export interface NodeOptions<N extends BaseNode> {
     isContainer?: boolean;
     hasEntity?: boolean;
     hasCollection?: boolean;
-    render: (node: DesignerNode<N>, parentCtx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+    render: (node: DesignerNode<N>, parentCtx: TypeContext<ModifiableEntity>) => React.ReactElement<any> | undefined;
     renderCode?: (node: N, cc: CodeContext) => string;
     renderTreeNode: (node: DesignerNode<N>) => React.ReactElement<any>;
     renderDesigner: (node: DesignerNode<N>) => React.ReactElement<any>;
@@ -55,36 +57,30 @@ export interface NodeOptions<N extends BaseNode> {
 
 export class CodeContext {
     ctxName: string;
-    usedNames: { [name: string]: Expression<any> };
-
-
-
-
+    usedNames: string[];
+    
     subCtx(field?: string, options?: StyleOptionsExpression): CodeContext {
         if (!field && !options)
             return this;
 
         var newName = "ctx" + (Dic.getKeys(this.usedNames).length + 1);
 
-        this.usedNames[newName] = this.subCtxCode(field, options);
+        return this.createNewContext(newName);
+    }
+
+    createNewContext(newName: string): CodeContext {
+        this.usedNames.push(newName);
         var result = new CodeContext();
         result.ctxName = newName;
         result.usedNames = this.usedNames;
         return result;
     }
 
-    subCtxCode(field?: string, options?: StyleOptionsExpression): Expression<any> {
-
-        if (!field && !options)
-            return { __code__: "ctx" };
-
-        var propStr = field && "e => " + TypeHelpComponent.getExpression("e", field, "Typescript", { stronglyTypedMixinTS: true });
-        var optionsStr = options && this.stringifyObject(options);
-
-        return { __code__: this.ctxName + ".subCtx(" + (propStr || "") + (propStr && optionsStr ? ", " : "") + (optionsStr ||"") + ")" };
-    }
-
     stringifyObject(expressionOrValue: ExpressionOrValue<any>): string {
+
+        if (typeof expressionOrValue == "function")
+            return expressionOrValue.toString();
+
         if (isExpression(expressionOrValue))
             return expressionOrValue.__code__.replace(/\bctx\b/, this.ctxName);
 
@@ -147,6 +143,17 @@ ${childrenString}
         var childrensCode = node.children.map(c => renderCode(c, ctx));
 
         return this.elementCode(type, props, ...childrensCode);
+    }
+
+    subCtxCode(field?: string, options?: StyleOptionsExpression): Expression<any> {
+
+        if (!field && !options)
+            return { __code__: "ctx" };
+
+        var propStr = field && "e => " + TypeHelpComponent.getExpression("e", field, "Typescript", { stronglyTypedMixinTS: true });
+        var optionsStr = options && this.stringifyObject(options);
+
+        return { __code__: this.ctxName + ".subCtx(" + (propStr || "") + (propStr && optionsStr ? ", " : "") + (optionsStr || "") + ")" };
     }
 
     getEntityBasePropsEx(node: EntityBaseNode, options: { showAutoComplete?: boolean, showMove?: boolean, avoidGetComponent?: boolean }): any/*: EntityBaseProps Expr*/ {
@@ -247,6 +254,12 @@ export class DesignerNode<N extends BaseNode> {
             return res;
 
         const options = registeredNodes[this.node.kind];
+        if (options.kind == "CustomContext")
+        {
+            var cc = registeredCustomContexts[(this.node as BaseNode as CustomContextNode).typeContext];
+            return cc.getPropertyRoute(this as DesignerNode<BaseNode> as DesignerNode<CustomContextNode>);
+        }
+
         if (options.hasCollection)
             res = res.tryAddMember({ name: "", type: "Indexer" });
 
@@ -526,7 +539,7 @@ export function validateEntityBase(dn: DesignerNode<EntityBaseNode>, parentCtx: 
 
 export function validateField(dn: DesignerNode<LineBaseNode>) {
 
-    const parentRoute = dn.parent!.route;
+    const parentRoute = dn.parent!.fixRoute();
 
     if (parentRoute == undefined)
         return undefined;
@@ -555,7 +568,7 @@ export function validateField(dn: DesignerNode<LineBaseNode>) {
 
 export function validateTableColumnProperty(dn: DesignerNode<EntityTableColumnNode>) {
 
-    const parentRoute = dn.parent!.route;
+    const parentRoute = dn.parent!.fixRoute();
 
     if (parentRoute == undefined)
         return undefined;

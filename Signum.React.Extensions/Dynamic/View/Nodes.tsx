@@ -2,7 +2,7 @@
 import { Tabs, Tab } from 'react-bootstrap'
 import {
     FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityTable,
-    EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip
+    EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip, RenderEntity
 } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ModifiableEntity, Entity, Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
@@ -24,6 +24,7 @@ import { FindOptionsLine, QueryTokenLine } from './FindOptionsComponent'
 import { HtmlAttributesLine } from './HtmlAttributesComponent'
 import { StyleOptionsLine } from './StyleOptionsComponent'
 import * as NodeUtils from './NodeUtils'
+import { getDynamicViewPromise, registeredCustomContexts } from '../DynamicViewClient'
 import { toFindOptions, FindOptionsExpr } from './FindOptionsExpression'
 import { toHtmlAttributes, HtmlAttributesExpression, withClassName } from './HtmlAttributesExpression'
 import { toStyleOptions, subCtx, StyleOptionsExpression } from './StyleOptionsExpression'
@@ -277,6 +278,74 @@ NodeUtils.register<TextNode>({
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.htmlAttributes)} />
     </div>),
 });
+
+
+export interface RenderEntityNode extends ContainerNode {
+    kind: "RenderEntity";
+    field: string;
+    viewName?: string;
+    styleOptions?: StyleOptionsExpression;
+}
+
+NodeUtils.register<RenderEntityNode>({
+    kind: "RenderEntity",
+    group: "Container",
+    order: 5,
+    isContainer: true,
+    hasEntity: true,
+    validate: (dn, ctx) => NodeUtils.validateField(dn),
+    renderTreeNode: NodeUtils.treeNodeKindField,
+    renderCode: (node, cc) => cc.elementCode("RenderEntity", {
+        ctx: cc.subCtxCode(node.field, node.styleOptions),
+        getComponent: cc.getGetComponentEx(node, true),
+        viewPromise: node.viewName && { __code__: `(typeName: string) => DynamicViewClient.getDynamicViewPromise(typeName, "${node.viewName}")` },
+    }),
+    render: (dn, ctx) => {
+        var sctx = ctx.subCtx(NodeUtils.asFieldFunction(dn.node.field), toStyleOptions(ctx, dn.node.styleOptions));
+        return (
+            <RenderEntity
+                ctx={sctx}
+                getComponent={NodeUtils.getGetComponent(dn)}
+                viewPromise={!dn.node.viewName ? undefined : typeName => getDynamicViewPromise(typeName, dn.node.viewName!)}
+            />
+        );
+    },
+    renderDesigner: dn => <div>
+        <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
+        <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.viewName)} type="string" defaultValue={null} allowsExpression={false} />     
+    </div>,
+});
+
+export interface CustomContextNode extends ContainerNode {
+    kind: "CustomContext",
+    typeContext: string;
+}
+
+NodeUtils.register<CustomContextNode>({
+    kind: "CustomContext",
+    group: "Container",
+    order: 6,
+    isContainer: true,
+    validate: dn => NodeUtils.mandatory(dn, n => n.typeContext) || (!registeredCustomContexts[dn.node.typeContext] ? `${dn.node.typeContext} not found` : undefined),
+    renderTreeNode: dn => <span><small > {dn.node.kind}:</small > <strong>{dn.node.typeContext}</strong></span >,
+    renderCode: (node, cc) => {
+        const ncc = registeredCustomContexts[node.typeContext].getCodeContext(cc);
+        var childrensCode = node.children.map(c => NodeUtils.renderCode(c, ncc));
+        return ncc.elementCode("div", null, ...childrensCode);
+    },
+    render: (dn, parentCtx) => {
+        const nctx = registeredCustomContexts[dn.node.typeContext].getTypeContext(parentCtx);
+        if (!nctx)
+            return undefined;
+
+        return NodeUtils.withChildrensSubCtx(dn, nctx, <div />);
+    },
+    renderDesigner: dn => (<div>
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.typeContext)} allowsExpression={false} type="string" options={Dic.getKeys(registeredCustomContexts)} defaultValue={null} />
+    </div>),
+});
+
 
 export interface LineBaseNode extends BaseNode {
     labelText?: ExpressionOrValue<string>;

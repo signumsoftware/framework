@@ -208,7 +208,7 @@ export module WorkflowActivityMessage {
 export const WorkflowActivityModel = new Type<WorkflowActivityModel>("WorkflowActivityModel");
 export interface WorkflowActivityModel extends Entities.ModelEntity {
     Type: "WorkflowActivityModel";
-    modelId?: number;
+    workflowActivity?: Entities.Lite<WorkflowActivityEntity> | null;
     workflow?: WorkflowEntity | null;
     mainEntityType: Basics.TypeEntity;
     name?: string | null;
@@ -401,6 +401,8 @@ export module WorkflowLaneOperation {
 export module WorkflowMessage {
     export const _0BelongsToADifferentWorkflow = new MessageKey("WorkflowMessage", "_0BelongsToADifferentWorkflow");
     export const Condition0IsDefinedFor1Not2 = new MessageKey("WorkflowMessage", "Condition0IsDefinedFor1Not2");
+    export const JumpsToSameActivityNotAllowed = new MessageKey("WorkflowMessage", "JumpsToSameActivityNotAllowed");
+    export const JumpTo0FailedBecause1 = new MessageKey("WorkflowMessage", "JumpTo0FailedBecause1");
 }
 
 export const WorkflowModel = new Type<WorkflowModel>("WorkflowModel");
