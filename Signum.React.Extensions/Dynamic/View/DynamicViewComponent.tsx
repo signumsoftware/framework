@@ -130,7 +130,7 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { vi
 
     render() {
         var dv = this.props.dynamicView;
-        var ctx = TypeContext.root(DynamicViewEntity, dv);
+        var ctx = TypeContext.root(dv);
 
         return (
             <div className="form-vertical code-container">

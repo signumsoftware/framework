@@ -6,14 +6,13 @@ import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scr
 import { EntityPack, Lite, toLite, MListElement, JavascriptMessage, EntityControlMessage, newMListElement, liteKey, getMixin, Entity, ExecuteSymbol } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { Type, PropertyRoute } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { EntityFrame } from '../../../Framework/Signum.React/Scripts/TypeContext'
+import { EntityFrame, TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { EntityOperationSettings, addSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { confirmInNecessary, notifySuccess, defaultExecuteEntity } from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 import { defaultContextualClick } from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
-import { TypeContext } from '../../../Framework/Signum.React/Scripts/Lines'
 
 import { UserEntity } from '../../../Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization'
 import * as DynamicViewClient from '../../../Extensions/Signum.React.Extensions/Dynamic/DynamicViewClient'
@@ -77,7 +76,7 @@ export function start(options: { routes: JSX.Element[] }) {
             if (!model)
                 return undefined;
 
-            return <InboxFilter ctx={TypeContext.root(InboxFilterModel, model)} />;
+            return <InboxFilter ctx={TypeContext.root(model)} />;
         }
     });
 
