@@ -47,7 +47,7 @@ namespace Signum.Engine.Workflow
 
         static Expression<Func<CaseEntity, CaseActivityEntity>> DecompositionSurrogateActivityExpression =
           childCase => Database.Query<CaseActivityEntity>()
-          .Where(ca => ca.Case.ToLite() == childCase.ParentCase)
+          .Where(ca => ca.Case == childCase.ParentCase)
           .SingleOrDefaultEx(ca => ca.WorkflowActivity.Decomposition.Workflow == childCase.Workflow);
         [ExpressionField]
         public static CaseActivityEntity DecompositionSurrogateActivity(this CaseEntity childCase)
@@ -352,7 +352,7 @@ namespace Signum.Engine.Workflow
 
                         var @case = new CaseEntity
                         {
-                            ParentCase = args.TryGetArgC<Lite<CaseEntity>>(),
+                            ParentCase = args.TryGetArgC<CaseEntity>(),
                             Workflow = w,
                             Description = w.Name,
                             MainEntity = mainEntity,
@@ -671,7 +671,7 @@ namespace Signum.Engine.Workflow
                     var subWorkflow = decActivity.Decomposition.Workflow;
                     foreach (var se in subEntities)
                     {
-                        var caseActivity = subWorkflow.ConstructFrom(CaseActivityOperation.CreateCaseFromWorkflow, se, ca.Case.ToLite());
+                        var caseActivity = subWorkflow.ConstructFrom(CaseActivityOperation.CreateCaseFromWorkflow, se, ca.Case);
                         caseActivity.Previous = ca.ToLite();
                         caseActivity.Execute(CaseActivityOperation.Register);
                     }
