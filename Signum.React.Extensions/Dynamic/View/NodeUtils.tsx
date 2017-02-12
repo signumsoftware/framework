@@ -19,7 +19,7 @@ import { ExpressionOrValueComponent, FieldComponent } from './Designer'
 import { FindOptionsLine } from './FindOptionsComponent'
 import { FindOptionsExpr, toFindOptions } from './FindOptionsExpression'
 import { AuthInfo } from './AuthInfo'
-import { BaseNode, LineBaseNode, EntityBaseNode, EntityListBaseNode, EntityLineNode, ContainerNode, EntityTableColumnNode, CustomContextNode } from './Nodes'
+import { BaseNode, LineBaseNode, EntityBaseNode, EntityListBaseNode, EntityLineNode, ContainerNode, EntityTableColumnNode, CustomContextNode, TypeIsNode } from './Nodes'
 import { toHtmlAttributes, HtmlAttributesExpression, withClassName } from './HtmlAttributesExpression'
 import { toStyleOptions, StyleOptionsExpression, subCtx } from './StyleOptionsExpression'
 import { HtmlAttributesLine } from './HtmlAttributesComponent'
@@ -258,6 +258,12 @@ export class DesignerNode<N extends BaseNode> {
         {
             var cc = registeredCustomContexts[(this.node as BaseNode as CustomContextNode).typeContext];
             return cc.getPropertyRoute(this as DesignerNode<BaseNode> as DesignerNode<CustomContextNode>);
+        }
+
+        if (options.kind == "TypeIs") {
+            var typeName = (this.node as BaseNode as TypeIsNode).typeName;
+            if (typeName)
+                return PropertyRoute.root(typeName);
         }
 
         if (options.hasCollection)

@@ -4,14 +4,14 @@ import {
     FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityTable,
     EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip, RenderEntity
 } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { ModifiableEntity, Entity, Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { ModifiableEntity, Entity, Lite, isEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { FindOptions, SearchControl, ValueSearchControlLine } from '../../../../Framework/Signum.React/Scripts/Search'
 import {
     getQueryNiceName, TypeInfo, MemberInfo, getTypeInfo, EntityData, EntityKind, getTypeInfos, KindOfType,
-    PropertyRoute, PropertyRouteType, LambdaMemberType, isTypeEntity, Binding
+    PropertyRoute, PropertyRouteType, LambdaMemberType, isTypeEntity, Binding, IsByAll, getAllTypes
 } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -346,6 +346,59 @@ NodeUtils.register<CustomContextNode>({
     </div>),
 });
 
+export interface TypeIsNode extends ContainerNode {
+    kind: "TypeIs",
+    typeName: string;
+}
+
+NodeUtils.register<TypeIsNode>({
+    kind: "TypeIs",
+    group: "Container",
+    order: 7,
+    isContainer: true,
+    validate: dn => NodeUtils.mandatory(dn, n => n.typeName) || (!getTypeInfo(dn.node.typeName) ? `Type '${dn.node.typeName}' not found` : undefined),
+    renderTreeNode: dn => <span><small> {dn.node.kind}:</small > <strong>{dn.node.typeName}</strong></span>,
+    renderCode: (node, cc) => {
+        const ncc = cc.createNewContext("ctx" + cc.usedNames.length + 1);
+        var childrensCode = node.children.map(c => NodeUtils.renderCode(c, ncc));
+        return ncc.elementCode("div", null, ...childrensCode);
+    },
+    render: (dn, parentCtx) => {
+        if (!isEntity(parentCtx.value) || parentCtx.value.Type != dn.node.typeName)
+            return undefined;
+
+        const nctx = TypeContext.root(parentCtx.value, undefined, parentCtx);
+
+        return NodeUtils.withChildrensSubCtx(dn, nctx, <div />);
+    },
+    renderDesigner: dn => (<div>
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.typeName)} allowsExpression={false} type="string" options={getTypes(dn.route)} defaultValue={null} />
+    </div>),
+});
+
+function getTypes(route: PropertyRoute | undefined): string[] | ((query: string) => string[]) {
+
+    if (route == undefined)
+        return [];
+
+    var tr = route.typeReference();
+    if (tr.name == IsByAll)
+        return autoCompleteType;
+
+    var types = getTypeInfos(tr);
+    if (types.length == 0 || types[0] == undefined)
+        return [];
+
+    return types.map(a => a.name);
+}
+
+function autoCompleteType(query: string): string[] {
+    return getAllTypes()
+        .filter(ti => ti.kind == "Entity" && ti.name.toLowerCase().contains(query.toLowerCase()))
+        .map(a => a.name)
+        .orderBy(a => a.length)
+        .filter((k, i) => i < 5);
+}
 
 export interface LineBaseNode extends BaseNode {
     labelText?: ExpressionOrValue<string>;
