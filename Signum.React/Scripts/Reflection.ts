@@ -14,6 +14,7 @@ export function getEnumInfo(enumTypeName: string, enumId: number) {
     return ti.membersById![enumId];
 }
 
+
 export interface TypeInfo {
     kind: KindOfType;
     name: string;
@@ -154,6 +155,9 @@ export const EntityKindValues: EntityKind[] = ["SystemString", "System", "Relati
 export type EntityData = "Master" | "Transactional";
 export const EntityDataValues: EntityData[] = ["Master", "Transactional"];
 
+export function getAllTypes(): TypeInfo[] {
+    return Dic.getValues(_types);
+}
 
 export interface TypeInfoDictionary {
     [name: string]: TypeInfo
