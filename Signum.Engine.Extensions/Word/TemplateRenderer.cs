@@ -36,7 +36,7 @@ namespace Signum.Engine.Word
         {
             List<QueryToken> tokens = new List<QueryToken>();
 
-            foreach (var root in document.RecursivePartsRootElements())
+            foreach (var root in document.AllRootElements())
             {
                 foreach (var item in root.Descendants<BaseNode>())
                 {
@@ -68,7 +68,7 @@ namespace Signum.Engine.Word
                 SystemWordTemplate = systemWordTemplate
             };
 
-            foreach (var root in document.RecursivePartsRootElements())
+            foreach (var root in document.AllRootElements())
             {
                 var list = root.Descendants<BaseNode>().ToList(); //eager
 
@@ -81,7 +81,7 @@ namespace Signum.Engine.Word
 
         public void AssertClean()
         {
-            foreach (var root in this.document.RecursivePartsRootElements())
+            foreach (var root in this.document.AllRootElements())
             {
                 var list = root.Descendants<BaseNode>().ToList();
 

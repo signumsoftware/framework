@@ -153,7 +153,8 @@ namespace Signum.Engine.Word
             {
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(template.Query.ToQueryName());
 
-                var result = template.ProcessOpenXmlPackage((document, memory) =>
+                string error = null;
+                template.ProcessOpenXmlPackage(document =>
                 {
                     Dump(document, "0.Original.txt");
 
@@ -162,17 +163,15 @@ namespace Signum.Engine.Word
                     parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
                     parser.AssertClean();
 
-                    if (parser.Errors.IsEmpty())
-                        return null;
-
-                    return parser.Errors.ToString(e => e.Message, "\r\n");
+                    error = parser.Errors.IsEmpty() ? null :
+                        parser.Errors.ToString(e => e.Message, "\r\n");
                 });
 
-                return result;
+                return error;
             }
         }
 
-        public static string DumpFileFolder;
+        public static string DumpFileFolder = @"C:\TemplatesPoperPoint";
 
         public static byte[] CreateReport(this Lite<WordTemplateEntity> liteTemplate, Entity entity, ISystemWordTemplate systemWordTemplate = null, bool avoidConversion = false)
         {
@@ -195,7 +194,7 @@ namespace Signum.Engine.Word
             {
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(template.Query.ToQueryName());
 
-                var array = template.ProcessOpenXmlPackage((document, memory) =>
+                var array = template.ProcessOpenXmlPackage(document =>
                 {
                     Dump(document, "0.Original.txt");
 
@@ -221,8 +220,6 @@ namespace Signum.Engine.Word
                             Entity = entity,
                             SystemWordTemplate = systemWordTemplate
                         }, document);
-
-                    return memory.ToArray();
                 });
 
                 if (!avoidConversion && template.WordConverter != null)
@@ -239,7 +236,7 @@ namespace Signum.Engine.Word
 
         private static void FixDocument(OpenXmlPackage document)
         {
-            foreach (var root in document.RecursivePartsRootElements())
+            foreach (var root in document.AllRootElements())
             {
                 foreach (var cell in root.Descendants<W.TableCell>().ToList())
                 {
@@ -257,7 +254,7 @@ namespace Signum.Engine.Word
             if (!Directory.Exists(DumpFileFolder))
                 Directory.CreateDirectory(DumpFileFolder);
 
-            foreach (var part in RecursiveParts(document).Where(p => p.RootElement != null))
+            foreach (var part in AllParts(document).Where(p => p.RootElement != null))
             {
                 string fullFileName = Path.Combine(DumpFileFolder, part.Uri.ToString().Replace("/", "_") + "." + fileName);
 
@@ -299,7 +296,17 @@ namespace Signum.Engine.Word
 
                 try
                 {
-                    var bytes = template.ProcessOpenXmlPackage((document, memory) =>
+                    SyncronizationContext sc = new SyncronizationContext
+                    {
+                        ModelType = template.SystemWordTemplate.ToType(),
+                        QueryDescription = qd,
+                        Replacements = replacements,
+                        StringDistance = sd,
+                        HasChanges = false,
+                        Variables = new ScopedDictionary<string, ValueProviderBase>(null),
+                    };
+
+                    var bytes = template.ProcessOpenXmlPackage(document =>
                     {
                         Dump(document, "0.Original.txt");
 
@@ -308,18 +315,7 @@ namespace Signum.Engine.Word
                         parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
                         parser.AssertClean();
 
-                        SyncronizationContext sc = new SyncronizationContext
-                        {
-                            ModelType = template.SystemWordTemplate.ToType(),
-                            QueryDescription = qd,
-                            Replacements = replacements,
-                            StringDistance = sd,
-                            HasChanges = false,
-                            Variables = new ScopedDictionary<string, ValueProviderBase>(null),
-                        };
-
-
-                        foreach (var root in document.RecursivePartsRootElements())
+                        foreach (var root in document.AllRootElements())
                         {
                             foreach (var node in root.Descendants<BaseNode>().ToList())
                             {
@@ -327,25 +323,23 @@ namespace Signum.Engine.Word
                             }
                         }
 
-                        if (!sc.HasChanges)
-                            return null;
-
-                        Dump(document, "3.Synchronized.txt");
-                        var variables = new ScopedDictionary<string, ValueProviderBase>(null);
-                        foreach (var root in document.RecursivePartsRootElements())
+                        if (sc.HasChanges)
                         {
-                            foreach (var node in root.Descendants<BaseNode>().ToList())
+                            Dump(document, "3.Synchronized.txt");
+                            var variables = new ScopedDictionary<string, ValueProviderBase>(null);
+                            foreach (var root in document.AllRootElements())
                             {
-                                node.RenderTemplate(variables);
+                                foreach (var node in root.Descendants<BaseNode>().ToList())
+                                {
+                                    node.RenderTemplate(variables);
+                                }
                             }
+
+                            Dump(document, "4.Rendered.txt");
                         }
-
-                        Dump(document, "4.Rendered.txt");
-
-                        return memory.ToArray();
                     });
 
-                    if (bytes == null)
+                    if (!sc.HasChanges)
                         return null;
 
                     file.AllowChange = true;
@@ -380,7 +374,7 @@ namespace Signum.Engine.Word
             }
         }
 
-        public static T ProcessOpenXmlPackage<T>(this WordTemplateEntity template, Func<OpenXmlPackage, MemoryStream, T> processPackage)
+        public static byte[] ProcessOpenXmlPackage(this WordTemplateEntity template, Action<OpenXmlPackage> processPackage)
         {
             var file = template.Template.Retrieve();
 
@@ -397,8 +391,10 @@ namespace Signum.Engine.Word
 
                 using (document)
                 {
-                    return processPackage(document, memory);
+                    processPackage(document);
                 }
+
+                return memory.ToArray();
             }
         }
         
@@ -427,21 +423,15 @@ namespace Signum.Engine.Word
             }
         }
 
-        public static IEnumerable<OpenXmlPartRootElement> RecursivePartsRootElements(this OpenXmlPartContainer document)
+        public static IEnumerable<OpenXmlPartRootElement> AllRootElements(this OpenXmlPartContainer document)
         {
-            return RecursiveParts(document).Select(p => p.RootElement).NotNull();
+            return AllParts(document).Select(p => p.RootElement).NotNull();
         }
 
-        public static IEnumerable<OpenXmlPart> RecursiveParts(this OpenXmlPartContainer container)
+        public static IEnumerable<OpenXmlPart> AllParts(this OpenXmlPartContainer container)
         {
-            List<OpenXmlPart> result = new List<OpenXmlPart>();
-
-            foreach (var item in container.Parts)
-            {
-                result.Add(item.OpenXmlPart);
-                result.AddRange(RecursiveParts(item.OpenXmlPart));
-            }
-
+            var roots = container.Parts.Select(a => a.OpenXmlPart);
+            var result = DirectedGraph<OpenXmlPart>.Generate(roots, c => c.Parts.Select(a => a.OpenXmlPart));
             return result;
         }
 

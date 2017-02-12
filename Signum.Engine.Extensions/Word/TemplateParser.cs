@@ -33,7 +33,7 @@ namespace Signum.Engine.Word
 
         public void ParseDocument()
         {
-            foreach (var p in document.RecursivePartsRootElements())
+            foreach (var p in document.AllRootElements())
             {
                 var wordNP = new WordprocessingNodeProvider();
                 foreach (var par in p.Descendants<W.Paragraph>())
@@ -44,84 +44,84 @@ namespace Signum.Engine.Word
                 var draNP = new DrawingNodeProvider();
                 foreach (var par in p.Descendants<D.Paragraph>())
                 {
-                    ReplaceRuns(par, wordNP);
+                    ReplaceRuns(par, draNP);
                 }
             }
         }
 
         private void ReplaceRuns(OpenXmlCompositeElement par, INodeProvider nodeProvider)
         {
-            string text = par.ChildElements.Where(a=>nodeProvider.IsRun(a)).ToString(r => nodeProvider.GetText(r), "");
+            string text = par.ChildElements.Where(a => nodeProvider.IsRun(a)).ToString(r => nodeProvider.GetText(r), "");
 
-                    var matches = TemplateUtils.KeywordsRegex.Matches(text).Cast<Match>().ToList();
+            var matches = TemplateUtils.KeywordsRegex.Matches(text).Cast<Match>().ToList();
 
-                    if (matches.Any())
-                    {
+            if (matches.Any())
+            {
                 List<ElementInfo> infos = GetElementInfos(par.ChildElements, nodeProvider);
 
-                        par.RemoveAllChildren();
+                par.RemoveAllChildren();
 
-                        var stack = new Stack<ElementInfo>(infos.AsEnumerable().Reverse());
+                var stack = new Stack<ElementInfo>(infos.AsEnumerable().Reverse());
 
-                        foreach (var m in matches)
-                        {
-                            var interval = new Interval<int>(m.Index, m.Index + m.Length);
+                foreach (var m in matches)
+                {
+                    var interval = new Interval<int>(m.Index, m.Index + m.Length);
 
-                            //  [Before][Start][Ignore][Ignore][End]...[Remaining]
-                            //              [        Match       ]
+                    //  [Before][Start][Ignore][Ignore][End]...[Remaining]
+                    //              [        Match       ]
 
-                            ElementInfo start = stack.Pop(); //Start
-                            while (start.Interval.Max <= interval.Min) //Before
-                            {
-                                par.Append(start.Element);
-                                start = stack.Pop();
-                            }
+                    ElementInfo start = stack.Pop(); //Start
+                    while (start.Interval.Max <= interval.Min) //Before
+                    {
+                        par.Append(start.Element);
+                        start = stack.Pop();
+                    }
 
                     var startRun = (OpenXmlCompositeElement)nodeProvider.CastRun(start.Element);
 
-                            if (start.Interval.Min < interval.Min)
-                            {
+                    if (start.Interval.Min < interval.Min)
+                    {
                         var firstRunPart = nodeProvider.NewRun(
-                            nodeProvider.GetRunProperties(startRun)?.Let(r => (OpenXmlCompositeElement)r.CloneNode(true)),
+                            (OpenXmlCompositeElement)nodeProvider.GetRunProperties(startRun)?.CloneNode(true),
                              start.Text.Substring(0, m.Index - start.Interval.Min),
                              SpaceProcessingModeValues.Preserve
                             );
-                                par.Append(firstRunPart);
-                            }
+                        par.Append(firstRunPart);
+                    }
 
-                    par.Append(new MatchNode(nodeProvider, m) { RunProperties = nodeProvider.GetRunProperties(startRun)?.Let(r => (OpenXmlCompositeElement)r.CloneNode(true)) });
+                    par.Append(new MatchNode(nodeProvider, m) { RunProperties = (OpenXmlCompositeElement)nodeProvider.GetRunProperties(startRun)?.CloneNode(true) });
 
-                            ElementInfo end = start;
-                            while (end.Interval.Max < interval.Max) //Ignore
-                                end = stack.Pop();
+                    ElementInfo end = start;
+                    while (end.Interval.Max < interval.Max) //Ignore
+                        end = stack.Pop();
 
-                            if (interval.Max < end.Interval.Max) //End
-                            {
+                    if (interval.Max < end.Interval.Max) //End
+                    {
                         var endRun = (OpenXmlCompositeElement)end.Element;
 
-                                var textPart = end.Text.Substring(interval.Max - end.Interval.Min);
+                        var textPart = end.Text.Substring(interval.Max - end.Interval.Min);
                         var endRunPart = nodeProvider.NewRun(
                             nodeProvider.GetRunProperties(startRun)?.Let(r => (OpenXmlCompositeElement)r.CloneNode(true)),
                             textPart,
                              SpaceProcessingModeValues.Preserve
                             );
 
-                                stack.Push(new ElementInfo
-                                {
-                                    Element = endRunPart,
-                                    Text = textPart,
-                                    Interval = new Interval<int>(interval.Max, end.Interval.Max)
-                                });
-                            }
-                        }
-
-                        while (!stack.IsEmpty()) //Remaining
+                        stack.Push(new ElementInfo
                         {
-                            var pop = stack.Pop();
-                            par.Append(pop.Element);
-                        }
+                            Element = endRunPart,
+                            Text = textPart,
+                            Interval = new Interval<int>(interval.Max, end.Interval.Max)
+                        });
                     }
                 }
+
+                while (!stack.IsEmpty()) //Remaining
+                {
+                    var pop = stack.Pop();
+                    par.Append(pop.Element);
+                }
+            }
+        }
 
         private static List<ElementInfo> GetElementInfos(IEnumerable<OpenXmlElement> childrens, INodeProvider nodeProvider)
         {
@@ -154,7 +154,7 @@ namespace Signum.Engine.Word
 
         public void CreateNodes()
         {
-            foreach (var root in document.RecursivePartsRootElements())
+            foreach (var root in document.AllRootElements())
             {
                 var lists = root.Descendants<MatchNode>().ToList();
 
@@ -166,7 +166,7 @@ namespace Signum.Engine.Word
                     var token = m.Groups["token"].Value;
                     var keyword = m.Groups["keyword"].Value;
                     var dec = m.Groups["dec"].Value;
-                    
+
                     switch (keyword)
                     {
                         case "":
@@ -176,10 +176,10 @@ namespace Signum.Engine.Word
                             else
                             {
                                 var vp = TryParseValueProvider(type, s.Value.Token, dec);
-                                
+
                                 matchNode.Parent.ReplaceChild(new TokenNode(matchNode.NodeProvider, vp, s.Value.Format)
                                 {
-                                    RunProperties = matchNode.RunProperties//?.Do(d => d.Remove()) 
+                                    RunProperties = (OpenXmlCompositeElement)matchNode.RunProperties?.CloneNode(true)
                                 }, matchNode);
 
                                 DeclareVariable(vp);
@@ -191,7 +191,7 @@ namespace Signum.Engine.Word
 
                                 matchNode.Parent.ReplaceChild(new DeclareNode(matchNode.NodeProvider, vp, this.AddError)
                                 {
-                                    RunProperties = matchNode.RunProperties//?.Do(d => d.Remove()) 
+                                    RunProperties = (OpenXmlCompositeElement)matchNode.RunProperties?.CloneNode(true)
                                 }, matchNode);
 
                                 DeclareVariable(vp);
@@ -389,7 +389,7 @@ namespace Signum.Engine.Word
 
         public void AssertClean()
         {
-            foreach (var root in this.document.RecursivePartsRootElements())
+            foreach (var root in this.document.AllRootElements())
             {
                 var list = root.Descendants<MatchNode>().ToList();
 

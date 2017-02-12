@@ -21,6 +21,7 @@ namespace Signum.Engine.Word
         OpenXmlLeafTextElement NewText(string text);
         OpenXmlCompositeElement NewRun(OpenXmlCompositeElement runProps, string text, SpaceProcessingModeValues spaceMode = SpaceProcessingModeValues.Default);
         bool IsRun(OpenXmlElement element);
+        bool IsText(OpenXmlElement element);
         string GetText(OpenXmlElement run);
         OpenXmlCompositeElement CastRun(OpenXmlElement element);
         OpenXmlCompositeElement GetRunProperties(OpenXmlCompositeElement run);
@@ -55,6 +56,11 @@ namespace Signum.Engine.Word
             return a is W.Run;
         }
 
+        public bool IsText(OpenXmlElement a)
+        {
+            return a is W.Text;
+        }
+        
         public OpenXmlCompositeElement GetRunProperties(OpenXmlCompositeElement run)
         {
             return ((W.Run)run).RunProperties;
@@ -98,6 +104,11 @@ namespace Signum.Engine.Word
             return a is D.Run;
         }
 
+        public bool IsText(OpenXmlElement a)
+        {
+            return a is D.Text;
+        }
+
         public OpenXmlCompositeElement GetRunProperties(OpenXmlCompositeElement run)
         {
             return ((D.Run)run).RunProperties;
@@ -117,7 +128,18 @@ namespace Signum.Engine.Word
     public class MatchNode : AlternateContent
     {
         public INodeProvider NodeProvider;
-        public OpenXmlCompositeElement RunProperties;
+
+        OpenXmlCompositeElement runProperties;
+        public OpenXmlCompositeElement RunProperties
+        {
+            get { return this.runProperties; }
+            set
+            {
+                if (value != null && value.Parent != null)
+                    throw new InvalidOperationException("Remove it from his parent first");
+                this.runProperties = value;
+            }
+        }
 
         public Match Match;
 
@@ -166,7 +188,18 @@ namespace Signum.Engine.Word
     public abstract class BaseNode : AlternateContent
     {
         public INodeProvider NodeProvider;
-        public OpenXmlCompositeElement RunProperties;
+
+        OpenXmlCompositeElement runProperties;
+        public OpenXmlCompositeElement RunProperties
+        {
+            get { return this.runProperties; }
+            set
+            {
+                if (value != null && value.Parent != null)
+                    throw new InvalidOperationException("Remove it from his parent first");
+                this.runProperties = value;
+            }
+        }
 
         public BaseNode(INodeProvider nodeProvider)
     {
@@ -234,14 +267,14 @@ namespace Signum.Engine.Word
                 obj is IFormattable ? ((IFormattable)obj).ToString(Format ?? ValueProvider.Format, p.Culture) :
                 obj?.ToString();
 
-            this.ReplaceBy(this.NodeProvider.NewRun(this.RunProperties/*?.Do(prop => prop.Remove())*/, text));
+            this.ReplaceBy(this.NodeProvider.NewRun((OpenXmlCompositeElement)this.RunProperties?.CloneNode(true), text));
         }
 
         protected internal override void RenderTemplate(ScopedDictionary<string, ValueProviderBase> variables)
         {
             var str = "@" + this.ValueProvider.ToString(variables, Format.HasText() ? (":" + TemplateUtils.ScapeColon(Format)) : null);
 
-            this.ReplaceBy(this.NodeProvider.NewRun(this.RunProperties/*?.Do(prop => prop.Remove())*/, str));
+            this.ReplaceBy(this.NodeProvider.NewRun((OpenXmlCompositeElement)this.RunProperties?.CloneNode(true), str));
         }
 
         public override void WriteTo(System.Xml.XmlWriter xmlWriter)
@@ -315,7 +348,7 @@ namespace Signum.Engine.Word
         {
             string str = "@declare" + ValueProvider.ToString(variables, null);
 
-            this.ReplaceBy(this.NodeProvider.NewRun(this.RunProperties/*?.Do(prop => prop.Remove())*/, str));
+            this.ReplaceBy(this.NodeProvider.NewRun((OpenXmlCompositeElement)this.RunProperties?.CloneNode(true), str));
 
             ValueProvider.Declare(variables);
         }
@@ -623,7 +656,7 @@ namespace Signum.Engine.Word
 
         internal OpenXmlElement ReplaceMatchNode(string text)
         {
-            var run = this.MatchNode.NodeProvider.NewRun(this.MatchNode.RunProperties/*?.Do(prop => prop.Remove())*/, text);
+            var run = this.MatchNode.NodeProvider.NewRun((OpenXmlCompositeElement)this.MatchNode.RunProperties?.CloneNode(true), text);
 
             if (this.MatchNode == AscendantNode)
                 return run;
