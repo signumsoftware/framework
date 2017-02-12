@@ -171,7 +171,7 @@ namespace Signum.Engine.Word
             }
         }
 
-        public static string DumpFileFolder = @"C:\TemplatesPoperPoint";
+        public static string DumpFileFolder = null;
 
         public static byte[] CreateReport(this Lite<WordTemplateEntity> liteTemplate, Entity entity, ISystemWordTemplate systemWordTemplate = null, bool avoidConversion = false)
         {
