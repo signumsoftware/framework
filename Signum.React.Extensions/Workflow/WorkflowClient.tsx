@@ -16,6 +16,7 @@ import { defaultContextualClick } from '../../../Framework/Signum.React/Scripts/
 
 import { UserEntity } from '../../../Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization'
 import * as DynamicViewClient from '../../../Extensions/Signum.React.Extensions/Dynamic/DynamicViewClient'
+import { CodeContext } from '../../../Extensions/Signum.React.Extensions/Dynamic/View/NodeUtils'
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import { WorkflowConditionEval, WorkflowActionEval, WorkflowJumpEntity, DecisionResult } from './Signum.Entities.Workflow'
@@ -109,15 +110,69 @@ export function start(options: { routes: JSX.Element[] }) {
 
     Constructor.registerConstructor(WorkflowConditionEntity, () => WorkflowConditionEntity.New({ eval: WorkflowConditionEval.New() }));
     Constructor.registerConstructor(WorkflowActionEntity, () => WorkflowActionEntity.New({ eval: WorkflowActionEval.New() }));
+    
+    registerCustomContexts();
+}
 
-    DynamicViewClient.registeredCustomContexts["caseActivity"] = {
-        getTypeContext: ctx => getCaseActivityContext(ctx),
-        getCodeContext: cc => {
+function registerCustomContexts() {
+
+    function addActx(cc: CodeContext) {
+        if (!cc.assignments["actx"]) {
             cc.assignments["actx"] = "getCaseActivityContext(ctx)";
             cc.imports.push("import { getCaseActivityContext } as WorkflowClient from '../../../../Extensions/Signum.React.Extensions/Workflow/WorkflowClient'");
+        }
+    }
+
+    DynamicViewClient.registeredCustomContexts["caseActivity"] = {
+        getTypeContext: ctx => {
+            var actx = getCaseActivityContext(ctx);
+            return actx;
+        },
+        getCodeContext: cc => {
+            addActx(cc);
             return cc.createNewContext("actx");
         },
         getPropertyRoute: dn => PropertyRoute.root(CaseActivityEntity)
+    };
+
+    DynamicViewClient.registeredCustomContexts["case"] = {
+        getTypeContext: ctx => {
+            var actx = getCaseActivityContext(ctx);
+            return actx && actx.subCtx(a => a.case);
+        },
+        getCodeContext: cc => {
+            addActx(cc);
+            cc.assignments["cctx"] = "actx && actx.subCtx(a => a.case)"; 
+            return cc.createNewContext("cctx");
+        },
+        getPropertyRoute: dn => CaseActivityEntity.propertyRoute(a => a.case)
+    };
+
+
+    DynamicViewClient.registeredCustomContexts["parentCase"] = {
+        getTypeContext: ctx => {
+            var actx = getCaseActivityContext(ctx);
+            return actx && actx.value.case.parentCase ? actx.subCtx(a => a.case.parentCase) : undefined;
+        },
+        getCodeContext: cc => {
+            addActx(cc);
+            cc.assignments["pcctx"] = "actx && actx.value.case.parentCase && actx.subCtx(a => a.case.parentCase)";
+            return cc.createNewContext("pcctx");
+        },
+        getPropertyRoute: dn => CaseActivityEntity.propertyRoute(a => a.case.parentCase)
+    };
+
+    DynamicViewClient.registeredCustomContexts["parentCaseMainEntity"] = {
+        getTypeContext: ctx => {
+            var actx = getCaseActivityContext(ctx);
+            return actx && actx.value.case.parentCase ? actx.subCtx(a => a.case.parentCase!.mainEntity) : undefined;
+        },
+        getCodeContext: cc => {
+            addActx(cc);
+            cc.assignments["pmctx"] = "actx && actx.value.case.parentCase && actx.subCtx(a => a.case.parentCase!.mainEntity)";
+            return cc.createNewContext("pmctx");
+        },
+        getPropertyRoute: dn => CaseActivityEntity.propertyRoute(a => a.case.parentCase!.mainEntity)
     };
 }
 
