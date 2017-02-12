@@ -59,11 +59,13 @@ export default class ShowCodeModal extends React.Component<ShowCodeModalProps, {
 
 function renderFile(typeName: string, node: BaseNode): string {
 
-    var ctx = new NodeUtils.CodeContext();
-    ctx.usedNames = [];
-    ctx.ctxName = "ctx";
+    var cc = new NodeUtils.CodeContext();
+    cc.usedNames = [];
+    cc.imports = [];
+    cc.assignments = {};
+    cc.ctxName = "ctx";
 
-    var text = NodeUtils.renderCode(node, ctx).indent(12);
+    var text = NodeUtils.renderCode(node, cc).indent(12);
 
     return (
         `
@@ -74,11 +76,13 @@ import { ${typeName}Entity } from '../[your namespace]'
 import { ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip, 
          EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, EntityTable } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl, ValueSearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
+${Dic.getValues(cc.imports.toObjectDistinct(a => a)).join("\n")}
 
 export default class ${typeName}Component extends React.Component<{ ctx: TypeContext<${typeName}Entity> }, void> {
 
     render() {
-        var ctx = this.props.ctx;
+        const ctx = this.props.ctx;
+${Dic.map(cc.assignments, (k, v) => `const ${k} = ${v};`).join("\n").indent(8)}
         return (
 ${text}
         );

@@ -112,7 +112,11 @@ export function start(options: { routes: JSX.Element[] }) {
 
     DynamicViewClient.registeredCustomContexts["caseActivity"] = {
         getTypeContext: ctx => getCaseActivityContext(ctx),
-        getCodeContext: cc => cc.createNewContext("actx"),
+        getCodeContext: cc => {
+            cc.assignments["actx"] = "getCaseActivityContext(ctx)";
+            cc.imports.push("import { getCaseActivityContext } as WorkflowClient from '../../../../Extensions/Signum.React.Extensions/Workflow/WorkflowClient'");
+            return cc.createNewContext("actx");
+        },
         getPropertyRoute: dn => PropertyRoute.root(CaseActivityEntity)
     };
 }

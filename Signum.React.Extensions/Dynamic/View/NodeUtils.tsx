@@ -58,12 +58,14 @@ export interface NodeOptions<N extends BaseNode> {
 export class CodeContext {
     ctxName: string;
     usedNames: string[];
+    assignments: { [name: string]: string };
+    imports: string[];
     
     subCtx(field?: string, options?: StyleOptionsExpression): CodeContext {
         if (!field && !options)
             return this;
 
-        var newName = "ctx" + (Dic.getKeys(this.usedNames).length + 1);
+        var newName = "ctx" + (this.usedNames.length + 1);
 
         return this.createNewContext(newName);
     }
@@ -73,6 +75,8 @@ export class CodeContext {
         var result = new CodeContext();
         result.ctxName = newName;
         result.usedNames = this.usedNames;
+        result.imports = this.imports;
+        result.assignments = this.assignments;
         return result;
     }
 
@@ -82,11 +86,11 @@ export class CodeContext {
             return expressionOrValue.toString();
 
         if (isExpression(expressionOrValue))
-            return expressionOrValue.__code__.replace(/\bctx\b/, this.ctxName);
+            return expressionOrValue.__code__;
 
         var result =  JSON.stringify(expressionOrValue, (k, v) => {
             if (v != undefined && isExpression(v))
-                return "%<%" + v.__code__.replace(/\bctx\b/, this.ctxName) + "%>%";
+                return "%<%" + v.__code__ + "%>%";
             return v;
         }, 3);
 
@@ -139,6 +143,8 @@ ${childrenString}
     elementCodeWithChildrenSubCtx(type: string, props: any, node: ContainerNode): string{
 
         var ctx = this.subCtx((node as any).field, (node as any).styleOptions);
+        if (this != ctx)
+            this.assignments[ctx.ctxName] = this.subCtxCode((node as any).field, (node as any).styleOptions).__code__;
 
         var childrensCode = node.children.map(c => renderCode(c, ctx));
 
@@ -190,15 +196,25 @@ ${childrenString}
         if (!node.children || !node.children.length)
             return undefined;
 
-        var cc = new CodeContext();
-        cc.ctxName = "ctx" + (Dic.getKeys(this.usedNames).length + 1);
+        const cc = new CodeContext();
+        cc.ctxName = "ctx" + (this.usedNames.length + 1);
+        this.usedNames.push(cc.ctxName);
         cc.usedNames = this.usedNames;
+        cc.imports = this.imports;
+        cc.assignments = {};
 
-        var div = cc.elementCodeWithChildren("div", null, node)
+        const div = cc.elementCodeWithChildren("div", null, node);
+
+        const assignments = Dic.map(cc.assignments, (k, v) => `const ${k} = ${v};`).join("\n");
+        const block = !assignments ? `(${div})` : `{
+${assignments.indent(4)}
+    return (${div});
+}`
+
         if (withComment)
-            return { __code__: `(${cc.ctxName} /*: YourEntity*/) => (${div})` };
+            return { __code__: `(${cc.ctxName} /*: YourEntity*/) => ${block}` };
         else
-            return { __code__: `${cc.ctxName} => (${div})` };
+            return { __code__: `${cc.ctxName} => ${block}` };
     }
    
 }
@@ -742,7 +758,6 @@ export function bindExpr(lambda: (...params: any[]) => any, ...parameters: Expre
     var body = parts[4];
 
     var newBody = body.replace(/\b[$a-zA-Z_][0-9a-zA-Z_$]*\b/g, str => params.contains(str) ? toCodeEx(parameters[params.indexOf(str)]) : str);
-
 
     return {
         __code__: newBody

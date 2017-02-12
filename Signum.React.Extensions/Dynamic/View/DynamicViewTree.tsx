@@ -156,7 +156,7 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
     handleGenerateChildren = () => {
 
         var selected = this.props.rootNode.context.getSelectedNode() ! as DesignerNode<ContainerNode>;
-        selected.node.children.push(...NodeConstructor.createSubChildren(selected.route!));
+        selected.node.children.push(...NodeConstructor.createSubChildren(selected.fixRoute()!));
         selected.context.refreshView();
     }
 

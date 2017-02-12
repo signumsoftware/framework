@@ -359,9 +359,10 @@ NodeUtils.register<TypeIsNode>({
     validate: dn => NodeUtils.mandatory(dn, n => n.typeName) || (!getTypeInfo(dn.node.typeName) ? `Type '${dn.node.typeName}' not found` : undefined),
     renderTreeNode: dn => <span><small> {dn.node.kind}:</small > <strong>{dn.node.typeName}</strong></span>,
     renderCode: (node, cc) => {
-        const ncc = cc.createNewContext("ctx" + cc.usedNames.length + 1);
+        const ncc = cc.createNewContext("ctx" + (cc.usedNames.length + 1));
+        cc.assignments[ncc.ctxName] = `${node.typeName}Entity.isInstanceOf(${cc.ctxName}.value) ? ${cc.ctxName}.cast(${node.typeName}) : null`;
         var childrensCode = node.children.map(c => NodeUtils.renderCode(c, ncc));
-        return ncc.elementCode("div", null, ...childrensCode);
+        return "{" + ncc.ctxName + " && " + ncc.elementCode("div", null, ...childrensCode) + "}";
     },
     render: (dn, parentCtx) => {
         if (!isEntity(parentCtx.value) || parentCtx.value.Type != dn.node.typeName)
