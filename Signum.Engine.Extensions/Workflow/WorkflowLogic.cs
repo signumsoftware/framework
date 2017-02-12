@@ -158,33 +158,12 @@ namespace Signum.Engine.Workflow
             return WorkflowGraphLazy.Value.GetOrThrow(e.Lane.Pool.Workflow.ToLite()).PreviousGraph.RelatedTo(e).Values;
         }
 
-        public class WorkflowNodeGraph
-        {
-            public Lite<WorkflowEntity> Workflow { get; internal set; }
-            public DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity> NextGraph { get; internal set; }
-            public DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity> PreviousGraph { get; internal set; }
-
-            public Dictionary<Lite<WorkflowEventEntity>, WorkflowEventEntity> Events { get; internal set; }
-            public Dictionary<Lite<WorkflowActivityEntity>, WorkflowActivityEntity> Activities { get; internal set; }
-            public Dictionary<Lite<WorkflowGatewayEntity>, WorkflowGatewayEntity> Gateways{ get; internal set; }
-            public Dictionary<Lite<WorkflowConnectionEntity>, WorkflowConnectionEntity> Connections { get; internal set; }
-
-            internal List<Lite<IWorkflowNodeEntity>> Autocomplete(string subString, int count)
-            {
-                return AutocompleteUtils.Autocomplete(Events.Keys, subString, count).Cast<Lite<IWorkflowNodeEntity>>()
-                    .Concat(AutocompleteUtils.Autocomplete(Activities.Keys, subString, count))
-                    .Concat(AutocompleteUtils.Autocomplete(Gateways.Keys, subString, count))
-                    .OrderByDescending(a => a.ToString().Length)
-                    .Take(count)
-                    .ToList();
-            }
-        }
 
         static ResetLazy<Dictionary<Lite<WorkflowEntity>, WorkflowNodeGraph>> WorkflowGraphLazy;
 
-        public static List<Lite<IWorkflowNodeEntity>> AutocompleteNodes(Lite<WorkflowEntity> workflow, string subString, int count)
+        public static List<Lite<IWorkflowNodeEntity>> AutocompleteNodes(Lite<WorkflowEntity> workflow, string subString, int count, List<Lite<IWorkflowNodeEntity>> excludes)
         {
-            return WorkflowGraphLazy.Value.GetOrThrow(workflow).Autocomplete(subString, count);
+            return WorkflowGraphLazy.Value.GetOrThrow(workflow).Autocomplete(subString, count, excludes);
         }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -212,6 +191,7 @@ namespace Signum.Engine.Workflow
                         Entity = e,
                         e.Id,
                         e.Name,
+                        e.BpmnElementId,
                         e.Workflow,
                     });
 
@@ -225,6 +205,7 @@ namespace Signum.Engine.Workflow
                         Entity = e,
                         e.Id,
                         e.Name,
+                        e.BpmnElementId,
                         e.Pool,
                         e.Pool.Workflow,
                     });
@@ -240,11 +221,13 @@ namespace Signum.Engine.Workflow
                         Entity = e,
                         e.Id,
                         e.Name,
+                        e.BpmnElementId,
                         e.Comments,
                         e.Lane,
                         e.Lane.Pool.Workflow,
                     });
 
+                sb.AddUniqueIndexMList((WorkflowActivityEntity a) => a.Jumps, mle => new { mle.Parent, mle.Element.To });
 
                 sb.Include<WorkflowEventEntity>()
                     .WithSave(WorkflowEventOperation.Save)
@@ -257,6 +240,7 @@ namespace Signum.Engine.Workflow
                         e.Id,
                         e.Type,
                         e.Name,
+                        e.BpmnElementId,
                         e.Lane,
                         e.Lane.Pool.Workflow,
                     });
@@ -272,6 +256,7 @@ namespace Signum.Engine.Workflow
                         e.Id,
                         e.Type,
                         e.Name,
+                        e.BpmnElementId,
                         e.Lane,
                         e.Lane.Pool.Workflow,
                     });
@@ -288,6 +273,8 @@ namespace Signum.Engine.Workflow
                     {
                         Entity = e,
                         e.Id,
+                        e.Name,
+                        e.BpmnElementId,
                         e.From,
                         e.To,
                     });
@@ -303,27 +290,17 @@ namespace Signum.Engine.Workflow
 
                         var result = Database.RetrieveAllLite<WorkflowEntity>().ToDictionary(w => w, w =>
                         {
-                             var nodeGraph = new WorkflowNodeGraph
-                             {
-                                 Workflow = w,
-                                 Events = events.TryGetC(w).EmptyIfNull().ToDictionary(e => e.ToLite()),
-                                 Gateways = gateways.TryGetC(w).EmptyIfNull().ToDictionary(g => g.ToLite()),
-                                 Activities = activities.TryGetC(w).EmptyIfNull().ToDictionary(a => a.ToLite()),
-                                 Connections = connections.TryGetC(w).EmptyIfNull().ToDictionary(c => c.ToLite()),
+                            var nodeGraph = new WorkflowNodeGraph
+                            {
+                                Workflow = w,
+                                Events = events.TryGetC(w).EmptyIfNull().ToDictionary(e => e.ToLite()),
+                                Gateways = gateways.TryGetC(w).EmptyIfNull().ToDictionary(g => g.ToLite()),
+                                Activities = activities.TryGetC(w).EmptyIfNull().ToDictionary(a => a.ToLite()),
+                                Connections = connections.TryGetC(w).EmptyIfNull().ToDictionary(c => c.ToLite()),
+                            };
 
-                             };
-
-                             var graph = new DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity>();
-
-                             foreach (var e in nodeGraph.Events.Values) graph.Add(e);
-                             foreach (var a in nodeGraph.Activities.Values) graph.Add(a);
-                             foreach (var g in nodeGraph.Gateways.Values) graph.Add(g);
-                             foreach (var c in nodeGraph.Connections.Values) graph.Add(c.From, c.To, c);
-
-                             nodeGraph.NextGraph = graph;
-                             nodeGraph.PreviousGraph = graph.Inverse();
-
-                             return nodeGraph;
+                            nodeGraph.FillGraphs();
+                            return nodeGraph;
                         });
 
                         return result;
@@ -394,6 +371,7 @@ namespace Signum.Engine.Workflow
                     new InvalidateWith(typeof(WorkflowActionEntity)));
             }
         }
+
 
         private static void ThrowConnectionError(IQueryable<WorkflowConnectionEntity> queryable, Entity toDelete)
         {
@@ -490,11 +468,53 @@ namespace Signum.Engine.Workflow
                 workflow.Save();
 
             wb.ApplyChanges(model, replacements);
+            wb.ValidateGraph();
             workflow.FullDiagramXml = new WorkflowXmlEntity { DiagramXml = wb.GetXDocument().ToString() };
             workflow.Save();
         }
     }
 
+    public class WorkflowNodeGraph
+    {
+        public Lite<WorkflowEntity> Workflow { get; internal set; }
+        public DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity> NextGraph { get; internal set; }
+        public DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity> PreviousGraph { get; internal set; }
 
-    
+        public Dictionary<Lite<WorkflowEventEntity>, WorkflowEventEntity> Events { get; internal set; }
+        public Dictionary<Lite<WorkflowActivityEntity>, WorkflowActivityEntity> Activities { get; internal set; }
+        public Dictionary<Lite<WorkflowGatewayEntity>, WorkflowGatewayEntity> Gateways { get; internal set; }
+        public Dictionary<Lite<WorkflowConnectionEntity>, WorkflowConnectionEntity> Connections { get; internal set; }
+
+        internal List<Lite<IWorkflowNodeEntity>> Autocomplete(string subString, int count, List<Lite<IWorkflowNodeEntity>> excludes)
+        {
+            var events = AutocompleteUtils.Autocomplete(Events.Where(a => a.Value.Type == WorkflowEventType.Finish).Select(a => a.Key), subString, count);
+            var activities = AutocompleteUtils.Autocomplete(Activities.Keys, subString, count);
+            var gateways = AutocompleteUtils.Autocomplete(Gateways.Keys, subString, count);
+            return new Sequence<Lite<IWorkflowNodeEntity>>()
+                {
+                    events,
+                    activities,
+                    gateways
+                }
+            .Except(excludes.EmptyIfNull())
+            .OrderByDescending(a => a.ToString().Length)
+            .Take(count)
+            .ToList();
+        }
+
+        internal void FillGraphs()
+        {
+            var graph = new DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity>();
+
+            foreach (var e in this.Events.Values) graph.Add(e);
+            foreach (var a in this.Activities.Values) graph.Add(a);
+            foreach (var g in this.Gateways.Values) graph.Add(g);
+            foreach (var c in this.Connections.Values) graph.Add(c.From, c.To, c);
+
+            this.NextGraph = graph;
+            this.PreviousGraph = graph.Inverse();
+        }
+    }
+
+
 }

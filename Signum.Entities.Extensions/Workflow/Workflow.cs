@@ -12,7 +12,7 @@ using System.Xml.Linq;
 
 namespace Signum.Entities.Workflow
 {
-    [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class WorkflowEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -81,11 +81,14 @@ namespace Signum.Entities.Workflow
 
     public enum WorkflowMessage
     {
-        [Description("{0} belongs to a different workflow")]
+        [Description("'{0}' belongs to a different workflow")]
         _0BelongsToADifferentWorkflow,
 
-        [Description("Condition {0} is defined for {1} not {2}")]
+        [Description("Condition '{0}' is defined for '{1}' not '{2}'")]
         Condition0IsDefinedFor1Not2,
+        JumpsToSameActivityNotAllowed,
+        [Description("Jump to '{0}' failed because '{1}'")]
+        JumpTo0FailedBecause1,
     }
 
     [Serializable]
@@ -100,6 +103,7 @@ namespace Signum.Entities.Workflow
     {
         WorkflowXmlEntity Xml { get; set; }
         string Name { get; set; }
+        string BpmnElementId { get; set; }
     }
 
     public interface IWorkflowNodeEntity : IWorkflowObjectEntity

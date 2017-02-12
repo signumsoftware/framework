@@ -27,7 +27,7 @@ export default class DashboardView extends React.Component<{ dashboard: Dashboar
         const db = this.props.dashboard;
         const entity = this.props.entity;
 
-        const ctx = TypeContext.root(DashboardEntity, db);
+        const ctx = TypeContext.root(db);
 
         return (
             <div>

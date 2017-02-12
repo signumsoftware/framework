@@ -45,7 +45,7 @@ namespace Signum.Engine.Workflow
                 var laneIds = laneElement.Elements(bpmn + "flowNodeRef").Select(a => a.Value).ToHashSet();
                 var laneElements = processElement.Elements().Where(a => laneIds.Contains(a.Attribute("id")?.Value));
 
-                var events = laneElements.Where(a=>WorkflowEventTypes.ContainsKey(a.Name.LocalName)).ToDictionary(a => a.Attribute("id").Value);
+                var events = laneElements.Where(a=>WorkflowEventTypes.Values.Contains(a.Name.LocalName)).ToDictionary(a => a.Attribute("id").Value);
                 var oldEvents = this.events.Values.ToDictionaryEx(a => a.bpmnElementId, "events");
 
                 Synchronizer.Synchronize(events, oldEvents,
@@ -74,7 +74,7 @@ namespace Signum.Engine.Workflow
                        var we = oe.Entity.ApplyXml(e, locator);
                    });
 
-                var activities = laneElements.Where(a => WorkflowActivityTypes.ContainsKey(a.Name.LocalName)).ToDictionary(a => a.Attribute("id").Value);
+                var activities = laneElements.Where(a => WorkflowActivityTypes.Values.Contains(a.Name.LocalName)).ToDictionary(a => a.Attribute("id").Value);
                 var oldActivities = this.activities.Values.ToDictionaryEx(a => a.bpmnElementId, "activities");
 
                 Synchronizer.Synchronize(activities, oldActivities,
@@ -104,7 +104,7 @@ namespace Signum.Engine.Workflow
                    });
 
                 var gateways = laneElements
-                    .Where(a => WorkflowGatewayTypes.ContainsKey(a.Name.LocalName))
+                    .Where(a => WorkflowGatewayTypes.Values.Contains(a.Name.LocalName))
                     .ToDictionary(a => a.Attribute("id").Value);
                 var oldGateways = this.gateways.Values.ToDictionaryEx(a => a.bpmnElementId, "gateways");
 
@@ -209,29 +209,30 @@ namespace Signum.Engine.Workflow
                 return res;
             }
 
-            public static Dictionary<string, WorkflowEventType> WorkflowEventTypes = new Dictionary<string, WorkflowEventType>()
+            public static Dictionary<WorkflowEventType, string> WorkflowEventTypes = new Dictionary<WorkflowEventType, string>()
             {
-                {"startEvent",WorkflowEventType.Start },
-                {"endEvent",WorkflowEventType.Finish },
+                { WorkflowEventType.Start, "startEvent" },
+                { WorkflowEventType.Finish, "endEvent" },
             };
 
-            public static Dictionary<string, WorkflowActivityType> WorkflowActivityTypes = new Dictionary<string, WorkflowActivityType>()
+            public static Dictionary<WorkflowActivityType, string> WorkflowActivityTypes = new Dictionary<WorkflowActivityType, string>()
             {
-                {"task",WorkflowActivityType.Task },
-                {"userTask",WorkflowActivityType.DecisionTask },
-                {"callActivity",WorkflowActivityType.DecompositionTask },
+                { WorkflowActivityType.Task, "task" },
+                { WorkflowActivityType.DecisionTask, "userTask" },
+                { WorkflowActivityType.CallWorkflow, "callActivity" },
+                { WorkflowActivityType.DecompositionWorkflow, "callActivity" },
             };
 
-            public static Dictionary<string, WorkflowGatewayType> WorkflowGatewayTypes = new Dictionary<string, WorkflowGatewayType>()
+            public static Dictionary<WorkflowGatewayType, string> WorkflowGatewayTypes = new Dictionary<WorkflowGatewayType, string>()
             {
-                {"inclusiveGateway",WorkflowGatewayType.Inclusive },
-                {"parallelGateway",WorkflowGatewayType.Parallel },
-                {"exclusiveGateway",WorkflowGatewayType.Exclusive },
+                { WorkflowGatewayType.Inclusive, "inclusiveGateway" },
+                { WorkflowGatewayType.Parallel, "parallelGateway" },
+                { WorkflowGatewayType.Exclusive, "exclusiveGateway" },
             };
 
             private XElement GetEventProcessElement(XmlEntity<WorkflowEventEntity> e)
             {
-                return new XElement(bpmn + WorkflowEventTypes.Single(kvp=>kvp.Value == e.Entity.Type).Key,
+                return new XElement(bpmn + WorkflowEventTypes.GetOrThrow(e.Entity.Type),
                     new XAttribute("id", e.bpmnElementId),
                     e.Entity.Name.HasText() ? new XAttribute("name", e.Entity.Name) : null,
                     GetConnections(e.Entity.ToLite()));
@@ -239,7 +240,7 @@ namespace Signum.Engine.Workflow
 
             private XElement GetActivityProcessElement(XmlEntity<WorkflowActivityEntity> a)
             {
-                return new XElement(bpmn + WorkflowActivityTypes.Single(kvp => kvp.Value == a.Entity.Type).Key,
+                return new XElement(bpmn + WorkflowActivityTypes.GetOrThrow(a.Entity.Type),
                     new XAttribute("id", a.bpmnElementId),
                     new XAttribute("name", a.Entity.Name),
                     GetConnections(a.Entity.ToLite()));
@@ -247,7 +248,7 @@ namespace Signum.Engine.Workflow
 
             private XElement GetGatewayProcessElement(XmlEntity<WorkflowGatewayEntity> g)
             {
-                return new XElement(bpmn + WorkflowGatewayTypes.Single(kvp => kvp.Value == g.Entity.Type).Key,
+                return new XElement(bpmn + WorkflowGatewayTypes.GetOrThrow(g.Entity.Type),
                     new XAttribute("id", g.bpmnElementId),
                     g.Entity.Name.HasText() ? new XAttribute("name", g.Entity.Name) : null,
                     GetConnections(g.Entity.ToLite()));

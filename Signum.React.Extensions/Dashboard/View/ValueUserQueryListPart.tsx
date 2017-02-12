@@ -19,7 +19,7 @@ export default class ValueUserQueryListPart extends React.Component<{ part: Valu
     render() {
 
         const entity = this.props.part;
-        const ctx = TypeContext.root(ValueUserQueryListPartEntity, entity, { formGroupStyle: "None" });
+        const ctx = TypeContext.root(entity, { formGroupStyle: "None" });
         return (
             <div>
                 {
