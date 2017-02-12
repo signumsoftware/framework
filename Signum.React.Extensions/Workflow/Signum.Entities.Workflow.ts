@@ -36,6 +36,7 @@ export interface CaseActivityEntity extends Entities.Entity {
     note: string | null;
     doneDate: string | null;
     doneBy: Entities.Lite<Authorization.UserEntity> | null;
+    doneType: DoneType | null;
 }
 
 export module CaseActivityMessage {
@@ -51,8 +52,8 @@ export module CaseActivityMessage {
     export const NextActivityOfDecompositionSurrogateAlreadyInProgress = new MessageKey("CaseActivityMessage", "NextActivityOfDecompositionSurrogateAlreadyInProgress");
     export const Only0CanUndoThisOperation = new MessageKey("CaseActivityMessage", "Only0CanUndoThisOperation");
     export const Activity0HasNoJumps = new MessageKey("CaseActivityMessage", "Activity0HasNoJumps");
-    export const RejectOperationIsNotAllowed = new MessageKey("CaseActivityMessage", "RejectOperationIsNotAllowed");
-    export const ThereIsNoPreviousForRejectOperation = new MessageKey("CaseActivityMessage", "ThereIsNoPreviousForRejectOperation");
+    export const Activity0HasNoReject = new MessageKey("CaseActivityMessage", "Activity0HasNoReject");
+    export const ThereIsNoPreviousActivity = new MessageKey("CaseActivityMessage", "ThereIsNoPreviousActivity");
 }
 
 export module CaseActivityOperation {
@@ -126,12 +127,13 @@ export type DecisionResult =
     "Approve" |
     "Decline";
 
-export const DecompositionEntity = new Type<DecompositionEntity>("DecompositionEntity");
-export interface DecompositionEntity extends Entities.EmbeddedEntity {
-    Type: "DecompositionEntity";
-    workflow?: WorkflowEntity | null;
-    subEntitiesEval?: SubEntitiesEval | null;
-}
+export const DoneType = new EnumType<DoneType>("DoneType");
+export type DoneType =
+    "Next" |
+    "Approve" |
+    "Decline" |
+    "Jump" |
+    "Rejected";
 
 export interface ICaseMainEntity extends Entities.Entity {
 }
@@ -164,6 +166,13 @@ export interface SubEntitiesEval extends Dynamic.EvalEntity<ISubEntitiesEvaluato
     Type: "SubEntitiesEval";
 }
 
+export const SubWorkflowEntity = new Type<SubWorkflowEntity>("SubWorkflowEntity");
+export interface SubWorkflowEntity extends Entities.EmbeddedEntity {
+    Type: "SubWorkflowEntity";
+    workflow?: WorkflowEntity | null;
+    subEntitiesEval?: SubEntitiesEval | null;
+}
+
 export const WorkflowActionEntity = new Type<WorkflowActionEntity>("WorkflowAction");
 export interface WorkflowActionEntity extends Entities.Entity {
     Type: "WorkflowAction";
@@ -191,12 +200,12 @@ export interface WorkflowActivityEntity extends Entities.Entity, IWorkflowNodeEn
     comments?: string | null;
     type?: WorkflowActivityType;
     requiresOpen?: boolean;
-    canReject?: boolean;
+    reject?: WorkflowRejectEntity | null;
     viewName?: string | null;
     validationRules: Entities.MList<WorkflowActivityValidationEntity>;
     jumps: Entities.MList<WorkflowJumpEntity>;
     xml?: WorkflowXmlEntity | null;
-    decomposition?: DecompositionEntity | null;
+    subWorkflow?: SubWorkflowEntity | null;
     userHelp?: string | null;
 }
 
@@ -214,13 +223,13 @@ export interface WorkflowActivityModel extends Entities.ModelEntity {
     name?: string | null;
     type?: WorkflowActivityType;
     requiresOpen?: boolean;
-    canReject?: boolean;
+    reject?: WorkflowRejectEntity | null;
     validationRules: Entities.MList<WorkflowActivityValidationEntity>;
     jumps: Entities.MList<WorkflowJumpEntity>;
     viewName?: string | null;
     comments?: string | null;
     userHelp?: string | null;
-    decomposition?: DecompositionEntity | null;
+    subWorkflow?: SubWorkflowEntity | null;
 }
 
 export module WorkflowActivityOperation {
@@ -232,7 +241,8 @@ export const WorkflowActivityType = new EnumType<WorkflowActivityType>("Workflow
 export type WorkflowActivityType =
     "Task" |
     "DecisionTask" |
-    "DecompositionTask";
+    "DecompositionWorkflow" |
+    "CallWorkflow";
 
 export const WorkflowActivityValidationEntity = new Type<WorkflowActivityValidationEntity>("WorkflowActivityValidationEntity");
 export interface WorkflowActivityValidationEntity extends Entities.EmbeddedEntity {
@@ -436,6 +446,13 @@ export interface WorkflowPoolModel extends Entities.ModelEntity {
 export module WorkflowPoolOperation {
     export const Save : Entities.ExecuteSymbol<WorkflowPoolEntity> = registerSymbol("Operation", "WorkflowPoolOperation.Save");
     export const Delete : Entities.DeleteSymbol<WorkflowPoolEntity> = registerSymbol("Operation", "WorkflowPoolOperation.Delete");
+}
+
+export const WorkflowRejectEntity = new Type<WorkflowRejectEntity>("WorkflowRejectEntity");
+export interface WorkflowRejectEntity extends Entities.EmbeddedEntity {
+    Type: "WorkflowRejectEntity";
+    condition?: Entities.Lite<WorkflowConditionEntity> | null;
+    action?: Entities.Lite<WorkflowActionEntity> | null;
 }
 
 export const WorkflowReplacementItemEntity = new Type<WorkflowReplacementItemEntity>("WorkflowReplacementItemEntity");

@@ -36,7 +36,7 @@ namespace Signum.Entities.Workflow
 
         public DateTime? DoneDate { get; set; }
         public Lite<UserEntity> DoneBy { get; set; }
-
+        public DoneType? DoneType { get; set; }
 
         static Expression<Func<CaseActivityEntity, CaseActivityState>> StateExpression =
         @this => @this.DoneDate.HasValue ? CaseActivityState.Done :
@@ -60,6 +60,15 @@ namespace Signum.Entities.Workflow
         {
             return ToStringExpression.Evaluate(this);
         }
+    }
+
+    public enum DoneType
+    {
+        Next,
+        Approve,
+        Decline,
+        Jump,
+        Rejected
     }
 
     public enum CaseActivityState
@@ -109,8 +118,9 @@ namespace Signum.Entities.Workflow
         Only0CanUndoThisOperation,
         [Description("Activity '{0}' has no jumps")]
         Activity0HasNoJumps,
-        RejectOperationIsNotAllowed,
-        ThereIsNoPreviousForRejectOperation,
+        [Description("Activity '{0}' has no reject")]
+        Activity0HasNoReject,
+        ThereIsNoPreviousActivity,
     }
 
 

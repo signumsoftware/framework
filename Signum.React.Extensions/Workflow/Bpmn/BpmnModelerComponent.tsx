@@ -170,7 +170,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
             return WorkflowActivityModel.New({
                 mainEntityType: this.getMainType(),
                 name: elementName,
-                type: (this.isCallActivity(elementType) ? "DecompositionTask" :
+                type: (this.isCallActivity(elementType) ? "CallWorkflow" :
                     this.isUserTask(elementType) ? "DecisionTask" :
                         "Task")
             });
@@ -234,7 +234,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
 
                 if (this.isTaskAnyway(obj.element.type)) {
                     var dt = (me as WorkflowActivityModel).type;
-                    obj.element.type = dt == "DecompositionTask" ? "bpmn:CallActivity" :
+                    obj.element.type = (dt == "CallWorkflow" || dt == "DecompositionWorkflow") ? "bpmn:CallActivity" :
                         dt == "DecisionTask" ? "bpmn:UserTask" : "bpmn:Task";
                 }
 
