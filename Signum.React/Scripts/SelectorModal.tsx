@@ -70,11 +70,13 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
 
         const {display, name, title, message, size, dialogClassName} = config!;
 
-        if (options.length == 1)
-            return Promise.resolve(options.single());
+        if (!config || !config.forceShow) {
+            if (options.length == 1)
+                return Promise.resolve(options.single());
 
-        if (options.length == 0)
-            return Promise.resolve(undefined);
+            if (options.length == 0)
+                return Promise.resolve(undefined);
+        }
 
         return openModal<T>(<SelectorModal
             options={options.map(a => ({
@@ -106,6 +108,7 @@ export interface SelectorConfig<T> {
     message?: React.ReactChild;
     size?: Sizes;
     dialogClassName?: string;
+    forceShow?: boolean;
 }
 
 

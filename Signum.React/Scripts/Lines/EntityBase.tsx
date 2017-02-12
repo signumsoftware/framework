@@ -28,6 +28,7 @@ export interface EntityBaseProps extends LineBaseProps {
     findOptions?: FindOptions;
 
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+    viewPromise?: (typeName: string) => Navigator.ViewPromise<ModifiableEntity>;
 }
 
 
@@ -67,8 +68,8 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
         const type = state.type!;
 
-        state.create = EntityBase.defaultIsCreable(type, !!this.props.getComponent);
-        state.view = EntityBase.defaultIsViewable(type, !!this.props.getComponent);
+        state.create = EntityBase.defaultIsCreable(type, !!this.props.getComponent || !!this.props.viewPromise);
+        state.view = EntityBase.defaultIsViewable(type, !!this.props.getComponent || !!this.props.viewPromise);
         state.find = EntityBase.defaultIsFindable(type);
 
         state.viewOnCreate = true;
@@ -110,7 +111,8 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     defaultView(value: ModifiableEntity | Lite<Entity>, propertyRoute: PropertyRoute): Promise<ModifiableEntity> {
         return Navigator.view(value, {
             propertyRoute: propertyRoute,
-            viewPromise: this.props.getComponent && Navigator.ViewPromise.resolve(this.props.getComponent)
+            viewPromise: this.props.getComponent ? Navigator.ViewPromise.resolve(this.props.getComponent) :
+                this.props.viewPromise ? this.props.viewPromise(isLite(value) ? value.EntityType : value.Type) : undefined
         });
     }
 
@@ -173,7 +175,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
     defaultCreate(): Promise<ModifiableEntity | Lite<Entity> | undefined> {
 
-        return this.chooseType(t => this.props.create /*Hack?*/ || Navigator.isCreable(t, !!this.props.getComponent, false))
+        return this.chooseType(t => this.props.create /*Hack?*/ || Navigator.isCreable(t, !!this.props.getComponent || !!this.props.viewPromise, false))
             .then(typeName => typeName ? Constructor.construct(typeName) : undefined)
             .then(e => {
                 if (!e)

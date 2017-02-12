@@ -242,11 +242,19 @@ namespace Signum.Engine.Maps
         //TO   ("[a.b.c].[d.e.f].[a.b.c]", "c.d.f")
         internal static Tuple<string, string> SplitLast(string str)
         {
-            string lastPart = str.EndsWith("]") ? str.AfterLast("["): (str.TryAfterLast('.') ?? str);
+            if (!str.EndsWith("]"))
+            {
+                return Tuple.Create(
+                    str.TryBeforeLast('.'),
+                    str.TryAfterLast('.') ?? str
+                    );
+            }
 
+            var index = str.LastIndexOf('[');
             return Tuple.Create(
-                str.Length > lastPart.Length ? str.Substring(0, str.Length - lastPart.Length - 1) : null,
-                lastPart.UnScapeSql());
+                index == 0 ? null : str.Substring(0, index - 1),
+                str.Substring(index).UnScapeSql()
+            );
         }
 
         public ObjectName OnDatabase(DatabaseName databaseName)
