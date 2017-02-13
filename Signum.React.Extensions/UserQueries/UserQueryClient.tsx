@@ -13,7 +13,7 @@ import { FindOptionsParsed, FindOptions, FilterOption, FilterOperation, OrderOpt
 import * as AuthClient  from '../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
 import { UserQueryEntity, UserQueryPermission, UserQueryMessage,
     QueryFilterEntity, QueryColumnEntity, QueryOrderEntity} from './Signum.Entities.UserQueries'
-import { QueryTokenEntity } from '../UserAssets/Signum.Entities.UserAssets'
+import { QueryTokenEntity, } from '../UserAssets/Signum.Entities.UserAssets'
 import UserQueryMenu from './UserQueryMenu'
 import * as UserAssetsClient from '../UserAssets/UserAssetClient'
 
@@ -118,8 +118,8 @@ export module Converter {
             fo.pagination = uq.paginationMode == undefined ?
                 ((qs && qs.pagination) || Finder.defaultPagination) : {
                     mode: uq.paginationMode,
-                    currentPage: undefined,
-                    elementsPerPage: uq.elementsPerPage
+                    currentPage: uq.paginationMode == "Paginate" ? 1 : undefined,
+                    elementsPerPage: uq.paginationMode == "All" ? undefined : uq.elementsPerPage,
                 } as Pagination;
 
             return fo;
