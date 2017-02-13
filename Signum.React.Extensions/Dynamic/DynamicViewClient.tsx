@@ -12,7 +12,7 @@ import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 import { TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
-import { isTypeEntity, getTypeInfo, } from '../../../Framework/Signum.React/Scripts/Reflection'
+import { isTypeEntity, getTypeInfo, PropertyRoute } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { Entity, ModifiableEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
@@ -29,6 +29,7 @@ import * as DynamicViewComponent from './View/DynamicViewComponent'
 import { DynamicViewComponentProps, DynamicViewPart } from './View/DynamicViewComponent'
 import { AuthInfo } from './View/AuthInfo'
 import * as Nodes from './View/Nodes' //Typings-only
+import * as NodeUtils from './View/NodeUtils' //Typings-only
 
 
 export function start(options: { routes: JSX.Element[] }) {
@@ -48,6 +49,14 @@ export function start(options: { routes: JSX.Element[] }) {
     }));
 
     Navigator.setViewDispatcher(new DynamicViewViewDispatcher());
+}
+
+export const registeredCustomContexts: { [name: string]: CustomContextSettings } = {};
+
+interface CustomContextSettings {
+    getTypeContext: (ctx: TypeContext<any>) => TypeContext<any> | undefined;
+    getCodeContext: (ctx: NodeUtils.CodeContext) => NodeUtils.CodeContext;
+    getPropertyRoute: (dn: NodeUtils.DesignerNode<Nodes.CustomContextNode>) => PropertyRoute;
 }
 
 export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
@@ -323,6 +332,14 @@ export function createDefaultDynamicView(typeName: string): Promise<DynamicViewE
 
 export function loadNodes(): Promise<typeof Nodes> {
     return new Promise<typeof Nodes>(resolve => require(["./View/Nodes"], resolve));
+}
+
+export function getDynamicViewPromise(typeName: string, viewName: string): ViewPromise<ModifiableEntity> {
+
+    return ViewPromise.flat(
+        API.getDynamicView(typeName, viewName)
+            .then(vn => new ViewPromise(resolve => require(['./View/DynamicViewComponent'], resolve)).withProps({ initialDynamicView: vn }))
+    );
 }
 
 

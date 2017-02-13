@@ -33,6 +33,10 @@ export default class CasePageFrame extends React.Component<CasePageFrameProps, C
 
     }
 
+    getCaseActivity() {
+        return this.state.pack && this.state.pack.activity;
+    }
+
     componentWillMount() {
         this.load(this.props);
     }

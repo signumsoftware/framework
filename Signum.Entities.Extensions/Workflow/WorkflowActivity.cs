@@ -26,6 +26,10 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
+        [NotNullable, SqlDbType(Size = 100)]
+        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
+        public string BpmnElementId { get; set; }
+
         [SqlDbType(Size = 400)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 400, MultiLine = true)]
         public string Comments { get; set; }
@@ -33,6 +37,8 @@ namespace Signum.Entities.Workflow
         public WorkflowActivityType Type { get; set; }
 
         public bool RequiresOpen { get; set; }
+
+        public WorkflowRejectEntity Reject { get; set; }
 
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 255)]
         public string ViewName { get; set; }
@@ -50,13 +56,13 @@ namespace Signum.Entities.Workflow
         public WorkflowXmlEntity Xml { get; set; }
         
         [NotifyChildProperty]
-        public DecompositionEntity Decomposition { get; set; }
+        public SubWorkflowEntity SubWorkflow { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = true, MultiLine = true)]
         public string UserHelp { get; set; }
 
-        static Expression<Func<WorkflowActivityEntity, string>> ToStringExpression = @this => @this.Name;
+        static Expression<Func<WorkflowActivityEntity, string>> ToStringExpression = @this => @this.Name ?? @this.BpmnElementId;
         [ExpressionField]
         public override string ToString()
         {
@@ -65,13 +71,24 @@ namespace Signum.Entities.Workflow
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Name == nameof(Decomposition))
+            if (pi.Name == nameof(SubWorkflow))
             {
-                if (Decomposition != null && this.Type != WorkflowActivityType.DecompositionTask)
+                var requiresSubWorkflow = this.Type == WorkflowActivityType.CallWorkflow || this.Type == WorkflowActivityType.DecompositionWorkflow;
+                if (SubWorkflow != null && !requiresSubWorkflow)
                     return ValidationMessage._0ShouldBeNull.NiceToString(pi.NiceName());
 
-                if (Decomposition == null && this.Type == WorkflowActivityType.DecompositionTask)
+                if (SubWorkflow == null && requiresSubWorkflow)
                     return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+            }
+
+            if(pi.Name == nameof(Jumps))
+            {
+                var repated = NoRepeatValidatorAttribute.ByKey(Jumps, j => j.To);
+                if (repated.HasText())
+                    return ValidationMessage._0HasSomeRepeatedElements1.NiceToString(pi.NiceName(), repated);
+
+                if (Jumps.Any(j => j.To.RefersTo(this)))
+                    return WorkflowMessage.JumpsToSameActivityNotAllowed.NiceToString();
             }
             return base.PropertyValidation(pi);
         }
@@ -79,16 +96,18 @@ namespace Signum.Entities.Workflow
         public ModelEntity GetModel()
         {
             var model = new WorkflowActivityModel();
+            model.WorkflowActivity = this.ToLite();
             model.Workflow = this.Lane.Pool.Workflow;
             model.MainEntityType = model.Workflow.MainEntityType;
             model.Name = this.Name;
             model.Type = this.Type;
             model.RequiresOpen = this.RequiresOpen;
+            model.Reject = this.Reject;
             model.ValidationRules.AssignMList(this.ValidationRules);
             model.Jumps.AssignMList(this.Jumps);
             model.ViewName = this.ViewName;
             model.UserHelp = this.UserHelp;
-            model.Decomposition = this.Decomposition;
+            model.SubWorkflow = this.SubWorkflow;
             model.Comments = this.Comments;
             return model;
         }
@@ -99,13 +118,22 @@ namespace Signum.Entities.Workflow
             this.Name = wModel.Name;
             this.Type = wModel.Type;
             this.RequiresOpen = wModel.RequiresOpen;
+            this.Reject = wModel.Reject;
             this.ValidationRules.AssignMList(wModel.ValidationRules);
             this.Jumps.AssignMList(wModel.Jumps);
             this.ViewName = wModel.ViewName;
             this.UserHelp = wModel.UserHelp;
             this.Comments = wModel.Comments;
-            this.Decomposition = wModel.Decomposition;
+            this.SubWorkflow = wModel.SubWorkflow;
         }
+    }
+
+    [Serializable]
+    public class WorkflowRejectEntity : EmbeddedEntity, IWorkflowConnectionOrJump
+    {
+        public Lite<WorkflowConditionEntity> Condition { get; set; }
+
+        public Lite<WorkflowActionEntity> Action { get; set; }
     }
 
     [Serializable]
@@ -123,7 +151,8 @@ namespace Signum.Entities.Workflow
     {
         Task,
         DecisionTask,
-        DecompositionTask,
+        DecompositionWorkflow,
+        CallWorkflow,
     }
 
     [AutoInit]
@@ -155,7 +184,7 @@ namespace Signum.Entities.Workflow
     }
 
     [Serializable]
-    public class DecompositionEntity : EmbeddedEntity
+    public class SubWorkflowEntity : EmbeddedEntity
     {
         [NotNullable]
         [NotNullValidator]
@@ -171,7 +200,7 @@ namespace Signum.Entities.Workflow
     {
         protected override CompilationResult Compile()
         {
-            var decomposition = (DecompositionEntity)this.GetParentEntity();
+            var decomposition = (SubWorkflowEntity)this.GetParentEntity();
             var activity = (WorkflowActivityEntity)decomposition.GetParentEntity();
 
             var script = this.Script.Trim();
@@ -208,6 +237,7 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowActivityModel : ModelEntity
     {
+        public Lite<WorkflowActivityEntity>  WorkflowActivity { get; set; }
         public WorkflowEntity Workflow { get; set; }
 
         [NotNullable]
@@ -221,6 +251,8 @@ namespace Signum.Entities.Workflow
         public WorkflowActivityType Type { get; set; }
 
         public bool RequiresOpen { get; set; }
+
+        public WorkflowRejectEntity Reject { get; set; }
 
         [NotNullable]
         [NotNullValidator, NoRepeatValidator]
@@ -241,12 +273,13 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(AllowNulls = true, MultiLine = true)]
         public string UserHelp { get; set; }
 
-        public DecompositionEntity Decomposition { get; set; }
+        public SubWorkflowEntity SubWorkflow { get; set; }
     }
 
     public enum WorkflowActivityMessage {
         [Description("Duplicate view name found: {0}")]
         DuplicateViewNameFound0,
+        ChooseADestinationForWorkflowJumping,
     }
 
 }

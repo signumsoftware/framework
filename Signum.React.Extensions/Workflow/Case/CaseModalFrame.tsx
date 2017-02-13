@@ -19,7 +19,7 @@ import CaseButtonBar from './CaseButtonBar'
 require("!style!css!../../../../Framework/Signum.React/Scripts/Frames/Frames.css");
 require("!style!css!./Case.css");
 
-interface ModalFrameProps extends React.Props<ModalFrame>, IModalProps {
+interface CaseModalFrameProps extends React.Props<CaseModalFrame>, IModalProps {
     title?: string;
     entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack;
     validate?: boolean;
@@ -27,7 +27,7 @@ interface ModalFrameProps extends React.Props<ModalFrame>, IModalProps {
     readOnly?: boolean;
 }
 
-interface ModalFrameState {
+interface CaseModalFrameState {
     pack?: WorkflowClient.CaseEntityPack;
     getComponent?: (ctx: TypeContext<ICaseMainEntity>) => React.ReactElement<any>;
     show: boolean;
@@ -36,7 +36,7 @@ interface ModalFrameState {
 
 var modalCount = 0;
 
-export default class ModalFrame extends React.Component<ModalFrameProps, ModalFrameState>  {
+export default class CaseModalFrame extends React.Component<CaseModalFrameProps, CaseModalFrameState>  {
     prefix = "caseModal" + (modalCount++)
     constructor(props: any) {
         super(props);
@@ -59,7 +59,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             .done();
     }
 
-    calculateState(props: ModalFrameState): ModalFrameState {
+    calculateState(props: CaseModalFrameState): CaseModalFrameState {
         return {
             show: true,
         };
@@ -102,6 +102,10 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
     handleOnExited = () => {
         this.props.onExited!(null);
+    }
+
+    getCaseActivity() {
+        return this.state.pack && this.state.pack.activity;
     }
 
     render() {
@@ -262,7 +266,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
     static openNavigate(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, readOnly? :boolean): Promise<void> {
 
-        return openModal<void>(<ModalFrame
+        return openModal<void>(<CaseModalFrame
             entityOrPack={entityOrPack}
             readOnly={readOnly || false} />);
     }

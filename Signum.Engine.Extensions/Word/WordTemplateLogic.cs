@@ -22,7 +22,7 @@ using Signum.Engine.Templating;
 using Signum.Entities.Files;
 using Signum.Utilities.DataStructures;
 using DocumentFormat.OpenXml;
-using DocumentFormat.OpenXml.Wordprocessing;
+using W = DocumentFormat.OpenXml.Wordprocessing;
 using System.Text.RegularExpressions;
 using Signum.Utilities.ExpressionTrees;
 
@@ -36,7 +36,7 @@ namespace Signum.Engine.Word
 
         public static ResetLazy<Dictionary<TypeEntity, List<Lite<WordTemplateEntity>>>> TemplatesByType;
 
-        public static Dictionary<WordTransformerSymbol, Action<WordContext, WordprocessingDocument>> Transformers = new Dictionary<WordTransformerSymbol, Action<WordContext, WordprocessingDocument>>();
+        public static Dictionary<WordTransformerSymbol, Action<WordContext, OpenXmlPackage>> Transformers = new Dictionary<WordTransformerSymbol, Action<WordContext, OpenXmlPackage>>();
         public static Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>> Converters = new Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>>();
 
         static Expression<Func<SystemWordTemplateEntity, IQueryable<WordTemplateEntity>>> WordTemplatesExpression =
@@ -121,7 +121,7 @@ namespace Signum.Engine.Word
             }
         }
 
-        public static void RegisterTransformer(WordTransformerSymbol transformerSymbol, Action<WordContext, WordprocessingDocument> transformer)
+        public static void RegisterTransformer(WordTransformerSymbol transformerSymbol, Action<WordContext, OpenXmlPackage> transformer)
         {
             if (transformerSymbol == null)
                 throw AutoInitAttribute.ArgumentNullException(typeof(WordTransformerSymbol), nameof(transformerSymbol));
@@ -153,29 +153,25 @@ namespace Signum.Engine.Word
             {
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(template.Query.ToQueryName());
 
-                using (var memory = new MemoryStream())
+                string error = null;
+                template.ProcessOpenXmlPackage(document =>
                 {
-                    memory.WriteAllBytes(template.Template.Retrieve().BinaryFile);
+                    Dump(document, "0.Original.txt");
 
-                    using (WordprocessingDocument document = WordprocessingDocument.Open(memory, true))
-                    {
-                        Dump(document, "0.Original.txt");
+                    var parser = new TemplateParser(document, qd, template.SystemWordTemplate.ToType());
+                    parser.ParseDocument(); Dump(document, "1.Match.txt");
+                    parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
+                    parser.AssertClean();
 
-                        var parser = new WordTemplateParser(document, qd, template.SystemWordTemplate.ToType());
-                        parser.ParseDocument(); Dump(document, "1.Match.txt");
-                        parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
-                        parser.AssertClean();
+                    error = parser.Errors.IsEmpty() ? null :
+                        parser.Errors.ToString(e => e.Message, "\r\n");
+                });
 
-                        if (parser.Errors.IsEmpty())
-                            return null;
-
-                        return parser.Errors.ToString(e => e.Message, "\r\n");
-                    }
-                }
+                return error;
             }
         }
 
-        public static string DumpFileFolder;
+        public static string DumpFileFolder = null;
 
         public static byte[] CreateReport(this Lite<WordTemplateEntity> liteTemplate, Entity entity, ISystemWordTemplate systemWordTemplate = null, bool avoidConversion = false)
         {
@@ -191,7 +187,6 @@ namespace Signum.Engine.Word
 
         public static byte[] CreateReport(this WordTemplateEntity template, Entity entity, ISystemWordTemplate systemWordTemplate = null, bool avoidConversion = false)
         {
-
             if (systemWordTemplate != null && template.SystemWordTemplate.FullClassName != systemWordTemplate.GetType().FullName)
                 throw new ArgumentException("systemWordTemplate should be a {0} instead of {1}".FormatWith(template.SystemWordTemplate.FullClassName, systemWordTemplate.GetType().FullName));
 
@@ -199,66 +194,59 @@ namespace Signum.Engine.Word
             {
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(template.Query.ToQueryName());
 
-                 using (var memory = new MemoryStream())
-                 {
-                     memory.WriteAllBytes(template.Template.Retrieve().BinaryFile);
+                var array = template.ProcessOpenXmlPackage(document =>
+                {
+                    Dump(document, "0.Original.txt");
 
-                     using (WordprocessingDocument document = WordprocessingDocument.Open(memory, true))
-                     {
-                         Dump(document, "0.Original.txt");
+                    var parser = new TemplateParser(document, qd, template.SystemWordTemplate.ToType());
+                    parser.ParseDocument(); Dump(document, "1.Match.txt");
+                    parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
+                    parser.AssertClean();
 
-                         var parser = new WordTemplateParser(document, qd, template.SystemWordTemplate.ToType());
-                         parser.ParseDocument(); Dump(document, "1.Match.txt");
-                         parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
-                         parser.AssertClean();
+                    if (parser.Errors.Any())
+                        throw new InvalidOperationException("Error in template {0}:\r\n".FormatWith(template) + parser.Errors.ToString(e => e.Message, "\r\n"));
 
-                         if (parser.Errors.Any())
-                             throw new InvalidOperationException("Error in template {0}:\r\n".FormatWith(template) + parser.Errors.ToString(e => e.Message, "\r\n"));
+                    var renderer = new TemplateRenderer(document, qd, entity, template.Culture.ToCultureInfo(), systemWordTemplate);
+                    renderer.MakeQuery();
+                    renderer.RenderNodes(); Dump(document, "3.Replaced.txt");
+                    renderer.AssertClean();
 
-                         var renderer = new WordTemplateRenderer(document, qd, entity, template.Culture.ToCultureInfo(), systemWordTemplate);
-                         renderer.MakeQuery();
-                         renderer.RenderNodes(); Dump(document, "3.Replaced.txt");
-                         renderer.AssertClean();
+                    FixDocument(document); Dump(document, "4.Fixed.txt");
 
-                         FixDocument(document); Dump(document, "4.Fixed.txt");
+                    if (template.WordTransformer != null)
+                        Transformers.GetOrThrow(template.WordTransformer)(new WordContext
+                        {
+                            Template = template,
+                            Entity = entity,
+                            SystemWordTemplate = systemWordTemplate
+                        }, document);
+                });
 
-                         if (template.WordTransformer != null)
-                             Transformers.GetOrThrow(template.WordTransformer)(new WordContext
-                             {
-                                 Template = template,
-                                 Entity = entity,
-                                 SystemWordTemplate = systemWordTemplate
-                             }, document);
-                     }
+                if (!avoidConversion && template.WordConverter != null)
+                    array = Converters.GetOrThrow(template.WordConverter)(new WordContext
+                    {
+                        Template = template,
+                        Entity = entity,
+                        SystemWordTemplate = systemWordTemplate
+                    }, array);
 
-                     var array = memory.ToArray();
-
-                     if (!avoidConversion && template.WordConverter != null)
-                         array = Converters.GetOrThrow(template.WordConverter)(new WordContext
-                         {
-                             Template = template,
-                             Entity = entity,
-                             SystemWordTemplate = systemWordTemplate
-                         }, array);
-
-                     return array;
-                 }
+                return array;
             }
         }
 
-        private static void FixDocument(WordprocessingDocument document)
+        private static void FixDocument(OpenXmlPackage document)
         {
-            foreach (var root in document.RecursivePartsRootElements())
+            foreach (var root in document.AllRootElements())
             {
-                foreach (var cell in root.Descendants<TableCell>().ToList())
+                foreach (var cell in root.Descendants<W.TableCell>().ToList())
                 {
-                    if (!cell.ChildElements.Any(c => !(c is TableCellProperties)))
-                        cell.AppendChild(new Paragraph());
+                    if (!cell.ChildElements.Any(c => !(c is W.TableCellProperties)))
+                        cell.AppendChild(new W.Paragraph());
                 }
             }
         }
 
-        private static void Dump(WordprocessingDocument document, string fileName)
+        private static void Dump(OpenXmlPackage document, string fileName)
         {
             if (DumpFileFolder == null)
                 return;
@@ -266,7 +254,7 @@ namespace Signum.Engine.Word
             if (!Directory.Exists(DumpFileFolder))
                 Directory.CreateDirectory(DumpFileFolder);
 
-            foreach (var part in RecursiveParts(document).Where(p => p.RootElement != null))
+            foreach (var part in AllParts(document).Where(p => p.RootElement != null))
             {
                 string fullFileName = Path.Combine(DumpFileFolder, part.Uri.ToString().Replace("/", "_") + "." + fileName);
 
@@ -308,44 +296,38 @@ namespace Signum.Engine.Word
 
                 try
                 {
-                    using (var memory = new MemoryStream())
+                    SyncronizationContext sc = new SyncronizationContext
                     {
-                        memory.WriteAllBytes(file.BinaryFile);
+                        ModelType = template.SystemWordTemplate.ToType(),
+                        QueryDescription = qd,
+                        Replacements = replacements,
+                        StringDistance = sd,
+                        HasChanges = false,
+                        Variables = new ScopedDictionary<string, ValueProviderBase>(null),
+                    };
 
-                        using (WordprocessingDocument document = WordprocessingDocument.Open(memory, true))
+                    var bytes = template.ProcessOpenXmlPackage(document =>
+                    {
+                        Dump(document, "0.Original.txt");
+
+                        var parser = new TemplateParser(document, qd, template.SystemWordTemplate.ToType());
+                        parser.ParseDocument(); Dump(document, "1.Match.txt");
+                        parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
+                        parser.AssertClean();
+
+                        foreach (var root in document.AllRootElements())
                         {
-                            Dump(document, "0.Original.txt");
-
-                            var parser = new WordTemplateParser(document, qd, template.SystemWordTemplate.ToType());
-                            parser.ParseDocument(); Dump(document, "1.Match.txt");
-                            parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
-                            parser.AssertClean();
-
-                            SyncronizationContext sc = new SyncronizationContext
+                            foreach (var node in root.Descendants<BaseNode>().ToList())
                             {
-                                ModelType = template.SystemWordTemplate.ToType(),
-                                QueryDescription = qd,
-                                Replacements = replacements,
-                                StringDistance = sd,
-                                HasChanges = false,
-                                Variables = new ScopedDictionary<string, ValueProviderBase>(null),
-                            };
-
-
-                            foreach (var root in document.RecursivePartsRootElements())
-                            {
-                                foreach (var node in root.Descendants<BaseNode>().ToList())
-                                {
-                                    node.Synchronize(sc);
-                                }
+                                node.Synchronize(sc);
                             }
+                        }
 
-                            if (!sc.HasChanges)
-                                return null;
-
+                        if (sc.HasChanges)
+                        {
                             Dump(document, "3.Synchronized.txt");
                             var variables = new ScopedDictionary<string, ValueProviderBase>(null);
-                            foreach (var root in document.RecursivePartsRootElements())
+                            foreach (var root in document.AllRootElements())
                             {
                                 foreach (var node in root.Descendants<BaseNode>().ToList())
                                 {
@@ -355,13 +337,16 @@ namespace Signum.Engine.Word
 
                             Dump(document, "4.Rendered.txt");
                         }
+                    });
 
-                        file.AllowChange = true;
-                        file.BinaryFile = memory.ToArray();
+                    if (!sc.HasChanges)
+                        return null;
 
-                        using (replacements.WithReplacedDatabaseName())
-                            return Schema.Current.Table<FileEntity>().UpdateSqlSync(file, comment: "WordTemplate: " + template.Name);
-                    }                 
+                    file.AllowChange = true;
+                    file.BinaryFile = bytes;
+
+                    using (replacements.WithReplacedDatabaseName())
+                        return Schema.Current.Table<FileEntity>().UpdateSqlSync(file, comment: "WordTemplate: " + template.Name);
                 }
                 catch (TemplateSyncException ex)
                 {
@@ -389,6 +374,30 @@ namespace Signum.Engine.Word
             }
         }
 
+        public static byte[] ProcessOpenXmlPackage(this WordTemplateEntity template, Action<OpenXmlPackage> processPackage)
+        {
+            var file = template.Template.Retrieve();
+
+            using (var memory = new MemoryStream())
+            {
+                memory.WriteAllBytes(file.BinaryFile);
+
+                var ext = Path.GetExtension(file.FileName).ToLower();
+
+                var document = 
+                    ext == ".docx" ? WordprocessingDocument.Open(memory, true) :
+                    ext == ".pptx" ? PresentationDocument.Open(memory, true) :
+                    new InvalidOperationException("Extension '{0}' not supported".FormatWith(ext)).Throw<OpenXmlPackage>();
+
+                using (document)
+                {
+                    processPackage(document);
+                }
+
+                return memory.ToArray();
+            }
+        }
+        
         public static bool Regenerate(WordTemplateEntity template)
         {
             var result = Regenerate(template, null);
@@ -414,21 +423,15 @@ namespace Signum.Engine.Word
             }
         }
 
-        public static IEnumerable<OpenXmlPartRootElement> RecursivePartsRootElements(this WordprocessingDocument document)
+        public static IEnumerable<OpenXmlPartRootElement> AllRootElements(this OpenXmlPartContainer document)
         {
-            return RecursiveParts(document).Select(p => p.RootElement).NotNull();
+            return AllParts(document).Select(p => p.RootElement).NotNull();
         }
 
-        public static IEnumerable<OpenXmlPart> RecursiveParts(this OpenXmlPartContainer container)
+        public static IEnumerable<OpenXmlPart> AllParts(this OpenXmlPartContainer container)
         {
-            List<OpenXmlPart> result = new List<OpenXmlPart>();
-
-            foreach (var item in container.Parts)
-            {
-                result.Add(item.OpenXmlPart);
-                result.AddRange(RecursiveParts(item.OpenXmlPart));
-            }
-
+            var roots = container.Parts.Select(a => a.OpenXmlPart);
+            var result = DirectedGraph<OpenXmlPart>.Generate(roots, c => c.Parts.Select(a => a.OpenXmlPart));
             return result;
         }
 

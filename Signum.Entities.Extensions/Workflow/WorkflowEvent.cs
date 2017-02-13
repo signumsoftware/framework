@@ -15,7 +15,11 @@ namespace Signum.Entities.Workflow
         [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string Name { get; set; }
-        
+
+        [NotNullable, SqlDbType(Size = 100)]
+        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
+        public string BpmnElementId { get; set; }
+
         [NotNullable]
         [NotNullValidator]
         public WorkflowLaneEntity Lane { get; set; }
@@ -27,7 +31,7 @@ namespace Signum.Entities.Workflow
         [NotNullValidator]
         public WorkflowXmlEntity Xml { get; set; }
 
-        static Expression<Func<WorkflowEventEntity, string>> ToStringExpression = @this => @this.Name;
+        static Expression<Func<WorkflowEventEntity, string>> ToStringExpression = @this => @this.Name ?? @this.BpmnElementId;
         [ExpressionField]
         public override string ToString()
         {

@@ -7,6 +7,7 @@ import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOpti
 import { getQueryNiceName, MemberInfo, PropertyRoute, Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import { Expression, ExpressionOrValue, DesignerContext, DesignerNode } from './NodeUtils'
 import { BaseNode, LineBaseNode } from './Nodes'
 import * as NodeUtils from './NodeUtils'
@@ -22,7 +23,7 @@ export interface ExpressionOrValueProps {
     dn: DesignerNode<BaseNode>;
     refreshView?: () => void;
     type: "number" | "string" | "boolean" | "textArea" |  null;
-    options?: (string | number)[];
+    options?: (string | number)[] | ((query: string) => string[]);
     defaultValue: number | string | boolean | null;
     allowsExpression?: boolean;
     avoidDelete?: boolean;
@@ -55,6 +56,11 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
     handleChangeSelectOrInput = (e: React.ChangeEvent<any>) => {
         var sender = (e.currentTarget as HTMLSelectElement | HTMLInputElement);
         this.updateValue(sender.value);
+    }
+
+    handleTypeaheadSelect = (item: string) => {
+        this.updateValue(item);
+        return item;
     }
 
     handleToggleExpression = (e: React.MouseEvent<any>) => {
@@ -158,6 +164,16 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         const style = this.props.hideLabel ? { display: "inline-block" } as React.CSSProperties : undefined;
         
         if (this.props.options) {
+            if (typeof this.props.options == "function")
+                return (
+                    <div style={{ position: "relative" }}>
+                        <Typeahead
+                            inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
+                            getItems={this.handleGetItems}
+                            onSelect={this.handleTypeaheadSelect} />
+                    </div>
+                );
+                else
             return (
                 <select className="form-control" style={style}
                     value={val == null ? "" : val.toString()} onChange={this.handleChangeSelectOrInput} >
@@ -181,6 +197,16 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
                 value={val == null ? "" : val.toString()}
                 onChange={this.handleChangeSelectOrInput} />);
         }
+    }
+
+    handleGetItems = (query: string) => {
+
+        if (typeof this.props.options != "function")
+            throw new Error("Unexpected options");
+
+        const result = this.props.options(query);
+
+        return Promise.resolve(result);
     }
 
 
