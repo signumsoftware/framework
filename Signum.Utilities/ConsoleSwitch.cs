@@ -70,13 +70,20 @@ namespace Signum.Utilities
                 var input = Console.ReadLine().Trim();
                 if (input == "+")
                 {
-                    if (noOfOptsPrinted >= dictionary.Count) continue;
+                    if (noOfOptsPrinted >= dictionary.Count)
+                        continue;
+
                     PrintOptions(noOfOptsPrinted, noOfOptsPerScreen);
                 }
                 else
                 {
-                    if (dictionary.ContainsKey(input)) return GetValue(input);
-                    if (string.IsNullOrWhiteSpace(input)) return null;
+                    if (string.IsNullOrWhiteSpace(input))
+                        return null;
+                    
+                    var val = TryGetValue(input);
+                    if (val != null)
+                        return val;
+                    
                     SafeConsole.WriteLineColor(ConsoleColor.Red, "Plase choose a valid option!");
                     noOfOptsPrinted = 0;
                     PrintOptions(noOfOptsPrinted, noOfOptsPerScreen);
@@ -195,9 +202,30 @@ namespace Signum.Utilities
             return index;
         }
 
-        WithDescription<V> GetValue(string value)
+        WithDescription<V> TryGetValue(string input)
         {
-            return dictionary.GetOrThrow(value, ConsoleMessage.NoOptionWithKey0Found.NiceToString());
+            var exact = dictionary.TryGetC(input);
+            if (exact != null)
+                return exact;
+
+            var sd = new StringDistance();
+            var best = dictionary.Keys.WithMin(a => sd.LevenshteinDistance(input.ToLowerInvariant(), a.ToLowerInvariant()));
+            if (sd.LevenshteinDistance(input.ToLowerInvariant(), best.ToLowerInvariant()) <= 2)
+            {
+                if (SafeConsole.Ask($"Did you mean '{best}'?"))
+                    return dictionary.GetOrThrow(best);
+            }
+
+            return null;
+        }
+
+        WithDescription<V> GetValue(string input)
+        {
+            var result = TryGetValue(input);
+            if (result == null)
+                throw new KeyNotFoundException(ConsoleMessage.NoOptionWithKey0Found.NiceToString(input));
+
+            return result;
         }
 
         public IEnumerator<KeyValuePair<string, WithDescription<V>>> GetEnumerator()
