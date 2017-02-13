@@ -78,7 +78,7 @@ namespace Signum.Engine
 
         static void BulkInsertMLists<T>(List<T> list, SqlBulkCopyOptions options, int? timeout, string message) where T : Entity
         {
-            var mlistPrs = PropertyRoute.GenerateRoutes(typeof(T)).Where(a => a.PropertyRouteType == PropertyRouteType.FieldOrProperty && a.Type.IsMList()).ToMList();
+            var mlistPrs = PropertyRoute.GenerateRoutes(typeof(T), includeIgnored: false).Where(a => a.PropertyRouteType == PropertyRouteType.FieldOrProperty && a.Type.IsMList()).ToList();
             foreach (var pr in mlistPrs)
             {
                 giBulkInsertMListFromEntities.GetInvoker(typeof(T), pr.Type.ElementType())(list, pr, options, timeout, message);
