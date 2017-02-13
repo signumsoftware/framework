@@ -48,12 +48,17 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
     handleSelect = (uq: Lite<UserQueryEntity>) => {
 
         Navigator.API.fetchAndForget(uq).then(userQuery => {
-            const oldFindOptions = this.props.searchControl.props.findOptions;
+            const sc = this.props.searchControl
+            const oldFindOptions =sc.props.findOptions;
             UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, undefined)
                 .then(newFindOptions => {
                     newFindOptions.showFilters = true;
-                    this.props.searchControl.forceUpdate();
+                   sc.forceUpdate();
                     this.setState({ currentUserQuery: uq });
+                    if (sc.props.findOptions.pagination.mode != "All")
+                    {
+                        sc.doSearchPage1();
+                    }
                 })
                 .done();
         }).then();
