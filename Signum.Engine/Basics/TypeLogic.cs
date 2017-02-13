@@ -101,6 +101,21 @@ namespace Signum.Engine.Basics
             Dictionary<string, TypeEntity> current = replacements.ApplyReplacementsToOldCleaning(
                 Administrator.TryRetrieveAll<TypeEntity>(replacements).ToDictionaryEx(c => c.TableName, "tableName in database"), Replacements.KeyTables);
 
+            { //Temporal solution until applications are updated
+                var repeated =
+                    should.Keys.Select(k=>ObjectName.Parse(k)).GroupBy(a => a.Name).Where(a => a.Count() > 1).Select(a => a.Key).Concat(
+                    current.Keys.Select(k=> ObjectName.Parse(k)).GroupBy(a => a.Name).Where(a => a.Count() > 1).Select(a => a.Key)).ToList();
+
+                Func<string, string> simplify = tn =>
+                {
+                    ObjectName name = ObjectName.Parse(tn);
+                    return repeated.Contains(name.Name) ? name.ToString() : name.Name;
+                };
+
+                should = should.SelectDictionary(simplify, v => v);
+                current = current.SelectDictionary(simplify, v => v);
+            }
+
             using (replacements.WithReplacedDatabaseName())
                 return Synchronizer.SynchronizeScript(
                     should,
@@ -147,7 +162,7 @@ namespace Signum.Engine.Basics
                         let type = EnumEntity.Extract(tab.Type) ?? tab.Type
                         select new TypeEntity
                         {
-                            TableName = tab.Name.Name,
+                            TableName = tab.Name.ToString(),
                             CleanName = Reflector.CleanTypeName(type),
                             Namespace = type.Namespace,
                             ClassName = type.Name,

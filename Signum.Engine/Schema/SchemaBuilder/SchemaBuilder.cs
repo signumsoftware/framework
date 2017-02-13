@@ -40,7 +40,9 @@ namespace Signum.Engine.Maps
                 cleanName => schema.NameToType.TryGetC(cleanName));
 
             FromEnumMethodExpander.miQuery = ReflectionTools.GetMethodInfo(() => Database.Query<Entity>()).GetGenericMethodDefinition();
-            Include<TypeEntity>().WithUniqueIndex(t => new { t.Namespace, t.ClassName });
+            Include<TypeEntity>()
+                .WithUniqueIndex(t => new { t.Namespace, t.ClassName });
+
             Settings.AssertNotIncluded = MixinDeclarations.AssertNotIncluded = t =>
             {
                 if (schema.Tables.ContainsKey(t))

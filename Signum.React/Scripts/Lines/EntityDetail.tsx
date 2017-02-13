@@ -47,7 +47,7 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
                         {EntityBase.hasChildrens(buttons) ? buttons : undefined}
                     </div>
                 </legend>
-                <RenderEntity ctx={s.ctx} getComponent={this.props.getComponent}/>
+                <RenderEntity ctx={s.ctx} getComponent={this.props.getComponent} viewPromise={this.props.viewPromise} />
             </fieldset>
         );
     }
