@@ -27,10 +27,12 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
     }
 
     handleStop = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
         API.stop().then(() => this.loadState()).done();
     }
 
     handleStart = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
         API.start().then(() => this.loadState()).done();
     }
 
@@ -47,8 +49,8 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
             <div>
                 <h2>SchedulerLogic state</h2>
                 <div className="btn-toolbar">
-                    {s.Running && <a href="#" className="sf-button btn btn-default active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a> }
-                    {!s.Running && <a href="#" className="sf-button btn btn-default" style={{ color: "green" }} onClick={this.handleStart}>Start</a> }
+                    {s.Running && <a href="" className="sf-button btn btn-default active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a> }
+                    {!s.Running && <a href="" className="sf-button btn btn-default" style={{ color: "green" }} onClick={this.handleStart}>Start</a> }
                 </div >
                 <div id="processMainDiv">
                     <br />
