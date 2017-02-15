@@ -154,7 +154,11 @@ namespace Signum.Web
                             QuerySettings[o].WebQueryName = GenerateWebQueryName(o);
                     }
 
-                    WebQueryNames = QuerySettings.ToDictionary(kvp => kvp.Value.WebQueryName, kvp => kvp.Key, StringComparer.InvariantCultureIgnoreCase, "WebQueryNames");
+                    WebQueryNames = QuerySettings.ToDictionaryEx(
+                        kvp => kvp.Value.WebQueryName,
+                        kvp => kvp.Key,
+                        StringComparer.InvariantCultureIgnoreCase,
+                        "WebQueryNames");
                 }
 
                 if (Initializing != null)
@@ -216,13 +220,13 @@ namespace Signum.Web
 
             FilterOption.SetFilterTokens(options.FilterOptions, queryDescription, canAggregate: false);
 
-            var request = new QueryCountRequest
+            var request = new QueryValueRequest
             { 
                 QueryName = options.QueryName,
                 Filters = options.FilterOptions.Select(f => f.ToFilter()).ToList()
             };
 
-            return DynamicQueryManager.Current.ExecuteQueryCount(request);
+            return (int)DynamicQueryManager.Current.ExecuteQueryCount(request);
         }
 
 

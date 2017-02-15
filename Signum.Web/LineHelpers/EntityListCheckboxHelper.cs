@@ -54,13 +54,13 @@ namespace Signum.Web
 
                     if (entityListCheckBox.UntypedValue != null)
                     {
-                        var already = TypeContextUtilities.TypeElementContext((TypeContext<MList<T>>)entityListCheckBox.Parent).ToDictionary(a=>AsLite(a.Value), "repeated elements");
+                        var already = TypeContextUtilities.TypeElementContext((TypeContext<MList<T>>)entityListCheckBox.Parent).ToDictionaryEx(a=>AsLite(a.Value), "repeated elements");
 
                         List<Lite<IEntity>> liteList = data.Except(already.Keys).ToList();
                         
                         List<T> typedList = typeof(Lite<IEntity>).IsAssignableFrom(typeof(T)) ? liteList.Cast<T>().ToList(): Database.RetrieveFromListOfLite(liteList).Cast<T>().ToList();                        
                         
-                        var extra = typedList.Select((e,i)=>new TypeElementContext<T>(e, (TypeContext)entityListCheckBox.Parent, i + already.Count, null)).ToDictionary(a=>AsLite(a.Value), "repeated elements");
+                        var extra = typedList.Select((e,i)=>new TypeElementContext<T>(e, (TypeContext)entityListCheckBox.Parent, i + already.Count, null)).ToDictionaryEx(a=>AsLite(a.Value), "repeated elements");
 
                         foreach (var lite in data)
                             sb.Add(InternalRepeaterElement(helper, already.TryGetC(lite) ?? extra.GetOrThrow(lite), entityListCheckBox, already.ContainsKey(lite), lite));
