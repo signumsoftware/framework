@@ -11,12 +11,18 @@ import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
-import { NoteEntity, NoteTypeEntity } from './Signum.Entities.Notes'
+import { NoteEntity, NoteTypeEntity, NoteOperation } from './Signum.Entities.Notes'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: JSX.Element[], creatingJustFromCertainTypes: PseudoType[] | undefined }) {
     Navigator.addSettings(new EntitySettings(NoteEntity, e => new ViewPromise(resolve => require(['./Templates/Note'], resolve))));
     Navigator.addSettings(new EntitySettings(NoteTypeEntity, e => new ViewPromise(resolve => require(['./Templates/NoteType'], resolve))));
+
+    if (options.creatingJustFromCertainTypes) {
+        Operations.addSettings(new EntityOperationSettings(NoteOperation.CreateNoteFromEntity, {
+            isVisible: eoc => options.creatingJustFromCertainTypes!.contains(eoc.entity.Type)
+        }));
+    }
 }
