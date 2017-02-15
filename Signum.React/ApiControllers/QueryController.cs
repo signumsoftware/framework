@@ -16,6 +16,7 @@ using Signum.Entities.Basics;
 using Signum.Engine;
 using Signum.React.Filters;
 using System.Collections.ObjectModel;
+using Signum.Engine.Maps;
 
 namespace Signum.React.ApiControllers
 {
@@ -40,16 +41,6 @@ namespace Signum.React.ApiControllers
             var entityType = qd.Columns.Single(a => a.IsEntity).Implementations.Value.Types.SingleEx();
 
             return entitiesQuery.AutocompleteUntyped(request.subString, request.count, entityType);
-        }
-
-        [Route("api/query/findTypeLike"), HttpGet]
-        public List<Lite<TypeEntity>> FindTypeLike(string subString, int count)
-        {
-            var lites = TypeLogic.TypeToEntity.Values.Select(a => a.ToLite()).ToList();
-
-            var result = AutocompleteUtils.Autocomplete(lites, subString, count);
-
-            return result;
         }
 
         [Route("api/query/allLites"), HttpGet, ProfilerActionSplitter("types")]
@@ -142,26 +133,30 @@ namespace Signum.React.ApiControllers
         }
 
         [Route("api/query/queryCount"), HttpPost, ProfilerActionSplitter]
-        public int? QueryCount(QueryCountTS request)
+        public object QueryCount(QueryValueRequestTS request)
         {
             return DynamicQueryManager.Current.ExecuteQueryCount(request.ToQueryCountRequest());
         }
     }
 
-    public class QueryCountTS
+    public class QueryValueRequestTS
     {
         public string querykey;
         public List<FilterTS> filters;
+        public string valueToken;
 
-        public QueryCountRequest ToQueryCountRequest()
+        public QueryValueRequest ToQueryCountRequest()
         {
             var qn = QueryLogic.ToQueryName(this.querykey);
             var qd = DynamicQueryManager.Current.QueryDescription(qn);
 
-            return new QueryCountRequest
+            var value = valueToken.HasText() ? QueryUtils.Parse(valueToken, qd, SubTokensOptions.CanAggregate | SubTokensOptions.CanElement) : null;
+
+            return new QueryValueRequest
             {
                 QueryName = qn,
                 Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false)).ToList(),
+                ValueToken = value,
             };
         }
 

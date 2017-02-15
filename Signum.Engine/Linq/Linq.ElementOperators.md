@@ -22,13 +22,13 @@ List<ProjectEntity> projects = //...
 project.Single();
 ```
 
-And `LINQ to Signum` also does exactly that **if the query ends in one of this operators**. Example:
+And `LINQ to Signum` also does exactly that, but only **if the query ends in one of this operators**. Example:
 
 ```C#
 Database.Query<ProjectEntity>().Single(); //Throws EXCEPTION if 0 or N elements
 ```
 
-The problem come if the operator is in the middle of a LINQ to Signum query: 
+The problem comes when the operator is in the middle of a LINQ to Signum query: 
 
 
 ## In-Database behavior: 
@@ -41,7 +41,7 @@ let c = b.Comments.Single()
 select new { b.Description, c.Text }; 
 ```
 
-This query is going to be translated to some SQL, but makes no sense in SQL to throw exceptions for a particular `BugEntity` with more/less than just one comment. 
+This query is going to be translated to some SQL, but is not cost-effective to throw exceptions for a particular `BugEntity` with more (or less) than just one comment. 
 
 One alternative that we consider was to translate the four operators to the behavior of `FirsOrDefault` when in-database, using `OUTER APPLY` and `TOP(1)`: 
 
@@ -55,7 +55,7 @@ OUTER APPLY (
 ) AS s2
 ```
 
-But having the same translation for the fourth operators is a loose of expressiveness:
+But having the same translation for the fourth operators is a loss of expressiveness:
 
 * If you know that there will be **always more than zero related rows**, the `OUTER APPLY` could be replaced by `CROSS APPLY`. 
 * If you know that there will **never be more than one related row**, so the `TOP(1)` is unnecessary. 
@@ -89,7 +89,7 @@ CROSS APPLY (
 ) AS s1
 ```
 
-This is a beautiful simple query, like the one you could write by hand if you know that each there's always exactly one comment for each bug. But notice that, even if `let` is not meant to increase or reduce the number of results:
+This is a beautiful simple query, like the one you could write by hand if you know that there's always exactly one comment for each bug. But notice that, even if `let` is not meant to increase or reduce the number of results:
 
 * If there are bugs without comments, **The bugs itself will disappear!!**
 * IF there are bugs with more than one comment, **The bugs will be duplicated!!**.

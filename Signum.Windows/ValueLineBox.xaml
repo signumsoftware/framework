@@ -8,7 +8,8 @@
     SizeToContent="WidthAndHeight"
     TextOptions.TextFormattingMode="Display"
     UseLayoutRounding="True" 
-    x:Name="win" Height="149" Width="289">
+    x:Name="win" Height="149" Width="289"
+	FlowDirection="{DynamicResource FlowDirection}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

@@ -27,8 +27,8 @@ export class EnumCheckboxList extends LineBase<EnumCheckboxListProps, EnumCheckb
         state.data = Dic.getKeys(ti.members);
     }
 
-    handleOnChange = (event: React.FormEvent, val: string) => {
-        const current = event.currentTarget as HTMLSelectElement;
+    handleOnChange = (event: React.ChangeEvent<HTMLInputElement>, val: string) => {
+        const current = event.currentTarget;
 
         var list = this.state.ctx.value;
         var toRemove = list.filter(mle => mle.element == val)
@@ -74,7 +74,7 @@ export class EnumCheckboxList extends LineBase<EnumCheckboxListProps, EnumCheckb
     renderInternal() {
        
         return (
-            <fieldset className={classes("SF-checkbox-list", this.state.ctx.errorClass) } {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
+            <fieldset className={classes("SF-checkbox-list", this.state.ctx.errorClass)} {...this.baseHtmlProps() } {...this.state.formGroupHtmlProps}>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>

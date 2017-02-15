@@ -1,19 +1,15 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Microsoft.SqlServer.Types;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Signum.Engine;
-using Signum.Entities;
-using System.Diagnostics;
-using System.IO;
-using Signum.Utilities;
-using Signum.Engine.Linq;
-using System.Linq.Expressions;
-using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Maps;
-using Microsoft.SqlServer.Types;
+using Signum.Entities;
 using Signum.Test.Environment;
+using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
+using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Linq.Expressions;
 
 namespace Signum.Test.LinqProvider
 {
@@ -45,6 +41,8 @@ namespace Signum.Test.LinqProvider
             Assert.IsTrue(artists.Any(a => a.Name.StartsWith("Billy")));
             Assert.IsTrue(artists.Any(a => a.Name.EndsWith("Corgan")));
             Assert.IsTrue(artists.Any(a => a.Name.Like("%Michael%")));
+            Assert.IsTrue(artists.Count(a => a.Name.EndsWith("Orri Páll Dýrason")) == 1);
+            Assert.IsTrue(artists.Count(a => a.Name.StartsWith("Orri Páll Dýrason")) == 1);
 
             Dump((ArtistEntity a) => a.Name.Length);
             Dump((ArtistEntity a) => a.Name.ToLower());
@@ -176,7 +174,7 @@ namespace Signum.Test.LinqProvider
 
 
             var nodes = Database.Query<LabelEntity>().Select(a => a.Node);
- 
+
             Debug.WriteLine(nodes.Select(n => n.GetAncestor(0).InSql()).ToString(", "));
             Debug.WriteLine(nodes.Select(n => n.GetAncestor(1).InSql()).ToString(", "));
             Debug.WriteLine(nodes.Select(n => (int)(short)n.GetLevel().InSql()).ToString(", "));
@@ -199,7 +197,7 @@ namespace Signum.Test.LinqProvider
             Dump((AlbumEntity a) => Math.Acos(Math.Cos(a.Year)));
             Dump((AlbumEntity a) => Math.Tan(a.Year));
             Dump((AlbumEntity a) => Math.Atan(Math.Tan(a.Year)));
-            Dump((AlbumEntity a) => Math.Atan2(1,1).InSql());
+            Dump((AlbumEntity a) => Math.Atan2(1, 1).InSql());
             Dump((AlbumEntity a) => Math.Pow(a.Year, 2).InSql());
             Dump((AlbumEntity a) => Math.Sqrt(a.Year));
             Dump((AlbumEntity a) => Math.Exp(Math.Log(a.Year)));
@@ -210,8 +208,8 @@ namespace Signum.Test.LinqProvider
             Dump((AlbumEntity a) => Math.Truncate(a.Year + 0.5).InSql());
         }
 
-        public void Dump<T,S>(Expression<Func<T, S>> bla)
-            where T:Entity
+        public void Dump<T, S>(Expression<Func<T, S>> bla)
+            where T : Entity
         {
             Debug.WriteLine(Database.Query<T>().Select(a => bla.Evaluate(a).InSql()).ToString(","));
         }
@@ -222,6 +220,38 @@ namespace Signum.Test.LinqProvider
             var list = Database.Query<ArtistEntity>().Select(a => (a.Name + null).InSql()).ToList();
 
             Assert.IsFalse(list.Any(string.IsNullOrEmpty));
+        }
+
+        [TestMethod]
+        public void EnumToString()
+        {
+            var sexs = Database.Query<ArtistEntity>().Select(a => a.Sex.ToString()).ToList();
+        }
+
+        [TestMethod]
+        public void NullableEnumToString()
+        {   
+            var sexs = Database.Query<ArtistEntity>().Select(a => a.Status.ToString()).ToList();
+        }
+
+        [TestMethod]
+        public void ConcatenateStringNullableNominate()
+        {
+            var list2 = Database.Query<ArtistEntity>().Select(a => a.Name + " is " + a.Status).ToList();
+        }
+
+        [TestMethod]
+        public void ConcatenateStringNullableEntity()
+        {
+            var list1 = Database.Query<AlbumEntity>().Select(a => a.Name + " is published by " + a.Label).ToList();
+        }
+
+        [TestMethod]
+        public void ConcatenateStringFullNominate()
+        {
+            var list = Database.Query<ArtistEntity>().Where(a => (a + "").Contains("Michael")).ToList();
+
+            Assert.IsTrue(list.Count == 1);
         }
 
         [TestMethod]
@@ -249,7 +279,7 @@ namespace Signum.Test.LinqProvider
             var songs = Database.MListQuery((AlbumEntity a) => a.Songs).Select(a => a.Element);
 
             var t1 = PerfCounter.Ticks;
-            
+
             var fast = (from s1 in songs
                         from s2 in songs
                         from s3 in songs

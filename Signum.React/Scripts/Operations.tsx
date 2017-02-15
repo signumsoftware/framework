@@ -44,10 +44,16 @@ export function getSettings(operation: OperationSymbol | string): OperationSetti
     return operationSettings[operationKey];
 }
 
-export const isOperationAllowedEvent: Array<(oi: OperationInfo) => boolean> = [];
+export const isOperationAllowedEvent: Array<(oi: OperationInfo | OperationSymbol | string) => boolean> = [];
 
-export function isOperationAllowed(oi: OperationInfo) {
+export function isOperationAllowed(oi: OperationInfo | OperationSymbol | string) {
     return isOperationAllowedEvent.every(a => a(oi));
+}
+
+export function assertOperationAllowed(operation: OperationInfo | OperationSymbol | string) {
+    var key = (operation as OperationInfo | OperationSymbol).key || operation as string;
+    if (!isOperationAllowed(key))
+        throw new Error(`Operation ${key} is denied`);
 }
 
 
@@ -81,7 +87,7 @@ export class ConstructorOperationSettings<T extends Entity> extends OperationSet
     constructor(operationSymbol: ConstructSymbol_Simple<T>, options: ConstructorOperationOptions<T>) {
         super(operationSymbol);
 
-        Dic.extend(this, options);
+        Dic.assign(this, options);
     }
 }
 
@@ -107,14 +113,14 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
     isVisible?: (ctx: ContextualOperationContext<T>) => boolean;
     hideOnCanExecute?: boolean;
     confirmMessage?: (ctx: ContextualOperationContext<T>) => string;
-    onClick?: (ctx: ContextualOperationContext<T>, event: React.MouseEvent) => void;
+    onClick?: (ctx: ContextualOperationContext<T>, event: React.MouseEvent<any>) => void;
     style?: BsStyle;
     order?: number;
 
     constructor(operationSymbol: ConstructSymbol_FromMany<any, T>, options: ContextualOperationOptions<T>) {
         super(operationSymbol);
 
-        Dic.extend(this, options);
+        Dic.assign(this, options);
     }
 }
 
@@ -123,7 +129,7 @@ export interface ContextualOperationOptions<T extends Entity> {
     isVisible?: (ctx: ContextualOperationContext<T>) => boolean;
     hideOnCanExecute?: boolean;
     confirmMessage?: (ctx: ContextualOperationContext<T>) => string;
-    onClick?: (ctx: ContextualOperationContext<T>, event: React.MouseEvent) => void;
+    onClick?: (ctx: ContextualOperationContext<T>, event: React.MouseEvent<any>) => void;
     style?: BsStyle;
     order?: number;
 }
@@ -143,9 +149,9 @@ export interface EntityOperationContext<T extends Entity> {
     tag?: string;
     entity: T;
     operationInfo: OperationInfo;
-    showOperations: boolean;
     settings: EntityOperationSettings<T>;
     canExecute: string | undefined;
+    closeRequested?: boolean;
 }
 
 export class EntityOperationSettings<T extends Entity> extends OperationSettings {
@@ -155,16 +161,17 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
 
     isVisible?: (ctx: EntityOperationContext<T>) => boolean;
     confirmMessage?: (ctx: EntityOperationContext<T>) => string;
-    onClick?: (ctx: EntityOperationContext<T>, event: React.MouseEvent) => void;
+    onClick?: (ctx: EntityOperationContext<T>, event: React.MouseEvent<any>) => void;
     hideOnCanExecute?: boolean;
     group?: EntityOperationGroup | null;
     order?: number;
     style?: BsStyle;
+    withClose?: boolean;
 
     constructor(operationSymbol: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>, options: EntityOperationOptions<T>) {
         super(operationSymbol)
 
-        Dic.extend(this, options);
+        Dic.assign(this, options);
 
         this.contextual = options.contextual ? new ContextualOperationSettings(operationSymbol as any, options.contextual) : undefined;
         this.contextualFromMany = options.contextualFromMany ? new ContextualOperationSettings(operationSymbol as any, options.contextualFromMany) : undefined;
@@ -180,7 +187,7 @@ export interface EntityOperationOptions<T extends Entity> {
     text?: () => string;
     isVisible?: (ctx: EntityOperationContext<T>) => boolean;
     confirmMessage?: (ctx: EntityOperationContext<T>) => string;
-    onClick?: (ctx: EntityOperationContext<T>, event: React.MouseEvent) => void;
+    onClick?: (ctx: EntityOperationContext<T>, event: React.MouseEvent<any>, closeRequested: boolean) => void;
     hideOnCanExecute?: boolean;
     group?: EntityOperationGroup | null;
     order?: number;

@@ -13,8 +13,8 @@ export interface FormGroupProps extends React.Props<FormGroup> {
     labelText?: React.ReactChild;
     controlId?: string;
     ctx: StyleContext;
-    labelProps?: React.HTMLAttributes;
-    htmlProps?: React.HTMLAttributes;
+    labelProps?: React.HTMLAttributes<HTMLLabelElement>;
+    htmlProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
 export class FormGroup extends React.Component<FormGroupProps, {}> {
@@ -59,7 +59,7 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
 
 export interface FormControlStaticProps extends React.Props<FormControlStatic> {
     ctx: StyleContext;
-    htmlProps?: React.HTMLAttributes;
+    htmlProps?: React.HTMLAttributes<HTMLParagraphElement>;
     className?: string
 }
 
@@ -69,10 +69,9 @@ export class FormControlStatic extends React.Component<FormControlStaticProps, {
         const ctx = this.props.ctx;
 
         var p = this.props.htmlProps;
-
-        const className = ctx.formControlStaticAsFormControlReadonly ? "form-control readonly" : "form-control-static";
+        
         return (
-            <p {...p} className={classes(className, p && p.className, this.props.className)} >
+            <p {...p} className={classes(ctx.formControlClassReadonly, p && p.className, this.props.className)} >
                 { this.props.children }
             </p>
         );
@@ -87,15 +86,15 @@ export interface LineBaseProps extends StyleOptions {
     hideIfNull?: boolean;
     onChange?: (val: any) => void;
     onValidate?: (val: any) => string;
-    labelHtmlProps?: React.HTMLAttributes;
-    formGroupHtmlProps?: React.HTMLAttributes;
+    labelHtmlProps?: React.HTMLAttributes<HTMLLabelElement>;
+    formGroupHtmlProps?: React.HTMLAttributes<any>;
 }
 
 export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps> extends React.Component<P, S> {
 
     constructor(props: P) {
         super(props);
-
+        
         this.state = this.calculateState(props);
     }
 
@@ -145,33 +144,29 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
 
     calculateState(props: P): S {
 
-        const so = {
-            formControlStaticAsFormControlReadonly: undefined,
-            formGroupSize: undefined,
-            formGroupStyle: undefined,
-            labelColumns: undefined,
-            placeholderLabels: undefined,
-            readOnly: undefined,
-            valueColumns: undefined,
-        } as StyleOptions;
+        const { type, ctx,
+            formControlClassReadonly, formGroupSize, formGroupStyle, labelColumns, placeholderLabels, readOnly, valueColumns,
+            ...otherProps
+        } = props as LineBaseProps;
 
-        const cleanProps = Dic.without(props, so);
+        const so: StyleOptions = { formControlClassReadonly, formGroupSize, formGroupStyle, labelColumns, placeholderLabels, readOnly, valueColumns };
 
-        const state = { ctx: cleanProps.ctx.subCtx(so), type: (cleanProps.type || cleanProps.ctx.propertyRoute.member!.type) } as LineBaseProps as S;
+        const state = { ctx: ctx.subCtx(so), type: (type || ctx.propertyRoute.member!.type) } as LineBaseProps as S;
+
         this.calculateDefaultState(state);
         runTasks(this, state);
-        const overridenProps = Dic.without(cleanProps, { ctx: undefined, type: undefined }) as LineBaseProps as S;
-        this.overrideProps(state, overridenProps);
+
+        this.overrideProps(state, otherProps as S);
         return state;
     }
     
     overrideProps(state: S, overridenProps: S) {
-        const labelHtmlProps = Dic.extendUndefined(state.labelHtmlProps, overridenProps.labelHtmlProps);
-        Dic.extendUndefined(state, overridenProps);
+        const labelHtmlProps = { ...state.labelHtmlProps, ...Dic.simplify(overridenProps.labelHtmlProps) };
+        Dic.assign(state, Dic.simplify(overridenProps))
         state.labelHtmlProps = labelHtmlProps;
     }
 
-    baseHtmlProps(): React.HTMLAttributes {
+    baseHtmlProps(): React.HTMLAttributes<any> {
         return {
             'data-propertyPath': this.state.ctx.propertyPath,
             'data-changes': this.changes

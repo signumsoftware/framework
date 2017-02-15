@@ -6,9 +6,9 @@ Nulls are specially problematic. C# and SQL treat them in a different way.
 
 In C#, all the reference types are nullable ([for now?](https://roslyn.codeplex.com/discussions/541334)) but they throw a `NullReferenceException` when you try to access any member on a `null` element. 
 
-In SQL this behavior is hard to imitate, and the only sensible behavior is to propagate `null`, much like the future [null-propagating operator ?.](https://roslyn.codeplex.com/discussions/540883) but completely implicit.
+In SQL this behavior is hard to imitate, and the only sensible behavior is to propagate `null`, much like the [null-propagating operator ?.](https://roslyn.codeplex.com/discussions/540883) but completely implicit.
 
-This mismatch has problems when the result is a value type:
+This mismatch has problems when the result is a ValueType:
 
 ```C#
 Database.Query<BugEntity>().Select(a => a.Fixer.Id).ToList();
@@ -103,6 +103,10 @@ Database.Query<BugEntity>()
 }).ToList()
 ```
 
-In order to completely remove the nullability mismatch problem, C# will need to forbid  `.` operator on nullable reference types (like SWIFT does), and only `?.` will be allowed in queries. This will probably never happen so you'll need to learn now to fix `FieldReaderException`.  
+***Note::** Even if C# 6 has support for `?.` it doesn't work yet in queries, so we need to keep waiting... 
+
+In order to completely remove the nullability mismatch problem, C# will need to forbid  `.` operator on nullable reference types (like SWIFT does), and only `?.` will be allowed in queries.
+
+Until this happens so you'll need to learn now to fix `FieldReaderException`.  
 
 

@@ -40,7 +40,9 @@ namespace Signum.Engine.Maps
                 cleanName => schema.NameToType.TryGetC(cleanName));
 
             FromEnumMethodExpander.miQuery = ReflectionTools.GetMethodInfo(() => Database.Query<Entity>()).GetGenericMethodDefinition();
-            Include<TypeEntity>();
+            Include<TypeEntity>()
+                .WithUniqueIndex(t => new { t.Namespace, t.ClassName });
+
             Settings.AssertNotIncluded = MixinDeclarations.AssertNotIncluded = t =>
             {
                 if (schema.Tables.ContainsKey(t))
@@ -221,16 +223,15 @@ namespace Signum.Engine.Maps
                 foreach (var t in type.Follow(a => a.BaseType))
                     if (!t.IsSerializable)
                         throw new InvalidOperationException("Type {0} is not marked as serializable".FormatWith(t.TypeName()));
-
-                result = new Table(type);
-
-                schema.Tables.Add(type, result);
-
+                
                 string name = schema.Settings.desambiguatedNames?.TryGetC(type) ?? Reflector.CleanTypeName(EnumEntity.Extract(type) ?? type);
 
                 if (schema.NameToType.ContainsKey(name))
                     throw new InvalidOperationException(route?.Let(r => "Error on field {0}: ".FormatWith(r)) + "Two types have the same cleanName, desambiguate using Schema.Current.Settings.Desambiguate method: \r\n {0}\r\n {1}".FormatWith(schema.NameToType[name].FullName, type.FullName));
 
+                result = new Table(type);
+
+                schema.Tables.Add(type, result);
                 schema.NameToType[name] = type;
                 schema.TypeToName[type] = name;
 
@@ -265,7 +266,7 @@ namespace Signum.Engine.Maps
             return mixins;
         }
 
-        HashSet<string> loadedModules = new HashSet<string>();
+        public HashSet<Tuple<Type, string>> LoadedModules = new HashSet<Tuple<Type, string>>();
         public bool NotDefined(MethodBase methodBase)
         {
             var should = methodBase.DeclaringType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
@@ -279,15 +280,15 @@ namespace Signum.Engine.Maps
                 should.Where(a => a == f.Name).SingleEx(() => "Methods for {0}".FormatWith(f.Name));
 
 
-            return loadedModules.Add(methodBase.DeclaringType.FullName + "." + methodBase.Name);
+            return LoadedModules.Add(Tuple.Create(methodBase.DeclaringType, methodBase.Name));
         }
 
         public void AssertDefined(MethodBase methodBase)
         {
-            string name = methodBase.DeclaringType.FullName + "." + methodBase.Name;
+            var tulpe = Tuple.Create(methodBase.DeclaringType, methodBase.Name);
 
-            if (!loadedModules.Contains(name))
-                throw new ApplicationException("Call {0} first".FormatWith(name));
+            if (!LoadedModules.Contains(tulpe))
+                throw new ApplicationException("Call {0} first".FormatWith(tulpe));
         }
 
         #region Field Generator
@@ -408,30 +409,7 @@ namespace Signum.Engine.Maps
             }
         }
 
-        public class FluentInclude<T>
-         where T : Entity
-        {
-            public SchemaBuilder SchemaBuilder { get; private set; }
-            public Table Table { get; private set; }
-
-            public FluentInclude(Table table, SchemaBuilder schemaBuilder)
-            {
-                Table = table;
-                SchemaBuilder = schemaBuilder;
-            }
-
-            public FluentInclude<T> WithUniqueIndex(Expression<Func<T, object>> fields, Expression<Func<T, bool>> where = null)
-            {
-                this.SchemaBuilder.AddUniqueIndex<T>(fields, where);
-                return this;
-            }
-
-            public FluentInclude<T> WithIndex(Expression<Func<T, object>> fields)
-            {
-                this.SchemaBuilder.AddIndex<T>(fields);
-                return this;
-            }
-        }
+        
 
 
         public enum KindOfField

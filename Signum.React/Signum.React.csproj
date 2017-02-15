@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.2\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.2\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
+  <Import Project="..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props" Condition="Exists('..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props')" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -28,7 +28,7 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <TypeScriptToolsVersion>2.0</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>2.1</TypeScriptToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -52,8 +52,8 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.2\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
+    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.SqlServer.Types, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
@@ -197,6 +197,7 @@
     <Content Include="Scripts\Signum.Entities.Basics.t4s" />
     <Content Include="Scripts\Signum.Entities.DynamicQuery.t4s" />
     <Content Include="Scripts\Signum.Entities.Patterns.t4s" />
+    <Content Include="package.json" />
     <None Include="Scripts\Signum.Entities.t4s" />
     <Content Include="tsconfig.json" />
     <TypeScriptCompile Include="Scripts\ConfigureReactWidgets.ts" />
@@ -209,6 +210,7 @@
     <TypeScriptCompile Include="Scripts\Frames\Widgets.tsx" />
     <TypeScriptCompile Include="Scripts\Globals.d.ts" />
     <TypeScriptCompile Include="Scripts\Lines\DynamicComponent.tsx" />
+    <TypeScriptCompile Include="Scripts\Lines\AutocompleteConfig.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityTable.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EnumCheckboxList.tsx" />
     <TypeScriptCompile Include="Scripts\Search.tsx" />
@@ -224,6 +226,7 @@
     <TypeScriptCompile Include="Scripts\Operations\ContextualOperations.tsx" />
     <TypeScriptCompile Include="Scripts\QuickLinks.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\ContextMenu.tsx" />
+    <TypeScriptCompile Include="Scripts\SearchControl\ValueSearchControlLine.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\EntityLink.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityList.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityListBase.tsx" />
@@ -243,7 +246,7 @@
     <TypeScriptCompile Include="Scripts\SearchControl\ContextualItems.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\FilterBuilder.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\MultipliedMessage.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\CountSearchControl.tsx" />
+    <TypeScriptCompile Include="Scripts\SearchControl\ValueSearchControl.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\PaginationSelector.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\QueryTokenBuilder.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\SearchControlLoaded.tsx" />
@@ -268,26 +271,12 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="Scripts\Lines\ValueLine.tsx" />
     <TypeScriptCompile Include="Scripts\Globals.ts" />
+    <TypeScriptCompile Include="Typings\d3\d3.d.ts" />
     <TypeScriptCompile Include="Typings\es6-promise\es6-promise.d.ts" />
-    <TypeScriptCompile Include="Typings\moment-duration-format\moment-duration-format.d.ts" />
-    <TypeScriptCompile Include="Typings\moment\moment-node.d.ts" />
-    <TypeScriptCompile Include="Typings\moment\moment.d.ts" />
-    <TypeScriptCompile Include="Typings\numbro\numbro.d.ts" />
-    <TypeScriptCompile Include="Typings\react-router\history.d.ts" />
-    <TypeScriptCompile Include="Typings\react-bootstrap\react-bootstrap.d.ts" />
     <TypeScriptCompile Include="Scripts\Exceptions\Exception.tsx" />
     <TypeScriptCompile Include="Scripts\Lines.tsx" />
     <TypeScriptCompile Include="Scripts\Reflection.ts" />
     <TypeScriptCompile Include="Scripts\TypeContext.ts" />
-    <TypeScriptCompile Include="Typings\d3\d3.d.ts" />
-    <TypeScriptCompile Include="Typings\react-router-bootstrap\react-router-bootstrap.d.ts" />
-    <TypeScriptCompile Include="Typings\react-router\react-router.d.ts" />
-    <TypeScriptCompile Include="Typings\react-widgets\react-widgets.d.ts" />
-    <TypeScriptCompile Include="Typings\react\react-addons-css-transition-group.d.ts" />
-    <TypeScriptCompile Include="Typings\react\react-addons-perf.d.ts" />
-    <TypeScriptCompile Include="Typings\react\react-addons-transition-group.d.ts" />
-    <TypeScriptCompile Include="Typings\react\react-dom.d.ts" />
-    <TypeScriptCompile Include="Typings\react\react.d.ts" />
     <TypeScriptCompile Include="Typings\whatwg-fetch\whatwg-fetch.d.ts" />
   </ItemGroup>
   <PropertyGroup>
@@ -344,7 +333,7 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props'))" />
-    <Error Condition="!Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.2\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.2\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
   </Target>
   <UsingTask TaskName="SignumTSGenerator" AssemblyFile="..\Signum.TSGenerator\Binaries\Signum.TSGenerator.dll" />
   <Target Name="GenerateSignumTS">

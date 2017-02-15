@@ -16,9 +16,11 @@ export interface ValueLineProps extends LineBaseProps, React.Props<ValueLine> {
     formatText?: string;
     autoTrim?: boolean;
     inlineCheckbox?: boolean;
-    comboBoxItems?: { name: string, niceName: string }[];
+    comboBoxItems?: ({ name: string, niceName: string } | string)[];
     onTextboxBlur?: (val: any) => void;
-    valueHtmlProps?: React.HTMLAttributes;
+    valueHtmlProps?: React.HTMLAttributes<any>;
+    extraButtons?: (vl: ValueLine) => React.ReactNode;
+    initiallyFocused?: boolean;
 }
 
 
@@ -41,16 +43,29 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
         state.valueLineType = ValueLine.getValueLineType(state.type!);
 
         if (state.valueLineType == undefined)
-            throw new Error(`No value line found for '${state.type!.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
+            throw new Error(`No ValueLine found for '${state.type!.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
     }
 
+    inputElement?: HTMLElement;
 
+    componentDidMount() {
+        setTimeout(() => {
+            let element = this.inputElement;
+            if (this.props.initiallyFocused && element) {
+                if (element instanceof HTMLInputElement)
+                    element.setSelectionRange(0, element.value.length);
+                else if (element instanceof HTMLTextAreaElement)
+                    element.setSelectionRange(0, element.value.length);
+                element.focus();
+            }
+        }, 0);
+    }
 
     static getValueLineType(t: TypeReference): ValueLineType | undefined {
-        
+
         if (t.isCollection || t.isLite)
             return undefined;
-        
+
         if (isTypeEnum(t.name) || t.name == "boolean" && !t.isNotNullable)
             return ValueLineType.Enum;
 
@@ -76,7 +91,8 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
     }
 
     overrideProps(state: ValueLineProps, overridenProps: ValueLineProps) {
-        const valueHtmlProps = Dic.extendUndefined(state.valueHtmlProps, overridenProps.valueHtmlProps);
+
+        const valueHtmlProps = { ...state.valueHtmlProps, ...Dic.simplify(overridenProps.valueHtmlProps) };
         super.overrideProps(state, overridenProps);
         state.valueHtmlProps = valueHtmlProps;
     }
@@ -84,7 +100,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
     static renderers: {
         [valueLineType: string]: (vl: ValueLine) => JSX.Element;
     } = {};
-    
+
 
     renderInternal() {
 
@@ -95,19 +111,20 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
 
     }
 
-    static withUnit(unit: React.ReactNode | undefined, input: JSX.Element): JSX.Element {
-        if (!unit)
+    static withItemGroup(vl: ValueLine, input: JSX.Element): JSX.Element {
+        if (!vl.state.unitText && !vl.state.extraButtons)
             return input;
 
         return (
             <div className="input-group">
                 {input}
-                <span className="input-group-addon">{unit}</span>
+                {vl.state.unitText && <span className="input-group-addon">{vl.state.unitText}</span>}
+                {vl.state.extraButtons && <span className="input-group-btn">{vl.state.extraButtons(vl)}</span>}
             </div>
         );
     }
 
-    static isNumber(e: React.KeyboardEvent) {
+    static isNumber(e: React.KeyboardEvent<any>) {
         const c = e.keyCode;
         return ((c >= 48 && c <= 57) /*0-9*/ ||
             (c >= 96 && c <= 105) /*NumPad 0-9*/ ||
@@ -126,7 +143,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
             (e.ctrlKey && c == 67) /*Ctrl + v*/);
     }
 
-    static isDecimal(e: React.KeyboardEvent) {
+    static isDecimal(e: React.KeyboardEvent<any>) {
         const c = e.keyCode;
         return (ValueLine.isNumber(e) ||
             (c == 110) /*NumPad Decimal*/ ||
@@ -134,7 +151,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
             (c == 188) /*,*/);
     }
 
-    static isDuration(e: React.KeyboardEvent) {
+    static isDuration(e: React.KeyboardEvent<any>) {
         const c = e.keyCode;
         return (ValueLine.isNumber(e) ||
             (c == 186) /*Colon*/);
@@ -143,8 +160,8 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
 
 ValueLine.renderers[ValueLineType.Boolean as any] = (vl) => {
     const s = vl.state;
-    
-    const handleCheckboxOnChange = (e: React.SyntheticEvent) => {
+
+    const handleCheckboxOnChange = (e: React.SyntheticEvent<any>) => {
         const input = e.currentTarget as HTMLInputElement;
         vl.setValue(input.checked);
     };
@@ -152,16 +169,16 @@ ValueLine.renderers[ValueLineType.Boolean as any] = (vl) => {
     if (s.inlineCheckbox) {
         return (
             <label className={vl.state.ctx.error} {...vl.baseHtmlProps() }>
-                <input type="checkbox" {...vl.state.valueHtmlProps} checked={s.ctx.value || false} onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly}/>
-                { " " + s.labelText}
+                <input type="checkbox" {...vl.state.valueHtmlProps} checked={s.ctx.value || false} onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly} />
+                {" " + s.labelText}
             </label>
         );
     }
     else {
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) }>
+            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }}>
                 <input type="checkbox" {...vl.state.valueHtmlProps} checked={s.ctx.value || false} onChange={handleCheckboxOnChange}
-                    className={addClass(vl.state.valueHtmlProps, "form-control")} disabled={s.ctx.readOnly}/>
+                    className={addClass(vl.state.valueHtmlProps, "form-control")} disabled={s.ctx.readOnly} />
             </FormGroup>
         );
     }
@@ -180,32 +197,43 @@ ValueLine.renderers[ValueLineType.Enum as any] = (vl) => {
 function internalComboBox(vl: ValueLine, typeInfo: TypeInfo, parseValue: (str: string) => any, toStringValue: (val: any) => string) {
 
     const s = vl.state;
-    let items = s.comboBoxItems || Dic.getValues(typeInfo.members);
+    let items = s.comboBoxItems ? s.comboBoxItems.map(a => typeof a == "string" ? typeInfo.members[a] : a) :
+        Dic.getValues(typeInfo.members);
 
     if (!s.type!.isNotNullable || s.ctx.value == undefined)
         items = [{ name: "", niceName: " - " }].concat(items);
 
-    if (s.ctx.readOnly)
+    if (s.ctx.readOnly) {
+
+        var value = null;
+        if (s.ctx.value) {
+
+            var item = items.filter(a => a.name == toStringValue(s.ctx.value)).singleOrNull();
+
+            value = item ? item.niceName : s.ctx.value;
+        }
+
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-                {ValueLine.withUnit(s.unitText,
+            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
+                {ValueLine.withItemGroup(vl,
                     <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx}>
-                           {s.ctx.value == undefined ? undefined : items.filter(a => a.name == toStringValue(s.ctx.value)).single().niceName}
-                    </FormControlStatic>) }
+                        {value}
+                    </FormControlStatic>)}
             </FormGroup>
         );
+    }
 
-    const handleEnumOnChange = (e: React.SyntheticEvent) => {
+    const handleEnumOnChange = (e: React.SyntheticEvent<any>) => {
         const input = e.currentTarget as HTMLInputElement;
         const val = input.value;
         vl.setValue(val == "" ? null : parseValue(val));
     };
 
     return (
-        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-            { ValueLine.withUnit(s.unitText,
-                <select {...vl.state.valueHtmlProps} value={s.ctx.value == undefined ? "" : toStringValue(s.ctx.value)} className={addClass(vl.state.valueHtmlProps, "form-control") } onChange={ handleEnumOnChange } >
-                        {items.map((mi, i) => <option key={i} value={mi.name}>{mi.niceName}</option>) } 
+        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
+            {ValueLine.withItemGroup(vl,
+                <select {...vl.state.valueHtmlProps} value={s.ctx.value == undefined ? "" : toStringValue(s.ctx.value)} className={addClass(vl.state.valueHtmlProps, "form-control")} onChange={handleEnumOnChange} >
+                    {items.map((mi, i) => <option key={i} value={mi.name}>{mi.niceName}</option>)}
                 </select>)
             }
         </FormGroup>
@@ -213,25 +241,27 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo, parseValue: (str: s
 
 }
 
+
+
 ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
 
     const s = vl.state;
 
     if (s.ctx.readOnly)
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-                {ValueLine.withUnit(s.unitText, <FormControlStatic htmlProps={vl.state.valueHtmlProps}  ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
+            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
+                {ValueLine.withItemGroup(vl, <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx}>{s.ctx.value}</FormControlStatic>)}
             </FormGroup>
         );
 
-    const handleTextOnChange = (e: React.SyntheticEvent) => {
+    const handleTextOnChange = (e: React.SyntheticEvent<any>) => {
         const input = e.currentTarget as HTMLInputElement;
         vl.setValue(input.value);
     };
 
-    let handleBlur: ((e: React.SyntheticEvent) => void) | undefined = undefined;
+    let handleBlur: ((e: React.SyntheticEvent<any>) => void) | undefined = undefined;
     if (s.autoTrim == undefined || s.autoTrim == true) {
-        handleBlur = (e: React.SyntheticEvent) => {
+        handleBlur = (e: React.SyntheticEvent<any>) => {
             const input = e.currentTarget as HTMLInputElement;
             if (input.value && input.value.trim() != input.value)
                 vl.setValue(input.value.trim());
@@ -243,21 +273,22 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
 
 
     return (
-        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-            { ValueLine.withUnit(s.unitText,
+        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
+            {ValueLine.withItemGroup(vl,
                 <input type="text" {...vl.state.valueHtmlProps}
-                    className={addClass(vl.state.valueHtmlProps, "form-control") }
+                    className={addClass(vl.state.valueHtmlProps, "form-control")}
                     value={s.ctx.value || ""}
                     onBlur={handleBlur}
                     onChange={handleTextOnChange} //https://github.com/facebook/react/issues/7211
                     onInput={handleTextOnChange}
-                    placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : undefined}/>)
+                    placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : undefined}
+                    ref={elment => vl.inputElement = elment} />)
             }
         </FormGroup>
     );
 };
 
-function asString(reactChild: React.ReactChild | undefined): string | undefined{
+function asString(reactChild: React.ReactChild | undefined): string | undefined {
     if (typeof reactChild == "string")
         return reactChild as string;
 
@@ -270,19 +301,19 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
 
     if (s.ctx.readOnly)
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-                {ValueLine.withUnit(s.unitText, <FormControlStatic htmlProps={vl.state.valueHtmlProps}  ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
+            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
+                {ValueLine.withItemGroup(vl, <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx}>{s.ctx.value}</FormControlStatic>)}
             </FormGroup>
         );
 
-    const handleTextOnChange = (e: React.SyntheticEvent) => {
+    const handleTextOnChange = (e: React.SyntheticEvent<any>) => {
         const input = e.currentTarget as HTMLInputElement;
         vl.setValue(input.value);
     };
 
-    let handleBlur: ((e: React.SyntheticEvent) => void) | undefined = undefined;
+    let handleBlur: ((e: React.SyntheticEvent<any>) => void) | undefined = undefined;
     if (s.autoTrim == true) {
-        handleBlur = (e: React.SyntheticEvent) => {
+        handleBlur = (e: React.SyntheticEvent<any>) => {
             const input = e.currentTarget as HTMLInputElement;
             if (input.value && input.value.trim() != input.value)
                 vl.setValue(input.value.trim());
@@ -293,12 +324,13 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
     }
 
     return (
-        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
+        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
             <textarea {...vl.state.valueHtmlProps} className={addClass(vl.state.valueHtmlProps, "form-control")} value={s.ctx.value || ""}
                 onChange={handleTextOnChange} //https://github.com/facebook/react/issues/7211
-                onInput={handleTextOnChange} 
+                onInput={handleTextOnChange}
                 onBlur={handleBlur}
-                placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : undefined}/>
+                placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : undefined}
+                ref={elment => vl.inputElement = elment} />
         </FormGroup>
     );
 };
@@ -311,18 +343,18 @@ ValueLine.renderers[ValueLineType.Decimal as any] = (vl) => {
     return numericTextBox(vl, ValueLine.isDecimal);
 };
 
-function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) {
+function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler<any>) {
     const s = vl.state
 
-    const numbroFormat = toNumbroFormat(s.formatText); 
+    const numbroFormat = toNumbroFormat(s.formatText);
 
     if (s.ctx.readOnly)
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-                { ValueLine.withUnit(s.unitText,
+            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
+                {ValueLine.withItemGroup(vl,
                     <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx} className="numeric">
-                        {s.ctx.value == null ? "" : numbro(s.ctx.value).format(numbroFormat) }
-                    </FormControlStatic>) }
+                        {s.ctx.value == null ? "" : numbro(s.ctx.value).format(numbroFormat)}
+                    </FormControlStatic>)}
             </FormGroup>
         );
 
@@ -330,21 +362,22 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) 
         vl.setValue(newValue);
     };
 
-    const htmlProps = Dic.extend(
-        { placeholder: s.ctx.placeholderLabels ? asString(s.labelText) : undefined } as React.HTMLAttributes,
-        vl.props.valueHtmlProps);
+    const htmlProps = {
+        placeholder: s.ctx.placeholderLabels ? asString(s.labelText) : undefined,
+        ...vl.props.valueHtmlProps
+    } as React.HTMLAttributes<HTMLInputElement>;
 
     return (
-        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-            { ValueLine.withUnit(s.unitText,
+        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
+            {ValueLine.withItemGroup(vl,
                 <NumericTextBox
                     htmlProps={htmlProps}
                     value={s.ctx.value}
                     onChange={handleOnChange}
                     validateKey={validateKey}
-                    format={ numbroFormat}
+                    format={numbroFormat}
                     />
-            ) }
+            )}
         </FormGroup>
     );
 }
@@ -352,9 +385,9 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) 
 export interface NumericTextBoxProps {
     value: number;
     onChange: (newValue: number | null) => void;
-    validateKey: React.KeyboardEventHandler;
+    validateKey: React.KeyboardEventHandler<any>;
     format?: string;
-    htmlProps: React.HTMLAttributes;
+    htmlProps: React.HTMLAttributes<HTMLInputElement>;
 }
 
 export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?: string }> {
@@ -363,34 +396,34 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?
         super(props);
         this.state = { text: undefined };
     }
-    
+
     render() {
 
         const value = this.state.text != undefined ? this.state.text :
             this.props.value != undefined ? numbro(this.props.value).format(this.props.format) :
                 "";
 
-        return <input {...this.props.htmlProps} type="text" className={addClass(this.props.htmlProps, "form-control numeric") } value={value}
+        return <input {...this.props.htmlProps} type="text" className={addClass(this.props.htmlProps, "form-control numeric")} value={value}
             onBlur={this.handleOnBlur}
             onChange={this.handleOnChange} //https://github.com/facebook/react/issues/7211
             onInput={this.handleOnChange}
-            onKeyDown={this.handleKeyDown}/>
+            onKeyDown={this.handleKeyDown} />
 
     }
 
-    handleOnBlur = (e: React.SyntheticEvent) => {
+    handleOnBlur = (e: React.SyntheticEvent<any>) => {
         const input = e.currentTarget as HTMLInputElement;
         const result = input.value == undefined || input.value.length == 0 ? null : numbro(input.value).value();
         this.setState({ text: undefined });
         this.props.onChange(result);
     }
 
-    handleOnChange = (e: React.SyntheticEvent) => {
+    handleOnChange = (e: React.SyntheticEvent<any>) => {
         const input = e.currentTarget as HTMLInputElement;
         this.setState({ text: input.value });
     }
 
-    handleKeyDown = (e: React.KeyboardEvent) => {
+    handleKeyDown = (e: React.KeyboardEvent<any>) => {
         if (!this.props.validateKey(e))
             e.preventDefault();
     }
@@ -402,31 +435,31 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
 
     const momentFormat = toMomentFormat(s.formatText);
 
-    const m = s.ctx.value ? moment(s.ctx.value, moment.ISO_8601()) : undefined;
+    const m = s.ctx.value ? moment(s.ctx.value, moment.ISO_8601) : undefined;
     const showTime = momentFormat != "L" && momentFormat != "LL";
 
     if (s.ctx.readOnly)
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-                {ValueLine.withUnit(s.unitText, <FormControlStatic htmlProps={vl.state.valueHtmlProps}  ctx={s.ctx}>{m && m.format(momentFormat) }</FormControlStatic>) }
+            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
+                {ValueLine.withItemGroup(vl, <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx}>{m && m.format(momentFormat)}</FormControlStatic>)}
             </FormGroup>
         );
 
     const handleDatePickerOnChange = (date: Date, str: string) => {
 
         const m = moment(date);
-        vl.setValue(m.isValid() ? m.format(moment.ISO_8601()) : null);
+        vl.setValue(m.isValid() ? m.format() : null);
     };
 
     let currentDate = moment();
     if (!showTime)
         currentDate = currentDate.startOf("day");
-    
+
     return (
-        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-            { ValueLine.withUnit(s.unitText,
-                <DateTimePicker value={m && m.toDate() } onChange={handleDatePickerOnChange} format={momentFormat} time={showTime} defaultCurrentDate={currentDate.toDate() }  />
-            ) }
+        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
+            {ValueLine.withItemGroup(vl,
+                <DateTimePicker value={m && m.toDate()} onChange={handleDatePickerOnChange} format={momentFormat} time={showTime} defaultCurrentDate={currentDate.toDate()} />
+            )}
         </FormGroup>
     );
 }
@@ -435,7 +468,7 @@ ValueLine.renderers[ValueLineType.TimeSpan as any] = (vl) => {
     return durationTextBox(vl, ValueLine.isDuration);
 };
 
-function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) {
+function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler<any>) {
 
     const s = vl.state;
 
@@ -446,8 +479,10 @@ function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler)
     if (s.ctx.readOnly) {
         const d = s.ctx.value ? moment.duration(s.ctx.value / ticksPerMillisecond) : undefined;
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-                <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx} className={addClass(vl.state.valueHtmlProps, "numeric") }>{d && d.format(durationFormat) }</FormControlStatic>
+            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
+                {ValueLine.withItemGroup(vl,
+                    <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx} className={addClass(vl.state.valueHtmlProps, "numeric")}>{d && d.format(durationFormat)}</FormControlStatic>
+                )}
             </FormGroup>
         );
     }
@@ -458,11 +493,16 @@ function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler)
         vl.setValue(moment.isDuration(d) ? (d.asMilliseconds() * ticksPerMillisecond) : null);
     };
 
-    const htmlProps = Dic.extend({ placeholder: s.ctx.placeholderLabels ? asString(s.labelText) : undefined } as React.HTMLAttributes, vl.props.valueHtmlProps);
+    const htmlProps = {
+        placeholder: s.ctx.placeholderLabels ? asString(s.labelText) : undefined,
+        ...vl.props.valueHtmlProps
+    } as React.HTMLAttributes<HTMLInputElement>;
 
     return (
-        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-            <DurationTextBox htmlProps={htmlProps} value={s.ctx.value} onChange={handleOnChange} validateKey={validateKey} format={durationFormat} />
+        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
+            {ValueLine.withItemGroup(vl,
+                <DurationTextBox htmlProps={htmlProps} value={s.ctx.value} onChange={handleOnChange} validateKey={validateKey} format={durationFormat} />
+            )}
         </FormGroup>
     );
 }
@@ -470,9 +510,9 @@ function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler)
 export interface DurationTextBoxProps {
     value: number;
     onChange: (newValue: number | null) => void;
-    validateKey: React.KeyboardEventHandler;
+    validateKey: React.KeyboardEventHandler<any>;
     format?: string;
-    htmlProps: React.HTMLAttributes;
+    htmlProps: React.HTMLAttributes<HTMLInputElement>;
 }
 
 export class DurationTextBox extends React.Component<DurationTextBoxProps, { text?: string }> {
@@ -488,27 +528,27 @@ export class DurationTextBox extends React.Component<DurationTextBoxProps, { tex
             this.props.value != undefined ? moment.duration(this.props.value / ticksPerMillisecond).format(this.props.format) :
                 "";
 
-        return <input {...this.props.htmlProps} type="text" className={addClass(this.props.htmlProps, "form-control numeric") } value={value}
+        return <input {...this.props.htmlProps} type="text" className={addClass(this.props.htmlProps, "form-control numeric")} value={value}
             onBlur={this.handleOnBlur}
             onChange={this.handleOnChange} //https://github.com/facebook/react/issues/7211
-            onInput={this.handleOnChange} 
-            onKeyDown={this.handleKeyDown}/>
+            onInput={this.handleOnChange}
+            onKeyDown={this.handleKeyDown} />
 
     }
 
-    handleOnBlur = (e: React.SyntheticEvent) => {
+    handleOnBlur = (e: React.SyntheticEvent<any>) => {
         const input = e.currentTarget as HTMLInputElement;
         const result = input.value == undefined || input.value.length == 0 ? null : moment.duration(input.value).asMilliseconds();
         this.setState({ text: undefined });
         this.props.onChange(result);
     }
 
-    handleOnChange = (e: React.SyntheticEvent) => {
+    handleOnChange = (e: React.SyntheticEvent<any>) => {
         const input = e.currentTarget as HTMLInputElement;
         this.setState({ text: input.value });
     }
 
-    handleKeyDown = (e: React.KeyboardEvent) => {
+    handleKeyDown = (e: React.KeyboardEvent<any>) => {
         if (!this.props.validateKey(e))
             e.preventDefault();
     }

@@ -86,22 +86,8 @@ namespace Signum.Engine.Operations
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<OperationLogEntity>();
-
-                SymbolLogic<OperationSymbol>.Start(sb, () => RegisteredOperations);
-
-                dqm.RegisterQuery(typeof(OperationSymbol), () =>
-                    from os in Database.Query<OperationSymbol>()
-                    select new
-                    {
-                        Entity = os,
-                        os.Id,
-                        os.Key
-                    });
-
-                dqm.RegisterQuery(typeof(OperationLogEntity), () =>
-                    from lo in Database.Query<OperationLogEntity>()
-                    select new
+                sb.Include<OperationLogEntity>()
+                    .WithQuery(dqm, lo => new
                     {
                         Entity = lo,
                         lo.Id,
@@ -111,6 +97,16 @@ namespace Signum.Engine.Operations
                         lo.Start,
                         lo.End,
                         lo.Exception
+                    });
+
+                SymbolLogic<OperationSymbol>.Start(sb, dqm, () => RegisteredOperations);
+
+                sb.Include<OperationSymbol>()
+                    .WithQuery(dqm, os => new
+                    {
+                        Entity = os,
+                        os.Id,
+                        os.Key
                     });
 
                 dqm.RegisterExpression((OperationSymbol o) => o.Logs(), () => OperationMessage.Logs.NiceToString());
@@ -134,27 +130,34 @@ namespace Signum.Engine.Operations
 
         static void OperationLogic_Initializing()
         {
-            var types = Schema.Current.Tables.Keys
-                .Where(t => EntityKindCache.GetAttribute(t) == null)
-                .Select(a => "'" + a.TypeName() + "'")
-                .CommaAnd();
+            try
+            {
+                var types = Schema.Current.Tables.Keys
+                    .Where(t => EntityKindCache.GetAttribute(t) == null)
+                    .Select(a => "'" + a.TypeName() + "'")
+                    .CommaAnd();
 
-            if (types.HasText())
-                throw new InvalidOperationException($"{0} has not EntityTypeAttribute".FormatWith(types));
+                if (types.HasText())
+                    throw new InvalidOperationException($"{0} has not EntityTypeAttribute".FormatWith(types));
 
-            var errors = (from t in Schema.Current.Tables.Keys
-                          let attr = EntityKindCache.GetAttribute(t)
-                          where attr.RequiresSaveOperation && !HasExecuteNoLite(t)
-                          select attr.IsRequiresSaveOperationOverriden ?
-                            "'{0}' has '{1}' set to true, but no operation for saving has been implemented.".FormatWith(t.TypeName(), nameof(attr.RequiresSaveOperation)) :
-                            "'{0}' is 'EntityKind.{1}', but no operation for saving has been implemented.".FormatWith(t.TypeName(), attr.EntityKind)).ToList();
+                var errors = (from t in Schema.Current.Tables.Keys
+                              let attr = EntityKindCache.GetAttribute(t)
+                              where attr.RequiresSaveOperation && !HasExecuteNoLite(t)
+                              select attr.IsRequiresSaveOperationOverriden ?
+                                "'{0}' has '{1}' set to true, but no operation for saving has been implemented.".FormatWith(t.TypeName(), nameof(attr.RequiresSaveOperation)) :
+                                "'{0}' is 'EntityKind.{1}', but no operation for saving has been implemented.".FormatWith(t.TypeName(), attr.EntityKind)).ToList();
 
-            if (errors.Any())
-                throw new InvalidOperationException(errors.ToString("\r\n") +  @"
+                if (errors.Any())
+                    throw new InvalidOperationException(errors.ToString("\r\n") + @"
 Consider the following options:
     * Implement an operation for saving using 'save' snippet.
     * Change the EntityKind to a more appropiated one. 
     * Exceptionally, override the property EntityTypeAttribute.RequiresSaveOperation for your particular entity.");
+            }
+            catch (Exception e) when (StartParameters.IgnoredCodeErrors != null)
+            {
+                StartParameters.IgnoredCodeErrors.Add(e);
+            }
         }
 
         static SqlPreCommand Operation_PreDeleteSqlSync(Entity arg)

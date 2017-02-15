@@ -69,7 +69,7 @@
     <Member Name="ThereAre0ThatReferThisEntity" Description="Es gibt '{0}', die auf diese Entität verweisen" />
     <Member Name="ThereAreRecordsIn0PointingToThisTableByColumn1" Description="Gibt es Datensätze in '{0}', die druch die Spalte '{1}' auf diese Tabelle verweisen" />
     <Member Name="TheresAlreadyA0With1EqualsTo2_G" Description="Es gibt bereits [m:einen|f:eine|n:ein] {0} mit {1}, [m:der|f:die|n:das] &quot;{2}&quot; entspricht" />
-    <Member Name="UnauthorizedAccessTo0Because1" Description="Nicht zuläassiger Zugang zu {0}, weil {1}" />
+    <Member Name="UnauthorizedAccessTo0Because1" Description="Nicht zulässiger Zugriff auf {0}, weil {1}" />
   </Type>
   <Type Name="Entity" Description="Entität" />
   <Type Name="EntityControlMessage">
@@ -152,7 +152,7 @@
     <Member Name="find" Description="Finden" />
     <Member Name="hideFilters" Description="Filter ausblenden" />
     <Member Name="insertColumn" Description="Spalte einfügen" />
-    <Member Name="loading" Description="Läd gerade..." />
+    <Member Name="loading" Description="Lädt gerade..." />
     <Member Name="loseCurrentChanges" Description="Änderungen verlieren?" />
     <Member Name="moveDown" Description="Nach unten" />
     <Member Name="moveUp" Description="Nach oben" />
@@ -359,9 +359,7 @@
     <Member Name="Key" Description="Schlüssel" />
   </Type>
   <Type Name="SynchronizerMessage">
-    <Member Name="_0HasBeenRenamedIn1" Description="Wurde {0} in {1} umbenannt?" />
     <Member Name="EndOfSyncScript" Description="--- ENDE DES SYNCHRONISIERUNGSSKRIPTS" />
-    <Member Name="NNone" Description="- n: Keine" />
     <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- ANFANG DES SYNCHRONISATIONSSKRIPTS GENERIERT AUF {0}" />
   </Type>
   <Type Name="TypeEntity" Description="Typ">
@@ -398,6 +396,7 @@
     <Member Name="_0ShouldBeNullWhen1IsSet" Description="{0} sollte leer sein, wenn {1} festgesetzt ist" />
     <Member Name="_0ShouldBeOfType1" Description="{0} sollte vom Typ {1} sein" />
     <Member Name="_0ShouldHaveJustOneLine" Description="{0} darf nur aus einer Zeile bestehen" />
+    <Member Name="_0ShouldNotBeOfType1" Description="{0} sollte nicht vom Typ {1} sein" />
     <Member Name="_0ShouldNotHaveFinalSpaces" Description="{0} darf keine abschließenden Leerzeichen haben" />
     <Member Name="_0ShouldNotHaveInitialSpaces" Description="{0} sollte keine Leerzeichen an erster stelle haben" />
     <Member Name="Be" Description="sein " />

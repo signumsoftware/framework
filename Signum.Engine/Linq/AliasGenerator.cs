@@ -34,7 +34,7 @@ namespace Signum.Engine.Linq
 
         public Alias Table(ObjectName name)
         {
-            return new Alias(name.ToString());
+            return new Alias(name);
         }
 
         public Alias Raw(string name)
@@ -57,25 +57,49 @@ namespace Signum.Engine.Linq
 
         public Alias CloneAlias(Alias alias)
         {
+            if (alias.Name == null)
+                throw new InvalidOperationException("Alias should have a name");
+
             return GetUniqueAlias(alias.Name + "b");
         }
     }
 
 
-    public class Alias
+    public class Alias: IEquatable<Alias>
     {
         public static readonly Alias Unknown = new Alias("Unknown");
 
-        public readonly string Name;
+        public readonly string Name; //Mutually exclusive
+        public readonly ObjectName ObjectName; //Mutually exclusive
 
         internal Alias(string name)
         {
             this.Name = name;
         }
 
+        internal Alias(ObjectName objectName)
+        {
+            this.ObjectName = objectName;
+        }
+
+        public bool Equals(Alias other)
+        {
+            return this.Name == other.Name && object.Equals(this.ObjectName, other.ObjectName);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Alias && base.Equals((Alias)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Name == null? this.ObjectName.GetHashCode(): this.Name.GetHashCode();
+        }
+
         public override string ToString()
         {
-            return Name;
+            return Name?.SqlEscape() ?? ObjectName.ToString();
         }
     }
 }

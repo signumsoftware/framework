@@ -1,21 +1,20 @@
-﻿using System;
-using System.Linq;
-using System.Linq.Expressions;
+﻿using Signum.Engine.Linq;
 using Signum.Engine.Maps;
+using Signum.Engine.SchemaInfoTables;
 using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
-using System.Data;
-using System.Collections.Generic;
-using Signum.Utilities.DataStructures;
-using Signum.Engine.SchemaInfoTables;
-using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
-using System.Reflection;
+using Signum.Utilities.Reflection;
+using System;
+using System.Collections;
 using System.Collections.Concurrent;
-using Signum.Engine.Linq;
+using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
+using System.Linq;
+using System.Linq.Expressions;
 
 namespace Signum.Engine
 {
@@ -30,63 +29,6 @@ namespace Signum.Engine
             foreach (SqlPreCommand command in totalScript.Commands)
             {
                 command.ExecuteLeaves();
-            }
-        }
-
-        public static bool ExistTable<T>()
-            where T : Entity
-        {
-            return ExistTable(Schema.Current.Table<T>());
-        }
-
-        public static bool ExistTable(Type type)
-        {
-            return ExistTable(Schema.Current.Table(type));
-        }
-
-        public static bool ExistTable(Table table)
-        {
-            SchemaName schema = table.Name.Schema;
-
-            if (schema.Database != null && schema.Database.Server != null && !Database.View<SysServers>().Any(ss => ss.name == schema.Database.Server.Name))
-                return false;
-
-            if (schema.Database != null && !Database.View<SysDatabases>().Any(ss => ss.name == schema.Database.Name))
-                return false;
-
-            using (schema.Database == null ? null : Administrator.OverrideDatabaseInSysViews(schema.Database))
-            {
-                return (from t in Database.View<SysTables>()
-                        join s in Database.View<SysSchemas>() on t.schema_id equals s.schema_id
-                        where t.name == table.Name.Name && s.name == schema.Name
-                        select t).Any();
-            }
-        }
-
-        internal static readonly ThreadVariable<DatabaseName> sysViewDatabase = Statics.ThreadVariable<DatabaseName>("viewDatabase");
-        public static IDisposable OverrideDatabaseInSysViews(DatabaseName database)
-        {
-            var old = sysViewDatabase.Value;
-            sysViewDatabase.Value = database;
-            return new Disposable(() => sysViewDatabase.Value = old);
-        }
-
-        public static List<T> TryRetrieveAll<T>(Replacements replacements)
-            where T : Entity
-        {
-            return TryRetrieveAll(typeof(T), replacements).Cast<T>().ToList();
-        }
-
-        public static List<Entity> TryRetrieveAll(Type type, Replacements replacements)
-        {
-            Table table = Schema.Current.Table(type);
-
-            using (Synchronizer.RenameTable(table, replacements))
-            using (ExecutionMode.DisableCache())
-            {
-                if (ExistTable(table))
-                    return Database.RetrieveAll(type);
-                return new List<Entity>();
             }
         }
 
@@ -110,8 +52,68 @@ namespace Signum.Engine
                 new SqlPreCommandSimple(SynchronizerMessage.EndOfSyncScript.NiceToString()));
         }
 
+        internal static readonly ThreadVariable<DatabaseName> sysViewDatabase = Statics.ThreadVariable<DatabaseName>("viewDatabase");
+        public static IDisposable OverrideDatabaseInSysViews(DatabaseName database)
+        {
+            var old = sysViewDatabase.Value;
+            sysViewDatabase.Value = database;
+            return new Disposable(() => sysViewDatabase.Value = old);
+        }
 
-    
+        public static bool ExistsTable<T>()
+            where T : Entity
+        {
+            return ExistsTable(Schema.Current.Table<T>());
+        }
+
+        public static bool ExistsTable(Type type)
+        {
+            return ExistsTable(Schema.Current.Table(type));
+        }
+
+        public static bool ExistsTable(ITable table)
+        {
+            SchemaName schema = table.Name.Schema;
+
+            if (schema.Database != null && schema.Database.Server != null && !Database.View<SysServers>().Any(ss => ss.name == schema.Database.Server.Name))
+                return false;
+
+            if (schema.Database != null && !Database.View<SysDatabases>().Any(ss => ss.name == schema.Database.Name))
+                return false;
+
+            using (schema.Database == null ? null : Administrator.OverrideDatabaseInSysViews(schema.Database))
+            {
+                return (from t in Database.View<SysTables>()
+                        join s in Database.View<SysSchemas>() on t.schema_id equals s.schema_id
+                        where t.name == table.Name.Name && s.name == schema.Name
+                        select t).Any();
+            }
+        }
+
+
+
+        public static List<T> TryRetrieveAll<T>(Replacements replacements)
+            where T : Entity
+        {
+            return TryRetrieveAll(typeof(T), replacements).Cast<T>().ToList();
+        }
+
+        public static List<Entity> TryRetrieveAll(Type type, Replacements replacements)
+        {
+            Table table = Schema.Current.Table(type);
+
+            using (Synchronizer.RenameTable(table, replacements))
+            using (ExecutionMode.DisableCache())
+            {
+                if (ExistsTable(table))
+                    return Database.RetrieveAll(type);
+                return new List<Entity>();
+            }
+        }
+
+       
+
+
 
         public static IDisposable DisableIdentity<T>()
             where T : Entity
@@ -196,14 +198,20 @@ namespace Signum.Engine
         public static SqlPreCommandSimple UnsafeDeletePreCommand<T>(IQueryable<T> query)
             where T : Entity
         {
+            if (!Administrator.ExistsTable<T>() || !query.Any())
+                return null;
+
             var prov = ((DbQueryProvider)query.Provider);
 
             return prov.Delete<SqlPreCommandSimple>(query, cm => cm, removeSelectRowCount: true);
         }
 
-        public static SqlPreCommandSimple UnsafeDeletePreCommand<E, V>(IQueryable<MListElement<E, V>> query)
+        public static SqlPreCommandSimple UnsafeDeletePreCommand<E, V>(Expression<Func<E, MList<V>>> mListProperty, IQueryable<MListElement<E, V>> query)
             where E : Entity
         {
+            if (!Administrator.ExistsTable(Schema.Current.TableMList(mListProperty)) || !query.Any())
+                return null;
+
             var prov = ((DbQueryProvider)query.Provider);
 
             return prov.Delete<SqlPreCommandSimple>(query, cm => cm, removeSelectRowCount: true);
@@ -255,9 +263,9 @@ namespace Signum.Engine
 
         public static void UpdateToString<T>(T entity) where T : Entity, new()
         {
-                entity.InDB().UnsafeUpdate()
-                    .Set(e => e.toStr, e => entity.ToString())
-                    .Execute();
+            entity.InDB().UnsafeUpdate()
+                .Set(e => e.toStr, e => entity.ToString())
+                .Execute();
         }
 
         public static void UpdateToString<T>(T entity, Expression<Func<T, string>> expression) where T : Entity, new()
@@ -400,7 +408,7 @@ namespace Signum.Engine
             if (oldEntity.GetType() != newEntity.GetType())
                 throw new ArgumentException("oldEntity and newEntity should have the same type");
 
-            if(oldEntity.Is(newEntity))
+            if (oldEntity.Is(newEntity))
                 throw new ArgumentException("oldEntity and newEntity should not be the same ");
 
             Schema s = Schema.Current;
@@ -445,173 +453,7 @@ namespace Signum.Engine
             });
         }
 
-        public static int BulkInsertDisableIdentity<T>(IEnumerable<T> entities,
-          SqlBulkCopyOptions options = SqlBulkCopyOptions.Default, bool validateFirst = false, int? timeout = null)
-          where T : Entity
-        {
-            options |= SqlBulkCopyOptions.KeepIdentity;
-
-            if (options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
-                throw new InvalidOperationException("BulkInsertDisableIdentity not compatible with UseInternalTransaction");
-
-            var list = entities.ToList();
-
-            if (validateFirst)
-            {
-                Validate<T>(list);
-            }
-            
-            var t = Schema.Current.Table<T>();
-            using (Transaction tr = new Transaction())
-            {
-                Schema.Current.OnPreBulkInsert(typeof(T), inMListTable: false);
-
-                using (DisableIdentity<T>())
-                {
-                    DataTable dt = CreateDataTable<T>(list, t);
-
-                    Executor.BulkCopy(dt, t.Name, options, timeout);
-
-                    foreach (var item in list)
-                        item.SetNotModified();
-
-                    return tr.Commit(list.Count);
-                }
-            }
-        }
-
-        public static int BulkInsert<T>(IEnumerable<T> entities,
-            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default, bool validateFirst = false, int? timeout = null, string message = null)
-            where T : Entity
-        {
-
-            if (message != null)
-                return SafeConsole.WaitRows(message == "auto" ? $"BulkInsering {entities.Count()} {typeof(T).TypeName()}" : message,
-                    () => BulkInsert(entities, options, validateFirst, timeout, message: null));
-
-            if (options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
-                throw new InvalidOperationException("BulkInsertDisableIdentity not compatible with UseInternalTransaction");
-
-            var list = entities.ToList();
-
-            if (validateFirst)
-            {
-                Validate<T>(list);
-            }
-
-            var t = Schema.Current.Table<T>();
-
-            DataTable dt = CreateDataTable<T>(list, t);
-
-            using (Transaction tr = new Transaction())
-            {
-                Schema.Current.OnPreBulkInsert(typeof(T), inMListTable: false);
-
-                Executor.BulkCopy(dt, t.Name, options, timeout);
-
-                foreach (var item in list)
-                    item.SetNotModified();
-
-                return tr.Commit(list.Count);
-            }
-        }
-
-        private static void Validate<T>(IEnumerable<T> entities) where T : Entity
-        {
-            foreach (var e in entities)
-            {
-                var ic = e.IntegrityCheck();
-
-                if (ic != null)
-                    throw new IntegrityCheckException(new Dictionary<Guid, Dictionary<string, string>> { { e.temporalId, ic } });
-            }
-        }
-
-        static DataTable CreateDataTable<T>(IEnumerable<T> entities, Table t) where T : Entity
-        {
-            DataTable dt = new DataTable();
-            foreach (var c in t.Columns.Values.Where(c => !c.IdentityBehaviour))
-                dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
-
-            foreach (var e in entities)
-            {
-                if (!e.IsNew)
-                    throw new InvalidOperationException("Entites should be new");
-                t.SetToStrField(e);
-                dt.Rows.Add(t.BulkInsertDataRow(e));
-            }
-            return dt;
-        }
-
-        public static int BulkInsertMListFromEntities<E, V>(List<E> entities, 
-            Expression<Func<E, MList<V>>> mListProperty,
-            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default,
-            int? timeout = null,
-            string message = null)
-            where E : Entity
-        {
-            try {
-                var func = mListProperty.Compile();
-
-                var mlists = (from e in entities
-                              from mle in func(e).Select((iw, i) => new MListElement<E, V>
-                              {
-                                  Order = i,
-                                  Element = iw,
-                                  Parent = e,
-                              })
-                              select mle).ToList();
-
-                return Administrator.BulkInsertMList(mListProperty, mlists, options, timeout, message);
-            }
-            catch(InvalidOperationException e) when (e.Message.Contains("has no Id"))
-            {
-                throw new InvalidOperationException($"{nameof(BulkInsertMListFromEntities)} requires that you set the Id of the entities manually using {nameof(UnsafeEntityExtensions.SetId)}");
-
-                throw;
-            }
-        }
-
-
-
-        public static int BulkInsertMList<E, V>(Expression<Func<E, MList<V>>> mListProperty,
-            IEnumerable<MListElement<E, V>> entities,
-            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default, 
-            int? timeout = null, 
-            string message = null)
-            where E : Entity
-        {
-
-            if (message != null)
-                return SafeConsole.WaitRows(message == "auto" ? $"BulkInsering MList<{ typeof(V).TypeName()}> in { typeof(E).TypeName()}" : message,
-                    () => BulkInsertMList(mListProperty, entities, options, timeout, message: null));
-
-            if (options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
-                throw new InvalidOperationException("BulkInsertDisableIdentity not compatible with UseInternalTransaction");
-
-            DataTable dt = new DataTable();
-            var t = ((FieldMList)Schema.Current.Field(mListProperty)).TableMList;
-            foreach (var c in t.Columns.Values.Where(c => !c.IdentityBehaviour))
-                dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
-
-            var list = entities.ToList();
-
-            foreach (var e in list)
-            {
-                dt.Rows.Add(t.BulkInsertDataRow(e.Parent, e.Element, e.Order));
-            }
-
-            using (Transaction tr = options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : new Transaction())
-            {
-                Schema.Current.OnPreBulkInsert(typeof(E), inMListTable: true);
-
-                Executor.BulkCopy(dt, t.Name, options, timeout);
-
-                return tr.Commit(list.Count);
-            }
-        }
-
-        public static T GetSetTicks<T>(this T entity) where T :Entity
+        public static T GetSetTicks<T>(this T entity) where T : Entity
         {
             entity.Ticks = entity.InDBEntity(e => e.Ticks);
             return entity;

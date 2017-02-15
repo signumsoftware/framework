@@ -36,12 +36,12 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
     }
 
     getTypeInfo(): TypeInfo {
-        return getTypeInfo(this.props.routeParams!.type);
+        return getTypeInfo(this.props.routeParams.type);
     }
 
     calculateState(props: PageFrameProps) {
 
-        return { componentClass: undefined, pack: undefined } as PageFrameState;
+        return { getComponent: undefined, pack: undefined } as PageFrameState;
     }
 
 
@@ -59,22 +59,24 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
 
     loadEntity(props: PageFrameProps): Promise<void> {
 
-        if (this.props.location.query["waitData"]) {
-            if (window.parentWindowData == null)
-                throw new Error("parentWindowData not found");
+        if (this.props.location.query.waitData) {
+            if (window.opener.dataForChildWindow == undefined) {
+                throw new Error("No dataForChildWindow in parent found!")
+            }
 
-            this.setState({ pack: window.parentWindowData });
-            window.parentWindowData = undefined;
+            var pack = window.opener.dataForChildWindow;
+            window.opener.dataForChildWindow = undefined;
+            this.setState({ pack: pack });
             return Promise.resolve<void>();
         }
 
         const ti = this.getTypeInfo();
 
-        if (this.props.routeParams!.id) {
+        if (this.props.routeParams.id) {
             
             const lite: Lite<Entity> = {
                 EntityType: ti.name,
-                id: parseId(ti, props.routeParams!.id!),
+                id: parseId(ti, props.routeParams.id!),
             };
 
             return Navigator.API.fetchEntityPack(lite)
@@ -160,7 +162,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
             <div className="normal-control">
                 { this.renderTitle() }
                 { renderWidgets(wc) }
-                { this.entityComponent && <ButtonBar frame={frame} pack={this.state.pack} showOperations={true} /> }
+                { this.entityComponent && <ButtonBar frame={frame} pack={this.state.pack} /> }
                 <ValidationErrors entity={this.state.pack.entity} ref={ve => this.validationErrors = ve}/>
                 { embeddedWidgets.top }
                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-main-entity={entityInfo(ctx.value) }>

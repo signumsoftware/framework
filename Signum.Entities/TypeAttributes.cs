@@ -148,19 +148,19 @@ namespace Signum.Entities
         bool? overridenRequiresSaveOperation; 
         public bool RequiresSaveOperation
         {
-            get { return overridenRequiresSaveOperation ?? CalculateRequiresSaveOperation() ; }
+            get { return overridenRequiresSaveOperation ?? CalculateRequiresSaveOperation(this.EntityKind) ; }
             set
             {
-                if (overridenRequiresSaveOperation != CalculateRequiresSaveOperation())
+                if (overridenRequiresSaveOperation != CalculateRequiresSaveOperation(this.EntityKind))
                     overridenRequiresSaveOperation = value;
             }
         }
 
         public bool IsRequiresSaveOperationOverriden => overridenRequiresSaveOperation.HasValue;
 
-        private bool CalculateRequiresSaveOperation()
+        public static bool CalculateRequiresSaveOperation(EntityKind entityKind)
         {
-            switch (this.EntityKind)
+            switch (entityKind)
             {
                 case EntityKind.SystemString: return false;
                 case EntityKind.System: return false;

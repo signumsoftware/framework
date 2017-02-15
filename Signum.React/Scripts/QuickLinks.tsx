@@ -114,13 +114,13 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
         this.makeRequest(this.props);
     }
 
-    componentWillReceiveProps(newProps: { ctx: WidgetContext }) {
+    componentWillReceiveProps(newProps: QuickLinkWidgetProps) {
         if (!is(newProps.ctx.pack.entity as Entity, this.props.ctx.pack.entity as Entity)) {
             this.makeRequest(newProps);
         }
     }
 
-    makeRequest(props: { ctx: WidgetContext }) {
+    makeRequest(props: QuickLinkWidgetProps) {
         this.setState({ links: undefined });
 
         const entity = props.ctx.pack.entity;
@@ -168,9 +168,9 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
     }
 }
 
-class QuickLinkToggle extends React.Component<{ bsRole: string, onClick?: (e: React.MouseEvent) => void, links: any[] | undefined }, void>{
+class QuickLinkToggle extends React.Component<{ bsRole: string, onClick?: (e: React.MouseEvent<any>) => void, links: any[] | undefined }, void>{
 
-    handleOnClick = (e: React.MouseEvent) => {
+    handleOnClick = (e: React.MouseEvent<any>) => {
         e.preventDefault();
 
         this.props.onClick!(e);
@@ -213,7 +213,7 @@ export abstract class QuickLink {
     constructor(name: string, options?: QuickLinkOptions) {
         this.name = name;
 
-        Dic.extend(this, { isVisible: true, text: "", order: 0 } as QuickLinkOptions, options);
+        Dic.assign(this, { isVisible: true, text: "", order: 0, ...options });
     }
 
     abstract toMenuItem(key: any): React.ReactElement<any>;
@@ -235,9 +235,9 @@ export abstract class QuickLink {
 }
 
 export class QuickLinkAction extends QuickLink {
-    action: (e: React.MouseEvent) => void;
+    action: (e: React.MouseEvent<any>) => void;
 
-    constructor(name: string, text: string, action: (e: React.MouseEvent) => void, options?: QuickLinkOptions) {
+    constructor(name: string, text: string, action: (e: React.MouseEvent<any>) => void, options?: QuickLinkOptions) {
         super(name, options);
         this.text = text;
         this.action = action;
@@ -254,14 +254,42 @@ export class QuickLinkAction extends QuickLink {
     }
 }
 
+export class QuickLinkLink extends QuickLink {
+    url: string;
+
+    constructor(name: string, text: string, url: string, options?: QuickLinkOptions) {
+        super(name, options);
+        this.text = text;
+        this.url = url;
+    }
+
+    toMenuItem(key: any) {
+
+        return (
+            <MenuItem data-name={this.name} className="sf-quick-link" key={key} onClick={this.handleClick}>
+                {this.icon()}
+                {this.text}
+            </MenuItem>
+        );
+    }
+
+    handleClick = (e: React.MouseEvent<any>) => {
+        if (e.ctrlKey || e.button == 1)
+            window.open(Navigator.currentHistory.createHref(this.url));
+        else
+            Navigator.currentHistory.push(this.url);
+    }
+}
+
 export class QuickLinkExplore extends QuickLink {
     findOptions: FindOptions;
 
     constructor(findOptions: FindOptions, options?: QuickLinkOptions) {
-        super(getQueryKey(findOptions.queryName), Dic.extend({
+        super(getQueryKey(findOptions.queryName), {
             isVisible: Finder.isFindable(findOptions.queryName),
             text: getQueryNiceName(findOptions.queryName),
-        }, options));
+            ...options
+        });
 
         this.findOptions = findOptions;
     }
@@ -275,7 +303,7 @@ export class QuickLinkExplore extends QuickLink {
         );
     }
 
-    exploreOrPopup = (e: React.MouseEvent) => {
+    exploreOrPopup = (e: React.MouseEvent<any>) => {
         if (e.ctrlKey || e.button == 1)
             window.open(Finder.findOptionsPath(this.findOptions));
         else
@@ -288,10 +316,11 @@ export class QuickLinkNavigate extends QuickLink {
     lite: Lite<Entity>;
 
     constructor(lite: Lite<Entity>, options?: QuickLinkOptions) {
-        super(lite.EntityType, Dic.extend({
+        super(lite.EntityType, {
             isVisible: Navigator.isNavigable(lite.EntityType),
             text: getTypeInfo(lite.EntityType).niceName,
-        }, options));
+            ...options
+        });
 
         this.lite = lite;
     }
@@ -305,7 +334,7 @@ export class QuickLinkNavigate extends QuickLink {
         );
     }
 
-    navigateOrPopup = (e: React.MouseEvent) => {
+    navigateOrPopup = (e: React.MouseEvent<any>) => {
         if (e.ctrlKey || e.button == 1 || Navigator.getSettings(this.lite.EntityType).avoidPopup)
             window.open(Navigator.navigateRoute(this.lite));
         else

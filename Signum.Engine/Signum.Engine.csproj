@@ -94,6 +94,7 @@
     <Compile Include="Basics\PropertyRouteLogic.cs" />
     <Compile Include="Basics\QueryLogic.cs" />
     <Compile Include="Basics\SemiSymbolLogic.cs" />
+    <Compile Include="BulkInserter.cs" />
     <Compile Include="CodeGeneration\CodeGenerator.cs" />
     <Compile Include="CodeGeneration\ReactCodeConverter.cs" />
     <Compile Include="CodeGeneration\ReactCodeGenerator.cs" />
@@ -172,6 +173,7 @@
     <Compile Include="Operations\OperationLogic.cs" />
     <Compile Include="Operations\Typle.cs" />
     <Compile Include="Retriever.cs" />
+    <Compile Include="Schema\FluentInclude.cs" />
     <Compile Include="Schema\ObjectName.cs" />
     <Compile Include="Schema\Schema.cs" />
     <Compile Include="Schema\Schema.Delete.cs" />
@@ -188,7 +190,7 @@
     <Compile Include="Engine\SqlBuilder.cs" />
     <Compile Include="Schema\UniqueIndex.cs" />
     <Compile Include="ServerBasic.cs" />
-    <Compile Include="Basics\TypesLogic.cs" />
+    <Compile Include="Basics\TypeLogic.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Administrator.md" />
@@ -196,8 +198,14 @@
     <None Include="CodeGeneration\EntityCodeGenerator.md" />
     <None Include="CodeGeneration\LegacyDatabase.AdventureWorks.md" />
     <None Include="CodeGeneration\LogicCodeGenerator.md" />
+    <None Include="CodeGeneration\ReactCodeConverter.md" />
+    <None Include="CodeGeneration\ReactCodeGenerator.md" />
     <None Include="CodeGeneration\WebCodeGenerator.md" />
     <None Include="CodeGeneration\WindowsCodeGenerator.md" />
+    <None Include="Connection\Connector.md" />
+    <None Include="Connection\Executor.md" />
+    <None Include="Connection\Transaction.md" />
+    <None Include="Connection\UserConnections.md" />
     <None Include="Database.Delete.md" />
     <None Include="Database.md" />
     <None Include="Database.Query.md" />
@@ -207,6 +215,7 @@
     <None Include="Database.UnsafeInsert.md" />
     <None Include="Database.UnsafeUpdate.md" />
     <None Include="DynamicQuery\DynamicQueries.md" />
+    <None Include="Engine\SqlPreCommand.md" />
     <None Include="EntityCache.md" />
     <None Include="index.mdi" />
     <None Include="Introduction.md" />
@@ -220,9 +229,9 @@
     <None Include="Linq\Linq.SelectMany.md" />
     <None Include="Linq\Linq.SqlFunctions.md" />
     <None Include="Linq\Linq.TypeMismatch.md" />
-    <None Include="Operations\Operations.cd" />
     <None Include="Operations\Operations.md" />
     <None Include="packages.config" />
+    <None Include="Schema\FluentInclude.md" />
     <None Include="Schema\EntityEvents.md" />
     <None Include="Schema\Schema.md" />
     <None Include="Schema\Schema.cd" />
@@ -255,9 +264,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Docs\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Analyzer Include="..\Signum.Analyzer\Binaries\Signum.Analyzer.dll" />
   </ItemGroup>

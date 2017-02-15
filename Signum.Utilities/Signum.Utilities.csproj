@@ -87,6 +87,7 @@
     <Compile Include="NaturalLanguage\German.cs" />
     <Compile Include="NaturalLanguage\Spanish.cs" />
     <Compile Include="Profiler\TimeTracker.cs" />
+    <Compile Include="StartParameters.cs" />
     <Compile Include="Statics.cs" />
     <Compile Include="DataStructures\HashsetComparer.cs" />
     <Compile Include="DataStructures\MinMax.cs" />

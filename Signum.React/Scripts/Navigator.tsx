@@ -1,24 +1,24 @@
 ﻿import * as React from "react"
+import * as HistoryModule from "history"
 import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { Dic, } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
 import { Lite, Entity, ModifiableEntity, EmbeddedEntity, ModelEntity, LiteMessage, EntityPack, isEntity, isLite, isEntityPack, toLite } from './Signum.Entities';
 import { IUserEntity, TypeEntity } from './Signum.Entities.Basics';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName, isTypeEmbeddedOrValue, isTypeModel, KindOfType, OperationType, TypeReference } from './Reflection';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeInfos, getTypeName, isTypeEmbeddedOrValue, isTypeModel, KindOfType, OperationType, TypeReference, IsByAll } from './Reflection';
 import { TypeContext } from './TypeContext';
 import * as Finder from './Finder';
 import { needsCanExecute } from './Operations/EntityOperations';
 import * as Operations from './Operations';
 import ModalFrame from './Frames/ModalFrame';
 import { ViewReplacer } from './Frames/ReactVisitor'
+import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './Lines/AutocompleteConfig'
+import { FindOptions } from './FindOptions'
 
 
 Dic.skipClasses.push(React.Component);
-React.Component.prototype.changeState = function (this: React.Component<any, any>, func: (state: any) => void) {
-    func(this.state);
-    this.forceUpdate();
-}
+
 
 export let currentUser: IUserEntity | undefined;
 export function setCurrentUser(user: IUserEntity | undefined) {
@@ -28,6 +28,11 @@ export function setCurrentUser(user: IUserEntity | undefined) {
 export let currentHistory: HistoryModule.History;
 export function setCurrentHistory(history: HistoryModule.History) {
     currentHistory = history;
+}
+
+export let resetUI: () => void = () => { };
+export function setResetUI(reset: () => void) {
+    resetUI = reset;
 }
 
 export namespace Expander {
@@ -104,35 +109,53 @@ export function getSettings(type: PseudoType): EntitySettings<ModifiableEntity> 
     return entitySettings[typeName];
 }
 
-export function setFallbackViewPromise(newFallback: (entity: ModifiableEntity) => ViewPromise<ModifiableEntity>) {
-    fallbackViewPromise = newFallback;
+export function setViewDispatcher(newDispatcher: ViewDispatcher) {
+    viewDispatcher = newDispatcher;
 }
 
-export let fallbackViewPromise: (entity: ModifiableEntity) => ViewPromise<ModifiableEntity> =
-    e => new ViewPromise<ModifiableEntity>(resolve => require(['./Lines/DynamicComponent'], resolve));
-
-export function getViewPromise<T extends ModifiableEntity>(entity: T): ViewPromise<ModifiableEntity> {
-
-    const settings = getSettings(entity.Type) as EntitySettings<T>;
-
-    if (settings == undefined) {
-        if (fallbackViewPromise)
-            return fallbackViewPromise(entity);
-
-        throw new Error(`No settings for '${entity.Type}'`);
-    }
-
-    if (settings.getViewPromise == undefined) {
-        if (fallbackViewPromise)
-            return fallbackViewPromise(entity);
-
-        throw new Error(`No getComponent set for settings for '${entity.Type}'`);
-    }
-
-    return settings.getViewPromise(entity).applyViewOverrides(settings);
+export interface ViewDispatcher {
+    hasView(typeName: string): boolean;
+    getView(entity: ModifiableEntity): ViewPromise<ModifiableEntity>;
 }
 
+export class BasicViewDispatcher implements ViewDispatcher {
+    hasView(typeName: string) {
+        const settings = getSettings(typeName) as EntitySettings<ModifiableEntity>;
 
+        return (settings && settings.getViewPromise) != null;
+    }
+    getView(entity: ModifiableEntity) {
+        const settings = getSettings(entity.Type) as EntitySettings<ModifiableEntity>;
+
+        if (!settings)
+            throw new Error(`No EntitySettings registered for ${entity.Type}`);
+
+        if (!settings.getViewPromise)
+            throw new Error(`The EntitySettings registered for ${entity.Type} has not getViewPromise`);
+
+        return settings.getViewPromise(entity).applyViewOverrides(settings);
+    }
+}
+
+export class DynamicComponentViewDispatcher implements ViewDispatcher {
+    hasView(typeName: string) {
+        return true;
+    }
+    getView(entity: ModifiableEntity) {
+        const settings = getSettings(entity.Type) as EntitySettings<ModifiableEntity>;
+
+        if (!settings || !settings.getViewPromise)
+            return new ViewPromise<ModifiableEntity>(resolve => require(['./Lines/DynamicComponent'], resolve));
+
+        return settings.getViewPromise(entity).applyViewOverrides(settings);
+    }
+}
+
+export let viewDispatcher: ViewDispatcher = new DynamicComponentViewDispatcher();
+
+export function getViewPromise<T extends ModifiableEntity>(entity: T): ViewPromise<T> {
+    return viewDispatcher.getView(entity);
+}
 
 export const isCreableEvent: Array<(typeName: string) => boolean> = [];
 
@@ -142,7 +165,7 @@ export function isCreable(type: PseudoType, customView = false, isSearch = false
 
     const baseIsCreable = checkFlag(typeIsCreable(typeName), isSearch);
 
-    const hasView = customView || hasRegisteredViewPromise(typeName);
+    const hasView = customView || viewDispatcher.hasView(typeName);
 
     const hasConstructor = hasAllowedConstructor(typeName);
 
@@ -232,6 +255,25 @@ function typeIsReadOnly(typeName: string): boolean {
     }
 }
 
+export function typeRequiresSaveOperation(typeName: string): boolean {
+
+    const typeInfo = getTypeInfo(typeName);
+    if (typeInfo == undefined)
+        return false;
+
+    switch (typeInfo.entityKind) {
+        case "SystemString": return true;
+        case "System": return true;
+        case "Relational": return true;
+        case "String": return true;
+        case "Shared": return true;
+        case "Main": return true;
+        case "Part": return false;
+        case "SharedPart": return false;
+        default: return false;
+    }
+}
+
 export const isFindableEvent: Array<(typeName: string) => boolean> = [];
 
 export function isFindable(type: PseudoType, isSearch?: boolean) {
@@ -280,15 +322,11 @@ export function isViewable(typeOrEntity: PseudoType | EntityPack<ModifiableEntit
 
     const baseIsViewable = typeIsViewable(typeName);
 
-    const hasView = customView || hasRegisteredViewPromise(typeName);
+    const hasView = customView || viewDispatcher.hasView(typeName);
 
     return baseIsViewable && hasView && isViewableEvent.every(f => f(typeName, entityPack));
 }
 
-function hasRegisteredViewPromise(typeName: string) {
-    const es = entitySettings[typeName];
-    return es && !!es.getViewPromise || !!fallbackViewPromise;
-}
 
 function typeIsViewable(typeName: string): boolean {
 
@@ -325,12 +363,10 @@ export function isNavigable(typeOrEntity: PseudoType | EntityPack<ModifiableEnti
 
     const baseTypeName = checkFlag(typeIsNavigable(typeName), isSearch);
 
-    const hasView = customComponent || hasRegisteredViewPromise(typeName);
+    const hasView = customComponent || viewDispatcher.hasView(typeName);
 
     return baseTypeName && hasView && isViewableEvent.every(f => f(typeName, entityPack));
 }
-
-
 
 function typeIsNavigable(typeName: string): EntityWhen {
 
@@ -359,12 +395,35 @@ function typeIsNavigable(typeName: string): EntityWhen {
     }
 }
 
+export function getAutoComplete(type: TypeReference, findOptions: FindOptions | undefined): AutocompleteConfig<any> | null {
+    if (type.isEmbedded || type.name == IsByAll)
+        return null;
+
+    if (findOptions)
+        return new FindOptionsAutocompleteConfig(findOptions, 5, false);
+
+    const types = getTypeInfos(type);
+
+    if (types.length == 1) {
+        var s = getSettings(types[0]);
+
+        if (s && s.autocomplete)
+            return s.autocomplete;
+    }
+
+    return new LiteAutocompleteConfig((subStr: string) => Finder.API.findLiteLike({
+        types: type.name,
+        subString: subStr,
+        count: 5
+    }), false);
+}
+
 
 export interface ViewOptions {
     title?: string;
     propertyRoute?: PropertyRoute;
     readOnly?: boolean;
-    showOperations?: boolean;
+    isOperationVisible?: (eoc: Operations.EntityOperationContext<Entity>) => boolean;
     validate?: boolean;
     requiresSaveOperation?: boolean;
     avoidPromptLooseChange?: boolean;
@@ -372,11 +431,11 @@ export interface ViewOptions {
     extraComponentProps?: {};
 }
 
-export function view<T extends ModifiableEntity>(options: EntityPack<T>, viewOptions?: ViewOptions): Promise<T>;
-export function view<T extends ModifiableEntity>(entity: T, viewOptions?: ViewOptions): Promise<T>;
-export function view<T extends Entity>(entity: Lite<T>, viewOptions?: ViewOptions): Promise<T>
-export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions): Promise<ModifiableEntity>;
-export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions): Promise<ModifiableEntity> {
+export function view<T extends ModifiableEntity>(options: EntityPack<T>, viewOptions?: ViewOptions): Promise<T | undefined>;
+export function view<T extends ModifiableEntity>(entity: T, viewOptions?: ViewOptions): Promise<T | undefined>;
+export function view<T extends Entity>(entity: Lite<T>, viewOptions?: ViewOptions): Promise<T | undefined>
+export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions): Promise<ModifiableEntity | undefined>;
+export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions): Promise<ModifiableEntity | undefined> {
     return new Promise<ModifiableEntity>((resolve, reject) => {
         require(["./Frames/ModalFrame"], function (NP: { default: typeof ModalFrame }) {
             NP.default.openView(entityOrPack, viewOptions || {}).then(resolve, reject);
@@ -403,17 +462,16 @@ export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityP
 
 export function createInNewTab(pack: EntityPack<ModifiableEntity>) {
     var url = createRoute(pack.entity.Type) + "?waitData=true";
+    window.dataForChildWindow = pack;
     var win = window.open(url);
-    if (win) //blocked pop-up
-        win.parentWindowData = pack;
 }
 
-export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.MouseEvent) {
+export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.MouseEvent<any>) {
     if (!pack || !pack.entity)
         return;
 
     const es = getSettings(pack.entity.Type);
-    if (es.avoidPopup || event.ctrlKey || event.button == 1) {
+    if (es && es.avoidPopup || event.ctrlKey || event.button == 1) {
         createInNewTab(pack);
     }
     else {
@@ -422,7 +480,7 @@ export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.Mouse
 }
 
 
-export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, showOperations: boolean): Promise<EntityPack<ModifiableEntity>> {
+export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>): Promise<EntityPack<ModifiableEntity>> {
     if ((entityOrEntityPack as EntityPack<ModifiableEntity>).canExecute)
         return Promise.resolve(entityOrEntityPack);
 
@@ -433,7 +491,7 @@ export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity
     if (entity == undefined)
         return API.fetchEntityPack(entityOrEntityPack as Lite<Entity>);
 
-    if (!showOperations || !needsCanExecute(entity))
+    if (!needsCanExecute(entity))
         return Promise.resolve({ entity: cloneEntity(entity), canExecute: {} });
 
     return API.fetchCanExecute(entity as Entity);
@@ -518,6 +576,15 @@ export module API {
     }
 }
 
+export interface EntitySettingsOptions<T> {
+    isCreable?: EntityWhen;
+    isFindable?: boolean;
+    isViewable?: boolean;
+    isNavigable?: EntityWhen;
+    isReadOnly?: boolean;
+    avoidPopup?: boolean;
+    autocomplete?: AutocompleteConfig<T>;
+}
 
 export class EntitySettings<T extends ModifiableEntity> {
     type: Type<T>;
@@ -535,7 +602,8 @@ export class EntitySettings<T extends ModifiableEntity> {
     isViewable: boolean;
     isNavigable: EntityWhen;
     isReadOnly: boolean;
-
+    autocomplete: AutocompleteConfig<T> | undefined;
+    
     overrideView(override: (replacer: ViewReplacer<T>) => void) {
         if (this.viewOverrides == undefined)
             this.viewOverrides = [];
@@ -543,13 +611,12 @@ export class EntitySettings<T extends ModifiableEntity> {
         this.viewOverrides.push(override);
     }
 
-    constructor(type: Type<T>, getViewPromise?: (entity: T) => ViewPromise<any>,
-        options?: { isCreable?: EntityWhen, isFindable?: boolean; isViewable?: boolean; isNavigable?: EntityWhen; isReadOnly?: boolean, avoidPopup?: boolean }) {
+    constructor(type: Type<T>, getViewPromise?: (entity: T) => ViewPromise<any>, options?: EntitySettingsOptions<T>) {
 
         this.type = type;
         this.getViewPromise = getViewPromise;
 
-        Dic.extend(this, options);
+        Dic.assign(this, options);
     }
 }
 
@@ -572,42 +639,50 @@ export class ViewPromise<T extends ModifiableEntity> {
         return result;
     }
 
-    withProps(componentParams: {} | Promise<{}>): ViewPromise<T> {
-        this.promise = this.promise.then(func =>
-            Promise.resolve(componentParams).then(params => {
-                return (ctx: TypeContext<T>) => {
-                    var result = func(ctx);
-                    return React.cloneElement(result, params);
-                };
-            }));
+    withProps(props: {}): ViewPromise<T> {
 
-        return this;
+        var result = new ViewPromise<T>();
+
+        result.promise = this.promise.then(func => {
+            return (ctx: TypeContext<T>) => {
+                var result = func(ctx);
+                return React.cloneElement(result, props);
+            };
+        });
+
+        return result;
     }
 
     applyViewOverrides(setting: EntitySettings<T>): ViewPromise<T> {
         this.promise = this.promise.then(func => {
             return (ctx: TypeContext<T>) => {
                 var result = func(ctx);
-                applyViewOverrides(setting, result.type as React.ComponentClass<{ ctx: TypeContext<T> }>);
+                var component = result.type as React.ComponentClass<{ ctx: TypeContext<T> }>;
+                monkeyPatchComponent(component, setting);
                 return result;
             };
         });
 
         return this;
     }
+
+    static flat<T extends ModifiableEntity>(promise: Promise<ViewPromise<T>>): ViewPromise<T> {
+        var result = new ViewPromise<T>();
+        result.promise = promise.then(vp => vp.promise);
+        return result;
+    }
 }
 
-function applyViewOverrides<T extends ModifiableEntity>(setting: EntitySettings<T>, component: React.ComponentClass<{ ctx: TypeContext<T> }>) {
+function monkeyPatchComponent<T extends ModifiableEntity>(component: React.ComponentClass<{ ctx: TypeContext<T> }>, setting: EntitySettings<T>) {
 
     if (!component.prototype.render)
         throw new Error("render function not defined in " + component);
 
     if (setting.viewOverrides == undefined || setting.viewOverrides.length == 0)
-        return component;
-
+        return;
 
     if (component.prototype.render.withViewOverrides)
-        return component;
+        return;
 
     const baseRender = component.prototype.render as () => void;
 
@@ -623,8 +698,6 @@ function applyViewOverrides<T extends ModifiableEntity>(setting: EntitySettings<
     };
 
     component.prototype.render.withViewOverrides = true;
-
-    return component;
 }
 
 
@@ -658,19 +731,18 @@ String.prototype.formatHtml = function (this: string) {
     return React.createElement("span", undefined, ...result);
 };
 
-function fixBaseName<T>(baseFunction: (location?: HistoryModule.LocationDescriptorObject | string) => T, baseName: string): (location?: HistoryModule.LocationDescriptorObject | string) => T {
+export function fixUrl(url: string): string {
+    if (url && url.startsWith("~/"))
+        return window.__baseUrl + url.after("~/");
 
-    function fixUrl(url: string): string {
-        if (url && url.startsWith("~/"))
-            return baseName + url.after("~/");
-
-        if (url.startsWith(baseName) || url.startsWith("http"))
-            return url;
-
-        console.warn(url);
+    if (url.startsWith(window.__baseUrl) || url.startsWith("http"))
         return url;
-    }
 
+    console.warn(url);
+    return url;
+}
+
+function fixBaseName<T>(baseFunction: (location?: HistoryModule.LocationDescriptorObject | string) => T): (location?: HistoryModule.LocationDescriptorObject | string) => T {
     return (location) => {
         if (typeof location === "string") {
             return baseFunction(fixUrl(location));
@@ -681,12 +753,12 @@ function fixBaseName<T>(baseFunction: (location?: HistoryModule.LocationDescript
     };
 }
 
-export function useAppRelativeBasename(history: HistoryModule.History, baseName: string) {
-    history.push = fixBaseName(history.push, baseName);
-    history.replace = fixBaseName(history.replace, baseName);
-    history.createHref = fixBaseName(history.createHref, baseName);
-    history.createPath = fixBaseName(history.createPath, baseName);
-    history.createLocation = fixBaseName(history.createLocation, baseName);
+export function useAppRelativeBasename(history: HistoryModule.History) {
+    history.push = fixBaseName(history.push);
+    history.replace = fixBaseName(history.replace);
+    history.createHref = fixBaseName(history.createHref);
+    history.createPath = fixBaseName(history.createPath);
+    history.createLocation = fixBaseName(history.createLocation);
 }
 
 export function tryConvert(value: any, type: TypeReference): Promise<any> | undefined {

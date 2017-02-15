@@ -1,7 +1,7 @@
 
 
-using System.ComponentModel;
 using Signum.Utilities;
+using System.ComponentModel;
 
 namespace Signum.Entities
 {
@@ -31,12 +31,8 @@ namespace Signum.Entities
 
     public enum SynchronizerMessage
     {
-        [Description("     '{0}' has been renamed in {1}?")]
-        _0HasBeenRenamedIn1,
         [Description("--- END OF SYNC SCRIPT")]
         EndOfSyncScript,
-        [Description("- n: None")]
-        NNone,
         [Description("--- START OF SYNC SCRIPT GENERATED ON {0}")]
         StartOfSyncScriptGeneratedOn0
     }
@@ -116,7 +112,7 @@ Lose changes?")]
     {
         [Description("No")]
         False = 0,
-        [Description("Yes")]        
+        [Description("Yes")]
         True = 1,
     }
 
@@ -218,7 +214,7 @@ Lose changes?")]
 
 
     public enum CalendarMessage
-    {  
+    {
         [Description("Today")]
         Today,
     }
@@ -255,7 +251,7 @@ Lose changes?")]
         loseCurrentChanges,
         [Description("No elements selected")]
         noElementsSelected,
-        [Description("Seach for results")]
+        [Description("Search for results")]
         searchForResults,
         [Description("Select only one element")]
         selectOnlyOneElement,

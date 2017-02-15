@@ -85,6 +85,9 @@ export module QueryTokenMessage {
     export const WeekNumber = new MessageKey("QueryTokenMessage", "WeekNumber");
     export const _0Steps1 = new MessageKey("QueryTokenMessage", "_0Steps1");
     export const Step0 = new MessageKey("QueryTokenMessage", "Step0");
+    export const Length = new MessageKey("QueryTokenMessage", "Length");
+    export const _0HasValue = new MessageKey("QueryTokenMessage", "_0HasValue");
+    export const HasValue = new MessageKey("QueryTokenMessage", "HasValue");
 }
 
 export const UniqueType = new EnumType<UniqueType>("UniqueType");

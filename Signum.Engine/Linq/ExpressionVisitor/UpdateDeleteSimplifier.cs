@@ -64,7 +64,7 @@ namespace Signum.Engine.Linq
             ce1 = ResolveColumn(ce1, select);
             ce2 = ResolveColumn(ce2, select);
 
-            return ce1.Name == ce2.Name && ce1.Alias.Name == ce2.Alias.Name;
+            return ce1.Name == ce2.Name && ce1.Alias.Equals(ce2.Alias);
         }
 
         private Expression RemoveConvert(Expression expression)

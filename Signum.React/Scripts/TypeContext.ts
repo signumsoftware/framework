@@ -1,6 +1,7 @@
 ﻿import * as React from 'react'
 import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, LambdaMemberType, Type, PseudoType, getTypeName } from './Reflection'
 import { ModelState, MList, ModifiableEntity, EntityPack, Entity } from './Signum.Entities'
+import { EntityOperationContext } from './Operations'
 
 export type FormGroupStyle =
     "None" |  /// Unaffected by FormGroupSize     
@@ -24,7 +25,7 @@ export class StyleContext {
         this.styleOptions = styleOptions || {};
 
         if (this.styleOptions.labelColumns && !this.styleOptions.valueColumns)
-            this.styleOptions.valueColumns = StyleContext.bsColumnsInvert(this.styleOptions.labelColumns);
+            this.styleOptions.valueColumns = StyleContext.bsColumnsInvert(toBsColumn(this.styleOptions.labelColumns));
     }
 
     static default: StyleContext = new StyleContext(undefined,
@@ -34,7 +35,7 @@ export class StyleContext {
         labelColumns: { sm: 2 },
         readOnly : false,
         placeholderLabels : false,
-        formControlStaticAsFormControlReadonly: false,
+        formControlClassReadonly: "form-control-static", //form-control readonly
         frame: undefined,
     });
 
@@ -55,20 +56,22 @@ export class StyleContext {
         return this.styleOptions.placeholderLabels != undefined ? this.styleOptions.placeholderLabels : this.parent.placeholderLabels;
     }
 
-    get formControlStaticAsFormControlReadonly(): boolean {
-        return this.styleOptions.formControlStaticAsFormControlReadonly != undefined ? this.styleOptions.formControlStaticAsFormControlReadonly : this.parent.formControlStaticAsFormControlReadonly;
+    get formControlClassReadonly(): string {
+        return this.styleOptions.formControlClassReadonly != undefined ? this.styleOptions.formControlClassReadonly : this.parent.formControlClassReadonly;
     }
     
     get labelColumns(): BsColumns {
-        return this.styleOptions.labelColumns != undefined ? this.styleOptions.labelColumns : this.parent.labelColumns;
+        return this.styleOptions.labelColumns != undefined ? toBsColumn(this.styleOptions.labelColumns) : this.parent.labelColumns;
     }
+
+    
 
     get labelColumnsCss(): string {
         return StyleContext.bsColumnsCss(this.labelColumns);
     }
 
     get valueColumns(): BsColumns {
-        return this.styleOptions.valueColumns != undefined ? this.styleOptions.valueColumns : this.parent.valueColumns;
+        return this.styleOptions.valueColumns != undefined ? toBsColumn(this.styleOptions.valueColumns) : this.parent.valueColumns;
     }
 
     get valueColumnsCss(): string {
@@ -114,13 +117,17 @@ export class StyleContext {
     }
 }
 
+function toBsColumn(bsColumnOrNumber: BsColumns | number): BsColumns {
+    return typeof (bsColumnOrNumber) == "number" ? { sm: bsColumnOrNumber } : bsColumnOrNumber;
+}
+
 export interface StyleOptions {
     formGroupStyle?: FormGroupStyle;
     formGroupSize?: FormGroupSize;
     placeholderLabels?: boolean;
-    formControlStaticAsFormControlReadonly?: boolean;
-    labelColumns?: BsColumns;
-    valueColumns?: BsColumns;
+    formControlClassReadonly?: string;
+    labelColumns?: BsColumns | number;
+    valueColumns?: BsColumns | number;
     readOnly?: boolean;
     frame?: EntityFrame<ModifiableEntity>;
 }
@@ -165,9 +172,9 @@ export class TypeContext<T> extends StyleContext {
         this.binding.setError(val);
     }
 
-    
-    static root<T extends ModifiableEntity>(type: Type<T>, value: T, styleOptions?: StyleOptions): TypeContext<T> {
-        return new TypeContext(undefined, styleOptions, PropertyRoute.root(type), new ReadonlyBinding<T>(value, ""));
+
+    static root<T extends ModifiableEntity>(value: T, styleOptions?: StyleOptions, parent?: StyleContext): TypeContext<T> {
+        return new TypeContext(parent, styleOptions, PropertyRoute.root(value.Type), new ReadonlyBinding<T>(value, ""));
     }
 
     constructor(parent: StyleContext | undefined, styleOptions: StyleOptions | undefined, propertyRoute: PropertyRoute /*| undefined*/, binding: IBinding<T>) {
@@ -199,14 +206,16 @@ export class TypeContext<T> extends StyleContext {
         return result;
     }
 
-    cast<R extends T & Entity>(type: Type<R>): TypeContext<R> {
+    cast<R extends T & ModifiableEntity>(type: Type<R>): TypeContext<R> {
 
         const entity = this.value as any as Entity;
 
         if (type.typeName != entity.Type)
             throw new Error(`Impossible to cast ${entity.Type} into ${type.typeName}`);
 
-        const result = new TypeContext<any>(this, undefined, PropertyRoute.root(type), new ReadonlyBinding(entity, this.binding.suffix + "_" + type.typeName));
+        var newPr = this.propertyRoute.typeReference().name == type.typeName ? this.propertyRoute : PropertyRoute.root(type);
+
+        const result = new TypeContext<any>(this, undefined, newPr, new ReadonlyBinding(entity, this.binding.suffix + "_" + type.typeName));
 
         return result;
     }
@@ -272,12 +281,20 @@ export class TypeContext<T> extends StyleContext {
 export interface ButtonsContext {
     pack: EntityPack<ModifiableEntity>;
     frame: EntityFrame<ModifiableEntity>;
-    showOperations: boolean;
+    isOperationVisible?: (eoc: EntityOperationContext<Entity>) => boolean;
     tag?: string;
 }
 
 export interface IRenderButtons {
     renderButtons(ctx: ButtonsContext): React.ReactElement<any>[];
+}
+
+export interface IOperationVisible {
+    isOperationVisible(eoc: EntityOperationContext<Entity>): boolean;
+}
+
+export interface IHasChanges {
+    componentHasChanges?: ()=> boolean;
 }
 
 export interface EntityFrame<T extends ModifiableEntity> {

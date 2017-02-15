@@ -277,6 +277,26 @@ Array.prototype.removeAt = function (this: any[], index: number) {
     this.splice(index, 1);
 };
 
+Array.prototype.moveUp = function (this: any[], index: number) {
+    if (index == 0)
+        return 0;
+
+    const entity = this[index]
+    this.removeAt(index);
+    this.insertAt(index - 1, entity);
+    return index - 1;
+};
+
+Array.prototype.moveDown = function (this: any[], index: number) {
+    if (index == this.length - 1)
+        return this.length - 1;
+
+    const entity = this[index]
+    this.removeAt(index);
+    this.insertAt(index + 1, entity);
+    return index + 1;
+};
+
 Array.prototype.remove = function (this: any[], element: any) {
 
     const index = this.indexOf(element);
@@ -422,15 +442,12 @@ String.prototype.replaceAll = function (this: string, from: string, to: string) 
     return this.split(from).join(to)
 };
 
-String.prototype.before = function (separator) {
-    const index = this.indexOf(separator);
-    if (index == -1)
-        throw Error("{0} not found".formatWith(separator));
-
-    return this.substring(0, index);
+String.prototype.indent = function (this: string, numChars: number) {
+    const indent = " ".repeat(numChars);
+    return this.split("\n").map(a => indent + a).join("\n");
 };
 
-String.prototype.after = function (separator) {
+String.prototype.after = function (this: string, separator: string) {
     const index = this.indexOf(separator);
     if (index == -1)
         throw Error("{0} not found".formatWith(separator));
@@ -438,15 +455,15 @@ String.prototype.after = function (separator) {
     return this.substring(index + separator.length);
 };
 
-String.prototype.tryBefore = function (separator) {
+String.prototype.before = function (this: string, separator: string) {
     const index = this.indexOf(separator);
     if (index == -1)
-        return undefined;
+        throw Error("{0} not found".formatWith(separator));
 
     return this.substring(0, index);
 };
 
-String.prototype.tryAfter = function (separator) {
+String.prototype.tryAfter = function (this: string, separator: string) {
     const index = this.indexOf(separator);
     if (index == -1)
         return undefined;
@@ -454,7 +471,15 @@ String.prototype.tryAfter = function (separator) {
     return this.substring(index + separator.length);
 };
 
-String.prototype.beforeLast = function (separator) {
+String.prototype.tryBefore = function (this: string, separator: string) {
+    const index = this.indexOf(separator);
+    if (index == -1)
+        return undefined;
+
+    return this.substring(0, index);
+};
+
+String.prototype.beforeLast = function (this: string, separator: string) {
     const index = this.lastIndexOf(separator);
     if (index == -1)
         throw Error("{0} not found".formatWith(separator));
@@ -462,7 +487,7 @@ String.prototype.beforeLast = function (separator) {
     return this.substring(0, index);
 };
 
-String.prototype.afterLast = function (separator) {
+String.prototype.afterLast = function (this: string, separator: string) {
     const index = this.lastIndexOf(separator);
     if (index == -1)
         throw Error("{0} not found".formatWith(separator));
@@ -470,7 +495,7 @@ String.prototype.afterLast = function (separator) {
     return this.substring(index + separator.length);
 };
 
-String.prototype.tryBeforeLast = function (separator) {
+String.prototype.tryBeforeLast = function (this: string, separator: string) {
     const index = this.lastIndexOf(separator);
     if (index == -1)
         return undefined;
@@ -478,7 +503,7 @@ String.prototype.tryBeforeLast = function (separator) {
     return this.substring(0, index);
 };
 
-String.prototype.tryAfterLast = function (separator) {
+String.prototype.tryAfterLast = function (this: string, separator: string) {
     const index = this.lastIndexOf(separator);
     if (index == -1)
         return undefined;
@@ -600,12 +625,22 @@ export module Dic {
         return akeys.every(k => equals((objA as any)[k], (objB as any)[k], deep, depth + 1, visited));
     }
 
+    export function assign<O extends P, P>(obj: O, other: P) {
+        if (!other)
+            return;
+
+        for (const key in other) {
+            if (other.hasOwnProperty == null || other.hasOwnProperty(key))
+                (obj as any)[key] = other[key];
+        }
+    }
+
 
     export function getValues<V>(obj: { [key: string]: V }): V[] {
         const result: V[] = [];
 
         for (const name in obj) {
-            if (obj.hasOwnProperty(name)) {
+            if (obj.hasOwnProperty == null || obj.hasOwnProperty(name)) {
                 result.push(obj[name]);
             }
         }
@@ -617,7 +652,7 @@ export module Dic {
         const result: string[] = [];
 
         for (const name in obj) {
-            if (obj.hasOwnProperty(name)) {
+            if (obj.hasOwnProperty == null || obj.hasOwnProperty(name)) {
                 result.push(name);
             }
         }
@@ -629,7 +664,7 @@ export module Dic {
         let index = 0;
         const result: R[] = [];
         for (const name in obj) {
-            if (obj.hasOwnProperty(name)) {
+            if (obj.hasOwnProperty == null || obj.hasOwnProperty(name)) {
                 result.push(selector(name, obj[name], index++));
             }
         }
@@ -639,7 +674,7 @@ export module Dic {
     export function foreach<V>(obj: { [key: string]: V }, action: (key: string, value: V) => void) {
 
         for (const name in obj) {
-            if (obj.hasOwnProperty(name)) {
+            if (obj.hasOwnProperty == null || obj.hasOwnProperty(name)) {
                 action(name, obj[name]);
             }
         }
@@ -653,79 +688,16 @@ export module Dic {
         dic[key] = value;
     }
 
-    export function copy<T>(object: T): T {
-        const objectCopy: any = {};
+    export function simplify<T>(a: T) : T {
+        if (a == null)
+            return a;
 
-        for (const key in object) {
-            if (object.hasOwnProperty(key)) {
-                objectCopy[key] = (object as any)[key];
-            }
+        var result : T = {} as any;
+        for (const key in a) {
+            if ((a.hasOwnProperty == null || a.hasOwnProperty(key)) && a[key] !== undefined)
+                result[key] = a[key];
         }
-
-        return objectCopy as T;
-    }
-
-    export function extend<O>(out: O): O;
-    export function extend<O, U>(out: O, arg1: U): O & U;
-    export function extend<O, U, V>(out: O, arg1: U, arg2: V): O & U & V;
-    export function extend<O, U, V>(out: O, ...args: Object[]): any;
-    export function extend(out: any) {
-        out = out || {};
-
-        for (let i = 1; i < arguments.length; i++) {
-
-            const a = arguments[i];
-
-            if (!a)
-                continue;
-
-            for (const key in a) {
-                if (a.hasOwnProperty(key))
-                    out[key] = a[key];
-            }
-        }
-
-        return out;
-    };
-
-    export function extendUndefined<O>(out: O): O;
-    export function extendUndefined<O, U>(out: O, arg1: U): O & U;
-    export function extendUndefined<O, U, V>(out: O, arg1: U, arg2: V): O & U & V;
-    export function extendUndefined<O, U, V>(out: O, ...args: Object[]): any;
-    export function extendUndefined(out: any) {
-        out = out || {};
-
-        for (let i = 1; i < arguments.length; i++) {
-
-            const a = arguments[i];
-
-            if (!a)
-                continue;
-
-            for (const key in a) {
-                if (a.hasOwnProperty(key) && a[key] !== undefined)
-                    out[key] = a[key];
-            }
-        }
-
-        return out;
-    };
-    
-
-   
-
-    /**  Waiting for https://github.com/Microsoft/TypeScript/issues/2103 */
-    export function without<T>(obj: T, toRemove: {}): T {
-        const result: any = {};
-
-        for (const key in obj) {
-            if (!toRemove.hasOwnProperty(key))
-                result[key] = (obj as any)[key];
-            else
-                (toRemove as any)[key] = (obj as any)[key];
-        }
-
-        return result as T;
+        return result;
     }
 }
 
@@ -770,7 +742,7 @@ export function areEqual<T>(a: T | undefined, b: T | undefined, field: (value: T
     return field(a) == field(b);
 }
 
-export function ifError<E extends Error, T>(ErrorClass: { new (...args: any[]): E }, onError: (error: E) => T): (error: any) => T {
+export function ifError<E, T>(ErrorClass: { new (...args: any[]): E }, onError: (error: E) => T): (error: any) => T {
     return error => {
         if (error instanceof ErrorClass)
             return onError((error as E));

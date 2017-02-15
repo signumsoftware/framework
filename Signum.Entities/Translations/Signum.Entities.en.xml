@@ -30,6 +30,7 @@
     <Member Name="GreaterThan" Description="greater than" />
     <Member Name="GreaterThanOrEqual" Description="greater than or equal" />
     <Member Name="IsIn" Description="is in" />
+    <Member Name="IsNotIn" Description="is not in" />
     <Member Name="LessThan" Description="less than" />
     <Member Name="LessThanOrEqual" Description="less than or equal" />
     <Member Name="Like" Description="like" />

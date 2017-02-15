@@ -23,8 +23,11 @@ export { RenderEntity };
 import { EntityBase } from  './Lines/EntityBase'
 export { EntityBase };
 
-import { EntityLine, AutocompleteConfig, LiteAutocompleteConfig, FindOptionsAutocompleteConfig } from './Lines/EntityLine'
-export { EntityLine, AutocompleteConfig, LiteAutocompleteConfig, FindOptionsAutocompleteConfig };
+import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './Lines/AutocompleteConfig'
+export { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig };
+
+import { EntityLine } from './Lines/EntityLine'
+export { EntityLine };
 
 import { EntityCombo } from  './Lines/EntityCombo'
 export { EntityCombo };
@@ -55,8 +58,8 @@ import { EnumCheckboxList } from  './Lines/EnumCheckboxList'
 export { EnumCheckboxList };
 
 
-import { EntityTable } from './Lines/EntityTable'
-export { EntityTable };
+import { EntityTable, EntityTableColumn, EntityTableRow } from './Lines/EntityTable'
+export { EntityTable, EntityTableColumn, EntityTableRow };
 
 tasks.push(taskSetNiceName);
 export function taskSetNiceName(lineBase: LineBase<any, any>, state: LineBaseProps) {
@@ -124,7 +127,7 @@ export function taskSetHtmlProperties(lineBase: LineBase<any, any>, state: LineB
 
         var member = pr.member!;
 
-        if (member.maxLength != undefined) {
+        if (member.maxLength != undefined && !s.ctx.readOnly) {
 
             if (!s.valueHtmlProps)
                 s.valueHtmlProps = {};

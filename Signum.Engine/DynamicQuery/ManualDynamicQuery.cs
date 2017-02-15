@@ -37,18 +37,35 @@ namespace Signum.Engine.DynamicQuery
             return manualResult.ToResultTable(request); 
         }
 
-        public override int ExecuteQueryCount(QueryCountRequest request)
+        public override object ExecuteQueryValue(QueryValueRequest request)
         {
             var req = new QueryRequest
             {
                 QueryName = request.QueryName,
                 Filters = request.Filters,
-                Columns = new List<Column>() { new Column(this.EntityColumnFactory().BuildColumnDescription(), QueryName) },
+                Columns = new List<Column>(),
                 Orders = new List<Order>(),
                 Pagination = new Pagination.All(),
             };
 
-            return Execute(req, GetQueryDescription()).Collection.Count();
+            if (request.ValueToken == null || request.ValueToken is AggregateToken && ((AggregateToken)request.ValueToken).AggregateFunction == AggregateFunction.Count)
+            {
+                req.Pagination = new Pagination.Paginate(1, 1);
+                req.Columns.Add(new Column(this.EntityColumnFactory().BuildColumnDescription(), QueryName));
+                return Execute(req, GetQueryDescription()).TotalElements.Value;
+            }
+
+            else if (request.ValueToken is AggregateToken)
+            {
+                var parent = request.ValueToken.Parent;
+                req.Columns.Add(new Column(parent, parent.NiceName()));
+                return Execute(req, GetQueryDescription()).SimpleAggregate((AggregateToken)request.ValueToken);
+            }
+            else
+            {
+                req.Columns.Add(new Column(request.ValueToken, request.ValueToken.NiceName()));
+                return Execute(req, GetQueryDescription()).SelectOne(request.ValueToken).Unique(UniqueType.Single);
+            }
         }
 
         public override Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request)

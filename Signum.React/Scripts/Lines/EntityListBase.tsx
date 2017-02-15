@@ -14,7 +14,7 @@ import { EntityBase, EntityBaseProps} from './EntityBase'
 
 
 export interface EntityListBaseProps extends EntityBaseProps {
-    move?: boolean;
+    move?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
     onFindMany?: () => Promise<(ModifiableEntity | Lite<Entity>)[] | undefined>;
 
     ctx: TypeContext<MList<Lite<Entity> | ModifiableEntity>>;
@@ -41,16 +41,11 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
     moveUp(index: number) {
         const list = this.props.ctx.value!;
-        if (index == 0)
-            return;
-
-        const entity = list[index]
-        list.removeAt(index);
-        list.insertAt(index - 1, entity);
+        list.moveUp(index);
         this.setValue(list);
     }
     renderMoveUp(btn: boolean, index: number) {
-        if (!this.state.move || this.state.ctx.readOnly)
+        if (!this.canMove(this.state.ctx.value[index].element) || this.state.ctx.readOnly)
             return undefined;
 
         return (
@@ -64,17 +59,12 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
     moveDown(index: number) {
         const list = this.props.ctx.value!;
-        if (index == list.length - 1)
-            return;
-  
-        const entity = list[index]
-        list.removeAt(index);
-        list.insertAt(index + 1, entity);
+        list.moveDown(index);
         this.setValue(list);
     }
 
     renderMoveDown(btn: boolean, index: number) {
-        if (!this.state.move || this.state.ctx.readOnly)
+        if (!this.canMove(this.state.ctx.value[index].element) || this.state.ctx.readOnly)
             return undefined;
 
         return (
@@ -85,7 +75,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
             </a>);
     }
 
-    handleCreateClick = (event: React.SyntheticEvent) => {
+    handleCreateClick = (event: React.SyntheticEvent<any>) => {
 
         event.preventDefault();
 
@@ -142,7 +132,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     }
 
 
-    handleFindClick = (event: React.SyntheticEvent) => {
+    handleFindClick = (event: React.SyntheticEvent<any>) => {
 
         event.preventDefault();
 
@@ -158,7 +148,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
         }).done();
     };
 
-    handleRemoveElementClick = (event: React.SyntheticEvent, index: number) => {
+    handleRemoveElementClick = (event: React.SyntheticEvent<any>, index: number) => {
 
         event.preventDefault();
 
@@ -175,4 +165,16 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
             }).done();
     };
 
+    canMove(item: ModifiableEntity | Lite<Entity>): boolean | undefined {
+
+        const move = this.state.move;
+
+        if (move == undefined)
+            return undefined;
+
+        if (typeof move === "function")
+            return move(item);
+
+        return move;
+    }
 }

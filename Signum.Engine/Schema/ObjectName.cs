@@ -110,7 +110,9 @@ namespace Signum.Engine.Maps
             if (string.IsNullOrEmpty(name))
                 return null;
 
-            return new DatabaseName(ServerName.Parse(name.TryBeforeLast('.')), (name.TryAfterLast('.') ?? name).UnScapeSql());
+            var tuple = ObjectName.SplitLast(name);
+
+            return new DatabaseName(ServerName.Parse(tuple.Item1), tuple.Item2);
         }
     }
 
@@ -179,7 +181,9 @@ namespace Signum.Engine.Maps
             if (string.IsNullOrEmpty(name))
                 return SchemaName.Default;
 
-            return new SchemaName(DatabaseName.Parse(name.TryBeforeLast('.')), (name.TryAfterLast('.') ?? name).UnScapeSql());
+            var tuple = ObjectName.SplitLast(name);
+
+            return new SchemaName(DatabaseName.Parse(tuple.Item1), (tuple.Item2));
         }
 
     }
@@ -229,7 +233,28 @@ namespace Signum.Engine.Maps
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException("name");
 
-            return new ObjectName(SchemaName.Parse(name.TryBeforeLast('.')), (name.TryAfterLast('.') ?? name).UnScapeSql());
+            var tuple = SplitLast(name);
+
+            return new ObjectName(SchemaName.Parse(tuple.Item1), tuple.Item2);
+        }
+
+        //FROM "[a.b.c].[d.e.f].[a.b.c].[c.d.f]"
+        //TO   ("[a.b.c].[d.e.f].[a.b.c]", "c.d.f")
+        internal static Tuple<string, string> SplitLast(string str)
+        {
+            if (!str.EndsWith("]"))
+            {
+                return Tuple.Create(
+                    str.TryBeforeLast('.'),
+                    str.TryAfterLast('.') ?? str
+                    );
+            }
+
+            var index = str.LastIndexOf('[');
+            return Tuple.Create(
+                index == 0 ? null : str.Substring(0, index - 1),
+                str.Substring(index).UnScapeSql()
+            );
         }
 
         public ObjectName OnDatabase(DatabaseName databaseName)

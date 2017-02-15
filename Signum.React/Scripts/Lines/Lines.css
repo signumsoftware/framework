@@ -78,6 +78,7 @@ label > input[type=checkbox] {
 
     .sf-line-button:not(.btn) {
         vertical-align: middle;
+         margin: 0 2px;
     }
 
 /* EntityLine buttons  */
@@ -148,6 +149,10 @@ fieldset.sf-repeater-element legend {
 ul.sf-strip-horizontal > li {
     float: left;
     margin-right: 10px;
+}
+
+body.rtl-mode ul.sf-strip-horizontal > li {
+    float: right;
 }
 
 ul.sf-strip-vertical > li {
@@ -246,9 +251,17 @@ ul.nav-tabs {
 }
 
 
-.form-xs .form-control:not(textarea),
-.form-xs .form-control-static {
+.form-xs .form-control:not(textarea) {
     height: 20px;
+    min-height: inherit;
+}
+
+.form-xs .input-group-btn .btn {
+    height: 20px;
+}
+
+
+.form-xs .form-control-static {
     min-height: inherit;
 }
 
@@ -263,7 +276,7 @@ ul.nav-tabs {
 
 .form-xs input[type=checkbox].form-control {
     height: 16px;
-    margin-top: 9px;
+    margin-top: 2px;
     padding: 2px;
 }
 
@@ -290,9 +303,13 @@ ul.nav-tabs {
 }
 
 .form-xs .rw-combobox, 
-.form-xs .rw-datetimepicker, 
 .form-xs .rw-numberpicker, 
 .form-xs .rw-dropdownlist{
+    padding-right:1.5em;
+    line-height: 18px;
+}
+
+.form-xs .rw-datetimepicker {
     padding-right:1.9em;
     line-height: 18px;
 }
@@ -343,9 +360,16 @@ ul.nav-tabs {
     padding: 3px 6px;
 }
 
-.form-sm .form-control:not(textarea),
-.form-sm .form-control-static {
+.form-sm .form-control:not(textarea) {
     height: 26px;
+    min-height: inherit;
+}
+
+.form-sm .input-group-btn .btn {
+    height: 26px;
+}
+
+.form-sm .form-control-static {
     min-height: inherit;
 }
 
@@ -386,10 +410,15 @@ ul.nav-tabs {
     line-height: 24px;
 }
 
+
 .form-sm .rw-combobox, 
-.form-sm .rw-datetimepicker, 
 .form-sm .rw-numberpicker, 
 .form-sm .rw-dropdownlist{
+    padding-right:1.5em;
+    line-height: 24px;
+}
+
+.form-sm .rw-datetimepicker{
     padding-right:1.9em;
     line-height: 24px;
 }
@@ -500,4 +529,8 @@ ul.dropdown-menu > li > a.disabled {
     margin-top: 0px;
     margin-bottom: 0px;
     color: #737373;
+}
+
+.sf-create-label {
+    margin-right: 5px;
 }

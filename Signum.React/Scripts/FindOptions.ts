@@ -96,10 +96,7 @@ export const DefaultPagination: Pagination = {
 };
 
 
-export enum FindMode {
-    Find = <any>"Find",
-    Explore = <any>"Explore"
-}
+export type FindMode = "Find"  |"Explore";
 
 export enum SubTokensOptions {
     CanAggregate = 1,
@@ -124,17 +121,13 @@ export interface QueryToken {
     propertyRoute?: string;
 }
 
-export enum QueryTokenType {
-    Aggregate = "Aggregate" as any,
-    Element = "Element" as any,
-    AnyOrAll = "AnyOrAll" as any,
-}
+export type QueryTokenType = "Aggregate" | "Element" | "AnyOrAll";
 
 export function hasAnyOrAll(token: QueryToken | undefined) : boolean {
     if(token == undefined)
         return false;
 
-    if(token.queryTokenType == QueryTokenType.AnyOrAll)
+    if(token.queryTokenType == "AnyOrAll")
         return true;
 
     return hasAnyOrAll(token.parent);
@@ -144,7 +137,7 @@ export function hasAggregate(token: QueryToken | undefined): boolean {
     if (token == undefined)
         return false;
 
-    if (token.queryTokenType == QueryTokenType.Aggregate)
+    if (token.queryTokenType == "Aggregate")
         return true;
 
     return hasAggregate(token.parent);
@@ -206,9 +199,12 @@ export interface QueryRequest {
     pagination: Pagination;
 }
 
-export interface CountQueryRequest {
+export type AggregateType = "Count" | "Average" | "Sum" | "Min" | "Max";
+
+export interface QueryCountRequest {
     queryKey: string;
     filters: FilterRequest[];
+    valueToken?: string;
 }
 
 export interface ResultColumn {
@@ -239,7 +235,7 @@ export interface Pagination {
 
 export module PaginateMath {
     export function startElementIndex(p: Pagination) {
-        return (p.elementsPerPage * (p.currentPage - 1)) + 1;
+        return (p.elementsPerPage! * (p.currentPage! - 1)) + 1;
     }
 
     export function endElementIndex(p: Pagination, rows: number) {
@@ -247,11 +243,11 @@ export module PaginateMath {
     }
 
     export function totalPages(p: Pagination, totalElements: number) {
-        return Math.ceil(totalElements / p.elementsPerPage); //Round up
+        return Math.ceil(totalElements / p.elementsPerPage!); //Round up
     }
 
     export function maxElementIndex(p: Pagination) {
-        return (p.elementsPerPage * (p.currentPage + 1)) - 1;
+        return (p.elementsPerPage! * (p.currentPage! + 1)) - 1;
     }
 }
 

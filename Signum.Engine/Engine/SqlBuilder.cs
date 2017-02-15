@@ -281,6 +281,11 @@ namespace Signum.Engine
             }
         }
 
+        internal static SqlPreCommand UpdateTrim(ITable tab, IColumn tabCol)
+        {
+            return new SqlPreCommandSimple("UPDATE {0} SET {1} = RTRIM({1})".FormatWith(tab.Name, tabCol.Name));;
+        }
+
         public static SqlPreCommand AlterTableDropConstraint(ObjectName tableName, ObjectName constraintName)
         {
             return new SqlPreCommandSimple("ALTER TABLE {0} DROP CONSTRAINT {1}".FormatWith(
@@ -492,12 +497,14 @@ EXEC DB.dbo.sp_executesql @sql"
             return new SqlPreCommandSimple(command);
         }
 
-        public static SqlPreCommandSimple AddDefaultConstraint(ObjectName tableName, string columnName, string definition)
+        public static SqlPreCommandSimple AddDefaultConstraint(ObjectName tableName, string columnName, string definition, SqlDbType sqlDbType)
         {
             string constraintName = "DF_{0}_{1}".FormatWith(tableName.Name, columnName);
-
-            return new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} DEFAULT {2} FOR {3}"
-                .FormatWith(tableName, constraintName, definition, columnName));
+            return new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} DEFAULT {2}{3}{2} FOR {4}"
+                .FormatWith(tableName, constraintName,
+                sqlDbType == SqlDbType.Char || sqlDbType == SqlDbType.NChar || 
+                sqlDbType == SqlDbType.VarChar || sqlDbType == SqlDbType.NVarChar ? "'": "",
+                definition, columnName));
         }
 
         internal static SqlPreCommand DropStatistics(string tn, List<DiffStats> list)

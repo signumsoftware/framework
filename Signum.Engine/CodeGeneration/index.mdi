@@ -3,4 +3,6 @@ EntityCodeGenerator
 LogicCodeGenerator
 WebCodeGenerator
 WindowsCodeGenerator
+ReactCodeGenerator
+ReactCodeConverter
 LegacyDatabase.AdventureWorks

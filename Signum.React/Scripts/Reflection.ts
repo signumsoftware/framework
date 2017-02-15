@@ -14,6 +14,7 @@ export function getEnumInfo(enumTypeName: string, enumId: number) {
     return ti.membersById![enumId];
 }
 
+
 export interface TypeInfo {
     kind: KindOfType;
     name: string;
@@ -120,19 +121,19 @@ export function toNumbroFormat(format: string | undefined) {
     const f = format.toUpperCase();
 
     if (f.startsWith("C"))
-        return "0." + "0".repeat(parseInt(f.after("C")));
+        return "0." + "0".repeat(parseInt(f.after("C") || "2"));
 
     if (f.startsWith("N"))
-        return "0." + "0".repeat(parseInt(f.after("N")));
+        return "0,0." + "0".repeat(parseInt(f.after("N") || "2"));
 
     if (f.startsWith("D"))
-        return "0".repeat(parseInt(f.after("D")));
+        return "0".repeat(parseInt(f.after("D") || "1"));
 
     if (f.startsWith("E"))
-        return "0." + "0".repeat(parseInt(f.after("E")));
+        return "0." + "0".repeat(parseInt(f.after("E") || "2"));
 
     if (f.startsWith("P"))
-        return "0." + "0".repeat(parseInt(f.after("P"))) + "%";
+        return "0." + "0".repeat(parseInt(f.after("P") || "2")) + "%";
 
     return format;
 }
@@ -149,8 +150,14 @@ export interface TypeReference {
 export type KindOfType = "Entity" | "Enum" | "Message" | "Query" | "SymbolContainer";
 
 export type EntityKind = "SystemString" | "System" | "Relational" | "String" | "Shared" | "Main" | "Part" | "SharedPart";
+export const EntityKindValues: EntityKind[] = ["SystemString", "System", "Relational", "String", "Shared", "Main", "Part", "SharedPart"];
 
 export type EntityData = "Master" | "Transactional";
+export const EntityDataValues: EntityData[] = ["Master", "Transactional"];
+
+export function getAllTypes(): TypeInfo[] {
+    return Dic.getValues(_types);
+}
 
 export interface TypeInfoDictionary {
     [name: string]: TypeInfo
@@ -204,7 +211,7 @@ export function isTypeEmbeddedOrValue(type: PseudoType): boolean {
     return !ti;
 }
 
-export function isModifiableEntity(type: TypeReference): boolean {
+export function isTypeModifiableEntity(type: TypeReference): boolean {
     return type.isEmbedded == true || getTypeInfos(type).every(ti => ti != undefined && (isTypeEntity(ti) || isTypeModel(ti)));
 }
 
@@ -373,13 +380,14 @@ export function setTypes(types: TypeInfoDictionary) {
 
                 const ti = _types[typeName];
                 if (!ti)
-                    throw new Error(`Type ${typeName} not found. Consider synchronizing.`);
-
-                const member = ti.members[k2.after(".")];
-                if (!member)
-                    throw new Error(`Member ${memberName} not found in ${ti.name}. Consider synchronizing.`);
-
-                t2.niceName = member.niceName;
+                    console.error(`Type ${typeName} not found. Consider synchronizing.`);
+                else {
+                    const member = ti.members[k2.after(".")];
+                    if (!member)
+                        console.error(`Member ${memberName} not found in ${ti.name}. Consider synchronizing.`);
+                    else
+                        t2.niceName = member.niceName;
+                }
             });
 
             Object.freeze(t.operations);
@@ -449,7 +457,7 @@ export class Binding<T> implements IBinding<T> {
     }
 
     get suffix() {
-        return this.member.toString();
+        return this.member == null ? "--unknown--" : this.member.toString();
     }
 
     getValue(): T {
@@ -529,7 +537,10 @@ export class ReadonlyBinding<T> implements IBinding<T> {
 
 export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBinding<T> {
 
-    const lambdaMatch = functionRegex.exec((lambda as any).toString());
+    var lambdaStr = (lambda as any).toString();
+
+    const lambdaMatch = functionRegex.exec(lambdaStr) || lambdaRegex.exec(lambdaStr);
+    //const lambdaMatch = functionRegex.exec((lambda as any).toString());
 
     if (lambdaMatch == undefined)
         throw Error("invalid function");
@@ -543,7 +554,7 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
     body = body.replace(partialMixinRegex,
         (...m: string[]) => `${m[2]}.mixins["${m[4]}"]`);
 
-    const m = memberRegex.exec(body);
+    const m = memberRegex.exec(body) || memberIndexerRegex.exec(body);;
 
     if (m == undefined) {
         const realParentValue = eval(`(function(${parameter}){ return ${body};})`)(parentValue);
@@ -561,14 +572,19 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
 
 
 const functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*(\"use strict\"\;)?\s*return\s*([^;]*)\s*;?\s*}$/;
+const lambdaRegex = /^\s*\(?\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)?\s*=>\s*{?\s*(return\s+)?([^;]*)\s*;?\s*}?$/;
 const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
+const memberIndexerRegex = /^(.*)\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; //Necessary for some crazy minimizers
 const indexRegex = /^(.*)\[(\d+)\]$/;
 const mixinRegex = /^(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)$/
+const mixinIndexerRegex = /^(.*).mixins\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; 
 const partialMixinRegex = /(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)/
 
 export function getLambdaMembers(lambda: Function): LambdaMember[]{
-    
-    const lambdaMatch = functionRegex.exec((lambda as any).toString());
+
+    var lambdaStr = (lambda as any).toString();
+
+    const lambdaMatch = functionRegex.exec(lambdaStr) || lambdaRegex.exec(lambdaStr);
 
     if (lambdaMatch == undefined)
         throw Error("invalid function");
@@ -579,7 +595,11 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
 
     while (body != parameter) {
         let m: RegExpExecArray | null;
-        if (m = memberRegex.exec(body)) {
+        if (m = mixinIndexerRegex.exec(body)) {
+            result.push({ name: m[2], type: "Mixin" });
+            body = m[1];
+        }
+        else if (m = memberRegex.exec(body) || memberIndexerRegex.exec(body)) {
             result.push({ name: m[2], type: "Member" });
             body = m[1];
         }
@@ -590,7 +610,8 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
         else if (m = mixinRegex.exec(body)) {
             result.push({ name: m[4], type: "Mixin" });
             body = m[2];
-        } else {
+        }
+        else {
             throw new Error(`Unexpected body in Property Route ${body}`);
         }
     }
@@ -645,12 +666,12 @@ export interface IType {
 
 export class Type<T extends ModifiableEntity> implements IType {
 
-    New(modify?: (entity: T) => void): T {
+    New(props?: Partial<T>): T {
 
         const result =  basicConstruct(this.typeName) as T;
 
-        if (modify)
-            modify(result);
+        if (props)
+            Dic.assign(result, props);
 
         return result;
     }
@@ -710,6 +731,10 @@ export class Type<T extends ModifiableEntity> implements IType {
             throw new Error(`no nicePropertyName found for ${member.name}`);
 
         return member.niceName;
+    }
+
+    isInstance(obj: any): obj is T {
+        return obj && (obj as ModifiableEntity).Type == this.typeName;
     }
 }
 
@@ -785,6 +810,10 @@ function getMember(key: string): MemberInfo | undefined {
     return member;
 }
 
+export function symbolNiceName(symbol: ISymbol) {
+    return getMember(symbol.key) !.niceName;
+}
+
 export function registerSymbol(type: string, key: string): any /*ISymbol*/ {
 
     const mi = getMember(key);
@@ -833,6 +862,27 @@ export class PropertyRoute {
         return new PropertyRoute(parent, "LiteEntity", undefined, undefined, undefined);
     }
 
+    
+
+    static parse(rootType: PseudoType, propertyString: string): PropertyRoute {
+        let result = PropertyRoute.root(rootType);
+        const parts = propertyString.replaceAll("/", ".&&.").trimEnd(".").split(".").map((p): LambdaMember =>
+        {
+            if (p == "&&")
+                return { type: "Indexer", name: "0" };
+
+
+            if (p.startsWith("[") && p.endsWith("]"))
+                return { type: "Mixin", name: p.trimStart("[").trimEnd("]") };
+
+            return { type: "Member", name: p };
+        });
+
+        parts.forEach(p => result = result.addMember(p));
+
+        return result;
+    }
+
     constructor(
         parent: PropertyRoute | undefined,
         propertyRouteType: PropertyRouteType,
@@ -856,17 +906,13 @@ export class PropertyRoute {
         return current;
     }
 
-    findRootType(): TypeInfo {
-        return this.rootType || this.parent!.findRootType();
-    }
-
     typeReference(): TypeReference {
         switch (this.propertyRouteType) {
             case "Root": return { name: this.rootType!.name };
             case "Field": return this.member!.type;
             case "Mixin": throw new Error("mixins can not be used alone");
-            case "MListItem": return Dic.extend({}, this.parent!.typeReference(), { isCollection: false });
-            case "LiteEntity": return Dic.extend({}, this.parent!.typeReference(), { isLite: false });
+            case "MListItem": return { ...this.parent!.typeReference(), isCollection: false };
+            case "LiteEntity": return { ...this.parent!.typeReference(), isLite: false };
             default: throw new Error("Unexpected propertyRouteType");
         }
     }
@@ -875,13 +921,13 @@ export class PropertyRoute {
         return getTypeInfo(this.typeReference().name);
     }
 
-    rootTypeInfo(): TypeInfo {
+    findRootType(): TypeInfo {
         switch (this.propertyRouteType) {
             case "Root": return this.rootType!;
-            case "Field": return this.parent!.rootTypeInfo();
-            case "Mixin": return this.parent!.rootTypeInfo();
-            case "MListItem": return this.parent!.rootTypeInfo();
-            case "LiteEntity": return this.parent!.rootTypeInfo();
+            case "Field": return this.parent!.findRootType();
+            case "Mixin": return this.parent!.findRootType();
+            case "MListItem": return this.parent!.findRootType();
+            case "LiteEntity": return this.parent!.findRootType();
             default: throw new Error("Unexpected propertyRouteType");
         }
     }
@@ -938,7 +984,7 @@ export class PropertyRoute {
                 this.propertyRouteType == "MListItem" ? this.propertyPath() + member.name.firstUpper() :
                     this.propertyPath() + "." + member.name.firstUpper();
 
-            const m = this.rootTypeInfo().members[memberName];
+            const m = this.findRootType().members[memberName];
             if (!m)
                 throw new Error(`member '${memberName}' not found`)
 
@@ -982,11 +1028,20 @@ export class PropertyRoute {
                 })
                 .toObject(m => m.name.substring(path.length))
         }
+
+        function mixinMembers(type: TypeInfo) {
+            var mixins = Dic.getValues(type.members).filter(a => a.name.startsWith("[")).groupBy(a => a.name.after("[").before("]")).map(a => a.key);
+
+            return mixins.flatMap(mn => Dic.getValues(simpleMembersAfter(type, `[${mn}].`))).toObject(a => a.name);
+        }
         
 
         switch (this.propertyRouteType) {
-            case "Root": return simpleMembersAfter(this.rootTypeInfo(), "");
-            case "Mixin": return simpleMembersAfter(this.rootTypeInfo(), this.propertyPath());                
+            case "Root": return {
+                ...simpleMembersAfter(this.findRootType(), ""),
+                ...mixinMembers(this.findRootType())
+            };
+            case "Mixin": return simpleMembersAfter(this.findRootType(), this.propertyPath());                
             case "LiteEntity": return simpleMembersAfter(this.typeReferenceInfo(), "");
             case "Field":
             case "MListItem": 
@@ -995,7 +1050,7 @@ export class PropertyRoute {
                     if (ti && isTypeEntity(ti))
                         return simpleMembersAfter(ti, "");
                     else
-                        return simpleMembersAfter(this.rootTypeInfo(), this.propertyPath() + (this.propertyRouteType == "Field" ? "." : ""));
+                        return simpleMembersAfter(this.findRootType(), this.propertyPath() + (this.propertyRouteType == "Field" ? "." : ""));
                 }
             default: throw new Error("Unexpected propertyRouteType");
 
@@ -1026,10 +1081,10 @@ export class GraphExplorer {
     static setModelState(e: ModifiableEntity, modelState: ModelState | undefined, initialPrefix: string) {
         const ge = new GraphExplorer();
         ge.modelStateMode = "set";
-        ge.modelState = modelState == undefined ? {} : Dic.copy(modelState);
+        ge.modelState = modelState == undefined ? {} : { ...modelState };
         ge.isModifiableObject(e, initialPrefix);
         if (Dic.getValues(ge.modelState).length) //Assign remaining
-            e.error = Dic.extend(e.error || {}, ge.modelState);
+            e.error = { ...e.error, ...ge.modelState };
     }
 
     static collectModelState(e: ModifiableEntity, initialPrefix: string): ModelState {
@@ -1082,7 +1137,7 @@ export class GraphExplorer {
             return (obj as Array<any>).map((o, i) => this.isModified(o, modelStatePrefix + "[" + i + "]")).some(a => a);
 
         const mle = obj as MListElement<any>;
-        if (mle.hasOwnProperty("rowId"))
+        if (mle.hasOwnProperty && mle.hasOwnProperty("rowId"))
             return this.isModified(mle.element, dot(modelStatePrefix, "element")) || mle.rowId == undefined;
 
         const lite = obj as Lite<Entity>
@@ -1093,7 +1148,7 @@ export class GraphExplorer {
         if (mod.Type == undefined) {
             let result = false;
             for (const p in obj) {
-                if (obj.hasOwnProperty(p)) {
+                if (obj.hasOwnProperty == null || obj.hasOwnProperty(p)) {
                     const propertyPrefix = dot(modelStatePrefix, p);
                     result = this.isModified(obj[p], propertyPrefix) || result;
                 }

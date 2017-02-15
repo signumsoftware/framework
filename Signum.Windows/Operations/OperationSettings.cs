@@ -303,6 +303,8 @@ namespace Signum.Windows.Operations
 
         public abstract ContextualOperationSettingsBase ContextualUntyped { get; }
         public abstract ContextualOperationSettingsBase ContextualFromManyUntyped { get; }
+        public bool AutoClose { get; set; }
+
     }
 
     public class EntityOperationSettings<T> : EntityOperationSettingsBase where T : class, IEntity

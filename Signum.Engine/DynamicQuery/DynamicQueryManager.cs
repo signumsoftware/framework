@@ -38,7 +38,7 @@ namespace Signum.Engine.DynamicQuery
 
         public void RegisterQuery<T>(object queryName, Func<IQueryable<T>> lazyQuery, Implementations? entityImplementations = null)
         {
-            queries[queryName] = new DynamicQueryBucket(queryName, () => DynamicQuery.Auto(lazyQuery()), entityImplementations ?? DefaultImplementations(typeof(T), queryName));
+            queries[queryName] = new DynamicQueryBucket(queryName, () => DynamicQueryCore.Auto(lazyQuery()), entityImplementations ?? DefaultImplementations(typeof(T), queryName));
         }
 
         public void RegisterQuery<T>(object queryName, Func<DynamicQueryCore<T>> lazyQueryCore, Implementations? entityImplementations = null)
@@ -113,9 +113,9 @@ namespace Signum.Engine.DynamicQuery
             return Execute(ExecuteType.ExecuteQuery, request.QueryName,request, dqb => dqb.Core.Value.ExecuteQuery(request));
         }
 
-        public int ExecuteQueryCount(QueryCountRequest request)
+        public object ExecuteQueryCount(QueryValueRequest request)
         {
-            return Execute(ExecuteType.ExecuteQueryCount, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryCount(request));
+            return Execute(ExecuteType.ExecuteQueryCount, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryValue(request));
         }
 
         public ResultTable ExecuteGroupQuery(QueryGroupRequest request)
@@ -142,10 +142,13 @@ namespace Signum.Engine.DynamicQuery
 
         public bool QueryAllowed(object queryName)
         {
-            if (AllowQuery == null)
-                return true;
+            foreach (var f in AllowQuery.GetInvocationListTyped())
+            {
+                if (!f(queryName))
+                    return false;
+            }
 
-            return AllowQuery(queryName);
+            return true;
         }
 
         public bool QueryDefined(object queryName)
@@ -254,8 +257,8 @@ namespace Signum.Engine.DynamicQuery
         {
             return requests.Select(r =>
             {
-                if (r is QueryCountRequest)
-                    return ExecuteQueryCount((QueryCountRequest)r);
+                if (r is QueryValueRequest)
+                    return ExecuteQueryCount((QueryValueRequest)r);
 
                 if (r is QueryRequest)
                     return ExecuteQuery((QueryRequest)r);
@@ -277,6 +280,18 @@ namespace Signum.Engine.DynamicQuery
             where T : Entity
         {
             dqm.RegisterQuery<Q>(typeof(T), () => Database.Query<T>().Select(simpleQuerySelector));
+            return fi;
+        }
+
+        public static FluentInclude<T> WithQuery<T, Q>(this FluentInclude<T> fi, DynamicQueryManager dqm, Expression<Func<T, Q>> simpleQuerySelector, Action<AutoDynamicQueryCore<Q>> modifyQuery)
+            where T : Entity
+        {
+            dqm.RegisterQuery<Q>(typeof(T), () =>
+            {
+                var autoQuery = DynamicQueryCore.Auto(Database.Query<T>().Select(simpleQuerySelector));
+                modifyQuery(autoQuery);
+                return autoQuery;
+            });
             return fi;
         }
 

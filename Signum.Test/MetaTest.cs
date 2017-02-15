@@ -30,20 +30,20 @@ namespace Signum.Test
         [TestMethod]
         public void MetaNoMetadata()
         {
-            Assert.IsNull(DynamicQuery.QueryMetadata(Database.Query<NoteWithDateEntity>().Select(a => a.Target)));
+            Assert.IsNull(DynamicQueryCore.QueryMetadata(Database.Query<NoteWithDateEntity>().Select(a => a.Target)));
         }
 
         [TestMethod]
         public void MetaRawEntity()
         {
-            var dic = DynamicQuery.QueryMetadata(Database.Query<NoteWithDateEntity>());
+            var dic = DynamicQueryCore.QueryMetadata(Database.Query<NoteWithDateEntity>());
             Assert.IsNotNull(dic);
         }
 
         [TestMethod]
         public void MetaAnonymousType()
         {
-            var dic = DynamicQuery.QueryMetadata(Database.Query<NoteWithDateEntity>().Select(a => new { a.Target, a.Text, a.ToString().Length, Sum = a.ToString() + a.ToString() }));
+            var dic = DynamicQueryCore.QueryMetadata(Database.Query<NoteWithDateEntity>().Select(a => new { a.Target, a.Text, a.ToString().Length, Sum = a.ToString() + a.ToString() }));
             Assert.IsInstanceOfType(dic["Target"], typeof(CleanMeta));
             Assert.IsInstanceOfType(dic["Text"], typeof(CleanMeta));
             Assert.IsInstanceOfType(dic["Length"], typeof(DirtyMeta));
@@ -59,7 +59,7 @@ namespace Signum.Test
         [TestMethod]
         public void MetaNamedType()
         {
-            var dic = DynamicQuery.QueryMetadata(Database.Query<NoteWithDateEntity>().Select(a => new Bla { ToStr = a.ToString(), Length = a.ToString().Length }));
+            var dic = DynamicQueryCore.QueryMetadata(Database.Query<NoteWithDateEntity>().Select(a => new Bla { ToStr = a.ToString(), Length = a.ToString().Length }));
             Assert.IsInstanceOfType(dic["ToStr"], typeof(CleanMeta));
             Assert.IsInstanceOfType(dic["Length"], typeof(DirtyMeta));
         }
@@ -67,7 +67,7 @@ namespace Signum.Test
         [TestMethod]
         public void MetaComplexJoin()
         {
-            var dic = DynamicQuery.QueryMetadata(
+            var dic = DynamicQueryCore.QueryMetadata(
                     from l in Database.Query<LabelEntity>()
                     join a in Database.Query<AlbumEntity>() on l equals a.Label
                     select new { Label = l.Name, Name = a.Name, Sum = l.Name.Length + a.Name });
@@ -76,13 +76,14 @@ namespace Signum.Test
             Assert.IsInstanceOfType(dic["Name"], typeof(CleanMeta));
             Assert.IsInstanceOfType(dic["Sum"], typeof(DirtyMeta));
 
-            Assert.AreEqual(((DirtyMeta)dic["Sum"]).CleanMetas.Select(cm => cm.PropertyRoutes[0].ToString()).OrderBy().ToString(","), "(Album).Name,(Label).Name");
+            var metas = ((DirtyMeta)dic["Sum"]).CleanMetas;
+            Assert.AreEqual(metas.SelectMany(cm => cm.PropertyRoutes).Distinct().ToString(","), "(Album).Name,(Label).Name");
         }
 
         [TestMethod]
         public void MetaComplexJoinGroup()
         {
-            var dic = DynamicQuery.QueryMetadata(
+            var dic = DynamicQueryCore.QueryMetadata(
                       from l in Database.Query<LabelEntity>()
                       join a in Database.Query<AlbumEntity>() on l equals a.Label into g
                       select new { l.Name, Num = g.Count() });
@@ -96,7 +97,7 @@ namespace Signum.Test
         [TestMethod]
         public void MetaComplexGroup()
         {
-            var dic = DynamicQuery.QueryMetadata(
+            var dic = DynamicQueryCore.QueryMetadata(
                     from a in Database.Query<AlbumEntity>()
                     group a by a.Label into g
                     select new { g.Key, Num = g.Count() });
@@ -110,7 +111,7 @@ namespace Signum.Test
         [TestMethod]
         public void MetaSelectMany()
         {
-            var dic = DynamicQuery.QueryMetadata(
+            var dic = DynamicQueryCore.QueryMetadata(
                     from a in Database.Query<AlbumEntity>()
                     from s in a.Songs
                     select new { a.Name, Song = s.Name }
@@ -125,7 +126,7 @@ namespace Signum.Test
         [TestMethod]
         public void MetaCoallesce()
         {
-            var dic = DynamicQuery.QueryMetadata(
+            var dic = DynamicQueryCore.QueryMetadata(
                     from a in Database.Query<AlbumEntity>()
                     select new { Author = (ArtistEntity)a.Author ?? (IAuthorEntity)(BandEntity)a.Author }
                     );
@@ -138,7 +139,7 @@ namespace Signum.Test
         [TestMethod]
         public void MetaConditional()
         {
-            var dic = DynamicQuery.QueryMetadata(
+            var dic = DynamicQueryCore.QueryMetadata(
                     from a in Database.Query<AlbumEntity>()
                     select new { Author = a.Id > 1 ? (ArtistEntity)a.Author : (IAuthorEntity)(BandEntity)a.Author }
                     );

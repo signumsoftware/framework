@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq.Expressions;
-using Signum.Utilities.ExpressionTrees;
-using System.Text.RegularExpressions;
 using System.Reflection;
-using System.ComponentModel;
+using System.Text.RegularExpressions;
 
 namespace Signum.Utilities
 {
@@ -148,10 +144,10 @@ namespace Signum.Utilities
             DateTime limitMonthStart = limit.MonthStart();
             DateTime nextMonthStart = limitMonthStart.AddMonths(1);
 
-            if(nextMonthStart < end)
+            if (nextMonthStart < end)
             {
                 result += ((nextMonthStart - limit).TotalDays / NumberOfDaysAfterOneMonth(limitMonthStart));
-                result += ((end - nextMonthStart).TotalDays / NumberOfDaysAfterOneMonth(nextMonthStart)); 
+                result += ((end - nextMonthStart).TotalDays / NumberOfDaysAfterOneMonth(nextMonthStart));
             }
             else
             {
@@ -359,14 +355,14 @@ namespace Signum.Utilities
 
             return resource.FormatWith((ts.Seconds == 1 ? DateTimeMessage._0Second.NiceToString() : DateTimeMessage._0Seconds.NiceToString()).FormatWith(Math.Abs(ts.Seconds))).ToLower();
         }
-        
 
-     
+
+
 
         public static long JavascriptMilliseconds(this DateTime dateTime)
         {
             if (dateTime.Kind != DateTimeKind.Utc)
-                throw new InvalidOperationException("dateTime should be UTC"); 
+                throw new InvalidOperationException("dateTime should be UTC");
 
             return (long)new TimeSpan(dateTime.Ticks - new DateTime(1970, 1, 1).Ticks).TotalMilliseconds;
         }
@@ -390,7 +386,27 @@ namespace Signum.Utilities
         {
             var cc = CultureInfo.CurrentCulture;
 
-            return cc.Calendar.GetWeekOfYear(dateTime, cc.DateTimeFormat.CalendarWeekRule, cc.DateTimeFormat.FirstDayOfWeek); 
+            return cc.Calendar.GetWeekOfYear(dateTime, cc.DateTimeFormat.CalendarWeekRule, cc.DateTimeFormat.FirstDayOfWeek);
+        }
+
+        /// <summary>
+        /// Returns the unix time (also known as POSIX time or epoch time) for the give date time.
+        /// </summary>
+        /// The unix time is defined as the number of seconds, that have elapsed since Thursday, 1 January 1970 00:00:00 (UTC).
+        /// <param name="dateTime"></param>
+        public static long ToUnixTimeSeconds(this DateTime dateTime)
+        {
+            return new DateTimeOffset(dateTime).ToUnixTimeSeconds();
+        }
+
+        /// <summary>
+        /// Returns the unix time (also known as POSIX time or epoch time) for the give date time in milliseconds.
+        /// </summary>
+        /// The unix time is defined as the number of milliseconds, that have elapsed since Thursday, 1 January 1970 00:00:00 (UTC).
+        /// <param name="dateTime"></param>
+        public static long ToUnixTimeMilliseconds(this DateTime dateTime)
+        {
+            return new DateTimeOffset(dateTime).ToUnixTimeMilliseconds();
         }
     }
 
@@ -459,7 +475,7 @@ namespace Signum.Utilities
 
         public override string ToString()
         {
-            string result= ", ".Combine(
+            string result = ", ".Combine(
                          Years == 0 ? null :
                          Years == 1 ? DateTimeMessage._0Year.NiceToString().FormatWith(Years) :
                                      DateTimeMessage._0Years.NiceToString().FormatWith(Years),

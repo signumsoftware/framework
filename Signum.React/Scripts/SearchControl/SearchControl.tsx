@@ -4,6 +4,7 @@ import * as React from 'react'
 import { DropdownButton, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { Dic, DomUtils, classes, coalesce } from '../Globals'
 import * as Finder from '../Finder'
+import { CellFormatter, EntityFormatter } from '../Finder'
 import {
     ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOptionParsed, FilterOption, QueryDescription, ColumnOption, ColumnOptionsMode, ColumnDescription,
     toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, QueryRequest
@@ -31,20 +32,24 @@ export interface SimpleFilterBuilderProps {
 export interface SearchControlProps extends React.Props<SearchControl> {
     allowSelection?: boolean
     findOptions: FindOptions;
-    onDoubleClick?: (e: React.MouseEvent, row: ResultRow) => void;
+    onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
+    formatters?: { [columnName: string]: CellFormatter };
+    rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
+    entityFormatter?: EntityFormatter;
     showContextMenu?: boolean;
     onSelectionChanged?: (entity: Lite<Entity>[]) => void;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
     onResult?: (table: ResultTable) => void;
     hideFullScreenButton?: boolean;
     showBarExtension?: boolean;
+    largeToolbarButtons?: boolean; 
     throwIfNotFindable?: boolean;
+    extraButtons?: (searchControl: SearchControlLoaded) => React.ReactNode
 }
 
 export interface SearchControlState {
     findOptions?: FindOptionsParsed;
     queryDescription?: QueryDescription;
-
 }
 
 
@@ -100,7 +105,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
     searchControlLoaded: SearchControlLoaded;
 
-    handleFullScreenClick(ev: React.MouseEvent) {
+    handleFullScreenClick(ev: React.MouseEvent<any>) {
         this.searchControlLoaded.handleFullScreenClick(ev);
     }
 
@@ -116,12 +121,17 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         return <SearchControlLoaded ref={(lo: SearchControlLoaded) => this.searchControlLoaded = lo}
             allowSelection={this.props.allowSelection}
             onDoubleClick={this.props.onDoubleClick}
+            formatters={this.props.formatters}
+            rowAttributes={this.props.rowAttributes}
+            entityFormatter={this.props.entityFormatter}
             showContextMenu={this.props.showContextMenu}
             onSelectionChanged={this.props.onSelectionChanged}
             onFiltersChanged= {this.props.onFiltersChanged}
             onResult={this.props.onResult}
             hideFullScreenButton={this.props.hideFullScreenButton}
             showBarExtension={this.props.showBarExtension}
+            extraButtons={this.props.extraButtons}
+            largeToolbarButtons={this.props.largeToolbarButtons} 
             findOptions={fo}
             queryDescription={this.state.queryDescription!}
             querySettings={Finder.getQuerySettings(fo.queryKey)}

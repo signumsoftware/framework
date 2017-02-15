@@ -11,7 +11,18 @@ using Signum.Entities;
 using Signum.Engine.DynamicQuery;
 
 namespace Signum.Engine
-{  
+{
+
+    public static class SymbolLogic
+    {
+        public static event Action OnLoadAll;
+
+        public static void LoadAll()
+        {
+            OnLoadAll?.Invoke();
+        }
+    }
+
     public static class SymbolLogic<T>
         where T: Symbol
     {
@@ -28,12 +39,19 @@ namespace Signum.Engine
             return new Disposable(() => avoidCache = old);
         }
 
-        public static void Start(SchemaBuilder sb, Func<IEnumerable<T>> getSymbols)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<IEnumerable<T>> getSymbols)
         {
             if (sb.NotDefined(typeof(SymbolLogic<T>).GetMethod("Start")))
             {
-                sb.Include<T>();
+                sb.Include<T>()
+                    .WithQuery(dqm, t => new
+                    {
+                        Entity = t,
+                        t.Id,
+                        t.Key
+                    });
 
+                SymbolLogic.OnLoadAll += () => lazy.Load();
                 sb.Schema.Initializing += () => lazy.Load();
                 sb.Schema.Synchronizing += Schema_Synchronizing;
                 sb.Schema.Generating += Schema_Generating;
@@ -41,21 +59,41 @@ namespace Signum.Engine
                 SymbolLogic<T>.getSymbols = getSymbols;
                 lazy = sb.GlobalLazy(() =>
                 {
- 					using(AvoidCache())
+                    using (AvoidCache())
                     {
-                    	Symbol.SetSymbolIds<T>(Database.RetrieveAll<T>().ToDictionary(a => a.Key, a => a.Id));
-                    	return getSymbols().ToDictionary(a => a.Key);
-                    }
-                }, new InvalidateWith(typeof(T)));
+                        var current = Database.RetrieveAll<T>();
 
-               sb.Schema.EntityEvents<T>().Retrieved += SymbolLogic_Retrieved;
+                        var result = EnumerableExtensions.JoinRelaxed(
+                            current,
+                            getSymbols(),
+                            c => c.Key,
+                            s => s.Key,
+                            (c, s) => s.SetId(c.Id),
+                            "caching " + typeof(T).Name);
+
+                        Symbol.SetSymbolIds<T>(current.ToDictionary(a => a.Key, a => a.Id));
+                        return result.ToDictionary(a => a.Key);
+                    }
+                }, 
+                new InvalidateWith(typeof(T)),
+                Schema.Current.InvalidateMetadata);
+
+                sb.Schema.EntityEvents<T>().Retrieved += SymbolLogic_Retrieved;
             }
         }
 
         static void SymbolLogic_Retrieved(T ident)
         {
             if (!avoidCache)
-                ident.FieldInfo = lazy.Value.GetOrThrow(ident.Key).FieldInfo;
+                try
+                {
+                    ident.FieldInfo = lazy.Value.GetOrThrow(ident.Key).FieldInfo;
+                }
+                catch (Exception e) when (StartParameters.IgnoredDatabaseMismatches != null)
+                {
+                    //Could happen when not 100% synchronized
+                    StartParameters.IgnoredDatabaseMismatches.Add(e);
+                }
         }
       
         static SqlPreCommand Schema_Generating()

@@ -82,10 +82,10 @@ namespace Signum.Engine.Maps
         {
             var errorSuffix = "columns in table " + this.Name.Name;
 
-            var columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionary(c => c.Name, errorSuffix);
+            var columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionaryEx(c => c.Name, errorSuffix);
 
             if (Mixins != null)
-                columns.AddRange(Mixins.Values.SelectMany(m => m.Fields.Values).SelectMany(f => f.Field.Columns()).ToDictionary(c => c.Name, errorSuffix), errorSuffix);
+                columns.AddRange(Mixins.Values.SelectMany(m => m.Fields.Values).SelectMany(f => f.Field.Columns()).ToDictionaryEx(c => c.Name, errorSuffix), errorSuffix);
 
             SetFullMListGetter();
 
@@ -223,26 +223,7 @@ namespace Signum.Engine.Maps
                 }
             }
         }
-
-        /// <summary>
-        /// Use this method also to change the Server
-        /// </summary>
-        public void ToDatabase(DatabaseName databaseName)
-        {
-            this.Name = this.Name.OnDatabase(databaseName);
-
-            foreach (var item in TablesMList())
-                item.ToDatabase(databaseName);
-        }
-
-        public void ToSchema(SchemaName schemaName)
-        {
-            this.Name = this.Name.OnSchema(schemaName);
-
-            foreach (var item in TablesMList())
-                item.ToSchema(schemaName);
-        }
-
+        
         public FieldTicks Ticks { get; internal set; }
         public FieldPrimaryKey PrimaryKey { get; internal set; }
 
@@ -318,7 +299,7 @@ namespace Signum.Engine.Maps
         internal abstract IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables();
 
         internal abstract IEnumerable<TableMList> TablesMList();
-        internal abstract void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter); 
+        internal abstract void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter);
     }
 
     public static class FieldExtensions

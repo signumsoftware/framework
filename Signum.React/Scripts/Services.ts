@@ -39,9 +39,10 @@ export function ajaxGetRaw(options: AjaxOptions) : Promise<Response> {
     return wrapRequest(options, () =>
         fetchWithAbortModule.fetch(baseUrl(options), {
             method: "GET",
-            headers: Dic.extend({
+            headers: {
                 'Accept': 'application/json',
-            }, options.headers),
+                ...options.headers
+            },
             mode: options.mode,
             credentials: options.credentials || "same-origin",
             cache: options.cache,
@@ -64,10 +65,11 @@ export function ajaxPostRaw(options: AjaxOptions, data: any): Promise<Response> 
         fetchWithAbortModule.fetch(baseUrl(options), {
             method: "POST",
             credentials: options.credentials || "same-origin",
-            headers: Dic.extend({
+            headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }, options.headers),
+                'Content-Type': 'application/json',
+                 ...options.headers
+            },
             mode: options.mode,
             cache: options.cache,
             body: JSON.stringify(data),
@@ -154,29 +156,54 @@ export function saveFile(response: Response) {
         fileName = match[1].trimEnd("\"").trimStart("\"");
 
     response.blob().then(blob => {
-        
-        if (window.navigator.msSaveBlob)
-            window.navigator.msSaveBlob(blob, fileName);
-        else {
-            const url = window.URL.createObjectURL(blob);
-            a.href = url;
-
-
-            (a as any).download = fileName;
-
-            a.click();
-
-            setTimeout(() => window.URL.revokeObjectURL(url), 500);
-        }
+        saveFileBlob(blob, fileName);
     });
 }
 
-export class ServiceError extends Error {
+export function saveFileBlob(blob: Blob, fileName: string) {
+    if (window.navigator.msSaveBlob)
+        window.navigator.msSaveBlob(blob, fileName);
+    else {
+        const url = window.URL.createObjectURL(blob);
+        a.href = url;
+
+        (a as any).download = fileName;
+
+        a.click();
+
+        setTimeout(() => window.URL.revokeObjectURL(url), 500);
+    }
+}
+
+export function b64toBlob(b64Data: string, contentType: string = "", sliceSize = 512) {
+    contentType = contentType || '';
+    sliceSize = sliceSize || 512;
+
+    var byteCharacters = atob(b64Data);
+    var byteArrays: Uint8Array[] = [];
+
+    for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+        var byteNumbers = new Array(slice.length);
+        for (var i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+
+        var byteArray = new Uint8Array(byteNumbers);
+
+        byteArrays.push(byteArray);
+    }
+
+    var blob = new Blob(byteArrays, { type: contentType });
+    return blob;
+}
+
+export class ServiceError {
     constructor(
         public statusText: string,
         public status: number,
         public httpError: WebApiHttpError) {
-        super(httpError.ExceptionMessage)
     }
 
     get defaultIcon() {
@@ -189,7 +216,7 @@ export class ServiceError extends Error {
     }
 
     toString() {
-        return this.message;
+        return this.httpError.Message;
     }
 }
 
@@ -203,12 +230,11 @@ export interface WebApiHttpError {
     ExceptionID?: string;
 }
 
-export class ValidationError extends Error {
+export class ValidationError  {
     modelState: ModelState;
     message: string;
 
     constructor(public statusText: string, json: WebApiHttpError) {
-        super(statusText)
         this.message = json.Message || "";
         this.modelState = json.ModelState!;
     }
@@ -218,24 +244,30 @@ export class ValidationError extends Error {
     }
 }
 
+//localStorage: Domain+Browser
+//sessionStorage: Browser tab
 
 var _appName: string = "";
 
-export function setAppName(appName: string) {
+export function setAppNameAndRequestSessionStorage(appName: string) {
     _appName = appName;
+    if (!sessionStorage.length) {
+        localStorage.setItem('requestSessionStorage' + _appName, new Date().toString());
+        localStorage.removeItem('requestSessionStorage' + _appName);
+    }
 }
 
 //http://blog.guya.net/2015/06/12/sharing-sessionstorage-between-tabs-for-secure-multi-tab-authentication/
 //To share session storage between tabs
 window.addEventListener("storage", se => {
 
-    if (se.key == 'getSessionStorage' + _appName) {
+    if (se.key == 'requestSessionStorage' + _appName) {
         // Some tab asked for the sessionStorage -> send it
 
-        localStorage.setItem('sessionStorage' + _appName, JSON.stringify(sessionStorage));
-        localStorage.removeItem('sessionStorage' + _appName);
+        localStorage.setItem('responseSessionStorage' + _appName, JSON.stringify(sessionStorage));
+        localStorage.removeItem('responseSessionStorage' + _appName);
 
-    } else if (se.key == ('sessionStorage' + _appName) && !sessionStorage.length) {
+    } else if (se.key == ('responseSessionStorage' + _appName) && !sessionStorage.length) {
         // sessionStorage is empty -> fill it
 
         if (se.newValue) {
@@ -248,20 +280,14 @@ window.addEventListener("storage", se => {
     }
 });
 
-if (!sessionStorage.length) {
-    // Ask other tabs for session storage
-    localStorage.setItem('getSessionStorage' + _appName, new Date().toString());
-};
 
-
-
-export function makeAbortable<T>(makeCall: (abortController: FetchAbortController) => Promise<T>): () => Promise<T | undefined> {
+export function makeAbortable<A,Q>(makeCall: (abortController: FetchAbortController, query: Q) => Promise<A>): (query: Q) => Promise<A | undefined> {
 
     let requestIndex = 0;
     let responseIndex = 0;
     let abortController: FetchAbortController | undefined = undefined;
 
-    return () => {
+    return (query) => {
 
         if (abortController) {
             if (abortController.abort) {
@@ -276,7 +302,7 @@ export function makeAbortable<T>(makeCall: (abortController: FetchAbortControlle
 
         abortController = {};
 
-        return makeCall(abortController).then(result => {
+        return makeCall(abortController, query).then(result => {
 
             if (myIndex <= responseIndex) //request is too old
                 return undefined;
@@ -286,7 +312,7 @@ export function makeAbortable<T>(makeCall: (abortController: FetchAbortControlle
             return result;
         }, (error: TypeError) => {
             if (error.message == "Aborted request")
-                return undefined;
+                return new Promise(resolve => { /*never*/ });
 
             throw error
         });

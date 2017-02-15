@@ -62,7 +62,7 @@ export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<
 
 
 
-function defaultConstructFromMany(coc: ContextualOperationContext<Entity>, event: React.MouseEvent, ...args: any[]) {
+function defaultConstructFromMany(coc: ContextualOperationContext<Entity>, event: React.MouseEvent<any>, ...args: any[]) {
 
     if (!confirmInNecessary(coc))
         return;
@@ -184,25 +184,26 @@ function getConfirmMessage(coc: ContextualOperationContext<Entity>) {
 
 export namespace MenuItemConstructor { //To allow monkey patching
 
-    export function createContextualMenuItem(coc: ContextualOperationContext<Entity>, defaultClick: (coc: ContextualOperationContext<Entity>, event: React.MouseEvent) => void, key: any) {
+    export function createContextualMenuItem(coc: ContextualOperationContext<Entity>, defaultClick: (coc: ContextualOperationContext<Entity>, event: React.MouseEvent<any>) => void, key: any) {
 
         const text = coc.settings && coc.settings.text ? coc.settings.text() :
             coc.entityOperationSettings && coc.entityOperationSettings.text ? coc.entityOperationSettings.text() :
                 coc.operationInfo.niceName;
 
-        const bsStyle = coc.settings && coc.settings.style || autoStyleFunction(coc.operationInfo);
+        const bsStyle = coc.settings && coc.settings.style || coc.entityOperationSettings && coc.entityOperationSettings.style || autoStyleFunction(coc.operationInfo);
 
         const disabled = !!coc.canExecute;
 
         const onClick = coc.settings && coc.settings.onClick ?
-            (me: React.MouseEvent) => coc.settings.onClick!(coc, me) :
-            (me: React.MouseEvent) => defaultClick(coc, me)
+            (me: React.MouseEvent<any>) => coc.settings.onClick!(coc, me) :
+            (me: React.MouseEvent<any>) => defaultClick(coc, me)
 
         const menuItem = <MenuItem
-            className={classes("btn-" + bsStyle, disabled ? "disabled" : undefined)}
+            className={disabled ? "disabled" : undefined}
             onClick={disabled ? undefined : onClick}
             data-operation={coc.operationInfo.key}
             key={key}>
+            {bsStyle && <span className={"icon empty-icon btn-" + bsStyle}></span>}
             {text}
         </MenuItem>;
 
@@ -217,7 +218,7 @@ export namespace MenuItemConstructor { //To allow monkey patching
 
 
 
-export function defaultContextualClick(coc: ContextualOperationContext<Entity>, event: React.MouseEvent, ...args: any[]) {
+export function defaultContextualClick(coc: ContextualOperationContext<Entity>, event: React.MouseEvent<any>, ...args: any[]) {
 
     event.persist();
 

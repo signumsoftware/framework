@@ -33,21 +33,21 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
         const buttons = (
             <span className="pull-right">
                 {!hasValue && this.renderCreateButton(false) }
-                {!hasValue && this.renderFindButton(false) }
-                {hasValue && this.renderRemoveButton(false) }
+                {!hasValue && this.renderFindButton(false)}
+                {hasValue && this.renderRemoveButton(false, s.ctx.value!)}
             </span>
         );
 
         return (
             <fieldset className={classes("sf-entity-line-details", s.ctx.errorClass) }
-                {...Dic.extend(this.baseHtmlProps(), EntityBase.entityHtmlProps(s.ctx.value), s.formGroupHtmlProps) }>
+                {...{ ...this.baseHtmlProps(), ...EntityBase.entityHtmlProps(s.ctx.value), ...s.formGroupHtmlProps}}>
                 <legend>
                     <div>
                         <span>{s.labelText}</span>
                         {EntityBase.hasChildrens(buttons) ? buttons : undefined}
                     </div>
                 </legend>
-                <RenderEntity ctx={s.ctx} getComponent={this.props.getComponent}/>
+                <RenderEntity ctx={s.ctx} getComponent={this.props.getComponent} viewPromise={this.props.viewPromise} />
             </fieldset>
         );
     }

@@ -7,7 +7,7 @@ import {
 } from '../Signum.Entities';
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationInfo, OperationType, LambdaMemberType, GraphExplorer } from '../Reflection';
 import { classes, ifError } from '../Globals';
-import { ButtonsContext } from '../TypeContext';
+import { ButtonsContext, IOperationVisible } from '../TypeContext';
 import * as Navigator from '../Navigator';
 import Notify from '../Frames/Notify';
 import { ajaxPost, ValidationError }  from '../Services';
@@ -33,22 +33,30 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
                 tag: ctx.tag,
                 canExecute: ctx.pack.canExecute[oi.key],
                 operationInfo: oi,
-                showOperations: ctx.showOperations, 
                 settings: eos
             };
 
-            if (eos && eos.isVisible ? eos.isVisible(eoc) : ctx.showOperations)
-                if (eoc.settings == undefined || !eoc.settings.hideOnCanExecute || eoc.canExecute == undefined)
-                    return eoc;
+            if (ctx.isOperationVisible && !ctx.isOperationVisible(eoc))
+                return undefined;
 
-            return undefined;
+            var ov = ctx.frame.entityComponent as any as IOperationVisible;
+            if (ov && ov.isOperationVisible && !ov.isOperationVisible(eoc))
+                return undefined;
+
+            if (eos && eos.isVisible && !eos.isVisible(eoc))
+                return undefined;
+
+            if (eos && eos.hideOnCanExecute && eoc.canExecute)
+                return undefined;
+
+            return eoc;
         })
         .filter(eoc => eoc != undefined)
         .map(eoc => eoc!);
 
     const groups = operations.groupBy(eoc => {
 
-        const group = getDefaultGroup(eoc);
+        const group = getGroup(eoc);
 
         if (group == undefined)
             return "";
@@ -64,7 +72,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
             }));
         } else {
 
-            const group = getDefaultGroup(gr.elements[0])!;
+            const group = getGroup(gr.elements[0])!;
 
 
             return [{
@@ -94,12 +102,11 @@ export function createEntityOperationContext<T extends Entity>(ctx: TypeContext<
         entity: ctx.value,
         settings: getSettings(operation) as EntityOperationSettings<T>,
         operationInfo: getTypeInfo(ctx.value.Type).operations![operation.key!],
-        showOperations: true,
         canExecute: undefined,
     };
 }
 
-function getDefaultGroup(eoc: EntityOperationContext<Entity>) {
+function getGroup(eoc: EntityOperationContext<Entity>) {
     if (eoc.settings != undefined && eoc.settings.group !== undefined) {
         return eoc.settings.group;
     }
@@ -110,29 +117,49 @@ function getDefaultGroup(eoc: EntityOperationContext<Entity>) {
     return undefined;
 }
 
-function createDefaultButton(eoc: EntityOperationContext<Entity>, group: EntityOperationGroup | undefined, asMenuItem: boolean, key: any) {
+function getWithClose(eoc: EntityOperationContext<Entity>) {
+    let withClose = eoc.settings && eoc.settings.withClose;
 
+    if (withClose != undefined)
+        return withClose;
+
+    return eoc.operationInfo.key.after(".") == "Save";
+}
+
+function createDefaultButton(eoc: EntityOperationContext<Entity>, group: EntityOperationGroup | undefined, asMenuItem: boolean, key: any) {
+    
     const text = eoc.settings && eoc.settings.text ? eoc.settings.text() :
         group && group.simplifyName ? group.simplifyName(eoc.operationInfo.niceName) :
             eoc.operationInfo.niceName;
+
+    const withClose = getWithClose(eoc);
 
     const bsStyle = eoc.settings && eoc.settings.style || autoStyleFunction(eoc.operationInfo);
 
     const disabled = !!eoc.canExecute;
 
-    const btn = !asMenuItem ?
-        <Button bsStyle={bsStyle} className={disabled ? "disabled" : undefined} onClick={disabled ? undefined : e => onClick(eoc, e)} data-operation={eoc.operationInfo.key} key={key}>{text}</Button> :
-        <MenuItem className={classes("btn-" + bsStyle, disabled ? "disabled" : undefined)} onClick={disabled ? undefined : e => onClick(eoc, e)} data-operation={eoc.operationInfo.key} key={key}>{text}</MenuItem>;
+    const btn = asMenuItem ? <MenuItem className={classes("btn-" + bsStyle, disabled ? "disabled" : undefined)} onClick={disabled ? undefined : e => onClick(eoc, e)} data-operation={eoc.operationInfo.key} key={key} > {text}</MenuItem> :
+        withClose ?
+            <div className="btn-group">
+                <Button bsStyle={bsStyle} className={disabled ? "disabled" : undefined} onClick={disabled ? undefined : e => onClick(eoc, e)} data-operation={eoc.operationInfo.key} key={key}>{text}</Button>
+                <Button bsStyle={bsStyle} className={classes("dropdown-toggle dropdown-toggle-split", disabled ? "disabled" : undefined)} onClick={disabled ? undefined : e => { eoc.closeRequested = true; onClick(eoc, e); } } data-operation={eoc.operationInfo.key} key={key + "1"}>
+                    <span>&times;</span>
+                </Button>
+
+            </div>
+        :
+        <Button bsStyle={bsStyle} className={disabled ? "disabled" : undefined} onClick={disabled ? undefined : e => onClick(eoc, e)} data-operation={eoc.operationInfo.key} key={key}>{text}</Button>
+
 
     if (!eoc.canExecute)
         return btn;
 
     const tooltip = <Tooltip id={"tooltip_" + eoc.operationInfo.key.replace(".", "_") }>{eoc.canExecute}</Tooltip>;
 
-    return <OverlayTrigger placement="bottom" overlay={tooltip}>{btn}</OverlayTrigger>;
+    return <OverlayTrigger placement="bottom" overlay={tooltip} key={key}>{btn}</OverlayTrigger>;
 }
 
-function onClick(eoc: EntityOperationContext<Entity>, event: React.MouseEvent): void{
+function onClick(eoc: EntityOperationContext<Entity>, event: React.MouseEvent<any>): void{
 
     event.persist();
 
@@ -158,10 +185,9 @@ function onClick(eoc: EntityOperationContext<Entity>, event: React.MouseEvent): 
 
 export function notifySuccess() {
     Notify.singletone.notifyTimeout({ text: JavascriptMessage.executed.niceToString(), type: "success" });
-    return true;
 }
 
-export function defaultConstructFromEntity(eoc: EntityOperationContext<Entity>, event: React.MouseEvent, ...args: any[]) {
+export function defaultConstructFromEntity(eoc: EntityOperationContext<Entity>, event: React.MouseEvent<any>, ...args: any[]) {
 
     if (!confirmInNecessary(eoc))
         return;
@@ -176,7 +202,7 @@ export function defaultConstructFromEntity(eoc: EntityOperationContext<Entity>, 
 
 }
 
-export function defaultConstructFromLite(eoc: EntityOperationContext<Entity>, event: React.MouseEvent, ...args: any[]) {
+export function defaultConstructFromLite(eoc: EntityOperationContext<Entity>, event: React.MouseEvent<any>, ...args: any[]) {
 
     if (!confirmInNecessary(eoc))
         return;
@@ -197,7 +223,7 @@ export function defaultExecuteEntity(eoc: EntityOperationContext<Entity>, ...arg
         return;
 
     API.executeEntity(eoc.entity, eoc.operationInfo.key, ...args)
-        .then(pack => { eoc.frame.onReload(pack); return notifySuccess(); })  
+        .then(pack => { if (eoc.closeRequested) { eoc.frame.onClose() } else { eoc.frame.onReload(pack); } notifySuccess(); })
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
         .done();
 }
@@ -208,7 +234,7 @@ export function defaultExecuteLite(eoc: EntityOperationContext<Entity>, ...args:
         return;
 
     API.executeLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
-        .then(pack => { eoc.frame.onReload(pack); return notifySuccess(); })
+        .then(pack => { if (eoc.closeRequested) { eoc.frame.onClose() } else { eoc.frame.onReload(pack); } notifySuccess(); })
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
         .done();
 }
@@ -219,7 +245,7 @@ export function defaultDeleteEntity(eoc: EntityOperationContext<Entity>, ...args
         return;
 
     API.deleteEntity(eoc.entity, eoc.operationInfo.key, ...args)
-        .then(() => { eoc.frame.onClose(); return notifySuccess(); })
+        .then(() => { eoc.frame.onClose(); notifySuccess(); })
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
         .done();
 }
@@ -230,7 +256,7 @@ export function defaultDeleteLite(eoc: EntityOperationContext<Entity>, ...args: 
         return;
 
     API.deleteLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
-        .then(() => { eoc.frame.onClose(); return notifySuccess(); })
+        .then(() => { eoc.frame.onClose(); notifySuccess(); })
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
         .done();
 }

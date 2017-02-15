@@ -1,17 +1,16 @@
-﻿using System;
+﻿using Signum.Entities.Basics;
+using Signum.Entities.Reflection;
+using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
+using Signum.Utilities.Reflection;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Reflection;
-using Signum.Utilities;
-using Signum.Entities.Reflection;
-using Signum.Utilities.Reflection;
 using System.Linq.Expressions;
-using Signum.Utilities.ExpressionTrees;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
-using Signum.Entities.Basics;
-using System.Collections;
 
 namespace Signum.Entities
 {
@@ -19,10 +18,10 @@ namespace Signum.Entities
     public class PropertyRoute : IEquatable<PropertyRoute>, ISerializable
     {
         Type type;
-        public PropertyRouteType PropertyRouteType { get; private set; } 
-        public FieldInfo FieldInfo { get; private set;}
+        public PropertyRouteType PropertyRouteType { get; private set; }
+        public FieldInfo FieldInfo { get; private set; }
         public PropertyInfo PropertyInfo { get; private set; }
-        public PropertyRoute Parent { get; private set;}
+        public PropertyRoute Parent { get; private set; }
 
         public MemberInfo[] Members
         {
@@ -48,7 +47,7 @@ namespace Signum.Entities
         public PropertyRoute Continue<T, S>(Expression<Func<T, S>> propertyRoute)
         {
             if (typeof(T) != this.Type)
-                throw new InvalidOperationException("Type mismatch between {0} and {1}".FormatWith(typeof(T).TypeName(), this.Type.TypeName())); 
+                throw new InvalidOperationException("Type mismatch between {0} and {1}".FormatWith(typeof(T).TypeName(), this.Type.TypeName()));
 
             var list = Reflector.GetMemberList(propertyRoute);
 
@@ -65,7 +64,7 @@ namespace Signum.Entities
             }
             return result;
         }
-     
+
         public PropertyRoute Add(string fieldOrProperty)
         {
             return Add(GetMember(fieldOrProperty));
@@ -107,7 +106,7 @@ namespace Signum.Entities
         public PropertyRoute Add(MemberInfo member)
         {
             if (member is MethodInfo && ((MethodInfo)member).IsInstantiationOf(MixinDeclarations.miMixin))
-                member = ((MethodInfo)member).GetGenericArguments()[0]; 
+                member = ((MethodInfo)member).GetGenericArguments()[0];
 
             if (this.Type.IsIEntity() && PropertyRouteType != PropertyRouteType.Root)
             {
@@ -188,7 +187,7 @@ namespace Signum.Entities
                     PropertyInfo = (PropertyInfo)fieldOrProperty;
                     FieldInfo = Reflector.TryFindFieldInfo(Parent.Type, PropertyInfo);
                 }
-                else if(fieldOrProperty is MethodInfo && ((MethodInfo)fieldOrProperty).Name == "ToString")
+                else if (fieldOrProperty is MethodInfo && ((MethodInfo)fieldOrProperty).Name == "ToString")
                 {
                     FieldInfo = (FieldInfo)fiToStr;
                     PropertyInfo = null;
@@ -204,7 +203,7 @@ namespace Signum.Entities
 
         }
 
-      
+
 
         static readonly FieldInfo fiToStr = ReflectionTools.GetFieldInfo((Entity e) => e.toStr);
 
@@ -227,7 +226,7 @@ namespace Signum.Entities
                 throw new ArgumentException("Type must implement IPropertyRouteRoot");
 
             if (type.IsAbstract)
-                throw new ArgumentException("Type must be non-abstract"); 
+                throw new ArgumentException("Type must be non-abstract");
 
             this.type = type;
             this.PropertyRouteType = PropertyRouteType.Root;
@@ -246,7 +245,7 @@ namespace Signum.Entities
                 if (PropertyInfo != null)
                     return PropertyInfo.PropertyType;
 
-                throw new InvalidOperationException("No FieldInfo or PropertyInfo"); 
+                throw new InvalidOperationException("No FieldInfo or PropertyInfo");
             }
         }
 
@@ -289,7 +288,7 @@ namespace Signum.Entities
                     switch (Parent.PropertyRouteType)
                     {
                         case PropertyRouteType.Root: return (PropertyInfo != null ? PropertyInfo.Name : FieldInfo.Name);
-                        case PropertyRouteType.FieldOrProperty: 
+                        case PropertyRouteType.FieldOrProperty:
                         case PropertyRouteType.Mixin:
                             return Parent.PropertyString() + "." + (PropertyInfo != null ? PropertyInfo.Name : FieldInfo.Name);
                         case PropertyRouteType.MListItems: return Parent.PropertyString() + (PropertyInfo != null ? PropertyInfo.Name : FieldInfo.Name);
@@ -312,7 +311,7 @@ namespace Signum.Entities
 
             if (!typeParentheses.StartsWith("(") || !(typeParentheses.EndsWith(")") || typeParentheses.EndsWith("]")))
                 throw new FormatException("fullToString should start with the type between parentheses");
-            
+
             var startType = typeParentheses.IndexOf('(') + 1;
             var cleanType = typeParentheses.Substring(startType, typeParentheses.IndexOf(')') - startType);
 
@@ -327,6 +326,11 @@ namespace Signum.Entities
                 propertyRoute = "{0}.{1}".FormatWith(typeParentheses.Substring(startMixin), propertyRoute);
 
             return Parse(type, propertyRoute);
+        }
+
+        public bool IsId()
+        {
+            return this.PropertyInfo != null && ReflectionTools.PropertyEquals(this.PropertyInfo, piId);
         }
 
         public static PropertyRoute Parse(Type rootType, string propertyString)
@@ -350,7 +354,6 @@ namespace Signum.Entities
 
         public Implementations? TryGetImplementations()
         {
-
             if (this.Type.CleanType().IsIEntity() && PropertyRouteType != Entities.PropertyRouteType.Root)
                 return GetImplementations();
 
@@ -371,7 +374,7 @@ namespace Signum.Entities
         }
 
         static Func<PropertyRoute, string> IsAllowedCallback;
-        
+
         public string IsAllowed()
         {
             if (IsAllowedCallback != null)
@@ -383,13 +386,13 @@ namespace Signum.Entities
         static PropertyInfo piId = ReflectionTools.GetPropertyInfo((Entity a) => a.Id);
 
 
-        public static List<PropertyRoute> GenerateRoutes(Type type)
+        public static List<PropertyRoute> GenerateRoutes(Type type, bool includeIgnored = true)
         {
             PropertyRoute root = PropertyRoute.Root(type);
             List<PropertyRoute> result = new List<PropertyRoute>();
 
             if (type.IsEntity())
-                result.Add(root.Add(piId)); 
+                result.Add(root.Add(piId));
 
             foreach (PropertyInfo pi in Reflector.PublicInstancePropertiesInOrder(type))
             {
@@ -397,34 +400,37 @@ namespace Signum.Entities
                 result.Add(route);
 
                 if (Reflector.IsEmbeddedEntity(pi.PropertyType))
-                    result.AddRange(GenerateEmbeddedProperties(route));
+                    result.AddRange(GenerateEmbeddedProperties(route, includeIgnored));
 
                 if (Reflector.IsMList(pi.PropertyType))
                 {
                     Type colType = pi.PropertyType.ElementType();
                     if (Reflector.IsEmbeddedEntity(colType))
-                        result.AddRange(GenerateEmbeddedProperties(route.Add("Item")));
+                        result.AddRange(GenerateEmbeddedProperties(route.Add("Item"), includeIgnored));
                 }
             }
 
             foreach (var t in MixinDeclarations.GetMixinDeclarations(type))
             {
-                result.AddRange(GenerateEmbeddedProperties(root.Add(t)));
+                result.AddRange(GenerateEmbeddedProperties(root.Add(t), includeIgnored));
             }
 
             return result;
         }
 
-        static List<PropertyRoute> GenerateEmbeddedProperties(PropertyRoute embeddedProperty)
+        static List<PropertyRoute> GenerateEmbeddedProperties(PropertyRoute embeddedProperty, bool includeIgnored)
         {
             List<PropertyRoute> result = new List<PropertyRoute>();
             foreach (var pi in Reflector.PublicInstancePropertiesInOrder(embeddedProperty.Type))
             {
-                PropertyRoute property = embeddedProperty.Add(pi);
-                result.AddRange(property);
+                if (includeIgnored || !pi.HasAttribute<IgnoreAttribute>())
+                {
+                    PropertyRoute property = embeddedProperty.Add(pi);
+                    result.AddRange(property);
 
-                if (Reflector.IsEmbeddedEntity(pi.PropertyType))
-                    result.AddRange(GenerateEmbeddedProperties(property));
+                    if (Reflector.IsEmbeddedEntity(pi.PropertyType))
+                        result.AddRange(GenerateEmbeddedProperties(property, includeIgnored));
+                }
             }
 
             return result;
@@ -496,7 +502,7 @@ namespace Signum.Entities
             {
                 case PropertyRouteType.Root:
                 case PropertyRouteType.FieldOrProperty: return this;
-                case PropertyRouteType.LiteEntity: 
+                case PropertyRouteType.LiteEntity:
                 case PropertyRouteType.MListItems:
                 case PropertyRouteType.Mixin: return this.Parent.SimplifyToPropertyOrRoot();
                 default:
@@ -528,7 +534,7 @@ namespace Signum.Entities
                 {
                     var parent = Root(root);
 
-                    SetParentAndProperty(parent, parent.GetMember(route)); 
+                    SetParentAndProperty(parent, parent.GetMember(route));
                 }
             }
         }
@@ -537,7 +543,7 @@ namespace Signum.Entities
         {
             info.AddValue("rootType", RootType.AssemblyQualifiedName);
 
-            string property = 
+            string property =
                 PropertyRouteType == Entities.PropertyRouteType.Root ? null :
                 (PropertyRouteType == Entities.PropertyRouteType.LiteEntity ? this.Parent.PropertyString() + ".Entity" :
                 this.PropertyString()).Replace("/", ".Item.").TrimEnd('.');
@@ -563,7 +569,7 @@ namespace Signum.Entities
         {
             ParameterExpression pe = Expression.Parameter(typeof(T));
             Expression exp = null;
-            foreach (var p in this.Follow(a => a.Parent).Reverse().SkipWhile(a=>a.Type != typeof(T)))
+            foreach (var p in this.Follow(a => a.Parent).Reverse().SkipWhile(a => a.Type != typeof(T)))
             {
                 switch (p.PropertyRouteType)
                 {
@@ -572,19 +578,19 @@ namespace Signum.Entities
                         exp = pe;
                         break;
                     case PropertyRouteType.FieldOrProperty:
-                        if(p.PropertyInfo != null)
+                        if (p.PropertyInfo != null)
                             exp = Expression.Property(exp, p.PropertyInfo);
                         else
                             exp = Expression.Field(exp, p.FieldInfo);
                         break;
                     case PropertyRouteType.Mixin:
-                            exp = Expression.Call(exp, MixinDeclarations.miMixin.MakeGenericMethod(p.Type));
+                        exp = Expression.Call(exp, MixinDeclarations.miMixin.MakeGenericMethod(p.Type));
                         break;
                     case PropertyRouteType.LiteEntity:
-                        exp = Expression.Property(exp, "Entity"); 
+                        exp = Expression.Property(exp, "Entity");
                         break;
                     default:
-                        throw new InvalidOperationException("Unexpected {0}".FormatWith(p.PropertyRouteType)); 
+                        throw new InvalidOperationException("Unexpected {0}".FormatWith(p.PropertyRouteType));
                 }
             }
 
@@ -626,7 +632,7 @@ namespace Signum.Entities
             switch (this.PropertyRouteType)
             {
                 case PropertyRouteType.Root: return true;
-                    
+
                 case PropertyRouteType.FieldOrProperty:
                     {
                         var parentEntity = entity.GetParentEntity();
@@ -679,9 +685,7 @@ namespace Signum.Entities
         Root,
         FieldOrProperty,
         Mixin,
-        LiteEntity, 
+        LiteEntity,
         MListItems,
     }
-
-   
 }

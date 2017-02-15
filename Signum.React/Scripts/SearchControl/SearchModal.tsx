@@ -46,7 +46,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
         this.props.onExited!(this.okPressed ? this.selectedEntites : undefined);
     }
 
-    handleDoubleClick = (e: React.MouseEvent, row: ResultRow) => {
+    handleDoubleClick = (e: React.MouseEvent<any>, row: ResultRow) => {
         e.preventDefault();
         this.selectedEntites = [row.entity];
         this.okPressed = true;
@@ -61,9 +61,9 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
 
         return (
             <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited}>
-                <Modal.Header closeButton={this.props.findMode == FindMode.Explore}>
-                    { this.props.findMode == FindMode.Find &&
-                        <div className="btn-toolbar" style={{ float: "right" }}>
+                <Modal.Header closeButton={this.props.findMode == "Explore"}>
+                    { this.props.findMode == "Find" &&
+                        <div className="btn-toolbar pull-right flip">
                             <button className ="btn btn-primary sf-entity-button sf-close-button sf-ok-button" disabled={!okEnabled} onClick={this.handleOkClicked}>
                                 {JavascriptMessage.ok.niceToString() }
                             </button>
@@ -83,7 +83,8 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
                         ref={(e: SearchControl) => this.searchControl = e}
                         findOptions={this.props.findOptions}
                         onSelectionChanged={this.handleSelectionChanged}
-                        onDoubleClick={this.props.findMode == FindMode.Find ? this.handleDoubleClick : undefined}
+                        largeToolbarButtons={true}
+                        onDoubleClick={this.props.findMode == "Find" ? this.handleDoubleClick : undefined}
                         />
                 </Modal.Body>
             </Modal>
@@ -94,7 +95,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
 
         return openModal<Lite<Entity>[]>(<SearchModal
             findOptions={findOptions}
-            findMode={FindMode.Find}
+            findMode={"Find"}
             isMany={false}
             title={title || getQueryNiceName(findOptions.queryName)} />)
             .then(a => a ? a[0] : undefined);
@@ -103,7 +104,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
     static openMany(findOptions: FindOptions, title?: string): Promise<Lite<Entity>[] | undefined> {
 
         return openModal<Lite<Entity>[]>(<SearchModal findOptions={findOptions}
-            findMode={FindMode.Find}
+            findMode={"Find"}
             isMany={true}
             title={title || getQueryNiceName(findOptions.queryName) } />);
     }
@@ -111,7 +112,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
     static explore(findOptions: FindOptions, title?: string): Promise<void> {
 
         return openModal<void>(<SearchModal findOptions={findOptions}
-            findMode={FindMode.Explore}
+            findMode={"Explore"}
             isMany={true}
             title={title || getQueryNiceName(findOptions.queryName) } />);
     }

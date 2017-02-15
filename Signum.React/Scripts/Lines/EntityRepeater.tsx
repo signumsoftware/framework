@@ -40,7 +40,8 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
         const readOnly = this.state.ctx.readOnly;
 
         return (
-            <fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass) } {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
+            <fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass)}
+                {...{ ...this.baseHtmlProps(), ...this.state.formGroupHtmlProps }}>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>
@@ -51,11 +52,12 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
                     {
                         mlistItemContext(ctx).map((mlec, i) =>
                             (<EntityRepeaterElement key={i}
-                                onRemove={this.state.remove && !readOnly? e => this.handleRemoveElementClick(e, i) : undefined}
-                                onMoveDown ={this.state.move && !readOnly? e => this.moveDown(i) : undefined}
-                                onMoveUp ={this.state.move && !readOnly? e => this.moveUp(i) : undefined}
+                                onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
+                                onMoveDown={this.canMove(mlec.value) && !readOnly ? e => this.moveDown(i) : undefined}
+                                onMoveUp={this.canMove(mlec.value) && !readOnly ? e => this.moveUp(i) : undefined}
                                 ctx={mlec}
-                                getComponent={this.props.getComponent} />))
+                                getComponent={this.props.getComponent}
+                                viewPromise={this.props.viewPromise} />))
                     }
                     {
                         this.state.createAsLink && this.state.create && !readOnly &&
@@ -63,7 +65,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
                             <a title={EntityControlMessage.Create.niceToString()}
                                 className="sf-line-button sf-create"
                                 onClick={this.handleCreateClick}>
-                                <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }}/>{EntityControlMessage.Create.niceToString()}
+                                <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
                             </a> )
                     }
                 </div>
@@ -76,9 +78,10 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
 export interface EntityRepeaterElementProps {
     ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
-    onRemove?: (event: React.MouseEvent) => void;
-    onMoveUp?: (event: React.MouseEvent) => void;
-    onMoveDown?: (event: React.MouseEvent) => void;
+    viewPromise?: (typeName: string) => Navigator.ViewPromise<ModifiableEntity>;
+    onRemove?: (event: React.MouseEvent<any>) => void;
+    onMoveUp?: (event: React.MouseEvent<any>) => void;
+    onMoveDown?: (event: React.MouseEvent<any>) => void;
 }
 
 export class EntityRepeaterElement extends React.Component<EntityRepeaterElementProps, void>
@@ -108,7 +111,7 @@ export class EntityRepeaterElement extends React.Component<EntityRepeaterElement
                     </div>
                 </legend>
                 <div className="sf-line-entity">
-                    <RenderEntity ctx={this.props.ctx} getComponent={this.props.getComponent}/>
+                    <RenderEntity ctx={this.props.ctx} getComponent={this.props.getComponent} viewPromise={this.props.viewPromise} />
                 </div>
             </fieldset>
         );

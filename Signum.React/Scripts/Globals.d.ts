@@ -1,17 +1,4 @@
-﻿/// <reference path="../typings/react/react.d.ts" />
-/// <reference path="../typings/react/react-dom.d.ts" />
-/// <reference path="../typings/react/react-addons-perf.d.ts" />
-/// <reference path="../typings/react/react-addons-transition-group.d.ts" />
-/// <reference path="../typings/react/react-addons-css-transition-group.d.ts" />
-/// <reference path="../typings/react-router/react-router.d.ts" />
-/// <reference path="../typings/react-router/history.d.ts" />
-/// <reference path="../typings/react-bootstrap/react-bootstrap.d.ts" />
-/// <reference path="../typings/react-router-bootstrap/react-router-bootstrap.d.ts" />
-/// <reference path="../typings/react-widgets/react-widgets.d.ts" />
-/// <reference path="../typings/numbro/numbro.d.ts" />
-/// <reference path="../typings/moment/moment.d.ts" />
-/// <reference path="../typings/moment-duration-format/moment-duration-format.d.ts"/>
-/// <reference path="../typings/es6-promise/es6-promise.d.ts" />
+﻿/// <reference path="../typings/es6-promise/es6-promise.d.ts" />
 
 declare const require: {
     <T>(path: string): T;
@@ -25,7 +12,7 @@ declare interface Promise<T> {
 
 declare interface Window {
     __baseUrl: string;
-    parentWindowData: any;
+    dataForChildWindow?: any;
 }
 
 interface Array<T> {
@@ -54,6 +41,8 @@ interface Array<T> {
     contains(this: Array<T>, element: T): boolean;
     remove(this: Array<T>, element: T): boolean;
     removeAt(this: Array<T>, index: number): void;
+    moveUp(this: Array<T>, index: number): number;
+    moveDown(this: Array<T>, index: number): number;
     insertAt(this: Array<T>, index: number, element: T): void;
     clone(this: Array<T>, ): T[];
     joinComma(this: Array<T>, lastSeparator: string): string;
@@ -75,6 +64,7 @@ interface String {
     forGenderAndNumber(this: string, gender: string | undefined): string;
     forGenderAndNumber(this: string, gender: any , number?: number): string;
     replaceAll(this: string, from: string, to: string): string;
+    indent(this: string, numChars: number): string;
     after(this: string, separator: string): string;
     before(this: string, separator: string): string;
     tryAfter(this: string, separator: string): string | undefined;
@@ -92,24 +82,6 @@ interface String {
     trimStart(this: string, char?: string): string;
 
     repeat(this: string, n: number): string;
-}
-
-declare module moment {
-    interface Moment {
-        fromUserInterface(this: moment.Moment): Moment;
-        toUserInterface(this: moment.Moment): Moment;
-
-    }
-
-    interface MomentStatic {
-        smartNow(this: moment.Moment): Moment;
-    }
-}
-
-declare namespace __React {
-    interface Component<P, S> {
-        changeState(func: (state: S) => void): void;
-    }
 }
 
 interface FetchAbortController { //Signum patch

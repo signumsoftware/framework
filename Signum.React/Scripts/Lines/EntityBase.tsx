@@ -14,12 +14,12 @@ import SelectorModal from '../SelectorModal'
 
 
 export interface EntityBaseProps extends LineBaseProps {
-    view?: boolean;
+    view?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
     viewOnCreate?: boolean;
     navigate?: boolean;
     create?: boolean;
     find?: boolean;
-    remove?: boolean;
+    remove?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
 
     onView?: (entity: ModifiableEntity | Lite<Entity>, pr: PropertyRoute) => Promise<ModifiableEntity | undefined> | undefined;
     onCreate?: () => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined;
@@ -28,17 +28,17 @@ export interface EntityBaseProps extends LineBaseProps {
     findOptions?: FindOptions;
 
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+    viewPromise?: (typeName: string) => Navigator.ViewPromise<ModifiableEntity>;
 }
 
 
 export interface EntityBaseState extends LineBaseProps {
-    view?: boolean;
+    view?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
     viewOnCreate?: boolean;
     create?: boolean;
     find?: boolean;
-    remove?: boolean;
+    remove?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
 }
-
 
 export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBaseState> extends LineBase<T, S>
 {
@@ -68,8 +68,8 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
         const type = state.type!;
 
-        state.create = EntityBase.defaultIsCreable(type, !!this.props.getComponent);
-        state.view = EntityBase.defaultIsViewable(type, !!this.props.getComponent);
+        state.create = EntityBase.defaultIsCreable(type, !!this.props.getComponent || !!this.props.viewPromise);
+        state.view = EntityBase.defaultIsViewable(type, !!this.props.getComponent || !!this.props.viewPromise);
         state.find = EntityBase.defaultIsFindable(type);
 
         state.viewOnCreate = true;
@@ -111,12 +111,13 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     defaultView(value: ModifiableEntity | Lite<Entity>, propertyRoute: PropertyRoute): Promise<ModifiableEntity> {
         return Navigator.view(value, {
             propertyRoute: propertyRoute,
-            viewPromise: this.props.getComponent && Navigator.ViewPromise.resolve(this.props.getComponent)
+            viewPromise: this.props.getComponent ? Navigator.ViewPromise.resolve(this.props.getComponent) :
+                this.props.viewPromise ? this.props.viewPromise(isLite(value) ? value.EntityType : value.Type) : undefined
         });
     }
 
 
-    handleViewClick = (event: React.MouseEvent) => {
+    handleViewClick = (event: React.MouseEvent<any>) => {
 
         event.preventDefault();
 
@@ -146,8 +147,9 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         }
     }
 
-    renderViewButton(btn: boolean) {
-        if (!this.state.view)
+    renderViewButton(btn: boolean, item: ModifiableEntity | Lite<Entity>) {
+
+        if (!this.canView(item))
             return undefined;
 
         return (
@@ -173,7 +175,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
     defaultCreate(): Promise<ModifiableEntity | Lite<Entity> | undefined> {
 
-        return this.chooseType(t => this.props.create /*Hack?*/ || Navigator.isCreable(t, !!this.props.getComponent, false))
+        return this.chooseType(t => this.props.create /*Hack?*/ || Navigator.isCreable(t, !!this.props.getComponent || !!this.props.viewPromise, false))
             .then(typeName => typeName ? Constructor.construct(typeName) : undefined)
             .then(e => {
                 if (!e)
@@ -189,7 +191,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             });
     }
 
-    handleCreateClick = (event: React.SyntheticEvent) => {
+    handleCreateClick = (event: React.SyntheticEvent<any>) => {
 
         event.preventDefault();
 
@@ -228,12 +230,12 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             <a className={classes("sf-line-button", "sf-create", btn ? "btn btn-default" : undefined) }
                 onClick={this.handleCreateClick}
                 title={EntityControlMessage.Create.niceToString() }>
-                <span className="glyphicon glyphicon-plus"/>
+                <span className="glyphicon glyphicon-plus sf-create"/>
             </a>
         );
     }
 
-    static entityHtmlProps(entity: ModifiableEntity | Lite<Entity> | undefined | null): React.HTMLAttributes {
+    static entityHtmlProps(entity: ModifiableEntity | Lite<Entity> | undefined | null): React.HTMLAttributes<any> {
 
         return {
             'data-entity': entityInfo(entity)
@@ -251,7 +253,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             .then<ModifiableEntity | Lite<Entity> | undefined>(qn =>
                 qn == undefined ? undefined : Finder.find({ queryName: qn } as FindOptions));
     }
-    handleFindClick = (event: React.SyntheticEvent) => {
+    handleFindClick = (event: React.SyntheticEvent<any>) => {
 
         event.preventDefault();
 
@@ -280,7 +282,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         );
     }
 
-    handleRemoveClick = (event: React.SyntheticEvent) => {
+    handleRemoveClick = (event: React.SyntheticEvent<any>) => {
 
         event.preventDefault();
 
@@ -293,8 +295,8 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             }).done();
     };
 
-    renderRemoveButton(btn: boolean) {
-        if (!this.state.remove || this.state.ctx.readOnly)
+    renderRemoveButton(btn: boolean, item: ModifiableEntity | Lite<Entity>) {
+        if (!this.canRemove(item) || this.state.ctx.readOnly)
             return undefined;
 
         return (
@@ -305,7 +307,31 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             </a>
         );
     }
+
+    canRemove(item: ModifiableEntity | Lite<Entity>): boolean | undefined {
+
+        const remove = this.state.remove;
+
+        if (remove == undefined)
+            return undefined;
+
+        if (typeof remove === "function")
+            return remove(item);
+
+        return remove;
+    }
+
+    canView(item: ModifiableEntity | Lite<Entity>): boolean | undefined {
+
+        const view = this.state.view;
+
+        if (view == undefined)
+            return undefined;
+
+        if (typeof view === "function")
+            return view(item);
+
+        return view;
+    }
 }
-
-
 

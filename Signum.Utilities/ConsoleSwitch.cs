@@ -40,14 +40,14 @@ namespace Signum.Utilities
             dictionary.AddOrThrow(key.ToString(), new WithDescription<V>(value, description), "Key {0} already in ConsoleSwitch");
         }
 
-        public V Choose()
+        public V Choose(int? numberOfOptions = null)
         {
-            return Choose(ConsoleMessage.EnterYourSelection.NiceToString());
+            return Choose(ConsoleMessage.EnterYourSelection.NiceToString(), numberOfOptions);
         }
 
-        public V Choose(string endMessage)
+        public V Choose(string endMessage, int? numberOfOptions = null)
         {
-            var tuple = ChooseTuple(endMessage);
+            var tuple = ChooseTuple(endMessage, numberOfOptions);
 
             if (tuple == null)
                 return null;
@@ -55,50 +55,41 @@ namespace Signum.Utilities
             return tuple.Value;
         }
 
-        public WithDescription<V> ChooseTuple()
+        public WithDescription<V> ChooseTuple(int? numberOfOptions = null)
         {
-            return ChooseTuple(ConsoleMessage.EnterYourSelection.NiceToString());
+            return ChooseTuple(ConsoleMessage.EnterYourSelection.NiceToString(), numberOfOptions);
         }
 
-        public WithDescription<V> ChooseTuple(string endMessage)
+        public WithDescription<V> ChooseTuple(string endMessage, int? numberOfOptions = null)
         {
-        retry:
-            try
+            var noOfOptsPerScreen = numberOfOptions.GetValueOrDefault(Console.WindowHeight - 10);
+            PrintOptions(0, noOfOptsPerScreen);
+            var noOfOptsPrinted = noOfOptsPerScreen;
+            do
             {
-                var step = Console.WindowHeight - 10;
-
-                Console.WriteLine(welcomeMessage);
-                for (int i = 0; i < dictionary.Count; i += step)
+                var input = Console.ReadLine().Trim();
+                if (input == "+")
                 {
-                    PrintOptions(i, step);
-
-                    if (i + step < dictionary.Count)
-                    {
-                        SafeConsole.WriteColor(ConsoleColor.White, " +");
-                        Console.WriteLine(" - " + ConsoleMessage.More.NiceToString());
-                    }
-
-                    Console.WriteLine(endMessage);
-                    string line = Console.ReadLine();
-
-                    if (string.IsNullOrEmpty(line))
-                        return null;
-
-                    if (line.Trim() == "+")
+                    if (noOfOptsPrinted >= dictionary.Count)
                         continue;
 
-                    Console.WriteLine();
-
-                    return GetValue(line.Trim());
+                    PrintOptions(noOfOptsPrinted, noOfOptsPerScreen);
                 }
-
-                return null;             
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                goto retry;
-            }
+                else
+                {
+                    if (string.IsNullOrWhiteSpace(input))
+                        return null;
+                    
+                    var val = TryGetValue(input);
+                    if (val != null)
+                        return val;
+                    
+                    SafeConsole.WriteLineColor(ConsoleColor.Red, "Plase choose a valid option!");
+                    noOfOptsPrinted = 0;
+                    PrintOptions(noOfOptsPrinted, noOfOptsPerScreen);
+                }
+                noOfOptsPrinted += noOfOptsPerScreen;
+            } while (true);
         }
 
         void PrintOptions(int skip, int take)
@@ -119,6 +110,10 @@ namespace Signum.Utilities
                 SafeConsole.WriteColor(ConsoleColor.White, " " + keys[i]);
                 Console.WriteLine(" - " + dictionary[key].Description);
             }
+
+            if (skip + take >= dictionary.Count) return;
+            SafeConsole.WriteColor(ConsoleColor.White, " +");
+            Console.WriteLine(" - " + ConsoleMessage.More.NiceToString());
         }
 
         public V[] ChooseMultiple(string[] args = null)
@@ -148,7 +143,7 @@ namespace Signum.Utilities
             if (args != null)
                 return args.ToString(" ").SplitNoEmpty(',').SelectMany(GetValuesRange).ToArray();
 
-        retry:
+            retry:
             try
             {
                 Console.WriteLine(welcomeMessage);
@@ -207,9 +202,30 @@ namespace Signum.Utilities
             return index;
         }
 
-        WithDescription<V> GetValue(string value)
+        WithDescription<V> TryGetValue(string input)
         {
-            return dictionary.GetOrThrow(value, ConsoleMessage.NoOptionWithKey0Found.NiceToString());
+            var exact = dictionary.TryGetC(input);
+            if (exact != null)
+                return exact;
+
+            var sd = new StringDistance();
+            var best = dictionary.Keys.WithMin(a => sd.LevenshteinDistance(input.ToLowerInvariant(), a.ToLowerInvariant()));
+            if (sd.LevenshteinDistance(input.ToLowerInvariant(), best.ToLowerInvariant()) <= 2)
+            {
+                if (SafeConsole.Ask($"Did you mean '{best}'?"))
+                    return dictionary.GetOrThrow(best);
+            }
+
+            return null;
+        }
+
+        WithDescription<V> GetValue(string input)
+        {
+            var result = TryGetValue(input);
+            if (result == null)
+                throw new KeyNotFoundException(ConsoleMessage.NoOptionWithKey0Found.NiceToString(input));
+
+            return result;
         }
 
         public IEnumerator<KeyValuePair<string, WithDescription<V>>> GetEnumerator()

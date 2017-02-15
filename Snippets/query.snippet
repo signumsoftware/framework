@@ -1,10 +1,10 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
   <CodeSnippet Format="1.0.0">
     <Header>
       <Title>Query</Title>
       <Shortcut>query</Shortcut>
-      <Description>Register a query in the DynamicQueryManager</Description>
+      <Description>Makes a database query</Description>
       <Author>Signum Software</Author>
       <SnippetTypes>
         <SnippetType>Expansion</SnippetType>
@@ -23,27 +23,15 @@
         </Import>
       </Imports>
       <Declarations>
-        <Literal>
+        <Literal Editable="true">
           <ID>entityName</ID>
           <ToolTip>Name of the main entity</ToolTip>
           <Default>Foo</Default>
-        </Literal>
-        <Literal>
-          <ID>entityParam</ID>
-          <ToolTip>Entity parameter</ToolTip>
-          <Default>e</Default>
+          <Function>
+          </Function>
         </Literal>
       </Declarations>
-      <Code Language="csharp">
-        <![CDATA[dqm.RegisterQuery(typeof($entityName$Entity), () =>
-                    from $entityParam$ in Database.Query<$entityName$Entity>()
-                    select new
-                    {
-                        Entity = $entityParam$,
-                        $entityParam$.Id,
-                        $entityParam$.$end$
-                    });]]>
-      </Code>
+      <Code Language="csharp" Delimiter="$"><![CDATA[ Database.Query<$entityName$Entity>()]]></Code>
     </Snippet>
   </CodeSnippet>
 </CodeSnippets>

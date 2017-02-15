@@ -1,4 +1,4 @@
-﻿import * as React from "react"
+﻿import * as React from "react";
 import * as moment from "moment"
 import * as numbro from "numbro"
 import { Router, Route, Redirect, IndexRoute } from "react-router"
@@ -6,7 +6,7 @@ import { Dic } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
 import {
-    QueryDescription, CountQueryRequest, QueryRequest, QueryEntitiesRequest, FindOptions, 
+    QueryDescription, QueryCountRequest, QueryRequest, QueryEntitiesRequest, FindOptions, 
     FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, CountOptionsParsed,
     QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination, ResultColumn,
     ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest
@@ -26,7 +26,7 @@ import {
 import { navigateRoute, isNavigable, currentHistory, API as NavAPI, isCreable, tryConvert } from './Navigator';
 import SearchModal from './SearchControl/SearchModal';
 import EntityLink from './SearchControl/EntityLink';
-import SearchControl from './SearchControl/SearchControlLoaded';
+import SearchControlLoaded from './SearchControl/SearchControlLoaded';
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -85,7 +85,7 @@ export function findMany(findOptions: FindOptions | Type<any>): Promise<Lite<Ent
     });
 }
 
-export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent) {
+export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent<any>) {
     if (e.ctrlKey || e.button == 2)
         window.open(findOptionsPath(findOptions));
     else
@@ -115,13 +115,15 @@ export function findOptionsPath(fo: FindOptions, extra?: any): string {
         showFooter: fo.showFooter,
         showHeader: fo.showHeader,
         allowChangeColumns: fo.allowChangeColumns,
+        paginationMode: fo.pagination && fo.pagination.mode,
+        elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,
+        currentPage: fo.pagination && fo.pagination.currentPage,
+        ...extra
     };
     
     Encoder.encodeFilters(query, fo.filterOptions);
     Encoder.encodeOrders(query, fo.orderOptions);
     Encoder.encodeColumns(query, fo.columnOptions);
-
-    Dic.extend(query, extra);
 
     return currentHistory.createPath({ pathname: "~/find/" + getQueryKey(fo.queryName), query: query });
 }
@@ -167,6 +169,11 @@ export function parseFindOptionsPath(queryName: PseudoType | QueryKey, query: an
         showFilters: parseBoolean(query.showFilters),
         showFooter: parseBoolean(query.showFooter),
         showHeader: parseBoolean(query.showHeader),
+        pagination: query.paginationMode && {
+            mode: query.paginationMode,
+            elementsPerPage: query.elementsPerPage,
+            currentPage: query.currentPage,
+        } as Pagination,
     } as FindOptions;
 
     return result;
@@ -286,7 +293,7 @@ export function setFilters(e: Entity, filterOptionsParsed: FilterOptionParsed[])
 
 export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription): Promise<FindOptionsParsed> {
 
-    const fo = Dic.extend({}, findOptions) as FindOptions;
+    const fo: FindOptions= { ...findOptions };
 
     expandParentColumn(fo);
 
@@ -302,7 +309,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
         if (qd.columns[defaultOrder]) {
             fo.orderOptions = [{
                 columnName: defaultOrder,
-                orderType: tis.some(a => a.entityData == "Transactional") ? "Descending" as OrderType : "Ascending" as OrderType
+                orderType: qs && qs.defaultOrderType || (tis.some(a => a.entityData == "Transactional") ? "Descending" as OrderType : "Ascending" as OrderType)
             }];
         }
     }
@@ -356,6 +363,8 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
     });
 }
 
+export function fetchEntitiesWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: FilterOption[], count: number): Promise<Lite<T>[]>;
+export function fetchEntitiesWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], count: number): Promise<Lite<Entity>[]>;
 export function fetchEntitiesWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], count: number) : Promise<Lite<Entity>[]> {
     return getQueryDescription(queryName).then(qd => {
         return parseFilterOptions(filterOptions, qd).then(fop => {
@@ -572,8 +581,8 @@ export module API {
     export function executeQuery(request: QueryRequest): Promise<ResultTable> {
         return ajaxPost<ResultTable>({ url: "~/api/query/executeQuery" }, request);
     }
-    
-    export function queryCount(request: CountQueryRequest): Promise<number> {
+
+    export function queryCount(request: QueryCountRequest): Promise<number> {
         return ajaxPost<number>({ url: "~/api/query/queryCount" }, request);
     }
 
@@ -723,7 +732,7 @@ export module Decoder {
 export module ButtonBarQuery {
 
     interface ButtonBarQueryContext {
-        searchControl: SearchControl;
+        searchControl: SearchControlLoaded;
         findOptions: FindOptionsParsed;
     }
 
@@ -748,10 +757,12 @@ export interface QuerySettings {
     queryName: PseudoType | QueryKey;
     pagination?: Pagination;
     defaultOrderColumn?: string;
+    defaultOrderType?: OrderType;
     hiddenColumns?: ColumnOption[];
     formatters?: { [columnName: string]: CellFormatter };
-    rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes | undefined;
+    rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
     entityFormatter?: EntityFormatter;
+    onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
     simpleFilterBuilder?: (qd: QueryDescription, initialFindOptions: FindOptionsParsed) => React.ReactElement<any> | undefined;
 }
 
@@ -764,7 +775,7 @@ export interface FormatRule {
 export class CellFormatter {
     constructor(
         public formatter: (cell: any) => React.ReactChild | undefined,
-        public textAllign = "left") {
+        public cellClass? : string) {
     }
 }
 
@@ -784,7 +795,7 @@ export function getCellFormatter(qs: QuerySettings, co: ColumnOptionParsed): Cel
 
     const rule = formatRules.filter(a => a.isApplicable(co)).last("FormatRules");
     
-    return rule.formatter(co)
+    return rule.formatter(co);
 }
 
 export const registeredPropertyFormatters: { [typeAndProperty: string]: CellFormatter } = {};
@@ -829,7 +840,7 @@ export const formatRules: FormatRule[] = [
         isApplicable: col => col.token!.filterType == "Integer" || col.token!.filterType == "Decimal",
         formatter: col => {
             const numbroFormat = toNumbroFormat(col.token!.format);
-            return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat)}</span>, "right");
+            return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat)}</span>, "numeric-cell");
         }
     },
     {
@@ -837,13 +848,13 @@ export const formatRules: FormatRule[] = [
         isApplicable: col => (col.token!.filterType == "Integer" || col.token!.filterType == "Decimal") && !!col.token!.unit,
         formatter: col => {
             const numbroFormat = toNumbroFormat(col.token!.format);
-            return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat) + " " + col.token!.unit}</span>, "right");
+            return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat) + "\u00a0" + col.token!.unit}</span>, "numeric-cell");
         }
     },
     {
         name: "Bool",
         isApplicable: col => col.token!.filterType == "Boolean",
-        formatter: col=> new CellFormatter((cell: boolean) => cell == undefined ? undefined : <input type="checkbox" disabled={true} checked={cell}/>, "center")
+        formatter: col=> new CellFormatter((cell: boolean) => cell == undefined ? undefined : <input type="checkbox" disabled={true} checked={cell}/>, "centered-cell")
     },
 ];
 
@@ -854,13 +865,13 @@ export interface EntityFormatRule {
 }
 
 
-export type EntityFormatter = (row: ResultRow, columns: string[]) => React.ReactChild | undefined;
+export type EntityFormatter = (row: ResultRow, columns: string[], sc?: SearchControlLoaded) => React.ReactChild | undefined;
 
 export const entityFormatRules: EntityFormatRule[] = [
     {
         name: "View",
         isApplicable: row=> true,
-        formatter: row => !row.entity || !isNavigable(row.entity.EntityType, undefined, true) ? undefined :
-            <EntityLink lite={row.entity} inSearch={true}>{EntityControlMessage.View.niceToString() }</EntityLink>
+        formatter: (row, columns, sc) => !row.entity || !isNavigable(row.entity.EntityType, undefined, true) ? undefined :
+            <EntityLink lite={row.entity} inSearch={true} onNavigated={sc && sc.handleOnNavigated}>{EntityControlMessage.View.niceToString()}</EntityLink>
     },
 ];

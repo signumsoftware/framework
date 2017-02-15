@@ -22,11 +22,13 @@ namespace Signum.Engine
 
         public static SqlPreCommand SynchronizeTablesScript(Replacements replacements)
         {
-            Dictionary<string, ITable> model = Schema.Current.GetDatabaseTables().ToDictionary(a => a.Name.ToString(), "schema tables");
-            HashSet<SchemaName> modelSchemas = Schema.Current.GetDatabaseTables().Select(a => a.Name.Schema).Where(a => !SqlBuilder.SystemSchemas.Contains(a.Name)).ToHashSet();
+            Schema s = Schema.Current;
 
-            Dictionary<string, DiffTable> database = DefaultGetDatabaseDescription(Schema.Current.DatabaseNames());
-            HashSet<SchemaName> databaseSchemas = DefaultGetSchemas(Schema.Current.DatabaseNames());
+            Dictionary<string, ITable> model = s.GetDatabaseTables().Where(t => !s.IsExternalDatabase(t.Name.Schema.Database)).ToDictionaryEx(a => a.Name.ToString(), "schema tables");
+            HashSet<SchemaName> modelSchemas = model.Values.Select(a => a.Name.Schema).Where(a => !SqlBuilder.SystemSchemas.Contains(a.Name)).ToHashSet();
+
+            Dictionary<string, DiffTable> database = DefaultGetDatabaseDescription(s.DatabaseNames());
+            HashSet<SchemaName> databaseSchemas = DefaultGetSchemas(s.DatabaseNames());
 
             if (SimplifyDiffTables != null) 
                 SimplifyDiffTables(database);
@@ -36,7 +38,7 @@ namespace Signum.Engine
             database = replacements.ApplyReplacementsToOld(database, Replacements.KeyTables);
 
             Dictionary<ITable, Dictionary<string, Index>> modelIndices = model.Values
-                .ToDictionary(t => t, t => t.GeneratAllIndexes().ToDictionary(a => a.IndexName, "Indexes for {0}".FormatWith(t.Name)));
+                .ToDictionary(t => t, t => t.GeneratAllIndexes().ToDictionaryEx(a => a.IndexName, "Indexes for {0}".FormatWith(t.Name)));
 
             model.JoinDictionaryForeach(database, (tn, tab, diff) =>
             {
@@ -154,10 +156,11 @@ namespace Signum.Engine
                                 difCol.Name == tabCol.Name ? null : SqlBuilder.RenameColumn(tab, difCol.Name, tabCol.Name),
                                 difCol.ColumnEquals(tabCol, ignorePrimaryKey: true) ? null : SqlPreCommand.Combine(Spacing.Simple,
                                     tabCol.PrimaryKey && !difCol.PrimaryKey && dif.PrimaryKeyName != null ? SqlBuilder.DropPrimaryKeyConstraint(tab.Name) : null,
-                                    SqlBuilder.AlterTableAlterColumn(tab, tabCol)),
+                                    SqlBuilder.AlterTableAlterColumn(tab, tabCol),
+                                    tabCol.SqlDbType == SqlDbType.NVarChar && difCol.SqlDbType == SqlDbType.NChar ? SqlBuilder.UpdateTrim(tab, tabCol) : null),
                                 difCol.DefaultEquals(tabCol) ? null : SqlPreCommand.Combine(Spacing.Simple,
                                     difCol.Default != null ? SqlBuilder.DropDefaultConstraint(tab.Name, tabCol.Name) : null,
-                                    tabCol.Default != null ? SqlBuilder.AddDefaultConstraint(tab.Name, tabCol.Name, tabCol.Default) : null),
+                                    tabCol.Default != null ? SqlBuilder.AddDefaultConstraint(tab.Name, tabCol.Name, tabCol.Default, tabCol.SqlDbType) : null),
                                 UpdateByFkChange(tn, difCol, tabCol, ChangeName)),
                             Spacing.Simple)),
                      Spacing.Double);
@@ -265,7 +268,7 @@ namespace Signum.Engine
             if (!temporalDefault)
                 return SqlBuilder.AlterTableAddColumn(table, column);
 
-            string defaultValue = SafeConsole.AskString("Default value for '{0}.{1}'? (or press enter) ".FormatWith(table.Name.Name, column.Name), stringValidator: str => null); ;
+            string defaultValue = rep.Interactive ? SafeConsole.AskString("Default value for '{0}.{1}'? (or press enter) ".FormatWith(table.Name.Name, column.Name), stringValidator: str => null) : "";
             if (defaultValue == "null")
                 return SqlBuilder.AlterTableAddColumn(table, column);
 
@@ -403,7 +406,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                                             Identity = c.is_identity,
                                             Default = ctr.definition,
                                             PrimaryKey = t.Indices().Any(i => i.is_primary_key && i.IndexColumns().Any(ic => ic.column_id == c.column_id)),
-                                        }).ToDictionary(a => a.Name, "columns"),
+                                        }).ToDictionaryEx(a => a.Name, "columns"),
 
                              MultiForeignKeys = (from fk in t.ForeignKeys()
                                                  join rt in Database.View<SysTables>() on fk.referenced_object_id equals rt.object_id
@@ -497,7 +500,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                     Dictionary<string, Entity> shouldByName = should.ToDictionary(a => a.ToString());
 
                     List<Entity> current = Administrator.TryRetrieveAll(table.Type, replacements);
-                    Dictionary<string, Entity> currentByName = current.ToDictionary(a => a.toStr, table.Name.Name);
+                    Dictionary<string, Entity> currentByName = current.ToDictionaryEx(a => a.toStr, table.Name.Name);
 
                     string key = Replacements.KeyEnumsForTable(table.Name.Name);
 

@@ -20,7 +20,7 @@ export class GlobalModalContainer extends React.Component<{}, GlobalModalContain
     }
 
     componentWillReceiveProps(nextProps: {}, nextContext: any): void {
-        this.state.modals = [];
+        this.setState({ modals: [] });
     }
 
     render() {

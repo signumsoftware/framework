@@ -51,13 +51,15 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
                 return result;
         }
         
-        const tis = getTypeInfos(tr);
-        const ti = tis.firstOrNull();
+        let tis = getTypeInfos(tr);
+
+        if (tis.length == 1 && tis[0] == undefined)
+            tis = []; 
 
         if (tr.isCollection) {
-            if (tr.isEmbedded || ti!.entityKind == "Part" || ti!.entityKind == "SharedPart")
+            if (tr.isEmbedded || tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
                 return <EntityRepeater ctx={ctx}/>;
-            else if (ti!.isLowPopulation)
+            else if (tis.every(t => t.isLowPopulation == true))
                 return <EntityCheckboxList ctx ={ctx}/>;
             else
                 return <EntityStrip ctx={ctx}/>;
@@ -66,14 +68,14 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
         if (tr.name == "[ALL]")
             return <EntityLine ctx={ctx}/>;
 
-        if (ti) {
-            if (ti.kind == "Enum")
+        if (tis.length) {
+            if (tis.length == 1 && tis.first().kind == "Enum")
                 return <ValueLine ctx={ctx}/>;
 
-            if (ti.entityKind == "Part" || ti.entityKind == "SharedPart")
+            if (tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
                 return <EntityDetail ctx={ctx} />;
 
-            if (ti.isLowPopulation)
+            if (tis.every(t => t.isLowPopulation == true))
                 return <EntityCombo ctx={ctx}/>;           
 
             return <EntityLine ctx={ctx}/>;

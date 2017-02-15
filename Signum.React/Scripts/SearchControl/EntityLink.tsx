@@ -6,21 +6,21 @@ import { Lite, Entity, liteKey } from '../Signum.Entities';
 import * as Navigator from '../Navigator';
 import { Link  } from 'react-router';
 
-export interface EntityLinkProps extends React.HTMLAttributes, React.Props<EntityLink> {
+export interface EntityLinkProps extends React.HTMLAttributes<Link>, React.Props<EntityLink> {
     lite: Lite<Entity>;
-    inSearch?: boolean
+    inSearch?: boolean;
+    onNavigated?: (lite: Lite<Entity>) => void;
 }
 
 
 export default class EntityLink extends React.Component<EntityLinkProps, void>{
 
     render() {
-        const lite = this.props.lite;
+        const { lite, inSearch, children, onNavigated, ...htmlAtts} = this.props;
 
         if (!Navigator.isNavigable(lite.EntityType, undefined, this.props.inSearch || false))
             return <span data-entity={liteKey(lite) }>{this.props.children || lite.toStr}</span>;
 
-        var htmlAtts = Dic.without(this.props, { lite: undefined, inSearch: undefined }) as React.HTMLAttributes;
 
         return (
             <Link
@@ -28,13 +28,13 @@ export default class EntityLink extends React.Component<EntityLinkProps, void>{
                 title={lite.toStr}
                 onClick={this.handleClick}
                 data-entity={liteKey(lite)}
-                {...htmlAtts}>
-                {this.props.children || lite.toStr}                
+                {...(htmlAtts as React.HTMLAttributes<Link>) }>
+                {children || lite.toStr}                
             </Link>
         );
     }
 
-    handleClick = (event: React.MouseEvent) => {
+    handleClick = (event: React.MouseEvent<any>) => {
 
         const lite = this.props.lite;
 
@@ -47,6 +47,8 @@ export default class EntityLink extends React.Component<EntityLinkProps, void>{
 
         event.preventDefault();
 
-        Navigator.navigate(lite);
+        Navigator.navigate(lite).then(() => {
+            this.props.onNavigated && this.props.onNavigated(lite);
+        }).done();
     }
 }

@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>MlistQuery</Title>
+      <Shortcut>mlistQuery</Shortcut>
+      <Description>Makes a query to an MList database table</Description>
+      <Author>Signum Software</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
+      <Imports>
+        <Import>
+          <Namespace>Signum.Engine</Namespace>
+        </Import>
+        <Import>
+          <Namespace>Signum.Entities</Namespace>
+        </Import>
+        <Import>
+          <Namespace>Signum.Utilities</Namespace>
+        </Import>
+      </Imports>
+      <Declarations>
+        <Literal Editable="true">
+          <ID>entityName</ID>
+          <ToolTip>Name of the main entity</ToolTip>
+          <Default>Foo</Default>
+          <Function>
+          </Function>
+        </Literal>
+        <Literal Editable="true">
+          <ID>entityParam</ID>
+          <ToolTip>Parameter</ToolTip>
+          <Default>e</Default>
+          <Function>
+          </Function>
+        </Literal>
+        <Literal Editable="true">
+          <ID>entityProp</ID>
+          <ToolTip>MList Property</ToolTip>
+          <Default>Collection</Default>
+          <Function>
+          </Function>
+        </Literal>
+      </Declarations>
+      <Code Language="csharp" Delimiter="$"><![CDATA[ Database.MListQuery(($entityName$Entity $entityParam$) => $entityParam$.$entityProp$)]]></Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>

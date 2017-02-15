@@ -50,7 +50,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
         super.componentWillReceiveProps(newProps, newContext);
     }
 
-    handleOnChange = (event: React.FormEvent) => {
+    handleOnChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const current = event.currentTarget as HTMLSelectElement;
 
         if (current.value != this.getLiteKey()) {
@@ -86,19 +86,18 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
 
         const hasValue = !!s.ctx.value;
 
-
         const buttons = (
             <span className="input-group-btn">
                 {!hasValue && this.renderCreateButton(true)}
                 {!hasValue && this.renderFindButton(true)}
-                {hasValue && this.renderViewButton(true)}
-                {hasValue && this.renderRemoveButton(true)}
+                {hasValue && this.renderViewButton(true, this.state.ctx.value!)}
+                {hasValue && this.renderRemoveButton(true, this.state.ctx.value!)}
             </span>
         );
 
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText}
-                htmlProps={Dic.extend(this.baseHtmlProps(), EntityBase.entityHtmlProps(s.ctx.value), s.formGroupHtmlProps)}
+                htmlProps={{ ...this.baseHtmlProps(), ...EntityBase.entityHtmlProps(s.ctx.value), ...s.formGroupHtmlProps }}
                 labelProps={s.labelHtmlProps} >
                 <div className="SF-entity-combo">
                     <div className={EntityBase.hasChildrens(buttons) ? "input-group" : undefined}>

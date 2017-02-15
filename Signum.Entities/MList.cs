@@ -684,7 +684,7 @@ namespace Signum.Entities
 
         bool IMListPrivate<T>.AssignMList(List<RowIdElement> newList)
         {
-            if (((IMListPrivate<T>)this).IsEqualTo(newList))
+            if (((IMListPrivate<T>)this).IsEqualTo(newList, orderMatters: true))
                 return false;
             
             var added = newList.Select(a => a.Element).Except(innerList.Select(a => a.Element)).ToList();
@@ -697,12 +697,12 @@ namespace Signum.Entities
             return true;
         }
 
-        public bool IsEqualTo(MList<T> list)
+        public bool IsEqualTo(MList<T> list, bool orderMatters)
         {
-            return ((IMListPrivate<T>)this).IsEqualTo(((IMListPrivate<T>)list).InnerList);
+            return ((IMListPrivate<T>)this).IsEqualTo(((IMListPrivate<T>)list).InnerList, orderMatters);
         }
 
-        bool IMListPrivate<T>.IsEqualTo(List<MList<T>.RowIdElement> newList)
+        bool IMListPrivate<T>.IsEqualTo(List<MList<T>.RowIdElement> newList, bool orderMatters)
         {
             if (newList.IsNullOrEmpty() && innerList.IsNullOrEmpty())
                 return true;
@@ -713,16 +713,39 @@ namespace Signum.Entities
             if (newList.Count != innerList.Count)
                 return false;
 
-            //Ordering the elements by RowId could remove some false modifications due to database indeterminism
-            //but we can not be sure if order matters, and at the end the order from Json should be respected
-            for (int i = 0; i < newList.Count; i++)
+            if (innerList.Any(a => a.RowId == null) ||
+                newList.Any(a => a.RowId == null))
+                return false;
+
+            if (orderMatters)
             {
-                if (newList[i].RowId != innerList[i].RowId ||
-                   !object.Equals(newList[i].Element, innerList[i].Element))
-                    return false;
+                for (int i = 0; i < newList.Count; i++)
+                {
+                    if (newList[i].RowId != innerList[i].RowId)
+                        return false;
+
+                    if (!object.Equals(newList[i].Element, innerList[i].Element))
+                        return false;
+                }
+
+                return true;
+            }
+            else
+            {
+                var current = innerList.ToDictionary(a => a.RowId.Value, a => a.Element);
+
+                foreach (var item in newList)
+                {
+                    if (item.RowId == null)
+                        return false;
+
+                    if (!current.Remove(item.RowId.Value))
+                        return false;
+                }
+
+                return current.Count == 0;
             }
 
-            return true;
         }
     }
 
@@ -744,7 +767,7 @@ namespace Signum.Entities
         List<MList<T>.RowIdElement> InnerList { get; }
 
         bool AssignMList(List<MList<T>.RowIdElement> newList);
-        bool IsEqualTo(List<MList<T>.RowIdElement> newList);
+        bool IsEqualTo(List<MList<T>.RowIdElement> newList, bool orderMatters);
     }
 
     internal sealed class MListDebugging<T>

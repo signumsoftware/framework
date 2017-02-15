@@ -77,6 +77,11 @@ namespace Signum.Entities.DynamicQuery
             get { return this.parent.QueryName; }
         }
 
+        public Func<object, T> GetAccessor<T>(BuildExpressionContext context)
+        {
+            return Expression.Lambda<Func<object, T>>(this.BuildExpression(context), context.Parameter).Compile();
+        }
+
         public Expression BuildExpression(BuildExpressionContext context)
         {
             Expression result;
@@ -151,20 +156,23 @@ namespace Signum.Entities.DynamicQuery
 
         Dictionary<string, QueryToken> CachedSubTokensOverride(SubTokensOptions options)
         {
-            return subTokensOverrideCache.GetOrAdd(Tuple.Create(this, options), (tup) => tup.Item1.SubTokensOverride(tup.Item2).ToDictionary(a => a.Key, "subtokens for " + this.Key));
+            return subTokensOverrideCache.GetOrAdd(Tuple.Create(this, options), (tup) => tup.Item1.SubTokensOverride(tup.Item2).ToDictionaryEx(a => a.Key, "subtokens for " + this.Key));
         }
 
         protected List<QueryToken> SubTokensBase(Type type, SubTokensOptions options, Implementations? implementations)
         {
             var ut = type.UnNullify();
             if (ut == typeof(DateTime))
-                return DateTimeProperties(this, DateTimePrecision.Milliseconds);
+                return DateTimeProperties(this, DateTimePrecision.Milliseconds).AndHasValue(this);
 
             if (ut == typeof(float) || ut == typeof(double) || ut == typeof(decimal))
-                return StepTokens(this, 4);
+                return StepTokens(this, 4).AndHasValue(this);
 
             if (ut == typeof(int) || ut == typeof(long) || ut == typeof(short))
-                return StepTokens(this, 0);
+                return StepTokens(this, 0).AndHasValue(this); ;
+
+            if (ut == typeof(string))
+                return StringTokens().AndHasValue(this);
 
             Type cleanType = type.CleanType();
             if (cleanType.IsIEntity())
@@ -176,27 +184,35 @@ namespace Signum.Entities.DynamicQuery
 
                 if (onlyType != null && onlyType == cleanType)
                     return new[] { EntityPropertyToken.IdProperty(this), new EntityToStringToken(this) }
-                        .Concat(EntityProperties(onlyType)).ToList();
+                        .Concat(EntityProperties(onlyType)).ToList().AndHasValue(this); ;
 
-                return implementations.Value.Types.Select(t => (QueryToken)new AsTypeToken(this, t)).ToList();
+                return implementations.Value.Types.Select(t => (QueryToken)new AsTypeToken(this, t)).ToList().AndHasValue(this);
             }
 
             if (type.IsEmbeddedEntity())
             {
-                return EntityProperties(type).OrderBy(a => a.ToString()).ToList();
+                return EntityProperties(type).OrderBy(a => a.ToString()).ToList().AndHasValue(this);
             }
 
-            if(IsCollection(type))
+            if (IsCollection(type))
             {
                 return CollectionProperties(this, options);
             }
 
             if (typeof(IQueryTokenBag).IsAssignableFrom(type))
             {
-                return BagProperties(type).OrderBy(a => a.ToString()).ToList();
+                return BagProperties(type).OrderBy(a => a.ToString()).ToList().AndHasValue(this);
             }
 
             return new List<QueryToken>();
+        }
+
+        public List<QueryToken> StringTokens()
+        {
+            return new List<QueryToken>
+            {
+                new NetPropertyToken(this, ReflectionTools.GetPropertyInfo((string str) => str.Length), QueryTokenMessage.Length.NiceToString())
+            };
         }
 
         public static IEnumerable<QueryToken> OnEntityExtension(QueryToken parent)
@@ -457,6 +473,11 @@ namespace Signum.Entities.DynamicQuery
         [Description("{0} step {1}")]
         _0Steps1,
         [Description("Step {0}")]
-        Step0
+        Step0,
+        Length,
+        [Description("{0} has value")]
+        _0HasValue,
+        [Description("Has value")]
+        HasValue
     }
 }

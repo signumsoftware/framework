@@ -17,7 +17,8 @@ namespace Signum.Windows
     public static class DynamicQueryServer
     {
         static ConcurrentDictionary<QueryToken, IEnumerable<QueryToken>> extensionCache = new ConcurrentDictionary<QueryToken, IEnumerable<QueryToken>>();
-        internal static IEnumerable<QueryToken> GetExtensionToken(QueryToken token)
+
+        public static IEnumerable<QueryToken> GetExtensionToken(QueryToken token)
         {
             var result = extensionCache.GetOrAdd(token, t => Server.Return((IDynamicQueryServer server) => server.ExternalQueryToken(t)));
             return result;
@@ -183,7 +184,7 @@ namespace Signum.Windows
             return options.ToRequest().QueryCount();
         }
 
-        public static int QueryCount(this QueryCountRequest request)
+        public static int QueryCount(this QueryValueRequest request)
         {
             Finder.Manager.AssertFindable(request.QueryName);
             return Server.Return((IDynamicQueryServer s) => s.ExecuteQueryCount(request));
@@ -194,19 +195,19 @@ namespace Signum.Windows
             options.ToRequest().QueryCountBatch(@onResult, @finally);
         }
 
-        private static void QueryCountBatch(this QueryCountRequest request, Action<int> onResult, Action @finally)
+        private static void QueryCountBatch(this QueryValueRequest request, Action<int> onResult, Action @finally)
         {
             Finder.Manager.AssertFindable(request.QueryName);
             Enqueue(request, obj => onResult((int)obj), @finally);
         }
 
-        public static QueryCountRequest ToRequest(this QueryCountOptions options)
+        public static QueryValueRequest ToRequest(this QueryCountOptions options)
         {
             QueryDescription qd = GetQueryDescription(options.QueryName);
 
             FilterOption.SetFilterTokens(options.FilterOptions, qd);
 
-            var request = new QueryCountRequest
+            var request = new QueryValueRequest
             {
                 QueryName = options.QueryName,
                 Filters = options.FilterOptions.Select(f => f.ToFilter()).ToList()

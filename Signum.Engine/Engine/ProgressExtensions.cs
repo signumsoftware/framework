@@ -16,6 +16,9 @@ namespace Signum.Engine
     {
         public static StopOnExceptionDelegate StopOnException = null;
 
+        /// <summary>
+        /// Executes an action for each element in the collection transactionally and showing the progress in the Console
+        /// </summary>
         public static void ProgressForeach<T>(this IEnumerable<T> collection, Func<T, string> elementID, Action<T> action)
         {
             LogWriter writer = GetLogWriter(null);
@@ -54,6 +57,10 @@ namespace Signum.Engine
                 SafeConsole.ClearSameLine();
         }
 
+        /// <summary>
+        /// Executes an action for each element in the collection transactionally and showing the progress in the Console.
+        /// </summary>
+        /// <param name="action">Use LogWriter to write in the Console and the file at the same time</param>
         public static void ProgressForeach<T>(this IEnumerable<T> collection, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
         {
             using (StreamWriter log = TryOpenAutoFlush(fileName))
@@ -98,6 +105,9 @@ namespace Signum.Engine
             }
         }
 
+        /// <summary>
+        /// Executes an action for each element in the collection WITHOUT transactions, and showing the progress in the Console
+        /// </summary>
         public static void ProgressForeachNonTransactional<T>(this IEnumerable<T> collection, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
         {
             using (StreamWriter log = TryOpenAutoFlush(fileName))
@@ -138,7 +148,12 @@ namespace Signum.Engine
             }
         }
 
-        public static void ProgressForeachParallel<T>(this IEnumerable<T> collection, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
+
+        /// <summary>
+        /// Executes an action for each element in the collection in paralel and transactionally, and showing the progress in the Console.
+        /// <param name="action">Use LogWriter to write in the Console and the file at the same time</param>
+        /// </summary>
+        public static void ProgressForeachParallel<T>(this IEnumerable<T> collection, Func<T, string> elementID, string fileName, Action<T, LogWriter> action, ParallelOptions paralelOptions = null)
         {
             using (StreamWriter log = TryOpenAutoFlush(fileName))
             {
@@ -150,47 +165,57 @@ namespace Signum.Engine
 
                     var col = collection.ToProgressEnumerator(out pi);
 
-                    lock (SafeConsole.SyncKey)
-                        SafeConsole.WriteSameLine(pi.ToString());
-
-                    Exception stopException = null;
-                    Parallel.ForEach(col, (item, state) =>
-                    {
-                        using (HeavyProfiler.Log("ProgressForeach", () => elementID(item)))
-                            try
-                            {
-                                using (Transaction tr = Transaction.ForceNew())
-                                {
-                                    action(item, writer);
-                                    tr.Commit();
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
-                                writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
-
-                                if (StopOnException != null && StopOnException(elementID(item), fileName, e))
-                                    stopException = e;
-                            }
+                    if (!Console.IsOutputRedirected)
                         lock (SafeConsole.SyncKey)
                             SafeConsole.WriteSameLine(pi.ToString());
 
-                        if (stopException != null)
-                            state.Break();
+                    Exception stopException = null;
 
-                    });
+                    using (ExecutionContext.SuppressFlow())
+                        Parallel.ForEach(col, paralelOptions ?? new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, (item, state) =>
+                       {
+                           using (HeavyProfiler.Log("ProgressForeach", () => elementID(item)))
+                               try
+                               {
+                                   using (Transaction tr = Transaction.ForceNew())
+                                   {
+                                       action(item, writer);
+                                       tr.Commit();
+                                   }
+                               }
+                               catch (Exception e)
+                               {
+                                   writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
+                                   writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
+
+                                   if (StopOnException != null && StopOnException(elementID(item), fileName, e))
+                                       stopException = e;
+                               }
+
+                           if (!Console.IsOutputRedirected)
+                               lock (SafeConsole.SyncKey)
+                                   SafeConsole.WriteSameLine(pi.ToString());
+
+                           if (stopException != null)
+                               state.Break();
+
+                       });
 
                     if (stopException != null)
                         throw stopException;
                 }
                 finally
                 {
-                    SafeConsole.ClearSameLine();
+                    if (!Console.IsOutputRedirected)
+                        SafeConsole.ClearSameLine();
                 }
             }
         }
 
+        /// <summary>
+        /// Executes an action for each element in the collection transactionally and showing the progress in the Console.
+        /// <param name="action">Use LogWriter to write in the Console and the file at the same time</param>
+        /// </summary>
         public static void ProgressForeach<T>(this IEnumerable<T> collection, bool isParallel, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
         {
             if (isParallel)
@@ -199,6 +224,11 @@ namespace Signum.Engine
                 collection.ProgressForeach(elementID, fileName, action);
         }
 
+        /// <summary>
+        /// Executes an action for each element in the collection transactionally and showing the progress in the Console.
+        /// Also it disables identity behaviour in the Schema and in Sql Server.
+        /// <param name="action">Use LogWriter to write in the Console and the file at the same time</param>
+        /// </summary>
         public static void ProgressForeachDisableIdentity<T>(this IEnumerable<T> collection, Type tableType, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
         {
             Table table = Schema.Current.Table(tableType);
@@ -218,10 +248,16 @@ namespace Signum.Engine
             finally
             {
                 table.IdentityBehaviour = true;
-                SafeConsole.ClearSameLine();
+                if (!Console.IsOutputRedirected)
+                    SafeConsole.ClearSameLine();
             }
         }
 
+        /// <summary>
+        /// Executes an action for each element in the collection in paralel, transactionally and showing the progress in the Console.
+        /// Also it disables identity behaviour in the Schema and in Sql Server.
+        /// <param name="action">Use LogWriter to write in the Console and the file at the same time</param>
+        /// </summary>
         public static void ProgressForeachParallelDisableIdentity<T>(this IEnumerable<T> collection, Type tableType, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
         {
             Table table = Schema.Current.Table(tableType);
@@ -244,6 +280,11 @@ namespace Signum.Engine
             }
         }
 
+        /// <summary>
+        /// Executes an action for each element in the collection transactionally and showing the progress in the Console.
+        /// Also it disables identity behaviour in the Schema and in Sql Server. Optionally in Parallel.
+        /// <param name="action">Use LogWriter to write in the Console and the file at the same time</param>
+        /// </summary>
         public static void ProgressForeachDisableIdentity<T>(this IEnumerable<T> collection, bool isParallel, Type tableType, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
         {
             if (isParallel)
@@ -283,7 +324,9 @@ namespace Signum.Engine
                         logStreamWriter.WriteLine(f);
                     lock (SafeConsole.SyncKey)
                     {
-                        SafeConsole.ClearSameLine();
+                        if (!Console.IsOutputRedirected)
+                            SafeConsole.ClearSameLine();
+
                         if (parameters.IsNullOrEmpty())
                             SafeConsole.WriteLineColor(color, str);
                         else
@@ -297,7 +340,9 @@ namespace Signum.Engine
                 {
                     lock (SafeConsole.SyncKey)
                     {
-                        SafeConsole.ClearSameLine();
+                        if (!Console.IsOutputRedirected)
+                            SafeConsole.ClearSameLine();
+
                         if (parameters.IsNullOrEmpty())
                             SafeConsole.WriteLineColor(color, str);
                         else

@@ -40,7 +40,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
 
 		return (
 			<fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass) }
-				{...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
+                {...this.baseHtmlProps() } {...this.state.formGroupHtmlProps}>
 				<legend>
 					<div>
 						<span>{this.state.labelText}</span>
@@ -54,17 +54,17 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
 								title={
 									<div>
 										{ getToString(mlec.value) }
-										&nbsp;
-										{ this.state.remove && !readOnly &&
+                                        &nbsp;
+										{this.canRemove(mlec.value) && !readOnly &&
 											<span className={classes("sf-line-button", "sf-create") }
 											onClick={e => this.handleRemoveElementClick(e, i) }
 											title={EntityControlMessage.Remove.niceToString() }>
 											<span className="glyphicon glyphicon-remove"/>
 											</span>
 										}
-									</div>
-								}>
-								<RenderEntity ctx={mlec} getComponent={this.props.getComponent}/>
+									</div> as any
+                                }>
+                                <RenderEntity ctx={mlec} getComponent={this.props.getComponent} viewPromise={this.props.viewPromise} />
 							</Tab>
 						)
 						

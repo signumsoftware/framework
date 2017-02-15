@@ -49,14 +49,24 @@ namespace Signum.Engine.Linq
 
         public static Expression PolymorphicEqual(Expression exp1, Expression exp2)
         {
-            if (exp1.NodeType == ExpressionType.New && exp2.NodeType == ExpressionType.New)
+            if (exp1.NodeType == ExpressionType.New || exp2.NodeType == ExpressionType.New)
             {
+                if (exp1.IsNull() || exp2.IsNull())
+                    return Expression.Constant(false);
+
+                exp1 = ConstanToNewExpression(exp1) ?? exp1;
+                exp2 = ConstanToNewExpression(exp2) ?? exp2;
+
                 return (exp1 as NewExpression).Arguments.ZipStrict(
                        (exp2 as NewExpression).Arguments, (o, i) => SmartEqualizer.PolymorphicEqual(o, i)).AggregateAnd();
             }
 
             Expression result;
             result = PrimaryKeyEquals(exp1, exp2);
+            if (result != null)
+                return result;
+            
+            result = ObjectEquals(exp1, exp2);
             if (result != null)
                 return result;
 
@@ -87,6 +97,25 @@ namespace Signum.Engine.Linq
             return EqualNullable(exp1, exp2);
         }
 
+        private static Expression ConstanToNewExpression(Expression exp)
+        {
+            var ce = exp as ConstantExpression;
+
+            if (ce == null)
+                return null;
+
+            var type = ce.Value.GetType();
+
+            if (!type.IsAnonymous())
+                return null;
+
+            var values = type.GetProperties().ToDictionary(a => a.Name, a => a.GetValue(ce.Value));
+
+            var ci = type.GetConstructors().SingleEx();
+
+            return Expression.New(ci, ci.GetParameters().Select(p => Expression.Constant(values.GetOrThrow(p.Name), p.ParameterType)));
+        }
+
         public static Expression PrimaryKeyEquals(Expression exp1, Expression exp2)
         {
             if (exp1.Type.UnNullify() == typeof(PrimaryKey) || exp2.Type.UnNullify() == typeof(PrimaryKey))
@@ -96,6 +125,59 @@ namespace Signum.Engine.Linq
 
                 return EqualNullable(left.Nullify(), right.Nullify());
             }
+
+            return null;
+        }
+
+        public static Expression ObjectEquals(Expression expr1, Expression expr2)
+        {
+            if (expr1.Type == typeof(object) && expr2.Type == typeof(object))
+            {
+                var left = UncastObject(expr1);
+                var right = UncastObject(expr2);
+
+                if (left == null && right == null)
+                    return null;
+
+                left = left ?? ChangeConstant(expr1, right.Type);
+                right = right ?? ChangeConstant(expr2, left.Type);
+
+                if (left == null || right == null)
+                    return null;
+
+                return PolymorphicEqual(left, right);
+            }
+
+            return null;
+        }
+
+        private static Expression ChangeConstant(Expression exp, Type type)
+        {
+            if (exp.NodeType == ExpressionType.Constant)
+            {
+                var val = ((ConstantExpression)exp).Value;
+
+                if (val == null)
+                {
+                    if (type.IsNullable() || !type.IsValueType)
+                        return Expression.Constant(val, type);
+                    else
+                        return null;
+                }
+
+                if (type.IsAssignableFrom(val.GetType()))
+                    return Expression.Constant(val, type);
+
+                return null;
+            }
+
+            return null;
+        }
+
+        private static Expression UncastObject(Expression expr)
+        {
+            if (expr.NodeType == ExpressionType.Convert)
+                return ((UnaryExpression)expr).Operand;
 
             return null;
         }

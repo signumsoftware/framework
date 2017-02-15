@@ -72,9 +72,9 @@ export default class PaginationSelector extends React.Component<PaginationSelect
 
     }
 
-    handleMode = (e: React.SyntheticEvent) => {
+    handleMode = (e: React.ChangeEvent<HTMLSelectElement>) => {
 
-        const mode = (e.currentTarget as HTMLInputElement).value as any as PaginationMode
+        const mode = e.currentTarget.value as any as PaginationMode
 
         const p: Pagination = {
             mode: mode,
@@ -85,13 +85,13 @@ export default class PaginationSelector extends React.Component<PaginationSelect
         this.props.onPagination(p);
     }
 
-    handleElementsPerPage = (e: React.SyntheticEvent) => {
-        const p = Dic.extend({}, this.props.pagination, { elementsPerPage: parseInt((e.currentTarget as HTMLInputElement).value) });
+    handleElementsPerPage = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const p: Pagination = { ...this.props.pagination, elementsPerPage: parseInt(e.currentTarget.value) };
         this.props.onPagination(p);
     }
 
-    handlePageClick = (eventKey: number, e: React.SyntheticEvent) => {
-        const p = Dic.extend({}, this.props.pagination, { currentPage: eventKey });
+    handlePageClick = (eventKey: any, e: React.SyntheticEvent<any>) => {
+        const p: Pagination = { ...this.props.pagination, currentPage: eventKey };
         this.props.onPagination(p);
     }
 
@@ -129,7 +129,7 @@ export default class PaginationSelector extends React.Component<PaginationSelect
                 maxButtons={8}
                 first={true}
                 last={true}
-                onSelect={this.handlePageClick}/>
+                onSelect={this.handlePageClick as any} />
         );
     }
 }

@@ -7,12 +7,13 @@ import ButtonBar from './ButtonBar'
 
 import { ValidationError } from '../Services'
 import { ifError, Dic } from '../Globals'
-import { TypeContext, StyleOptions, EntityFrame, IRenderButtons } from '../TypeContext'
+import { TypeContext, StyleOptions, EntityFrame, IRenderButtons, IHasChanges } from '../TypeContext'
 import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, toLite, getToString, EntityPack, ModelState, entityInfo, isEntityPack, isLite } from '../Signum.Entities'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel, parseId } from '../Reflection'
 import ValidationErrors from './ValidationErrors'
 import { renderWidgets, WidgetContext } from './Widgets'
 import { needsCanExecute } from '../Operations/EntityOperations'
+import { EntityOperationContext } from '../Operations'
 
 require("!style!css!./Frames.css");
 
@@ -20,10 +21,11 @@ interface ModalFrameProps extends React.Props<ModalFrame>, IModalProps {
     title?: string;
     entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>;
     propertyRoute?: PropertyRoute;
-    showOperations?: boolean;
+    isOperationVisible?: (eoc: EntityOperationContext<Entity>) => boolean;
     validate?: boolean;
     requiresSaveOperation?: boolean;
     avoidPromptLooseChange?: boolean;
+    extraComponentProps?: {}
     viewPromise?: Navigator.ViewPromise<ModifiableEntity>;
     isNavigate?: boolean;
     readOnly?: boolean;
@@ -34,15 +36,15 @@ interface ModalFrameState {
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
     propertyRoute?: PropertyRoute;
     show?: boolean;
-    prefix?: string;
 }
 
 let modalCount = 0;
 
 export default class ModalFrame extends React.Component<ModalFrameProps, ModalFrameState>  {
+    prefix = "modal" + (modalCount++);
 
     static defaultProps: ModalFrameProps = {
-        showOperations: true,
+        isOperationVisible: undefined,
         viewPromise: undefined,
         entityOrPack: null as any
     }
@@ -50,11 +52,10 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     constructor(props: ModalFrameProps) {
         super(props);
         this.state = this.calculateState(props);
-        this.state.prefix = "modal" + (modalCount++);
     }
 
     componentWillMount() {
-        Navigator.toEntityPack(this.props.entityOrPack, this.props.showOperations!)
+        Navigator.toEntityPack(this.props.entityOrPack)
             .then(ep => this.setPack(ep))
             .then(() => this.loadComponent())
             .done();
@@ -63,7 +64,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     componentWillReceiveProps(props: ModalFrameProps) {
         this.setState(this.calculateState(props));
 
-        Navigator.toEntityPack(props.entityOrPack, this.props.showOperations!)
+        Navigator.toEntityPack(props.entityOrPack)
             .then(ep => this.setPack(ep))
             .then(() => this.loadComponent())
             .done();
@@ -107,18 +108,19 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
     loadComponent() {
 
-        if (this.props.viewPromise) {
-            return this.props.viewPromise.promise
-                .then(c => this.setState({ getComponent: c }));
-        }
+        var viewPromise = this.props.viewPromise || Navigator.getViewPromise(this.state.pack!.entity);
 
-        return Navigator.getViewPromise(this.state.pack!.entity).promise
+        if (this.props.extraComponentProps)
+            viewPromise = viewPromise.withProps(this.props.extraComponentProps);
+
+        return viewPromise.promise
             .then(c => this.setState({ getComponent: c }));
     }
 
     okClicked: boolean;
     handleOkClicked = (val: any) => {
-        if (this.hasChanges() && this.props.requiresSaveOperation) {
+        if (this.hasChanges() &&
+            (this.props.requiresSaveOperation != undefined ? this.props.requiresSaveOperation : Navigator.typeRequiresSaveOperation(this.state.pack!.entity.Type))) {
             alert(JavascriptMessage.saveChangesBeforeOrPressCancel.niceToString());
             return;
         }
@@ -156,6 +158,10 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
     hasChanges() {
 
+        var hc = this.entityComponent as IHasChanges;
+        if (hc.componentHasChanges)
+            return hc.componentHasChanges();
+
         const entity = this.state.pack!.entity;
 
         GraphExplorer.propagateAll(entity);
@@ -174,7 +180,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         return (
             <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-popup-control">
                 <Modal.Header closeButton={this.props.isNavigate}>
-                    {!this.props.isNavigate && <ButtonToolbar style={{ float: "right" }}>
+                    {!this.props.isNavigate && <ButtonToolbar className="pull-right flip">
                         <Button className="sf-entity-button sf-close-button sf-ok-button" bsStyle="primary" disabled={!pack} onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString() }</Button>
                         <Button className="sf-entity-button sf-close-button sf-cancel-button" bsStyle="default" disabled={!pack} onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString() }</Button>
                     </ButtonToolbar>}
@@ -215,12 +221,12 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
         const pack = this.state.pack!;
 
-        const ctx = new TypeContext(undefined, styleOptions, this.state.propertyRoute!, new ReadonlyBinding(pack.entity, this.state.prefix!));
+        const ctx = new TypeContext(undefined, styleOptions, this.state.propertyRoute!, new ReadonlyBinding(pack.entity, this.prefix!));
 
         return (
             <Modal.Body>
-                {renderWidgets({ ctx: ctx, pack: pack }) }
-                { this.entityComponent && <ButtonBar frame={frame} pack={pack} showOperations={this.props.showOperations!} />}
+                {renderWidgets({ ctx: ctx, pack: pack })}
+                {this.entityComponent && <ButtonBar frame={frame} pack={pack} isOperationVisible={this.props.isOperationVisible} />}
                 <ValidationErrors entity={pack.entity} ref={ve => this.validationErrors = ve}/>
                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-main-entity={entityInfo(ctx.value) }>
                     { this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any,any>) => this.setComponent(c) }) }
@@ -267,7 +273,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         );
     }
 
-    handlePopupFullScreen = (e: React.MouseEvent) => {
+    handlePopupFullScreen = (e: React.MouseEvent<any>) => {
 
         if (e.ctrlKey || e.buttons) {
 
@@ -286,9 +292,10 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             readOnly={options.readOnly}
             propertyRoute={options.propertyRoute}
             viewPromise={options.viewPromise}
-            showOperations={options.showOperations}
+            isOperationVisible={options.isOperationVisible}
             requiresSaveOperation={options.requiresSaveOperation}
             avoidPromptLooseChange={options.avoidPromptLooseChange}
+            extraComponentProps={options.extraComponentProps}
             validate={options.validate == undefined ? ModalFrame.isModelEntity(entityOrPack) : options.validate }
             title={options.title}
             isNavigate={false}/>);
@@ -308,7 +315,6 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             readOnly={options.readOnly}
             propertyRoute={undefined}
             viewPromise={options.viewPromise}
-            showOperations={true}
             requiresSaveOperation={undefined}
             avoidPromptLooseChange={options.avoidPromptLooseChange}
             isNavigate={true}/>);

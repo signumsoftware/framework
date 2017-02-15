@@ -1,5 +1,6 @@
 ﻿using Signum.Entities;
 using Signum.React.Json;
+using Signum.Utilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -100,7 +101,7 @@ namespace Signum.React.Json
         private bool ValidateMList(ValidationContext validationContext, IMListPrivate mlist)
         {
             bool isValid = true;
-            Type elementType = mlist.GetType();
+            Type elementType = mlist.GetType().ElementType();
             ModelMetadata elementMetadata = validationContext.MetadataProvider.GetMetadataForType(null, elementType);
 
             ElementScope elementScope = new ElementScope() { Index = 0 };

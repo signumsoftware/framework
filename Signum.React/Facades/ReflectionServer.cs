@@ -43,7 +43,7 @@ namespace Signum.React.Facades
         public static ResetLazy<Dictionary<string, Type>> TypesByName = new ResetLazy<Dictionary<string, Type>>(
             () => GetTypes().Where(t => typeof(ModifiableEntity).IsAssignableFrom(t) ||
             t.IsEnum && !t.Name.EndsWith("Query") && !t.Name.EndsWith("Message"))
-            .ToDictionary(GetTypeName, "Types"));
+            .ToDictionaryEx(GetTypeName, "Types"));
 
         public static void RegisterLike(Type type)
         {
@@ -54,8 +54,9 @@ namespace Signum.React.Facades
         internal static void Start()
         {
             DescriptionManager.Invalidated += () => cache.Clear();
+            Schema.Current.OnMetadataInvalidated += () => cache.Clear();
 
-            EntityAssemblies = TypeLogic.TypeToEntity.Keys.AgGroupToDictionary(t => t.Assembly, gr => gr.Select(a => a.Namespace).ToHashSet());
+            EntityAssemblies = Schema.Current.Tables.Keys.AgGroupToDictionary(t => t.Assembly, gr => gr.Select(a => a.Namespace).ToHashSet());
             EntityAssemblies[typeof(PaginationMode).Assembly].Add(typeof(PaginationMode).Namespace);
         }
         
@@ -110,11 +111,7 @@ namespace Signum.React.Facades
 
             return oi;
         }
-
-
-
-
-
+        
 
         internal static Dictionary<string, TypeInfoTS> GetTypeInfoTS()
         {
@@ -139,7 +136,7 @@ namespace Signum.React.Facades
                 var usedEnums = (from type in normalTypes
                                  where typeof(ModifiableEntity).IsAssignableFrom(type)
                                  from p in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
-                                 let pt = p.PropertyType.UnNullify()
+                                 let pt = (p.PropertyType.ElementType() ?? p.PropertyType).UnNullify()
                                  where pt.IsEnum && !EntityAssemblies.ContainsKey(pt.Assembly)
                                  select pt).Distinct().ToList();
                 
@@ -192,12 +189,12 @@ namespace Signum.React.Facades
                               Operations = !type.IsEntity() ? null : OperationLogic.GetAllOperationInfos(type)
                                 .ToDictionary(oi => oi.OperationSymbol.Key, oi => OnAddOperationExtension(new OperationInfoTS(oi), oi))
 
-                          }, type))).ToDictionary("entities");
+                          }, type))).ToDictionaryEx("entities");
 
             return result;
         }
 
-        private static bool InTypeScript(PropertyRoute pr)
+        public static bool InTypeScript(PropertyRoute pr)
         {
             return (pr.Parent == null || InTypeScript(pr.Parent)) && (pr.PropertyInfo == null || pr.PropertyInfo.GetCustomAttribute<InTypeScriptAttribute>()?.GetInTypeScript() != false);
         }
@@ -207,7 +204,7 @@ namespace Signum.React.Facades
             if (lambdaExpression == null)
                 return null;
 
-            var body = ToJavascriptBody(lambdaExpression.Parameters.Single(), lambdaExpression.Body);
+            var body = ToJavascript(lambdaExpression.Parameters.Single(), lambdaExpression.Body);
 
             if (body == null)
                 return null;
@@ -215,25 +212,42 @@ namespace Signum.React.Facades
             return "function(e){ return " + body + "; }"; 
         }
 
-        private static string ToJavascriptBody(ParameterExpression param, Expression body)
+        static Dictionary<string, string> replacements = new Dictionary<string, string>
         {
-            if (param == body)
+            { "\t", "\\t"},
+            { "\n", "\\n"},
+            { "\r", ""},
+        };
+
+        private static string ToJavascript(ParameterExpression param, Expression expr)
+        {
+            if (param == expr)
                 return "e";
 
-            if (body.NodeType == ExpressionType.MemberAccess)
+            if(expr.NodeType == ExpressionType.Constant && expr.Type == typeof(string))
             {
-                var a = ToJavascriptBody(param, ((MemberExpression)body).Expression);
+                var str = (string)((ConstantExpression)expr).Value;
+
+                if (!str.HasText())
+                    return "\"\"";
+
+                return "\"" + str.Replace(replacements) + "\"";
+            }
+
+            if (expr.NodeType == ExpressionType.MemberAccess)
+            {
+                var a = ToJavascript(param, ((MemberExpression)expr).Expression);
 
                 if (a == null)
                     return null;
 
-                return a + "." + ((MemberExpression)body).Member.Name.FirstLower();
+                return a + "." + ((MemberExpression)expr).Member.Name.FirstLower();
             }
 
-            if (body.NodeType == ExpressionType.Add)
+            if (expr.NodeType == ExpressionType.Add)
             {
-                var a = ToJavascriptBody(param, ((BinaryExpression)body).Left);
-                var b = ToJavascriptBody(param, ((BinaryExpression)body).Right);
+                var a = ToJavascriptToString(param, ((BinaryExpression)expr).Left);
+                var b = ToJavascriptToString(param, ((BinaryExpression)expr).Right);
 
                 if (a != null && b != null)
                     return "(" + a + " + " + b + ")";
@@ -241,17 +255,33 @@ namespace Signum.React.Facades
                 return null;
             }
 
-            if (body.NodeType == ExpressionType.Call && ((MethodCallExpression)body).Method.Name == "ToString")
+            if (expr.NodeType == ExpressionType.Call && ((MethodCallExpression)expr).Method.Name == "ToString")
             {
-                var a = ToJavascriptBody(param, ((MethodCallExpression)body).Object);
+                return ToJavascriptToString(param, ((MethodCallExpression)expr).Object);
+            }
 
-                if (a == null)
-                    return null;
-
-                return a + ".toString()";
+            if(expr.NodeType == ExpressionType.Convert)
+            {
+                return ToJavascriptToString(param, ((UnaryExpression)expr).Operand);
             }
 
             return null;
+        }
+
+        private static string ToJavascriptToString(ParameterExpression param, Expression expr)
+        {
+            var r = ToJavascript(param, expr);
+
+            if (r == null)
+                return null;
+            
+            if (expr.NodeType != ExpressionType.MemberAccess)
+                return r;
+
+            if (expr.Type.IsModifiableEntity() || expr.Type.IsLite())
+                return "getToString(" + r + ")";
+
+            return "valToString(" + r + ")";
         }
 
         static string GetTypeNiceName(Type type)
@@ -261,9 +291,11 @@ namespace Signum.React.Facades
             return null;
         }
 
-        private static bool IsId(PropertyRoute p)
+        public static bool IsId(PropertyRoute p)
         {
-            return p.PropertyInfo.Name == nameof(Entity.Id) && p.Parent.PropertyRouteType == PropertyRouteType.Root;
+            return p.PropertyRouteType == PropertyRouteType.FieldOrProperty &&
+                p.PropertyInfo.Name == nameof(Entity.Id) && 
+                p.Parent.PropertyRouteType == PropertyRouteType.Root;
         }
 
         public static Dictionary<string, TypeInfoTS> GetEnums(IEnumerable<Type> allTypes)
@@ -287,37 +319,49 @@ namespace Signum.React.Facades
                                   NiceName = fi.NiceName(),
                                   IsIgnoredEnum = kind == KindOfType.Enum && fi.HasAttribute<IgnoreAttribute>()
                               }, fi)),
-                          }, type))).ToDictionary("enums");
+                          }, type))).ToDictionaryEx("enums");
 
             return result;
         }
 
         public static Dictionary<string, TypeInfoTS> GetSymbolContainers(IEnumerable<Type> allTypes)
         {
+            SymbolLogic.LoadAll();
+
             var result = (from type in allTypes
                           where type.IsStaticClass() && type.HasAttribute<AutoInitAttribute>()
                           select KVP.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
                           {
                               Kind = KindOfType.SymbolContainer,
-                              Members = type.GetFields(staticFlags).Where(f => GetSymbol(f).IdOrNull.HasValue).ToDictionary(fi => fi.Name, fi => OnAddFieldInfoExtension(new MemberInfoTS
-                              {
-                                  NiceName = fi.NiceName(),
-                                  Id = GetSymbol(fi).Id.Object
-                              }, fi))
-                          }, type))).ToDictionary("symbols");
+                              Members = type.GetFields(staticFlags)
+                                  .Select(f => GetSymbol(f))
+                                  .Where(s =>
+                                  s.FieldInfo != null && /*Duplicated like in Dynamic*/
+                                  s.IdOrNull.HasValue /*Not registered*/)
+                                  .ToDictionary(s => s.FieldInfo.Name, s => OnAddFieldInfoExtension(new MemberInfoTS
+                                  {
+                                      NiceName = s.FieldInfo.NiceName(),
+                                      Id = s.Id.Object
+                                  }, s.FieldInfo))
+                          }, type)))
+                          .Where(a => a.Value.Members.Any())
+                          .ToDictionaryEx("symbols");
 
             return result;
         }
 
         private static Symbol GetSymbol(FieldInfo m)
         {
-            var v = m.GetValue(null);
-
+            object v = m.GetValue(null);          
             if (v is IOperationSymbolContainer)
                 v = ((IOperationSymbolContainer)v).Symbol;
 
-            return ((Symbol)v);
+            var s = ((Symbol)v);
+
+            return s;
+
         }
+
 
         public static string GetTypeName(Type t)
         {

@@ -10,7 +10,8 @@ import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, isLite, isEntity } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
-import { EntityBase, EntityBaseProps} from './EntityBase'
+import { EntityBase, EntityBaseProps } from './EntityBase'
+import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './AutocompleteConfig'
 
 export interface EntityLineProps extends EntityBaseProps {
 
@@ -34,13 +35,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         super.overrideProps(state, overridenProps);
         if (state.autoComplete === undefined) {
             const type = state.type!;
-            state.autoComplete = type.isEmbedded || type.name == IsByAll ? null :
-                overridenProps.findOptions ? new FindOptionsAutocompleteConfig(overridenProps.findOptions, 5, false) :
-                    new LiteAutocompleteConfig((subStr: string) => Finder.API.findLiteLike({
-                        types: type.name,
-                        subString: subStr,
-                        count: 5
-                    }), false);
+            state.autoComplete = Navigator.getAutoComplete(type, overridenProps.findOptions);
         }
 
         if (!state.currentItem) {
@@ -66,13 +61,16 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
             if (newEntity == null) {
                 if (this.state.currentItem)
-                    this.changeState(s => s.currentItem = undefined);
+                    this.setState({ currentItem: undefined });
             } else {
                 if (!this.state.currentItem || this.state.currentItem.entity !== newEntity) {
                     var ci = { entity: newEntity!, item: undefined }
-                    this.changeState(s => s.currentItem = ci);
+                    this.setState({ currentItem: ci });
                     this.state.autoComplete.getItemFromEntity(newEntity)
-                        .then(item => this.changeState(s => ci.item = item))
+                        .then(item => {
+                            ci.item = item;
+                            this.forceUpdate()
+                        })
                         .done();
                 }
             }
@@ -85,18 +83,23 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         this.typeahead!.writeInInput(query);
     }
 
-    handleOnSelect = (item: any, event: React.SyntheticEvent) => {
+    handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
 
         var lite = this.state.autoComplete!.getEntityFromItem(item);
 
         this.convert(lite)
             .then(entity => {
-                this.changeState(s => s.currentItem = { entity: entity, item: item }); //Optimization
+                this.setState({ currentItem: { entity: entity, item: item } }); //Optimization
                 this.setValue(entity);
             })
             .done();
 
         return lite.toStr || "";
+    }
+
+    setValue(val: any) {
+        super.setValue(val);
+        this.refreshItem(this.props);
     }
 
     renderInternal() {
@@ -108,19 +111,27 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         const buttons = (
             <span className="input-group-btn">
                 {!hasValue && this.renderCreateButton(true) }
-                {!hasValue && this.renderFindButton(true) }
-                {hasValue && this.renderViewButton(true) }
-                {hasValue && this.renderRemoveButton(true) }
+                {!hasValue && this.renderFindButton(true)}
+                {hasValue && this.renderViewButton(true, s.ctx.value!)}
+                {hasValue && this.renderRemoveButton(true, s.ctx.value!) }
             </span>
         );
-        
+
+        var linkOrAutocomplete = hasValue ? this.renderLink() : this.renderAutoComplete();
+
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(this.baseHtmlProps(), EntityBase.entityHtmlProps(s.ctx.value!), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
+            <FormGroup ctx={s.ctx} labelText={s.labelText}
+                htmlProps={{ ...this.baseHtmlProps(), ...EntityBase.entityHtmlProps(s.ctx.value!), ...s.formGroupHtmlProps }}
+                labelProps={s.labelHtmlProps}>
                 <div className="SF-entity-line">
-                    <div className={EntityBase.hasChildrens(buttons) ? "input-group" : undefined}>
-                        {hasValue ? this.renderLink() : this.renderAutoComplete()}
-                        {EntityBase.hasChildrens(buttons) ? buttons : undefined}
-                    </div>
+                    {
+                        !EntityBase.hasChildrens(buttons) ?
+                            <div style={{ position: "relative" }}>{linkOrAutocomplete}</div>:
+                            <div className="input-group">
+                                {linkOrAutocomplete}
+                                {buttons}
+                            </div>
+                    }
                 </div>
             </FormGroup>
         );
@@ -177,136 +188,6 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
     }
 }
 
-export interface AutocompleteConfig<T> {
-    getItems: (subStr: string) => Promise<T[]>;
-    renderItem: (item: T, subStr?: string) => React.ReactNode;
-    renderList?: (typeahead: Typeahead) => React.ReactNode;
-    getEntityFromItem: (item: T) => Lite<Entity> | ModifiableEntity;
-    getItemFromEntity: (entity: Lite<Entity> | ModifiableEntity) => Promise<T>;
-}
-
-export class LiteAutocompleteConfig implements AutocompleteConfig<Lite<Entity>>{
-
-    constructor(
-        public getItems: (subStr: string) => Promise<Lite<Entity>[]>,
-        public withCustomToString: boolean) {
-    }
-
-    renderItem(item: Lite<Entity>, subStr: string) {
-        return Typeahead.highlightedText(item.toStr || "", subStr)
-    }
-
-    getEntityFromItem(item: Lite<Entity>) {
-        return item;
-    }
-
-    getItemFromEntity(entity: Lite<Entity> | ModifiableEntity): Promise<Lite<Entity>> {
-
-        var lite = this.convertToLite(entity);;
-
-        if (!this.withCustomToString)
-            return Promise.resolve(lite);
-
-        if (lite.id == undefined)
-            return Promise.resolve(lite);
-
-        return this.getItems(lite.id!.toString()).then(lites => {
-
-            const result = lites.filter(a => a.id == lite.id).firstOrNull();
-
-            if (!result)
-                throw new Error("Impossible to getInitialItem with the current implementation of getItems");
-
-            return result;
-        });
-    }
-
-    convertToLite(entity: Lite<Entity> | ModifiableEntity) {
-        
-        if (isLite(entity))
-            return entity;
-
-        if (isEntity(entity))
-            return toLite(entity, entity.isNew);
-
-        throw new Error("Impossible to convert to Lite");
-    }
-}
-
-export class FindOptionsAutocompleteConfig implements AutocompleteConfig<Lite<Entity>>{
-
-    constructor(
-        public findOptions: FindOptions,
-        public count: number,
-        public withCustomToString: boolean) {
-    }
-
-    parsedFilters?: FilterOptionParsed[];
-
-    getParsedFilters(): Promise<FilterOptionParsed[]> {
-        if (this.parsedFilters)
-            return Promise.resolve(this.parsedFilters);
-
-        return Finder.getQueryDescription(this.findOptions.queryName)
-            .then(qd => Finder.parseFilterOptions(this.findOptions.filterOptions || [], qd))
-            .then(filters => this.parsedFilters = filters);
-    }
-
-    getItems = (subStr: string): Promise<Lite<Entity>[]> => {
-        return this.getParsedFilters()
-            .then(filters => Finder.API.findLiteLikeWithFilters({
-                queryKey: getQueryKey(this.findOptions.queryName),
-                filters: filters.map(f => ({ token: f.token!.fullKey, operation: f.operation, value: f.value }) as FilterRequest),
-                count: this.count,
-                subString: subStr
-            }));
-    }
-
-    renderItem(item: Lite<Entity>, subStr: string) {
-        return Typeahead.highlightedText(item.toStr || "", subStr)
-    }
-
-    getEntityFromItem(item: Lite<Entity>) {
-        return item;
-    }
-
-    getItemFromEntity(entity: Lite<Entity> | ModifiableEntity): Promise<Lite<Entity>> {
-
-        var lite = this.convertToLite(entity);;
-
-        if (!this.withCustomToString)
-            return Promise.resolve(lite);
-
-        if (lite.id == undefined)
-            return Promise.resolve(lite);
-
-        return Finder.API.findLiteLikeWithFilters({
-            queryKey: getQueryKey(this.findOptions.queryName),
-            filters:  [{ token: "Entity.Id", operation: "EqualTo", value: lite.id }],
-            count: 1,
-            subString: ""
-        }).then(lites => {
-
-            const result = lites.filter(a => a.id == lite.id).firstOrNull();
-
-            if (!result)
-                throw new Error("Impossible to getInitialItem with the current implementation of getItems");
-
-            return result;
-        });
-    }
-
-    convertToLite(entity: Lite<Entity> | ModifiableEntity) {
-
-        if (isLite(entity))
-            return entity;
-
-        if (isEntity(entity))
-            return toLite(entity, entity.isNew);
-
-        throw new Error("Impossible to convert to Lite");
-    }
-}
 
 
 
