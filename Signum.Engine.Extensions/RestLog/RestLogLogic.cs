@@ -19,6 +19,10 @@ namespace Signum.Engine.RestLog
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<RestLogEntity>()
+                    .WithIndex(a=>a.StartDate)
+                    .WithIndex(a=>a.EndDate)
+                    .WithIndex(a=>a.Controller)
+                    .WithIndex(a=>a.Action)
                     .WithQuery(dqm, e => new
                     {
                         Entity = e,

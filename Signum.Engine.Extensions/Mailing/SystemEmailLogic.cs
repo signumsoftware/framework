@@ -89,15 +89,13 @@ namespace Signum.Engine.Mailing
             {
                 sb.Schema.Generating += Schema_Generating;
                 sb.Schema.Synchronizing += Schema_Synchronizing;
-
-                dqm.RegisterQuery(typeof(SystemEmailEntity), () =>
-                    (from se in Database.Query<SystemEmailEntity>()
-                     select new
-                     {
-                         Entity = se,
-                         se.Id,
-                         se.FullClassName,
-                     }));
+                sb.Include<SystemEmailEntity>()
+                    .WithQuery(dqm, se => new
+                    {
+                        Entity = se,
+                        se.Id,
+                        se.FullClassName,
+                    });
 
                 new Graph<EmailTemplateEntity>.ConstructFrom<SystemEmailEntity>(EmailTemplateOperation.CreateEmailTemplateFromSystemEmail)
                 {
@@ -115,9 +113,14 @@ namespace Signum.Engine.Mailing
                 systemEmailToEntity = sb.GlobalLazy(() =>
                 {
                     var dbSystemEmails = Database.RetrieveAll<SystemEmailEntity>();
-                    return EnumerableExtensions.JoinStrict(
-                        dbSystemEmails, systemEmails.Keys, systemEmail => systemEmail.FullClassName, type => type.FullName,
-                        (systemEmail, type) => KVP.Create(type, systemEmail), "caching EmailTemplates. Consider synchronize").ToDictionary();
+                    return EnumerableExtensions.JoinRelaxed(
+                        dbSystemEmails,
+                        systemEmails.Keys,
+                        systemEmail => systemEmail.FullClassName,
+                        type => type.FullName,
+                        (systemEmail, type) => KVP.Create(type, systemEmail),
+                        "caching EmailTemplates")
+                        .ToDictionary();
                 }, new InvalidateWith(typeof(SystemEmailEntity)));
 
 

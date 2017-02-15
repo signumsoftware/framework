@@ -5,7 +5,7 @@ import * as numbro from 'numbro'
 import * as moment from 'moment'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
-import {CountSearchControl, SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
+import {ValueSearchControl, SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -33,7 +33,7 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
             .then(s => this.setState({times: s}));
     }
     
-    handleClear = (e: React.MouseEvent) => {
+    handleClear = (e: React.MouseEvent<any>) => {
         API.Times.clear().then(() => this.loadState()).done();
     }
 

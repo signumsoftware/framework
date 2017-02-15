@@ -16,9 +16,9 @@ namespace Signum.Engine.Files
 {
     public static class FileTypeLogic
     {
-        public static Dictionary<FileTypeSymbol, FileTypeAlgorithm> FileTypes = new Dictionary<FileTypeSymbol, FileTypeAlgorithm>();
+        public static Dictionary<FileTypeSymbol, IFileTypeAlgorithm> FileTypes = new Dictionary<FileTypeSymbol, IFileTypeAlgorithm>();
 
-        public static void Register(FileTypeSymbol fileTypeSymbol, FileTypeAlgorithm algorithm)
+        public static void Register(FileTypeSymbol fileTypeSymbol, IFileTypeAlgorithm algorithm)
         {
             if (fileTypeSymbol == null)
                 throw AutoInitAttribute.ArgumentNullException(typeof(FileTypeSymbol), nameof(fileTypeSymbol));
@@ -33,25 +33,27 @@ namespace Signum.Engine.Files
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                SymbolLogic<FileTypeSymbol>.Start(sb, () => FileTypes.Keys.ToHashSet());
-
-                dqm.RegisterQuery(typeof(FileTypeSymbol), () =>
-                    from f in Database.Query<FileTypeSymbol>()
-                    select new
+                SymbolLogic<FileTypeSymbol>.Start(sb,dqm, () => FileTypes.Keys.ToHashSet());
+                sb.Include<FileTypeSymbol>()
+                    .WithQuery(dqm, f => new
                     {
                         Entity = f,
                         f.Key
                     });
 
-
                 sb.Schema.SchemaCompleted += Schema_SchemaCompleted;
             }
+        }
+
+        public static IFileTypeAlgorithm GetAlgorithm(this FileTypeSymbol fileType)
+        {
+            return FileTypes.GetOrThrow(fileType);
         }
 
         static void Schema_SchemaCompleted()
         {
             var errors = (from kvp in FileTypes
-                          let error = kvp.Value.Errors()
+                          let error = kvp.Value.ConfigErrors()
                           where error.HasText()
                           select kvp.Key + ": " + error.Indent(4)).ToList();
 
@@ -59,58 +61,36 @@ namespace Signum.Engine.Files
                 throw new InvalidOperationException("Errors in the following FileType algorithms: \r\n" +
                     errors.ToString("\r\n").Indent(4));
         }
-
-        internal static void SaveFile(IFilePath fp)
-        {
-            using (new EntityCache(EntityCacheType.ForceNew))
-            {
-                FileTypeAlgorithm alg = FileTypes.GetOrThrow(fp.FileType);
-
-                if (alg.TakesOwnership)
-                {
-                    string sufix = alg.CalculateSufix(fp);
-                    if (!sufix.HasText())
-                        throw new InvalidOperationException("Sufix not set");
-
-                    fp.SetPrefixPair(alg.GetPrefixPair(fp));
-
-                    int i = 2;
-                    fp.Suffix = sufix;
-                    while (alg.RenameOnCollision && File.Exists(fp.FullPhysicalPath()))
-                    {
-                        fp.Suffix = alg.RenameAlgorithm(sufix, i);
-                        i++;
-                    }
-
-                    alg.SaveFileInDisk(fp);
-                }
-            }
-        }
     }
 
-    public sealed class FileTypeAlgorithm
+    public interface IFileTypeAlgorithm
+    {
+        void SaveFile(IFilePath fp);
+        void DeleteFiles(IEnumerable<IFilePath> files);
+        byte[] ReadAllBytes(IFilePath fp);
+        Stream OpenRead(IFilePath fp);
+        void MoveFile(IFilePath ofp, IFilePath nfp);
+        string ConfigErrors();
+        PrefixPair GetPrefixPair(IFilePath efp);
+    }
+
+    public class FileTypeAlgorithm : IFileTypeAlgorithm
     {
         public Func<IFilePath, PrefixPair> GetPrefixPair { get; set; }
         public Func<IFilePath, string> CalculateSufix { get; set; }
 
         public bool RenameOnCollision { get; set; }
-        public bool TakesOwnership { get; set; }
+        public bool WeakFileReference { get; set; }
 
         public Func<string, int, string> RenameAlgorithm { get; set; }
 
-        public Action<IFilePath> SaveFileInDisk;
-        public Action<List<IFilePath>> DeleteFiles;
-
         public FileTypeAlgorithm()
         {
-            TakesOwnership = true;
+            WeakFileReference = false;
             CalculateSufix = FileName_Sufix;
 
             RenameOnCollision = true;
             RenameAlgorithm = DefaultRenameAlgorithm;
-
-            SaveFileInDisk = SaveFileDefault;
-            DeleteFiles = DeleteFilesDefault;
         }
 
         public static readonly Func<string, int, string> DefaultRenameAlgorithm = (sufix, num) =>
@@ -130,14 +110,14 @@ namespace Signum.Engine.Files
         public static readonly Func<IFilePath, string> Isolated_YearMonth_Guid_Filename_Sufix = (IFilePath fp) => Path.Combine(IsolationEntity.Current?.IdOrNull?.ToString() ?? "None", TimeZoneManager.Now.ToString("yyyy-MM"), Path.Combine(Guid.NewGuid().ToString(), fp.FileName));
 
 
-        public string Errors()
+        public string ConfigErrors()
         {
             string error = null;
 
             if (GetPrefixPair == null)
                 error = "GetPrefixPair";
 
-            if (TakesOwnership && CalculateSufix == null)
+            if (!WeakFileReference && CalculateSufix == null)
                 error = ", ".CombineIfNotEmpty(error, "CalculateSufix");
 
             if (RenameOnCollision && RenameAlgorithm == null)
@@ -149,7 +129,32 @@ namespace Signum.Engine.Files
             return error;
         }
 
-        public static void SaveFileDefault(IFilePath fp)
+        public virtual void SaveFile(IFilePath fp)
+        {
+            using (new EntityCache(EntityCacheType.ForceNew))
+            {
+                if (WeakFileReference)
+                    return;
+
+                string sufix = CalculateSufix(fp);
+                if (!sufix.HasText())
+                    throw new InvalidOperationException("Sufix not set");
+
+                fp.SetPrefixPair(GetPrefixPair(fp));
+
+                int i = 2;
+                fp.Suffix = sufix;
+                while (RenameOnCollision && File.Exists(fp.FullPhysicalPath()))
+                {
+                    fp.Suffix = RenameAlgorithm(sufix, i);
+                    i++;
+                }
+
+                SaveFileInDisk(fp);
+            }
+        }
+
+        public virtual void SaveFileInDisk(IFilePath fp)
         {
             string fullPhysicalPath = null;
             try
@@ -170,12 +175,38 @@ namespace Signum.Engine.Files
             }
         }
 
-        public static void DeleteFilesDefault(List<IFilePath> filePaths)
+        public virtual Stream OpenRead(IFilePath path)
         {
-            foreach (var fp in filePaths)
+            return File.OpenRead(path.FullPhysicalPath());
+        }
+
+        public virtual byte[] ReadAllBytes(IFilePath path)
+        {
+            return File.ReadAllBytes(path.FullPhysicalPath());
+        }
+
+        public virtual void MoveFile(IFilePath ofp, IFilePath fp)
+        {
+            if (WeakFileReference)
+                return;
+
+            System.IO.File.Move(ofp.FullPhysicalPath(), fp.FullPhysicalPath());
+        }
+
+        public virtual void DeleteFiles(IEnumerable<IFilePath> files)
+        {
+            if (WeakFileReference)
+                return;
+
+            foreach (var f in files)
             {
-                File.Delete(fp.FullPhysicalPath());
+                File.Delete(f.FullPhysicalPath());
             }
+        }
+
+        PrefixPair IFileTypeAlgorithm.GetPrefixPair(IFilePath efp)
+        {
+            return this.GetPrefixPair(efp);
         }
     }
 }

@@ -39,7 +39,7 @@ export default class UserChartPage extends React.Component<UserChartPageProps, {
 
     load(props: UserChartPageProps) {
 
-        const {userChartId, entity } = this.props.routeParams;
+        const {userChartId, entity } = this.props.routeParams!;
 
         const lite = entity == undefined ? undefined : parseLite(entity);
 

@@ -8,7 +8,7 @@ import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Frame
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, Lite, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
-import { CountSearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
+import { ValueSearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle, mlistItemContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'

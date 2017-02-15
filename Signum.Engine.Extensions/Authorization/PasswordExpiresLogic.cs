@@ -19,25 +19,16 @@ namespace Signum.Engine.Authorization
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<PasswordExpiresIntervalEntity>();
-
-                dqm.RegisterQuery(typeof(PasswordExpiresIntervalEntity), ()=>
-                    from e in Database.Query<PasswordExpiresIntervalEntity>()
-                     select new
-                     {
-                         Entity = e,
-                         e.Id,
-                         e.Enabled,
-                         e.Days,
-                         e.DaysWarning
-                     });
-
-                new Graph<PasswordExpiresIntervalEntity>.Execute(PasswordExpiresIntervalOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (pei, _) => { },
-                }.Register();
+                sb.Include<PasswordExpiresIntervalEntity>()
+                    .WithSave(PasswordExpiresIntervalOperation.Save)
+                    .WithQuery(dqm, e => new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.Enabled,
+                        e.Days,
+                        e.DaysWarning
+                    });
 
                 AuthLogic.UserLogingIn += (u =>
                 {

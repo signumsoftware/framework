@@ -83,25 +83,22 @@ namespace Signum.Engine.Mailing
 
                 GetSmtpConfiguration = getSmtpConfiguration;
 
-                sb.Include<EmailTemplateEntity>();       
-
-                EmailTemplatesLazy = sb.GlobalLazy(() => Database.Query<EmailTemplateEntity>()
-                    .ToDictionary(et => et.ToLite()), new InvalidateWith(typeof(EmailTemplateEntity)));
-
-                SystemEmailLogic.Start(sb, dqm);
-                EmailMasterTemplateLogic.Start(sb, dqm);
-
-                dqm.RegisterQuery(typeof(EmailTemplateEntity), () =>
-                    from t in Database.Query<EmailTemplateEntity>()
-                    select new
+                sb.Include<EmailTemplateEntity>()
+                    .WithQuery(dqm, t => new
                     {
                         Entity = t,
                         t.Id,
                         t.Name,
                         Active = t.IsActiveNow(),
                         t.IsBodyHtml
-                    });
+                    });       
 
+                EmailTemplatesLazy = sb.GlobalLazy(() => Database.Query<EmailTemplateEntity>()
+                    .ToDictionary(et => et.ToLite()), new InvalidateWith(typeof(EmailTemplateEntity)));
+
+                SystemEmailLogic.Start(sb, dqm);
+                EmailMasterTemplateLogic.Start(sb, dqm);
+                
                 sb.Schema.EntityEvents<EmailTemplateEntity>().PreSaving += new PreSavingEventHandler<EmailTemplateEntity>(EmailTemplate_PreSaving);
                 sb.Schema.EntityEvents<EmailTemplateEntity>().Retrieved += EmailTemplateLogic_Retrieved;
 
@@ -174,7 +171,7 @@ namespace Signum.Engine.Mailing
                 try
                 {
                     string errorMessage;
-                    message.TextParsedNode = ParseTemplate(message.Template, message.Text, out errorMessage);
+                    message.TextParsedNode = ParseTemplate((EmailTemplateEntity)message.GetParentEntity(), message.Text, out errorMessage);
                     return errorMessage.DefaultText(null);
                 }
                 catch (Exception ex)
@@ -193,7 +190,7 @@ namespace Signum.Engine.Mailing
                 try
                 {
                     string errorMessage;
-                    message.SubjectParsedNode = ParseTemplate(message.template, message.Subject, out errorMessage);
+                    message.SubjectParsedNode = ParseTemplate((EmailTemplateEntity)message.GetParentEntity(), message.Subject, out errorMessage);
                     return errorMessage.DefaultText(null);
                 }
                 catch (Exception ex)

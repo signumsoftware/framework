@@ -23,11 +23,8 @@ namespace Signum.Engine.Authorization
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<ResetPasswordRequestEntity>();
-
-                dqm.RegisterQuery(typeof(ResetPasswordRequestEntity), () =>
-                    from e in Database.Query<ResetPasswordRequestEntity>()
-                    select new
+                sb.Include<ResetPasswordRequestEntity>()
+                    .WithQuery(dqm, e => new
                     {
                         Entity = e,
                         e.Id,
@@ -80,10 +77,10 @@ namespace Signum.Engine.Authorization
     {
         public string Url;
 
-        public ResetPasswordRequestMail(ResetPasswordRequestEntity entity) : this(entity, "http://wwww.tesurl.com") 
+        public ResetPasswordRequestMail(ResetPasswordRequestEntity entity) : this(entity, "http://wwww.tesurl.com")
         { }
 
-        public ResetPasswordRequestMail(ResetPasswordRequestEntity entity, string url) :base(entity)
+        public ResetPasswordRequestMail(ResetPasswordRequestEntity entity, string url) : base(entity)
         {
             this.Url = url;
         }

@@ -7,7 +7,7 @@ import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity,
 export default class ChartTable extends React.Component<{ resultTable: ResultTable, chartRequest: ChartRequest, onRedraw: () => void }, void> {
 
 
-    handleHeaderClick = (e: React.MouseEvent) => {
+    handleHeaderClick = (e: React.MouseEvent<any>) => {
 
         const tokenStr = (e.currentTarget as HTMLElement).getAttribute("data-column-name");
 
@@ -68,9 +68,9 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
                     {
                         resultTable.rows.map((row, i) =>
                             <tr key={i}>
-                                { !chartRequest.groupResults && <td>{ ((qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row)).last("EntityFormatRules").formatter)(row, resultTable.columns) }</td> }
-                                { columns.map((c, j) =>
-                                    <td key={j} style={{ textAlign: c.cellFormatter && c.cellFormatter.textAllign }}>
+                                {!chartRequest.groupResults && <td>{((qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row)).last("EntityFormatRules").formatter)(row, resultTable.columns, undefined)}</td>}
+                                {columns.map((c, j) =>
+                                    <td key={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
                                         {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex]) }
                                     </td>)
                                 }

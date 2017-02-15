@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 import * as numbro from 'numbro'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import EntityLink from '../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
-import {CountSearchControl, SearchControl } from '../../../Framework/Signum.React/Scripts/Search'
+import {ValueSearchControl, SearchControl } from '../../../Framework/Signum.React/Scripts/Search'
 import { QueryDescription, SubTokensOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -27,11 +27,13 @@ export default class ProcessPanelPage extends React.Component<ProcessPanelProps,
             .then(s => this.setState(s));
     }
 
-    handleStop = (e: React.MouseEvent) => {
+    handleStop = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
         API.stop().then(() => this.loadState()).done();
     }
 
-    handleStart = (e: React.MouseEvent) => {
+    handleStart = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
         API.start().then(() => this.loadState()).done();
     }
 

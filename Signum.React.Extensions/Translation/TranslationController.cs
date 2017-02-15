@@ -112,8 +112,10 @@ namespace Signum.React.Translation
                  {
                      cultures = g.ToDictionary(a => a.culture)
                  }))
-                 .ToDictionary("types");
+                 .ToDictionaryEx("types");
 
+
+            types.ToList().ForEach(lt => lt.Value.FixMembers(defaultCulture));
 
             if (filter.HasText())
             {
@@ -128,7 +130,7 @@ namespace Signum.React.Translation
                     var allMembers = v.cultures.Values.SelectMany(a => a.members.Keys).Distinct().ToList();
 
                     var filteredMembers = allMembers.Where(m => m.Contains(filter, StringComparison.InvariantCultureIgnoreCase) ||
-                    v.cultures.Values.Any(lt => lt.members.TryGetC(m)?.description.Contains(filter, StringComparison.InvariantCultureIgnoreCase) ?? false))
+                    v.cultures.Values.Any(lt => lt.members.GetOrThrow(m).description?.Contains(filter, StringComparison.InvariantCultureIgnoreCase) ?? false))
                     .ToList();
 
                     if (filteredMembers.Count == 0)
@@ -253,6 +255,19 @@ namespace Signum.React.Translation
                 hasMembers = options.IsSet(DescriptionOptions.Members);
                 hasGender = options.IsSet(DescriptionOptions.Gender);
             }
+
+            internal void FixMembers(CultureInfo defaultCulture)
+            {
+                if (this.hasMembers)
+                {
+                    var members = cultures[defaultCulture.Name].members.Keys;
+
+                    foreach (var locType in cultures.Where(kvp => kvp.Key != defaultCulture.Name).Select(kvp => kvp.Value))
+                    {
+                        locType.members = members.ToDictionary(m => m, m => locType.members.TryGetC(m) ?? new LocalizedMemberTS { name = m });
+                    }
+                }
+            }
         }
 
         public class LocalizedTypeTS
@@ -266,6 +281,7 @@ namespace Signum.React.Translation
         {
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string gender;
+            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string description;
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string translatedDescription;

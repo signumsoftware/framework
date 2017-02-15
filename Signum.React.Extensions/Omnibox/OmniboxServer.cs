@@ -25,7 +25,6 @@ namespace Signum.React.Omnibox
 {
     public static class OmniboxServer
     {
-        public static Func<object, bool> IsFindable;
         public static Func<Type, bool> IsNavigable;
 
         public static void Start(HttpConfiguration config, params IOmniboxResultGenerator[] generators)
@@ -58,7 +57,7 @@ namespace Signum.React.Omnibox
 
         public override bool AllowedQuery(object queryName)
         {
-            return OmniboxServer.IsFindable.GetInvocationListTyped().All(f => f(queryName));
+            return DynamicQueryManager.Current.QueryAllowed(queryName);
         }
 
         public override Lite<Entity> RetrieveLite(Type type, PrimaryKey id)

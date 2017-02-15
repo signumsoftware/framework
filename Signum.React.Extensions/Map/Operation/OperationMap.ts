@@ -309,18 +309,18 @@ export class OperationMapD3 {
 
         this.link.attr("d", l => this.getPathExpression(l));
 
-        this.statesGroup.attr("transform", d => "translate(" + (d.x - d.width / 2) + ", " + (d.y - d.height / 2) + ")");
-        this.operationsGroup.attr("transform", d => "translate(" + (d.x - d.width / 2) + ", " + (d.y - d.height / 2) + ")");
+        this.statesGroup.attr("transform", d => "translate(" + (d.x! - d.width / 2) + ", " + (d.y! - d.height / 2) + ")");
+        this.operationsGroup.attr("transform", d => "translate(" + (d.x! - d.width / 2) + ", " + (d.y! - d.height / 2) + ")");
 
     }
 
     getPathExpression(t: Transition) {
         if (t.fromState == t.toState) {
 
-            const dx = t.sourcePoint.x - t.operation.x;
-            const dy = t.sourcePoint.y - t.operation.y;
+            const dx = t.sourcePoint.x! - t.operation.x!;
+            const dy = t.sourcePoint.y! - t.operation.y!;
 
-            return `M${t.sourcePoint.x} ${t.sourcePoint.y} C ${t.operation.x - dy} ${t.operation.y + dx} ${t.operation.x + dy} ${t.operation.y - dx} ${t.targetPoint.x} ${t.targetPoint.y}`;
+            return `M${t.sourcePoint.x} ${t.sourcePoint.y} C ${t.operation.x! - dy} ${t.operation.y! + dx} ${t.operation.x! + dy} ${t.operation.y! - dx} ${t.targetPoint.x} ${t.targetPoint.y}`;
         }
 
 
@@ -332,18 +332,18 @@ export class OperationMapD3 {
         const fanInConstant = 0.05;
         this.map.states.forEach(d => {
             if (d.fanOut > 0)
-                d.y -= d.y * d.fanOut * fanInConstant * this.force.alpha();
+                d.y = d.y! + d.y! * d.fanOut * fanInConstant * this.force.alpha();
 
             if (d.fanIn > 0)
-                d.y += (this.height - d.y) * d.fanIn * fanInConstant * this.force.alpha();
+                d.y = d.y! + (this.height - d.y!) * d.fanIn * fanInConstant * this.force.alpha();
         });
     }
 
 
     gravity() {
         this.map.allNodes.forEach(n => {
-            n.nx += this.gravityDim(n.x!, 0, this.width);
-            n.ny += this.gravityDim(n.y!, 0, this.height);
+            n.nx = n.nx! + this.gravityDim(n.x!, 0, this.width);
+            n.ny = n.ny! + this.gravityDim(n.y!, 0, this.height);
         });
     }
 

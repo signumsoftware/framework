@@ -11,6 +11,7 @@ using System.IO;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities;
 using System.Globalization;
+using Signum.Entities;
 
 namespace Signum.Engine.Excel
 {
@@ -18,12 +19,12 @@ namespace Signum.Engine.Excel
     {
         public static string ToExcelDate(DateTime datetime)
         {
-            return (datetime.ToOADate()).ToString(CultureInfo.InvariantCulture); //Convert to Julean Format
+            return datetime.ToUserInterface().ToOADate().ToString(CultureInfo.InvariantCulture); //Convert to Julean Format
         }
 
         public static DateTime FromExcelDate(string datetime)
         {
-            return DateTime.FromOADate(double.Parse(datetime, CultureInfo.InstalledUICulture)); //Convert to Julean Format
+            return DateTime.FromOADate(double.Parse(datetime, CultureInfo.InstalledUICulture)).FromUserInterface(); //Convert to Julean Format
         }
 
         public static string ToExcelNumber(decimal number)

@@ -51,7 +51,7 @@ namespace Signum.Engine.Cache
 
         internal string CreatePartialInnerJoin(IColumn column)
         {
-            return "INNER JOIN {0} {1} ON {1}.{2}=".FormatWith(table.Name.ToString(), currentAlias.Name.SqlEscape(), column.Name);
+            return "INNER JOIN {0} {1} ON {1}.{2}=".FormatWith(table.Name.ToString(), currentAlias, column.Name);
         }
 
         internal Type GetColumnType(IColumn column)

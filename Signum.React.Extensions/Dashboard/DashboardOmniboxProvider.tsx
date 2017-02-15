@@ -35,7 +35,7 @@ export default class DashboardOmniboxProvider extends OmniboxProvider<DashboardO
         if (result.Dashboard == undefined)
             return undefined;
 
-        return Promise.resolve(Navigator.currentHistory.createHref("~/dashboard/" + result.Dashboard.id));
+        return Promise.resolve(DashboardClient.dashboardUrl(result.Dashboard));
     }
 
     toString(result: DashboardOmniboxResult) {

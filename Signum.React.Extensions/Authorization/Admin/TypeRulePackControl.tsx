@@ -90,11 +90,11 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                         </tr>
                     </thead>
                     <tbody>
-                        { ctx.mlistItemCtxs(a => a.rules).groupBy(a => a.value.resource.fullClassName!.tryBeforeLast(".") || "").orderBy(a => a.key).flatMap(gr => [
+                        {ctx.mlistItemCtxs(a => a.rules).groupBy(a => a.value.resource.namespace).orderBy(a => a.key).flatMap(gr => [
                             <tr key={gr.key} className="sf-auth-namespace">
                                 <td colSpan={10}><b>{gr.key}</b></td>
                             </tr>
-                        ].concat(gr.elements.orderBy(a => a.value.resource.fullClassName).flatMap(c => this.renderType(c)))) }
+                        ].concat(gr.elements.orderBy(a => a.value.resource.className).flatMap(c => this.renderType(c))))}
                     </tbody>
                 </table>
 
@@ -108,9 +108,9 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                 if (!tc)
                     return;
 
-                taac.conditions.push(TypeConditionRule.New(tcr => {
-                    tcr.typeCondition = tc!;
-                    tcr.allowed = "None";
+                taac.conditions.push(TypeConditionRule.New({
+                    typeCondition : tc!,
+                    allowed : "None"
                 }));
 
                 this.forceUpdate();
@@ -133,7 +133,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
 
         let fallback = Binding.create(ctx.value.allowed, a => a.fallback);
         return [
-            <tr key={ctx.value.resource.fullClassName!} className={ classes("sf-auth-type", ctx.value.allowed.conditions.length > 0 && "sf-auth-with-conditions") }>
+            <tr key={ctx.value.resource.namespace + "." + ctx.value.resource.className} className={classes("sf-auth-type", ctx.value.allowed.conditions.length > 0 && "sf-auth-with-conditions")}>
                 <td>
                     { remaining.length > 0 ? <a className="fa fa-plus-circle sf-condition-icon" aria-hidden="true" onClick={() => this.handleAddConditionClick(remaining, ctx.value.allowed) }></a> :
                         <i className="fa fa-circle sf-placeholder-icon" aria-hidden="true"></i> }
@@ -168,7 +168,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
         ].concat(ctx.value.allowed!.conditions!.map(c => {
             let b = Binding.create(c, ca => ca.allowed);
             return (
-                <tr key={ctx.value.resource.fullClassName + "_" + c.typeCondition.id} className="sf-auth-condition">
+                <tr key={ctx.value.resource.namespace + "." + ctx.value.resource.className + "_" + c.typeCondition.id} className= "sf-auth-condition" >
                     <td>
                         &nbsp; &nbsp;
                         <a className="fa fa-minus-circle sf-condition-icon" aria-hidden="true" onClick={() => this.handleRemoveConditionClick(ctx.value.allowed, c) }></a>
@@ -281,7 +281,7 @@ function isActive(allowed: TypeAllowed | null, basicAllowed: TypeAllowedBasic) {
 }
 
 
-function select(current: TypeAllowed | null, basicAllowed: TypeAllowedBasic, e: React.MouseEvent) {
+function select(current: TypeAllowed | null, basicAllowed: TypeAllowedBasic, e: React.MouseEvent<any>) {
     if (!e.shiftKey || current == null)
         return basicAllowed as TypeAllowedBasic;
 

@@ -44,6 +44,13 @@ namespace Signum.Engine.Cache
 
         public static bool DropStaleServices = true;
 
+        public static FluentInclude<T> WithCache<T>(this FluentInclude<T> fi)
+          where T : Entity
+        {
+            CacheLogic.TryCacheTable(fi.SchemaBuilder, typeof(T));
+            return fi;
+        }
+
         public static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null, null)));
@@ -465,7 +472,7 @@ namespace Signum.Engine.Cache
 
             public override void Load()
             {
-                cachedTable.LoadAll();
+                LoadAllConnectedTypes(typeof(T));
             }
 
             public void ForceReset()
@@ -525,6 +532,7 @@ namespace Signum.Engine.Cache
         static Dictionary<Type, ICacheLogicController> controllers = new Dictionary<Type, ICacheLogicController>(); //CachePack
 
         static DirectedGraph<Type> inverseDependencies = new DirectedGraph<Type>();
+        static DirectedGraph<Type> dependencies = new DirectedGraph<Type>();
 
         public static bool GloballyDisabled { get; set; }
 
@@ -615,12 +623,14 @@ namespace Signum.Engine.Cache
                 .Where(a => !a.Value.IsEnum)
                 .Select(t => t.Key.Type).ToList();
 
+            dependencies.Add(type);
             inverseDependencies.Add(type);
 
             foreach (var rType in relatedTypes)
             {
                 TryCacheTable(sb, rType);
 
+                dependencies.Add(type, rType);
                 inverseDependencies.Add(rType, type);
             }
         }
@@ -633,6 +643,19 @@ namespace Signum.Engine.Cache
                 throw new InvalidOperationException("{0} is just semi cached".FormatWith(type.TypeName()));
 
             return controller;
+        }
+
+
+        internal static void LoadAllConnectedTypes(Type type)
+        {
+            var connected = dependencies.IndirectlyRelatedTo(type, includeInitialNode: true);
+
+            foreach (var stype in connected)
+            {
+                var controller = controllers[stype];
+                if (controller != null)
+                    controller.CachedTable.LoadAll();
+            }
         }
 
         internal static void NotifyInvalidateAllConnectedTypes(Type type)

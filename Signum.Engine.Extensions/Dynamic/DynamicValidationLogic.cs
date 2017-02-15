@@ -59,6 +59,8 @@ namespace Signum.Engine.Dynamic
                     .GroupToDictionary(a => a.PropertyRoute.PropertyInfo),
                         new InvalidateWith(typeof(DynamicValidationEntity)));
 
+                DynamicValidationEntity.GetMainType = dve => dve.PropertyRoute?.ToPropertyRoute().Parent.Type;
+
                 sb.Schema.Initializing += () => { initialized = true; };
 
                 Validator.GlobalValidation += DynamicValidation;

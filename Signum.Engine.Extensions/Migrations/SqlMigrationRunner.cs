@@ -47,7 +47,7 @@ namespace Signum.Engine.Migrations
 
             var executedMigrations = Database.Query<SqlMigrationEntity>().Select(m => m.VersionNumber).OrderBy().ToList().Where(d => first == null || first.Version.CompareTo(d) <= 0).ToList();
 
-            var dic = migrations.ToDictionary(a => a.Version, "Migrations in folder");
+            var dic = migrations.ToDictionaryEx(a => a.Version, "Migrations in folder");
 
             foreach (var ver in executedMigrations)
             {
@@ -172,11 +172,11 @@ namespace Signum.Engine.Migrations
 
                 try
                 {
-                    foreach (var item in migrations.AsEnumerable().Where(a => !a.IsExecuted))
+                    foreach (var mi in migrations.AsEnumerable().Where(a => !a.IsExecuted))
                     {
-                        Draw(migrations, item);
+                        Draw(migrations, mi);
 
-                        Execute(item, autoRun);
+                        Execute(mi);
                     }
 
                     return true;
@@ -194,39 +194,55 @@ namespace Signum.Engine.Migrations
 
         public static int Timeout = 5 * 60; 
 
-        private static void Execute(MigrationInfo mi, bool autoRun)
+        private static void Execute(MigrationInfo mi)
         {
             string title = mi.Version + (mi.Comment.HasText() ? " ({0})".FormatWith(mi.Comment) : null);
-
-            string databaseName = Connector.Current.DatabaseName();
-
-            using (Connector.CommandTimeoutScope(Timeout))
+            string text = File.ReadAllText(mi.FileName);
+            
             using (Transaction tr = new Transaction())
             {
-                string text = File.ReadAllText(mi.FileName);
+                ExecuteScript(title, text);
 
-                text = text.Replace(DatabaseNameReplacement, databaseName);
+                SqlMigrationEntity m = new SqlMigrationEntity
+                {
+                    VersionNumber = mi.Version,
+                }.Save();
 
-                var parts = Regex.Split(text, " *GO *(\r?\n|$)", RegexOptions.IgnoreCase).Where(a => !string.IsNullOrWhiteSpace(a)).ToArray();
+                mi.IsExecuted = true;
+
+                tr.Commit();
+            }
+        }
+
+        public static void ExecuteScript(string title, string script)
+        {
+            using (Connector.CommandTimeoutScope(Timeout))
+            {
+                string databaseName = Connector.Current.DatabaseName();
+
+                script = script.Replace(DatabaseNameReplacement, databaseName);
+
+                var parts = Regex.Split(script, " *GO *(\r?\n|$)", RegexOptions.IgnoreCase).Where(a => !string.IsNullOrWhiteSpace(a)).ToArray();
 
                 int pos = 0;
 
                 try
-                {   
+                {
                     for (pos = 0; pos < parts.Length; pos++)
                     {
-                        if (autoRun)
-                            Executor.ExecuteNonQuery(parts[pos]);
-                        else
-                            SafeConsole.WaitExecute("Executing {0} [{1}/{2}]".FormatWith(title, pos + 1, parts.Length), () => Executor.ExecuteNonQuery(parts[pos]));
+                        SafeConsole.WaitExecute("Executing {0} [{1}/{2}]".FormatWith(title, pos + 1, parts.Length), () => Executor.ExecuteNonQuery(parts[pos]));
                     }
                 }
-                catch (SqlException e)
+                catch (Exception ex)
                 {
+                    var e = ex as SqlException ?? ex.InnerException as SqlException;
+                    if (e == null)
+                        throw;
+
                     Console.WriteLine();
                     Console.WriteLine();
 
-                    var list = text.Lines();
+                    var list = script.Lines();
 
                     var lineNumer = (e.LineNumber - 1) + pos + parts.Take(pos).Sum(a => a.Lines().Length);
 
@@ -255,15 +271,6 @@ namespace Signum.Engine.Migrations
 
                     throw new MigrationException();
                 }
-
-                SqlMigrationEntity m = new SqlMigrationEntity
-                {
-                    VersionNumber = mi.Version,
-                }.Save();
-
-                mi.IsExecuted = true;
-
-                tr.Commit();
             }
         }
 

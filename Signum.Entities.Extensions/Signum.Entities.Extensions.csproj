@@ -114,10 +114,21 @@
     <Compile Include="Dashboard\DashboardOmniboxResultGenerator.cs" />
     <Compile Include="DiffLog\DiffLogMixin.cs" />
     <Compile Include="DiffLog\Services.cs" />
+    <Compile Include="Dynamic\DynamicCode.cs" />
+    <Compile Include="Dynamic\Dynamic.cs" />
+    <Compile Include="Dynamic\DynamicMixinConnection.cs" />
+    <Compile Include="Toolbar\Toolbar.cs" />
+    <Compile Include="Dynamic\DynamicSqlMigration.cs" />
+    <Compile Include="Dynamic\DynamicType.cs" />
+    <Compile Include="Dynamic\DynamicExpression.cs" />
+    <Compile Include="Dynamic\DynamicTypeConditionSymbol.cs" />
+    <Compile Include="Dynamic\DynamicTypeCondition.cs" />
     <Compile Include="Dynamic\DynamicView.cs" />
     <Compile Include="Dynamic\DynamicValidation.cs" />
     <Compile Include="Dynamic\EvalEntity.cs" />
     <Compile Include="Excel\ExcelAttachmentEntity.cs" />
+    <Compile Include="Excel\ExcelReportEntity.cs" />
+    <Compile Include="Excel\IExcelReportServer.cs" />
     <Compile Include="Files\EmbeddedFile.cs" />
     <Compile Include="Files\FileUtils.cs" />
     <Compile Include="Help\AppendixHelp.cs" />
@@ -130,6 +141,8 @@
     <Compile Include="Help\QueryHelp.cs" />
     <Compile Include="Isolation\IIsolationServer.cs" />
     <Compile Include="Isolation\IsolationEntity.cs" />
+    <Compile Include="Printing\PrintLine.cs" />
+    <Compile Include="Printing\PrintPackages.cs" />
     <Compile Include="RestLog\RestLog.cs" />
     <Compile Include="Mailing\EmailMasterTemplate.cs" />
     <Compile Include="Mailing\SendEmailTask.cs" />
@@ -197,10 +210,8 @@
     <Compile Include="Profiler\ProfilerPermissions.cs" />
     <Compile Include="SMS\SMSCharacters.cs" />
     <Compile Include="UserQueries\IUserQueryServer.cs" />
-    <Compile Include="Excel\ExcelReportEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserAssets\FilterValueConverter.cs" />
-    <Compile Include="Excel\IExcelReportServer.cs" />
     <Compile Include="UserQueries\UserQueryEntity.cs" />
     <Compile Include="Scheduler\HolidayCalendarEntity.cs" />
     <Compile Include="Scheduler\ScheduledTaskEntity.cs" />
@@ -212,6 +223,19 @@
     <Compile Include="SMS\SMSPackages.cs" />
     <Compile Include="Word\WordTemplate.cs" />
     <Compile Include="Word\SystemWordTemplate.cs" />
+    <Compile Include="Workflow\Case.cs" />
+    <Compile Include="Workflow\CaseActivity.cs" />
+    <Compile Include="Workflow\CaseJunction.cs" />
+    <Compile Include="Workflow\CaseNotification.cs" />
+    <Compile Include="Workflow\Workflow.cs" />
+    <Compile Include="Workflow\WorkflowActivity.cs" />
+    <Compile Include="Workflow\WorkflowAction.cs" />
+    <Compile Include="Workflow\WorkflowCondition.cs" />
+    <Compile Include="Workflow\WorkflowConnection.cs" />
+    <Compile Include="Workflow\WorkflowEvent.cs" />
+    <Compile Include="Workflow\WorkflowGateway.cs" />
+    <Compile Include="Workflow\WorkflowLane.cs" />
+    <Compile Include="Workflow\WorkflowPool.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj">

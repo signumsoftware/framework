@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { Route } from 'react-router'
-import { ModifiableEntity, EntityPack, is } from '../../../Framework/Signum.React/Scripts/Signum.Entities';
+import { ModifiableEntity, EntityPack, is, OperationSymbol } from '../../../Framework/Signum.React/Scripts/Signum.Entities';
 import { ifError } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile, ServiceError } from '../../../Framework/Signum.React/Scripts/Services';
 import * as Services from '../../../Framework/Signum.React/Scripts/Services';
@@ -71,7 +71,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     }
 
     if (options.operations) {
-        Operations.isOperationAllowedEvent.push(onOperationAuthorized);
+        Operations.isOperationAllowedEvent.push(isOperationAuthorized);
 
         Navigator.addSettings(new EntitySettings(OperationRulePack, e => new ViewPromise(resolve => require(['./Admin/OperationRulePackControl'], resolve))));
     }
@@ -102,9 +102,13 @@ export function queryIsFindable(queryKey: string) {
     return getQueryInfo(queryKey).queryAllowed;
 }
 
-export function onOperationAuthorized(oi: OperationInfo) {
-    const member = getTypeInfo(oi.key.before(".")).members[oi.key.after(".")];
-    return member.operationAllowed;
+function isOperationAuthorized(operation: OperationInfo | OperationSymbol | string): boolean {
+    var key = (operation as OperationInfo | OperationSymbol).key || operation as string;
+    const member = getTypeInfo(key.before(".")).members[key.after(".")];
+    if (member == null)
+        throw new Error(`Operation ${key} not found, consider Synchronize`);
+
+    return  member.operationAllowed;
 }
 
 export function taskAuthorizeProperties(lineBase: LineBase<LineBaseProps, LineBaseProps>, state: LineBaseProps) {
@@ -142,7 +146,7 @@ export function navigatorIsViewable(typeName: string, entityPack?: EntityPack<Mo
     const ti = getTypeInfo(typeName);
 
     if (ti == undefined)
-        return false;
+        return true;
 
     if (entityPack && entityPack.typeAllowed)
         return entityPack.typeAllowed != "None";
@@ -160,16 +164,16 @@ export function currentUser(): UserEntity {
     return Navigator.currentUser as UserEntity;
 }
 
-export const onCurrentUserChanged: Array<(newUser: UserEntity | undefined) => void> = [];
+export const onCurrentUserChanged: Array<(newUser: UserEntity | undefined, avoidReRender?: boolean) => void> = [];
 
-export function setCurrentUser(user: UserEntity | undefined) {
+export function setCurrentUser(user: UserEntity | undefined, avoidReRender?: boolean) {
 
     const changed = !is(Navigator.currentUser, user, true);
 
     Navigator.setCurrentUser(user);
 
     if (changed)
-        onCurrentUserChanged.forEach(f => f(user));
+        onCurrentUserChanged.forEach(f => f(user, avoidReRender));
 }
 
 export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Promise<Response>): Promise<Response> {
@@ -194,7 +198,7 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
                 return Api.refreshToken(token).then(resp => {
                     setAuthToken(resp.token);
                     setCurrentUser(resp.userEntity)
-
+                    
                     options.headers!["Authorization"] = "Bearer " + resp.token;
 
                     return makeCall();
@@ -230,6 +234,7 @@ export function autoLogin(): Promise<UserEntity> {
     if (getAuthToken())
         return Api.fetchCurrentUser().then(u => {
             setCurrentUser(u);
+            Navigator.resetUI();
             return u;
         });
 
@@ -239,6 +244,7 @@ export function autoLogin(): Promise<UserEntity> {
                 Api.fetchCurrentUser()
                     .then(u => {
                         setCurrentUser(u);
+                        Navigator.resetUI();
                         resolve(u);
                     });
             } else {
@@ -250,6 +256,7 @@ export function autoLogin(): Promise<UserEntity> {
                         } else {
                             setAuthToken(respo.token);
                             setCurrentUser(respo.userEntity);
+                            Navigator.resetUI();
                             resolve(respo.userEntity);
                         }
                     });
@@ -261,9 +268,9 @@ export function autoLogin(): Promise<UserEntity> {
 export function logout() {
 
     Api.logout().then(() => {
-        Options.onLogout();
         setAuthToken(undefined);
         setCurrentUser(undefined);
+        Options.onLogout();
     }).done();
 }
 
@@ -272,19 +279,21 @@ export namespace Options {
         Navigator.currentHistory.push("~/");
     }
 
-    export let onLogin = () => {
-        Navigator.currentHistory.push("~/");
+    export let onLogin = (url?: string) => {
+        Navigator.currentHistory.push(url || "~/");
     }
 }
 
-export function isPermissionAuthorized(permission: PermissionSymbol) {
-    const member = getTypeInfo(permission.key.before(".")).members[permission.key.after(".")];
+export function isPermissionAuthorized(permission: PermissionSymbol | string) {
+    var key = (permission as PermissionSymbol).key || permission as string;
+    const member = getTypeInfo(key.before(".")).members[key.after(".")];
     return member.permissionAllowed;
 }
 
-export function asserPermissionAuthorized(permission: PermissionSymbol) {
-    if (!isPermissionAuthorized(permission))
-        throw new Error(`Permission ${permission.key} is denied`);
+export function asserPermissionAuthorized(permission: PermissionSymbol | string) {
+    var key = (permission as PermissionSymbol).key || permission as string;
+    if (!isPermissionAuthorized(key))
+        throw new Error(`Permission ${key} is denied`);
 }
 
 export module Api {

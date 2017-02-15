@@ -50,9 +50,6 @@ namespace Signum.Engine.Authorization
             get { return anonymousUserLazy.Value; }
         }
 
-
-        
-
         static ResetLazy<DirectedGraph<Lite<RoleEntity>>> roles;
 
         class RoleData
@@ -128,10 +125,8 @@ namespace Signum.Engine.Authorization
                         r.Name,
                         Refered = rc,
                     });
-
-                dqm.RegisterQuery(typeof(UserEntity), () =>
-                    from e in Database.Query<UserEntity>()
-                    select new
+                sb.Include<UserEntity>()
+                    .WithQuery(dqm, e => new
                     {
                         Entity = e,
                         e.Id,
@@ -140,10 +135,8 @@ namespace Signum.Engine.Authorization
                         e.Role,
                         e.State,
                     });
-
-                UserGraph.Register();
-
-             
+                
+                UserGraph.Register();             
             }
         }
 
@@ -329,11 +322,11 @@ namespace Signum.Engine.Authorization
 
         public static void StartAllModules(SchemaBuilder sb, DynamicQueryManager dqm)
         {
-            TypeAuthLogic.Start(sb);
+            TypeAuthLogic.Start(sb, dqm);
             PropertyAuthLogic.Start(sb);
             QueryAuthLogic.Start(sb, dqm);
             OperationAuthLogic.Start(sb);
-            PermissionAuthLogic.Start(sb);
+            PermissionAuthLogic.Start(sb, dqm);
         }
 
         public static HashSet<Lite<RoleEntity>> CurrentRoles()

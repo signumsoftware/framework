@@ -1,11 +1,13 @@
 ﻿import * as React from 'react'
 import { Link } from 'react-router'
+import * as d3 from 'd3'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
+import { } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
-import {CountSearchControl, SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
+import {ValueSearchControl, SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -187,7 +189,7 @@ export class HeavyProfilerDetailsD3 extends React.Component<{entries: HeavyProfi
 
     chartContainer:HTMLDivElement;
 
-    handleWeel = (e: React.WheelEvent)=>{
+    handleWeel = (e: React.WheelEvent<any>)=>{
 
         e.preventDefault();
 

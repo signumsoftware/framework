@@ -33,11 +33,8 @@ namespace Signum.Entities.Dashboard
         [ImplementedBy(
             typeof(UserChartPartEntity),
             typeof(UserQueryPartEntity),
-            typeof(CountSearchControlPartEntity),
-            typeof(LinkListPartEntity),
-            typeof(OmniboxPanelPartEntity),
-            typeof(LinkPartEntity),
-            typeof(UserQueryCountPartEntity))]
+            typeof(ValueUserQueryListPartEntity),
+            typeof(LinkListPartEntity))]
         public IPartEntity Content { get; set; }
 
         public override string ToString()
@@ -213,10 +210,10 @@ namespace Signum.Entities.Dashboard
     }
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
-    public class CountSearchControlPartEntity : Entity, IPartEntity
+    public class ValueUserQueryListPartEntity : Entity, IPartEntity
     {
         [NotNullable]
-        public MList<CountUserQueryElementEntity> UserQueries { get; set; } = new MList<CountUserQueryElementEntity>();
+        public MList<ValueUserQueryElementEntity> UserQueries { get; set; } = new MList<ValueUserQueryElementEntity>();
 
         public override string ToString()
         {
@@ -230,7 +227,7 @@ namespace Signum.Entities.Dashboard
 
         public IPartEntity Clone()
         {
-            return new CountSearchControlPartEntity
+            return new ValueUserQueryListPartEntity
             {
                 UserQueries = this.UserQueries.Select(e => e.Clone()).ToMList(),
             };
@@ -238,7 +235,7 @@ namespace Signum.Entities.Dashboard
 
         public XElement ToXml(IToXmlContext ctx)
         {
-            return new XElement("CountSearchControlPart",
+            return new XElement("ValueUserQueryListPart",
                 UserQueries.Select(cuqe => cuqe.ToXml(ctx)));
         }
 
@@ -249,7 +246,7 @@ namespace Signum.Entities.Dashboard
     }
 
     [Serializable]
-    public class CountUserQueryElementEntity : EmbeddedEntity
+    public class ValueUserQueryElementEntity : EmbeddedEntity
     {
         string label;
         public string Label
@@ -263,9 +260,9 @@ namespace Signum.Entities.Dashboard
 
         public string Href { get; set; }
 
-        public CountUserQueryElementEntity Clone()
+        public ValueUserQueryElementEntity Clone()
         {
-            return new CountUserQueryElementEntity
+            return new ValueUserQueryElementEntity
             {
                 Href = this.Href,
                 Label = this.Label,
@@ -275,7 +272,7 @@ namespace Signum.Entities.Dashboard
 
         internal XElement ToXml(IToXmlContext ctx)
         {
-            return new XElement("CountUserQueryElement",
+            return new XElement("ValueUserQueryElement",
                 Label == null ? null : new XAttribute("Label", Label),
                 Href == null ? null : new XAttribute("Href", Href),
                 new XAttribute("UserQuery", ctx.Include(UserQuery)));
@@ -323,88 +320,6 @@ namespace Signum.Entities.Dashboard
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
             Links.Synchronize(element.Elements().ToList(), (le, x) => le.FromXml(x));
-        }
-    }
-
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
-    public class LinkPartEntity : Entity, IPartEntity
-    {
-        public LinkElementEntity Link { get; set; }
-
-        public override string ToString()
-        {
-            return "{0} ({1})".FormatWith(Link.Label, Link.Link);
-        }
-
-        public bool RequiresTitle
-        {
-            get { return true; }
-        }
-
-        public IPartEntity Clone()
-        {
-            return new LinkPartEntity
-            {
-                Link = this.Link.Clone()
-            };
-        }
-
-        public XElement ToXml(IToXmlContext ctx)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void FromXml(XElement element, IFromXmlContext ctx)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
-    public class UserQueryCountPartEntity : Entity, IPartEntity
-    {
-        public bool RequiresTitle { get; set; }
-
-        public Lite<UserQueryEntity> UserQuery { get; set; }
-
-        public string IconClass { get; set; }
-
-        public bool ShowName { get; set; }
-
-        public IPartEntity Clone()
-        {
-            return new UserQueryPartEntity();
-        }
-
-        public XElement ToXml(IToXmlContext ctx)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void FromXml(XElement element, IFromXmlContext ctx)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
-    public class OmniboxPanelPartEntity : Entity, IPartEntity
-    {
-        public bool RequiresTitle { get; set; }
-
-        public IPartEntity Clone()
-        {
-            return new OmniboxPanelPartEntity();
-        }
-
-        public XElement ToXml(IToXmlContext ctx)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void FromXml(XElement element, IFromXmlContext ctx)
-        {
-            throw new NotImplementedException();
         }
     }
 

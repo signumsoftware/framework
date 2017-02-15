@@ -60,7 +60,8 @@ namespace Signum.React.Profiler
         {
             ProfilerPermission.ViewHeavyProfiler.AssertAuthorized();
 
-            return HeavyProfiler.Entries.Select(e => new HeavyProfofilerEntryTS(e, false)).ToList();
+            lock (HeavyProfiler.Entries)
+                return HeavyProfiler.Entries.Select(e => new HeavyProfofilerEntryTS(e, false)).ToList();
         }
 
         [Route("api/profilerHeavy/details/{fullIndex}"), HttpGet]

@@ -25,21 +25,17 @@ namespace Signum.Engine.Scheduler
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<ApplicationEventLogEntity>();
-                dqm.RegisterQuery(typeof(ApplicationEventLogEntity), () =>
-                   from s in Database.Query<ApplicationEventLogEntity>()
-                   select new
-                   {
-                       Entity = s,
-                       s.Id,
-                       s.MachineName,
-                       s.GlobalEvent,
-                       s.Date,
-                   });
-
-
+                sb.Include<ApplicationEventLogEntity>()
+                    .WithQuery(dqm, s => new
+                    {
+                        Entity = s,
+                        s.Id,
+                        s.MachineName,
+                        s.GlobalEvent,
+                        s.Date,
+                    });
+                
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
-
             }
         }
 

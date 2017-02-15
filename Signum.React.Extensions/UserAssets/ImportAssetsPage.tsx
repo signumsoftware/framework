@@ -4,7 +4,7 @@ import * as numbro from 'numbro'
 import * as moment from 'moment'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
-import { CountSearchControl, SearchControl } from '../../../Framework/Signum.React/Scripts/Search'
+import { ValueSearchControl, SearchControl } from '../../../Framework/Signum.React/Scripts/Search'
 import EntityLink from '../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
 import { QueryDescription, SubTokensOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfo } from '../../../Framework/Signum.React/Scripts/Reflection'
@@ -20,7 +20,7 @@ interface ImportAssetsPageState {
     file?: API.FileUpload;
     model?: UserAssetPreviewModel;
     success?: boolean;
-    fileVer?: number;
+    fileVer: number;
 }
 
 
@@ -46,7 +46,7 @@ export default class ImportAssetsPage extends React.Component<ImportAssetsPagePr
         );
     }
 
-    handleInputChange = (e: React.FormEvent) => {
+    handleInputChange = (e: React.FormEvent<any>) => {
         let f = (e.currentTarget as HTMLInputElement).files![0];
         let fileReader = new FileReader();
         fileReader.onerror = e => { setTimeout(() => { throw (e as any).error; }, 0); };
@@ -85,7 +85,7 @@ export default class ImportAssetsPage extends React.Component<ImportAssetsPagePr
     }
 
     renderModel() {
-        const tc = TypeContext.root(UserAssetPreviewModel, this.state.model!, undefined);
+        const tc = TypeContext.root(this.state.model!, undefined);
 
         return (
             <div>

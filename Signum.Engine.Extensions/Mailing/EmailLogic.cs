@@ -54,7 +54,7 @@ namespace Signum.Engine.Mailing
 
         public static Func<EmailMessageEntity, SmtpClient> GetSmtpClient;
         
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailConfigurationEntity> getConfiguration, Func<EmailTemplateEntity, SmtpConfigurationEntity> getSmtpConfiguration,  Func<EmailMessageEntity, SmtpClient> getSmtpClient = null, FileTypeAlgorithm attachment = null)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailConfigurationEntity> getConfiguration, Func<EmailTemplateEntity, SmtpConfigurationEntity> getSmtpConfiguration,  Func<EmailMessageEntity, SmtpClient> getSmtpClient = null, IFileTypeAlgorithm attachment = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {   
@@ -74,13 +74,8 @@ namespace Signum.Engine.Mailing
 
                 Schema.Current.WhenIncluded<ProcessEntity>(() => EmailPackageLogic.Start(sb, dqm));
 
-                sb.Include<EmailMessageEntity>();
-
-                PermissionAuthLogic.RegisterPermissions(AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel);
-
-                dqm.RegisterQuery(typeof(EmailMessageEntity), () =>
-                    from e in Database.Query<EmailMessageEntity>()
-                    select new
+                sb.Include<EmailMessageEntity>()
+                    .WithQuery(dqm, e => new
                     {
                         Entity = e,
                         e.Id,
@@ -93,6 +88,8 @@ namespace Signum.Engine.Mailing
                         e.Exception,
                     });
 
+                PermissionAuthLogic.RegisterPermissions(AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel);
+                
                 SenderManager = new EmailSenderManager();
 
                 EmailGraph.Register();
@@ -313,39 +310,6 @@ namespace Signum.Engine.Mailing
 
         public static Func<EmailMessageEntity, MailMessage> CustomCreateMailMessage;
 
-        public MailMessage CreateMailMessage(EmailMessageEntity email)
-        {
-            MailMessage message = new MailMessage()
-            {
-                From = email.From.ToMailAddress(),
-                Subject = email.Subject,
-                IsBodyHtml = email.IsBodyHtml,
-            };
-
-            AlternateView view = AlternateView.CreateAlternateViewFromString(email.Body, null, email.IsBodyHtml ? "text/html" : "text/plain");
-            view.LinkedResources.AddRange(email.Attachments
-                .Where(a => a.Type == EmailAttachmentType.LinkedResource)
-                .Select(a => new LinkedResource(a.File.FullPhysicalPath(), MimeMapping.GetMimeMapping(a.File.FileName))
-                {
-                    ContentId = a.ContentId,
-                }));
-
-            message.Attachments.AddRange(email.Attachments
-                .Where(a => a.Type == EmailAttachmentType.Attachment)
-                .Select(a => new Attachment(a.File.FullPhysicalPath(), MimeMapping.GetMimeMapping(a.File.FileName))
-                {
-                    ContentId = a.ContentId,
-                    Name = a.File.FileName,
-                }));
-
-            message.AlternateViews.Add(view);
-
-            message.To.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.To).Select(r => r.ToMailAddress()).ToList());
-            message.CC.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.Cc).Select(r => r.ToMailAddress()).ToList());
-            message.Bcc.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.Bcc).Select(r => r.ToMailAddress()).ToList());
-
-            return message;
-        }
 
         public virtual void Send(EmailMessageEntity email)
         {
@@ -361,10 +325,7 @@ namespace Signum.Engine.Mailing
 
                 try
                 {
-                    MailMessage message = CustomCreateMailMessage != null ? CustomCreateMailMessage(email) : CreateMailMessage(email);
-
-                    using (HeavyProfiler.Log("SMTP-Send"))
-                        EmailLogic.GetSmtpClient(email).Send(message);
+                    SendInternal(email);
 
                     email.State = EmailMessageState.Sent;
                     email.Sent = TimeZoneManager.Now;
@@ -392,6 +353,49 @@ namespace Signum.Engine.Mailing
                     throw;
                 }
             }
+        }
+
+        protected virtual void SendInternal(EmailMessageEntity email)
+        {
+            MailMessage message = CustomCreateMailMessage != null ? CustomCreateMailMessage(email) : CreateMailMessage(email);
+
+            using (HeavyProfiler.Log("SMTP-Send"))
+                EmailLogic.GetSmtpClient(email).Send(message);
+        }
+
+
+        protected virtual MailMessage CreateMailMessage(EmailMessageEntity email)
+        {
+            MailMessage message = new MailMessage()
+            {
+                From = email.From.ToMailAddress(),
+                Subject = email.Subject,
+                IsBodyHtml = email.IsBodyHtml,
+            };
+
+            AlternateView view = AlternateView.CreateAlternateViewFromString(email.Body, null, email.IsBodyHtml ? "text/html" : "text/plain");
+            view.LinkedResources.AddRange(email.Attachments
+                .Where(a => a.Type == EmailAttachmentType.LinkedResource)
+                .Select(a => new LinkedResource(a.File.OpenRead(), MimeMapping.GetMimeMapping(a.File.FileName))
+                {
+                    ContentId = a.ContentId,
+                }));
+
+            message.Attachments.AddRange(email.Attachments
+                .Where(a => a.Type == EmailAttachmentType.Attachment)
+                .Select(a => new Attachment(a.File.OpenRead(), MimeMapping.GetMimeMapping(a.File.FileName))
+                {
+                    ContentId = a.ContentId,
+                    Name = a.File.FileName,
+                }));
+
+            message.AlternateViews.Add(view);
+
+            message.To.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.To).Select(r => r.ToMailAddress()).ToList());
+            message.CC.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.Cc).Select(r => r.ToMailAddress()).ToList());
+            message.Bcc.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.Bcc).Select(r => r.ToMailAddress()).ToList());
+
+            return message;
         }
     }
 }

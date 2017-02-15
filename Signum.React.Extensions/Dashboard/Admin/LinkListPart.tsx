@@ -12,7 +12,7 @@ import FileLine, {FileTypeSymbol} from '../../Files/FileLine'
 import { LinkListPartEntity, LinkElementEntity} from '../Signum.Entities.Dashboard'
 
 
-export default class CountSearchControlPart extends React.Component<{ ctx: TypeContext<LinkListPartEntity> }, void> {
+export default class ValueSearchControlPart extends React.Component<{ ctx: TypeContext<LinkListPartEntity> }, void> {
 
     render() {
         const ctx = this.props.ctx.subCtx({ formGroupStyle: "SrOnly", placeholderLabels: true });

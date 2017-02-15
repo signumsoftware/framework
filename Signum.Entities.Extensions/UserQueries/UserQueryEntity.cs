@@ -1,20 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
+using Signum.Entities.UserAssets;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
-using System.Globalization;
-using System.Reflection;
-using System.Linq.Expressions;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
-using Signum.Entities.Authorization;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Xml.Linq;
-using Signum.Entities.UserAssets;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Entities.Dashboard;
 
 namespace Signum.Entities.UserQueries
 {
@@ -183,7 +179,7 @@ namespace Signum.Entities.UserQueries
         public static ExecuteSymbol<UserQueryEntity> Save;
         public static DeleteSymbol<UserQueryEntity> Delete;
     }
-    
+
 
     [Serializable]
     public class QueryOrderEntity : EmbeddedEntity

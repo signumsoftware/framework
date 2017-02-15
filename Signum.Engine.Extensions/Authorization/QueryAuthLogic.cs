@@ -32,7 +32,7 @@ namespace Signum.Engine.Authorization
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AuthLogic.AssertStarted(sb);
-                QueryLogic.Start(sb);
+                QueryLogic.Start(sb, dqm);
 
                 dqm.AllowQuery += new Func<object, bool>(dqm_AllowQuery);
 

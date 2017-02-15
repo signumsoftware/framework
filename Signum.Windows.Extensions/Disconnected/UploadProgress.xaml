@@ -7,7 +7,8 @@
         WindowStartupLocation="CenterOwner"
         WindowStyle="SingleBorderWindow"
         Title="Uploading database..." MinWidth="400" 
-        ResizeMode="NoResize">
+        ResizeMode="NoResize"
+        FlowDirection="{DynamicResource FlowDirection}">
     <StackPanel>
         <GroupBox Header="Uploading">
             <ProgressBar Height="20" x:Name="pbUploading"/>

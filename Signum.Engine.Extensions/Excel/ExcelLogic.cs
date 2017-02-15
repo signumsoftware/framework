@@ -31,12 +31,12 @@ namespace Signum.Engine.Excel
             {
                 if (excelReport)
                 {
-                    QueryLogic.Start(sb);
+                    QueryLogic.Start(sb, dqm);
 
-                    sb.Include<ExcelReportEntity>();
-                    dqm.RegisterQuery(typeof(ExcelReportEntity), () =>
-                        from s in Database.Query<ExcelReportEntity>()
-                        select new
+                    sb.Include<ExcelReportEntity>()
+                        .WithSave(ExcelReportOperation.Save)
+                        .WithDelete(ExcelReportOperation.Delete)
+                        .WithQuery(dqm, s => new
                         {
                             Entity = s,
                             s.Id,
@@ -44,19 +44,6 @@ namespace Signum.Engine.Excel
                             s.File.FileName,
                             s.DisplayName,
                         });
-
-                    new Graph<ExcelReportEntity>.Execute(ExcelReportOperation.Save)
-                    {
-                        AllowsNew = true,
-                        Lite = false,
-                        Execute = (er, _) => { }
-                    }.Register();
-
-                    new Graph<ExcelReportEntity>.Delete(ExcelReportOperation.Delete)
-                    {
-                        Lite = true,
-                        Delete = (er, _) => { er.Delete(); }
-                    }.Register();
                 }
             }
         }

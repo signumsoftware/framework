@@ -22,38 +22,25 @@ namespace Signum.Engine.Translation
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<TranslationReplacementEntity>();
+                sb.Include<TranslationReplacementEntity>()
+                    .WithSave(TranslationReplacementOperation.Save)
+                    .WithDelete(TranslationReplacementOperation.Delete)
+                    .WithQuery(dqm, e => new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.CultureInfo,
+                        e.WrongTranslation,
+                        e.RightTranslation,
+                    });
 
                 sb.AddUniqueIndex<TranslationReplacementEntity>(tr => new { tr.CultureInfo, tr.WrongTranslation });
-
-                dqm.RegisterQuery(typeof(TranslationReplacementEntity), () =>
-                   from e in Database.Query<TranslationReplacementEntity>()
-                   select new
-                   {
-                       Entity = e,
-                       e.Id,
-                       e.CultureInfo,
-                       e.WrongTranslation,
-                       e.RightTranslation,
-                   });
-
-                new Graph<TranslationReplacementEntity>.Execute(TranslationReplacementOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (e, _) => { },
-                }.Register();
-
-                new Graph<TranslationReplacementEntity>.Delete(TranslationReplacementOperation.Delete)
-                {
-                    Delete = (e, _) => { e.Delete(); },
-                }.Register();
-
+                
                 ReplacementsLazy = sb.GlobalLazy(() => Database.Query<TranslationReplacementEntity>()
                     .AgGroupToDictionary(a => a.CultureInfo.ToCultureInfo(),
                     gr =>
                     {
-                        var dic = gr.ToDictionary(a => a.WrongTranslation, a => a.RightTranslation, StringComparer.InvariantCultureIgnoreCase, "wrong translations");
+                        var dic = gr.ToDictionaryEx(a => a.WrongTranslation, a => a.RightTranslation, StringComparer.InvariantCultureIgnoreCase, "wrong translations");
 
                         var regex = new Regex(dic.Keys.ToString(Regex.Escape, "|"), RegexOptions.IgnoreCase);
 

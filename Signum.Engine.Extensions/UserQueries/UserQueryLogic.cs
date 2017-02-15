@@ -1,22 +1,21 @@
-﻿using System;
+﻿using Signum.Engine.Authorization;
+using Signum.Engine.Basics;
+using Signum.Engine.DynamicQuery;
+using Signum.Engine.Maps;
+using Signum.Engine.Operations;
+using Signum.Engine.UserAssets;
+using Signum.Engine.ViewLog;
+using Signum.Entities;
+using Signum.Entities.Authorization;
+using Signum.Entities.Basics;
+using Signum.Entities.DynamicQuery;
+using Signum.Entities.UserAssets;
+using Signum.Entities.UserQueries;
+using Signum.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Signum.Engine.Maps;
 using System.Reflection;
-using Signum.Entities.UserQueries;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Basics;
-using Signum.Entities;
-using Signum.Entities.DynamicQuery;
-using Signum.Entities.Authorization;
-using Signum.Engine.Authorization;
-using Signum.Entities.Basics;
-using Signum.Engine.Operations;
-using Signum.Utilities;
-using Signum.Engine.UserAssets;
-using Signum.Entities.UserAssets;
-using Signum.Engine.ViewLog;
 
 namespace Signum.Engine.UserQueries
 {
@@ -30,19 +29,20 @@ namespace Signum.Engine.UserQueries
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                QueryLogic.Start(sb);
+                QueryLogic.Start(sb, dqm);
 
                 PermissionAuthLogic.RegisterPermissions(UserQueryPermission.ViewUserQuery);
 
                 UserAssetsImporter.RegisterName<UserQueryEntity>("UserQuery");
 
                 sb.Schema.Synchronizing += Schema_Synchronizing;
+                sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += e =>
+                    Administrator.UnsafeDeletePreCommand(Database.Query<UserQueryEntity>().Where(a => a.Query == e));
 
-                sb.Include<UserQueryEntity>();
-
-                dqm.RegisterQuery(typeof(UserQueryEntity), () =>
-                    from uq in Database.Query<UserQueryEntity>()
-                    select new
+                sb.Include<UserQueryEntity>()
+                    .WithSave(UserQueryOperation.Save)
+                    .WithDelete(UserQueryOperation.Delete)
+                    .WithQuery(dqm, uq => new
                     {
                         Entity = uq,
                         uq.Query,
@@ -50,22 +50,9 @@ namespace Signum.Engine.UserQueries
                         uq.DisplayName,
                         uq.EntityType,
                     });
-
+                
                 sb.Schema.EntityEvents<UserQueryEntity>().Retrieved += UserQueryLogic_Retrieved;
-
-                new Graph<UserQueryEntity>.Execute(UserQueryOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (uq, _) => { }
-                }.Register();
-
-                new Graph<UserQueryEntity>.Delete(UserQueryOperation.Delete)
-                {
-                    Lite = true,
-                    Delete = (uq, _) => uq.Delete()
-                }.Register();
-
+                
                 UserQueries = sb.GlobalLazy(() => Database.Query<UserQueryEntity>().ToDictionary(a => a.ToLite()),
                     new InvalidateWith(typeof(UserQueryEntity)));
 
@@ -85,7 +72,7 @@ namespace Signum.Engine.UserQueries
 
             if (!userQuery.WithoutFilters)
             {
-                qr.Filters = userQuery.Filters.Select(qf => 
+                qr.Filters = userQuery.Filters.Select(qf =>
                     new Filter(qf.Token.Token, qf.Operation, FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation.IsList()))).ToList();
             }
 
@@ -254,7 +241,7 @@ namespace Signum.Engine.UserQueries
                             switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, item.DisplayName.HasText() ? "'{0}'".FormatWith(item.DisplayName) : null, allowRemoveToken: true, allowReCreate: false))
                             {
                                 case FixTokenResult.Nothing: break;
-                                case FixTokenResult.DeleteEntity: ; return table.DeleteSqlSync(uq);
+                                case FixTokenResult.DeleteEntity:; return table.DeleteSqlSync(uq);
                                 case FixTokenResult.RemoveToken: uq.Columns.Remove(item); break;
                                 case FixTokenResult.SkipEntity: return null;
                                 case FixTokenResult.Fix: item.Token = token; break;

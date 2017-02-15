@@ -96,7 +96,7 @@ export function isCompatibleWith(chartScript: ChartScriptEntity, chartBase: ICha
             if (!isChartColumnType(c.token.token, s.columnType!))
                 return false;
 
-            if (c.token.token!.queryTokenType == QueryTokenType.Aggregate)
+            if (c.token.token!.queryTokenType == "Aggregate")
                 return !s.isGroupKey;
             else
                 return s.isGroupKey || !chartBase.groupResults;
@@ -238,14 +238,14 @@ export function synchronizeColumns(chart: IChartBase) {
     }
 
     chart.columns.map(mle => mle.element).forEach((cc, i) => {
-        if (cc.token && cc.token.token!.queryTokenType == QueryTokenType.Aggregate) {
+        if (cc.token && cc.token.token!.queryTokenType == "Aggregate") {
 
             const sc = chart.chartScript!.columns![i]
             if (chart.groupResults == false || sc && sc.element.isGroupKey) {
                 const parentToken = cc.token.token!.parent;
-                cc.token = parentToken == undefined ? undefined : QueryTokenEntity.New(t => {
-                    t.tokenString = parentToken && parentToken.fullKey;
-                    t.token = parentToken;
+                cc.token = parentToken == undefined ? undefined : QueryTokenEntity.New({
+                    tokenString : parentToken && parentToken.fullKey,
+                    token : parentToken
                 });
             }
         }
@@ -258,9 +258,9 @@ export function synchronizeColumns(chart: IChartBase) {
 
         cr.orderOptions = cr.orderOptions!.filter(o => {
             if (chart.groupResults)
-                return o.token!.queryTokenType == QueryTokenType.Aggregate || keys.contains(o.token!.fullKey);
+                return o.token!.queryTokenType == "Aggregate" || keys.contains(o.token!.fullKey);
             else
-                return o.token!.queryTokenType != QueryTokenType.Aggregate;
+                return o.token!.queryTokenType != "Aggregate";
         });
     }
 }
@@ -294,6 +294,7 @@ export module Encoder {
         const query = {
             script: cr.chartScript && cr.chartScript.name,
             groupResults: cr.groupResults,
+            ...extra
         };
 
         Finder.Encoder.encodeFilters(query, cr.filterOptions.map(a => ({ columnName: a.token!.fullKey, operation: a.operation, value: a.value, frozen: a.frozen } as FilterOption)));
@@ -301,9 +302,7 @@ export module Encoder {
         encodeParameters(query, cr.parameters);
 
         encodeColumn(query, cr.columns);
-
-        Dic.extend(query, extra);
-
+        
         return Navigator.currentHistory.createPath({ pathname: "~/Chart/" + cr.queryKey, query: query });
     }
 
@@ -342,15 +341,15 @@ export module Decoder {
 
                     cols.filter(a => a.element.token != null).forEach(a => a.element.token!.token = completer.get(a.element.token!.tokenString));
 
-                    const chartRequest = ChartRequest.New(cr => {
-                        cr.chartScript = query.script == undefined ? scripts.first("ChartScript").first() :
-                            scripts.flatMap(a => a).filter(cs => cs.name == query.script).single(`ChartScript '${query.queryKey}'`);
-                        cr.queryKey = getQueryKey(queryName);
-                        cr.groupResults = query.groupResults;
-                        cr.filterOptions = fos.map(fo => ({ token: completer.get(fo.columnName), operation: fo.operation, value: fo.value, frozen: fo.frozen }) as FilterOptionParsed);
-                        cr.orderOptions = oos.map(oo => ({ token: completer.get(oo.columnName), orderType: oo.orderType }) as OrderOptionParsed);
-                        cr.columns = cols;
-                        cr.parameters = Decoder.decodeParameters(query);
+                    const chartRequest = ChartRequest.New({
+                        chartScript : query.script == undefined ? scripts.first("ChartScript").first() :
+                            scripts.flatMap(a => a).filter(cs => cs.name == query.script).single(`ChartScript '${query.queryKey}'`),
+                        queryKey : getQueryKey(queryName),
+                        groupResults : query.groupResults == "true",
+                        filterOptions : fos.map(fo => ({ token: completer.get(fo.columnName), operation: fo.operation, value: fo.value, frozen: fo.frozen }) as FilterOptionParsed),
+                        orderOptions : oos.map(oo => ({ token: completer.get(oo.columnName), orderType: oo.orderType }) as OrderOptionParsed),
+                        columns : cols,
+                        parameters : Decoder.decodeParameters(query),
                     });
 
                     return Finder.parseFilterValues(chartRequest.filterOptions)
@@ -365,25 +364,27 @@ export module Decoder {
     const valuesInOrder = Finder.Decoder.valuesInOrder;
 
     export function decodeColumns(query: any): MList<ChartColumnEntity> {
-        return valuesInOrder(query, "column").map(val => ({
-            rowId: null,
-            element: ChartColumnEntity.New(cc => {
-                const ts = (val.contains("~") ? val.before("~") : val).trim();
+        return valuesInOrder(query, "column").map(val => {
+            const ts = (val.contains("~") ? val.before("~") : val).trim();
 
-                cc.token = !!ts ? QueryTokenEntity.New(qte => {
-                    qte.tokenString = ts;
-                }) : undefined;
-                cc.displayName = unscapeTildes(val.tryAfter("~"));
-            })
-        }));
+            return ({
+                rowId: null,
+                element: ChartColumnEntity.New({
+                    token: !!ts ? QueryTokenEntity.New({
+                        tokenString: ts,
+                    }) : undefined,
+                    displayName: unscapeTildes(val.tryAfter("~")),
+                })
+            });
+        });
     }
 
     export function decodeParameters(query: any): MList<ChartParameterEntity> {
         return valuesInOrder(query, "param").map(val => ({
             rowId: null,
-            element: ChartParameterEntity.New(cp => {
-                cp.name = unscapeTildes(val.before("~"));
-                cp.value = unscapeTildes(val.after("~"));
+            element: ChartParameterEntity.New({
+                name : unscapeTildes(val.before("~")),
+                value : unscapeTildes(val.after("~")),
             })
         }));
     }
@@ -395,7 +396,7 @@ export module API {
 
 
     export function cleanedChartRequest(request: ChartRequest) {
-        const clone = Dic.copy(request);
+        const clone = {...request };
 
         clone.orders = clone.orderOptions!.map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType }) as OrderRequest);
         delete clone.orderOptions;

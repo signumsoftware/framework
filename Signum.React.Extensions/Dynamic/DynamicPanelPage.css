@@ -1,0 +1,9 @@
+﻿tr.dynamic-error-line {
+    cursor: pointer;
+}
+
+
+.error-block h3 {
+    margin-top: 0px;
+    color: black;
+}

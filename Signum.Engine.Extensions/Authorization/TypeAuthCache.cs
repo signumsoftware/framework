@@ -55,7 +55,9 @@ namespace Signum.Entities.Authorization
             }
 
             Type type = TypeLogic.DnToType[rt.Resource];
-            var conditions = rt.Conditions.Where(a => !TypeConditionLogic.IsDefined(type, a.Condition));
+            var conditions = rt.Conditions.Where(a => 
+            a.Condition.FieldInfo != null && /*Not 100% Sync*/
+            !TypeConditionLogic.IsDefined(type, a.Condition));
 
             if (conditions.IsEmpty())
                 return null;
@@ -368,7 +370,7 @@ namespace Signum.Entities.Authorization
                                {
                                    Allowed = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>(),
                                    Condition = Conditions(xr, replacements)
-                               })).ToDictionary("Type rules for {0}".FormatWith(role));
+                               })).ToDictionaryEx("Type rules for {0}".FormatWith(role));
 
                     SqlPreCommand restSql = dic.Select(kvp => table.InsertSqlSync(new RuleTypeEntity
                     {
@@ -386,7 +388,7 @@ namespace Signum.Entities.Authorization
                     var dic = (from xr in x.Elements("Type")
                                let t = getResource(xr.Attribute("Resource").Value)
                                where t != null && !t.ToType().IsEnumEntity()
-                               select KVP.Create(t, xr)).ToDictionary("Type rules for {0}".FormatWith(role));
+                               select KVP.Create(t, xr)).ToDictionaryEx("Type rules for {0}".FormatWith(role));
 
                     SqlPreCommand restSql = Synchronizer.SynchronizeScript(
                         dic,

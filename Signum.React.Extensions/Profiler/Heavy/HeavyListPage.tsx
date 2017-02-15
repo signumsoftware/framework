@@ -1,11 +1,12 @@
 ﻿import * as React from 'react'
 import { Link } from 'react-router'
+import * as d3 from 'd3'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
-import {CountSearchControl, SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
+import {ValueSearchControl, SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -17,7 +18,7 @@ interface HeavyListProps extends ReactRouter.RouteComponentProps<{}, {}> {
 
 }
 
-export default class HeavyList extends React.Component<HeavyListProps, { enabled?: boolean; entries?: HeavyProfilerEntry[], fileToUpload?: File, fileVer?: number }> {
+export default class HeavyList extends React.Component<HeavyListProps, { enabled?: boolean; entries?: HeavyProfilerEntry[], fileToUpload?: File, fileVer: number }> {
 
     constructor(props: HeavyListProps) {
         super(props);
@@ -36,13 +37,13 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
             .then(entries => this.setState({ entries }));
     }
 
-    handleClear = (e: React.MouseEvent) => {
+    handleClear = (e: React.MouseEvent<any>) => {
         API.Heavy.clear()
             .then(() => this.loadEntries())
             .done();
     }
 
-    handleUpdate = (e: React.MouseEvent) => {
+    handleUpdate = (e: React.MouseEvent<any>) => {
         this.loadEntries().done();
         this.loadIsEnabled().done();
     }
@@ -64,7 +65,7 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
         API.Heavy.download(undefined);
     }
 
-    handleInputChange = (e: React.FormEvent) => {
+    handleInputChange = (e: React.FormEvent<any>) => {
         let f = (e.currentTarget as HTMLInputElement).files![0];
         this.setState({ fileToUpload: f });
     }

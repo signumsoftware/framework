@@ -340,7 +340,7 @@ namespace Signum.Entities.Authorization
                                let r = toResource(xr.Attribute("Resource").Value)
                                where r != null
                                select KVP.Create(r, parseAllowed(xr.Attribute("Allowed").Value)))
-                               .ToDictionary("{0} rules for {1}".FormatWith(typeof(R).NiceName(), role));
+                               .ToDictionaryEx("{0} rules for {1}".FormatWith(typeof(R).NiceName(), role));
 
                     SqlPreCommand restSql = dic.Select(kvp => table.InsertSqlSync(new RT
                     {
@@ -360,7 +360,7 @@ namespace Signum.Entities.Authorization
                                let r = toResource(xr.Attribute("Resource").Value)
                                where r != null
                                select KVP.Create(r, xr))
-                               .ToDictionary("{0} rules for {1}".FormatWith(typeof(R).NiceName(), role));
+                               .ToDictionaryEx("{0} rules for {1}".FormatWith(typeof(R).NiceName(), role));
 
                     SqlPreCommand restSql = Synchronizer.SynchronizeScript(
                         dic,

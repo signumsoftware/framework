@@ -1,24 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Signum.Engine.Maps;
-using Signum.Engine.DynamicQuery;
-using System.Reflection;
-using Signum.Entities.Dashboard;
-using Signum.Entities;
-using Signum.Entities.Authorization;
-using Signum.Utilities;
-using Signum.Engine.Authorization;
+﻿using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
-using Signum.Engine.UserQueries;
+using Signum.Engine.DynamicQuery;
+using Signum.Engine.Maps;
 using Signum.Engine.Operations;
-using Signum.Entities.UserQueries;
-using Signum.Entities.Chart;
-using Signum.Entities.Basics;
 using Signum.Engine.UserAssets;
 using Signum.Engine.ViewLog;
-using Signum.Entities.UserAssets;
+using Signum.Entities;
+using Signum.Entities.Authorization;
+using Signum.Entities.Basics;
+using Signum.Entities.Chart;
+using Signum.Entities.Dashboard;
+using Signum.Entities.UserQueries;
+using Signum.Utilities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace Signum.Engine.Dashboard
 {
@@ -42,32 +39,27 @@ namespace Signum.Engine.Dashboard
                     {"LinkListPart", typeof(LinkListPartEntity)},
                 });
 
-                sb.Include<DashboardEntity>();
-
-
-                dqm.RegisterQuery(typeof(DashboardEntity), () =>
-                    from cp in Database.Query<DashboardEntity>()
-                    select new
+                sb.Include<DashboardEntity>()
+                    .WithQuery(dqm, cp => new
                     {
                         Entity = cp,
                         cp.Id,
                         cp.DisplayName,
                         cp.EntityType,
-                        Related = cp.Owner,
+                        cp.Owner,
+                        cp.DashboardPriority,
                     });
 
-                dqm.RegisterQuery(typeof(LinkListPartEntity), () =>
-                    from cp in Database.Query<LinkListPartEntity>()
-                    select new
+                sb.Include<LinkListPartEntity>()
+                    .WithQuery(dqm, cp => new
                     {
                         Entity = cp,
                         ToStr = cp.ToString(),
                         Links = cp.Links.Count
                     });
-
-                dqm.RegisterQuery(typeof(CountSearchControlPartEntity), () =>
-                    from cp in Database.Query<CountSearchControlPartEntity>()
-                    select new
+                
+                sb.Include<ValueUserQueryListPartEntity>()
+                    .WithQuery(dqm, cp => new
                     {
                         Entity = cp,
                         ToStr = cp.ToString(),
@@ -86,7 +78,7 @@ namespace Signum.Engine.Dashboard
                     {
                         var uq = (UserQueryEntity)arg;
 
-                        var parts = Administrator.UnsafeDeletePreCommand(Database.MListQuery((DashboardEntity cp) => cp.Parts)
+                        var parts = Administrator.UnsafeDeletePreCommand((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts)
                             .Where(mle => ((UserQueryPartEntity)mle.Element.Content).UserQuery == uq));
 
                         var parts2 = Administrator.UnsafeDeletePreCommand(Database.Query<UserQueryPartEntity>()
@@ -108,7 +100,7 @@ namespace Signum.Engine.Dashboard
                     {
                         var uc = (UserChartEntity)arg;
 
-                        var parts = Administrator.UnsafeDeletePreCommand(Database.MListQuery((DashboardEntity cp) => cp.Parts)
+                        var parts = Administrator.UnsafeDeletePreCommand((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts)
                             .Where(mle => ((UserChartPartEntity)mle.Element.Content).UserChart == uc));
 
                         var parts2 = Administrator.UnsafeDeletePreCommand(Database.Query<UserChartPartEntity>()
@@ -279,7 +271,7 @@ namespace Signum.Engine.Dashboard
 
         public static void RegisterPartsTypeCondition(TypeConditionSymbol typeCondition)
         {
-            TypeConditionLogic.Register<CountSearchControlPartEntity>(typeCondition,
+            TypeConditionLogic.Register<ValueUserQueryListPartEntity>(typeCondition,
                  cscp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(cp => cp.ContainsContent(cscp)));
 
             TypeConditionLogic.Register<LinkListPartEntity>(typeCondition,

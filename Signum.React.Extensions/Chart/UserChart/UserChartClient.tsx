@@ -99,23 +99,27 @@ export module Converter {
             
             cr.parameters = uq.parameters!.map(mle => ({
                 rowId: null,
-                element: ChartParameterEntity.New(p => {
-                    p.name = mle.element.name;
-                    p.value = mle.element.value;
+                element: ChartParameterEntity.New({
+                    name : mle.element.name,
+                    value : mle.element.value,
                 })
             }));
 
-            cr.columns = uq.columns!.map(mle => ({
-                rowId: null,
-                element: ChartColumnEntity.New(c => {
-                    c.displayName = mle.element.displayName;
-                    var t = mle.element.token;
-                    c.token = t && QueryTokenEntity.New(qt => {
-                        qt.token = t!.token;
-                        qt.tokenString = t!.tokenString;
-                    });
+            cr.columns = uq.columns!.map(mle => {
+                var t = mle.element.token;
+
+                return ({
+                    rowId: null,
+                    element: ChartColumnEntity.New({
+                        displayName: mle.element.displayName,
+
+                        token: t && QueryTokenEntity.New({
+                            token: t!.token,
+                            tokenString: t!.tokenString
+                        })
+                    })
                 })
-            }));
+            });
 
             cr.orderOptions = (uq.orders || []).map(f => ({
                 token: f.element.token!.token,
@@ -128,7 +132,7 @@ export module Converter {
     }
 
     export function toChartRequest(uq: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequest> {
-        const cs = ChartRequest.New(cr => cr.queryKey = uq.query!.key); 
+        const cs = ChartRequest.New({ queryKey: uq.query!.key }); 
         return applyUserChart(cs, uq, entity);
     }
 }

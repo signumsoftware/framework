@@ -42,7 +42,7 @@ export default class UserChart extends React.Component<{ ctx: TypeContext<UserCh
                         <EntityRepeater ctx={ctx.subCtx(e => e.filters) } getComponent={this.renderFilter}/>
                     </div>
                 </div>
-                <ChartBuilder queryKey={queryKey} onInvalidate={this.handleNull} onRedraw={this.handleNull} ctx={this.props.ctx} />
+                <ChartBuilder queryKey={queryKey} onInvalidate={this.handleInvalidate} onTokenChange={this.handleTokenChange} onRedraw={this.handleInvalidate} ctx={this.props.ctx} />
                 <div className="form-xs">
                     <div className="repeater-inline form-inline sf-filters-list ">
                         <EntityRepeater ctx={ctx.subCtx(e => e.orders) } getComponent={this.renderOrder}/>
@@ -52,9 +52,26 @@ export default class UserChart extends React.Component<{ ctx: TypeContext<UserCh
         );
     }
 
-    handleNull = () => {
-
+    handleInvalidate = () => {
+        this.fixOrders();
     };
+
+
+    handleTokenChange = () => {
+        this.fixOrders();
+    };
+
+    fixOrders() {
+        var uc = this.props.ctx.value;
+
+        if (uc.groupResults) {
+            var oldOrders = uc.orders.filter(mle =>
+                mle.element.token && mle.element.token.token && mle.element.token.token.queryTokenType != "Aggregate" &&
+                !uc.columns.some(mle2 => !!mle2.element.token && !!mle2.element.token.token && mle2.element.token.token.fullKey == mle.element.token!.token!.fullKey));
+
+            oldOrders.forEach(o => this.props.ctx.value.orders.remove(o));
+        }
+    }
 
     renderFilter = (ctx: TypeContext<QueryFilterEntity>) => {
         const ctx2 = ctx.subCtx({ formGroupStyle: "None" });
