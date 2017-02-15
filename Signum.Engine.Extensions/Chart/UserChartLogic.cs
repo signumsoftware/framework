@@ -208,7 +208,7 @@ namespace Signum.Engine.Chart
                         {
                             QueryTokenEntity token = item.Token;
                             if (item.Token == null)
-                                break;
+                                continue;
 
                             switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | canAggregate, item.ScriptColumn.DisplayName, allowRemoveToken: item.ScriptColumn.IsOptional, allowReCreate: false))
                             {

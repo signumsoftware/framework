@@ -2,16 +2,16 @@
 import { Tabs, Tab } from 'react-bootstrap'
 import {
     FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityTable,
-    EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip
+    EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip, RenderEntity
 } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { ModifiableEntity, Entity, Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { ModifiableEntity, Entity, Lite, isEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { FindOptions, SearchControl, ValueSearchControlLine } from '../../../../Framework/Signum.React/Scripts/Search'
 import {
     getQueryNiceName, TypeInfo, MemberInfo, getTypeInfo, EntityData, EntityKind, getTypeInfos, KindOfType,
-    PropertyRoute, PropertyRouteType, LambdaMemberType, isTypeEntity, Binding
+    PropertyRoute, PropertyRouteType, LambdaMemberType, isTypeEntity, Binding, IsByAll, getAllTypes
 } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -24,6 +24,7 @@ import { FindOptionsLine, QueryTokenLine } from './FindOptionsComponent'
 import { HtmlAttributesLine } from './HtmlAttributesComponent'
 import { StyleOptionsLine } from './StyleOptionsComponent'
 import * as NodeUtils from './NodeUtils'
+import { getDynamicViewPromise, registeredCustomContexts } from '../DynamicViewClient'
 import { toFindOptions, FindOptionsExpr } from './FindOptionsExpression'
 import { toHtmlAttributes, HtmlAttributesExpression, withClassName } from './HtmlAttributesExpression'
 import { toStyleOptions, subCtx, StyleOptionsExpression } from './StyleOptionsExpression'
@@ -277,6 +278,128 @@ NodeUtils.register<TextNode>({
         <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.htmlAttributes)} />
     </div>),
 });
+
+
+export interface RenderEntityNode extends ContainerNode {
+    kind: "RenderEntity";
+    field: string;
+    viewName?: string;
+    styleOptions?: StyleOptionsExpression;
+}
+
+NodeUtils.register<RenderEntityNode>({
+    kind: "RenderEntity",
+    group: "Container",
+    order: 5,
+    isContainer: true,
+    hasEntity: true,
+    validate: (dn, ctx) => NodeUtils.validateField(dn),
+    renderTreeNode: NodeUtils.treeNodeKindField,
+    renderCode: (node, cc) => cc.elementCode("RenderEntity", {
+        ctx: cc.subCtxCode(node.field, node.styleOptions),
+        getComponent: cc.getGetComponentEx(node, true),
+        viewPromise: node.viewName && { __code__: `(typeName: string) => DynamicViewClient.getDynamicViewPromise(typeName, "${node.viewName}")` },
+    }),
+    render: (dn, ctx) => {
+        var sctx = ctx.subCtx(NodeUtils.asFieldFunction(dn.node.field), toStyleOptions(ctx, dn.node.styleOptions));
+        return (
+            <RenderEntity
+                ctx={sctx}
+                getComponent={NodeUtils.getGetComponent(dn)}
+                viewPromise={!dn.node.viewName ? undefined : typeName => getDynamicViewPromise(typeName, dn.node.viewName!)}
+            />
+        );
+    },
+    renderDesigner: dn => <div>
+        <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
+        <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.viewName)} type="string" defaultValue={null} allowsExpression={false} />     
+    </div>,
+});
+
+export interface CustomContextNode extends ContainerNode {
+    kind: "CustomContext",
+    typeContext: string;
+}
+
+NodeUtils.register<CustomContextNode>({
+    kind: "CustomContext",
+    group: "Container",
+    order: 6,
+    isContainer: true,
+    validate: dn => NodeUtils.mandatory(dn, n => n.typeContext) || (!registeredCustomContexts[dn.node.typeContext] ? `${dn.node.typeContext} not found` : undefined),
+    renderTreeNode: dn => <span><small > {dn.node.kind}:</small > <strong>{dn.node.typeContext}</strong></span >,
+    renderCode: (node, cc) => {
+        const ncc = registeredCustomContexts[node.typeContext].getCodeContext(cc);
+        var childrensCode = node.children.map(c => NodeUtils.renderCode(c, ncc));
+        return ncc.elementCode("div", null, ...childrensCode);
+    },
+    render: (dn, parentCtx) => {
+        const nctx = registeredCustomContexts[dn.node.typeContext].getTypeContext(parentCtx);
+        if (!nctx)
+            return undefined;
+
+        return NodeUtils.withChildrensSubCtx(dn, nctx, <div />);
+    },
+    renderDesigner: dn => (<div>
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.typeContext)} allowsExpression={false} type="string" options={Dic.getKeys(registeredCustomContexts)} defaultValue={null} />
+    </div>),
+});
+
+export interface TypeIsNode extends ContainerNode {
+    kind: "TypeIs",
+    typeName: string;
+}
+
+NodeUtils.register<TypeIsNode>({
+    kind: "TypeIs",
+    group: "Container",
+    order: 7,
+    isContainer: true,
+    validate: dn => NodeUtils.mandatory(dn, n => n.typeName) || (!getTypeInfo(dn.node.typeName) ? `Type '${dn.node.typeName}' not found` : undefined),
+    renderTreeNode: dn => <span><small> {dn.node.kind}:</small > <strong>{dn.node.typeName}</strong></span>,
+    renderCode: (node, cc) => {
+        const ncc = cc.createNewContext("ctx" + (cc.usedNames.length + 1));
+        cc.assignments[ncc.ctxName] = `${node.typeName}Entity.isInstanceOf(${cc.ctxName}.value) ? ${cc.ctxName}.cast(${node.typeName}) : null`;
+        var childrensCode = node.children.map(c => NodeUtils.renderCode(c, ncc));
+        return "{" + ncc.ctxName + " && " + ncc.elementCode("div", null, ...childrensCode) + "}";
+    },
+    render: (dn, parentCtx) => {
+        if (!isEntity(parentCtx.value) || parentCtx.value.Type != dn.node.typeName)
+            return undefined;
+
+        const nctx = TypeContext.root(parentCtx.value, undefined, parentCtx);
+
+        return NodeUtils.withChildrensSubCtx(dn, nctx, <div />);
+    },
+    renderDesigner: dn => (<div>
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.typeName)} allowsExpression={false} type="string" options={getTypes(dn.route)} defaultValue={null} />
+    </div>),
+});
+
+function getTypes(route: PropertyRoute | undefined): string[] | ((query: string) => string[]) {
+
+    if (route == undefined)
+        return [];
+
+    var tr = route.typeReference();
+    if (tr.name == IsByAll)
+        return autoCompleteType;
+
+    var types = getTypeInfos(tr);
+    if (types.length == 0 || types[0] == undefined)
+        return [];
+
+    return types.map(a => a.name);
+}
+
+function autoCompleteType(query: string): string[] {
+    return getAllTypes()
+        .filter(ti => ti.kind == "Entity" && ti.name.toLowerCase().contains(query.toLowerCase()))
+        .map(a => a.name)
+        .orderBy(a => a.length)
+        .filter((k, i) => i < 5);
+}
 
 export interface LineBaseNode extends BaseNode {
     labelText?: ExpressionOrValue<string>;

@@ -1,11 +1,11 @@
 ﻿import * as React from 'react'
 import {
-    WorkflowActivityModel, WorkflowActivityValidationEntity, WorkflowActivityMessage, WorkflowConditionEntity, WorkflowActionEntity,
-    WorkflowJumpEntity, IWorkflowNodeEntity, DecompositionEntity, SubEntitiesEval
+    WorkflowActivityEntity, WorkflowActivityModel, WorkflowActivityValidationEntity, WorkflowActivityMessage, WorkflowConditionEntity, WorkflowActionEntity,
+    WorkflowJumpEntity, IWorkflowNodeEntity, SubWorkflowEntity, SubEntitiesEval
 } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 import * as DynamicViewClient from '../../../../Extensions/Signum.React.Extensions/Dynamic/DynamicViewClient'
-import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityTable, FormGroup, LiteAutocompleteConfig } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityTable, EntityDetail, FormGroup, LiteAutocompleteConfig } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { is, JavascriptMessage, Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { DynamicValidationEntity } from '../../../../Extensions/Signum.React.Extensions/Dynamic/Signum.Entities.Dynamic'
@@ -70,16 +70,17 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
     handleTypeChange = () => {
 
         var wa = this.props.ctx.value;
-        if (wa.type == "DecompositionTask") {
-            wa.decomposition = DecompositionEntity.New({
-                subEntitiesEval: SubEntitiesEval.New()
-            });
+        if (wa.type == "DecompositionWorkflow" || wa.type == "CallWorkflow") {
+            if (!wa.subWorkflow)
+                wa.subWorkflow = SubWorkflowEntity.New({
+                    subEntitiesEval: SubEntitiesEval.New()
+                });
             wa.viewName = null;
             wa.requiresOpen = false;
             wa.validationRules = [];
         }
         else
-            wa.decomposition = null;
+            wa.subWorkflow = null;
 
         wa.modified = true;
 
@@ -93,10 +94,10 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
 
         return (
             <div>
-                <ValueLine ctx={ctx.subCtx(d => d.name)} />
+                <ValueLine ctx={ctx.subCtx(d => d.name)} onChange={() => this.forceUpdate()} />
                 <ValueLine ctx={ctx.subCtx(d => d.type)} onChange={this.handleTypeChange} />
 
-                {ctx.value.type != "DecompositionTask" &&
+                {ctx.value.type != "DecompositionWorkflow" && ctx.value.type != "CallWorkflow" &&
                     <div>
                         <FormGroup ctx={ctx.subCtx(d => d.viewName)} labelText={ctx.niceName(d => d.viewName)}>
                             {
@@ -130,14 +131,14 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                                 template: ctx => <ValueLine ctx={ctx.subCtx(wav => wav.onDecline)} formGroupStyle="None" valueHtmlProps={{ style: { margin: "0 auto" } }} />,
                             } : null,
                         ])} />
+                        <EntityDetail ctx={ctx.subCtx(a => a.reject)} />
                         <EntityTable ctx={ctx.subCtx(d => d.jumps)} columns={EntityTable.typedColumns<WorkflowJumpEntity>([
                             {
                                 property: wj => wj.to,
                                 template: (jCtx, row, state) => {
                                     return <EntityLine
                                         ctx={jCtx.subCtx(wj => wj.to)}
-                                        autoComplete={new LiteAutocompleteConfig(str => API.findNode({ workflowId: ctx.value.workflow!.id, subString: str, count: 5 }), false)}
-                                        onChange={this.handleJumpToChanged}
+                                        autoComplete={new LiteAutocompleteConfig(str => API.findNode(({ workflowId: ctx.value.workflow!.id, subString: str, count: 5, excludes: this.getCurrentJumpsTo() })), false)}
                                         find={false} />
                                 },
                                 headerProps: { width: "32%" }
@@ -173,18 +174,24 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                         <ValueLine ctx={ctx.subCtx(d => d.comments)} />
                     </div>
                 }
-                {ctx.value.decomposition &&
-                    <DecompositionComponent ctx={ctx.subCtx(a => a.decomposition!)} mainEntityType={ctx.value.mainEntityType} />}
+                {ctx.value.subWorkflow &&
+                    <DecompositionComponent ctx={ctx.subCtx(a => a.subWorkflow!)} mainEntityType={ctx.value.mainEntityType} />}
             </div>
         );
     }
 
-    handleJumpToChanged = () => {
-
+    getCurrentJumpsTo()
+    {
+        var result: Lite<IWorkflowNodeEntity>[] = [];
+        var ctx = this.props.ctx;
+        if (ctx.value.workflowActivity)
+            result.push(ctx.value.workflowActivity);
+        ctx.value.jumps.forEach(j => j.element.to && result.push(j.element.to));
+        return result;
     }
 }
 
-class DecompositionComponent extends React.Component<{ ctx: TypeContext<DecompositionEntity>, mainEntityType: TypeEntity }, void>{
+class DecompositionComponent extends React.Component<{ ctx: TypeContext<SubWorkflowEntity>, mainEntityType: TypeEntity }, void>{
 
     handleCodeChange = (newScript: string) => {
         const subEntitiesEval = this.props.ctx.value.subEntitiesEval!;

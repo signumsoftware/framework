@@ -85,7 +85,7 @@ export default class ImportAssetsPage extends React.Component<ImportAssetsPagePr
     }
 
     renderModel() {
-        const tc = TypeContext.root(UserAssetPreviewModel, this.state.model!, undefined);
+        const tc = TypeContext.root(this.state.model!, undefined);
 
         return (
             <div>
