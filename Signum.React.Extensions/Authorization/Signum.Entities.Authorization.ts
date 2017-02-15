@@ -56,7 +56,7 @@ export module AuthMessage {
     export const ChangePasswordAspx_ChangePassword = new MessageKey("AuthMessage", "ChangePasswordAspx_ChangePassword");
     export const ChangePasswordAspx_ConfirmNewPassword = new MessageKey("AuthMessage", "ChangePasswordAspx_ConfirmNewPassword");
     export const ChangePasswordAspx_NewPassword = new MessageKey("AuthMessage", "ChangePasswordAspx_NewPassword");
-    export const ChangePasswordAspx_WriteActualPasswordAndNewOne = new MessageKey("AuthMessage", "ChangePasswordAspx_WriteActualPasswordAndNewOne");
+    export const ChangePasswordAspx_EnterActualPasswordAndNewOne = new MessageKey("AuthMessage", "ChangePasswordAspx_EnterActualPasswordAndNewOne");
     export const ConfirmNewPassword = new MessageKey("AuthMessage", "ConfirmNewPassword");
     export const EmailMustHaveAValue = new MessageKey("AuthMessage", "EmailMustHaveAValue");
     export const EmailSent = new MessageKey("AuthMessage", "EmailSent");
@@ -71,7 +71,7 @@ export module AuthMessage {
     export const WeWillSendYouAnEmailWithALinkToResetYourPassword = new MessageKey("AuthMessage", "WeWillSendYouAnEmailWithALinkToResetYourPassword");
     export const IHaveForgottenMyPassword = new MessageKey("AuthMessage", "IHaveForgottenMyPassword");
     export const IncorrectPassword = new MessageKey("AuthMessage", "IncorrectPassword");
-    export const IntroduceYourUserNameAndPassword = new MessageKey("AuthMessage", "IntroduceYourUserNameAndPassword");
+    export const EnterYourUserNameAndPassword = new MessageKey("AuthMessage", "EnterYourUserNameAndPassword");
     export const InvalidUsernameOrPassword = new MessageKey("AuthMessage", "InvalidUsernameOrPassword");
     export const InvalidUsername = new MessageKey("AuthMessage", "InvalidUsername");
     export const InvalidPassword = new MessageKey("AuthMessage", "InvalidPassword");

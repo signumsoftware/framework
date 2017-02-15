@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
+﻿using System.ComponentModel;
 
 namespace Signum.Entities.Authorization
 {
@@ -28,8 +24,8 @@ namespace Signum.Entities.Authorization
         ChangePasswordAspx_ConfirmNewPassword,
         [Description("New password")]
         ChangePasswordAspx_NewPassword,
-        [Description("Write your current password and the new one")]
-        ChangePasswordAspx_WriteActualPasswordAndNewOne,
+        [Description("Enter your current password and the new one")]
+        ChangePasswordAspx_EnterActualPasswordAndNewOne,
         ConfirmNewPassword,
         [Description("The email must have a value")]
         EmailMustHaveAValue,
@@ -51,8 +47,8 @@ namespace Signum.Entities.Authorization
         WeWillSendYouAnEmailWithALinkToResetYourPassword,
         IHaveForgottenMyPassword,
         IncorrectPassword,
-        [Description("Introduce your username and password")]
-        IntroduceYourUserNameAndPassword,
+        [Description("Enter your username and password")]
+        EnterYourUserNameAndPassword,
         InvalidUsernameOrPassword,
         InvalidUsername,
         InvalidPassword,

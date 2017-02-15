@@ -83,7 +83,7 @@ export default class ChangePassword extends React.Component<{}, { modelState?: M
                 <div className="row">
                     <div className="col-sm-offset-4 col-sm-6">
                         <h2>{AuthMessage.ChangePasswordAspx_ChangePassword.niceToString() }</h2>
-                        <p>{ AuthMessage.ChangePasswordAspx_WriteActualPasswordAndNewOne.niceToString() }</p>
+                        <p>{ AuthMessage.ChangePasswordAspx_EnterActualPasswordAndNewOne.niceToString() }</p>
                     </div>
                 </div>
                 <div className="form-horizontal">
