@@ -58,7 +58,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                     <div className="form-group">
                         <div className="col-sm-offset-4 col-sm-6">
                             <h2>Login</h2>
-                            <p>{AuthMessage.IntroduceYourUserNameAndPassword.niceToString()}</p>
+                            <p>{AuthMessage.EnterYourUserNameAndPassword.niceToString()}</p>
                         </div>
                     </div>
 
