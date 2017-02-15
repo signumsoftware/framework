@@ -46,9 +46,9 @@ namespace Signum.Web.Dashboard
         {
             { typeof(UserChartPartEntity), new PartViews(ViewPrefix.FormatWith("UserChartPart"), AdminViewPrefix.FormatWith("UserChartPart")) { HasFullScreenLink = true, TitleLink = p=> NavigateRoute(((UserChartPartEntity)p).UserChart) }},
             { typeof(UserQueryPartEntity), new PartViews(ViewPrefix.FormatWith("SearchControlPart"), AdminViewPrefix.FormatWith("SearchControlPart")) { HasFullScreenLink = true, TitleLink = p=> NavigateRoute(((UserQueryPartEntity)p).UserQuery) }},
-            { typeof(CountSearchControlPartEntity), new PartViews(ViewPrefix.FormatWith("CountSearchControlPart"), AdminViewPrefix.FormatWith("CountSearchControlPart")) },
+            //{ typeof(CountSearchControlPartEntity), new PartViews(ViewPrefix.FormatWith("CountSearchControlPart"), AdminViewPrefix.FormatWith("CountSearchControlPart")) },
             { typeof(LinkListPartEntity), new PartViews(ViewPrefix.FormatWith("LinkListPart"), AdminViewPrefix.FormatWith("LinkListPart")) },
-            { typeof(LinkPartEntity), new PartViews(ViewPrefix.FormatWith("LinkPart"), AdminViewPrefix.FormatWith("LinkPart")) },
+            //{ typeof(LinkPartEntity), new PartViews(ViewPrefix.FormatWith("LinkPart"), AdminViewPrefix.FormatWith("LinkPart")) },
         };
 
         static string NavigateRoute(Entity entity)
@@ -77,33 +77,33 @@ namespace Signum.Web.Dashboard
 
                     new EntitySettings<UserQueryPartEntity>(),
 
-                    new EntitySettings<CountSearchControlPartEntity>(),
-                    new EmbeddedEntitySettings<CountUserQueryElementEntity> { PartialViewName = e => AdminViewPrefix.FormatWith("CountUserQueryElement") },
+                    //new EntitySettings<CountSearchControlPartEntity>(),
+                    //new EmbeddedEntitySettings<CountUserQueryElementEntity> { PartialViewName = e => AdminViewPrefix.FormatWith("CountUserQueryElement") },
                     
                     new EntitySettings<LinkListPartEntity>(),
-                    new EntitySettings<LinkPartEntity>(),
+                    //new EntitySettings<LinkPartEntity>(),
                     new EmbeddedEntitySettings<LinkElementEntity> { PartialViewName = e => AdminViewPrefix.FormatWith("LinkElement") },
                 });
 
 
-                if(navBar)
-                {
+                //if(navBar)
+                //{
 
-                    Navigator.AddSettings(new List<EntitySettings>
-                    {
-                        new EntitySettings<OmniboxPanelPartEntity> {  },
-                        new EntitySettings<UserQueryCountPartEntity> { PartialViewName = e => AdminViewPrefix.FormatWith("UserQueryCountPartAdmin") },
-                    });
+                //    Navigator.AddSettings(new List<EntitySettings>
+                //    {
+                //        new EntitySettings<OmniboxPanelPartEntity> {  },
+                //        new EntitySettings<UserQueryCountPartEntity> { PartialViewName = e => AdminViewPrefix.FormatWith("UserQueryCountPartAdmin") },
+                //    });
                     
 
-                    DashboardClient.PanelPartViews.Add(
-                       typeof(OmniboxPanelPartEntity),
-                       new DashboardClient.PartViews(ViewPrefixOmnibox.FormatWith("OmniboxPanelPart"), ViewPrefixOmnibox.FormatWith("OmniboxPanelPart")));
+                //    DashboardClient.PanelPartViews.Add(
+                //       typeof(OmniboxPanelPartEntity),
+                //       new DashboardClient.PartViews(ViewPrefixOmnibox.FormatWith("OmniboxPanelPart"), ViewPrefixOmnibox.FormatWith("OmniboxPanelPart")));
 
-                    DashboardClient.PanelPartViews.Add(
-                     typeof(UserQueryCountPartEntity),
-                     new DashboardClient.PartViews(ViewPrefix.FormatWith("UserQueryCountPart"), AdminViewPrefix.FormatWith("UserQueryCountPartAdmin")));
-                }
+                //    DashboardClient.PanelPartViews.Add(
+                //     typeof(UserQueryCountPartEntity),
+                //     new DashboardClient.PartViews(ViewPrefix.FormatWith("UserQueryCountPart"), AdminViewPrefix.FormatWith("UserQueryCountPartAdmin")));
+                //}
 
 
                 Constructor.Register(ctx => new DashboardEntity { Owner = UserQueryUtils.DefaultOwner() });
