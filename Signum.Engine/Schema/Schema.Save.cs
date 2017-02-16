@@ -87,9 +87,15 @@ namespace Signum.Engine.Maps
 
         internal object[] BulkInsertDataRow(Entity ident)
         {
-            var parameters = IdentityBehaviour ?
-                inserterIdentity.Value.InsertParameters(ident, new Forbidden(), "") :
-                inserterDisableIdentity.Value.InsertParameters(ident, new Forbidden(), "");
+            //var parameters = IdentityBehaviour ?
+            //    inserterDisableIdentity.Value.InsertParameters(ident, new Forbidden(), "") :
+            //    inserterIdentity.Value.InsertParameters(ident, new Forbidden(), "");
+
+
+            var parameters = ident.IdOrNull!=null ?
+                inserterDisableIdentity.Value.InsertParameters(ident, new Forbidden(), "") :
+                inserterIdentity.Value.InsertParameters(ident, new Forbidden(), "");
+
 
             return parameters.Select(a => a.Value).ToArray();
         }

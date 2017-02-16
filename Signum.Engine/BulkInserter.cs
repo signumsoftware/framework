@@ -130,9 +130,10 @@ namespace Signum.Engine
             }
 
             var t = Schema.Current.Table<T>();
+            var keepIdentity = copyOptions.HasFlag(SqlBulkCopyOptions.KeepIdentity);
 
             DataTable dt = new DataTable();
-            foreach (var c in t.Columns.Values.Where(c => !c.IdentityBehaviour))
+            foreach (var c in t.Columns.Values.Where(c => keepIdentity || !c.IdentityBehaviour))
                 dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
 
             foreach (var e in entities)
