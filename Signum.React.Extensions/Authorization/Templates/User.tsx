@@ -23,7 +23,7 @@ export default class User extends React.Component<{ ctx: TypeContext<UserEntity>
                     <DoublePassword ctx={new TypeContext<string>(ctx, undefined, undefined as any, Binding.create(ctx.value, v => v.newPassword)) }/> :
                     !ctx.readOnly && this.renderButton(ctx)
                 }
-                <EntityCombo ctx={ctx.subCtx(e => e.role) } />
+                <EntityLine ctx={ctx.subCtx(e => e.role) } />
                 <ValueLine ctx={ctx.subCtx(e => e.email) } />
                 <EntityCombo ctx={ctx.subCtx(e => e.cultureInfo) }/>
                 <ValueLine ctx={ctx.subCtx(e => e.passwordNeverExpires) } />
