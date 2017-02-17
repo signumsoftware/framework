@@ -25,55 +25,6 @@ namespace Signum.Utilities
 
             return array;
         }
-
-        public static S[] ToArray<T, S>(this IEnumerable<T> collection, Func<T, S> value, Func<T, int> xPos)
-        {
-            if (collection.IsEmpty())
-                return new S[0];
-
-            return ToArray(collection, value, xPos, collection.Max(xPos) + 1);
-        }
-
-        public static S[] ToArray<T, S>(this IEnumerable<T> collection, Func<T, S> value, Func<T, int> xPos, int xLength)
-        {
-            S[] result = new S[xLength];
-            foreach (var item in collection)
-                result[xPos(item)] = value(item);
-            return result;
-        }
-
-        public static S[,] ToArray<T, S>(this IEnumerable<T> collection, Func<T, S> value, Func<T, int> xPos, Func<T, int> yPos)
-        {
-            if (collection.IsEmpty())
-                return new S[0, 0];
-
-            return ToArray(collection, value, xPos, yPos, collection.Max(xPos) + 1, collection.Max(yPos) + 1);
-        }
-
-        public static S[,] ToArray<T, S>(this IEnumerable<T> collection, Func<T, S> value, Func<T, int> xPos, Func<T, int> yPos, int xLength, int yLength)
-        {
-            S[,] result = new S[xLength, yLength];
-            foreach (var item in collection)
-                result[xPos(item), yPos(item)] = value(item);
-            return result;
-        }
-
-        public static S[, ,] ToArray<T, S>(this IEnumerable<T> collection, Func<T, S> value, Func<T, int> xPos, Func<T, int> yPos, Func<T, int> zPos)
-        {
-            if (collection.IsEmpty())
-                return new S[0, 0, 0];
-
-            return ToArray(collection, value, xPos, yPos, zPos, collection.Max(xPos) + 1, collection.Max(yPos) + 1, collection.Max(zPos) + 1);
-        }
-
-        public static S[, ,] ToArray<T, S>(this IEnumerable<T> collection, Func<T, S> value, Func<T, int> xPos, Func<T, int> yPos, Func<T, int> zPos, int xLength, int yLength, int zLength)
-        {
-            S[, ,] result = new S[xLength, yLength, zLength];
-            foreach (var item in collection)
-                result[xPos(item), yPos(item), zPos(item)] = value(item);
-            return result;
-        }
-
         public static IEnumerable<T> Row<T>(this T[,] data, int row)
         {
             for (int i = 0; i < data.GetLength(0); i++)
