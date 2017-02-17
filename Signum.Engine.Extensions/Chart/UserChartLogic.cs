@@ -133,6 +133,21 @@ namespace Signum.Engine.Chart
             }
         }
 
+        internal static ChartRequest ToChartRequest(UserChartEntity userChart)
+        {
+            var cr = new ChartRequest(userChart.Query.ToQueryName())
+            {
+                ChartScript = userChart.ChartScript,
+                Filters = userChart.Filters.Select(qf =>
+                new Filter(qf.Token.Token, qf.Operation, FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation.IsList()))).ToList(),
+                Columns = userChart.Columns.ToMList(),
+                GroupResults = userChart.GroupResults,
+                Orders = userChart.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList(),
+                Parameters = userChart.Parameters,
+            };
+            return cr;
+        }
+
         public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
         {
             sb.Schema.Settings.AssertImplementedBy((UserChartEntity uq) => uq.Owner, typeof(UserEntity));

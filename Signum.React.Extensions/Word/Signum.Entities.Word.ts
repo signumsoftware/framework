@@ -36,6 +36,7 @@ export interface WordTemplateEntity extends Entities.Entity {
     fileName?: string | null;
     wordTransformer?: WordTransformerSymbol | null;
     wordConverter?: WordConverterSymbol | null;
+    tableSources: Entities.MList<WordTemplateTableSourceEntity>;
 }
 
 export module WordTemplateMessage {
@@ -43,6 +44,8 @@ export module WordTemplateMessage {
     export const Type0DoesNotHaveAPropertyWithName1 = new MessageKey("WordTemplateMessage", "Type0DoesNotHaveAPropertyWithName1");
     export const ChooseAReportTemplate = new MessageKey("WordTemplateMessage", "ChooseAReportTemplate");
     export const _01RequiresExtraParameters = new MessageKey("WordTemplateMessage", "_01RequiresExtraParameters");
+    export const SelectTheSourceOfDataForYourTableOrChart = new MessageKey("WordTemplateMessage", "SelectTheSourceOfDataForYourTableOrChart");
+    export const WriteThisKeyAsTileInTheAlternativeTextOfYourTableOrChart = new MessageKey("WordTemplateMessage", "WriteThisKeyAsTileInTheAlternativeTextOfYourTableOrChart");
 }
 
 export module WordTemplateOperation {
@@ -54,6 +57,13 @@ export module WordTemplateOperation {
 
 export module WordTemplatePermission {
     export const GenerateReport : Authorization.PermissionSymbol = registerSymbol("Permission", "WordTemplatePermission.GenerateReport");
+}
+
+export const WordTemplateTableSourceEntity = new Type<WordTemplateTableSourceEntity>("WordTemplateTableSourceEntity");
+export interface WordTemplateTableSourceEntity extends Entities.EmbeddedEntity {
+    Type: "WordTemplateTableSourceEntity";
+    key?: string | null;
+    source?: Entities.Lite<Entities.Entity> | null;
 }
 
 export const WordTransformerSymbol = new Type<WordTransformerSymbol>("WordTransformer");

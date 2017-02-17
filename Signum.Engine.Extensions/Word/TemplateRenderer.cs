@@ -1,4 +1,5 @@
 ﻿using DocumentFormat.OpenXml.Packaging;
+using D = DocumentFormat.OpenXml.Drawing;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
@@ -9,6 +10,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data;
 
 namespace Signum.Engine.Word
 {
@@ -76,6 +78,11 @@ namespace Signum.Engine.Word
                 {
                     node.RenderNode(parameters);
                 }
+
+                if(root is D.Charts.ChartSpace)
+                {
+                    TableBinder.ReplaceChartSpace((D.Charts.ChartSpace)root, parameters);
+                }
             }           
         }
 
@@ -89,5 +96,7 @@ namespace Signum.Engine.Word
                     throw new InvalidOperationException("{0} unexpected BaseNode instances found: {1}".FormatWith(list.Count, list.ToString(l => l.LocalName, ", ")));
             }
         }
+
+     
     }
 }

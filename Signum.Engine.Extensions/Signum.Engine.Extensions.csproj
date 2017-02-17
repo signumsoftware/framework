@@ -206,6 +206,7 @@
     <Compile Include="UserAssets\UserAssetsExporterImporter.cs" />
     <Compile Include="WikiMarkup\WikiParserExtensions.cs" />
     <Compile Include="Word\SystemWordTemplateLogic.cs" />
+    <Compile Include="Word\TableBinder.cs" />
     <Compile Include="Word\WordImageReplacer.cs" />
     <Compile Include="Word\WordTemplateLogic.cs" />
     <Compile Include="Word\TemplateNodes.cs" />

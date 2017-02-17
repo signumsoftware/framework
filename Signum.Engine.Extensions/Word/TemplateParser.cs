@@ -35,16 +35,13 @@ namespace Signum.Engine.Word
         {
             foreach (var p in document.AllRootElements())
             {
-                var wordNP = new WordprocessingNodeProvider();
-                foreach (var par in p.Descendants<W.Paragraph>())
+                foreach (var item in p.Descendants())
                 {
-                    ReplaceRuns(par, wordNP);
-                }
+                    if (item is W.Paragraph)
+                        ReplaceRuns((W.Paragraph)item, new WordprocessingNodeProvider());
 
-                var draNP = new DrawingNodeProvider();
-                foreach (var par in p.Descendants<D.Paragraph>())
-                {
-                    ReplaceRuns(par, draNP);
+                    if (item is D.Paragraph)
+                        ReplaceRuns((D.Paragraph)item, new DrawingNodeProvider());
                 }
             }
         }
