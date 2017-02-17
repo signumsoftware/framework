@@ -96,7 +96,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
         );
 
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText}
+            <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock}
                 htmlProps={{ ...this.baseHtmlProps(), ...EntityBase.entityHtmlProps(s.ctx.value), ...s.formGroupHtmlProps }}
                 labelProps={s.labelHtmlProps} >
                 <div className="SF-entity-combo">

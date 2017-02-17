@@ -120,7 +120,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         var linkOrAutocomplete = hasValue ? this.renderLink() : this.renderAutoComplete();
 
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText}
+            <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock}
                 htmlProps={{ ...this.baseHtmlProps(), ...EntityBase.entityHtmlProps(s.ctx.value!), ...s.formGroupHtmlProps }}
                 labelProps={s.labelHtmlProps}>
                 <div className="SF-entity-line">
