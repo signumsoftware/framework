@@ -25,6 +25,9 @@ using DocumentFormat.OpenXml;
 using W = DocumentFormat.OpenXml.Wordprocessing;
 using System.Text.RegularExpressions;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities.UserQueries;
+using System.Data;
+using Signum.Entities.Chart;
 
 namespace Signum.Engine.Word
 {
@@ -38,6 +41,8 @@ namespace Signum.Engine.Word
 
         public static Dictionary<WordTransformerSymbol, Action<WordContext, OpenXmlPackage>> Transformers = new Dictionary<WordTransformerSymbol, Action<WordContext, OpenXmlPackage>>();
         public static Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>> Converters = new Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>>();
+
+        public static Polymorphic<Func<Entity, WordContext, DataTable>> ToDataTable = new Polymorphic<Func<Entity, WordContext, DataTable>>();
 
         static Expression<Func<SystemWordTemplateEntity, IQueryable<WordTemplateEntity>>> WordTemplatesExpression =
             e => Database.Query<WordTemplateEntity>().Where(a => a.SystemWordTemplate == e);
@@ -80,6 +85,10 @@ namespace Signum.Engine.Word
                         Entity = f,
                         f.Key
                     });
+
+
+                ToDataTable.Register(new Func<UserQueryEntity, WordContext, DataTable>(TableBinder.UserQueryToDataTable));
+                ToDataTable.Register(new Func<UserChartEntity, WordContext, DataTable>(TableBinder.UserChartToDataTable));
 
                 dqm.RegisterExpression((SystemWordTemplateEntity e) => e.WordTemplates(), () => typeof(WordTemplateEntity).NiceName());
 
