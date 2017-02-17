@@ -559,8 +559,7 @@ namespace Signum.Engine.Cache
         {
             DisabledTypesDuringTransaction().Add(type);
 
-            if (type.Name == "ResourceEntity")
-                type = type;
+       
 
             controllers[type].NotifyDisabled();
         }
