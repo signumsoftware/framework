@@ -243,6 +243,15 @@ namespace Signum.Utilities.DataStructures
                 postAction(node);
         }
 
+        public void DepthExploreConnections(T node, Func<T, E, T, bool> condition)
+        {
+            foreach (var kvp in RelatedTo(node))
+            {
+                if (condition(node, kvp.Value, kvp.Key))
+                    DepthExploreConnections(kvp.Key, condition);
+            }
+        }
+
         public void BreadthExplore(T root, Func<T, bool> condition, Action<T> action)
         {
             Queue<T> queue = new Queue<T>();
@@ -257,6 +266,23 @@ namespace Signum.Utilities.DataStructures
                 action(node);
 
                 queue.EnqueueRange(RelatedTo(node).Keys);
+            }
+        }
+
+        public void BreadthExploreConnections(T root, Func<T, E, T, bool> condition)
+        {
+            Queue<T> queue = new Queue<T>();
+            queue.Enqueue(root);
+
+            while (queue.Count > 0)
+            {
+                T node = queue.Dequeue();
+
+                foreach (var kvp in RelatedTo(node))
+                {
+                    if (condition(node, kvp.Value, kvp.Key))
+                        queue.Enqueue(kvp.Key);
+                }
             }
         }
 
