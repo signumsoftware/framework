@@ -176,6 +176,9 @@
     <TypeScriptCompile Include="Alerts\AlertsClient.tsx" />
     <TypeScriptCompile Include="Alerts\Templates\AlertType.tsx" />
     <TypeScriptCompile Include="Alerts\Templates\Alert.tsx" />
+    <TypeScriptCompile Include="Basics\BasicsClient.tsx" />
+    <TypeScriptCompile Include="Basics\Templates\DateSpan.tsx" />
+    <TypeScriptCompile Include="Basics\Templates\TimeSpan.tsx" />
     <TypeScriptCompile Include="Chart\UserChartToolbarConfig.ts" />
     <TypeScriptCompile Include="Dashboard\DashboardToolbarConfig.ts" />
     <TypeScriptCompile Include="Dynamic\DynamicClient.tsx" />
