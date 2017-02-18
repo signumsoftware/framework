@@ -175,7 +175,8 @@ namespace Signum.Engine.Workflow
                     {
                         Entity = e,
                         e.Id,
-                        e.Name
+                        e.Name,
+                        e.MainEntityType,
                     });
                 
                 WorkflowGraph.Register();

@@ -111,11 +111,16 @@ namespace Signum.Entities.Workflow
         WorkflowLaneEntity Lane { get; set; }
     }
 
-    public interface IWorkflowConnectionOrJump
+    public interface IWorkflowTransition
     {
-        Lite<WorkflowConditionEntity> Condition { get; set; }
+        Lite<WorkflowConditionEntity> Condition { get; }
 
-        Lite<WorkflowActionEntity> Action { get; set; }
+        Lite<WorkflowActionEntity> Action { get; }
+    }
+
+    public interface IWorkflowTransitionTo : IWorkflowTransition
+    {
+        Lite<IWorkflowNodeEntity> To { get; }
     }
 
     [Serializable]
@@ -137,7 +142,7 @@ namespace Signum.Entities.Workflow
 
     public class WorkflowEvaluationContext
     {
-        public WorkflowEvaluationContext(CaseActivityEntity ca, IWorkflowConnectionOrJump conn, DecisionResult? dr)
+        public WorkflowEvaluationContext(CaseActivityEntity ca, IWorkflowTransition conn, DecisionResult? dr)
         {
             this.CaseActivity = ca;
             this.Case = ca?.Case;
@@ -147,7 +152,51 @@ namespace Signum.Entities.Workflow
 
         public CaseActivityEntity CaseActivity { get; internal set; }
         public DecisionResult? DecisionResult { get; internal set; }
-        public IWorkflowConnectionOrJump Connection { get; internal set; }
+        public IWorkflowTransition Connection { get; internal set; }
         public CaseEntity Case { get; internal set; }
+    }
+
+    public enum WorkflowValidationMessage
+    {
+        [Description("Node type {0} with Id {1} is invalid.")]
+        NodeType0WithId1IsInvalid,
+        [Description("Participants and Processes are not synchronized.")]
+        ParticipantsAndProcessesAreNotSynchronized,
+        [Description("Multiple start events are not allowed.")]
+        MultipleFinishEventsAreNotAllowed,
+        [Description("Start event is required. each workflow could have one and only one start event.")]
+        StartEventIsRequired,
+        [Description("The following tasks are going to be deleted :")]
+        TheFollowingTasksAreGoingToBeDeleted,
+        FinishEventIsRequired,
+        [Description("Activity '{0}' can not reject to start.")]
+        Activity0CanNotRejectToStart,
+        [Description("'{0}' has inputs.")]
+        _0HasInputs,
+        [Description("'{0}' has outputs.")]
+        _0HasOutputs,
+        [Description("'{0}' has no inputs.")]
+        _0HasNoInputs,
+        [Description("'{0}' has no outputs.")]
+        _0HasNoOutputs,
+        [Description("'{0}' has just one input and one output.")]
+        _0HasJustOneInputAndOneOutput,
+        [Description("'{0}' has multiple inputs and outputs at same time.")]
+        _0HasMultipleInputsAndOutputsAtTheSameTime,
+        [Description("'{0}' has multiple outputs.")]
+        _0HasMultipleOutputs,
+        [Description("Activity '{0}' can not reject to parallel gateways.")]
+        Activity0CanNotRejectToParallelGateway,
+        IsNotInWorkflow,
+        [Description("Activity '{0}' can not jump to '{1}' because '{2}'.")]
+        Activity0CanNotJumpTo1Because2,
+        [Description("Activity '{0}' can not timeout to '{1}' because '{2}'.")]
+        Activity0CanNotTimeoutTo1Because2,
+        IsStart,
+        IsInDifferentParallelTrack,
+        [Description("'{0}' (Track {1}) can not be connected to '{2}' (Track {3} instead of Track {4}).")]
+        _0Track1CanNotBeConnectedTo2Track3InsteadOfTrack4,
+        StartEventNextNodeShouldBeAnActivity,
+        ParallelGatewaysShouldPair
     }
 }
