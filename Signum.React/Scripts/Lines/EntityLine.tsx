@@ -16,16 +16,12 @@ import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConf
 export interface EntityLineProps extends EntityBaseProps {
 
     ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
-
     autoComplete?: AutocompleteConfig<any> | null;
+    renderItem?: React.ReactNode; 
+    itemHtmlProps?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
 }
 
-export interface EntityLineState extends EntityBaseProps {
-
-    ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
-
-    autoComplete?: AutocompleteConfig<any> | null;
-
+export interface EntityLineState extends EntityLineProps {
     currentItem?: { entity: ModifiableEntity | Lite<Entity>, item?: any };
 }
 
@@ -163,9 +159,10 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
         var value = s.ctx.value!;
 
-        const str = this.state.currentItem && this.state.currentItem.item && this.state.autoComplete ?
-            this.state.autoComplete.renderItem(this.state.currentItem.item) :
-            getToString(value);
+        const str =
+            s.renderItem ? s.renderItem :
+            s.currentItem && s.currentItem.item && s.autoComplete ? s.autoComplete.renderItem(s.currentItem.item) :
+                    getToString(value);
 
         if (s.ctx.readOnly)
             return <FormControlStatic ctx={s.ctx}>{ str }</FormControlStatic>
@@ -174,13 +171,13 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
             return (
                 <a href="#" onClick={this.handleViewClick}
                     className="form-control btn-default sf-entity-line-entity"
-                    title={JavascriptMessage.navigate.niceToString() }>
+                    title={JavascriptMessage.navigate.niceToString()} {...s.itemHtmlProps}>
                     {str}
                 </a>
             );
         } else {
             return (
-                <span className="form-control btn-default sf-entity-line-entity">
+                <span className="form-control btn-default sf-entity-line-entity" {...s.itemHtmlProps}>
                     {str }
                 </span>
             );

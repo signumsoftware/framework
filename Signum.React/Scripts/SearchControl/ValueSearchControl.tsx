@@ -29,6 +29,7 @@ export interface ValueSearchControlProps extends React.Props<ValueSearchControl>
     customClass?: string;
     customStyle?: React.CSSProperties;
     format?: string;
+    avoidNotifyPendingRequest?: boolean;
 }
 
 export interface ValueSearchControlState {
@@ -101,7 +102,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
 
         Finder.getQueryDescription(fo.queryName)
             .then(qd => Finder.parseFindOptions(fo, qd))
-            .then(fo => Finder.API.queryCount(this.getQueryRequest(fo)))
+            .then(fo => Finder.API.queryCount(this.getQueryRequest(fo), props!.avoidNotifyPendingRequest))
             .then(value => {
                 this.setState({ value });
                 this.props.onValueChange && this.props.onValueChange(value);

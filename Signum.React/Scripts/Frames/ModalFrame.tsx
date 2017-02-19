@@ -206,7 +206,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             frameComponent: this,
             entityComponent: this.entityComponent,
             onReload: pack => this.setPack(pack),
-            onClose: () => this.props.onExited!(undefined),
+            onClose: (ok?: boolean) => this.props.onExited!(ok ? this.state.pack!.entity : undefined)                    ,
             revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
             setError: (modelState, initialPrefix = "") => {
                 GraphExplorer.setModelState(this.state.pack!.entity, modelState, initialPrefix!);

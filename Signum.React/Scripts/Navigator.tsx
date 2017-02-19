@@ -87,7 +87,17 @@ export function navigateRoute(typeOrEntity: Entity | Lite<Entity> | PseudoType, 
         typeName = getTypeName(typeOrEntity as PseudoType);
     }
 
-    return currentHistory.createHref("~/view/" + typeName[0].toLowerCase() + typeName.substr(1) + "/" + id);
+    const es = getSettings(typeName);
+    if (es && es.onNavigateRoute)
+        return es.onNavigateRoute(typeName, id!);
+    else
+        return navigateRouteDefault(typeName, id!);
+
+}
+
+export function navigateRouteDefault(typeName: string, id: number | string) {
+    return currentHistory.createHref("~/view/" + typeName.firstLower() + "/" + id);
+
 }
 
 export function createRoute(type: PseudoType) {
@@ -101,9 +111,9 @@ export function addSettings(...settings: EntitySettings<any>[]) {
 }
 
 
-export function getSettings<T extends ModifiableEntity>(type: Type<T>): EntitySettings<T>;
-export function getSettings(type: PseudoType): EntitySettings<ModifiableEntity>;
-export function getSettings(type: PseudoType): EntitySettings<ModifiableEntity> {
+export function getSettings<T extends ModifiableEntity>(type: Type<T>): EntitySettings<T> | undefined;
+export function getSettings(type: PseudoType): EntitySettings<ModifiableEntity> | undefined;
+export function getSettings(type: PseudoType): EntitySettings<ModifiableEntity> | undefined {
     const typeName = getTypeName(type);
 
     return entitySettings[typeName];
@@ -436,13 +446,24 @@ export function view<T extends ModifiableEntity>(entity: T, viewOptions?: ViewOp
 export function view<T extends Entity>(entity: Lite<T>, viewOptions?: ViewOptions): Promise<T | undefined>
 export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions): Promise<ModifiableEntity | undefined>;
 export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions): Promise<ModifiableEntity | undefined> {
+
+    const typeName = isEntityPack(entityOrPack) ? entityOrPack.entity.Type : getTypeName(entityOrPack);
+
+    const es = getSettings(typeName);
+
+    if (es && es.onView)
+        return es.onView(entityOrPack, viewOptions);
+    else
+        return viewDefault(entityOrPack, viewOptions);
+}
+
+export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions) {
     return new Promise<ModifiableEntity>((resolve, reject) => {
         require(["./Frames/ModalFrame"], function (NP: { default: typeof ModalFrame }) {
             NP.default.openView(entityOrPack, viewOptions || {}).then(resolve, reject);
         });
     });
 }
-
 
 export interface NavigateOptions {
     readOnly?: boolean;
@@ -453,11 +474,22 @@ export interface NavigateOptions {
 
 export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
 
+    const typeName = isEntityPack(entityOrPack) ? entityOrPack.entity.Type : getTypeName(entityOrPack);
+
+    const es = getSettings(typeName);
+
+    if (es && es.onNavigate)
+        return es.onNavigate(entityOrPack, navigateOptions);
+    else 
+        return navigateDefault(entityOrPack, navigateOptions);
+}
+
+export function navigateDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         require(["./Frames/ModalFrame"], function (NP: { default: typeof ModalFrame }) {
             NP.default.openNavigate(entityOrPack, navigateOptions || {}).then(resolve, reject);
         });
-    });
+    })
 }
 
 export function createInNewTab(pack: EntityPack<ModifiableEntity>) {
@@ -576,7 +608,7 @@ export module API {
     }
 }
 
-export interface EntitySettingsOptions<T> {
+export interface EntitySettingsOptions<T extends ModifiableEntity> {
     isCreable?: EntityWhen;
     isFindable?: boolean;
     isViewable?: boolean;
@@ -584,6 +616,9 @@ export interface EntitySettingsOptions<T> {
     isReadOnly?: boolean;
     avoidPopup?: boolean;
     autocomplete?: AutocompleteConfig<T>;
+    onNavigateRoute?: (typeName: string, id: string | number) => string;
+    onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
+    onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
 }
 
 export class EntitySettings<T extends ModifiableEntity> {
@@ -602,7 +637,10 @@ export class EntitySettings<T extends ModifiableEntity> {
     isViewable: boolean;
     isNavigable: EntityWhen;
     isReadOnly: boolean;
-    autocomplete: AutocompleteConfig<T> | undefined;
+    autocomplete?: AutocompleteConfig<T>;
+    onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
+    onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
+    onNavigateRoute?: (typeName: string, id: string |number) => string;
     
     overrideView(override: (replacer: ViewReplacer<T>) => void) {
         if (this.viewOverrides == undefined)

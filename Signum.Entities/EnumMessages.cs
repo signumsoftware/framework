@@ -91,7 +91,9 @@ Lose changes?")]
 	Continue?")]
         ThereAreChangesContinue,
         ThereAreErrors,
-        Message
+        Message,
+        [Description(@"{0} and Close")]
+        _0AndClose,
     }
 
     public enum EntityControlMessage

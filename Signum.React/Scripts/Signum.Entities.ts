@@ -343,6 +343,7 @@ export module NormalWindowMessage {
     export const ThereAreChangesContinue = new MessageKey("NormalWindowMessage", "ThereAreChangesContinue");
     export const ThereAreErrors = new MessageKey("NormalWindowMessage", "ThereAreErrors");
     export const Message = new MessageKey("NormalWindowMessage", "Message");
+    export const _0AndClose = new MessageKey("NormalWindowMessage", "_0AndClose");
 }
 
 export module OperationMessage {

@@ -3,7 +3,7 @@ import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { Button, OverlayTrigger, Tooltip, MenuItem, DropdownButton } from "react-bootstrap"
 import {
     Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, toLite, JavascriptMessage,
-    OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, OperationMessage, getToString, NormalControlMessage
+    OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, OperationMessage, getToString, NormalControlMessage, NormalWindowMessage
 } from '../Signum.Entities';
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationInfo, OperationType, LambdaMemberType, GraphExplorer } from '../Reflection';
 import { classes, ifError } from '../Globals';
@@ -140,9 +140,10 @@ function createDefaultButton(eoc: EntityOperationContext<Entity>, group: EntityO
 
     const btn = asMenuItem ? <MenuItem className={classes("btn-" + bsStyle, disabled ? "disabled" : undefined)} onClick={disabled ? undefined : e => onClick(eoc, e)} data-operation={eoc.operationInfo.key} key={key} > {text}</MenuItem> :
         withClose ?
-            <div className="btn-group">
-                <Button bsStyle={bsStyle} className={disabled ? "disabled" : undefined} onClick={disabled ? undefined : e => onClick(eoc, e)} data-operation={eoc.operationInfo.key} key={key}>{text}</Button>
-                <Button bsStyle={bsStyle} className={classes("dropdown-toggle dropdown-toggle-split", disabled ? "disabled" : undefined)} onClick={disabled ? undefined : e => { eoc.closeRequested = true; onClick(eoc, e); } } data-operation={eoc.operationInfo.key} key={key + "1"}>
+            <div className="btn-group" key={key}>
+                <Button bsStyle={bsStyle} className={disabled ? "disabled" : undefined} onClick={disabled ? undefined : e => onClick(eoc, e)} data-operation={eoc.operationInfo.key}>{text}</Button>
+                <Button bsStyle={bsStyle} className={classes("dropdown-toggle dropdown-toggle-split", disabled ? "disabled" : undefined)} onClick={disabled ? undefined : e => { eoc.closeRequested = true; onClick(eoc, e); }}
+                    title={NormalWindowMessage._0AndClose.niceToString(eoc.operationInfo.niceName)}>
                     <span>&times;</span>
                 </Button>
 
@@ -223,7 +224,7 @@ export function defaultExecuteEntity(eoc: EntityOperationContext<Entity>, ...arg
         return;
 
     API.executeEntity(eoc.entity, eoc.operationInfo.key, ...args)
-        .then(pack => { if (eoc.closeRequested) { eoc.frame.onClose() } else { eoc.frame.onReload(pack); } notifySuccess(); })
+        .then(pack => { eoc.frame.onReload(pack); notifySuccess(); if (eoc.closeRequested) { eoc.frame.onClose(true); }  })
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
         .done();
 }
@@ -234,7 +235,7 @@ export function defaultExecuteLite(eoc: EntityOperationContext<Entity>, ...args:
         return;
 
     API.executeLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
-        .then(pack => { if (eoc.closeRequested) { eoc.frame.onClose() } else { eoc.frame.onReload(pack); } notifySuccess(); })
+        .then(pack => { eoc.frame.onReload(pack); notifySuccess(); if (eoc.closeRequested) { eoc.frame.onClose(true); } })
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
         .done();
 }
