@@ -192,6 +192,7 @@ export interface EntityOperationOptions<T extends Entity> {
     group?: EntityOperationGroup | null;
     order?: number;
     style?: BsStyle;
+    withClose?: boolean;
 }
 
 export const CreateGroup: EntityOperationGroup = {
