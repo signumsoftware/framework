@@ -18,6 +18,8 @@ import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConf
 export interface EntityStripProps extends EntityListBaseProps {
     vertical?: boolean;
     autoComplete?: AutocompleteConfig<any> | null;
+    onRenderItem?: (item: Lite<Entity> | ModifiableEntity) => React.ReactNode; 
+    onItemHtmlProps?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
 }
 
 export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripProps> {
@@ -45,7 +47,10 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                         {
                             mlistItemContext(s.ctx).map((mlec, i) =>
                                 (<EntityStripElement key={i}
-                                    ctx={mlec} autoComplete={s.autoComplete}
+                                    ctx={mlec}
+                                    autoComplete={s.autoComplete}
+                                    onRenderItem={s.onRenderItem}
+                                    onItemHtmlProps={s.onItemHtmlProps}
                                     onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
                                     onView={this.canView(mlec.value) ? e => this.handleViewElement(e, i) : undefined}
                                     />))
@@ -136,6 +141,8 @@ export interface EntityStripElementProps {
     onView?: (event: React.MouseEvent<any>) => void;
     ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
     autoComplete?: AutocompleteConfig<any> | null;
+    onRenderItem?: (item: Lite<Entity> | ModifiableEntity) => React.ReactNode;
+    onItemHtmlProps?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
 }
 
 export interface EntityStripElementState {
@@ -175,17 +182,22 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
     
     render() {
 
-        const toStr = this.state.currentItem && this.state.currentItem.item ? this.props.autoComplete!.renderItem(this.state.currentItem.item) : getToString(this.props.ctx.value);
+        const toStr =
+            this.props.onRenderItem ? this.props.onRenderItem(this.props.ctx.value) :
+                this.state.currentItem && this.state.currentItem.item ? this.props.autoComplete!.renderItem(this.state.currentItem.item) :
+                    getToString(this.props.ctx.value);
+
+        const htmlProps = this.props.onItemHtmlProps && this.props.onItemHtmlProps(this.props.ctx.value);
 
         return (
             <li className="sf-strip-element input-group" {...EntityListBase.entityHtmlProps(this.props.ctx.value) }>
                 {
                     this.props.onView ?
-                        <a className="sf-entitStrip-link" href="#" onClick={this.props.onView}>
+                        <a className="sf-entitStrip-link" href="" onClick={this.props.onView} {...htmlProps}>
                             {toStr}
                         </a>
                         :
-                        <span className="sf-entitStrip-link">
+                        <span className="sf-entitStrip-link" {...htmlProps}>
                             {toStr}
                         </span>
                 }
