@@ -15,6 +15,8 @@ export interface ToolbarElementEntity extends Entities.EmbeddedEntity {
     iconName?: string | null;
     iconColor?: string | null;
     content?: Entities.Lite<Entities.Entity> | null;
+    openInPopup?: boolean;
+    autoRefreshPeriod?: number | null;
 }
 
 export const ToolbarElementType = new EnumType<ToolbarElementType>("ToolbarElementType");

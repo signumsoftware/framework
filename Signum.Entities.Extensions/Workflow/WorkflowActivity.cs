@@ -40,6 +40,8 @@ namespace Signum.Entities.Workflow
 
         public WorkflowRejectEntity Reject { get; set; }
 
+        public WorkflowTimeoutEntity Timeout { get; set; }
+
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 255)]
         public string ViewName { get; set; }
 
@@ -103,6 +105,7 @@ namespace Signum.Entities.Workflow
             model.Type = this.Type;
             model.RequiresOpen = this.RequiresOpen;
             model.Reject = this.Reject;
+            model.Timeout = this.Timeout;
             model.ValidationRules.AssignMList(this.ValidationRules);
             model.Jumps.AssignMList(this.Jumps);
             model.ViewName = this.ViewName;
@@ -119,6 +122,7 @@ namespace Signum.Entities.Workflow
             this.Type = wModel.Type;
             this.RequiresOpen = wModel.RequiresOpen;
             this.Reject = wModel.Reject;
+            this.Timeout = wModel.Timeout;
             this.ValidationRules.AssignMList(wModel.ValidationRules);
             this.Jumps.AssignMList(wModel.Jumps);
             this.ViewName = wModel.ViewName;
@@ -129,7 +133,7 @@ namespace Signum.Entities.Workflow
     }
 
     [Serializable]
-    public class WorkflowRejectEntity : EmbeddedEntity, IWorkflowConnectionOrJump
+    public class WorkflowRejectEntity : EmbeddedEntity, IWorkflowTransition
     {
         public Lite<WorkflowConditionEntity> Condition { get; set; }
 
@@ -137,7 +141,23 @@ namespace Signum.Entities.Workflow
     }
 
     [Serializable]
-    public class WorkflowJumpEntity : EmbeddedEntity, IWorkflowConnectionOrJump
+    public class WorkflowTimeoutEntity : EmbeddedEntity, IWorkflowTransitionTo
+    {
+        [NotNullable]
+        [NotNullValidator]
+        public TimeSpanEntity Timeout { get; set; }
+
+        [NotNullable, ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity), typeof(WorkflowGatewayEntity))]
+        [NotNullValidator]
+        public Lite<IWorkflowNodeEntity> To { get; set; }
+
+        public Lite<WorkflowActionEntity> Action { get; set; }
+
+        Lite<WorkflowConditionEntity> IWorkflowTransition.Condition => null;
+    }
+
+    [Serializable]
+    public class WorkflowJumpEntity : EmbeddedEntity, IWorkflowTransitionTo
     {
         [ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity), typeof(WorkflowGatewayEntity))]
         public Lite<IWorkflowNodeEntity> To { get; set; }
@@ -145,6 +165,14 @@ namespace Signum.Entities.Workflow
         public Lite<WorkflowConditionEntity> Condition { get; set; }
 
         public Lite<WorkflowActionEntity> Action { get; set; }
+
+        public WorkflowJumpDirection Direction { get; set; }
+    }
+
+    public enum WorkflowJumpDirection
+    {
+        Forward,
+        Backward,
     }
 
     public enum WorkflowActivityType
@@ -253,6 +281,8 @@ namespace Signum.Entities.Workflow
         public bool RequiresOpen { get; set; }
 
         public WorkflowRejectEntity Reject { get; set; }
+
+        public WorkflowTimeoutEntity Timeout { get; set; }
 
         [NotNullable]
         [NotNullValidator, NoRepeatValidator]

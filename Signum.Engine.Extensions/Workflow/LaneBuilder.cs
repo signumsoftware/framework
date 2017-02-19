@@ -174,7 +174,7 @@ namespace Signum.Engine.Workflow
                 return (node is WorkflowEventEntity) ? events.Values.Single(a => a.Entity.Is(node)).bpmnElementId :
                     (node is WorkflowActivityEntity) ? activities.Values.Single(a => a.Entity.Is(node)).bpmnElementId :
                     (node is WorkflowGatewayEntity) ? gateways.Values.Single(a => a.Entity.Is(node)).bpmnElementId :
-                    new InvalidOperationException(WorkflowBuilderMessage.NodeType0WithId1IsInvalid.NiceToString(node.GetType().NiceName(), node.Id.ToString())).Throw<string>();
+                    new InvalidOperationException(WorkflowValidationMessage.NodeType0WithId1IsInvalid.NiceToString(node.GetType().NiceName(), node.Id.ToString())).Throw<string>();
             }
 
             internal XElement GetLaneSetElement()

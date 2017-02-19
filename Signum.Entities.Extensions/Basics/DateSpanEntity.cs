@@ -48,7 +48,7 @@ namespace Signum.Entities.Basics
             return ToDateSpan().ToString();
         }
 
-        public DateSpanEntity Clonar()
+        public DateSpanEntity Clone()
         {
 
             DateSpanEntity ds = new DateSpanEntity
@@ -56,6 +56,62 @@ namespace Signum.Entities.Basics
                 Days = this.Days,
                 Months = this.Months,
                 Years = this.Years,
+            };
+
+            return ds;
+        }
+    }
+
+    [Serializable]
+    public class TimeSpanEntity : EmbeddedEntity
+    {
+        public int Days { get; set; }
+
+        public int Hours { get; set; }
+
+        public int Minutes { get; set; }
+
+        public int Seconds { get; set; }
+
+        public bool IsZero()
+        {
+            return Days == 0 && Hours == 0 && Minutes == 0  && Seconds == 0;
+        }
+
+        static Expression<Func<TimeSpanEntity, DateTime, DateTime>> AddExpression =
+             (ds, dt) => dt.AddDays(ds.Days).AddHours(ds.Hours).AddMinutes(ds.Minutes).AddMinutes(ds.Seconds);
+        [ExpressionField]
+        public DateTime Add(DateTime date)
+        {
+            return AddExpression.Evaluate(this, date);
+        }
+
+        static Expression<Func<TimeSpanEntity, DateTime, DateTime>> SubtractExpression =
+           (ds, dt) => dt.AddDays(-ds.Days).AddHours(-ds.Hours).AddMinutes(-ds.Minutes).AddMinutes(-ds.Seconds);
+        [ExpressionField]
+        public DateTime Subtract(DateTime date)
+        {
+            return SubtractExpression.Evaluate(this, date);
+        }
+
+        public TimeSpan ToTimeSpan()
+        {
+            return new TimeSpan(Days, Hours, Minutes, Seconds);
+        }
+
+        public override string ToString()
+        {
+            return ToTimeSpan().ToString();
+        }
+
+        public TimeSpanEntity Clone()
+        {
+            TimeSpanEntity ds = new TimeSpanEntity
+            {
+                Days = this.Days,
+                Hours = this.Hours,
+                Minutes = this.Minutes,
+                Seconds = this.Seconds,
             };
 
             return ds;

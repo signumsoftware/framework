@@ -41,10 +41,10 @@ namespace Signum.Entities.Alerts
 
         public Lite<IUserEntity> CreatedBy { get; set; }
 
-        public Lite<IUserEntity> AttendedBy { get; set; }
+        public Lite<IUserEntity> Recipient { get; set; }
 
-        [NotNullable]
-        [NotNullValidator]
+        public Lite<IUserEntity> AttendedBy { get; set; }
+        
         public AlertTypeEntity AlertType { get; set; }
 
         public AlertState State { get; set; }
@@ -104,6 +104,7 @@ namespace Signum.Entities.Alerts
         Attended
     }
 
+    [InTypeScript(true), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]
     public enum AlertCurrentState
     {
         Attended,
@@ -115,10 +116,22 @@ namespace Signum.Entities.Alerts
     public static class AlertOperation
     {
         public static ConstructSymbol<AlertEntity>.From<Entity> CreateAlertFromEntity;
-        public static ExecuteSymbol<AlertEntity> SaveNew;
         public static ExecuteSymbol<AlertEntity> Save;
+        public static ExecuteSymbol<AlertEntity> Delay;
         public static ExecuteSymbol<AlertEntity> Attend;
         public static ExecuteSymbol<AlertEntity> Unattend;
+    }
+
+    [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
+    public enum DelayOption
+    {
+        _5Mins,
+        _15Mins,
+        _30Mins, 
+        _1Hour,
+        _2Hours,
+        _1Day,
+        Custom 
     }
 
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
@@ -156,6 +169,9 @@ namespace Signum.Entities.Alerts
         [Description("Futures")]
         FutureAlerts,
         [Description("Warned")]
-        WarnedAlerts
+        WarnedAlerts,
+        CustomDelay,
+        DelayDuration,
+        MyActiveAlerts,
     }
 }

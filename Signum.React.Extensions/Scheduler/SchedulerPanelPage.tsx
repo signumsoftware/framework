@@ -107,11 +107,11 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
                         </tr>
                     </thead>
                     <tbody>
-                        { s.Queue.map((item, i) =>
+                        {s.Queue.map((item, i) =>
                             <tr key={i}>
                                 <td><EntityLink lite={item.ScheduledTask} inSearch={true} /></td>
-                                <td>{ item.Rule } </td>
-                                <td>{ item.NextExecution} ({ item.NextExecution == undefined ? "-None-" : moment(item.NextExecution).toNow() }) </td>
+                                <td>{item.Rule} </td>
+                                <td>{item.NextExecution} ({item.NextExecution == undefined ? "-None-" : moment(item.NextExecution).fromNow()}) </td>
                             </tr>)
                         }
                     </tbody>

@@ -7,8 +7,8 @@ import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search
 import { getToString, getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { ToolbarElementEntity } from '../Signum.Entities.Toolbar'
-import { ColorTypeaheadLine } from './ColorTypeahead'
-import { IconTypeaheadLine } from './IconTypeahead'
+import { ColorTypeaheadLine } from '../../Basics/Templates/ColorTypeahead'
+import { IconTypeaheadLine } from '../../Basics/Templates/IconTypeahead'
 
 export default class ToolbarElement extends React.Component<{ ctx: TypeContext<ToolbarElementEntity> }, void> {
 
@@ -26,7 +26,10 @@ export default class ToolbarElement extends React.Component<{ ctx: TypeContext<T
 
         const ctx4 = ctx.subCtx({ labelColumns: 4 });
         const ctx2 = ctx.subCtx({ labelColumns: 2 });
+        const ctx6 = ctx.subCtx({ labelColumns: 6 });
         const bgColor = (ctx4.value.iconColor && ctx4.value.iconColor.toLowerCase() == "white" ? "black" : undefined);
+
+        var content = ctx2.value.content;
 
         return (
             <div>
@@ -39,18 +42,27 @@ export default class ToolbarElement extends React.Component<{ ctx: TypeContext<T
                     </div>
                 </div>
 
-                <div className="row">
-                    <div className="col-sm-5">
-                        {ctx4.value.type != "Divider" && <IconTypeaheadLine ctx={ctx4.subCtx(t => t.iconName)} onChange={() => this.forceUpdate()} extraIcons={["none"].concat(ctx.value.content && ctx.value.content.EntityType == "UserQuery" ? ["count"] : [] as string[])} />}
-                        {ctx4.value.type != "Divider" && <ColorTypeaheadLine ctx={ctx4.subCtx(t => t.iconColor)} onChange={() => this.forceUpdate()}/>}
+                {ctx4.value.type != "Divider" &&
+                    <div className="row">
+                        <div className="col-sm-5">
+                            <IconTypeaheadLine ctx={ctx4.subCtx(t => t.iconName)} onChange={() => this.forceUpdate()} extraIcons={["none"].concat(content && content.EntityType == "UserQuery" ? ["count"] : [] as string[])} />
+                            <ColorTypeaheadLine ctx={ctx4.subCtx(t => t.iconColor)} onChange={() => this.forceUpdate()} />
+                        </div>
+                        <div className="col-sm-1">
+                            {ctx4.value.iconName && <span className={ctx4.value.iconName} style={{ backgroundColor: bgColor, color: ctx4.value.iconColor, fontSize: "25px", marginTop: "17px" }} />}
+                        </div>
+                        <div className="col-sm-5">
+                            <ValueLine ctx={ctx2.subCtx(t => t.label)} valueHtmlProps={{ placeholder: content && content.toStr || undefined }} />
+                            {content && (content.EntityType == "UserQuery" || content.EntityType == "Query") &&
+                                <div>
+                                    <ValueLine ctx={ctx6.subCtx(t => t.openInPopup)}  />
+                                    <ValueLine ctx={ctx6.subCtx(t => t.autoRefreshPeriod)} />
+                                </div>
+                            }
+                        </div>
                     </div>
-                    <div className="col-sm-1">
-                        {ctx4.value.iconName && <span className={ctx4.value.iconName} style={{ backgroundColor: bgColor, color: ctx4.value.iconColor, fontSize: "25px", marginTop: "17px" }} />}
-                    </div>
-                    <div className="col-sm-5">
-                        {ctx2.value.type != "Divider" && <ValueLine ctx={ctx2.subCtx(t => t.label)} valueHtmlProps={{ placeholder: ctx2.value.content && ctx2.value.content.toStr || undefined }} />}
-                    </div>
-                </div>
+                }
+
             </div>
         );
     }

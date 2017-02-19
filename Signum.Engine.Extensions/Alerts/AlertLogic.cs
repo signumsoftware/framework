@@ -30,6 +30,16 @@ namespace Signum.Engine.Alerts
             return AlertsExpression.Evaluate(e);
         }
 
+        static Expression<Func<Entity, IQueryable<AlertEntity>>> MyActiveAlertsExpression =
+            e => e.Alerts().Where(a => a.Recipient == UserHolder.Current.ToLite() && a.CurrentState == AlertCurrentState.Alerted);
+        [ExpressionField]
+        public static IQueryable<AlertEntity> MyActiveAlerts(this Entity e)
+        {
+            return MyActiveAlertsExpression.Evaluate(e);
+        }
+
+        public static Func<IUserEntity> DefaultRecipient = () => null;
+
         public static HashSet<AlertTypeEntity> SystemAlertTypes = new HashSet<AlertTypeEntity>();
         public static bool Started = false;
 
@@ -51,11 +61,11 @@ namespace Signum.Engine.Alerts
                         a.AlertDate,
                         a.Title,
                         Text = a.Text.Etc(100),
+                        a.Target,
                         a.CreationDate,
                         a.CreatedBy,
                         a.AttendedDate,
                         a.AttendedBy,
-                        a.Target
                     });
 
                 AlertGraph.Register();
@@ -74,9 +84,13 @@ namespace Signum.Engine.Alerts
                 
                 if (registerExpressionsFor != null)
                 {
-                    var exp = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity ident) => ident.Alerts());
+                    var alerts = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity ident) => ident.Alerts());
+                    var myActiveAlerts = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity ident) => ident.MyActiveAlerts());
                     foreach (var type in registerExpressionsFor)
-                        dqm.RegisterExpression(new ExtensionInfo(type, exp, exp.Body.Type, "Alerts", () => typeof(AlertEntity).NicePluralName()));
+                    {
+                        dqm.RegisterExpression(new ExtensionInfo(type, alerts, alerts.Body.Type, "Alerts", () => typeof(AlertEntity).NicePluralName()));
+                        dqm.RegisterExpression(new ExtensionInfo(type, myActiveAlerts, myActiveAlerts.Body.Type, "MyActiveAlerts", () => AlertMessage.MyActiveAlerts.NiceToString()));
+                    }
                 }
 
                 Started = true;
@@ -111,7 +125,7 @@ namespace Signum.Engine.Alerts
                 AlertType = alertType
             };
 
-            return result.Execute(AlertOperation.SaveNew);
+            return result.Execute(AlertOperation.Save);
         }
 
         public static AlertEntity CreateAlertForceNew(this IEntity entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity> user = null)
@@ -146,6 +160,7 @@ namespace Signum.Engine.Alerts
                 {
                     AlertDate = TimeZoneManager.Now,
                     CreatedBy = UserHolder.Current.ToLite(),
+                    Recipient = AlertLogic.DefaultRecipient()?.ToLite(),
                     Text = null,
                     Title = null,
                     Target = a.ToLite(),
@@ -153,19 +168,11 @@ namespace Signum.Engine.Alerts
                 }
             }.Register();
 
-            new Execute(AlertOperation.SaveNew)
-            {
-                FromStates = { AlertState.New },
-                ToStates = { AlertState.Saved },
-                AllowsNew = true,
-                Lite = false,
-                Execute = (a, _) => { a.State = AlertState.Saved; }
-            }.Register();
-
             new Execute(AlertOperation.Save)
             {
-                FromStates = { AlertState.Saved },
+                FromStates = { AlertState.Saved, AlertState.New },
                 ToStates = { AlertState.Saved },
+                AllowsNew = true,
                 Lite = false,
                 Execute = (a, _) => { a.State = AlertState.Saved; }
             }.Register();
@@ -191,6 +198,16 @@ namespace Signum.Engine.Alerts
                     a.State = AlertState.Saved;
                     a.AttendedDate = null;
                     a.AttendedBy = null;
+                }
+            }.Register();
+
+            new Execute(AlertOperation.Delay)
+            {
+                FromStates = { AlertState.Saved },
+                ToStates = { AlertState.Saved },
+                Execute = (a, args) =>
+                {
+                    a.AlertDate = args.GetArg<DateTime>();
                 }
             }.Register();
         }
