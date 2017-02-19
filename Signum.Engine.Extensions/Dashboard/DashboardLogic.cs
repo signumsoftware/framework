@@ -175,13 +175,26 @@ namespace Signum.Engine.Dashboard
         {
             var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: true);
 
+
             var result = Dashboards.Value.Values
-                .Where(d =>
-                    d.ForNavbar == forNavbar
-                     && (!key.HasText() || d.Key == key)
+            .Where(d =>
+                    d.Owner != null && d.Owner.RefersTo(UserEntity.Current)
+                    && d.ForNavbar == forNavbar
+                    && (!key.HasText() || d.Key == key)
                     && d.EntityType == null && d.DashboardPriority.HasValue && isAllowed(d))
-                .OrderByDescending(a => a.DashboardPriority)
-                .FirstOrDefault();
+            .OrderByDescending(a => a.DashboardPriority)
+            .FirstOrDefault();
+
+
+
+            if (result == null)
+                result = Dashboards.Value.Values
+                   .Where(d =>
+                       d.ForNavbar == forNavbar
+                        && (!key.HasText() || d.Key == key)
+                       && d.EntityType == null && d.DashboardPriority.HasValue && isAllowed(d))
+                   .OrderByDescending(a => a.DashboardPriority)
+                   .FirstOrDefault();
 
             return result;
         }
