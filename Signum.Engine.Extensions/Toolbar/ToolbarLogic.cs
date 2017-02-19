@@ -1,4 +1,5 @@
-﻿using Signum.Engine;
+﻿using Newtonsoft.Json;
+using Signum.Engine;
 using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
 using Signum.Engine.Chart;
@@ -194,6 +195,8 @@ namespace Signum.Engine.Toolbar
                 label = element.Label,
                 iconName = element.IconName,
                 iconColor = element.IconColor,
+                autoRefreshPeriod = element.AutoRefreshPeriod,
+                openInPopup = element.OpenInPopup,
             };
 
             if (element.Content is Lite<ToolbarMenuEntity>)
@@ -235,5 +238,10 @@ namespace Signum.Engine.Toolbar
         public List<ToolbarResponse> elements;
         public string iconName;
         public string iconColor;
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public int? autoRefreshPeriod;
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore )]
+        public bool openInPopup;
     }
 }

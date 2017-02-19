@@ -19,11 +19,19 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
         this.type = QueryEntity;
     }
 
-    getLabel(element: ToolbarResponse<QueryEntity>) {
-        return element.label || getQueryNiceName(element.lite!.toStr!);
+    getLabel(res: ToolbarResponse<QueryEntity>) {
+        return res.label || getQueryNiceName(res.lite!.toStr!);
     }
 
-    navigateTo(element: ToolbarResponse<QueryEntity>): Promise<string> {
-        return Promise.resolve(Finder.findOptionsPath({ queryName: element.lite!.toStr! }));
+    handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {
+        if (!res.openInPopup)
+            super.handleNavigateClick(e, res);
+        else {
+            Finder.explore({ queryName: res.lite!.toStr! }).done()
+        }
+    }
+
+    navigateTo(res: ToolbarResponse<QueryEntity>): Promise<string> {
+        return Promise.resolve(Finder.findOptionsPath({ queryName: res.lite!.toStr! }));
     }
 }

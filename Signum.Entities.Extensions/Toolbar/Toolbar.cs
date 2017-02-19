@@ -91,6 +91,11 @@ namespace Signum.Entities.Toolbar
         [ImplementedBy(typeof(ToolbarMenuEntity), typeof(UserQueryEntity), typeof(UserChartEntity), typeof(QueryEntity), typeof(DashboardEntity))]
         public Lite<Entity> Content { get; set; }
 
+        public bool OpenInPopup { get; set; }
+
+
+        [Unit("s"), NumberIsValidator(Entities.ComparisonType.GreaterThanOrEqualTo, 10)]
+        public int? AutoRefreshPeriod { get; set; }
 
         internal XElement ToXml(IToXmlContext ctx)
         {
@@ -98,6 +103,9 @@ namespace Signum.Entities.Toolbar
                 Label == null ? null : new XAttribute("Label", Label),
                 new XAttribute("Type", Type),
                 new XAttribute("IconName", IconName),
+                new XAttribute("IconColor", IconColor),
+                OpenInPopup ? new XAttribute("OpenInPopup", OpenInPopup) : null,
+                AutoRefreshPeriod == null ? null : new XAttribute("AutoRefreshPeriod", AutoRefreshPeriod),
                 new XElement("Content", this.Content is Lite<QueryEntity> ?
                 ctx.QueryToName((Lite<QueryEntity>)this.Content) :
                 (object)ctx.Include((Lite<IUserAssetEntity>)this.Content)));
@@ -110,6 +118,9 @@ namespace Signum.Entities.Toolbar
             Label = x.Attribute("Label")?.Value;
             Type = x.Attribute("Type").Value.ToEnum<ToolbarElementType>();
             IconName = x.Attribute("IconName")?.Value;
+            IconColor = x.Attribute("IconColor")?.Value;
+            OpenInPopup = x.Attribute("OpenInPopup")?.Value.ToBool() ?? false;
+            AutoRefreshPeriod = x.Attribute("AutoRefreshPeriod")?.Value.ToInt() ?? null;
 
             var content = x.Attribute("Content").Value;
 

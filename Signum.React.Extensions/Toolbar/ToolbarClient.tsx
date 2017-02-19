@@ -83,4 +83,6 @@ export interface ToolbarResponse<T extends Entity> {
     label?: string;
     lite?: Lite<T>;
     elements?: Array<ToolbarResponse<any>>;
+    openInPopup?: boolean;
+    autoRefreshPeriod?: number;
 }
