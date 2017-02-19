@@ -19,7 +19,7 @@ export default class Alert extends React.Component<{ ctx: TypeContext<AlertEntit
 
         const e = this.props.ctx;
 
-        const ec = e.subCtx({ labelColumns: { sm: 4 } });
+        const ec = e.subCtx({ labelColumns: { sm: 2 } });
         const sc = ec.subCtx({ formGroupStyle: "Basic" });
 
 
@@ -31,7 +31,8 @@ export default class Alert extends React.Component<{ ctx: TypeContext<AlertEntit
                         <ValueLine ctx={ec.subCtx(e => e.creationDate)} readOnly={true} />
                     </div>
                 }
-                <EntityLine ctx={ec.subCtx(n => n.target)} readOnly={true} />
+                {ec.value.target && <EntityLine ctx={ec.subCtx(n => n.target)} readOnly={true} />}
+                <EntityLine ctx={ec.subCtx(n => n.recipient)} readOnly={true} />
                 <hr />
                 <ValueLine ctx={ec.subCtx(n => n.title)} />
                 <EntityCombo ctx={ec.subCtx(n => n.alertType)} />
