@@ -26,6 +26,15 @@ export interface DateSpanEntity extends Entities.EmbeddedEntity {
     days?: number;
 }
 
+export const TimeSpanEntity = new Type<TimeSpanEntity>("TimeSpanEntity");
+export interface TimeSpanEntity extends Entities.EmbeddedEntity {
+    Type: "TimeSpanEntity";
+    days?: number;
+    hours?: number;
+    minutes?: number;
+    seconds?: number;
+}
+
 export const TypeConditionSymbol = new Type<TypeConditionSymbol>("TypeCondition");
 export interface TypeConditionSymbol extends Entities.Symbol {
     Type: "TypeCondition";

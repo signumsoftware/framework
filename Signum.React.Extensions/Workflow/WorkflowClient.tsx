@@ -3,7 +3,10 @@ import { Route, Link } from 'react-router'
 import { ifError, Dic } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
-import { EntityPack, Lite, toLite, MListElement, JavascriptMessage, EntityControlMessage, newMListElement, liteKey, getMixin, Entity, ExecuteSymbol } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import {
+    EntityPack, Lite, toLite, MListElement, JavascriptMessage, EntityControlMessage,
+    newMListElement, liteKey, getMixin, Entity, ExecuteSymbol, isEntityPack
+} from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { Type, PropertyRoute } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { EntityFrame, TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
@@ -17,11 +20,11 @@ import { defaultContextualClick } from '../../../Framework/Signum.React/Scripts/
 import { UserEntity } from '../../../Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization'
 import * as DynamicViewClient from '../../../Extensions/Signum.React.Extensions/Dynamic/DynamicViewClient'
 import { CodeContext } from '../../../Extensions/Signum.React.Extensions/Dynamic/View/NodeUtils'
+import { TimeSpanEntity } from '../../../Extensions/Signum.React.Extensions/Basics/Signum.Entities.Basics'
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import { WorkflowConditionEval, WorkflowActionEval, WorkflowJumpEntity, DecisionResult } from './Signum.Entities.Workflow'
 
-import CaseEntityLink from './Case/CaseEntityLink'
 import ActivityWithRemarks from './Case/ActivityWithRemarks'
 import CaseModalFrame from './Case/CaseModalFrame'
 export { CaseModalFrame };
@@ -36,7 +39,7 @@ import {
     WorkflowEntity, WorkflowLaneEntity, WorkflowActivityEntity, WorkflowConnectionEntity, WorkflowConditionEntity, WorkflowActionEntity, CaseActivityQuery, CaseActivityEntity,
     CaseActivityOperation, CaseEntity, CaseNotificationEntity, CaseNotificationState, InboxFilterModel, WorkflowOperation, WorkflowPoolEntity,
     WorkflowActivityOperation, WorkflowReplacementModel, WorkflowModel, BpmnEntityPair, WorkflowActivityModel, ICaseMainEntity, WorkflowGatewayEntity, WorkflowEventEntity,
-    WorkflowLaneModel, WorkflowConnectionModel, IWorkflowNodeEntity, WorkflowActivityMessage
+    WorkflowLaneModel, WorkflowConnectionModel, IWorkflowNodeEntity, WorkflowActivityMessage, WorkflowTimeoutEntity, CaseTagEntity, CaseTagsModel
 } from './Signum.Entities.Workflow'
 
 import InboxFilter from './Case/InboxFilter'
@@ -54,8 +57,6 @@ export function start(options: { routes: JSX.Element[] }) {
         hiddenColumns: [
             { columnName: "State" },
         ],
-        entityFormatter: (row, columns, sc) => <CaseEntityLink lite={row.entity as Lite<CaseActivityEntity>} inSearch={true} onNavigated={sc && sc.handleOnNavigated}>{EntityControlMessage.View.niceToString()}</CaseEntityLink>,
-        onDoubleClick: (e, row) => navigateCase(row.entity as Lite<CaseActivityEntity>),
         rowAttributes: (row, columns) => {
             var rowState = row.columns[columns.indexOf("State")] as CaseNotificationState;
             switch (rowState) {
@@ -81,11 +82,23 @@ export function start(options: { routes: JSX.Element[] }) {
         }
     });
 
+    Navigator.addSettings(new EntitySettings(CaseTagEntity, w => new ViewPromise(m => require(['./Case/CaseTag'], m))));
+    Navigator.addSettings(new EntitySettings(CaseTagsModel, w => new ViewPromise(m => require(['./Case/CaseTagsModel'], m))));
+
+    Navigator.addSettings(new EntitySettings(CaseActivityEntity, undefined, {
+        onNavigateRoute: (typeName, id) => Navigator.currentHistory.createHref("~/workflow/activity/" + id),
+        onNavigate: (entityOrPack, options) => navigateCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options && options.readOnly),
+        onView: (entityOrPack, options) => viewCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options && options.readOnly),
+    }));
+
+    Constructor.registerConstructor(WorkflowTimeoutEntity, () => Constructor.construct(TimeSpanEntity).then(ep => ep && WorkflowTimeoutEntity.New({ timeout: ep.entity })));
+
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { hideOnCanExecute: true, style: "primary" }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Delete, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Undo, { hideOnCanExecute: true, style: "danger" }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Jump, { onClick: executeWorkflowJump, contextual: { isVisible: ctx => true, onClick: executeWorkflowJumpContextual } }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Reject, { contextual: { isVisible: ctx => true } }));
+    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Timeout, { isVisible: ctx => false }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.MarkAsUnread, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
     caseActivityOperation(CaseActivityOperation.Next, "primary");
     caseActivityOperation(CaseActivityOperation.Approve, "success");
@@ -286,6 +299,15 @@ export function navigateCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivi
     return new Promise<void>((resolve, reject) => {
         require(["./Case/CaseModalFrame"], function (NP: { default: typeof CaseModalFrame }) {
             NP.default.openNavigate(entityOrPack, readOnly).then(resolve, reject);
+        });
+    });
+} 
+
+export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, readOnly?: boolean): Promise<CaseActivityEntity> {
+
+    return new Promise<CaseActivityEntity>((resolve, reject) => {
+        require(["./Case/CaseModalFrame"], function (NP: { default: typeof CaseModalFrame }) {
+            NP.default.openView(entityOrPack, readOnly).then(resolve, reject);
         });
     });
 } 

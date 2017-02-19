@@ -9,6 +9,8 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Signum.Entities.Dynamic;
+using Signum.Entities.Scheduler;
+using Signum.Entities.Processes;
 
 namespace Signum.Entities.Workflow
 {
@@ -68,7 +70,8 @@ namespace Signum.Entities.Workflow
         Approve,
         Decline,
         Jump,
-        Rejected
+        Rejected,
+        Timeout,
     }
 
     public enum CaseActivityState
@@ -92,10 +95,23 @@ namespace Signum.Entities.Workflow
         public static readonly ExecuteSymbol<CaseActivityEntity> Decline;
         public static readonly ExecuteSymbol<CaseActivityEntity> Jump;
         public static readonly ExecuteSymbol<CaseActivityEntity> Reject;
+        public static readonly ExecuteSymbol<CaseActivityEntity> Timeout;
         public static readonly ExecuteSymbol<CaseActivityEntity> MarkAsUnread;
         public static readonly ExecuteSymbol<CaseActivityEntity> Undo;
 
         public static readonly ExecuteSymbol<DynamicTypeEntity> FixCaseDescriptions;
+    }
+
+    [AutoInit]
+    public static class CaseActivityTask
+    {
+        public static readonly SimpleTaskSymbol Timeout;
+    }
+
+    [AutoInit]
+    public static class CaseActivityProcessAlgorithm
+    {
+        public static readonly ProcessAlgorithmSymbol Timeout;
     }
 
     public enum CaseActivityMessage
@@ -120,6 +136,8 @@ namespace Signum.Entities.Workflow
         Activity0HasNoJumps,
         [Description("Activity '{0}' has no reject")]
         Activity0HasNoReject,
+        [Description("Activity '{0}' has no timeout")]
+        Activity0HasNoTimeout,
         ThereIsNoPreviousActivity,
     }
 

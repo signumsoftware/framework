@@ -22,9 +22,9 @@ require("!style!css!./Case.css");
 interface CaseModalFrameProps extends React.Props<CaseModalFrame>, IModalProps {
     title?: string;
     entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack;
-    validate?: boolean;
     avoidPromptLooseChange?: boolean;
     readOnly?: boolean;
+    isNavigate?: boolean;
 }
 
 interface CaseModalFrameState {
@@ -100,8 +100,29 @@ export default class CaseModalFrame extends React.Component<CaseModalFrameProps,
         return entity.modified;
     }
 
+    okClicked: boolean;
+    handleCancelClicked = () => {
+
+        if (this.hasChanges() && !this.props.avoidPromptLooseChange) {
+            if (!confirm(NormalWindowMessage.LoseChanges.niceToString()))
+                return;
+        }
+
+        this.setState({ show: false });
+    }
+    
+    handleOkClicked = (val: any) => {
+        if (this.hasChanges()) {
+            alert(JavascriptMessage.saveChangesBeforeOrPressCancel.niceToString());
+            return;
+        }
+
+        this.okClicked = true;
+        this.setState({ show: false });
+    }
+
     handleOnExited = () => {
-        this.props.onExited!(null);
+        this.props.onExited!(this.okClicked ? this.getCaseActivity() : undefined);
     }
 
     getCaseActivity() {
@@ -114,8 +135,11 @@ export default class CaseModalFrame extends React.Component<CaseModalFrameProps,
 
         return (
             <Modal bsSize="lg" onHide={this.handleCloseClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-popup-control">
-                <Modal.Header closeButton={true}>
- 
+                <Modal.Header closeButton={this.props.isNavigate}>
+                    {!this.props.isNavigate && <ButtonToolbar className="pull-right flip">
+                        <Button className="sf-entity-button sf-close-button sf-ok-button" bsStyle="primary" disabled={!pack} onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString()}</Button>
+                        <Button className="sf-entity-button sf-close-button sf-cancel-button" bsStyle="default" disabled={!pack} onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString()}</Button>
+                    </ButtonToolbar>}
                     {this.renderTitle() }
                 </Modal.Header>
                 {pack && this.renderBody() }
@@ -143,7 +167,7 @@ export default class CaseModalFrame extends React.Component<CaseModalFrameProps,
                 pack.canExecuteActivity = newPack.canExecute;
                 this.forceUpdate();
             },
-            onClose: () => this.props.onExited!(null),
+            onClose: (ok?: boolean) => this.props.onExited!(ok ? this.getCaseActivity() : undefined),
             revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
             setError: (modelState, initialPrefix) => {
                 GraphExplorer.setModelState(pack.activity, modelState, initialPrefix || "");
@@ -263,11 +287,22 @@ export default class CaseModalFrame extends React.Component<CaseModalFrameProps,
         }
     }
 
+    static openView(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, readOnly?: boolean): Promise<CaseActivityEntity> {
+
+        return openModal<CaseActivityEntity>(<CaseModalFrame
+            entityOrPack={entityOrPack}
+            readOnly={readOnly || false}
+            isNavigate={false}
+        />);
+    }
+
 
     static openNavigate(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, readOnly? :boolean): Promise<void> {
 
         return openModal<void>(<CaseModalFrame
             entityOrPack={entityOrPack}
-            readOnly={readOnly || false} />);
+            readOnly={readOnly || false}
+            isNavigate={true}
+        />);
     }
 }

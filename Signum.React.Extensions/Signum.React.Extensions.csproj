@@ -176,6 +176,10 @@
     <TypeScriptCompile Include="Alerts\AlertsClient.tsx" />
     <TypeScriptCompile Include="Alerts\Templates\AlertType.tsx" />
     <TypeScriptCompile Include="Alerts\Templates\Alert.tsx" />
+    <TypeScriptCompile Include="Basics\BasicsClient.tsx" />
+    <TypeScriptCompile Include="Basics\Color.ts" />
+    <TypeScriptCompile Include="Basics\Templates\DateSpan.tsx" />
+    <TypeScriptCompile Include="Basics\Templates\TimeSpan.tsx" />
     <TypeScriptCompile Include="Chart\UserChartToolbarConfig.ts" />
     <TypeScriptCompile Include="Dashboard\DashboardToolbarConfig.ts" />
     <TypeScriptCompile Include="Dynamic\DynamicClient.tsx" />
@@ -260,8 +264,8 @@
     <TypeScriptCompile Include="Toolbar\Signum.Entities.Toolbar.ts">
       <DependentUpon>Signum.Entities.Toolbar.t4s</DependentUpon>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="Toolbar\Templates\IconTypeahead.tsx" />
-    <TypeScriptCompile Include="Toolbar\Templates\ColorTypeahead.tsx" />
+    <TypeScriptCompile Include="Basics\Templates\IconTypeahead.tsx" />
+    <TypeScriptCompile Include="Basics\Templates\ColorTypeahead.tsx" />
     <TypeScriptCompile Include="Toolbar\Templates\ToolbarRenderer.tsx" />
     <TypeScriptCompile Include="Toolbar\Templates\ToolbarElement.tsx" />
     <TypeScriptCompile Include="Toolbar\Templates\ToolbarMenu.tsx" />
@@ -273,7 +277,9 @@
     <TypeScriptCompile Include="Workflow\Case\CaseButtonBar.tsx" />
     <TypeScriptCompile Include="Workflow\Case\ActivityWithRemarks.tsx" />
     <TypeScriptCompile Include="Workflow\Case\CaseFromSenderInfo.tsx" />
-    <TypeScriptCompile Include="Workflow\Case\CaseEntityLink.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\CaseTagsModel.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\Tag.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\CaseTag.tsx" />
     <TypeScriptCompile Include="Workflow\Signum.Entities.Workflow.ts">
       <DependentUpon>Signum.Entities.Workflow.t4s</DependentUpon>
     </TypeScriptCompile>
@@ -309,6 +315,7 @@
     <Content Include="Map\Operation\operationMap.css" />
     <Content Include="Map\Schema\schemaMap.css" />
     <Content Include="packages.config" />
+    <Content Include="Workflow\Case\Tag.css" />
     <Content Include="Workflow\Case\Inbox.css" />
     <Content Include="Workflow\Workflow\InitialWorkflow.xml">
       <SubType>Designer</SubType>

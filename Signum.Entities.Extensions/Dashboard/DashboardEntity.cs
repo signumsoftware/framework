@@ -43,7 +43,7 @@ namespace Signum.Entities.Dashboard
 
         public int? DashboardPriority { get; set; }
 
-        [Unit("s"), NumberIsValidator(Entities.ComparisonType.GreaterThan, 1)]
+        [Unit("s"), NumberIsValidator(Entities.ComparisonType.GreaterThanOrEqualTo, 10)]
         public int? AutoRefreshPeriod { get; set; }
 
         [StringLengthValidator(AllowNulls = false, Min = 2)]
