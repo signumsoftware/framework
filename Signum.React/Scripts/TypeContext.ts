@@ -303,7 +303,7 @@ export interface EntityFrame<T extends ModifiableEntity> {
     onReload: (pack: EntityPack<T>) => void;
     setError: (modelState: ModelState, initialPrefix?: string) => void;
     revalidate: () => void;
-    onClose: () => void;
+    onClose: (ok?: boolean) => void;
 }
 
 

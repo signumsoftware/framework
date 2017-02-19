@@ -184,13 +184,18 @@ function getConfirmMessage(coc: ContextualOperationContext<Entity>) {
 
 export namespace MenuItemConstructor { //To allow monkey patching
 
+    export function simplifyName(niceName: string) {
+        const array = new RegExp(OperationMessage.CreateFromRegex.niceToString()).exec(niceName);
+        return array ? (niceName.tryBefore(array[1]) || "") + array[1].firstUpper() : niceName;
+    }
     export function createContextualMenuItem(coc: ContextualOperationContext<Entity>, defaultClick: (coc: ContextualOperationContext<Entity>, event: React.MouseEvent<any>) => void, key: any) {
 
         const text = coc.settings && coc.settings.text ? coc.settings.text() :
             coc.entityOperationSettings && coc.entityOperationSettings.text ? coc.entityOperationSettings.text() :
-                coc.operationInfo.niceName;
+                simplifyName(coc.operationInfo.niceName);
 
         const bsStyle = coc.settings && coc.settings.style || coc.entityOperationSettings && coc.entityOperationSettings.style || autoStyleFunction(coc.operationInfo);
+        const icon = coc.settings && coc.settings.icon;
 
         const disabled = !!coc.canExecute;
 
@@ -203,7 +208,8 @@ export namespace MenuItemConstructor { //To allow monkey patching
             onClick={disabled ? undefined : onClick}
             data-operation={coc.operationInfo.key}
             key={key}>
-            {bsStyle && <span className={"icon empty-icon btn-" + bsStyle}></span>}
+            {icon ? <span className={classes("icon", icon)} style={{ color: coc.settings && coc.settings.iconColor }}></span> :
+                bsStyle ? <span className={classes("icon", "empty-icon", "btn-" + bsStyle)}></span> : undefined}
             {text}
         </MenuItem>;
 

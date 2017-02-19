@@ -9,7 +9,7 @@ import SelectorModal from './SelectorModal';
 import * as Operations from './Operations';
 import * as Navigator from './Navigator';
 
-export const customConstructors: { [typeName: string]: (typeName: string) => ModifiableEntity | Promise<ModifiableEntity> } = { }
+export const customConstructors: { [typeName: string]: (typeName: string) => ModifiableEntity | Promise<ModifiableEntity | undefined> } = {}
 
 export function construct<T extends ModifiableEntity>(type: Type<T>): Promise<EntityPack<T> | undefined>;
 export function construct(type: string): Promise<EntityPack<ModifiableEntity> | undefined>;
@@ -86,10 +86,6 @@ function assertCorrect(m: ModifiableEntity) {
         throw new Error("Member 'modified' expected after constructor");
 }
 
-export function registerConstructor<T extends ModifiableEntity>(type: Type<T>, constructor: (typeName: string) => T) {
-    customConstructors[type.typeName] = constructor;
-}
-
-export function registerConstructorPromise<T extends ModifiableEntity>(type: Type<T>, constructor: (typeName: string) => Promise<T>) {
+export function registerConstructor<T extends ModifiableEntity>(type: Type<T>, constructor: (typeName: string) => T | Promise<T | undefined>) {
     customConstructors[type.typeName] = constructor;
 }
