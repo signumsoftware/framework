@@ -5,52 +5,126 @@ import { Button } from "react-bootstrap"
 import { Binding, LambdaMemberType } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { newMListElement, Lite, liteKey, Entity, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { CaseActivityMessage, CaseNotificationEntity, CaseNotificationOperation, CaseActivityEntity, WorkflowActivityEntity } from '../Signum.Entities.Workflow'
+import {
+    CaseActivityMessage, CaseNotificationEntity, CaseNotificationOperation, CaseActivityEntity, WorkflowActivityEntity, CaseTagEntity,
+    CaseTagsModel, CaseOperation, CaseEntity
+} from '../Signum.Entities.Workflow'
 import { TypeContext, ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EnumCheckboxList, FormGroup, FormGroupStyle, FormGroupSize, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { SearchControl, ValueSearchControl, FilterOperation, OrderType, PaginationMode, ISimpleFilterBuilder, FilterOption, FindOptionsParsed } from '../../../../Framework/Signum.React/Scripts/Search'
+import { SearchControl, ValueSearchControl, FilterOperation, OrderType, PaginationMode, ISimpleFilterBuilder, FilterOption, FindOptions  } from '../../../../Framework/Signum.React/Scripts/Search'
+import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
+import { AlertEntity, AlertState } from '../../Alerts/Signum.Entities.Alerts'
 import * as WorkflowClient from '../WorkflowClient'
+import { Color } from '../../Basics/Color'
+import Tag from './Tag'
 
 
 export interface ActivityWithRemarks {
-    activity: Lite<WorkflowActivityEntity>;
+    workflowActivity: Lite<WorkflowActivityEntity>;
+    case: Lite<CaseEntity>;
+    caseActivity: Lite<CaseActivityEntity>;
     notification: Lite<CaseNotificationEntity>;
     remarks: string | undefined;
+    alerts: number;
+    tags: Array<CaseTagEntity>;
 }
 
 export interface ActivityWithRemarksProps extends React.Props<ActivityWithRemarks> {
     data: ActivityWithRemarks;
 }
 
-export default class ActivityWithRemarksComponent extends React.Component<ActivityWithRemarksProps, { remarks: string | undefined | null }>{
+export interface ActivityWithRemarksState {
+    remarks: string | undefined | null;
+    alerts: number;
+    tags: Array<CaseTagEntity>;
+}
+
+export default class ActivityWithRemarksComponent extends React.Component<ActivityWithRemarksProps, ActivityWithRemarksState>{
 
     constructor(props: ActivityWithRemarksProps) {
         super(props);
-        this.state = { remarks: this.props.data.remarks };
+        this.state = {
+            remarks: this.props.data.remarks,
+            alerts: this.props.data.alerts,
+            tags: this.props.data.tags,
+        };
     }
     componentWillReceiveProps(newProps: ActivityWithRemarksProps) {
-        if (!is(this.props.data.notification, newProps.data.notification))
-            this.setState({ remarks: newProps.data.remarks });
+        if ((this.props.data.remarks != newProps.data.remarks) ||
+            (this.props.data.alerts != newProps.data.alerts) ||
+            (this.props.data.tags.map(a => a.id).join(",") != newProps.data.tags.map(a => a.id).join(","))) {
+            this.setState({
+                remarks: newProps.data.remarks,
+                alerts: newProps.data.alerts,
+                tags: newProps.data.tags,
+            });
+        }
     }
 
     render() {
         return (
             <span>
-                {this.props.data.activity.toStr}
+                {this.props.data.workflowActivity.toStr}
                 &nbsp;
-                <a href="" onClick={this.handleClick} className={classes(
-                        "case-remarks",
-                        !this.state.remarks && "case-remarks-pencil")}>
+                <a href="" onClick={this.handleRemarksClick} className={classes(
+                        "case-icon",
+                        !this.state.remarks && "case-icon-ghost")}>
                     <span className={classes(
                         this.state.remarks ? "glyphicon glyphicon-comment" : "glyphicon glyphicon-pencil")} />
+                </a>
+                {this.state.alerts > 0 && " "}
+                {this.state.alerts > 0 && <a href="" onClick={this.handleAlertsClick} style={{ color: "orange" }}>
+                    <span className={"fa fa-bell"} />
+                </a>}
+                &nbsp;
+                <a href="" onClick={this.handleTagsClick} className={classes("case-icon", this.state.tags.length == 0 && "case-icon-ghost")}>
+                    {
+                        this.state.tags.length == 0 ? <span className={"fa fa-tags"} /> :
+                            this.state.tags.map((t, i) => <Tag key={i} tag={t} />)
+                    }
                 </a>
             </span>
         );
     }
 
-    handleClick = (e: React.MouseEvent<any>) => {
+    handleTagsClick = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
+
+        Navigator.view(CaseTagsModel.New({ caseTags: this.state.tags.map(m => newMListElement(m)) }),
+            { title: this.props.data.case.toStr || "" })
+            .then(cm => {
+                if (!cm)
+                    return;
+                Operations.API.executeLite(this.props.data.case, CaseOperation.SetTags, cm)
+                    .then(() => this.setState({ tags: cm.caseTags.map(a => a.element) }))
+                    .done()
+            }).done();
+
+    }
+
+    handleAlertsClick = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
+
+        var fo: FindOptions = {
+            queryName: AlertEntity,
+            filterOptions: [
+                { columnName: "Target", value: this.props.data.caseActivity },
+                { columnName: "Entity.Recipient", value: Navigator.currentUser },
+                { columnName: "Entity.CurrentState", value: "Alerted" }
+            ],
+            columnOptions: [{ columnName: "Target" }],
+            columnOptionsMode: "Remove",
+        }; 
+
+        Finder.exploreOrNavigate(fo)
+            .then(() => Finder.getCount(fo.queryName, fo.filterOptions!))
+            .then(alerts => this.setState({ alerts: alerts }))
+            .done();
+    }
+
+    handleRemarksClick = (e: React.MouseEvent<any>) => {
         e.preventDefault();
 
         ValueLineModal.show({
@@ -73,3 +147,4 @@ export default class ActivityWithRemarksComponent extends React.Component<Activi
         }).done();
     }
 }
+

@@ -9,6 +9,7 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 import * as Signum from '../Basics/Signum.Entities.Basics'
 import * as Dynamic from '../Dynamic/Signum.Entities.Dynamic'
 import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler'
+import * as Processes from '../Processes/Signum.Entities.Processes'
 
 
 interface IWorkflowConditionEvaluator {}
@@ -74,6 +75,10 @@ export module CaseActivityOperation {
     export const FixCaseDescriptions : Entities.ExecuteSymbol<Dynamic.DynamicTypeEntity> = registerSymbol("Operation", "CaseActivityOperation.FixCaseDescriptions");
 }
 
+export module CaseActivityProcessAlgorithm {
+    export const Timeout : Processes.ProcessAlgorithmSymbol = registerSymbol("ProcessAlgorithm", "CaseActivityProcessAlgorithm.Timeout");
+}
+
 export module CaseActivityQuery {
     export const Inbox = new QueryKey("CaseActivityQuery", "Inbox");
 }
@@ -91,6 +96,7 @@ export interface CaseEntity extends Entities.Entity {
     mainEntity: ICaseMainEntity;
     startDate: string;
     finishDate: string | null;
+    tags: Entities.MList<CaseTagEntity>;
 }
 
 export const CaseJunctionEntity = new Type<CaseJunctionEntity>("CaseJunction");
@@ -122,6 +128,27 @@ export type CaseNotificationState =
     "InProgress" |
     "Done" |
     "DoneByOther";
+
+export module CaseOperation {
+    export const SetTags : Entities.ExecuteSymbol<CaseEntity> = registerSymbol("Operation", "CaseOperation.SetTags");
+}
+
+export const CaseTagEntity = new Type<CaseTagEntity>("CaseTag");
+export interface CaseTagEntity extends Entities.Entity {
+    Type: "CaseTag";
+    name?: string | null;
+    color?: string | null;
+}
+
+export module CaseTagOperation {
+    export const Save : Entities.ExecuteSymbol<CaseTagEntity> = registerSymbol("Operation", "CaseTagOperation.Save");
+}
+
+export const CaseTagsModel = new Type<CaseTagsModel>("CaseTagsModel");
+export interface CaseTagsModel extends Entities.ModelEntity {
+    Type: "CaseTagsModel";
+    caseTags: Entities.MList<CaseTagEntity>;
+}
 
 export const DateFilterRange = new EnumType<DateFilterRange>("DateFilterRange");
 export type DateFilterRange =

@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Signum.Entities.Dynamic;
 using Signum.Entities.Scheduler;
+using Signum.Entities.Processes;
 
 namespace Signum.Entities.Workflow
 {
@@ -105,6 +106,12 @@ namespace Signum.Entities.Workflow
     public static class CaseActivityTask
     {
         public static readonly SimpleTaskSymbol Timeout;
+    }
+
+    [AutoInit]
+    public static class CaseActivityProcessAlgorithm
+    {
+        public static readonly ProcessAlgorithmSymbol Timeout;
     }
 
     public enum CaseActivityMessage
