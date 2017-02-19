@@ -23,7 +23,7 @@ import {
     TypeInfo, PropertyRoute
 } from './Reflection';
 
-import { navigateRoute, isNavigable, currentHistory, API as NavAPI, isCreable, tryConvert } from './Navigator';
+import { navigateRoute, isNavigable, currentHistory, API as NavAPI, isCreable, tryConvert, navigate } from './Navigator';
 import SearchModal from './SearchControl/SearchModal';
 import EntityLink from './SearchControl/EntityLink';
 import SearchControlLoaded from './SearchControl/SearchControlLoaded';
@@ -363,6 +363,30 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
     });
 }
 
+export function exploreOrNavigate(findOptions: FindOptions): Promise<void> {
+    return fetchEntitiesWithFilters(findOptions.queryName, findOptions.filterOptions || [], 2).then(list => {
+        if (list.length == 1)
+            return navigate(list[0]);
+        else
+            return explore(findOptions);
+    });
+}
+
+export function getCount(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], valueToken?: string) : Promise<number> {
+    return getQueryDescription(queryName).then(qd => {
+        return parseFilterOptions(filterOptions, qd).then(fop => {
+
+            let filters = fop.map(fo => ({
+                token: fo.token!.fullKey,
+                operation: fo.operation,
+                value: fo.value,
+            } as FilterRequest));
+
+            return API.queryCount({ queryKey: qd.queryKey, filters, valueToken });
+        });
+    });
+}
+
 export function fetchEntitiesWithFilters<T extends Entity>(queryName: Type<T>, filterOptions: FilterOption[], count: number): Promise<Lite<T>[]>;
 export function fetchEntitiesWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], count: number): Promise<Lite<Entity>[]>;
 export function fetchEntitiesWithFilters(queryName: PseudoType | QueryKey, filterOptions: FilterOption[], count: number) : Promise<Lite<Entity>[]> {
@@ -582,8 +606,8 @@ export module API {
         return ajaxPost<ResultTable>({ url: "~/api/query/executeQuery" }, request);
     }
 
-    export function queryCount(request: QueryCountRequest): Promise<number> {
-        return ajaxPost<number>({ url: "~/api/query/queryCount" }, request);
+    export function queryCount(request: QueryCountRequest, avoidNotifyPendingRequest: boolean | undefined = undefined): Promise<number> {
+        return ajaxPost<number>({ url: "~/api/query/queryCount", avoidNotifyPendingRequests: avoidNotifyPendingRequest }, request);
     }
 
     export function fetchEntitiesWithFilters(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
