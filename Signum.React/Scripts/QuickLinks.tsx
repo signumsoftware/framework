@@ -197,8 +197,8 @@ export interface QuickLinkOptions {
     isVisible?: boolean;
     text?: string;
     order?: number;
-    glyphicon?: string;
-    glyphiconColor?: string;
+    icon?: string;
+    iconColor?: string;
 }
 
 export abstract class QuickLink {
@@ -206,8 +206,8 @@ export abstract class QuickLink {
     text: string;
     order: number;
     name: string;
-    glyphicon: string;
-    glyphiconColor: string;
+    icon: string;
+    iconColor: string;
     ctx: QuickLinkContext<Entity>;
 
     constructor(name: string, options?: QuickLinkOptions) {
@@ -218,14 +218,14 @@ export abstract class QuickLink {
 
     abstract toMenuItem(key: any): React.ReactElement<any>;
 
-    icon() {
-        if (this.glyphicon == undefined)
+    renderIcon() {
+        if (this.icon == undefined)
             return undefined;
 
         return (
             <span
-                className={classes("glyphicon", this.glyphicon) }
-                style={{ color: this.glyphiconColor }}>
+                className={classes("icon", this.icon) }
+                style={{ color: this.iconColor }}>
             </span>
         );
     }
@@ -247,7 +247,7 @@ export class QuickLinkAction extends QuickLink {
 
         return (
             <MenuItem data-name={this.name} className="sf-quick-link" key={key} onClick={this.action}>
-                {this.icon()}
+                {this.renderIcon()}
                 {this.text}
             </MenuItem>
         );
@@ -267,7 +267,7 @@ export class QuickLinkLink extends QuickLink {
 
         return (
             <MenuItem data-name={this.name} className="sf-quick-link" key={key} onClick={this.handleClick}>
-                {this.icon()}
+                {this.renderIcon()}
                 {this.text}
             </MenuItem>
         );
@@ -297,7 +297,7 @@ export class QuickLinkExplore extends QuickLink {
     toMenuItem(key: any) {
         return (
             <MenuItem data-name={this.name} className="sf-quick-link" key={key} onClick={this.exploreOrPopup}>
-                {this.icon() }
+                {this.renderIcon() }
                 {this.text}
             </MenuItem>
         );
@@ -328,7 +328,7 @@ export class QuickLinkNavigate extends QuickLink {
     toMenuItem(key: any) {
         return (
             <MenuItem data-name={this.name} className="sf-quick-link" key={key} onClick={this.navigateOrPopup}>
-                {this.icon() }
+                {this.renderIcon() }
                 {this.text}
             </MenuItem>
         );

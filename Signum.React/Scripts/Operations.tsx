@@ -115,6 +115,8 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
     confirmMessage?: (ctx: ContextualOperationContext<T>) => string;
     onClick?: (ctx: ContextualOperationContext<T>, event: React.MouseEvent<any>) => void;
     style?: BsStyle;
+    icon?: string;
+    iconColor?: string;
     order?: number;
 
     constructor(operationSymbol: ConstructSymbol_FromMany<any, T>, options: ContextualOperationOptions<T>) {
@@ -131,6 +133,8 @@ export interface ContextualOperationOptions<T extends Entity> {
     confirmMessage?: (ctx: ContextualOperationContext<T>) => string;
     onClick?: (ctx: ContextualOperationContext<T>, event: React.MouseEvent<any>) => void;
     style?: BsStyle;
+    icon?: string;
+    iconColor?: string;
     order?: number;
 }
 
