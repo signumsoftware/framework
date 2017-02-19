@@ -335,7 +335,8 @@ export class QuickLinkNavigate extends QuickLink {
     }
 
     navigateOrPopup = (e: React.MouseEvent<any>) => {
-        if (e.ctrlKey || e.button == 1 || Navigator.getSettings(this.lite.EntityType).avoidPopup)
+        const es = Navigator.getSettings(this.lite.EntityType);
+        if (e.ctrlKey || e.button == 1 || es && es.avoidPopup)
             window.open(Navigator.navigateRoute(this.lite));
         else
             Navigator.navigate(this.lite);
