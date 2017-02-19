@@ -44,7 +44,7 @@ export function start(options: { routes: JSX.Element[] }) {
         return API.forEntityType(ctx.lite.EntityType).then(uqs =>
             uqs.map(uc => new QuickLinks.QuickLinkAction(liteKey(uc), uc.toStr || "", e => {
                 window.open(Navigator.currentHistory.createHref(`~/userChart/${uc.id}/${liteKey(ctx.lite)}`));
-            }, { glyphicon: "glyphicon-list-alt", glyphiconColor: "dodgerblue" })));
+            }, { icon: "glyphicon glyphicon-list-alt", iconColor: "dodgerblue" })));
     });
 
     QuickLinks.registerQuickLink(UserChartEntity, ctx => new QuickLinks.QuickLinkAction("preview", ChartMessage.Preview.niceToString(),

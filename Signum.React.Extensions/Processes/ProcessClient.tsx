@@ -20,18 +20,18 @@ require("!style!css!./Processes.css");
 export function start(options: { routes: JSX.Element[], packages: boolean, packageOperations: boolean }) {
   
 
-    Navigator.addSettings(new EntitySettings(ProcessEntity, e => new ViewPromise(resolve => require(['./Templates/Process'], resolve))));
+    Navigator.addSettings(new EntitySettings(ProcessEntity, e => new ViewPromise(resolve => require(['./Templates/Process'], resolve)), { isCreable : "Never" }));
 
     if (options.packages || options.packageOperations) {
         Navigator.addSettings(new EntitySettings(PackageLineEntity, e => new ViewPromise(resolve => require(['./Templates/PackageLine'], resolve))));
     }
 
     if (options.packages) {
-        Navigator.addSettings(new EntitySettings(PackageEntity, e => new ViewPromise(resolve => require(['./Templates/Package'], resolve))));
+        Navigator.addSettings(new EntitySettings(PackageEntity, e => new ViewPromise(resolve => require(['./Templates/Package'], resolve)), { isCreable: "Never" }));
     }
 
     if (options.packageOperations) {
-        Navigator.addSettings(new EntitySettings(PackageOperationEntity, e => new ViewPromise(resolve => require(['./Templates/PackageOperation'], resolve))));
+        Navigator.addSettings(new EntitySettings(PackageOperationEntity, e => new ViewPromise(resolve => require(['./Templates/PackageOperation'], resolve)), { isCreable: "Never" }));
     }
 
     options.routes.push(<Route path="processes">
@@ -127,7 +127,7 @@ function defaultConstructFromMany(coc: Operations.ContextualOperationContext<Ent
             return;
 
         const es = Navigator.getSettings(pack.entity.Type);
-        if (es.avoidPopup || event.ctrlKey || event.button == 1) {
+        if (es && es.avoidPopup || event.ctrlKey || event.button == 1) {
             Navigator.currentHistory.pushState(pack, '/Create/');
             return;
         }

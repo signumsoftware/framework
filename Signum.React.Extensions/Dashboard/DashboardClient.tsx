@@ -106,7 +106,7 @@ export function start(options: { routes: JSX.Element[] }) {
         return API.forEntityType(ctx.lite.EntityType).then(das =>
             das.map(d => new QuickLinks.QuickLinkAction(liteKey(d), d.toStr || "", e => {
                 navigateOrWindowsOpen(e, dashboardUrl(d, ctx.lite))
-            }, { glyphicon: "glyphicon-th-large", glyphiconColor: "darkslateblue" })));
+            }, { icon: "glyphicon glyphicon-th-large", iconColor: "darkslateblue" })));
     });
 
     QuickLinks.registerQuickLink(DashboardEntity, ctx => new QuickLinks.QuickLinkAction("preview", DashboardMessage.Preview.niceToString(),

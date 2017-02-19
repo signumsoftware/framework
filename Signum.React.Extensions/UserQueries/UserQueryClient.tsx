@@ -40,7 +40,7 @@ export function start(options: { routes: JSX.Element[] }) {
         return API.forEntityType(ctx.lite.EntityType).then(uqs =>
             uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), uq.toStr || "", e => {
                 window.open(Navigator.currentHistory.createHref(`~/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
-            }, { glyphicon: "glyphicon-list-alt", glyphiconColor: "dodgerblue" })));
+            }, { icon: "glyphicon glyphicon-list-alt", iconColor: "dodgerblue" })));
     });
 
     QuickLinks.registerQuickLink(UserQueryEntity, ctx => new QuickLinks.QuickLinkAction("preview", UserQueryMessage.Preview.niceToString(),
