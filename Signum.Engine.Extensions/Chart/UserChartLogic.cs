@@ -139,12 +139,19 @@ namespace Signum.Engine.Chart
             {
                 ChartScript = userChart.ChartScript,
                 Filters = userChart.Filters.Select(qf =>
-                new Filter(qf.Token.Token, qf.Operation, FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation.IsList()))).ToList(),
-                Columns = userChart.Columns.ToMList(),
+                    new Filter(qf.Token.Token, qf.Operation, FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation.IsList())))
+                .ToList(),
                 GroupResults = userChart.GroupResults,
                 Orders = userChart.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList(),
-                Parameters = userChart.Parameters,
+                Parameters = userChart.Parameters.ToMList(),
             };
+            
+            cr.Columns.ZipForeach(userChart.Columns, (a, b) =>
+            {
+                a.Token = b.Token == null ? null : new QueryTokenEntity(b.Token.Token);
+                a.DisplayName = b.DisplayName;
+            });
+
             return cr;
         }
 

@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Signum.Entities.Word;
 
 namespace Signum.Engine.Word
 {
@@ -23,12 +24,14 @@ namespace Signum.Engine.Word
         ScopedDictionary<string, ValueProviderBase> variables = new ScopedDictionary<string, ValueProviderBase>(null);
         public readonly Type SystemWordTemplateType;
         OpenXmlPackage document;
+        WordTemplateEntity template;
 
-        public TemplateParser(OpenXmlPackage document, QueryDescription queryDescription, Type systemWordTemplateType)
+        public TemplateParser(OpenXmlPackage document, QueryDescription queryDescription, Type systemWordTemplateType, WordTemplateEntity template)
         {
             this.queryDescription = queryDescription;
             this.SystemWordTemplateType = systemWordTemplateType;
             this.document = document;
+            this.template = template;
         }
 
         public void ParseDocument()

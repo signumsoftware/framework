@@ -167,7 +167,7 @@ namespace Signum.Engine.Word
                 {
                     Dump(document, "0.Original.txt");
 
-                    var parser = new TemplateParser(document, qd, template.SystemWordTemplate.ToType());
+                    var parser = new TemplateParser(document, qd, template.SystemWordTemplate.ToType(), template);
                     parser.ParseDocument(); Dump(document, "1.Match.txt");
                     parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
                     parser.AssertClean();
@@ -207,7 +207,7 @@ namespace Signum.Engine.Word
                 {
                     Dump(document, "0.Original.txt");
 
-                    var parser = new TemplateParser(document, qd, template.SystemWordTemplate.ToType());
+                    var parser = new TemplateParser(document, qd, template.SystemWordTemplate.ToType(), template);
                     parser.ParseDocument(); Dump(document, "1.Match.txt");
                     parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
                     parser.AssertClean();
@@ -215,7 +215,7 @@ namespace Signum.Engine.Word
                     if (parser.Errors.Any())
                         throw new InvalidOperationException("Error in template {0}:\r\n".FormatWith(template) + parser.Errors.ToString(e => e.Message, "\r\n"));
 
-                    var renderer = new TemplateRenderer(document, qd, entity, template.Culture.ToCultureInfo(), systemWordTemplate);
+                    var renderer = new TemplateRenderer(document, qd, entity, template.Culture.ToCultureInfo(), systemWordTemplate, template);
                     renderer.MakeQuery();
                     renderer.RenderNodes(); Dump(document, "3.Replaced.txt");
                     renderer.AssertClean();
@@ -319,7 +319,7 @@ namespace Signum.Engine.Word
                     {
                         Dump(document, "0.Original.txt");
 
-                        var parser = new TemplateParser(document, qd, template.SystemWordTemplate.ToType());
+                        var parser = new TemplateParser(document, qd, template.SystemWordTemplate.ToType(), template);
                         parser.ParseDocument(); Dump(document, "1.Match.txt");
                         parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
                         parser.AssertClean();
