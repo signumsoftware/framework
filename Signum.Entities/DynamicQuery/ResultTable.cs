@@ -274,10 +274,57 @@ namespace Signum.Entities.DynamicQuery
             return dt;
         }
 
+        public DataTable ToDataTablePivot(int rowColumnIndex, int columnColumnIndex, int valueIndex)
+        {
+            string Null = "- NULL -";
+
+            Dictionary<object, Dictionary<object, object>> dictionary = 
+                this.Rows
+                .AgGroupToDictionary(
+                    row => row[rowColumnIndex] ?? Null,
+                    gr => gr.ToDictionaryEx(
+                        row => row[columnColumnIndex] ?? Null,
+                        row => row[valueIndex])
+                );
+
+            var secondKeys = dictionary.Values.SelectMany(d => d.Keys).Distinct();
+
+            var firstColumn = this.Columns[rowColumnIndex];
+            var valueColumn = this.Columns[valueIndex];
+
+            var result = new DataTable();
+            result.Columns.Add(new DataColumn( firstColumn.Column.DisplayName, ConvertType(firstColumn.Column.Type)));
+            foreach (var item in secondKeys)
+                result.Columns.Add(new DataColumn(item.ToString(), valueColumn.Column.Type.UnNullify()));
+
+            foreach (var kvp in dictionary)
+            {
+                result.Rows.Add(secondKeys.Select(k => Convert(kvp.Value.TryGetC(k))).PreAnd(Convert(kvp.Key)).ToArray());
+            }
+
+            return result;
+
+        }
+
+        private Type ConvertType(Type type)
+        {
+            if (type.IsLite())
+                return typeof(string);
+
+            if (type.UnNullify().IsEnum)
+                return typeof(string);
+
+            return type.UnNullify();
+        }
+
         private object Convert(object p)
         {
             if (p is Lite<Entity>)
-                return ((Lite<Entity>)p).KeyLong();
+                return ((Lite<Entity>)p).ToString();
+
+
+            if (p is Enum)
+                return ((Enum)p).NiceToString();
 
             return p;
         }
