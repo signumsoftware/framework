@@ -138,6 +138,16 @@ namespace Signum.Utilities
             throw new FormatException(error);
         }
 
+        public static decimal ToDecimal(this double number)
+        {
+            return (decimal)number;
+        }
+
+        public static decimal RoundTo(this decimal number, int decimals)
+        {
+            return Math.Round(number, decimals);
+        }
+
         #endregion
 
         #region Math
