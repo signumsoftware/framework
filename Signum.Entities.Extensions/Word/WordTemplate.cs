@@ -13,6 +13,9 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities;
+using Signum.Entities.UserQueries;
+using Signum.Entities.Chart;
 
 namespace Signum.Entities.Word
 {
@@ -61,6 +64,10 @@ namespace Signum.Entities.Word
 
         public WordConverterSymbol WordConverter { get; set; }
 
+        [NotNullable, PreserveOrder]
+        [NotNullValidator, NoRepeatValidator]
+        public MList<WordTemplateTableSourceEntity> TableSources { get; set; } = new MList<WordTemplateTableSourceEntity>();
+
         static Expression<Func<WordTemplateEntity, string>> ToStringExpression = e => e.Name;
         [ExpressionField]
         public override string ToString()
@@ -73,8 +80,27 @@ namespace Signum.Entities.Word
             if (pi.Name == nameof(Template) && Template == null && Active)
                 return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
 
+            if (pi.Name == nameof(TableSources))
+            {
+                var errors = NoRepeatValidatorAttribute.ByKey(TableSources, a => a.Key);
+                if (errors.HasText())
+                    return ValidationMessage._0HasSomeRepeatedElements1.NiceToString(pi.NiceName(), errors);
+            }
+
             return base.PropertyValidation(pi);
         }
+    }
+
+    [Serializable]
+    public class WordTemplateTableSourceEntity : EmbeddedEntity
+    {
+        [NotNullable, SqlDbType(Size = 100)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        public string Key { get; set; }
+
+        [NotNullable]
+        [NotNullValidator, ImplementedBy(typeof(UserQueryEntity), typeof(UserChartEntity))]
+        public Lite<Entity> Source { get; set; }
     }
 
     [AutoInit]
@@ -96,6 +122,10 @@ namespace Signum.Entities.Word
         ChooseAReportTemplate,
         [Description("{0} {1} requires extra parameters")]
         _01RequiresExtraParameters,
+        [Description("Select the source of data for your table or chart")]
+        SelectTheSourceOfDataForYourTableOrChart,
+        [Description("Write this key as Title in the 'Alternative text' of your table or chart")]
+        WriteThisKeyAsTileInTheAlternativeTextOfYourTableOrChart,
     }
 
     [Serializable]

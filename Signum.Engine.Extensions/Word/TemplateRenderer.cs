@@ -1,4 +1,5 @@
 ﻿using DocumentFormat.OpenXml.Packaging;
+using D = DocumentFormat.OpenXml.Drawing;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
@@ -9,6 +10,9 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data;
+using Signum.Entities.Word;
+using DocumentFormat.OpenXml;
 
 namespace Signum.Engine.Word
 {
@@ -19,15 +23,17 @@ namespace Signum.Engine.Word
          Entity entity;
          CultureInfo culture;
          ISystemWordTemplate systemWordTemplate;
+        WordTemplateEntity template;
 
-         public TemplateRenderer(OpenXmlPackage document, QueryDescription queryDescription, Entity entity, CultureInfo culture, ISystemWordTemplate systemWordTemplate)
-         {
-             this.document = document;
-             this.entity = entity;
-             this.culture = culture;
-             this.systemWordTemplate = systemWordTemplate;
-             this.queryDescription = queryDescription;
-         }
+        public TemplateRenderer(OpenXmlPackage document, QueryDescription queryDescription, Entity entity, CultureInfo culture, ISystemWordTemplate systemWordTemplate, WordTemplateEntity template)
+        {
+            this.document = document;
+            this.entity = entity;
+            this.culture = culture;
+            this.systemWordTemplate = systemWordTemplate;
+            this.queryDescription = queryDescription;
+            this.template = template;
+        }
 
         ResultTable table;
         Dictionary<QueryToken, ResultColumn> dicTokenColumn;
@@ -65,17 +71,20 @@ namespace Signum.Engine.Word
         {
             var parameters = new WordTemplateParameters(this.entity, this.culture, this.dicTokenColumn, this.table.Rows)
             {
-                SystemWordTemplate = systemWordTemplate
+                SystemWordTemplate = systemWordTemplate,
+                Template = template,
             };
 
-            foreach (var root in document.AllRootElements())
+            foreach (var part in document.AllParts().Where(p => p.RootElement != null))
             {
-                var list = root.Descendants<BaseNode>().ToList(); //eager
-
-                foreach (var node in list)
+                var root = part.RootElement;
+                var baseNodes = root.Descendants<BaseNode>().ToList(); //eager
+                foreach (var node in baseNodes)
                 {
                     node.RenderNode(parameters);
                 }
+
+                TableBinder.ProcessTables(part, parameters);
             }           
         }
 
@@ -89,5 +98,7 @@ namespace Signum.Engine.Word
                     throw new InvalidOperationException("{0} unexpected BaseNode instances found: {1}".FormatWith(list.Count, list.ToString(l => l.LocalName, ", ")));
             }
         }
+
+     
     }
 }

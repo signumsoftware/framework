@@ -216,7 +216,13 @@ namespace Signum.Windows.Calendars
 
             if (GridBehavior)
             {
-                rowsHeight = InternalChildren.Cast<UIElement>().GroupBy(a => GetRow(a)).ToArray(g => g.Max(a => a.DesiredSize.Height), g => g.Key);
+                var groups = InternalChildren.Cast<UIElement>().GroupBy(a => GetRow(a));
+                
+                rowsHeight = new double[groups.Max(gr => gr.Key)];
+                foreach (var gr in groups)
+                {
+                    rowsHeight[gr.Key] = gr.Max(a => a.DesiredSize.Height);
+                }
                 rowsPosition = rowsHeight.SelectAggregate(0.0, (a, b) => a + b).ToArray();               
             }
 

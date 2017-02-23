@@ -27,6 +27,8 @@ namespace Signum.Engine.Word
 
         public ISystemWordTemplate SystemWordTemplate;
 
+        public WordTemplateEntity Template;
+
         public override object GetModel()
         {
             if (SystemWordTemplate == null)

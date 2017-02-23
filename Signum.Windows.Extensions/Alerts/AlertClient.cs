@@ -34,8 +34,6 @@ namespace Signum.Windows.Alerts
                 OperationClient.AddSettings(new List<OperationSettings> 
                 {
                     new EntityOperationSettings<Entity>(AlertOperation.CreateAlertFromEntity){ IsVisible = a => false },
-                    new EntityOperationSettings<AlertEntity>(AlertOperation.SaveNew){ IsVisible = a => a.Entity.IsNew },
-                    new EntityOperationSettings<AlertEntity>(AlertOperation.Save){ IsVisible = a => !a.Entity.IsNew }
                 });
 
                 WidgetPanel.GetWidgets += (obj, mainControl) =>
