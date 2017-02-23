@@ -29,9 +29,6 @@ namespace Signum.Engine.Chart
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                if (sb.Schema.Tables.ContainsKey(typeof(UserChartEntity)))
-                    throw new InvalidOperationException("UserChart has already been registered");
-
                 UserAssetsImporter.RegisterName<UserChartEntity>("UserChart");
 
                 sb.Schema.Synchronizing += Schema_Synchronizing;
