@@ -4,7 +4,7 @@ import * as moment from 'moment'
 import { classes, Dic, addClass } from '../Globals'
 import { Tab } from 'react-bootstrap'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
-import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference} from '../Reflection'
+import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference } from '../Reflection'
 import { ValidationMessage } from '../Signum.Entities'
 
 require("!style!css!./Lines.css");
@@ -15,6 +15,7 @@ export interface FormGroupProps extends React.Props<FormGroup> {
     ctx: StyleContext;
     labelProps?: React.HTMLAttributes<HTMLLabelElement>;
     htmlProps?: React.HTMLAttributes<HTMLDivElement>;
+    helpBlock?: React.ReactChild;
 }
 
 export class FormGroup extends React.Component<FormGroupProps, {}> {
@@ -30,9 +31,9 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
         if (ctx.formGroupStyle == "None") {
 
             const c = this.props.children as React.ReactElement<any>;
-         
+
             return (
-                <span {...this.props.htmlProps} className={ errorClass }>
+                <span {...this.props.htmlProps} className={errorClass}>
                     {c}
                 </span>
             );
@@ -40,18 +41,25 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
 
         const labelClasses = classes(ctx.formGroupStyle == "SrOnly" && "sr-only", ctx.formGroupStyle == "LabelColumns" && ("control-label " + ctx.labelColumnsCss));
         const label = (
-            <label htmlFor={this.props.controlId} {...this.props.labelProps } className= {addClass(this.props.labelProps, labelClasses)} >
-                { this.props.labelText || tCtx.propertyRoute && tCtx.propertyRoute.member!.niceName }
+            <label htmlFor={this.props.controlId} {...this.props.labelProps } className={addClass(this.props.labelProps, labelClasses)} >
+                {this.props.labelText || tCtx.propertyRoute && tCtx.propertyRoute.member!.niceName}
             </label>
         );
 
         const formGroupClasses = classes("form-group", this.props.ctx.formGroupSizeCss, errorClass);
         return <div {...this.props.htmlProps} className={addClass(this.props.htmlProps, formGroupClasses)}>
-            { ctx.formGroupStyle != "BasicDown" && label }
+            {ctx.formGroupStyle != "BasicDown" && label}
             {
-                ctx.formGroupStyle == "LabelColumns" ? (<div className={ this.props.ctx.valueColumnsCss } > { this.props.children } </div>) : this.props.children}
-            {ctx.formGroupStyle == "BasicDown" && label
+                ctx.formGroupStyle != "LabelColumns" ? this.props.children :
+                    (
+                        <div className={this.props.ctx.valueColumnsCss} >
+                            {this.props.children}
+                            {this.props.helpBlock && ctx.formGroupStyle == "LabelColumns" && <span className="help-block">{this.props.helpBlock}</span>}
+                        </div>
+                    )
             }
+            {ctx.formGroupStyle == "BasicDown" && label}
+            {this.props.helpBlock && ctx.formGroupStyle != "LabelColumns" && <span className="help-block">{this.props.helpBlock}</span>}
         </div>;
     }
 }
@@ -69,10 +77,10 @@ export class FormControlStatic extends React.Component<FormControlStaticProps, {
         const ctx = this.props.ctx;
 
         var p = this.props.htmlProps;
-        
+
         return (
             <p {...p} className={classes(ctx.formControlClassReadonly, p && p.className, this.props.className)} >
-                { this.props.children }
+                {this.props.children}
             </p>
         );
     }
@@ -88,13 +96,14 @@ export interface LineBaseProps extends StyleOptions {
     onValidate?: (val: any) => string;
     labelHtmlProps?: React.HTMLAttributes<HTMLLabelElement>;
     formGroupHtmlProps?: React.HTMLAttributes<any>;
+    helpBlock?: React.ReactChild;
 }
 
 export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps> extends React.Component<P, S> {
 
     constructor(props: P) {
         super(props);
-        
+
         this.state = this.calculateState(props);
     }
 
@@ -102,7 +111,7 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
         if (Dic.equals(this.state, nextState, true))
             return false; //For Debugging
 
-        return true; 
+        return true;
     }
 
     componentWillReceiveProps(nextProps: P, nextContext: any) {
@@ -159,7 +168,7 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
         this.overrideProps(state, otherProps as S);
         return state;
     }
-    
+
     overrideProps(state: S, overridenProps: S) {
         const labelHtmlProps = { ...state.labelHtmlProps, ...Dic.simplify(overridenProps.labelHtmlProps) };
         Dic.assign(state, Dic.simplify(overridenProps))

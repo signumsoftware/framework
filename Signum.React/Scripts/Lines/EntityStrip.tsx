@@ -41,7 +41,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         const s = this.state;
         const readOnly = this.state.ctx.readOnly;
         return (
-            <FormGroup ctx={s.ctx!} labelText={s.labelText} labelProps={s.labelHtmlProps} {...{ ...this.baseHtmlProps(), ...this.state.formGroupHtmlProps } }>
+            <FormGroup ctx={s.ctx!} labelText={s.labelText} labelProps={s.labelHtmlProps} helpBlock={s.helpBlock} {...{ ...this.baseHtmlProps(), ...this.state.formGroupHtmlProps } }>
                 <div className="SF-entity-strip SF-control-container">
                     <ul className={classes("sf-strip", this.props.vertical ? "sf-strip-vertical" : "sf-strip-horizontal") }>
                         {
