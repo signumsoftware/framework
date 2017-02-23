@@ -348,7 +348,7 @@ namespace Signum.Engine
             }
 
             if (!interactive)
-                throw new InvalidOperationException("Impossible to synchronize {0} without interactive Console".FormatWith(replacementsKey));
+                throw new InvalidOperationException("Impossible to synchronize {0} without interactive Console. Consider running the Load project.".FormatWith(replacementsKey));
 
             int startingIndex = 0;
             Console.WriteLine();
