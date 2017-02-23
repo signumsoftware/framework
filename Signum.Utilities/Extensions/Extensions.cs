@@ -148,6 +148,11 @@ namespace Signum.Utilities
             return Math.Round(number, decimals);
         }
 
+        public static double RoundTo(this double number, int decimals)
+        {
+            return Math.Round(number, decimals);
+        }
+
         #endregion
 
         #region Math
