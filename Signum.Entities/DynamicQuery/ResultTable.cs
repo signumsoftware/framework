@@ -262,20 +262,25 @@ namespace Signum.Entities.DynamicQuery
             this.rows = 0.To(rows).Select(i => new ResultRow(i, this)).ToArray();
         }
 
-        public DataTable ToDataTable()
+        public DataTable ToDataTable(DataTableValueConverter converter = null)
         {
+            if (converter != null)
+                converter = new InvariantDataTableValueConverter();
+
             DataTable dt = new DataTable("Table");
-            dt.Columns.AddRange(Columns.Select(c => new DataColumn(c.Column.Name,
-                c.Column.Type.IsLite() ? typeof(string) : c.Column.Type.UnNullify())).ToArray());
+            dt.Columns.AddRange(Columns.Select(c => new DataColumn(c.Column.Name, converter.ConvertType(c.Column))).ToArray());
             foreach (var row in Rows)
             {
-                dt.Rows.Add(Columns.Select((_, i) => Convert(row[i])).ToArray());
+                dt.Rows.Add(Columns.Select((c, i) => converter.ConvertValue(row[i], c.Column)).ToArray());
             }
             return dt;
         }
 
-        public DataTable ToDataTablePivot(int rowColumnIndex, int columnColumnIndex, int valueIndex)
+        public DataTable ToDataTablePivot(int rowColumnIndex, int columnColumnIndex, int valueIndex, DataTableValueConverter converter = null)
         {
+            if (converter != null)
+                converter = new InvariantDataTableValueConverter();
+
             string Null = "- NULL -";
 
             Dictionary<object, Dictionary<object, object>> dictionary = 
@@ -287,47 +292,28 @@ namespace Signum.Entities.DynamicQuery
                         row => row[valueIndex])
                 );
 
-            var secondKeys = dictionary.Values.SelectMany(d => d.Keys).Distinct();
+            var allColumns = dictionary.Values.SelectMany(d => d.Keys).Distinct();
 
-            var firstColumn = this.Columns[rowColumnIndex];
+            var rowColumn = this.Columns[rowColumnIndex];
             var valueColumn = this.Columns[valueIndex];
 
             var result = new DataTable();
-            result.Columns.Add(new DataColumn( firstColumn.Column.DisplayName, ConvertType(firstColumn.Column.Type)));
-            foreach (var item in secondKeys)
-                result.Columns.Add(new DataColumn(item.ToString(), valueColumn.Column.Type.UnNullify()));
+            result.Columns.Add(new DataColumn( rowColumn.Column.DisplayName, converter.ConvertType(rowColumn.Column)));
+            foreach (var item in allColumns)
+                result.Columns.Add(new DataColumn(item.ToString(), converter.ConvertType(valueColumn.Column)));
 
             foreach (var kvp in dictionary)
             {
-                result.Rows.Add(secondKeys.Select(k => Convert(kvp.Value.TryGetC(k))).PreAnd(Convert(kvp.Key)).ToArray());
+                result.Rows.Add(
+                    allColumns.Select(val => converter.ConvertValue(kvp.Value.TryGetC(val), valueColumn.Column))
+                    .PreAnd(converter.ConvertValue(kvp.Key, rowColumn.Column))
+                    .ToArray());
             }
 
             return result;
 
         }
 
-        private Type ConvertType(Type type)
-        {
-            if (type.IsLite())
-                return typeof(string);
-
-            if (type.UnNullify().IsEnum)
-                return typeof(string);
-
-            return type.UnNullify();
-        }
-
-        private object Convert(object p)
-        {
-            if (p is Lite<Entity>)
-                return ((Lite<Entity>)p).ToString();
-
-
-            if (p is Enum)
-                return ((Enum)p).NiceToString();
-
-            return p;
-        }
 
         int? totalElements;
         public int? TotalElements { get { return totalElements; } }
@@ -351,6 +337,74 @@ namespace Signum.Entities.DynamicQuery
         }
     }
 
+    public abstract class DataTableValueConverter
+    {
+        public abstract Type ConvertType(Column column);
+        public abstract object ConvertValue(object value, Column column);
+    }
+
+    public class NiceDataTableValueConverter : DataTableValueConverter
+    {
+        public override Type ConvertType(Column column)
+        {
+            var type = column.Type;
+
+            if (type.IsLite())
+                return typeof(string);
+
+            if (type.UnNullify().IsEnum)
+                return typeof(string);
+            
+            if (type.UnNullify() == typeof(DateTime) && column.Format != "g")
+                return typeof(string);
+
+            return type.UnNullify();
+        }
+
+        public override object ConvertValue(object value, Column column)
+        {
+            if (value is Lite<Entity>)
+                return ((Lite<Entity>)value).ToString();
+            
+            if (value is Enum)
+                return ((Enum)value).NiceToString();
+
+            if (value is DateTime && column.Token.Format != "g")
+                return ((DateTime)value).ToString(column.Token.Format);
+
+            return value;
+        }
+    }
+
+
+    public class InvariantDataTableValueConverter : NiceDataTableValueConverter
+    {
+        public override Type ConvertType(Column column)
+        {
+            var type = column.Token.Type;
+
+            if (type.IsLite())
+                return typeof(string);
+
+            if (type.UnNullify().IsEnum)
+                return typeof(string);
+
+            return type.UnNullify();
+        }
+
+        public override object ConvertValue(object value, Column column)
+        {
+            var type = column.Token.Type;
+
+            if (value is Lite<Entity>)
+                return ((Lite<Entity>)value).KeyLong();
+
+            if (value is Enum)
+                return ((Enum)value).ToString();
+            
+            return value;
+        }
+    }
 
     [Serializable]
     public class ResultRow : INotifyPropertyChanged
