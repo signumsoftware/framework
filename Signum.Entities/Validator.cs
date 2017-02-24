@@ -106,12 +106,12 @@ namespace Signum.Entities
 
             foreach (PropertyValidator<T> item in Validator.GetPropertyValidators(typeof(T)).Values)
             {
-                if (item.IsAplicable == null)
-                    item.IsAplicable = condition;
+                if (item.IsApplicable == null)
+                    item.IsApplicable = condition;
                 else
                 {
-                    var old = item.IsAplicable;
-                    item.IsAplicable = m => old(m) && condition(m);
+                    var old = item.IsApplicable;
+                    item.IsApplicable = m => old(m) && condition(m);
                 }
             }
 
@@ -135,10 +135,10 @@ namespace Signum.Entities
         public PropertyInfo PropertyInfo { get; private set; }
         public List<ValidatorAttribute> Validators { get; private set; }
 
-        public Func<T, bool> IsAplicable { get; set; }
-        public Func<T, bool> IsAplicablePropertyValidation { get; set; }
-        public Func<T, bool> IsAplicableParentChildPropertyValidation { get; set; }
-        public Func<T, bool> IsAplicableStaticPropertyValidation { get; set; }
+        public Func<T, bool> IsApplicable { get; set; }
+        public Func<T, bool> IsApplicablePropertyValidation { get; set; }
+        public Func<T, bool> IsApplicableParentChildPropertyValidation { get; set; }
+        public Func<T, bool> IsApplicableStaticPropertyValidation { get; set; }
 
         public Func<T, PropertyInfo, string> StaticPropertyValidation { get; set; }
 
@@ -160,7 +160,7 @@ namespace Signum.Entities
 
         public string PropertyCheck(T entity)
         {
-            if (IsAplicable != null && !IsAplicable(entity))
+            if (IsApplicable != null && !IsApplicable(entity))
                 return null;
 
             if (Validators.Count > 0)
@@ -177,7 +177,7 @@ namespace Signum.Entities
             }
 
             //Internal Validation
-            if (IsAplicablePropertyValidation == null || IsAplicablePropertyValidation(entity))
+            if (IsApplicablePropertyValidation == null || IsApplicablePropertyValidation(entity))
             {
                 string result = entity.PropertyValidation(PropertyInfo);
                 if (result != null)
@@ -185,7 +185,7 @@ namespace Signum.Entities
             }
 
             //Parent Validation
-            if (IsAplicableParentChildPropertyValidation == null || IsAplicableParentChildPropertyValidation(entity))
+            if (IsApplicableParentChildPropertyValidation == null || IsApplicableParentChildPropertyValidation(entity))
             {
                 string result = entity.OnParentChildPropertyValidation(PropertyInfo);
                 if (result != null)
@@ -193,7 +193,7 @@ namespace Signum.Entities
             }
 
             //Static validation
-            if (StaticPropertyValidation != null && (IsAplicableStaticPropertyValidation == null || IsAplicableStaticPropertyValidation(entity)))
+            if (StaticPropertyValidation != null && (IsApplicableStaticPropertyValidation == null || IsApplicableStaticPropertyValidation(entity)))
             {
                 foreach (var item in StaticPropertyValidation.GetInvocationListTyped())
                 {

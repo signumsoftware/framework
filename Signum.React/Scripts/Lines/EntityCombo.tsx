@@ -21,8 +21,7 @@ export interface EntityComboProps extends EntityBaseProps {
 }
 
 export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> {
-
-
+    
     calculateDefaultState(state: EntityComboProps) {
         state.remove = false;
         state.create = false;
@@ -36,10 +35,8 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
     }
 
     componentDidMount() {
-        if (!this.state.data) {
-            Finder.API.fetchAllLites({ types: this.state.type!.name })
-                .then(data => this.setState({ data: data.orderBy(a => a.toStr) } as any))
-                .done();
+        if (!this.state.data) {   
+            this.reloadData(this.props);
         }
     }
 
@@ -47,7 +44,31 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
         if (!!newProps.data && !this.props.data)
             console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityCombo: ${this.state.type!.name}`);
 
+        if (EntityCombo.getFindOptions(newProps.findOptions) != EntityCombo.getFindOptions(this.props.findOptions))
+            this.reloadData(newProps);
+
         super.componentWillReceiveProps(newProps, newContext);
+    }
+
+    static getFindOptions(fo: FindOptions | undefined) {
+        if (fo == undefined)
+            return undefined;
+
+        return Finder.findOptionsPath(fo);
+    }
+
+    reloadData(props: EntityComboProps) {
+        const fo = props.findOptions;
+        if (fo) {
+            Finder.expandParentColumn(fo);
+            Finder.fetchEntitiesWithFilters(fo.queryName, fo.filterOptions || [], 100)
+                .then(data => this.setState({ data: data.orderBy(a => a.toStr) } as any))
+                .done();
+        }
+        else
+            Finder.API.fetchAllLites({ types: this.state.type!.name })
+                .then(data => this.setState({ data: data.orderBy(a => a.toStr) } as any))
+                .done();
     }
 
     handleOnChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
