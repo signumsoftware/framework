@@ -35,7 +35,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
     }
 
     componentDidMount() {
-        if (!this.state.data) {
+        if (!this.state.data) {   
             this.reloadData(this.props);
         }
     }
@@ -59,10 +59,12 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
 
     reloadData(props: EntityComboProps) {
         const fo = props.findOptions;
-        if (fo)
+        if (fo) {
+            Finder.expandParentColumn(fo);
             Finder.fetchEntitiesWithFilters(fo.queryName, fo.filterOptions || [], 100)
                 .then(data => this.setState({ data: data.orderBy(a => a.toStr) } as any))
                 .done();
+        }
         else
             Finder.API.fetchAllLites({ types: this.state.type!.name })
                 .then(data => this.setState({ data: data.orderBy(a => a.toStr) } as any))
