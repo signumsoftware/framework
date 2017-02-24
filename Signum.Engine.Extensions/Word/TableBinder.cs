@@ -19,6 +19,7 @@ using Signum.Engine.Chart;
 using Signum.Entities;
 using DocumentFormat.OpenXml.Packaging;
 using System.Globalization;
+using System.Reflection;
 
 namespace Signum.Engine.Word
 {
@@ -32,16 +33,28 @@ namespace Signum.Engine.Word
                 var nonVisualProps = item.Descendants().SingleOrDefaultEx(a => a.LocalName == "cNvPr");
                 var title = GetTitle(nonVisualProps);
                 
-                Data.DataTable table = GetDataTable(parameters, title);
-                if (table != null)
+                Data.DataTable dataTable = GetDataTable(parameters, title);
+                if (dataTable != null)
                 {
-                    var chartRef = item.Descendants<Charts.ChartReference>().SingleEx();
-                    OpenXmlPart chartPart = part.GetPartById(chartRef.Id.Value);
-                    var chart = chartPart.RootElement.Descendants<Charts.Chart>().SingleEx();
-                    TableBinder.ReplaceChart(chart, table);
+                    var chartRef = item.Descendants<Charts.ChartReference>().SingleOrDefaultEx();
+                    if (chartRef != null)
+                    {
+                        OpenXmlPart chartPart = part.GetPartById(chartRef.Id.Value);
+                        var chart = chartPart.RootElement.Descendants<Charts.Chart>().SingleEx();
+                        ReplaceChart(chart, dataTable);
+                    }
+                    else
+                    {
+                        var table = item.Descendants<Drawing.Table>().SingleOrDefaultEx();
+                        if (table != null)
+                        {
+                            ReplaceTable(table, dataTable);
+                        }
+                    }
                 }
             }
         }
+
 
         static string GetTitle(OpenXmlElement nonVisualProps)
         {
@@ -54,21 +67,7 @@ namespace Signum.Engine.Word
             throw new NotImplementedException("Imposible to get the Title from " + nonVisualProps.GetType().FullName);
         }
 
-        public static void ReplaceChart(Charts.Chart chart, Data.DataTable table)
-        {
-            var plotArea = chart.Descendants<Charts.PlotArea>().SingleEx();
-            var series = plotArea.Descendants<OpenXmlCompositeElement>().Where(a => a.LocalName == "ser").ToList();
-
-                SynchronizeNodes(series, table.Rows.Cast<Data.DataRow>().ToList(),
-                    (ser, row, i, isCloned) =>
-                    {
-                        if (isCloned)
-                            ser.Descendants<Drawing.SchemeColor>().ToList().ForEach(f => f.Remove());
-
-                        BindData(ser, row, i);
-                    });
-        }
-
+ 
         
         static void SynchronizeNodes<N, T>(List<N> nodes, List<T> data, Action<N, T, int, bool> apply)
             where N : OpenXmlElement
@@ -94,7 +93,55 @@ namespace Signum.Engine.Word
             }
         }
 
-        private static void BindData(OpenXmlCompositeElement serie, Data.DataRow dataRow, int index)
+        private static void ReplaceTable(Drawing.Table table, Data.DataTable dataTable)
+        {
+            var tableGrid = table.Descendants<Drawing.TableGrid>().SingleEx();
+            SynchronizeNodes(
+                tableGrid.Descendants<Drawing.GridColumn>().ToList(),
+                dataTable.Columns.Cast<Data.DataColumn>().ToList(),
+                (gc, dc, i, isCloned) => { });
+
+            var rows = table.Descendants<Drawing.TableRow>().ToList();
+            SynchronizeNodes(
+               rows.FirstEx().Descendants<Drawing.TableCell>().ToList(),
+               dataTable.Columns.Cast<Data.DataColumn>().ToList(),
+               (gc, dc, i, isCloned) =>
+               {
+                   var text = gc.Descendants<Drawing.Text>().SingleOrDefaultEx();
+
+                   if (text != null)
+                       text.Text = dc.ColumnName;
+               });           
+            
+            SynchronizeNodes(
+                rows.Skip(1).ToList(),
+                dataTable.Rows.Cast<Data.DataRow>().ToList(),
+                (tr, dr, j, isCloned) => 
+                {
+                    SynchronizeNodes(
+                        tr.Descendants<Drawing.TableCell>().ToList(),
+                        dataTable.Columns.Cast<Data.DataColumn>().Select(dc => dr[dc]).ToList(),
+                        (gc, val, i, isCloned2) => { gc.Descendants<Drawing.Text>().SingleEx().Text = ToStringLocal(val); });
+                });
+        }
+
+        public static void ReplaceChart(Charts.Chart chart, Data.DataTable table)
+        {
+            var plotArea = chart.Descendants<Charts.PlotArea>().SingleEx();
+            var series = plotArea.Descendants<OpenXmlCompositeElement>().Where(a => a.LocalName == "ser").ToList();
+
+            SynchronizeNodes(series, table.Rows.Cast<Data.DataRow>().ToList(),
+                (ser, row, i, isCloned) =>
+                {
+                    if (isCloned)
+                        ser.Descendants<Drawing.SchemeColor>().ToList().ForEach(f => f.Remove());
+
+                    BindSerie(ser, row, i);
+                });
+        }
+
+
+        private static void BindSerie(OpenXmlCompositeElement serie, Data.DataRow dataRow, int index)
         {
             serie.Descendants<Charts.Formula>().ToList().ForEach(f => f.Remove());
 
@@ -124,15 +171,17 @@ namespace Signum.Engine.Word
                   (sp, val, i, isCloned) =>
                   {
                       sp.Index = new UInt32Value((uint)i);
-                      sp.Descendants<Charts.NumericValue>().Single().Text = 
-                        val == null ? null: 
-                        (val is IFormattable) ? ((IFormattable) val).ToString(null, CultureInfo.InvariantCulture) : 
-                        val.ToString();
+                      sp.Descendants<Charts.NumericValue>().Single().Text = ToStringLocal(val);
                   });
             }
         }
 
-
+        private static string ToStringLocal(object val)
+        {
+            return val == null ? null :
+                (val is IFormattable) ? ((IFormattable)val).ToString(null, CultureInfo.InvariantCulture) :
+                val.ToString();
+        }
 
         private static Data.DataTable GetDataTable(WordTemplateParameters parameters, string title)
         {
@@ -148,6 +197,35 @@ namespace Signum.Engine.Word
                 });
 
                 return table;
+            }
+
+            var method = title.TryAfter("Model:");
+            if (method != null)
+            {
+                var swt = parameters.SystemWordTemplate;
+                if (swt == null)
+                    throw new InvalidOperationException($"No SystemWordTemplate found in template '{parameters.Template}' to call '{method}'");
+                
+                var mi = swt.GetType().GetMethod(method);
+                if (mi == null)
+                    throw new InvalidOperationException($"No Method with name '{method}' found in type '{swt.GetType().Name}'");
+
+                object result;
+                try
+                {
+                    result = mi.Invoke(swt, null);
+                }
+                catch (TargetInvocationException e)
+                {
+                    e.InnerException.PreserveStackTrace();
+
+                    throw e.InnerException;
+                }
+
+                if (!(result is Data.DataTable))
+                    throw new InvalidOperationException($"Method '{method}' on '{swt.GetType().Name}' did not return a DataTable");
+
+                return (Data.DataTable)result;
             }
 
             return null;
