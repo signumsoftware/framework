@@ -31,3 +31,4 @@ _ReSharper*/
 *.js
 Signum.Analyzer/packages/*
 Signum.React/node_modules/*.js
+*.ncrunchproject
