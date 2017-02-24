@@ -1,5 +1,4 @@
-﻿/// <reference path="../typings/whatwg-fetch/whatwg-fetch.d.ts" />
-import { ModelState } from './Signum.Entities'
+﻿import { ModelState } from './Signum.Entities'
 import { Dic } from './Globals'
 import { GraphExplorer } from './Reflection'
 
@@ -14,9 +13,9 @@ export interface AjaxOptions {
 
     
     headers?: { [index: string]: string };
-    mode?: string | RequestMode;
-    credentials?: string | RequestCredentials;
-    cache?: string | RequestCache;
+    mode?: string;
+    credentials?: string;
+    cache?: string;
     abortController?: { abort?: () => void };
 }
 
@@ -32,7 +31,7 @@ export function baseUrl(options: AjaxOptions): string {
 
 export function ajaxGet<T>(options: AjaxOptions): Promise<T> {
     return ajaxGetRaw(options)
-        .then(a=> a.status == 204 ? undefined as any : a.json<T>());
+        .then(a => a.status == 204 ? undefined as any : a.json().then(a => a as T));
 }
 
 export function ajaxGetRaw(options: AjaxOptions) : Promise<Response> {
@@ -52,7 +51,7 @@ export function ajaxGetRaw(options: AjaxOptions) : Promise<Response> {
 
 export function ajaxPost<T>(options: AjaxOptions, data: any): Promise<T> {
     return ajaxPostRaw(options, data)
-        .then(a=> a.status == 204 ? undefined as any : a.json<T>());
+        .then(a => a.status == 204 ? undefined as any : a.json().then(a => a as T));
 }
 
 
@@ -151,7 +150,7 @@ a.style.display = "none";
 
 export function saveFile(response: Response) {
     let fileName = "file.dat";
-    let match = /attachment; filename=(.+)/.exec(response.headers.get("Content-Disposition"));
+    let match = /attachment; filename=(.+)/.exec(response.headers.get("Content-Disposition")!);
     if (match)
         fileName = match[1].trimEnd("\"").trimStart("\"");
 

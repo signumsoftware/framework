@@ -28,7 +28,7 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <TypeScriptToolsVersion>2.1</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>2.2</TypeScriptToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -277,7 +277,6 @@
     <TypeScriptCompile Include="Scripts\Lines.tsx" />
     <TypeScriptCompile Include="Scripts\Reflection.ts" />
     <TypeScriptCompile Include="Scripts\TypeContext.ts" />
-    <TypeScriptCompile Include="Typings\whatwg-fetch\whatwg-fetch.d.ts" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
