@@ -142,7 +142,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             }, ifError(ValidationError, e => {
                 GraphExplorer.setModelState(this.state.pack!.entity, e.modelState, "entity");
                 this.forceUpdate();
-            }));
+            })).done();
     }
 
 
