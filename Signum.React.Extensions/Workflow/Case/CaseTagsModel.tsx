@@ -2,7 +2,7 @@
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { ColorTypeaheadLine } from '../../Basics/Templates/ColorTypeahead'
-import { CaseTagsModel, CaseTagEntity } from '../Signum.Entities.Workflow'
+import { CaseTagsModel, CaseTagTypeEntity } from '../Signum.Entities.Workflow'
 import {
     ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip,
     EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, EntityTable
@@ -16,8 +16,8 @@ export default class CaseTagsModelComponent extends React.Component<{ ctx: TypeC
         var ctx = this.props.ctx;
         return (
             <EntityStrip ctx={ctx.subCtx(a => a.caseTags)}
-                onItemHtmlProps={(tag: CaseTagEntity) => ({ style: { textDecoration: "none" } })}
-                onRenderItem={(tag: CaseTagEntity) => <Tag tag={tag} />}
+                onItemHtmlProps={(tag: CaseTagTypeEntity) => ({ style: { textDecoration: "none" } })}
+                onRenderItem={(tag: CaseTagTypeEntity) => <Tag tag={tag} />}
             />
         );
     }

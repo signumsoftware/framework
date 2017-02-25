@@ -53,6 +53,8 @@ namespace Signum.Entities.Workflow
         [NotNullValidator, NoRepeatValidator]
         public MList<WorkflowJumpEntity> Jumps { get; set; } = new MList<WorkflowJumpEntity>();
 
+        public WorkflowScriptEntity Script { get; set; }
+
         [NotNullable]
         [NotNullValidator]
         public WorkflowXmlEntity Xml { get; set; }
@@ -108,6 +110,7 @@ namespace Signum.Entities.Workflow
             model.Timeout = this.Timeout;
             model.ValidationRules.AssignMList(this.ValidationRules);
             model.Jumps.AssignMList(this.Jumps);
+            model.Script = this.Script;
             model.ViewName = this.ViewName;
             model.UserHelp = this.UserHelp;
             model.SubWorkflow = this.SubWorkflow;
@@ -125,6 +128,7 @@ namespace Signum.Entities.Workflow
             this.Timeout = wModel.Timeout;
             this.ValidationRules.AssignMList(wModel.ValidationRules);
             this.Jumps.AssignMList(wModel.Jumps);
+            this.Script = wModel.Script;
             this.ViewName = wModel.ViewName;
             this.UserHelp = wModel.UserHelp;
             this.Comments = wModel.Comments;
@@ -165,22 +169,15 @@ namespace Signum.Entities.Workflow
         public Lite<WorkflowConditionEntity> Condition { get; set; }
 
         public Lite<WorkflowActionEntity> Action { get; set; }
-
-        public WorkflowJumpDirection Direction { get; set; }
-    }
-
-    public enum WorkflowJumpDirection
-    {
-        Forward,
-        Backward,
     }
 
     public enum WorkflowActivityType
     {
         Task,
-        DecisionTask,
+        Decision,
         DecompositionWorkflow,
         CallWorkflow,
+        Script,
     }
 
     [AutoInit]
@@ -259,7 +256,7 @@ namespace Signum.Entities.Workflow
 
     public interface ISubEntitiesEvaluator
     {
-        List<ICaseMainEntity> GetSubEntities(ICaseMainEntity mainEntity, WorkflowEvaluationContext ctx);
+        List<ICaseMainEntity> GetSubEntities(ICaseMainEntity mainEntity, WorkflowTransitionContext ctx);
     }
 
     [Serializable]
@@ -291,6 +288,8 @@ namespace Signum.Entities.Workflow
         [NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
         public MList<WorkflowJumpEntity> Jumps { get; set; } = new MList<WorkflowJumpEntity>();
+
+        public WorkflowScriptEntity Script { get; set; }
 
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 255)]
         public string ViewName { get; set; }

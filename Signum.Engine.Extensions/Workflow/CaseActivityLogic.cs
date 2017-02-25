@@ -89,6 +89,15 @@ namespace Signum.Engine.Workflow
             return CaseActivitiesFromCaseExpression.Evaluate(e);
         }
 
+
+        static Expression<Func<CaseEntity, IQueryable<CaseTagEntity>>> TagsExpression =
+        e => Database.Query<CaseTagEntity>().Where(a => a.Case.RefersTo(e));
+        [ExpressionField]
+        public static IQueryable<CaseTagEntity> Tags(this CaseEntity e)
+        {
+            return TagsExpression.Evaluate(e);
+        }
+
         static Expression<Func<CaseActivityEntity, IQueryable<CaseNotificationEntity>>> NotificationsExpression =
             e => Database.Query<CaseNotificationEntity>().Where(a => a.CaseActivity.RefersTo(e));
         [ExpressionField]
@@ -110,8 +119,8 @@ namespace Signum.Engine.Workflow
                         e.Description,
                     });
 
-                sb.Include<CaseTagEntity>()
-                    .WithSave(CaseTagOperation.Save)
+                sb.Include<CaseTagTypeEntity>()
+                    .WithSave(CaseTagTypeOperation.Save)
                     .WithQuery(dqm, e => new
                     {
                         Entity = e,
@@ -120,23 +129,42 @@ namespace Signum.Engine.Workflow
                         e.Color
                     });
 
+
+                sb.Include<CaseTagEntity>()
+                    .WithExpressionFrom(dqm, (CaseEntity ce) => ce.Tags())
+                    .WithQuery(dqm, e => new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.CreationDate,
+                        e.Case,
+                        e.TagType,
+                        e.CreatedBy,
+                    });
+
                 new Graph<CaseEntity>.Execute(CaseOperation.SetTags)
                 {
-                    AllowsNew = true,
-                    Lite = false,
                     Execute = (e, args) => 
                     {
-                        var visible = e.Tags.Where(a => a.IsAllowedFor(TypeAllowedBasic.Read)).ToList();
+                        var current = e.Tags().ToList();
 
                         var model = args.GetArg<CaseTagsModel>();
 
-                        e.Tags.RemoveAll(t => visible.Contains(t) && !model.CaseTags.Contains(t));
+                        var toDelete = current.Where(ct => model.OldCaseTags.Contains(ct.TagType) && !model.CaseTags.Contains(ct.TagType)).ToList();
 
-                        e.Tags.AddRange(model.CaseTags.Except(e.Tags).ToList());
+                        Database.DeleteList(toDelete);
+
+                        model.CaseTags.Where(ctt => !current.Any(ct => ct.TagType.Is(ctt))).Select(ctt => new CaseTagEntity
+                        {
+                            Case = e.ToLite(),
+                            TagType = ctt,
+                            CreatedBy = UserHolder.Current.ToLite(),
+                        }).SaveList();
                     },
                 }.Register();
 
                 sb.Include<CaseActivityEntity>()
+                    .WithIndex(a => new { a.NextExecution })
                     .WithExpressionFrom(dqm, (WorkflowActivityEntity c) => c.CaseActivities())
                     .WithExpressionFrom(dqm, (CaseEntity c) => c.CaseActivities())
                     .WithExpressionFrom(dqm, (CaseActivityEntity c) => c.NextActivities())
@@ -213,7 +241,7 @@ namespace Signum.Engine.Workflow
                                 notification = cn.ToLite(),
                                 remarks = cn.Remarks,
                                 alerts = ca.MyActiveAlerts().Count(),
-                                tags = ca.Case.Tags.Where(t=> t.IsAllowedFor(TypeAllowedBasic.Read)).ToList(),
+                                tags = ca.Case.Tags().Select(a=>a.TagType).ToList(),
                             },
                             Case = ca.Case.Description,
                             Sender = previous.DoneBy,
@@ -246,7 +274,7 @@ namespace Signum.Engine.Workflow
             public Lite<CaseNotificationEntity> notification { get; set; }
             public string remarks { get; set; }
             public int alerts { get; set; }
-            public List<CaseTagEntity> tags { get; set; }
+            public List<CaseTagTypeEntity> tags { get; set; }
         }
 
         static readonly GenericInvoker<Action> giFixCaseDescriptions = new GenericInvoker<Action>(() => FixCaseDescriptions<Entity>());
@@ -323,7 +351,7 @@ namespace Signum.Engine.Workflow
             if (wc.Condition != null)
             {
                 var alg = wc.Condition.RetrieveFromCache().Eval.Algorithm;
-                var result = alg.EvaluateUntyped(ctx.CaseActivity.Case.MainEntity, new WorkflowEvaluationContext(ctx.CaseActivity, wc, ctx.DecisionResult));
+                var result = alg.EvaluateUntyped(ctx.CaseActivity.Case.MainEntity, new WorkflowTransitionContext(ctx.CaseActivity, wc, ctx.DecisionResult));
 
 
                 return result;
@@ -332,7 +360,7 @@ namespace Signum.Engine.Workflow
             return true;
         }
 
-        static void WorkflowAction(ICaseMainEntity me, WorkflowEvaluationContext ctx)
+        static void WorkflowAction(ICaseMainEntity me, WorkflowTransitionContext ctx)
         {
             WorkflowLogic.OnTransition?.Invoke(me, ctx);
 
@@ -369,7 +397,7 @@ namespace Signum.Engine.Workflow
             var lane = caseActivity.WorkflowActivity.Lane;
             var actors = lane.Actors.ToList();
             if (lane.ActorsEval != null)
-                actors.AddRange(lane.ActorsEval.Algorithm.GetActors(caseActivity.Case.MainEntity, new WorkflowEvaluationContext(caseActivity, null, null)).EmptyIfNull().NotNull());
+                actors.AddRange(lane.ActorsEval.Algorithm.GetActors(caseActivity.Case.MainEntity, new WorkflowTransitionContext(caseActivity, null, null)).EmptyIfNull().NotNull());
 
             var notifications = actors.Distinct().SelectMany(a =>
             Database.Query<UserEntity>()
@@ -427,7 +455,7 @@ namespace Signum.Engine.Workflow
                             Case = @case,
                         };
 
-                        WorkflowAction(@case.MainEntity, new WorkflowEvaluationContext(ca, connection, null));
+                        WorkflowAction(@case.MainEntity, new WorkflowTransitionContext(ca, connection, null));
                        
                         return ca;
                     }
@@ -449,7 +477,7 @@ namespace Signum.Engine.Workflow
                         c.Save();
 
                         var prev = ca.WorkflowActivity.PreviousConnectionsFromCache().SingleEx(a => a.From is WorkflowEventEntity && ((WorkflowEventEntity)a.From).Type == WorkflowEventType.Start);
-                        WorkflowAction(ca.Case.MainEntity, new WorkflowEvaluationContext(ca, prev, null));
+                        WorkflowAction(ca.Case.MainEntity, new WorkflowTransitionContext(ca, prev, null));
 
                         ca.StartDate = now;
                         ca.Save();
@@ -647,6 +675,7 @@ namespace Signum.Engine.Workflow
                     ca.DoneType = transition is WorkflowJumpEntity ? DoneType.Jump :
                                   transition is WorkflowRejectEntity ? DoneType.Rejected :
                                   transition is WorkflowTimeoutEntity ? DoneType.Timeout :
+                                  transition is WorkflowScriptEntity ? DoneType.Failure :
                                   decisionResult == DecisionResult.Approve ? DoneType.Approve :
                                   decisionResult == DecisionResult.Decline ? DoneType.Decline : 
                                   DoneType.Next;
@@ -669,12 +698,13 @@ namespace Signum.Engine.Workflow
                         var to =
                             transition is WorkflowJumpEntity ? ((WorkflowJumpEntity)transition).To.Retrieve() :
                             transition is WorkflowTimeoutEntity ? ((WorkflowTimeoutEntity)transition).To.Retrieve() :
+                            transition is WorkflowScriptEntity ? ((IWorkflowTransitionTo)transition).To.Retrieve() :
                             transition is WorkflowRejectEntity ? ca.Previous.Retrieve().WorkflowActivity :
                             new NotImplementedException().Throw<IWorkflowNodeEntity>();
 
                         if (transition.Condition != null)
                         {
-                            var jumpCtx = new WorkflowEvaluationContext(ctx.CaseActivity, transition, null);
+                            var jumpCtx = new WorkflowTransitionContext(ctx.CaseActivity, transition, null);
                             var alg = transition.Condition.RetrieveFromCache().Eval.Algorithm;
                             var result = alg.EvaluateUntyped(ctx.CaseActivity.Case.MainEntity, jumpCtx);
                             if (!result)
@@ -692,7 +722,7 @@ namespace Signum.Engine.Workflow
                             return;
                     }
 
-                    ctx.Connections.ForEach(wc => WorkflowAction(ca.Case.MainEntity, new WorkflowEvaluationContext(ca, wc, ctx.DecisionResult)));
+                    ctx.Connections.ForEach(wc => WorkflowAction(ca.Case.MainEntity, new WorkflowTransitionContext(ca, wc, ctx.DecisionResult)));
 
                     ca.Case.Description = ca.Case.MainEntity.ToString().Trim();
 
@@ -748,7 +778,7 @@ namespace Signum.Engine.Workflow
             private static void Decompose(CaseActivityEntity ca, WorkflowActivityEntity decActivity, IWorkflowTransition conn)
             {
                 var surrogate = InsertNewCaseActivity(ca, decActivity);
-                var subEntities = decActivity.SubWorkflow.SubEntitiesEval.Algorithm.GetSubEntities(ca.Case.MainEntity, new WorkflowEvaluationContext(ca, conn, null));
+                var subEntities = decActivity.SubWorkflow.SubEntitiesEval.Algorithm.GetSubEntities(ca.Case.MainEntity, new WorkflowTransitionContext(ca, conn, null));
                 if (decActivity.Type == WorkflowActivityType.CallWorkflow && subEntities.Count > 1)
                     throw new InvalidOperationException("More than one entity generated using CallWorkflow. Use DecompositionWorkflow instead.");
 

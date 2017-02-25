@@ -5,7 +5,7 @@ import { TypeContext, StyleOptions, EntityFrame  } from '../../../../Framework/S
 import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
-import { EntityPack, Entity, Lite, JavascriptMessage, entityInfo, getToString } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { EntityPack, Entity, Lite, JavascriptMessage, entityInfo, getToString, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from '../../../../Framework/Signum.React/Scripts/Frames/Widgets'
 import ValidationErrors from '../../../../Framework/Signum.React/Scripts/Frames/ValidationErrors'
 import ButtonBar from '../../../../Framework/Signum.React/Scripts/Frames/ButtonBar'
@@ -13,6 +13,7 @@ import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperat
 import * as WorkflowClient from '../WorkflowClient'
 import CaseFromSenderInfo from './CaseFromSenderInfo'
 import CaseButtonBar from './CaseButtonBar'
+import InlineCaseTags from './InlineCaseTags'
 
 require("!style!css!../../../../Framework/Signum.React/Scripts/Frames/Frames.css");
 require("!style!css!./Case.css");
@@ -61,7 +62,7 @@ export default class CasePageFrame extends React.Component<CasePageFrameProps, C
 
         const routeParams = props.routeParams!;
         if (routeParams.caseActivityId) {
-            return WorkflowClient.API.fetchActivityForViewing(routeParams.caseActivityId!)
+            return WorkflowClient.API.fetchActivityForViewing({ EntityType: CaseActivityEntity.typeName, id: routeParams.caseActivityId })
                 .then(pack => this.setState({ pack: pack  }));
 
         } else if (routeParams.workflowId) {
@@ -136,7 +137,8 @@ export default class CasePageFrame extends React.Component<CasePageFrameProps, C
         return (
             <div className="normal-control">
                 {this.renderTitle()}     
-                <CaseFromSenderInfo current={pack.activity} />         
+                <CaseFromSenderInfo current={pack.activity} />  
+                {!pack.activity.case.isNew && <div className="inline-tags"> <InlineCaseTags case={toLite(pack.activity.case)} /></div>}
                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-activity-entity={entityInfo(pack.activity) }>
                     {this.renderMainEntity() }
                 </div>

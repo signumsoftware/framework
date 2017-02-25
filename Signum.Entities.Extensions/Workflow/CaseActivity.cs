@@ -40,9 +40,12 @@ namespace Signum.Entities.Workflow
         public Lite<UserEntity> DoneBy { get; set; }
         public DoneType? DoneType { get; set; }
 
+        public DateTime? NextExecution { get; set; }
+        public int? RetryCount { get; set; }
+
         static Expression<Func<CaseActivityEntity, CaseActivityState>> StateExpression =
         @this => @this.DoneDate.HasValue ? CaseActivityState.Done :
-        @this.WorkflowActivity.Type == WorkflowActivityType.DecisionTask ? CaseActivityState.PendingDecision : 
+        @this.WorkflowActivity.Type == WorkflowActivityType.Decision ? CaseActivityState.PendingDecision : 
         CaseActivityState.PendingNext;
         [ExpressionField("StateExpression")]
         public CaseActivityState State
@@ -72,6 +75,7 @@ namespace Signum.Entities.Workflow
         Jump,
         Rejected,
         Timeout,
+        Failure,
     }
 
     public enum CaseActivityState

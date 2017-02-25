@@ -98,7 +98,7 @@ namespace Signum.Entities.Workflow
 
     public interface IWorkflowLaneActorsEvaluator
     {
-        List<Lite<Entity>> GetActors(ICaseMainEntity mainEntity, WorkflowEvaluationContext ctx);
+        List<Lite<Entity>> GetActors(ICaseMainEntity mainEntity, WorkflowTransitionContext ctx);
     }
 
     [AutoInit]

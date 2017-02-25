@@ -5,7 +5,7 @@ import { ajaxPost, ajaxGet, ValidationError } from '../../../Framework/Signum.Re
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import {
     EntityPack, Lite, toLite, MListElement, JavascriptMessage, EntityControlMessage,
-    newMListElement, liteKey, getMixin, Entity, ExecuteSymbol, isEntityPack
+    newMListElement, liteKey, getMixin, Entity, ExecuteSymbol, isEntityPack, isEntity
 } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { Type, PropertyRoute } from '../../../Framework/Signum.React/Scripts/Reflection'
@@ -39,7 +39,7 @@ import {
     WorkflowEntity, WorkflowLaneEntity, WorkflowActivityEntity, WorkflowConnectionEntity, WorkflowConditionEntity, WorkflowActionEntity, CaseActivityQuery, CaseActivityEntity,
     CaseActivityOperation, CaseEntity, CaseNotificationEntity, CaseNotificationState, InboxFilterModel, WorkflowOperation, WorkflowPoolEntity,
     WorkflowActivityOperation, WorkflowReplacementModel, WorkflowModel, BpmnEntityPair, WorkflowActivityModel, ICaseMainEntity, WorkflowGatewayEntity, WorkflowEventEntity,
-    WorkflowLaneModel, WorkflowConnectionModel, IWorkflowNodeEntity, WorkflowActivityMessage, WorkflowTimeoutEntity, CaseTagEntity, CaseTagsModel
+    WorkflowLaneModel, WorkflowConnectionModel, IWorkflowNodeEntity, WorkflowActivityMessage, WorkflowTimeoutEntity, CaseTagEntity, CaseTagsModel, CaseTagTypeEntity
 } from './Signum.Entities.Workflow'
 
 import InboxFilter from './Case/InboxFilter'
@@ -220,7 +220,7 @@ function hide<T extends Entity>(type: Type<T>) {
     Navigator.addSettings(new EntitySettings(type, undefined, { isNavigable: "Never", isViewable: false, isCreable: "Never" }));
 }
 
-export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Entity>) {
+export function executeWorkflowSave(eoc: Operations.EntityOperationContext<WorkflowEntity>) {
 
     let wf = eoc.frame.entityComponent as Workflow;
     wf.getXml()
@@ -235,7 +235,7 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Entit
 
             var promise = eoc.entity.isNew ?
                 Promise.resolve<PreviewResult | undefined>(undefined) :
-                API.previewChanges(eoc.entity.id, model);
+                API.previewChanges(toLite(eoc.entity), model);
 
             promise.then(pr => {
                 if (!pr || pr.Model.replacements.length == 0)
@@ -326,9 +326,9 @@ export function toEntityPackWorkflow(entityOrEntityPack: Lite<CaseActivityEntity
     if ((entityOrEntityPack as CaseEntityPack).canExecuteActivity)
         return Promise.resolve(entityOrEntityPack);
 
-    const id = (entityOrEntityPack as CaseActivityEntity | Lite<CaseActivityEntity>).id!;
+    const lite = isEntity(entityOrEntityPack) ? toLite(entityOrEntityPack) : entityOrEntityPack as Lite<CaseActivityEntity>;
 
-    return API.fetchActivityForViewing(id);
+    return API.fetchActivityForViewing(lite);
 }
 
 
@@ -387,20 +387,24 @@ export function getViewNames(typeName: string) {
 }
 
 export namespace API {
-    export function fetchActivityForViewing(caseActivityId: string | number): Promise<CaseEntityPack> {
-        return ajaxGet<CaseEntityPack>({ url: `~/api/workflow/fetchForViewing/${caseActivityId}` });
+    export function fetchActivityForViewing(caseActivity: Lite<CaseActivityEntity>): Promise<CaseEntityPack> {
+        return ajaxGet<CaseEntityPack>({ url: `~/api/workflow/fetchForViewing/${caseActivity.id}` });
+    }
+
+    export function fetchCaseTags(caseLite: Lite<CaseEntity>): Promise<CaseTagTypeEntity[]> {
+        return ajaxGet<CaseTagTypeEntity[]>({ url: `~/api/workflow/tags/${caseLite.id}` });
     }
 
     export function starts(): Promise<Array<Lite<WorkflowEntity>>> {
         return ajaxGet<Array<Lite<WorkflowEntity>>>({ url: `~/api/workflow/starts` });
     }
 
-    export function getWorkflowModel(workflowId: string | number): Promise<WorkflowModel> {
-        return ajaxGet<WorkflowModel>({ url: `~/api/workflow/workflowModel/${workflowId} ` });
+    export function getWorkflowModel(workflow: Lite<WorkflowEntity>): Promise<WorkflowModel> {
+        return ajaxGet<WorkflowModel>({ url: `~/api/workflow/workflowModel/${workflow.id} ` });
     }
 
-    export function previewChanges(workflowId: string | number, model: WorkflowModel): Promise<PreviewResult> {
-        return ajaxPost<PreviewResult>({ url: `~/api/workflow/previewChanges/${workflowId} ` }, model);
+    export function previewChanges(workflow: Lite<WorkflowEntity>, model: WorkflowModel): Promise<PreviewResult> {
+        return ajaxPost<PreviewResult>({ url: `~/api/workflow/previewChanges/${workflow.id} ` }, model);
     }
 
     export function findMainEntityType(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {

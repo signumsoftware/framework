@@ -6,7 +6,7 @@ import { Binding, LambdaMemberType } from '../../../../Framework/Signum.React/Sc
 import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { newMListElement, Lite, liteKey, Entity, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import {
-    CaseActivityMessage, CaseNotificationEntity, CaseNotificationOperation, CaseActivityEntity, WorkflowActivityEntity, CaseTagEntity,
+    CaseActivityMessage, CaseNotificationEntity, CaseNotificationOperation, CaseActivityEntity, WorkflowActivityEntity, CaseTagTypeEntity,
     CaseTagsModel, CaseOperation, CaseEntity
 } from '../Signum.Entities.Workflow'
 import { TypeContext, ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EnumCheckboxList, FormGroup, FormGroupStyle, FormGroupSize, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
@@ -18,7 +18,7 @@ import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLine
 import { AlertEntity, AlertState } from '../../Alerts/Signum.Entities.Alerts'
 import * as WorkflowClient from '../WorkflowClient'
 import { Color } from '../../Basics/Color'
-import Tag from './Tag'
+import InlineCaseTags from './InlineCaseTags'
 
 
 export interface ActivityWithRemarks {
@@ -28,7 +28,7 @@ export interface ActivityWithRemarks {
     notification: Lite<CaseNotificationEntity>;
     remarks: string | undefined;
     alerts: number;
-    tags: Array<CaseTagEntity>;
+    tags: Array<CaseTagTypeEntity>;
 }
 
 export interface ActivityWithRemarksProps extends React.Props<ActivityWithRemarks> {
@@ -38,7 +38,7 @@ export interface ActivityWithRemarksProps extends React.Props<ActivityWithRemark
 export interface ActivityWithRemarksState {
     remarks: string | undefined | null;
     alerts: number;
-    tags: Array<CaseTagEntity>;
+    tags: Array<CaseTagTypeEntity>;
 }
 
 export default class ActivityWithRemarksComponent extends React.Component<ActivityWithRemarksProps, ActivityWithRemarksState>{
@@ -79,31 +79,12 @@ export default class ActivityWithRemarksComponent extends React.Component<Activi
                     <span className={"fa fa-bell"} />
                 </a>}
                 &nbsp;
-                <a href="" onClick={this.handleTagsClick} className={classes("case-icon", this.state.tags.length == 0 && "case-icon-ghost")}>
-                    {
-                        this.state.tags.length == 0 ? <span className={"fa fa-tags"} /> :
-                            this.state.tags.map((t, i) => <Tag key={i} tag={t} />)
-                    }
-                </a>
+               <InlineCaseTags case={this.props.data.case} defaultTags={this.state.tags} />
             </span>
         );
     }
 
-    handleTagsClick = (e: React.MouseEvent<any>) => {
-        e.preventDefault();
-
-        Navigator.view(CaseTagsModel.New({ caseTags: this.state.tags.map(m => newMListElement(m)) }),
-            { title: this.props.data.case.toStr || "" })
-            .then(cm => {
-                if (!cm)
-                    return;
-                Operations.API.executeLite(this.props.data.case, CaseOperation.SetTags, cm)
-                    .then(() => this.setState({ tags: cm.caseTags.map(a => a.element) }))
-                    .done()
-            }).done();
-
-    }
-
+   
     handleAlertsClick = (e: React.MouseEvent<any>) => {
         e.preventDefault();
 
