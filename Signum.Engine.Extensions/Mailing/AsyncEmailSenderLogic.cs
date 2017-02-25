@@ -182,18 +182,18 @@ namespace Signum.Engine.Mailing
             }
         }
 
-		static bool sqlDependencyRegistered = false;
+        static bool sqlDependencyRegistered = false;
         private static void SetSqlDepndency()
         {
-			if(sqlDependencyRegistered)
-				return;
-			
+            if(sqlDependencyRegistered)
+                return;
+            
             var query = Database.Query<EmailMessageEntity>().Where(m => m.State == EmailMessageState.ReadyToSend).Select(m => m.Id);
-			sqlDependencyRegistered = true;
+            sqlDependencyRegistered = true;
             query.ToListWithInvalidation(typeof(EmailMessageEntity), "EmailAsyncSender ReadyToSend dependency", a => {
-				sqlDependencyRegistered = false;
-				WakeUp("EmailAsyncSender ReadyToSend dependency", a);
-			});
+                sqlDependencyRegistered = false;
+                WakeUp("EmailAsyncSender ReadyToSend dependency", a);
+            });
         }
 
         private static bool RecruitQueuedItems()
