@@ -96,7 +96,6 @@ export interface CaseEntity extends Entities.Entity {
     mainEntity: ICaseMainEntity;
     startDate: string;
     finishDate: string | null;
-    tags: Entities.MList<CaseTagEntity>;
 }
 
 export const CaseJunctionEntity = new Type<CaseJunctionEntity>("CaseJunction");
@@ -136,18 +135,28 @@ export module CaseOperation {
 export const CaseTagEntity = new Type<CaseTagEntity>("CaseTag");
 export interface CaseTagEntity extends Entities.Entity {
     Type: "CaseTag";
-    name?: string | null;
-    color?: string | null;
-}
-
-export module CaseTagOperation {
-    export const Save : Entities.ExecuteSymbol<CaseTagEntity> = registerSymbol("Operation", "CaseTagOperation.Save");
+    creationDate?: string;
+    case?: Entities.Lite<CaseEntity> | null;
+    tagType?: CaseTagTypeEntity | null;
+    createdBy?: Entities.Lite<Basics.IUserEntity> | null;
 }
 
 export const CaseTagsModel = new Type<CaseTagsModel>("CaseTagsModel");
 export interface CaseTagsModel extends Entities.ModelEntity {
     Type: "CaseTagsModel";
-    caseTags: Entities.MList<CaseTagEntity>;
+    caseTags: Entities.MList<CaseTagTypeEntity>;
+    oldCaseTags: Entities.MList<CaseTagTypeEntity>;
+}
+
+export const CaseTagTypeEntity = new Type<CaseTagTypeEntity>("CaseTagType");
+export interface CaseTagTypeEntity extends Entities.Entity {
+    Type: "CaseTagType";
+    name?: string | null;
+    color?: string | null;
+}
+
+export module CaseTagTypeOperation {
+    export const Save : Entities.ExecuteSymbol<CaseTagTypeEntity> = registerSymbol("Operation", "CaseTagTypeOperation.Save");
 }
 
 export const DateFilterRange = new EnumType<DateFilterRange>("DateFilterRange");

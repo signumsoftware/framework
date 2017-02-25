@@ -2,7 +2,7 @@
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { ColorTypeaheadLine } from '../../Basics/Templates/ColorTypeahead'
-import { CaseTagEntity } from '../Signum.Entities.Workflow'
+import { CaseTagTypeEntity } from '../Signum.Entities.Workflow'
 import {
     ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip,
     EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, EntityTable
@@ -13,7 +13,7 @@ import { Color } from '../../Basics/Color'
 require("!style!css!./Tag.css");
 
 
-export default class Tag extends React.Component<{ tag: CaseTagEntity }, void> {
+export default class Tag extends React.Component<{ tag: CaseTagTypeEntity }, void> {
     render() {
         const tag = this.props.tag;
         var color = Color.parse(tag.color!) || Color.Black;

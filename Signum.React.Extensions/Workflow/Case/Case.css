@@ -24,3 +24,7 @@ div.workflow-buttons {
     background: #ddd;
     padding: 3px;
 }
+
+.inline-tags{
+    text-align:right;
+}

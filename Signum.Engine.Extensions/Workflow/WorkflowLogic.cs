@@ -22,7 +22,7 @@ namespace Signum.Engine.Workflow
 
     public static class WorkflowLogic
     {
-        public static Action<ICaseMainEntity, WorkflowEvaluationContext> OnTransition;
+        public static Action<ICaseMainEntity, WorkflowTransitionContext> OnTransition;
 
         static Expression<Func<WorkflowEntity, IQueryable<WorkflowPoolEntity>>> WorkflowPoolsExpression =
             e => Database.Query<WorkflowPoolEntity>().Where(a => a.Workflow == e);
@@ -370,6 +370,17 @@ namespace Signum.Engine.Workflow
 
                 Actions = sb.GlobalLazy(() => Database.Query<WorkflowActionEntity>().ToDictionary(a => a.ToLite()),
                     new InvalidateWith(typeof(WorkflowActionEntity)));
+
+
+                sb.Include<WorkflowScriptRetryStrategyEntity>()
+                    .WithSave(WorkflowScriptRetryStrategyOperation.Save)
+                    .WithDelete(WorkflowScriptRetryStrategyOperation.Delete)
+                    .WithQuery(dqm, e => new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.Rule
+                    });
             }
         }
 

@@ -466,6 +466,9 @@ namespace Signum.Engine.Workflow
                 if (wa.Timeout != null)
                     ValidateTransition(wa, wa.Timeout);
 
+                if (wa.Script != null)
+                    ValidateTransition(wa, wa.Script);
+
                 foreach (var item in wa.Jumps)
                 {
                     ValidateTransition(wa, item);

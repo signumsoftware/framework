@@ -34,6 +34,14 @@ namespace Signum.React.Workflow
             };
         }
 
+        [Route("api/workflow/tags/{caseId}"), HttpGet]
+        public List<CaseTagTypeEntity> GetTags(string caseId)
+        {
+            var lite = Lite.ParsePrimaryKey<CaseEntity>(caseId);
+
+            return Database.Query<CaseTagEntity>().Where(a => a.Case == lite).Select(a => a.TagType).ToList();
+        }
+
         public class EntityPackWorkflow
         {
             public Entity activity { get; set; }
@@ -110,7 +118,7 @@ namespace Signum.React.Workflow
             {
                 return new WorkflowConditionTestResponse
                 {
-                    validationResult = evaluator.EvaluateUntyped(request.exampleEntity, new WorkflowEvaluationContext(null, null, request.decisionResult))
+                    validationResult = evaluator.EvaluateUntyped(request.exampleEntity, new WorkflowTransitionContext(null, null, request.decisionResult))
                 };
             }
             catch (Exception e)

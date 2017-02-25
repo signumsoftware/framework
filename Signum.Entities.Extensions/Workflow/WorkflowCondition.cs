@@ -74,6 +74,6 @@ namespace Signum.Entities.Workflow
 
     public interface IWorkflowConditionEvaluator
     {
-        bool EvaluateUntyped(ICaseMainEntity mainEntity, WorkflowEvaluationContext ctx);
+        bool EvaluateUntyped(ICaseMainEntity mainEntity, WorkflowTransitionContext ctx);
     }
 }

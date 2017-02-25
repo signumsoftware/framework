@@ -140,9 +140,9 @@ namespace Signum.Entities.Workflow
         public string NewTask { get; set; }
     }
 
-    public class WorkflowEvaluationContext
+    public class WorkflowTransitionContext
     {
-        public WorkflowEvaluationContext(CaseActivityEntity ca, IWorkflowTransition conn, DecisionResult? dr)
+        public WorkflowTransitionContext(CaseActivityEntity ca, IWorkflowTransition conn, DecisionResult? dr)
         {
             this.CaseActivity = ca;
             this.Case = ca?.Case;

@@ -73,6 +73,6 @@ namespace Signum.Entities.Workflow
 
     public interface IWorkflowActionExecutor
     {
-        void ExecuteUntyped(ICaseMainEntity mainEntity, WorkflowEvaluationContext ctx);
+        void ExecuteUntyped(ICaseMainEntity mainEntity, WorkflowTransitionContext ctx);
     }
 }

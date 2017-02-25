@@ -2,7 +2,7 @@
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { ColorTypeaheadLine } from '../../Basics/Templates/ColorTypeahead'
-import { CaseTagEntity } from '../Signum.Entities.Workflow'
+import { CaseTagTypeEntity } from '../Signum.Entities.Workflow'
 import {
     ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip,
     EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, EntityTable
@@ -10,7 +10,7 @@ import {
 import { SearchControl, ValueSearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import Tag from './Tag'
 
-export default class CaseTagComponent extends React.Component<{ ctx: TypeContext<CaseTagEntity> }, void> {
+export default class CaseTagComponent extends React.Component<{ ctx: TypeContext<CaseTagTypeEntity> }, void> {
 
     render() {
         var ctx = this.props.ctx;

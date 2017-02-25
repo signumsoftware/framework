@@ -278,6 +278,7 @@
     <TypeScriptCompile Include="Workflow\Case\ActivityWithRemarks.tsx" />
     <TypeScriptCompile Include="Workflow\Case\CaseFromSenderInfo.tsx" />
     <TypeScriptCompile Include="Workflow\Case\CaseTagsModel.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\InlineCaseTags.tsx" />
     <TypeScriptCompile Include="Workflow\Case\Tag.tsx" />
     <TypeScriptCompile Include="Workflow\Case\CaseTag.tsx" />
     <TypeScriptCompile Include="Workflow\Signum.Entities.Workflow.ts">
