@@ -8,7 +8,7 @@ import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos } f
 import { Transition } from 'react-overlays'
 
 
-require("!style!css!./Notify.css");
+require("./Notify.css");
 
 type NotifyType = "warning" | "error" | "success" | "loading";
 

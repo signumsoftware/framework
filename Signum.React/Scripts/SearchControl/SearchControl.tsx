@@ -22,7 +22,7 @@ import ContextMenu from './ContextMenu'
 import SelectorModal from '../SelectorModal'
 import SearchControlLoaded from './SearchControlLoaded'
 
-require("!style!css!./Search.css");
+require("./Search.css");
 
 export interface SimpleFilterBuilderProps {
     findOptions: FindOptions;
