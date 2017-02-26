@@ -23,7 +23,7 @@ import { ContextMenuPosition } from './ContextMenu'
 import SelectorModal from '../SelectorModal'
 import { ISimpleFilterBuilder } from './SearchControl'
 
-require("!style!css!./Search.css");
+require("./Search.css");
 
 export interface SearchControlLoadedProps {
     allowSelection?: boolean;

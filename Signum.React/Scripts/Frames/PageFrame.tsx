@@ -12,7 +12,7 @@ import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos, Gr
 import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from './Widgets'
 import ValidationErrors from './ValidationErrors'
 
-require("!style!css!./Frames.css");
+require("./Frames.css");
 
 interface PageFrameProps extends ReactRouter.RouteComponentProps<{}, { type: string; id?: string, waitData?: string }> {
 }
