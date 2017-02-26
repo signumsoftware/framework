@@ -749,6 +749,10 @@ export class EnumType<T extends string> {
         return Dic.getKeys(this.typeInfo().members) as T[];
     }
 
+    value(val: T): T {
+        return val;
+    }
+
     niceName(value?: T): string | undefined {
 
         if (value == undefined)

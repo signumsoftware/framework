@@ -16,6 +16,8 @@ namespace Signum.Engine.Maps
         public ITable Table { get; private set; }
         public IColumn[] Columns { get; private set; }
 
+        public string Where { get; set; }
+
         public static IColumn[] GetColumnsFromFields(params Field[] fields)
         {
             if (fields == null || fields.IsEmpty())
@@ -43,10 +45,19 @@ namespace Signum.Engine.Maps
         {
             get { return "IX_{0}".FormatWith(ColumnSignature()).TryStart(Connector.Current.MaxNameLength); }
         }
-
-        protected virtual string ColumnSignature()
+        
+        protected string ColumnSignature()
         {
-            return Columns.ToString(c => c.Name, "_");
+            string columns = Columns.ToString(c => c.Name, "_");
+            if (string.IsNullOrEmpty(Where))
+                return columns;
+
+            return columns + "__" + StringHashEncoder.Codify(Where);
+        }
+
+        public override string ToString()
+        {
+            return IndexName;
         }
     }
 
@@ -68,9 +79,7 @@ namespace Signum.Engine.Maps
     public class UniqueIndex : Index
     {
         public UniqueIndex(ITable table, IColumn[] columns) : base(table, columns) { }
-
-        public string Where { get; set; }
-
+        
 
         public override string IndexName
         {
@@ -89,27 +98,6 @@ namespace Signum.Engine.Maps
 
                 return "VIX_{0}_{1}".FormatWith(Table.Name.Name, ColumnSignature()).TryStart(Connector.Current.MaxNameLength);
             }
-        }
-
-       
-
-        protected override string ColumnSignature()
-        {
-            string columns = base.ColumnSignature();
-            if (string.IsNullOrEmpty(Where))
-                return columns;
-
-            return columns + "__" + StringHashEncoder.Codify(Where);
-        }
-
-        static bool IsComplexIB(Field field)
-        {
-            return field is FieldImplementedBy && ((FieldImplementedBy)field).ImplementationColumns.Count > 1;
-        }
-
-        public override string ToString()
-        {
-            return IndexName;
         }
 
         public bool AvoidAttachToUniqueIndexes { get; set; }
