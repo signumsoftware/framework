@@ -7,9 +7,9 @@ import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator
 import * as connectionIcons from './ConnectionIcons'
 import * as customRenderer from './CustomRenderer'
 
-require("!style!css!bpmn-js/assets/bpmn-font/css/bpmn-embedded.css");
-require("!style!css!diagram-js/assets/diagram-js.css");
-require("!style!css!./Bpmn.css");
+require("bpmn-js/assets/bpmn-font/css/bpmn-embedded.css");
+require("diagram-js/assets/diagram-js.css");
+require("./Bpmn.css");
 
 export interface BpmnModelerComponentProps {
     workflow: WorkflowEntity;

@@ -20,7 +20,7 @@ import { AuthInfo } from './AuthInfo'
 import ShowCodeModal from './ShowCodeModal'
 import { DynamicViewEntity, DynamicViewOperation, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 
-require("!style!css!./DynamicView.css");
+require("./DynamicView.css");
 
 export interface DynamicViewComponentProps {
     ctx: TypeContext<ModifiableEntity>;

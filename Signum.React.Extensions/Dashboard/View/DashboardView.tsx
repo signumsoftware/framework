@@ -17,7 +17,7 @@ import { DashboardEntity, PanelPartEntity, IPartEntity } from '../Signum.Entitie
 
 
 
-require("!style!css!../Dashboard.css");
+require("../Dashboard.css");
 
 
 export default class DashboardView extends React.Component<{ dashboard: DashboardEntity, entity?: Entity }, void> {

@@ -16,7 +16,7 @@ import DashboardView from './DashboardView'
 
 
 
-require("!style!css!../Dashboard.css");
+require("../Dashboard.css");
 
 interface DashboardPageProps extends ReactRouter.RouteComponentProps<{}, { dashboardId: string }> {
 

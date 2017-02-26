@@ -14,7 +14,7 @@ import { Color } from '../../Basics/Color'
 import Tag from './Tag'
 import * as WorkflowClient from '../WorkflowClient'
 
-require("!style!css!./Tag.css");
+require("./Tag.css");
 
 export interface InlineCaseTagsProps{
     case: Lite<CaseEntity>;

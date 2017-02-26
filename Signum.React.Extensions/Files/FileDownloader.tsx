@@ -14,7 +14,7 @@ import { IFile, IFilePath, FileMessage, FileTypeSymbol, FileEntity, FilePathEnti
 import Typeahead from '../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import { EntityBase, EntityBaseProps} from '../../../Framework/Signum.React/Scripts/Lines/EntityBase'
 
-require("!style!css!./Files.css");
+require("./Files.css");
 
 
 export type DownloadBehaviour = "SaveAs" | "View" | "None";

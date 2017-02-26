@@ -11,7 +11,7 @@ import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
 
-require("!style!css!../Chart.css");
+require("../Chart.css");
 
 export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<ChartScriptEntity> }, void> {
 

@@ -10,7 +10,7 @@ import {
 import { SearchControl, ValueSearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { Color } from '../../Basics/Color'
 
-require("!style!css!./Tag.css");
+require("./Tag.css");
 
 
 export default class Tag extends React.Component<{ tag: CaseTagTypeEntity }, void> {

@@ -16,7 +16,7 @@ import { EntityGridRepeater, EntityGridItem } from './EntityGridRepeater'
 
 
 
-require("!style!css!../Dashboard.css");
+require("../Dashboard.css");
 
 export default class Dashboard extends React.Component<{ ctx: TypeContext<DashboardEntity> }, void> {
 
