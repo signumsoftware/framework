@@ -130,6 +130,10 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         return (elementType == "bpmn:CallActivity");
     }
 
+    private isScriptTask(elementType: string): boolean {
+        return (elementType == "bpmn:ScriptTask");
+    }
+
     private isGateway(elementType: string): boolean {
         return (elementType == "bpmn:ExclusiveGateway" || elementType == "bpmn:InclusiveGateway" || elementType == "bpmn:ParallelGateway");
     }
@@ -171,8 +175,9 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                 mainEntityType: this.getMainType(),
                 name: elementName,
                 type: (this.isCallActivity(elementType) ? "CallWorkflow" :
-                    this.isUserTask(elementType) ? "DecisionTask" :
-                        "Task")
+                    this.isUserTask(elementType) ? "Decision" :
+                        this.isScriptTask(elementType) ? "Script"
+                            : "Task")
             });
 
         if (this.isConnection(elementType))
@@ -235,7 +240,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                 if (this.isTaskAnyway(obj.element.type)) {
                     var dt = (me as WorkflowActivityModel).type;
                     obj.element.type = (dt == "CallWorkflow" || dt == "DecompositionWorkflow") ? "bpmn:CallActivity" :
-                        dt == "DecisionTask" ? "bpmn:UserTask" : "bpmn:Task";
+                        dt == "Decision" ? "bpmn:UserTask" : dt == "Script" ? "bpmn:ScriptTask" : "bpmn:Task";
                 }
 
                 this.fireElementChanged(obj.element);

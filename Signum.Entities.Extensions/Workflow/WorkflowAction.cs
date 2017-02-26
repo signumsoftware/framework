@@ -57,12 +57,12 @@ namespace Signum.Entities.Workflow
                     {
                         class MyWorkflowActionEvaluator : IWorkflowActionExecutor
                         {
-                            public void ExecuteUntyped(ICaseMainEntity mainEntity, WorkflowEvaluationContext ctx)
+                            public void ExecuteUntyped(ICaseMainEntity mainEntity, WorkflowTransitionContext ctx)
                             {
                                 this.Execute((" + WorkflowEntityTypeName + @")mainEntity, ctx);
                             }
 
-                            void Execute(" + WorkflowEntityTypeName + @" e, WorkflowEvaluationContext ctx)
+                            void Execute(" + WorkflowEntityTypeName + @" e, WorkflowTransitionContext ctx)
                             {
                                 " + script + @"
                             }

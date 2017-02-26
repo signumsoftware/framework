@@ -35,12 +35,16 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowScriptEval : EvalEntity<IWorkflowScriptExecutor>
     {
+        [SqlDbType(Size = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = true, MultiLine = true)]
+        public string CustomTypes { get; set; }
+
         protected override CompilationResult Compile()
         {
-            var parent = (WorkflowActionEntity)this.GetParentEntity().GetParentEntity();
+            var parent = (WorkflowActivityEntity)this.GetParentEntity().GetParentEntity();
 
             var script = this.Script.Trim();
-            var WorkflowEntityTypeName = parent.MainEntityType.ToType().FullName;
+            var WorkflowEntityTypeName = parent.Lane.Pool.Workflow.MainEntityType.ToType().FullName;
 
             return Compile(DynamicCode.GetAssemblies(),
                 DynamicCode.GetNamespaces() +
@@ -58,7 +62,9 @@ namespace Signum.Entities.Workflow
                             {
                                 " + script + @"
                             }
-                        }                  
+                        }
+
+                        " + CustomTypes + @"                  
                     }");
         }
     }
