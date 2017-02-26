@@ -3,7 +3,7 @@ import * as React from 'react'
 import * as CodeMirror from 'codemirror'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 
-require("!style!css!codemirror/lib/codemirror.css");
+require("codemirror/lib/codemirror.css");
 
 
 export interface CodeMirrorProps {

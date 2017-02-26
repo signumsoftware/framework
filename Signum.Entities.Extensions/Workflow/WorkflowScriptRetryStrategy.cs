@@ -14,7 +14,7 @@ using System.Text.RegularExpressions;
 
 namespace Signum.Entities.Workflow
 {
-    [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
+    [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
     public class WorkflowScriptRetryStrategyEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]

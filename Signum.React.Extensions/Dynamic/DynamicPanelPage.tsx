@@ -18,7 +18,7 @@ import CSharpCodeMirror from '../Codemirror/CSharpCodeMirror'
 import * as AuthClient from '../Authorization/AuthClient'
 import { DynamicPanelPermission, DynamicTypeMessage } from './Signum.Entities.Dynamic'
 
-require("!style!css!./DynamicPanelPage.css");
+require("./DynamicPanelPage.css");
 
 interface DynamicPanelProps extends ReactRouter.RouteComponentProps<{}, {}> {
 }

@@ -53,6 +53,7 @@ namespace Signum.Entities.Workflow
         [NotNullValidator, NoRepeatValidator]
         public MList<WorkflowJumpEntity> Jumps { get; set; } = new MList<WorkflowJumpEntity>();
 
+        [NotifyChildProperty]
         public WorkflowScriptEntity Script { get; set; }
 
         [NotNullable]
@@ -240,12 +241,12 @@ namespace Signum.Entities.Workflow
                     {
                         class MySubEntitiesEvaluator : ISubEntitiesEvaluator
                         {
-                            public List<ICaseMainEntity> GetSubEntities(ICaseMainEntity mainEntity, WorkflowEvaluationContext ctx)
+                            public List<ICaseMainEntity> GetSubEntities(ICaseMainEntity mainEntity, WorkflowTransitionContext ctx)
                             {
                                 return this.Evaluate((" + MainEntityTypeName + @")mainEntity, ctx).EmptyIfNull().Cast<ICaseMainEntity>().ToList();
                             }
 
-                            IEnumerable<" + SubEntityTypeName + "> Evaluate(" + MainEntityTypeName + @" e, WorkflowEvaluationContext ctx)
+                            IEnumerable<" + SubEntityTypeName + "> Evaluate(" + MainEntityTypeName + @" e, WorkflowTransitionContext ctx)
                             {
                                 " + script + @"
                             }
@@ -309,6 +310,8 @@ namespace Signum.Entities.Workflow
         [Description("Duplicate view name found: {0}")]
         DuplicateViewNameFound0,
         ChooseADestinationForWorkflowJumping,
+        [Description("To use '{0}', you should save workflow")]
+        ToUse0YouSouldSaveWorkflow,
     }
 
 }

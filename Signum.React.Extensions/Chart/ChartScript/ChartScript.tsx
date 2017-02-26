@@ -12,7 +12,7 @@ import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntity
 import FileLine, {FileTypeSymbol} from '../../Files/FileLine'
 import ChartScriptCode from './ChartScriptCode'
 
-require("!style!css!../Chart.css");
+require("../Chart.css");
 
 export default class ChartScript extends React.Component<{ ctx: TypeContext<ChartScriptEntity> }, void> {
 

@@ -58,12 +58,12 @@ namespace Signum.Entities.Workflow
                     {
                         class MyWorkflowConditionEvaluator : IWorkflowConditionEvaluator
                         {
-                            public bool EvaluateUntyped(ICaseMainEntity mainEntity, WorkflowEvaluationContext ctx)
+                            public bool EvaluateUntyped(ICaseMainEntity mainEntity, WorkflowTransitionContext ctx)
                             {
                                 return this.Evaluate((" + WorkflowEntityTypeName + @")mainEntity, ctx);
                             }
 
-                            bool Evaluate(" + WorkflowEntityTypeName + @" e, WorkflowEvaluationContext ctx)
+                            bool Evaluate(" + WorkflowEntityTypeName + @" e, WorkflowTransitionContext ctx)
                             {
                                 " + script + @"
                             }

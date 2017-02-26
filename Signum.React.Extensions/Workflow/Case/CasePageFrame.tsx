@@ -15,8 +15,8 @@ import CaseFromSenderInfo from './CaseFromSenderInfo'
 import CaseButtonBar from './CaseButtonBar'
 import InlineCaseTags from './InlineCaseTags'
 
-require("!style!css!../../../../Framework/Signum.React/Scripts/Frames/Frames.css");
-require("!style!css!./Case.css");
+require("../../../../Framework/Signum.React/Scripts/Frames/Frames.css");
+require("./Case.css");
 
 interface CasePageFrameProps extends ReactRouter.RouteComponentProps<{}, { workflowId: string; caseActivityId?: string }> {
 }

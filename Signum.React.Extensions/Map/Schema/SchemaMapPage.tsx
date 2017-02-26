@@ -12,7 +12,7 @@ import * as MapClient from '../MapClient'
 import { SchemaMapInfo, EntityBaseType, ITableInfo, MListRelationInfo, IRelationInfo, ClientColorProvider, SchemaMapD3 } from './SchemaMap'
 const colorbrewer = require("colorbrewer");
 
-require("!style!css!./schemaMap.css");
+require("./schemaMap.css");
 
 interface SchemaMapPageProps extends ReactRouter.RouteComponentProps<{}, {}> {
 

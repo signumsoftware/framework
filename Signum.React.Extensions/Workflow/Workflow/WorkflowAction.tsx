@@ -42,7 +42,7 @@ export default class WorkflowConditionComponent extends React.Component<Workflow
                         <div className="row">
                             <div className="col-sm-7">
                                 <div className="code-container">
-                                    <pre style={{ border: "0px", margin: "0px" }}>{"void Action(" + ctx.value.mainEntityType.cleanName + " e, WorkflowEvaluationContext ctx)\n{"}</pre>
+                                    <pre style={{ border: "0px", margin: "0px" }}>{"void Action(" + ctx.value.mainEntityType.cleanName + " e, WorkflowTransitionContext ctx)\n{"}</pre>
                                     <CSharpCodeMirror script={ctx.value.eval!.script || ""} onChange={this.handleCodeChange} />
                                     <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
                                 </div>
