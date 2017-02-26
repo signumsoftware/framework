@@ -106,7 +106,5 @@ export interface AsyncEmailSenderState {
     IsCancelationRequested: boolean;
     NextPlannedExecution: string;
     QueuedItems: number;
-    MachineName: string;
-    ApplicationName: string;
     CurrentProcessIdentifier: string;
 }

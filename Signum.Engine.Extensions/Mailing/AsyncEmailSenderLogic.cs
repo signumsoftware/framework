@@ -36,8 +36,6 @@ namespace Signum.Engine.Mailing
                 NextPlannedExecution = nextPlannedExecution,
                 IsCancelationRequested = CancelProcess != null && CancelProcess.IsCancellationRequested,
                 QueuedItems = queuedItems,
-                MachineName = Environment.MachineName,
-                ApplicationName = Schema.Current.ApplicationName
             };
         }
 
@@ -256,8 +254,6 @@ namespace Signum.Engine.Mailing
         public bool IsCancelationRequested;
         public DateTime? NextPlannedExecution;
         public long QueuedItems;
-        public string MachineName;
-        public string ApplicationName;
         public Guid CurrentProcessIdentifier;
     }
 }
