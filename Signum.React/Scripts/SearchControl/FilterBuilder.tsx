@@ -13,7 +13,7 @@ import { Binding, IsByAll, getTypeInfos, toNumbroFormat, toMomentFormat } from '
 import { TypeContext, FormGroupStyle } from '../TypeContext'
 import QueryTokenBuilder from './QueryTokenBuilder'
 
-require("!style!css!./FilterBuilder.css");
+require("./FilterBuilder.css");
 
 interface FilterBuilderProps extends React.Props<FilterBuilder> {
     filterOptions: FilterOptionParsed[];
