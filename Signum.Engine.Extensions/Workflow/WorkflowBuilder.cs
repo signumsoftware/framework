@@ -421,7 +421,7 @@ namespace Signum.Engine.Workflow
 
             Action<WorkflowActivityEntity, IWorkflowTransitionTo> ValidateTransition = (WorkflowActivityEntity wa, IWorkflowTransitionTo item) =>
             {
-                var activity0CanNotXTo1Because2 = (item is WorkflowJumpEntity || item is WorkflowScriptEntity) ?
+                var activity0CanNotXTo1Because2 = (item is WorkflowJumpEntity || item is WorkflowScriptPartEntity) ?
                     WorkflowValidationMessage.Activity0CanNotJumpTo1Because2 :
                     WorkflowValidationMessage.Activity0CanNotTimeoutTo1Because2;
 

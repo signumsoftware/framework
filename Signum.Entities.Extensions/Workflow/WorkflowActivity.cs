@@ -54,7 +54,7 @@ namespace Signum.Entities.Workflow
         public MList<WorkflowJumpEntity> Jumps { get; set; } = new MList<WorkflowJumpEntity>();
 
         [NotifyChildProperty]
-        public WorkflowScriptEntity Script { get; set; }
+        public WorkflowScriptPartEntity Script { get; set; }
 
         [NotNullable]
         [NotNullValidator]
@@ -135,6 +135,24 @@ namespace Signum.Entities.Workflow
             this.Comments = wModel.Comments;
             this.SubWorkflow = wModel.SubWorkflow;
         }
+    }
+    
+    [Serializable]
+    public class WorkflowScriptPartEntity : EmbeddedEntity, IWorkflowTransitionTo
+    {
+        public Lite<WorkflowScriptEntity> Script { get; set; }
+
+        public WorkflowScriptRetryStrategyEntity RetryStrategy { get; set; }
+
+        [NotNullable]
+        [NotNullValidator, ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity), typeof(WorkflowGatewayEntity))]
+        public Lite<IWorkflowNodeEntity> OnFailureJump { get; set; }
+
+        Lite<IWorkflowNodeEntity> IWorkflowTransitionTo.To => this.OnFailureJump;
+
+        Lite<WorkflowConditionEntity> IWorkflowTransition.Condition => null;
+
+        Lite<WorkflowActionEntity> IWorkflowTransition.Action => null;
     }
 
     [Serializable]
@@ -290,7 +308,7 @@ namespace Signum.Entities.Workflow
         [NotNullValidator, NoRepeatValidator]
         public MList<WorkflowJumpEntity> Jumps { get; set; } = new MList<WorkflowJumpEntity>();
 
-        public WorkflowScriptEntity Script { get; set; }
+        public WorkflowScriptPartEntity Script { get; set; }
 
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 255)]
         public string ViewName { get; set; }

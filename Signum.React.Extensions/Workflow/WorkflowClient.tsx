@@ -37,13 +37,17 @@ import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal
 
 import {
     WorkflowEntity, WorkflowLaneEntity, WorkflowActivityEntity, WorkflowConnectionEntity, WorkflowConditionEntity, WorkflowActionEntity, CaseActivityQuery, CaseActivityEntity,
-    CaseActivityOperation, CaseEntity, CaseNotificationEntity, CaseNotificationState, InboxFilterModel, WorkflowOperation, WorkflowPoolEntity,
+    CaseActivityOperation, CaseEntity, CaseNotificationEntity, CaseNotificationState, InboxFilterModel, WorkflowOperation, WorkflowPoolEntity, WorkflowScriptEntity, WorkflowScriptEval,
     WorkflowActivityOperation, WorkflowReplacementModel, WorkflowModel, BpmnEntityPair, WorkflowActivityModel, ICaseMainEntity, WorkflowGatewayEntity, WorkflowEventEntity,
-    WorkflowLaneModel, WorkflowConnectionModel, IWorkflowNodeEntity, WorkflowActivityMessage, WorkflowTimeoutEntity, CaseTagEntity, CaseTagsModel, CaseTagTypeEntity
+    WorkflowLaneModel, WorkflowConnectionModel, IWorkflowNodeEntity, WorkflowActivityMessage, WorkflowTimeoutEntity, CaseTagEntity, CaseTagsModel, CaseTagTypeEntity,
+    WorkflowScriptRunnerPanelPermission
 } from './Signum.Entities.Workflow'
 
 import InboxFilter from './Case/InboxFilter'
 import Workflow from './Workflow/Workflow'
+import * as AuthClient from '../Authorization/AuthClient'
+import * as OmniboxClient from '../Omnibox/OmniboxClient'
+
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -51,6 +55,16 @@ export function start(options: { routes: JSX.Element[] }) {
         <Route path="activity/:caseActivityId" getComponent={(loc, cb) => require(["./Case/CasePageFrame"], (Comp) => cb(null, Comp.default))} />
         <Route path="new/:workflowId" getComponent={(loc, cb) => require(["./Case/CasePageFrame"], (Comp) => cb(null, Comp.default))} />
     </Route>);
+
+    options.routes.push(<Route path="workflow">
+        <Route path="panel" getComponent={(loc, cb) => require(["./Workflow/WorkflowScriptRunnerPanelPage"], (Comp) => cb(undefined, Comp.default))} />
+    </Route>);
+
+    OmniboxClient.registerSpecialAction({
+        allowed: () => AuthClient.isPermissionAuthorized(WorkflowScriptRunnerPanelPermission.ViewWorkflowScriptRunnerPanel),
+        key: "WorlflowScriptRunnerPanel",
+        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/workflow/panel"))
+    });
 
     Finder.addSettings({
         queryName: CaseActivityQuery.Inbox,
@@ -100,6 +114,9 @@ export function start(options: { routes: JSX.Element[] }) {
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Reject, { contextual: { isVisible: ctx => true } }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Timeout, { isVisible: ctx => false }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.MarkAsUnread, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
+    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.ScriptExecute, { isVisible: ctx => false }));
+    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.ScriptFailureJump, { isVisible: ctx => false }));
+    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.ScriptScheduleRetry, { isVisible: ctx => false }));
     caseActivityOperation(CaseActivityOperation.Next, "primary");
     caseActivityOperation(CaseActivityOperation.Approve, "success");
     caseActivityOperation(CaseActivityOperation.Decline, "warning");
@@ -119,10 +136,12 @@ export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(WorkflowReplacementModel, w => new ViewPromise(m => require(['./Workflow/WorkflowReplacementComponent'], m))));
     Navigator.addSettings(new EntitySettings(WorkflowConditionEntity, w => new ViewPromise(m => require(['./Workflow/WorkflowCondition'], m))));
     Navigator.addSettings(new EntitySettings(WorkflowActionEntity, w => new ViewPromise(m => require(['./Workflow/WorkflowAction'], m))));
+    Navigator.addSettings(new EntitySettings(WorkflowScriptEntity, w => new ViewPromise(m => require(['./Workflow/WorkflowScript'], m))));
     Navigator.addSettings(new EntitySettings(WorkflowLaneModel, w => new ViewPromise(m => require(['./Workflow/WorkflowLaneModel'], m))));
 
     Constructor.registerConstructor(WorkflowConditionEntity, () => WorkflowConditionEntity.New({ eval: WorkflowConditionEval.New() }));
     Constructor.registerConstructor(WorkflowActionEntity, () => WorkflowActionEntity.New({ eval: WorkflowActionEval.New() }));
+    Constructor.registerConstructor(WorkflowScriptEntity, () => WorkflowScriptEntity.New({ eval: WorkflowScriptEval.New() }));
     
     registerCustomContexts();
 }
@@ -420,6 +439,18 @@ export namespace API {
     export function conditionTest(request: WorkflowConditionTestRequest): Promise<WorkflowConditionTestResponse> {
         return ajaxPost<WorkflowConditionTestResponse>({ url: `~/api/workflow/condition/test` }, request);
     }
+
+    export function view(): Promise<WorkflowScriptRunnerState> {
+        return ajaxGet<WorkflowScriptRunnerState>({ url: "~/api/workflow/scriptRunner/view" });
+    }
+
+    export function start(): Promise<void> {
+        return ajaxPost<void>({ url: "~/api/workflow/scriptRunner/start" }, undefined);
+    }
+
+    export function stop(): Promise<void> {
+        return ajaxPost<void>({ url: "~/api/workflow/scriptRunner/stop" }, undefined);
+    }
 }
 
 export interface WorkflowFindNodeRequest {
@@ -457,4 +488,13 @@ export interface CaseEntityPack {
     activity: CaseActivityEntity;
     canExecuteActivity: { [key: string]: string };
     canExecuteMainEntity: { [key: string]: string };
+}
+
+export interface WorkflowScriptRunnerState {
+    ScriptRunnerPeriod: number;
+    Running: boolean;
+    IsCancelationRequested: boolean;
+    NextPlannedExecution: string;
+    QueuedItems: number;
+    CurrentProcessIdentifier: string;
 }

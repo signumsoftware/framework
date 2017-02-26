@@ -62,7 +62,7 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
                     <br />
                     SchedulerMargin: {s.SchedulerMargin}
                     <br />
-                    NextExecution: { s.NextExecution} ({ s.NextExecution == undefined ? "-None-" : moment(s.NextExecution).toNow() })
+                    NextExecution: {s.NextExecution} ({s.NextExecution == undefined ? "-None-" : moment(s.NextExecution).fromNow()})
                     <br />
                     { this.renderTable() }
                     <br />

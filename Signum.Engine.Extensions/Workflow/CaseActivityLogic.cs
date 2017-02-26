@@ -30,7 +30,6 @@ namespace Signum.Engine.Workflow
 {
     public static class CaseActivityLogic
     {
-
         static Expression<Func<WorkflowEntity, IQueryable<CaseEntity>>> CasesExpression =
             w => Database.Query<CaseEntity>().Where(a => a.Workflow == w);
         [ExpressionField]
@@ -47,9 +46,7 @@ namespace Signum.Engine.Workflow
         {
             return NextActivitiesExpression.Evaluate(e);
         }
-
-
-
+        
         static Expression<Func<CaseEntity, CaseActivityEntity>> DecompositionSurrogateActivityExpression =
           childCase => Database.Query<CaseActivityEntity>()
           .Where(ca => ca.Case == childCase.ParentCase)
@@ -164,7 +161,8 @@ namespace Signum.Engine.Workflow
                 }.Register();
 
                 sb.Include<CaseActivityEntity>()
-                    .WithIndex(a => new { a.NextExecution })
+                    .WithIndex(a => new { a.ScriptExecution.ProcessIdentifier }, a => a.DoneDate == null)
+                    .WithIndex(a => new { a.ScriptExecution.NextExecution }, a => a.DoneDate == null)
                     .WithExpressionFrom(dqm, (WorkflowActivityEntity c) => c.CaseActivities())
                     .WithExpressionFrom(dqm, (CaseEntity c) => c.CaseActivities())
                     .WithExpressionFrom(dqm, (CaseActivityEntity c) => c.NextActivities())
@@ -179,9 +177,6 @@ namespace Signum.Engine.Workflow
                         e.Case,
                         e.WorkflowActivity,
                     });
-
-
-       
 
                 SimpleTaskLogic.Register(CaseActivityTask.Timeout, () =>
                 {
@@ -265,6 +260,8 @@ namespace Signum.Engine.Workflow
                 CaseActivityGraph.Register();
             }
         }
+
+
 
         public class ActivityWithRemarks : IQueryTokenBag
         {
@@ -413,17 +410,7 @@ namespace Signum.Engine.Workflow
             notifications.BulkInsert();
         }
 
-        static CaseActivityEntity InsertNewCaseActivity(CaseActivityEntity currentCaseActivity, WorkflowActivityEntity workflowActivity)
-        {
-            return new CaseActivityEntity
-            {
-                StartDate = currentCaseActivity.DoneDate.Value,
-                Previous = currentCaseActivity.ToLite(),
-                WorkflowActivity = workflowActivity,
-                OriginalWorkflowActivityName = workflowActivity.Name,
-                Case = currentCaseActivity.Case
-            }.Save();
-        }
+      
 
         class CaseActivityGraph : Graph<CaseActivityEntity, CaseActivityState>
         {
@@ -538,6 +525,8 @@ namespace Signum.Engine.Workflow
                     },
                 }.Register();
 
+            
+
                 new Execute(CaseActivityOperation.Jump)
                 {
                     FromStates = { CaseActivityState.PendingNext, CaseActivityState.PendingDecision },
@@ -650,6 +639,51 @@ namespace Signum.Engine.Workflow
                            .Execute();
                     },
                 }.Register();
+
+                new Execute(CaseActivityOperation.ScriptExecute)
+                {
+                    CanExecute = s => s.WorkflowActivity.Type != WorkflowActivityType.Script ? CaseActivityMessage.OnlyForScriptWorkflowActivities.NiceToString() : null,
+                    FromStates = { CaseActivityState.PendingNext },
+                    ToStates = { CaseActivityState.Done },
+                    Lite = false,
+                    Execute = (ca, args) =>
+                    {
+                        var script = ca.WorkflowActivity.Script.Script.RetrieveFromCache();
+                        script.Eval.Algorithm.ExecuteUntyped(ca.Case.MainEntity, new WorkflowScriptContext
+                        {
+                            CaseActivity = ca,
+                            RetryCount = ca.ScriptExecution.RetryCount,
+                        });
+                        ExecuteStep(ca, null, null);
+                    },
+                }.Register();
+
+                new Execute(CaseActivityOperation.ScriptScheduleRetry)
+                {
+                    CanExecute = s => s.WorkflowActivity.Type != WorkflowActivityType.Script ? CaseActivityMessage.OnlyForScriptWorkflowActivities.NiceToString() : null,
+                    FromStates = { CaseActivityState.PendingNext },
+                    ToStates = { CaseActivityState.PendingNext },
+                    Lite = false,
+                    Execute = (ca, args) =>
+                    {
+                        ca.ScriptExecution.RetryCount++;
+                        ca.ScriptExecution.NextExecution = args.GetArg<DateTime>();
+                        ca.ScriptExecution.ProcessIdentifier = null;
+                        ca.Save();
+                    },
+                }.Register();
+
+                new Execute(CaseActivityOperation.ScriptFailureJump)
+                {
+                    CanExecute = s => s.WorkflowActivity.Type != WorkflowActivityType.Script ? CaseActivityMessage.OnlyForScriptWorkflowActivities.NiceToString() : null,
+                    FromStates = { CaseActivityState.PendingNext },
+                    ToStates = { CaseActivityState.Done },
+                    Lite = false,
+                    Execute = (ca, args) =>
+                    {
+                        ExecuteStep(ca, null, ca.WorkflowActivity.Script);
+                    },
+                }.Register();
             }
 
             private static void CheckRequiresOpen(CaseActivityEntity ca)
@@ -661,6 +695,7 @@ namespace Signum.Engine.Workflow
                 }
             }
 
+    
             private static void ExecuteStep(CaseActivityEntity ca, DecisionResult? decisionResult, IWorkflowTransition transition)
             {
                 using (DynamicValidationLogic.EnabledRulesExplicitely(ca.WorkflowActivity.ValidationRules
@@ -675,9 +710,10 @@ namespace Signum.Engine.Workflow
                     ca.DoneType = transition is WorkflowJumpEntity ? DoneType.Jump :
                                   transition is WorkflowRejectEntity ? DoneType.Rejected :
                                   transition is WorkflowTimeoutEntity ? DoneType.Timeout :
-                                  transition is WorkflowScriptEntity ? DoneType.Failure :
+                                  transition is WorkflowScriptPartEntity ? DoneType.ScriptFailure :
                                   decisionResult == DecisionResult.Approve ? DoneType.Approve :
                                   decisionResult == DecisionResult.Decline ? DoneType.Decline : 
+                                  ca.WorkflowActivity.Type == WorkflowActivityType.Script ? DoneType.ScriptSuccess:
                                   DoneType.Next;
                     ca.Case.Description = ca.Case.MainEntity.ToString().Trim();
                     ca.Save();
@@ -698,7 +734,7 @@ namespace Signum.Engine.Workflow
                         var to =
                             transition is WorkflowJumpEntity ? ((WorkflowJumpEntity)transition).To.Retrieve() :
                             transition is WorkflowTimeoutEntity ? ((WorkflowTimeoutEntity)transition).To.Retrieve() :
-                            transition is WorkflowScriptEntity ? ((IWorkflowTransitionTo)transition).To.Retrieve() :
+                            transition is WorkflowScriptPartEntity ? ((IWorkflowTransitionTo)transition).To.Retrieve() :
                             transition is WorkflowRejectEntity ? ca.Previous.Retrieve().WorkflowActivity :
                             new NotImplementedException().Throw<IWorkflowNodeEntity>();
 
@@ -754,11 +790,29 @@ namespace Signum.Engine.Workflow
                             else
                             {
                                 var nca = InsertNewCaseActivity(ca, t2);
-                                InsertCaseActivityNotifications(nca);
+                                if (nca.ScriptExecution == null)
+                                    InsertCaseActivityNotifications(nca);
                             }
                         }
                     }
                 }
+            }
+
+            static CaseActivityEntity InsertNewCaseActivity(CaseActivityEntity currentCaseActivity, WorkflowActivityEntity workflowActivity)
+            {
+                return new CaseActivityEntity
+                {
+                    StartDate = currentCaseActivity.DoneDate.Value,
+                    Previous = currentCaseActivity.ToLite(),
+                    WorkflowActivity = workflowActivity,
+                    OriginalWorkflowActivityName = workflowActivity.Name,
+                    Case = currentCaseActivity.Case,
+                    ScriptExecution = workflowActivity.Type == WorkflowActivityType.Script ? new ScriptExecutionEntity
+                    {
+                        NextExecution = TimeZoneManager.Now,
+                        RetryCount = 0,
+                    } : null
+                }.Save();
             }
 
             private static void TryToRecompose(CaseEntity childCase)

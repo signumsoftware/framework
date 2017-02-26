@@ -41,8 +41,7 @@ export interface CaseActivityEntity extends Entities.Entity {
     doneDate: string | null;
     doneBy: Entities.Lite<Authorization.UserEntity> | null;
     doneType: DoneType | null;
-    nextExecution: string | null;
-    retryCount: number | null;
+    scriptExecution: ScriptExecutionEntity | null;
 }
 
 export module CaseActivityMessage {
@@ -61,6 +60,7 @@ export module CaseActivityMessage {
     export const Activity0HasNoReject = new MessageKey("CaseActivityMessage", "Activity0HasNoReject");
     export const Activity0HasNoTimeout = new MessageKey("CaseActivityMessage", "Activity0HasNoTimeout");
     export const ThereIsNoPreviousActivity = new MessageKey("CaseActivityMessage", "ThereIsNoPreviousActivity");
+    export const OnlyForScriptWorkflowActivities = new MessageKey("CaseActivityMessage", "OnlyForScriptWorkflowActivities");
 }
 
 export module CaseActivityOperation {
@@ -75,6 +75,9 @@ export module CaseActivityOperation {
     export const Timeout : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Timeout");
     export const MarkAsUnread : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.MarkAsUnread");
     export const Undo : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Undo");
+    export const ScriptExecute : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.ScriptExecute");
+    export const ScriptScheduleRetry : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.ScriptScheduleRetry");
+    export const ScriptFailureJump : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.ScriptFailureJump");
     export const FixCaseDescriptions : Entities.ExecuteSymbol<Dynamic.DynamicTypeEntity> = registerSymbol("Operation", "CaseActivityOperation.FixCaseDescriptions");
 }
 
@@ -182,7 +185,8 @@ export type DoneType =
     "Jump" |
     "Rejected" |
     "Timeout" |
-    "Failure";
+    "ScriptSuccess" |
+    "ScriptFailure";
 
 export interface ICaseMainEntity extends Entities.Entity {
 }
@@ -208,6 +212,14 @@ export interface IWorkflowObjectEntity extends Entities.Entity {
     xml?: WorkflowXmlEntity | null;
     name?: string | null;
     bpmnElementId?: string | null;
+}
+
+export const ScriptExecutionEntity = new Type<ScriptExecutionEntity>("ScriptExecutionEntity");
+export interface ScriptExecutionEntity extends Entities.EmbeddedEntity {
+    Type: "ScriptExecutionEntity";
+    nextExecution?: string;
+    retryCount?: number;
+    processIdentifier?: string | null;
 }
 
 export const SubEntitiesEval = new Type<SubEntitiesEval>("SubEntitiesEval");
@@ -254,7 +266,7 @@ export interface WorkflowActivityEntity extends Entities.Entity, IWorkflowNodeEn
     viewName?: string | null;
     validationRules: Entities.MList<WorkflowActivityValidationEntity>;
     jumps: Entities.MList<WorkflowJumpEntity>;
-    script?: WorkflowScriptEntity | null;
+    script?: WorkflowScriptPartEntity | null;
     xml?: WorkflowXmlEntity | null;
     subWorkflow?: SubWorkflowEntity | null;
     userHelp?: string | null;
@@ -279,7 +291,7 @@ export interface WorkflowActivityModel extends Entities.ModelEntity {
     timeout?: WorkflowTimeoutEntity | null;
     validationRules: Entities.MList<WorkflowActivityValidationEntity>;
     jumps: Entities.MList<WorkflowJumpEntity>;
-    script?: WorkflowScriptEntity | null;
+    script?: WorkflowScriptPartEntity | null;
     viewName?: string | null;
     comments?: string | null;
     userHelp?: string | null;
@@ -323,6 +335,14 @@ export interface WorkflowConditionEval extends Dynamic.EvalEntity<IWorkflowCondi
 export module WorkflowConditionOperation {
     export const Save : Entities.ExecuteSymbol<WorkflowConditionEntity> = registerSymbol("Operation", "WorkflowConditionOperation.Save");
     export const Delete : Entities.DeleteSymbol<WorkflowConditionEntity> = registerSymbol("Operation", "WorkflowConditionOperation.Delete");
+}
+
+export const WorkflowConfigurationEntity = new Type<WorkflowConfigurationEntity>("WorkflowConfigurationEntity");
+export interface WorkflowConfigurationEntity extends Entities.EmbeddedEntity {
+    Type: "WorkflowConfigurationEntity";
+    scriptRunnerPeriod?: number;
+    avoidExecutingScriptsOlderThan?: number | null;
+    chunkSizeRunningScripts?: number;
 }
 
 export const WorkflowConnectionEntity = new Type<WorkflowConnectionEntity>("WorkflowConnection");
@@ -523,18 +543,31 @@ export interface WorkflowReplacementModel extends Entities.ModelEntity {
     replacements: Entities.MList<WorkflowReplacementItemEntity>;
 }
 
-export const WorkflowScriptEntity = new Type<WorkflowScriptEntity>("WorkflowScriptEntity");
-export interface WorkflowScriptEntity extends Entities.EmbeddedEntity {
-    Type: "WorkflowScriptEntity";
+export const WorkflowScriptEntity = new Type<WorkflowScriptEntity>("WorkflowScript");
+export interface WorkflowScriptEntity extends Entities.Entity {
+    Type: "WorkflowScript";
+    name?: string | null;
+    mainEntityType?: Basics.TypeEntity | null;
     eval?: WorkflowScriptEval | null;
-    retryStrategy?: WorkflowScriptRetryStrategyEntity | null;
-    onFailureJump?: Entities.Lite<IWorkflowNodeEntity> | null;
 }
 
 export const WorkflowScriptEval = new Type<WorkflowScriptEval>("WorkflowScriptEval");
 export interface WorkflowScriptEval extends Dynamic.EvalEntity<IWorkflowScriptExecutor> {
     Type: "WorkflowScriptEval";
     customTypes?: string | null;
+}
+
+export module WorkflowScriptOperation {
+    export const Save : Entities.ExecuteSymbol<WorkflowScriptEntity> = registerSymbol("Operation", "WorkflowScriptOperation.Save");
+    export const Delete : Entities.DeleteSymbol<WorkflowScriptEntity> = registerSymbol("Operation", "WorkflowScriptOperation.Delete");
+}
+
+export const WorkflowScriptPartEntity = new Type<WorkflowScriptPartEntity>("WorkflowScriptPartEntity");
+export interface WorkflowScriptPartEntity extends Entities.EmbeddedEntity {
+    Type: "WorkflowScriptPartEntity";
+    script?: Entities.Lite<WorkflowScriptEntity> | null;
+    retryStrategy?: WorkflowScriptRetryStrategyEntity | null;
+    onFailureJump?: Entities.Lite<IWorkflowNodeEntity> | null;
 }
 
 export const WorkflowScriptRetryStrategyEntity = new Type<WorkflowScriptRetryStrategyEntity>("WorkflowScriptRetryStrategy");
@@ -546,6 +579,10 @@ export interface WorkflowScriptRetryStrategyEntity extends Entities.Entity {
 export module WorkflowScriptRetryStrategyOperation {
     export const Save : Entities.ExecuteSymbol<WorkflowScriptRetryStrategyEntity> = registerSymbol("Operation", "WorkflowScriptRetryStrategyOperation.Save");
     export const Delete : Entities.DeleteSymbol<WorkflowScriptRetryStrategyEntity> = registerSymbol("Operation", "WorkflowScriptRetryStrategyOperation.Delete");
+}
+
+export module WorkflowScriptRunnerPanelPermission {
+    export const ViewWorkflowScriptRunnerPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "WorkflowScriptRunnerPanelPermission.ViewWorkflowScriptRunnerPanel");
 }
 
 export const WorkflowTimeoutEntity = new Type<WorkflowTimeoutEntity>("WorkflowTimeoutEntity");
