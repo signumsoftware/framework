@@ -314,7 +314,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         var d = e.target as HTMLDivElement;
 
         if (d.classList && d.classList.contains("connection-icon")) {
-            const lite = parseLite(d.dataset["key"]);
+            const lite = parseLite(d.dataset["key"]!);
             Navigator.navigate(lite).done();
         }
     }

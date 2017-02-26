@@ -493,7 +493,7 @@ export function isBooleanOrFunction(val: any) {
 }
 
 export function isFindOptions(val: any) {
-    return typeof val == "Object" ? null : `The returned value (${JSON.stringify(val)}) should be a valid findOptions`;
+    return typeof val == "object" ? null : `The returned value (${JSON.stringify(val)}) should be a valid findOptions`;
 }
 
 export function isStringOrNull(val: any) {

@@ -29,9 +29,6 @@ namespace Signum.Engine.Chart
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                if (sb.Schema.Tables.ContainsKey(typeof(UserChartEntity)))
-                    throw new InvalidOperationException("UserChart has already been registered");
-
                 UserAssetsImporter.RegisterName<UserChartEntity>("UserChart");
 
                 sb.Schema.Synchronizing += Schema_Synchronizing;
@@ -133,6 +130,28 @@ namespace Signum.Engine.Chart
             }
         }
 
+        internal static ChartRequest ToChartRequest(UserChartEntity userChart)
+        {
+            var cr = new ChartRequest(userChart.Query.ToQueryName())
+            {
+                ChartScript = userChart.ChartScript,
+                Filters = userChart.Filters.Select(qf =>
+                    new Filter(qf.Token.Token, qf.Operation, FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation.IsList())))
+                .ToList(),
+                GroupResults = userChart.GroupResults,
+                Orders = userChart.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList(),
+                Parameters = userChart.Parameters.ToMList(),
+            };
+            
+            cr.Columns.ZipForeach(userChart.Columns, (a, b) =>
+            {
+                a.Token = b.Token == null ? null : new QueryTokenEntity(b.Token.Token);
+                a.DisplayName = b.DisplayName;
+            });
+
+            return cr;
+        }
+
         public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
         {
             sb.Schema.Settings.AssertImplementedBy((UserChartEntity uq) => uq.Owner, typeof(UserEntity));
@@ -208,7 +227,7 @@ namespace Signum.Engine.Chart
                         {
                             QueryTokenEntity token = item.Token;
                             if (item.Token == null)
-                                break;
+                                continue;
 
                             switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | canAggregate, item.ScriptColumn.DisplayName, allowRemoveToken: item.ScriptColumn.IsOptional, allowReCreate: false))
                             {

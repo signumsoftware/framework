@@ -6,7 +6,9 @@ import { SearchControl }  from '../../../../Framework/Signum.React/Scripts/Searc
 import { getToString, getMixin }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { EmailMessageEntity, EmailAddressEntity, EmailRecipientEntity, EmailAttachmentEntity,
-    EmailReceptionMixin, EmailFileType } from '../Signum.Entities.Mailing'
+    EmailReceptionMixin, EmailFileType
+} from '../Signum.Entities.Mailing'
+import { EmailTemplateEntity, EmailTemplateContactEntity, EmailTemplateRecipientEntity, EmailTemplateMessageEntity, EmailTemplateViewMessage, EmailTemplateMessage } from '../Signum.Entities.Mailing'
 import FileLine from '../../Files/FileLine'
 import IFrameRenderer from './IFrameRenderer'
 import HtmlCodemirror from './HtmlCodemirror'
@@ -58,7 +60,8 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
                             <ValueLine ctx={e.subCtx(f => f.body) } valueLineType={ValueLineType.TextArea} valueHtmlProps={{ style: { width: "100%", height: "180px" } }} formGroupStyle="SrOnly"/>
                     }
                 </Tab>
-                {getMixin(e.value, EmailReceptionMixin) && getMixin(e.value, EmailReceptionMixin).receptionInfo && this.renderEmailReceptionMixin() }
+                {getMixin(e.value, EmailReceptionMixin) && getMixin(e.value, EmailReceptionMixin).receptionInfo && this.renderEmailReceptionMixin()}
+                <EmailMessageComponent ctx={e} invalidate={() => this.forceUpdate()} /> 
             </Tabs>
         );
     }
@@ -96,3 +99,44 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
     };
 }
 
+export interface EmailMessageComponentProps {
+    ctx: TypeContext<EmailMessageEntity>;
+    invalidate: () => void;
+}
+
+export class EmailMessageComponent extends React.Component<EmailMessageComponentProps, { showPreview: boolean }>{
+    constructor(props: EmailMessageComponentProps) {
+        super(props);
+        this.state = { showPreview: false }
+    }
+
+    handlePreviewClick = (e: React.FormEvent<any>) => {
+        e.preventDefault();
+        this.setState({
+            showPreview: !this.state.showPreview
+        });
+    }
+
+    handleCodeMirrorChange = () => {
+        if (this.state.showPreview)
+            this.forceUpdate();
+    }
+
+
+    render() {
+        const ec = this.props.ctx.subCtx({ labelColumns: { sm: 2 }});
+        return (
+            <div className="sf-email-template-message">
+                <div className="form-vertical">
+                    <br />
+                    <a href="#" onClick={this.handlePreviewClick}>
+                        {this.state.showPreview ?
+                            EmailTemplateMessage.HidePreview.niceToString() :
+                            EmailTemplateMessage.ShowPreview.niceToString()}
+                    </a>
+                    {this.state.showPreview && <IFrameRenderer style={{ width: "100%", height: "150px" }} html={ec.value.body} />}
+                </div>
+            </div>
+        );
+    }
+}

@@ -57,10 +57,10 @@ namespace Signum.Entities.Chart
         string displayName;
         public string DisplayName
         {
-            get { return displayName ?? Token?.Let(t => t.Token?.NiceName()); }
+            get { return displayName ?? Token?.Let(t => t.TryToken?.NiceName()); }
             set
             {
-                var name = value == Token?.Let(t => t.Token?.NiceName()) ? null : value;
+                var name = value == Token?.Let(t => t.TryToken?.NiceName()) ? null : value;
                 Set(ref displayName, name);
             }
         }
