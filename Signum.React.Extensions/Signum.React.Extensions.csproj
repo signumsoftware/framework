@@ -291,7 +291,9 @@
     <TypeScriptCompile Include="Workflow\Bpmn\CustomRenderer.ts" />
     <TypeScriptCompile Include="Workflow\Bpmn\ConnectionIcons.ts" />
     <TypeScriptCompile Include="Workflow\Case\InboxFilter.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowScriptRunnerPanelPage.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\Workflow.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowScript.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowConnectionModel.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowActivityModel.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowAction.tsx" />

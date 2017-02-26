@@ -1,4 +1,5 @@
 ﻿using Signum.Entities;
+using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
 using Signum.Utilities;
@@ -12,25 +13,34 @@ using System.Threading.Tasks;
 
 namespace Signum.Entities.Workflow
 {
-    [Serializable]
-    public class WorkflowScriptEntity : EmbeddedEntity, IWorkflowTransitionTo
+    [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
+    public class WorkflowScriptEntity : Entity
     {
+        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        public string Name { get; set; }
+
+        public TypeEntity MainEntityType { get; set; }
+
         [NotNullable]
         [NotNullValidator, NotifyChildProperty]
         public WorkflowScriptEval Eval { get; set; }
 
-        public WorkflowScriptRetryStrategyEntity RetryStrategy { get; set; }
-        
-        [NotNullable]
-        [NotNullValidator, ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity), typeof(WorkflowGatewayEntity))]
-        public Lite<IWorkflowNodeEntity> OnFailureJump { get; set; }
-
-        Lite<IWorkflowNodeEntity> IWorkflowTransitionTo.To => this.OnFailureJump;
-
-        Lite<WorkflowConditionEntity> IWorkflowTransition.Condition => null;
-
-        Lite<WorkflowActionEntity> IWorkflowTransition.Action => null;
+        static Expression<Func<WorkflowScriptEntity, string>> ToStringExpression = @this => @this.Name;
+        [ExpressionField]
+        public override string ToString()
+        {
+            return ToStringExpression.Evaluate(this);
+        }
     }
+
+    [AutoInit]
+    public static class WorkflowScriptOperation
+    {
+        public static readonly ExecuteSymbol<WorkflowScriptEntity> Save;
+        public static readonly DeleteSymbol<WorkflowScriptEntity> Delete;
+    }
+
 
     [Serializable]
     public class WorkflowScriptEval : EvalEntity<IWorkflowScriptExecutor>
@@ -41,10 +51,10 @@ namespace Signum.Entities.Workflow
 
         protected override CompilationResult Compile()
         {
-            var parent = (WorkflowActivityEntity)this.GetParentEntity().GetParentEntity();
+            var parent = (WorkflowScriptEntity)this.GetParentEntity();
 
             var script = this.Script.Trim();
-            var WorkflowEntityTypeName = parent.Lane.Pool.Workflow.MainEntityType.ToType().FullName;
+            var WorkflowEntityTypeName = parent.MainEntityType.ToType().FullName;
 
             return Compile(DynamicCode.GetAssemblies(),
                 DynamicCode.GetNamespaces() +
@@ -79,4 +89,11 @@ namespace Signum.Entities.Workflow
         public CaseActivityEntity CaseActivity { get; internal set; }
         public int RetryCount { get; internal set; }
     }
+
+    [AutoInit]
+    public static class WorkflowScriptRunnerPanelPermission
+    {
+        public static PermissionSymbol ViewWorkflowScriptRunnerPanel;
+    }
+
 }

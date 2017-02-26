@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import {
     WorkflowActivityEntity, WorkflowActivityModel, WorkflowActivityValidationEntity, WorkflowActivityMessage, WorkflowConditionEntity, WorkflowActionEntity,
-    WorkflowJumpEntity, WorkflowTimeoutEntity, IWorkflowNodeEntity, SubWorkflowEntity, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptEval, WorkflowEntity
+    WorkflowJumpEntity, WorkflowTimeoutEntity, IWorkflowNodeEntity, SubWorkflowEntity, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEntity, WorkflowScriptEval, WorkflowEntity
 } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 import * as DynamicViewClient from '../../../../Extensions/Signum.React.Extensions/Dynamic/DynamicViewClient'
@@ -16,7 +16,6 @@ import TypeHelpComponent from '../../Dynamic/Help/TypeHelpComponent'
 import HtmlEditor from '../../../../Extensions/Signum.React.Extensions/HtmlEditor/HtmlEditor'
 import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import { API } from '../WorkflowClient'
-import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
 interface WorkflowActivityModelComponentProps {
     ctx: TypeContext<WorkflowActivityModel>;
@@ -76,8 +75,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
 
         if (wa.type == "Script") {
             if (!wa.script)
-                wa.script = WorkflowScriptEntity.New({
-                    eval: WorkflowScriptEval.New(),
+                wa.script = WorkflowScriptPartEntity.New({
                 });
             wa.subWorkflow = null;
         }
@@ -219,7 +217,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                 }
 
                 {ctx.value.script ?
-                    ctx.value.workflow ? <ScriptComponent ctx={ctx.subCtx(a => a.script!)} workflow={ctx.value.workflow!} />
+                    ctx.value.workflow ? <ScriptComponent ctx={ctx.subCtx(a => a.script!)} mainEntityType={ctx.value.mainEntityType} workflow={ctx.value.workflow!} />
                         : <div className="alert alert-warning">{WorkflowActivityMessage.ToUse0YouSouldSaveWorkflow.niceToString('Script')}</div>
                     : undefined
                 }
@@ -240,20 +238,8 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
     }
 }
 
-class ScriptComponent extends React.Component<{ ctx: TypeContext<WorkflowScriptEntity>, workflow: WorkflowEntity }, void>{
-    handleScriptChange = (newScript: string) => {
-        const scriptEval = this.props.ctx.value.eval!;
-        scriptEval.script = newScript;
-        scriptEval.modified = true;
-        this.forceUpdate();
-    }
+class ScriptComponent extends React.Component<{ ctx: TypeContext<WorkflowScriptPartEntity>, mainEntityType: TypeEntity, workflow: WorkflowEntity }, void>{
 
-    handleCustomTypesChange = (newScript: string) => {
-        const scriptEval = this.props.ctx.value.eval!;
-        scriptEval.customTypes = newScript;
-        scriptEval.modified = true;
-        this.forceUpdate();
-    }
 
     render() {
         const ctx = this.props.ctx;
@@ -261,101 +247,19 @@ class ScriptComponent extends React.Component<{ ctx: TypeContext<WorkflowScriptE
         return (
             <fieldset>
                 <legend>{ctx.niceName()}</legend>
+                <EntityLine ctx={ctx.subCtx(p => p.script)} findOptions={{
+                    queryName: WorkflowScriptEntity,
+                    parentColumn: "Entity.MainEntityType",
+                    parentValue: this.props.mainEntityType
+                }} />
                 <EntityLine ctx={ctx.subCtx(s => s.retryStrategy)} />
                 <EntityLine
                     ctx={ctx.subCtx(s => s.onFailureJump)}
                     autoComplete={new LiteAutocompleteConfig(str => API.findNode(({ workflowId: this.props.workflow.id, subString: str, count: 5 })), false)}
                     find={false} />
-                &nbsp;
-                <div className="row">
-                    <div className="col-sm-7">
-                        <div className="btn-group" style={{ marginBottom: "3px" }}>
-                           <input type="button" className="btn btn-danger btn-xs sf-button" value="try-catch" onClick={this.handleTryCatchClick} />
-                           <input type="button" className="btn btn-success btn-xs sf-button" value="REST" onClick={this.handleRestClick} />
-                           <input type="button" className="btn btn-warning btn-xs sf-button" value="SOAP" onClick={this.handleSoapClick} />
-                           <input type="button" className="btn btn-danger btn-xs sf-button" value="ctx" onClick={this.handleCtxClick} />
-                        </div>
-                        <div className="code-container">
-                            <pre style={{ border: "0px", margin: "0px" }}>{`public static void CallScript(${mainEntityName}Entity e, WorkflowScriptContext ctx)\n{`}</pre>
-                            <CSharpCodeMirror script={ctx.value.eval!.script || ""} onChange={this.handleScriptChange} />
-                            <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
-                        </div>
-                        <div className="code-container">
-                            <pre style={{ border: "0px", margin: "0px" }}>{`namespace MyCustomTypes {`}</pre>
-                            <CSharpCodeMirror script={ctx.value.eval!.customTypes || ""} onChange={this.handleCustomTypesChange} />
-                            <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
-                        </div>
-                    </div>
-                    <div className="col-sm-5">
-                        <TypeHelpComponent initialType={mainEntityName} mode="CSharp" />
-                    </div>
-                </div>
+             
             </fieldset>
         );
-    }
-
-    handleRestClick = () => {
-        ValueLineModal.show({
-            type: { name: "string" },
-            initialValue: `// REST
-var response = HttpClient.Post<MyResponse>("Your URL", new { paramName = e.[Property Name], ... });
-e.[Property Name] = response.[Property Name];
-
-class MyResponse {}`,
-            valueLineType: ValueLineType.TextArea,
-            title: "REST Template",
-            message: "Copy to clipboard: Ctrl+C, ESC",
-            initiallyFocused: true,
-            valueHtmlProps: { style: { height: "115px" } },
-        });
-    }
-
-    handleSoapClick = () => {
-        ValueLineModal.show({
-            type: { name: "string" },
-            initialValue: `// SOAP
-var lib = Assembly.Load("[Assembly full path name]").GetType("[Type Name]").GetMethod("[Method Name]").Invoke(e.[Property Name]);
-e.[Property Name] = lib;`,
-            valueLineType: ValueLineType.TextArea,
-            title: "SOAP Template",
-            message: "Copy to clipboard: Ctrl+C, ESC",
-            initiallyFocused: true,
-            valueHtmlProps: { style: { height: "115px" } },
-        });
-    }
-
-    handleCtxClick = () => {
-        const hint = "WorkflowScriptContext Members";
-        ValueLineModal.show({
-            type: { name: "string" },
-            initialValue: `// ${hint}
-CaseActivityEntity CaseActivity; 
-int RetryCount;`,
-            valueLineType: ValueLineType.TextArea,
-            title: hint,
-            message: "Copy to clipboard: Ctrl+C, ESC",
-            initiallyFocused: true,
-            valueHtmlProps: { style: { height: "115px" } },
-        });
-    }
-
-    handleTryCatchClick = () => {
-        ValueLineModal.show({
-            type: { name: "string" },
-            initialValue: `try
-{
-
-}
-catch (Exception e)
-{
-    throw e;
-}`,
-            valueLineType: ValueLineType.TextArea,
-            title: "Try/Catch block",
-            message: "Copy to clipboard: Ctrl+C, ESC",
-            initiallyFocused: true,
-            valueHtmlProps: { style: { height: "180px" } },
-        });
     }
 }
 
