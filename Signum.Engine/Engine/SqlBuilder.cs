@@ -238,28 +238,9 @@ namespace Signum.Engine
                   index.IndexName,
                   columns));
             }
-            
-            if (!(index is UniqueIndex))
-            {
-                return new SqlPreCommandSimple("CREATE INDEX {0} ON {1}({2})".FormatWith(
-                  index.IndexName,
-                  index.Table.Name,
-                  columns));
 
-            }
-
-            var uIndex = (UniqueIndex)index;
-
-            if (string.IsNullOrEmpty(uIndex.Where))
-            {
-                return new SqlPreCommandSimple("CREATE {0}INDEX {1} ON {2}({3})".FormatWith(
-                    uIndex is UniqueIndex ? "UNIQUE " : null,
-                    uIndex.IndexName,
-                    uIndex.Table.Name,
-                    columns));
-            }
-
-            if (uIndex.ViewName != null)
+            var uIndex = index as UniqueIndex;
+            if (uIndex != null && uIndex.ViewName != null)
             {
                 ObjectName viewName = new ObjectName(uIndex.Table.Name.Schema, uIndex.ViewName);
 
@@ -274,10 +255,12 @@ namespace Signum.Engine
             }
             else
             {
-                return new SqlPreCommandSimple("CREATE UNIQUE INDEX {0} ON {1}({2}) WHERE {3}".FormatWith(
-                      uIndex.IndexName,
-                      uIndex.Table.Name,
-                      columns, uIndex.Where));
+                return new SqlPreCommandSimple("CREATE {0}INDEX {1} ON {2}({3}){4}".FormatWith(
+                    index is UniqueIndex ? "UNIQUE " : null,
+                    index.IndexName,
+                    index.Table.Name,
+                    columns,
+                    index.Where.HasText() ? $" WHERE {index.Where}" : ""));
             }
         }
 

@@ -81,13 +81,16 @@ namespace Signum.Engine.Maps
             return index;
         }
 
-        public Index AddIndex<T>(Expression<Func<T, object>> fields) where T : Entity
+        public Index AddIndex<T>(Expression<Func<T, object>> fields, Expression<Func<T, bool>> where = null) where T : Entity
         {
             var table = Schema.Table<T>();
 
             IColumn[] columns = Split(table, fields);
 
             var index = new Index(table, columns);
+            
+            if (where != null)
+                index.Where = IndexWhereExpressionVisitor.GetIndexWhere(where, table);
 
             AddIndex(index);
 

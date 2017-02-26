@@ -327,9 +327,8 @@ namespace Signum.Engine
 
                     if (!news.SetEquals(oldIx.Columns))
                         return false;
-
-                    var uix = newIx as UniqueIndex;
-                    if (uix != null && uix.Where != null && !oldIx.IndexName.EndsWith(StringHashEncoder.Codify(uix.Where)))
+                    
+                    if (newIx.Where != null && !oldIx.IndexName.EndsWith(StringHashEncoder.Codify(newIx.Where)))
                         return false;
 
                     return true;

@@ -26,9 +26,9 @@ namespace Signum.Engine.Maps
             return this;
         }
 
-        public FluentInclude<T> WithIndex(Expression<Func<T, object>> fields)
+        public FluentInclude<T> WithIndex(Expression<Func<T, object>> fields, Expression<Func<T, bool>> where = null)
         {
-            this.SchemaBuilder.AddIndex<T>(fields);
+            this.SchemaBuilder.AddIndex<T>(fields, where);
             return this;
         }
     }
