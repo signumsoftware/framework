@@ -19,7 +19,7 @@ import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 
-require("!style!css!./Mailing.css");
+require("./Mailing.css");
 
 export function start(options: { routes: JSX.Element[], smtpConfig: boolean, newsletter: boolean, pop3Config: boolean, sendEmailTask: boolean, quickLinksFrom: PseudoType[] | undefined }) {
     options.routes.push(<Route path="asyncEmailSender">
@@ -106,7 +106,5 @@ export interface AsyncEmailSenderState {
     IsCancelationRequested: boolean;
     NextPlannedExecution: string;
     QueuedItems: number;
-    MachineName: string;
-    ApplicationName: string;
     CurrentProcessIdentifier: string;
 }

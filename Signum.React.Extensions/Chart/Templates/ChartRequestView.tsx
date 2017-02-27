@@ -22,8 +22,8 @@ import ChartTable from './ChartTable'
 import ChartRenderer from './ChartRenderer'
 
 
-require("!style!css!../Chart.css");
-require("!style!css!../../../../Framework/Signum.React/Scripts/SearchControl/Search.css");
+require("../Chart.css");
+require("../../../../Framework/Signum.React/Scripts/SearchControl/Search.css");
 
 
 interface ChartRequestViewProps {

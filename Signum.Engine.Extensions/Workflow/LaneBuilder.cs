@@ -218,9 +218,10 @@ namespace Signum.Engine.Workflow
             public static Dictionary<WorkflowActivityType, string> WorkflowActivityTypes = new Dictionary<WorkflowActivityType, string>()
             {
                 { WorkflowActivityType.Task, "task" },
-                { WorkflowActivityType.DecisionTask, "userTask" },
+                { WorkflowActivityType.Decision, "userTask" },
                 { WorkflowActivityType.CallWorkflow, "callActivity" },
                 { WorkflowActivityType.DecompositionWorkflow, "callActivity" },
+                { WorkflowActivityType.Script, "scriptTask" },
             };
 
             public static Dictionary<WorkflowGatewayType, string> WorkflowGatewayTypes = new Dictionary<WorkflowGatewayType, string>()

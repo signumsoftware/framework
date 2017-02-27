@@ -13,7 +13,7 @@ import * as ChartClient from '../ChartClient'
 
 const colorbrewer = require("colorbrewer");
 
-require("!style!css!../Chart.css");
+require("../Chart.css");
 
 declare global {
     interface Error {

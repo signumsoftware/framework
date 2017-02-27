@@ -28,10 +28,12 @@ export default class AsyncEmailSenderPage extends React.Component<AsyncEmailSend
     }
 
     handleStop = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
         API.stop().then(() => this.loadState()).done();
     }
 
     handleStart = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
         API.start().then(() => this.loadState()).done();
     }
 
@@ -48,8 +50,8 @@ export default class AsyncEmailSenderPage extends React.Component<AsyncEmailSend
             <div>
                 <h2>AsyncEmailSender State</h2>
                 <div className="btn-toolbar">
-                    {s.Running && <a href="#" className="sf-button btn btn-default active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a> }
-                    {!s.Running && <a href="#" className="sf-button btn btn-default" style={{ color: "green" }} onClick={this.handleStart}>Start</a> }
+                    {s.Running && <a href="" className="sf-button btn btn-default active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a> }
+                    {!s.Running && <a href="" className="sf-button btn btn-default" style={{ color: "green" }} onClick={this.handleStart}>Start</a> }
                 </div >
 
                 <div>
@@ -64,15 +66,11 @@ export default class AsyncEmailSenderPage extends React.Component<AsyncEmailSend
                     <br />
                     AsyncSenderPeriod: { s.AsyncSenderPeriod} sec
                     <br />
-                    NextPlannedExecution: { s.NextPlannedExecution} ({ s.NextPlannedExecution == undefined ? "-None-" : moment(s.NextPlannedExecution).toNow() })
+                    NextPlannedExecution: {s.NextPlannedExecution} ({s.NextPlannedExecution == undefined ? "-None-" : moment(s.NextPlannedExecution).fromNow()})
                     <br />
                     IsCancelationRequested: { s.IsCancelationRequested }
                     <br />
                     QueuedItems: { s.QueuedItems }
-                    <br />
-                    MachineName: { s.MachineName }
-                    <br />
-                    ApplicationName: { s.ApplicationName }
                 </div>
                 <br />
                 <h2>{EmailMessageEntity.niceName() }</h2>

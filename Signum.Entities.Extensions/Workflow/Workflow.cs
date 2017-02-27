@@ -140,9 +140,9 @@ namespace Signum.Entities.Workflow
         public string NewTask { get; set; }
     }
 
-    public class WorkflowEvaluationContext
+    public class WorkflowTransitionContext
     {
-        public WorkflowEvaluationContext(CaseActivityEntity ca, IWorkflowTransition conn, DecisionResult? dr)
+        public WorkflowTransitionContext(CaseActivityEntity ca, IWorkflowTransition conn, DecisionResult? dr)
         {
             this.CaseActivity = ca;
             this.Case = ca?.Case;
@@ -193,6 +193,7 @@ namespace Signum.Entities.Workflow
         [Description("Activity '{0}' can not timeout to '{1}' because '{2}'.")]
         Activity0CanNotTimeoutTo1Because2,
         IsStart,
+        IsSelfJumping,
         IsInDifferentParallelTrack,
         [Description("'{0}' (Track {1}) can not be connected to '{2}' (Track {3} instead of Track {4}).")]
         _0Track1CanNotBeConnectedTo2Track3InsteadOfTrack4,

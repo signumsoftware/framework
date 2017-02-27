@@ -9,14 +9,17 @@ using System.Threading.Tasks;
 using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Entities;
-using Signum.Entities.Mailing;
 using Signum.Engine.Authorization;
 using Signum.Engine.Cache;
 using System.Data.SqlClient;
+using Signum.Entities.Workflow;
+using Signum.Engine.Operations;
+using Signum.Entities.Authorization;
+using Signum.Entities.Basics;
 
-namespace Signum.Engine.Mailing
+namespace Signum.Engine.Workflow
 {
-    public static class AsyncEmailSenderLogic
+    public static class WorkflowScriptRunner
     {
         static Timer timer;
         internal static DateTime? nextPlannedExecution;
@@ -26,20 +29,20 @@ namespace Signum.Engine.Mailing
         static Guid processIdentifier;
         static AutoResetEvent autoResetEvent = new AutoResetEvent(false);
 
-        public static AsyncEmailSenderState ExecutionState()
+        public static WorkflowScriptRunnerState ExecutionState()
         {
-            return new AsyncEmailSenderState
+            return new WorkflowScriptRunnerState
             {
                 Running = running,
                 CurrentProcessIdentifier = processIdentifier,
-                AsyncSenderPeriod = EmailLogic.Configuration.AsyncSenderPeriod,
+                ScriptRunnerPeriod = WorkflowLogic.Configuration.ScriptRunnerPeriod,
                 NextPlannedExecution = nextPlannedExecution,
                 IsCancelationRequested = CancelProcess != null && CancelProcess.IsCancellationRequested,
                 QueuedItems = queuedItems,
             };
         }
 
-        public static void StartRunningEmailSenderAsync(int initialDelayMilliseconds)
+        public static void StartRunningScripts(int initialDelayMilliseconds)
         {
             if (initialDelayMilliseconds == 0)
                 ExecuteProcess();
@@ -57,7 +60,7 @@ namespace Signum.Engine.Mailing
         private static void ExecuteProcess()
         {
             if (running)
-                throw new InvalidOperationException("EmailAsyncSender process is already running");
+                throw new InvalidOperationException("WorkflowScriptRunner process is already running");
 
 
             using (ExecutionContext.SuppressFlow())
@@ -77,47 +80,33 @@ namespace Signum.Engine.Mailing
 
                         GC.KeepAlive(timer);
 
-                        using (AuthLogic.Disable())
+                        using (UserHolder.UserSession(AuthLogic.SystemUser))
                         {
-                            if (EmailLogic.Configuration.AvoidSendingEmailsOlderThan.HasValue)
-                            {
-                                DateTime firstDate = TimeZoneManager.Now.AddHours(-EmailLogic.Configuration.AvoidSendingEmailsOlderThan.Value);
-                                Database.Query<EmailMessageEntity>().Where(m =>
-                                    m.State == EmailMessageState.ReadyToSend &&
-                                    m.CreationDate < firstDate).UnsafeUpdate()
-                                    .Set(m => m.State, m => EmailMessageState.Outdated)
-                                    .Execute();
-                            }
-
                             if (CacheLogic.WithSqlDependency)
                             {
-                                SetSqlDepndency();
+                                SetSqlDependency();
                             }
 
                             while (autoResetEvent.WaitOne())
                             {
-                                if (!EmailLogic.Configuration.SendEmails)
-                                    throw new ApplicationException("Email configuration does not allow email sending");
-
                                 if (CancelProcess.IsCancellationRequested)
                                     return;
 
                                 timer.Change(Timeout.Infinite, Timeout.Infinite);
                                 nextPlannedExecution = null;
 
-                                using (HeavyProfiler.Log("EmailAsyncSender", () => "Execute process"))
+                                using (HeavyProfiler.Log("WorkflowScriptRunner", () => "Execute process"))
                                 {
                                     processIdentifier = Guid.NewGuid();
                                     if (RecruitQueuedItems())
                                     {
                                         while (queuedItems > 0 || RecruitQueuedItems())
                                         {
-                                            var items = Database.Query<EmailMessageEntity>().Where(m =>
-                                                m.ProcessIdentifier == processIdentifier &&
-                                                m.State == EmailMessageState.RecruitedForSending)
-                                                .Take(EmailLogic.Configuration.ChunkSizeSendingEmails).ToList();
+                                            var items = Database.Query<CaseActivityEntity>().Where(m => m.DoneDate == null && 
+                                                m.ScriptExecution.ProcessIdentifier == processIdentifier)
+                                                .Take(WorkflowLogic.Configuration.ChunkSizeRunningScripts).ToList();
                                             queuedItems = items.Count;
-                                            foreach (var email in items)
+                                            foreach (var caseActivity in items)
                                             {
                                                 CancelProcess.Token.ThrowIfCancellationRequested();
 
@@ -125,37 +114,42 @@ namespace Signum.Engine.Mailing
                                                 {
                                                     using (Transaction tr = Transaction.ForceNew())
                                                     {
-                                                        EmailLogic.SenderManager.Send(email);
+                                                        caseActivity.Execute(CaseActivityOperation.ScriptExecute);
+
                                                         tr.Commit();
                                                     }
                                                 }
                                                 catch
-                                                {
+                                                { 
                                                     try
                                                     {
-                                                        if (email.SendRetries < EmailLogic.Configuration.MaxEmailSendRetries)
+                                                        var ca = caseActivity.ToLite().Retrieve();
+                                                        var retry = ca.WorkflowActivity.Script.RetryStrategy;
+                                                        var nextDate = retry?.NextDate(ca.ScriptExecution.RetryCount);
+                                                        if(nextDate == null)
                                                         {
-                                                            using (Transaction tr = Transaction.ForceNew())
-                                                            {
-                                                                var nm = email.ToLite().Retrieve();
-                                                                nm.SendRetries += 1;
-                                                                nm.State = EmailMessageState.ReadyToSend;
-                                                                nm.Save();
-                                                                tr.Commit();
-                                                            }
+                                                            ca.Execute(CaseActivityOperation.ScriptFailureJump);
+                                                        }
+                                                        else
+                                                        {
+                                                            ca.Execute(CaseActivityOperation.ScriptScheduleRetry, nextDate.Value);
                                                         }
                                                     }
-                                                    catch { }
+                                                    catch (Exception e)
+                                                    {
+                                                        e.LogException();
+                                                        throw;
+                                                    }
                                                 }
                                                 queuedItems--;
                                             }
-                                            queuedItems = Database.Query<EmailMessageEntity>().Where(m =>
-                                                m.ProcessIdentifier == processIdentifier &&
-                                                m.State == EmailMessageState.RecruitedForSending).Count();
+                                            queuedItems = Database.Query<CaseActivityEntity>()
+                                            .Where(m => m.ScriptExecution.ProcessIdentifier == processIdentifier && m.DoneDate == null)
+                                            .Count();
                                         }
                                     }
                                     SetTimer();
-                                    SetSqlDepndency();
+                                    SetSqlDependency();
                                 }
                             }
                         }
@@ -166,7 +160,7 @@ namespace Signum.Engine.Mailing
                         {
                             e.LogException(edn =>
                             {
-                                edn.ControllerName = "EmailAsyncSender";
+                                edn.ControllerName = "WorkflowScriptRunner";
                                 edn.ActionName = "ExecuteProcess";
                             });
                         }
@@ -181,37 +175,38 @@ namespace Signum.Engine.Mailing
         }
 
         static bool sqlDependencyRegistered = false;
-        private static void SetSqlDepndency()
+        private static void SetSqlDependency()
         {
             if(sqlDependencyRegistered)
                 return;
             
-            var query = Database.Query<EmailMessageEntity>().Where(m => m.State == EmailMessageState.ReadyToSend).Select(m => m.Id);
+            var query = Database.Query<CaseActivityEntity>().Where(m => m.ScriptExecution != null).Select(m => m.Id);
             sqlDependencyRegistered = true;
-            query.ToListWithInvalidation(typeof(EmailMessageEntity), "EmailAsyncSender ReadyToSend dependency", a => {
+            query.ToListWithInvalidation(typeof(CaseActivityEntity), "WorkflowScriptRunner ReadyToExecute dependency", a => {
                 sqlDependencyRegistered = false;
-                WakeUp("EmailAsyncSender ReadyToSend dependency", a);
+                WakeUp("WorkflowScriptRunner ReadyToExecute dependency", a);
             });
         }
 
         private static bool RecruitQueuedItems()
         {
-            DateTime? firstDate = EmailLogic.Configuration.AvoidSendingEmailsOlderThan == null ?
-                null : (DateTime?)TimeZoneManager.Now.AddHours(-EmailLogic.Configuration.AvoidSendingEmailsOlderThan.Value);
+            DateTime? firstDate = WorkflowLogic.Configuration.AvoidExecutingScriptsOlderThan == null ?
+                null : (DateTime?)TimeZoneManager.Now.AddHours(-WorkflowLogic.Configuration.AvoidExecutingScriptsOlderThan.Value);
 
-            queuedItems = Database.Query<EmailMessageEntity>().Where(m =>
-                m.State == EmailMessageState.ReadyToSend &&
-                m.CreationDate  < TimeZoneManager.Now &&
-                (firstDate == null ? true : m.CreationDate >= firstDate)).UnsafeUpdate()
-                    .Set(m => m.ProcessIdentifier, m => processIdentifier)
-                    .Set(m => m.State, m => EmailMessageState.RecruitedForSending)
-                    .Execute();
+            queuedItems = Database.Query<CaseActivityEntity>()
+                .Where(ca => ca.DoneDate == null &&
+                             ((firstDate == null || firstDate < ca.ScriptExecution.NextExecution) &&
+                            ca.ScriptExecution.NextExecution < TimeZoneManager.Now))
+                .UnsafeUpdate()
+                .Set(m => m.ScriptExecution.ProcessIdentifier, m => processIdentifier)
+                .Execute();
+
             return queuedItems > 0;
         }
 
         internal static bool WakeUp(string reason, SqlNotificationEventArgs args)
         {
-            using (HeavyProfiler.Log("EmailAsyncSender WakeUp", () => "WakeUp! " + reason + ToString(args)))
+            using (HeavyProfiler.Log("WorkflowScriptRunner WakeUp", () => "WakeUp! " + reason + ToString(args)))
             {
                 return autoResetEvent.Set();
             }
@@ -227,16 +222,16 @@ namespace Signum.Engine.Mailing
 
         private static void SetTimer()
         {
-            nextPlannedExecution = TimeZoneManager.Now.AddMilliseconds(EmailLogic.Configuration.AsyncSenderPeriod * 1000);
-            timer.Change(EmailLogic.Configuration.AsyncSenderPeriod * 1000, Timeout.Infinite);
+            nextPlannedExecution = TimeZoneManager.Now.AddMilliseconds(WorkflowLogic.Configuration.ScriptRunnerPeriod * 1000);
+            timer.Change(WorkflowLogic.Configuration.ScriptRunnerPeriod * 1000, Timeout.Infinite);
         }
 
         public static void Stop()
         {
             if (!running)
-                throw new InvalidOperationException("EmailAsyncSender is not running");
+                throw new InvalidOperationException("WorkflowScriptRunner is not running");
 
-            using (HeavyProfiler.Log("EmailAsyncSender", () => "Stopping process"))
+            using (HeavyProfiler.Log("WorkflowScriptRunner", () => "Stopping process"))
             {
                 timer.Dispose();
                 CancelProcess.Cancel();
@@ -246,10 +241,9 @@ namespace Signum.Engine.Mailing
         }
     }
 
-
-    public class AsyncEmailSenderState
+    public class WorkflowScriptRunnerState
     {
-        public int AsyncSenderPeriod;
+        public int ScriptRunnerPeriod;
         public bool Running;
         public bool IsCancelationRequested;
         public DateTime? NextPlannedExecution;

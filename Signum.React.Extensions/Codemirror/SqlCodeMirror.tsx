@@ -2,10 +2,10 @@
 import CodeMirrorComponent from './CodeMirrorComponent'
 import * as CodeMirror from 'codemirror'
 
-require("!style!css!codemirror/lib/codemirror.css");
-require("!style!css!codemirror/addon/dialog/dialog.css");
-require("!style!css!codemirror/addon/display/fullscreen.css");
-require("!style!css!codemirror/addon/hint/show-hint.css");
+require("codemirror/lib/codemirror.css");
+require("codemirror/addon/dialog/dialog.css");
+require("codemirror/addon/display/fullscreen.css");
+require("codemirror/addon/hint/show-hint.css");
 
 
 require("codemirror/lib/codemirror");

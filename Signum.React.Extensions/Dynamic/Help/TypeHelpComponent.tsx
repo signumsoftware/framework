@@ -19,7 +19,7 @@ import * as DynamicClient from '../DynamicClient'
 import ContextMenu from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
 import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
 
-require("!style!css!./TypeHelpComponent.css");
+require("./TypeHelpComponent.css");
 
 interface TypeHelpComponentProps {
     initialType?: string;

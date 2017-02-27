@@ -228,6 +228,9 @@
     <Compile Include="Workflow\CaseJunction.cs" />
     <Compile Include="Workflow\CaseNotification.cs" />
     <Compile Include="Workflow\Workflow.cs" />
+    <Compile Include="Workflow\WorkflowConfiguration.cs" />
+    <Compile Include="Workflow\WorkflowScriptRetryStrategy.cs" />
+    <Compile Include="Workflow\WorkflowScript.cs" />
     <Compile Include="Workflow\WorkflowActivity.cs" />
     <Compile Include="Workflow\WorkflowAction.cs" />
     <Compile Include="Workflow\WorkflowCondition.cs" />
