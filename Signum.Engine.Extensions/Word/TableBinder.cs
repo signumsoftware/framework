@@ -19,11 +19,42 @@ using Signum.Engine.Chart;
 using Signum.Entities;
 using DocumentFormat.OpenXml.Packaging;
 using System.Globalization;
+using System.Reflection;
+using Signum.Engine.Templating;
+using Signum.Entities.Word;
 
 namespace Signum.Engine.Word
 {
     public static class TableBinder
     {
+        internal static void ValidateTables(OpenXmlPart part, WordTemplateEntity template, List<TemplateError> errors)
+        {
+            var graphicFrames = part.RootElement.Descendants().Where(a => a.LocalName == "graphicFrame").ToList();
+            foreach (var item in graphicFrames)
+            {
+                var nonVisualProps = item.Descendants().SingleOrDefaultEx(a => a.LocalName == "cNvPr");
+                var title = GetTitle(nonVisualProps);
+
+                if (title != null)
+                {
+                    var prefix = title.TryBefore(":");
+                    if (prefix != null)
+                    {
+                        var provider = WordTemplateLogic.ToDataTableProviders.TryGetC(prefix);
+                        if (provider == null)
+                            errors.Add(new TemplateError(false, "No DataTableProvider '{0}' found (Possibilieties {1})".FormatWith(prefix, WordTemplateLogic.ToDataTableProviders.Keys.CommaOr())));
+                        else
+                        {
+                            var error = provider.Validate(title.After(":"), template);
+                            if (error != null)
+                                errors.Add(new TemplateError(false, error));
+                        }
+                    }
+                    
+                }
+            }
+        }
+
         internal static void ProcessTables(OpenXmlPart part, WordTemplateParameters parameters)
         {
             var graphicFrames = part.RootElement.Descendants().Where(a => a.LocalName == "graphicFrame").ToList();
@@ -31,44 +62,43 @@ namespace Signum.Engine.Word
             {
                 var nonVisualProps = item.Descendants().SingleOrDefaultEx(a => a.LocalName == "cNvPr");
                 var title = GetTitle(nonVisualProps);
-                
-                Data.DataTable table = GetDataTable(parameters, title);
-                if (table != null)
+
+                Data.DataTable dataTable = title != null ? GetDataTable(parameters, title) : null;
+                if (dataTable != null)
                 {
-                    var chartRef = item.Descendants<Charts.ChartReference>().SingleEx();
-                    OpenXmlPart chartPart = part.GetPartById(chartRef.Id.Value);
-                    var chart = chartPart.RootElement.Descendants<Charts.Chart>().SingleEx();
-                    TableBinder.ReplaceChart(chart, table);
+                    var chartRef = item.Descendants<Charts.ChartReference>().SingleOrDefaultEx();
+                    if (chartRef != null)
+                    {
+                        OpenXmlPart chartPart = part.GetPartById(chartRef.Id.Value);
+                        var chart = chartPart.RootElement.Descendants<Charts.Chart>().SingleEx();
+                        ReplaceChart(chart, dataTable);
+                    }
+                    else
+                    {
+                        var table = item.Descendants<Drawing.Table>().SingleOrDefaultEx();
+                        if (table != null)
+                        {
+                            ReplaceTable(table, dataTable);
+                        }
+                    }
                 }
             }
         }
 
+ 
+
         static string GetTitle(OpenXmlElement nonVisualProps)
         {
             if (nonVisualProps is Drawing.NonVisualDrawingProperties)
-                return ((Drawing.NonVisualDrawingProperties)nonVisualProps).Title.Value;
+                return ((Drawing.NonVisualDrawingProperties)nonVisualProps).Title?.Value;
 
             if (nonVisualProps is Presentation.NonVisualDrawingProperties)
-                return ((Presentation.NonVisualDrawingProperties)nonVisualProps).Title.Value;
+                return ((Presentation.NonVisualDrawingProperties)nonVisualProps).Title?.Value;
             
             throw new NotImplementedException("Imposible to get the Title from " + nonVisualProps.GetType().FullName);
         }
 
-        public static void ReplaceChart(Charts.Chart chart, Data.DataTable table)
-        {
-            var plotArea = chart.Descendants<Charts.PlotArea>().SingleEx();
-            var series = plotArea.Descendants<OpenXmlCompositeElement>().Where(a => a.LocalName == "ser").ToList();
-
-                SynchronizeNodes(series, table.Rows.Cast<Data.DataRow>().ToList(),
-                    (ser, row, i, isCloned) =>
-                    {
-                        if (isCloned)
-                            ser.Descendants<Drawing.SchemeColor>().ToList().ForEach(f => f.Remove());
-
-                        BindData(ser, row, i);
-                    });
-        }
-
+ 
         
         static void SynchronizeNodes<N, T>(List<N> nodes, List<T> data, Action<N, T, int, bool> apply)
             where N : OpenXmlElement
@@ -94,7 +124,55 @@ namespace Signum.Engine.Word
             }
         }
 
-        private static void BindData(OpenXmlCompositeElement serie, Data.DataRow dataRow, int index)
+        private static void ReplaceTable(Drawing.Table table, Data.DataTable dataTable)
+        {
+            var tableGrid = table.Descendants<Drawing.TableGrid>().SingleEx();
+            SynchronizeNodes(
+                tableGrid.Descendants<Drawing.GridColumn>().ToList(),
+                dataTable.Columns.Cast<Data.DataColumn>().ToList(),
+                (gc, dc, i, isCloned) => { });
+
+            var rows = table.Descendants<Drawing.TableRow>().ToList();
+            SynchronizeNodes(
+               rows.FirstEx().Descendants<Drawing.TableCell>().ToList(),
+               dataTable.Columns.Cast<Data.DataColumn>().ToList(),
+               (gc, dc, i, isCloned) =>
+               {
+                   var text = gc.Descendants<Drawing.Text>().SingleOrDefaultEx();
+
+                   if (text != null)
+                       text.Text = dc.ColumnName;
+               });           
+            
+            SynchronizeNodes(
+                rows.Skip(1).ToList(),
+                dataTable.Rows.Cast<Data.DataRow>().ToList(),
+                (tr, dr, j, isCloned) => 
+                {
+                    SynchronizeNodes(
+                        tr.Descendants<Drawing.TableCell>().ToList(),
+                        dataTable.Columns.Cast<Data.DataColumn>().Select(dc => dr[dc]).ToList(),
+                        (gc, val, i, isCloned2) => { gc.Descendants<Drawing.Text>().SingleEx().Text = ToStringLocal(val); });
+                });
+        }
+
+        public static void ReplaceChart(Charts.Chart chart, Data.DataTable table)
+        {
+            var plotArea = chart.Descendants<Charts.PlotArea>().SingleEx();
+            var series = plotArea.Descendants<OpenXmlCompositeElement>().Where(a => a.LocalName == "ser").ToList();
+
+            SynchronizeNodes(series, table.Rows.Cast<Data.DataRow>().ToList(),
+                (ser, row, i, isCloned) =>
+                {
+                    if (isCloned)
+                        ser.Descendants<Drawing.SchemeColor>().ToList().ForEach(f => f.Remove());
+
+                    BindSerie(ser, row, i);
+                });
+        }
+
+
+        private static void BindSerie(OpenXmlCompositeElement serie, Data.DataRow dataRow, int index)
         {
             serie.Descendants<Charts.Formula>().ToList().ForEach(f => f.Remove());
 
@@ -124,39 +202,98 @@ namespace Signum.Engine.Word
                   (sp, val, i, isCloned) =>
                   {
                       sp.Index = new UInt32Value((uint)i);
-                      sp.Descendants<Charts.NumericValue>().Single().Text = 
-                        val == null ? null: 
-                        (val is IFormattable) ? ((IFormattable) val).ToString(null, CultureInfo.InvariantCulture) : 
-                        val.ToString();
+                      sp.Descendants<Charts.NumericValue>().Single().Text = ToStringLocal(val);
                   });
             }
         }
 
-
+        private static string ToStringLocal(object val)
+        {
+            return val == null ? null :
+                (val is IFormattable) ? ((IFormattable)val).ToString(null, CultureInfo.InvariantCulture) :
+                val.ToString();
+        }
 
         private static Data.DataTable GetDataTable(WordTemplateParameters parameters, string title)
         {
-            var tableSource = title.TryAfter("TableSource:");
-            if (tableSource != null)
-            {
-                var ts = parameters.Template.TableSources.Single(a => a.Key == tableSource);
-                var table = WordTemplateLogic.ToDataTable.Invoke(ts.Source.Retrieve(), new WordTemplateLogic.WordContext
-                {
-                    Entity = (Entity)parameters.Entity,
-                    SystemWordTemplate = parameters.SystemWordTemplate,
-                    Template = parameters.Template
-                });
+            var key = title.TryBefore(":");
 
-                return table;
+            if (key == null)
+                return null;
+
+            var provider = WordTemplateLogic.ToDataTableProviders.GetOrThrow(key);
+
+            var table = provider.GetDataTable(title.After(":"), new WordTemplateLogic.WordContext
+            {
+                Entity = (Entity)parameters.Entity,
+                SystemWordTemplate = parameters.SystemWordTemplate,
+                Template = parameters.Template
+            });
+
+            return table;
+        }
+    }
+
+    public class ModelDataTableProvider : IWordDataTableProvider
+    {
+        public Data.DataTable GetDataTable(string suffix, WordTemplateLogic.WordContext ctx)
+        {
+            ISystemWordTemplate swt;
+            MethodInfo mi = GetMethod(ctx.Template, suffix);
+
+            object result;
+            try
+            {
+                result = mi.Invoke(ctx.SystemWordTemplate, null);
+            }
+            catch (TargetInvocationException e)
+            {
+                e.InnerException.PreserveStackTrace();
+
+                throw e.InnerException;
             }
 
-            return null;
+            if (!(result is Data.DataTable))
+                throw new InvalidOperationException($"Method '{suffix}' on '{ctx.SystemWordTemplate.GetType().Name}' did not return a DataTable");
+
+            return (Data.DataTable)result;
         }
 
-
-        internal static Data.DataTable UserQueryToDataTable(UserQueryEntity userQuery, WordTemplateLogic.WordContext ctx)
+        private static MethodInfo GetMethod(WordTemplateEntity template, string method)
         {
-            using (CurrentEntityConverter.SetCurrentEntity(ctx.Entity))
+            if (template.SystemWordTemplate == null)
+                throw new InvalidOperationException($"No SystemWordTemplate found in template '{template}' to call '{method}'");
+
+            var type = template.SystemWordTemplate.ToType();
+            var mi = type.GetMethod(method);
+            if (mi == null)
+                throw new InvalidOperationException($"No Method with name '{method}' found in type '{type.Name}'");
+
+
+            return mi;
+        }
+
+        public string Validate(string suffix, WordTemplateEntity template)
+        {
+            try
+            {
+                GetMethod(template, suffix);
+                return null;
+            }
+            catch (Exception e)
+            {
+                return e.Message;
+            }
+        }
+    }
+
+    public class UserQueryDataTableProvider : IWordDataTableProvider
+    {
+        public Data.DataTable GetDataTable(string suffix, WordTemplateLogic.WordContext context)
+        {
+            var userQuery = Database.Query<UserQueryEntity>().SingleOrDefault(a => a.Guid == Guid.Parse(suffix));
+
+            using (CurrentEntityConverter.SetCurrentEntity(context.Entity))
             {
                 var request = UserQueryLogic.ToQueryRequest(userQuery);
                 ResultTable resultTable = DynamicQueryManager.Current.ExecuteQuery(request);
@@ -165,9 +302,26 @@ namespace Signum.Engine.Word
             }
         }
 
-        internal static Data.DataTable UserChartToDataTable(UserChartEntity userChart, WordTemplateLogic.WordContext ctx)
+        public string Validate(string suffix, WordTemplateEntity template)
         {
-            using (CurrentEntityConverter.SetCurrentEntity(ctx.Entity))
+            Guid guid;
+            if (!Guid.TryParse(suffix, out guid))
+                return "Impossible to convert '{0}' in a GUID for a UserQuery".FormatWith(suffix);
+
+            if (!Database.Query<UserQueryEntity>().Any(a => a.Guid == guid))
+                return "No UserQuery with GUID={0} found".FormatWith(guid);
+
+            return null;
+        }
+    }
+
+    public class UserChartDataTableProvider : IWordDataTableProvider
+    {
+        public Data.DataTable GetDataTable(string suffix, WordTemplateLogic.WordContext context)
+        {
+            var userChart = Database.Query<UserChartEntity>().SingleOrDefault(a => a.Guid == Guid.Parse(suffix));
+
+            using (CurrentEntityConverter.SetCurrentEntity(context.Entity))
             {
                 var chartRequest = UserChartLogic.ToChartRequest(userChart);
                 ResultTable result = ChartLogic.ExecuteChart(chartRequest);
@@ -185,6 +339,16 @@ namespace Signum.Engine.Word
             }
         }
 
-      
+        public string Validate(string suffix, WordTemplateEntity template)
+        {
+            Guid guid;
+            if (!Guid.TryParse(suffix, out guid))
+                return "Impossible to convert '{0}' in a GUID for a UserChart".FormatWith(suffix);
+
+            if (!Database.Query<UserChartEntity>().Any(a => a.Guid == guid))
+                return "No UserChart with GUID={0} found".FormatWith(guid);
+
+            return null;
+        }
     }
 }

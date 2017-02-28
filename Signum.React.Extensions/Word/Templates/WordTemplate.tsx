@@ -68,7 +68,6 @@ export default class WordTemplate extends React.Component<{ ctx: TypeContext<Wor
                             </div>
                             <FileLine ctx={sc.subCtx(e => e.template)} />
                         </div>
-                        <EntityRepeater ctx={ctx.subCtx(f => f.tableSources)} />
                     </div>
                 }
             </div>
