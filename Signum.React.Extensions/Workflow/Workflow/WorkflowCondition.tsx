@@ -51,7 +51,7 @@ export default class WorkflowConditionComponent extends React.Component<Workflow
                     onChange={this.handleMainEntityTypeChange}
                     autoComplete={new LiteAutocompleteConfig(str => API.findMainEntityType({ subString: str, count: 5 }), false)}
                     find={false}
-                    />
+                />
                 {ctx.value.mainEntityType &&
                     <div>
                         <br />
@@ -59,7 +59,7 @@ export default class WorkflowConditionComponent extends React.Component<Workflow
                             <div className="col-sm-7">
                                 {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handleEvaluate}><i className="fa fa-play" aria-hidden="true"></i> Evaluate</button>}
                                 <div className="code-container">
-                                    <pre style={{ border: "0px", margin: "0px" }}>{"boolean Evaluate(" + ctx.value.mainEntityType.cleanName + " e, WorkflowEvaluationContext ctx)\n{"}</pre>
+                                    <pre style={{ border: "0px", margin: "0px" }}>{"boolean Evaluate(" + ctx.value.mainEntityType.cleanName + " e, WorkflowTransitionContext ctx)\n{"}</pre>
                                     <CSharpCodeMirror script={ctx.value.eval!.script || ""} onChange={this.handleCodeChange} />
                                     <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
                                 </div>

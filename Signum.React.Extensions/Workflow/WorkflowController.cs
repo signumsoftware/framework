@@ -5,6 +5,7 @@ using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.React.Facades;
 using System;
+using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -14,6 +15,7 @@ using System.Xml.Linq;
 using Signum.Entities.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
+using Signum.Engine.Authorization;
 
 namespace Signum.React.Workflow
 {
@@ -32,6 +34,14 @@ namespace Signum.React.Workflow
                 canExecuteActivity = OperationLogic.ServiceCanExecute(activity).ToDictionary(a => a.Key.Key, a => a.Value),
                 canExecuteMainEntity = OperationLogic.ServiceCanExecute((Entity)activity.Case.MainEntity).ToDictionary(a => a.Key.Key, a => a.Value),
             };
+        }
+
+        [Route("api/workflow/tags/{caseId}"), HttpGet]
+        public List<CaseTagTypeEntity> GetTags(string caseId)
+        {
+            var lite = Lite.ParsePrimaryKey<CaseEntity>(caseId);
+
+            return Database.Query<CaseTagEntity>().Where(a => a.Case == lite).Select(a => a.TagType).ToList();
         }
 
         public class EntityPackWorkflow
@@ -110,7 +120,7 @@ namespace Signum.React.Workflow
             {
                 return new WorkflowConditionTestResponse
                 {
-                    validationResult = evaluator.EvaluateUntyped(request.exampleEntity, new WorkflowEvaluationContext(null, null, request.decisionResult))
+                    validationResult = evaluator.EvaluateUntyped(request.exampleEntity, new WorkflowTransitionContext(null, null, request.decisionResult))
                 };
             }
             catch (Exception e)
@@ -134,6 +144,36 @@ namespace Signum.React.Workflow
             public string compileError;
             public string validationException;
             public bool validationResult;
+        }
+
+        [Route("api/workflow/scriptRunner/view"), HttpGet]
+        public WorkflowScriptRunnerState View()
+        {
+            WorkflowScriptRunnerPanelPermission.ViewWorkflowScriptRunnerPanel.AssertAuthorized();
+
+            WorkflowScriptRunnerState state = WorkflowScriptRunner.ExecutionState();
+
+            return state;
+        }
+
+        [Route("api/workflow/scriptRunner/start"), HttpPost]
+        public void Start()
+        {
+            WorkflowScriptRunnerPanelPermission.ViewWorkflowScriptRunnerPanel.AssertAuthorized();
+
+            WorkflowScriptRunner.StartRunningScripts(0);
+
+            Thread.Sleep(1000);
+        }
+
+        [Route("api/workflow/scriptRunner/stop"), HttpPost]
+        public void Stop()
+        {
+            WorkflowScriptRunnerPanelPermission.ViewWorkflowScriptRunnerPanel.AssertAuthorized();
+
+            WorkflowScriptRunner.Stop();
+
+            Thread.Sleep(1000);
         }
     }
 }

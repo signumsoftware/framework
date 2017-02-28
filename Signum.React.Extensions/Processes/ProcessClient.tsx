@@ -15,7 +15,7 @@ import { ProcessState, ProcessEntity, ProcessPermission, PackageLineEntity, Pack
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 
-require("!style!css!./Processes.css");
+require("./Processes.css");
 
 export function start(options: { routes: JSX.Element[], packages: boolean, packageOperations: boolean }) {
   

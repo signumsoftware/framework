@@ -1,4 +1,5 @@
 ﻿using Signum.Entities;
+using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
 using Signum.Utilities;
@@ -13,7 +14,7 @@ using System.Threading.Tasks;
 namespace Signum.Entities.Workflow
 {
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
-    public class WorkflowActionEntity : Entity
+    public class WorkflowScriptEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
@@ -23,9 +24,9 @@ namespace Signum.Entities.Workflow
 
         [NotNullable]
         [NotNullValidator, NotifyChildProperty]
-        public WorkflowActionEval Eval { get; set; }
+        public WorkflowScriptEval Eval { get; set; }
 
-        static Expression<Func<WorkflowActionEntity, string>> ToStringExpression = @this => @this.Name;
+        static Expression<Func<WorkflowScriptEntity, string>> ToStringExpression = @this => @this.Name;
         [ExpressionField]
         public override string ToString()
         {
@@ -34,18 +35,23 @@ namespace Signum.Entities.Workflow
     }
 
     [AutoInit]
-    public static class WorkflowActionOperation
+    public static class WorkflowScriptOperation
     {
-        public static readonly ExecuteSymbol<WorkflowActionEntity> Save;
-        public static readonly DeleteSymbol<WorkflowActionEntity> Delete;
+        public static readonly ExecuteSymbol<WorkflowScriptEntity> Save;
+        public static readonly DeleteSymbol<WorkflowScriptEntity> Delete;
     }
 
+
     [Serializable]
-    public class WorkflowActionEval : EvalEntity<IWorkflowActionExecutor>
+    public class WorkflowScriptEval : EvalEntity<IWorkflowScriptExecutor>
     {
+        [SqlDbType(Size = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = true, MultiLine = true)]
+        public string CustomTypes { get; set; }
+
         protected override CompilationResult Compile()
         {
-            var parent = (WorkflowActionEntity)this.GetParentEntity();
+            var parent = (WorkflowScriptEntity)this.GetParentEntity();
 
             var script = this.Script.Trim();
             var WorkflowEntityTypeName = parent.MainEntityType.ToType().FullName;
@@ -55,24 +61,39 @@ namespace Signum.Entities.Workflow
                     @"
                     namespace Signum.Entities.Workflow
                     {
-                        class MyWorkflowActionEvaluator : IWorkflowActionExecutor
+                        class MyWorkflowScriptEvaluator : IWorkflowScriptExecutor
                         {
-                            public void ExecuteUntyped(ICaseMainEntity mainEntity, WorkflowTransitionContext ctx)
+                            public void ExecuteUntyped(ICaseMainEntity mainEntity, WorkflowScriptContext ctx)
                             {
                                 this.Execute((" + WorkflowEntityTypeName + @")mainEntity, ctx);
                             }
 
-                            void Execute(" + WorkflowEntityTypeName + @" e, WorkflowTransitionContext ctx)
+                            void Execute(" + WorkflowEntityTypeName + @" e, WorkflowScriptContext ctx)
                             {
                                 " + script + @"
                             }
-                        }                  
+                        }
+
+                        " + CustomTypes + @"                  
                     }");
         }
     }
 
-    public interface IWorkflowActionExecutor
+    public interface IWorkflowScriptExecutor
     {
-        void ExecuteUntyped(ICaseMainEntity mainEntity, WorkflowTransitionContext ctx);
+        void ExecuteUntyped(ICaseMainEntity mainEntity, WorkflowScriptContext ctx);
     }
+
+    public class WorkflowScriptContext
+    {
+        public CaseActivityEntity CaseActivity { get; internal set; }
+        public int RetryCount { get; internal set; }
+    }
+
+    [AutoInit]
+    public static class WorkflowScriptRunnerPanelPermission
+    {
+        public static PermissionSymbol ViewWorkflowScriptRunnerPanel;
+    }
+
 }

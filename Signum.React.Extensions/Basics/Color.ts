@@ -188,7 +188,10 @@ export class Color {
         return (this.r + this.g + this.b) / 3 > (256 / 2) ? Color.Black : Color.White;
     }
 
-    static parse(color: string): Color | undefined {
+    static parse(color: string | undefined): Color | undefined {
+
+        if (!color)
+            return undefined;
 
         let c = nameToHex(color) || color;
 

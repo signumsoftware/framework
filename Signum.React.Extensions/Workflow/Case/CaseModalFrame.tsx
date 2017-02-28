@@ -7,7 +7,7 @@ import { TypeContext, StyleOptions, EntityFrame  } from '../../../../Framework/S
 import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
-import { EntityPack, Entity, Lite, JavascriptMessage, NormalWindowMessage, entityInfo, getToString } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { EntityPack, Entity, Lite, JavascriptMessage, NormalWindowMessage, entityInfo, getToString, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from '../../../../Framework/Signum.React/Scripts/Frames/Widgets'
 import ValidationErrors from '../../../../Framework/Signum.React/Scripts/Frames/ValidationErrors'
 import ButtonBar from '../../../../Framework/Signum.React/Scripts/Frames/ButtonBar'
@@ -15,9 +15,10 @@ import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperat
 import * as WorkflowClient from '../WorkflowClient'
 import CaseFromSenderInfo from './CaseFromSenderInfo'
 import CaseButtonBar from './CaseButtonBar'
+import InlineCaseTags from './InlineCaseTags'
 
-require("!style!css!../../../../Framework/Signum.React/Scripts/Frames/Frames.css");
-require("!style!css!./Case.css");
+require("../../../../Framework/Signum.React/Scripts/Frames/Frames.css");
+require("./Case.css");
 
 interface CaseModalFrameProps extends React.Props<CaseModalFrame>, IModalProps {
     title?: string;
@@ -180,7 +181,8 @@ export default class CaseModalFrame extends React.Component<CaseModalFrameProps,
         return (
             <Modal.Body>
                 <CaseFromSenderInfo current={pack.activity} />
-                <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-activity-entity={entityInfo(pack.activity) }>
+                {!pack.activity.case.isNew && <div className="inline-tags"> <InlineCaseTags case={toLite(pack.activity.case)} /></div>}
+                <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf()} data-activity-entity={entityInfo(pack.activity)}>
                     { this.renderMainEntity() }
                 </div>
                 {this.entityComponent && <CaseButtonBar frame={activityFrame} pack={activityPack} />}

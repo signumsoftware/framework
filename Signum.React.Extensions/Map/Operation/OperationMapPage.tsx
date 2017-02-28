@@ -11,7 +11,7 @@ import * as MapClient from '../MapClient'
 import { OperationMapInfo, OperationMapD3, ForceNode, ForceLink, Transition} from './OperationMap'
 const colorbrewer = require("colorbrewer");
 
-require("!style!css!./operationMap.css");
+require("./operationMap.css");
 
 interface OperationMapPageProps extends ReactRouter.RouteComponentProps<{}, { type: string}> {
     

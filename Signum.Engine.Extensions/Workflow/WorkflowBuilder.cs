@@ -421,7 +421,7 @@ namespace Signum.Engine.Workflow
 
             Action<WorkflowActivityEntity, IWorkflowTransitionTo> ValidateTransition = (WorkflowActivityEntity wa, IWorkflowTransitionTo item) =>
             {
-                var activity0CanNotXTo1Because2 = item is WorkflowJumpEntity ?
+                var activity0CanNotXTo1Because2 = (item is WorkflowJumpEntity || item is WorkflowScriptPartEntity) ?
                     WorkflowValidationMessage.Activity0CanNotJumpTo1Because2 :
                     WorkflowValidationMessage.Activity0CanNotTimeoutTo1Because2;
 
@@ -435,6 +435,9 @@ namespace Signum.Engine.Workflow
 
                 if (to is WorkflowEventEntity && ((WorkflowEventEntity)to).Type == WorkflowEventType.Start)
                     errors.Add(activity0CanNotXTo1Because2.NiceToString(wa, item.To, WorkflowValidationMessage.IsStart.NiceToString()));
+
+                if (to is WorkflowActivityEntity && to == wa)
+                    errors.Add(activity0CanNotXTo1Because2.NiceToString(wa, item.To, WorkflowValidationMessage.IsSelfJumping.NiceToString()));
 
                 if (TrackId.GetOrThrow(to) != TrackId.GetOrThrow(wa))
                     errors.Add(activity0CanNotXTo1Because2.NiceToString(wa, item.To, WorkflowValidationMessage.IsInDifferentParallelTrack.NiceToString()));
@@ -465,6 +468,9 @@ namespace Signum.Engine.Workflow
 
                 if (wa.Timeout != null)
                     ValidateTransition(wa, wa.Timeout);
+
+                if (wa.Script != null)
+                    ValidateTransition(wa, wa.Script);
 
                 foreach (var item in wa.Jumps)
                 {
