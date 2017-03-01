@@ -8,6 +8,7 @@ import 'react-widgets/dist/css/react-widgets.css';
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
 import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference, toMomentFormat, toMomentDurationFormat, toNumbroFormat, isTypeEnum } from '../Reflection'
 import { LineBase, LineBaseProps, runTasks, FormGroup, FormControlStatic } from '../Lines/LineBase'
+import { BooleanEnum } from '../Signum.Entities'
 
 
 export interface ValueLineProps extends LineBaseProps, React.Props<ValueLine> {
@@ -16,26 +17,28 @@ export interface ValueLineProps extends LineBaseProps, React.Props<ValueLine> {
     formatText?: string;
     autoTrim?: boolean;
     inlineCheckbox?: boolean;
-    comboBoxItems?: ({ name: string, niceName: string } | string)[];
+    comboBoxItems?: (OptionItem | MemberInfo | string)[];
     onTextboxBlur?: (val: any) => void;
     valueHtmlProps?: React.HTMLAttributes<any>;
     extraButtons?: (vl: ValueLine) => React.ReactNode;
     initiallyFocused?: boolean;
 }
 
-
-export enum ValueLineType {
-    Boolean = "Boolean" as any,
-    Enum = "Enum" as any,
-    DateTime = "DateTime" as any,
-    TextBox = "TextBox" as any,
-    TextArea = "TextArea" as any,
-    Number = "Number" as any,
-    Decimal = "Decimal" as any,
-    Color = "Color" as any,
-    TimeSpan = "TimeSpan" as any,
+export interface OptionItem {
+    value: any;
+    label: string;
 }
 
+export type ValueLineType =
+    "Boolean" |
+    "ComboBox" |
+    "DateTime" |
+    "TextBox" |
+    "TextArea" |
+    "Number" |
+    "Decimal" |
+    "Color" |
+    "TimeSpan";
 
 export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
 
@@ -67,25 +70,25 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
             return undefined;
 
         if (isTypeEnum(t.name) || t.name == "boolean" && !t.isNotNullable)
-            return ValueLineType.Enum;
+            return "ComboBox";
 
         if (t.name == "boolean")
-            return ValueLineType.Boolean;
+            return "Boolean";
 
         if (t.name == "datetime")
-            return ValueLineType.DateTime;
+            return "DateTime";
 
         if (t.name == "string" || t.name == "Guid")
-            return ValueLineType.TextBox;
+            return "TextBox";
 
         if (t.name == "number")
-            return ValueLineType.Number;
+            return "Number";
 
         if (t.name == "decimal")
-            return ValueLineType.Decimal;
+            return "Decimal";
 
         if (t.name == "TimeSpan")
-            return ValueLineType.TimeSpan;
+            return "TimeSpan";
 
         return undefined;
     }
@@ -158,7 +161,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
     }
 }
 
-ValueLine.renderers[ValueLineType.Boolean as any] = (vl) => {
+ValueLine.renderers["Boolean" as ValueLineType] = (vl) => {
     const s = vl.state;
 
     const handleCheckboxOnChange = (e: React.SyntheticEvent<any>) => {
@@ -184,56 +187,81 @@ ValueLine.renderers[ValueLineType.Boolean as any] = (vl) => {
     }
 };
 
-ValueLine.renderers[ValueLineType.Enum as any] = (vl) => {
-
-    if (vl.state.type!.name == "boolean")
-        return internalComboBox(vl, getTypeInfo("BooleanEnum"),
-            str => str == "True" ? true : false,
-            val => val == true ? "True" : "False");
-
-    return internalComboBox(vl, getTypeInfo(vl.state.type!.name), str => str, str => str);
+ValueLine.renderers["ComboBox"] = (vl) => {
+    return internalComboBox(vl);
 };
 
-function internalComboBox(vl: ValueLine, typeInfo: TypeInfo, parseValue: (str: string) => any, toStringValue: (val: any) => string) {
+function getOptionsItems(vl: ValueLine): OptionItem[]{
+
+    var ti = getTypeInfo(vl.state.type!.name);
+    if (vl.state.comboBoxItems)
+        return vl.state.comboBoxItems.map(a =>
+            typeof a == "string" ? toOptionItem(ti.members[a]) :
+                toOptionItem(a));
+
+    if (vl.state.type!.name == "boolean")
+        return ([
+            { label: BooleanEnum.niceName("False")!, value: false },
+            { label: BooleanEnum.niceName("True")!, value: true }
+        ]);
+
+    return Dic.getValues(ti.members).map(m => toOptionItem(m));
+}
+
+function toOptionItem(m: MemberInfo | OptionItem): OptionItem {
+
+    if ((m as MemberInfo).name)
+        return {
+            value: (m as MemberInfo).name,
+            label: (m as MemberInfo).niceName,
+        };
+
+    return m as OptionItem;
+}
+
+function internalComboBox(vl: ValueLine) {
+
+    var optionItems = getOptionsItems(vl);
 
     const s = vl.state;
-    let items = s.comboBoxItems ? s.comboBoxItems.map(a => typeof a == "string" ? typeInfo.members[a] : a) :
-        Dic.getValues(typeInfo.members);
-
     if (!s.type!.isNotNullable || s.ctx.value == undefined)
-        items = [{ name: "", niceName: " - " }].concat(items);
+        optionItems = [{ value: null, label: " - " }].concat(optionItems);
 
     if (s.ctx.readOnly) {
 
-        var value = null;
+        var label = null;
         if (s.ctx.value) {
 
-            var item = items.filter(a => a.name == toStringValue(s.ctx.value)).singleOrNull();
+            var item = optionItems.filter(a => a.value == s.ctx.value).singleOrNull();
 
-            value = item ? item.niceName : s.ctx.value;
+            label = item ? item.label : s.ctx.value.toString();
         }
 
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
                 {ValueLine.withItemGroup(vl,
                     <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx}>
-                        {value}
+                        {label}
                     </FormControlStatic>)}
             </FormGroup>
         );
     }
 
+    function toStr(val: any){
+        return val == null ? "" : val.toString();
+    }
+
     const handleEnumOnChange = (e: React.SyntheticEvent<any>) => {
         const input = e.currentTarget as HTMLInputElement;
-        const val = input.value;
-        vl.setValue(val == "" ? null : parseValue(val));
+        const option = optionItems.filter(a => toStr(a.value) == input.value).single();
+        vl.setValue(option.value);
     };
 
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
             {ValueLine.withItemGroup(vl,
-                <select {...vl.state.valueHtmlProps} value={s.ctx.value == undefined ? "" : toStringValue(s.ctx.value)} className={addClass(vl.state.valueHtmlProps, "form-control")} onChange={handleEnumOnChange} >
-                    {items.map((mi, i) => <option key={i} value={mi.name}>{mi.niceName}</option>)}
+                <select {...vl.state.valueHtmlProps} value={s.ctx.value == undefined ? "" : s.ctx.value} className={addClass(vl.state.valueHtmlProps, "form-control")} onChange={handleEnumOnChange} >
+                    {optionItems.map((oi, i) => <option key={i} value={toStr(oi.value)}>{oi.label}</option>)}
                 </select>)
             }
         </FormGroup>
@@ -243,7 +271,9 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo, parseValue: (str: s
 
 
 
-ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
+
+
+ValueLine.renderers["TextBox" as ValueLineType] = (vl) => {
 
     const s = vl.state;
 
@@ -295,7 +325,7 @@ function asString(reactChild: React.ReactChild | undefined): string | undefined 
     return undefined;
 }
 
-ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
+ValueLine.renderers["TextArea" as ValueLineType] = (vl) => {
 
     const s = vl.state;
 
@@ -335,11 +365,11 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
     );
 };
 
-ValueLine.renderers[ValueLineType.Number as any] = (vl) => {
+ValueLine.renderers["Number" as ValueLineType] = (vl) => {
     return numericTextBox(vl, ValueLine.isNumber);
 };
 
-ValueLine.renderers[ValueLineType.Decimal as any] = (vl) => {
+ValueLine.renderers["Decimal" as ValueLineType] = (vl) => {
     return numericTextBox(vl, ValueLine.isDecimal);
 };
 
@@ -429,7 +459,7 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?
     }
 }
 
-ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
+ValueLine.renderers["DateTime" as ValueLineType] = (vl) => {
 
     const s = vl.state;
 
@@ -464,7 +494,7 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
     );
 }
 
-ValueLine.renderers[ValueLineType.TimeSpan as any] = (vl) => {
+ValueLine.renderers["TimeSpan" as ValueLineType] = (vl) => {
     return durationTextBox(vl, ValueLine.isDuration);
 };
 
