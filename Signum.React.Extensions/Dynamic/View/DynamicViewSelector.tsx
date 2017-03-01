@@ -68,7 +68,7 @@ export default class DynamicViewSelectorComponent extends React.Component<Dynami
         ValueLineModal.show({
             type: { name: "string" },
             initialValue: TypeHelpComponent.getExpression("e", pr, "Typescript"),
-            valueLineType: ValueLineType.TextArea,
+            valueLineType: "TextArea",
             title: "Property Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,

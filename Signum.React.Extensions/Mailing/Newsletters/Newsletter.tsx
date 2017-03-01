@@ -35,7 +35,7 @@ export default class Newsletter extends React.Component<{ ctx: TypeContext<Newsl
                     <Tab>
                               
                         <ValueLine ctx={nc.subCtx(n => n.subject)}  />
-                        <ValueLine ctx={nc.subCtx(n => n.text)} valueLineType={ValueLineType.TextArea} valueHtmlProps={{ style: {width: "100%", height: "180px"} }} />
+                        <ValueLine ctx={nc.subCtx(n => n.text)} valueLineType="TextArea" valueHtmlProps={{ style: {width: "100%", height: "180px"} }} />
                     </Tab>
                     <Tab>
                     

@@ -80,7 +80,7 @@ var response = HttpClient.Post<MyResponse>("Your URL", new { paramName = e.[Prop
 e.[Property Name] = response.[Property Name];
 
 class MyResponse {}`,
-            valueLineType: ValueLineType.TextArea,
+            valueLineType: "TextArea",
             title: "REST Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
@@ -94,7 +94,7 @@ class MyResponse {}`,
             initialValue: `// SOAP
 var lib = Assembly.Load("[Assembly full path name]").GetType("[Type Name]").GetMethod("[Method Name]").Invoke(e.[Property Name]);
 e.[Property Name] = lib;`,
-            valueLineType: ValueLineType.TextArea,
+            valueLineType: "TextArea",
             title: "SOAP Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
@@ -109,7 +109,7 @@ e.[Property Name] = lib;`,
             initialValue: `// ${hint}
 CaseActivityEntity CaseActivity; 
 int RetryCount;`,
-            valueLineType: ValueLineType.TextArea,
+            valueLineType: "TextArea",
             title: hint,
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
@@ -128,7 +128,7 @@ catch (Exception e)
 {
     throw e;
 }`,
-            valueLineType: ValueLineType.TextArea,
+            valueLineType: "TextArea",
             title: "Try/Catch block",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,

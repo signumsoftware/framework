@@ -41,7 +41,7 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
         ValueLineModal.show({
             type: { name: "string" },
             initialValue: TypeHelpComponent.getExpression("e", pr, "CSharp"),
-            valueLineType: ValueLineType.TextArea,
+            valueLineType: "TextArea",
             title: "Property Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
