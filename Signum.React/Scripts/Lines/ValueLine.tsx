@@ -248,7 +248,10 @@ function internalComboBox(vl: ValueLine) {
     }
 
     function toStr(val: any){
-        return val == null ? "" : val.toString();
+        return val == null ? "" :
+            val === true ? "True" :
+                val === false ? "False" :
+                    val.toString();
     }
 
     const handleEnumOnChange = (e: React.SyntheticEvent<any>) => {
@@ -260,7 +263,7 @@ function internalComboBox(vl: ValueLine) {
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
             {ValueLine.withItemGroup(vl,
-                <select {...vl.state.valueHtmlProps} value={s.ctx.value == undefined ? "" : s.ctx.value} className={addClass(vl.state.valueHtmlProps, "form-control")} onChange={handleEnumOnChange} >
+                <select {...vl.state.valueHtmlProps} value={toStr(s.ctx.value)} className={addClass(vl.state.valueHtmlProps, "form-control")} onChange={handleEnumOnChange} >
                     {optionItems.map((oi, i) => <option key={i} value={toStr(oi.value)}>{oi.label}</option>)}
                 </select>)
             }
@@ -268,10 +271,6 @@ function internalComboBox(vl: ValueLine) {
     );
 
 }
-
-
-
-
 
 ValueLine.renderers["TextBox" as ValueLineType] = (vl) => {
 
