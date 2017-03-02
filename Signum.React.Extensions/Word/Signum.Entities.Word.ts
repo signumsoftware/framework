@@ -36,7 +36,6 @@ export interface WordTemplateEntity extends Entities.Entity {
     fileName?: string | null;
     wordTransformer?: WordTransformerSymbol | null;
     wordConverter?: WordConverterSymbol | null;
-    tableSources: Entities.MList<WordTemplateTableSourceEntity>;
 }
 
 export module WordTemplateMessage {
@@ -57,13 +56,6 @@ export module WordTemplateOperation {
 
 export module WordTemplatePermission {
     export const GenerateReport : Authorization.PermissionSymbol = registerSymbol("Permission", "WordTemplatePermission.GenerateReport");
-}
-
-export const WordTemplateTableSourceEntity = new Type<WordTemplateTableSourceEntity>("WordTemplateTableSourceEntity");
-export interface WordTemplateTableSourceEntity extends Entities.EmbeddedEntity {
-    Type: "WordTemplateTableSourceEntity";
-    key?: string | null;
-    source?: Entities.Lite<Entities.Entity> | null;
 }
 
 export const WordTransformerSymbol = new Type<WordTransformerSymbol>("WordTransformer");
