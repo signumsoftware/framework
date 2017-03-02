@@ -9,6 +9,9 @@ using System.Linq;
 using System.Reflection;
 using System.Web;
 using System.Web.Http;
+using System.Web.Http.Controllers;
+using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace Signum.React.Translation
 {
@@ -45,12 +48,9 @@ namespace Signum.React.Translation
             }
         }
 
-        public static CultureInfo GetCultureRequest(HttpRequest request)
+        public static CultureInfo GetCultureRequest(HttpActionContext ctx)
         {
-            if (request.UserLanguages == null)
-                return null;
-
-            foreach (string lang in request.UserLanguages)
+            foreach (string lang in ctx.Request.Headers.AcceptLanguage.Select(a => a.Value))
             {
                 string cleanLang = lang.Contains('-') ? lang.Split('-')[0] : lang;
 
@@ -63,6 +63,24 @@ namespace Signum.React.Translation
             }
 
             return null;
+        }
+
+        public static void AddLanguageCookie(HttpResponseMessage resp, HttpRequestMessage request, CultureInfo ci)
+        {
+            resp.Headers.AddCookies(new[]
+            {
+                new CookieHeaderValue("language", ci.Name)
+                {
+                    Expires = DateTime.Now.AddMonths(6),
+                    Domain = request.RequestUri.Host,
+                    Path = "/"
+                }
+            });
+        }
+
+        public static string ReadLanguageCookie(HttpRequestMessage request)
+        {
+            return request.Headers.GetCookies().FirstOrDefault()?.Cookies.SingleOrDefaultEx(cs => cs.Name == "language")?.Value;
         }
     }
 }
