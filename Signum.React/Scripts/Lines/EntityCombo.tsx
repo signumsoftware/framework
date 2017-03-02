@@ -35,7 +35,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
     }
 
     componentDidMount() {
-        if (!this.state.data) {   
+        if (!this.isHidden() && !this.state.data) {   
             this.reloadData(this.props);
         }
     }
@@ -44,12 +44,13 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
         if (!!newProps.data && !this.props.data)
             console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityCombo: ${this.state.type!.name}`);
 
-        if (EntityCombo.getFindOptions(newProps.findOptions) != EntityCombo.getFindOptions(this.props.findOptions))
-            this.reloadData(newProps);
-
         super.componentWillReceiveProps(newProps, newContext);
-    }
 
+        if (EntityCombo.getFindOptions(newProps.findOptions) != EntityCombo.getFindOptions(this.props.findOptions) ||
+            !this.isHidden() && !this.state.data)
+            this.reloadData(newProps);
+    }
+    
     static getFindOptions(fo: FindOptions | undefined) {
         if (fo == undefined)
             return undefined;
