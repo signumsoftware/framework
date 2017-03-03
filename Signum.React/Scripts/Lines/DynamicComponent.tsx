@@ -4,7 +4,7 @@ import { Binding, LambdaMemberType, getTypeInfos, EntityKind, KindOfType } from 
 import { ModifiableEntity } from '../Signum.Entities'
 import * as Navigator from '../Navigator'
 import { ViewReplacer } from '../Frames/ReactVisitor'
-import {  ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, TypeContext, EntityCheckboxList } from '../Lines'
+import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, TypeContext, EntityCheckboxList, EntityTable } from '../Lines'
 
 export default class DynamicComponent extends React.Component<{ ctx: TypeContext<ModifiableEntity> }, void> {
 
@@ -58,7 +58,7 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
 
         if (tr.isCollection) {
             if (tr.isEmbedded || tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
-                return <EntityRepeater ctx={ctx}/>;
+                return <EntityTable ctx={ctx}/>;
             else if (tis.every(t => t.isLowPopulation == true))
                 return <EntityCheckboxList ctx ={ctx}/>;
             else

@@ -286,7 +286,7 @@ export interface ButtonsContext {
 }
 
 export interface IRenderButtons {
-    renderButtons(ctx: ButtonsContext): React.ReactElement<any>[];
+    renderButtons(ctx: ButtonsContext): (React.ReactElement<any> | undefined)[];
 }
 
 export interface IOperationVisible {
