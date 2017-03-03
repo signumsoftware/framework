@@ -237,16 +237,19 @@ namespace Signum.Utilities
 
         #region DateTime
 
-        public static DateTime? ToDateTime(this string date, string format,IFormatProvider formatProvider = null ,DateTimeStyles? styles = null)
+        public static DateTime? ToDateTimeExact(this string date, string format, IFormatProvider formatProvider = null,
+            DateTimeStyles? styles = null)
         {
             DateTime result;
-            if (DateTime.TryParseExact(date,format, formatProvider ?? CultureInfo.CurrentCulture, styles ?? DateTimeStyles.None, out result ))
+            if (DateTime.TryParseExact(date, format, 
+                formatProvider ?? CultureInfo.CurrentCulture,
+                styles ?? DateTimeStyles.None, out result))
             {
                 return result;
             }
             return null;
         }
-        
+
         #endregion
 
         public static T? DefaultToNull<T>(this T value)
