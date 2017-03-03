@@ -17,7 +17,8 @@ import { RenderEntity } from './RenderEntity'
 
 export interface EntityTableProps extends EntityListBaseProps {
     createAsLink?: boolean | ((er: EntityTable) => React.ReactElement<any>);
-    columns: EntityTableColumn<ModifiableEntity, any>[],
+    /**Consider using EntityTable.typedColumns to get Autocompletion**/
+    columns?: EntityTableColumn<ModifiableEntity, any>[],
     fetchRowState?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow) => Promise<any>;
     rowProps?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow, rowState: any) => React.HTMLProps<any> | null | undefined;
 }
@@ -44,6 +45,19 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
         super.calculateDefaultState(state);
         state.viewOnCreate = false;
         state.createAsLink = true;
+    }
+
+    overrideProps(state: EntityTableProps, overridenProps: EntityTableProps) {
+        super.overrideProps(state, overridenProps);
+        
+        if (!state.columns) {
+            var elementPr = state.ctx.propertyRoute.add(a => a[0].element);
+
+            state.columns = Dic.getKeys(elementPr.subMembers())
+                .map(memberName => ({
+                    property: eval("(function(e){ return e." + memberName.firstLower() + "; })")
+                }) as EntityTableColumn<ModifiableEntity, any>);
+        }
     }
 
 
@@ -78,7 +92,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                         <tr>
                             <th></th>
                             {
-                                this.props.columns.map((c, i) => <th key={i} {...c.headerProps}>
+                                this.state.columns!.map((c, i) => <th key={i} {...c.headerProps}>
                                     {c.header === undefined && c.property ? elementPr.add(c.property).member!.niceName : c.header}
                                 </th>)
                             }
@@ -93,13 +107,13 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                                     onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
                                     onMoveDown={this.canMove(mlec.value) && !readOnly ? e => this.moveDown(i) : undefined}
                                     onMoveUp={this.canMove(mlec.value) && !readOnly ? e => this.moveUp(i) : undefined}
-                                    columns={this.props.columns}
+                                    columns={this.state.columns!}
                                     ctx={mlec} />))
                         }
                         {
                             this.state.createAsLink && this.state.create && !readOnly &&
                             <tr>
-                                <td colSpan={1 + this.props.columns.length}>
+                                <td colSpan={1 + this.state.columns!.length}>
                                     {typeof this.state.createAsLink == "function" ? this.state.createAsLink(this) :
                                         <a title={EntityControlMessage.Create.niceToString()}
                                             className="sf-line-button sf-create"
