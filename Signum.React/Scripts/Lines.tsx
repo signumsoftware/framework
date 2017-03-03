@@ -14,8 +14,8 @@ export { PropertyRoute };
 import { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, LineBase, LineBaseProps, tasks} from './Lines/LineBase'
 export { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, LineBase, LineBaseProps, tasks};
 
-import { ValueLine, ValueLineType, ValueLineProps } from './Lines/ValueLine'
-export { ValueLine, ValueLineType, ValueLineProps};
+import { ValueLine, ValueLineType, ValueLineProps, OptionItem } from './Lines/ValueLine'
+export { ValueLine, ValueLineType, ValueLineProps, OptionItem};
 
 import { RenderEntity } from  './Lines/RenderEntity'
 export { RenderEntity };
@@ -123,7 +123,7 @@ export function taskSetHtmlProperties(lineBase: LineBase<any, any>, state: LineB
     const vl = lineBase instanceof ValueLine ? lineBase as ValueLine : undefined;
     const pr = state.ctx.propertyRoute;
     const s = state as ValueLineProps;
-    if (vl && pr && pr.propertyRouteType == "Field" && (s.valueLineType == ValueLineType.TextBox || s.valueLineType == ValueLineType.TextArea)) {
+    if (vl && pr && pr.propertyRouteType == "Field" && (s.valueLineType == "TextBox" || s.valueLineType == "TextArea")) {
 
         var member = pr.member!;
 
@@ -138,6 +138,6 @@ export function taskSetHtmlProperties(lineBase: LineBase<any, any>, state: LineB
         }
 
         if (member.isMultiline)
-            s.valueLineType = ValueLineType.TextArea;
+            s.valueLineType = "TextArea";
     }
 }
