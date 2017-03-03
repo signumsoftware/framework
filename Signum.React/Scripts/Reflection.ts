@@ -1128,6 +1128,7 @@ export class GraphExplorer {
 
     private static specialProperties = ["Type", "id", "isNew", "ticks", "toStr", "modified"];
 
+    //The redundant return true / return false are there for debugging
     private isModifiableObject(obj: any, modelStatePrefix: string) {
 
         if (obj instanceof Date)
@@ -1137,20 +1138,32 @@ export class GraphExplorer {
             return (obj as Array<any>).map((o, i) => this.isModified(o, modelStatePrefix + "[" + i + "]")).some(a => a);
 
         const mle = obj as MListElement<any>;
-        if (mle.hasOwnProperty && mle.hasOwnProperty("rowId"))
-            return this.isModified(mle.element, dot(modelStatePrefix, "element")) || mle.rowId == undefined;
+        if (mle.hasOwnProperty && mle.hasOwnProperty("rowId")) {
+            if (this.isModified(mle.element, dot(modelStatePrefix, "element")))
+                return true;
+
+            if (mle.rowId == undefined)
+                return true;
+
+            return false;
+        };
 
         const lite = obj as Lite<Entity>
-        if (lite.EntityType)
-            return lite.entity != undefined && this.isModified(lite.entity, dot(modelStatePrefix, "entity"));
+        if (lite.EntityType) {
+            if (lite.entity != undefined && this.isModified(lite.entity, dot(modelStatePrefix, "entity")))
+                return true;
+
+            return false;
+        }
 
         const mod = obj as ModifiableEntity;
-        if (mod.Type == undefined) {
+        if (mod.Type == undefined) { //Other object
             let result = false;
             for (const p in obj) {
                 if (obj.hasOwnProperty == null || obj.hasOwnProperty(p)) {
                     const propertyPrefix = dot(modelStatePrefix, p);
-                    result = this.isModified(obj[p], propertyPrefix) || result;
+                    if (this.isModified(obj[p], propertyPrefix))
+                        result = true;
                 }
             }
 
@@ -1201,11 +1214,17 @@ export class GraphExplorer {
             }
         }
 
-        if ((mod as Entity).isNew)
-            mod.modified = true;
+        if ((mod as Entity).isNew) {
+            mod.modified = true; //Just in case
+
+            if (GraphExplorer.TypesLazilyCreated.push((mod as Entity).Type))
+                return false;
+        }
       
         return mod.modified;
     }
+
+    static TypesLazilyCreated: string[] = [];
 }
 
 function dot(prev: string, property: string) {
