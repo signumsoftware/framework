@@ -74,7 +74,7 @@ namespace Signum.Engine.Word
                 SystemWordTemplate = systemWordTemplate,
                 Template = template,
             };
-
+            
             foreach (var part in document.AllParts().Where(p => p.RootElement != null))
             {
                 var root = part.RootElement;
@@ -85,7 +85,21 @@ namespace Signum.Engine.Word
                 }
 
                 TableBinder.ProcessTables(part, parameters);
-            }           
+                
+                foreach (var item in root.Descendants<D.Charts.ExternalData>().ToList())
+                {
+                    item.Remove();
+                }
+            }
+
+            foreach (var item in document.AllParts().OfType<EmbeddedPackagePart>().ToList())
+            {
+                foreach (var p in item.GetParentParts().ToList())
+                {
+                    p.DeletePart(item);
+                }
+            }
+            
         }
 
         public void AssertClean()

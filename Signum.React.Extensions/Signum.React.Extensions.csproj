@@ -270,7 +270,6 @@
     <TypeScriptCompile Include="Toolbar\Templates\ToolbarElement.tsx" />
     <TypeScriptCompile Include="Toolbar\Templates\ToolbarMenu.tsx" />
     <TypeScriptCompile Include="UserQueries\UserQueryToolbarConfig.tsx" />
-    <TypeScriptCompile Include="Word\Templates\WordTemplateTableSource.tsx" />
     <TypeScriptCompile Include="Word\Templates\WordTemplate.tsx" />
     <TypeScriptCompile Include="Word\WordClient.tsx" />
     <TypeScriptCompile Include="Workflow\bpmn-js.d.ts" />
@@ -291,7 +290,9 @@
     <TypeScriptCompile Include="Workflow\Bpmn\CustomRenderer.ts" />
     <TypeScriptCompile Include="Workflow\Bpmn\ConnectionIcons.ts" />
     <TypeScriptCompile Include="Workflow\Case\InboxFilter.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowScriptRunnerPanelPage.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\Workflow.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowScript.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowConnectionModel.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowActivityModel.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowAction.tsx" />

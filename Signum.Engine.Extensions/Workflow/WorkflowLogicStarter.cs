@@ -3,6 +3,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
+using Signum.Entities.Workflow;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
@@ -16,9 +17,9 @@ namespace Signum.Engine.Workflow
 
     public static class WorkflowLogicStarter
     {
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<WorkflowConfigurationEntity> getConfiguration)
         {
-            WorkflowLogic.Start(sb, dqm);
+            WorkflowLogic.Start(sb, dqm, getConfiguration);
             CaseActivityLogic.Start(sb, dqm);
         }
     }

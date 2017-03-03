@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 using Signum.Entities.Dynamic;
 using Signum.Entities.Scheduler;
 using Signum.Entities.Processes;
+using System.Reflection;
+using Signum.Entities.Reflection;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Workflow
 {
@@ -40,8 +43,7 @@ namespace Signum.Entities.Workflow
         public Lite<UserEntity> DoneBy { get; set; }
         public DoneType? DoneType { get; set; }
 
-        public DateTime? NextExecution { get; set; }
-        public int? RetryCount { get; set; }
+        public ScriptExecutionEntity ScriptExecution { get; set; }
 
         static Expression<Func<CaseActivityEntity, CaseActivityState>> StateExpression =
         @this => @this.DoneDate.HasValue ? CaseActivityState.Done :
@@ -67,6 +69,14 @@ namespace Signum.Entities.Workflow
         }
     }
 
+    [Serializable]
+    public class ScriptExecutionEntity : EmbeddedEntity
+    {
+        public DateTime NextExecution { get; set; }
+        public int RetryCount { get; set; }
+        public Guid? ProcessIdentifier { get; set; }
+    }
+    
     public enum DoneType
     {
         Next,
@@ -75,7 +85,8 @@ namespace Signum.Entities.Workflow
         Jump,
         Rejected,
         Timeout,
-        Failure,
+        ScriptSuccess,
+        ScriptFailure,
     }
 
     public enum CaseActivityState
@@ -102,6 +113,9 @@ namespace Signum.Entities.Workflow
         public static readonly ExecuteSymbol<CaseActivityEntity> Timeout;
         public static readonly ExecuteSymbol<CaseActivityEntity> MarkAsUnread;
         public static readonly ExecuteSymbol<CaseActivityEntity> Undo;
+        public static readonly ExecuteSymbol<CaseActivityEntity> ScriptExecute;
+        public static readonly ExecuteSymbol<CaseActivityEntity> ScriptScheduleRetry;
+        public static readonly ExecuteSymbol<CaseActivityEntity> ScriptFailureJump;
 
         public static readonly ExecuteSymbol<DynamicTypeEntity> FixCaseDescriptions;
     }
@@ -143,6 +157,7 @@ namespace Signum.Entities.Workflow
         [Description("Activity '{0}' has no timeout")]
         Activity0HasNoTimeout,
         ThereIsNoPreviousActivity,
+        OnlyForScriptWorkflowActivities,
     }
 
 

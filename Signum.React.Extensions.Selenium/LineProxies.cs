@@ -42,7 +42,7 @@ namespace Signum.React.Selenium
         }
         
 
-        private void SetStringValue(string value)
+        public void SetStringValue(string value)
         {
             IWebElement checkBox = this.Element.TryFindElement(By.CssSelector("input[type=checkbox]"));
             if (checkBox != null)

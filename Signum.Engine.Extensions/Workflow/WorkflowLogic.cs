@@ -16,6 +16,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Signum.Entities.Basics;
+using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Workflow
 {
@@ -166,10 +167,20 @@ namespace Signum.Engine.Workflow
             return WorkflowGraphLazy.Value.GetOrThrow(workflow).Autocomplete(subString, count, excludes);
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        static Func<WorkflowConfigurationEntity> getConfiguration;
+        public static WorkflowConfigurationEntity Configuration
+        {
+            get { return getConfiguration(); }
+        }
+
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<WorkflowConfigurationEntity> getConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                PermissionAuthLogic.RegisterPermissions(WorkflowScriptRunnerPanelPermission.ViewWorkflowScriptRunnerPanel);
+
+                WorkflowLogic.getConfiguration = getConfiguration;
+
                 sb.Include<WorkflowEntity>()
                     .WithQuery(dqm, e => new
                     {
@@ -371,7 +382,28 @@ namespace Signum.Engine.Workflow
                 Actions = sb.GlobalLazy(() => Database.Query<WorkflowActionEntity>().ToDictionary(a => a.ToLite()),
                     new InvalidateWith(typeof(WorkflowActionEntity)));
 
+                sb.Include<WorkflowScriptEntity>()
+                 .WithSave(WorkflowScriptOperation.Save)
+                 .WithQuery(dqm, s => new
+                 {
+                     Entity = s,
+                     s.Id,
+                     s.Name,
+                     s.MainEntityType,
+                 });
 
+                new Graph<WorkflowScriptEntity>.Delete(WorkflowScriptOperation.Delete)
+                {
+                    Delete = (s, _) =>
+                    {
+                        ThrowConnectionError(Database.Query<WorkflowActivityEntity>().Where(a => a.Script.Script == s.ToLite()), s);
+                        s.Delete();
+                    },
+                }.Register();
+
+                Scripts = sb.GlobalLazy(() => Database.Query<WorkflowScriptEntity>().ToDictionary(a => a.ToLite()),
+                    new InvalidateWith(typeof(WorkflowScriptEntity)));
+                
                 sb.Include<WorkflowScriptRetryStrategyEntity>()
                     .WithSave(WorkflowScriptRetryStrategyOperation.Save)
                     .WithDelete(WorkflowScriptRetryStrategyOperation.Delete)
@@ -398,6 +430,21 @@ namespace Signum.Engine.Workflow
 
             throw new ApplicationException($"Impossible to delete '{toDelete}' because is used in some connections: \r\n" + formattedErrors);
         }
+
+        private static void ThrowConnectionError(IQueryable<WorkflowActivityEntity> queryable, Entity toDelete)
+        {
+            if (queryable.Count() == 0)
+                return;
+
+            var errors = queryable.Select(a => new { Activity = a.ToLite(), Workflow = a.Lane.Pool.Workflow.ToLite() }).ToList();
+
+            var formattedErrors = errors.GroupBy(a => a.Workflow).ToString(gr => $"Workflow '{gr.Key}':" +
+                  gr.ToString(a => $"Activity {a.Activity}", "\r\n").Indent(4),
+                "\r\n\r\n").Indent(4);
+
+            throw new ApplicationException($"Impossible to delete '{toDelete}' because is used in some activities: \r\n" + formattedErrors);
+        }
+
 
         public class WorkflowGraph : Graph<WorkflowEntity>
         {
@@ -439,10 +486,17 @@ namespace Signum.Engine.Workflow
             return WorkflowLogic.Actions.Value.GetOrThrow(wa);
         }
 
+        public static ResetLazy<Dictionary<Lite<WorkflowScriptEntity>, WorkflowScriptEntity>> Scripts;
+        public static WorkflowScriptEntity RetrieveFromCache(this Lite<WorkflowScriptEntity> ws)
+        {
+            return WorkflowLogic.Scripts.Value.GetOrThrow(ws);
+        }
+
         public static Expression<Func<Lite<Entity>, UserEntity,  bool>> IsCurrentUserActor = (actor, user) =>
             actor.RefersTo(user) ||
             actor.Is(user.Role);
 
+      
         public static List<Lite<WorkflowEntity>> GetAllowedStarts()
         {
             return (from w in Database.Query<WorkflowEntity>()

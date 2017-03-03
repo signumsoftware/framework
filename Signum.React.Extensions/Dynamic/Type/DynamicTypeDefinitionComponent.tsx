@@ -135,7 +135,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
         ValueLineModal.show({
             type: { name: "string" },
             initialValue: TypeHelpComponent.getExpression("e", pr, "CSharp"),
-            valueLineType: ValueLineType.TextArea,
+            valueLineType: "TextArea",
             title: "Property Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
@@ -515,7 +515,7 @@ save: e => ${os ? `e.Execute(${entityName}Operation.Save)` : "e.Save()"}
         ValueLineModal.show({
             type: { name: "string" },
             initialValue: text,
-            valueLineType: ValueLineType.TextArea,
+            valueLineType: "TextArea",
             title: `${entityName} -> ${eventName}`,
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,

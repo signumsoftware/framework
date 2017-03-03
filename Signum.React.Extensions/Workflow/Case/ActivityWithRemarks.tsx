@@ -110,7 +110,7 @@ export default class ActivityWithRemarksComponent extends React.Component<Activi
 
         ValueLineModal.show({
             type: { name: "string" },
-            valueLineType: ValueLineType.TextArea,
+            valueLineType: "TextArea",
             title: CaseNotificationEntity.nicePropertyName(a => a.remarks),
             message: CaseActivityMessage.PersonalRemarksForThisNotification.niceToString(),
             labelText: undefined,
