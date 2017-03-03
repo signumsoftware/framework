@@ -145,14 +145,10 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
 
     render() {
 
-        if (this.isHidden())
+        if (this.state.visible == false || this.state.hideIfNull && this.state.ctx.value == undefined)
             return null;
 
         return this.renderInternal();
-    }
-
-    isHidden() {
-        return this.state.visible == false || this.state.hideIfNull && this.state.ctx.value == undefined;
     }
 
     calculateState(props: P): S {

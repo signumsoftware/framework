@@ -24,8 +24,8 @@ export default class Exception extends React.Component<{ ctx: TypeContext<Except
                         <ValueLine ctx={sc.subCtx(f => f.actionName) } />
                         <ValueLine ctx={sc.subCtx(f => f.controllerName) } />
                         <ValueLine ctx={sc.subCtx(f => f.userHostAddress) } />
-                        <ValueLine ctx={sc.subCtx(f => f.userHostName) } />
-                        <ValueLine ctx={sc.subCtx(f => f.userAgent) } valueLineType={ValueLineType.TextArea} />
+                        <ValueLine ctx={sc.subCtx(f => f.userHostName)} />
+                        <ValueLine ctx={sc.subCtx(f => f.userAgent)} valueLineType="TextArea" />
                     </div>
                 </div>
                 <ValueLine ctx={ctx.subCtx(f => f.requestUrl) } />

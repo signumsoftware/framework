@@ -425,11 +425,18 @@ namespace Signum.Entities
             {
                 if (includeIgnored || !pi.HasAttribute<IgnoreAttribute>())
                 {
-                    PropertyRoute property = embeddedProperty.Add(pi);
-                    result.AddRange(property);
+                    PropertyRoute route = embeddedProperty.Add(pi);
+                    result.AddRange(route);
 
                     if (Reflector.IsEmbeddedEntity(pi.PropertyType))
-                        result.AddRange(GenerateEmbeddedProperties(property, includeIgnored));
+                        result.AddRange(GenerateEmbeddedProperties(route, includeIgnored));
+
+                    if (Reflector.IsMList(pi.PropertyType))
+                    {
+                        Type colType = pi.PropertyType.ElementType();
+                        if (Reflector.IsEmbeddedEntity(colType))
+                            result.AddRange(GenerateEmbeddedProperties(route.Add("Item"), includeIgnored));
+                    }
                 }
             }
 

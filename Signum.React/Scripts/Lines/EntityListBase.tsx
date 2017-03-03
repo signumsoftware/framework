@@ -23,16 +23,16 @@ export interface EntityListBaseProps extends EntityBaseProps {
 
 export abstract class EntityListBase<T extends EntityListBaseProps, S extends EntityListBaseProps> extends EntityBase<T, S>
 {
-    calculateDefaultState(props: S) {
+    calculateDefaultState(state: S) {
 
-        if (props.onFind)
+        if (state.onFind)
             throw new Error(`'onFind' property is not applicable to '${this}'. Use 'onFindMany' instead`);
 
 
-        if(props.ctx.value == undefined)
-            props.ctx.value = [];
+        if(state.ctx.value == undefined)
+            state.ctx.value = [];
 
-        super.calculateDefaultState(props);
+        super.calculateDefaultState(state);
     }
 
     setValue(list: MList<Lite<Entity> | ModifiableEntity>) {
