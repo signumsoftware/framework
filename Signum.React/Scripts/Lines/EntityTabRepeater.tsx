@@ -47,7 +47,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
 						{React.Children.count(buttons) ? buttons : undefined}
 					</div>
 				</legend>
-				<Tabs id={ctx.compose("tabs")}>
+                <Tabs id={ctx.compose("tabs")} unmountOnExit={true}>
 					{
 						mlistItemContext(ctx).map((mlec, i) =>
 							<Tab className="sf-repeater-element" eventKey={i} key={i} {...EntityListBase.entityHtmlProps(mlec.value) }
