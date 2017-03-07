@@ -24,6 +24,10 @@ export function loadCurrentCulture() : Promise<void> {
 
 export function changeCurrentCulture(newCulture: Lite<CultureInfoEntity>) {
     API.setCurrentCulture(newCulture)
+        .then(c => {
+            //if (!document.cookie.contains("language="))
+                document.cookie = "language=" + c + ";path =" + Navigator.fixUrl("~/");
+        })
         .then(() => reloadTypes())
         .then(() => Finder.clearQueryDescriptionCache())
         .then(() => loadCurrentCulture())
@@ -47,8 +51,8 @@ export module API {
         return ajaxGet<CultureInfoEntity>({ url: "~/api/culture/currentCulture", cache: "no-cache" });
     }
 
-    export function setCurrentCulture(culture: Lite<CultureInfoEntity>): Promise<void> {
-        return ajaxPost<void>({ url: "~/api/culture/currentCulture", cache: "no-cache" }, culture);
+    export function setCurrentCulture(culture: Lite<CultureInfoEntity>): Promise<string> {
+        return ajaxPost<string>({ url: "~/api/culture/currentCulture", cache: "no-cache", credentials: "include" }, culture);
     }
 }
 

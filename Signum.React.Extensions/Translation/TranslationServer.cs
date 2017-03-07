@@ -73,14 +73,14 @@ namespace Signum.React.Translation
                 {
                     Expires = DateTime.Now.AddMonths(6),
                     Domain = request.RequestUri.Host,
-                    Path = "/"
+                    Path =  VirtualPathUtility.ToAbsolute("~/")
                 }
             });
         }
 
         public static string ReadLanguageCookie(HttpRequestMessage request)
         {
-            return request.Headers.GetCookies().FirstOrDefault()?.Cookies.SingleOrDefaultEx(cs => cs.Name == "language")?.Value;
+            return request.Headers.GetCookies().FirstOrDefault()?.Cookies.FirstOrDefault(cs => cs.Name == "language")?.Value;
         }
     }
 }
