@@ -48,9 +48,9 @@ namespace Signum.React.Translation
             }
         }
 
-        public static CultureInfo GetCultureRequest(HttpActionContext ctx)
+        public static CultureInfo GetCultureRequest(HttpRequestMessage request)
         {
-            foreach (string lang in ctx.Request.Headers.AcceptLanguage.Select(a => a.Value))
+            foreach (string lang in request.Headers.AcceptLanguage.Select(a => a.Value))
             {
                 string cleanLang = lang.Contains('-') ? lang.Split('-')[0] : lang;
 
