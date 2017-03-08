@@ -38,3 +38,47 @@
 .dialog-header-notify {
     background-color: #eeeeee;
 }
+
+.dialog-header-warning {
+    background-color: #EAAB19;
+}
+
+    .dialog-header-warning, .dialog-header-warning h4 {
+        color: #ffffff;
+    }
+
+        .dialog-header-warning a {
+            color: #FFECBE;
+        }
+
+.dialog-header-notify {
+    background-color: #eeeeee;
+}
+
+.dialog-header-info {
+    background-color: #4AB2E6;
+}
+
+    .dialog-header-info, .dialog-header-info h4 {
+        color: #ffffff;
+    }
+
+        .dialog-header-info a {
+            color: #B9DFFF;
+        }
+
+.dialog-header-success {
+    background-color: #74B45A;
+}
+
+    .dialog-header-success, .dialog-header-success h4 {
+        color: #ffffff;
+    }
+
+        .dialog-header-success a {
+            color: #DCF9CC;
+        }
+
+.bg-primary a {
+    color: #BCE1E1;
+}
