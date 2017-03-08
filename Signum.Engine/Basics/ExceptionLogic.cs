@@ -47,12 +47,7 @@ namespace Signum.Engine.Basics
 
 		public static ExceptionEntity LogException(this Exception ex)
 		{
-
-            System.IO.File.WriteAllText(@"c:\SeleniumScreenshot\Error_{0}.txt".FormatWith(TimeZoneManager.Now.Ticks), ex.Message);
-
-
             var entity = GetEntity(ex);
-
 			return entity.SaveForceNew();
 		}
 
