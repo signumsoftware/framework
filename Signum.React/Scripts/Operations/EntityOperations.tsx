@@ -10,10 +10,13 @@ import { classes, ifError } from '../Globals';
 import { ButtonsContext, IOperationVisible } from '../TypeContext';
 import * as Navigator from '../Navigator';
 import Notify from '../Frames/Notify';
-import { ajaxPost, ValidationError }  from '../Services';
-import { TypeContext }  from '../TypeContext';
-import { operationInfos, getSettings, EntityOperationSettings, EntityOperationContext, EntityOperationGroup,
-    CreateGroup, API, isEntityOperation, autoStyleFunction } from '../Operations'
+import ModalMessage from '../Modals/ModalMessage'
+import { ajaxPost, ValidationError } from '../Services';
+import { TypeContext } from '../TypeContext';
+import {
+    operationInfos, getSettings, EntityOperationSettings, EntityOperationContext, EntityOperationGroup,
+    CreateGroup, API, isEntityOperation, autoStyleFunction
+} from '../Operations'
 
 
 export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.ReactElement<any> | undefined> | undefined {
@@ -72,14 +75,14 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
             }));
         } else {
 
-            const group = getGroup(gr.elements[0])!;
+            const group = getGroup(gr.elements[0]) !;
 
 
             return [{
                 order: group.order != undefined ? group.order : 100,
                 button: (
-                    <DropdownButton title={group.text() } data-key={group.key} key={i} id={group.key}>
-                        { gr.elements
+                    <DropdownButton title={group.text()} data-key={group.key} key={i} id={group.key}>
+                        {gr.elements
                             .orderBy(a => a.settings && a.settings.order)
                             .map((eoc, j) => createDefaultButton(eoc, group, true, j))
                         }
@@ -127,7 +130,7 @@ function getWithClose(eoc: EntityOperationContext<Entity>) {
 }
 
 function createDefaultButton(eoc: EntityOperationContext<Entity>, group: EntityOperationGroup | undefined, asMenuItem: boolean, key: any) {
-    
+
     const text = eoc.settings && eoc.settings.text ? eoc.settings.text() :
         group && group.simplifyName ? group.simplifyName(eoc.operationInfo.niceName) :
             eoc.operationInfo.niceName;
@@ -142,24 +145,24 @@ function createDefaultButton(eoc: EntityOperationContext<Entity>, group: EntityO
         withClose ?
             <div className="btn-group">
                 <Button bsStyle={bsStyle} className={disabled ? "disabled" : undefined} onClick={disabled ? undefined : e => onClick(eoc, e)} data-operation={eoc.operationInfo.key} key={key}>{text}</Button>
-                <Button bsStyle={bsStyle} className={classes("dropdown-toggle dropdown-toggle-split", disabled ? "disabled" : undefined)} onClick={disabled ? undefined : e => { eoc.closeRequested = true; onClick(eoc, e); } } data-operation={eoc.operationInfo.key} key={key + "1"}>
+                <Button bsStyle={bsStyle} className={classes("dropdown-toggle dropdown-toggle-split", disabled ? "disabled" : undefined)} onClick={disabled ? undefined : e => { eoc.closeRequested = true; onClick(eoc, e); }} data-operation={eoc.operationInfo.key} key={key + "1"}>
                     <span>&times;</span>
                 </Button>
 
             </div>
-        :
-        <Button bsStyle={bsStyle} className={disabled ? "disabled" : undefined} onClick={disabled ? undefined : e => onClick(eoc, e)} data-operation={eoc.operationInfo.key} key={key}>{text}</Button>
+            :
+            <Button bsStyle={bsStyle} className={disabled ? "disabled" : undefined} onClick={disabled ? undefined : e => onClick(eoc, e)} data-operation={eoc.operationInfo.key} key={key}>{text}</Button>
 
 
     if (!eoc.canExecute)
         return btn;
 
-    const tooltip = <Tooltip id={"tooltip_" + eoc.operationInfo.key.replace(".", "_") }>{eoc.canExecute}</Tooltip>;
+    const tooltip = <Tooltip id={"tooltip_" + eoc.operationInfo.key.replace(".", "_")}>{eoc.canExecute}</Tooltip>;
 
     return <OverlayTrigger placement="bottom" overlay={tooltip} key={key}>{btn}</OverlayTrigger>;
 }
 
-function onClick(eoc: EntityOperationContext<Entity>, event: React.MouseEvent<any>): void{
+function onClick(eoc: EntityOperationContext<Entity>, event: React.MouseEvent<any>): void {
 
     event.persist();
 
@@ -189,80 +192,92 @@ export function notifySuccess() {
 
 export function defaultConstructFromEntity(eoc: EntityOperationContext<Entity>, event: React.MouseEvent<any>, ...args: any[]) {
 
-    if (!confirmInNecessary(eoc))
-        return;
+    confirmInNecessary(eoc).then(conf => {
+        if (!conf)
+            return;
 
-    API.constructFromEntity(eoc.entity, eoc.operationInfo.key, ...args)
-        .then(pack => {
-            notifySuccess();
-            Navigator.createNavigateOrTab(pack, event);
-        })
-        .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
-        .done();
-
+        API.constructFromEntity(eoc.entity, eoc.operationInfo.key, ...args)
+            .then(pack => {
+                notifySuccess();
+                Navigator.createNavigateOrTab(pack, event);
+            })
+            .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
+            .done();
+    }).done();
 }
 
 export function defaultConstructFromLite(eoc: EntityOperationContext<Entity>, event: React.MouseEvent<any>, ...args: any[]) {
 
-    if (!confirmInNecessary(eoc))
-        return;
+    confirmInNecessary(eoc).then(conf => {
+        if (!conf)
+            return;
 
-    API.constructFromLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
-        .then(pack => {
-            notifySuccess();
-            Navigator.createNavigateOrTab(pack, event);
-        })
-        .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
-        .done();
+        API.constructFromLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
+            .then(pack => {
+                notifySuccess();
+                Navigator.createNavigateOrTab(pack, event);
+            })
+            .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
+            .done();
+    }).done();
 }
 
 
-export function defaultExecuteEntity(eoc: EntityOperationContext<Entity>, ...args: any[]){
+export function defaultExecuteEntity(eoc: EntityOperationContext<Entity>, ...args: any[]) {
 
-    if (!confirmInNecessary(eoc))
-        return;
+    confirmInNecessary(eoc).then(conf => {
+        if (!conf)
+            return;
 
-    API.executeEntity(eoc.entity, eoc.operationInfo.key, ...args)
-        .then(pack => { if (eoc.closeRequested) { eoc.frame.onClose() } else { eoc.frame.onReload(pack); } notifySuccess(); })
-        .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
-        .done();
+        API.executeEntity(eoc.entity, eoc.operationInfo.key, ...args)
+            .then(pack => { if (eoc.closeRequested) { eoc.frame.onClose() } else { eoc.frame.onReload(pack); } notifySuccess(); })
+            .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
+            .done();
+    }).done();
 }
 
 export function defaultExecuteLite(eoc: EntityOperationContext<Entity>, ...args: any[]) {
 
-    if (!confirmInNecessary(eoc))
-        return;
+    confirmInNecessary(eoc).then(conf => {
+        if (!conf)
+            return;
 
-    API.executeLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
-        .then(pack => { if (eoc.closeRequested) { eoc.frame.onClose() } else { eoc.frame.onReload(pack); } notifySuccess(); })
-        .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
-        .done();
+        API.executeLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
+            .then(pack => { if (eoc.closeRequested) { eoc.frame.onClose() } else { eoc.frame.onReload(pack); } notifySuccess(); })
+            .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
+            .done();
+    }).done();
 }
 
-export function defaultDeleteEntity(eoc: EntityOperationContext<Entity>, ...args: any[]){
+export function defaultDeleteEntity(eoc: EntityOperationContext<Entity>, ...args: any[]) {
 
-    if (!confirmInNecessary(eoc))
-        return;
+    confirmInNecessary(eoc).then(conf => {
+        if (!conf)
+            return;
 
-    API.deleteEntity(eoc.entity, eoc.operationInfo.key, ...args)
-        .then(() => { eoc.frame.onClose(); notifySuccess(); })
-        .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
-        .done();
+        API.deleteEntity(eoc.entity, eoc.operationInfo.key, ...args)
+            .then(() => { eoc.frame.onClose(); notifySuccess(); })
+            .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
+            .done();
+    }).done();
 }
 
 export function defaultDeleteLite(eoc: EntityOperationContext<Entity>, ...args: any[]) {
 
-    if (!confirmInNecessary(eoc))
-        return;
+    confirmInNecessary(eoc).then(conf => {
+        if (!conf)
+            return;
 
-    API.deleteLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
-        .then(() => { eoc.frame.onClose(); notifySuccess(); })
-        .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
-        .done();
+        API.deleteLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
+            .then(() => { eoc.frame.onClose(); notifySuccess(); })
+            .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
+            .done();
+    }).done();
+
 }
 
 
-export function confirmInNecessary(eoc: EntityOperationContext<Entity>, checkLite = true): boolean {
+export function confirmInNecessary(eoc: EntityOperationContext<Entity>, checkLite = true): Promise<boolean> {
 
     if (eoc.operationInfo.lite) {
         GraphExplorer.propagateAll(eoc.entity);
@@ -273,13 +288,21 @@ export function confirmInNecessary(eoc: EntityOperationContext<Entity>, checkLit
 
     const confirmMessage = getConfirmMessage(eoc);
 
-    return confirmMessage == undefined || confirm(confirmMessage);
+    if (confirmMessage == undefined)
+        return Promise.resolve(true);
+
+    return ModalMessage.show({
+        title: OperationMessage.Confirm.niceToString(),
+        message: confirmMessage,
+        buttons: "yes_no",
+        icon: "question"
+    }).then(result => { return result == "yes"; });
 }
 
 function getConfirmMessage(eoc: EntityOperationContext<Entity>) {
     if (eoc.settings && eoc.settings.confirmMessage === undefined)
         return undefined;
-  
+
     if (eoc.settings && eoc.settings.confirmMessage != undefined)
         return eoc.settings.confirmMessage(eoc);
 

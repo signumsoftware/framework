@@ -2,6 +2,7 @@
 import * as React from 'react'
 import { Modal, ModalProps, ModalClass, ButtonToolbar, Button } from 'react-bootstrap'
 import { openModal, IModalProps } from '../Modals'
+import ModalMessage from '../Modals/ModalMessage'
 import * as Navigator from '../Navigator'
 import ButtonBar from './ButtonBar'
 
@@ -76,7 +77,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             (this.props.entityOrPack as ModifiableEntity).Type ||
             (this.props.entityOrPack as EntityPack<ModifiableEntity>).entity.Type;
     }
-    
+
     getTypeInfo() {
         const typeName = this.getTypeName();
 
@@ -121,8 +122,13 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     handleOkClicked = (val: any) => {
         if (this.hasChanges() &&
             (this.props.requiresSaveOperation != undefined ? this.props.requiresSaveOperation : Navigator.typeRequiresSaveOperation(this.state.pack!.entity.Type))) {
-            alert(JavascriptMessage.saveChangesBeforeOrPressCancel.niceToString());
-            return;
+            ModalMessage.show({
+                title: JavascriptMessage.error.niceToString(),
+                message: JavascriptMessage.saveChangesBeforeOrPressCancel.niceToString(),
+                buttons: "ok",
+                defaultStyle: "warning",
+                icon: "warning"
+            }).then(result => { return; });
         }
 
         if (!this.props.validate) {
@@ -149,11 +155,24 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     handleCancelClicked = () => {
 
         if (this.hasChanges() && !this.props.avoidPromptLooseChange) {
-            if (!confirm(NormalWindowMessage.LoseChanges.niceToString()))
-                return;
+            ModalMessage.show({
+                title: NormalWindowMessage.ThereAreChanges.niceToString(),
+                message: NormalWindowMessage.LoseChanges.niceToString(),
+                buttons: "yes_no",
+                defaultStyle: "warning",
+                icon: "warning"
+            }).then(result => {
+                if (result == "yes") {
+                    this.setState({ show: false });
+                }
+                else {
+                    return;
+                }
+            }).done();
         }
-
-        this.setState({ show: false });
+        else {
+            this.setState({ show: false });
+        }
     }
 
     hasChanges() {
@@ -181,12 +200,12 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-popup-control">
                 <Modal.Header closeButton={this.props.isNavigate}>
                     {!this.props.isNavigate && <ButtonToolbar className="pull-right flip">
-                        <Button className="sf-entity-button sf-close-button sf-ok-button" bsStyle="primary" disabled={!pack} onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString() }</Button>
-                        <Button className="sf-entity-button sf-close-button sf-cancel-button" bsStyle="default" disabled={!pack} onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString() }</Button>
+                        <Button className="sf-entity-button sf-close-button sf-ok-button" bsStyle="primary" disabled={!pack} onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString()}</Button>
+                        <Button className="sf-entity-button sf-close-button sf-cancel-button" bsStyle="default" disabled={!pack} onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString()}</Button>
                     </ButtonToolbar>}
-                    {this.renderTitle() }
+                    {this.renderTitle()}
                 </Modal.Header>
-                {pack && this.renderBody() }  
+                {pack && this.renderBody()}
             </Modal>
         );
     }
@@ -201,7 +220,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     }
 
     renderBody() {
-        
+
         const frame: EntityFrame<Entity> = {
             frameComponent: this,
             entityComponent: this.entityComponent,
@@ -227,9 +246,9 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             <Modal.Body>
                 {renderWidgets({ ctx: ctx, pack: pack })}
                 {this.entityComponent && <ButtonBar frame={frame} pack={pack} isOperationVisible={this.props.isOperationVisible} />}
-                <ValidationErrors entity={pack.entity} ref={ve => this.validationErrors = ve}/>
-                <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-main-entity={entityInfo(ctx.value) }>
-                    { this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any,any>) => this.setComponent(c) }) }
+                <ValidationErrors entity={pack.entity} ref={ve => this.validationErrors = ve} />
+                <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
+                    {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any>) => this.setComponent(c) })}
                 </div>
             </Modal.Body>
         );
@@ -238,19 +257,19 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     validationErrors: ValidationErrors;
 
     renderTitle() {
-        
+
         if (!this.state.pack)
-            return <h3>{JavascriptMessage.loading.niceToString() }</h3>;
+            return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
 
         const entity = this.state.pack.entity;
         const pr = this.props.propertyRoute;
 
         return (
             <h4>
-                <span className="sf-entity-title">{this.props.title || getToString(entity) }</span>&nbsp;
-                {this.renderExpandLink() }
+                <span className="sf-entity-title">{this.props.title || getToString(entity)}</span>&nbsp;
+                {this.renderExpandLink()}
                 <br />
-                <small> {pr && pr.member && pr.member.typeNiceName || Navigator.getTypeTitle(entity, pr) }</small>
+                <small> {pr && pr.member && pr.member.typeNiceName || Navigator.getTypeTitle(entity, pr)}</small>
             </h4>
         );
     }
@@ -267,7 +286,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             return undefined;
 
         return (
-            <a href={ Navigator.navigateRoute(entity as Entity) } className="sf-popup-fullscreen" onClick={this.handlePopupFullScreen}>
+            <a href={Navigator.navigateRoute(entity as Entity)} className="sf-popup-fullscreen" onClick={this.handlePopupFullScreen}>
                 <span className="glyphicon glyphicon-new-window"></span>
             </a>
         );
@@ -296,9 +315,9 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             requiresSaveOperation={options.requiresSaveOperation}
             avoidPromptLooseChange={options.avoidPromptLooseChange}
             extraComponentProps={options.extraComponentProps}
-            validate={options.validate == undefined ? ModalFrame.isModelEntity(entityOrPack) : options.validate }
+            validate={options.validate == undefined ? ModalFrame.isModelEntity(entityOrPack) : options.validate}
             title={options.title}
-            isNavigate={false}/>);
+            isNavigate={false} />);
     }
 
     static isModelEntity(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>) {
@@ -317,7 +336,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             viewPromise={options.viewPromise}
             requiresSaveOperation={undefined}
             avoidPromptLooseChange={options.avoidPromptLooseChange}
-            isNavigate={true}/>);
+            isNavigate={true} />);
     }
 }
 
