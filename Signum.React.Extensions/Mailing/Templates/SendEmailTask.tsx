@@ -43,8 +43,8 @@ export default class SendEmailTask extends React.Component<{ ctx: TypeContext<Se
 
         return (
             <div>
-                <ValueLine ctx={sc.subCtx(s => s.name) }  />
-                <EntityLine ctx={sc.subCtx(s => s.emailTemplate) }  onChange={e => this.loadEntity(e) }/>
+                <ValueLine ctx={sc.subCtx(s => s.name)} />
+                <EntityLine ctx={sc.subCtx(s => s.emailTemplate)} onChange={e => this.loadEntity(e.newValue)} />
                 {this.state.type && <EntityLine ctx={sc.subCtx(s => s.targetsFromUserQuery) } /> }
                 {this.state.type && <EntityLine ctx={sc.subCtx(s => s.uniqueTarget) } type={{ isLite: true, name: this.state.type }} /> }
             </div>
