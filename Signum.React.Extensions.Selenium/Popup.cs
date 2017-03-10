@@ -132,9 +132,9 @@ namespace Signum.React.Selenium
         }
     }
 
-    public class ValueLinePopup : Popup
+    public class ValueLineModal : Popup
     {
-        public ValueLinePopup(IWebElement element) : base(element)
+        public ValueLineModal(IWebElement element) : base(element)
         {
         }
 
@@ -142,7 +142,7 @@ namespace Signum.React.Selenium
         {
             get
             {
-                var formGroup = this.Element.FindElement(By.CssSelector("div.modal-body div.form-grup"));
+                var formGroup = this.Element.FindElement(By.CssSelector("div.modal-body div.form-group"));
                 return new ValueLineProxy(formGroup, null);
             }
         }
