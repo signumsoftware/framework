@@ -123,32 +123,33 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         if (this.hasChanges() &&
             (this.props.requiresSaveOperation != undefined ? this.props.requiresSaveOperation : Navigator.typeRequiresSaveOperation(this.state.pack!.entity.Type))) {
             ModalMessage.show({
-                title: JavascriptMessage.error.niceToString(),
+                title: NormalWindowMessage.ThereAreChanges.niceToString(),
                 message: JavascriptMessage.saveChangesBeforeOrPressCancel.niceToString(),
                 buttons: "ok",
                 defaultStyle: "warning",
                 icon: "warning"
-            }).then(result => { return; });
+            }).done();
         }
-
-        if (!this.props.validate) {
-
-            this.okClicked = true;
-            this.setState({ show: false });
-
-            return;
-        }
-
-        Navigator.API.validateEntity(this.state.pack!.entity)
-            .then(() => {
+        else {
+            if (!this.props.validate) {
 
                 this.okClicked = true;
                 this.setState({ show: false });
 
-            }, ifError(ValidationError, e => {
-                GraphExplorer.setModelState(this.state.pack!.entity, e.modelState, "entity");
-                this.forceUpdate();
-            }));
+                return;
+            }
+
+            Navigator.API.validateEntity(this.state.pack!.entity)
+                .then(() => {
+
+                    this.okClicked = true;
+                    this.setState({ show: false });
+
+                }, ifError(ValidationError, e => {
+                    GraphExplorer.setModelState(this.state.pack!.entity, e.modelState, "entity");
+                    this.forceUpdate();
+                }));
+        }
     }
 
 
