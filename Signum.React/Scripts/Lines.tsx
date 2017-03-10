@@ -11,8 +11,8 @@ import { ViewReplacer } from  './Frames/ReactVisitor'
 
 export { PropertyRoute };
 
-import { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, LineBase, LineBaseProps, tasks} from './Lines/LineBase'
-export { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, LineBase, LineBaseProps, tasks};
+import { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, LineBase, LineBaseProps, tasks, ChangeEvent } from './Lines/LineBase'
+export { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, LineBase, LineBaseProps, tasks, ChangeEvent };
 
 import { ValueLine, ValueLineType, ValueLineProps, OptionItem } from './Lines/ValueLine'
 export { ValueLine, ValueLineType, ValueLineProps, OptionItem};

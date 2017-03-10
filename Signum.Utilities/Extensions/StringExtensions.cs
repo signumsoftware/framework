@@ -59,9 +59,10 @@ namespace Signum.Utilities
 
         public static string[] Lines(this string str)
         {
-            if (str.HasText())
-                return str.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
-            return new string[0];
+            if (!str.HasText())
+                return new string[0];
+
+            return str.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
         }
 
         static InvalidOperationException NotFound(string str, char separator)
