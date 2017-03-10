@@ -21,7 +21,7 @@ import * as UserChartClient from '../../../Extensions/Signum.React.Extensions/Ch
 import * as UserQueryClient from '../../../Extensions/Signum.React.Extensions/UserQueries/UserQueryClient'
 import { QueryFilterEntity, QueryColumnEntity, QueryOrderEntity } from '../UserQueries/Signum.Entities.UserQueries'
 
-import { DashboardPermission, DashboardEntity, CountSearchControlPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, DashboardEmbedededInEntity } from './Signum.Entities.Dashboard'
+import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, DashboardEmbedededInEntity } from './Signum.Entities.Dashboard'
 import { QueryTokenEntity } from '../UserAssets/Signum.Entities.UserAssets'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 
@@ -33,8 +33,8 @@ export interface PanelPartContentProps<T extends IPartEntity> {
 
 export interface PartRenderer<T extends IPartEntity>{
     component: () => Promise<React.ComponentClass<PanelPartContentProps<T>>>;
-    handleTitleClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent) => void;
-    handleFullScreenClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent) => void;
+    handleTitleClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent<any>) => void;
+    handleFullScreenClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent<any>) => void;
 }
 
 
@@ -47,17 +47,19 @@ export function start(options: { routes: JSX.Element[] }) {
 
     Navigator.addSettings(new EntitySettings(DashboardEntity, e => new ViewPromise(resolve => require(['./Admin/Dashboard'], resolve))));
 
-    Navigator.addSettings(new EntitySettings(CountSearchControlPartEntity, e => new ViewPromise(resolve => require(['./Admin/CountSearchControlPart'], resolve))));
+    Navigator.addSettings(new EntitySettings(ValueUserQueryListPartEntity, e => new ViewPromise(resolve => require(['./Admin/ValueUserQueryListPart'], resolve))));
     Navigator.addSettings(new EntitySettings(LinkListPartEntity, e => new ViewPromise(resolve => require(['./Admin/LinkListPart'], resolve))));
     Navigator.addSettings(new EntitySettings(UserChartPartEntity, e => new ViewPromise(resolve => require(['./Admin/UserChartPart'], resolve))));
     Navigator.addSettings(new EntitySettings(UserQueryPartEntity, e => new ViewPromise(resolve => require(['./Admin/UserQueryPart'], resolve))));
+
+    Finder.addSettings({ queryName: DashboardEntity, defaultOrderColumn: "DashboardPriority", defaultOrderType: "Descending" });
 
     options.routes.push(<Route path="dashboard">
         <Route path=":dashboardId" getComponent={ (loc, cb) => require(["./View/DashboardPage"], (Comp) => cb(undefined, Comp.default)) } />
     </Route>);
 
-    registerRenderer(CountSearchControlPartEntity, { 
-        component: () => new Promise(resolve => require(['./View/CountSearchControlPart'], resolve)).then((a : any) => a.default)
+    registerRenderer(ValueUserQueryListPartEntity, { 
+        component: () => new Promise(resolve => require(['./View/ValueUserQueryListPart'], resolve)).then((a : any) => a.default)
     });
     registerRenderer(LinkListPartEntity, {
         component: () =>new Promise(resolve => require(['./View/LinkListPart'], resolve)).then((a: any) => a.default)
@@ -103,7 +105,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
         return API.forEntityType(ctx.lite.EntityType).then(das =>
             das.map(d => new QuickLinks.QuickLinkAction(liteKey(d), d.toStr || "", e => {
-                navigateOrWindowsOpen(e, "~/dashboard/" + d.id + "?entity=" + liteKey(ctx.lite))
+                navigateOrWindowsOpen(e, dashboardUrl(d, ctx.lite))
             }, { glyphicon: "glyphicon-th-large", glyphiconColor: "darkslateblue" })));
     });
 
@@ -111,20 +113,24 @@ export function start(options: { routes: JSX.Element[] }) {
         e => Navigator.API.fetchAndRemember(ctx.lite)
             .then(db => {
                 if (db.entityType == undefined)
-                    navigateOrWindowsOpen(e, "~/dashboard/" + ctx.lite.id);
+                    navigateOrWindowsOpen(e, dashboardUrl(ctx.lite));
                 else
                     Navigator.API.fetchAndRemember(db.entityType)
                         .then(t => Finder.find({ queryName: t.cleanName }))
-                        .then(lite => {
-                            if (!lite)
+                        .then(entity => {
+                            if (!entity)
                                 return;
 
-                            navigateOrWindowsOpen(e, "~/dashboard/" + ctx.lite.id + "?entity=" + liteKey(lite));
+                            navigateOrWindowsOpen(e, dashboardUrl(ctx.lite, entity));
                         }).done();
             }).done()));
 }
 
-function navigateOrWindowsOpen(e: React.MouseEvent, url: string){
+export function dashboardUrl(lite: Lite<DashboardEntity>, entity?: Lite<Entity>) {
+    return "~/dashboard/" + lite.id + (!entity ? "" : "?entity=" + liteKey(entity)); 
+}
+
+function navigateOrWindowsOpen(e: React.MouseEvent<any>, url: string){
     if (e.ctrlKey || e.button == 1) {
         window.open(url);
     } else {

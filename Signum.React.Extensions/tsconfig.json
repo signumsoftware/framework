@@ -8,7 +8,14 @@
     "noImplicitAny": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,
-    "strictNullChecks": true
-  },
-  "exclude": [ "node_modules" ]
+    "strictNullChecks": true,
+    "baseUrl": ".",
+    "paths": {
+      "*": [
+        "../../Framework/Signum.React/node_modules/@types/*",
+        "../../Framework/Signum.React/node_modules/*",
+        "*"
+      ]
+    }
+  }
 }

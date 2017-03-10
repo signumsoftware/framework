@@ -9,7 +9,8 @@
     TextOptions.TextFormattingMode="Display"
     UseLayoutRounding="True" 
     m:Monitors.AdjustToMonitor="True"
-    m:Common.TypeContext="{x:Type d:ChartRequest}">
+    m:Common.TypeContext="{x:Type d:ChartRequest}"
+    FlowDirection="{DynamicResource FlowDirection}">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

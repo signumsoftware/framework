@@ -8,7 +8,7 @@ import { getToString, Lite, is }  from '../../../../Framework/Signum.React/Scrip
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { SendEmailTaskEntity, EmailTemplateEntity } from '../Signum.Entities.Mailing'
 
-export interface IFrameRendererProps extends React.HTMLAttributes {
+export interface IFrameRendererProps extends React.HTMLAttributes<HTMLIFrameElement> {
     html: string | null | undefined;
 }
 
@@ -32,7 +32,7 @@ export default class IFrameRenderer extends React.Component<IFrameRendererProps,
 
     render() {
 
-        var props = Dic.without(this.props, { html: null });
+        var props = { ...this.props, html: null };
 
         return (<iframe {...props} ref={e => this.iframe = e}></iframe>);
     }

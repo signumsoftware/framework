@@ -49,15 +49,8 @@ namespace Signum.Engine.Files
             {
                 FileTypeLogic.Start(sb, dqm);
 
-                sb.Include<FilePathEntity>();
-
-                FilePathEntity.CalculatePrefixPair = CalculatePrefixPair;
-                sb.Schema.EntityEvents<FilePathEntity>().PreSaving += FilePath_PreSaving;
-                sb.Schema.EntityEvents<FilePathEntity>().PreUnsafeDelete += new PreUnsafeDeleteHandler<FilePathEntity>(FilePathLogic_PreUnsafeDelete);
-
-                dqm.RegisterQuery(typeof(FilePathEntity), () =>
-                    from p in Database.Query<FilePathEntity>()
-                    select new
+                sb.Include<FilePathEntity>()
+                    .WithQuery(dqm, p => new
                     {
                         Entity = p,
                         p.Id,
@@ -66,6 +59,10 @@ namespace Signum.Engine.Files
                         p.Suffix
                     });
 
+                FilePathEntity.CalculatePrefixPair = CalculatePrefixPair;
+                sb.Schema.EntityEvents<FilePathEntity>().PreSaving += FilePath_PreSaving;
+                sb.Schema.EntityEvents<FilePathEntity>().PreUnsafeDelete += new PreUnsafeDeleteHandler<FilePathEntity>(FilePathLogic_PreUnsafeDelete);
+                
                 new Graph<FilePathEntity>.Execute(FilePathOperation.Save)
                 {
                     AllowsNew = true,
@@ -74,31 +71,27 @@ namespace Signum.Engine.Files
                     {
                         if (!fp.IsNew)
                         {
-
                             var ofp = fp.ToLite().Retrieve();
 
-
-                            if (fp.FileName != ofp.FileName || fp.Suffix != ofp.Suffix || fp.FullPhysicalPath() != ofp.FullPhysicalPath())
+                            if (fp.FileName != ofp.FileName || fp.Suffix != ofp.Suffix)
                             {
                                 using (Transaction tr = new Transaction())
                                 {
                                     var preSufix = ofp.Suffix.Substring(0, ofp.Suffix.Length - ofp.FileName.Length);
                                     fp.Suffix = Path.Combine(preSufix, fp.FileName);
                                     fp.Save();
-                                    System.IO.File.Move(ofp.FullPhysicalPath(), fp.FullPhysicalPath());
+                                    fp.FileType.GetAlgorithm().MoveFile(ofp, fp);
                                     tr.Commit();
                                 }
-                            }
+                            }  
                         }
                     }
                 }.Register();
-                
 
                 sb.AddUniqueIndex<FilePathEntity>(f => new { f.Suffix, f.FileType }); //With mixins, add AttachToUniqueIndexes to field
 
                 dqm.RegisterExpression((FilePathEntity fp) => fp.WebImage(), () => typeof(WebImage).NiceName(), "Image");
                 dqm.RegisterExpression((FilePathEntity fp) => fp.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
-
             }
         }
 
@@ -112,7 +105,7 @@ namespace Signum.Engine.Files
         static PrefixPair CalculatePrefixPair(FilePathEntity fp)
         {
             using (new EntityCache(EntityCacheType.ForceNew))
-               return FileTypeLogic.FileTypes.GetOrThrow(fp.FileType).GetPrefixPair(fp);
+               return fp.FileType.GetAlgorithm().GetPrefixPair(fp);
         }
 
         public static void FilePathLogic_PreUnsafeDelete(IQueryable<FilePathEntity> query)
@@ -125,9 +118,8 @@ namespace Signum.Engine.Files
                 {
                     foreach (var gr in list.GroupBy(f => f.FileType))
                     {
-                        var alg = FileTypeLogic.FileTypes.GetOrThrow(gr.Key);
-                        if (alg.TakesOwnership)
-                            alg.DeleteFiles(gr.Cast<IFilePath>().ToList());
+                        var alg = gr.Key.GetAlgorithm();
+                        alg.DeleteFiles(gr.ToList());
                     }
                 };
             }
@@ -146,18 +138,18 @@ namespace Signum.Engine.Files
         {
             if (fp.IsNew && !unsafeMode.Value)
             {
-                FileTypeLogic.SaveFile(fp);
+                fp.FileType.GetAlgorithm().SaveFile(fp);
             }
         }
 
         public static byte[] GetByteArray(this FilePathEntity fp)
         {
-            return fp.BinaryFile ?? File.ReadAllBytes(fp.FullPhysicalPath());
+            return fp.BinaryFile ?? fp.FileType.GetAlgorithm().ReadAllBytes(fp);
         }
 
-        public static byte[] GetByteArray(this Lite<FilePathEntity> fp)
+        public static Stream OpenRead(this FilePathEntity fp)
         {
-            return File.ReadAllBytes(fp.InDB(f => f.FullPhysicalPath()));
+            return fp.FileType.GetAlgorithm().OpenRead(fp);
         }
     }
 }

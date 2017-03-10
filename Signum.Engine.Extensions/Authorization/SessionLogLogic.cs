@@ -21,13 +21,8 @@ namespace Signum.Engine.Authorization
             {
                 AuthLogic.AssertStarted(sb);
 
-                sb.Include<SessionLogEntity>();
-
-                PermissionAuthLogic.RegisterPermissions(SessionLogPermission.TrackSession);
-
-                dqm.RegisterQuery(typeof(SessionLogEntity), () =>
-                    from sl in Database.Query<SessionLogEntity>()
-                    select new
+                sb.Include<SessionLogEntity>()
+                    .WithQuery(dqm, sl => new
                     {
                         Entity = sl,
                         sl.Id,
@@ -36,6 +31,8 @@ namespace Signum.Engine.Authorization
                         sl.SessionEnd,
                         sl.SessionTimeOut
                     });
+
+                PermissionAuthLogic.RegisterPermissions(SessionLogPermission.TrackSession);
 
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }

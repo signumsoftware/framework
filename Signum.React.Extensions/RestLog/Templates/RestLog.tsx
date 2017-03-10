@@ -3,6 +3,7 @@ import * as moment from 'moment'
 import { Tabs, Tab } from 'react-bootstrap'
 import { RestLogEntity } from '../Signum.Entities.RestLog'
 import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityRepeater } from "../../../../Framework/Signum.React/Scripts/Lines";
+import { } from "../../../../Framework/Signum.React/Scripts/ConfigureReactWidgets";
 
 export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogEntity> }, void> {
     render() {
@@ -28,9 +29,6 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
         );
     }
     renderCode(ctx: TypeContext<string | null>) {
-        if (!ctx.value) 
-            return null;
-
         return (
             <fieldset>
                 <legend>{ctx.niceName()}</legend>

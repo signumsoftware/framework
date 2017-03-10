@@ -43,19 +43,15 @@ namespace Signum.Engine.Translation
             {
                 CultureInfoLogic.AssertStarted(sb);
 
-                sb.Include<TranslatorUserEntity>();
-
-                dqm.RegisterQuery(typeof(TranslatorUserEntity), () =>
-                    from e in Database.Query<TranslatorUserEntity>()
-                    select new
+                sb.Include<TranslatorUserEntity>()
+                    .WithQuery(dqm, e => new
                     {
                         Entity = e,
                         e.Id,
                         e.User,
                         Cultures = e.Cultures.Count,
                     });
-
-
+                
                 PermissionAuthLogic.RegisterTypes(typeof(TranslationPermission));
 
                 dqm.RegisterExpression((IUserEntity e) => e.TranslatorUser(), () => typeof(TranslatorUserEntity).NiceName());

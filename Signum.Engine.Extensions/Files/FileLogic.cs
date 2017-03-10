@@ -37,18 +37,14 @@ namespace Signum.Engine.Files
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<FileEntity>();
-
-                dqm.RegisterQuery(typeof(FileEntity), () =>
-                    from a in Database.Query<FileEntity>()
-                    select new
+                sb.Include<FileEntity>()
+                    .WithQuery(dqm, a => new
                     {
                         Entity = a,
                         a.Id,
                         a.FileName,
                     });
-
-
+                
                 dqm.RegisterExpression((FileEntity f) => f.WebImage(), () => typeof(WebImage).NiceName(), "Image");
                 dqm.RegisterExpression((FileEntity f) => f.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
             }

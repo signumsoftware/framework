@@ -1,24 +1,16 @@
-﻿using System;
+﻿using Signum.Engine.DynamicQuery;
+using Signum.Engine.Maps;
+using Signum.Engine.Operations;
+using Signum.Entities;
+using Signum.Entities.Basics;
+using Signum.Entities.Disconnected;
+using Signum.Utilities;
+using Signum.Utilities.Reflection;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Signum.Engine.Maps;
-using Signum.Entities;
-using Signum.Utilities;
-using Signum.Utilities.DataStructures;
 using System.Linq.Expressions;
-using Signum.Entities.Authorization;
-using Signum.Engine.DynamicQuery;
 using System.Reflection;
-using Signum.Entities.Reflection;
-using Signum.Entities.Disconnected;
-using Signum.Utilities.Reflection;
-using System.IO;
-using System.IO.Compression;
-using System.Data.SqlClient;
-using Signum.Engine.Operations;
-using Signum.Entities.Basics;
-using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Disconnected
 {
@@ -60,13 +52,8 @@ namespace Signum.Engine.Disconnected
             {
                 ServerSeed = serverSeed;
 
-                sb.Include<DisconnectedMachineEntity>();
-                sb.Include<DisconnectedExportEntity>();
-                sb.Include<DisconnectedImportEntity>();
-
-                dqm.RegisterQuery(typeof(DisconnectedMachineEntity), () =>
-                    from dm in Database.Query<DisconnectedMachineEntity>()
-                    select new
+                sb.Include<DisconnectedMachineEntity>()
+                    .WithQuery(dqm, dm => new
                     {
                         Entity = dm,
                         dm.MachineName,
@@ -75,9 +62,8 @@ namespace Signum.Engine.Disconnected
                         dm.SeedMax,
                     });
 
-                dqm.RegisterQuery(typeof(DisconnectedExportEntity), () =>
-                    from dm in Database.Query<DisconnectedExportEntity>()
-                    select new
+                sb.Include<DisconnectedExportEntity>()
+                    .WithQuery(dqm, dm => new
                     {
                         Entity = dm,
                         dm.CreationDate,
@@ -87,9 +73,8 @@ namespace Signum.Engine.Disconnected
                         dm.Exception,
                     });
 
-                dqm.RegisterQuery(typeof(DisconnectedImportEntity), () =>
-                    from dm in Database.Query<DisconnectedImportEntity>()
-                    select new
+                sb.Include<DisconnectedImportEntity>()
+                    .WithQuery(dqm, dm => new
                     {
                         Entity = dm,
                         dm.CreationDate,
@@ -98,10 +83,10 @@ namespace Signum.Engine.Disconnected
                         dm.Total,
                         dm.Exception,
                     });
-
-                dqm.RegisterExpression((DisconnectedMachineEntity dm) => dm.Imports(), ()=>DisconnectedMessage.Imports.NiceToString());
-                dqm.RegisterExpression((DisconnectedMachineEntity dm) => dm.Exports(), ()=>DisconnectedMessage.Exports.NiceToString());
                 
+                dqm.RegisterExpression((DisconnectedMachineEntity dm) => dm.Imports(), () => DisconnectedMessage.Imports.NiceToString());
+                dqm.RegisterExpression((DisconnectedMachineEntity dm) => dm.Exports(), () => DisconnectedMessage.Exports.NiceToString());
+
                 MachineGraph.Register();
 
                 sb.Schema.SchemaCompleted += AssertDisconnectedStrategies;
@@ -122,7 +107,7 @@ namespace Signum.Engine.Disconnected
             if (DisconnectedLogic.OfflineMode)
                 return null;
 
-            if (!arg.Interactive  && arg.SchemaOnly) // Is ImportManager
+            if (!arg.Interactive && arg.SchemaOnly) // Is ImportManager
                 return null;
 
             return Schema.Current.Tables.Values
@@ -162,7 +147,7 @@ namespace Signum.Engine.Disconnected
                     ToStates = { DisconnectedMachineState.Connected },
                     AllowsNew = true,
                     Lite = false,
-                    Execute = (dm, _) => 
+                    Execute = (dm, _) =>
                     {
 
                     }
@@ -194,8 +179,8 @@ namespace Signum.Engine.Disconnected
         {
             TypeEntity type = (TypeEntity)arg;
 
-            var ce = Administrator.UnsafeDeletePreCommand(Database.MListQuery((DisconnectedExportEntity de) => de.Copies).Where(mle => mle.Element.Type.RefersTo(type)));
-            var ci = Administrator.UnsafeDeletePreCommand(Database.MListQuery((DisconnectedImportEntity di) => di.Copies).Where(mle => mle.Element.Type.RefersTo(type)));
+            var ce = Administrator.UnsafeDeletePreCommand((DisconnectedExportEntity de) => de.Copies, Database.MListQuery((DisconnectedExportEntity de) => de.Copies).Where(mle => mle.Element.Type.RefersTo(type)));
+            var ci = Administrator.UnsafeDeletePreCommand((DisconnectedImportEntity di) => di.Copies, Database.MListQuery((DisconnectedImportEntity di) => di.Copies).Where(mle => mle.Element.Type.RefersTo(type)));
 
             return SqlPreCommand.Combine(Spacing.Simple, ce, ci);
         }
@@ -231,7 +216,7 @@ namespace Signum.Engine.Disconnected
                         (extra.HasText() ? ("Remove something like:\r\n" + extra + "\r\n\r\n") : null) +
                         (lacking.HasText() ? ("Add something like:\r\n" + lacking + "\r\n\r\n") : null));
 
-            string errors = strategies.Where(kvp=>kvp.Value.Upload == Upload.Subset && s.Table(kvp.Key).Ticks == null).ToString(a=>a.Key.Name, "\r\n");
+            string errors = strategies.Where(kvp => kvp.Value.Upload == Upload.Subset && s.Table(kvp.Key).Ticks == null).ToString(a => a.Key.Name, "\r\n");
             if (errors.HasText())
                 throw new InvalidOperationException("Ticks is mandatory for this Disconnected strategy. Tables: \r\n" + errors.Indent(4));
 
@@ -408,7 +393,7 @@ namespace Signum.Engine.Disconnected
 
             if (upload != Upload.None)
                 MixinDeclarations.Register(typeof(T), typeof(DisconnectedCreatedMixin));
-             
+
             if (upload == Upload.Subset)
             {
                 if (uploadSubset == null)

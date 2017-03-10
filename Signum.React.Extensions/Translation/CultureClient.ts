@@ -27,6 +27,7 @@ export function changeCurrentCulture(newCulture: Lite<CultureInfoEntity>) {
         .then(() => reloadTypes())
         .then(() => Finder.clearQueryDescriptionCache())
         .then(() => loadCurrentCulture())
+        .then(() => Navigator.resetUI())
         .done();
 }
 

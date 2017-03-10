@@ -75,29 +75,9 @@ namespace Signum.Engine.Mailing.Pop3
 
                 //MimeMapping.CacheExtension.TryAdd("message/rfc822", ".eml");
 
-                sb.Include<Pop3ConfigurationEntity>();
-                sb.Include<Pop3ReceptionEntity>();
-                sb.Include<Pop3ReceptionExceptionEntity>();
-
-                dqm.RegisterQuery(typeof(EmailMessageEntity), () =>
-                   from e in Database.Query<EmailMessageEntity>()
-                   select new
-                   {
-                       Entity = e,
-                       e.Id,
-                       e.From,
-                       e.Subject,
-                       e.Template,
-                       e.State,
-                       e.Sent,
-                       SentDate = (DateTime?)e.Mixin<EmailReceptionMixin>().ReceptionInfo.SentDate,
-                       e.Package,
-                       e.Exception,
-                   });
-
-                dqm.RegisterQuery(typeof(Pop3ConfigurationEntity), () =>
-                    from s in Database.Query<Pop3ConfigurationEntity>()
-                    select new
+                sb.Include<Pop3ConfigurationEntity>()
+                    .WithSave(Pop3ConfigurationOperation.Save)
+                    .WithQuery(dqm, s => new
                     {
                         Entity = s,
                         s.Id,
@@ -106,8 +86,25 @@ namespace Signum.Engine.Mailing.Pop3
                         s.Username,
                         s.EnableSSL
                     });
+                sb.Include<Pop3ReceptionEntity>();
+                sb.Include<Pop3ReceptionExceptionEntity>();
 
-                dqm.RegisterQuery(typeof(Pop3ReceptionEntity), () => DynamicQuery.DynamicQuery.Auto(
+                sb.Include<EmailMessageEntity>()
+                    .WithQuery(dqm, e => new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.From,
+                        e.Subject,
+                        e.Template,
+                        e.State,
+                        e.Sent,
+                        SentDate = (DateTime?)e.Mixin<EmailReceptionMixin>().ReceptionInfo.SentDate,
+                        e.Package,
+                        e.Exception,
+                    });
+                
+                 dqm.RegisterQuery(typeof(Pop3ReceptionEntity), () => DynamicQueryCore.Auto(
                  from s in Database.Query<Pop3ReceptionEntity>()
                  select new
                  {
@@ -124,29 +121,10 @@ namespace Signum.Engine.Mailing.Pop3
                  .ColumnDisplayName(a => a.EmailMessages, () => typeof(EmailMessageEntity).NicePluralName())
                  .ColumnDisplayName(a => a.Exceptions, () => typeof(ExceptionEntity).NicePluralName()));
 
-                dqm.RegisterQuery(typeof(Pop3ConfigurationEntity), () =>
-                    from s in Database.Query<Pop3ConfigurationEntity>()
-                    select new
-                    {
-                        Entity = s,
-                        s.Id,
-                        s.Host,
-                        s.Port,
-                        s.Username,
-                        s.EnableSSL
-                    });
-
                 dqm.RegisterExpression((Pop3ConfigurationEntity c) => c.Receptions(), () => typeof(Pop3ReceptionEntity).NicePluralName());
                 dqm.RegisterExpression((Pop3ReceptionEntity r) => r.EmailMessages(), () => typeof(EmailMessageEntity).NicePluralName());
                 dqm.RegisterExpression((Pop3ReceptionEntity r) => r.Exceptions(), () => typeof(ExceptionEntity).NicePluralName());
                 dqm.RegisterExpression((ExceptionEntity r) => r.Pop3Reception(), () => typeof(Pop3ReceptionEntity).NiceName());
-
-                new Graph<Pop3ConfigurationEntity>.Execute(Pop3ConfigurationOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (e, _) => { }
-                }.Register();
 
                 new Graph<Pop3ReceptionEntity>.ConstructFrom<Pop3ConfigurationEntity>(Pop3ConfigurationOperation.ReceiveEmails)
                 {
@@ -224,6 +202,8 @@ namespace Signum.Engine.Mailing.Pop3
                                     try
                                     {
                                         var email = client.GetMessage(mi, reception.ToLite());
+
+                                        email.Subject = email.Subject.Replace('\n', ' ').Replace('\r', ' ');
 
                                         if (email.Recipients.IsEmpty())
                                         {

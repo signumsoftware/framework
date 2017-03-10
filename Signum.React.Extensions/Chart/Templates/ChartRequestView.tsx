@@ -66,8 +66,24 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
         }
     }
 
-    handleOnInvalidate = () => {
+    handleTokenChange = () => {
+        this.removeObsoleteOrders();
+    }
+
+    handleInvalidate = () => {
+        this.removeObsoleteOrders();
         this.setState({ chartResult: undefined });
+    }
+
+    removeObsoleteOrders() {
+        var cr = this.props.chartRequest;
+        if (cr && cr.groupResults) {
+            var oldOrders = cr.orderOptions.filter(o =>
+                o.token.queryTokenType != "Aggregate" &&
+                !cr!.columns.some(mle2 => !!mle2.element.token && !!mle2.element.token.token && mle2.element.token.token.fullKey == o.token.fullKey));
+
+            oldOrders.forEach(o => cr!.orderOptions.remove(o));
+        }
     }
 
     handleOnRedraw = () => {
@@ -87,12 +103,12 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
             .done();
     }
 
-    handleOnFullScreen = (e: React.MouseEvent) => {
+    handleOnFullScreen = (e: React.MouseEvent<any>) => {
         e.preventDefault();
         Navigator.currentHistory.push(ChartClient.Encoder.chartRequestPath(this.props.chartRequest!));
     }
 
-    handleEditScript = (e: React.MouseEvent) => {
+    handleEditScript = (e: React.MouseEvent<any>) => {
         window.open(Navigator.navigateRoute(this.props.chartRequest!.chartScript));
     }
 
@@ -123,7 +139,11 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
                     </div>
                     <div className="SF-control-container">
-                        <ChartBuilder queryKey={cr.queryKey} ctx={tc} onInvalidate={this.handleOnInvalidate} onRedraw={this.handleOnRedraw}/>
+                        <ChartBuilder queryKey={cr.queryKey} ctx={tc}
+                            onInvalidate={this.handleInvalidate}
+                            onRedraw={this.handleOnRedraw}
+                            onTokenChange={this.handleTokenChange}
+                            />
                     </div >
                     <div className="sf-query-button-bar btn-toolbar">
                         <button type="submit" className="sf-query-button sf-chart-draw btn btn-primary" onClick={this.handleOnDrawClick}>{ ChartMessage.Chart_Draw.niceToString() }</button>

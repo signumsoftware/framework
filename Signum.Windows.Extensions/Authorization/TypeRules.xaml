@@ -13,7 +13,8 @@
     WindowStartupLocation="CenterOwner"    
     TextOptions.TextFormattingMode="Display"
     UseLayoutRounding="True" 
-    x:Name="me" MinWidth="300" MinHeight="300" m:Common.TypeContext="{x:Type d:TypeRulePack}">
+    x:Name="me" MinWidth="300" MinHeight="300" m:Common.TypeContext="{x:Type d:TypeRulePack}"
+    FlowDirection="{DynamicResource FlowDirection}">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -59,9 +60,9 @@
                 <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="4" Content="{m:Loc {x:Static d:TypeAllowedBasic.None}}" />
 
                 <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="5" Content="Overriden" />
-                <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="6" Content="{m:LocTypePlural {x:Type seb2:PropertyRouteEntity}}" />
+                <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="6" Content="{m:LocTypePlural {x:Type seb:PropertyRouteEntity}}" />
                 <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="7" Content="{m:LocTypePlural {x:Type se:OperationSymbol}}" />
-                <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="8" Content="{m:LocTypePlural {x:Type seb2:QueryEntity}}" />
+                <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="8" Content="{m:LocTypePlural {x:Type seb:QueryEntity}}" />
             </Grid>
         </ScrollViewer>
 

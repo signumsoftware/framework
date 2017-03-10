@@ -1,1 +1,2 @@
-interface IEvaluator {}
+interface IDynamicValidationEvaluator {}
+interface IDynamicTypeConditionEvaluator {}

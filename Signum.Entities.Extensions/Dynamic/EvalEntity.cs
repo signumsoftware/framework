@@ -66,7 +66,7 @@ namespace Signum.Entities.Dynamic
 
         static ConcurrentDictionary<string, CompilationResult> resultCache = new ConcurrentDictionary<string, CompilationResult>();
 
-        protected static CompilationResult Compile(IEnumerable<string> assemblies, string code)
+        public static CompilationResult Compile(IEnumerable<string> assemblies, string code)
         {
             return resultCache.GetOrAdd(code, _ =>
             {
@@ -79,10 +79,12 @@ namespace Signum.Entities.Dynamic
                         CompilerParameters parameters = new CompilerParameters();
 
                         parameters.ReferencedAssemblies.Add("System.dll");
+                        parameters.ReferencedAssemblies.Add("System.Data.dll");
                         parameters.ReferencedAssemblies.Add("System.Core.dll");
+                        
                         foreach (var ass in assemblies)
                         {
-                            parameters.ReferencedAssemblies.Add(Path.Combine(Eval.AssemblyDirectory, ass));
+                            parameters.ReferencedAssemblies.Add(ass);
                         }
 
                         parameters.GenerateInMemory = true;
@@ -140,35 +142,5 @@ namespace Signum.Entities.Dynamic
                 Notify(() => Compiled);
             }
         }
-    }
-
-    public static class Eval
-    {
-        public static string AssemblyDirectory = AppDomain.CurrentDomain.BaseDirectory;
-
-        public static List<string> BasicNamespaces = new List<string>
-        {
-            "System",
-            "System.Linq",
-            "System.Reflection",
-            "System.Collections.Generic",
-            "System.Linq.Expressions",
-            "Signum.Entities",
-            "Signum.Utilities"
-        };
-
-        public static string CreateUsings(IEnumerable<string> namespaces )
-        {
-            return namespaces.ToString(ns => "using {0};\r\n".FormatWith(ns), "");
-        }
-
-        public static List<string> BasicAssemblies = new List<string>
-        {
-            "Signum.Engine.dll",
-            "Signum.Entities.dll",
-            "Signum.Utilities.dll",
-            "Signum.Entities.Extensions.dll",
-            "Signum.Engine.Extensions.dll"
-        };
     }
 }

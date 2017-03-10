@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { CountSearchControl, SearchControl } from '../../../Framework/Signum.React/Scripts/Search'
+import { ValueSearchControl, SearchControl } from '../../../Framework/Signum.React/Scripts/Search'
 import EntityLink from '../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
 import { QueryDescription, SubTokensOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../Framework/Signum.React/Scripts/Reflection'
@@ -26,11 +26,13 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
             .then(s => this.setState(s));
     }
 
-    handleStop = (e: React.MouseEvent) => {
+    handleStop = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
         API.stop().then(() => this.loadState()).done();
     }
 
-    handleStart = (e: React.MouseEvent) => {
+    handleStart = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
         API.start().then(() => this.loadState()).done();
     }
 
@@ -47,8 +49,8 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
             <div>
                 <h2>SchedulerLogic state</h2>
                 <div className="btn-toolbar">
-                    {s.Running && <a href="#" className="sf-button btn btn-default active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a> }
-                    {!s.Running && <a href="#" className="sf-button btn btn-default" style={{ color: "green" }} onClick={this.handleStart}>Start</a> }
+                    {s.Running && <a href="" className="sf-button btn btn-default active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a> }
+                    {!s.Running && <a href="" className="sf-button btn btn-default" style={{ color: "green" }} onClick={this.handleStart}>Start</a> }
                 </div >
                 <div id="processMainDiv">
                     <br />

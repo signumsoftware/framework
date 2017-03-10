@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.2\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.2\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
+  <Import Project="..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props" Condition="Exists('..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -68,8 +68,8 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.2\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
+    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -114,10 +114,21 @@
     <Compile Include="Dashboard\DashboardOmniboxResultGenerator.cs" />
     <Compile Include="DiffLog\DiffLogMixin.cs" />
     <Compile Include="DiffLog\Services.cs" />
+    <Compile Include="Dynamic\DynamicCode.cs" />
+    <Compile Include="Dynamic\Dynamic.cs" />
+    <Compile Include="Dynamic\DynamicMixinConnection.cs" />
+    <Compile Include="Toolbar\Toolbar.cs" />
+    <Compile Include="Dynamic\DynamicSqlMigration.cs" />
+    <Compile Include="Dynamic\DynamicType.cs" />
+    <Compile Include="Dynamic\DynamicExpression.cs" />
+    <Compile Include="Dynamic\DynamicTypeConditionSymbol.cs" />
+    <Compile Include="Dynamic\DynamicTypeCondition.cs" />
     <Compile Include="Dynamic\DynamicView.cs" />
     <Compile Include="Dynamic\DynamicValidation.cs" />
     <Compile Include="Dynamic\EvalEntity.cs" />
     <Compile Include="Excel\ExcelAttachmentEntity.cs" />
+    <Compile Include="Excel\ExcelReportEntity.cs" />
+    <Compile Include="Excel\IExcelReportServer.cs" />
     <Compile Include="Files\EmbeddedFile.cs" />
     <Compile Include="Files\FileUtils.cs" />
     <Compile Include="Help\AppendixHelp.cs" />
@@ -130,6 +141,8 @@
     <Compile Include="Help\QueryHelp.cs" />
     <Compile Include="Isolation\IIsolationServer.cs" />
     <Compile Include="Isolation\IsolationEntity.cs" />
+    <Compile Include="Printing\PrintLine.cs" />
+    <Compile Include="Printing\PrintPackages.cs" />
     <Compile Include="RestLog\RestLog.cs" />
     <Compile Include="Mailing\EmailMasterTemplate.cs" />
     <Compile Include="Mailing\SendEmailTask.cs" />
@@ -197,10 +210,8 @@
     <Compile Include="Profiler\ProfilerPermissions.cs" />
     <Compile Include="SMS\SMSCharacters.cs" />
     <Compile Include="UserQueries\IUserQueryServer.cs" />
-    <Compile Include="Excel\ExcelReportEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserAssets\FilterValueConverter.cs" />
-    <Compile Include="Excel\IExcelReportServer.cs" />
     <Compile Include="UserQueries\UserQueryEntity.cs" />
     <Compile Include="Scheduler\HolidayCalendarEntity.cs" />
     <Compile Include="Scheduler\ScheduledTaskEntity.cs" />
@@ -212,6 +223,19 @@
     <Compile Include="SMS\SMSPackages.cs" />
     <Compile Include="Word\WordTemplate.cs" />
     <Compile Include="Word\SystemWordTemplate.cs" />
+    <Compile Include="Workflow\Case.cs" />
+    <Compile Include="Workflow\CaseActivity.cs" />
+    <Compile Include="Workflow\CaseJunction.cs" />
+    <Compile Include="Workflow\CaseNotification.cs" />
+    <Compile Include="Workflow\Workflow.cs" />
+    <Compile Include="Workflow\WorkflowActivity.cs" />
+    <Compile Include="Workflow\WorkflowAction.cs" />
+    <Compile Include="Workflow\WorkflowCondition.cs" />
+    <Compile Include="Workflow\WorkflowConnection.cs" />
+    <Compile Include="Workflow\WorkflowEvent.cs" />
+    <Compile Include="Workflow\WorkflowGateway.cs" />
+    <Compile Include="Workflow\WorkflowLane.cs" />
+    <Compile Include="Workflow\WorkflowPool.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj">
@@ -288,6 +312,6 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Net.Compilers.1.3.2\build\Microsoft.Net.Compilers.props'))" />
-    <Error Condition="!Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.2\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.2\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
   </Target>
 </Project>

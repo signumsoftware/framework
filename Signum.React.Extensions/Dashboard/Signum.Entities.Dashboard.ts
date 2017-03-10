@@ -11,21 +11,6 @@ import * as Chart from '../Chart/Signum.Entities.Chart'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
-export const CountSearchControlPartEntity = new Type<CountSearchControlPartEntity>("CountSearchControlPart");
-export interface CountSearchControlPartEntity extends Entities.Entity, IPartEntity {
-    Type: "CountSearchControlPart";
-    userQueries: Entities.MList<CountUserQueryElementEntity>;
-    requiresTitle?: boolean;
-}
-
-export const CountUserQueryElementEntity = new Type<CountUserQueryElementEntity>("CountUserQueryElementEntity");
-export interface CountUserQueryElementEntity extends Entities.EmbeddedEntity {
-    Type: "CountUserQueryElementEntity";
-    label?: string | null;
-    userQuery?: UserQueries.UserQueryEntity | null;
-    href?: string | null;
-}
-
 export const DashboardEmbedededInEntity = new EnumType<DashboardEmbedededInEntity>("DashboardEmbedededInEntity");
 export type DashboardEmbedededInEntity =
     "None" |
@@ -50,8 +35,6 @@ export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetE
 export module DashboardMessage {
     export const CreateNewPart = new MessageKey("DashboardMessage", "CreateNewPart");
     export const DashboardDN_TitleMustBeSpecifiedFor0 = new MessageKey("DashboardMessage", "DashboardDN_TitleMustBeSpecifiedFor0");
-    export const CountSearchControlPartEntity = new MessageKey("DashboardMessage", "CountSearchControlPartEntity");
-    export const CountUserQueryElement = new MessageKey("DashboardMessage", "CountUserQueryElement");
     export const Preview = new MessageKey("DashboardMessage", "Preview");
     export const _0Is1InstedOf2In3 = new MessageKey("DashboardMessage", "_0Is1InstedOf2In3");
     export const Part0IsTooLarge = new MessageKey("DashboardMessage", "Part0IsTooLarge");
@@ -87,19 +70,6 @@ export interface LinkListPartEntity extends Entities.Entity, IPartEntity {
     requiresTitle?: boolean;
 }
 
-export const LinkPartEntity = new Type<LinkPartEntity>("LinkPart");
-export interface LinkPartEntity extends Entities.Entity, IPartEntity {
-    Type: "LinkPart";
-    link?: LinkElementEntity | null;
-    requiresTitle?: boolean;
-}
-
-export const OmniboxPanelPartEntity = new Type<OmniboxPanelPartEntity>("OmniboxPanelPart");
-export interface OmniboxPanelPartEntity extends Entities.Entity, IPartEntity {
-    Type: "OmniboxPanelPart";
-    requiresTitle?: boolean;
-}
-
 export const PanelPartEntity = new Type<PanelPartEntity>("PanelPartEntity");
 export interface PanelPartEntity extends Entities.EmbeddedEntity {
     Type: "PanelPartEntity";
@@ -128,20 +98,26 @@ export interface UserChartPartEntity extends Entities.Entity, IPartEntity {
     requiresTitle?: boolean;
 }
 
-export const UserQueryCountPartEntity = new Type<UserQueryCountPartEntity>("UserQueryCountPart");
-export interface UserQueryCountPartEntity extends Entities.Entity, IPartEntity {
-    Type: "UserQueryCountPart";
-    requiresTitle?: boolean;
-    userQuery?: Entities.Lite<UserQueries.UserQueryEntity> | null;
-    iconClass?: string | null;
-    showName?: boolean;
-}
-
 export const UserQueryPartEntity = new Type<UserQueryPartEntity>("UserQueryPart");
 export interface UserQueryPartEntity extends Entities.Entity, IPartEntity {
     Type: "UserQueryPart";
     userQuery?: UserQueries.UserQueryEntity | null;
     allowSelection?: boolean;
+    requiresTitle?: boolean;
+}
+
+export const ValueUserQueryElementEntity = new Type<ValueUserQueryElementEntity>("ValueUserQueryElementEntity");
+export interface ValueUserQueryElementEntity extends Entities.EmbeddedEntity {
+    Type: "ValueUserQueryElementEntity";
+    label?: string | null;
+    userQuery?: UserQueries.UserQueryEntity | null;
+    href?: string | null;
+}
+
+export const ValueUserQueryListPartEntity = new Type<ValueUserQueryListPartEntity>("ValueUserQueryListPart");
+export interface ValueUserQueryListPartEntity extends Entities.Entity, IPartEntity {
+    Type: "ValueUserQueryListPart";
+    userQueries: Entities.MList<ValueUserQueryElementEntity>;
     requiresTitle?: boolean;
 }
 

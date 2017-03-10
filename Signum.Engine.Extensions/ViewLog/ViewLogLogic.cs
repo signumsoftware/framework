@@ -15,6 +15,7 @@ using Signum.Entities.DynamicQuery;
 using System.IO;
 using Signum.Utilities.ExpressionTrees;
 using System.Data.Common;
+using Signum.Engine;
 
 namespace Signum.Engine.ViewLog
 {
@@ -39,11 +40,8 @@ namespace Signum.Engine.ViewLog
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<ViewLogEntity>();
-
-                dqm.RegisterQuery(typeof(ViewLogEntity), () =>
-                    from e in Database.Query<ViewLogEntity>()
-                    select new
+                sb.Include<ViewLogEntity>()
+                    .WithQuery(dqm, e => new
                     {
                         Entity = e,
                         e.Id,
@@ -54,7 +52,7 @@ namespace Signum.Engine.ViewLog
                         e.StartDate,
                         e.EndDate,
                     });
-
+                
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
 
                 var exp = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity entity) => entity.ViewLogs());
@@ -103,10 +101,16 @@ namespace Signum.Engine.ViewLog
             {
                 try
                 {
-                    viewLog.EndDate = TimeZoneManager.Now;
-                    viewLog.Data = GetData(request, sw);
-                    using (ExecutionMode.Global())
-                        viewLog.Save();
+                    using (Transaction tr = Transaction.ForceNew())
+                    {
+
+                        viewLog.EndDate = TimeZoneManager.Now;
+                         viewLog.Data = GetData(request, sw);
+                        using (ExecutionMode.Global())
+                            viewLog.Save();
+                        tr.Commit();
+                    }
+
                 }
                 finally
                 {

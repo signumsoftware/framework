@@ -9,30 +9,9 @@ import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Ref
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
-import CodeMirrorComponent from '../../Codemirror/CodeMirrorComponent'
-import * as CodeMirror from 'codemirror'
+import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
 
 require("!style!css!../Chart.css");
-
-require("!style!css!codemirror/lib/codemirror.css");
-require("!style!css!codemirror/addon/dialog/dialog.css");
-require("!style!css!codemirror/addon/display/fullscreen.css");
-require("!style!css!codemirror/addon/hint/show-hint.css");
-
-
-require("codemirror/lib/codemirror");
-require("codemirror/mode/javascript/javascript");
-require("codemirror/addon/comment/comment");
-require("codemirror/addon/comment/continuecomment");
-require("codemirror/addon/dialog/dialog");
-require("codemirror/addon/display/fullscreen");
-require("codemirror/addon/edit/closebrackets");
-require("codemirror/addon/edit/matchbrackets");
-require("codemirror/addon/hint/show-hint");
-require("codemirror/addon/hint/javascript-hint");
-require("codemirror/addon/search/match-highlighter");
-require("codemirror/addon/search/search");
-require("codemirror/addon/search/searchcursor");
 
 export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<ChartScriptEntity> }, void> {
 
@@ -60,15 +39,15 @@ export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<
         }
     }
 
-    codeMirrorComponent: CodeMirrorComponent;
+    jsCodeMirror: JavascriptCodeMirror;
     lineHandle: CodeMirror.LineHandle;
     getException = () => {
         const number = opener.getExceptionNumber();
         clearTimeout(this.exceptionHandler);
         if (this.lineHandle != undefined)
-            this.codeMirrorComponent.codeMirror.removeLineClass(this.lineHandle, undefined, undefined);
+            this.jsCodeMirror.codeMirrorComponent.codeMirror.removeLineClass(this.lineHandle, undefined, undefined);
         if (number != -1)
-            this.lineHandle = this.codeMirrorComponent.codeMirror.addLineClass(number - 1, undefined, "exceptionLine");
+            this.lineHandle = this.jsCodeMirror.codeMirrorComponent.codeMirror.addLineClass(number - 1, undefined, "exceptionLine");
 
     }
 
@@ -76,34 +55,16 @@ export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<
 
         const ctx = this.props.ctx;
 
-        const options = {
-            lineNumbers: true,
-            mode: "javascript",
-            extraKeys: {
-                "Ctrl-Space": "autocomplete",
-                "Ctrl-K": (cm: any) => cm.lineComment(cm.getCursor(true), cm.getCursor(false)),
-                "Ctrl-U": (cm: any) => cm.uncomment(cm.getCursor(true), cm.getCursor(false)),
-                "Ctrl-I": (cm: any) => cm.autoFormatRange(cm.getCursor(true), cm.getCursor(false)),
-                "F11": (cm: any) => cm.setOption("fullScreen", !cm.getOption("fullScreen")),
-                "Esc": (cm: any) => {
-                    if (cm.getOption("fullScreen"))
-                        cm.setOption("fullScreen", false);
-                }
-            }
-        } as CodeMirror.EditorConfiguration;
-
-        (options as any).highlightSelectionMatches = true;
-        (options as any).matchBrackets = true;
+      
 
         const css = ".exceptionLine { background: 'pink' }";
 
 
         return (
-            <div>
+            <div className="code-container">
                 <pre style={{ color: "Green", overflowStyle: "inherit" }}>{ChartScriptCode.example}</pre>
                 <style>{css}</style>
-                <CodeMirrorComponent value={this.props.ctx.value.script} ref={cm => this.codeMirrorComponent = cm}
-                    options={options}
+                <JavascriptCodeMirror code={this.props.ctx.value.script || ""} ref={jscm => this.jsCodeMirror = jscm}
                     onChange={this.handleOnChange}/>
             </div>
         );

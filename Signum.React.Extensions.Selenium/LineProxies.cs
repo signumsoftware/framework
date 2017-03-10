@@ -469,6 +469,20 @@ arguments[0].dispatchEvent(new Event('blur'));";
         {
             return EntityInfoInternal(null);
         }
+        public void AssertOptions(Lite<Entity>[] list, bool removeNullElement = true, bool orderIndependent = false)
+        {
+            this.Element.GetDriver().Wait(() =>
+            {
+                var options = this.Options();
+                if (removeNullElement)
+                    options = options.NotNull().ToList();
+
+                if (orderIndependent)
+                    return options.OrderBy(a => a.Id).SequenceEqual(list.OrderBy(a => a.Id));
+                else
+                    return options.SequenceEqual(list);
+            });
+        }
     }
 
     public class EntityDetailProxy : EntityBaseProxy
@@ -604,7 +618,7 @@ arguments[0].dispatchEvent(new Event('blur'));";
         
         public LineContainer<T> Details<T>(int index) where T : ModifiableEntity
         {
-            return new LineContainer<T>(ItemElement(index).Find(), this.ItemRoute);
+            return new LineContainer<T>(ItemElement(index).WaitPresent(), this.ItemRoute);
         }
 
         public IWebElement RemoveElementIndex(int index)
@@ -735,6 +749,19 @@ arguments[0].dispatchEvent(new Event('blur'));";
         {
             CheckBoxElement(lite).Find().SetChecked(isChecked);
         }
+
+        public void AssertDataElements(Lite<Entity>[] list, bool orderIndependent = false)
+        {
+            this.Element.GetDriver().Wait(() =>
+            {
+                var options = this.GetDataElements();
+
+                if (orderIndependent)
+                    return options.OrderBy(a => a.Id).SequenceEqual(list.OrderBy(a => a.Id));
+                else
+                    return options.SequenceEqual(list);
+            });
+        }
     }
 
 
@@ -743,6 +770,7 @@ arguments[0].dispatchEvent(new Event('blur'));";
         public FileLineProxy(IWebElement element, PropertyRoute route)
             : base(element, route)
         {
+            
         }
 
         public void SetPath(string path)
@@ -754,6 +782,19 @@ arguments[0].dispatchEvent(new Event('blur'));";
         private WebElementLocator FileElement
         {
             get { return this.Element.WithLocator(By.CssSelector("input[type=file]")); }
+        }
+    }
+
+    public static class FileExtensions
+    {
+        public static LineContainer<T> SetPath<T>(this EntityRepeaterProxy repeater, string path) where T: ModifiableEntity
+        {
+            var count = repeater.ItemsCount();
+
+            var input = repeater.Element.FindElement(By.CssSelector("input[type=file]"));
+            input.SendKeys(path);
+            
+            return repeater.Details<T>(count + 1);
         }
     }
 }

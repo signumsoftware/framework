@@ -27,7 +27,7 @@ export default class DashboardView extends React.Component<{ dashboard: Dashboar
         const db = this.props.dashboard;
         const entity = this.props.entity;
 
-        const ctx = TypeContext.root(DashboardEntity, db);
+        const ctx = TypeContext.root(db);
 
         return (
             <div>
@@ -41,7 +41,7 @@ export default class DashboardView extends React.Component<{ dashboard: Dashboar
 
                                     const last = j == 0 ? undefined : list[j - 1].value;
 
-                                    const offset = c.value.startColumn - (last ? (last.startColumn + last.columns) : 0);
+                                    const offset = c.value.startColumn! - (last ? (last.startColumn! + last.columns!) : 0);
 
                                     return (
                                         <div key={j} className={`col-sm-${c.value.columns} col-sm-offset-${offset}`}>

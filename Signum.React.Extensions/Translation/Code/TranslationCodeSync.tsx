@@ -5,7 +5,7 @@ import * as moment from 'moment'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { notifySuccess } from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
-import { CountSearchControl, SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
+import { ValueSearchControl, SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -36,13 +36,13 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
     }
 
     loadSync() {
-        const { assembly, culture } = this.props.routeParams;
+        const { assembly, culture } = this.props.routeParams!;
         return API.sync(assembly, culture).then(result => this.setState({ result }))
     }
 
     render() {
 
-        const {assembly, culture } = this.props.routeParams;
+        const { assembly, culture } = this.props.routeParams!;
 
 
         if (this.state.result && this.state.result.totalTypes == 0) {
@@ -72,7 +72,7 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
 
 
     handleSearch = (filter: string) => {
-        const {assembly, culture} = this.props.routeParams;
+        const {assembly, culture } = this.props.routeParams!;
 
         return API.retrieve(assembly, culture || "", filter)
             .then(result => this.setState({ result: result }))
@@ -96,9 +96,9 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
         );
     }
 
-    handleSave = (e: React.FormEvent) => {
+    handleSave = (e: React.FormEvent<any>) => {
         e.preventDefault();
-        const params = this.props.routeParams;
+        const params = this.props.routeParams!;
         API.save(params.assembly, params.culture || "", this.state.result!)
             .then(() => notifySuccess())
             .then(() => this.loadSync())

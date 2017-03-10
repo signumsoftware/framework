@@ -36,7 +36,7 @@ export default class TemplateControls extends React.Component<TemplateControlsPr
 
         return (
             <div className="form-sm">
-                <QueryTokenBuilder queryToken={ct} queryKey={this.props.queryKey} onTokenChange={t => this.setState({ currentToken: t }) } subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} readOnly={false} />
+                <QueryTokenBuilder queryToken={ct} queryKey={this.props.queryKey} onTokenChange={t => this.setState({ currentToken: t || undefined })} subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} readOnly={false} />
                 <div className="btn-group" style={{ marginLeft: "10px" }}>
                     {this.renderButton(TemplateTokenMessage.Insert.niceToString(), this.canElement(), token => `@[${token}]`) }
                     {this.renderButton("if", this.canIf(), token => this.props.forHtml ?
@@ -47,7 +47,7 @@ export default class TemplateControls extends React.Component<TemplateControlsPr
                         `@foreach[${token}] @endforeach`) }
                     {this.renderButton("any", this.canElement(), token => this.props.forHtml ?
                         `<!--@any[${token}]--> <!--@notany--> <!--@endany-->` :
-                        `@any[${token}] @notany @end`) }
+                        `@any[${token}] @notany @endany`) }
                 </div>
             </div>
         );

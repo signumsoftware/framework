@@ -86,7 +86,7 @@ export interface LocalizableType {
 
 export interface LocalizedType {
     culture: string;
-    typeDescription: LocalizedDescription;
+    typeDescription?: LocalizedDescription;
     members: { [member: string]: LocalizedMember };
 }
 

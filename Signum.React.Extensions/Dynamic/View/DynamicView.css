@@ -43,9 +43,16 @@ span.design-default {
         flex-direction: row;
     }
 
+    body.rtl-mode div.design-main {
+        flex-direction: row-reverse;
+    }
+
         div.design-main .design-left.open {
-            width: 40%;
-            min-width:300px;
+            flex: 1;
+        }
+
+        div.design-main .design-content {
+            flex: 2;
         }
 }
 
@@ -65,4 +72,30 @@ i.formula:hover {
 
 i.formula.active {
     color:black;
+}
+
+.filter-options .table{
+    margin-top:-10px;
+    margin-bottom:-10px;
+}
+
+.small-codemirror .CodeMirror {
+    height: auto;
+}
+
+ul.expression-list {
+    list-style: none;
+    padding-left: 20px;
+}
+
+ul.expression-list a.sf-remove {
+    float: left;
+    margin-left: -20px;
+}
+
+
+.design-help-button {
+    background: #ddd;
+    padding: 5px;
+    margin: -5px;
 }

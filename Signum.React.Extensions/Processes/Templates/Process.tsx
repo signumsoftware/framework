@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
-import { CountSearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
+import { ValueSearchControlLine }  from '../../../../Framework/Signum.React/Scripts/Search'
 import { toLite }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator  from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -23,6 +23,7 @@ export default class Process extends React.Component<{ ctx: TypeContext<ProcessE
             this.handler = setTimeout(()=> {
                 this.handler = undefined;
                 const lite = toLite(e);
+                this.processExceptionsCounter && this.processExceptionsCounter.refreshValue();
                 Navigator.API.fetchEntityPack(lite)
                     .then(pack => this.props.ctx.frame!.onReload(pack))
                     .done(); 
@@ -30,6 +31,7 @@ export default class Process extends React.Component<{ ctx: TypeContext<ProcessE
         }
     }
 
+    processExceptionsCounter: ValueSearchControlLine;
 
     render() {
 
@@ -67,7 +69,13 @@ export default class Process extends React.Component<{ ctx: TypeContext<ProcessE
 
                 {this.renderProgress()}
 
-                <CountSearchControl ctx={ctx3} findOptions={{ queryName: ProcessExceptionLineEntity, parentColumn: "Process", parentValue: ctx3.value }} />
+                <ValueSearchControlLine ctx={ctx3}
+                    ref={(vsc: ValueSearchControlLine) => this.processExceptionsCounter = vsc}
+                    findOptions={{
+                        queryName: ProcessExceptionLineEntity,
+                        parentColumn: "Process",
+                        parentValue: ctx3.value
+                    }} />
             </div>
         );
     }

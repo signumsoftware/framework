@@ -18,9 +18,7 @@ import * as AuthClient from '../Authorization/AuthClient'
 require("!style!css!./Processes.css");
 
 export function start(options: { routes: JSX.Element[], packages: boolean, packageOperations: boolean }) {
-    options.routes.push(<Route path="processes">
-        <Route path="view" getComponent={(loc, cb) => require(["./ProcessPanelPage"], (Comp) => cb(undefined, Comp.default))}/>
-    </Route>);
+  
 
     Navigator.addSettings(new EntitySettings(ProcessEntity, e => new ViewPromise(resolve => require(['./Templates/Process'], resolve))));
 
@@ -36,6 +34,9 @@ export function start(options: { routes: JSX.Element[], packages: boolean, packa
         Navigator.addSettings(new EntitySettings(PackageOperationEntity, e => new ViewPromise(resolve => require(['./Templates/PackageOperation'], resolve))));
     }
 
+    options.routes.push(<Route path="processes">
+        <Route path="view" getComponent={(loc, cb) => require(["./ProcessPanelPage"], (Comp) => cb(undefined, Comp.default))} />
+    </Route>);
     
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(ProcessPermission.ViewProcessPanel),
@@ -56,7 +57,7 @@ function monkeyPatchCreateContextualMenuItem(){
 
     const base = ContextualOperations.MenuItemConstructor.createContextualMenuItem;
 
-    ContextualOperations.MenuItemConstructor.createContextualMenuItem = (coc: Operations.ContextualOperationContext<Entity>, defaultClick: (coc: Operations.ContextualOperationContext<Entity>, event: React.MouseEvent) => void, key: any) => {
+    ContextualOperations.MenuItemConstructor.createContextualMenuItem = (coc: Operations.ContextualOperationContext<Entity>, defaultClick: (coc: Operations.ContextualOperationContext<Entity>, event: React.MouseEvent<any>) => void, key: any) => {
         
         if(!Navigator.isViewable(PackageOperationEntity) )
             return base(coc, defaultClick, key);
@@ -88,14 +89,15 @@ function monkeyPatchCreateContextualMenuItem(){
         const disabled = !!coc.canExecute;
 
         const onClick = coc.settings && coc.settings.onClick ?
-            (me: React.MouseEvent) => coc.settings.onClick!(coc, me) :
-            (me: React.MouseEvent) => defaultClick(coc, me);
+            (me: React.MouseEvent<any>) => coc.settings.onClick!(coc, me) :
+            (me: React.MouseEvent<any>) => defaultClick(coc, me);
 
         const menuItem = <MenuItem
-            className={classes("btn-" + bsStyle, disabled ? "disabled" : undefined) }
+            className={disabled ? "disabled" : undefined}
             onClick={disabled ? undefined : onClick}
             data-operation={coc.operationInfo.key}
             key={key}>
+            {bsStyle && <span className={"icon empty-icon btn-" + bsStyle}></span>}
             {text}
             <span className="glyphicon glyphicon-cog process-contextual-icon" aria-hidden={true} onClick={me =>defaultConstructFromMany(coc, me)}></span>
             </MenuItem>;
@@ -111,7 +113,7 @@ function monkeyPatchCreateContextualMenuItem(){
     };
 }
 
-function defaultConstructFromMany(coc: Operations.ContextualOperationContext<Entity>, event: React.MouseEvent) {
+function defaultConstructFromMany(coc: Operations.ContextualOperationContext<Entity>, event: React.MouseEvent<any>) {
 
     event.preventDefault();
     event.stopPropagation();

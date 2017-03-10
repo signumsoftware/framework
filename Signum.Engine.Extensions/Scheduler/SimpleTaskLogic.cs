@@ -25,7 +25,7 @@ namespace Signum.Engine.Scheduler
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                SymbolLogic<SimpleTaskSymbol>.Start(sb, () => tasks.Keys.ToHashSet());
+                SymbolLogic<SimpleTaskSymbol>.Start(sb, dqm, () => tasks.Keys.ToHashSet());
 
                 SchedulerLogic.ExecuteTask.Register((SimpleTaskSymbol st) =>
                 {
@@ -33,15 +33,13 @@ namespace Signum.Engine.Scheduler
                     return func();
                 });
 
-
-                dqm.RegisterQuery(typeof(SimpleTaskSymbol), ()=>
-                      from ct in Database.Query<SimpleTaskSymbol>()
-                       select new
-                       {
-                           Entity = ct,
-                           ct.Id,
-                           ct.Key,
-                       });
+                sb.Include<SimpleTaskSymbol>()
+                    .WithQuery(dqm, ct => new
+                    {
+                        Entity = ct,
+                        ct.Id,
+                        ct.Key,
+                    });
             }
         }
 

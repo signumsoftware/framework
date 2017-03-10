@@ -26,16 +26,13 @@ namespace Signum.Engine.Chart
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<ChartColorEntity>();
-
-                dqm.RegisterQuery(typeof(ChartColorEntity), () =>
-                    from cc in Database.Query<ChartColorEntity>()
-                    select new
+                sb.Include<ChartColorEntity>()
+                    .WithQuery(dqm, cc => new
                     {
                         Entity = cc,
                         cc.Related,
                         cc.Color,
-                    });
+                    }); 
 
                 Colors = sb.GlobalLazy(() =>
                     Database.Query<ChartColorEntity>()

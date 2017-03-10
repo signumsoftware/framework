@@ -42,30 +42,27 @@ namespace Signum.Engine.Alerts
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<AlertEntity>();
-
-                dqm.RegisterQuery(typeof(AlertEntity), () =>
-                    from a in Database.Query<AlertEntity>()
-                    select new
-                           {
-                               Entity = a,
-                               a.Id,
-                               a.AlertType,
-                               a.AlertDate,
-                               a.Title,
-                               Text = a.Text.Etc(100),
-                               a.CreationDate,
-                               a.CreatedBy,
-                               a.AttendedDate,
-                               a.AttendedBy,
-                               a.Target
-                           });
+                sb.Include<AlertEntity>()
+                    .WithQuery(dqm, a => new
+                    {
+                        Entity = a,
+                        a.Id,
+                        a.AlertType,
+                        a.AlertDate,
+                        a.Title,
+                        Text = a.Text.Etc(100),
+                        a.CreationDate,
+                        a.CreatedBy,
+                        a.AttendedDate,
+                        a.AttendedBy,
+                        a.Target
+                    });
 
                 AlertGraph.Register();
 
-                dqm.RegisterQuery(typeof(AlertTypeEntity), () =>
-                    from t in Database.Query<AlertTypeEntity>()
-                    select new
+                sb.Include<AlertTypeEntity>()
+                    .WithSave(AlertTypeOperation.Save)
+                    .WithQuery(dqm, t => new
                     {
                         Entity = t,
                         t.Id,
@@ -74,14 +71,7 @@ namespace Signum.Engine.Alerts
                     });
 
                 SemiSymbolLogic<AlertTypeEntity>.Start(sb, () => SystemAlertTypes);
-
-                new Graph<AlertTypeEntity>.Execute(AlertTypeOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (a, _) => { }
-                }.Register();
-
+                
                 if (registerExpressionsFor != null)
                 {
                     var exp = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity ident) => ident.Alerts());

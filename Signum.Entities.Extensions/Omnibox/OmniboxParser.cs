@@ -68,6 +68,8 @@ $@"(?<entity>{ident};(\d+|{guid}))|
 
             if (IsHelp(omniboxQuery))
             {
+                result.Add(new HelpOmniboxResult { Text = OmniboxMessage.Omnibox_OmniboxSyntaxGuide.NiceToString() });
+
                 foreach (var generator in Generators)
                 {
                     if (ct.IsCancellationRequested)
@@ -76,14 +78,9 @@ $@"(?<entity>{ident};(\d+|{guid}))|
                     result.AddRange(generator.GetHelp());
                 }
 
-                string matchingOptions = OmniboxMessage.Omnibox_MatchingOptions.NiceToString();
-                result.Add(new HelpOmniboxResult { Text = matchingOptions });
-
-                string databaseAccess = OmniboxMessage.Omnibox_DatabaseAccess.NiceToString();
-                result.Add(new HelpOmniboxResult { Text = databaseAccess });
-
-                string disambiguate = OmniboxMessage.Omnibox_Disambiguate.NiceToString();
-                result.Add(new HelpOmniboxResult { Text = disambiguate });
+                result.Add(new HelpOmniboxResult { Text = OmniboxMessage.Omnibox_MatchingOptions.NiceToString() });
+                result.Add(new HelpOmniboxResult { Text = OmniboxMessage.Omnibox_DatabaseAccess.NiceToString() });
+                result.Add(new HelpOmniboxResult { Text = OmniboxMessage.Omnibox_Disambiguate.NiceToString() });
 
                 return result.ToList();
             }
@@ -169,7 +166,7 @@ $@"(?<entity>{ident};(\d+|{guid}))|
         public Dictionary<string, object> GetQueries()
         {
             return queries.GetOrAdd(CultureInfo.CurrentCulture, ci =>
-                 GetAllQueryNames().ToDictionary(qn => QueryUtils.GetNiceName(qn).ToOmniboxPascal(), "Translated QueryNames"));
+                 GetAllQueryNames().ToDictionaryEx(qn => QueryUtils.GetNiceName(qn).ToOmniboxPascal(), "Translated QueryNames"));
         }
 
         protected abstract IEnumerable<Type> GetAllTypes();
@@ -179,7 +176,7 @@ $@"(?<entity>{ident};(\d+|{guid}))|
         public Dictionary<string, Type> Types()
         {
             return types.GetOrAdd(CultureInfo.CurrentUICulture, ci =>
-               GetAllTypes().Where(t => !t.IsEnumEntityOrSymbol()).ToDictionary(t => t.NicePluralName().ToOmniboxPascal(), "Translated Types"));
+               GetAllTypes().Where(t => !t.IsEnumEntityOrSymbol()).ToDictionaryEx(t => t.NicePluralName().ToOmniboxPascal(), "Translated Types"));
         }
     }
 

@@ -26,7 +26,7 @@ export interface FileUploaderProps {
     dragAndDropMessage?: string;
     accept?: string;
     multiple?: boolean
-    divHtmlProps?: React.HTMLAttributes
+    divHtmlProps?: React.HTMLAttributes<HTMLDivElement>
 }
 
 export interface FileUploaderState {
@@ -46,24 +46,24 @@ export default class FileUploader extends React.Component<FileUploaderProps, Fil
         this.state = { isLoading: false, isOver: false }; 
     }
 
-    handleDragOver = (e: React.DragEvent) => {
+    handleDragOver = (e: React.DragEvent<any>) => {
         e.stopPropagation();
         e.preventDefault();
-        this.changeState(s => s.isOver = true);
+        this.setState({ isOver: true });
     }
 
-    handleDragLeave = (e: React.DragEvent) => {
+    handleDragLeave = (e: React.DragEvent<any>) => {
         e.stopPropagation();
         e.preventDefault();
-        this.changeState(s => s.isOver = false);
+        this.setState({ isOver: false });
     }
 
-    handleDrop = (e: React.DragEvent) => {
+    handleDrop = (e: React.DragEvent<any>) => {
         e.stopPropagation();
         e.preventDefault();
-        this.changeState(s => {
-            s.isOver = false;
-            s.isLoading = true;
+        this.setState({
+            isOver : false,
+            isLoading : true
         });
 
         for (var i = 0; i < e.dataTransfer.files.length; i++) {
@@ -71,11 +71,11 @@ export default class FileUploader extends React.Component<FileUploaderProps, Fil
         }
     }
 
-    handleFileChange = (e: React.FormEvent) => {
+    handleFileChange = (e: React.FormEvent<any>) => {
         e.preventDefault();
-        this.changeState(s => {
-            s.isOver = false;
-            s.isLoading = true;
+        this.setState({
+            isOver: false,
+            isLoading: true
         });
 
 
@@ -97,7 +97,7 @@ export default class FileUploader extends React.Component<FileUploaderProps, Fil
             if (this.props.fileType)
                 (newEntity as any as IFilePath).fileType = this.props.fileType;
 
-            this.changeState(s => s.isLoading = false);
+            this.setState({ isLoading: false });
 
             this.props.onFileLoaded(newEntity); 
         };

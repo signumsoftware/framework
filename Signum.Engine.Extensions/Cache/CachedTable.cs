@@ -148,10 +148,13 @@ namespace Signum.Engine.Cache
     class CachedTable<T> : CachedTableBase where T : Entity
     {
         Table table;
-
-        public Dictionary<PrimaryKey, object> Rows { get { return rows.Value; } }
-
+        
         ResetLazy<Dictionary<PrimaryKey, object>> rows;
+
+        public Dictionary<PrimaryKey, object> GetRows()
+        {
+            return rows.Value;
+        }
 
         Func<FieldReader, object> rowReader;
         Action<object, IRetriever, T> completer;
@@ -174,11 +177,11 @@ namespace Signum.Engine.Cache
             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
             {
                 string select = "SELECT\r\n{0}\r\nFROM {1} {2}\r\n".FormatWith(
-                    Table.Columns.Values.ToString(c => ctr.currentAlias.Name.SqlEscape() + "." + c.Name.SqlEscape(), ",\r\n"),
+                    Table.Columns.Values.ToString(c => ctr.currentAlias + "." + c.Name.SqlEscape(), ",\r\n"),
                     table.Name.ToString(),
-                    ctr.currentAlias.Name.SqlEscape());
+                    ctr.currentAlias.ToString());
 
-                ctr.remainingJoins = lastPartialJoin == null ? null : lastPartialJoin + ctr.currentAlias.Name.SqlEscape() + ".Id\r\n" + remainingJoins;
+                ctr.remainingJoins = lastPartialJoin == null ? null : lastPartialJoin + ctr.currentAlias + ".Id\r\n" + remainingJoins;
 
                 if (ctr.remainingJoins != null)
                     select += ctr.remainingJoins;
@@ -269,7 +272,7 @@ namespace Signum.Engine.Cache
         public object GetRow(PrimaryKey id)
         {
             Interlocked.Increment(ref hits);
-            var origin = Rows.TryGetC(id);
+            var origin = this.GetRows().TryGetC(id);
             if (origin == null)
                 throw new EntityNotFoundException(typeof(T), id);
 
@@ -279,7 +282,7 @@ namespace Signum.Engine.Cache
         public string TryGetToString(PrimaryKey id)
         {
             Interlocked.Increment(ref hits);
-            var origin = Rows.TryGetC(id);
+            var origin = this.GetRows().TryGetC(id);
             if (origin == null)
                 return null;
 
@@ -290,7 +293,7 @@ namespace Signum.Engine.Cache
         {
             Interlocked.Increment(ref hits);
 
-            var origin = Rows.TryGetC(entity.Id);
+            var origin = this.GetRows().TryGetC(entity.Id);
             if (origin == null)
                 throw new EntityNotFoundException(typeof(T), entity.Id);
 
@@ -300,7 +303,7 @@ namespace Signum.Engine.Cache
         internal IEnumerable<PrimaryKey> GetAllIds()
         {
             Interlocked.Increment(ref hits);
-            return Rows.Keys;
+            return this.GetRows().Keys;
         }
 
         public override int? Count
@@ -321,7 +324,7 @@ namespace Signum.Engine.Cache
 
         internal override bool Contains(PrimaryKey primaryKey)
         {
-            return this.rows.Value.ContainsKey(primaryKey);
+            return this.GetRows().ContainsKey(primaryKey);
         }
     }
 
@@ -353,11 +356,11 @@ namespace Signum.Engine.Cache
             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
             {
                 string select = "SELECT\r\n{0}\r\nFROM {1} {2}\r\n".FormatWith(
-                    ctr.table.Columns.Values.ToString(c => ctr.currentAlias.Name.SqlEscape() + "." + c.Name.SqlEscape(), ",\r\n"),
+                    ctr.table.Columns.Values.ToString(c => ctr.currentAlias + "." + c.Name.SqlEscape(), ",\r\n"),
                     table.Name.ToString(),
-                    ctr.currentAlias.Name.SqlEscape());
+                    ctr.currentAlias.ToString());
 
-                ctr.remainingJoins = lastPartialJoin + ctr.currentAlias.Name.SqlEscape() + "." + table.BackReference.Name.SqlEscape() + "\r\n" + remainingJoins;
+                ctr.remainingJoins = lastPartialJoin + ctr.currentAlias + "." + table.BackReference.Name.SqlEscape() + "\r\n" + remainingJoins;
 
                 query = new SqlPreCommandSimple(select);
             }
@@ -534,11 +537,11 @@ namespace Signum.Engine.Cache
             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
             {
                 string select = "SELECT {0}\r\nFROM {1} {2}\r\n".FormatWith(
-                    columns.ToString(c => currentAlias.Name.SqlEscape() + "." + c.Name.SqlEscape(), ", "),
+                    columns.ToString(c => currentAlias + "." + c.Name.SqlEscape(), ", "),
                     table.Name.ToString(),
-                    currentAlias.Name.SqlEscape());
+                    currentAlias.ToString());
 
-                select += this.lastPartialJoin + currentAlias.Name.SqlEscape() + "." + table.PrimaryKey.Name.SqlEscape() + "\r\n" + this.remainingJoins;
+                select += this.lastPartialJoin + currentAlias + "." + table.PrimaryKey.Name.SqlEscape() + "\r\n" + this.remainingJoins;
 
                 query = new SqlPreCommandSimple(select);
             }

@@ -22,10 +22,8 @@ namespace Signum.Engine.Excel
     {
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
-            sb.Include<ExcelAttachmentEntity>();
-            dqm.RegisterQuery(typeof(ExcelAttachmentEntity), () =>
-                from s in Database.Query<ExcelAttachmentEntity>()
-                select new
+            sb.Include<ExcelAttachmentEntity>()
+                .WithQuery(dqm, s => new
                 {
                     Entity = s,
                     s.Id,
@@ -33,8 +31,7 @@ namespace Signum.Engine.Excel
                     s.UserQuery,
                     s.Related,
                 });
-
-
+            
             EmailTemplateLogic.FillAttachmentTokens.Register((ExcelAttachmentEntity uqe, EmailTemplateLogic.FillAttachmentTokenContext ctx) =>
             {
                 if (uqe.FileName != null)
@@ -83,12 +80,13 @@ namespace Signum.Engine.Excel
 
         static string ExcelAttachmentFileName_StaticPropertyValidation(ExcelAttachmentEntity excelAttachment, PropertyInfo pi)
         {
-            if (excelAttachment.Template != null && excelAttachment.FileNameNode as EmailTemplateParser.BlockNode == null)
+            var template = (EmailTemplateEntity)excelAttachment.GetParentEntity();
+            if (template != null && excelAttachment.FileNameNode as EmailTemplateParser.BlockNode == null)
             {
                 try
                 {
                     string errorMessage;
-                    excelAttachment.FileNameNode = EmailTemplateLogic.ParseTemplate(excelAttachment.Template, excelAttachment.FileName, out errorMessage);
+                    excelAttachment.FileNameNode = EmailTemplateLogic.ParseTemplate(template, excelAttachment.FileName, out errorMessage);
                     return errorMessage.DefaultText(null);
                 }
                 catch (Exception ex)
@@ -102,12 +100,13 @@ namespace Signum.Engine.Excel
 
         static string ExcelAttachmentTitle_StaticPropertyValidation(ExcelAttachmentEntity excelAttachment, PropertyInfo pi)
         {
-            if (excelAttachment.Template != null && excelAttachment.TitleNode as EmailTemplateParser.BlockNode == null)
+            var template = (EmailTemplateEntity)excelAttachment.GetParentEntity();
+            if (template != null && excelAttachment.TitleNode as EmailTemplateParser.BlockNode == null)
             {
                 try
                 {
                     string errorMessage;
-                    excelAttachment.FileNameNode = EmailTemplateLogic.ParseTemplate(excelAttachment.Template, excelAttachment.Title, out errorMessage);
+                    excelAttachment.FileNameNode = EmailTemplateLogic.ParseTemplate(template, excelAttachment.Title, out errorMessage);
                     return errorMessage.DefaultText(null);
                 }
                 catch (Exception ex)

@@ -57,7 +57,7 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineProps> {
         const hasValue = !!s.ctx.value;
 
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} labelProps={s.labelHtmlProps} htmlProps={Dic.extend(this.baseHtmlProps(), EntityBase.entityHtmlProps(s.ctx.value), s.formGroupHtmlProps)}>
+            <FormGroup ctx={s.ctx} labelText={s.labelText} labelProps={s.labelHtmlProps} htmlProps={{ ...this.baseHtmlProps(), ...EntityBase.entityHtmlProps(s.ctx.value), ...s.formGroupHtmlProps }}>
                 {hasValue ? this.renderFile() :
                     <FileUploader
                         accept={this.props.accept}
@@ -88,7 +88,7 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineProps> {
                             htmlProps={{ className: "form-control file-control" }} />
                 }
                 <span className="input-group-btn">
-                    {this.renderRemoveButton(true) }
+                    {this.renderRemoveButton(true, val) }
                 </span>
             </div>
         );

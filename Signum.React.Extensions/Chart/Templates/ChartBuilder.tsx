@@ -18,6 +18,7 @@ export interface ChartBuilderProps {
     ctx: TypeContext<IChartBase>; /*IChart*/
     queryKey: string;
     onInvalidate: () => void;
+    onTokenChange: () => void;
     onRedraw: () => void;
 }
 
@@ -86,6 +87,11 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
         this.props.onInvalidate();
     }
 
+    handleTokenChange = () => {
+        this.forceUpdate();
+        this.props.onTokenChange();
+    }
+
     handleChartScriptOnClick = (cs: ChartScriptEntity) => {
 
         const chart = this.props.ctx.value;
@@ -141,7 +147,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
                                 <tbody>
                                     { this.state.expanded && mlistItemContext(this.props.ctx.subCtx(c => c.columns, { formGroupSize: "ExtraSmall" })).flatMap((ctx, i) => [
                                         <ChartColumn chartBase={chart} ctx={ctx} key={"C" + i} scriptColumn={chart.chartScript!.columns[i].element} queryKey={this.props.queryKey}
-                                            onToggleInfo={() => this.handleOnToggleInfo(i)} onInvalidate={this.handleOnInvalidate} />,
+                                            onToggleInfo={() => this.handleOnToggleInfo(i)} onGroupChange={this.handleOnInvalidate} onTokenChange={this.handleTokenChange} />,
                                         this.state.expanded![i] && this.state.colorPalettes && <ChartColumnInfo ctx= { ctx } key= { "CI" + i } colorPalettes= {this.state.colorPalettes} onRedraw= { this.handleOnRedraw } />
                                     ]) }
                                 </tbody>

@@ -1,24 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection;
-using Signum.Engine.Maps;
-using Signum.Engine.DynamicQuery;
-using Signum.Entities.Chart;
+﻿using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
-using Signum.Entities.DynamicQuery;
+using Signum.Engine.DynamicQuery;
+using Signum.Engine.Maps;
+using Signum.Engine.Operations;
+using Signum.Engine.UserAssets;
+using Signum.Engine.ViewLog;
 using Signum.Entities;
 using Signum.Entities.Authorization;
-using Signum.Engine.Authorization;
-using Signum.Engine.Operations;
-using Signum.Utilities;
-using Signum.Engine.UserQueries;
 using Signum.Entities.Basics;
-using Signum.Entities.UserQueries;
-using Signum.Engine.UserAssets;
+using Signum.Entities.Chart;
+using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserAssets;
-using Signum.Engine.ViewLog;
+using Signum.Utilities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace Signum.Engine.Chart
 {
@@ -39,11 +36,10 @@ namespace Signum.Engine.Chart
 
                 sb.Schema.Synchronizing += Schema_Synchronizing;
 
-                sb.Include<UserChartEntity>();
-
-                dqm.RegisterQuery(typeof(UserChartEntity), () =>
-                    from uq in Database.Query<UserChartEntity>()
-                    select new
+                sb.Include<UserChartEntity>()
+                    .WithSave(UserChartOperation.Save)
+                    .WithDelete(UserChartOperation.Delete)
+                    .WithQuery(dqm, uq => new
                     {
                         Entity = uq,
                         uq.Query,
@@ -56,18 +52,10 @@ namespace Signum.Engine.Chart
 
                 sb.Schema.EntityEvents<UserChartEntity>().Retrieved += ChartLogic_Retrieved;
 
-                new Graph<UserChartEntity>.Execute(UserChartOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (uc, _) => { }
-                }.Register();
-
-                new Graph<UserChartEntity>.Delete(UserChartOperation.Delete)
-                {
-                    Delete = (uc, _) => { uc.Delete(); }
-                }.Register();
-
+                sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += e =>
+                  Administrator.UnsafeDeletePreCommand(Database.Query<UserChartEntity>().Where(a => a.Query == e));
+                
+               
                 UserCharts = sb.GlobalLazy(() => Database.Query<UserChartEntity>().ToDictionary(a => a.ToLite()),
                  new InvalidateWith(typeof(UserChartEntity)));
 
@@ -220,7 +208,7 @@ namespace Signum.Engine.Chart
                         {
                             QueryTokenEntity token = item.Token;
                             if (item.Token == null)
-                                break;
+                                continue;
 
                             switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | canAggregate, item.ScriptColumn.DisplayName, allowRemoveToken: item.ScriptColumn.IsOptional, allowReCreate: false))
                             {
@@ -274,7 +262,7 @@ namespace Signum.Engine.Chart
                 foreach (var item in uc.Parameters)
                 {
                     string val = item.Value;
-                    retry:
+                retry:
                     switch (FixParameter(item, ref val))
                     {
                         case FixTokenResult.Nothing: break;
@@ -290,7 +278,7 @@ namespace Signum.Engine.Chart
                 {
                     return table.UpdateSqlSync(uc, includeCollections: true);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Console.WriteLine("Integrity Error:");
                     SafeConsole.WriteLineColor(ConsoleColor.DarkRed, e.Message);
@@ -314,7 +302,7 @@ namespace Signum.Engine.Chart
                     }
                 }
 
-               
+
             }
             catch (Exception e)
             {

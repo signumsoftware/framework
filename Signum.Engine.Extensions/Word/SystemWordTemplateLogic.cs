@@ -86,16 +86,13 @@ namespace Signum.Engine.Word
             {
                 sb.Schema.Generating += Schema_Generating;
                 sb.Schema.Synchronizing += Schema_Synchronizing;
-                sb.Include<SystemWordTemplateEntity>();
-
-                dqm.RegisterQuery(typeof(SystemWordTemplateEntity), () =>
-                    (from se in Database.Query<SystemWordTemplateEntity>()
-                     select new
-                     {
-                         Entity = se,
-                         se.Id,
-                         se.FullClassName,
-                     }));
+                sb.Include<SystemWordTemplateEntity>()
+                    .WithQuery(dqm, se => new
+                    {
+                        Entity = se,
+                        se.Id,
+                        se.FullClassName,
+                    });
                 
                 new Graph<WordTemplateEntity>.ConstructFrom<SystemWordTemplateEntity>(WordTemplateOperation.CreateWordTemplateFromSystemWordTemplate)
                 {
@@ -113,9 +110,13 @@ namespace Signum.Engine.Word
                 TypeToSystemWordTemplate = sb.GlobalLazy(() =>
                 {
                     var dbSystemWordReports = Database.RetrieveAll<SystemWordTemplateEntity>();
-                    return EnumerableExtensions.JoinStrict(
-                        dbSystemWordReports, systemWordReports.Keys, swr => swr.FullClassName, type => type.FullName,
-                        (swr, type) => KVP.Create(type, swr), "caching WordTemplates. Consider synchronize").ToDictionary();
+                    return EnumerableExtensions.JoinRelaxed(
+                        dbSystemWordReports, 
+                        systemWordReports.Keys, 
+                        swr => swr.FullClassName, 
+                        type => type.FullName,
+                        (swr, type) => KVP.Create(type, swr), 
+                        "caching WordTemplates").ToDictionary();
                 }, new InvalidateWith(typeof(SystemWordTemplateEntity)));
 
                 sb.Schema.Initializing += () => TypeToSystemWordTemplate.Load();

@@ -16,9 +16,9 @@ export interface MListTableInfo extends ITableInfo {
 export interface ITableInfo extends d3.layout.force.Node, Rectangle {
     tableName: string;
     niceName: string;
-    rows: number;
+    rows: number | null;
     columns: number;
-    total_size_kb: number;
+    total_size_kb: number | null;
     entityKind: EntityKind;
     entityData: EntityData;
     entityBaseType: EntityBaseType;
@@ -315,8 +315,8 @@ export class SchemaMapD3 {
         this.gravity();
 
         this.nodes.forEach(d => {
-            d.x += d.nx;
-            d.y += d.ny;
+            d.x = (d.x || 0) + d.nx;
+            d.y = (d.y || 0) + d.ny;
         });
 
         const visibleLink = this.link.filter(f => this.links.indexOf(f) != -1);
@@ -330,8 +330,8 @@ export class SchemaMapD3 {
 
         this.nodeGroup.filter(d => this.nodes.indexOf(d) != -1)
             .attr("transform", d => "translate(" +
-                (d.x - d.width / 2) + ", " +
-                (d.y - d.height / 2) + ")");
+                (d.x! - d.width / 2) + ", " +
+                (d.y! - d.height / 2) + ")");
     }
 
     getPathExpression(l: IRelationInfo) {
@@ -345,11 +345,11 @@ export class SchemaMapD3 {
             const dy = ((l.repetitions + 1 ) % 2) * 2 - 1;
 
             const c = calculatePoint(l.source, {
-                x: l.source.x + dx * (l.source.width / 2),
-                y: l.source.y + dy * (l.source.height / 2),
+                x: l.source.x! + dx * (l.source.width / 2),
+                y: l.source.y! + dy * (l.source.height / 2),
             });
             
-            return `M${c.x} ${c.y} C ${c.x + 50 * dx} ${c.y} ${c.x} ${c.y + 50 * dy} ${c.x} ${c.y}`;
+            return `M${c.x} ${c.y} C ${c.x! + 50 * dx} ${c.y} ${c.x} ${c.y! + 50 * dy} ${c.x} ${c.y}`;
         } else {
             let p = this.getPointRepetitions(s, t, l.repetitions);
             return `M${s.x} ${s.y} Q ${p.x} ${p.y} ${t.x} ${t.y}`;
@@ -359,16 +359,16 @@ export class SchemaMapD3 {
     getPointRepetitions(s: Point, t: Point, repetitions: number): Point {
 
         const m: Point = {
-            x: (s.x + t.x) / 2,
-            y: (s.y + t.y) / 2
+            x: (s.x! + t.x!) / 2,
+            y: (s.y! + t.y!) / 2
         };
 
         const d: Point = {
-            x: (s.x - t.x),
-            y: (s.y - t.y)
+            x: (s.x! - t.x!),
+            y: (s.y! - t.y!)
         };
 
-        let h = Math.sqrt(d.x * d.x + d.y * d.y);
+        let h = Math.sqrt(d.x! * d.x! + d.y! * d.y!);
 
         if (h == 0)
             h = 1;
@@ -377,8 +377,8 @@ export class SchemaMapD3 {
         const repPixels = Math.floor(repetitions + 1 / 2) * ((repetitions % 2) * 2 - 1);
 
         const p: Point = {
-            x: m.x + (d.y / h) * 20 * repPixels,
-            y: m.y - (d.x / h) * 20 * repPixels
+            x: m.x! + (d.y! / h) * 20 * repPixels,
+            y: m.y! - (d.x! / h) * 20 * repPixels
         };
 
         return p;
@@ -434,8 +434,8 @@ export class SchemaMapD3 {
             quadtree.visit((quad, x1, y1, x2, y2) => {
                 if (quad.point && quad.point != d) {
 
-                    let x = d.x - quad.point.x;
-                    let y = d.y - quad.point.y;
+                    let x = d.x! - quad.point.x!;
+                    let y = d.y! - quad.point.y!;
 
                     if (x == 0 && y == 0) {
                         x = (Math.random() - 0.5) * 10;

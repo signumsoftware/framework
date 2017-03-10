@@ -9,7 +9,8 @@
 	    WindowStartupLocation="CenterScreen" 
         m:Monitors.AdjustToMonitor="true"
         m:Monitors.CenterOnSizedToContent="true"
-        Title="DashboardWindow" Height="300" Width="300" x:Name="me">
+        Title="DashboardWindow" Height="300" Width="300" x:Name="me"
+        FlowDirection="{DynamicResource FlowDirection}">
     <Grid>
         <DockPanel LastChildFill="True" >
             <Border  DockPanel.Dock="Top" Background="{StaticResource EntityTitleUpperBackgroundGradient}">

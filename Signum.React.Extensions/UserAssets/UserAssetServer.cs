@@ -35,7 +35,23 @@ namespace Signum.React.UserAssets
                     var qte = (QueryTokenEntity)ctx.Entity;
 
                     ctx.JsonWriter.WritePropertyName(ctx.LowerCaseName);
-                    ctx.JsonSerializer.Serialize(ctx.JsonWriter, qte.Token == null ? null : new QueryTokenTS(qte.Token, true));
+                    ctx.JsonSerializer.Serialize(ctx.JsonWriter, qte.TryToken == null ? null : new QueryTokenTS(qte.TryToken, true));
+                },
+                AvoidValidate = true,
+                CustomReadJsonProperty = ctx =>
+                {
+                    var result = ctx.JsonSerializer.Deserialize(ctx.JsonReader);
+                    //Discard
+                }
+            });
+            pcs.Add("parseException", new PropertyConverter()
+            {
+                CustomWriteJsonProperty = ctx =>
+                {
+                    var qte = (QueryTokenEntity)ctx.Entity;
+
+                    ctx.JsonWriter.WritePropertyName(ctx.LowerCaseName);
+                    ctx.JsonSerializer.Serialize(ctx.JsonWriter, qte.ParseException?.Message);
                 },
                 AvoidValidate = true,
                 CustomReadJsonProperty = ctx =>
@@ -49,7 +65,7 @@ namespace Signum.React.UserAssets
                 var qte = (QueryTokenEntity)ctx.Entity;
 
                 ctx.JsonWriter.WritePropertyName(ctx.LowerCaseName);
-                ctx.JsonWriter.WriteValue(qte.Token?.FullKey() ?? qte.TokenString);
+                ctx.JsonWriter.WriteValue(qte.TryToken?.FullKey() ?? qte.TokenString);
             };
         }
     }

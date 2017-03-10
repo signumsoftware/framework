@@ -28,13 +28,13 @@ namespace Signum.Engine.Authorization
 
         public static bool IsStarted { get { return cache != null; } }
 
-        public static void Start(SchemaBuilder sb)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 TypeLogic.AssertStarted(sb);
                 AuthLogic.AssertStarted(sb);
-                TypeConditionLogic.Start(sb);
+                TypeConditionLogic.Start(sb, dqm);
 
                 sb.Schema.EntityEventsGlobal.Saving += Schema_Saving; //because we need Modifications propagated
                 sb.Schema.EntityEventsGlobal.Retrieved += EntityEventsGlobal_Retrieved;
@@ -67,7 +67,7 @@ namespace Signum.Engine.Authorization
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => TypeAuthLogic.Start(null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => TypeAuthLogic.Start(null, null)));
         }
 
         static string Schema_IsAllowedCallback(Type type, bool inUserInterface)
@@ -245,7 +245,7 @@ namespace Signum.Engine.Authorization
         public Func<Type, TypeAllowedAndConditions> MergeDefault(Lite<RoleEntity> role)
         {
             var taac = new TypeAllowedAndConditions(AuthLogic.GetDefaultAllowed(role) ? TypeAllowed.Create : TypeAllowed.None);
-            return new ConstantFunction<Type, TypeAllowedAndConditions>(taac).GetValue;
+            return new ConstantFunctionButEnums(taac).GetValue;
         }
 
         public static TypeAllowedAndConditions MergeBase(IEnumerable<TypeAllowedAndConditions> baseRules, Func<IEnumerable<TypeAllowed>, TypeAllowed> maxMerge, TypeAllowed max, TypeAllowed min)

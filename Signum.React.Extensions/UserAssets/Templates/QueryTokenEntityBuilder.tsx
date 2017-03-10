@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { ajaxGet, ajaxPost, ServiceError } from '../../../../Framework/Signum.React/Scripts/Services'
-import { QueryTokenEntity} from '../Signum.Entities.UserAssets'
+import { QueryTokenEntity } from '../Signum.Entities.UserAssets'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { TypeContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -18,15 +18,15 @@ interface QueryTokenEntityBuilderProps {
     onTokenChanged?: (newToken: QueryToken) => void;
 }
 
-export default class QueryTokenEntityBuilder extends React.Component<QueryTokenEntityBuilderProps, { }> {
+export default class QueryTokenEntityBuilder extends React.Component<QueryTokenEntityBuilderProps, {}> {
 
     handleTokenChanged = (newToken: QueryToken) => {
         if (newToken == undefined)
             this.props.ctx.value = undefined;
         else
-            this.props.ctx.value = QueryTokenEntity.New(t => {
-                t.tokenString = newToken.fullKey;
-                t.token = newToken
+            this.props.ctx.value = QueryTokenEntity.New({
+                tokenString : newToken.fullKey,
+                token : newToken
             });
 
         if (this.props.onTokenChanged)
@@ -42,15 +42,20 @@ export default class QueryTokenEntityBuilder extends React.Component<QueryTokenE
 
         const tokenBuilder = <QueryTokenBuilder queryToken={qte && qte.token}
             onTokenChange={this.handleTokenChanged} queryKey={this.props.queryKey} subTokenOptions={this.props.subTokenOptions}
-            readOnly={this.props.ctx.readOnly}/>
+            readOnly={this.props.ctx.readOnly} />
 
         return (
             <FormGroup ctx={this.props.ctx}>
                 {
                     !qte || !qte.parseException ? tokenBuilder :
                         <div>
+                            <code>{qte.tokenString}</code>
+                            <br />
                             {tokenBuilder}
-                            <p className="alert alert-danger">{qte.parseException}</p>
+                            <br />
+                            <p className="alert alert-danger">
+                                {qte.parseException}
+                            </p>
                         </div>
                 }
             </FormGroup>

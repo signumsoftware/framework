@@ -62,6 +62,29 @@ namespace Signum.Entities.Authorization
         }
     }
 
+    [Serializable]
+    public class ConstantFunctionButEnums
+    {
+        internal TypeAllowedAndConditions Allowed;
+        public ConstantFunctionButEnums(TypeAllowedAndConditions allowed)
+        {
+            this.Allowed = allowed;
+        }
+
+        public TypeAllowedAndConditions GetValue(Type type)
+        {
+            if (EnumEntity.Extract(type) != null)
+                return new TypeAllowedAndConditions(TypeAllowed.Read);
+
+            return Allowed;
+        }
+
+        public override string ToString()
+        {
+            return "Constant {0}".FormatWith(Allowed);
+        }
+    }
+
 
     [Serializable, InTypeScript(Undefined = false)]
     public abstract class BaseRulePack<T> : ModelEntity

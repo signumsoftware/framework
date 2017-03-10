@@ -39,8 +39,7 @@ namespace Signum.Engine.Files
         {
             return WebDownloadExpression.Evaluate(fp, fileType);
         }
-
-
+        
         public static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmbeddedFilePathLogic.Start(null, null)));
@@ -56,7 +55,7 @@ namespace Signum.Engine.Files
                 {
                     if(efp.BinaryFile != null) //First time
                     {
-                        FileTypeLogic.SaveFile(efp);
+                        efp.SaveFile();
                     }
                 };
 
@@ -67,21 +66,32 @@ namespace Signum.Engine.Files
         static PrefixPair CalculatePrefixPair(this EmbeddedFilePathEntity efp)
         {
             using (new EntityCache(EntityCacheType.ForceNew))
-                return FileTypeLogic.FileTypes.GetOrThrow(efp.FileType).GetPrefixPair(efp);
+                return efp.FileType.GetAlgorithm().GetPrefixPair(efp);
         }
 
         public static byte[] GetByteArray(this EmbeddedFilePathEntity efp)
         {
-            return efp.BinaryFile ?? File.ReadAllBytes(efp.FullPhysicalPath());
+            return efp.BinaryFile ?? efp.FileType.GetAlgorithm().ReadAllBytes(efp);
+        }
+
+        public static Stream OpenRead(this EmbeddedFilePathEntity efp)
+        {
+            return efp.FileType.GetAlgorithm().OpenRead(efp);
         }
 
         public static EmbeddedFilePathEntity SaveFile(this EmbeddedFilePathEntity efp)
         {
-            FileTypeLogic.SaveFile(efp);
+            efp.FileType.GetAlgorithm().SaveFile(efp);
             efp.BinaryFile = null;
             return efp;
         }
 
-        
+        public static void DeleteFileOnCommit(this EmbeddedFilePathEntity efp)
+        {
+            Transaction.PostRealCommit += dic =>
+            {
+                efp.FileType.GetAlgorithm().DeleteFiles(new List<IFilePath> { efp });
+            };
+        }
     }
 }

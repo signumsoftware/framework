@@ -37,13 +37,81 @@ namespace Signum.Entities.Dynamic
         public static readonly DeleteSymbol<DynamicViewEntity> Delete;
     }
 
+
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    public class DynamicViewSelectorEntity : Entity
+    {
+        [NotNullable]
+        [NotNullValidator, UniqueIndex]
+        public TypeEntity EntityType { get; set; }
+
+        [SqlDbType(Size = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
+        public string Script { get; set; }
+        
+        static Expression<Func<DynamicViewSelectorEntity, string>> ToStringExpression = @this => "ViewSelector " + @this.EntityType;
+        [ExpressionField]
+        public override string ToString()
+        {
+            return ToStringExpression.Evaluate(this);
+        }
+    }
+
+    [AutoInit]
+    public static class DynamicViewSelectorOperation
+    {
+        public static readonly ExecuteSymbol<DynamicViewSelectorEntity> Save;
+        public static readonly DeleteSymbol<DynamicViewSelectorEntity> Delete;
+    }
+
+
+
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    public class DynamicViewOverrideEntity : Entity
+    {
+        [NotNullable]
+        [NotNullValidator, UniqueIndex]
+        public TypeEntity EntityType { get; set; }
+
+        [SqlDbType(Size = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
+        public string Script { get; set; }
+
+        static Expression<Func<DynamicViewOverrideEntity, string>> ToStringExpression = @this => "DynamicViewOverride " + @this.EntityType;
+        [ExpressionField]
+        public override string ToString()
+        {
+            return ToStringExpression.Evaluate(this);
+        }
+    }
+    
+    [AutoInit]
+    public static class DynamicViewOverrideOperation
+    {
+        public static readonly ExecuteSymbol<DynamicViewOverrideEntity> Save;
+        public static readonly DeleteSymbol<DynamicViewOverrideEntity> Delete;
+    }
+
+
     public enum DynamicViewMessage
     {
         AddChild,
         AddSibling,
         Remove,
+        GenerateChildren,
+        ClearChildren,
         SelectATypeOfComponent,
-        SelectANodeFirst
+        SelectANodeFirst,
+        UseExpression,
+        SuggestedFindOptions,
+        [Description("The following queries reference {0}:")]
+        TheFollowingQueriesReference0,
+        ChooseAView,
+        [Description("Since there is no DynamicViewSelector you need to choose a view manually:")]
+        SinceThereIsNoDynamicViewSelectorYouNeedToChooseAViewManually,
+        ExampleEntity,
+        ShowHelp,
+        HideHelp
     }
 
     public enum DynamicViewValidationMessage
@@ -65,5 +133,12 @@ namespace Signum.Entities.Dynamic
         Value,
         CollectionOfEnums,
         EntityOrValue,
+
+        [Description("Filtering with new {0}. Consider changing visibility.")]
+        FilteringWithNew0ConsiderChangingVisibility,
+
+
+        [Description("Aggregate is mandatory for '{0}' ({1}).")]
+        AggregateIsMandatoryFor01,
     }
 }

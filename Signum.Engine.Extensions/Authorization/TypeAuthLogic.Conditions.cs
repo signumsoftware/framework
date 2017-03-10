@@ -1,24 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Signum.Engine.Basics;
+using Signum.Engine.DynamicQuery;
+using Signum.Engine.Linq;
 using Signum.Engine.Maps;
+using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Basics;
-using Signum.Entities;
-using Signum.Utilities.DataStructures;
-using Signum.Utilities;
 using Signum.Entities.DynamicQuery;
-using System.Reflection;
-using System.Linq.Expressions;
-using Signum.Entities.Reflection;
-using Signum.Utilities.Reflection;
+using Signum.Utilities;
+using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Engine.Linq;
-using System.Data.SqlClient;
-using System.Xml.Linq;
+using Signum.Utilities.Reflection;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Signum.Engine.Authorization
 {
@@ -94,7 +90,7 @@ namespace Signum.Engine.Authorization
 
             var modified = (List<Entity>)Transaction.UserData.TryGetC(ModifiedKey);
             if (modified != null && modified.Contains(entity))
-                modified.Remove(entity); 
+                modified.Remove(entity);
         }
 
         static void Transaction_PreRealCommit(Dictionary<string, object> dic)
@@ -232,7 +228,7 @@ namespace Signum.Engine.Authorization
             var inMemoryCodition = IsAllowedInMemory<T>(tac, allowed, inUserInterface);
             if (inMemoryCodition != null)
                 return inMemoryCodition(entity);
-         
+
             using (DisableQueryFilter())
                 return entity.InDB().WhereIsAllowedFor(allowed, inUserInterface).Any();
         }
@@ -253,7 +249,7 @@ namespace Signum.Engine.Authorization
                 }
 
                 return tac.FallbackOrNone.Get(inUserInterface) >= allowed;
-            }; 
+            };
         }
 
         [MethodExpander(typeof(IsAllowedForExpander))]
@@ -315,7 +311,7 @@ namespace Signum.Engine.Authorization
 
             using (DisableQueryFilter())
                 return entity.InDB().Select(e => e.IsAllowedForDebug(allowed, inUserInterface)).SingleEx();
-        } 
+        }
 
         [MethodExpander(typeof(IsAllowedForDebugExpander))]
         public static DebugData IsAllowedForDebug(this Lite<IEntity> lite, TypeAllowedBasic allowed, bool inUserInterface)
@@ -351,7 +347,7 @@ namespace Signum.Engine.Authorization
         }
 
 
-        static FilterQueryResult<T> TypeAuthLogic_FilterQuery<T>() 
+        static FilterQueryResult<T> TypeAuthLogic_FilterQuery<T>()
           where T : Entity
         {
             if (queryFilterDisabled.Value)
@@ -465,9 +461,9 @@ namespace Signum.Engine.Authorization
         }
 
         public static Expression IsAllowedExpression(Expression entity, TypeAllowedBasic requested, bool inUserInterface)
-        {            
+        {
             Type type = entity.Type;
-          
+
             TypeAllowedAndConditions tac = GetAllowed(type);
 
             Expression baseValue = Expression.Constant(tac.FallbackOrNone.Get(inUserInterface) >= requested);
@@ -488,7 +484,7 @@ namespace Signum.Engine.Authorization
         }
 
 
-        static ConstructorInfo ciDebugData = ReflectionTools.GetConstuctorInfo(() => new DebugData(null, TypeAllowedBasic.Create, true, TypeAllowed.Create,  null));
+        static ConstructorInfo ciDebugData = ReflectionTools.GetConstuctorInfo(() => new DebugData(null, TypeAllowedBasic.Create, true, TypeAllowed.Create, null));
         static ConstructorInfo ciGroupDebugData = ReflectionTools.GetConstuctorInfo(() => new ConditionDebugData(null, true, TypeAllowed.Create));
         static MethodInfo miToLite = ReflectionTools.GetMethodInfo((Entity a) => a.ToLite()).GetGenericMethodDefinition();
 
@@ -509,9 +505,9 @@ namespace Signum.Engine.Authorization
 
             Expression liteEntity = Expression.Call(null, miToLite.MakeGenericMethod(entity.Type), entity);
 
-            return Expression.New(ciDebugData, liteEntity, 
+            return Expression.New(ciDebugData, liteEntity,
                 Expression.Constant(requested),
-                Expression.Constant(inUserInterface), 
+                Expression.Constant(inUserInterface),
                 Expression.Constant(tac.Fallback),
                 newList);
         }
@@ -526,7 +522,7 @@ namespace Signum.Engine.Authorization
                 this.UserInterface = userInterface;
                 this.Conditions = groups;
             }
-            
+
             public Lite<IEntity> Lite { get; private set; }
             public TypeAllowedBasic Requested { get; private set; }
             public TypeAllowed Fallback { get; private set; }
@@ -540,7 +536,7 @@ namespace Signum.Engine.Authorization
                 {
                     foreach (var item in Conditions.AsEnumerable().Reverse())
                     {
-                        if(item.InGroup)
+                        if (item.InGroup)
                             return Requested <= item.Allowed.Get(UserInterface);
                     }
 
@@ -548,7 +544,7 @@ namespace Signum.Engine.Authorization
                 }
             }
 
-            public string Error 
+            public string Error
             {
                 get
                 {
@@ -578,7 +574,7 @@ namespace Signum.Engine.Authorization
                 this.Allowed = allowed;
             }
         }
-     
+
         public static DynamicQueryCore<T> ToDynamicDisableAutoFilter<T>(this IQueryable<T> query)
         {
             return new AutoDynamicQueryNoFilterCore<T>(query);
@@ -606,11 +602,11 @@ namespace Signum.Engine.Authorization
                 }
             }
 
-            public override int ExecuteQueryCount(QueryCountRequest request)
+            public override object ExecuteQueryValue(QueryValueRequest request)
             {
                 using (TypeAuthLogic.DisableQueryFilter())
                 {
-                    return base.ExecuteQueryCount(request);
+                    return base.ExecuteQueryValue(request);
                 }
             }
         }
@@ -647,7 +643,7 @@ namespace Signum.Engine.Authorization
                 .ToList();
 
             using (rep.WithReplacedDatabaseName())
-                return errors.Select(a => Administrator.UnsafeDeletePreCommand(Database.MListQuery((RuleTypeEntity rt) => rt.Conditions)
+                return errors.Select(a => Administrator.UnsafeDeletePreCommand((RuleTypeEntity rt) => rt.Conditions, Database.MListQuery((RuleTypeEntity rt) => rt.Conditions)
                     .Where(mle => mle.Element.Condition.Is(a.Key.Condition) && mle.Parent.Resource.Is(a.Key.Resource)))
                     .AddComment("TypeCondition {0} not defined for {1} (roles {2})".FormatWith(a.Key.Condition, a.Key.Resource, a.ToString(", "))))
                     .Combine(Spacing.Double);

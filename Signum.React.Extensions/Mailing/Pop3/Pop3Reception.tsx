@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityDetail} from '../../../../Framework/Signum.React/Scripts/Lines'
-import { SearchControl, CountSearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
+import { SearchControl, ValueSearchControlLine }  from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { ExceptionEntity }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -20,8 +20,8 @@ export default class Pop3Reception extends React.Component<{ ctx: TypeContext<Po
                 <ValueLine ctx={sc.subCtx(s => s.endDate)}  />
                 <ValueLine ctx={sc.subCtx(s => s.newEmails)}  />
                 <EntityLine ctx={sc.subCtx(s => s.exception)}  />
-                <CountSearchControl ctx={sc}  findOptions={{queryName: EmailMessageEntity, parentColumn: "Entity.ReceptionInfo.Reception", parentValue: sc.value}}/>
-                <CountSearchControl ctx={sc}  findOptions={{queryName: ExceptionEntity, parentColumn: "Entity.Pop3Reception", parentValue: sc.value}}/>}
+                <ValueSearchControlLine ctx={sc} findOptions={{ queryName: EmailMessageEntity, parentColumn: "Entity.ReceptionInfo.Reception", parentValue: sc.value }} />
+                <ValueSearchControlLine ctx={sc} findOptions={{ queryName: ExceptionEntity, parentColumn: "Entity.Pop3Reception", parentValue: sc.value }} />}
             </div>
         );
     }
