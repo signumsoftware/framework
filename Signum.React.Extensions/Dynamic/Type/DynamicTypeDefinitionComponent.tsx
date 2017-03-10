@@ -15,6 +15,7 @@ import { ModifiableEntity, JavascriptMessage, EntityControlMessage, is, Lite, En
 import { QueryEntity, TypeEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { FilterOperation, PaginationMode } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.DynamicQuery'
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal';
+import ModalMessage from '../../../../Framework/Signum.React/Scripts/Modals/ModalMessage'
 import * as DynamicTypeClient from '../DynamicTypeClient';
 import * as DynamicClient from '../DynamicClient';
 import { DynamicTypeMessage, DynamicTypeEntity, DynamicMixinConnectionEntity } from '../Signum.Entities.Dynamic';
@@ -39,8 +40,7 @@ interface DynamicTypeDefinitionComponentProps {
     showDatabaseMapping: boolean;
 }
 
-interface DynamicTypeDefinitionComponentState
-{
+interface DynamicTypeDefinitionComponentState {
     expressionsNames?: string[];
     typeEntity?: Lite<TypeEntity> | false;
 }
@@ -79,7 +79,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
         var dt = this.props.dynamicType;
         if (!dt.isNew && dt.typeName && eventKey == "query")
             DynamicTypeClient.API.expressionNames(dt.typeName + "Entity")
-                .then(exprNames => this.setState({ expressionsNames: exprNames}))
+                .then(exprNames => this.setState({ expressionsNames: exprNames }))
                 .done();
     }
 
@@ -116,9 +116,19 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
         if (requiresSave && !def.operationSave) {
             def.operationSave = { execute: "" };
         } else if (!requiresSave && def.operationSave) {
-            if (this.isEmpty(def.operationSave) ||
-                confirm(DynamicTypeMessage.RemoveSaveOperation.niceToString()))
+            if (this.isEmpty(def.operationSave))
                 def.operationSave = undefined;
+            else {
+                ModalMessage.show({
+                    title: EntityControlMessage.Remove.niceToString(),
+                    message: DynamicTypeMessage.RemoveSaveOperation.niceToString(),
+                    buttons: "yes_no",
+                    icon: "question"
+                }).then(result => {
+                    if (result == "yes")
+                        def.operationSave = undefined;
+                }).done();
+            }
         }
     }
 
@@ -184,7 +194,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                                                 <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.identity)} type="boolean" defaultValue={null} />
                                             </div>
                                         }
-                                        />
+                                    />
                                 </div>
                                 <div className="col-sm-6">
                                     <TicksFieldsetComponent
@@ -197,7 +207,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                                                 <ValueComponent dc={this.props.dc} labelColumns={4} binding={Binding.create(item, i => i.type)} type="string" defaultValue={null} options={["int", "Guid", "DateTime"]} />
                                             </div>
                                         }
-                                        />
+                                    />
                                 </div>
                             </div>
                         }
@@ -223,7 +233,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                                         </div>
                                     </div>
                                 }
-                                />
+                            />
                         }
 
                         <fieldset>
@@ -251,7 +261,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                                             "\r\n};"
                                         })}
                                         renderContent={oc => <CSharpExpressionCodeMirror binding={Binding.create(oc, d => d.construct)} signature={"(object[] args) =>"} />}
-                                        />
+                                    />
 
                                     <SaveOperationFieldsetComponent
                                         binding={Binding.create(def, d => d.operationSave)}
@@ -262,7 +272,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                                                 <CSharpExpressionCodeMirror binding={Binding.create(oe, d => d.canExecute)} title="CanSave" signature={"string (" + dt.typeName + "Entity e) =>"} />
                                                 <CSharpExpressionCodeMirror binding={Binding.create(oe, d => d.execute)} title="OperationSave" signature={"(" + dt.typeName + "Entity e, object[] args) =>"} />
                                             </div>}
-                                        />
+                                    />
 
                                     <DeleteOperationFieldsetComponent
                                         binding={Binding.create(def, d => d.operationDelete)}
@@ -273,11 +283,11 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                                                 <CSharpExpressionCodeMirror binding={Binding.create(od, d => d.canDelete)} title="CanDelete" signature={"string (" + dt.typeName + "Entity e) =>"} />
                                                 <CSharpExpressionCodeMirror binding={Binding.create(od, d => d.delete)} title="OperationDelete" signature={"(" + dt.typeName + "Entity e, object[] args) =>"} />
                                             </div>}
-                                        />
+                                    />
                                 </div>
                                 <div className="col-sm-5">
-                                {!dt.isNew &&
-                                    <TypeHelpComponent initialType={dt.typeName!} mode="CSharp" onMemberClick={this.handleTypeHelpClick} />
+                                    {!dt.isNew &&
+                                        <TypeHelpComponent initialType={dt.typeName!} mode="CSharp" onMemberClick={this.handleTypeHelpClick} />
                                     }
                                 </div>
                             </div>
@@ -292,21 +302,21 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                         <Tab eventKey="connections" title="Apply To">
                             <SearchControl findOptions={{
                                 queryName: DynamicMixinConnectionEntity,
-                                parentColumn:  "DynamicMixin",
-                                parentValue:  dt
+                                parentColumn: "DynamicMixin",
+                                parentValue: dt
                             }} />
                         </Tab>
                     }
 
                     {!dt.isNew && dt.baseType == "Entity" && this.state.typeEntity != null &&
                         <Tab eventKey="connections" title="Mixins">
-                        {this.state.typeEntity == false ? <p className="alert alert-warning">{DynamicTypeMessage.TheEntityShouldBeSynchronizedToApplyMixins.niceToString()}</p> :
-                            <SearchControl findOptions={{
-                                queryName: DynamicMixinConnectionEntity,
-                                parentColumn: "EntityType",
-                                parentValue: this.state.typeEntity
-                            }} />
-                        }
+                            {this.state.typeEntity == false ? <p className="alert alert-warning">{DynamicTypeMessage.TheEntityShouldBeSynchronizedToApplyMixins.niceToString()}</p> :
+                                <SearchControl findOptions={{
+                                    queryName: DynamicMixinConnectionEntity,
+                                    parentColumn: "EntityType",
+                                    parentValue: this.state.typeEntity
+                                }} />
+                            }
                         </Tab>
                     }
 
@@ -352,7 +362,7 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                                 </div>
                             </div>
                         }
-                        />
+                    />
 
                     <CustomCodeFieldsetComponent
                         binding={Binding.create(def, d => d.customEntityMembers)}
@@ -373,7 +383,7 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                                 </div>
                             </div>
                         }
-                        />
+                    />
 
                     <CustomCodeFieldsetComponent
                         binding={Binding.create(def, d => d.customStartCode)}
@@ -391,7 +401,7 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                                 </div>
                             </div>
                         }
-                        />
+                    />
 
                     <CustomCodeFieldsetComponent
                         binding={Binding.create(def, d => d.customLogicMembers)}
@@ -408,7 +418,7 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                                 </div>
                             </div>
                         }
-                        />
+                    />
 
                     <CustomCodeFieldsetComponent
                         binding={Binding.create(def, d => d.customTypes)}
@@ -425,8 +435,8 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                                 </div>
                             </div>
                         }
-                        />
-            
+                    />
+
 
                     <CustomCodeFieldsetComponent
                         binding={Binding.create(def, d => d.customBeforeSchema)}
@@ -443,7 +453,7 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                                 </div>
                             </div>
                         }
-                        />
+                    />
                 </div>
                 <div className="col-sm-5">
                     {!dt.isNew &&
@@ -543,7 +553,7 @@ export class CSharpExpressionCodeMirror extends React.Component<CSharpExpression
                     <div className="small-codemirror">
                         <CSharpCodeMirror
                             script={val || ""}
-                            onChange={newScript => { this.props.binding.setValue(newScript); this.forceUpdate(); } } />
+                            onChange={newScript => { this.props.binding.setValue(newScript); this.forceUpdate(); }} />
                     </div>
                 </div>
             </div>
@@ -660,9 +670,9 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
         const newIndex = this.props.properties.moveUp(index);
         if (newIndex != index) {
             if (index == this.state.activeIndex)
-                this.setState({ activeIndex: this.state.activeIndex-1 });
+                this.setState({ activeIndex: this.state.activeIndex - 1 });
             else if (newIndex == this.state.activeIndex)
-                this.setState({ activeIndex: this.state.activeIndex+1 });
+                this.setState({ activeIndex: this.state.activeIndex + 1 });
         }
 
         this.props.dc.refreshView();
@@ -721,7 +731,7 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
                 <a title={EntityControlMessage.Create.niceToString()}
                     className="sf-line-button sf-create"
                     onClick={this.handleCreateClick}>
-                    <span className="glyphicon glyphicon-plus sf-create sf-create-label"/>{EntityControlMessage.Create.niceToString()}
+                    <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
                 </a>
             </div>
         );
@@ -792,8 +802,8 @@ export class PropertyComponent extends React.Component<PropertyComponentProps, v
                     <div className="col-sm-7">
                         <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.name)} type="string" defaultValue={null} />
                         {this.props.showDatabaseMapping &&
-                            <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.columnName)} type="string" defaultValue={null} labelClass="database-mapping"  />
-                         }
+                            <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.columnName)} type="string" defaultValue={null} labelClass="database-mapping" />
+                        }
                         <TypeCombo dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.type)} onBlur={this.handleAutoFix} />
                         {this.props.showDatabaseMapping &&
                             <ValueComponent dc={this.props.dc} labelColumns={3} binding={Binding.create(p, d => d.columnType)} type="string" defaultValue={null} labelClass="database-mapping" />
@@ -816,7 +826,7 @@ export class PropertyComponent extends React.Component<PropertyComponentProps, v
                             onChange={() => {
                                 fetchPropertyType(p, this.props.dc);
                                 this.handleAutoFix();
-                            } }
+                            }}
                         />
 
                         {p.type && <div>
@@ -838,7 +848,7 @@ export class PropertyComponent extends React.Component<PropertyComponentProps, v
     }
 }
 
-export class TypeCombo extends React.Component<{ dc: DynamicTypeDesignContext; binding: Binding<string>; labelColumns: number; onBlur: ()=> void }, { suggestions: string[] }>{
+export class TypeCombo extends React.Component<{ dc: DynamicTypeDesignContext; binding: Binding<string>; labelColumns: number; onBlur: () => void }, { suggestions: string[] }>{
 
     constructor(props: any) {
         super(props);
@@ -866,7 +876,7 @@ export class TypeCombo extends React.Component<{ dc: DynamicTypeDesignContext; b
                         <Typeahead
                             inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
                             onBlur={this.props.onBlur}
-                            getItems={this.handleGetItems} 
+                            getItems={this.handleGetItems}
                             value={this.props.binding.getValue()}
                             onChange={this.handleOnChange} />
                     </div>

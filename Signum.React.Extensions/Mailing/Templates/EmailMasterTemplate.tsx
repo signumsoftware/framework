@@ -6,7 +6,7 @@ import { getToString }  from '../../../../Framework/Signum.React/Scripts/Signum.
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { EmailMasterTemplateEntity, EmailMasterTemplateMessageEntity, EmailTemplateViewMessage, EmailTemplateMessage } from '../Signum.Entities.Mailing'
 import TemplateControls from '../../Templating/TemplateControls'
-import HtmlCodemirror from './HtmlCodemirror'
+import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
 import IFrameRenderer from './IFrameRenderer'
 
 export default class EmailMasterTemplate extends React.Component<{ ctx: TypeContext<EmailMasterTemplateEntity> }, void> {

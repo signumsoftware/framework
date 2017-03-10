@@ -16,11 +16,17 @@ import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 
-export function start(options: { routes: JSX.Element[] }) {
+export function start(options: { routes: JSX.Element[], creatingJustFromCertainTypes: PseudoType[] | undefined  }) {
     Navigator.addSettings(new EntitySettings(AlertEntity, e => new ViewPromise(resolve => require(['./Templates/Alert'], resolve))));
     Navigator.addSettings(new EntitySettings(AlertTypeEntity, e => new ViewPromise(resolve => require(['./Templates/AlertType'], resolve))));
 
     Operations.addSettings(new EntityOperationSettings(AlertOperation.SaveNew, {
         isVisible: eoc => eoc.entity.isNew
     }));
+
+    if (options.creatingJustFromCertainTypes) {
+        Operations.addSettings(new EntityOperationSettings(AlertOperation.CreateAlertFromEntity, {
+            isVisible: eoc => options.creatingJustFromCertainTypes!.contains(eoc.entity.Type)
+        }));
+    }
 }
