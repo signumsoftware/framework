@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { WorkflowConnectionModel, WorkflowConditionEntity, WorkflowActionEntity } from '../Signum.Entities.Workflow'
+import { WorkflowConnectionModel, WorkflowConditionEntity, WorkflowActionEntity, WorkflowMessage } from '../Signum.Entities.Workflow'
 import {
     ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip,
     EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, EntityTable
@@ -10,28 +10,48 @@ import { SearchControl, ValueSearchControl } from '../../../../Framework/Signum.
 
 export default class WorkflowConnectionModelComponent extends React.Component<{ ctx: TypeContext<WorkflowConnectionModel> }, void> {
 
+    componentWillMount() {
+
+        var ctx = this.props.ctx;
+        if (!ctx.value.needDecisonResult)
+            ctx.value.decisonResult = null;
+
+        if (!ctx.value.needCondition)
+            ctx.value.condition = null;
+
+        if (!ctx.value.needOrder)
+            ctx.value.order = null;
+
+        this.forceUpdate();
+    }
+
     render() {
         var ctx = this.props.ctx;
         return (
             <div>
                 <ValueLine ctx={ctx.subCtx(e => e.name)} />
-                {ctx.value.isBranching && <ValueLine ctx={ctx.subCtx(e => e.decisonResult)} />}
+                {ctx.value.needDecisonResult && <ValueLine ctx={ctx.subCtx(e => e.decisonResult)} />}
 
-                {ctx.value.isBranching && <EntityLine ctx={ctx.subCtx(e => e.condition)} findOptions={{
-                    queryName: WorkflowConditionEntity,
-                    filterOptions: [
-                        { columnName: "Entity.MainEntityType", operation: "EqualTo", value: ctx.value.mainEntityType }
-                    ]
-                }} />}
+                {ctx.value.needCondition ?
+                    ctx.value.mainEntityType ?
+                        <EntityLine ctx={ctx.subCtx(e => e.condition)} findOptions={{
+                            queryName: WorkflowConditionEntity,
+                            filterOptions: [
+                                { columnName: "Entity.MainEntityType", operation: "EqualTo", value: ctx.value.mainEntityType }
+                            ]
+                        }} /> : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.condition), ctx.niceName(e => e.mainEntityType))}</div>
+                    : undefined}
 
-                <EntityLine ctx={ctx.subCtx(e => e.action)} findOptions={{
-                    queryName: WorkflowActionEntity,
-                    filterOptions: [
-                        { columnName: "Entity.MainEntityType", operation: "EqualTo", value: ctx.value.mainEntityType }
-                    ]
-                }} />
+                {ctx.value.mainEntityType ?
+                    <EntityLine ctx={ctx.subCtx(e => e.action)} findOptions={{
+                        queryName: WorkflowActionEntity,
+                        filterOptions: [
+                            { columnName: "Entity.MainEntityType", operation: "EqualTo", value: ctx.value.mainEntityType }
+                        ]
+                    }} />
+                    : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.action), ctx.niceName(e => e.mainEntityType))}</div>}                        
 
-                {ctx.value.isBranching && <ValueLine ctx={ctx.subCtx(e => e.order)} />}
+                {ctx.value.needOrder && <ValueLine ctx={ctx.subCtx(e => e.order)} />}
             </div>
         );
     }

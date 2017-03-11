@@ -432,7 +432,7 @@ namespace Signum.Engine.Workflow
                             MainEntity = mainEntity,
                         };
 
-                        var start = w.WorkflowEvents().Single(a => a.Type == WorkflowEventType.Start);
+                        var start = args.TryGetArgC<WorkflowEventEntity>() ?? w.WorkflowEvents().Single(a => a.Type == WorkflowEventType.Start);
                         var connection = start.NextConnectionsFromCache().SingleEx();
                         var next = (WorkflowActivityEntity)connection.To;
                         var ca = new CaseActivityEntity

@@ -51,7 +51,7 @@ export default class DynamicTypeConditionComponent extends React.Component<Dynam
             title: "Property Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-        });
+        }).done();
     }
 
     render() {

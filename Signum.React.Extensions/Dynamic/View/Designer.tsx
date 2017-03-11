@@ -368,7 +368,7 @@ export class CollapsableTypeHelp extends React.Component<{ initialTypeName?: str
             title: "Property Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-        });
+        }).done();
     }
 
     render() {

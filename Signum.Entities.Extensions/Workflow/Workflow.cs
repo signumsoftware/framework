@@ -83,12 +83,19 @@ namespace Signum.Entities.Workflow
     {
         [Description("'{0}' belongs to a different workflow")]
         _0BelongsToADifferentWorkflow,
-
         [Description("Condition '{0}' is defined for '{1}' not '{2}'")]
         Condition0IsDefinedFor1Not2,
         JumpsToSameActivityNotAllowed,
         [Description("Jump to '{0}' failed because '{1}'")]
         JumpTo0FailedBecause1,
+        [Description("To use '{0}', you should save workflow")]
+        ToUse0YouSouldSaveWorkflow,
+        [Description("To use new nodes on jumps, you should save workflow")]
+        ToUseNewNodesOnJumpsYouSouldSaveWorkflow,
+        [Description("To use '{0}', you should set the workflow '{1}'")]
+        ToUse0YouSouldSetTheWorkflow1,
+        [Description("Change workflow main entity type is not allowed because we have nodes that use it.")]
+        ChangeWorkflowMainEntityTypeIsNotAllowedBecausueWeHaveNodesThatUseIt
     }
 
     [Serializable]
@@ -163,9 +170,9 @@ namespace Signum.Entities.Workflow
         [Description("Participants and Processes are not synchronized.")]
         ParticipantsAndProcessesAreNotSynchronized,
         [Description("Multiple start events are not allowed.")]
-        MultipleFinishEventsAreNotAllowed,
+        MultipleStartEventsAreNotAllowed,
         [Description("Start event is required. each workflow could have one and only one start event.")]
-        StartEventIsRequired,
+        SomeStartEventIsRequired,
         [Description("The following tasks are going to be deleted :")]
         TheFollowingTasksAreGoingToBeDeleted,
         FinishEventIsRequired,
@@ -198,6 +205,9 @@ namespace Signum.Entities.Workflow
         [Description("'{0}' (Track {1}) can not be connected to '{2}' (Track {3} instead of Track {4}).")]
         _0Track1CanNotBeConnectedTo2Track3InsteadOfTrack4,
         StartEventNextNodeShouldBeAnActivity,
-        ParallelGatewaysShouldPair
+        ParallelGatewaysShouldPair,
+        TimerOrConditionalStartEventsCanNotGoToJoinGateways,
+        [Description("Gateway '{0}' should has condition on each output.")]
+        Gateway0ShouldHasConditionOnEachOutput
     }
 }

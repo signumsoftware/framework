@@ -139,7 +139,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
             title: "Property Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-        });
+        }).done();
     }
 
     render() {
@@ -204,7 +204,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                     </div>
                 }
 
-                <Tabs defaultActiveKey="properties" id="DynamicTypeTabs" onSelect={this.handleTabSelect}>
+                <Tabs unmountOnExit={true} defaultActiveKey="properties" id="DynamicTypeTabs" onSelect={this.handleTabSelect}>
                     <Tab eventKey="properties" title="Properties">
                         <PropertyRepeaterComponent dc={this.props.dc} properties={def.properties} onRemove={this.handlePropertyRemoved} showDatabaseMapping={this.props.showDatabaseMapping} />
 
@@ -239,7 +239,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                     }
 
                     {dt.baseType == "Entity" &&
-                        <Tab eventKey="operations" title="Operations">
+                        <Tab unmountOnExit={true} eventKey="operations" title="Operations">
                             <div className="row">
                                 <div className="col-sm-7">
                                     <CreateOperationFieldsetComponent
@@ -284,7 +284,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                         </Tab>
                     }
 
-                    <Tab eventKey="customCode" title="Custom Code">
+                    <Tab unmountOnExit={true} eventKey="customCode" title="Custom Code">
                         <CustomCodeTab definition={def} dynamicType={dt} />
                     </Tab>
 
@@ -520,7 +520,7 @@ save: e => ${os ? `e.Execute(${entityName}Operation.Save)` : "e.Save()"}
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
             valueHtmlProps: { style: { height: "115px" } },
-        });
+        }).done();
     }
 }
 

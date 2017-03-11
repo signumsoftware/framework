@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
-import { WorkflowEntity, WorkflowModel, WorkflowEntitiesDictionary, BpmnEntityPair, WorkflowOperation } from '../Signum.Entities.Workflow'
+import { WorkflowEntity, WorkflowModel, WorkflowEntitiesDictionary, BpmnEntityPair, WorkflowOperation, WorkflowMessage } from '../Signum.Entities.Workflow'
 import { TypeContext, ValueLine, EntityLine, LiteAutocompleteConfig } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { is, JavascriptMessage, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { is, JavascriptMessage, toLite, ModifiableEntity, Lite, Entity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { createEntityOperationContext } from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 import * as Entities from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
@@ -21,7 +21,7 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
 
     constructor(props: WorkflowProps) {
         super(props);
-        this.state = {  };
+        this.state = {};
     }
 
     private bpmnModelerComponent: BpmnModelerComponent | undefined;
@@ -52,8 +52,7 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
     }
 
     loadXml(w: WorkflowEntity) {
-        if (w.isNew)
-        {
+        if (w.isNew) {
             require(["raw-loader!./InitialWorkflow.xml"], (xml) => {
                 var model = WorkflowModel.New({
                     diagramXml: xml,
@@ -76,20 +75,30 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
                 <ValueLine ctx={ctx.subCtx(d => d.name)} />
                 <EntityLine ctx={ctx.subCtx(d => d.mainEntityType)}
                     autoComplete={new LiteAutocompleteConfig(str => API.findMainEntityType({ subString: str, count: 5 }), false)}
-                    find={false}  />
-               
+                    find={false}
+                    onRemove={this.handleMainEntityTypeChange} />
+
                 <fieldset>
                     {this.state.initialXmlDiagram ?
                         <div className="code-container">
-                        <BpmnModelerComponent ref={m => this.bpmnModelerComponent = m}
-                            workflow={ctx.value}
-                            diagramXML={this.state.initialXmlDiagram}
-                            entities={this.state.entities!}
+                            <BpmnModelerComponent ref={m => this.bpmnModelerComponent = m}
+                                workflow={ctx.value}
+                                diagramXML={this.state.initialXmlDiagram}
+                                entities={this.state.entities!}
                             /></div> :
                         <h3>{JavascriptMessage.loading.niceToString()}</h3>}
-                        
-                    </fieldset>
+
+                </fieldset>
             </div>
         );
+    }
+
+    handleMainEntityTypeChange = (entity: ModifiableEntity | Lite<Entity>): Promise<boolean> => {
+        if (this.bpmnModelerComponent!.existsMainEntityTypeRelatedNodes()) {
+            alert(WorkflowMessage.ChangeWorkflowMainEntityTypeIsNotAllowedBecausueWeHaveNodesThatUseIt.niceToString());
+            return Promise.resolve(false);
+        }
+        else
+            return Promise.resolve(true);
     }
 }

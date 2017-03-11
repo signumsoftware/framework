@@ -45,7 +45,7 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
             title: "Property Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-        });
+        }).done();
     }
 
     render() {

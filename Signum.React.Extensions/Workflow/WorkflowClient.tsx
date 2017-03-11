@@ -40,7 +40,7 @@ import {
     CaseActivityOperation, CaseEntity, CaseNotificationEntity, CaseNotificationState, InboxFilterModel, WorkflowOperation, WorkflowPoolEntity, WorkflowScriptEntity, WorkflowScriptEval,
     WorkflowActivityOperation, WorkflowReplacementModel, WorkflowModel, BpmnEntityPair, WorkflowActivityModel, ICaseMainEntity, WorkflowGatewayEntity, WorkflowEventEntity,
     WorkflowLaneModel, WorkflowConnectionModel, IWorkflowNodeEntity, WorkflowActivityMessage, WorkflowTimeoutEntity, CaseTagEntity, CaseTagsModel, CaseTagTypeEntity,
-    WorkflowScriptRunnerPanelPermission
+    WorkflowScriptRunnerPanelPermission, WorkflowEventModel, WorkflowEventTaskEntity
 } from './Signum.Entities.Workflow'
 
 import InboxFilter from './Case/InboxFilter'
@@ -138,6 +138,8 @@ export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(WorkflowActionEntity, w => new ViewPromise(m => require(['./Workflow/WorkflowAction'], m))));
     Navigator.addSettings(new EntitySettings(WorkflowScriptEntity, w => new ViewPromise(m => require(['./Workflow/WorkflowScript'], m))));
     Navigator.addSettings(new EntitySettings(WorkflowLaneModel, w => new ViewPromise(m => require(['./Workflow/WorkflowLaneModel'], m))));
+    Navigator.addSettings(new EntitySettings(WorkflowEventModel, w => new ViewPromise(m => require(['./Workflow/WorkflowEventModel'], m))));
+    Navigator.addSettings(new EntitySettings(WorkflowEventTaskEntity, w => new ViewPromise(m => require(['./Workflow/WorkflowEventTask'], m))));
 
     Constructor.registerConstructor(WorkflowConditionEntity, () => WorkflowConditionEntity.New({ eval: WorkflowConditionEval.New() }));
     Constructor.registerConstructor(WorkflowActionEntity, () => WorkflowActionEntity.New({ eval: WorkflowActionEval.New() }));

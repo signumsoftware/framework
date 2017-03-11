@@ -72,7 +72,7 @@ export default class DynamicViewSelectorComponent extends React.Component<Dynami
             title: "Property Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-        });
+        }).done();
     }
 
     render() {

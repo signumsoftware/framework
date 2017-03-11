@@ -84,6 +84,7 @@ declare namespace BPMN {
         name: string;
         $type: string;
         lanes: ModdleElement[];
+        eventDefinitions: ModdleElement[];
     }
 
     interface ConnectionModdleElemnet extends ModdleElement {
@@ -166,6 +167,16 @@ declare module 'bpmn-js/lib/draw/BpmnRenderer' {
     export = BpmnRenderer
 }
 
+declare module 'bpmn-js/lib/features/popup-menu/ReplaceMenuProvider' {
+
+    class BpmnReplaceMenuProvider {
+        constructor(popupMenu: any, modeling: any, moddle: BPMN.ModdleElement, bpmnReplace: any, rules: any, translate: any);
+
+        _createMenuEntry(definition: any, element: BPMN.DiElement, action: any): any;
+    }
+
+    export = BpmnReplaceMenuProvider
+}
 
 declare module 'bpmn-js' {
     import Viewer = require("bpmn-js/lib/Viewer");

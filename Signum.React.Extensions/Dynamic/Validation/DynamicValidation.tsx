@@ -126,7 +126,7 @@ export default class DynamicValidation extends React.Component<DynamicValidation
             title: "Mixin Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-        });
+        }).done();
     }
 
   

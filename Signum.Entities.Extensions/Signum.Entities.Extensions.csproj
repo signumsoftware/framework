@@ -239,6 +239,7 @@
     <Compile Include="Workflow\WorkflowGateway.cs" />
     <Compile Include="Workflow\WorkflowLane.cs" />
     <Compile Include="Workflow\WorkflowPool.cs" />
+    <Compile Include="Workflow\WorkflowEventTask.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj">
