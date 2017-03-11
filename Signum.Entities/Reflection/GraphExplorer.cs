@@ -132,6 +132,12 @@ namespace Signum.Entities.Reflection
                 p.ToString(m => "  {0}{1}".FormatWith(m.Modified, m), "\r\n")), "\r\n\r\n"));
         }
 
+        public static bool IsGraphModified(ModifiableEntity entity)
+        {
+            var graph = FromRoot(entity);
+            return graph.Any(a => a.IsGraphModified);
+        }
+
         public static DirectedGraph<Modifiable> PreSaving(Func<DirectedGraph<Modifiable>> recreate)
         {
             return PreSaving(recreate, (Modifiable m, ref bool graphModified) => 
