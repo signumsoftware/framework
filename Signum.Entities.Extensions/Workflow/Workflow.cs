@@ -149,18 +149,18 @@ namespace Signum.Entities.Workflow
 
     public class WorkflowTransitionContext
     {
-        public WorkflowTransitionContext(CaseActivityEntity ca, IWorkflowTransition conn, DecisionResult? dr)
+        public WorkflowTransitionContext(CaseEntity @case, CaseActivityEntity previous, IWorkflowTransition conn, DecisionResult? dr)
         {
-            this.CaseActivity = ca;
-            this.Case = ca?.Case;
+            this.Case = @case;
+            this.PreviousCaseActivity = previous;
             this.Connection = conn;
             this.DecisionResult = dr;
         }
 
-        public CaseActivityEntity CaseActivity { get; internal set; }
+        public CaseActivityEntity PreviousCaseActivity { get; internal set; }
         public DecisionResult? DecisionResult { get; internal set; }
         public IWorkflowTransition Connection { get; internal set; }
-        public CaseEntity Case { get; internal set; }
+        public CaseEntity Case { get; set; }
     }
 
     public enum WorkflowValidationMessage
@@ -188,8 +188,6 @@ namespace Signum.Entities.Workflow
         _0HasNoOutputs,
         [Description("'{0}' has just one input and one output.")]
         _0HasJustOneInputAndOneOutput,
-        [Description("'{0}' has multiple inputs and outputs at same time.")]
-        _0HasMultipleInputsAndOutputsAtTheSameTime,
         [Description("'{0}' has multiple outputs.")]
         _0HasMultipleOutputs,
         [Description("Activity '{0}' can not reject to parallel gateways.")]
@@ -208,6 +206,9 @@ namespace Signum.Entities.Workflow
         ParallelGatewaysShouldPair,
         TimerOrConditionalStartEventsCanNotGoToJoinGateways,
         [Description("Gateway '{0}' should has condition on each output.")]
-        Gateway0ShouldHasConditionOnEachOutput
+        Gateway0ShouldHasConditionOnEachOutput,
+        [Description("Gateway '{0}' should has condition on each output except the last one.")]
+        Gateway0ShouldHasConditionOnEachOutputExceptTheLast,
+        _0CanNotBeConnectodToAParallelJoinBecauseHasNoPreviousParallelSplit
     }
 }

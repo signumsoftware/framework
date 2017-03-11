@@ -120,7 +120,7 @@ namespace Signum.React.Workflow
             {
                 return new WorkflowConditionTestResponse
                 {
-                    validationResult = evaluator.EvaluateUntyped(request.exampleEntity, new WorkflowTransitionContext(null, null, request.decisionResult))
+                    validationResult = evaluator.EvaluateUntyped(request.exampleEntity, new WorkflowTransitionContext(null, null, null, request.decisionResult))
                 };
             }
             catch (Exception e)

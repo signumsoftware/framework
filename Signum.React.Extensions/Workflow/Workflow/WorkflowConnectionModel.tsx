@@ -10,21 +10,6 @@ import { SearchControl, ValueSearchControl } from '../../../../Framework/Signum.
 
 export default class WorkflowConnectionModelComponent extends React.Component<{ ctx: TypeContext<WorkflowConnectionModel> }, void> {
 
-    componentWillMount() {
-
-        var ctx = this.props.ctx;
-        if (!ctx.value.needDecisonResult)
-            ctx.value.decisonResult = null;
-
-        if (!ctx.value.needCondition)
-            ctx.value.condition = null;
-
-        if (!ctx.value.needOrder)
-            ctx.value.order = null;
-
-        this.forceUpdate();
-    }
-
     render() {
         var ctx = this.props.ctx;
         return (

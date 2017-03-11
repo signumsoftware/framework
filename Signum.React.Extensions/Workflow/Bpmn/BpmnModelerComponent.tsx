@@ -30,6 +30,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
 
     private modeler: Modeler;
     private elementRegistry: BPMN.ElementRegistry;
+    private bpmnFactory: BPMN.BpmnFactory;
     private divArea: HTMLDivElement; 
 
     constructor(props: any) {
@@ -189,10 +190,10 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         });
         this.configureModules();
         this.elementRegistry = this.modeler.get<BPMN.ElementRegistry>('elementRegistry');
+        this.bpmnFactory = this.modeler.get<BPMN.BpmnFactory>('bpmnFactory');
         this.modeler.on('element.dblclick', 1500, this.handleElementDoubleClick);
         this.modeler.on('element.paste', 1500, this.handleElementPaste);
         this.modeler.on('shape.add', 1500, this.handleAddShapeOrConnection);
-        this.modeler.on('shape.changed', 1500, this.handleShapeChanged);
         this.modeler.on('connection.add', 1500, this.handleAddShapeOrConnection);
         this.modeler.on('label.add', 1500, () => this.lastPasted = undefined);
         this.modeler.importXML(this.props.diagramXML, this.handleOnModelError)
@@ -242,16 +243,23 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                     var et = (me as WorkflowEventModel).type;
                     obj.element.type = (et == "Start" || et == "TimerStart" || et == "ConditionalStart") ? "bpmn:StartEvent" : "bpmn:EndEvent";
 
-                    //if (et == "TimerStart" || et == "ConditionalStart") {
-                    //    var definition = obj.element.businessObject.eventDefinitions;
-                    //    var val = (et == "TimerStart") ? "bpmn:TimerEventDefinition" : "bpmn:ConditionalEventDefinition";
 
-                    //    if (definition)
-                    //        definition[0].$type = val
-                    //    else
-                    //        definition = [{ $type: val } as BPMN.ModdleElement];
+                    var bo = obj.element.businessObject;
+                    var shouldEvent =
+                        et == "TimerStart" ? "bpmn:TimerEventDefinition" :
+                        et == "ConditionalStart" ? "bpmn:ConditionalEventDefinition" :
+                                null;
 
-                    //    obj.element.businessObject.eventDefinitions = definition;
+                    if (shouldEvent) {
+                        if (!bo.eventDefinitions)
+                            bo.eventDefinitions = [];
+
+                        bo.eventDefinitions.filter(a => a.$type != shouldEvent).forEach(a => bo.eventDefinitions!.remove(a));
+                        if (bo.eventDefinitions.length == 0)
+                            bo.eventDefinitions.push(this.bpmnFactory.create(shouldEvent, {}));
+                    } else {
+                        bo.eventDefinitions = undefined;
+                    }
                 }
 
                 this.fireElementChanged(obj.element);
@@ -297,10 +305,6 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
 
             this.lastPasted = undefined;
         }
-    }
-
-    handleShapeChanged = (obj: BPMN.AddClickEvent) => {
-        console.log("shape.changed: " + obj);
     }
 
     componentWillUnmount() {

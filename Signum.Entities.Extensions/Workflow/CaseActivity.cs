@@ -102,7 +102,8 @@ namespace Signum.Entities.Workflow
     [AutoInit]
     public static class CaseActivityOperation
     {
-        public static readonly ConstructSymbol<CaseActivityEntity>.From<WorkflowEntity> CreateCaseFromWorkflow;
+        public static readonly ConstructSymbol<CaseActivityEntity>.From<WorkflowEntity> CreateCaseActivityFromWorkflow;
+        public static readonly ConstructSymbol<CaseEntity>.From<WorkflowEventTaskEntity> CreateCaseFromWorkflowEventTask;
         public static readonly ExecuteSymbol<CaseActivityEntity> Register;
         public static readonly DeleteSymbol<CaseActivityEntity> Delete;
         public static readonly ExecuteSymbol<CaseActivityEntity> Next;

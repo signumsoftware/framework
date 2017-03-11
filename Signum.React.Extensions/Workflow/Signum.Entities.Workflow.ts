@@ -66,7 +66,8 @@ export module CaseActivityMessage {
 }
 
 export module CaseActivityOperation {
-    export const CreateCaseFromWorkflow : Entities.ConstructSymbol_From<CaseActivityEntity, WorkflowEntity> = registerSymbol("Operation", "CaseActivityOperation.CreateCaseFromWorkflow");
+    export const CreateCaseActivityFromWorkflow : Entities.ConstructSymbol_From<CaseActivityEntity, WorkflowEntity> = registerSymbol("Operation", "CaseActivityOperation.CreateCaseActivityFromWorkflow");
+    export const CreateCaseFromWorkflowEventTask : Entities.ConstructSymbol_From<CaseEntity, WorkflowEventTaskEntity> = registerSymbol("Operation", "CaseActivityOperation.CreateCaseFromWorkflowEventTask");
     export const Register : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Register");
     export const Delete : Entities.DeleteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Delete");
     export const Next : Entities.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Next");
@@ -447,6 +448,7 @@ export interface WorkflowEventTaskEntity extends Entities.Entity, Scheduler.ITas
 export const WorkflowEventTaskModel = new Type<WorkflowEventTaskModel>("WorkflowEventTaskModel");
 export interface WorkflowEventTaskModel extends Entities.ModelEntity {
     Type: "WorkflowEventTaskModel";
+    suspended?: boolean;
     rule?: Scheduler.IScheduleRuleEntity | null;
     triggeredOn?: TriggeredOn;
     condition?: WorkflowEventTaskConditionEval | null;
@@ -665,7 +667,6 @@ export module WorkflowValidationMessage {
     export const _0HasNoInputs = new MessageKey("WorkflowValidationMessage", "_0HasNoInputs");
     export const _0HasNoOutputs = new MessageKey("WorkflowValidationMessage", "_0HasNoOutputs");
     export const _0HasJustOneInputAndOneOutput = new MessageKey("WorkflowValidationMessage", "_0HasJustOneInputAndOneOutput");
-    export const _0HasMultipleInputsAndOutputsAtTheSameTime = new MessageKey("WorkflowValidationMessage", "_0HasMultipleInputsAndOutputsAtTheSameTime");
     export const _0HasMultipleOutputs = new MessageKey("WorkflowValidationMessage", "_0HasMultipleOutputs");
     export const Activity0CanNotRejectToParallelGateway = new MessageKey("WorkflowValidationMessage", "Activity0CanNotRejectToParallelGateway");
     export const IsNotInWorkflow = new MessageKey("WorkflowValidationMessage", "IsNotInWorkflow");
@@ -679,6 +680,8 @@ export module WorkflowValidationMessage {
     export const ParallelGatewaysShouldPair = new MessageKey("WorkflowValidationMessage", "ParallelGatewaysShouldPair");
     export const TimerOrConditionalStartEventsCanNotGoToJoinGateways = new MessageKey("WorkflowValidationMessage", "TimerOrConditionalStartEventsCanNotGoToJoinGateways");
     export const Gateway0ShouldHasConditionOnEachOutput = new MessageKey("WorkflowValidationMessage", "Gateway0ShouldHasConditionOnEachOutput");
+    export const Gateway0ShouldHasConditionOnEachOutputExceptTheLast = new MessageKey("WorkflowValidationMessage", "Gateway0ShouldHasConditionOnEachOutputExceptTheLast");
+    export const _0CanNotBeConnectodToAParallelJoinBecauseHasNoPreviousParallelSplit = new MessageKey("WorkflowValidationMessage", "_0CanNotBeConnectodToAParallelJoinBecauseHasNoPreviousParallelSplit");
 }
 
 export const WorkflowXmlEntity = new Type<WorkflowXmlEntity>("WorkflowXmlEntity");

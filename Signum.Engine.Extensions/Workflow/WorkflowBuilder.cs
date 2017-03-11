@@ -344,9 +344,6 @@ namespace Signum.Engine.Workflow
 
                         if (e.Type == WorkflowEventType.Start && !(nextConn.To is WorkflowActivityEntity))
                             errors.Add(WorkflowValidationMessage.StartEventNextNodeShouldBeAnActivity.NiceToString());
-
-                        if (IsTimerOrConditionalStartEvent(e) && IsParallelGatway(nextConn.To, WorkflowGatewayDirection.Join))
-                            errors.Add(WorkflowValidationMessage.TimerOrConditionalStartEventsCanNotGoToJoinGateways.NiceToString());
                     }
                 }
 
@@ -359,28 +356,30 @@ namespace Signum.Engine.Workflow
                 }
             });
 
-            // Exception here to fix the problems by user ...
-
             wg.Gateways.Values.ToList().ForEach(g =>
             {
-                var fanIn = wg.PreviousGraph.RelatedTo(g).Where(kvp => !IsStartEvent(kvp.Key)).Count();
+                var fanIn = wg.PreviousGraph.RelatedTo(g).Count();
                 var fanOut = wg.NextGraph.RelatedTo(g).Count;
                 if (fanIn == 0)
                     errors.Add(WorkflowValidationMessage._0HasNoInputs.NiceToString(g));
                 if (fanOut == 0)
                     errors.Add(WorkflowValidationMessage._0HasNoOutputs.NiceToString(g));
-
-                if (fanIn > 1 && fanOut > 1)
-                    errors.Add(WorkflowValidationMessage._0HasMultipleInputsAndOutputsAtTheSameTime.NiceToString(g));
-
+                
                 if (fanIn == 1 && fanOut == 1)
                     errors.Add(WorkflowValidationMessage._0HasJustOneInputAndOneOutput.NiceToString(g));
 
-                g.Direction = fanIn > 1 ? WorkflowGatewayDirection.Join : WorkflowGatewayDirection.Split;
+                g.Direction = fanOut == 1 ? WorkflowGatewayDirection.Join : WorkflowGatewayDirection.Split;
                 g.Execute(WorkflowGatewayOperation.Save);
 
-                if (!IsParallelGatway(g) && g.NextConnections().Any(c => c.Condition == null))
-                    errors.Add(WorkflowValidationMessage.Gateway0ShouldHasConditionOnEachOutput.NiceToString(g));
+
+                if (g.Direction == WorkflowGatewayDirection.Split)
+                {
+                    if (g.Type == WorkflowGatewayType.Exclusive && g.NextConnections().OrderByDescending(a => a.Order).Skip(1).Any(c => c.Condition == null))
+                        errors.Add(WorkflowValidationMessage.Gateway0ShouldHasConditionOnEachOutputExceptTheLast .NiceToString(g));
+
+                    if (g.Type == WorkflowGatewayType.Inclusive && g.NextConnections().Any(c => c.Condition == null))
+                        errors.Add(WorkflowValidationMessage.Gateway0ShouldHasConditionOnEachOutput.NiceToString(g));
+                }
             });
 
             var starts = wg.Events.Values.Where(a => a.Type.IsStart()).ToList();
@@ -391,12 +390,6 @@ namespace Signum.Engine.Workflow
             wg.NextGraph.BreadthExploreConnections(st,
                 (prev, conn, next) =>
                 {
-                    //if (IsTimerOrConditionalStartEvent(prev) && IsParallelGatway(next, WorkflowGatewayDirection.Join))
-                    //{
-                    //    errors.Add(WorkflowValidationMessage.TimerOrConditionalStartEventsCanNotGoToJoinGateways.NiceToString());
-                    //    return false;
-                    //}
-
                     var prevTrackId = TrackId.GetOrThrow(prev);
                     int newTrackId;
 
@@ -413,7 +406,16 @@ namespace Signum.Engine.Workflow
                     else
                     {
                         if (IsParallelGatway(next, WorkflowGatewayDirection.Join))
-                            newTrackId = ParentIds.GetOrThrow(prevTrackId);
+                        {
+                            var parentId = ParentIds.TryGetS(prevTrackId);
+                            if (parentId == null)
+                            {
+                                errors.Add(WorkflowValidationMessage._0CanNotBeConnectodToAParallelJoinBecauseHasNoPreviousParallelSplit.NiceToString(prev));
+                                return false;
+                            }
+
+                            newTrackId = parentId.Value;
+                        }
                         else
                             newTrackId = prevTrackId;
                     }

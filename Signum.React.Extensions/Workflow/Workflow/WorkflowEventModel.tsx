@@ -2,7 +2,7 @@
 import { ValueLine, EntityLine, TypeContext, FormGroup, EntityStrip, EntityDetail } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ScheduledTaskEntity } from '../../../../Extensions/Signum.React.Extensions/Scheduler/Signum.Entities.Scheduler'
 import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { WorkflowEventModel, WorkflowEventTaskModel, WorkflowEventTaskActionEval, WorkflowEventTaskConditionEval, WorkflowMessage } from '../Signum.Entities.Workflow'
+import { WorkflowEventModel, WorkflowEventTaskModel, WorkflowEventTaskActionEval, WorkflowEventTaskConditionEval, WorkflowMessage, WorkflowEventType } from '../Signum.Entities.Workflow'
 import WorkflowEventTaskConditionComponent from './WorkflowEventTaskConditionComponent'
 import WorkflowEventTaskActionComponent from './WorkflowEventTaskActionComponent'
 
@@ -47,7 +47,9 @@ export default class WorkflowEventModelComponent extends React.Component<Workflo
         return (
             <div>
                 <ValueLine ctx={ctx.subCtx(we => we.name)} />
-                <ValueLine ctx={ctx.subCtx(we => we.type)} onChange={this.handleTypeChange} />
+                <ValueLine ctx={ctx.subCtx(we => we.type)}
+                    comboBoxItems={[WorkflowEventType.value("Start"), WorkflowEventType.value("TimerStart"), WorkflowEventType.value("ConditionalStart")]}
+                    onChange={this.handleTypeChange} />
                 {this.isTimerOrConditionalStart() && this.renderTaskModel(ctx)}
             </div>
         );
@@ -59,6 +61,7 @@ export default class WorkflowEventModelComponent extends React.Component<Workflo
 
         return (
             <div>
+                <ValueLine ctx={ctx.subCtx(we => we.task!.suspended)} />
                 <EntityDetail ctx={ctx.subCtx(we => we.task!.rule)} />
                 <ValueLine ctx={ctx.subCtx(we => we.task!.triggeredOn)} />
                 <WorkflowEventTaskConditionComponent ctx={ctx.subCtx(we => we.task!.condition)} />

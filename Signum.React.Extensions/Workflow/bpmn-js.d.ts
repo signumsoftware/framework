@@ -84,7 +84,7 @@ declare namespace BPMN {
         name: string;
         $type: string;
         lanes: ModdleElement[];
-        eventDefinitions: ModdleElement[];
+        eventDefinitions?: ModdleElement[];
     }
 
     interface ConnectionModdleElemnet extends ModdleElement {
@@ -98,6 +98,10 @@ declare namespace BPMN {
     interface ElementRegistry {
         get(elementId: string): BPMN.DiElement;
         forEach(action: (element: BPMN.DiElement) => void): void;
+    }
+
+    interface BpmnFactory {
+        create(type: string, attrs: any): ModdleElement;
     }
 
     interface EventBus {

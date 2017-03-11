@@ -69,6 +69,7 @@ namespace Signum.Entities.Workflow
         public static Func<WorkflowEventEntity, WorkflowEventTaskModel> GetModel;
         public static Action<WorkflowEventEntity, WorkflowEventTaskModel> ApplyModel;
 
+        public bool Suspended { get; set; }
         public IScheduleRuleEntity Rule { get; set; }
 
         public TriggeredOn TriggeredOn { get; set; }
@@ -124,7 +125,7 @@ namespace Signum.Entities.Workflow
                     {
                         class MyWorkflowEventTaskConditionEvaluator : IWorkflowEventTaskConditionEvaluator
                         {
-                            bool Evaluate()
+                            public bool Evaluate()
                             {
                                 " + script + @"
                             }
@@ -170,7 +171,7 @@ namespace Signum.Entities.Workflow
                                 }
                             }
 
-                            List<ICaseMainEntity> EvaluateUntyped(IWorkflowEventTaskActionContext ctx)
+                            public List<ICaseMainEntity> EvaluateUntyped()
                             {
                                 var evaluator = new CreateCaseEvaluator();
                                 evaluator.Evaluate();

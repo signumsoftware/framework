@@ -9,6 +9,7 @@ using Signum.Engine.Scheduler;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Processes;
+using Signum.Entities.Reflection;
 using Signum.Entities.Scheduler;
 using Signum.Entities.Workflow;
 using Signum.Utilities;
@@ -84,8 +85,9 @@ namespace Signum.Engine.Workflow
                     var schedule = @event.ScheduledTask();
                     var task = (schedule?.Task as WorkflowEventTaskEntity);
 
-                    return new WorkflowEventTaskModel()
+                    return new WorkflowEventTaskModel
                     {
+                        Suspended = schedule?.Suspended ?? true,
                         Rule = schedule?.Rule,
                         TriggeredOn = task?.TriggeredOn ?? TriggeredOn.Always,
                         Condition = task?.Condition != null ? new WorkflowEventTaskConditionEval() { Script = task.Condition.Script } : null,
@@ -107,6 +109,7 @@ namespace Signum.Engine.Workflow
                     if (schedule != null)
                     {
                         var task = (schedule.Task as WorkflowEventTaskEntity);
+                        schedule.Suspended = model.Suspended;
                         schedule.Rule = model.Rule;
                         task.TriggeredOn = model.TriggeredOn;
 
@@ -120,6 +123,11 @@ namespace Signum.Engine.Workflow
                             task.Condition = null;
 
                         task.Action.Script = model.Action.Script;
+                        if (GraphExplorer.IsGraphModified(schedule))
+                        {
+                            task.Execute(WorkflowEventTaskOperation.Save);
+                            schedule.Execute(ScheduledTaskOperation.Save);
+                        }
                     }
                     else
                     {
@@ -130,18 +138,16 @@ namespace Signum.Engine.Workflow
                             TriggeredOn = model.TriggeredOn,
                             Condition = model.Condition != null ? new WorkflowEventTaskConditionEval() { Script = model.Condition.Script } : null,
                             Action = new WorkflowEventTaskActionEval() { Script = model.Action.Script },
-                        };
-                        newTask.Execute(WorkflowEventTaskOperation.Save);
+                        }.Execute(WorkflowEventTaskOperation.Save);
 
                         schedule = new ScheduledTaskEntity()
                         {
+                            Suspended = model.Suspended,
                             Rule = model.Rule,
                             Task = newTask,
                             User = AuthLogic.SystemUser.ToLite(),
-                        };
+                        }.Execute(ScheduledTaskOperation.Save);
                     }
-
-                    schedule.Execute(ScheduledTaskOperation.Save);
                 };
             }
         }
@@ -167,21 +173,22 @@ namespace Signum.Engine.Workflow
             using (Transaction tr = new Transaction())
             {
                 if (!EvaluateCondition(task))
-                    return null;
+                    return tr.Commit<Lite<IEntity>>(null);
 
                 var mainEntities = task.Action.Algorithm.EvaluateUntyped();
-                var caseActivities = new List<CaseActivityEntity>();
+                var caseActivities = new List<Lite<CaseActivityEntity>>();
                 foreach (var item in mainEntities)
                 {
-                    var ca = task.GetWorkflow().ConstructFrom(CaseActivityOperation.CreateCaseFromWorkflow, item, task.Event);
-                    ca.Execute(CaseActivityOperation.Register);
-                    caseActivities.Add(ca);
+                    var @case = task.ConstructFrom(CaseActivityOperation.CreateCaseFromWorkflowEventTask, item);
+                    caseActivities.AddRange(@case.CaseActivities().Select(a => a.ToLite()).ToList());
+                    caseActivities.AddRange(@case.SubCases().SelectMany(sc => sc.CaseActivities()).Select(a => a.ToLite()).ToList());
                 }
 
                 var result =
                     caseActivities.Count == 0 ? null :
-                    caseActivities.Count == 1 ? caseActivities.SingleEx().ToLite() :
-                    (Lite<IEntity>)new PackageEntity().CreateLines(caseActivities).ToLite();
+                    caseActivities.Count == 1 ? (Lite<IEntity>)caseActivities.SingleEx() :
+                    new PackageEntity { Name = task.Event.ToString() + " " + TimeZoneManager.Now.ToString()}
+                    .CreateLines(caseActivities).ToLite();
 
                 return tr.Commit(result);
             }
@@ -196,7 +203,7 @@ namespace Signum.Engine.Workflow
             if (task.TriggeredOn == TriggeredOn.ConditionIsTrue)
                 return result;
 
-            var last = task.ConditionResults().OrderByDescending(a => a.CreationDate).LastOrDefault();
+            var last = task.ConditionResults().OrderByDescending(a => a.CreationDate).FirstOrDefault();
 
             new WorkflowEventTaskConditionResultEntity
             {

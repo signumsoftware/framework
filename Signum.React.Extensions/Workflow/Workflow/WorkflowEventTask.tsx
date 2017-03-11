@@ -24,7 +24,8 @@ export default class WorkflowEventTaskComponent extends React.Component<Workflow
         else
             Navigator.API.fetchAndRemember(this.props.ctx.value.workflow!)
                 .then(wf => {
-                    ctx.value.action = WorkflowEventTaskActionEval.New();
+                    if (!ctx.value.action)
+                        ctx.value.action = WorkflowEventTaskActionEval.New();
                     this.forceUpdate();
                 }).done();
     }

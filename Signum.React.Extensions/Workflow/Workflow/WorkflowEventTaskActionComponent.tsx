@@ -52,7 +52,7 @@ export default class WorkflowEventTaskActionComponent extends React.Component<Wo
         ValueLineModal.show({
             type: { name: "string" },
             initialValue: TypeHelpComponent.getExpression("e", pr, "CSharp"),
-            valueLineType: ValueLineType.TextArea,
+            valueLineType: "TextArea",
             title: "Property Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
@@ -62,8 +62,8 @@ export default class WorkflowEventTaskActionComponent extends React.Component<Wo
     handleCreateCaseClick = () => {
         ValueLineModal.show({
             type: { name: "string" },
-            initialValue: `CreateCase(new ${this.props.mainEntityType.cleanName}Entity{{ initial properties here... }});`,
-            valueLineType: ValueLineType.TextArea,
+            initialValue: `CreateCase(new ${this.props.mainEntityType.cleanName}Entity(){ initial properties here... });`,
+            valueLineType: "TextArea",
             title: "Create case Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,

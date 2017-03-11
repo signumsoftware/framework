@@ -335,7 +335,7 @@ export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEn
 
 export function createNewCase(workflowId: number | string): Promise<CaseEntityPack>{
     return Navigator.API.fetchEntity(WorkflowEntity, workflowId)
-        .then(wf => Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseFromWorkflow))
+        .then(wf => Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow))
         .then(ep => ({
             activity: ep.entity,
             canExecuteActivity: ep.canExecute,
