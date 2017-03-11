@@ -21,6 +21,8 @@ namespace Signum.React.Filters
 
         public static Func<HttpActionContext, IDisposable> Authenticate;
 
+        public static Func<HttpActionContext, IDisposable> GetCurrentCultures;
+
         public async Task<HttpResponseMessage> ExecuteAuthorizationFilterAsync(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
         {
             string action = ProfilerActionSplitterAttribute.GetActionDescription(actionContext);
@@ -40,10 +42,14 @@ namespace Signum.React.Filters
                             
                     using (Authenticate == null ? null : Authenticate(actionContext))
                     {
-                        if (actionContext.Response != null)
-                            return actionContext.Response;
+                        using (GetCurrentCultures(actionContext))
+                        {
 
-                        return await continuation();
+                            if (actionContext.Response != null)
+                                return actionContext.Response;
+
+                            return await continuation();
+                        }
                     }
 
                 }

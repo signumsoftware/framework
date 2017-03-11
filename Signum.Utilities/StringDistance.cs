@@ -371,10 +371,10 @@ namespace Signum.Utilities
         }
 
         
-        public List<DiffPair<List<DiffPair<string>>>> DiffText(string textOld, string textNew)
+        public List<DiffPair<List<DiffPair<string>>>> DiffText(string textOld, string textNew, bool lineEndingDifferences = true)
         {
-            var linesOld = textOld.Lines();
-            var linesNew = textNew.Lines();
+            var linesOld = lineEndingDifferences ? textOld.Split('\n') : textOld.Lines();
+            var linesNew = lineEndingDifferences ? textNew.Split('\n') : textNew.Lines();
 
             List<DiffPair<string>> diff = this.Diff(linesOld, linesNew);
 

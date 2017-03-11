@@ -603,15 +603,51 @@ namespace Signum.Utilities
             collection.Select(toString).ToFile(fileName);
         }
 
-        public static DataTable ToDataTable<T>(this IEnumerable<T> collection)
+        public static DataTable ToDataTable<T>(this IEnumerable<T> collection, bool withDescriptions = false)
         {
             DataTable table = new DataTable();
 
             List<MemberEntry<T>> members = MemberEntryFactory.GenerateList<T>();
-            table.Columns.AddRange(members.Select(m => new DataColumn(m.Name, m.MemberInfo.ReturningType())).ToArray());
+            foreach (var m in members)
+            {
+                var name = withDescriptions ? m.MemberInfo.GetCustomAttribute<DescriptionAttribute>()?.Description ?? m.Name : m.Name;
+                var type = m.MemberInfo.ReturningType().UnNullify();
+                table.Columns.Add(name, type);
+            }
             foreach (var e in collection)
                 table.Rows.Add(members.Select(m => m.Getter(e)).ToArray());
             return table;
+        }
+
+        public static DataTable Transpose(this DataTable table)
+        {
+            DataTable result = new DataTable();
+            result.Columns.Add(new DataColumn("", typeof(string)));
+
+            var list = table.Columns.Cast<DataColumn>().Skip(1).Select(a => a.DataType).Distinct().ToList();
+
+            var bestCommon = BetsCommonType(list);
+
+            foreach (var row in table.Rows.Cast<DataRow>())
+            {
+                result.Columns.Add(new DataColumn(row[0]?.ToString(), bestCommon));
+            }
+
+            foreach (var col in table.Columns.Cast<DataColumn>().Skip(1))
+            {
+                var array = table.Rows.Cast<DataRow>().Select(dr => dr[col]).Cast<object>().ToArray();
+                result.Rows.Add(array.PreAnd(col.ColumnName).ToArray());
+            }
+
+            return result;
+        }
+
+        static Type BetsCommonType(List<Type> list)
+        {
+            if (list.Count == 1)
+                return list.Single();
+
+            return typeof(string);
         }
 
         #region String Tables

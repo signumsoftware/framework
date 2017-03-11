@@ -416,10 +416,7 @@ namespace Signum.Engine
             return csb.ToString();
         }
 
-        public override bool AllowsSetSnapshotIsolation
-        {
-            get { return this.Version == SqlServerVersion.SqlServer2008; }
-        }
+        public override bool AllowsSetSnapshotIsolation => this.Version >= SqlServerVersion.SqlServer2008;
 
         public override void FixType(ref SqlDbType type, ref int? size, ref int? scale)
         {

@@ -220,6 +220,20 @@ export class TypeContext<T> extends StyleContext {
         return result;
     }
 
+    as<R extends T & ModifiableEntity>(type: Type<R>): TypeContext<R> | undefined {
+
+        const entity = this.value as any as Entity;
+
+        if (type.typeName != entity.Type)
+            return undefined;
+
+        var newPr = this.propertyRoute.typeReference().name == type.typeName ? this.propertyRoute : PropertyRoute.root(type);
+
+        const result = new TypeContext<any>(this, undefined, newPr, new ReadonlyBinding(entity, this.binding.suffix + "_" + type.typeName));
+
+        return result;
+    }
+
     niceName(property?: (val: T) => any): string  {
 
         if (this.propertyRoute == undefined)
@@ -286,7 +300,7 @@ export interface ButtonsContext {
 }
 
 export interface IRenderButtons {
-    renderButtons(ctx: ButtonsContext): React.ReactElement<any>[];
+    renderButtons(ctx: ButtonsContext): (React.ReactElement<any> | undefined)[];
 }
 
 export interface IOperationVisible {
