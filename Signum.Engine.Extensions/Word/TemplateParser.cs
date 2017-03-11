@@ -36,9 +36,9 @@ namespace Signum.Engine.Word
 
         public void ParseDocument()
         {
-            foreach (var p in document.AllRootElements())
+            foreach (var part in document.AllParts().Where(p => p.RootElement != null))
             {
-                foreach (var item in p.Descendants())
+                foreach (var item in part.RootElement.Descendants())
                 {
                     if (item is W.Paragraph)
                         ReplaceRuns((W.Paragraph)item, new WordprocessingNodeProvider());
@@ -46,6 +46,9 @@ namespace Signum.Engine.Word
                     if (item is D.Paragraph)
                         ReplaceRuns((D.Paragraph)item, new DrawingNodeProvider());
                 }
+
+
+                TableBinder.ValidateTables(part, this.template, this.Errors);
             }
         }
 

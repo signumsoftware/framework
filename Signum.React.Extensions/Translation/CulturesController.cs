@@ -50,17 +50,8 @@ namespace Signum.React.Translation
                     user.Save();
             }
 
-            var resp = new HttpResponseMessage();
-            resp.Headers.AddCookies(new[]
-            {
-                new CookieHeaderValue("language", ci.Name)
-                {
-                    Expires = DateTime.Now.AddMonths(6),
-                    Domain = Request.RequestUri.Host,
-                    Path = "/"
-                }
-            });
-            resp.StatusCode = HttpStatusCode.NoContent;
+            var resp = Request.CreateResponse(ci.Name);
+            TranslationServer.AddLanguageCookie(resp, Request, ci);
             return resp;
         }
     }

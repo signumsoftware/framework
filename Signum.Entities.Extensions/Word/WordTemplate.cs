@@ -64,10 +64,6 @@ namespace Signum.Entities.Word
 
         public WordConverterSymbol WordConverter { get; set; }
 
-        [NotNullable, PreserveOrder]
-        [NotNullValidator, NoRepeatValidator]
-        public MList<WordTemplateTableSourceEntity> TableSources { get; set; } = new MList<WordTemplateTableSourceEntity>();
-
         static Expression<Func<WordTemplateEntity, string>> ToStringExpression = e => e.Name;
         [ExpressionField]
         public override string ToString()
@@ -80,27 +76,8 @@ namespace Signum.Entities.Word
             if (pi.Name == nameof(Template) && Template == null && Active)
                 return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
 
-            if (pi.Name == nameof(TableSources))
-            {
-                var errors = NoRepeatValidatorAttribute.ByKey(TableSources, a => a.Key);
-                if (errors.HasText())
-                    return ValidationMessage._0HasSomeRepeatedElements1.NiceToString(pi.NiceName(), errors);
-            }
-
             return base.PropertyValidation(pi);
         }
-    }
-
-    [Serializable]
-    public class WordTemplateTableSourceEntity : EmbeddedEntity
-    {
-        [NotNullable, SqlDbType(Size = 100)]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Key { get; set; }
-
-        [NotNullable]
-        [NotNullValidator, ImplementedBy(typeof(UserQueryEntity), typeof(UserChartEntity))]
-        public Lite<Entity> Source { get; set; }
     }
 
     [AutoInit]

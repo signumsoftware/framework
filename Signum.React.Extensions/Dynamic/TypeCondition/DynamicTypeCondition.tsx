@@ -47,7 +47,7 @@ export default class DynamicTypeConditionComponent extends React.Component<Dynam
         ValueLineModal.show({
             type: { name: "string" },
             initialValue: TypeHelpComponent.getExpression("e", pr, "CSharp"),
-            valueLineType: ValueLineType.TextArea,
+            valueLineType: "TextArea",
             title: "Property Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,

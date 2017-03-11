@@ -386,7 +386,7 @@
     <Member Name="None" Description="Keine" />
     <Member Name="Top" Description="Nach oben" />
   </Type>
-  <Type Name="DashboardEntity" Description="Steuerung des Systems">
+  <Type Name="DashboardEntity" Description="Dashboard">
     <Member Name="AutoRefreshPeriod" Description="Autoaktualisierungszeitraum" />
     <Member Name="DashboardPriority" Description="Dashboard-Priorität" />
     <Member Name="DisplayName" Description="Name" />
