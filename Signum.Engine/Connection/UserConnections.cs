@@ -40,5 +40,10 @@ namespace Signum.Engine
 
             return replacements.TryGetC(databaseName) ?? connectionString;
         }
+
+        public static string GetCustomReplacement(string key)
+        {
+            return replacements.TryGetC(key);
+        }
     }
 }
