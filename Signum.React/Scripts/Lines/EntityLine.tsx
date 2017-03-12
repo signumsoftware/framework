@@ -150,6 +150,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
             <Typeahead ref={ta => this.typeahead = ta}
                 inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
                 getItems={ac.getItems}
+                getItemsDelay={ac.getItemsDelay}
                 renderItem={ac.renderItem}
                 renderList={ac.renderList}
                 liAttrs={lite => ({ 'data-entity-key': liteKey(lite) }) }

@@ -9,6 +9,7 @@ export interface TypeaheadProps {
     onBlur?: () => void;
     getItems: (query: string) => Promise<any[]>;
     getItemsTimeout?: number;
+    getItemsDelay?: number;
     minLength?: number;
     renderList?: (typeAhead: Typeahead) => React.ReactNode;
     renderItem?: (item: any, query: string) => React.ReactNode;
@@ -59,6 +60,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     static defaultProps: TypeaheadProps = {
         getItems: undefined as any,
         getItemsTimeout: 200,
+        getItemsDelay: undefined,
         minLength: 1,
         renderItem: Typeahead.highlightedText,
         onSelect: (elem, event) => elem,
@@ -69,15 +71,31 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
     handle: number;
 
+    timer: any;
+
     lookup() {
+        if (this.props.getItemsDelay) {
+            if (this.timer) {
+                clearTimeout(this.timer);
+            }
+            this.timer = setTimeout(() => {
+                this.doLookup();
+            }, this.props.getItemsDelay);
+        }
+        else {
+            this.doLookup();
+        }
+    }
+
+    doLookup() {
         if (!this.props.getItemsTimeout) {
-            this.popupate();
+            this.populate();
         }
         else {
             if (this.handle)
                 clearTimeout(this.handle);
 
-            setTimeout(() => this.popupate(), this.props.getItemsTimeout);
+            setTimeout(() => this.populate(), this.props.getItemsTimeout);
         }
     }
 
@@ -86,7 +104,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
             clearTimeout(this.handle);
     }
 
-    popupate() {
+    populate() {
 
         if (this.props.minLength == null || this.input.value.length < this.props.minLength) {
             this.setState({ shown: false, items: undefined, selectedIndex: undefined });
@@ -104,7 +122,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         })).done();
     }
 
-    select(e: React.SyntheticEvent<any>): boolean {        
+    select(e: React.SyntheticEvent<any>): boolean {
         if (this.state.items!.length == 0)
             return false;
 
@@ -267,7 +285,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
                     onKeyUp={this.handleKeyUp}
                     onKeyDown={this.handleKeyDown}
                     onChange={this.handleOnChange}
-                    />
+                />
                 <span>{/*placeholder for rouded borders*/}</span>
                 {
                     this.state.shown && (this.props.renderList ? this.props.renderList(this) : this.renderDefaultList())
