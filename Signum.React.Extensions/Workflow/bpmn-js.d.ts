@@ -164,6 +164,7 @@ declare module 'bpmn-js/lib/NavigatedViewer' {
 }
 
 
+
 declare module 'bpmn-js/lib/Modeler' {
     import Viewer = require("bpmn-js/lib/Viewer");
 
@@ -196,3 +197,10 @@ declare module 'bpmn-js/lib/features/popup-menu/ReplaceMenuProvider' {
 
     export = BpmnReplaceMenuProvider
 }
+
+declare module 'bpmn-js/lib/features/search' {
+    var a : {};
+    export = a;
+}
+
+

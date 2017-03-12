@@ -13,6 +13,7 @@ import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperat
 import * as WorkflowClient from '../WorkflowClient'
 import CaseFromSenderInfo from './CaseFromSenderInfo'
 import CaseButtonBar from './CaseButtonBar'
+import CaseFlowButton from './CaseFlowButton'
 import InlineCaseTags from './InlineCaseTags'
 
 require("../../../../Framework/Signum.React/Scripts/Frames/Frames.css");
@@ -156,12 +157,14 @@ export default class CasePageFrame extends React.Component<CasePageFrameProps, C
 
         return (
             <h3>
+                <CaseFlowButton caseActivity={this.state.pack.activity} />
                 <span className="sf-entity-title">{ getToString(activity) }</span>
                 <br/>
                 <small className="sf-type-nice-name">{Navigator.getTypeTitle(activity, undefined)}</small>
             </h3>
         );
     }
+
 
     validationErrors: ValidationErrors;
 

@@ -278,6 +278,7 @@
     <TypeScriptCompile Include="Workflow\Bpmn\CaseFlowRenderer.ts" />
     <TypeScriptCompile Include="Workflow\Case\CaseButtonBar.tsx" />
     <TypeScriptCompile Include="Workflow\Case\ActivityWithRemarks.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\CaseFlowButton.tsx" />
     <TypeScriptCompile Include="Workflow\Case\CaseFromSenderInfo.tsx" />
     <TypeScriptCompile Include="Workflow\Case\Case.tsx" />
     <TypeScriptCompile Include="Workflow\Case\CaseTagsModel.tsx" />

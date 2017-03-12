@@ -13,7 +13,7 @@ import { EntityPack, Entity, Lite, JavascriptMessage, NormalWindowMessage, entit
 import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from '../../../../Framework/Signum.React/Scripts/Frames/Widgets'
 import ValidationErrors from '../../../../Framework/Signum.React/Scripts/Frames/ValidationErrors'
 import ButtonBar from '../../../../Framework/Signum.React/Scripts/Frames/ButtonBar'
-import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperation, CaseActivityMessage, WorkflowActivityEntity } from '../Signum.Entities.Workflow'
+import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperation, CaseActivityMessage, WorkflowActivityEntity, WorkflowActivityMessage } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 import { DynamicViewMessage } from '../../Dynamic/Signum.Entities.Dynamic'
 import HtmlEditor from '../../../../Extensions/Signum.React.Extensions/HtmlEditor/HtmlEditor'

@@ -292,6 +292,7 @@ export interface WorkflowActivityEntity extends Entities.Entity, IWorkflowNodeEn
 export module WorkflowActivityMessage {
     export const DuplicateViewNameFound0 = new MessageKey("WorkflowActivityMessage", "DuplicateViewNameFound0");
     export const ChooseADestinationForWorkflowJumping = new MessageKey("WorkflowActivityMessage", "ChooseADestinationForWorkflowJumping");
+    export const CaseFlow = new MessageKey("WorkflowActivityMessage", "CaseFlow");
 }
 
 export const WorkflowActivityModel = new Type<WorkflowActivityModel>("WorkflowActivityModel");

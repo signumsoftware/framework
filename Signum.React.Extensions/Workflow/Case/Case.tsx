@@ -2,7 +2,7 @@
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { getMixin, toLite, JavascriptMessage, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { ColorTypeaheadLine } from '../../Basics/Templates/ColorTypeahead'
-import { CaseEntity, WorkflowEntity, WorkflowEntitiesDictionary } from '../Signum.Entities.Workflow'
+import { CaseEntity, WorkflowEntity, WorkflowEntitiesDictionary, CaseActivityEntity } from '../Signum.Entities.Workflow'
 import {
     ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip,
     EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, EntityTable
@@ -12,6 +12,7 @@ import BpmnViewerComponent from '../Bpmn/BpmnViewerComponent'
 
 interface CaseComponentProps {
     ctx: TypeContext<CaseEntity>;
+    caseActivity?: CaseActivityEntity;
 }
 
 interface CaseComponentState {
@@ -78,6 +79,7 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
                                 diagramXML={this.state.initialXmlDiagram}
                                 entities={this.state.entities}
                                 caseFlow={this.state.caseFlow}
+                                caseActivity={this.props.caseActivity}
                             /></div> :
                         <h3>{JavascriptMessage.loading.niceToString()}</h3>}
                 </fieldset>

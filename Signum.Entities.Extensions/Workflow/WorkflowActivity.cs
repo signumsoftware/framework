@@ -336,6 +336,6 @@ namespace Signum.Entities.Workflow
         [Description("Duplicate view name found: {0}")]
         DuplicateViewNameFound0,
         ChooseADestinationForWorkflowJumping,
+        CaseFlow,
     }
-
 }

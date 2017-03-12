@@ -1,11 +1,13 @@
 ﻿import * as React from 'react'
-import { DropdownButton, MenuItem } from 'react-bootstrap'
-import { WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity, IWorkflowNodeEntity, CaseFlowColor } from '../Signum.Entities.Workflow'
+import { DropdownButton, MenuItem, Button } from 'react-bootstrap'
+import { WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity, IWorkflowNodeEntity, CaseFlowColor, CaseActivityEntity } from '../Signum.Entities.Workflow'
+import { JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { CaseFlow } from '../WorkflowClient'
 import NavigatedViewer = require("bpmn-js/lib/NavigatedViewer");
 import * as caseFlowRenderer from './CaseFlowRenderer'
 import * as connectionIcons from './ConnectionIcons'
+import * as searchPad from 'bpmn-js/lib/features/search';
 import * as BpmnUtils from './BpmnUtils'
 
 require("bpmn-js/assets/bpmn-font/css/bpmn-embedded.css");
@@ -16,6 +18,7 @@ export interface BpmnViewerComponentProps {
     diagramXML?: string;
     entities: WorkflowEntitiesDictionary;
     caseFlow: CaseFlow;
+    caseActivity?: CaseActivityEntity;
 }
 
 export interface BpmnViewerComponentState {
@@ -29,7 +32,7 @@ class CustomViewer extends NavigatedViewer {
 CustomViewer.prototype._modules =
     CustomViewer.prototype._modules.concat([caseFlowRenderer]);
 
-export default class BpmnViewerComponent extends React.Component<BpmnViewerComponentProps, BpmnViewerComponentState > {
+export default class BpmnViewerComponent extends React.Component<BpmnViewerComponentProps, BpmnViewerComponentState> {
 
     constructor(props: BpmnViewerComponentProps) {
         super(props);
@@ -38,11 +41,18 @@ export default class BpmnViewerComponent extends React.Component<BpmnViewerCompo
     }
 
     viewer: NavigatedViewer;
-    divArea: HTMLDivElement; 
+    divArea: HTMLDivElement;
 
     handleOnModelError = (err: string) => {
         if (err)
             throw new Error('Error rendering the model ' + err);
+        else {
+
+            if (this.props.caseActivity) {
+                var sp = this.viewer.get("searchPad") as any;
+                sp._search(this.props.caseActivity.workflowActivity.bpmnElementId);
+            }
+        }
     }
 
     componentDidMount() {
@@ -51,9 +61,10 @@ export default class BpmnViewerComponent extends React.Component<BpmnViewerCompo
             keyboard: {
                 bindTo: document
             },
-            height: 1000,
+            height: 500,
             additionalModules: [
                 connectionIcons,
+                searchPad,
             ]
         });
         this.configureModules();
@@ -94,6 +105,8 @@ export default class BpmnViewerComponent extends React.Component<BpmnViewerCompo
         caseFlowRenderer.caseFlow = this.props.caseFlow;
         caseFlowRenderer.maxDuration = Dic.getValues(this.props.caseFlow.Activities).map(a => a.map(a => a.Duration || 0).sum()).max()!;
         caseFlowRenderer.caseFlowColor = this.state.caseFlowColor;
+
+       
         conIcons.show();
     }
 
@@ -112,14 +125,20 @@ export default class BpmnViewerComponent extends React.Component<BpmnViewerCompo
         });
     }
 
+    handleSearchClick = (e: React.MouseEvent<Button>) => {
+        var searchPad = this.viewer.get<any>("searchPad");
+        searchPad.toggle();
+    }
+
     render() {
         return (
             <div>
                 <DropdownButton title={"Color: " + CaseFlowColor.niceName(this.state.caseFlowColor)} id="colorMenu" onSelect={this.handleChangeColor}>
                     {this.menuItem("CaseMaxDuration")}
                     {this.menuItem("AverageDuration")}
-                    {this.menuItem("EstimatedDuration")}    
-                </DropdownButton>
+                    {this.menuItem("EstimatedDuration")}
+                </DropdownButton>{" "}
+                <Button onClick={this.handleSearchClick}>{JavascriptMessage.search.niceToString()}</Button>
                 <div ref={de => this.divArea = de} />
             </div>
         );
