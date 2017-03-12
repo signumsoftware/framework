@@ -317,6 +317,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             viewPromise={options.viewPromise}
             requiresSaveOperation={undefined}
             avoidPromptLooseChange={options.avoidPromptLooseChange}
+            extraComponentProps={options.extraComponentProps}
             isNavigate={true}/>);
     }
 }
