@@ -85,7 +85,7 @@ export default class WorkflowConditionComponent extends React.Component<Workflow
             title: "Property Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-        });
+        }).done();
     }
 
     handleEvaluate = () => {

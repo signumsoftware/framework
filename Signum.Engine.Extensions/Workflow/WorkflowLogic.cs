@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Signum.Entities.Basics;
 using Signum.Engine.Authorization;
+using Signum.Entities.Scheduler;
 
 namespace Signum.Engine.Workflow
 {
@@ -160,7 +161,7 @@ namespace Signum.Engine.Workflow
         }
 
 
-        static ResetLazy<Dictionary<Lite<WorkflowEntity>, WorkflowNodeGraph>> WorkflowGraphLazy;
+        public static ResetLazy<Dictionary<Lite<WorkflowEntity>, WorkflowNodeGraph>> WorkflowGraphLazy;
 
         public static List<Lite<IWorkflowNodeEntity>> AutocompleteNodes(Lite<WorkflowEntity> workflow, string subString, int count, List<Lite<IWorkflowNodeEntity>> excludes)
         {
@@ -243,7 +244,6 @@ namespace Signum.Engine.Workflow
 
                 sb.Include<WorkflowEventEntity>()
                     .WithSave(WorkflowEventOperation.Save)
-                    .WithDelete(WorkflowEventOperation.Delete)
                     .WithExpressionFrom(dqm, (WorkflowEntity p) => p.WorkflowEvents())
                     .WithExpressionFrom(dqm, (WorkflowLaneEntity p) => p.WorkflowEvents())
                     .WithQuery(dqm, e => new
@@ -256,6 +256,21 @@ namespace Signum.Engine.Workflow
                         e.Lane,
                         e.Lane.Pool.Workflow,
                     });
+
+                new Graph<WorkflowEventEntity>.Delete(WorkflowEventOperation.Delete)
+                {
+                    Delete = (e, _) => {
+
+                        if (e.Type.IsTimerOrConditionalStart())
+                        {
+                            var scheduled = e.ScheduledTask();
+                            if (scheduled != null)
+                                WorkflowEventTaskLogic.DeleteWorkflowEventScheduledTask(scheduled);
+                        }
+
+                        e.Delete();
+                    },
+                }.Register();
 
                 sb.Include<WorkflowGatewayEntity>()
                     .WithSave(WorkflowGatewayOperation.Save)
@@ -300,11 +315,12 @@ namespace Signum.Engine.Workflow
                         var activities = Database.RetrieveAll<WorkflowActivityEntity>().GroupToDictionary(a => a.Lane.Pool.Workflow.ToLite());
                         var connections = Database.RetrieveAll<WorkflowConnectionEntity>().GroupToDictionary(a => a.From.Lane.Pool.Workflow.ToLite());
 
-                        var result = Database.RetrieveAllLite<WorkflowEntity>().ToDictionary(w => w, w =>
+                        var result = Database.RetrieveAll<WorkflowEntity>().ToDictionary(workflow => workflow.ToLite(), workflow =>
                         {
+                            var w = workflow.ToLite();
                             var nodeGraph = new WorkflowNodeGraph
                             {
-                                Workflow = w,
+                                Workflow = workflow,
                                 Events = events.TryGetC(w).EmptyIfNull().ToDictionary(e => e.ToLite()),
                                 Gateways = gateways.TryGetC(w).EmptyIfNull().ToDictionary(g => g.ToLite()),
                                 Activities = activities.TryGetC(w).EmptyIfNull().ToDictionary(a => a.ToLite()),
@@ -354,7 +370,8 @@ namespace Signum.Engine.Workflow
                     },
                 }.Register();
 
- 
+
+                WorkflowEventTaskEntity.GetWorkflowEntity = lite => WorkflowGraphLazy.Value.GetOrThrow(lite).Workflow;
 
                 Conditions = sb.GlobalLazy(() => Database.Query<WorkflowConditionEntity>().ToDictionary(a => a.ToLite()),
                     new InvalidateWith(typeof(WorkflowConditionEntity)));
@@ -542,7 +559,7 @@ namespace Signum.Engine.Workflow
 
     public class WorkflowNodeGraph
     {
-        public Lite<WorkflowEntity> Workflow { get; internal set; }
+        public WorkflowEntity Workflow { get; internal set; }
         public DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity> NextGraph { get; internal set; }
         public DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity> PreviousGraph { get; internal set; }
 

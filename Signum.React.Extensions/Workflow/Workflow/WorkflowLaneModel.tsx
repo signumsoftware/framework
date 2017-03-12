@@ -3,7 +3,7 @@ import { ValueLine, EntityLine, TypeContext, FormGroup, EntityStrip, EntityDetai
 import { PropertyRoute, Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import CSharpCodeMirror from '../../../../Extensions/Signum.React.Extensions/Codemirror/CSharpCodeMirror'
-import { WorkflowLaneModel, WorkflowLaneActorsEval, ICaseMainEntity } from '../Signum.Entities.Workflow'
+import { WorkflowLaneModel, WorkflowLaneActorsEval, ICaseMainEntity, WorkflowMessage } from '../Signum.Entities.Workflow'
 import { WorkflowConditionTestResponse, API, DecisionResultValues } from '../WorkflowClient'
 import TypeHelpComponent from '../../Dynamic/Help/TypeHelpComponent'
 
@@ -24,7 +24,10 @@ export default class WorkflowLaneModelComponent extends React.Component<Workflow
             <div>
                 <ValueLine ctx={ctx.subCtx(wc => wc.name)} />
                 <EntityStrip ctx={ctx.subCtx(wc => wc.actors)} />
-                <EntityDetail ctx={ctx.subCtx(wc => wc.actorsEval)} getComponent={this.renderActorEval} onCreate={() => Promise.resolve(WorkflowLaneActorsEval.New({ script : "new List<Lite<Entity>>{ e.YourProperty }" }))} />
+                {ctx.value.mainEntityType ?
+                    <EntityDetail ctx={ctx.subCtx(wc => wc.actorsEval)} getComponent={this.renderActorEval} onCreate={() => Promise.resolve(WorkflowLaneActorsEval.New({ script: "new List<Lite<Entity>>{ e.YourProperty }" }))} />
+                    :
+                    <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.actorsEval), ctx.niceName(e => e.mainEntityType))}</div>}            
             </div>
         );
     }

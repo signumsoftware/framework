@@ -15,6 +15,7 @@ import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperat
 import * as WorkflowClient from '../WorkflowClient'
 import CaseFromSenderInfo from './CaseFromSenderInfo'
 import CaseButtonBar from './CaseButtonBar'
+import CaseFlowButton from './CaseFlowButton'
 import InlineCaseTags from './InlineCaseTags'
 
 require("../../../../Framework/Signum.React/Scripts/Frames/Frames.css");
@@ -254,6 +255,7 @@ export default class CaseModalFrame extends React.Component<CaseModalFrameProps,
                 <span className="sf-entity-title">{this.props.title || getToString(activity) }</span>&nbsp;
                 {this.renderExpandLink() }
                 <br />
+                <CaseFlowButton caseActivity={this.state.pack.activity} />
                 <small> {Navigator.getTypeTitle(activity, undefined)}</small>
             </h4>
         );
