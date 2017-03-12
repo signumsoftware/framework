@@ -74,11 +74,8 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     }
 
     private handleOnModelError = (err : string) => {
-        if (err) {
+        if (err) 
             throw new Error('Error rendering the model ' + err);
-        } else {
-            this.configureModules();
-        }            
     }
 
     configureModules() {
@@ -185,7 +182,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                 bindTo: document
             },
             additionalModules: [
-                connectionIcons,                
+                connectionIcons,
             ],
         });
         this.configureModules();

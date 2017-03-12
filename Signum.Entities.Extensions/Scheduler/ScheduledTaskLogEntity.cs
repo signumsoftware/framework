@@ -30,7 +30,7 @@ namespace Signum.Entities.Scheduler
 
         static Expression<Func<ScheduledTaskLogEntity, double?>> DurationExpression =
             log => (double?)(log.EndTime - log.StartTime).Value.TotalMilliseconds;
-        [ExpressionField("DurationExpression")]
+        [ExpressionField("DurationExpression"), Unit("ms")]
         public double? Duration
         {
             get { return EndTime == null ? null : DurationExpression.Evaluate(this); }

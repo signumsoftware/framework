@@ -7,7 +7,7 @@ import {
     EntityPack, Lite, toLite, MListElement, JavascriptMessage, EntityControlMessage,
     newMListElement, liteKey, getMixin, Entity, ExecuteSymbol, isEntityPack, isEntity
 } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { TypeEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import { TypeEntity, IUserEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { Type, PropertyRoute } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { EntityFrame, TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -40,7 +40,7 @@ import {
     CaseActivityOperation, CaseEntity, CaseNotificationEntity, CaseNotificationState, InboxFilterModel, WorkflowOperation, WorkflowPoolEntity, WorkflowScriptEntity, WorkflowScriptEval,
     WorkflowActivityOperation, WorkflowReplacementModel, WorkflowModel, BpmnEntityPair, WorkflowActivityModel, ICaseMainEntity, WorkflowGatewayEntity, WorkflowEventEntity,
     WorkflowLaneModel, WorkflowConnectionModel, IWorkflowNodeEntity, WorkflowActivityMessage, WorkflowTimeoutEntity, CaseTagEntity, CaseTagsModel, CaseTagTypeEntity,
-    WorkflowScriptRunnerPanelPermission, WorkflowEventModel, WorkflowEventTaskEntity
+    WorkflowScriptRunnerPanelPermission, WorkflowEventModel, WorkflowEventTaskEntity, DoneType
 } from './Signum.Entities.Workflow'
 
 import InboxFilter from './Case/InboxFilter'
@@ -96,6 +96,7 @@ export function start(options: { routes: JSX.Element[] }) {
         }
     });
 
+    Navigator.addSettings(new EntitySettings(CaseEntity, w => new ViewPromise(m => require(['./Case/Case'], m))));
     Navigator.addSettings(new EntitySettings(CaseTagEntity, w => new ViewPromise(m => require(['./Case/CaseTag'], m))));
     Navigator.addSettings(new EntitySettings(CaseTagsModel, w => new ViewPromise(m => require(['./Case/CaseTagsModel'], m))));
 
@@ -453,6 +454,10 @@ export namespace API {
     export function stop(): Promise<void> {
         return ajaxPost<void>({ url: "~/api/workflow/scriptRunner/stop" }, undefined);
     }
+
+    export function caseFlow(c: Lite<CaseEntity>): Promise<CaseFlow> {
+        return ajaxGet<CaseFlow>({ url: `~/api/workflow/caseFlow/${c.id}` });
+    }
 }
 
 export interface WorkflowFindNodeRequest {
@@ -499,4 +504,31 @@ export interface WorkflowScriptRunnerState {
     NextPlannedExecution: string;
     QueuedItems: number;
     CurrentProcessIdentifier: string;
+}
+
+export interface  CaseActivityStats {
+    CaseActivity: Lite<CaseActivityEntity>;
+    PreviousActivity: Lite<CaseActivityEntity>;
+    WorkflowActivity: Lite<WorkflowActivityEntity>;
+    Notifications: number;
+    StartOn: string;
+    DoneDate?: string;
+    DoneType?: DoneType;
+    DoneBy: Lite<IUserEntity>;
+    Duration?: number;
+    AverageDuration?: number;
+    EstimatedDuration?: number;
+
+}
+export interface CaseConnectionStats {
+    Connection: Lite<WorkflowConnectionEntity>;
+    DoneDate: string;
+    DoneBy: Lite<IUserEntity>;
+
+}
+
+export interface CaseFlow {
+    Activities: { [bpmnElementId: string]: CaseActivityStats[] };
+    Connections: { [bpmnElementId: string]: CaseConnectionStats[] };
+    AllNodes: string[];
 }

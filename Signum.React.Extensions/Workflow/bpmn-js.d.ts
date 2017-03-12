@@ -27,7 +27,7 @@ declare namespace BPMN {
 
     interface DoubleClickEvent extends Event {
         element: DiElement;
-        gfx: Gfx;
+        gfx: SVGElement;
         originalEvent: MouseEvent;
 
         type: string;
@@ -92,12 +92,15 @@ declare namespace BPMN {
         targetRef: ModdleElement;
     }
 
-    interface Gfx {
-    }
-
     interface ElementRegistry {
         get(elementId: string): BPMN.DiElement;
+        getAll(): BPMN.DiElement[];
+        getGraphics(element: BPMN.DiElement): SVGElement;
         forEach(action: (element: BPMN.DiElement) => void): void;
+    }
+
+    interface GraphicsFactory {
+        update(type: string, element: BPMN.DiElement, gfx: SVGElement): void;
     }
 
     interface BpmnFactory {
@@ -131,6 +134,7 @@ declare namespace BPMN {
 declare module 'bpmn-js/lib/Viewer' {
 
     class Viewer {
+        _modules: any[];
         constructor(options: BPMN.Options)
         importXML(xml: string, done: (error: string, warning: string[]) => void): void;
         saveXML(options: BPMN.SaveOptions, done: (error: string, xml: string) => void): void;
@@ -148,11 +152,22 @@ declare module 'bpmn-js/lib/Viewer' {
     export = Viewer;
 }
 
+declare module 'bpmn-js/lib/NavigatedViewer' {
+
+    import Viewer = require("bpmn-js/lib/Viewer");
+
+    class NavigatedViewer extends Viewer {
+      
+    }
+
+    export = NavigatedViewer;
+}
+
+
 declare module 'bpmn-js/lib/Modeler' {
     import Viewer = require("bpmn-js/lib/Viewer");
 
     class Modeler extends Viewer {
-        _modules: any[];
         createDiagram(done: (error: string, warning: string[]) => void): void;
     }
 
@@ -164,8 +179,8 @@ declare module 'bpmn-js/lib/draw/BpmnRenderer' {
     class BpmnRenderer {
         constructor(eventBus: BPMN.EventBus, styles: any, pathMap: any, canvas: any, priority: number);
 
-        drawShape(visuals: any, element: BPMN.DiElement): any;
-        drawConnection(visuals: any, element: BPMN.DiElement): any;
+        drawShape(visuals: any, element: BPMN.DiElement): SVGElement;
+        drawConnection(visuals: any, element: BPMN.DiElement): SVGElement;
     }
 
     export = BpmnRenderer
@@ -180,9 +195,4 @@ declare module 'bpmn-js/lib/features/popup-menu/ReplaceMenuProvider' {
     }
 
     export = BpmnReplaceMenuProvider
-}
-
-declare module 'bpmn-js' {
-    import Viewer = require("bpmn-js/lib/Viewer");
-    export = Viewer;
 }

@@ -14,17 +14,14 @@ export class CustomRenderer extends BpmnRenderer {
     getDecisionResult : (element: BPMN.DiElement) => DecisionResult | undefined; 
 
     drawConnection(visuals: any, element: BPMN.DiElement) {
-    
+
         var result = super.drawConnection(visuals, element);
+        
+        var dr = this.getDecisionResult(element);
 
-        if (BpmnUtils.isSequenceFlowConnection(element.type)) {
-
-            var dr = this.getDecisionResult(element);
-
-            if(dr)
-                result.style.setProperty('stroke', dr == "Approve" ? "#0c9c01" : "#c71a01");
-        }
-
+        if (dr)
+            result.style.setProperty('stroke', dr == "Approve" ? "#0c9c01" : "#c71a01");
+            
         return result;
     }
 
@@ -69,7 +66,6 @@ export class CustomRenderer extends BpmnRenderer {
         return result;
     }
 }
-
 
 export var __init__ = ['customRenderer'];
 export var customRenderer = ['type', CustomRenderer];

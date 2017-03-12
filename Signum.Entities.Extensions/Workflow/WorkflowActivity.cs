@@ -41,6 +41,9 @@ namespace Signum.Entities.Workflow
         public WorkflowRejectEntity Reject { get; set; }
 
         public WorkflowTimeoutEntity Timeout { get; set; }
+        
+        [Unit("min")]
+        public double? EstimatedDuration { get; set; }
 
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 255)]
         public string ViewName { get; set; }
@@ -109,6 +112,7 @@ namespace Signum.Entities.Workflow
             model.RequiresOpen = this.RequiresOpen;
             model.Reject = this.Reject;
             model.Timeout = this.Timeout;
+            model.EstimatedDuration = this.EstimatedDuration;
             model.ValidationRules.AssignMList(this.ValidationRules);
             model.Jumps.AssignMList(this.Jumps);
             model.Script = this.Script;
@@ -127,6 +131,7 @@ namespace Signum.Entities.Workflow
             this.RequiresOpen = wModel.RequiresOpen;
             this.Reject = wModel.Reject;
             this.Timeout = wModel.Timeout;
+            this.EstimatedDuration = wModel.EstimatedDuration;
             this.ValidationRules.AssignMList(wModel.ValidationRules);
             this.Jumps.AssignMList(wModel.Jumps);
             this.Script = wModel.Script;
@@ -299,6 +304,9 @@ namespace Signum.Entities.Workflow
         public WorkflowRejectEntity Reject { get; set; }
 
         public WorkflowTimeoutEntity Timeout { get; set; }
+
+        [Unit("min")]
+        public double? EstimatedDuration { get; set; }
 
         [NotNullable]
         [NotNullValidator, NoRepeatValidator]

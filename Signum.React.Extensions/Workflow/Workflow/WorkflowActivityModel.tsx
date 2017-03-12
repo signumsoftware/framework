@@ -118,6 +118,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
             <div>
                 <ValueLine ctx={ctx.subCtx(d => d.name)} onChange={() => this.forceUpdate()} />
                 <ValueLine ctx={ctx.subCtx(d => d.type)} onChange={this.handleTypeChange} />
+                <ValueLine ctx={ctx.subCtx(a => a.estimatedDuration)} />
 
                 {ctx.value.type != "DecompositionWorkflow" && ctx.value.type != "CallWorkflow" && ctx.value.type != "Script" &&
                     <div>

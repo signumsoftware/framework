@@ -88,7 +88,7 @@ namespace Signum.React.Workflow
         public List<Lite<IWorkflowNodeEntity>> FindNode(WorkflowFindNodeRequest request)
         {
             var workflow = Lite.Create<WorkflowEntity>(request.workflowId);
-            
+
             return WorkflowLogic.AutocompleteNodes(workflow, request.subString, request.count, request.excludes);
         }
 
@@ -174,6 +174,14 @@ namespace Signum.React.Workflow
             WorkflowScriptRunner.Stop();
 
             Thread.Sleep(1000);
+        }
+
+        [Route("api/workflow/caseflow/{caseId}"), HttpGet]
+        public CaseFlow GetCaseFlow(string caseId)
+        {
+            var lite = Lite.ParsePrimaryKey<CaseEntity>(caseId);
+
+            return CaseFlowLogic.GetCaseFlow(lite.Retrieve());
         }
     }
 }

@@ -41,6 +41,7 @@ export interface CaseActivityEntity extends Entities.Entity {
     previous: Entities.Lite<CaseActivityEntity> | null;
     note: string | null;
     doneDate: string | null;
+    duration: number | null;
     doneBy: Entities.Lite<Authorization.UserEntity> | null;
     doneType: DoneType | null;
     scriptExecution: ScriptExecutionEntity | null;
@@ -106,6 +107,12 @@ export interface CaseEntity extends Entities.Entity {
     startDate: string;
     finishDate: string | null;
 }
+
+export const CaseFlowColor = new EnumType<CaseFlowColor>("CaseFlowColor");
+export type CaseFlowColor =
+    "CaseMaxDuration" |
+    "AverageDuration" |
+    "EstimatedDuration";
 
 export const CaseJunctionEntity = new Type<CaseJunctionEntity>("CaseJunction");
 export interface CaseJunctionEntity extends Entities.Entity {
@@ -272,6 +279,7 @@ export interface WorkflowActivityEntity extends Entities.Entity, IWorkflowNodeEn
     requiresOpen?: boolean;
     reject?: WorkflowRejectEntity | null;
     timeout?: WorkflowTimeoutEntity | null;
+    estimatedDuration?: number | null;
     viewName?: string | null;
     validationRules: Entities.MList<WorkflowActivityValidationEntity>;
     jumps: Entities.MList<WorkflowJumpEntity>;
@@ -297,6 +305,7 @@ export interface WorkflowActivityModel extends Entities.ModelEntity {
     requiresOpen?: boolean;
     reject?: WorkflowRejectEntity | null;
     timeout?: WorkflowTimeoutEntity | null;
+    estimatedDuration?: number | null;
     validationRules: Entities.MList<WorkflowActivityValidationEntity>;
     jumps: Entities.MList<WorkflowJumpEntity>;
     script?: WorkflowScriptPartEntity | null;

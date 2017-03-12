@@ -275,9 +275,11 @@
     <TypeScriptCompile Include="Workflow\bpmn-js.d.ts" />
     <TypeScriptCompile Include="Workflow\Bpmn\CustomPopupMenu.ts" />
     <TypeScriptCompile Include="Workflow\Bpmn\BpmnUtils.tsx" />
+    <TypeScriptCompile Include="Workflow\Bpmn\CaseFlowRenderer.ts" />
     <TypeScriptCompile Include="Workflow\Case\CaseButtonBar.tsx" />
     <TypeScriptCompile Include="Workflow\Case\ActivityWithRemarks.tsx" />
     <TypeScriptCompile Include="Workflow\Case\CaseFromSenderInfo.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\Case.tsx" />
     <TypeScriptCompile Include="Workflow\Case\CaseTagsModel.tsx" />
     <TypeScriptCompile Include="Workflow\Case\InlineCaseTags.tsx" />
     <TypeScriptCompile Include="Workflow\Case\Tag.tsx" />

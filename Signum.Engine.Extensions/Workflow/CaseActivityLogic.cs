@@ -269,7 +269,7 @@ namespace Signum.Engine.Workflow
             }
         }
 
-
+      
 
         public class ActivityWithRemarks : IQueryTokenBag
         {

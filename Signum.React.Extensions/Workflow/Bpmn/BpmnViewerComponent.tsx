@@ -1,27 +1,62 @@
 ﻿import * as React from 'react'
-import Viewer = require("bpmn-js/lib/Viewer");
+import { DropdownButton, MenuItem } from 'react-bootstrap'
+import { WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity, IWorkflowNodeEntity, CaseFlowColor } from '../Signum.Entities.Workflow'
+import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
+import { CaseFlow } from '../WorkflowClient'
+import NavigatedViewer = require("bpmn-js/lib/NavigatedViewer");
+import * as caseFlowRenderer from './CaseFlowRenderer'
+import * as connectionIcons from './ConnectionIcons'
+import * as BpmnUtils from './BpmnUtils'
+
+require("bpmn-js/assets/bpmn-font/css/bpmn-embedded.css");
+require("diagram-js/assets/diagram-js.css");
+require("./Bpmn.css");
 
 export interface BpmnViewerComponentProps {
-    diagramXML?: string
+    diagramXML?: string;
+    entities: WorkflowEntitiesDictionary;
+    caseFlow: CaseFlow;
 }
 
-export default class BpmnViewerComponent extends React.Component<BpmnViewerComponentProps, void> {
+export interface BpmnViewerComponentState {
+    caseFlowColor: CaseFlowColor;
+}
 
-    viewer: Viewer;
+class CustomViewer extends NavigatedViewer {
+
+}
+
+CustomViewer.prototype._modules =
+    CustomViewer.prototype._modules.concat([caseFlowRenderer]);
+
+export default class BpmnViewerComponent extends React.Component<BpmnViewerComponentProps, BpmnViewerComponentState > {
+
+    constructor(props: BpmnViewerComponentProps) {
+        super(props);
+
+        this.state = { caseFlowColor: CaseFlowColor.value("CaseMaxDuration") };
+    }
+
+    viewer: NavigatedViewer;
     divArea: HTMLDivElement; 
 
     handleOnModelError = (err: string) => {
-        if (err) {
+        if (err)
             throw new Error('Error rendering the model ' + err);
-        };
-    }
-
-    constructor(props: any) {
-        super(props);
     }
 
     componentDidMount() {
-        this.viewer = new Viewer({ container: this.divArea });
+        this.viewer = new CustomViewer({
+            container: this.divArea,
+            keyboard: {
+                bindTo: document
+            },
+            height: 1000,
+            additionalModules: [
+                connectionIcons,
+            ]
+        });
+        this.configureModules();
         if (this.props.diagramXML && this.props.diagramXML.trim() != "")
             this.viewer.importXML(this.props.diagramXML, this.handleOnModelError);
     }
@@ -38,8 +73,59 @@ export default class BpmnViewerComponent extends React.Component<BpmnViewerCompo
         }
     }
 
-    render() {
-        return (<div ref={ de => this.divArea = de } />);
+    configureModules() {
+        var conIcons = this.viewer.get<connectionIcons.ConnectionIcons>('connectionIcons');
+        conIcons.hasAction = con => {
+            var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
+            return mod && mod.action || undefined;
+        };
 
+        conIcons.hasCondition = con => {
+            var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
+            return mod && mod.condition || undefined;
+        };
+
+        var caseFlowRenderer = this.viewer.get<caseFlowRenderer.CaseFlowRenderer>('caseFlowRenderer');
+        caseFlowRenderer.getDecisionResult = con => {
+            var mod = this.props.entities[con.id] as (WorkflowConnectionModel | undefined);
+            return mod && mod.decisonResult || undefined;
+        }
+
+        caseFlowRenderer.caseFlow = this.props.caseFlow;
+        caseFlowRenderer.maxDuration = Dic.getValues(this.props.caseFlow.Activities).map(a => a.map(a => a.Duration || 0).sum()).max()!;
+        caseFlowRenderer.caseFlowColor = this.state.caseFlowColor;
+        conIcons.show();
+    }
+
+    handleChangeColor = (eventKey: any) => {
+        this.setState({ caseFlowColor: eventKey });
+        var caseFlowRenderer = this.viewer.get<caseFlowRenderer.CaseFlowRenderer>('caseFlowRenderer');
+        caseFlowRenderer.caseFlowColor = eventKey;
+
+        var reg = this.viewer.get<BPMN.ElementRegistry>("elementRegistry");
+        var gFactory = this.viewer.get<BPMN.GraphicsFactory>("graphicsFactory");
+        reg.getAll().forEach(a => {
+
+            const type = BpmnUtils.isConnection(a.type) ? "connection" : "shape";
+            const gfx = reg.getGraphics(a);
+            gFactory.update(type, a, gfx);
+        });
+    }
+
+    render() {
+        return (
+            <div>
+                <DropdownButton title={"Color: " + CaseFlowColor.niceName(this.state.caseFlowColor)} id="colorMenu" onSelect={this.handleChangeColor}>
+                    {this.menuItem("CaseMaxDuration")}
+                    {this.menuItem("AverageDuration")}
+                    {this.menuItem("EstimatedDuration")}    
+                </DropdownButton>
+                <div ref={de => this.divArea = de} />
+            </div>
+        );
+    }
+
+    menuItem(color: CaseFlowColor) {
+        return <MenuItem eventKey={color} selected={this.state.caseFlowColor == color}>{CaseFlowColor.niceName(color)}</MenuItem>
     }
 }
