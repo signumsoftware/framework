@@ -252,6 +252,23 @@ namespace Signum.Utilities.DataStructures
             }
         }
 
+        public void DepthExploreConnections(Stack<T> stack, Func<T, E, T, bool> condition)
+        {
+            var node = stack.Peek();
+            foreach (var kvp in RelatedTo(node))
+            {
+                if (!stack.Contains(kvp.Key))
+                {
+                    stack.Push(kvp.Key);
+
+                    if (condition(node, kvp.Value, kvp.Key))
+                        DepthExploreConnections(stack, condition);
+
+                    stack.Pop();
+                }
+            }
+        }
+
         public void BreadthExplore(T root, Func<T, bool> condition, Action<T> action)
         {
             Queue<T> queue = new Queue<T>();
@@ -560,12 +577,16 @@ namespace Signum.Utilities.DataStructures
 
                 foreach (var v in RelatedTo(u))
                 {
-                    int newDist = distance[u] + getWeight(v.Value);
-                    if (newDist < distance[v.Key])
+                    int weight = getWeight(v.Value);
+                    if (weight != int.MaxValue)
                     {
-                        distance[v.Key] = newDist;
-                        queue.Update(v.Key);
-                        previous[v.Key] = u;
+                        int newDist = distance[u] + weight;
+                        if (newDist < distance[v.Key])
+                        {
+                            distance[v.Key] = newDist;
+                            queue.Update(v.Key);
+                            previous[v.Key] = u;
+                        }
                     }
                 }
                 queue.Pop();
