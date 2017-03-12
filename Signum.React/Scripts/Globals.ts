@@ -111,6 +111,39 @@ Array.prototype.orderByDescending = function (this: any[], keySelector: (element
     return cloned;
 };
 
+
+Array.prototype.withMin = function (this: any[], keySelector: (element: any) => any): any {
+    if (this.length == 0)
+        return undefined;
+
+    var min = keySelector(this[0]);
+    var result = this[0]; 
+    for (var i = 0; i < this.length; i++) {
+        var val = keySelector(this[i]);
+        if (val < min) {
+            min = val;
+            result = this[i];
+        }
+    }
+    return result;
+};
+
+Array.prototype.withMax = function (this: any[], keySelector: (element: any) => any): any {
+    if (this.length == 0)
+        return undefined;
+
+    var max = keySelector(this[0]);
+    var result = this[0];
+    for (var i = 0; i < this.length; i++) {
+        var val = keySelector(this[i]);
+        if (val > max) {
+            max = val;
+            result = this[i];
+        }
+    }
+    return result;
+};
+
 Array.prototype.toObject = function (this: any[], keySelector: (element: any) => any, valueSelector?: (element: any) => any): any {
     const obj: any = {};
 
@@ -357,6 +390,13 @@ Array.repeat = function (count: number, val: any) : any[] {
         result[i] = val;
     }
 
+    return result;
+}
+
+Array.toArray = function (arrayish: { length: number;[index: number]: any }) {
+    var result = [];
+    for (var i = 0; i < arrayish.length; i++)
+        result.push(arrayish[i]);
     return result;
 }
 
