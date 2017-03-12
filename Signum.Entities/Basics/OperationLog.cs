@@ -29,7 +29,7 @@ namespace Signum.Entities.Basics
 
         static Expression<Func<OperationLogEntity, double?>> DurationExpression =
             log => (double?)(log.End - log.Start).Value.TotalMilliseconds;
-        [ExpressionField("DurationExpression")]
+        [ExpressionField("DurationExpression"), Unit("ms")]
         public double? Duration
         {
             get { return End == null ? null : DurationExpression.Evaluate(this); }
