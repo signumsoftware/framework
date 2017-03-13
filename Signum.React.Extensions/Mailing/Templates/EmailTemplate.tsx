@@ -198,6 +198,6 @@ export class EmailTemplateMessageComponent extends React.Component<EmailTemplate
             title: "Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-        });
+        }).done();
     }
 }

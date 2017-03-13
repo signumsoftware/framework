@@ -123,7 +123,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
             title: "Mixin Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-        });
+        }).done();
     }
 
     render() {
@@ -300,7 +300,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
             title: title,
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-        });
+        }).done();
     }
 }
 

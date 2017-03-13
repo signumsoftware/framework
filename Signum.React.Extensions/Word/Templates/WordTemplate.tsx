@@ -22,7 +22,7 @@ export default class WordTemplate extends React.Component<{ ctx: TypeContext<Wor
             title: "Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-        });
+        }).done();
     }
 
     render() {
