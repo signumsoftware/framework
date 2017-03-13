@@ -95,13 +95,16 @@ class EntityComboSelect extends React.Component<EntityComboSelectProps, { data?:
     }
 
     componentWillReceiveProps(newProps: EntityComboSelectProps, newContext: any) {
-        if (!!newProps.data && !this.props.data)
-            console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityCombo: ${this.props.type!.name}`);
+        if (newProps.data) {
+            if (this.props.data == null)
+                console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityCombo: ${this.props.type!.name}`);
 
-        if (this.props.data == null)
+            this.setState({ data: newProps.data });
+        } else {
             if (EntityComboSelect.getFindOptions(newProps.findOptions) != EntityComboSelect.getFindOptions(this.props.findOptions) ||
                 newProps.type.name != this.props.type.name)
                 this.reloadData(newProps);
+        }
     }
 
     static getFindOptions(fo: FindOptions | undefined) {

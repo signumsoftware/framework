@@ -86,13 +86,18 @@ export class FormControlStatic extends React.Component<FormControlStaticProps, {
     }
 }
 
+export interface ChangeEvent {
+    newValue: any;
+    oldValue: any;
+}
+
 export interface LineBaseProps extends StyleOptions {
     ctx: TypeContext<any>;
     type?: TypeReference;
     labelText?: React.ReactChild;
     visible?: boolean;
     hideIfNull?: boolean;
-    onChange?: (val: any) => void;
+    onChange?: (e: ChangeEvent) => void;
     onValidate?: (val: any) => string;
     labelHtmlProps?: React.HTMLAttributes<HTMLLabelElement>;
     formGroupHtmlProps?: React.HTMLAttributes<any>;
@@ -121,12 +126,13 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
 
     changes = 0;
     setValue(val: any) {
+        var oldValue = this.state.ctx.value;
         this.state.ctx.value = val;
         this.changes++;
         this.validate();
         this.forceUpdate();
         if (this.state.onChange)
-            this.state.onChange(val);
+            this.state.onChange({ oldValue: oldValue, newValue: val });
     }
 
     validate() {

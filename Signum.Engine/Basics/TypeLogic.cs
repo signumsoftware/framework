@@ -98,7 +98,7 @@ namespace Signum.Engine.Basics
 
             Dictionary<string, TypeEntity> should = GenerateSchemaTypes().ToDictionaryEx(s => s.TableName, "tableName in memory");
 
-            Dictionary<string, TypeEntity> current = replacements.ApplyReplacementsToOldCleaning(
+            Dictionary<string, TypeEntity> current = ApplyReplacementsToOld(replacements, 
                 Administrator.TryRetrieveAll<TypeEntity>(replacements).ToDictionaryEx(c => c.TableName, "tableName in database"), Replacements.KeyTables);
 
             { //Temporal solution until applications are updated
@@ -134,16 +134,14 @@ namespace Signum.Engine.Basics
                     }, Spacing.Double);
         }
 
-        static Dictionary<string, O> ApplyReplacementsToOldCleaning<O>(this Replacements replacements, Dictionary<string, O> oldDictionary, string replacementsKey)
+        static Dictionary<string, O> ApplyReplacementsToOld<O>(this Replacements replacements, Dictionary<string, O> oldDictionary, string replacementsKey)
         {
             if (!replacements.ContainsKey(replacementsKey))
                 return oldDictionary;
 
             Dictionary<string, string> dic = replacements[replacementsKey];
 
-            var cleanDic = dic.SelectDictionary(n => ObjectName.Parse(n).Name, n => ObjectName.Parse(n).Name);
-
-            return oldDictionary.SelectDictionary(a => cleanDic.TryGetC(a) ?? a, v => v);
+            return oldDictionary.SelectDictionary(a => dic.TryGetC(a) ?? a, v => v);
         }
 
         internal static SqlPreCommand Schema_Generating()
