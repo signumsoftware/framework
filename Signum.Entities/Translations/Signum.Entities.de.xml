@@ -198,6 +198,7 @@
     <Member Name="ViewForType0IsNotAllowed" Description="Anzeigen des Typs {0} ist nicht zulässig" />
   </Type>
   <Type Name="NormalWindowMessage">
+    <Member Name="_0AndClose" Description="{0} und schließen" />
     <Member Name="_0Errors1" Description="{0} Fehler: {1}" />
     <Member Name="_1Error" Description="1 Fehler: {0}" />
     <Member Name="Cancel" Description="Abbrechen" />
@@ -260,6 +261,7 @@
   </Type>
   <Type Name="QueryTokenMessage">
     <Member Name="_0As1" Description="({0} als {1})" />
+    <Member Name="_0HasValue" Description="{0} hat einen Wert" />
     <Member Name="_0Steps1" Description="{0} Schritt {1}" />
     <Member Name="And" Description=" und " />
     <Member Name="AnyEntity" Description="Jede Einheit" />
@@ -275,7 +277,9 @@
     <Member Name="DecimalNumber" Description="Dezimalzahl" />
     <Member Name="Embedded0" Description="eingebettet {0}" />
     <Member Name="GlobalUniqueIdentifier" Description="Globaler einzigartiger Identifikator" />
+    <Member Name="HasValue" Description="Hat einen Wert" />
     <Member Name="Hour" Description="Zeit" />
+    <Member Name="Length" Description="Länge" />
     <Member Name="ListOf0" Description="Liste von {0}" />
     <Member Name="Millisecond" Description="Millisekunde" />
     <Member Name="Minute" Description="Minute" />
