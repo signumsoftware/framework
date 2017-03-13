@@ -253,6 +253,9 @@ namespace Signum.Engine.Disconnected
         static MethodInfo miSetMixin = ReflectionTools.GetMethodInfo((Entity a) => a.SetMixin((DisconnectedCreatedMixin m) => m.DisconnectedCreated, true)).GetGenericMethodDefinition();
         static Expression<Func<DisconnectedCreatedMixin, bool>> disconnectedCreated = (DisconnectedCreatedMixin m) => m.DisconnectedCreated;
 
+        public static GenericInvoker<Func<Download, Upload, IDisconnectedStrategy>> giRegister = 
+            new GenericInvoker<Func<Download, Upload, IDisconnectedStrategy>>((down, up) => Register<TypeEntity>(down, up));
+
         public static DisconnectedStrategy<T> Register<T>(Download download, Upload upload) where T : Entity
         {
             return Register(new DisconnectedStrategy<T>(download, null, upload, null, new BasicImporter<T>()));
