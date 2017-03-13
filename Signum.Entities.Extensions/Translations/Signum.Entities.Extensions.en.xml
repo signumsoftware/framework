@@ -25,11 +25,20 @@
   <Type Name="CaseActivityEntity" />
   <Type Name="CaseActivityMessage" />
   <Type Name="CaseActivityOperation" />
+  <Type Name="CaseActivityProcessAlgorithm" />
   <Type Name="CaseActivityQuery" />
+  <Type Name="CaseActivityState" />
+  <Type Name="CaseActivityTask" />
   <Type Name="CaseEntity" />
   <Type Name="CaseJunctionEntity" />
   <Type Name="CaseNotificationEntity" />
+  <Type Name="CaseNotificationOperation" />
   <Type Name="CaseNotificationState" />
+  <Type Name="CaseOperation" />
+  <Type Name="CaseTagEntity" />
+  <Type Name="CaseTagsModel" />
+  <Type Name="CaseTagTypeEntity" />
+  <Type Name="CaseTagTypeOperation" />
   <Type Name="CertFileType" />
   <Type Name="ChartColorEntity" />
   <Type Name="ChartColumnEntity" />
@@ -59,6 +68,7 @@
   <Type Name="DateSpanEntity" />
   <Type Name="DecisionResult" />
   <Type Name="DefaultState" />
+  <Type Name="DelayOption" />
   <Type Name="DiffLogMessage" />
   <Type Name="DiffLogMixin" />
   <Type Name="DisconnectedCreatedMixin" />
@@ -73,6 +83,7 @@
   <Type Name="DisconnectedMachineState" />
   <Type Name="DisconnectedMessage" />
   <Type Name="DisconnectedSubsetMixin" />
+  <Type Name="DoneType" />
   <Type Name="DynamicBaseType" />
   <Type Name="DynamicExpressionEntity" />
   <Type Name="DynamicExpressionOperation" />
@@ -170,7 +181,6 @@
   <Type Name="IsolationOperation" />
   <Type Name="ITaskEntity" />
   <Type Name="IUserAssetEntity" />
-  <Type Name="IWorkflowConnectionEntity" />
   <Type Name="IWorkflowNodeEntity" />
   <Type Name="IWorkflowObjectEntity" />
   <Type Name="LastAuthRulesImportEntity" />
@@ -221,6 +231,7 @@
   <Type Name="PrintPackageEntity" />
   <Type Name="PrintPackageProcess" />
   <Type Name="PrintPermission" />
+  <Type Name="PrintTask" />
   <Type Name="ProcessAlgorithmSymbol" />
   <Type Name="ProcessEntity" />
   <Type Name="ProcessExceptionLineEntity" />
@@ -263,6 +274,7 @@
   <Type Name="ScheduleRuleMinutelyEntity" />
   <Type Name="ScheduleRuleMonthsEntity" />
   <Type Name="ScheduleRuleWeekDaysEntity" />
+  <Type Name="ScriptExecutionEntity" />
   <Type Name="SendEmailTaskEntity" />
   <Type Name="SendEmailTaskOperation" />
   <Type Name="SessionLogEntity" />
@@ -285,11 +297,14 @@
   <Type Name="SmtpConfigurationOperation" />
   <Type Name="SmtpNetworkDeliveryEntity" />
   <Type Name="SqlMigrationEntity" />
+  <Type Name="SubEntitiesEval" />
+  <Type Name="SubWorkflowEntity" />
   <Type Name="SystemEmailEntity" />
   <Type Name="SystemWordTemplateEntity" />
   <Type Name="TaskMessage" />
   <Type Name="TaskOperation" />
   <Type Name="TemplateTokenMessage" />
+  <Type Name="TimeSpanEntity" />
   <Type Name="ToolbarElementEntity" />
   <Type Name="ToolbarElementType" />
   <Type Name="ToolbarEntity" />
@@ -341,6 +356,9 @@
   <Type Name="WordTemplateOperation" />
   <Type Name="WordTemplatePermission" />
   <Type Name="WordTransformerSymbol" />
+  <Type Name="WorkflowActionEntity" />
+  <Type Name="WorkflowActionEval" />
+  <Type Name="WorkflowActionOperation" />
   <Type Name="WorkflowActivityEntity" />
   <Type Name="WorkflowActivityMessage" />
   <Type Name="WorkflowActivityModel" />
@@ -348,9 +366,10 @@
   <Type Name="WorkflowActivityType" />
   <Type Name="WorkflowActivityValidationEntity" />
   <Type Name="WorkflowConditionEntity" />
+  <Type Name="WorkflowConditionEval" />
   <Type Name="WorkflowConditionOperation" />
+  <Type Name="WorkflowConfigurationEntity" />
   <Type Name="WorkflowConnectionEntity" />
-  <Type Name="WorkflowConnectionEval" />
   <Type Name="WorkflowConnectionModel" />
   <Type Name="WorkflowConnectionOperation" />
   <Type Name="WorkflowEntity" />
@@ -363,6 +382,7 @@
   <Type Name="WorkflowGatewayModel" />
   <Type Name="WorkflowGatewayOperation" />
   <Type Name="WorkflowGatewayType" />
+  <Type Name="WorkflowJumpEntity" />
   <Type Name="WorkflowLaneActorsEval" />
   <Type Name="WorkflowLaneEntity" />
   <Type Name="WorkflowLaneModel" />
@@ -373,7 +393,17 @@
   <Type Name="WorkflowPoolEntity" />
   <Type Name="WorkflowPoolModel" />
   <Type Name="WorkflowPoolOperation" />
+  <Type Name="WorkflowRejectEntity" />
   <Type Name="WorkflowReplacementItemEntity" />
   <Type Name="WorkflowReplacementModel" />
+  <Type Name="WorkflowScriptEntity" />
+  <Type Name="WorkflowScriptEval" />
+  <Type Name="WorkflowScriptOperation" />
+  <Type Name="WorkflowScriptPartEntity" />
+  <Type Name="WorkflowScriptRetryStrategyEntity" />
+  <Type Name="WorkflowScriptRetryStrategyOperation" />
+  <Type Name="WorkflowScriptRunnerPanelPermission" />
+  <Type Name="WorkflowTimeoutEntity" />
+  <Type Name="WorkflowValidationMessage" />
   <Type Name="WorkflowXmlEntity" />
 </Translations>
