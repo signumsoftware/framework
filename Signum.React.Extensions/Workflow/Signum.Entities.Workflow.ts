@@ -692,6 +692,7 @@ export module WorkflowValidationMessage {
     export const Gateway0ShouldHasConditionOnEachOutput = new MessageKey("WorkflowValidationMessage", "Gateway0ShouldHasConditionOnEachOutput");
     export const Gateway0ShouldHasConditionOnEachOutputExceptTheLast = new MessageKey("WorkflowValidationMessage", "Gateway0ShouldHasConditionOnEachOutputExceptTheLast");
     export const _0CanNotBeConnectodToAParallelJoinBecauseHasNoPreviousParallelSplit = new MessageKey("WorkflowValidationMessage", "_0CanNotBeConnectodToAParallelJoinBecauseHasNoPreviousParallelSplit");
+    export const Activity0WithDecisionTypeShouldGoToAnExclusiveOrInclusiveGateways = new MessageKey("WorkflowValidationMessage", "Activity0WithDecisionTypeShouldGoToAnExclusiveOrInclusiveGateways");
 }
 
 export const WorkflowXmlEntity = new Type<WorkflowXmlEntity>("WorkflowXmlEntity");
