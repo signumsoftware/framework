@@ -130,11 +130,14 @@ namespace Signum.Engine
             }
 
             var t = Schema.Current.Table<T>();
+            bool disableIdentityBehaviour = copyOptions.HasFlag(SqlBulkCopyOptions.KeepIdentity);
+            bool oldIdentityBehaviour = t.IdentityBehaviour;
 
             DataTable dt = new DataTable();
-            foreach (var c in t.Columns.Values.Where(c => !c.IdentityBehaviour))
+            foreach (var c in disableIdentityBehaviour ? t.Columns.Values : t.Columns.Values.Where(c => !c.IdentityBehaviour))
                 dt.Columns.Add(new DataColumn(c.Name, c.Type.UnNullify()));
 
+            if (disableIdentityBehaviour) t.IdentityBehaviour = false;
             foreach (var e in entities)
             {
                 if (!e.IsNew)
@@ -142,6 +145,7 @@ namespace Signum.Engine
                 t.SetToStrField(e);
                 dt.Rows.Add(t.BulkInsertDataRow(e));
             }
+            if (disableIdentityBehaviour) t.IdentityBehaviour = oldIdentityBehaviour;
 
             using (Transaction tr = new Transaction())
             {
