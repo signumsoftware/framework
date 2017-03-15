@@ -208,6 +208,7 @@ namespace Signum.Engine.Word
                 throw new ArgumentException("systemWordTemplate should be a {0} instead of {1}".FormatWith(template.SystemWordTemplate.FullClassName, systemWordTemplate.GetType().FullName));
 
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
+            using (CultureInfoUtils.ChangeBothCultures(template.Culture.ToCultureInfo()))
             {
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(template.Query.ToQueryName());
 
