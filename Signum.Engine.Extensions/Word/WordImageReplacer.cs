@@ -5,10 +5,10 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using Signum.Utilities;
 using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Drawing.Drawing2D;
 
 namespace Signum.Engine.Word
 {
@@ -35,6 +35,13 @@ namespace Signum.Engine.Word
             ImagePart img = CreateImagePart(doc, bitmap, newImagePartId, imagePartType);
 
             blip.Embed = doc.MainDocumentPart.GetIdOfPart(img);
+        }
+
+        public static void RemoveImage(WordprocessingDocument doc, string title)
+        {
+            Blip blip = FindBlip(doc, title);
+            doc.MainDocumentPart.DeletePart(blip.Embed);
+            blip.Remove();
         }
 
         static ImagePart CreateImagePart(WordprocessingDocument doc, Bitmap bitmap, string id, ImagePartType imagePartType = ImagePartType.Png)
