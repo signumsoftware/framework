@@ -1,11 +1,13 @@
 ﻿/// <reference path="../bpmn-js.d.ts" />
 import * as React from 'react'
-import { WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEntity } from '../Signum.Entities.Workflow'
+import { WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity, IWorkflowNodeEntity } from '../Signum.Entities.Workflow'
 import Modeler = require("bpmn-js/lib/Modeler");
 import { ModelEntity, ValidationMessage, parseLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as connectionIcons from './ConnectionIcons'
 import * as customRenderer from './CustomRenderer'
+import * as customPopupMenu from './CustomPopupMenu'
+import * as BpmnUtils from './BpmnUtils'
 
 require("bpmn-js/assets/bpmn-font/css/bpmn-embedded.css");
 require("diagram-js/assets/diagram-js.css");
@@ -22,24 +24,58 @@ class CustomModeler extends Modeler {
 }
 
 CustomModeler.prototype._modules =
-    CustomModeler.prototype._modules.concat([customRenderer]);
+    CustomModeler.prototype._modules.concat([customRenderer/*, customPopupMenu*/]);
 
 export default class BpmnModelerComponent extends React.Component<BpmnModelerComponentProps, void> {
 
     private modeler: Modeler;
     private elementRegistry: BPMN.ElementRegistry;
+    private bpmnFactory: BPMN.BpmnFactory;
     private divArea: HTMLDivElement; 
 
     constructor(props: any) {
         super(props);
     }
 
+    existsMainEntityTypeRelatedNodes(): boolean {
+
+        var entities = this.props.entities;
+        var result = false;
+        this.elementRegistry.forEach(e => {
+
+            var model = entities[e.id];
+
+            if (!model)
+                return;
+
+            if (BpmnUtils.isLane(e.type) &&
+                (model as WorkflowLaneModel).actorsEval != null)
+                result = true;
+
+            if (BpmnUtils.isStartEvent(e.type) &&
+                (model as WorkflowEventModel).task != null &&
+                ((model as WorkflowEventModel).task!.action != null || (model as WorkflowEventModel).task!.condition != null))
+                result = true;
+
+            if (BpmnUtils.isConnection(e.type) &&
+                ((model as WorkflowConnectionModel).action != null) ||
+                ((BpmnUtils.isExclusiveGateway(e.type) || BpmnUtils.isInclusiveGateway(e.type)) && (model as WorkflowConnectionModel).condition != null))
+                result = true;
+
+            if (BpmnUtils.isTaskAnyKind(e.type) && (
+                ((model as WorkflowActivityModel).validationRules.length > 0) ||
+                (model as WorkflowActivityModel).script != null ||
+                ((model as WorkflowActivityModel).timeout != null && (model as WorkflowActivityModel).timeout!.action != null) ||
+                ((model as WorkflowActivityModel).jumps.length > 0 && (model as WorkflowActivityModel).jumps!.filter(j => j.element.action != null || j.element.condition != null).length > 0)))
+                result = true;
+        });
+
+        return result;
+    }
+
     private handleOnModelError = (err : string) => {
-        if (err) {
+        if (err) 
             throw new Error('Error rendering the model ' + err);
-        } else {
-            this.configureModules();
-        }            
     }
 
     configureModules() {
@@ -98,62 +134,8 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         this.modeler._emit('elements.changed', { elements: [element] });
     }
 
-    //private fireElementsChanged() {
-    //    this.modeler._emit("elements.changed", {});
-    //}
-
-    private isPool(elementType: string): boolean {
-        return (elementType == "bpmn:Participant");
-    }
-
-    private isLane(elementType: string): boolean {
-        return (elementType == "bpmn:Lane");
-    }
-
-    private isEvent(elementType: string): boolean {
-        return (elementType == "bpmn:StartEvent" || elementType == "bpmn:EndEvent");
-    }
-
-    private isTaskAnyway(elementType: string): boolean {
-        return this.isTask(elementType) || this.isUserTask(elementType) || this.isCallActivity(elementType);
-    }
-
-    private isTask(elementType: string): boolean {
-        return (elementType == "bpmn:Task");
-    }
-
-    private isUserTask(elementType: string): boolean {
-        return (elementType == "bpmn:UserTask");
-    }
-
-    private isCallActivity(elementType: string): boolean {
-        return (elementType == "bpmn:CallActivity");
-    }
-
-    private isScriptTask(elementType: string): boolean {
-        return (elementType == "bpmn:ScriptTask");
-    }
-
-    private isGateway(elementType: string): boolean {
-        return (elementType == "bpmn:ExclusiveGateway" || elementType == "bpmn:InclusiveGateway" || elementType == "bpmn:ParallelGateway");
-    }
-
-    private isConnection(elementType: string): boolean {
-        return (elementType == "bpmn:SequenceFlow" || elementType == "bpmn:MessageFlow");
-    }
-
-    private isLabel(elementType: string): boolean {
-        return (elementType == "label");
-    }
-
-
-
     getMainType() {
-        var result = this.props.workflow.mainEntityType;
-        if (!result)
-            throw new Error(ValidationMessage._0IsNotSet.niceToString(WorkflowEntity.nicePropertyName(a => a.mainEntityType)));
-
-        return result;
+        return this.props.workflow.mainEntityType;
     }
 
     newModel(element: BPMN.DiElement): ModelEntity | undefined {
@@ -161,30 +143,32 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         const elementType = element.type;
         const elementName = element.businessObject.name;
 
-        if (this.isPool(elementType))
-            return WorkflowPoolModel.New({ name : elementName });
-
-        if (this.isLane(elementType))
-            return WorkflowLaneModel.New({
-                mainEntityType: this.getMainType(),
+        if (BpmnUtils.isPool(elementType))
+            return WorkflowPoolModel.New({
                 name: elementName
             });
 
-        if (this.isTaskAnyway(elementType))
-            return WorkflowActivityModel.New({
-                mainEntityType: this.getMainType(),
-                name: elementName,
-                type: (this.isCallActivity(elementType) ? "CallWorkflow" :
-                    this.isUserTask(elementType) ? "Decision" :
-                        this.isScriptTask(elementType) ? "Script"
-                            : "Task")
+        if (BpmnUtils.isLane(elementType))
+            return WorkflowLaneModel.New({
+                name: elementName
             });
 
-        if (this.isConnection(elementType))
-            return WorkflowConnectionModel.New({
-                mainEntityType: this.getMainType(),
+        if (BpmnUtils.isStartEvent(elementType)) {
+            return WorkflowEventModel.New({
                 name: elementName,
-                isBranching: this.isGateway((element.businessObject as BPMN.ConnectionModdleElemnet).sourceRef.$type)
+                type: "Start"
+            });
+        }
+
+        if (BpmnUtils.isTaskAnyKind(elementType))
+            return WorkflowActivityModel.New({
+                name: elementName,
+                type: "Task"
+            });
+
+        if (BpmnUtils.isConnection(elementType))
+            return WorkflowConnectionModel.New({
+                name: elementName,
             });
 
         return undefined;
@@ -198,11 +182,12 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                 bindTo: document
             },
             additionalModules: [
-                connectionIcons,                
+                connectionIcons,
             ],
         });
         this.configureModules();
         this.elementRegistry = this.modeler.get<BPMN.ElementRegistry>('elementRegistry');
+        this.bpmnFactory = this.modeler.get<BPMN.BpmnFactory>('bpmnFactory');
         this.modeler.on('element.dblclick', 1500, this.handleElementDoubleClick);
         this.modeler.on('element.paste', 1500, this.handleElementPaste);
         this.modeler.on('shape.add', 1500, this.handleAddShapeOrConnection);
@@ -221,12 +206,22 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
 
             this.props.entities[obj.element.id] = model;
         }
-        else {
+        else
             (model as any).name = obj.element.businessObject.name;
 
-            if (this.isConnection(obj.element.type))
-                (model as WorkflowConnectionModel).isBranching = this.isGateway((obj.element.businessObject as BPMN.ConnectionModdleElemnet).sourceRef.$type);
+        var elementType = obj.element.type;
+
+        if (BpmnUtils.isConnection(elementType)) {
+            var sourceElementType = (obj.element.businessObject as BPMN.ConnectionModdleElemnet).sourceRef.$type;
+            var connModel = (model as WorkflowConnectionModel);
+
+            connModel.needDecisonResult = BpmnUtils.isExclusiveGateway(sourceElementType);
+            connModel.needCondition = BpmnUtils.isExclusiveGateway(sourceElementType) || BpmnUtils.isInclusiveGateway(sourceElementType);
+            connModel.needOrder = BpmnUtils.isExclusiveGateway(sourceElementType);
         }
+
+        if (BpmnUtils.isLane(elementType) || BpmnUtils.isTaskAnyKind(elementType) || BpmnUtils.isStartEvent(elementType) || BpmnUtils.isConnection(elementType))
+            (model as any).mainEntityType = this.getMainType();
 
         obj.preventDefault();
         obj.stopPropagation();
@@ -237,10 +232,31 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                 this.props.entities[obj.element.id] = me;
                 obj.element.businessObject.name = (me as any).name;
 
-                if (this.isTaskAnyway(obj.element.type)) {
+                if (BpmnUtils.isTaskAnyKind(obj.element.type)) {
                     var dt = (me as WorkflowActivityModel).type;
                     obj.element.type = (dt == "CallWorkflow" || dt == "DecompositionWorkflow") ? "bpmn:CallActivity" :
                         dt == "Decision" ? "bpmn:UserTask" : dt == "Script" ? "bpmn:ScriptTask" : "bpmn:Task";
+                } else if (BpmnUtils.isStartEvent(obj.element.type)) {
+                    var et = (me as WorkflowEventModel).type;
+                    obj.element.type = (et == "Start" || et == "TimerStart" || et == "ConditionalStart") ? "bpmn:StartEvent" : "bpmn:EndEvent";
+
+
+                    var bo = obj.element.businessObject;
+                    var shouldEvent =
+                        et == "TimerStart" ? "bpmn:TimerEventDefinition" :
+                        et == "ConditionalStart" ? "bpmn:ConditionalEventDefinition" :
+                                null;
+
+                    if (shouldEvent) {
+                        if (!bo.eventDefinitions)
+                            bo.eventDefinitions = [];
+
+                        bo.eventDefinitions.filter(a => a.$type != shouldEvent).forEach(a => bo.eventDefinitions!.remove(a));
+                        if (bo.eventDefinitions.length == 0)
+                            bo.eventDefinitions.push(this.bpmnFactory.create(shouldEvent, {}));
+                    } else {
+                        bo.eventDefinitions = undefined;
+                    }
                 }
 
                 this.fireElementChanged(obj.element);

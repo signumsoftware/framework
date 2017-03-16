@@ -7,7 +7,7 @@ import {
     EntityPack, Lite, toLite, MListElement, JavascriptMessage, EntityControlMessage,
     newMListElement, liteKey, getMixin, Entity, ExecuteSymbol, isEntityPack, isEntity
 } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { TypeEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import { TypeEntity, IUserEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { Type, PropertyRoute } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { EntityFrame, TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -32,6 +32,7 @@ export { CaseModalFrame };
 import CasePageFrame from './Case/CaseModalFrame'
 export { CasePageFrame };
 
+import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
 import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal'
 
@@ -40,7 +41,7 @@ import {
     CaseActivityOperation, CaseEntity, CaseNotificationEntity, CaseNotificationState, InboxFilterModel, WorkflowOperation, WorkflowPoolEntity, WorkflowScriptEntity, WorkflowScriptEval,
     WorkflowActivityOperation, WorkflowReplacementModel, WorkflowModel, BpmnEntityPair, WorkflowActivityModel, ICaseMainEntity, WorkflowGatewayEntity, WorkflowEventEntity,
     WorkflowLaneModel, WorkflowConnectionModel, IWorkflowNodeEntity, WorkflowActivityMessage, WorkflowTimeoutEntity, CaseTagEntity, CaseTagsModel, CaseTagTypeEntity,
-    WorkflowScriptRunnerPanelPermission
+    WorkflowScriptRunnerPanelPermission, WorkflowEventModel, WorkflowEventTaskEntity, DoneType, CaseOperation
 } from './Signum.Entities.Workflow'
 
 import InboxFilter from './Case/InboxFilter'
@@ -56,9 +57,19 @@ export function start(options: { routes: JSX.Element[] }) {
         <Route path="new/:workflowId" getComponent={(loc, cb) => require(["./Case/CasePageFrame"], (Comp) => cb(null, Comp.default))} />
     </Route>);
 
+    QuickLinks.registerQuickLink(CaseActivityEntity, ctx => [
+        new QuickLinks.QuickLinkAction("caseFlow", WorkflowActivityMessage.CaseFlow.niceToString(), e => {
+            Navigator.API.fetchAndForget(ctx.lite)
+                .then(ca => Navigator.navigate(ca.case, { extraComponentProps: { caseActivity: ca } }))
+                .done();
+        }, { icon: "fa fa-random", iconColor: "green" })
+    ]);
+
     options.routes.push(<Route path="workflow">
         <Route path="panel" getComponent={(loc, cb) => require(["./Workflow/WorkflowScriptRunnerPanelPage"], (Comp) => cb(undefined, Comp.default))} />
     </Route>);
+
+    Link
 
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(WorkflowScriptRunnerPanelPermission.ViewWorkflowScriptRunnerPanel),
@@ -96,6 +107,7 @@ export function start(options: { routes: JSX.Element[] }) {
         }
     });
 
+    Navigator.addSettings(new EntitySettings(CaseEntity, w => new ViewPromise(m => require(['./Case/Case'], m))));
     Navigator.addSettings(new EntitySettings(CaseTagEntity, w => new ViewPromise(m => require(['./Case/CaseTag'], m))));
     Navigator.addSettings(new EntitySettings(CaseTagsModel, w => new ViewPromise(m => require(['./Case/CaseTagsModel'], m))));
 
@@ -107,6 +119,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
     Constructor.registerConstructor(WorkflowTimeoutEntity, () => Constructor.construct(TimeSpanEntity).then(ep => ep && WorkflowTimeoutEntity.New({ timeout: ep.entity })));
 
+    Operations.addSettings(new EntityOperationSettings(CaseOperation.SetTags, { isVisible: ctx => false }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { hideOnCanExecute: true, style: "primary" }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Delete, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Undo, { hideOnCanExecute: true, style: "danger" }));
@@ -138,6 +151,8 @@ export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(WorkflowActionEntity, w => new ViewPromise(m => require(['./Workflow/WorkflowAction'], m))));
     Navigator.addSettings(new EntitySettings(WorkflowScriptEntity, w => new ViewPromise(m => require(['./Workflow/WorkflowScript'], m))));
     Navigator.addSettings(new EntitySettings(WorkflowLaneModel, w => new ViewPromise(m => require(['./Workflow/WorkflowLaneModel'], m))));
+    Navigator.addSettings(new EntitySettings(WorkflowEventModel, w => new ViewPromise(m => require(['./Workflow/WorkflowEventModel'], m))));
+    Navigator.addSettings(new EntitySettings(WorkflowEventTaskEntity, w => new ViewPromise(m => require(['./Workflow/WorkflowEventTask'], m))));
 
     Constructor.registerConstructor(WorkflowConditionEntity, () => WorkflowConditionEntity.New({ eval: WorkflowConditionEval.New() }));
     Constructor.registerConstructor(WorkflowActionEntity, () => WorkflowActionEntity.New({ eval: WorkflowActionEval.New() }));
@@ -333,7 +348,7 @@ export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEn
 
 export function createNewCase(workflowId: number | string): Promise<CaseEntityPack>{
     return Navigator.API.fetchEntity(WorkflowEntity, workflowId)
-        .then(wf => Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseFromWorkflow))
+        .then(wf => Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow))
         .then(ep => ({
             activity: ep.entity,
             canExecuteActivity: ep.canExecute,
@@ -451,6 +466,10 @@ export namespace API {
     export function stop(): Promise<void> {
         return ajaxPost<void>({ url: "~/api/workflow/scriptRunner/stop" }, undefined);
     }
+
+    export function caseFlow(c: Lite<CaseEntity>): Promise<CaseFlow> {
+        return ajaxGet<CaseFlow>({ url: `~/api/workflow/caseFlow/${c.id}` });
+    }
 }
 
 export interface WorkflowFindNodeRequest {
@@ -497,4 +516,31 @@ export interface WorkflowScriptRunnerState {
     NextPlannedExecution: string;
     QueuedItems: number;
     CurrentProcessIdentifier: string;
+}
+
+export interface  CaseActivityStats {
+    CaseActivity: Lite<CaseActivityEntity>;
+    PreviousActivity: Lite<CaseActivityEntity>;
+    WorkflowActivity: Lite<WorkflowActivityEntity>;
+    Notifications: number;
+    StartOn: string;
+    DoneDate?: string;
+    DoneType?: DoneType;
+    DoneBy: Lite<IUserEntity>;
+    Duration?: number;
+    AverageDuration?: number;
+    EstimatedDuration?: number;
+
+}
+export interface CaseConnectionStats {
+    Connection: Lite<WorkflowConnectionEntity>;
+    DoneDate: string;
+    DoneBy: Lite<IUserEntity>;
+
+}
+
+export interface CaseFlow {
+    Activities: { [bpmnElementId: string]: CaseActivityStats[] };
+    Connections: { [bpmnElementId: string]: CaseConnectionStats[] };
+    AllNodes: string[];
 }

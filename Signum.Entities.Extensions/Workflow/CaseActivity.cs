@@ -38,10 +38,15 @@ namespace Signum.Entities.Workflow
         [SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = true, MultiLine = true)]
         public string Note { get; set; }
-
+        
         public DateTime? DoneDate { get; set; }
+
+        [Unit("min")]
+        public double? Duration { get; set; }
+
         public Lite<UserEntity> DoneBy { get; set; }
         public DoneType? DoneType { get; set; }
+
 
         public ScriptExecutionEntity ScriptExecution { get; set; }
 
@@ -66,6 +71,13 @@ namespace Signum.Entities.Workflow
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
+        }
+
+        protected override void PreSaving(ref bool graphModified)
+        {
+            base.PreSaving(ref graphModified);
+            this.Duration = this.DoneDate == null ? (double?)null :
+                (this.DoneDate.Value - this.StartDate).TotalMinutes;
         }
     }
 
@@ -102,7 +114,8 @@ namespace Signum.Entities.Workflow
     [AutoInit]
     public static class CaseActivityOperation
     {
-        public static readonly ConstructSymbol<CaseActivityEntity>.From<WorkflowEntity> CreateCaseFromWorkflow;
+        public static readonly ConstructSymbol<CaseActivityEntity>.From<WorkflowEntity> CreateCaseActivityFromWorkflow;
+        public static readonly ConstructSymbol<CaseEntity>.From<WorkflowEventTaskEntity> CreateCaseFromWorkflowEventTask;
         public static readonly ExecuteSymbol<CaseActivityEntity> Register;
         public static readonly DeleteSymbol<CaseActivityEntity> Delete;
         public static readonly ExecuteSymbol<CaseActivityEntity> Next;

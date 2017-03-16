@@ -11,14 +11,13 @@ import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
-import { WordTemplateEntity, WordTemplateOperation, WordTemplateTableSourceEntity } from './Signum.Entities.Word'
+import { WordTemplateEntity, WordTemplateOperation } from './Signum.Entities.Word'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 
 export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(WordTemplateEntity, e => new ViewPromise(resolve => require(['./Templates/WordTemplate'], resolve))));
-    Navigator.addSettings(new EntitySettings(WordTemplateTableSourceEntity, e => new ViewPromise(resolve => require(['./Templates/WordTemplateTableSource'], resolve))));
 
     Operations.addSettings(new EntityOperationSettings(WordTemplateOperation.CreateWordReport, {
         onClick: ctx => {

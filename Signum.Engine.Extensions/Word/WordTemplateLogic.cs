@@ -31,6 +31,13 @@ using Signum.Entities.Chart;
 
 namespace Signum.Engine.Word
 {
+
+    public interface IWordDataTableProvider
+    {
+        string Validate(string suffix, WordTemplateEntity template);
+        DataTable GetDataTable(string suffix, WordTemplateLogic.WordContext context);
+    }
+
     public static class WordTemplateLogic
     {
         public static bool AvoidSynchronize = false;
@@ -42,7 +49,7 @@ namespace Signum.Engine.Word
         public static Dictionary<WordTransformerSymbol, Action<WordContext, OpenXmlPackage>> Transformers = new Dictionary<WordTransformerSymbol, Action<WordContext, OpenXmlPackage>>();
         public static Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>> Converters = new Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>>();
 
-        public static Polymorphic<Func<Entity, WordContext, DataTable>> ToDataTable = new Polymorphic<Func<Entity, WordContext, DataTable>>();
+        public static Dictionary<string, IWordDataTableProvider> ToDataTableProviders = new Dictionary<string, IWordDataTableProvider>();
 
         static Expression<Func<SystemWordTemplateEntity, IQueryable<WordTemplateEntity>>> WordTemplatesExpression =
             e => Database.Query<WordTemplateEntity>().Where(a => a.SystemWordTemplate == e);
@@ -87,8 +94,9 @@ namespace Signum.Engine.Word
                     });
 
 
-                ToDataTable.Register(new Func<UserQueryEntity, WordContext, DataTable>(TableBinder.UserQueryToDataTable));
-                ToDataTable.Register(new Func<UserChartEntity, WordContext, DataTable>(TableBinder.UserChartToDataTable));
+                ToDataTableProviders.Add("Model", new ModelDataTableProvider());
+                ToDataTableProviders.Add("UserQuery", new UserQueryDataTableProvider());
+                ToDataTableProviders.Add("UserChart", new UserChartDataTableProvider());
 
                 dqm.RegisterExpression((SystemWordTemplateEntity e) => e.WordTemplates(), () => typeof(WordTemplateEntity).NiceName());
 
@@ -200,6 +208,7 @@ namespace Signum.Engine.Word
                 throw new ArgumentException("systemWordTemplate should be a {0} instead of {1}".FormatWith(template.SystemWordTemplate.FullClassName, systemWordTemplate.GetType().FullName));
 
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
+            using (CultureInfoUtils.ChangeBothCultures(template.Culture.ToCultureInfo()))
             {
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(template.Query.ToQueryName());
 

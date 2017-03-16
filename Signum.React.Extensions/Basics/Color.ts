@@ -188,38 +188,88 @@ export class Color {
         return (this.r + this.g + this.b) / 3 > (256 / 2) ? Color.Black : Color.White;
     }
 
-    static parse(color: string | undefined): Color | undefined {
+    static parse(color: string): Color {
+        var result = Color.tryParse(color);
+        if (!result)
+            throw new Error("Impossible to parse color " + color);
+
+        return result;
+    }
+
+    static tryParse(color: string | undefined): Color | undefined {
 
         if (!color)
             return undefined;
 
         let c = nameToHex(color) || color;
 
-        if (c[0] === '#')
+        if (c.startsWith("rgba")) {
+            c = c.after("rgba(").before(")");
+            var parts = c.split(",");
+            return new Color(
+                parseInt(parts[0]),
+                parseInt(parts[1]),
+                parseInt(parts[2]),
+                parseInt(parts[3]),
+            );
+        }
+        else if (c.startsWith("rgb")) {
+            c = c.after("rgb(").before(")");
+            var parts = c.split(",");
+            return new Color(
+                parseInt(parts[0]),
+                parseInt(parts[1]),
+                parseInt(parts[2]),
+            );
+
+        }
+        else if (c.startsWith('#')) {
             c = c.substr(1);
 
-        switch (c.length) {
-            case 3: return new Color(
-                parseInt(c.slice(0, 1), 16) * 16,
-                parseInt(c.slice(1, 2), 16) * 16,
-                parseInt(c.slice(2, 3), 16) * 16
-            );
+            switch (c.length) {
+                case 3: return new Color(
+                    parseInt(c.slice(0, 1), 16) * 16,
+                    parseInt(c.slice(1, 2), 16) * 16,
+                    parseInt(c.slice(2, 3), 16) * 16
+                );
 
-            case 6: return new Color(
-                parseInt(c.slice(0, 2), 16),
-                parseInt(c.slice(2, 4), 16),
-                parseInt(c.slice(4, 6), 16)
-            );
+                case 6: return new Color(
+                    parseInt(c.slice(0, 2), 16),
+                    parseInt(c.slice(2, 4), 16),
+                    parseInt(c.slice(4, 6), 16)
+                );
 
-            case 8: return new Color(
-                parseInt(c.slice(0, 2), 16),
-                parseInt(c.slice(2, 4), 16),
-                parseInt(c.slice(4, 6), 16),
-                parseInt(c.slice(6, 8), 16)
-            );
+                case 8: return new Color(
+                    parseInt(c.slice(0, 2), 16),
+                    parseInt(c.slice(2, 4), 16),
+                    parseInt(c.slice(4, 6), 16),
+                    parseInt(c.slice(6, 8), 16)
+                );
 
-            default:
-                return undefined;
+                default:
+                    return undefined;
+            }
         }
+        else
+            return undefined;
+    }
+}
+
+export class Gradient {
+    constructor(public list : { value: number, color: Color }[]) {
+
+    }
+
+    getColor(value: number) {
+        var prev = this.list.filter(a => a.value <= value).withMax(a => a.value);
+        var next = this.list.filter(a => a.value > value).withMin(a => a.value);
+        
+        if (prev == undefined)
+            return next!.color;
+
+        if (next == undefined)
+            return prev!.color;
+
+        return prev.color.lerp(value - prev.value / next.value - prev.value, next.color);
     }
 }

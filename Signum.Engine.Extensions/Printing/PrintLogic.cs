@@ -18,6 +18,7 @@ using Signum.Entities.Printing;
 using Signum.Entities;
 using System.IO;
 using Signum.Engine.Scheduler;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.Printing
 {
@@ -172,6 +173,14 @@ namespace Signum.Engine.Printing
                 a.File.DeleteFileOnCommit();
             });
             list.SaveList();
+        }
+
+        public static FileContent SavePrintLine(this FileContent file, Entity entity, FileTypeSymbol fileTypeForPrinting)
+        {
+            PrintingLogic.CancelPrinting(entity, fileTypeForPrinting);
+            PrintingLogic.CreateLine(entity, fileTypeForPrinting, Path.GetFileName(file.FileName), file.Bytes);
+
+            return file;
         }
 
         public static IQueryable<PrintLineEntity> ReadyToPrint(Entity entity, FileTypeSymbol fileType)

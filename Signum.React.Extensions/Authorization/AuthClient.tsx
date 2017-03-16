@@ -10,8 +10,9 @@ import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
+import { PropertyRouteEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import ButtonBar from '../../../Framework/Signum.React/Scripts/Frames/ButtonBar'
-import { PseudoType, QueryKey, getTypeInfo, PropertyRouteType, OperationInfo, isQueryDefined, getQueryInfo } from '../../../Framework/Signum.React/Scripts/Reflection'
+import { PseudoType, QueryKey, getTypeInfo, PropertyRouteType, OperationInfo, isQueryDefined, getQueryInfo, GraphExplorer } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission } from './Signum.Entities.Authorization'
 import { PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack} from './Signum.Entities.Authorization'
@@ -54,7 +55,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
 
     if (options.properties) {
         tasks.push(taskAuthorizeProperties);
-
+        GraphExplorer.TypesLazilyCreated.push(PropertyRouteEntity.typeName);
         Navigator.addSettings(new EntitySettings(PropertyRulePack, e => new ViewPromise(resolve => require(['./Admin/PropertyRulePackControl'], resolve))));
     }
 

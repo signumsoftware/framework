@@ -8,7 +8,7 @@ import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOpti
 import { TypeContext, FormGroupSize, FormGroupStyle, StyleOptions, StyleContext, mlistItemContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { SearchMessage, JavascriptMessage, parseLite, is, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { ValueLine, FormGroup, ValueLineProps, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { ValueLine, FormGroup, ValueLineProps, ValueLineType, OptionItem } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity, IChartBase, GroupByChart, ChartMessage, ChartColorEntity, ChartScriptEntity, ChartParameterEntity, ChartParameterType } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
@@ -182,10 +182,10 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
         };
 
         if (scriptParameter.type == "Number" || scriptParameter.type == "String") {
-            vl.valueLineType = ValueLineType.TextBox;
+            vl.valueLineType = "TextBox";
         }
         else if (scriptParameter.type == "Enum") {
-            vl.valueLineType = ValueLineType.Enum;
+            vl.valueLineType = "ComboBox";
 
             const tokenEntity = scriptParameter.columnIndex == undefined ? undefined : chart.columns[scriptParameter.columnIndex].element.token;
 
@@ -193,7 +193,11 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
             if (compatible.length <= 1)
                 vl.ctx.styleOptions.readOnly = true;
 
-            vl.comboBoxItems = compatible.map(ev => ({ name: ev.name, niceName: ev.name }));
+            vl.comboBoxItems = compatible.map(ev => ({
+                value: ev.name,
+                label: ev.name
+            } as OptionItem));
+
             vl.valueHtmlProps = { size: null as any };
         }
 

@@ -435,7 +435,7 @@ NodeUtils.register<ValueLineNode>({
         formatText: node.formatText,
         readOnly: node.readOnly,
         inlineCheckbox: node.inlineCheckbox,
-        valueLineType: node.textArea && bindExpr(ta => ta ? ValueLineType.TextArea : undefined, node.textArea),
+        valueLineType: node.textArea && bindExpr(ta => ta ? "TextArea" : undefined, node.textArea),
         autoTrim: node.autoTrim,
         onChange: cc.evaluateOnChange(node.redrawOnChange)
     }),
@@ -448,7 +448,7 @@ NodeUtils.register<ValueLineNode>({
         formatText={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.formatText, NodeUtils.isStringOrNull)}
         readOnly={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
         inlineCheckbox={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.inlineCheckbox, NodeUtils.isBooleanOrNull)}
-        valueLineType={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.textArea, NodeUtils.isBooleanOrNull) ? ValueLineType.TextArea : undefined}
+        valueLineType={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.textArea, NodeUtils.isBooleanOrNull) ? "TextArea" : undefined}
         autoTrim={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.autoTrim, NodeUtils.isBooleanOrNull)}
         onChange={NodeUtils.evaluateOnChange(ctx, dn)}
         />),

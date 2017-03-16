@@ -109,6 +109,7 @@
     <Compile Include="Authorization\Role.cs" />
     <Compile Include="Authorization\ServicesData.cs" />
     <Compile Include="Authorization\User.cs" />
+    <Compile Include="Basics\FileContent.cs" />
     <Compile Include="Chart\ChartParameter.cs" />
     <Compile Include="Chart\ChartScriptColumn.cs" />
     <Compile Include="Dashboard\DashboardOmniboxResultGenerator.cs" />
@@ -239,6 +240,7 @@
     <Compile Include="Workflow\WorkflowGateway.cs" />
     <Compile Include="Workflow\WorkflowLane.cs" />
     <Compile Include="Workflow\WorkflowPool.cs" />
+    <Compile Include="Workflow\WorkflowEventTask.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj">

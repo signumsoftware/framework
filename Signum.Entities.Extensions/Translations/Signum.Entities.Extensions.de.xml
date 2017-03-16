@@ -38,7 +38,6 @@
     <Member Name="Attend" Description="Erledigen" />
     <Member Name="CreateAlertFromEntity" Description="Warnung aus Entität erstellen" />
     <Member Name="Save" Description="Speichern" />
-    <Member Name="SaveNew" Description="Speichern neu" />
     <Member Name="Unattend" Description="Unerledigt bleiben" />
   </Type>
   <Type Name="AlertState" Description="Warnungsstatus">
@@ -106,7 +105,6 @@
     <Member Name="ChangePasswordAspx_ChangePassword" Description="Passwort ändern" />
     <Member Name="ChangePasswordAspx_ConfirmNewPassword" Description="Neues Passwort bestätigen" />
     <Member Name="ChangePasswordAspx_NewPassword" Description="Neues Passwort" />
-    <Member Name="ChangePasswordAspx_WriteActualPasswordAndNewOne" Description="Schreiben Sie Ihr aktuelles Kennwort und das neue" />
     <Member Name="ConfirmNewPassword" Description="Passwort bestätigen" />
     <Member Name="Email" Description="E-Mail" />
     <Member Name="EmailMustHaveAValue" Description="Die E-Mail muss einen Wert haben" />
@@ -120,7 +118,6 @@
     <Member Name="ForgotYourPasswordEnterYourPasswordBelow" Description="Passwort vergessen? Geben Sie Ihre Login-E-Mail-Adresse ein." />
     <Member Name="IHaveForgottenMyPassword" Description="Ich habe mein Passwort vergessen" />
     <Member Name="IncorrectPassword" Description="Falsches Passwort" />
-    <Member Name="IntroduceYourUserNameAndPassword" Description="Geben Sie Ihren Benutzernamen und Ihr Passwort ein" />
     <Member Name="InvalidPassword" Description="Ungültiges Passwort" />
     <Member Name="InvalidUsername" Description="Ungültiger Benutzername" />
     <Member Name="InvalidUsernameOrPassword" Description="Ungültiger Benutzername oder Kennwort" />
@@ -206,32 +203,70 @@
     <Member Name="Case" Description="Fall" />
     <Member Name="DoneBy" Description="Abgeschlossen durch" />
     <Member Name="DoneDate" Description="Abschlussdatum" />
+    <Member Name="DoneType" Description="Fertigstellungstypen" />
+    <Member Name="Note" Description="Notiz" />
     <Member Name="OriginalWorkflowActivityName" Description="Ursprünglicher Name der Workflow-Aktivität" />
+    <Member Name="Previous" Description="Vorherige" />
+    <Member Name="ScriptExecution" Description="Ausführung des Skripts" />
     <Member Name="StartDate" Description="Startdatum" />
+    <Member Name="State" Description="Zustand" />
     <Member Name="WorkflowActivity" Description="Workflow-Aktivität" />
   </Type>
   <Type Name="CaseActivityMessage">
-    <Member Name="ActivityAlreadyRegistered" Description="Aktivität ist bereits registriert" />
-    <Member Name="AlreadyDone" Description="Bereits getan" />
+    <Member Name="Activity0HasNoJumps" Description="Aktivität &quot;{0}&quot; hat keine Sprünge" />
+    <Member Name="Activity0HasNoReject" Description="Aktivität &quot;{0}&quot; ist keine Ablehnung." />
+    <Member Name="Activity0HasNoTimeout" Description="Aktivität &quot;{0}&quot; hat keinen Timeout" />
     <Member Name="CaseContainsOtherActivities" Description="Fall enthält andere Aktivitäten" />
+    <Member Name="CaseIsADecompositionOf0" Description="Vorgang ist eine Zersetzung von {0}" />
+    <Member Name="DoneBy0On1" Description="Abgeschlossen von {0} auf {1}" />
+    <Member Name="From0On1" Description="Von {0} auf {1}" />
+    <Member Name="NextActivityAlreadyInProgress" Description="Nächste Aktivität bereits im Gange" />
+    <Member Name="NextActivityOfDecompositionSurrogateAlreadyInProgress" Description="Nächste Surrogat-Aktivität der Zersetzung bereits im Gange" />
     <Member Name="NoNextConnectionThatSatisfiesTheConditionsFound" Description="Keine nächste Verbindung gefunden, die der Bedingung entspricht" />
-    <Member Name="OnlyFor0Activites" Description="Nur für {0} Aktivitäten" />
+    <Member Name="NoOpenedOrInProgressNotificationsFound" Description="Keine geöffnete, oder in bearbeitung, Statusbenachrichtigungen gefunden." />
+    <Member Name="Only0CanUndoThisOperation" Description="Nur &quot;{0}&quot; kann diesen Vorgang rückgängig machen." />
+    <Member Name="OnlyForScriptWorkflowActivities" Description="Nur für Skript-Workflow-Aktivitäten" />
+    <Member Name="PersonalRemarksForThisNotification" Description="Persönliche Anmerkungen für diese Benachrichtigung" />
+    <Member Name="TheActivity0RequiresToBeOpened" Description="Die Aktivität &quot;{0}&quot; muss geöffnet werden" />
+    <Member Name="ThereIsNoPreviousActivity" Description="Es ist keine vorherige Aktivität vorhanden" />
   </Type>
   <Type Name="CaseActivityOperation">
     <Member Name="Approve" Description="Genehmigen" />
-    <Member Name="Create" Description="Erstellen" />
+    <Member Name="CreateCaseFromWorkflow" Description="Vorgang vom Workflow erstellen" />
     <Member Name="Decline" Description="Rückgang" />
     <Member Name="Delete" Description="Löschen" />
+    <Member Name="FixCaseDescriptions" Description="Vorgangsbeschreibung beheben" />
+    <Member Name="Jump" Description="Springen" />
+    <Member Name="MarkAsUnread" Description="Als ungelesen markieren" />
     <Member Name="Next" Description="Nächstes" />
     <Member Name="Register" Description="Anlegen" />
+    <Member Name="Reject" Description="Ablehnen" />
+    <Member Name="ScriptExecute" Description="Skript ausführen" />
+    <Member Name="ScriptFailureJump" Description="Skript Fehler springen" />
+    <Member Name="ScriptScheduleRetry" Description="Skript-Zeitplan wiederholen" />
+    <Member Name="Timeout" Description="Timeout" />
+    <Member Name="Undo" Description="Rückgängig" />
+  </Type>
+  <Type Name="CaseActivityProcessAlgorithm">
+    <Member Name="Timeout" Description="Timeout" />
   </Type>
   <Type Name="CaseActivityQuery">
     <Member Name="Inbox" Description="Posteingang" />
+  </Type>
+  <Type Name="CaseActivityState" Description="Vorgangsaktivität Zustand">
+    <Member Name="Done" Description="Abgeschlossen" />
+    <Member Name="New" Description="Neu" />
+    <Member Name="PendingDecision" Description="Ausstehende Entscheidung" />
+    <Member Name="PendingNext" Description="Ausstehende weiter" />
+  </Type>
+  <Type Name="CaseActivityTask">
+    <Member Name="Timeout" Description="Timeout" />
   </Type>
   <Type Name="CaseEntity" Description="Fall">
     <Member Name="Description" Description="Beschreibung" />
     <Member Name="FinishDate" Description="Fertigstellungsdatum" />
     <Member Name="MainEntity" Description="Hauptentität" />
+    <Member Name="ParentCase" Description="Übergeordneter Vorgang" />
     <Member Name="StartDate" Description="Startdatum" />
     <Member Name="Workflow" Description="Workflow" />
   </Type>
@@ -243,14 +278,39 @@
   <Type Name="CaseNotificationEntity" Description="Fall Benachrichtigung">
     <Member Name="Actor" Description="Schauspieler" />
     <Member Name="CaseActivity" Description="Fall-Aktivität" />
+    <Member Name="Remarks" Description="Bemerkungen" />
     <Member Name="State" Description="Zustand" />
     <Member Name="User" Description="Benutzer" />
   </Type>
+  <Type Name="CaseNotificationOperation">
+    <Member Name="SetRemarks" Description="Bemerkungen hinzufügen" />
+  </Type>
   <Type Name="CaseNotificationState" Description="Fall Benachrichtigungszustand">
     <Member Name="Done" Description="Abgeschlossen" />
+    <Member Name="DoneByOther" Description="Durch anderen abgeschlossen" />
     <Member Name="InProgress" Description="In Bearbeitung" />
     <Member Name="New" Description="Neu" />
     <Member Name="Opened" Description="Geöffnet" />
+  </Type>
+  <Type Name="CaseOperation">
+    <Member Name="SetTags" Description="Setze Tags" />
+  </Type>
+  <Type Name="CaseTagEntity" Description="Vorgangstag">
+    <Member Name="Case" Description="Vorgang" />
+    <Member Name="CreatedBy" Description="Erstellt von" />
+    <Member Name="CreationDate" Description="Erstellungsdatum" />
+    <Member Name="TagType" Description="Tagtyp" />
+  </Type>
+  <Type Name="CaseTagsModel" Description="Vorgangstags">
+    <Member Name="CaseTags" Description="Vorgangstags" />
+    <Member Name="OldCaseTags" Description="Alter Vorgangstag" />
+  </Type>
+  <Type Name="CaseTagTypeEntity" Description="Gehäusetyp" PluralDescription="Gehäusetypen" Gender="m">
+    <Member Name="Color" Description="Farbe" />
+    <Member Name="Name" Description="Name" />
+  </Type>
+  <Type Name="CaseTagTypeOperation">
+    <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="CertFileType" Description="Zertifikationsdateityp">
     <Member Name="CertFile" Description="Zertiikationsdatei" />
@@ -435,6 +495,7 @@
     <Member Name="End" Description="Ende" />
     <Member Name="Start" Description="Start" />
   </Type>
+  <Type Name="DelayOption" />
   <Type Name="DiffLogMessage">
     <Member Name="CurrentEntity" Description="Aktuelle Entität" />
     <Member Name="DifferenceBetweenFinalStateAndTheCurrentStateOfTheEntity" Description="Unterschied zwischen Endstatus und dem aktuellen Status der Entität" />
@@ -538,6 +599,16 @@
   <Type Name="DisconnectedSubsetMixin">
     <Member Name="DisconnectedMachine" Description="Getrennter Computer" />
     <Member Name="LastOnlineTicks" Description="Letzte Onlineticks" />
+  </Type>
+  <Type Name="DoneType" Description="Fertigstellungstypen">
+    <Member Name="Approve" Description="Genehmigen" />
+    <Member Name="Decline" Description="Rückgang" />
+    <Member Name="Jump" Description="Springen" />
+    <Member Name="Next" Description="Nächstes" />
+    <Member Name="Rejected" Description="Abgelehnt" />
+    <Member Name="ScriptFailure" Description="Skriptfehler" />
+    <Member Name="ScriptSuccess" Description="Skript-Erfolgreich" />
+    <Member Name="Timeout" Description="Timeout" />
   </Type>
   <Type Name="DynamicBaseType" Description="Dynamische Basistyp">
     <Member Name="Entity" Description="Entität" />
@@ -865,7 +936,6 @@
   <Type Name="EmailTemplateMessageEntity" Description="Nachricht E-Mail-Vorlage">
     <Member Name="CultureInfo" Description="Kulturinfo" />
     <Member Name="Subject" Description="Betreff" />
-    <Member Name="Template" Description="Vorlage" />
     <Member Name="Text" Description="Text" />
   </Type>
   <Type Name="EmailTemplateOperation">
@@ -919,7 +989,6 @@
   <Type Name="ExcelAttachmentEntity" Description="Excel-Anlage">
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="Related" Description="In Beziehung mit" />
-    <Member Name="Template" Description="Vorlage" />
     <Member Name="Title" Description="Titel" />
     <Member Name="UserQuery" Description="Benutzer-Abfrage" />
   </Type>
@@ -1086,9 +1155,7 @@
     <Member Name="Date" Description="Datum" />
     <Member Name="Name" Description="Name" />
   </Type>
-  <Type Name="IAttachmentGeneratorEntity">
-    <Member Name="Template" Description="Vorlage" />
-  </Type>
+  <Type Name="IAttachmentGeneratorEntity" />
   <Type Name="ICaseMainEntity" />
   <Type Name="IEmailOwnerEntity">
     <Member Name="EmailOwnerData" Description="E-Mailbesitzerdaten" />
@@ -1126,11 +1193,11 @@
   <Type Name="IUserAssetEntity">
     <Member Name="Guid" Description="Guid" />
   </Type>
-  <Type Name="IWorkflowConnectionEntity" />
   <Type Name="IWorkflowNodeEntity">
     <Member Name="Lane" Description="Fahrbahn" />
   </Type>
   <Type Name="IWorkflowObjectEntity">
+    <Member Name="BpmnElementId" Description="BPMN Element-id" />
     <Member Name="Name" Description="Name" />
     <Member Name="Xml" Description="XML" />
   </Type>
@@ -1377,6 +1444,7 @@
   <Type Name="PrintPermission">
     <Member Name="ViewPrintPanel" Description="Druckerbedienfeld öffnen" />
   </Type>
+  <Type Name="PrintTask" />
   <Type Name="ProcessAlgorithmSymbol" Description="Prozess-Algorithmus" PluralDescription="Prozess-Algorithmen" Gender="m" />
   <Type Name="ProcessEntity" Description="Prozess" PluralDescription="Prozesse" Gender="m">
     <Member Name="Algorithm" Description="Algorithmus" />
@@ -1625,6 +1693,11 @@
     <Member Name="Tuesday" Description="Dienstag" />
     <Member Name="Wednesday" Description="Mittwoch" />
   </Type>
+  <Type Name="ScriptExecutionEntity" Description="Ausführung des Skripts">
+    <Member Name="NextExecution" Description="Nächste Ausführung" />
+    <Member Name="ProcessIdentifier" Description="Prozess-ID" />
+    <Member Name="RetryCount" Description="Wiederholungszähler" />
+  </Type>
   <Type Name="SendEmailTaskEntity" Description="Sende eine Email Aufgabe" PluralDescription="Sende E-Mail Aufgaben">
     <Member Name="EmailTemplate" Description="E-Mail Vorlage" />
     <Member Name="Name" Description="Name" />
@@ -1755,6 +1828,8 @@
   <Type Name="SqlMigrationEntity" Description="SQL-Migration">
     <Member Name="VersionNumber" Description="Versionsnummer" />
   </Type>
+  <Type Name="SubEntitiesEval" />
+  <Type Name="SubWorkflowEntity" />
   <Type Name="SystemEmailEntity" Description="System-E-Mail" PluralDescription="System-E-Mails">
     <Member Name="FullClassName" Description="Vollständiger class name" />
   </Type>
@@ -1778,6 +1853,7 @@
     <Member Name="YouCanOnlyAddForeachBlocksWithCollectionFields" Description="Sie können nur Foreach-Blöcke mit Collection-Feldern hinzufügen" />
     <Member Name="YouHaveToAddTheElementTokenToUseForeachOnCollectionFields" Description="Sie müssen das Element Token zur Verwendung von Foreach in einem Collection-Feld hinzufügen" />
   </Type>
+  <Type Name="TimeSpanEntity" />
   <Type Name="ToolbarElementEntity" Description="Symbolleisten-element">
     <Member Name="Content" Description="Inhalt" />
     <Member Name="IconColor" Description="Symbolfarbe" />
@@ -2093,11 +2169,12 @@
     <Member Name="GenerateReport" Description="Bericht generieren" />
   </Type>
   <Type Name="WordTransformerSymbol" Description="Word-Transformator" PluralDescription="Word-Transformatoren" />
+  <Type Name="WorkflowActionEntity" />
+  <Type Name="WorkflowActionEval" />
+  <Type Name="WorkflowActionOperation" />
   <Type Name="WorkflowActivityEntity" Description="Workflow-Aktivität">
-    <Member Name="Description" Description="Beschreibung" />
     <Member Name="Lane" Description="Fahrbahn" />
     <Member Name="Name" Description="Name" />
-    <Member Name="Thread" Description="Thread" />
     <Member Name="Type" Description="Typ" />
     <Member Name="ValidationRules" Description="Validierungsregeln" />
     <Member Name="ViewName" Description="Ansichtsname" />
@@ -2107,7 +2184,6 @@
     <Member Name="DuplicateViewNameFound0" Description="Doppelter Ansichtsname gefunden: {0}" />
   </Type>
   <Type Name="WorkflowActivityModel" Description="Workflow-Aktivität">
-    <Member Name="Description" Description="Beschreibung" />
     <Member Name="MainEntityType" Description="Haupt-Entitätstyp" />
     <Member Name="Name" Description="Name" />
     <Member Name="Type" Description="Typ" />
@@ -2119,7 +2195,6 @@
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="WorkflowActivityType" Description="Workflow-Aktivitäts-Typ">
-    <Member Name="DecisionTask" Description="Entscheidungsaufgabe" />
     <Member Name="Task" Description="Aufgabe" />
   </Type>
   <Type Name="WorkflowActivityValidationEntity" Description="Workflow-Aktivitäts-Validierung">
@@ -2132,10 +2207,12 @@
     <Member Name="MainEntityType" Description="Haupt-Entitätstyp" />
     <Member Name="Name" Description="Name" />
   </Type>
+  <Type Name="WorkflowConditionEval" />
   <Type Name="WorkflowConditionOperation">
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
+  <Type Name="WorkflowConfigurationEntity" />
   <Type Name="WorkflowConnectionEntity" Description="Workflow-Verbindung">
     <Member Name="Condition" Description="Bedingung" />
     <Member Name="DecisonResult" Description="Beschluß-Ergebnis" />
@@ -2145,7 +2222,6 @@
     <Member Name="To" Description="An" />
     <Member Name="Xml" Description="XML" />
   </Type>
-  <Type Name="WorkflowConnectionEval" Description="Workflow-Verbindungsauswertung" />
   <Type Name="WorkflowConnectionModel" Description="Workflow-Verbindung">
     <Member Name="Condition" Description="Bedingung" />
     <Member Name="DecisonResult" Description="Beschluß-Ergebnis" />
@@ -2164,7 +2240,6 @@
   <Type Name="WorkflowEventEntity" Description="Workflow-event">
     <Member Name="Lane" Description="Fahrbahn" />
     <Member Name="Name" Description="Name" />
-    <Member Name="Thread" Description="Thread" />
     <Member Name="Type" Description="Typ" />
     <Member Name="Xml" Description="XML" />
   </Type>
@@ -2188,7 +2263,6 @@
     <Member Name="Direction" Description="Richtung" />
     <Member Name="Lane" Description="Fahrbahn" />
     <Member Name="Name" Description="Name" />
-    <Member Name="Thread" Description="Thread" />
     <Member Name="Type" Description="Typ" />
     <Member Name="Xml" Description="XML" />
   </Type>
@@ -2206,6 +2280,7 @@
     <Member Name="Inclusive" Description="Inklusive" />
     <Member Name="Parallel" Description="Parallel" />
   </Type>
+  <Type Name="WorkflowJumpEntity" />
   <Type Name="WorkflowLaneActorsEval" />
   <Type Name="WorkflowLaneEntity" Description="Workflowstrasse">
     <Member Name="Actors" Description="Schauspieler" />
@@ -2225,12 +2300,16 @@
   <Type Name="WorkflowMessage">
     <Member Name="_0BelongsToADifferentWorkflow" Description="{0} gehört zu  einem anderem Arbeitsablauf" />
     <Member Name="Condition0IsDefinedFor1Not2" Description="Zustand {0} ist für {1} definiert, nicht für {2}" />
+    <Member Name="JumpsToSameActivityNotAllowed" Description="Sprünge für dieselbe Tätigkeit sind nicht erlaubt" />
+    <Member Name="JumpTo0FailedBecause1" Description="Wechseln zu &quot;{0}' ist fehlgeschlagen, da&quot;{1}&quot;" />
   </Type>
   <Type Name="WorkflowModel" Description="Workflow">
     <Member Name="DiagramXml" Description="XML Diagramm" />
     <Member Name="Entities" Description="Entitäten" />
   </Type>
   <Type Name="WorkflowOperation">
+    <Member Name="Clone" Description="Klonen" />
+    <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="WorkflowPoolEntity" Description="Workflow-pool">
@@ -2245,6 +2324,7 @@
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
+  <Type Name="WorkflowRejectEntity" />
   <Type Name="WorkflowReplacementItemEntity" Description="Workflow-Ersatzteil">
     <Member Name="NewTask" Description="Neue Aufgabe" />
     <Member Name="OldTask" Description="Alte Aufgabe" />
@@ -2252,6 +2332,15 @@
   <Type Name="WorkflowReplacementModel" Description="Workflow-Ersatz">
     <Member Name="Replacements" Description="Ersatz" />
   </Type>
+  <Type Name="WorkflowScriptEntity" />
+  <Type Name="WorkflowScriptEval" />
+  <Type Name="WorkflowScriptOperation" />
+  <Type Name="WorkflowScriptPartEntity" />
+  <Type Name="WorkflowScriptRetryStrategyEntity" />
+  <Type Name="WorkflowScriptRetryStrategyOperation" />
+  <Type Name="WorkflowScriptRunnerPanelPermission" />
+  <Type Name="WorkflowTimeoutEntity" />
+  <Type Name="WorkflowValidationMessage" />
   <Type Name="WorkflowXmlEntity" Description="XML Workflow">
     <Member Name="DiagramXml" Description="XML Diagramm" />
   </Type>

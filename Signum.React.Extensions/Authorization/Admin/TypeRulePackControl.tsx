@@ -16,7 +16,10 @@ import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum
 import { getQueryNiceName, PropertyRoute, getTypeInfo, Binding, GraphExplorer } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { Api, properties, queries, operations } from '../AuthClient'
-import { TypeRulePack, AuthAdminMessage, PermissionSymbol, AuthMessage, TypeAllowed, TypeAllowedRule, TypeAllowedAndConditions, TypeAllowedBasic, TypeConditionRule, AuthThumbnail } from '../Signum.Entities.Authorization'
+import {
+    TypeRulePack, AuthAdminMessage, PermissionSymbol, AuthMessage, TypeAllowed, TypeAllowedRule,
+    TypeAllowedAndConditions, TypeAllowedBasic, TypeConditionRule, AuthThumbnail, PropertyRulePack, OperationRulePack, QueryRulePack
+} from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import { TypeConditionSymbol } from '../../Basics/Signum.Entities.Basics'
 import { OperationSymbol, ModelEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -156,13 +159,23 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                     <GrayCheckbox checked={!typeAllowedEquals(ctx.value.allowed, ctx.value.allowedBase) }/>
                 </td>
                 {properties && <td style={{ textAlign: "center" }}>
-                    {this.link("fa fa-pencil-square-o", ctx.value.properties, () => Api.fetchPropertyRulePack(ctx.value.resource.cleanName, roleId)) }
+                    {this.link("fa fa-pencil-square-o", ctx.value.properties,
+                        () => Api.fetchPropertyRulePack(ctx.value.resource.cleanName, roleId),
+                        m => ctx.value.properties = m.rules.every(a => a.element.allowed == "None") ? "None" :
+                            m.rules.every(a => a.element.allowed == "Modify") ? "All" : "Mix"
+                    )}
                 </td>}
                 {operations && <td style={{ textAlign: "center" }}>
-                    {this.link("fa fa-bolt", ctx.value.operations, () => Api.fetchOperationRulePack(ctx.value.resource.cleanName, roleId)) }
+                    {this.link("fa fa-bolt", ctx.value.operations,
+                        () => Api.fetchOperationRulePack(ctx.value.resource.cleanName, roleId),
+                        m => ctx.value.operations = m.rules.every(a => a.element.allowed == "None") ? "None" :
+                            m.rules.every(a => a.element.allowed == "Allow") ? "All" : "Mix")}
                 </td>}
                 {queries && <td style={{ textAlign: "center" }}>
-                    {this.link("fa fa-search", ctx.value.queries, () => Api.fetchQueryRulePack(ctx.value.resource.cleanName, roleId)) }
+                    {this.link("fa fa-search", ctx.value.queries,
+                        () => Api.fetchQueryRulePack(ctx.value.resource.cleanName, roleId),
+                        m => ctx.value.queries = m.rules.every(a => a.element.allowed == false) ? "None" :
+                            m.rules.every(a => a.element.allowed == true) ? "All" : "Mix")}
                 </td>}
             </tr>
         ].concat(ctx.value.allowed!.conditions!.map(c => {
@@ -202,8 +215,8 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
             onClicked={e => { b.setValue(select(b.getValue(), part, e)); this.forceUpdate(); } }/>;
     }
 
-    link(icon: string, allowed: AuthThumbnail | undefined | null, action: () => Promise<ModelEntity>) {
-
+    link<T extends ModelEntity>(icon: string, allowed: AuthThumbnail | null, action: () => Promise<T>, setNewValue: (model: T) => void) {
+        
         if (!allowed)
             return undefined;
 
@@ -216,7 +229,13 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
             }
 
             action()
-                .then(m => Navigator.navigate(m))
+                .then(m => Navigator.view(m))
+                .then(m => {
+                    if (m) {
+                        setNewValue(m);
+                        this.forceUpdate();
+                    }
+                })
                 .done();
         };
 

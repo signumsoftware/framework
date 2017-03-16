@@ -122,11 +122,11 @@ export default class DynamicValidation extends React.Component<DynamicValidation
         ValueLineModal.show({
             type: { name: "string" },
             initialValue: TypeHelpComponent.getExpression(prefix, pr, "CSharp"),
-            valueLineType: ValueLineType.TextArea,
+            valueLineType: "TextArea",
             title: "Mixin Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-        });
+        }).done();
     }
 
   

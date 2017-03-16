@@ -119,11 +119,11 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
         ValueLineModal.show({
             type: { name: "string" },
             initialValue: text,
-            valueLineType: ValueLineType.TextArea,
+            valueLineType: "TextArea",
             title: "Mixin Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-        });
+        }).done();
     }
 
     render() {
@@ -296,11 +296,11 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
         ValueLineModal.show({
             type: { name: "string" },
             initialValue: text,
-            valueLineType: ValueLineType.TextArea,
+            valueLineType: "TextArea",
             title: title,
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-        });
+        }).done();
     }
 }
 
