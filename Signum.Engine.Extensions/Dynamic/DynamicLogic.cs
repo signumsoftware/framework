@@ -22,17 +22,13 @@ namespace Signum.Engine.Dynamic
 {
     public static class DynamicLogic
     {
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, string codeGenDirectory)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 PermissionAuthLogic.RegisterTypes(typeof(DynamicPanelPermission));
                 DynamicLogic.GetCodeFiles += GetCodeGenStarter;
                 AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(AssemblyResolveHandler);
-
-                DynamicCode.CodeGenEntitiesNamespace = "Signum.Entities.CodeGen";
-                DynamicCode.CodeGenDirectory = codeGenDirectory;
-                DynamicCode.CodeGenAssembly = "DynamicAssembly.dll";
             }
         }
 
