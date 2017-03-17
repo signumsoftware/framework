@@ -22,9 +22,12 @@ namespace Signum.Entities.Mailing
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class EmailTemplateEntity : Entity
     {
-        public EmailTemplateEntity() { }
+        public EmailTemplateEntity()
+        {
+            RebindEvents();
+        }
 
-        public EmailTemplateEntity(object queryName)
+        public EmailTemplateEntity(object queryName) : this()
         {
             this.queryName = queryName;
         }
