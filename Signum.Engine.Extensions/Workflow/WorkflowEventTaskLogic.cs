@@ -49,6 +49,9 @@ namespace Signum.Engine.Workflow
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                var ib = sb.Schema.Settings.FieldAttribute<ImplementedByAttribute>(PropertyRoute.Construct((ScheduledTaskEntity e) => e.Rule));
+                sb.Schema.Settings.FieldAttributes((WorkflowEventTaskModel a) => a.Rule).Replace(new ImplementedByAttribute(ib.ImplementedTypes));
+
                 sb.Include<WorkflowEventTaskEntity>()
                     .WithSave(WorkflowEventTaskOperation.Save)
                     .WithDelete(WorkflowEventTaskOperation.Delete)
