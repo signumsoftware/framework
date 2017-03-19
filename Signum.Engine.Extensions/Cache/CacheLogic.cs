@@ -510,14 +510,12 @@ namespace Signum.Engine.Cache
 
             public void NotifyDisabled()
             {
-                if (Invalidated != null)
-                    Invalidated(this, CacheEventArgs.Disabled);
+                Invalidated?.Invoke(this, CacheEventArgs.Disabled);
             }
 
             public void NotifyInvalidated()
             {
-                if (Invalidated != null)
-                    Invalidated(this, CacheEventArgs.Invalidated);
+                Invalidated?.Invoke(this, CacheEventArgs.Invalidated);
             }
 
             public Type Type
