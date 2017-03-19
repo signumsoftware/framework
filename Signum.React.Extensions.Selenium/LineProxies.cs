@@ -106,7 +106,7 @@ arguments[0].dispatchEvent(new Event('blur'));";
 
         public WebElementLocator EditableElement
         {
-            get { return this.Element.WithLocator(By.CssSelector("input, textarea")); }
+            get { return this.Element.WithLocator(By.CssSelector("input, textarea, select")); }
         }
 
         public object GetValue()
