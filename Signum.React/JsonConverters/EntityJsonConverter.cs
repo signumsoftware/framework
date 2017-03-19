@@ -234,6 +234,8 @@ namespace Signum.React.Json
                 {
                     writer.WritePropertyName(lowerCaseName);
                     serializer.Serialize(writer, pc.GetValue(mod));
+                    if (writer.WriteState == WriteState.Property)
+                        throw new InvalidOperationException($"Impossible to serialize '{mod}' to JSON. Maybe there is a cycle?");
                 }
             }
         }
