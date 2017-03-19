@@ -316,7 +316,7 @@ export module LiteMessage {
     export const ToStr = new MessageKey("LiteMessage", "ToStr");
 }
 
-export interface ModelEntity extends EmbeddedEntity {
+export interface ModelEntity extends ModifiableEntity {
 }
 
 export module NormalControlMessage {

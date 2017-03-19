@@ -8,7 +8,7 @@ using Signum.Utilities;
 namespace Signum.Entities
 {
     [Serializable]
-    public abstract class ModelEntity : EmbeddedEntity, IRootEntity
+    public abstract class ModelEntity : ModifiableEntity, IRootEntity
     {
         protected internal override void PreSaving(ref bool graphModified)
         {
