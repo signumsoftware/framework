@@ -60,13 +60,12 @@ namespace Signum.Windows.Isolation
 
                     var isos = isValid == null ? isolations : isolations.Where(i => isValid(i) == null).ToList();
 
-                    Lite<IsolationEntity> result;
-                    if (SelectorWindow.ShowDialog(isos, out result,
-                        elementIcon: getIsolationIcon,
-                        elementText: iso => getIsolationIcon(iso) == null ? iso.ToString() : null,
-                        title: IsolationMessage.SelectAnIsolation.NiceToString(),
-                        message: IsolationMessage.SelectAnIsolation.NiceToString(),
-                        owner: owner))
+                    if (SelectorWindow.ShowDialog(isos, out Lite<IsolationEntity> result,
+    elementIcon: getIsolationIcon,
+    elementText: iso => getIsolationIcon(iso) == null ? iso.ToString() : null,
+    title: IsolationMessage.SelectAnIsolation.NiceToString(),
+    message: IsolationMessage.SelectAnIsolation.NiceToString(),
+    owner: owner))
                         return result;
 
                     return null;

@@ -12,26 +12,22 @@ namespace Signum.Windows.UIAutomation
         public static string NiceToString(this Condition condition)
         {
             {
-                var pc = condition as PropertyCondition;
-                if (pc != null)
+                if (condition is PropertyCondition pc)
                     return "{0} = {1}".FormatWith(pc.Property.CleanPropertyName(), pc.Value?.ToString());
             }
 
             {
-                var ac = condition as AndCondition;
-                if (ac != null)
+                if (condition is AndCondition ac)
                     return ac.GetConditions().ToString(c => c is PropertyCondition ? c.NiceToString() : "({0})".FormatWith(c.NiceToString()), " AND ");
             }
 
             {
-                var oc = condition as OrCondition;
-                if (oc != null)
+                if (condition is OrCondition oc)
                     return oc.GetConditions().ToString(c => c is PropertyCondition ? c.NiceToString() : "({0})".FormatWith(c.NiceToString()), " OR ");
             }
 
             {
-                var nc = condition as NotCondition;
-                if (nc != null)
+                if (condition is NotCondition nc)
                     return "NOT ({0})".FormatWith(nc.Condition.NiceToString());
             }
             throw new InvalidOperationException("{0} not expected".FormatWith(condition.GetType().Name));

@@ -124,10 +124,9 @@ namespace Signum.Entities.Toolbar
 
             var content = x.Attribute("Content").Value;
 
-            Guid guid;
-            Content = Guid.TryParse(content, out guid) ?
-                (Lite<Entity>)ctx.GetEntity(guid).ToLite() :
-                (Lite<Entity>)ctx.GetQuery(content).ToLite();
+            Content = Guid.TryParse(content, out Guid guid) ?
+    (Lite<Entity>)ctx.GetEntity(guid).ToLite() :
+    (Lite<Entity>)ctx.GetQuery(content).ToLite();
         }
 
         static StateValidator<ToolbarElementEntity, ToolbarElementType> stateValidator = new StateValidator<ToolbarElementEntity, ToolbarElementType>

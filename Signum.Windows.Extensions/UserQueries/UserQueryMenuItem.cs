@@ -133,9 +133,8 @@ namespace Signum.Windows.UserQueries
             {
                 e.Handled = true;
 
-                if (e.OriginalSource is MenuItem)
+                if (e.OriginalSource is MenuItem b)
                 {
-                    MenuItem b = (MenuItem)e.OriginalSource;
                     Lite<UserQueryEntity> userQuery = (Lite<UserQueryEntity>)b.Tag;
 
                     var uq = Server.Return((IUserQueryServer s) => s.RetrieveUserQuery(userQuery));

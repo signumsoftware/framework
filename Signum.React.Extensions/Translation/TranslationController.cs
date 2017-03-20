@@ -174,8 +174,7 @@ namespace Signum.React.Translation
 
             var master = reference.Extract(defaultCulture);
             var target = reference.Extract(targetCulture);
-            int totalTypes;
-            var changes = TranslationSynchronizer.GetAssemblyChanges(TranslationServer.Translator, target, master, reference.Values.ToList(), false, null, out totalTypes);
+            var changes = TranslationSynchronizer.GetAssemblyChanges(TranslationServer.Translator, target, master, reference.Values.ToList(), false, null, out int totalTypes);
 
             return new AssemblyResultTS
             {

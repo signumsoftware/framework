@@ -37,8 +37,7 @@ namespace Signum.Entities.UserAssets
 
         static string ToStringElement(object value, Type type)
         {
-            string result;
-            string error = TryToStringElement(value, type, out result);
+            string error = TryToStringElement(value, type, out string result);
             if (error == null)
                 return result;
             throw new InvalidOperationException(error);
@@ -72,8 +71,7 @@ namespace Signum.Entities.UserAssets
 
         public static object Parse(string stringValue, Type type, bool isList)
         {
-            object result;
-            string error = TryParse(stringValue, type, out result, isList);
+            string error = TryParse(stringValue, type, out object result, isList);
             if (error.HasText())
                 throw new FormatException(error);
 
@@ -88,8 +86,7 @@ namespace Signum.Entities.UserAssets
                 result = list;
                 foreach (var item in stringValue.Split('|'))
                 {
-                    object element;
-                    string error = TryParseInternal(item.Trim(), type, out element);
+                    string error = TryParseInternal(item.Trim(), type, out object element);
                     if (error.HasText())
                         return error;
 
@@ -394,13 +391,11 @@ namespace Signum.Entities.UserAssets
 
         public string TryParseValue(string value, Type type, out object result)
         {
-            SmartDateTimeSpan ss;
-            string error = SmartDateTimeSpan.TryParse(value, out ss);
+            string error = SmartDateTimeSpan.TryParse(value, out SmartDateTimeSpan ss);
 
             if (error != null)
             {
-                DateTime dtResult;
-                if (DateTime.TryParse(value, out dtResult)) 
+                if (DateTime.TryParse(value, out DateTime dtResult))
                 {
                     result = dtResult;
                     return null; //do not block 
@@ -437,8 +432,7 @@ namespace Signum.Entities.UserAssets
                 return FilterValueConverter.Continue;
             }
 
-            Lite<Entity> lResult;
-            string error = Lite.TryParseLite( value, out lResult);
+            string error = Lite.TryParseLite(value, out Lite<Entity> lResult);
 
             if (error == null)
             {
@@ -473,9 +467,8 @@ namespace Signum.Entities.UserAssets
 
         public string TryToStringValue(object value, Type type, out string result)
         {
-            var lite = value as Lite<Entity>;
 
-            if (lite != null && lite.RefersTo(currentEntityVariable.Value))
+            if (value is Lite<Entity> lite && lite.RefersTo(currentEntityVariable.Value))
             {
                 result = CurrentEntityKey;
                 return null;
@@ -528,12 +521,11 @@ namespace Signum.Entities.UserAssets
 
         public string TryToStringValue(object value, Type type, out string result)
         {
-            var lu = value as Lite<UserEntity>;
 
-            if (lu != null  && lu.EntityType == typeof(UserEntity) && lu.IdOrNull == UserEntity.Current.Id)
+            if (value is Lite<UserEntity> lu && lu.EntityType == typeof(UserEntity) && lu.IdOrNull == UserEntity.Current.Id)
             {
                 result = CurrentUserKey;
-                return null; 
+                return null;
             }
 
             result = null;

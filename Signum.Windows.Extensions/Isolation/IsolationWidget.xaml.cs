@@ -29,10 +29,9 @@ namespace Signum.Windows.Isolation
 
         void EntidadSistemaWidget_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            Entity ident = e.NewValue as Entity;
 
-            if (ident != null)
-            {   
+            if (e.NewValue is Entity ident)
+            {
                 var isolation = ident.Isolation();
 
                 if (isolation == null)
@@ -51,7 +50,7 @@ namespace Signum.Windows.Isolation
                         isolation.ToString();
                 }
             }
-  
+
         }
     }
 }

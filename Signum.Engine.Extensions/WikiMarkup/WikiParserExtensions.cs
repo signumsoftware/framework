@@ -44,8 +44,7 @@ namespace Signum.Engine.WikiMarkup
             {
                 string result = content;
 
-                Dictionary<string, string> codeRegions = null;
-                result = SaveCodeRegions(result, out codeRegions);
+                result = SaveCodeRegions(result, out Dictionary<string, string> codeRegions);
 
                 if (settings.EncodeHtml)
                 {

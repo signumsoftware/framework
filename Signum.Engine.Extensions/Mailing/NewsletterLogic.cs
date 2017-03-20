@@ -104,8 +104,7 @@ namespace Signum.Engine.Mailing
 
             try
             {
-                string error;
-                EmailTemplateParser.TryParse(text, qd, null, out error);
+                EmailTemplateParser.TryParse(text, qd, null, out string error);
 
                 return error.DefaultText(null);
             }

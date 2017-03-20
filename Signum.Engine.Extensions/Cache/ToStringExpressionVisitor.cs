@@ -44,10 +44,8 @@ namespace Signum.Engine.Cache
         {
             var exp = this.Visit(node.Expression);
 
-            if (exp is CachedEntityExpression)
+            if (exp is CachedEntityExpression cee)
             {
-                var cee = (CachedEntityExpression)exp;
-
                 Field field = cee.FieldEmbedded != null ? cee.FieldEmbedded.GetField(node.Member) :
                     ((Table)cee.Constructor.table).GetField(node.Member);
 
@@ -102,9 +100,8 @@ namespace Signum.Engine.Cache
                     return GetEntity(isLite, column, field.FieldType.CleanType(),  constructor);
                 }
 
-                if (field is FieldImplementedBy)
+                if (field is FieldImplementedBy ib)
                 {
-                    var ib = (FieldImplementedBy)field;
                     var nullRef = Expression.Constant(null, field.FieldType);
                     var call = ib.ImplementationColumns.Aggregate((Expression)nullRef, (acum, kvp) =>
                     {
@@ -128,10 +125,8 @@ namespace Signum.Engine.Cache
                 }
             }
 
-            if (field is FieldEmbedded)
+            if (field is FieldEmbedded fe)
             {
-                var fe = (FieldEmbedded)field;
-
                 return new CachedEntityExpression(previousPrimaryKey, fe.FieldType, constructor, fe);
             }
 
@@ -227,8 +222,7 @@ namespace Signum.Engine.Cache
             if (exp is ConstantExpression && ((ConstantExpression)exp).Value == null)
                 return Expression.Constant(null, typeof(PrimaryKey?));
 
-            var cee = exp as CachedEntityExpression;
-            if (cee != null)
+            if (exp is CachedEntityExpression cee)
                 return cee.PrimaryKey;
 
             throw new InvalidOperationException("");

@@ -54,15 +54,13 @@ namespace Signum.Windows.Chart
 
         void ChartScript_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            var oldEntity = e.OldValue as INotifyPropertyChanged;
-            if(oldEntity != null)
+            if (e.OldValue is INotifyPropertyChanged oldEntity)
                 oldEntity.PropertyChanged -= oldEntity_PropertyChanged;
 
-            
-            var newEntity = e.NewValue as INotifyPropertyChanged;
-            if(newEntity != null)
+
+            if (e.NewValue is INotifyPropertyChanged newEntity)
                 newEntity.PropertyChanged += oldEntity_PropertyChanged;
-            
+
         }
 
         void oldEntity_PropertyChanged(object sender, PropertyChangedEventArgs e)

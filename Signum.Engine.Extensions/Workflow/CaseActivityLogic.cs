@@ -922,10 +922,8 @@ namespace Signum.Engine.Workflow
 
             private static bool FindNext(IWorkflowNodeEntity next, WorkflowExecuteStepContext ctx)
             {
-                if (next is WorkflowEventEntity)
+                if (next is WorkflowEventEntity ne)
                 {
-                    var ne = ((WorkflowEventEntity)next);
-
                     if (ne.Type == WorkflowEventType.Finish)
                     {
                         ctx.IsFinished = true;
@@ -937,7 +935,7 @@ namespace Signum.Engine.Workflow
                 else if (next is WorkflowActivityEntity)
                 {
                     ctx.ToActivities.Add((WorkflowActivityEntity)next);
-                    return true; 
+                    return true;
                 }
                 else
                 {
@@ -961,7 +959,7 @@ namespace Signum.Engine.Workflow
                                 var singleConnection = gateway.NextConnectionsFromCache().SingleEx();
                                 return FindNext(singleConnection, ctx);
                             }
-         
+
                         case WorkflowGatewayType.Parallel:
                         case WorkflowGatewayType.Inclusive:
                             if (gateway.Direction == WorkflowGatewayDirection.Split)
@@ -982,7 +980,7 @@ namespace Signum.Engine.Workflow
                                     FindNext(con, ctx);
                                 }
 
-                                return true; 
+                                return true;
                             }
                             else //if (gateway.Direction == WorkflowGatewayDirection.Join)
                             {
@@ -1004,9 +1002,8 @@ namespace Signum.Engine.Workflow
                 {
                     throw new InvalidOperationException($"Unexpected {nameof(WorkflowEventEntity)} in {nameof(FindPrevious)}");
                 }
-                else if (node is WorkflowActivityEntity)
+                else if (node is WorkflowActivityEntity wa)
                 {
-                    var wa = (WorkflowActivityEntity)node;
                     if (wa.Is(ctx.CaseActivity.WorkflowActivity))
                         return true;
 
@@ -1020,9 +1017,8 @@ namespace Signum.Engine.Workflow
                         return prevsConnections.All(wn => FindPrevious(depth, wn, ctx));
                     }
                 }
-                else if (node is WorkflowGatewayEntity)
+                else if (node is WorkflowGatewayEntity g)
                 {
-                    var g = (WorkflowGatewayEntity)node;
                     if (g.Type != WorkflowGatewayType.Exclusive)
                     {
                         depth += (g.Direction == WorkflowGatewayDirection.Split ? -1 : 1);

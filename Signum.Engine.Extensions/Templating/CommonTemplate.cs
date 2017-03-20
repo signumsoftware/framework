@@ -191,8 +191,7 @@ namespace Signum.Engine.Templating
                 {
                     string v = tokenString.TryBefore('.') ?? tokenString;
 
-                    ValueProviderBase prov;
-                    if (!Variables.TryGetValue(v, out prov))
+                    if (!Variables.TryGetValue(v, out ValueProviderBase prov))
                         SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Variable '{0}' not found!".FormatWith(v));
 
                     var provToken = prov as TokenValueProvider;
@@ -215,8 +214,7 @@ namespace Signum.Engine.Templating
                 SafeConsole.WriteColor(ConsoleColor.Red, "  " + tokenString);
                 Console.WriteLine(" " + remainingText);
 
-                QueryToken token;
-                FixTokenResult result = QueryTokenSynchronizer.FixToken(Replacements, tokenString, out token, QueryDescription, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll /*not always*/, remainingText, allowRemoveToken: false, allowReGenerate: ModelType != null);
+                FixTokenResult result = QueryTokenSynchronizer.FixToken(Replacements, tokenString, out QueryToken token, QueryDescription, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll /*not always*/, remainingText, allowRemoveToken: false, allowReGenerate: ModelType != null);
                 switch (result)
                 {
                     case FixTokenResult.Nothing:

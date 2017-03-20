@@ -231,8 +231,7 @@ namespace Signum.Entities.Omnibox
                 case FilterType.Decimal:
                     if (omniboxToken.Type == OmniboxTokenType.Number)
                     {
-                        object result;
-                        if (ReflectionTools.TryParse(omniboxToken.Value, queryToken.Type, out result))
+                        if (ReflectionTools.TryParse(omniboxToken.Value, queryToken.Type, out object result))
                             return new[] { new ValueTuple { Value = result, Match = null } };
                     }
                     break;
@@ -244,8 +243,7 @@ namespace Signum.Entities.Omnibox
                     if (omniboxToken.Type == OmniboxTokenType.String)
                     {
                         var str = OmniboxUtils.CleanCommas(omniboxToken.Value);
-                        object result;
-                        if (ReflectionTools.TryParse(str, queryToken.Type, out result))
+                        if (ReflectionTools.TryParse(str, queryToken.Type, out object result))
                             return new[] { new ValueTuple { Value = result, Match = null } };
                     }
                     break;
@@ -260,9 +258,8 @@ namespace Signum.Entities.Omnibox
                     }
                     else if (omniboxToken.Type == OmniboxTokenType.Entity)
                     {
-                        Lite<Entity> lite;
-                        var error = Lite.TryParseLite(omniboxToken.Value, out lite);
-                        if(string.IsNullOrEmpty(error))
+                        var error = Lite.TryParseLite(omniboxToken.Value, out Lite<Entity> lite);
+                        if (string.IsNullOrEmpty(error))
                             return new []{new ValueTuple { Value = lite }}; 
                     }
                     else if (omniboxToken.Type == OmniboxTokenType.Number)
@@ -300,17 +297,16 @@ namespace Signum.Entities.Omnibox
                 case FilterType.Guid:
                     if (omniboxToken.Type == OmniboxTokenType.Guid)
                     {
-                        Guid result;
-                        if (Guid.TryParse(omniboxToken.Value, out result))
+                        if (Guid.TryParse(omniboxToken.Value, out Guid result))
                             return new[] { new ValueTuple { Value = result, Match = null } };
                     }
                     else if (omniboxToken.Type == OmniboxTokenType.String)
                     {
                         var str = OmniboxUtils.CleanCommas(omniboxToken.Value);
-                        Guid result;
-                        if (Guid.TryParse(str, out result))
-                            return new []{new ValueTuple{ Value = result, Match = null}};
-                    }break;
+                        if (Guid.TryParse(str, out Guid result))
+                            return new[] { new ValueTuple { Value = result, Match = null } };
+                    }
+                    break;
                 default:
                     break;
             }
@@ -320,8 +316,7 @@ namespace Signum.Entities.Omnibox
 
         Lite<Entity> CreateLite(Type type, string value)
         {
-            PrimaryKey id;
-            if (PrimaryKey.TryParse(value, type, out id))
+            if (PrimaryKey.TryParse(value, type, out PrimaryKey id))
                 return Lite.Create(type, id, "{0} {1}".FormatWith(type.NiceName(), id));
 
             return null;

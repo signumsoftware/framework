@@ -39,8 +39,7 @@ namespace Signum.Entities.Omnibox
                 {
                     Type type = (Type)match.Value;
 
-                    PrimaryKey id;
-                    if(PrimaryKey.TryParse(tokens[1].Value, type, out id))
+                    if (PrimaryKey.TryParse(tokens[1].Value, type, out PrimaryKey id))
                     {
                         Lite<Entity> lite = OmniboxParser.Manager.RetrieveLite(type, id);
 

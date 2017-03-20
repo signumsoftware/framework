@@ -681,8 +681,7 @@ namespace Signum.Engine.Cache
             if (!type.IsEntity())
                 throw new ArgumentException("type should be an Entity");
 
-            ICacheLogicController controller;
-            if (!controllers.TryGetValue(type, out controller))
+            if (!controllers.TryGetValue(type, out ICacheLogicController controller))
                 return CacheType.None;
 
             if (controller == null)

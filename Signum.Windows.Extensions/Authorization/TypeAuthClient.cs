@@ -135,9 +135,8 @@ namespace Signum.Windows.Authorization
                 if (tag == null)
                     return;
 
-                Type type = tag as Type;
 
-                if (type != null && Navigator.Manager.EntitySettings.ContainsKey(type))
+                if (tag is Type type && Navigator.Manager.EntitySettings.ContainsKey(type))
                 {
                     if (GetAllowed(type).MaxUI() < TypeAllowedBasic.Read)
                         menuItem.Visibility = Visibility.Collapsed;

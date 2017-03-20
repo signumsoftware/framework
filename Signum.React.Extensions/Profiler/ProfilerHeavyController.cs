@@ -142,8 +142,7 @@ namespace Signum.React.Profiler
             if (role == null)
                 return Color.Gray.ToHtml();
 
-            Color color;
-            if (RoleColors.TryGetValue(role, out color))
+            if (RoleColors.TryGetValue(role, out Color color))
                 return color.ToHtml();
 
             return ColorExtensions.ToHtmlColor(StringHashEncoder.GetHashCode32(role));

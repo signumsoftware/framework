@@ -87,8 +87,7 @@ namespace Signum.React.Authorization
                 {
                     if (fi.DeclaringType.Name.EndsWith("Operation"))
                     {
-                        var container = fi.GetValue(null) as IOperationSymbolContainer;
-                        if (container != null)
+                        if (fi.GetValue(null) is IOperationSymbolContainer container)
                             mi.Extension.Add("operationAllowed",
                                 UserEntity.Current == null ? false
                                     : OperationAuthLogic.GetOperationAllowed(container.Symbol, inUserInterface: true));

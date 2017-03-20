@@ -57,9 +57,8 @@ namespace Signum.Windows.Notes
 
         private void Note_MouseDown(object sender, RoutedEventArgs e)
         {
-            if (e.OriginalSource is Button) //Not to capture the mouseDown of the scrollbar buttons
+            if (e.OriginalSource is Button b) //Not to capture the mouseDown of the scrollbar buttons
             {
-                Button b = (Button)e.OriginalSource;
                 Lite<NoteEntity> nota = (Lite<NoteEntity>)b.Tag;
                 ViewNote(Server.RetrieveAndForget(nota));
             }

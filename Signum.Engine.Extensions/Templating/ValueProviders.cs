@@ -128,8 +128,7 @@ namespace Signum.Engine.Templating
                         {
                             string v = token.TryBefore('.') ?? token;
 
-                            ValueProviderBase vp;
-                            if (!variables.TryGetValue(v, out vp))
+                            if (!variables.TryGetValue(v, out ValueProviderBase vp))
                             {
                                 addError(false, "Variable '{0}' is not defined at this scope".FormatWith(v));
                                 return null;
@@ -175,9 +174,8 @@ namespace Signum.Engine.Templating
             if (Type == null)
                 return;
 
-            object rubish;
-            string error = FilterValueConverter.TryParse(valueString, Type, out rubish, Operation.Value.IsList());
-            
+            string error = FilterValueConverter.TryParse(valueString, Type, out object rubish, Operation.Value.IsList());
+
             if (error.HasText())
                 addError(false, "Impossible to convert '{0}' to {1}: {2}".FormatWith(valueString, Type.TypeName(), error));
         }
@@ -432,8 +430,7 @@ namespace Signum.Engine.Templating
             {
                 string v = tokenString.TryBefore('.') ?? tokenString;
 
-                ValueProviderBase vp;
-                if (!variables.TryGetValue(v, out vp))
+                if (!variables.TryGetValue(v, out ValueProviderBase vp))
                 {
                     addError(false, "Variable '{0}' is not defined at this scope".FormatWith(v));
                     return result;
@@ -529,9 +526,8 @@ namespace Signum.Engine.Templating
         {
             try
             {
-                var pi = member as PropertyInfo;
 
-                if (pi != null)
+                if (member is PropertyInfo pi)
                     return pi.GetValue(systemEmail, null);
 
                 return ((FieldInfo)member).GetValue(systemEmail);
@@ -777,8 +773,7 @@ namespace Signum.Engine.Templating
 
         public override object GetValue(TemplateParameters p)
         {
-            object value;
-            if (!p.RuntimeVariables.TryGetValue(Parent.Variable, out value))
+            if (!p.RuntimeVariables.TryGetValue(Parent.Variable, out object value))
                 throw new InvalidOperationException("Variable {0} not found".FormatWith(Parent.Variable));
 
             foreach (var m in Members)
@@ -795,9 +790,8 @@ namespace Signum.Engine.Templating
         {
             try
             {
-                var pi = member as PropertyInfo;
 
-                if (pi != null)
+                if (member is PropertyInfo pi)
                     return pi.GetValue(value, null);
 
                 return ((FieldInfo)member).GetValue(value);

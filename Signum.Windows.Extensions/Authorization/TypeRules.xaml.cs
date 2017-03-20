@@ -138,18 +138,17 @@ namespace Signum.Windows.Authorization
         private void addCondition_Click(object sender, RoutedEventArgs e)
         {
             TypeRuleBuilder rules = (TypeRuleBuilder)((Button)sender).DataContext;
-            
-            TypeConditionSymbol value;
+
             if (SelectorWindow.ShowDialog<TypeConditionSymbol>(
-                rules.AvailableConditions.Except(rules.Conditions.Select(a => a.TypeCondition)).ToArray(), 
-                out value, 
-                elementIcon: null,
-                elementText: v => v.NiceToString(),
-                title: "New condition", 
-                message: "Select the condition for {0} to add specific authorization rules".FormatWith(rules.Resource.CleanName), 
-                owner: this))
+    rules.AvailableConditions.Except(rules.Conditions.Select(a => a.TypeCondition)).ToArray(),
+    out TypeConditionSymbol value,
+    elementIcon: null,
+    elementText: v => v.NiceToString(),
+    title: "New condition",
+    message: "Select the condition for {0} to add specific authorization rules".FormatWith(rules.Resource.CleanName),
+    owner: this))
             {
-                rules.Conditions.Add(new TypeConditionRuleBuilder(value, rules.Allowed.None ? TypeAllowed.Create : TypeAllowed.None)); 
+                rules.Conditions.Add(new TypeConditionRuleBuilder(value, rules.Allowed.None ? TypeAllowed.Create : TypeAllowed.None));
             }
         }
 
@@ -176,15 +175,14 @@ namespace Signum.Windows.Authorization
 
             foreach (var item in tree.Items)
             {
-                var i = item as NamespaceNode;
-                if (i != null)
+                if (item is NamespaceNode i)
                 {
                     i.Selected = true;
                     i.SelectedFind = false;
                     foreach (var subitem in i.SubNodes)
                     {
-                            subitem.Selected = true;
-                            subitem.SelectedFind = false;
+                        subitem.Selected = true;
+                        subitem.SelectedFind = false;
                     }
                 }
             }
@@ -196,8 +194,7 @@ namespace Signum.Windows.Authorization
                 return;
             foreach (var item in tree.Items)
             {
-                var i = item as NamespaceNode;
-                if (i != null)
+                if (item is NamespaceNode i)
                 {
                     foreach (var subitem in i.SubNodes)
                     {
@@ -209,7 +206,7 @@ namespace Signum.Windows.Authorization
                         else
                         {
                             subitem.Selected = false;
-                             subitem.SelectedFind = false;
+                            subitem.SelectedFind = false;
                         }
                     }
 
@@ -223,15 +220,15 @@ namespace Signum.Windows.Authorization
                     }
                     else
                         if (i.Name.ToUpper().Contains(key.Trim().ToUpper()))
+                    {
+                        i.Selected = true;
+                        i.SelectedFind = true;
+                        foreach (var si in i.SubNodes)
                         {
-                            i.Selected = true;
-                            i.SelectedFind = true;
-                            foreach (var si in i.SubNodes)
-                            {
-                                si.Selected = true;
-                            }           
+                            si.Selected = true;
                         }
-                        else
+                    }
+                    else
                         i.Selected = false;
                 }
             }

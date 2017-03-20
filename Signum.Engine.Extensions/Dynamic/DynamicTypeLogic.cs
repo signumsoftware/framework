@@ -428,13 +428,12 @@ namespace Signum.Engine.Dynamic
 
             if (property.Size != null || property.Scale != null || property.ColumnType.HasText())
             {
-                SqlDbType dbType;
                 var props = new[]
                 {
                     property.Size != null ? "Size = " + Literal(property.Size) : null,
                     property.Scale != null ? "Scale = " + Literal(property.Scale) : null,
-                    property.ColumnType.HasText() ?  "SqlDbType = " + Literal(Enum.TryParse<SqlDbType>(property.ColumnType, out dbType) ? dbType : SqlDbType.Udt) : null,
-                    property.ColumnType.HasText() && !Enum.TryParse<SqlDbType>(property.ColumnType, out dbType) ?  "UserDefinedTypeName = " + Literal(property.ColumnType) : null,
+                    property.ColumnType.HasText() ?  "SqlDbType = " + Literal(Enum.TryParse(property.ColumnType, out SqlDbType dbType) ? dbType : SqlDbType.Udt) : null,
+                    property.ColumnType.HasText() && !Enum.TryParse<SqlDbType>(property.ColumnType, out var _) ?  "UserDefinedTypeName = " + Literal(property.ColumnType) : null,
                      
                 }.NotNull().ToString(", ");
 

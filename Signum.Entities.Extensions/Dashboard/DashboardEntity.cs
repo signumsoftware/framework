@@ -70,10 +70,8 @@ namespace Signum.Entities.Dashboard
 
         protected override string ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
         {
-            if (sender is PanelPartEntity)
+            if (sender is PanelPartEntity part)
             {
-                PanelPartEntity part = (PanelPartEntity)sender;
-
                 if (pi.Name == nameof(part.StartColumn))
                 {
                     if (part.StartColumn + part.Columns > 12)

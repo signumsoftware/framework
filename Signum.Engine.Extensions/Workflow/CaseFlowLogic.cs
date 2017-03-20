@@ -54,8 +54,7 @@ namespace Signum.Engine.Workflow
                     });
                 }).ToList();
 
-            Lite<IUserEntity> startUser;
-            WorkflowEventEntity start = GetStartEvent(@case, caseActivities, gr, out startUser);
+            WorkflowEventEntity start = GetStartEvent(@case, caseActivities, gr, out Lite<IUserEntity> startUser);
 
             if (start != null)
             {
@@ -148,9 +147,8 @@ namespace Signum.Engine.Workflow
                 if (next is WorkflowActivityEntity)
                     return false;
 
-                if (next is WorkflowEventEntity)
+                if (next is WorkflowEventEntity we)
                 {
-                    var we = (WorkflowEventEntity)next;
                     if (we.Type.IsFinish())
                         result = we;
                     return false;

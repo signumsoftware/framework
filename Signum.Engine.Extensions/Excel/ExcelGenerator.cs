@@ -151,8 +151,7 @@ namespace Signum.Engine.Excel
             //they must be in the same column
             //If cellReferences of HeaderCell and DataCell differ only in the number they are on the same column
             var firstDifferentCharacter = headerLastCellReference.Zip(dataCellReference).FirstEx(t => t.Item1 != t.Item2);
-            int number;
-            return int.TryParse(firstDifferentCharacter.Item1.ToString(), out number);
+            return int.TryParse(firstDifferentCharacter.Item1.ToString(), out int number);
         }
 
         private static string GetExcelColumn(int columnNumberBase0)
@@ -160,8 +159,7 @@ namespace Signum.Engine.Excel
             string result = "";
             int numAlphabetCharacters = 26;
             int numAlphabetRounds;
-            int numAlphabetCharacter;
-            numAlphabetRounds = Math.DivRem(columnNumberBase0, numAlphabetCharacters, out numAlphabetCharacter);
+            numAlphabetRounds = Math.DivRem(columnNumberBase0, numAlphabetCharacters, out int numAlphabetCharacter);
 
             if (numAlphabetRounds > 0)
                 result = ((char)('A' + (char)(numAlphabetRounds - 1))).ToString();

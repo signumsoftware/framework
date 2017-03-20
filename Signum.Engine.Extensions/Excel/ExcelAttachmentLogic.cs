@@ -85,8 +85,7 @@ namespace Signum.Engine.Excel
             {
                 try
                 {
-                    string errorMessage;
-                    excelAttachment.FileNameNode = EmailTemplateLogic.ParseTemplate(template, excelAttachment.FileName, out errorMessage);
+                    excelAttachment.FileNameNode = EmailTemplateLogic.ParseTemplate(template, excelAttachment.FileName, out string errorMessage);
                     return errorMessage.DefaultText(null);
                 }
                 catch (Exception ex)
@@ -105,8 +104,7 @@ namespace Signum.Engine.Excel
             {
                 try
                 {
-                    string errorMessage;
-                    excelAttachment.FileNameNode = EmailTemplateLogic.ParseTemplate(template, excelAttachment.Title, out errorMessage);
+                    excelAttachment.FileNameNode = EmailTemplateLogic.ParseTemplate(template, excelAttachment.Title, out string errorMessage);
                     return errorMessage.DefaultText(null);
                 }
                 catch (Exception ex)

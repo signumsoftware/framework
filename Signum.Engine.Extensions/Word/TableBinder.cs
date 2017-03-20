@@ -238,7 +238,6 @@ namespace Signum.Engine.Word
     {
         public Data.DataTable GetDataTable(string suffix, WordTemplateLogic.WordContext ctx)
         {
-            ISystemWordTemplate swt;
             MethodInfo mi = GetMethod(ctx.Template, suffix);
 
             object result;
@@ -304,8 +303,7 @@ namespace Signum.Engine.Word
 
         public string Validate(string suffix, WordTemplateEntity template)
         {
-            Guid guid;
-            if (!Guid.TryParse(suffix, out guid))
+            if (!Guid.TryParse(suffix, out Guid guid))
                 return "Impossible to convert '{0}' in a GUID for a UserQuery".FormatWith(suffix);
 
             if (!Database.Query<UserQueryEntity>().Any(a => a.Guid == guid))
@@ -341,8 +339,7 @@ namespace Signum.Engine.Word
 
         public string Validate(string suffix, WordTemplateEntity template)
         {
-            Guid guid;
-            if (!Guid.TryParse(suffix, out guid))
+            if (!Guid.TryParse(suffix, out Guid guid))
                 return "Impossible to convert '{0}' in a GUID for a UserChart".FormatWith(suffix);
 
             if (!Database.Query<UserChartEntity>().Any(a => a.Guid == guid))

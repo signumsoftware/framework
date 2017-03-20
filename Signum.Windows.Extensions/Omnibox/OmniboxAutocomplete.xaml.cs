@@ -46,8 +46,7 @@ namespace Signum.Windows.Omnibox
 
             if (e.Reason == CloseReason.ClickList || e.Reason == CloseReason.Enter)
             {
-                var selected = autoCompleteTb.SelectedItem as OmniboxResult;
-                if (selected != null && !(selected is HelpOmniboxResult))
+                if (autoCompleteTb.SelectedItem is OmniboxResult selected && !(selected is HelpOmniboxResult))
                     OmniboxClient.Providers.GetOrThrow(selected.GetType()).OnSelectedBase(selected, Window.GetWindow((DependencyObject)sender));
             }
         }

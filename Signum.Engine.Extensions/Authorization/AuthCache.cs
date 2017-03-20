@@ -144,8 +144,7 @@ namespace Signum.Entities.Authorization
 
             public A GetAllowed(Lite<RoleEntity> role)
             {
-                A result;
-                if (specificRules.TryGetValue(role, out result))
+                if (specificRules.TryGetValue(role, out A result))
                     return coercer(role, result);
 
                 return GetAllowedBase(role);

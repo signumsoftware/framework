@@ -172,8 +172,7 @@ namespace Signum.Entities.Chart
 
             public string Validate(string parameter)
             {
-                decimal value;
-                if (!decimal.TryParse(parameter, out value))
+                if (!decimal.TryParse(parameter, out decimal value))
                     return "{0} is not a valid number".FormatWith(parameter);
 
                 if (MinValue.HasValue && value < MinValue)
@@ -193,8 +192,7 @@ namespace Signum.Entities.Chart
                 list = new EnumValueList();
                 foreach (var item in valueDefinition.SplitNoEmpty('|'))
                 {
-                    EnumValue val;
-                    string error = EnumValue.TryParse(item, out val);
+                    string error = EnumValue.TryParse(item, out EnumValue val);
                     if (error.HasText())
                         return error;
 
@@ -264,9 +262,8 @@ namespace Signum.Entities.Chart
                 if (!composedCode.HasText())
                     return null;
 
-                ChartColumnType filter;
 
-                string error = ChartColumnTypeUtils.TryParseComposed(composedCode, out filter);
+                string error = ChartColumnTypeUtils.TryParseComposed(composedCode, out ChartColumnType filter);
                 if (error.HasText())
                     return enumValue.Name + ": " + error;
 

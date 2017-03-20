@@ -147,8 +147,7 @@ namespace Signum.Engine.Word
 
         public static byte[] CreateReport(this ISystemWordTemplate systemWordTemplate, bool avoidConversion = false)
         {
-            WordTemplateEntity rubish;
-            return systemWordTemplate.CreateReport(out rubish, avoidConversion);
+            return systemWordTemplate.CreateReport(out WordTemplateEntity rubish, avoidConversion);
         }
 
         public static byte[] CreateReport(this ISystemWordTemplate systemWordTemplate, out WordTemplateEntity template, bool avoidConversion = false)

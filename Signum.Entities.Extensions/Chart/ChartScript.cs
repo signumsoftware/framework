@@ -56,8 +56,7 @@ namespace Signum.Entities.Chart
 
         protected override string ChildPropertyValidation(ModifiableEntity sender, System.Reflection.PropertyInfo pi)
         {
-            var column = sender as ChartScriptColumnEntity;
-            if (column != null && pi.Name == nameof(column.IsGroupKey))
+            if (sender is ChartScriptColumnEntity column && pi.Name == nameof(column.IsGroupKey))
             {
                 if (column.IsGroupKey)
                 {
@@ -66,8 +65,7 @@ namespace Signum.Entities.Chart
                 }
             }
 
-            var param = sender as ChartScriptParameterEntity;
-            if (param != null && pi.Name == nameof(param.ColumnIndex))
+            if (sender is ChartScriptParameterEntity param && pi.Name == nameof(param.ColumnIndex))
             {
                 if (param.ColumnIndex == null && param.ShouldHaveColumnIndex())
                     return ValidationMessage._0IsNecessary.NiceToString(pi.NiceName());

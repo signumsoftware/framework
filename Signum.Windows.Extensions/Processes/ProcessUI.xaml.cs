@@ -44,8 +44,7 @@ namespace Signum.Windows.Processes
 
         void timer_Tick(object sender, EventArgs e)
         {
-            ProcessEntity pe = DataContext as ProcessEntity;
-            if (pe != null && (pe.State == ProcessState.Queued || pe.State == ProcessState.Executing || pe.State == ProcessState.Suspending))
+            if (DataContext is ProcessEntity pe && (pe.State == ProcessState.Queued || pe.State == ProcessState.Executing || pe.State == ProcessState.Suspending))
             {
                 ProcessEntity npe = pe.ToLite().RetrieveAndForget();
                 RaiseEvent(new ChangeDataContextEventArgs(npe));

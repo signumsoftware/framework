@@ -144,12 +144,10 @@ namespace Signum.Windows.UIAutomation
 
         public static Condition AsCondition(Expression operand)
         {
-            var ace = operand as AutomationConditionExpression;
-            if (ace != null)
+            if (operand is AutomationConditionExpression ace)
                 return ace.AutomationCondition;
 
-            var ape = operand as AutomationPropertyExpression;
-            if (ape != null)
+            if (operand is AutomationPropertyExpression ape)
                 return new PropertyCondition(ape.AutomationProperty, true);
 
             throw new InvalidOperationException("{0} is not a Condition");
@@ -188,12 +186,10 @@ namespace Signum.Windows.UIAutomation
             if(ce == null)
                 return null;
 
-            AutomationPropertyExpression prop = exp as AutomationPropertyExpression;
-            if (prop != null)
+            if (exp is AutomationPropertyExpression prop)
                 return new PropertyCondition(((AutomationPropertyExpression)exp).AutomationProperty, ce.Value);
 
-            AutomationPatternExpression pattern = exp as AutomationPatternExpression;
-            if (pattern != null && ce.Value == null)
+            if (exp is AutomationPatternExpression pattern && ce.Value == null)
                 return new PropertyCondition(GetCachedProperty(pattern.AutomationPattern, "Is{0}AvailableProperty".FormatWith(pattern.AutomationPattern.Name)), false);
 
             return null;

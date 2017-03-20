@@ -119,8 +119,7 @@ namespace Signum.Entities.Chart
             type = default(ChartColumnType);
             foreach (var item in code.Split(','))
             {
-                ChartColumnType temp;
-                string error = TryParse(item, out temp);
+                string error = TryParse(item, out ChartColumnType temp);
 
                 if (error.HasText())
                     return error;

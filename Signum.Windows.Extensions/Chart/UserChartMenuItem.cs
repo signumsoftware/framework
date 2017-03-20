@@ -156,9 +156,8 @@ namespace Signum.Windows.Chart
         {
             e.Handled = true;
 
-            if (e.OriginalSource is MenuItem)
+            if (e.OriginalSource is MenuItem b)
             {
-                MenuItem b = (MenuItem)e.OriginalSource;
                 Lite<UserChartEntity> userChart = (Lite<UserChartEntity>)b.Tag;
 
                 var uc = Server.Return((IChartServer s) => s.RetrieveUserChart(userChart));

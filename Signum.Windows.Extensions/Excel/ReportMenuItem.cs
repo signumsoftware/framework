@@ -28,11 +28,10 @@ namespace Signum.Windows.Excel
             {
                 e.Handled = true;
 
-                if (e.OriginalSource is MenuItem) //Not to capture the mouseDown of the scrollbar buttons
+                if (e.OriginalSource is MenuItem b) //Not to capture the mouseDown of the scrollbar buttons
                 {
-                    MenuItem b = (MenuItem)e.OriginalSource;
                     Lite<ExcelReportEntity> reportLite = (Lite<ExcelReportEntity>)b.Tag;
-                    
+
                     SaveFileDialog sfd = new SaveFileDialog()
                     {
                         AddExtension = true,

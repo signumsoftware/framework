@@ -363,8 +363,7 @@ namespace Signum.Engine.Authorization
 
             Expression body = IsAllowedExpression(e, TypeAllowedBasic.Read, ui);
 
-            var ce = body as ConstantExpression;
-            if (ce != null)
+            if (body is ConstantExpression ce)
             {
                 if (((bool)ce.Value))
                     return null;
@@ -409,9 +408,8 @@ namespace Signum.Engine.Authorization
 
             Expression body = IsAllowedExpression(e, allowed, inUserInterface);
 
-            var ce = body as ConstantExpression;
 
-            if (ce != null)
+            if (body is ConstantExpression ce)
             {
                 if (((bool)ce.Value))
                     return query;

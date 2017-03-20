@@ -118,8 +118,7 @@ namespace Signum.React.Authorization
         [Route("api/auth/refreshToken"), HttpPost, AllowAnonymous]
         public LoginResponse RefreshToken([FromBody]string oldToken)
         {
-            UserEntity user;
-            var newToken = AuthTokenServer.RefreshToken(oldToken, out user);
+            var newToken = AuthTokenServer.RefreshToken(oldToken, out UserEntity user);
 
             return new LoginResponse { message = null, userEntity = user, token = newToken };
         }

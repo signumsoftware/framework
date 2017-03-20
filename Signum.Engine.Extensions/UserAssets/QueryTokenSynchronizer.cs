@@ -155,8 +155,7 @@ namespace Signum.Engine.UserAssets
 
         public static FixTokenResult FixValue(Replacements replacements, Type type, ref string valueString, bool allowRemoveToken, bool isList)
         {
-            object val;
-            string error = FilterValueConverter.TryParse(valueString, type, out val, isList);
+            string error = FilterValueConverter.TryParse(valueString, type, out object val, isList);
 
             if (error == null)
                 return FixTokenResult.Nothing;
@@ -285,8 +284,7 @@ namespace Signum.Engine.UserAssets
                     if (answer == "n")
                         return null;
 
-                    int option = 0;
-                    if (int.TryParse(answer, out option))
+                    if (int.TryParse(answer, out int option))
                     {
                         return list[option];
                     }
@@ -304,8 +302,7 @@ namespace Signum.Engine.UserAssets
             if (token.ParseException == null)
                 return FixTokenResult.Nothing;
 
-            QueryToken resultToken;
-            FixTokenResult result = FixToken(replacements, token.TokenString, out resultToken, qd, options, remainingText, allowRemoveToken, allowReCreate);
+            FixTokenResult result = FixToken(replacements, token.TokenString, out QueryToken resultToken, qd, options, remainingText, allowRemoveToken, allowReCreate);
 
             if (result == FixTokenResult.Fix)
                 token = new QueryTokenEntity(resultToken);
@@ -317,8 +314,7 @@ namespace Signum.Engine.UserAssets
         {
             string[] parts = original.Split('.');
 
-            QueryToken current;
-            if (TryParseRemember(replacements, original, qd, options, out current))
+            if (TryParseRemember(replacements, original, qd, options, out QueryToken current))
             {
                 if (current.FullKey() != original)
                 {
@@ -461,8 +457,7 @@ namespace Signum.Engine.UserAssets
                         }
                     }
 
-                    int option = 0;
-                    if (int.TryParse(answer, out option))
+                    if (int.TryParse(answer, out int option))
                     {
                         token = subTokens[option];
                         return null;

@@ -377,8 +377,7 @@ namespace Signum.Engine.Word
         {
             if (token?.Variable.HasText() == true)
             {
-                ValueProviderBase t;
-                if (variables.TryGetValue(token.Variable, out t))
+                if (variables.TryGetValue(token.Variable, out ValueProviderBase t))
                 {
                     if (!t.Equals(token))
                         AddError(true, "There's already a variable '{0}' defined in this scope".FormatWith(token.Variable));

@@ -326,8 +326,7 @@ namespace Signum.Entities.UserQueries
 
                 if (pi.Name == nameof(ValueString))
                 {
-                    object val;
-                    return FilterValueConverter.TryParse(ValueString, Token.Token.Type, out val, Operation.IsList());
+                    return FilterValueConverter.TryParse(ValueString, Token.Token.Type, out object val, Operation.IsList());
                 }
             }
 

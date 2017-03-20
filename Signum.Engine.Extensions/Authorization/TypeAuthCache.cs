@@ -127,8 +127,7 @@ namespace Signum.Entities.Authorization
 
             public TypeAllowedAndConditions GetAllowed(Lite<RoleEntity> role)
             {
-                TypeAllowedAndConditions result;
-                if (rules.TryGetValue(role, out result))
+                if (rules.TryGetValue(role, out TypeAllowedAndConditions result))
                     return result;
 
                 return GetAllowedBase(role);
