@@ -43,7 +43,7 @@ namespace Signum.React.Json
                     writer.WriteStartObject();
                     
                     writer.WritePropertyName("rowId");
-                    writer.WriteValue(item.RowId?.Value.Object);
+                    writer.WriteValue(item.RowId?.Object);
 
                     writer.WritePropertyName("element");
                     serializer.Serialize(writer, item.Element);
