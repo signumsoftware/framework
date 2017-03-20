@@ -52,9 +52,10 @@ namespace Signum.Windows
             string labelText = null, string format = null, string unitText = null, 
             Window owner = null)
         {
-            ValueLineBox vlb = new ValueLineBox();
-            vlb.Title = title ?? SelectorMessage.ChooseAValue.NiceToString();
-            
+            ValueLineBox vlb = new ValueLineBox()
+            {
+                Title = title ?? SelectorMessage.ChooseAValue.NiceToString()
+            };
             vlb.tb.Text = text ?? SelectorMessage.PleaseChooseAValueToContinue.NiceToString();
 
             vlb.valueLine.Type = type;

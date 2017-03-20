@@ -211,8 +211,10 @@ namespace Signum.Utilities.ExpressionTrees
             if (type.IsArray)
             {
                 Array array = (Array)value;
-                CodeArrayCreateExpression expression = new CodeArrayCreateExpression();
-                expression.CreateType = TypeReference(type.GetElementType(), importedNamespaces);
+                CodeArrayCreateExpression expression = new CodeArrayCreateExpression()
+                {
+                    CreateType = TypeReference(type.GetElementType(), importedNamespaces)
+                };
                 if (array != null)
                 {
                     foreach (object obj2 in array)

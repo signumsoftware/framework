@@ -304,8 +304,10 @@ namespace Signum.Engine
                 fileName = Path.Combine(DefaultLogFolder, fileName);
             }
 
-            var result = new StreamWriter(fileName, append: true);
-            result.AutoFlush = true;
+            var result = new StreamWriter(fileName, append: true)
+            {
+                AutoFlush = true
+            };
             return result;
         }
 

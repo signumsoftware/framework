@@ -409,8 +409,10 @@ namespace Signum.Engine
 
         private static string Replace(string connectionString, DatabaseName item)
         {
-            var csb = new SqlConnectionStringBuilder(connectionString);
-            csb.InitialCatalog = item.ToString();
+            var csb = new SqlConnectionStringBuilder(connectionString)
+            {
+                InitialCatalog = item.ToString()
+            };
             return csb.ToString();
         }
 
@@ -470,7 +472,7 @@ namespace Signum.Engine
             if (IsDate(sqlType))
                 AssertDateTime((DateTime?)value);
 
-            var result = new SqlParameter(parameterName, value == null ? DBNull.Value : value)
+            var result = new SqlParameter(parameterName, value ?? DBNull.Value)
             {
                 IsNullable = nullable
             };

@@ -1025,36 +1025,37 @@ namespace Signum.Engine.Maps
         {
             var pb = Connector.Current.ParameterBuilder;
 
-            TableMListCache<T> result = new TableMListCache<T>();
-            result.table = this;
-            result.Getter = ident => (MList<T>)FullGetter(ident);
-
-            result.sqlDelete = suffix => "DELETE {0} WHERE {1} = {2}".FormatWith(Name, BackReference.Name.SqlEscape(), ParameterBuilder.GetParameterName(BackReference.Name + suffix));
-            result.DeleteParameter = (ident, suffix) => pb.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name + suffix), ident.Id, this.BackReference.ReferenceTable.PrimaryKey);
-
-            result.sqlDeleteExcept = num =>
+            TableMListCache<T> result = new TableMListCache<T>()
             {
-                var sql = "DELETE {0} WHERE {1} = {2}"
-                    .FormatWith(Name, BackReference.Name.SqlEscape(), ParameterBuilder.GetParameterName(BackReference.Name));
+                table = this,
+                Getter = ident => (MList<T>)FullGetter(ident),
 
-                sql += " AND {0} NOT IN ({1})"
-                    .FormatWith(PrimaryKey.Name.SqlEscape(), 0.To(num).Select(i => ParameterBuilder.GetParameterName("e" + i)).ToString(", "));
+                sqlDelete = suffix => "DELETE {0} WHERE {1} = {2}".FormatWith(Name, BackReference.Name.SqlEscape(), ParameterBuilder.GetParameterName(BackReference.Name + suffix)),
+                DeleteParameter = (ident, suffix) => pb.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name + suffix), ident.Id, this.BackReference.ReferenceTable.PrimaryKey),
 
-                return sql;
-            };
+                sqlDeleteExcept = num =>
+                {
+                    var sql = "DELETE {0} WHERE {1} = {2}"
+                        .FormatWith(Name, BackReference.Name.SqlEscape(), ParameterBuilder.GetParameterName(BackReference.Name));
 
-            result.DeleteExceptParameter = delete =>
-            {
-                var list = new List<DbParameter>
-                { 
+                    sql += " AND {0} NOT IN ({1})"
+                        .FormatWith(PrimaryKey.Name.SqlEscape(), 0.To(num).Select(i => ParameterBuilder.GetParameterName("e" + i)).ToString(", "));
+
+                    return sql;
+                },
+
+                DeleteExceptParameter = delete =>
+                {
+                    var list = new List<DbParameter>
+                    {
                     pb.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name), delete.Entity.Id, BackReference)
-                };
+                    };
 
-                list.AddRange(delete.ExceptRowIds.Select((e, i) => pb.CreateReferenceParameter(ParameterBuilder.GetParameterName("e" + i), e, PrimaryKey)));
+                    list.AddRange(delete.ExceptRowIds.Select((e, i) => pb.CreateReferenceParameter(ParameterBuilder.GetParameterName("e" + i), e, PrimaryKey)));
 
-                return list;
+                    return list;
+                }
             };
-
             var paramIdent = Expression.Parameter(typeof(Entity), "ident");
             var paramItem = Expression.Parameter(typeof(T), "item");
             var paramOrder = Expression.Parameter(typeof(int), "order");

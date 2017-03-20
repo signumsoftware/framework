@@ -2145,21 +2145,21 @@ namespace Signum.Engine.Linq
         {
             return implementedByReplacements.GetOrCreate(ib, () =>
             {
-                UnionAllRequest result = new UnionAllRequest(ib);
-
-                result.UnionAlias = aliasGenerator.NextTableAlias("Union" + ib.Type.Name);
-
-                result.Implementations = ib.Implementations.SelectDictionary(k => k, ee =>
+                UnionAllRequest result = new UnionAllRequest(ib)
                 {
-                    var alias = NextTableAlias(ee.Table.Name);
+                    UnionAlias = aliasGenerator.NextTableAlias("Union" + ib.Type.Name),
 
-                    return new UnionEntity
+                    Implementations = ib.Implementations.SelectDictionary(k => k, ee =>
                     {
-                        Table = new TableExpression(alias, ee.Table, null),
-                        Entity = (EntityExpression)ee.Table.GetProjectorExpression(alias, this),
-                    };
-                }).ToReadOnly();
+                        var alias = NextTableAlias(ee.Table.Name);
 
+                        return new UnionEntity
+                        {
+                            Table = new TableExpression(alias, ee.Table, null),
+                            Entity = (EntityExpression)ee.Table.GetProjectorExpression(alias, this),
+                        };
+                    }).ToReadOnly()
+                };
                 List<Expression> equals = new List<Expression>();
                 foreach (var unionEntity in result.Implementations.Values)
                 {
