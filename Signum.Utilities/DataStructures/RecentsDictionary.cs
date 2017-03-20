@@ -58,10 +58,7 @@ namespace Signum.Utilities.DataStructures
                     K purgeKey = linkToKey[tail];
 
                     // Fire the event
-                    if (Purged != null)
-                    {
-                        Purged(purgeKey, tail.Value);
-                    }
+                    Purged?.Invoke(purgeKey, tail.Value);
 
                     Remove(purgeKey);
                 }

@@ -27,18 +27,15 @@ namespace Signum.Engine
 
                 if (oldVal == null)
                 {
-                    if (createNew != null)
-                        createNew(key, newVal);
+                    createNew?.Invoke(key, newVal);
                 }
                 else if (newVal == null)
                 {
-                    if (removeOld != null)
-                        removeOld(key, oldVal);
+                    removeOld?.Invoke(key, oldVal);
                 }
                 else
                 {
-                    if (merge != null)
-                        merge(key, newVal, oldVal);
+                    merge?.Invoke(key, newVal, oldVal);
                 }
             }
         }
@@ -62,18 +59,15 @@ namespace Signum.Engine
 
                 if (oldVal == null)
                 {
-                    if (createNew != null)
-                        createNew(key, newVal);
+                    createNew?.Invoke(key, newVal);
                 }
                 else if (newVal == null)
                 {
-                    if (removeOld != null)
-                        removeOld(key, oldVal);
+                    removeOld?.Invoke(key, oldVal);
                 }
                 else
                 {
-                    if (merge != null)
-                        merge(key, newVal, oldVal);
+                    merge?.Invoke(key, newVal, oldVal);
                 }
             });
         }
@@ -105,18 +99,15 @@ namespace Signum.Engine
 
                 if (oldVal == null)
                 {
-                    if (createNew != null)
-                        createNew(key, newVal);
+                    createNew?.Invoke(key, newVal);
                 }
                 else if (newVal == null)
                 {
-                    if (removeOld != null)
-                        removeOld(key, oldVal);
+                    removeOld?.Invoke(key, oldVal);
                 }
                 else
                 {
-                    if (merge != null)
-                        merge(key, newVal, oldVal);
+                    merge?.Invoke(key, newVal, oldVal);
                 }
             }
         }

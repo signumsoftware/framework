@@ -113,8 +113,7 @@ namespace Signum.Utilities
 
         void OnChanged(ProgressAction pa)
         {
-            if (Changed != null)
-                Changed(this, new ProgressArgs(pa));
+            Changed?.Invoke(this, new ProgressArgs(pa));
         }
 
         static int RoundToPowerOfTwoMinusOne(int n)

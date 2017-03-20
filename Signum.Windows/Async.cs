@@ -80,8 +80,7 @@ namespace Signum.Windows
 
                 win.Show();
 
-                if (afterShown != null)
-                    afterShown(win);
+                afterShown?.Invoke(win);
             }
             else
             {
@@ -113,8 +112,7 @@ namespace Signum.Windows
 
                         win.Closed += (sender, args) =>
                         {
-                            if (closed != null)
-                                closed(sender, args);
+                            closed?.Invoke(sender, args);
 
                             ((Window)sender).Dispatcher.InvokeShutdown();
                             threadWindows.TryRemove(Thread.CurrentThread, out Window rubish);
@@ -122,11 +120,9 @@ namespace Signum.Windows
 
                         win.Show();
 
-                        if (onWindowsReady != null)
-                            onWindowsReady(win);
+                        onWindowsReady?.Invoke(win);
 
-                        if (afterShown != null)
-                            afterShown(win);
+                        afterShown?.Invoke(win);
 
                         Dispatcher.Run();
                     }

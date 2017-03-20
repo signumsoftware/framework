@@ -231,14 +231,12 @@ namespace Signum.Utilities.DataStructures
             if (condition != null && !condition(node))
                 return;
 
-            if (preAction != null)
-                preAction(node);
+            preAction?.Invoke(node);
 
             foreach (T item in RelatedTo(node).Keys)
                 DepthExplore(item, condition, preAction, postAction);
 
-            if (postAction != null)
-                postAction(node);
+            postAction?.Invoke(node);
         }
 
         public void DepthExploreConnections(T node, Func<T, E, T, bool> condition)

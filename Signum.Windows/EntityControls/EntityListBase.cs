@@ -122,8 +122,7 @@ namespace Signum.Windows
 
         public virtual void OnEntitiesChanged(DependencyPropertyChangedEventArgs e)
         {
-            if (EntitiesChanged != null)
-                EntitiesChanged(this, isListUserInteraction, e.OldValue, e.NewValue);
+            EntitiesChanged?.Invoke(this, isListUserInteraction, e.OldValue, e.NewValue);
         }
     }
 }

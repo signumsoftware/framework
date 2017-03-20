@@ -322,8 +322,7 @@ namespace Signum.Windows
 
         protected virtual void OnEntityChanged(object oldValue, object newValue)
         {
-            if (EntityChanged != null)
-                EntityChanged(this, isUserInteraction, oldValue, newValue);
+            EntityChanged?.Invoke(this, isUserInteraction, oldValue, newValue);
 
             AutomationProperties.SetItemStatus(this, Common.GetEntityStringAndHashCode(newValue));
 

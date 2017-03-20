@@ -420,8 +420,7 @@ namespace Signum.Entities.DynamicQuery
             {
                 isDirty = value;
 
-                if (PropertyChanged != null)
-                    PropertyChanged(this, new PropertyChangedEventArgs("IsDirty"));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsDirty"));
             }
         }
 

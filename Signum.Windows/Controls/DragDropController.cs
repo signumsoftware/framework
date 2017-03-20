@@ -62,8 +62,7 @@ namespace Signum.Windows
 
                     DragDropEffects de = DragDrop.DoDragDrop(dragElement, dataObject, allowedEffects); //Leap of faith
 
-                    if (Dropped != null)
-                        Dropped(dragElement, de);
+                    Dropped?.Invoke(dragElement, de);
                 }
             }
             else

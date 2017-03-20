@@ -83,8 +83,7 @@ namespace Signum.Windows
             if (current == null)
                 return false;
 
-            if (Connecting != null)
-                Connecting();
+            Connecting?.Invoke();
 
             return true;
         }

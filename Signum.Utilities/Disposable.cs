@@ -19,8 +19,7 @@ namespace Signum.Utilities
 
         public void Dispose()
         {
-            if (action != null)
-                action(); 
+            action?.Invoke();
         }
 
         public static IDisposable Combine(IDisposable first, IDisposable second)

@@ -177,8 +177,7 @@ namespace Signum.Utilities
         public override int Read(byte[] buffer, int offset, int count)
         {
             int result = InnerStream.Read(buffer, offset, count);
-            if (ProgressChanged != null)
-                ProgressChanged(this, EventArgs.Empty);
+            ProgressChanged?.Invoke(this, EventArgs.Empty);
             return result;
         }
 
@@ -195,8 +194,7 @@ namespace Signum.Utilities
         public override void Write(byte[] buffer, int offset, int count)
         {
             InnerStream.Write(buffer, offset, count);
-            if (ProgressChanged != null)
-                ProgressChanged(this, EventArgs.Empty);
+            ProgressChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public override void Close()

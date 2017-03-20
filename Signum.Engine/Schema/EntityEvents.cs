@@ -79,28 +79,24 @@ namespace Signum.Engine.Maps
 
         void IEntityEvents.OnPreSaving(Entity entity, ref bool graphModified)
         {
-            if (PreSaving != null)
-                PreSaving((T)entity, ref graphModified);
+            PreSaving?.Invoke((T)entity, ref graphModified);
         }
 
         void IEntityEvents.OnSaving(Entity entity)
         {
-            if (Saving != null)
-                Saving((T)entity);
+            Saving?.Invoke((T)entity);
 
         }
 
         void IEntityEvents.OnSaved(Entity entity, SavedEventArgs args)
         {
-            if (Saved != null)
-                Saved((T)entity, args);
+            Saved?.Invoke((T)entity, args);
 
         }
 
         void IEntityEvents.OnRetrieved(Entity entity)
         {
-            if (Retrieved != null)
-                Retrieved((T)entity);
+            Retrieved?.Invoke((T)entity);
         }
 
         ICacheController IEntityEvents.CacheController

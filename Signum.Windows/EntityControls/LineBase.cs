@@ -46,8 +46,7 @@ namespace Signum.Windows
         {
             this.Loaded -= OnLoad;
 
-            if (PreLoad != null)
-                PreLoad(this, EventArgs.Empty);
+            PreLoad?.Invoke(this, EventArgs.Empty);
 
             if (DesignerProperties.GetIsInDesignMode(this))
                 return;

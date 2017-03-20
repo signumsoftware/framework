@@ -206,10 +206,9 @@ namespace Signum.Windows
 
                 TaskNormalWindow += TaskSetIconNormalWindow;
 
-                TaskNormalWindow += TaskSetLabelNormalWindow;    
+                TaskNormalWindow += TaskSetLabelNormalWindow;
 
-                if (Initializing != null)
-                    Initializing();
+                Initializing?.Invoke();
 
                 initialized = true;
             }
@@ -382,8 +381,7 @@ namespace Signum.Windows
                 win.SaveProtected = ((ViewOptions)options).RequiresSaveOperation ??
                     (typeof(Entity).IsAssignableFrom(entityType) && EntityKindCache.RequiresSaveOperation(entityType)); //Matters even on Ok
 
-            if (TaskNormalWindow != null)
-                TaskNormalWindow(win, entity);
+            TaskNormalWindow?.Invoke(win, entity);
 
             return win;
         }
@@ -639,8 +637,7 @@ namespace Signum.Windows
 
                 win.Show();
 
-                if (afterShown != null)
-                    afterShown(win);
+                afterShown?.Invoke(win);
             }
         }
 

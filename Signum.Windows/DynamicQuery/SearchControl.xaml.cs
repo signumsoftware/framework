@@ -569,8 +569,7 @@ namespace Signum.Windows
                     contextMenu.Items.Add(new MenuItem { Header = new TextBlock(new Italic(new Run(SearchMessage.NoActionsFound.NiceToString()))), IsEnabled = false });
             }
 
-            if (ContextMenuOpened != null)
-                ContextMenuOpened(contextMenu);
+            ContextMenuOpened?.Invoke(contextMenu);
         }
 
         public event Action<ContextMenu> ContextMenuOpened;
@@ -833,13 +832,11 @@ namespace Signum.Windows
                 oldPaginate.ElementsPerPage == newPaginate.ElementsPerPage &&
                 oldPaginate.CurrentPage != newPaginate.CurrentPage)
             {
-                if (FixSize != null)
-                    FixSize(this, new EventArgs());
+                FixSize?.Invoke(this, new EventArgs());
             }
             else
             {
-                if (ClearSize != null)
-                    ClearSize(this, new EventArgs());
+                ClearSize?.Invoke(this, new EventArgs());
             }
 
             if (newValue is Pagination.All)

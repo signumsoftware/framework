@@ -22,8 +22,7 @@ namespace Signum.Entities.Basics
             set
             {
                 CurrentUserVariable.Value = value;
-                if (CurrentUserChanged != null)
-                    CurrentUserChanged();
+                CurrentUserChanged?.Invoke();
             }
         }
 
