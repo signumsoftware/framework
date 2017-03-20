@@ -856,9 +856,10 @@ namespace Signum.Engine.Linq
             this.thenBys = null;
             ProjectionExpression projection = this.VisitCastProjection(source);
 
-            List<OrderExpression> orderings = new List<OrderExpression>();
-            orderings.Add(new OrderExpression(orderType, GetOrderExpression(orderSelector, projection)));
-
+            List<OrderExpression> orderings = new List<OrderExpression>
+            {
+                new OrderExpression(orderType, GetOrderExpression(orderSelector, projection))
+            };
             if (myThenBys != null)
             {
                 for (int i = myThenBys.Count - 1; i >= 0; i--)
@@ -3088,7 +3089,7 @@ namespace Signum.Engine.Linq
 
                 return GetEntityConstant(
                     ident == null ? Expression.Constant(null, type) : Expression.Constant(ident.Id.Object, type),
-                    ident == null ? null : ident.GetType());
+                    ident?.GetType());
             }
 
             if (colExpression is EmbeddedEntityExpression)
@@ -3104,7 +3105,7 @@ namespace Signum.Engine.Linq
 
                     var entity = GetEntityConstant(
                         lite == null ? Expression.Constant(null, type) : Expression.Constant(lite.Id.Object, type),
-                        lite == null ? null : lite.GetType().CleanType());
+                        lite?.GetType().CleanType());
                     return new LiteReferenceExpression(colLite.Type, entity, null);
                 }
             }

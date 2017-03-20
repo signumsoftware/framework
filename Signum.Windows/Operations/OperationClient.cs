@@ -356,7 +356,7 @@ namespace Signum.Windows.Operations
             var operations = (from oi in OperationInfos(type)
                               where oi.IsEntityOperation
                               let os = GetSettings<EntityOperationSettingsBase>(type, oi.OperationSymbol)
-                              let coc = newContextualOperationContext.GetInvoker(os?.OverridenType ?? sc.SelectedItem.EntityType)(sc, oi, os == null ? null : os.ContextualUntyped)
+                              let coc = newContextualOperationContext.GetInvoker(os?.OverridenType ?? sc.SelectedItem.EntityType)(sc, oi, os?.ContextualUntyped)
                               where os == null ? oi.Lite == true :
                                    os.ContextualUntyped.HasIsVisible ? os.ContextualUntyped.OnIsVisible(coc) :
                                    oi.Lite == true && !os.HasIsVisible && (!os.HasClick || os.ContextualUntyped.HasClick)

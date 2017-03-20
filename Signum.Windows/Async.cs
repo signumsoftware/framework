@@ -84,8 +84,7 @@ namespace Signum.Windows
             }
             else
             {
-                Action<Window> onWindowsReady = OnShowInAnotherThread == null ? null :
-                    OnShowInAnotherThread.GetInvocationListTyped()
+                Action<Window> onWindowsReady = OnShowInAnotherThread?.GetInvocationListTyped()
                     .Select(a => a())
                     .Aggregate((a, b) => w => { a(w); b(w); });
 

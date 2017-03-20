@@ -138,7 +138,7 @@ namespace Signum.Windows
         {
             DependencyObject obj = e.NewFocus as DependencyObject;
 
-            obj = obj == null ? null : obj.VisualParents().FirstOrDefault(a => a is Visual || a is Visual3D);
+            obj = obj?.VisualParents().FirstOrDefault(a => a is Visual || a is Visual3D);
 
             if (obj == null || !popup.Child.IsAncestorOf(obj))
                 popup.IsOpen = false;

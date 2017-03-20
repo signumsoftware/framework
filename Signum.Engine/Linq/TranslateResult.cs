@@ -203,9 +203,9 @@ namespace Signum.Engine.Linq
         {
             try
             {
-                SqlPreCommand eager = EagerProjections == null ? null : EagerProjections.Select(cp => cp.Command).Combine(Spacing.Double);
+                SqlPreCommand eager = EagerProjections?.Select(cp => cp.Command).Combine(Spacing.Double);
 
-                SqlPreCommand lazy = LazyChildProjections  == null ? null : LazyChildProjections.Select(cp => cp.Command).Combine(Spacing.Double);
+                SqlPreCommand lazy = LazyChildProjections?.Select(cp => cp.Command).Combine(Spacing.Double);
 
                 return SqlPreCommandConcat.Combine(Spacing.Double,
                     eager == null ? null : new SqlPreCommandSimple("--------- Eager Client Joins ----------------"),

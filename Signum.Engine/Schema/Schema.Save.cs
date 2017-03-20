@@ -29,7 +29,7 @@ namespace Signum.Engine.Maps
 
         public Forbidden(DirectedGraph<Entity> graph, Entity entity)
         {
-            this.set = graph == null ? null : graph.TryRelatedTo(entity);
+            this.set = graph?.TryRelatedTo(entity);
         }
 
         readonly HashSet<Entity> set;

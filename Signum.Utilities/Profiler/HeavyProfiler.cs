@@ -191,7 +191,7 @@ namespace Signum.Utilities
 
             var newTracer = CreateNewEntry(role, additionalData, hasStackTrace);
 
-            tracer.newCurrent = newTracer == null ? null : newTracer.newCurrent;
+            tracer.newCurrent = newTracer?.newCurrent;
         }
 
         public static IEnumerable<HeavyProfilerEntry> AllEntries()
@@ -398,8 +398,7 @@ namespace Signum.Utilities
                 new XAttribute("End", this.End),
                 this.AdditionalData == null ? null :
                 new XAttribute("AdditionalData", this.AdditionalData),
-                Entries == null ? null :
-                Entries.Select(e => e.ExportXml()).ToList());
+                Entries?.Select(e => e.ExportXml()).ToList());
         }
 
         public void CleanStackTrace()

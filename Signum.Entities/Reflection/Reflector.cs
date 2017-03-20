@@ -362,14 +362,14 @@ namespace Signum.Entities.Reflection
                 if (unitName != null)
                     return a => a == null ? null : a.ToString(format, CultureInfo.CurrentCulture) + " " + unitName;
                 else
-                    return a => a == null ? null : a.ToString(format, CultureInfo.CurrentCulture);
+                    return a => a?.ToString(format, CultureInfo.CurrentCulture);
             }
             else
             {
                 if (unitName != null)
                     return a => a == null ? null : a.ToString() + " " + unitName;
                 else
-                    return a => a == null ? null : a.ToString();
+                    return a => a?.ToString();
             }
         }
 
