@@ -47,8 +47,10 @@ namespace Signum.Entities.Workflow
 
         public ModelEntity GetModel()
         {
-            var model = new WorkflowLaneModel();
-            model.MainEntityType = this.Pool.Workflow.MainEntityType;
+            var model = new WorkflowLaneModel()
+            {
+                MainEntityType = this.Pool.Workflow.MainEntityType
+            };
             model.Actors.AssignMList(this.Actors);
             model.ActorsEval = this.ActorsEval;
             model.Name = this.Name;

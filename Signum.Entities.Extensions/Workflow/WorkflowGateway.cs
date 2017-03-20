@@ -39,10 +39,12 @@ namespace Signum.Entities.Workflow
         }
         public ModelEntity GetModel()
         {
-            var model = new WorkflowGatewayModel();
-            model.Name = this.Name;
-            model.Type = this.Type;
-            model.Direction = this.Direction;
+            var model = new WorkflowGatewayModel()
+            {
+                Name = this.Name,
+                Type = this.Type,
+                Direction = this.Direction
+            };
             return model;
         }
 

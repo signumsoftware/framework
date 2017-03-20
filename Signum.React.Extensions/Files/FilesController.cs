@@ -61,8 +61,10 @@ namespace Signum.React.Files
         /// <param name="stream">No need to close</param
         public static HttpResponseMessage GetHttpReponseMessage(Stream stream, string fileName, bool forDownload = true)
         {
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            response.Content = new StreamContent(stream);
+            var response = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StreamContent(stream)
+            };
             if (forDownload)
             {
                 response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")

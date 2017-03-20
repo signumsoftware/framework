@@ -309,11 +309,11 @@ namespace Signum.Windows.SyntaxHighlight
                 FlowDirection.LeftToRight,
                 new Typeface(FontFamily, FontStyle, FontWeight, FontStretch),
                 FontSize,
-                Brushes.Black);
-
-            ft.Trimming = TextTrimming.None;
-            ft.LineHeight = lineHeight;
-
+                Brushes.Black)
+            {
+                Trimming = TextTrimming.None,
+                LineHeight = lineHeight
+            };
             return ft;
         }
 
@@ -333,12 +333,12 @@ namespace Signum.Windows.SyntaxHighlight
                 FlowDirection.LeftToRight,
                 new Typeface(FontFamily, FontStyle, FontWeight, FontStretch),
                 FontSize,
-                new SolidColorBrush(Color.FromRgb(0x21, 0xA1, 0xD8)));
-
-            ft.Trimming = TextTrimming.None;
-            ft.LineHeight = lineHeight;
-            ft.TextAlignment = TextAlignment.Right;
-
+                new SolidColorBrush(Color.FromRgb(0x21, 0xA1, 0xD8)))
+            {
+                Trimming = TextTrimming.None,
+                LineHeight = lineHeight,
+                TextAlignment = TextAlignment.Right
+            };
             return ft;
         }
 
@@ -353,11 +353,11 @@ namespace Signum.Windows.SyntaxHighlight
                 FlowDirection.LeftToRight,
                 new Typeface(FontFamily, FontStyle, FontWeight, FontStretch),
                 FontSize,
-                Brushes.Black);
-
-            ft.Trimming = TextTrimming.None;
-            ft.LineHeight = lineHeight;
-
+                Brushes.Black)
+            {
+                Trimming = TextTrimming.None,
+                LineHeight = lineHeight
+            };
             return ft.Width;
         }
 

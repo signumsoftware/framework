@@ -216,8 +216,10 @@ namespace Signum.Windows.Files
             {
                 IFile file = (IFile)Server.Convert(entity, cleanType);
 
-                SaveFileDialog sfd = new SaveFileDialog();
-                sfd.FileName = file.FileName;
+                SaveFileDialog sfd = new SaveFileDialog()
+                {
+                    FileName = file.FileName
+                };
                 if (CustomizeFileDialog != null)
                     CustomizeFileDialog(sfd);
 

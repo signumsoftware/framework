@@ -103,9 +103,11 @@ namespace Signum.Entities.Workflow
 
         public ModelEntity GetModel()
         {
-            var model = new WorkflowActivityModel();
-            model.WorkflowActivity = this.ToLite();
-            model.Workflow = this.Lane.Pool.Workflow;
+            var model = new WorkflowActivityModel()
+            {
+                WorkflowActivity = this.ToLite(),
+                Workflow = this.Lane.Pool.Workflow
+            };
             model.MainEntityType = model.Workflow.MainEntityType;
             model.Name = this.Name;
             model.Type = this.Type;

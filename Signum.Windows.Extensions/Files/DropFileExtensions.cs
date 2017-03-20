@@ -296,13 +296,14 @@ namespace Signum.Windows.Extensions.Files
 
         public MemoryStream GetData(string format, int index)
         {
-            FORMATETC formatetc = new FORMATETC();
-            formatetc.cfFormat = (short)DataFormats.GetDataFormat(format).Id;
-            formatetc.dwAspect = DVASPECT.DVASPECT_CONTENT;
-            formatetc.lindex = index;
-            formatetc.ptd = new IntPtr(0);
-            formatetc.tymed = TYMED.TYMED_ISTREAM | TYMED.TYMED_ISTORAGE | TYMED.TYMED_HGLOBAL;
-
+            FORMATETC formatetc = new FORMATETC()
+            {
+                cfFormat = (short)DataFormats.GetDataFormat(format).Id,
+                dwAspect = DVASPECT.DVASPECT_CONTENT,
+                lindex = index,
+                ptd = new IntPtr(0),
+                tymed = TYMED.TYMED_ISTREAM | TYMED.TYMED_ISTORAGE | TYMED.TYMED_HGLOBAL
+            };
             STGMEDIUM medium = new STGMEDIUM();
 
             this.comUnderlyingDataObject.GetData(ref formatetc, out medium);

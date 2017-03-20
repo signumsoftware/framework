@@ -45,13 +45,15 @@ namespace Signum.Entities.Workflow
 
         public ModelEntity GetModel()
         {
-            var model = new WorkflowConnectionModel();
-            model.MainEntityType = this.From.Lane.Pool.Workflow.MainEntityType;
-            model.Name = this.Name;
-            model.DecisonResult = this.DecisonResult;
-            model.Condition = this.Condition;
-            model.Action = this.Action;
-            model.Order = this.Order;
+            var model = new WorkflowConnectionModel()
+            {
+                MainEntityType = this.From.Lane.Pool.Workflow.MainEntityType,
+                Name = this.Name,
+                DecisonResult = this.DecisonResult,
+                Condition = this.Condition,
+                Action = this.Action,
+                Order = this.Order
+            };
             return model;
         }
 

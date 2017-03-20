@@ -37,8 +37,10 @@ namespace Signum.Entities.Workflow
 
         public ModelEntity GetModel()
         {
-            var model = new WorkflowPoolModel();
-            model.Name = this.Name;
+            var model = new WorkflowPoolModel()
+            {
+                Name = this.Name
+            };
             return model;
         }
 

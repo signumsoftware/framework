@@ -74,9 +74,10 @@ namespace Signum.Windows.Shapes
             get
             {
                 // Create a StreamGeometry for describing the shape
-                StreamGeometry geometry = new StreamGeometry();
-                geometry.FillRule = FillRule.EvenOdd;
-
+                StreamGeometry geometry = new StreamGeometry()
+                {
+                    FillRule = FillRule.EvenOdd
+                };
                 using (StreamGeometryContext context = geometry.Open())
                 {
                     InternalDrawArrowGeometry(context);

@@ -46,11 +46,13 @@ namespace Signum.Entities.Workflow
 
         public ModelEntity GetModel()
         {
-            var model = new WorkflowEventModel();
-            model.MainEntityType = this.Lane.Pool.Workflow.MainEntityType;
-            model.Name = this.Name;
-            model.Type = this.Type;
-            model.Task = WorkflowEventTaskModel.GetModel(this);
+            var model = new WorkflowEventModel()
+            {
+                MainEntityType = this.Lane.Pool.Workflow.MainEntityType,
+                Name = this.Name,
+                Type = this.Type,
+                Task = WorkflowEventTaskModel.GetModel(this)
+            };
             return model;
         }
 

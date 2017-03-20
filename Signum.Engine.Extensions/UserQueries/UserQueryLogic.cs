@@ -66,10 +66,10 @@ namespace Signum.Engine.UserQueries
 
         public static QueryRequest ToQueryRequest(this UserQueryEntity userQuery)
         {
-            var qr = new QueryRequest();
-
-            qr.QueryName = userQuery.Query.ToQueryName();
-
+            var qr = new QueryRequest()
+            {
+                QueryName = userQuery.Query.ToQueryName()
+            };
             if (!userQuery.WithoutFilters)
             {
                 qr.Filters = userQuery.Filters.Select(qf =>
