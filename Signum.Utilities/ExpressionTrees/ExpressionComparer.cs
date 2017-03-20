@@ -151,8 +151,7 @@ namespace Signum.Utilities.ExpressionTrees
         {
             if (parameterScope != null)
             {
-                ParameterExpression mapped;
-                if (parameterScope.TryGetValue(a, out mapped))
+                if (parameterScope.TryGetValue(a, out ParameterExpression mapped))
                     return mapped == b;
             }
             return a == b;

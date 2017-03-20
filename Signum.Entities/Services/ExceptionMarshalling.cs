@@ -132,8 +132,7 @@ namespace Signum.Entities.Services
                     reply = buffer.CreateMessage();         // Restore the original message
 
                     object faultDetail = ReadFaultDetail(copy);
-                    Exception exception = faultDetail as Exception;
-                    if (exception != null)
+                    if (faultDetail is Exception exception)
                     {
                         throw exception;
                     }

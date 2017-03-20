@@ -343,13 +343,12 @@ namespace Signum.Engine.Linq
 
                 if (ReflectionTools.MethodEqual(mi, miTakeE) || ReflectionTools.MethodEqual(mi, miTakeQ))
                 {
-                    var m2 = m.GetArgument("source") as MethodCallExpression;
 
-                    if(m2 != null)
+                    if (m.GetArgument("source") is MethodCallExpression m2)
                     {
                         var mi2 = (((MethodCallExpression)m2).Method).GetGenericMethodDefinition();
 
-                        if(ReflectionTools.MethodEqual(mi2, miSkipE) ||ReflectionTools.MethodEqual(mi2, miSkipQ))
+                        if (ReflectionTools.MethodEqual(mi2, miSkipE) || ReflectionTools.MethodEqual(mi2, miSkipQ))
                         {
                             var source = Visit(m2.GetArgument("source"));
                             var skip = Visit(m2.GetArgument("count"));
@@ -365,8 +364,8 @@ namespace Signum.Engine.Linq
 
                             MethodInfo miWhereIndex = (query ? miWhereIndexQ : miWhereIndexE).MakeGenericMethod(paramTypes[0]);
 
-                            return Expression.Call(miWhereIndex, source, lambda); 
-                        } 
+                            return Expression.Call(miWhereIndex, source, lambda);
+                        }
                     }
                 }
             }

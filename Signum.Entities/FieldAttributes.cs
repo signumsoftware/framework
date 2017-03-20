@@ -181,9 +181,8 @@ sb.Schema.Settings.FieldAttributes(({0} a) => a.{1}).Replace(new ImplementedByAt
             arrayOrType = str == "ALL" ? null :
                 str.Split('|').Select(Type.GetType).ToArray();
 
-            var array = arrayOrType as Type[];
-            if(array != null && array.Length == 1)
-                arrayOrType = array[0]; 
+            if (arrayOrType is Type[] array && array.Length == 1)
+                arrayOrType = array[0];
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)

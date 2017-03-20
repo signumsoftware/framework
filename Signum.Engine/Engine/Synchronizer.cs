@@ -396,8 +396,7 @@ namespace Signum.Engine
                 if (answer == "")
                     return new Selection(oldValue, newValues[0]);
 
-                int option = 0;
-                if (int.TryParse(answer, out option))
+                if (int.TryParse(answer, out int option))
                     return new Selection(oldValue, newValues[option]);
 
                 Console.WriteLine("Error");

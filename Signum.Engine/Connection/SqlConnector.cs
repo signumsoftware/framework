@@ -304,8 +304,7 @@ namespace Signum.Engine
 
         Exception ReplaceException(Exception ex, SqlPreCommandSimple command)
         {
-            var se = ex as SqlException;
-            if (se != null)
+            if (ex is SqlException se)
             {
                 switch (se.Number)
                 {
@@ -316,8 +315,7 @@ namespace Signum.Engine
                 }
             }
 
-            var ste = ex as SqlTypeException;
-            if (ste != null && ex.Message.Contains("DateTime"))
+            if (ex is SqlTypeException ste && ex.Message.Contains("DateTime"))
             {
                 var mins = command.Parameters.Where(a => DateTime.MinValue.Equals(a.Value));
 

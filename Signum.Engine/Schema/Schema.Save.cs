@@ -121,8 +121,7 @@ namespace Signum.Engine.Maps
 
                     AssertHasId(etity);
 
-                    Entity entity = etity as Entity;
-                    if (entity != null)
+                    if (etity is Entity entity)
                         entity.Ticks = TimeZoneManager.Now.Ticks;
 
                     table.SetToStrField(etity);
@@ -150,8 +149,7 @@ namespace Signum.Engine.Maps
                         var ident = idents[i];
                         AssertHasId(ident);
 
-                        Entity entity = ident as Entity;
-                        if (entity != null)
+                        if (ident is Entity entity)
                             entity.Ticks = TimeZoneManager.Now.Ticks;
 
                         table.SetToStrField(ident);
@@ -240,8 +238,7 @@ namespace Signum.Engine.Maps
                         var ident = idents[i];
                         AssertNoId(ident);
 
-                        Entity entity = ident as Entity;
-                        if (entity != null)
+                        if (ident is Entity entity)
                             entity.Ticks = TimeZoneManager.Now.Ticks;
 
                         table.SetToStrField(ident);
@@ -324,9 +321,8 @@ namespace Signum.Engine.Maps
         {
             get
             {
-                EntityField entity;
 
-                if (Fields.TryGetValue("toStr", out entity))
+                if (Fields.TryGetValue("toStr", out EntityField entity))
                     return (IColumn)entity.Field;
 
                 return null;
@@ -666,16 +662,14 @@ namespace Signum.Engine.Maps
             Schema current = Schema.Current;
             DirectedGraph<Modifiable> modifiables = GraphExplorer.PreSaving(() => GraphExplorer.FromRoot(entity), (Modifiable m, ref bool graphModified) =>
             {
-                ModifiableEntity me = m as ModifiableEntity;
 
-                if (me != null)
+                if (m is ModifiableEntity me)
                     me.SetTemporalErrors(null);
 
                 m.PreSaving(ref graphModified);
 
-                Entity ident = m as Entity;
 
-                if (ident != null)
+                if (m is Entity ident)
                     current.OnPreSaving(ident, ref graphModified);
             });
 

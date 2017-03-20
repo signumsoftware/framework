@@ -19,16 +19,13 @@ namespace Signum.React.Json
 
         private bool? SignumValidate(ValidationContext validationContext, object model)
         {
-            var lite = model as Lite<Entity>;
-            if (lite != null)
+            if (model is Lite<Entity> lite)
                 return ValidateLite(validationContext, lite);
 
-            var mod = model as ModifiableEntity;
-            if (mod != null)
+            if (model is ModifiableEntity mod)
                 return ValidateModifiableEntity(validationContext, mod);
 
-            var mlist = model as IMListPrivate;
-            if (mlist != null)
+            if (model is IMListPrivate mlist)
                 return ValidateMList(validationContext, mlist);
 
             return null;

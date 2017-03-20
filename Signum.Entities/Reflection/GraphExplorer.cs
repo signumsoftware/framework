@@ -142,9 +142,8 @@ namespace Signum.Entities.Reflection
         {
             return PreSaving(recreate, (Modifiable m, ref bool graphModified) => 
             {
-                ModifiableEntity me = m as ModifiableEntity;
 
-                if (me != null)
+                if (m is ModifiableEntity me)
                     me.SetTemporalErrors(null);
 
                 m.PreSaving(ref graphModified);

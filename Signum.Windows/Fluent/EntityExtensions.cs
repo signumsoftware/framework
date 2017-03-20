@@ -20,8 +20,7 @@ namespace Signum.Windows
     {
         public static bool HasChanges(this FrameworkElement element)
         {
-            IHasChangesHandler hch = element as IHasChangesHandler;
-            if (hch != null)
+            if (element is IHasChangesHandler hch)
                 return hch.HasChanges();
 
             return GraphExplorer.HasChanges((Modifiable)element.DataContext);
@@ -29,8 +28,7 @@ namespace Signum.Windows
 
         public static bool AssertErrors(this FrameworkElement element)
         {
-            IAssertErrorsHandler aeh = element as IAssertErrorsHandler;
-            if (aeh != null)
+            if (element is IAssertErrorsHandler aeh)
                 return aeh.AssertErrors();
 
             string error = GetErrors(element);
@@ -58,8 +56,7 @@ namespace Signum.Windows
 
         public static string GetErrors(this FrameworkElement element)
         {
-            IGetErrorsHandler geh = element as IGetErrorsHandler;
-            if (geh != null)
+            if (element is IGetErrorsHandler geh)
                 return geh.GetErrors();
 
             var visualErrors = VisualErrors(element).DefaultText(null);

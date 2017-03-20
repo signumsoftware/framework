@@ -158,8 +158,7 @@ namespace Signum.Utilities.DataStructures
 
         Dictionary<T, E> TryGetOrAdd(T node)
         {
-            Dictionary<T, E> result;
-            if (adjacency.TryGetValue(node, out result))
+            if (adjacency.TryGetValue(node, out Dictionary<T, E> result))
                 return result;
 
             result = new Dictionary<T, E>(Comparer);
@@ -187,8 +186,7 @@ namespace Signum.Utilities.DataStructures
         {
             foreach (var item in adjacency)
             {
-                E edge;
-                if (item.Value.TryGetValue(node, out edge))
+                if (item.Value.TryGetValue(node, out E edge))
                     yield return KVP.Create(item.Key, edge);
             }
         }

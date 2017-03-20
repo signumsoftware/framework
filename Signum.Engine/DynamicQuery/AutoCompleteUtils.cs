@@ -48,8 +48,7 @@ namespace Signum.Engine.DynamicQuery
           
             foreach (var t in types)
             {
-                PrimaryKey id;
-                if (PrimaryKey.TryParse(subString, t, out id))
+                if (PrimaryKey.TryParse(subString, t, out PrimaryKey id))
                 {
                     var lite = miLiteById.GetInvoker(t).Invoke(id);
                     if (lite != null)
@@ -65,8 +64,7 @@ namespace Signum.Engine.DynamicQuery
 
             foreach (var t in types)
             {
-                PrimaryKey id;
-                if (!PrimaryKey.TryParse(subString, t, out id))
+                if (!PrimaryKey.TryParse(subString, t, out PrimaryKey id))
                 {
                     var parts = subString.Trim('\'', '"').SplitNoEmpty(' ');
 
@@ -87,8 +85,7 @@ namespace Signum.Engine.DynamicQuery
 
                 List<Lite<Entity>> results = new List<Lite<Entity>>();
 
-                PrimaryKey id;
-                if (PrimaryKey.TryParse(subString, type, out id))
+                if (PrimaryKey.TryParse(subString, type, out PrimaryKey id))
                 {
                     Lite<Entity> entity = query.SingleOrDefaultEx(e => e.Id == id);
 
@@ -118,8 +115,7 @@ namespace Signum.Engine.DynamicQuery
 
                 List<Lite<T>> results = new List<Lite<T>>();
 
-                PrimaryKey id;
-                if (PrimaryKey.TryParse(subString, typeof(T), out id))
+                if (PrimaryKey.TryParse(subString, typeof(T), out PrimaryKey id))
                 {
                     Lite<T> entity = query.SingleOrDefaultEx(e => e.Id == id);
 
@@ -147,8 +143,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 List<Lite<T>> results = new List<Lite<T>>();
 
-                PrimaryKey id;
-                if (PrimaryKey.TryParse(subString, typeof(T), out id))
+                if (PrimaryKey.TryParse(subString, typeof(T), out PrimaryKey id))
                 {
                     Lite<T> entity = query.SingleOrDefaultEx(e => e.Id == id);
 

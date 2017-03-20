@@ -249,8 +249,7 @@ namespace Signum.Engine.Maps
 
         public SqlDbTypePair GetSqlDbTypePair(Type type)
         {
-            SqlDbType result;
-            if (TypeValues.TryGetValue(type, out result))
+            if (TypeValues.TryGetValue(type, out SqlDbType result))
                 return new SqlDbTypePair(result, null);
 
             string udtTypeName = GetUdtName(type);

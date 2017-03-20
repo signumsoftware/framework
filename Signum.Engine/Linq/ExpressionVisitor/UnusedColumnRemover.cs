@@ -119,9 +119,8 @@ namespace Signum.Engine.Linq
 
             if (join.JoinType == JoinType.OuterApply ||join.JoinType == JoinType.LeftOuterJoin)
             {
-                var sql = join.Right as SelectExpression;
 
-                if (sql != null && sql.IsOneRow())
+                if (join.Right is SelectExpression sql && sql.IsOneRow())
                 {
                     var hs = allColumnsUsed.TryGetC(sql.Alias);
                     if (hs == null || hs.Count == 0)

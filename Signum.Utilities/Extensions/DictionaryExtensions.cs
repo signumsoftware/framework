@@ -10,40 +10,35 @@ namespace Signum.Utilities
     {
         public static V TryGet<K, V>(this IReadOnlyDictionary<K, V> dictionary, K key, V defaultValue)
         {
-            V result;
-            if (dictionary.TryGetValue(key, out result))
+            if (dictionary.TryGetValue(key, out V result))
                 return result;
             return defaultValue;
         }
 
         public static V TryGetC<K, V>(this IReadOnlyDictionary<K, V> dictionary, K key) where V : class
         {
-            V result;
-            if (dictionary.TryGetValue(key, out result))
+            if (dictionary.TryGetValue(key, out V result))
                 return result;
             return null;
         }
 
         public static V? TryGetS<K, V>(this IReadOnlyDictionary<K, V> dictionary, K key) where V : struct
         {
-            V result;
-            if (dictionary.TryGetValue(key, out result))
+            if (dictionary.TryGetValue(key, out V result))
                 return result;
             return null;
         }
 
         public static V? TryGetS<K, V>(this IReadOnlyDictionary<K, V?> dictionary, K key) where V : struct
         {
-            V? result;
-            if (dictionary.TryGetValue(key, out result))
+            if (dictionary.TryGetValue(key, out V? result))
                 return result;
             return null;
         }
 
         public static V GetOrCreate<K, V>(this IDictionary<K, V> dictionary, K key) where V : new()
         {
-            V result;
-            if (!dictionary.TryGetValue(key, out result))
+            if (!dictionary.TryGetValue(key, out V result))
             {
                 result = new V();
                 dictionary.Add(key, result);
@@ -58,8 +53,7 @@ namespace Signum.Utilities
 
         public static V GetOrCreate<K, V>(this IDictionary<K, V> dictionary, K key, V value)
         {
-            V result;
-            if (!dictionary.TryGetValue(key, out result))
+            if (!dictionary.TryGetValue(key, out V result))
             {
                 result = value;
                 dictionary.Add(key, result);
@@ -69,8 +63,7 @@ namespace Signum.Utilities
 
         public static V GetOrCreate<K, V>(this IDictionary<K, V> dictionary, K key, Func<V> generator)
         {
-            V result;
-            if (!dictionary.TryGetValue(key, out result))
+            if (!dictionary.TryGetValue(key, out V result))
             {
                 result = generator();
                 dictionary.Add(key, result);
@@ -80,24 +73,21 @@ namespace Signum.Utilities
 
         public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, Func<K, Exception> exception)
         {
-            V result;
-            if (!dictionary.TryGetValue(key, out result))
+            if (!dictionary.TryGetValue(key, out V result))
                 throw exception(key);
             return result;
         }
 
         public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, string messageWithFormat)
         {
-            V result;
-            if (!dictionary.TryGetValue(key, out result))
+            if (!dictionary.TryGetValue(key, out V result))
                 throw new KeyNotFoundException(messageWithFormat.FormatWith(key));
             return result;
         }
 
         public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key)
         {
-            V result;
-            if (!dictionary.TryGetValue(key, out result))
+            if (!dictionary.TryGetValue(key, out V result))
                 throw new KeyNotFoundException("Key '{0}' ({1}) not found on {2}".FormatWith(key, key.GetType().TypeName(), dictionary.GetType().TypeName()));
             return result;
         }
@@ -501,8 +491,7 @@ namespace Signum.Utilities
 
         public static bool Decrement<K>(this IDictionary<K, int> dic, K key)
         {
-            int count;
-            if (!dic.TryGetValue(key, out count))
+            if (!dic.TryGetValue(key, out int count))
                 return false;
 
             if (count == 1)
@@ -515,8 +504,7 @@ namespace Signum.Utilities
 
         public static void Increment<K>(this IDictionary<K, int> dic, K key)
         {
-            int count;
-            if (!dic.TryGetValue(key, out count))
+            if (!dic.TryGetValue(key, out int count))
                 dic[key] = 1;
             else
                 dic[key] = count + 1;

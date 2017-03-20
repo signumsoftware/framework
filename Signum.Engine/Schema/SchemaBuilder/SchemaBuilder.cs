@@ -211,8 +211,7 @@ namespace Signum.Engine.Maps
 
         internal protected virtual Table Include(Type type, PropertyRoute route)
         {
-            Table result;
-            if (schema.Tables.TryGetValue(type, out result))
+            if (schema.Tables.TryGetValue(type, out Table result))
                 return result;
 
             using (HeavyProfiler.LogNoStackTrace("Include", () => type.TypeName()))

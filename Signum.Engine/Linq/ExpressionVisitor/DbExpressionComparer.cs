@@ -169,8 +169,7 @@ namespace Signum.Engine.Linq
 
             if (aliasMap != null)
             {
-                Alias mapped;
-                if (aliasMap.TryGetValue(a, out mapped))
+                if (aliasMap.TryGetValue(a, out Alias mapped))
                     return mapped == b;
             }
             return a == b;

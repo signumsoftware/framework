@@ -199,8 +199,7 @@ namespace Signum.Engine.Linq
                 else
                 {
                     Expression expr = CurrentScope[col];
-                    ColumnExpression colExp = expr as ColumnExpression;
-                    if (colExp != null)
+                    if (expr is ColumnExpression colExp)
                     {
                         ColumnDeclaration cd = cg.Columns.FirstOrDefault(c => c.Expression.Equals(colExp));
                         if (cd == null)
@@ -241,8 +240,7 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitColumn(ColumnExpression column)
         {
-            Expression result;
-            if (CurrentScope.TryGetValue(column, out result))
+            if (CurrentScope.TryGetValue(column, out Expression result))
                 return result ?? column;
             else
             {

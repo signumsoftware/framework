@@ -175,8 +175,7 @@ namespace Signum.Utilities.DataStructures
 
         public IntervalValue<V> TryGetValue(K key)
         {
-            V val;
-            if(TryGetValue(key, out val))
+            if (TryGetValue(key, out V val))
                 return new IntervalValue<V>(val);
 
             return new IntervalValue<V>();

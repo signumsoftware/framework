@@ -70,9 +70,8 @@ namespace Signum.Windows
 
         public Func<Binding, DataTemplate> GetFormatter(Column column)
         {
-            Func<Binding, DataTemplate> cf;
-            if (formatters != null && formatters.TryGetValue(column.Name, out cf))
-                return cf; 
+            if (formatters != null && formatters.TryGetValue(column.Name, out Func<Binding, DataTemplate> cf))
+                return cf;
 
             PropertyRoute route = column.Token.GetPropertyRoute();
             if (route != null)

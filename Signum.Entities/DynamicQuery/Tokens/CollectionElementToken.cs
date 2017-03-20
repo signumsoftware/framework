@@ -57,9 +57,8 @@ namespace Signum.Entities.DynamicQuery
         {
             get
             {
-                ExtensionToken et = Parent as ExtensionToken;
 
-                if (et != null && et.IsProjection)
+                if (Parent is ExtensionToken et && et.IsProjection)
                     return et.ElementFormat;
 
                 return Parent.Format;
@@ -70,9 +69,8 @@ namespace Signum.Entities.DynamicQuery
         {
             get
             {
-                ExtensionToken et = Parent as ExtensionToken;
 
-                if (et != null && et.IsProjection)
+                if (Parent is ExtensionToken et && et.IsProjection)
                     return et.ElementUnit;
 
                 return Parent.Unit;
@@ -94,8 +92,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override PropertyRoute GetPropertyRoute()
         {
-            ExtensionToken et = Parent as ExtensionToken;
-            if (et != null && et.IsProjection)
+            if (Parent is ExtensionToken et && et.IsProjection)
                 return et.GetElementPropertyRoute();
 
             PropertyRoute parent = Parent.GetPropertyRoute();

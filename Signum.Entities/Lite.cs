@@ -301,8 +301,7 @@ namespace Signum.Entities
 
         public static Lite<Entity> Parse(string liteKey)
         {
-            Lite<Entity> result;
-            string error = TryParseLite(liteKey, out result);
+            string error = TryParseLite(liteKey, out Lite<Entity> result);
             if (error == null)
                 return result;
             else
@@ -328,8 +327,7 @@ namespace Signum.Entities
             if (type == null)
                 return LiteMessage.Type0NotFound.NiceToString().FormatWith(match.Groups["type"].Value);
 
-            PrimaryKey id;
-            if (!PrimaryKey.TryParse(match.Groups["id"].Value, type, out id))
+            if (!PrimaryKey.TryParse(match.Groups["id"].Value, type, out PrimaryKey id))
                 return LiteMessage.IdNotValid.NiceToString();
 
             string toStr = match.Groups["toStr"].Value.DefaultText(null); //maybe null
@@ -340,8 +338,7 @@ namespace Signum.Entities
 
         public static string TryParse<T>(string liteKey, out Lite<T> lite) where T : class, IEntity
         {
-            Lite<Entity> untypedLite;
-            var result = Lite.TryParseLite(liteKey, out untypedLite);
+            var result = Lite.TryParseLite(liteKey, out Lite<Entity> untypedLite);
             lite = (Lite<T>)untypedLite;
             return result;
         }

@@ -53,21 +53,17 @@ namespace Signum.Engine.Linq
             if (IsCacheable(typeId))
                 return null;
 
-            if (lite.Reference is EntityExpression)
+            if (lite.Reference is EntityExpression entityExp)
             {
-                var ee = (EntityExpression)lite.Reference;
-                
-                if(ee.AvoidExpandOnRetrieving)
+                if (entityExp.AvoidExpandOnRetrieving)
                     return null;
 
-                return binder.BindMethodCall(Expression.Call(lite.Reference, EntityExpression.ToStringMethod));
+                return binder.BindMethodCall(Expression.Call(entityExp, EntityExpression.ToStringMethod));
             }
-                
-            if(lite.Reference is ImplementedByExpression)
-            {
-                var ibe = (ImplementedByExpression)lite.Reference;
 
-                if(ibe.Implementations.Any(imp => imp.Value.AvoidExpandOnRetrieving))
+            if (lite.Reference is ImplementedByExpression ibe)
+            {
+                if (ibe.Implementations.Any(imp => imp.Value.AvoidExpandOnRetrieving))
                     return null;
 
                 return ibe.Implementations.Values.Select(ee =>
@@ -81,14 +77,12 @@ namespace Signum.Engine.Linq
 
         private bool IsCacheable(Expression newTypeId)
         {
-            TypeEntityExpression tfie= newTypeId as TypeEntityExpression;
 
-            if (tfie != null)
+            if (newTypeId is TypeEntityExpression tfie)
                 return IsCached(tfie.TypeValue);
 
-            TypeImplementedByExpression tibe = newTypeId as TypeImplementedByExpression;
 
-            if (tibe != null)
+            if (newTypeId is TypeImplementedByExpression tibe)
                 return tibe.TypeImplementations.All(t => IsCached(t.Key));
 
             return false;

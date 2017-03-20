@@ -117,8 +117,7 @@ namespace Signum.Windows
                                 closed(sender, args);
 
                             ((Window)sender).Dispatcher.InvokeShutdown();
-                            Window rubish;
-                            threadWindows.TryRemove(Thread.CurrentThread, out rubish);
+                            threadWindows.TryRemove(Thread.CurrentThread, out Window rubish);
                         };
 
                         win.Show();

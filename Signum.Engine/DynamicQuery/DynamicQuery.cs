@@ -272,8 +272,7 @@ namespace Signum.Engine.DynamicQuery
 
         public static DQueryable<T> Select<T>(this DQueryable<T> query, HashSet<QueryToken> columns)
         {
-            BuildExpressionContext newContext;
-            var selector = TupleConstructor(query.Context, columns, out newContext);
+            var selector = TupleConstructor(query.Context, columns, out BuildExpressionContext newContext);
 
             return new DQueryable<T>(query.Query.Select(selector), newContext);
         }
@@ -285,8 +284,7 @@ namespace Signum.Engine.DynamicQuery
 
         public static DEnumerable<T> Select<T>(this DEnumerable<T> collection, HashSet<QueryToken> columns)
         {
-            BuildExpressionContext newContext;
-            var selector = TupleConstructor(collection.Context, columns, out newContext);
+            var selector = TupleConstructor(collection.Context, columns, out BuildExpressionContext newContext);
 
             return new DEnumerable<T>(collection.Collection.Select(selector.Compile()), newContext);
         }
@@ -616,17 +614,14 @@ namespace Signum.Engine.DynamicQuery
 
                 return new DEnumerableCount<T>(allList, query.Context, allList.Count);
             }
-            else if(pagination is Pagination.Firsts)
+            else if (pagination is Pagination.Firsts top)
             {
-                var top = (Pagination.Firsts)pagination;
                 var topList = query.Query.Take(top.TopElements).ToList();
 
-                return new DEnumerableCount<T>(topList, query.Context, null); 
+                return new DEnumerableCount<T>(topList, query.Context, null);
             }
-            else if (pagination is Pagination.Paginate)
+            else if (pagination is Pagination.Paginate pag)
             {
-                var pag = (Pagination.Paginate)pagination;
-               
                 int? totalElements = null;
 
                 var q = query.Query.OrderAlsoByKeys();
@@ -658,17 +653,14 @@ namespace Signum.Engine.DynamicQuery
 
                 return new DEnumerableCount<T>(allList, collection.Context, allList.Count);
             }
-            else if (pagination is Pagination.Firsts)
+            else if (pagination is Pagination.Firsts top)
             {
-                var top = (Pagination.Firsts)pagination;
                 var topList = collection.Collection.Take(top.TopElements).ToList();
 
                 return new DEnumerableCount<T>(topList, collection.Context, null);
             }
-            else if (pagination is Pagination.Paginate)
+            else if (pagination is Pagination.Paginate pag)
             {
-                var pag = (Pagination.Paginate)pagination;
-
                 int? totalElements = null;
 
                 var q = collection.Collection;
@@ -697,17 +689,14 @@ namespace Signum.Engine.DynamicQuery
             {
                 return new DEnumerableCount<T>(collection.Collection, collection.Context, collection.TotalElements);
             }
-            else if (pagination is Pagination.Firsts)
+            else if (pagination is Pagination.Firsts top)
             {
-                var top = (Pagination.Firsts)pagination;
                 var topList = collection.Collection.Take(top.TopElements).ToList();
 
                 return new DEnumerableCount<T>(topList, collection.Context, null);
             }
-            else if (pagination is Pagination.Paginate)
+            else if (pagination is Pagination.Paginate pag)
             {
-                var pag = (Pagination.Paginate)pagination;
-
                 var c = collection.Collection;
                 if (pag.CurrentPage != 1)
                     c = c.Skip((pag.CurrentPage - 1) * pag.ElementsPerPage);
@@ -731,8 +720,7 @@ namespace Signum.Engine.DynamicQuery
         {
             var keySelector = KeySelector(collection.Context, keyTokens);
 
-            BuildExpressionContext newContext;
-            LambdaExpression resultSelector = ResultSelectSelectorAndContext(collection.Context, keyTokens, aggregateTokens, keySelector.Body.Type, out newContext);
+            LambdaExpression resultSelector = ResultSelectSelectorAndContext(collection.Context, keyTokens, aggregateTokens, keySelector.Body.Type, out BuildExpressionContext newContext);
 
             var resultCollection = giGroupByE.GetInvoker(typeof(object), keySelector.Body.Type, typeof(object))(collection.Collection, keySelector.Compile(), resultSelector.Compile());
 
@@ -744,8 +732,7 @@ namespace Signum.Engine.DynamicQuery
         {
             var keySelector = KeySelector(query.Context, keyTokens);
 
-            BuildExpressionContext newContext;
-            LambdaExpression resultSelector = ResultSelectSelectorAndContext(query.Context, keyTokens, aggregateTokens, keySelector.Body.Type, out newContext);
+            LambdaExpression resultSelector = ResultSelectSelectorAndContext(query.Context, keyTokens, aggregateTokens, keySelector.Body.Type, out BuildExpressionContext newContext);
 
             var resultQuery = (IQueryable<object>)query.Query.Provider.CreateQuery<object>(Expression.Call(null, miGroupByQ.MakeGenericMethod(typeof(object), keySelector.Body.Type, typeof(object)),
                 new Expression[] { query.Query.Expression, Expression.Quote(keySelector), Expression.Quote(resultSelector) }));

@@ -257,8 +257,7 @@ namespace Signum.React.Json
             {
                 reader.Assert(JsonToken.StartObject);
 
-                bool markedAsModified;
-                ModifiableEntity mod = GetEntity(reader, objectType, existingValue, serializer, out markedAsModified);
+                ModifiableEntity mod = GetEntity(reader, objectType, existingValue, serializer, out bool markedAsModified);
 
                 var pr = GetCurrentPropertyRoute(mod);
 
@@ -507,7 +506,9 @@ namespace Signum.React.Json
     static class MemCompare
     {
         [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
+#pragma warning disable IDE1006 // Naming Styles
         static extern int memcmp(byte[] b1, byte[] b2, long count);
+#pragma warning restore IDE1006 // Naming Styles
 
         public static bool Compare(byte[] b1, byte[] b2)
         {

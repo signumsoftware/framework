@@ -99,13 +99,11 @@ namespace Signum.Engine.Maps
 
         public Field GetField(MemberInfo member)
         {
-            if (member is MethodInfo)
+            if (member is MethodInfo mi)
             {
-                var mi = (MethodInfo)member;
-
                 if (mi.IsGenericMethod && mi.GetGenericMethodDefinition().Name == "Mixin")
                 {
-                    if(Mixins == null)
+                    if (Mixins == null)
                         throw new InvalidOperationException("{0} has not mixins".FormatWith(this.Type.Name));
 
                     return Mixins.GetOrThrow(mi.GetGenericArguments().Single());
@@ -124,10 +122,8 @@ namespace Signum.Engine.Maps
 
         public Field TryGetField(MemberInfo member)
         {
-            if (member is MethodInfo)
+            if (member is MethodInfo mi)
             {
-                var mi = (MethodInfo)member;
-
                 if (mi.IsGenericMethod && mi.GetGenericMethodDefinition().Name == "Mixin")
                 {
                     return Mixins?.TryGetC(mi.GetGenericArguments().Single());

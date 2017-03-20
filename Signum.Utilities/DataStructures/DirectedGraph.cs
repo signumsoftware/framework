@@ -151,8 +151,7 @@ namespace Signum.Utilities.DataStructures
 
         HashSet<T> TryGetOrAdd(T node)
         {
-            HashSet<T> result;
-            if (adjacency.TryGetValue(node, out result))
+            if (adjacency.TryGetValue(node, out HashSet<T> result))
                 return result;
 
             result = new HashSet<T>(Comparer);

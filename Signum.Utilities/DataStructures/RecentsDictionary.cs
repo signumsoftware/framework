@@ -76,8 +76,7 @@ namespace Signum.Utilities.DataStructures
 
         public bool Contains(K key)
         {
-            LinkedListNode<V> node;
-            if (keyToLink.TryGetValue(key, out node))
+            if (keyToLink.TryGetValue(key, out LinkedListNode<V> node))
             {
                 MoveToHead(node);
                 return true;
@@ -105,8 +104,7 @@ namespace Signum.Utilities.DataStructures
         {
             get
             {
-                LinkedListNode<V> value;
-                if (keyToLink.TryGetValue(key, out value))
+                if (keyToLink.TryGetValue(key, out LinkedListNode<V> value))
                 {
                     MoveToHead(value);
                     return value.Value;
@@ -115,9 +113,8 @@ namespace Signum.Utilities.DataStructures
             }
             set
             {
-                LinkedListNode<V> link = null;
 
-                if (keyToLink.TryGetValue(key, out link))
+                if (keyToLink.TryGetValue(key, out LinkedListNode<V> link))
                 {
                     link.Value = value;
 
@@ -137,8 +134,7 @@ namespace Signum.Utilities.DataStructures
 
         public bool TryGetValue(K key, out V value)
         {
-            LinkedListNode<V> node;
-            if (keyToLink.TryGetValue(key, out node))
+            if (keyToLink.TryGetValue(key, out LinkedListNode<V> node))
             {
                 MoveToHead(node);
                 value = node.Value;
@@ -151,8 +147,7 @@ namespace Signum.Utilities.DataStructures
 
         public V GetOrCreate(K key, Func<V> createValue)
         {
-            V value;
-            if (!TryGetValue(key, out value))
+            if (!TryGetValue(key, out V value))
             {
                 value = createValue();
                 Add(key, value);

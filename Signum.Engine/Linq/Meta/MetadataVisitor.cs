@@ -173,8 +173,7 @@ namespace Signum.Engine.Linq
             {
                 var obj = Visit(m.Object);
 
-                var me = obj as MetaExpression;
-                if (me != null && me.Meta is CleanMeta)
+                if (obj is MetaExpression me && me.Meta is CleanMeta)
                 {
                     CleanMeta cm = (CleanMeta)me.Meta;
 
@@ -227,8 +226,7 @@ namespace Signum.Engine.Linq
 
         public static MetaProjectorExpression AsProjection(Expression expression)
         {
-            MetaProjectorExpression mpe = expression as MetaProjectorExpression;
-            if (mpe != null)
+            if (expression is MetaProjectorExpression mpe)
                 return (MetaProjectorExpression)mpe;
 
             if (expression.NodeType == ExpressionType.New)
@@ -241,8 +239,7 @@ namespace Signum.Engine.Linq
             Type elementType = expression.Type.ElementType();
             if (elementType != null)
             {
-                MetaExpression meta = expression as MetaExpression;
-                if (meta != null && meta.Meta is CleanMeta)
+                if (expression is MetaExpression meta && meta.Meta is CleanMeta)
                 {
                     PropertyRoute route = ((CleanMeta)meta.Meta).PropertyRoutes.SingleEx(() => "PropertyRoutes for {0}. Metas don't work over polymorphic MLists".FormatWith(meta.Meta)).Add("Item");
 
@@ -445,9 +442,8 @@ namespace Signum.Engine.Linq
                     break;
             }
 
-            if (source is MetaMListExpression)
+            if (source is MetaMListExpression mme)
             {
-                MetaMListExpression mme = (MetaMListExpression)source;
                 var ga = mme.Type.GetGenericArguments();
                 if (member.Name == "Parent")
                     return new MetaExpression(ga[0], mme.Parent);

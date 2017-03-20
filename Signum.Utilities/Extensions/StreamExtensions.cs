@@ -85,9 +85,8 @@ namespace Signum.Utilities
             }
             catch (Exception e)
             {
-                var de = disposable as IDisposableException;
 
-                if (de != null)
+                if (disposable is IDisposableException de)
                     de.OnException(e);
 
                 throw;
@@ -109,9 +108,8 @@ namespace Signum.Utilities
             }
             catch (Exception e)
             {
-                var de = disposable as IDisposableException;
 
-                if (de != null)
+                if (disposable is IDisposableException de)
                     de.OnException(e);
 
                 throw;

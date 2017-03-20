@@ -198,8 +198,7 @@ namespace Signum.Entities
 
         public static bool TryParse(string value, Type entityType, out PrimaryKey id)
         {
-            object val;
-            if (ReflectionTools.TryParse(value, Type(entityType), out  val))
+            if (ReflectionTools.TryParse(value, Type(entityType), out object val))
             {
                 id = new PrimaryKey((IComparable)val);
                 return true;

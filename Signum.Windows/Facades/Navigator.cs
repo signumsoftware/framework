@@ -500,13 +500,12 @@ namespace Signum.Windows
             if (only != null)
                 return only;
 
-            Type sel;
-            if (SelectorWindow.ShowDialog(filtered, out sel,
-                elementIcon: t => Navigator.Manager.GetEntityIcon(t, true),
-                elementText: t => t.NiceName(),
-                title: SelectorMessage.TypeSelector.NiceToString(),
-                message: SelectorMessage.PleaseSelectAType.NiceToString(),
-                owner: parent))
+            if (SelectorWindow.ShowDialog(filtered, out Type sel,
+    elementIcon: t => Navigator.Manager.GetEntityIcon(t, true),
+    elementText: t => t.NiceName(),
+    title: SelectorMessage.TypeSelector.NiceToString(),
+    message: SelectorMessage.PleaseSelectAType.NiceToString(),
+    owner: parent))
                 return sel;
             return null;
         }

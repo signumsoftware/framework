@@ -192,8 +192,7 @@ namespace Signum.Entities.Reflection
         {
             Expression e = lambdaToField.Body;
 
-            UnaryExpression ue = e as UnaryExpression;
-            if (ue != null && ue.NodeType == ExpressionType.Convert && ue.Type == typeof(object))
+            if (e is UnaryExpression ue && ue.NodeType == ExpressionType.Convert && ue.Type == typeof(object))
                 e = ue.Operand;
 
             MemberInfo[] result = GetMemberListBase(e);

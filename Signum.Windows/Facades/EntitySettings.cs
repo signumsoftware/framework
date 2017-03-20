@@ -157,7 +157,10 @@ namespace Signum.Windows
         }
     }
 
-    public class EmbeddedEntitySettings<T> : EntitySettings where T : EmbeddedEntity
+    public class EmbeddedEntitySettings<T> : ModifiableEntitySettings<T> where T: EmbeddedEntity { }
+    public class ModelEntitySettings<T> : ModifiableEntitySettings<T> where T: ModelEntity { }
+
+    public abstract class ModifiableEntitySettings<T> : EntitySettings where T : ModifiableEntity
     {
         public override Type StaticType
         {
@@ -171,7 +174,7 @@ namespace Signum.Windows
         public bool IsViewable { get; set; }
         public bool IsReadonly { get; set; }
 
-        public EmbeddedEntitySettings()
+        public ModifiableEntitySettings()
         {
             IsCreable = true;
             IsViewable = true;

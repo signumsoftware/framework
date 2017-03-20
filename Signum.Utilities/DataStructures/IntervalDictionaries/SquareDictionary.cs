@@ -52,9 +52,8 @@ namespace Signum.Utilities.DataStructures
         {
             get
             {
-                int ix, iy;
-                if (!xDimension.TryGetValue(x, out ix) ||
-                    !yDimension.TryGetValue(y, out iy) || !used[ix, iy])
+                if (!xDimension.TryGetValue(x, out int ix) ||
+                    !yDimension.TryGetValue(y, out int iy) || !used[ix, iy])
                     throw new KeyNotFoundException("Square not found"); 
 
                 return values[ix, iy];
@@ -63,10 +62,8 @@ namespace Signum.Utilities.DataStructures
 
         public bool TryGetValue(K1 x, K2 y, out V value)
         {
-           
-            int ix, iy;
-            if (!xDimension.TryGetValue(x, out ix) ||
-                !yDimension.TryGetValue(y, out iy) || !used[ix,iy])
+            if (!xDimension.TryGetValue(x, out int ix) ||
+                !yDimension.TryGetValue(y, out int iy) || !used[ix,iy])
             {
                 value = default(V); 
                 return false;
@@ -78,9 +75,8 @@ namespace Signum.Utilities.DataStructures
 
         public IntervalValue<V> TryGetValue(K1 x, K2 y)
         {
-            int ix, iy;
-            if (!xDimension.TryGetValue(x, out ix) ||
-                !yDimension.TryGetValue(y, out iy) || !used[ix, iy])
+            if (!xDimension.TryGetValue(x, out int ix) ||
+                !yDimension.TryGetValue(y, out int iy) || !used[ix, iy])
             {
                 return new IntervalValue<V>();
             }

@@ -73,8 +73,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         public override string ToString()
         {
-            ConstantExpression ce = expression as ConstantExpression;
-            if (ce != null && ce.Value == this)
+            if (expression is ConstantExpression ce && ce.Value == this)
                 return this.GetType().TypeName().CleanIdentifiers();
             else
                 return expression.ToString();

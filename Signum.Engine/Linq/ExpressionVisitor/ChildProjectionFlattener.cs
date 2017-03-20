@@ -108,8 +108,7 @@ namespace Signum.Engine.Linq
                     List<ColumnDeclaration> columnsSMExternal = externalColumns.Select(ce => generatorSM.MapColumn(ce)).ToList();
                     List<ColumnDeclaration> columnsSMInternal = proj.Select.Columns.Select(cd => generatorSM.MapColumn(cd.GetReference(proj.Select.Alias))).ToList();
 
-                    List<OrderExpression> innerOrders;
-                    SelectExpression @internal = ExtractOrders(proj.Select, out innerOrders);
+                    SelectExpression @internal = ExtractOrders(proj.Select, out List<OrderExpression> innerOrders);
 
                     Alias aliasSM = aliasGenerator.GetUniqueAlias(@internal.Alias.Name + "SM");
                     SelectExpression selectMany = new SelectExpression(aliasSM, false, null, columnsSMExternal.Concat(columnsSMInternal),
@@ -222,8 +221,7 @@ namespace Signum.Engine.Linq
 
             private static IEnumerable<ColumnExpression> KeysTable(TableExpression table)
             {
-                var t = table.Table as Table;
-                if (t != null && t.IsView)
+                if (table.Table is Table t && t.IsView)
                     yield return new ColumnExpression(typeof(int), table.Alias, t.Columns.Values.Single(a => a.PrimaryKey).Name);
                 else
                     yield return new ColumnExpression(typeof(int), table.Alias, table.Table.PrimaryKey.Name);

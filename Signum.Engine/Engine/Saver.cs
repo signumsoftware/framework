@@ -32,16 +32,14 @@ namespace Signum.Engine
                 Schema schema = Schema.Current;
                 DirectedGraph<Modifiable> modifiables = GraphExplorer.PreSaving(() => GraphExplorer.FromRoots(entities), (Modifiable m, ref bool graphModified) =>
                 {
-                    ModifiableEntity me = m as ModifiableEntity;
 
-                    if (me != null)
+                    if (m is ModifiableEntity me)
                         me.SetTemporalErrors(null);
 
                     m.PreSaving(ref graphModified);
 
-                    Entity ident = m as Entity;
 
-                    if (ident != null)
+                    if (m is Entity ident)
                         schema.OnPreSaving(ident, ref graphModified);
                 });
                 

@@ -54,14 +54,13 @@ namespace Signum.Windows
         public override ValidationResult Validate(object value, CultureInfo culture)
         {
             string s = (string)value;
-            decimal v;
             if (string.IsNullOrEmpty(s))
                 return new ValidationResult(true, null);
 
             if (ReflectionTools.IsPercentage(Format, culture))
                 s = s.Trim(culture.NumberFormat.PercentSymbol.ToCharArray());
 
-            if (!decimal.TryParse(s, NumberStyles.Number, culture, out v))
+            if (!decimal.TryParse(s, NumberStyles.Number, culture, out decimal v))
                 return new ValidationResult(false, ValidationMessage.InvalidFormat.NiceToString());
             else
                 return new ValidationResult(true, null);

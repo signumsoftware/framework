@@ -43,8 +43,7 @@ namespace Signum.Engine
 
         bool TryGetRequest(IdentityTuple key, out Entity value)
         {
-            Dictionary<PrimaryKey, Entity> dic;
-            if (requests != null && requests.TryGetValue(key.Type, out dic) && dic.TryGetValue(key.Id, out value))
+            if (requests != null && requests.TryGetValue(key.Type, out Dictionary<PrimaryKey, Entity> dic) && dic.TryGetValue(key.Id, out value))
                 return true;
 
             value = null;
@@ -58,8 +57,7 @@ namespace Signum.Engine
 
             IdentityTuple tuple = new IdentityTuple(typeof(T), id.Value);
 
-            Entity result;
-            if (entityCache.TryGetValue(tuple, out result))
+            if (entityCache.TryGetValue(tuple, out Entity result))
                 return (T)result;
 
             if (retrieved.TryGetValue(tuple, out result))
@@ -91,8 +89,7 @@ namespace Signum.Engine
 
             IdentityTuple tuple = new IdentityTuple(typeof(T), id.Value);
 
-            Entity ident;
-            if (entityCache.TryGetValue(tuple, out ident))
+            if (entityCache.TryGetValue(tuple, out Entity ident))
                 return (T)ident;
 
             if (retrieved.TryGetValue(tuple, out ident))

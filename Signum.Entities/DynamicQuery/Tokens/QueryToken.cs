@@ -84,8 +84,7 @@ namespace Signum.Entities.DynamicQuery
 
         public Expression BuildExpression(BuildExpressionContext context)
         {
-            Expression result;
-            if (context.Replacemens != null && context.Replacemens.TryGetValue(this, out result))
+            if (context.Replacemens != null && context.Replacemens.TryGetValue(this, out Expression result))
                 return result;
 
             return BuildExpressionInternal(context); 

@@ -13,8 +13,7 @@ namespace Signum.Utilities
         #region Parse Number
         public static int? ToInt(this string str, NumberStyles ns = NumberStyles.Integer, CultureInfo ci = null)
         {
-            int result;
-            if (int.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out result))
+            if (int.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out int result))
                 return result;
             else
                 return null;
@@ -22,8 +21,7 @@ namespace Signum.Utilities
 
         public static long? ToLong(this string str, NumberStyles ns = NumberStyles.Integer, CultureInfo ci = null)
         {
-            long result;
-            if (long.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out result))
+            if (long.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out long result))
                 return result;
             else
                 return null;
@@ -31,8 +29,7 @@ namespace Signum.Utilities
 
         public static short? ToShort(this string str, NumberStyles ns = NumberStyles.Integer, CultureInfo ci = null)
         {
-            short result;
-            if (short.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out result))
+            if (short.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out short result))
                 return result;
             else
                 return null;
@@ -40,8 +37,7 @@ namespace Signum.Utilities
 
         public static float? ToFloat(this string str, NumberStyles ns = NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo ci = null)
         {
-            float result;
-            if (float.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out result))
+            if (float.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out float result))
                 return result;
             else
                 return null;
@@ -49,8 +45,7 @@ namespace Signum.Utilities
 
         public static double? ToDouble(this string str, NumberStyles ns = NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo ci = null)
         {
-            double result;
-            if (double.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out result))
+            if (double.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out double result))
                 return result;
             else
                 return null;
@@ -58,8 +53,7 @@ namespace Signum.Utilities
 
         public static decimal? ToDecimal(this string str, NumberStyles ns = NumberStyles.Number, CultureInfo ci = null)
         {
-            decimal result;
-            if (decimal.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out result))
+            if (decimal.TryParse(str, ns, ci ?? CultureInfo.CurrentCulture, out decimal result))
                 return result;
             else
                 return null;
@@ -67,8 +61,7 @@ namespace Signum.Utilities
 
         public static bool? ToBool(this string str)
         {
-            bool result;
-            if (bool.TryParse(str, out result))
+            if (bool.TryParse(str, out bool result))
                 return result;
             else
                 return null;
@@ -76,8 +69,7 @@ namespace Signum.Utilities
 
         public static int ToInt(this string str, string error)
         {
-            int result;
-            if (int.TryParse(str, out result))
+            if (int.TryParse(str, out int result))
                 return result;
 
             throw new FormatException(error);
@@ -85,8 +77,7 @@ namespace Signum.Utilities
 
         public static long ToLong(this string str, string error)
         {
-            long result;
-            if (long.TryParse(str, out result))
+            if (long.TryParse(str, out long result))
                 return result;
 
             throw new FormatException(error);
@@ -94,8 +85,7 @@ namespace Signum.Utilities
 
         public static short ToShort(this string str, string error)
         {
-            short result;
-            if (short.TryParse(str, out result))
+            if (short.TryParse(str, out short result))
                 return result;
 
             throw new FormatException(error);
@@ -104,8 +94,7 @@ namespace Signum.Utilities
 
         public static float? ToFloat(this string str, string error)
         {
-            float result;
-            if (float.TryParse(str, out result))
+            if (float.TryParse(str, out float result))
                 return result;
 
             throw new FormatException(error);
@@ -113,8 +102,7 @@ namespace Signum.Utilities
 
         public static double ToDouble(this string str, string error)
         {
-            double result;
-            if (double.TryParse(str, out result))
+            if (double.TryParse(str, out double result))
                 return result;
 
             throw new FormatException(error);
@@ -122,8 +110,7 @@ namespace Signum.Utilities
 
         public static decimal ToDecimal(this string str, string error)
         {
-            decimal result;
-            if (decimal.TryParse(str, out result))
+            if (decimal.TryParse(str, out decimal result))
                 return result;
 
             throw new FormatException(error);
@@ -131,8 +118,7 @@ namespace Signum.Utilities
 
         public static bool ToBool(this string str, string error)
         {
-            bool result;
-            if (bool.TryParse(str, out result))
+            if (bool.TryParse(str, out bool result))
                 return result;
 
             throw new FormatException(error);
@@ -240,10 +226,9 @@ namespace Signum.Utilities
         public static DateTime? ToDateTimeExact(this string date, string format, IFormatProvider formatProvider = null,
             DateTimeStyles? styles = null)
         {
-            DateTime result;
-            if (DateTime.TryParseExact(date, format, 
-                formatProvider ?? CultureInfo.CurrentCulture,
-                styles ?? DateTimeStyles.None, out result))
+            if (DateTime.TryParseExact(date, format,
+    formatProvider ?? CultureInfo.CurrentCulture,
+    styles ?? DateTimeStyles.None, out DateTime result))
             {
                 return result;
             }

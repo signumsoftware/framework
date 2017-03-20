@@ -463,8 +463,7 @@ namespace Signum.Utilities
 
         static PerfCounter()
         {
-            long freq;
-            if (!QueryPerformanceFrequency(out freq))
+            if (!QueryPerformanceFrequency(out long freq))
                 throw new InvalidOperationException("Low performance performance counter");
 
             FrequencyMilliseconds = freq / 1000; 
@@ -474,8 +473,7 @@ namespace Signum.Utilities
         {
             get
             {
-                long count;
-                QueryPerformanceCounter(out count);
+                QueryPerformanceCounter(out long count);
                 return count;
             }
         }

@@ -129,8 +129,7 @@ namespace Signum.Utilities
             if (obj == null)
                 return "";
 
-            IFormattable f = obj as IFormattable;
-            if (f != null)
+            if (obj is IFormattable f)
                 return f.ToString(null, culture);
             else
                 return obj.ToString();
