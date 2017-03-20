@@ -121,7 +121,7 @@ namespace Signum.Entities.Chart
 
         public XDocument ExportXml()
         {
-            var icon = Icon == null ? null : Icon.Entity;
+            var icon = Icon?.Entity;
 
             return new XDocument(new XDeclaration("1.0", "utf-8", "yes"),
                 new XElement("ChartScript",

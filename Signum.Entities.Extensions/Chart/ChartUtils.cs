@@ -242,8 +242,8 @@ namespace Signum.Entities.Chart
 				name = "c" + i,
 				displayName = c.ScriptColumn.DisplayName,
 				title = c.GetTitle(),
-				token = c.Token == null ? null : c.Token.Token.FullKey(),
-				type = c.Token == null ? null : c.Token.Token.GetChartColumnType().ToString(),               
+				token = c.Token?.Token.FullKey(),
+				type = c.Token?.Token.GetChartColumnType().ToString(),               
 				isGroupKey = c.IsGroupKey,
 				converter = c.Token == null ? null : c.Converter(index++)
             }).ToList();
@@ -308,7 +308,7 @@ namespace Signum.Entities.Chart
 					Enum e = (Enum)r[columnIndex];
 					return new
 					{
-						key = e == null ? null : e.ToString(),
+						key = e?.ToString(),
 						toStr = e?.NiceToString(),
 						color = e == null ? "#555" : GetChartColor(enumEntity, Convert.ToInt32(e)).TryToHtml(),
 					};

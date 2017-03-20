@@ -406,7 +406,7 @@ namespace Signum.Engine.Mailing
             newTemplate.SetIsNew(false);
             newTemplate.Ticks = et.Ticks; 
 
-            using (replacements == null ? null : replacements.WithReplacedDatabaseName())
+            using (replacements?.WithReplacedDatabaseName())
                 return table.UpdateSqlSync(newTemplate, includeCollections: true, comment: "EmailTemplate Regenerated: " + et.Name);
         }
     }

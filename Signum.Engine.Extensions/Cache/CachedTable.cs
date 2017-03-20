@@ -51,7 +51,7 @@ namespace Signum.Engine.Cache
 
                 if (args.Info == SqlNotificationInfo.PreviousFire)
                     throw new InvalidOperationException("The same transaction that loaded the data is invalidating it! Table: {0} SubTables: {1} ".
-                        FormatWith(Table, subTables==null?null: subTables.Select(e=>e.Table).ToString(","))) { Data = { { "query", query.PlainSql() } } };
+                        FormatWith(Table, subTables?.Select(e=>e.Table).ToString(","))) { Data = { { "query", query.PlainSql() } } };
 
                 if (CacheLogic.LogWriter != null)
                     CacheLogic.LogWriter.WriteLine("Change {0}".FormatWith(GetType().TypeName())); 
@@ -612,7 +612,7 @@ namespace Signum.Engine.Cache
         {
             Interlocked.Increment(ref hits);
 
-            return retriever.ModifiablePostRetrieving((LiteImp<T>)Lite.Create<T>(id,toStrings==null?null: toStrings.Value[id]));
+            return retriever.ModifiablePostRetrieving((LiteImp<T>)Lite.Create<T>(id,toStrings?.Value[id]));
         }
 
         public override int? Count

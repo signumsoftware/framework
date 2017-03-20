@@ -87,7 +87,7 @@ namespace Signum.Engine.Help
 
             Before = clean.TryBeforeLast('.');
 
-            Description = entity == null ? null : entity.Description;
+            Description = entity?.Description;
             Entity = entity ?? new NamespaceHelpEntity
             {
                 Culture = this.Culture.ToCultureInfoEntity(),

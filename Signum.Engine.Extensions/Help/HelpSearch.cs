@@ -108,7 +108,7 @@ namespace Signum.Engine.Help
                 {
                     m = regex.Match(p.UserDescription.RemoveDiacritics());
                     if (m.Success)
-                        yield return new SearchResult(TypeSearchResult.Property, p.PropertyInfo == null ? null : p.PropertyInfo.NiceName(), p.UserDescription.Extract(m), type, m, 
+                        yield return new SearchResult(TypeSearchResult.Property, p.PropertyInfo?.NiceName(), p.UserDescription.Extract(m), type, m, 
                             HelpUrls.PropertyUrl(p.PropertyRoute), isDescription: true);
                 }
             }

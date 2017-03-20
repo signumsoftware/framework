@@ -65,7 +65,7 @@ namespace Signum.Entities.UserAssets
 
         protected override void PreSaving(ref bool graphModified)
         {
-            TokenString = token == null ? null : token.FullKey();
+            TokenString = token?.FullKey();
         }
 
         public void ParseData(ModifiableEntity context, QueryDescription description, SubTokensOptions options)
