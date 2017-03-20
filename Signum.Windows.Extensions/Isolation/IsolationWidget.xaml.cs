@@ -40,8 +40,7 @@ namespace Signum.Windows.Isolation
                 {
                     if (IsolationEntity.Default == null && !IsolationEntity.Default.Is(isolation))
                     {
-                        if (ForceShow != null)
-                            ForceShow();
+                        ForceShow?.Invoke();
                     }
 
                     img.Source = IsolationClient.GetIsolationIcon(isolation);

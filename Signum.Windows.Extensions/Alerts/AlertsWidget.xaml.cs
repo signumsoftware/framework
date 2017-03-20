@@ -133,8 +133,7 @@ namespace Signum.Windows.Alerts
 
                     tbAlerts.FontWeight = FontWeights.Bold;
 
-                    if (ForceShow != null)
-                        ForceShow();
+                    ForceShow?.Invoke();
                 }
             }, () => { }); 
         }

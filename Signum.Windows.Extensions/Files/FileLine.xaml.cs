@@ -220,8 +220,7 @@ namespace Signum.Windows.Files
                 {
                     FileName = file.FileName
                 };
-                if (CustomizeFileDialog != null)
-                    CustomizeFileDialog(sfd);
+                CustomizeFileDialog?.Invoke(sfd);
 
                 if (sfd.ShowDialog() == true)
                     File.WriteAllBytes(sfd.FileName, file.BinaryFile ?? OnResolveBinaryFile(file));
@@ -252,8 +251,7 @@ namespace Signum.Windows.Files
             if (typeof(IFile).IsAssignableFrom(cleanType))
             {
                 OpenFileDialog ofd = new OpenFileDialog();
-                if (CustomizeFileDialog != null)
-                    CustomizeFileDialog(ofd);
+                CustomizeFileDialog?.Invoke(ofd);
 
                 if (ofd.ShowDialog() == true)
                 {

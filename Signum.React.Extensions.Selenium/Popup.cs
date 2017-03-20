@@ -59,8 +59,7 @@ namespace Signum.React.Selenium
                     this.WaitNotVisible();
                 }
 
-            if (Disposing != null)
-                Disposing(OkPressed);
+            Disposing?.Invoke(OkPressed);
         }
 
         public Action<bool> Disposing;
@@ -202,8 +201,7 @@ namespace Signum.React.Selenium
                     throw new InvalidOperationException(confirmationMessage);
             }
 
-            if (Disposing != null)
-                Disposing(this.OkPressed);
+            Disposing?.Invoke(this.OkPressed);
         }
 
         [DebuggerStepThrough]

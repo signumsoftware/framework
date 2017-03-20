@@ -81,8 +81,7 @@ namespace Signum.Windows.Chart
         {
             this.Loaded -= OnLoad;
 
-            if (PreLoad != null)
-                PreLoad(this, EventArgs.Empty);
+            PreLoad?.Invoke(this, EventArgs.Empty);
 
             UpdateGroup(); 
         }

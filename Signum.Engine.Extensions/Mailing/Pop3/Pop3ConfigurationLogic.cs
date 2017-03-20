@@ -223,13 +223,11 @@ namespace Signum.Engine.Mailing.Pop3
 
                                             email.AssignEntities(dup);
 
-                                            if (AssociateDuplicateEmail != null)
-                                                AssociateDuplicateEmail(email, dup);
+                                            AssociateDuplicateEmail?.Invoke(email, dup);
                                         }
                                         else
                                         {
-                                            if (AssociateNewEmail != null)
-                                                AssociateNewEmail(email);
+                                            AssociateNewEmail?.Invoke(email);
                                         }
 
                                         email.Save();

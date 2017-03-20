@@ -279,8 +279,7 @@ namespace Signum.Engine.Authorization
             {
                 UserEntity user = RetrieveUser(username, passwordHash);
 
-                if (UserLogingIn != null)
-                    UserLogingIn(user);
+                UserLogingIn?.Invoke(user);
 
                 return user;
             }

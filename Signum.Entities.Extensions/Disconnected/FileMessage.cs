@@ -29,8 +29,7 @@ namespace Signum.Entities.Disconnected
                 Stream.Close();
                 Stream = null;
 
-                if (OnDisposing != null)
-                    OnDisposing();
+                OnDisposing?.Invoke();
             }
         }
 

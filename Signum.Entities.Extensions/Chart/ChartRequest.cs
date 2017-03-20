@@ -113,8 +113,7 @@ namespace Signum.Entities.Chart
             if (needNewQuery)
                 this.NeedNewQuery = true;
 
-            if (ChartRequestChanged != null)
-                ChartRequestChanged();
+            ChartRequestChanged?.Invoke();
 
             Notify(() => Invalidator);
         }

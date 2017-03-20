@@ -27,8 +27,7 @@ namespace Signum.Windows.Authorization
 
         public static void UpdateCache()
         {
-            if (UpdateCacheEvent != null)
-                UpdateCacheEvent();
+            UpdateCacheEvent?.Invoke();
         }
 
         public static void Start(bool types, bool property, bool queries, bool permissions, bool operations, bool defaultPasswordExpiresLogic)

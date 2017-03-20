@@ -74,8 +74,7 @@ namespace Signum.Windows.Help
 
         private void ToggleButton_Checked(object sender, RoutedEventArgs e)
         {
-            if (Checked != null)
-                Checked(this, null);
+            Checked?.Invoke(this, null);
         }
 
         private void ToggleButton_Unchecked(object sender, RoutedEventArgs e)

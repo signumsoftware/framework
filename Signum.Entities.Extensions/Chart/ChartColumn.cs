@@ -107,8 +107,7 @@ namespace Signum.Entities.Chart
             Notify(() => GroupByVisible);
             Notify(() => PropertyLabel);
 
-            if (Notified != null)
-                Notified();
+            Notified?.Invoke();
         }
 
         protected override string PropertyValidation(PropertyInfo pi)

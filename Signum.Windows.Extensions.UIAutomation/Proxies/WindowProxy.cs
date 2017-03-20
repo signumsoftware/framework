@@ -46,8 +46,7 @@ namespace Signum.Windows.UIAutomation
 
         protected void OnDisposed()
         {
-            if (Disposed != null)
-                Disposed();
+            Disposed?.Invoke();
         }
 
         public bool WaitForInputIdle(int? timeOut = null)
