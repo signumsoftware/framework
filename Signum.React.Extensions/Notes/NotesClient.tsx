@@ -16,13 +16,13 @@ import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 
-export function start(options: { routes: JSX.Element[], creatingJustFromCertainTypes: PseudoType[] | undefined }) {
+export function start(options: { routes: JSX.Element[], couldHaveNotes?: (typeName: string) => boolean }) {
     Navigator.addSettings(new EntitySettings(NoteEntity, e => new ViewPromise(resolve => require(['./Templates/Note'], resolve))));
     Navigator.addSettings(new EntitySettings(NoteTypeEntity, e => new ViewPromise(resolve => require(['./Templates/NoteType'], resolve))));
 
-    if (options.creatingJustFromCertainTypes) {
+    if (options.couldHaveNotes) {
         Operations.addSettings(new EntityOperationSettings(NoteOperation.CreateNoteFromEntity, {
-            isVisible: eoc => options.creatingJustFromCertainTypes!.contains(eoc.entity.Type)
+            isVisible: eoc => options.couldHaveNotes!(eoc.entity.Type)
         }));
     }
 }
