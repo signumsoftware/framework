@@ -8,6 +8,7 @@ import {
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationInfo, OperationType, LambdaMemberType } from '../Reflection';
 import { classes } from '../Globals';
 import * as Navigator from '../Navigator';
+import ModalMessage from '../Modals/ModalMessage'
 import Notify from '../Frames/Notify';
 import { ContextualItemsContext, MenuItemBlock } from '../SearchControl/ContextualItems';
 import { EntityFrame } from '../TypeContext';
@@ -64,12 +65,15 @@ export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<
 
 function defaultConstructFromMany(coc: ContextualOperationContext<Entity>, event: React.MouseEvent<any>, ...args: any[]) {
 
-    if (!confirmInNecessary(coc))
-        return;
+    confirmInNecessary(coc).then(conf => {
+        if (!conf)
+            return;
 
-    API.constructFromMany<Entity, Entity>(coc.context.lites, coc.operationInfo.key, ...args).then(pack => {
-        Navigator.createNavigateOrTab(pack, event);
+        API.constructFromMany<Entity, Entity>(coc.context.lites, coc.operationInfo.key, ...args).then(pack => {
+            Navigator.createNavigateOrTab(pack, event);
+        }).done();
     }).done();
+
 }
 
 export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock> | undefined {
@@ -158,11 +162,19 @@ function hideOnCanExecute(coc: ContextualOperationContext<Entity>) {
 
 
 
-export function confirmInNecessary(coc: ContextualOperationContext<Entity>): boolean {
+export function confirmInNecessary(coc: ContextualOperationContext<Entity>): Promise<boolean> {
 
     const confirmMessage = getConfirmMessage(coc);
 
-    return confirmMessage == undefined || confirm(confirmMessage);
+    if (confirmMessage == undefined)
+        return Promise.resolve(true);
+
+    return ModalMessage.show({
+        title: OperationMessage.Confirm.niceToString(),
+        message: confirmMessage,
+        buttons: "yes_no",
+        icon: "question"
+    }).then(result => { return result == "yes"; });
 }
 
 function getConfirmMessage(coc: ContextualOperationContext<Entity>) {
@@ -228,34 +240,37 @@ export function defaultContextualClick(coc: ContextualOperationContext<Entity>, 
 
     event.persist();
 
-    if (!confirmInNecessary(coc))
-        return;
+    confirmInNecessary(coc).then(conf => {
+        if (!conf)
+            return;
 
-    switch (coc.operationInfo.operationType) {
-        case OperationType.ConstructorFrom:
-            if (coc.context.lites.length == 1) {
-                API.constructFromLite(coc.context.lites[0], coc.operationInfo.key, ...args)
-                    .then(pack => {
-                        coc.context.markRows({});
-                        Navigator.createNavigateOrTab(pack, event);
-                    })
-                    .done();
-            } else {
-                API.constructFromMultiple(coc.context.lites, coc.operationInfo.key, ...args)
+        switch (coc.operationInfo.operationType) {
+            case OperationType.ConstructorFrom:
+                if (coc.context.lites.length == 1) {
+                    API.constructFromLite(coc.context.lites[0], coc.operationInfo.key, ...args)
+                        .then(pack => {
+                            coc.context.markRows({});
+                            Navigator.createNavigateOrTab(pack, event);
+                        })
+                        .done();
+                } else {
+                    API.constructFromMultiple(coc.context.lites, coc.operationInfo.key, ...args)
+                        .then(report => coc.context.markRows(report.errors))
+                        .done();
+                }
+                break;
+            case OperationType.Execute:
+                API.executeMultiple(coc.context.lites, coc.operationInfo.key, ...args)
                     .then(report => coc.context.markRows(report.errors))
                     .done();
-            }
-            break;
-        case OperationType.Execute:
-            API.executeMultiple(coc.context.lites, coc.operationInfo.key, ...args)
-                .then(report => coc.context.markRows(report.errors))
-                .done();
-            break;
-        case OperationType.Delete:
-            API.deleteMultiple(coc.context.lites, coc.operationInfo.key, ...args)
-                .then(report => coc.context.markRows(report.errors))
-                .done();
-            break;
-    }
+                break;
+            case OperationType.Delete:
+                API.deleteMultiple(coc.context.lites, coc.operationInfo.key, ...args)
+                    .then(report => coc.context.markRows(report.errors))
+                    .done();
+                break;
+        }
+    }).done();
+
 }
 

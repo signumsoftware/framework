@@ -14,10 +14,6 @@
   <Type Name="CalendarMessage">
     <Member Name="Today" Description="Hoy" />
   </Type>
-  <Type Name="Case">
-    <Member Name="Lowercase" Description="Minúsculas" />
-    <Member Name="Uppercase" Description="Mayúsculas" />
-  </Type>
   <Type Name="CollectionElementType">
     <Member Name="All" Description="Todos" />
     <Member Name="All2" Description="Todos (2)" />
@@ -47,7 +43,9 @@
     <Member Name="DistinctTo" Description="distinto a" />
     <Member Name="EqualTo" Description="igual a" />
     <Member Name="GreaterThan" Description="mayor que" />
+    <Member Name="GreaterThanOrEqualTo" Description="Mayor o igual a" />
     <Member Name="LessThan" Description="menor que" />
+    <Member Name="LessThanOrEqualTo" Description="Menor o igual a" />
   </Type>
   <Type Name="ConnectionMessage">
     <Member Name="AConnectionWithTheServerIsNecessaryToContinue" Description="Es necesario tener conexión con el servidor para continuar" />
@@ -124,6 +122,7 @@
     <Member Name="GreaterThan" Description="mayor que" />
     <Member Name="GreaterThanOrEqual" Description="mayor o igual que" />
     <Member Name="IsIn" Description="está en" />
+    <Member Name="IsNotIn" Description="No esta en" />
     <Member Name="LessThan" Description="menor que" />
     <Member Name="LessThanOrEqual" Description="menor o igual que" />
     <Member Name="Like" Description="like" />
@@ -146,11 +145,13 @@
     <Member Name="chooseAType" Description="Elija un tipo" />
     <Member Name="chooseAValue" Description="Elija un valor" />
     <Member Name="create" Description="Crear" />
+    <Member Name="editColumn" Description="Editar columna" />
     <Member Name="enterTheNewColumnName" Description="Introduzca el nuevo nombre de la columna" />
     <Member Name="error" Description="Error" />
     <Member Name="executed" Description="Ejecutado" />
     <Member Name="find" Description="Buscar" />
     <Member Name="hideFilters" Description="Ocultar filtros" />
+    <Member Name="insertColumn" Description="Insertar columna" />
     <Member Name="loading" Description="Cargando..." />
     <Member Name="loseCurrentChanges" Description="¿Perder cambios?" />
     <Member Name="moveDown" Description="Bajar" />
@@ -193,6 +194,7 @@
   <Type Name="ModifiableEntity" Description="Entidad modificable" />
   <Type Name="NormalControlMessage">
     <Member Name="Save" Description="Guardar" />
+    <Member Name="SaveChangesFirst" Description="Guardar primero los cambios" />
     <Member Name="ViewForType0IsNotAllowed" Description="View para el tipo {0} no está permitido" />
   </Type>
   <Type Name="NormalWindowMessage">
@@ -230,6 +232,7 @@
     <Member Name="InUserInterface" Description="(en interfaz de usuario)" />
     <Member Name="Logs" Description="Registros" />
     <Member Name="Operation01IsNotAuthorized" Description="La operación {0} ({1}) no está autorizada" />
+    <Member Name="PleaseConfirmYouDLikeToDelete0FromTheSystem" Description="Por favor confirme que desea eliminar {0} del sistema" />
     <Member Name="PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem" Description="Confirme que desea eliminar esta entidad del sistema" />
     <Member Name="PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem" Description="Confirme que desea eliminar las entidades seleccionadas del sistema" />
     <Member Name="StateShouldBe0InsteadOf1" Description="Estado debe ser {0} (en lugar de {1})" />
@@ -248,8 +251,13 @@
     <Member Name="Firsts" Description="Primeros" />
     <Member Name="Paginate" Description="Paginar" />
   </Type>
-  <Type Name="PropertyRouteEntity" />
-  <Type Name="QueryEntity" />
+  <Type Name="PropertyRouteEntity" Description="Ruta de la propiedad">
+    <Member Name="Path" Description="Ruta" />
+    <Member Name="RootType" Description="Tipo de raíz" />
+  </Type>
+  <Type Name="QueryEntity" Description="Consulta">
+    <Member Name="Key" Description="Clave" />
+  </Type>
   <Type Name="QueryTokenMessage">
     <Member Name="_0As1" Description="({0} como {1})" />
     <Member Name="_0Steps1" Description="paso de {0} {1}" />
@@ -286,19 +294,20 @@
     <Member Name="No0Found" Description="Ningún {0} encontrado" />
     <Member Name="Quicklinks" Description="Vínculos rápidos" />
   </Type>
-  <Type Name="RoundingType" />
   <Type Name="RoundingType">
     <Member Name="Ceil" Description="Cielo" />
     <Member Name="Floor" Description="Piso" />
-    <Member Name="Round" Description="Redondeo" />
-    <Member Name="RoundMiddle" Description="Medio medio" />
+    <Member Name="Round" Description="Ronda" />
+    <Member Name="RoundMiddle" Description="Media ronda" />
   </Type>
   <Type Name="SearchMessage">
     <Member Name="_01of2Results_N" Description="{0} - {1} de {2} resultado[s]." />
     <Member Name="_0Results_N" Description="{0} resultado[s]." />
     <Member Name="AddColumn" Description="Añadir columna" />
     <Member Name="AddFilter" Description="Añadir filtro" />
+    <Member Name="AddValue" Description="Agregar valor" />
     <Member Name="ChooseTheDisplayNameOfTheNewColumn" Description="Elige el nombre que se verá en la nueva columna" />
+    <Member Name="CollectionsCanNotBeAddedAsColumns" Description="Colecciones no se pueden agregar columnas" />
     <Member Name="Create" Description="Crear" />
     <Member Name="CreateNew0_G" Description="Crear nuev[m:o|f:a] {0}" />
     <Member Name="DeleteFilter" Description="Borrar filtro" />
@@ -342,6 +351,10 @@
     <Member Name="Key" Description="Clave" />
     <Member Name="Name" Description="Nombre" />
   </Type>
+  <Type Name="StringCase">
+    <Member Name="Lowercase" Description="Minúscula" />
+    <Member Name="Uppercase" Description="En mayúsculas" />
+  </Type>
   <Type Name="Symbol" Description="Símbolo">
     <Member Name="Key" Description="Clave" />
   </Type>
@@ -359,6 +372,7 @@
     <Member Name="TableName" Description="Table Name" />
   </Type>
   <Type Name="ValidationMessage">
+    <Member Name="_0And1CanNotBeSetAtTheSameTime" Description="{0} y {1} pueden no ajustarse al mismo tiempo" />
     <Member Name="_0DoesNotHaveAValid1Format" Description="{0} no tiene un formato válido {1}" />
     <Member Name="_0HasAnInvalidFormat" Description="{0} tiene un formato inválido" />
     <Member Name="_0HasAPrecissionOf1InsteadOf2" Description="{0} tiene una precisión de {1} en lugar de {2}" />
@@ -382,7 +396,8 @@
     <Member Name="_0ShouldBeNull" Description="{0} debe ser nulo" />
     <Member Name="_0ShouldBeNullWhen1IsNotSet" Description="{0} debe ser nulo si {1} no está establecido" />
     <Member Name="_0ShouldBeNullWhen1IsSet" Description="{0} debe ser nulo si {1} se establece" />
-    <Member Name="_0ShouldNotHaveBreakLines" Description="{0} no debe tener líneas de retorno de carro" />
+    <Member Name="_0ShouldBeOfType1" Description="{0} debe ser de tipo {1}" />
+    <Member Name="_0ShouldHaveJustOneLine" Description="{0} debe tener una sola línea" />
     <Member Name="_0ShouldNotHaveFinalSpaces" Description="{0} no debe tener espacios finales" />
     <Member Name="_0ShouldNotHaveInitialSpaces" Description="{0} no debe tener espacios iniciales" />
     <Member Name="Be" Description="ser " />

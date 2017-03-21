@@ -86,7 +86,7 @@ public class DynamicQueryManager
 And using `Column` method (or `ColumnDisplayName`) to override each column meta-data like this:
 
 ```C#
-dqm.RegisterQuery(typeof(OrderEntity), () => DynamicQuery.Auto(
+dqm.RegisterQuery(typeof(OrderEntity), () =>DynamicQueryCore.Auto(
     from o in Database.Query<OrderEntity>()
     select new
     {

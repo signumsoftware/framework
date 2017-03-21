@@ -908,7 +908,7 @@ namespace Signum.Web
                 {
                     Debug.Assert(!itemCtx.Empty());
 
-                    string rowIdString = itemCtx.Inputs.TryGetC(EntityListBaseKeys.RowId);  
+                    string rowIdString = (itemCtx.Inputs.ContainsKey(EntityListBaseKeys.RowId)? itemCtx.Inputs[EntityListBaseKeys.RowId]:null);  
 
                     if(rowIdString.HasText())
                     {

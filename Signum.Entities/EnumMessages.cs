@@ -17,6 +17,7 @@ namespace Signum.Entities
         InUserInterface,
         [Description("Operation {0} ({1}) is not Authorized")]
         Operation01IsNotAuthorized,
+        Confirm,
         [Description("Please confirm you'd like to delete {0} from the system")]
         PleaseConfirmYouDLikeToDelete0FromTheSystem,
         [Description("Please confirm you'd like to delete the entity from the system")]
