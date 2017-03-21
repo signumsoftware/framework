@@ -20,6 +20,8 @@ using System.ServiceModel.Channels;
 using System.ServiceModel;
 using Signum.Engine.Scheduler;
 using Signum.Entities.Scheduler;
+using Signum.Engine.Authorization;
+using Signum.Entities.Authorization;
 
 namespace Signum.Engine.Isolation
 {
@@ -122,7 +124,7 @@ namespace Signum.Engine.Isolation
 
             foreach (var item in strategies.Where(kvp => kvp.Value == IsolationStrategy.Isolated || kvp.Value == IsolationStrategy.Optional).Select(a => a.Key))
             {
-                giRegisterFilterQuery.GetInvoker(item)(); 
+                giRegisterFilterQuery.GetInvoker(item)();
             }
 
             Schema.Current.EntityEvents<IsolationEntity>().FilterQuery += () =>
@@ -131,7 +133,7 @@ namespace Signum.Engine.Isolation
                     return null;
 
                 return new FilterQueryResult<IsolationEntity>(
-                    a => a.ToLite().Is(IsolationEntity.Current), 
+                    a => a.ToLite().Is(IsolationEntity.Current),
                     a => a.ToLite().Is(IsolationEntity.Current));
             };
         }
@@ -159,7 +161,7 @@ namespace Signum.Engine.Isolation
                 if (ExecutionMode.InGlobal || IsolationEntity.Current == null)
                     return constructor;
 
-                if (constructor.Body.Type == typeof(T)) 
+                if (constructor.Body.Type == typeof(T))
                 {
                     var newBody = Expression.Call(
                       miSetMixin.MakeGenericMethod(typeof(T), typeof(IsolationMixin), typeof(Lite<IsolationEntity>)),
@@ -171,7 +173,7 @@ namespace Signum.Engine.Isolation
                 }
 
                 return constructor; //MListTable
-            }; 
+            };
         }
 
         static MethodInfo miSetMixin = ReflectionTools.GetMethodInfo((Entity a) => a.SetMixin((IsolationMixin m) => m.Isolation, null)).GetGenericMethodDefinition();
@@ -222,7 +224,7 @@ namespace Signum.Engine.Isolation
         }
 
 
-        static GenericInvoker<Func<IEnumerable<Lite<Entity>>, Lite<IsolationEntity>>> giGetOnlyIsolation = 
+        static GenericInvoker<Func<IEnumerable<Lite<Entity>>, Lite<IsolationEntity>>> giGetOnlyIsolation =
             new GenericInvoker<Func<IEnumerable<Lite<Entity>>, Lite<IsolationEntity>>>(list => GetOnlyIsolation<Entity>(list));
 
 
@@ -237,6 +239,6 @@ namespace Signum.Engine.Isolation
         {
             return strategies.ToDictionary();
         }
-        
+
     }
 }

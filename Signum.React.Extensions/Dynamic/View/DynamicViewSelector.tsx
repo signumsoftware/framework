@@ -3,7 +3,7 @@ import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
 import { DynamicViewSelectorEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 import { EntityLine, TypeContext, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { Entity, JavascriptMessage, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { Entity, JavascriptMessage, NormalWindowMessage, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { getTypeInfo, Binding, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
 import * as DynamicViewClient from '../DynamicViewClient'
@@ -11,6 +11,8 @@ import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator
 import TypeHelpComponent from '../Help/TypeHelpComponent'
 import { AuthInfo } from './AuthInfo'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
+import ModalMessage from '../../../../Framework/Signum.React/Scripts/Modals/ModalMessage'
+
 
 
 interface DynamicViewSelectorComponentProps {
@@ -56,7 +58,13 @@ export default class DynamicViewSelectorComponent extends React.Component<Dynami
 
     handleTypeRemove = () => {
         if (this.state.scriptChanged == true)
-            return Promise.resolve(confirm(JavascriptMessage.loseCurrentChanges.niceToString()));
+            return ModalMessage.show({
+                title: NormalWindowMessage.ThereAreChanges.niceToString(),
+                message: JavascriptMessage.loseCurrentChanges.niceToString(),
+                buttons: "yes_no",
+                icon: "warning",
+                defaultStyle: "warning"
+            }).then(result => { return result == "yes" });
 
         return Promise.resolve(true);
     }
