@@ -14,6 +14,7 @@ export const ExcelAttachmentEntity = new Type<ExcelAttachmentEntity>("ExcelAttac
 export interface ExcelAttachmentEntity extends Entities.Entity, Mailing.IAttachmentGeneratorEntity {
     Type: "ExcelAttachment";
     fileName?: string | null;
+    template?: Mailing.EmailTemplateEntity | null;
     title?: string | null;
     userQuery?: Entities.Lite<UserQueries.UserQueryEntity> | null;
     related?: Entities.Lite<Entities.Entity> | null;

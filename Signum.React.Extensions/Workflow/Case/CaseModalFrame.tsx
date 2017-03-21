@@ -6,6 +6,7 @@ import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scrip
 import { TypeContext, StyleOptions, EntityFrame  } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
+import ModalMessage from '../../../../Framework/Signum.React/Scripts/Modals/ModalMessage'
 import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
 import { EntityPack, Entity, Lite, JavascriptMessage, NormalWindowMessage, entityInfo, getToString, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from '../../../../Framework/Signum.React/Scripts/Frames/Widgets'
@@ -86,10 +87,20 @@ export default class CaseModalFrame extends React.Component<CaseModalFrameProps,
     handleCloseClicked = () => {
 
         if (this.hasChanges() && !this.props.avoidPromptLooseChange) {
-            if (!confirm(NormalWindowMessage.LoseChanges.niceToString()))
+            ModalMessage.show({
+                title: NormalWindowMessage.ThereAreChanges.niceToString(),
+                message: NormalWindowMessage.LoseChanges.niceToString(),
+                buttons: "yes_no",
+                icon: "warning",
+                defaultStyle: "warning"
+            }).then(result => {
+                if (result != "yes")
                 return;
-        }
 
+                this.setState({ show: false });
+            }).done();
+        }
+        else
         this.setState({ show: false });
     }
 
@@ -183,7 +194,7 @@ export default class CaseModalFrame extends React.Component<CaseModalFrameProps,
             <Modal.Body>
                 <CaseFromSenderInfo current={pack.activity} />
                 {!pack.activity.case.isNew && <div className="inline-tags"> <InlineCaseTags case={toLite(pack.activity.case)} /></div>}
-                <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf()} data-activity-entity={entityInfo(pack.activity)}>
+                <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-activity-entity={entityInfo(pack.activity) }>
                     { this.renderMainEntity() }
                 </div>
                 {this.entityComponent && <CaseButtonBar frame={activityFrame} pack={activityPack} />}

@@ -91,6 +91,10 @@ namespace Signum.Engine.Files
 
             RenameOnCollision = true;
             RenameAlgorithm = DefaultRenameAlgorithm;
+
+
+            SaveFileInDisk = SaveFileDefault;
+            DeleteFiles = DeleteFilesDefault;
         }
 
         public static readonly Func<string, int, string> DefaultRenameAlgorithm = (sufix, num) =>
@@ -107,8 +111,12 @@ namespace Signum.Engine.Files
         public static readonly Func<IFilePath, string> Year_Month_GuidExtension_Sufix = (IFilePath fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), Path.Combine(TimeZoneManager.Now.Month.ToString(), Guid.NewGuid() + Path.GetExtension(fp.FileName)));
 
         public static readonly Func<IFilePath, string> YearMonth_Guid_Filename_Sufix = (IFilePath fp) => Path.Combine(TimeZoneManager.Now.ToString("yyyy-MM"), Path.Combine(Guid.NewGuid().ToString(), fp.FileName));
-        public static readonly Func<IFilePath, string> Isolated_YearMonth_Guid_Filename_Sufix = (IFilePath fp) => Path.Combine(IsolationEntity.Current.IdOrNull.ToString() ?? "None", TimeZoneManager.Now.ToString("yyyy-MM"), Path.Combine(Guid.NewGuid().ToString(), fp.FileName));
+        public static readonly Func<IFilePath, string> Isolated_YearMonth_Guid_Filename_Sufix = (IFilePath fp) => Path.Combine(IsolationEntity.Current?.IdOrNull?.ToString() ?? "None", TimeZoneManager.Now.ToString("yyyy-MM"), Path.Combine(Guid.NewGuid().ToString(), fp.FileName));
 
+
+
+        public Action<IFilePath> SaveFileInDisk;
+        public Action<IEnumerable<IFilePath>> DeleteFiles;
 
         public string ConfigErrors()
         {
@@ -154,7 +162,7 @@ namespace Signum.Engine.Files
             }
         }
 
-        public virtual void SaveFileInDisk(IFilePath fp)
+        public static void SaveFileDefault(IFilePath fp)
         {
             string fullPhysicalPath = null;
             try
@@ -193,7 +201,7 @@ namespace Signum.Engine.Files
             System.IO.File.Move(ofp.FullPhysicalPath(), fp.FullPhysicalPath());
         }
 
-        public virtual void DeleteFiles(IEnumerable<IFilePath> files)
+        public virtual void DeleteFilesDefault(IEnumerable<IFilePath> files)
         {
             if (WeakFileReference)
                 return;
@@ -207,6 +215,11 @@ namespace Signum.Engine.Files
         PrefixPair IFileTypeAlgorithm.GetPrefixPair(IFilePath efp)
         {
             return this.GetPrefixPair(efp);
+        }
+
+        void IFileTypeAlgorithm.DeleteFiles(IEnumerable<IFilePath> files)
+        {
+            DeleteFiles.Invoke(files);
         }
     }
 }

@@ -13,12 +13,21 @@ export function toPlainExcel(prefix: string, url: string) {
 }
 
 export function toExcelReport(prefix: string, url: string, excelReportKey : string) {
-    Finder.getFor(prefix).then(sc=>
-    {
-        var info = sc.requestDataForSearch(Finder.RequestType.QueryRequest);
+    //Finder.getFor(prefix).then(sc=>
+    //{
+    //    var info = sc.requestDataForSearch(Finder.RequestType.QueryRequest);
 
-        return SF.submitOnly(url, $.extend({ excelReport: excelReportKey }, info));
-    });
+    //    return SF.submitOnly(url, $.extend({ excelReport: excelReportKey }, info));
+    //});
+
+
+    Finder.getFor(prefix)
+        .then(sc => sc.requestDataForSearch(Finder.RequestType.QueryRequest))
+        .then(info => SF.submitOnly(url, $.extend({ excelReport: excelReportKey }, info)));
+      
+
+        
+   
 }
 
 export function administerExcelReports(prefix: string, excelReportQueryName: string, queryKey: string) {

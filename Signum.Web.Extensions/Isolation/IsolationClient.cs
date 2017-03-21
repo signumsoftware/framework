@@ -30,7 +30,7 @@ namespace Signum.Web.Isolation
                     IsolationWidgetHelper.CreateWidget(ctx) : null;
 
                 Navigator.AddSetting(new EntitySettings<IsolationEntity> { PartialViewName = _ => ViewPrefix.FormatWith("Isolation") });
-                 
+
                 Constructor.ClientManager.GlobalPreConstructors += ctx =>
                     (!MixinDeclarations.IsDeclared(ctx.Type, typeof(IsolationMixin)) || IsolationEntity.Current != null) ? null :
                     Module["getIsolation"](ClientConstructorManager.ExtraJsonParams, ctx.Prefix,
@@ -75,17 +75,17 @@ namespace Signum.Web.Isolation
             return new[]
             {
                 new MapColorProvider
-                { 
-                    Name = "isolation", 
-                    NiceName = "Isolation", 
+                {
+                    Name = "isolation",
+                    NiceName = "Isolation",
                     GetJsProvider = ColorsModule["isolationColors"](MapClient.NodesConstant),
-                    AddExtra = t => 
+                    AddExtra = t =>
                     {
                         var s = strategies.TryGetS(t.webTypeName);
 
                         if (s == null)
                             return;
-                        
+
                         t.extra["isolation"] = s.ToString();
                     },
                     Order = 3,
@@ -100,7 +100,7 @@ namespace Signum.Web.Isolation
 
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
-            var iso = IsolationClient.GetIsolation(filterContext.Controller.ControllerContext); 
+            var iso = IsolationClient.GetIsolation(filterContext.Controller.ControllerContext);
 
             ViewDataDictionary viewData = filterContext.Controller.ViewData;
 
@@ -146,7 +146,7 @@ namespace Signum.Web.Isolation
 
         void Dispose(ViewDataDictionary viewData)
         {
-            IDisposable elapsed = (IDisposable)viewData.TryGetC(Key);
+            IDisposable elapsed = viewData.ContainsKey(Key) ? (IDisposable)viewData[Key] : null;
             if (elapsed != null)
             {
                 elapsed.Dispose();

@@ -1,13 +1,8 @@
 ﻿import * as React from 'react'
-import { UserQueryEntity, UserQueryMessage, QueryFilterEntity, QueryOrderEntity, QueryColumnEntity } from '../../UserQueries/Signum.Entities.UserQueries'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
-import CodeMirrorComponent from '../../Codemirror/CodeMirrorComponent'
+import { getQueryNiceName } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
+import { TypeContext, FormGroupStyle } from '../../../Framework/Signum.React/Scripts/TypeContext'
+import CodeMirrorComponent from '../Codemirror/CodeMirrorComponent'
 import * as CodeMirror from 'codemirror'
 
 require("codemirror/lib/codemirror.css");

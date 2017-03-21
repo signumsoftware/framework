@@ -494,7 +494,7 @@
     <TypeScriptCompile Include="Mailing\Signum.Entities.Mailing.ts">
       <DependentUpon>Signum.Entities.Mailing.t4s</DependentUpon>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="Mailing\Templates\HtmlCodemirror.tsx" />
+    <TypeScriptCompile Include="Codemirror\HtmlCodemirror.tsx" />
     <TypeScriptCompile Include="Profiler\Heavy\HeavyEntryPage.tsx" />
     <TypeScriptCompile Include="Profiler\ProfilerClient.tsx" />
     <TypeScriptCompile Include="Profiler\Signum.Entities.Profiler.ts">
