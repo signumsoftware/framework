@@ -128,6 +128,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
             <Typeahead
                 inputAttrs={{ className: "sf-entity-autocomplete" }}
                 getItems={ac.getItems}
+                getItemsDelay={ac.getItemsDelay}
                 renderItem={ac.renderItem}
                 liAttrs={lite => ({ 'data-entity-key': liteKey(lite) }) }
                 onSelect={this.handleOnSelect}/>

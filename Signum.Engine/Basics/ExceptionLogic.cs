@@ -47,8 +47,7 @@ namespace Signum.Engine.Basics
 
 		public static ExceptionEntity LogException(this Exception ex)
 		{
-			var entity = GetEntity(ex);
-
+            var entity = GetEntity(ex);
 			return entity.SaveForceNew();
 		}
 

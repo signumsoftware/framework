@@ -14,6 +14,7 @@ import { EntityBase, EntityBaseProps} from './EntityBase'
 
 export interface AutocompleteConfig<T> {
     getItems: (subStr: string) => Promise<T[]>;
+    getItemsDelay?: number;
     renderItem: (item: T, subStr?: string) => React.ReactNode;
     renderList?: (typeahead: Typeahead) => React.ReactNode;
     getEntityFromItem: (item: T) => Lite<Entity> | ModifiableEntity;

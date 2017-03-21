@@ -421,7 +421,7 @@ namespace Signum.Web
                 }
 
                 WebTypeNames = EntitySettings.Values.Where(es => es.WebTypeName.HasText())
-                    .ToDictionary(es => es.WebTypeName, es => es.StaticType, StringComparer.InvariantCultureIgnoreCase, "WebTypeNames");
+                    .ToDictionaryEx(es => es.WebTypeName, es => es.StaticType, StringComparer.InvariantCultureIgnoreCase, "WebTypeNames");
 
 
                 Navigator.RegisterArea(typeof(Navigator), areaName: "Signum", resourcesNamespace: "Signum.Web.Signum");
