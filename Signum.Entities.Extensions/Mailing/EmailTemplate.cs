@@ -215,15 +215,6 @@ namespace Signum.Entities.Mailing
         {
             return CultureInfo?.ToString() ?? EmailTemplateMessage.NewCulture.NiceToString();
         }
-
-        [Ignore]
-        internal EmailTemplateEntity template;
-        [InTypeScript(false)]
-        public EmailTemplateEntity Template
-        {
-            get { return template; }
-            set { template = value; }
-        }
     }
 
     public interface IAttachmentGeneratorEntity : IEntity

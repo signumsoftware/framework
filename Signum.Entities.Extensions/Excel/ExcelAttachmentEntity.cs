@@ -36,9 +36,6 @@ namespace Signum.Entities.Excel
         }
 
         [Ignore]
-        public EmailTemplateEntity Template { get; set; }
-
-        [Ignore]
         internal object FileNameNode;
 
         [SqlDbType(Size = 300)]
