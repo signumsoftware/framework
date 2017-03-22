@@ -766,7 +766,7 @@ namespace Signum.Engine.Workflow
                             transition is WorkflowTimeoutEntity ? ((WorkflowTimeoutEntity)transition).To.Retrieve() :
                             transition is WorkflowScriptPartEntity ? ((IWorkflowTransitionTo)transition).To.Retrieve() :
                             transition is WorkflowRejectEntity ? ca.Previous.Retrieve().WorkflowActivity :
-                            new NotImplementedException().Throw<IWorkflowNodeEntity>();
+                            throw new NotImplementedException();
 
                         if (transition.Condition != null)
                         {

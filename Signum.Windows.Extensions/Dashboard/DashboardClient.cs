@@ -117,7 +117,7 @@ namespace Signum.Windows.Dashboard
                          Control = control, 
                          Position = dashboard.EmbeddedInEntity.Value == DashboardEmbedededInEntity.Top ? EmbeddedWidgetPostion.Top:
                                     dashboard.EmbeddedInEntity.Value == DashboardEmbedededInEntity.Bottom ? EmbeddedWidgetPostion.Bottom:
-                                    new InvalidOperationException("Unexpected").Throw<EmbeddedWidgetPostion>()
+                                    throw new InvalidOperationException("Unexpected")
                     }; 
 
                 };

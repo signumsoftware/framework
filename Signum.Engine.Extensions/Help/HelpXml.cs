@@ -476,14 +476,14 @@ namespace Signum.Engine.Help
                         doc.Root.Name == EntityXml._Entity ? EntityXml.Load(doc, types):
                         doc.Root.Name == QueryXml._Query ? QueryXml.Load(doc) :
                         doc.Root.Name == OperationXml._Operation ? OperationXml.Load(doc) :
-                        new InvalidOperationException("Unknown Xml root: " + doc.Root.Name).Throw<ImportAction>();
+                        throw new InvalidOperationException("Unknown Xml root: " + doc.Root.Name);
 
                     ConsoleColor color =
                         action == ImportAction.Inserted ? ConsoleColor.Green :
                         action == ImportAction.Updated ? ConsoleColor.DarkGreen :
                         action == ImportAction.Skipped ? ConsoleColor.Yellow :
                         action == ImportAction.NoChanges ? ConsoleColor.DarkGray :
-                        new InvalidOperationException("Unexpected action").Throw<ConsoleColor>();
+                        throw new InvalidOperationException("Unexpected action");
 
                     SafeConsole.WriteLineColor(color, " {0} {1}".FormatWith(action, path));
                 }

@@ -249,7 +249,7 @@ namespace Signum.Windows.DiffLog
                     var color =
                         gr.Key == StringDistance.DiffAction.Added ? green :
                         gr.Key == StringDistance.DiffAction.Removed ? red :
-                        new InvalidOperationException().Throw<Brush>();
+                        throw new InvalidOperationException();
 
                     span.Inlines.Add(new Run(text) { Background = color });
                 }

@@ -284,7 +284,7 @@ namespace Signum.Engine.Migrations
                     mi.FileName != null && mi.IsExecuted ? ConsoleColor.DarkGreen :
                     mi.FileName == null && mi.IsExecuted ? ConsoleColor.Red :
                     mi.FileName != null && !mi.IsExecuted ? ConsoleColor.White :
-                    new InvalidOperationException().Throw<ConsoleColor>();
+                    throw new InvalidOperationException();
 
 
                 SafeConsole.WriteColor(color,  
