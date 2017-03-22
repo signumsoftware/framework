@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import * as numbro from 'numbro'
+import * as numeral from 'numeral'
 import * as moment from 'moment'
 import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
 import * as Finder from '../Finder'
@@ -9,7 +9,7 @@ import { openModal, IModalProps } from '../Modals';
 import { FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, FilterType, isList, FilterOperation } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
 import { ValueLine, EntityLine, EntityCombo } from '../Lines'
-import { Binding, IsByAll, getTypeInfos, toNumbroFormat, toMomentFormat } from '../Reflection'
+import { Binding, IsByAll, getTypeInfos, toNumeralFormat, toMomentFormat } from '../Reflection'
 import { TypeContext, FormGroupStyle } from '../TypeContext'
 import QueryTokenBuilder from './QueryTokenBuilder'
 

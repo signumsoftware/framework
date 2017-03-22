@@ -1,12 +1,12 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
-import * as numbro from 'numbro'
+import * as numeral from 'numeral'
 
 import { Dic, addClass } from '../Globals'
 import { DateTimePicker } from 'react-widgets'
 import 'react-widgets/dist/css/react-widgets.css';
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
-import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference, toMomentFormat, toMomentDurationFormat, toNumbroFormat, isTypeEnum } from '../Reflection'
+import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference, toMomentFormat, toMomentDurationFormat, toNumeralFormat, isTypeEnum } from '../Reflection'
 import { LineBase, LineBaseProps, runTasks, FormGroup, FormControlStatic } from '../Lines/LineBase'
 import { BooleanEnum } from '../Signum.Entities'
 
@@ -375,14 +375,14 @@ ValueLine.renderers["Decimal" as ValueLineType] = (vl) => {
 function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler<any>) {
     const s = vl.state
 
-    const numbroFormat = toNumbroFormat(s.formatText);
+    const numeralFormat = toNumeralFormat(s.formatText);
 
     if (s.ctx.readOnly)
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
                 {ValueLine.withItemGroup(vl,
                     <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx} className="numeric">
-                        {s.ctx.value == null ? "" : numbro(s.ctx.value).format(numbroFormat)}
+                        {s.ctx.value == null ? "" : numeral(s.ctx.value).format(numeralFormat)}
                     </FormControlStatic>)}
             </FormGroup>
         );
@@ -404,7 +404,7 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler<a
                     value={s.ctx.value}
                     onChange={handleOnChange}
                     validateKey={validateKey}
-                    format={numbroFormat}
+                    format={numeralFormat}
                     />
             )}
         </FormGroup>
@@ -429,7 +429,7 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?
     render() {
 
         const value = this.state.text != undefined ? this.state.text :
-            this.props.value != undefined ? numbro(this.props.value).format(this.props.format) :
+            this.props.value != undefined ? numeral(this.props.value).format(this.props.format) :
                 "";
 
         return <input {...this.props.htmlProps} type="text" className={addClass(this.props.htmlProps, "form-control numeric")} value={value}
@@ -442,7 +442,7 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?
 
     handleOnBlur = (e: React.SyntheticEvent<any>) => {
         const input = e.currentTarget as HTMLInputElement;
-        const result = input.value == undefined || input.value.length == 0 ? null : numbro(input.value).value();
+        const result = input.value == undefined || input.value.length == 0 ? null : numeral(input.value).value();
         this.setState({ text: undefined });
         this.props.onChange(result);
     }
