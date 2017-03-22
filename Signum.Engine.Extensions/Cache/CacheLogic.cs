@@ -410,15 +410,9 @@ namespace Signum.Engine.Cache
                 var ee = schema.EntityEvents<T>();
 
                 ee.CacheController = this;
-                ee.Saving += ident =>
-                {
-                    if (ident.IsGraphModified)
-                    {
-                        DisableAndInvalidate(withUpdates: !ident.IsNew);
-                    }
-                };
-                ee.PreUnsafeDelete += query => DisableAndInvalidate(withUpdates: false); ;
-                ee.PreUnsafeUpdate += (update, entityQuery) => DisableAndInvalidate(withUpdates: true); ;
+                ee.Saving += ident => DisableAndInvalidate(withUpdates: true); //Even if new, loading the cache afterwars will Timeout
+                ee.PreUnsafeDelete += query => DisableAndInvalidate(withUpdates: false);
+                ee.PreUnsafeUpdate += (update, entityQuery) => DisableAndInvalidate(withUpdates: true);
                 ee.PreUnsafeInsert += (query, constructor, entityQuery) => { DisableAndInvalidate(withUpdates: constructor.Body.Type.IsInstantiationOf(typeof(MListElement<,>))); return constructor; };
                 ee.PreUnsafeMListDelete += (mlistQuery, entityQuery) => DisableAndInvalidate(withUpdates: true);
                 ee.PreBulkInsert += inMListTable => DisableAndInvalidate(withUpdates: inMListTable);
@@ -562,6 +556,8 @@ namespace Signum.Engine.Cache
         internal static void DisableTypeInTransaction(Type type)
         {
             DisabledTypesDuringTransaction().Add(type);
+
+       
 
             controllers[type].NotifyDisabled();
         }
@@ -820,7 +816,7 @@ namespace Signum.Engine.Cache
 
         internal static bool IsAssumedMassiveChangeAsInvalidation<T>()
         {
-            var asssumeAsInvalidation = CacheLogic.assumeMassiveChangesAsInvalidations.Value.TryGetS(typeof(T));
+            var asssumeAsInvalidation = CacheLogic.assumeMassiveChangesAsInvalidations.Value?.TryGetS(typeof(T));
 
             if (asssumeAsInvalidation == null)
                 throw new InvalidOperationException("Impossible to determine if the massive operation will affect the semi-cached instances of {1}. Execute CacheLogic.AssumeMassiveChangesAsInvalidations to desanbiguate.");

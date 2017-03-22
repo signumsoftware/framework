@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { Button } from 'react-bootstrap'
 import { Link } from 'react-router'
-import * as numbro from 'numbro'
+import * as numeral from 'numeral'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
@@ -11,6 +11,7 @@ import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl
 import { TypeContext, ButtonsContext, IRenderButtons } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { EntityLine, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines'
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal'
+import ModalMessage from '../../../../Framework/Signum.React/Scripts/Modals/ModalMessage'
 
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfo, Binding, GraphExplorer } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -224,19 +225,25 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
             GraphExplorer.propagateAll(this.props.ctx.value);
 
             if (this.props.ctx.value.modified) {
-                alert(AuthAdminMessage.PleaseSaveChangesFirst.niceToString());
-                return;
+                ModalMessage.show({
+                    title: "",
+                    message: "",
+                    buttons: "ok",
+                    defaultStyle: "warning",
+                    icon: "warning"
+                }).done();
             }
-
-            action()
-                .then(m => Navigator.view(m))
-                .then(m => {
-                    if (m) {
-                        setNewValue(m);
-                        this.forceUpdate();
-                    }
-                })
-                .done();
+            else {
+                action()
+                    .then(m => Navigator.view(m))
+                    .then(m => {
+                       if (m) {
+                          setNewValue(m);
+                          this.forceUpdate();
+                       }
+                     })
+                    .done();
+            }
         };
 
         return (

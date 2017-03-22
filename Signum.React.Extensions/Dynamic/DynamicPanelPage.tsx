@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { Tabs, Tab } from 'react-bootstrap'
-import * as numbro from 'numbro'
+import * as numeral from 'numeral'
 import * as moment from 'moment'
 import { classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import { StyleContext } from '../../../Framework/Signum.React/Scripts/TypeContext'

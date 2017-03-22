@@ -240,7 +240,7 @@ namespace Signum.Web.Translation.Controllers
 
         static Dictionary<string, LocalizedType> DictionaryByTypeName(LocalizedAssembly locAssembly)
         {
-            return locAssembly.Types.Values.ToDictionary(a => a.Type.Name, "LocalizedTypes");
+            return locAssembly.Types.Values.ToDictionaryEx(a => a.Type.Name, "LocalizedTypes");
         }
     }
 

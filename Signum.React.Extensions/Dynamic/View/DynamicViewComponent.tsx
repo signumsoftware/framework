@@ -1,12 +1,13 @@
 ﻿import * as React from 'react'
 import { DropdownButton, MenuItem } from 'react-bootstrap'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { ModifiableEntity, OperationSymbol, JavascriptMessage, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { ModifiableEntity, OperationSymbol, JavascriptMessage, NormalWindowMessage, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfo } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
+import ModalMessage from '../../../../Framework/Signum.React/Scripts/Modals/ModalMessage'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
 import * as EntityOperations from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
@@ -38,7 +39,7 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
 
     constructor(props: DynamicViewComponentProps) {
         super(props);
-        
+
         const rootNode = JSON.parse(props.initialDynamicView.viewContent!) as BaseNode;
         this.state = {
             dynamicView: props.initialDynamicView,
@@ -58,7 +59,7 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
             getSelectedNode: () => this.state.isDesignerOpen ? this.state.selectedNode : undefined,
             setSelectedNode: (newNode) => this.setState({ selectedNode: newNode })
         } as DesignerContext;
-        
+
         return DesignerNode.zero(context, typeName);
     }
 
@@ -71,7 +72,7 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
         });
     }
 
-    handleOpen= () => {
+    handleOpen = () => {
         this.setState({ isDesignerOpen: true });
     }
 
@@ -105,17 +106,23 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
         const node = JSON.stringify(this.state.rootNode);
 
         if (this.state.dynamicView.isNew || node != this.state.dynamicView.viewContent) {
-            return confirm(JavascriptMessage.loseCurrentChanges.niceToString());
+            return ModalMessage.show({
+                title: NormalWindowMessage.ThereAreChanges.niceToString(),
+                message: JavascriptMessage.loseCurrentChanges.niceToString(),
+                buttons: "yes_no",
+                defaultStyle: "warning",
+                icon: "warning"
+            }).then(result => { return result == "yes"; });
         }
 
-        return true;
+        return Promise.resolve(true);
     }
 }
 
 interface DynamicViewDesignerProps {
     rootNode: DesignerNode<BaseNode>;
     dynamicView: DynamicViewEntity;
-    onLoseChanges: () => boolean;
+    onLoseChanges: () => Promise<boolean>;
     onReload: (dynamicView: DynamicViewEntity) => void;
     typeName: string;
 }
@@ -134,7 +141,7 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { vi
 
         return (
             <div className="form-vertical code-container">
-                <button type="button" className="close" aria-label="Close" style={{ float: "right"}} onClick={this.props.rootNode.context.onClose}><span aria-hidden="true">×</span></button>
+                <button type="button" className="close" aria-label="Close" style={{ float: "right" }} onClick={this.props.rootNode.context.onClose}><span aria-hidden="true">×</span></button>
                 <h3>
                     <small>{Navigator.getTypeTitle(this.props.dynamicView, undefined)}</small>
                 </h3>
@@ -157,7 +164,7 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { vi
     handleSave = () => {
 
         this.props.dynamicView.viewContent = JSON.stringify(this.props.rootNode.node);
-        this.props.dynamicView.modified = true; 
+        this.props.dynamicView.modified = true;
 
         Operations.API.executeEntity(this.props.dynamicView, DynamicViewOperation.Save)
             .then(pack => { this.reload(pack.entity); return EntityOperations.notifySuccess(); })
@@ -166,31 +173,38 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { vi
 
     handleCreate = () => {
 
-        if (!this.props.onLoseChanges())
-            return;
+        this.props.onLoseChanges().then(goahead => {
+            if (!goahead)
+                return;
 
-        DynamicViewClient.createDefaultDynamicView(this.props.typeName)
-            .then(entity => { this.reload(entity); return EntityOperations.notifySuccess(); })
-            .done();
+            DynamicViewClient.createDefaultDynamicView(this.props.typeName)
+                .then(entity => { this.reload(entity); return EntityOperations.notifySuccess(); })
+                .done();
+
+        }).done();
     }
 
     handleClone = () => {
 
-        if (!this.props.onLoseChanges())
-            return;
+        this.props.onLoseChanges().then(goahead => {
+            if (!goahead)
+                return;
 
-        Operations.API.constructFromEntity(this.props.dynamicView, DynamicViewOperation.Clone)
-            .then(pack => { this.reload(pack.entity); return EntityOperations.notifySuccess(); })
-            .done();
+            Operations.API.constructFromEntity(this.props.dynamicView, DynamicViewOperation.Clone)
+                .then(pack => { this.reload(pack.entity); return EntityOperations.notifySuccess(); })
+                .done();
+        }).done();
     }
-    
-    handleChangeView = (viewName: string) => {
-        if (!this.props.onLoseChanges())
-            return;
 
-        DynamicViewClient.API.getDynamicView(this.props.typeName, viewName)
-            .then(entity => { this.reload(entity!); })
-            .done();
+    handleChangeView = (viewName: string) => {
+        this.props.onLoseChanges().then(goahead => {
+            if (!goahead)
+                return;
+
+            DynamicViewClient.API.getDynamicView(this.props.typeName, viewName)
+                .then(entity => { this.reload(entity!); })
+                .done();
+        }).done();
     }
 
     handleOnToggle = (isOpen: boolean) => {
@@ -210,7 +224,7 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { vi
         var operations = Operations.operationInfos(getTypeInfo(DynamicViewEntity)).toObject(a => a.key);
 
         return (
-            <div className="btn-group btn-group-sm" role="group" style={{ marginBottom: "5px"}}>
+            <div className="btn-group btn-group-sm" role="group" style={{ marginBottom: "5px" }}>
                 {operations[DynamicViewOperation.Save.key] && <button type="button" className="btn btn-primary" onClick={this.handleSave}>{operations[DynamicViewOperation.Save.key].niceName}</button>}
                 <button type="button" className="btn btn-success" onClick={this.handleShowCode}>Show code</button>
                 <DropdownButton title=" … " id="bg-nested-dropdown" onToggle={this.handleOnToggle} bsSize="sm">
@@ -257,10 +271,10 @@ export class DynamicViewPart extends React.Component<DynamicViewPartProps, Dynam
         var ctx = this.props.ctx;
 
         var rootNode = DesignerNode.zero({
-            onClose: () => {},
-            refreshView: () => {},
+            onClose: () => { },
+            refreshView: () => { },
             getSelectedNode: () => undefined,
-            setSelectedNode: () => {},
+            setSelectedNode: () => { },
         }, ctx.value.Type).createChild(this.state.rootNode);
 
         return (

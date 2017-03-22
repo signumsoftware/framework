@@ -11,7 +11,7 @@ import { TemplateTokenMessage } from '../../Templating/Signum.Entities.Templatin
 import FileLine from '../../Files/FileLine'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import TemplateControls from '../../Templating/TemplateControls'
-import HtmlCodemirror from './HtmlCodemirror'
+import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
 import IFrameRenderer from './IFrameRenderer'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 

@@ -54,7 +54,7 @@ namespace Signum.Entities.Isolation
             return UnsafeOverride(null);
         }
 
-        static IDisposable UnsafeOverride(Lite<IsolationEntity> isolation)
+        public static IDisposable UnsafeOverride(Lite<IsolationEntity> isolation)
         {
             var old = CurrentThreadVariable.Value;
 
