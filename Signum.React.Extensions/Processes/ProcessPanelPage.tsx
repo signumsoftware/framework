@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { Link } from 'react-router'
-import * as numbro from 'numbro'
+import * as numeral from 'numeral'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import EntityLink from '../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
 import {ValueSearchControl, SearchControl } from '../../../Framework/Signum.React/Scripts/Search'
@@ -97,7 +97,7 @@ export default class ProcessPanelPage extends React.Component<ProcessPanelProps,
                                 <tr key={i}>
                                     <td> <EntityLink lite={item.Process} inSearch={true} /> </td>
                                     <td> { item.State } </td>
-                                    <td> { numbro(item.Progress).format("0 %") } </td>
+                                    <td> { numeral(item.Progress).format("0 %") } </td>
                                     <td> { item.MachineName } </td>
                                     <td> { item.ApplicationName } </td>
                                     <td> { item.IsCancellationRequested } </td>
