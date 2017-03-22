@@ -33,10 +33,13 @@ namespace Signum.React.Mailing
 
             ReflectionServer.RegisterLike(typeof(TemplateTokenMessage));
 
-            EntityJsonConverter.AfterDeserilization.Register((EmailTemplateEntity ue) =>
+            EntityJsonConverter.AfterDeserilization.Register((EmailTemplateEntity et) =>
             {
-                var qd = DynamicQueryManager.Current.QueryDescription(ue.Query.ToQueryName());
-                ue.ParseData(qd);
+                if (et.Query != null)
+                {
+                    var qd = DynamicQueryManager.Current.QueryDescription(et.Query.ToQueryName());
+                    et.ParseData(qd);
+                }
             });
         }
     }
