@@ -214,7 +214,7 @@ namespace Signum.Entities.DynamicQuery
                 Rounding == RoundingType.Floor ? "⌊{0}⌋" :
                 Rounding == RoundingType.Round ? "[{0}]" :
                 Rounding == RoundingType.RoundMiddle ? "|{0}|" :
-                new InvalidOperationException().Throw<string>();
+                throw new InvalidOperationException();
 
             return QueryTokenMessage._0Steps1.NiceToString(Parent.Parent.Parent.NiceName(), str.FormatWith(num));
         }

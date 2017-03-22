@@ -367,11 +367,6 @@ namespace Signum.Utilities
                 yield return i.Value;
         }
 
-        public static T Throw<T>(this Exception exception)
-        {
-            throw exception;
-        }
-
         public static IEnumerable<D> GetInvocationListTyped<D>(this D multicastDelegate)
             where D : class, ICloneable, ISerializable
         {

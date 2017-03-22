@@ -110,7 +110,7 @@ namespace Signum.Utilities.ExpressionTrees
             return mi is PropertyInfo ? ((PropertyInfo)mi).PropertyName() :
              mi is FieldInfo ? ((FieldInfo)mi).FieldName() :
              mi is MethodInfo ? ((MethodInfo)mi).MethodName() :
-             new InvalidOperationException("MethodInfo mi should be a PropertyInfo, FieldInfo or MethodInfo").Throw<string>();
+             throw new InvalidOperationException("MethodInfo mi should be a PropertyInfo, FieldInfo or MethodInfo");
         }
 
         public static string TypeName(this Type type)
