@@ -437,6 +437,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         return SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(gender).formatWith(types);
     }
 
+    getSelectedEntities(): Lite<Entity>[] {
+        return this.state.selectedRows!.map(a => a.entity);
+    }
+
     // SELECT BUTTON
 
     handleSelectedToggle = (isOpen: boolean) => {
@@ -447,7 +451,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     loadMenuItems() {
         const options: ContextualItemsContext<Entity> = {
-            lites: this.state.selectedRows!.map(a => a.entity),
+            lites: this.getSelectedEntities(),
             queryDescription: this.props.queryDescription,
             markRows: this.markRows
         };

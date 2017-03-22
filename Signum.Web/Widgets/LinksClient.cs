@@ -10,30 +10,31 @@ using Signum.Entities.DynamicQuery;
 using Signum.Engine;
 using System.Reflection;
 using Newtonsoft.Json.Linq;
+using Signum.Engine.Basics;
 
 namespace Signum.Web
 {
     static class QuickLinkWidgetHelper
-    {  
+    {
         internal static IWidget CreateWidget(WidgetContext ctx)
         {
             var ident = ctx.Entity as Entity;
 
-            if(ident == null || ident.IsNew)
+            if (ident == null || ident.IsNew)
                 return null;
 
             List<QuickLink> quicklinks = LinksClient.GetForEntity(ident.ToLiteFat(), ctx.PartialViewName, ctx.Prefix, null, ctx.Url);
             if (quicklinks == null || quicklinks.Count == 0)
                 return null;
 
-            return new Widget 
+            return new Widget
             {
                 Id = TypeContextUtilities.Compose(ctx.Prefix, "quicklinksWidget"),
                 Class = "sf-quicklinks",
                 Title = QuickLinkMessage.Quicklinks.NiceToString(),
                 IconClass = "glyphicon glyphicon-star",
                 Text = quicklinks.Count.ToString(),
-                Items = quicklinks.OrderBy(a=>a.Order).Cast<IMenuItem>().ToList(),
+                Items = quicklinks.OrderBy(a => a.Order).Cast<IMenuItem>().ToList(),
                 Active = true,
             };
         }
@@ -49,7 +50,7 @@ namespace Signum.Web
             List<QuickLink> quickLinks = LinksClient.GetForEntity(ctx.Lites[0], null, ctx.Prefix, ctx.QueryName, ctx.Url);
             if (quickLinks.IsNullOrEmpty())
                 return null;
-            
+
             return new MenuItemBlock { Header = QuickLinkMessage.Quicklinks.NiceToString(), Items = quickLinks };
         }
     }
@@ -77,7 +78,19 @@ namespace Signum.Web
         {
             var current = EntityLinks.GetDefinition(typeof(T));
 
-            current += (t, p0) => getQuickLinks((Lite<T>)t, p0);
+            current += (t, p0) =>
+            {
+
+                try
+                {
+                    return getQuickLinks((Lite<T>)t, p0);
+                }
+                catch (global::System.Exception ex)
+                {
+                    ex.LogException();
+                    return null;
+                }
+            };
 
             EntityLinks.SetDefinition(typeof(T), current);
         }
@@ -87,9 +100,9 @@ namespace Signum.Web
         {
             List<QuickLink> links = new List<QuickLink>();
 
-            QuickLinkContext ctx = new QuickLinkContext { PartialViewName = partialViewName, Prefix = prefix, QueryName = queryName, Url = url }; 
+            QuickLinkContext ctx = new QuickLinkContext { PartialViewName = partialViewName, Prefix = prefix, QueryName = queryName, Url = url };
 
-            var func  =  EntityLinks.TryGetValue(ident.EntityType);
+            var func = EntityLinks.TryGetValue(ident.EntityType);
             if (func != null)
             {
                 foreach (var item in func.GetInvocationListTyped())
@@ -160,7 +173,7 @@ namespace Signum.Web
         public string Url { get; set; }
 
 
-        public QuickLinkAction(Enum nameAndText, string url): this
+        public QuickLinkAction(Enum nameAndText, string url) : this
             (nameAndText.ToString(), nameAndText.NiceToString(), url)
         {
         }
@@ -169,7 +182,7 @@ namespace Signum.Web
         {
             Text = text;
             Url = url;
-            Name = name; 
+            Name = name;
             IsVisible = true;
         }
 
@@ -182,7 +195,7 @@ namespace Signum.Web
     public class QuickLinkExplore : QuickLink
     {
         public FindOptions FindOptions { get; set; }
-        
+
         public QuickLinkExplore(FindOptions findOptions)
         {
             FindOptions = findOptions;
@@ -197,7 +210,7 @@ namespace Signum.Web
                 QueryName = queryName,
                 SearchOnLoad = true,
                 ColumnOptionsMode = ColumnOptionsMode.Remove,
-                ColumnOptions = {new ColumnOption(columnName)},
+                ColumnOptions = { new ColumnOption(columnName) },
                 ShowFilters = false,
                 FilterOptions = new List<FilterOption>
                 {

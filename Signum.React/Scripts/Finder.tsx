@@ -1,6 +1,6 @@
 ﻿import * as React from "react";
 import * as moment from "moment"
-import * as numbro from "numbro"
+import * as numeral from "numeral"
 import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { Dic } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
@@ -19,7 +19,7 @@ import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 
 import {
     Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
-    getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat, toNumbroFormat, PseudoType, EntityData,
+    getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat, toNumeralFormat, PseudoType, EntityData,
     TypeInfo, PropertyRoute
 } from './Reflection';
 
@@ -863,16 +863,16 @@ export const formatRules: FormatRule[] = [
         name: "Number",
         isApplicable: col => col.token!.filterType == "Integer" || col.token!.filterType == "Decimal",
         formatter: col => {
-            const numbroFormat = toNumbroFormat(col.token!.format);
-            return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat)}</span>, "numeric-cell");
+            const numeralFormat = toNumeralFormat(col.token!.format);
+            return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numeral(cell).format(numeralFormat)}</span>, "numeric-cell");
         }
     },
     {
         name: "Number with Unit",
         isApplicable: col => (col.token!.filterType == "Integer" || col.token!.filterType == "Decimal") && !!col.token!.unit,
         formatter: col => {
-            const numbroFormat = toNumbroFormat(col.token!.format);
-            return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat) + "\u00a0" + col.token!.unit}</span>, "numeric-cell");
+            const numeralFormat = toNumeralFormat(col.token!.format);
+            return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numeral(cell).format(numeralFormat) + "\u00a0" + col.token!.unit}</span>, "numeric-cell");
         }
     },
     {

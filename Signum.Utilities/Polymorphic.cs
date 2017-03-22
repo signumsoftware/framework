@@ -88,6 +88,13 @@ namespace Signum.Utilities
         PolymorphicMerger<T> merger;
         Type minimumType;
 
+
+       public bool ContainsKey(Type type)
+        {
+           return definitions.ContainsKey(type);
+
+        }
+
         bool IsAllowed(Type type)
         {
             return minimumType == null || minimumType.IsAssignableFrom(type);

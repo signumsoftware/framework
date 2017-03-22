@@ -29,7 +29,7 @@ namespace Signum.Web
                 if (lastModified == null)
                     lastModified = new DateTime(new FileInfo(MainAssembly.Location).LastWriteTime.Ticks).TrimToSeconds();
 
-                return lastModified.Value; 
+                return lastModified.Value;
             }
         }
 
@@ -40,7 +40,7 @@ namespace Signum.Web
             {
                 if (version == null)
                     version = new FileInfo(MainAssembly.Location).LastWriteTime.Ticks.ToString();
-                
+
                 return version;
             }
         }
@@ -56,8 +56,12 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
             foreach (var f in files)
-                sb.AddLine(MvcHtmlString.Create(scriptElement.FormatWith(Subdomain(f + "?v=" + Version))));
-
+            {
+                if (f.StartsWith("http",StringComparison.InvariantCultureIgnoreCase))
+                    sb.AddLine(MvcHtmlString.Create(scriptElement.FormatWith(f + "?v=" + Version)));
+                else
+                    sb.AddLine(MvcHtmlString.Create(scriptElement.FormatWith(Subdomain(f + "?v=" + Version))));
+            }
             return sb.ToHtml();
         }
 
@@ -120,23 +124,23 @@ namespace Signum.Web
 
     public class HtmlCallbackString : IHtmlString
     {
-        string callback; 
-        Func<string, string> render; 
+        string callback;
+        Func<string, string> render;
 
         public HtmlCallbackString(Func<string, string> render)
         {
-            this.render = render; 
+            this.render = render;
         }
 
         public string ToHtmlString()
         {
- 	        return render(callback);
+            return render(callback);
         }
 
         public HtmlCallbackString Callback(string callback)
         {
             this.callback = callback;
-            return this; 
+            return this;
         }
     }
 }

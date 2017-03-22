@@ -143,7 +143,7 @@ namespace Signum.Web
 
                 return result.Concat(helper.FormControlStatic(valueLine, valueLine.Prefix, value?.ToString(valueLine.Format), valueLine.ValueHtmlProps));
             }
-            
+
             var dateFormatAttr = valueLine.PropertyRoute.PropertyInfo.GetCustomAttribute<TimeSpanDateFormatAttribute>();
             if (dateFormatAttr != null)
                 return helper.TimePicker(valueLine.Prefix, true, value, dateFormatAttr.Format, CultureInfo.CurrentCulture, valueLine.ValueHtmlProps);
@@ -176,7 +176,9 @@ namespace Signum.Web
             else
                 valueLine.ValueHtmlProps.Remove("autocomplete");
 
-            valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + valueLine.ValueHtmlProps.TryGetC("onblur");
+
+
+            valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + (valueLine.ValueHtmlProps.ContainsKey("onblur") ? valueLine.ValueHtmlProps["onblur"] : null);
 
             if (!valueLine.ValueHtmlProps.ContainsKey("type"))
                 valueLine.ValueHtmlProps["type"] = "text";
@@ -188,12 +190,12 @@ namespace Signum.Web
         public static MvcHtmlString NumericTextbox(this HtmlHelper helper, ValueLine valueLine)
         {
             if (!valueLine.ReadOnly)
-                valueLine.ValueHtmlProps.Add("onkeydown", Reflector.IsDecimalNumber(valueLine.Type) ? 
-                    "return SF.InputValidator.isDecimal(event);" : 
+                valueLine.ValueHtmlProps.Add("onkeydown", Reflector.IsDecimalNumber(valueLine.Type) ?
+                    "return SF.InputValidator.isDecimal(event);" :
                     "return SF.InputValidator.isNumber(event);");
 
             valueLine.ValueHtmlProps.AddCssClass("numeric");
-            
+
             return helper.TextboxInLine(valueLine);
         }
 
@@ -235,7 +237,7 @@ namespace Signum.Web
             }
 
             valueLine.ValueHtmlProps.Add("autocomplete", "off");
-            valueLine.ValueHtmlProps["onblur"] = "this.innerHTML = this.value; " + valueLine.ValueHtmlProps.TryGetC("onblur");
+            valueLine.ValueHtmlProps["onblur"] = "this.innerHTML = this.value; " + (valueLine.ValueHtmlProps.ContainsKey("onblur") ? valueLine.ValueHtmlProps["onblur"] : null);
             valueLine.ValueHtmlProps.AddCssClass("form-control");
             return helper.TextArea(valueLine.Prefix, (string)valueLine.UntypedValue, valueLine.ValueHtmlProps);
         }
@@ -309,7 +311,7 @@ namespace Signum.Web
 
     public class ValueLineConfigurator
     {
-        public int? MaxValueLineSize = 100; 
+        public int? MaxValueLineSize = 100;
 
         public virtual ValueLineType GetDefaultValueLineType(Type type)
         {

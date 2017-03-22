@@ -113,7 +113,7 @@ export function toMomentDurationFormat(format: string | undefined): string | und
 }
 
 
-export function toNumbroFormat(format: string | undefined) {
+export function toNumeralFormat(format: string | undefined) {
 
     if (format == undefined)
         return undefined;
