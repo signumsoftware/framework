@@ -50,21 +50,29 @@ namespace Signum.React.Chart
 
             EntityJsonConverter.AfterDeserilization.Register((ChartRequest cr) =>
             {
-                cr.ChartScript.SynchronizeColumns(cr);
-                var qd = DynamicQueryManager.Current.QueryDescription(cr.QueryName);
+                if (cr.ChartScript != null)
+                    cr.ChartScript.SynchronizeColumns(cr);
 
-                if (cr.Columns != null)
-                    foreach (var c in cr.Columns)
-                        c.ParseData(cr, qd, SubTokensOptions.CanElement | (c.IsGroupKey == false ? SubTokensOptions.CanAggregate : 0));
+                if (cr.QueryName != null)
+                {
+                    var qd = DynamicQueryManager.Current.QueryDescription(cr.QueryName);
 
+                    if (cr.Columns != null)
+                        foreach (var c in cr.Columns)
+                            c.ParseData(cr, qd, SubTokensOptions.CanElement | (c.IsGroupKey == false ? SubTokensOptions.CanAggregate : 0));
+                }
             });
 
             EntityJsonConverter.AfterDeserilization.Register((UserChartEntity uc) =>
             {
-                uc.ChartScript.SynchronizeColumns(uc);
+                if (uc.ChartScript != null)
+                    uc.ChartScript.SynchronizeColumns(uc);
 
-                var qd = DynamicQueryManager.Current.QueryDescription(uc.Query.ToQueryName());
-                uc.ParseData(qd);
+                if (uc.Query != null)
+                {
+                    var qd = DynamicQueryManager.Current.QueryDescription(uc.Query.ToQueryName());
+                    uc.ParseData(qd);
+                }
             });
 
             UserChartEntity.SetConverters(

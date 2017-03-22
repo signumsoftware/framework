@@ -23,10 +23,13 @@ namespace Signum.React.UserQueries
 
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
-            EntityJsonConverter.AfterDeserilization.Register((UserQueryEntity ue) =>
+            EntityJsonConverter.AfterDeserilization.Register((UserQueryEntity uq) =>
             {
-                var qd = DynamicQueryManager.Current.QueryDescription(ue.Query.ToQueryName());
-                ue.ParseData(qd);
+                if (uq.Query != null)
+                {
+                    var qd = DynamicQueryManager.Current.QueryDescription(uq.Query.ToQueryName());
+                    uq.ParseData(qd);
+                }
             });
         }
     }
