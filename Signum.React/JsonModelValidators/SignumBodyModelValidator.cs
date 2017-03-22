@@ -14,7 +14,13 @@ namespace Signum.React.Json
     {
         protected override bool? CustomValidation(ModelMetadata metadata, ValidationContext validationContext, object model)
         {
-            return SignumValidate(validationContext, model);
+            validationContext.Visited.Remove(model); //comes already visited when jumping to SignumBodyModelValidator
+
+            var result = SignumValidate(validationContext, model);
+
+            validationContext.Visited.Add(model);
+
+            return result;
         }
 
         private bool? SignumValidate(ValidationContext validationContext, object model)
