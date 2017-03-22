@@ -78,7 +78,7 @@ export module Converter {
 
         const promise = UserAssetsClient.API.parseFilters({
             queryKey: uq.query.key,
-            canAggregate: true,
+            canAggregate: uq.groupResults,
             entity: entity,
             filters: uq.filters!.map(mle => mle.element).map(f => ({
                 tokenString: f.token!.tokenString,
@@ -88,6 +88,8 @@ export module Converter {
         });
 
         return promise.then(filters => {
+
+            cr.groupResults = uq.groupResults;
 
             cr.filterOptions = (cr.filterOptions || []).filter(f => f.frozen);
             cr.filterOptions.push(...uq.filters.map((f, i) => ({
@@ -125,6 +127,7 @@ export module Converter {
                 token: f.element.token!.token,
                 orderType: f.element.orderType
             }) as OrderOptionParsed);
+
 
 
             return cr;
