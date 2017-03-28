@@ -670,6 +670,18 @@ Consider the following options:
                         o.FromStates.CommaOr(v => ((Enum)(object)v).NiceToString()),
                         invalid.CommaOr(v => ((Enum)(object)v).NiceToString())))).ToDictionary();
         }
+
+        public static Func<OperationLogEntity, bool> LogOperation = (request) => true;
+
+        public static void SaveLog(this OperationLogEntity log)
+        {
+            if (!LogOperation(log))
+                return;
+
+
+            using (ExecutionMode.Global())
+                log.Save();
+        }
     }
     
     public static class FluentOperationInclude
