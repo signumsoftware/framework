@@ -49,9 +49,9 @@ namespace Signum.Engine
 
                     if(Table != null)
                     {
-                        var tuple = cachedLookups.GetOrAdd(Tuple.Create(Table, IndexName), tup=>
+                        var tuple = cachedLookups.GetOrAdd((Table, IndexName), tup=>
                         {
-                            var index = tup.Item1.GeneratAllIndexes().OfType<UniqueIndex>().FirstOrDefault(ix => ix.IndexName == tup.Item2);
+                            var index = tup.table.GeneratAllIndexes().OfType<UniqueIndex>().FirstOrDefault(ix => ix.IndexName == tup.indexName);
 
                             if(index == null)
                                 return null;
@@ -64,13 +64,13 @@ namespace Signum.Engine
                             if (properties.IsEmpty())
                                 return null;
 
-                            return Tuple.Create(index, properties); 
+                            return (index, properties); 
                         });
  
                         if(tuple != null)
                         {
-                            Index = tuple.Item1;
-                            Properties = tuple.Item2;
+                            Index = tuple.Value.index;
+                            Properties = tuple.Value.properties;
                         }
                     }
                 }
@@ -78,7 +78,8 @@ namespace Signum.Engine
         }
 
         static ConcurrentDictionary<string, Table> cachedTables = new ConcurrentDictionary<string, Table>();
-        static ConcurrentDictionary<Tuple<Table, string>, Tuple<UniqueIndex, List<PropertyInfo>>> cachedLookups = new ConcurrentDictionary<Tuple<Table, string>, Tuple<UniqueIndex, List<PropertyInfo>>>();
+        static ConcurrentDictionary<(Table table, string indexName), (UniqueIndex index, List<PropertyInfo> properties)?> cachedLookups = 
+            new ConcurrentDictionary<(Table table, string indexName), (UniqueIndex index, List<PropertyInfo> properties)?>();
 
         public override string Message
         {

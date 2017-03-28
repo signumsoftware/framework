@@ -30,13 +30,10 @@ namespace Signum.Engine.DynamicQuery
 
         public DynamicQueryBucket(object queryName, Func<IDynamicQueryCore> lazyQueryCore, Implementations entityImplementations)
         {
-            if (queryName == null)
-                throw new ArgumentNullException("queryName");
-
             if (lazyQueryCore == null)
                 throw new ArgumentNullException("lazyQueryCore");
 
-            this.QueryName = queryName;
+            this.QueryName = queryName ?? throw new ArgumentNullException("queryName");
             this.EntityImplementations = entityImplementations;
 
             this.Core = new Lazy<IDynamicQueryCore>(() =>
@@ -462,9 +459,10 @@ namespace Signum.Engine.DynamicQuery
             if (str == null)
                 throw new ApplicationException(str);
 
-            var pairs = orders.Select(o => Tuple.Create(
-                     Expression.Lambda(OnAddaptForOrderBy(o.Token.BuildExpression(query.Context)), query.Context.Parameter),
-                    o.OrderType)).ToList();
+            var pairs = orders.Select(o => (
+            lambda: Expression.Lambda(OnAddaptForOrderBy(o.Token.BuildExpression(query.Context)), query.Context.Parameter),
+            orderType: o.OrderType)
+            ).ToList();
 
             return new DQueryable<T>(query.Query.OrderBy(pairs), query.Context);
         }
@@ -481,16 +479,16 @@ namespace Signum.Engine.DynamicQuery
 
         public static Func<Expression, Expression> AddaptForOrderBy = e => e; 
 
-        public static IQueryable<object> OrderBy(this IQueryable<object> query, List<Tuple<LambdaExpression, OrderType>> orders)
+        public static IQueryable<object> OrderBy(this IQueryable<object> query, List<(LambdaExpression lambda, OrderType orderType)> orders)
         {
             if (orders == null || orders.Count == 0)
                 return query;
 
-            IOrderedQueryable<object> result = query.OrderBy(orders[0].Item1, orders[0].Item2);
+            IOrderedQueryable<object> result = query.OrderBy(orders[0].lambda, orders[0].orderType);
 
             foreach (var order in orders.Skip(1))
             {
-                result = result.ThenBy(order.Item1, order.Item2);
+                result = result.ThenBy(order.lambda, order.orderType);
             }
 
             return result;
@@ -517,9 +515,10 @@ namespace Signum.Engine.DynamicQuery
 
         public static DEnumerable<T> OrderBy<T>(this DEnumerable<T> collection, List<Order> orders)
         {
-            var pairs = orders.Select(o => Tuple.Create(
-                    Expression.Lambda(OnAddaptForOrderBy(o.Token.BuildExpression(collection.Context)), collection.Context.Parameter),
-                   o.OrderType)).ToList();
+            var pairs = orders.Select(o => (
+            lambda: Expression.Lambda(OnAddaptForOrderBy(o.Token.BuildExpression(collection.Context)), collection.Context.Parameter),
+            orderType: o.OrderType
+            )).ToList();
 
 
             return new DEnumerable<T>(collection.Collection.OrderBy(pairs), collection.Context);
@@ -527,24 +526,24 @@ namespace Signum.Engine.DynamicQuery
 
         public static DEnumerableCount<T> OrderBy<T>(this DEnumerableCount<T> collection, List<Order> orders)
         {
-            var pairs = orders.Select(o => Tuple.Create(
-                    Expression.Lambda(OnAddaptForOrderBy(o.Token.BuildExpression(collection.Context)), collection.Context.Parameter),
-                   o.OrderType)).ToList();
-
+            var pairs = orders.Select(o => (
+                lambda: Expression.Lambda(OnAddaptForOrderBy(o.Token.BuildExpression(collection.Context)), collection.Context.Parameter),
+                orderType: o.OrderType))
+            .ToList();
 
             return new DEnumerableCount<T>(collection.Collection.OrderBy(pairs), collection.Context, collection.TotalElements);
         }
 
-        public static IEnumerable<object> OrderBy(this IEnumerable<object> collection, List<Tuple<LambdaExpression, OrderType>> orders)
+        public static IEnumerable<object> OrderBy(this IEnumerable<object> collection, List<(LambdaExpression lambda, OrderType orderType)> orders)
         {
             if (orders == null || orders.Count == 0)
                 return collection;
 
-            IOrderedEnumerable<object> result = collection.OrderBy(orders[0].Item1, orders[0].Item2);
+            IOrderedEnumerable<object> result = collection.OrderBy(orders[0].lambda, orders[0].orderType);
 
             foreach (var order in orders.Skip(1))
             {
-                result = result.ThenBy(order.Item1, order.Item2);
+                result = result.ThenBy(order.lambda, order.orderType);
             }
 
             return result;
@@ -819,17 +818,19 @@ namespace Signum.Engine.DynamicQuery
         {
             object[] array = collection.Collection as object[] ?? collection.Collection.ToArray();
 
-            var columnAccesors = req.Columns.Select(c => Tuple.Create(c,
-                Expression.Lambda(c.Token.BuildExpression(collection.Context), collection.Context.Parameter))).ToList();
+            var columnAccesors = req.Columns.Select(c =>  (
+                column: c,
+                lambda: Expression.Lambda(c.Token.BuildExpression(collection.Context), collection.Context.Parameter)
+            )).ToList();
 
             return ToResultTable(array, columnAccesors, collection.TotalElements, req.Pagination);
         }
 
-        public static ResultTable ToResultTable(this object[] result, List<Tuple<Column, LambdaExpression>> columnAccesors, int? totalElements,  Pagination pagination)
+        public static ResultTable ToResultTable(this object[] result, List<(Column column, LambdaExpression lambda)> columnAccesors, int? totalElements,  Pagination pagination)
         {
-            var columnValues = columnAccesors.Select(c => new ResultColumn(
-                c.Item1,
-                miGetValues.GetInvoker(c.Item1.Type)(result, c.Item2.Compile()))
+            var columnValues = columnAccesors.Select(c => new ResultColumn( 
+                c.column,
+                miGetValues.GetInvoker(c.column.Type)(result, c.lambda.Compile()))
              ).ToArray();
 
             return new ResultTable(columnValues, totalElements, pagination);

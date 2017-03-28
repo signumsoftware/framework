@@ -18,9 +18,9 @@ namespace Signum.Utilities.DataStructures
         V[, ,] values;
         bool[, ,] used; 
 
-        public CubeDictionary(IEnumerable<Tuple<Cube<K1, K2, K3>, V>> dic)
+        public CubeDictionary(IEnumerable<(Cube<K1, K2, K3> cube, V value)> dic)
         {
-            IEnumerable<Cube<K1, K2, K3>> cubes = dic.Select(p=>p.Item1); 
+            IEnumerable<Cube<K1, K2, K3>> cubes = dic.Select(p => p.cube);
 
             xDimension = cubes.ToIndexIntervalDictinary(c =>c.XInterval.Elements());
             yDimension = cubes.ToIndexIntervalDictinary(c =>c.YInterval.Elements());
@@ -31,7 +31,7 @@ namespace Signum.Utilities.DataStructures
 
 
             foreach (var item in dic)
-                Add(item.Item1, item.Item2);
+                Add(item.cube, item.value);
         }
 
         void Add(Cube<K1, K2, K3> cube, V value)

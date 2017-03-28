@@ -263,7 +263,7 @@ namespace Signum.Windows
                     {
                         foreach (var item in tup.Zip(results))
                         {
-                            item.Item1.OnResult(item.Item2);
+                            item.first.OnResult(item.second);
                         }
                     },
                     () =>

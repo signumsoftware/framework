@@ -12,7 +12,7 @@ public class IntervalDictionary<K,V>: IEnumerable<KeyValuePair<Interval<K>, V>>
 
     //Constructors
     public IntervalDictionary()
-    public IntervalDictionary(IEnumerable<Tuple<Interval<K>,V>> pares)
+    public IntervalDictionary(IEnumerable<(Interval<K> interval, V value)> pares)
   
     public IList<Interval<K>> Intervals {get;}
     public int Count {get;}

@@ -94,7 +94,7 @@ namespace Signum.Engine.DynamicQuery
                 .OrderBy(request.Orders);
 
             var cols = request.Columns
-                .Select(c => Tuple.Create(c, Expression.Lambda(c.Token.BuildExpression(query.Context), query.Context.Parameter))).ToList();
+                .Select(column => (column, Expression.Lambda(column.Token.BuildExpression(query.Context), query.Context.Parameter))).ToList();
 
             var values = query.Query.ToArray();
 

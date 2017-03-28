@@ -268,7 +268,7 @@ namespace Signum.Engine.Maps
             return mixins;
         }
 
-        public HashSet<Tuple<Type, string>> LoadedModules = new HashSet<Tuple<Type, string>>();
+        public HashSet<(Type type, string method)> LoadedModules = new HashSet<(Type type, string method)>();
         public bool NotDefined(MethodBase methodBase)
         {
             var should = methodBase.DeclaringType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
@@ -282,12 +282,12 @@ namespace Signum.Engine.Maps
                 should.Where(a => a == f.Name).SingleEx(() => "Methods for {0}".FormatWith(f.Name));
 
 
-            return LoadedModules.Add(Tuple.Create(methodBase.DeclaringType, methodBase.Name));
+            return LoadedModules.Add((type: methodBase.DeclaringType, method: methodBase.Name));
         }
 
         public void AssertDefined(MethodBase methodBase)
         {
-            var tulpe = Tuple.Create(methodBase.DeclaringType, methodBase.Name);
+            var tulpe = (methodBase.DeclaringType, methodBase.Name);
 
             if (!LoadedModules.Contains(tulpe))
                 throw new ApplicationException("Call {0} first".FormatWith(tulpe));

@@ -18,10 +18,7 @@ namespace Signum.Engine.DynamicQuery
 
         public ManualDynamicQueryCore(Func<QueryRequest, QueryDescription, DEnumerableCount<T>> execute)
         {
-            if (execute == null)
-                throw new ArgumentNullException("execute");
-
-            this.Execute = execute;
+            this.Execute = execute ?? throw new ArgumentNullException("execute");
 
             this.StaticColumns = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
               .Select((e, i) => new ColumnDescriptionFactory(i, e.MemberInfo, null)).ToArray();
@@ -114,7 +111,7 @@ namespace Signum.Engine.DynamicQuery
                      .OrderBy(request.Orders);
 
             var cols = request.Columns
-                .Select(c => Tuple.Create(c, Expression.Lambda(c.Token.BuildExpression(groupCollection.Context), groupCollection.Context.Parameter))).ToList();
+                .Select(column => (column, Expression.Lambda(column.Token.BuildExpression(groupCollection.Context), groupCollection.Context.Parameter))).ToList();
 
             var values = groupCollection.Collection.ToArray();
 
