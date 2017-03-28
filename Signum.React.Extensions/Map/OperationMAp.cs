@@ -94,11 +94,11 @@ namespace Signum.React.Map
             return new Dictionary<Enum, int> { { DefaultState.All, Database.Query<T>().Count() } };
         }
 
-        public static Dictionary<Tuple<Type, Type>, string> Tokens = new Dictionary<Tuple<Type, Type>, string>();
+        public static Dictionary<(Type fromType, Type toType), string> Tokens = new Dictionary<(Type fromType, Type toType), string>();
 
         static string GetToken(LambdaExpression expr)
         {
-            var tuple = Tuple.Create(expr.Parameters.Single().Type, expr.Body.Type);
+            var tuple = (fromType: expr.Parameters.Single().Type, toType: expr.Body.Type);
 
             return Tokens.GetOrCreate(tuple, () =>
                 "Entity." + Reflector.GetMemberListBase(expr.Body).ToString(a => a.Name, "."));

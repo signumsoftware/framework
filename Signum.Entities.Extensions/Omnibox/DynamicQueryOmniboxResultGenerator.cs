@@ -108,20 +108,20 @@ namespace Signum.Entities.Omnibox
 
             int operatorIndex = syntax.Index + syntax.TokenLength;
 
-            List<Tuple<QueryToken, ImmutableStack<OmniboxMatch>>> ambiguousTokens = GetAmbiguousTokens(null, ImmutableStack<OmniboxMatch>.Empty, 
+            List<(QueryToken token, ImmutableStack<OmniboxMatch> stack)> ambiguousTokens = GetAmbiguousTokens(null, ImmutableStack<OmniboxMatch>.Empty, 
                 queryDescription, tokens, syntax.Index, operatorIndex).ToList();
 
-            foreach (Tuple<QueryToken, ImmutableStack<OmniboxMatch>> pair in ambiguousTokens)
+            foreach ((QueryToken token, ImmutableStack<OmniboxMatch> stack) pair in ambiguousTokens)
             {
-                var distance = pair.Item2.Sum(a => a.Distance);
-                var tokenMatches = pair.Item2.Reverse().ToArray();
-                var token = pair.Item1;
+                var distance = pair.stack.Sum(a => a.Distance);
+                var tokenMatches = pair.stack.Reverse().ToArray();
+                var token = pair.token;
 
                 if (syntax.Completion == FilterSyntaxCompletion.Token)
                 {
-                    if (tokens[operatorIndex - 1].Next(rawQuery) == '.' && pair.Item2.All(a => ((QueryToken)a.Value).ToString().ToOmniboxPascal() == a.Text))
+                    if (tokens[operatorIndex - 1].Next(rawQuery) == '.' && pair.stack.All(a => ((QueryToken)a.Value).ToString().ToOmniboxPascal() == a.Text))
                     {
-                        foreach (var qt in QueryUtils.SubTokens(pair.Item1, queryDescription, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
+                        foreach (var qt in QueryUtils.SubTokens(pair.token, queryDescription, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
                         {
                             result.Add(new OmniboxFilterResult(distance, syntax, qt, tokenMatches));
                         }
@@ -133,7 +133,7 @@ namespace Signum.Entities.Omnibox
                 }
                 else
                 {
-                    string canFilter = QueryUtils.CanFilter(pair.Item1);
+                    string canFilter = QueryUtils.CanFilter(pair.token);
 
                     if (canFilter.HasText())
                     {
@@ -148,7 +148,7 @@ namespace Signum.Entities.Omnibox
 
                         if (syntax.Completion == FilterSyntaxCompletion.Operation)
                         {
-                            var suggested = SugestedValues(pair.Item1);
+                            var suggested = SugestedValues(pair.token);
 
                             if (suggested == null)
                             {
@@ -171,7 +171,7 @@ namespace Signum.Entities.Omnibox
                         }
                         else
                         {
-                            var values = GetValues(pair.Item1, tokens[operatorIndex + 1]);
+                            var values = GetValues(pair.token, tokens[operatorIndex + 1]);
 
                             foreach (var value in values)
                             {
@@ -335,7 +335,7 @@ namespace Signum.Entities.Omnibox
             return null;
         }
 
-        protected virtual IEnumerable<Tuple<QueryToken, ImmutableStack<OmniboxMatch>>> GetAmbiguousTokens(QueryToken queryToken, ImmutableStack<OmniboxMatch> distancePack,
+        protected virtual IEnumerable<(QueryToken token, ImmutableStack<OmniboxMatch> stack)> GetAmbiguousTokens(QueryToken queryToken, ImmutableStack<OmniboxMatch> distancePack,
             QueryDescription queryDescription, List<OmniboxToken> omniboxTokens, int index, int operatorIndex)
         {
             OmniboxToken omniboxToken = omniboxTokens[index];
@@ -349,7 +349,10 @@ namespace Signum.Entities.Omnibox
             if (index == operatorIndex - 1)
             {
                 foreach (var m in matches)
-                    yield return Tuple.Create((QueryToken)m.Value, distancePack.Push(m));
+                {
+                    var token = (QueryToken)m.Value;
+                    yield return (token: token, stack: distancePack.Push(m));
+                }
             }
             else
             {

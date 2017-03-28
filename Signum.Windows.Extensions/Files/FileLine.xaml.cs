@@ -352,24 +352,24 @@ namespace Signum.Windows.Files
             }
             else if (e.CanHandleOutlookAttachment())
             {
-                var tuples = e.DropOutlookAttachment();
+                var attachments = e.DropOutlookAttachment();
 
-                if (tuples.Count != 1)
+                if (attachments.Count != 1)
                     throw new ApplicationException(FileMessage.OnlyOneFileIsSupported.NiceToString());
 
-                var tuple = tuples.SingleEx();
+                var fileContent = attachments.SingleEx();
 
                 int i = 0;
                 var tPath = System.IO.Path.GetTempPath();
-                while (File.Exists(System.IO.Path.Combine(tPath, tuple.Item1)))
+                while (File.Exists(System.IO.Path.Combine(tPath, fileContent.FileName)))
                 {
                     tPath = System.IO.Path.Combine(tPath, i.ToString());
                     if (!Directory.Exists(tPath))
                         Directory.CreateDirectory(tPath);
                     i++;
                 }
-                string fileName = System.IO.Path.Combine(tPath, tuple.Item1);
-                File.WriteAllBytes(fileName, tuple.Item2);
+                string fileName = System.IO.Path.Combine(tPath, fileContent.FileName);
+                File.WriteAllBytes(fileName, fileContent.Bytes);
 
                 files = new[] { fileName };
             }

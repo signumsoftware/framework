@@ -202,7 +202,7 @@ namespace Signum.Windows.Calendars
 
             icDays.ItemsSource = days.Select(a => new Day { Value = a }).ToObservableCollection();
 
-            icWeeks.ItemsSource = days.GroupCount(d => GetWeek(d)).Select(p => new WeekGroup { Min = p.Key.Item1.Day, Max = p.Key.Item2.Day, Count = p.Value }).ToObservableCollection();
+            icWeeks.ItemsSource = days.GroupCount(d => GetWeek(d)).Select(p => new WeekGroup { Min = p.Key.min.Day, Max = p.Key.max.Day, Count = p.Value }).ToObservableCollection();
         }
 
         public Binding BindingToDayWidth<T>(Func<double,T> converter )
@@ -322,10 +322,10 @@ namespace Signum.Windows.Calendars
 
         }
 
-        private Tuple<DateTime,DateTime> GetWeek(DateTime d)
+        private (DateTime min, DateTime max) GetWeek(DateTime d)
         {
             int spanishDayOfWeek = ((int)d.DayOfWeek + 6) % 7;
-            return new Tuple<DateTime, DateTime>(d.AddDays(-spanishDayOfWeek), d.AddDays(6 - spanishDayOfWeek)); 
+            return (min: d.AddDays(-spanishDayOfWeek), max: d.AddDays(6 - spanishDayOfWeek)); 
         }
 	}
 }

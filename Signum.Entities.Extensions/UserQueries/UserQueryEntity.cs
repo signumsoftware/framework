@@ -383,8 +383,8 @@ namespace Signum.Entities.UserQueries
                     Operation = f.Operation,
                     ValueString = FilterValueConverter.ToString(f.Value, f.Token.Type)
                 }).ToMList(),
-                ColumnsMode = tuple.Item1,
-                Columns = tuple.Item2,
+                ColumnsMode = tuple.mode,
+                Columns = tuple.columns,
                 Orders = request.Orders.Select(oo => new QueryOrderEntity
                 {
                     Token = new QueryTokenEntity(oo.Token),
@@ -395,7 +395,7 @@ namespace Signum.Entities.UserQueries
             };
         }
 
-        public static Tuple<ColumnOptionsMode, MList<QueryColumnEntity>> SmartColumns(List<Column> current, QueryDescription qd)
+        public static (ColumnOptionsMode mode, MList<QueryColumnEntity> columns) SmartColumns(List<Column> current, QueryDescription qd)
         {
             var ideal = (from cd in qd.Columns
                          where !cd.IsEntity
@@ -420,12 +420,12 @@ namespace Signum.Entities.UserQueries
                 }
 
                 if (toRemove.Count + current.Count == ideal.Count)
-                    return Tuple.Create(ColumnOptionsMode.Remove, toRemove.Select(c => new QueryColumnEntity { Token = new QueryTokenEntity(c.Token) }).ToMList());
+                    return (mode: ColumnOptionsMode.Remove, columns: toRemove.Select(c => new QueryColumnEntity { Token = new QueryTokenEntity(c.Token) }).ToMList());
             }
             else
             {
-                if (current.Zip(ideal).All(t => t.Item1.Similar(t.Item2)))
-                    return Tuple.Create(ColumnOptionsMode.Add, current.Skip(ideal.Count).Select(c => new QueryColumnEntity
+                if (current.Zip(ideal).All(t => t.first.Similar(t.second)))
+                    return (mode: ColumnOptionsMode.Add, columns: current.Skip(ideal.Count).Select(c => new QueryColumnEntity
                     {
                         Token = new QueryTokenEntity(c.Token),
                         DisplayName = c.DisplayName
@@ -433,7 +433,7 @@ namespace Signum.Entities.UserQueries
 
             }
 
-            return Tuple.Create(ColumnOptionsMode.Replace, current.Select(c => new QueryColumnEntity
+            return (mode: ColumnOptionsMode.Replace, columns: current.Select(c => new QueryColumnEntity
             {
                 Token = new QueryTokenEntity(c.Token),
                 DisplayName = c.DisplayName

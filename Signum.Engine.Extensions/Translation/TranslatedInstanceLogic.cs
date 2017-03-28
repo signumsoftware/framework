@@ -48,11 +48,7 @@ namespace Signum.Engine.Translation
                         e.TranslatedText,
                         e.OriginalText,
                     });
-                
-                if (defaultCulture == null)
-                    throw new ArgumentNullException("defaultCulture");
-
-                TranslatedInstanceLogic.getDefaultCulture = defaultCulture;
+                TranslatedInstanceLogic.getDefaultCulture = defaultCulture ?? throw new ArgumentNullException("defaultCulture");
 
                 LocalizationCache = sb.GlobalLazy(() =>
                     Database.Query<TranslatedInstanceEntity>()
@@ -501,17 +497,17 @@ namespace Signum.Engine.Translation
 
         public static void SaveRecords(List<TranslationRecord> records, Type t, CultureInfo c)
         {
-            Dictionary<Tuple<CultureInfo, LocalizedInstanceKey>, TranslationRecord> should = records.Where(a => a.TranslatedText.HasText())
-                .ToDictionary(a => Tuple.Create(a.Culture, a.Key));
+            Dictionary<(CultureInfo culture, LocalizedInstanceKey instanceKey), TranslationRecord> should = records.Where(a => a.TranslatedText.HasText())
+                .ToDictionary(a => (a.Culture, a.Key));
 
-            Dictionary<Tuple<CultureInfo, LocalizedInstanceKey>, TranslatedInstanceEntity> current =
+            Dictionary<(CultureInfo culture, LocalizedInstanceKey instanceKey), TranslatedInstanceEntity> current =
                 (from ci in TranslatedInstanceLogic.TranslationsForType(t, c)
                  from key in ci.Value
-                 select KVP.Create(Tuple.Create(ci.Key, key.Key), key.Value)).ToDictionary();
+                 select KVP.Create((culture: ci.Key, instanceKey: key.Key), key.Value)).ToDictionary();
 
             using (Transaction tr = new Transaction())
             {
-                Dictionary<PropertyRoute, PropertyRouteEntity> routes = should.Keys.Select(a => a.Item2.Route).Distinct().ToDictionary(a => a, a => a.ToPropertyRouteEntity());
+                Dictionary<PropertyRoute, PropertyRouteEntity> routes = should.Keys.Select(a => a.instanceKey.Route).Distinct().ToDictionary(a => a, a => a.ToPropertyRouteEntity());
 
                 Synchronizer.Synchronize(
                     should,
@@ -671,11 +667,8 @@ namespace Signum.Engine.Translation
 
         public LocalizedInstanceKey(PropertyRoute route, Lite<Entity> instance, PrimaryKey? rowId)
         {
-            if (route == null) throw new ArgumentNullException("route");
-            if (instance == null) throw new ArgumentNullException("entity");
-
-            this.Route = route;
-            this.Instance = instance;
+            this.Route = route ?? throw new ArgumentNullException("route");
+            this.Instance = instance ?? throw new ArgumentNullException("entity");
             this.RowId = rowId;
         }
 

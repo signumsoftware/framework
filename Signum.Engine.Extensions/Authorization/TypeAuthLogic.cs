@@ -171,12 +171,13 @@ namespace Signum.Engine.Authorization
             return cache.GetDefaultDictionary();
         }
 
-        static readonly Variable<ImmutableStack<Tuple<Type, TypeAllowed>>> tempAllowed = Statics.ThreadVariable<ImmutableStack<Tuple<Type, TypeAllowed>>>("temporallyAllowed");
+        static readonly Variable<ImmutableStack<(Type type, TypeAllowed typeAllowed)>> tempAllowed = 
+            Statics.ThreadVariable<ImmutableStack<(Type type, TypeAllowed typeAllowed)>>("temporallyAllowed");
 
         public static IDisposable AllowTemporally<T>(TypeAllowed typeAllowed)
             where T : Entity
         {
-            tempAllowed.Value = (tempAllowed.Value ?? ImmutableStack<Tuple<Type, TypeAllowed>>.Empty).Push(Tuple.Create(typeof(T), typeAllowed));
+            tempAllowed.Value = (tempAllowed.Value ?? ImmutableStack<(Type type, TypeAllowed typeAllowed)>.Empty).Push((typeof(T), typeAllowed));
 
             return new Disposable(() => tempAllowed.Value = tempAllowed.Value.Pop());
         }
@@ -186,13 +187,13 @@ namespace Signum.Engine.Authorization
             var ta = tempAllowed.Value;
             if (ta == null || ta.IsEmpty)
                 return null;
-
+            
             var pair = ta.FirstOrDefault(a => a.Item1 == type);
 
-            if (pair == null)
+            if (pair.type == null)
                 return null;
 
-            return pair.Item2;
+            return pair.typeAllowed;
         }
     }
 

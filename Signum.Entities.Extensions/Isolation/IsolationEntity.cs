@@ -30,7 +30,6 @@ namespace Signum.Entities.Isolation
             set { DefaultVariable.Value = value; }
         }
 
-        public static readonly ThreadVariable<Tuple<Lite<IsolationEntity>>> CurrentThreadVariable = Statics.ThreadVariable<Tuple<Lite<IsolationEntity>>>("CurrentIsolation");
 
         public static IDisposable Override(Lite<IsolationEntity> isolation)
         {
@@ -49,6 +48,9 @@ namespace Signum.Entities.Isolation
             return UnsafeOverride(isolation);
         }
 
+        //null: no override
+        //Tuple<T>(null): override to null
+        public static readonly ThreadVariable<Tuple<Lite<IsolationEntity>>> CurrentThreadVariable = Statics.ThreadVariable<Tuple<Lite<IsolationEntity>>>("CurrentIsolation");
         public static IDisposable Disable()
         {
             return UnsafeOverride(null);

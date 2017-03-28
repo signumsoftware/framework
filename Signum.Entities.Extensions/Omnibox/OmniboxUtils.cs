@@ -146,11 +146,11 @@ namespace Signum.Entities.Omnibox
         public string Text;
         public string BoldMask;
 
-        public IEnumerable<Tuple<string, bool>> BoldSpans()
+        public IEnumerable<(string span, bool isBold)> BoldSpans()
         {
             return this.Text.ZipStrict(BoldMask)
-                .GroupWhenChange(a => a.Item2 == '#')
-                .Select(gr => Tuple.Create(new string(gr.Select(a => a.Item1).ToArray()), gr.Key));
+                .GroupWhenChange(a => a.second == '#')
+                .Select(gr => (span: new string(gr.Select(a => a.Item1).ToArray()), isBold: gr.Key));
         }
     }
 
