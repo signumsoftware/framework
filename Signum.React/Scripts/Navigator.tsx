@@ -409,23 +409,39 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
     if (type.isEmbedded || type.name == IsByAll)
         return null;
 
+    var config: AutocompleteConfig<any> | null = null;
+
     if (findOptions)
-        return new FindOptionsAutocompleteConfig(findOptions, 5, false);
+        config = new FindOptionsAutocompleteConfig(findOptions, 5, false);
 
     const types = getTypeInfos(type);
+    var delay: number | undefined;
 
     if (types.length == 1) {
         var s = getSettings(types[0]);
 
-        if (s && s.autocomplete)
-            return s.autocomplete;
+        if (s) {
+            if (s.autocomplete) {
+                config = s.autocomplete;
+            }
+
+            delay = s.autocompleteDelay;
+        }
     }
 
-    return new LiteAutocompleteConfig((subStr: string) => Finder.API.findLiteLike({
-        types: type.name,
-        subString: subStr,
-        count: 5
-    }), false);
+    if(!config) {
+        config = new LiteAutocompleteConfig((subStr: string) => Finder.API.findLiteLike({
+            types: type.name,
+            subString: subStr,
+            count: 5
+        }), false);
+    }
+
+    if (!config.getItemsDelay) {
+        config.getItemsDelay = delay;
+    }
+
+    return config;
 }
 
 
@@ -480,7 +496,7 @@ export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityP
 
     if (es && es.onNavigate)
         return es.onNavigate(entityOrPack, navigateOptions);
-    else 
+    else
         return navigateDefault(entityOrPack, navigateOptions);
 }
 
@@ -616,6 +632,7 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
     isReadOnly?: boolean;
     avoidPopup?: boolean;
     autocomplete?: AutocompleteConfig<T>;
+    autocompleteDelay?: number;
     onNavigateRoute?: (typeName: string, id: string | number) => string;
     onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
     onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
@@ -638,10 +655,11 @@ export class EntitySettings<T extends ModifiableEntity> {
     isNavigable: EntityWhen;
     isReadOnly: boolean;
     autocomplete?: AutocompleteConfig<T>;
+    autocompleteDelay?: number;
     onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
     onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
-    onNavigateRoute?: (typeName: string, id: string |number) => string;
-    
+    onNavigateRoute?: (typeName: string, id: string | number) => string;
+
     overrideView(override: (replacer: ViewReplacer<T>) => void) {
         if (this.viewOverrides == undefined)
             this.viewOverrides = [];

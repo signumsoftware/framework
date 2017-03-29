@@ -71,13 +71,13 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
     lookup() {
         if (!this.props.getItemsDelay) {
-            this.popupate();
+            this.populate();
         }
         else {
             if (this.handle)
                 clearTimeout(this.handle);
 
-            setTimeout(() => this.popupate(), this.props.getItemsDelay);
+            this.handle = setTimeout(() => this.populate(), this.props.getItemsDelay);
         }
     }
 
@@ -86,7 +86,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
             clearTimeout(this.handle);
     }
 
-    popupate() {
+    populate() {
 
         if (this.props.minLength == null || this.input.value.length < this.props.minLength) {
             this.setState({ shown: false, items: undefined, selectedIndex: undefined });
