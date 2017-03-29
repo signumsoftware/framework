@@ -254,9 +254,8 @@ namespace Signum.Windows
         private static void MoveFocus()
         {
             // Change keyboard focus.
-            UIElement elementWithFocus = Keyboard.FocusedElement as UIElement;
 
-            if (elementWithFocus != null)
+            if (Keyboard.FocusedElement is UIElement elementWithFocus)
             {
                 elementWithFocus.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
             }

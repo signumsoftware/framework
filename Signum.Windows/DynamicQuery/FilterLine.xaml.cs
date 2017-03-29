@@ -34,8 +34,7 @@ namespace Signum.Windows
 
         private void btRemove_Click(object sender, RoutedEventArgs e)
         {
-            if (Remove != null)
-                Remove(this, e);
+            Remove?.Invoke(this, e);
         }
 
         private void StackPanel_Loaded(object sender, RoutedEventArgs e)

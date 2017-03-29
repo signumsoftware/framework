@@ -206,10 +206,9 @@ namespace Signum.Windows
 
                 TaskNormalWindow += TaskSetIconNormalWindow;
 
-                TaskNormalWindow += TaskSetLabelNormalWindow;    
+                TaskNormalWindow += TaskSetLabelNormalWindow;
 
-                if (Initializing != null)
-                    Initializing();
+                Initializing?.Invoke();
 
                 initialized = true;
             }
@@ -382,8 +381,7 @@ namespace Signum.Windows
                 win.SaveProtected = ((ViewOptions)options).RequiresSaveOperation ??
                     (typeof(Entity).IsAssignableFrom(entityType) && EntityKindCache.RequiresSaveOperation(entityType)); //Matters even on Ok
 
-            if (TaskNormalWindow != null)
-                TaskNormalWindow(win, entity);
+            TaskNormalWindow?.Invoke(win, entity);
 
             return win;
         }
@@ -500,13 +498,12 @@ namespace Signum.Windows
             if (only != null)
                 return only;
 
-            Type sel;
-            if (SelectorWindow.ShowDialog(filtered, out sel,
-                elementIcon: t => Navigator.Manager.GetEntityIcon(t, true),
-                elementText: t => t.NiceName(),
-                title: SelectorMessage.TypeSelector.NiceToString(),
-                message: SelectorMessage.PleaseSelectAType.NiceToString(),
-                owner: parent))
+            if (SelectorWindow.ShowDialog(filtered, out Type sel,
+    elementIcon: t => Navigator.Manager.GetEntityIcon(t, true),
+    elementText: t => t.NiceName(),
+    title: SelectorMessage.TypeSelector.NiceToString(),
+    message: SelectorMessage.PleaseSelectAType.NiceToString(),
+    owner: parent))
                 return sel;
             return null;
         }
@@ -640,8 +637,7 @@ namespace Signum.Windows
 
                 win.Show();
 
-                if (afterShown != null)
-                    afterShown(win);
+                afterShown?.Invoke(win);
             }
         }
 

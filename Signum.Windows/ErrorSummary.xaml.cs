@@ -111,8 +111,7 @@ namespace Signum.Windows
 
             var exceptions = es.BindingExceptions.ToString(a => a.Exception.Message, "\r\n");
 
-            var dei = es.DataContext as IDataErrorInfo;
-            if (dei != null)
+            if (es.DataContext is IDataErrorInfo dei)
                 return "\r\n".Combine(exceptions, dei.Error);
 
             return exceptions;

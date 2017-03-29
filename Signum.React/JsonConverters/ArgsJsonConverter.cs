@@ -39,8 +39,7 @@ namespace Signum.React.Json
             if (request.args != null)
                 for (int i = 0; i < request.args.Length; i++)
                 {
-                    var jtoken = request.args[i] as JToken;
-                    if (jtoken != null)
+                    if (request.args[i] is JToken jtoken)
                         request.args[i] = ConvertObject(jtoken, serializer, operationSymbol);
                 }
 
@@ -58,19 +57,16 @@ namespace Signum.React.Json
                 return obj;
             }
 
-            if (token is JObject)
+            if (token is JObject j)
             {
-                var j = (JObject)token;
-
                 if (j.Property("EntityType") != null)
                     return serializer.Deserialize(new JTokenReader(j), typeof(Lite<Entity>));
 
                 if (j.Property("Type") != null)
                     return serializer.Deserialize(new JTokenReader(j), typeof(ModifiableEntity));
             }
-            else if (token is JArray)
+            else if (token is JArray a)
             {
-                var a = (JArray)token;
                 var result = a.Select(t => ConvertObject(t, serializer, operationSymbol)).ToList();
                 return result;
 

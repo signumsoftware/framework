@@ -483,7 +483,7 @@ namespace Signum.Utilities
 
         public static LocalizedAssembly FromXml(Assembly assembly, CultureInfo cultureInfo, XDocument doc, Dictionary<string, string> replacements /*new -> old*/)
         {
-            Dictionary<string, XElement> file = doc == null ? null : doc.Element("Translations").Elements("Type")
+            Dictionary<string, XElement> file = doc?.Element("Translations").Elements("Type")
                 .Select(x => KVP.Create(x.Attribute("Name").Value, x))
                 .Distinct(x => x.Key)
                 .ToDictionary();
@@ -574,7 +574,7 @@ namespace Signum.Utilities
                 (x == null || x.Attribute("Name").Value != type.Name ? null : x.Attribute("Description")?.Value) ??
                 (!assembly.IsDefault ? null : DescriptionManager.DefaultTypeDescription(type));
 
-            var xMembers = x == null ? null : x.Elements("Member")
+            var xMembers = x?.Elements("Member")
                 .Select(m => KVP.Create(m.Attribute("Name").Value, m.Attribute("Description").Value))
                 .Distinct(m => m.Key)
                 .ToDictionary();
@@ -592,7 +592,7 @@ namespace Signum.Utilities
                              (description == null ? null : NaturalLanguageTools.Pluralize(description, assembly.Culture))),
 
                 Gender = !opts.IsSetAssert(DescriptionOptions.Gender, type) ? null :
-                         ((x == null ? null : x.Attribute("Gender")?.Value.Single()) ??
+                         ((x?.Attribute("Gender")?.Value.Single()) ??
                          (!assembly.IsDefault ? null : type.GetCustomAttribute<GenderAttribute>()?.Gender) ??
                          (description == null ? null : NaturalLanguageTools.GetGender(description, assembly.Culture))),
 

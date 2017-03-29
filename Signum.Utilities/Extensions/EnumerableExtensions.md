@@ -399,20 +399,20 @@ each sequence in pairs. Zip operator is common operator included in C# 4.0, and 
 public static IEnumerable<R> Zip<A, B>(this IEnumerable<A> colA, IEnumerable<B> colB, Func<A, B, R> resultSelector)
 
 //Zips two sequences using Tuples, finish on the shorter
-public static IEnumerable<Tuple<A, B>> Zip<A, B>(this IEnumerable<A> colA, IEnumerable<B> colB)
+public static IEnumerable<(A, B)> Zip<A, B>(this IEnumerable<A> colA, IEnumerable<B> colB)
 
 //Zips two sequences using a mixer function, finish on the longer and filling the sorter with default(T)
 public static IEnumerable<R> ZipOrDefault<A, B, R>(this IEnumerable<A> colA, IEnumerable<B> colB, Func<A, B, R> resultSelector)
 
 //Zips two sequences using Tuples, finish on the longer and filling the sorter with default(T)
-public static IEnumerable<Tuple<A, B>> ZipOrDefault<A, B>(this IEnumerable<A> colA, IEnumerable<B> colB)
+public static IEnumerable<(A, B)> ZipOrDefault<A, B>(this IEnumerable<A> colA, IEnumerable<B> colB)
 
 
 //Zips two sequences using a mixer function, throws InvalidOperationException is they are not the same size
 public static IEnumerable<R> ZipStrict<A, B, R>(this IEnumerable<A> colA, IEnumerable<B> colB, Func<A, B, R> resultSelector)
 
 //Zips two sequences using Tuples, throws InvalidOperationException is they are not the same size
-public static IEnumerable<Tuple<A, B>> ZipStrict<A, B>(this IEnumerable<A> colA, IEnumerable<B> colB)
+public static IEnumerable<(A, B)> ZipStrict<A, B>(this IEnumerable<A> colA, IEnumerable<B> colB)
 
 
 //Zips two sequences taking an action for each pair and returning void, finishes on the sorter

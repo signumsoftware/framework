@@ -55,8 +55,7 @@ public static class TreeExtensions
             if (itemThatMightBelongToContainer != null)
                 return itemThatMightBelongToContainer;
 
-            TreeViewItem recursionResult = ItemFromContainer(parentContainer.ItemContainerGenerator, parentContainer.Items, container) as TreeViewItem;
-            if (recursionResult != null)
+            if (ItemFromContainer(parentContainer.ItemContainerGenerator, parentContainer.Items, container) is TreeViewItem recursionResult)
                 return recursionResult;
         }
         return null;

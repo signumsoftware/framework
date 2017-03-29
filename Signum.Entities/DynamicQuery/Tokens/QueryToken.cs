@@ -84,8 +84,7 @@ namespace Signum.Entities.DynamicQuery
 
         public Expression BuildExpression(BuildExpressionContext context)
         {
-            Expression result;
-            if (context.Replacemens != null && context.Replacemens.TryGetValue(this, out result))
+            if (context.Replacemens != null && context.Replacemens.TryGetValue(this, out Expression result))
                 return result;
 
             return BuildExpressionInternal(context); 
@@ -127,8 +126,8 @@ namespace Signum.Entities.DynamicQuery
             this.parent = parent;
         }
 
-        static ConcurrentDictionary<Tuple<QueryToken, SubTokensOptions>, Dictionary<string, QueryToken>> subTokensOverrideCache =
-            new ConcurrentDictionary<Tuple<QueryToken, SubTokensOptions>, Dictionary<string, QueryToken>>();
+        static ConcurrentDictionary<(QueryToken, SubTokensOptions), Dictionary<string, QueryToken>> subTokensOverrideCache =
+            new ConcurrentDictionary<(QueryToken, SubTokensOptions), Dictionary<string, QueryToken>>();
 
         public QueryToken SubTokenInternal(string key, SubTokensOptions options)
         {
@@ -156,7 +155,7 @@ namespace Signum.Entities.DynamicQuery
 
         Dictionary<string, QueryToken> CachedSubTokensOverride(SubTokensOptions options)
         {
-            return subTokensOverrideCache.GetOrAdd(Tuple.Create(this, options), (tup) => tup.Item1.SubTokensOverride(tup.Item2).ToDictionaryEx(a => a.Key, "subtokens for " + this.Key));
+            return subTokensOverrideCache.GetOrAdd((this, options), (tup) => tup.Item1.SubTokensOverride(tup.Item2).ToDictionaryEx(a => a.Key, "subtokens for " + this.Key));
         }
 
         protected List<QueryToken> SubTokensBase(Type type, SubTokensOptions options, Implementations? implementations)

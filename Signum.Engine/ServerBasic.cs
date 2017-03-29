@@ -171,7 +171,7 @@ namespace Signum.Services
                  () => Symbol.GetSymbolIds(type));
         }
 
-        public Dictionary<string, Tuple<PrimaryKey, string>> GetSemiSymbolIdsAndNames(Type type)
+        public Dictionary<string, (PrimaryKey id, string name)> GetSemiSymbolIdsAndNames(Type type)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                  () => SemiSymbol.GetSemiSymbolIdsAndNames(type));

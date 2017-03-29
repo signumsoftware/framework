@@ -203,8 +203,7 @@ namespace Signum.Engine
 
         public override SqlPreCommand Clone()
         {
-            return new SqlPreCommandSimple(Sql, Parameters == null ? null : Parameters
-                .Select(p => Connector.Current.CloneParameter(p))
+            return new SqlPreCommandSimple(Sql, Parameters?.Select(p => Connector.Current.CloneParameter(p))
                 .ToList());
         }
 

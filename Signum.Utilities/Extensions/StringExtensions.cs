@@ -635,8 +635,7 @@ namespace Signum.Utilities
             for (int i = 0; i < str.Length; i++)
             {
                 char c = str[i];
-                char rep;
-                if (replacements.TryGetValue(c, out rep))
+                if (replacements.TryGetValue(c, out char rep))
                 {
                     if (sb == null)
                         sb = new StringBuilder(str, 0, i, str.Length);

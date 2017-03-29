@@ -260,12 +260,10 @@ namespace Signum.Engine.Linq
 
             static SelectExpression GetLeftMostSelect(Expression source)
             {
-                SelectExpression select = source as SelectExpression;
-                if (select != null)
+                if (source is SelectExpression select)
                     return select;
-                JoinExpression join = source as JoinExpression;
 
-                if (join != null)
+                if (source is JoinExpression join)
                     return GetLeftMostSelect(join.Left);
                 return null;
             }

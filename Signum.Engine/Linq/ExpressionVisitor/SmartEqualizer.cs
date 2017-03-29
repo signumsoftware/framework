@@ -496,25 +496,19 @@ namespace Signum.Engine.Linq
                 return collection.Contains(type) ? True : False;
             }
 
-            if (typeExpr is TypeEntityExpression)
+            if (typeExpr is TypeEntityExpression typeFie)
             {
-                var typeFie = (TypeEntityExpression)typeExpr;
-
                 return collection.Contains(typeFie.TypeValue) ? NotEqualToNull(typeFie.ExternalId) : (Expression)False;
             }
 
-            if (typeExpr is TypeImplementedByExpression)
+            if (typeExpr is TypeImplementedByExpression typeIb)
             {
-                var typeIb = (TypeImplementedByExpression)typeExpr;
-
                 return typeIb.TypeImplementations.Where(imp => collection.Contains(imp.Key))
                     .Select(imp => NotEqualToNull(imp.Value)).AggregateOr();
             }
 
-            if (typeExpr is TypeImplementedByAllExpression)
+            if (typeExpr is TypeImplementedByAllExpression typeIba)
             {
-                var typeIba = (TypeImplementedByAllExpression)typeExpr;
-
                 PrimaryKey[] ids = collection.Select(t => QueryBinder.TypeId(t)).ToArray();
 
                 return InPrimaryKey(typeIba.TypeColumn, ids);
@@ -570,18 +564,15 @@ namespace Signum.Engine.Linq
 
         static Expression EntityIn(Expression newItem, Dictionary<Type, PrimaryKey[]> entityIDs)
         {
-            EntityExpression ee = newItem as EntityExpression;
-            if (ee != null)
+            if (newItem is EntityExpression ee)
                 return InPrimaryKey(ee.ExternalId, entityIDs.TryGetC(ee.Type) ?? new PrimaryKey[0]);
 
-            ImplementedByExpression ib = newItem as ImplementedByExpression;
-            if (ib != null)
+            if (newItem is ImplementedByExpression ib)
                 return ib.Implementations.JoinDictionary(entityIDs,
                     (t, f, values) => Expression.And(DbExpressionNominator.FullNominate(NotEqualToNull(f.ExternalId)), InPrimaryKey(f.ExternalId, values)))
                     .Values.AggregateOr();
 
-            ImplementedByAllExpression iba = newItem as ImplementedByAllExpression;
-            if (iba != null)
+            if (newItem is ImplementedByAllExpression iba)
                 return entityIDs.Select(kvp => Expression.And(
                     EqualNullable(new PrimaryKeyExpression(QueryBinder.TypeConstant(kvp.Key).Nullify()), iba.TypeId.TypeColumn),
                     InPrimaryKey(iba.Id, kvp.Value))).AggregateOr();

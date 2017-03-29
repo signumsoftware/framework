@@ -136,7 +136,7 @@ namespace Signum.Entities.DynamicQuery
 
             string parent = Parent.IsAllowed();
 
-            string route = pr == null ? null : pr.IsAllowed();
+            string route = pr?.IsAllowed();
 
             if (parent.HasText() && route.HasText())
                 return QueryTokenMessage.And.NiceToString().Combine(parent, route);

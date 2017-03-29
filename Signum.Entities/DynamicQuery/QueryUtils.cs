@@ -386,8 +386,7 @@ namespace Signum.Entities.DynamicQuery
         {
             if (expression.Type.IsLite())
             {
-                MethodCallExpression mce = expression as MethodCallExpression;
-                if (mce != null && mce.Method.IsInstantiationOf(miToLite))
+                if (expression is MethodCallExpression mce && mce.Method.IsInstantiationOf(miToLite))
                     return mce.Arguments[0];
 
                 if (!idAndToStr)

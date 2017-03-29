@@ -602,8 +602,7 @@ namespace Signum.Engine.Linq
                 sb.Append(" AS ");
                 sb.Append(((SourceWithAliasExpression)source).Alias.ToString());
 
-                var ta = source as TableExpression;
-                if (ta != null && ta.WithHint != null)
+                if (source is TableExpression ta && ta.WithHint != null)
                 {
                     sb.Append(" WITH(" + ta.WithHint + ")");
                 }

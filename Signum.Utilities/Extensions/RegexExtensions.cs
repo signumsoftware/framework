@@ -13,37 +13,7 @@ namespace Signum.Utilities
         {
             return m.Index + m.Length;
         }
-
-        public static IEnumerable<Match> Match(this IEnumerable<string> collection, string regex)
-        {
-            Regex reg = new Regex(regex);
-            return collection.Select(s => reg.Match(s)).Where(m => m.Success);
-        }
-
-        public static IEnumerable<Tuple<string, Match>> MatchPair(this IEnumerable<string> collection, string regex)
-        {
-            Regex reg = new Regex(regex);
-            return from s in collection
-                   let m = reg.Match(s)
-                   where m.Success
-                   select new Tuple<string,Match>(s, m);
-        }
-
-        public static IEnumerable<Match> Match<T>(this IEnumerable<T> collection, Func<T, string> stringSelector, string regex)
-        {
-            Regex reg = new Regex(regex);
-            return collection.Select(s => reg.Match(stringSelector(s))).Where(m => m.Success);
-        }
-
-        public static IEnumerable<Tuple<T, Match>> MatchPair<T>(this IEnumerable<T> collection, Func<T, string> stringSelector, string regex)
-        {
-            Regex reg = new Regex(regex);
-            return from s in collection
-                   let m = reg.Match(stringSelector(s))
-                   where m.Success
-                   select new Tuple<T, Match>(s, m);
-        }
-
+        
         public static bool Contains(this Capture larger, Capture smaller)
         {
             return

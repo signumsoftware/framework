@@ -117,9 +117,8 @@ namespace Signum.Utilities
                 if (Value.Equals(default(T)))
                     return true;
 
-                var col = Value as IEnumerable;
 
-                if (col != null)
+                if (Value is IEnumerable col)
                 {
                     foreach (var item in col)
                     {
@@ -241,8 +240,7 @@ namespace Signum.Utilities
             {
                 get
                 {
-                    object result;
-                    if (singletonSession.TryGetValue(Name, out result))
+                    if (singletonSession.TryGetValue(Name, out object result))
                         return (T)result;
 
                     return GetDefaulValue();
@@ -316,8 +314,7 @@ namespace Signum.Utilities
 
                     if (dic != null)
                     {
-                        object result;
-                        if (dic.TryGetValue(Name, out result))
+                        if (dic.TryGetValue(Name, out object result))
                             return (T)result;
 
                         return GetDefaulValue();

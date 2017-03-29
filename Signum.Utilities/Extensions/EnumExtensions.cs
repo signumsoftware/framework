@@ -23,14 +23,12 @@ namespace Signum.Utilities
 
         public static T? TryToEnum<T>(this string str) where T : struct
         {
-            T result; 
-            return Enum.TryParse(str, out result) ? result : (T?)null;
+            return Enum.TryParse(str, out T result) ? result : (T?)null;
         }
 
         public static T? TryToEnum<T>(this string str, bool ignoreCase) where T : struct
         {
-            T result;
-            return Enum.TryParse(str, ignoreCase, out result) ? result : (T?)null;
+            return Enum.TryParse(str, ignoreCase, out T result) ? result : (T?)null;
         }
 
         public static T[] GetValues<T>()
@@ -77,8 +75,7 @@ namespace Signum.Utilities
 
         public static bool TryParse(string value, Type enumType, bool ignoreCase, out Enum result)
         {
-            int rubish;
-            if (!Enum.IsDefined(enumType, value) && !int.TryParse(value, out rubish))
+            if (!Enum.IsDefined(enumType, value) && !int.TryParse(value, out int rubish))
             {
                 result = null;
                 return false;

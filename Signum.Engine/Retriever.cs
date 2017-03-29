@@ -36,15 +36,14 @@ namespace Signum.Engine
         }
 
         EntityCache.RealEntityCache entityCache;
-        Dictionary<IdentityTuple, Entity> retrieved = new Dictionary<IdentityTuple, Entity>();
+        Dictionary<(Type type, PrimaryKey id), Entity> retrieved = new Dictionary<(Type type, PrimaryKey id), Entity>();
         Dictionary<Type, Dictionary<PrimaryKey, Entity>> requests;
-        Dictionary<IdentityTuple, List<Lite<IEntity>>> liteRequests;
+        Dictionary<(Type type, PrimaryKey id), List<Lite<IEntity>>> liteRequests;
         List<Modifiable> modifiablePostRetrieving = new List<Modifiable>();
 
-        bool TryGetRequest(IdentityTuple key, out Entity value)
+        bool TryGetRequest((Type type, PrimaryKey id) key, out Entity value)
         {
-            Dictionary<PrimaryKey, Entity> dic;
-            if (requests != null && requests.TryGetValue(key.Type, out dic) && dic.TryGetValue(key.Id, out value))
+            if (requests != null && requests.TryGetValue(key.type, out Dictionary<PrimaryKey, Entity> dic) && dic.TryGetValue(key.id, out value))
                 return true;
 
             value = null;
@@ -56,10 +55,9 @@ namespace Signum.Engine
             if (id == null)
                 return null;
 
-            IdentityTuple tuple = new IdentityTuple(typeof(T), id.Value);
+            var tuple = (typeof(T), id.Value);
 
-            Entity result;
-            if (entityCache.TryGetValue(tuple, out result))
+            if (entityCache.TryGetValue(tuple, out Entity result))
                 return (T)result;
 
             if (retrieved.TryGetValue(tuple, out result))
@@ -89,10 +87,9 @@ namespace Signum.Engine
             if (id == null)
                 return null;
 
-            IdentityTuple tuple = new IdentityTuple(typeof(T), id.Value);
+            var tuple = (type: typeof(T), id: id.Value);
 
-            Entity ident;
-            if (entityCache.TryGetValue(tuple, out ident))
+            if (entityCache.TryGetValue(tuple, out Entity ident))
                 return (T)ident;
 
             if (retrieved.TryGetValue(tuple, out ident))
@@ -115,7 +112,7 @@ namespace Signum.Engine
             if (requests == null)
                 requests = new Dictionary<Type, Dictionary<PrimaryKey, Entity>>();
 
-            requests.GetOrCreate(tuple.Type).Add(tuple.Id, entity);
+            requests.GetOrCreate(tuple.type).Add(tuple.id, entity);
 
             return entity;
         }
@@ -144,9 +141,9 @@ namespace Signum.Engine
                 return lite;
             }
 
-            IdentityTuple tuple = new IdentityTuple(lite.EntityType, lite.Id);
+            var tuple = (type: lite.EntityType, id: lite.Id);
             if (liteRequests == null)
-                liteRequests = new Dictionary<IdentityTuple, List<Lite<IEntity>>>();
+                liteRequests = new Dictionary<(Type type, PrimaryKey id), List<Lite<IEntity>>>();
             liteRequests.GetOrCreate(tuple).Add(lite);
             return lite;
         }
@@ -181,7 +178,7 @@ namespace Signum.Engine
 
                             cc.Complete(ident, this);
 
-                            retrieved.Add(new IdentityTuple(ident), ident);
+                            retrieved.Add((type: ident.GetType(), id : ident.Id), ident);
                             dic.Remove(ident.Id);
                         }
                     }
@@ -199,7 +196,7 @@ namespace Signum.Engine
             {
 
                 {
-                    List<IdentityTuple> toRemove = null;
+                    List<(Type type, PrimaryKey id)> toRemove = null;
                     foreach (var item in liteRequests)
                     {
                         var entity = retrieved.TryGetC(item.Key);
@@ -211,7 +208,7 @@ namespace Signum.Engine
                                 lite.SetToString(toStr);
 
                             if (toRemove == null)
-                                toRemove = new List<IdentityTuple>();
+                                toRemove = new List<(Type type, PrimaryKey id)>();
 
                             toRemove.Add(item.Key);
                         }
@@ -223,13 +220,13 @@ namespace Signum.Engine
 
                 while (liteRequests.Count > 0)
                 {
-                    var group = liteRequests.GroupBy(a => a.Key.Type).FirstEx();
+                    var group = liteRequests.GroupBy(a => a.Key.type).FirstEx();
 
-                    var dic = giGetStrings.GetInvoker(group.Key)(group.Select(a => a.Key.Id).ToList());
+                    var dic = giGetStrings.GetInvoker(group.Key)(group.Select(a => a.Key.id).ToList());
 
                     foreach (var item in group)
                     {
-                        var toStr = dic.TryGetC(item.Key.Id) ?? ("[" + EngineMessage.EntityWithType0AndId1NotFound.NiceToString().FormatWith(item.Key.Type.NiceName(), item.Key.Id) + "]");
+                        var toStr = dic.TryGetC(item.Key.id) ?? ("[" + EngineMessage.EntityWithType0AndId1NotFound.NiceToString().FormatWith(item.Key.type.NiceName(), item.Key.id) + "]");
                         foreach (var lite in item.Value)
                         {
                             lite.SetToString(toStr);

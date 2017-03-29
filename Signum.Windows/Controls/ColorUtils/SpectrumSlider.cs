@@ -60,11 +60,12 @@ namespace Signum.Windows.ColorUtils
         private void createSpectrum()
         {
 
-            pickerBrush = new LinearGradientBrush();
-            pickerBrush.StartPoint = new Point(0.5, 1);
-            pickerBrush.EndPoint = new Point(0.5, 0);
-            pickerBrush.ColorInterpolationMode = ColorInterpolationMode.SRgbLinearInterpolation;
-
+            pickerBrush = new LinearGradientBrush()
+            {
+                StartPoint = new Point(0.5, 1),
+                EndPoint = new Point(0.5, 0),
+                ColorInterpolationMode = ColorInterpolationMode.SRgbLinearInterpolation
+            };
             List<GradientStop> colorsList = 0.To(31).Select(i => new GradientStop(
                 new HsvColor((double)((i % 30) * 12), 1.0, 1.0).ToColor(), ((double)i) / 30.0)).ToList();
 

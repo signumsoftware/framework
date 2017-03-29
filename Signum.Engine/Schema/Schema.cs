@@ -564,16 +564,13 @@ namespace Signum.Engine.Maps
             //if (field == null)
             //    return Implementations.ByAll;
 
-            FieldReference refField = field as FieldReference;
-            if (refField != null)
+            if (field is FieldReference refField)
                 return Implementations.By(refField.FieldType.CleanType());
 
-            FieldImplementedBy ibField = field as FieldImplementedBy;
-            if (ibField != null)
+            if (field is FieldImplementedBy ibField)
                 return Implementations.By(ibField.ImplementationColumns.Keys.ToArray());
 
-            FieldImplementedByAll ibaField = field as FieldImplementedByAll;
-            if (ibaField != null)
+            if (field is FieldImplementedByAll ibaField)
                 return Implementations.ByAll;
 
             Implementations? implementations = CalculateExpressionImplementations(route);

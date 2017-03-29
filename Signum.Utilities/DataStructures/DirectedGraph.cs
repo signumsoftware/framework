@@ -151,8 +151,7 @@ namespace Signum.Utilities.DataStructures
 
         HashSet<T> TryGetOrAdd(T node)
         {
-            HashSet<T> result;
-            if (adjacency.TryGetValue(node, out result))
+            if (adjacency.TryGetValue(node, out HashSet<T> result))
                 return result;
 
             result = new HashSet<T>(Comparer);
@@ -222,14 +221,12 @@ namespace Signum.Utilities.DataStructures
             if (condition != null && !condition(node))
                 return;
 
-            if (preAction != null)
-                preAction(node);
+            preAction?.Invoke(node);
 
             foreach (T item in RelatedTo(node))
                 DepthExplore(item, condition, preAction, postAction);
 
-            if (postAction != null)
-                postAction(node);
+            postAction?.Invoke(node);
         }
 
         public void BreadthExplore(T root, Func<T, bool> condition, Action<T> action)

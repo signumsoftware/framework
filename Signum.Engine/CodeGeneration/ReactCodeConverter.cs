@@ -76,8 +76,7 @@ namespace Signum.Engine.CodeGeneration
             if (value.StartsWith("new BsColumn("))
                 return "{{ sm: " + value.After("new BsColumn(") + "}}";
 
-            int _;
-            if (value == "true" || value == "false" || int.TryParse(value, out _))
+            if (value == "true" || value == "false" || int.TryParse(value, out int _))
                 return "{" + value + "}";
 
             return "\"" + value + "\"";

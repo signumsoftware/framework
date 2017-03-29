@@ -39,9 +39,8 @@ namespace Signum.Windows.ColorUtils
         private void PART_tb_TextChanged(object sender, TextChangedEventArgs e)
         {
             TextBox tb = (TextBox)sender; 
-            string txt = tb.Text; 
-            byte b;
-            if (byte.TryParse(txt, out b))
+            string txt = tb.Text;
+            if (byte.TryParse(txt, out byte b))
             {
                 Color = Color.FromArgb(
                     tb == PART_tbA ? b : Color.A,

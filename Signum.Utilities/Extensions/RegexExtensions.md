@@ -124,37 +124,6 @@ cache the object locally, using the same for all the elements in the
 collection, but not from one call to the next one. This is a good idea
 for Loading applications, but for server methods it's a better idea to
 store the Regex object in a static field, not using the methods here.
-
-### Match, MatchPair
-
-Applies a Regex string to all the elements in collection, returning only
-the ones who actually matched.
-
-`
-public static IEnumerable<Match> Match(this IEnumerable<string> collection, string regex)
-public static IEnumerable<Match> Match<T>(this IEnumerable<T> collection, Func<T, string> stringSelector, string regex)
-
-public static IEnumerable<Tuple<string, Match>> MatchPair(this IEnumerable<string> collection, string regex)
-public static IEnumerable<Tuple<T, Match>> MatchPair<T>(this IEnumerable<T> collection, Func<T, string> stringSelector, string regex)
-`
-
-Example:
-
-`
-typeof(Console).Assembly.GetTypes()
-.MatchPair(a => a.Name, "^.*Console.*$")
-.ToConsole(p => p.First.Name);
-
-//Console
-//ConsoleCancelEventHandler
-//ConsoleCancelEventArgs
-//ConsoleColor
-//ConsoleKey
-//ConsoleKeyInfo
-//ConsoleModifiers
-//ConsoleSpecialKey
-//ConsoleCtrlHandlerRoutine
-//__ConsoleStream
 `
 
 ### MostSimilar

@@ -112,7 +112,7 @@ namespace Signum.Engine.Maps
 
             var tuple = ObjectName.SplitLast(name);
 
-            return new DatabaseName(ServerName.Parse(tuple.Item1), tuple.Item2);
+            return new DatabaseName(ServerName.Parse(tuple.prefix), tuple.name);
         }
     }
 
@@ -183,7 +183,7 @@ namespace Signum.Engine.Maps
 
             var tuple = ObjectName.SplitLast(name);
 
-            return new SchemaName(DatabaseName.Parse(tuple.Item1), (tuple.Item2));
+            return new SchemaName(DatabaseName.Parse(tuple.prefix), (tuple.name));
         }
 
     }
@@ -196,14 +196,8 @@ namespace Signum.Engine.Maps
 
         public ObjectName(SchemaName schema, string name)
         {
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("name");
-
-            if (schema == null)
-                throw new ArgumentNullException("schema");
-
-            this.Name = name;
-            this.Schema = schema;
+            this.Name = name.HasText() ? name : throw new ArgumentNullException("name");
+            this.Schema = schema ?? throw new ArgumentNullException("schema");
         }
 
         public override string ToString()
@@ -235,25 +229,25 @@ namespace Signum.Engine.Maps
 
             var tuple = SplitLast(name);
 
-            return new ObjectName(SchemaName.Parse(tuple.Item1), tuple.Item2);
+            return new ObjectName(SchemaName.Parse(tuple.prefix), tuple.name);
         }
 
         //FROM "[a.b.c].[d.e.f].[a.b.c].[c.d.f]"
         //TO   ("[a.b.c].[d.e.f].[a.b.c]", "c.d.f")
-        internal static Tuple<string, string> SplitLast(string str)
+        internal static (string prefix, string name) SplitLast(string str)
         {
             if (!str.EndsWith("]"))
             {
-                return Tuple.Create(
-                    str.TryBeforeLast('.'),
-                    str.TryAfterLast('.') ?? str
+                return (
+                    prefix: str.TryBeforeLast('.'),
+                    name: str.TryAfterLast('.') ?? str
                     );
             }
 
             var index = str.LastIndexOf('[');
-            return Tuple.Create(
-                index == 0 ? null : str.Substring(0, index - 1),
-                str.Substring(index).UnScapeSql()
+            return (
+                prefix: index == 0 ? null : str.Substring(0, index - 1),
+                name: str.Substring(index).UnScapeSql()
             );
         }
 

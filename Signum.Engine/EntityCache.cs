@@ -19,20 +19,20 @@ namespace Signum.Engine
     {
         internal class RealEntityCache
         {
-            readonly Dictionary<IdentityTuple, Entity> dic = new Dictionary<IdentityTuple,Entity>();
+            readonly Dictionary<(Type type, PrimaryKey id), Entity> dic = new Dictionary<(Type type, PrimaryKey id), Entity>();
 
-            public void Add(Entity ie)
+            public void Add(Entity e)
             {
-                if (ie == null)
+                if (e == null)
                     throw new ArgumentNullException("ie");
 
-                var tuple = new IdentityTuple(ie);
+                var tuple = (e.GetType(), e.Id);
 
                 Entity ident = dic.TryGetC(tuple);
 
                 if (ident == null)
-                    dic.Add(tuple, ie);
-                else if (ident != ie)
+                    dic.Add(tuple, e);
+                else if (ident != e)
                 {
                     //Odd but allowed
                     //throw new InvalidOperationException("There's a different instance of the same entity with Type '{0}' and Id '{1}'".FormatWith(ie.GetType().Name, ie.id));
@@ -41,12 +41,12 @@ namespace Signum.Engine
 
             public bool Contains(Type type, PrimaryKey id)
             {
-                return dic.ContainsKey(new IdentityTuple(type, id));
+                return dic.ContainsKey((type, id));
             }
 
             public Entity Get(Type type, PrimaryKey id)
             {
-                return dic.TryGetC(new IdentityTuple(type, id));
+                return dic.TryGetC((type, id));
             }
 
             public void AddFullGraph(ModifiableEntity ie)
@@ -86,7 +86,7 @@ namespace Signum.Engine
                 get{return retriever != null; }
             }
 
-            internal bool TryGetValue(IdentityTuple tuple, out Entity result)
+            internal bool TryGetValue((Type type, PrimaryKey id) tuple, out Entity result)
             {
                 return dic.TryGetValue(tuple, out result);
             }
@@ -220,51 +220,4 @@ namespace Signum.Engine
         ForceNew,
         ForceNewSealed
     }
-
-    [Serializable]
-    internal struct IdentityTuple : IEquatable<IdentityTuple>
-    {
-        public readonly Type Type;
-        public readonly PrimaryKey Id;
-
-        public IdentityTuple(Lite<Entity> lite)
-        {
-            this.Type = lite.EntityType;
-            this.Id = lite.Id;
-        }
-
-        public IdentityTuple(Entity entiy)
-        {
-            this.Type = entiy.GetType();
-            this.Id = entiy.Id;
-        }
-
-        public IdentityTuple(Type type, PrimaryKey id)
-        {
-            this.Type = type;
-            this.Id = id;
-        }
-
-        public override int GetHashCode()
-        {
-            return this.Type.GetHashCode() ^ this.Id.GetHashCode();
-        }
-
-        public override bool Equals(object obj)
-        {
-            return base.Equals((IdentityTuple)obj);
-        }
-
-        public override string ToString()
-        {
-            return "[{0},{1}]".FormatWith(this.Type.Name, this.Id);
-        }
-
-        public bool Equals(IdentityTuple other)
-        {
-            return this.Type == other.Type && Id == other.Id;
-        }
-    }
-
-
-}
+  }

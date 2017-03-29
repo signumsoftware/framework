@@ -562,14 +562,12 @@ namespace Signum.Engine.Linq
             Expression right = b.Right;
 
             List<Expression> expressions = new List<Expression>();
-            SqlFunctionExpression fLeft = left as SqlFunctionExpression;
-            if (fLeft != null && fLeft.SqlFunction == SqlFunction.COALESCE.ToString())
+            if (left is SqlFunctionExpression fLeft && fLeft.SqlFunction == SqlFunction.COALESCE.ToString())
                 expressions.AddRange(fLeft.Arguments);
             else
                 expressions.Add(left);
 
-            SqlFunctionExpression fRight = right as SqlFunctionExpression;
-            if (fRight != null && fRight.SqlFunction == SqlFunction.COALESCE.ToString())
+            if (right is SqlFunctionExpression fRight && fRight.SqlFunction == SqlFunction.COALESCE.ToString())
                 expressions.AddRange(fRight.Arguments);
             else
                 expressions.Add(right);
@@ -729,9 +727,8 @@ namespace Signum.Engine.Linq
 
             if (Has(test) && Has(ifTrue) && Has(ifFalse))
             {
-                if (ifFalse is CaseExpression)
+                if (ifFalse is CaseExpression oldC)
                 {
-                    var oldC = (CaseExpression)ifFalse;
                     candidates.Remove(ifFalse); // just to save some memory
                     result = new CaseExpression(oldC.Whens.PreAnd(new When(test, ifTrue)), oldC.DefaultValue);
                 }

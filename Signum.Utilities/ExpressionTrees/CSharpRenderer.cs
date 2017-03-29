@@ -110,7 +110,7 @@ namespace Signum.Utilities.ExpressionTrees
             return mi is PropertyInfo ? ((PropertyInfo)mi).PropertyName() :
              mi is FieldInfo ? ((FieldInfo)mi).FieldName() :
              mi is MethodInfo ? ((MethodInfo)mi).MethodName() :
-             new InvalidOperationException("MethodInfo mi should be a PropertyInfo, FieldInfo or MethodInfo").Throw<string>();
+             throw new InvalidOperationException("MethodInfo mi should be a PropertyInfo, FieldInfo or MethodInfo");
         }
 
         public static string TypeName(this Type type)
@@ -211,8 +211,10 @@ namespace Signum.Utilities.ExpressionTrees
             if (type.IsArray)
             {
                 Array array = (Array)value;
-                CodeArrayCreateExpression expression = new CodeArrayCreateExpression();
-                expression.CreateType = TypeReference(type.GetElementType(), importedNamespaces);
+                CodeArrayCreateExpression expression = new CodeArrayCreateExpression()
+                {
+                    CreateType = TypeReference(type.GetElementType(), importedNamespaces)
+                };
                 if (array != null)
                 {
                     foreach (object obj2 in array)

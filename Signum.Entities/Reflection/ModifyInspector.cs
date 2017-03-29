@@ -61,8 +61,7 @@ namespace Signum.Entities.Reflection
                     yield return (Modifiable)field;
                 }
 
-                Entity ident = obj as Entity;
-                if (ident != null)
+                if (obj is Entity ident)
                 {
                     foreach (var mixin in ident.Mixins)
                     {
@@ -101,8 +100,7 @@ namespace Signum.Entities.Reflection
                     yield return (Modifiable)field;
                 }
 
-                Entity ident = obj as Entity;
-                if (ident != null)
+                if (obj is Entity ident)
                 {
                     foreach (var mixin in ident.Mixins)
                     {

@@ -96,8 +96,7 @@ namespace Signum.Entities
             if(obj == null)
                 return false;
 
-            Entity ident = obj as Entity;
-            if (ident != null && ident.GetType() == this.GetType() && this.id != null && this.id == ident.id)
+            if (obj is Entity ident && ident.GetType() == this.GetType() && this.id != null && this.id == ident.id)
                 return true;
 
             return false;

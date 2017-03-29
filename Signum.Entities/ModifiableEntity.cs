@@ -58,8 +58,7 @@ namespace Signum.Entities
             if (value is IMListPrivate && !((IMListPrivate)value).IsNew && !object.ReferenceEquals(value, field))
                 throw new InvalidOperationException("Only MList<T> with IsNew = true can be assigned to an entity");
 
-            INotifyCollectionChanged col = field as INotifyCollectionChanged;
-            if (col != null)
+            if (field is INotifyCollectionChanged col)
             {
                 if (AttributeManager<NotifyCollectionChangedAttribute>.FieldContainsAttribute(GetType(), pi))
                     col.CollectionChanged -= ChildCollectionChanged;
@@ -69,8 +68,7 @@ namespace Signum.Entities
                         item.SetParentEntity(null);
             }
 
-            ModifiableEntity mod = field as ModifiableEntity;
-            if (mod != null)
+            if ((object)field is ModifiableEntity mod)
             {
                 if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
                     mod.SetParentEntity(null);
@@ -166,8 +164,7 @@ namespace Signum.Entities
                 if (field == null)
                     continue;
 
-                var entity = field as ModifiableEntity;
-                if (entity != null)
+                if (field is ModifiableEntity entity)
                     entity.SetParentEntity(this);
                 else
                 {
@@ -265,9 +262,7 @@ namespace Signum.Entities
             if (parent != null)
                 parent.ChildPropertyChanged(this, new PropertyChangedEventArgs(propertyName));
 
-            var handler = PropertyChanged;
-            if (handler != null)
-                handler(this, new PropertyChangedEventArgs(propertyName));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         }
 

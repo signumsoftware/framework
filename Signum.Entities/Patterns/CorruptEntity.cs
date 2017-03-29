@@ -56,16 +56,14 @@ namespace Signum.Entities
 
         public static void OnSaveCorrupted(Entity corruptEntity, Dictionary<Guid, Dictionary<string, string>> integrity)
         {
-            if (SaveCorrupted != null)
-                SaveCorrupted(corruptEntity, integrity);
+            SaveCorrupted?.Invoke(corruptEntity, integrity);
         }
 
         public static event Action<Entity> CorruptionRemoved;
 
         public static void OnCorruptionRemoved(Entity corruptEntity)
         {
-            if (CorruptionRemoved != null)
-                CorruptionRemoved(corruptEntity);
+            CorruptionRemoved?.Invoke(corruptEntity);
         }
     }
 

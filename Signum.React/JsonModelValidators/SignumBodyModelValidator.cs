@@ -14,21 +14,24 @@ namespace Signum.React.Json
     {
         protected override bool? CustomValidation(ModelMetadata metadata, ValidationContext validationContext, object model)
         {
-            return SignumValidate(validationContext, model);
+            validationContext.Visited.Remove(model); //comes already visited when jumping to SignumBodyModelValidator
+
+            var result = SignumValidate(validationContext, model);
+
+            validationContext.Visited.Add(model);
+
+            return result;
         }
 
         private bool? SignumValidate(ValidationContext validationContext, object model)
         {
-            var lite = model as Lite<Entity>;
-            if (lite != null)
+            if (model is Lite<Entity> lite)
                 return ValidateLite(validationContext, lite);
 
-            var mod = model as ModifiableEntity;
-            if (mod != null)
+            if (model is ModifiableEntity mod)
                 return ValidateModifiableEntity(validationContext, mod);
 
-            var mlist = model as IMListPrivate;
-            if (mlist != null)
+            if (model is IMListPrivate mlist)
                 return ValidateMList(validationContext, mlist);
 
             return null;

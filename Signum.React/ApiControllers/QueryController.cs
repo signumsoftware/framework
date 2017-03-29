@@ -347,8 +347,7 @@ namespace Signum.React.ApiControllers
             if (qt is AggregateToken)
                 return QueryTokenType.Aggregate;
 
-            var ce = qt as CollectionElementToken;
-            if (ce != null)
+            if (qt is CollectionElementToken ce)
             {
                 switch (ce.CollectionElementType)
                 {

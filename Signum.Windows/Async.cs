@@ -80,13 +80,11 @@ namespace Signum.Windows
 
                 win.Show();
 
-                if (afterShown != null)
-                    afterShown(win);
+                afterShown?.Invoke(win);
             }
             else
             {
-                Action<Window> onWindowsReady = OnShowInAnotherThread == null ? null :
-                    OnShowInAnotherThread.GetInvocationListTyped()
+                Action<Window> onWindowsReady = OnShowInAnotherThread?.GetInvocationListTyped()
                     .Select(a => a())
                     .Aggregate((a, b) => w => { a(w); b(w); });
 
@@ -113,21 +111,17 @@ namespace Signum.Windows
 
                         win.Closed += (sender, args) =>
                         {
-                            if (closed != null)
-                                closed(sender, args);
+                            closed?.Invoke(sender, args);
 
                             ((Window)sender).Dispatcher.InvokeShutdown();
-                            Window rubish;
-                            threadWindows.TryRemove(Thread.CurrentThread, out rubish);
+                            threadWindows.TryRemove(Thread.CurrentThread, out Window rubish);
                         };
 
                         win.Show();
 
-                        if (onWindowsReady != null)
-                            onWindowsReady(win);
+                        onWindowsReady?.Invoke(win);
 
-                        if (afterShown != null)
-                            afterShown(win);
+                        afterShown?.Invoke(win);
 
                         Dispatcher.Run();
                     }

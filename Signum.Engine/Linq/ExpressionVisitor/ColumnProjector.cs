@@ -48,8 +48,7 @@ namespace Signum.Engine.Linq
 
         static internal ProjectedColumns ProjectColumns(Expression projector, Alias newAlias, bool isGroupKey = false, bool selectTrivialColumns = false)
         {
-            Expression newProj;
-            var candidates = DbExpressionNominator.Nominate(projector, out newProj, isGroupKey: isGroupKey);
+            var candidates = DbExpressionNominator.Nominate(projector, out Expression newProj, isGroupKey: isGroupKey);
 
             ColumnProjector cp = new ColumnProjector
             {
@@ -74,8 +73,7 @@ namespace Signum.Engine.Linq
                         return expression;
 
                     ColumnExpression column = (ColumnExpression)expression;
-                    ColumnExpression mapped;
-                    if (this.map.TryGetValue(column, out mapped))
+                    if (this.map.TryGetValue(column, out ColumnExpression mapped))
                     {
                         return mapped;
                     }
@@ -131,11 +129,9 @@ namespace Signum.Engine.Linq
         {
             if (this.candidates.Contains(expression))
             {
-                if (expression is ColumnExpression)
+                if (expression is ColumnExpression column)
                 {
-                    ColumnExpression column = (ColumnExpression)expression;
-                    ColumnExpression mapped;
-                    if (this.map.TryGetValue(column, out mapped))
+                    if (this.map.TryGetValue(column, out ColumnExpression mapped))
                     {
                         return mapped;
                     }

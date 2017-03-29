@@ -107,8 +107,7 @@ namespace Signum.Engine.CodeGeneration
                     name = item.FullName.RemovePrefix(solutionName + ".Entities");
                 else
                 {
-                    int startName, rubbish;
-                    int length = sd.LongestCommonSubstring(name, item.FullName, out startName, out rubbish);
+                    int length = sd.LongestCommonSubstring(name, item.FullName, out int startName, out int rubbish);
 
                     name = name.Substring(startName, length);
 

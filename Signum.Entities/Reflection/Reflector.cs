@@ -192,8 +192,7 @@ namespace Signum.Entities.Reflection
         {
             Expression e = lambdaToField.Body;
 
-            UnaryExpression ue = e as UnaryExpression;
-            if (ue != null && ue.NodeType == ExpressionType.Convert && ue.Type == typeof(object))
+            if (e is UnaryExpression ue && ue.NodeType == ExpressionType.Convert && ue.Type == typeof(object))
                 e = ue.Operand;
 
             MemberInfo[] result = GetMemberListBase(e);
@@ -363,14 +362,14 @@ namespace Signum.Entities.Reflection
                 if (unitName != null)
                     return a => a == null ? null : a.ToString(format, CultureInfo.CurrentCulture) + " " + unitName;
                 else
-                    return a => a == null ? null : a.ToString(format, CultureInfo.CurrentCulture);
+                    return a => a?.ToString(format, CultureInfo.CurrentCulture);
             }
             else
             {
                 if (unitName != null)
                     return a => a == null ? null : a.ToString() + " " + unitName;
                 else
-                    return a => a == null ? null : a.ToString();
+                    return a => a?.ToString();
             }
         }
 

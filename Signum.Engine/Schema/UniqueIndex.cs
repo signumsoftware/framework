@@ -157,8 +157,7 @@ namespace Signum.Engine.Maps
         {
             var f = GetField(b.Expression);
 
-            FieldReference fr = f as FieldReference;
-            if (fr != null)
+            if (f is FieldReference fr)
             {
                 if (b.TypeOperand.IsAssignableFrom(fr.FieldType))
                 {
@@ -170,15 +169,14 @@ namespace Signum.Engine.Maps
                 return b;
             }
 
-            FieldImplementedBy fib = f as FieldImplementedBy;
-            if (fib != null)
+            if (f is FieldImplementedBy fib)
             {
                 var imp = fib.ImplementationColumns.Where(kvp => b.TypeOperand.IsAssignableFrom(kvp.Key));
 
                 if (imp.Any())
                     sb.Append(imp.ToString(kvp => kvp.Value.Name.SqlEscape() + " IS NOT NULL", " OR "));
                 else
-                    throw new InvalidOperationException("No implementation ({0}) will never be {1}".FormatWith(fib.ImplementationColumns.Keys.ToString(t=>t.TypeName(), ", "), b.TypeOperand.TypeName()));
+                    throw new InvalidOperationException("No implementation ({0}) will never be {1}".FormatWith(fib.ImplementationColumns.Keys.ToString(t => t.TypeName(), ", "), b.TypeOperand.TypeName()));
 
                 return b;
             }
@@ -226,10 +224,8 @@ namespace Signum.Engine.Maps
         {
             string isNull = equals ? "{0} IS NULL" : "{0} IS NOT NULL";
 
-            if (field is IColumn)
+            if (field is IColumn col)
             {
-                var col = ((IColumn)field);
-
                 string result = isNull.FormatWith(col.Name.SqlEscape());
 
                 if (!SqlBuilder.IsString(col.SqlDbType))
@@ -238,24 +234,18 @@ namespace Signum.Engine.Maps
                 return result + (equals ? " OR " : " AND ") + (col.Name.SqlEscape() + (equals ? " == " : " <> ") + "''");
 
             }
-            else if (field is FieldImplementedBy)
+            else if (field is FieldImplementedBy ib)
             {
-                var ib = (FieldImplementedBy)field;
-
                 return ib.ImplementationColumns.Values.Select(ic => isNull.FormatWith(ic.Name.SqlEscape())).ToString(equals ? " AND " : " OR ");
             }
-            else if (field is FieldImplementedByAll)
+            else if (field is FieldImplementedByAll iba)
             {
-                var iba = (FieldImplementedByAll)field;
-
                 return isNull.FormatWith(iba.Column.Name.SqlEscape()) +
                     (equals ? " AND " : " OR ") +
                     isNull.FormatWith(iba.ColumnType.Name.SqlEscape());
             }
-            else if (field is FieldEmbedded)
+            else if (field is FieldEmbedded fe)
             {
-                var fe = (FieldEmbedded)field;
-
                 if (fe.HasValue == null)
                     throw new NotSupportedException("{0} is not nullable".FormatWith(field));
 

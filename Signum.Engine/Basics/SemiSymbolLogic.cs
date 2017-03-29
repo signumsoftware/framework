@@ -50,10 +50,10 @@ namespace Signum.Engine.Extensions.Basics
                           getSemiSymbols(),
                           c => c.Key,
                           s => s.Key,
-                          (c, s) => { s.SetIdAndName(Tuple.Create(c.Id, c.Name)); return s; },
+                          (c, s) => { s.SetIdAndName((c.Id, c.Name)); return s; },
                           "caching " + typeof(T).Name);
 
-                        SemiSymbol.SetSemiSymbolIdsAndNames<T>(current.ToDictionary(a => a.Key, a => Tuple.Create(a.Id, a.Name)));
+                        SemiSymbol.SetSemiSymbolIdsAndNames<T>(current.ToDictionary(a => a.Key, a => (a.Id, a.Name)));
                         return result.ToDictionary(a => a.Key);
                     }
                 }, 

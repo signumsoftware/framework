@@ -125,8 +125,7 @@ namespace Signum.Windows
 
                 TaskSearchWindow += TaskSetIconSearchWindow;
 
-                if (Initializing != null)
-                    Initializing();
+                Initializing?.Invoke();
 
                 initialized = true;
             }
@@ -259,11 +258,9 @@ namespace Signum.Windows
                 EntityTypeTitle = options.EntityTypeTitle,
             };
 
-            if (options.InitializeSearchControl != null)
-                options.InitializeSearchControl(sw.SearchControl);
+            options.InitializeSearchControl?.Invoke(sw.SearchControl);
 
-            if (TaskSearchWindow != null)
-                TaskSearchWindow(sw, options.QueryName);
+            TaskSearchWindow?.Invoke(sw, options.QueryName);
 
             return sw;
         }

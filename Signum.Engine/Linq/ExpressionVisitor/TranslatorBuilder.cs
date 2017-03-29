@@ -439,9 +439,8 @@ namespace Signum.Engine.Linq
                         Expression.Convert(Lite.NewExpression(type, id, toStringOrNull), lite.Type),
                         nothing);
                 }
-                else if (typeId is TypeImplementedByExpression)
+                else if (typeId is TypeImplementedByExpression tib)
                 {
-                    TypeImplementedByExpression tib = (TypeImplementedByExpression)typeId;
                     liteConstructor = tib.TypeImplementations.Aggregate(nothing,
                         (acum, ti) =>
                             {
@@ -450,9 +449,8 @@ namespace Signum.Engine.Linq
                                     Expression.Convert(Lite.NewExpression(ti.Key, visitId, toStringOrNull), lite.Type), acum);
                             });
                 }
-                else if (typeId is TypeImplementedByAllExpression)
+                else if (typeId is TypeImplementedByAllExpression tiba)
                 {
-                    TypeImplementedByAllExpression tiba = (TypeImplementedByAllExpression)typeId;
                     var tid = Visit(NullifyColumn(tiba.TypeColumn));
                     liteConstructor = Expression.Convert(Expression.Call(miLiteCreateParse, Expression.Constant(Schema.Current), tid, id.UnNullify(), toStringOrNull), lite.Type);
                 }

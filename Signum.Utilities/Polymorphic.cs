@@ -153,8 +153,7 @@ namespace Signum.Utilities
 
         T TryGetValueInternal(Type type)
         {
-            T result;
-            if (cached.TryGetValue(type, out result))
+            if (cached.TryGetValue(type, out T result))
                 return result;
 
             var baseValue = type.BaseType == null || !IsAllowed(type.BaseType) ? null : TryGetValue(type.BaseType);

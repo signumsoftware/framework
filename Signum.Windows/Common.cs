@@ -47,9 +47,8 @@ namespace Signum.Windows
 
         public static void AutoHidePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            var fe = d as FrameworkElement;
 
-            if (fe != null && e.NewValue is AutoHide)
+            if (d is FrameworkElement fe && e.NewValue is AutoHide)
                 fe.Loaded += new RoutedEventHandler(Common_Loaded);
         }
 
@@ -537,8 +536,7 @@ namespace Signum.Windows
 
         static void TaskSetUnitText(FrameworkElement fe, string route, PropertyRoute context)
         {
-            ValueLine vl = fe as ValueLine;
-            if (vl != null && vl.NotSet(ValueLine.UnitTextProperty) && context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
+            if (fe is ValueLine vl && vl.NotSet(ValueLine.UnitTextProperty) && context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
                 UnitAttribute ua = context.PropertyInfo.GetCustomAttribute<UnitAttribute>();
                 if (ua != null)
@@ -548,8 +546,7 @@ namespace Signum.Windows
 
         static void TaskSetFormatText(FrameworkElement fe, string route, PropertyRoute context)
         {
-            ValueLine vl = fe as ValueLine;
-            if (vl != null && vl.NotSet(ValueLine.FormatProperty) && context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
+            if (fe is ValueLine vl && vl.NotSet(ValueLine.FormatProperty) && context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
                 string format = Reflector.FormatString(context);
                 if (format != null)
@@ -569,8 +566,7 @@ namespace Signum.Windows
 
         public static void TaskSetImplementations(FrameworkElement fe, string route, PropertyRoute context)
         {
-            EntityBase eb = fe as EntityBase;
-            if (eb != null && eb.NotSet(EntityBase.ImplementationsProperty))
+            if (fe is EntityBase eb && eb.NotSet(EntityBase.ImplementationsProperty))
             {
                 PropertyRoute entityContext = eb.GetEntityPropertyRoute();
 
@@ -583,10 +579,9 @@ namespace Signum.Windows
 
         public static void TaskSetMove(FrameworkElement fe, string route, PropertyRoute context)
         {
-            EntityListBase eb = fe as EntityListBase;
-            if (eb != null && eb.NotSet(EntityListBase.MoveProperty))
+            if (fe is EntityListBase eb && eb.NotSet(EntityListBase.MoveProperty))
             {
-                if (!eb.Move  && context.FieldInfo.HasAttribute<PreserveOrderAttribute>())
+                if (!eb.Move && context.FieldInfo.HasAttribute<PreserveOrderAttribute>())
                 {
                     eb.Move = true;
                 }
@@ -609,8 +604,7 @@ namespace Signum.Windows
         
         static void TaskSetNotNullItemsSource(FrameworkElement fe, string route, PropertyRoute context)
         {
-            ValueLine vl = fe as ValueLine;
-            if (vl != null && vl.NotSet(ValueLine.ItemSourceProperty) && context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
+            if (fe is ValueLine vl && vl.NotSet(ValueLine.ItemSourceProperty) && context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
                 if (context.Type.IsNullable() && context.Type.UnNullify().IsEnum &&
                    Validator.TryGetPropertyValidator(context).Let(pv => pv != null && pv.Validators.OfType<NotNullValidatorAttribute>().Any()))
@@ -622,8 +616,7 @@ namespace Signum.Windows
 
         static void TaskSetNullValueEntityCombo(FrameworkElement fe, string route, PropertyRoute context)
         {
-            EntityCombo ec = fe as EntityCombo;
-            if (ec != null && ec.NotSet(EntityCombo.NullValueProperty) && context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
+            if (fe is EntityCombo ec && ec.NotSet(EntityCombo.NullValueProperty) && context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
                 if (Validator.TryGetPropertyValidator(context).Let(pv => pv != null && pv.Validators.OfType<NotNullValidatorAttribute>().Any()))
                 {
@@ -634,8 +627,7 @@ namespace Signum.Windows
 
         static void TaskSetMaxLenth(FrameworkElement fe, string route, PropertyRoute context)
         {
-            ValueLine vl = fe as ValueLine;
-            if (vl != null && context.PropertyRouteType == PropertyRouteType.FieldOrProperty && context.Type == typeof(string))
+            if (fe is ValueLine vl && context.PropertyRouteType == PropertyRouteType.FieldOrProperty && context.Type == typeof(string))
             {
                 var slv = Validator.TryGetPropertyValidator(context)?.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault();
                 if (slv != null && slv.Max != -1)
@@ -706,8 +698,7 @@ namespace Signum.Windows
             if (newValue is EmbeddedEntity)
                 return newValue.GetType().Name;
 
-            var ident = newValue as Entity;
-            if (ident != null)
+            if (newValue is Entity ident)
             {
                 if (ident.IsNew)
                     return "{0};New".FormatWith(Server.ServerTypes[ident.GetType()].CleanName);
@@ -715,8 +706,7 @@ namespace Signum.Windows
                 return ident.ToLite().Key();
             }
 
-            var lite = newValue as Lite<IEntity>;
-            if (lite != null)
+            if (newValue is Lite<IEntity> lite)
             {
                 if (lite.UntypedEntityOrNull != null && lite.UntypedEntityOrNull.IsNew)
                     return "{0};New".FormatWith(Server.ServerTypes[lite.EntityType].CleanName);

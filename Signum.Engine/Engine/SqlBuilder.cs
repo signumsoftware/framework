@@ -239,8 +239,7 @@ namespace Signum.Engine
                   columns));
             }
 
-            var uIndex = index as UniqueIndex;
-            if (uIndex != null && uIndex.ViewName != null)
+            if (index is UniqueIndex uIndex && uIndex.ViewName != null)
             {
                 ObjectName viewName = new ObjectName(uIndex.Table.Name.Schema, uIndex.ViewName);
 

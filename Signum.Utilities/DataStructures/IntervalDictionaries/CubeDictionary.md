@@ -36,7 +36,7 @@ public class CubeDictionary<K1, K2, K3, V>
     IntervalDictionary<K3, int> zDimension;
     V[,,] values;
 
-    public CubeDictionary(IEnumerable<Tuple<Cube<K1, K2, K3>, V>> dic) 
+    public CubeDictionary(IEnumerable<(Cube<K1, K2, K3> cube, V value)> dic) 
 
     //Retrieves the value for a key (not set available)
     //If no interval throws KeyNotFoundException       

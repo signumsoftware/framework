@@ -96,8 +96,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression Accept(ExpressionVisitor visitor)
         {
-            DbExpressionVisitor dbVisitor = visitor as DbExpressionVisitor;
-            if (dbVisitor != null)
+            if (visitor is DbExpressionVisitor dbVisitor)
                 return Accept(dbVisitor);
 
             return base.Accept(visitor);
@@ -455,9 +454,8 @@ namespace Signum.Engine.Linq
 
         internal bool IsOneRow()
         {
-            ConstantExpression ce = Top as ConstantExpression;
 
-            if (ce != null && ((int)ce.Value) == 1)
+            if (Top is ConstantExpression ce && ((int)ce.Value) == 1)
                 return true;
 
             return false;

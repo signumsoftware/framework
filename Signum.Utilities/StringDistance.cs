@@ -207,9 +207,7 @@ namespace Signum.Utilities
             if (string.IsNullOrEmpty(str1) || string.IsNullOrEmpty(str2))
                 return 0;
 
-            int pos1;
-            int pos2; 
-            return LongestCommonSubstring<char>(str1.ToCharArray(), str2.ToCharArray(), out pos1, out pos2);
+            return LongestCommonSubstring<char>(str1.ToCharArray(), str2.ToCharArray(), out int pos1, out int pos2);
         }
 
         public int LongestCommonSubstring(string str1, string str2, out int startPos1, out int startPos2)
@@ -445,9 +443,7 @@ namespace Signum.Utilities
 
         void DiffPrivate<T>(Slice<T> sliceOld, Slice<T> sliceNew, IEqualityComparer<T> comparer, List<DiffPair<T>> result)
         {
-            int posOld;
-            int posNew;
-            int length = LongestCommonSubstring<T>(sliceOld, sliceNew, out posOld, out posNew, comparer);
+            int length = LongestCommonSubstring<T>(sliceOld, sliceNew, out int posOld, out int posNew, comparer);
 
             if (length == 0)
             {

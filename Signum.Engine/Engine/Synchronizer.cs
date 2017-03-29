@@ -27,18 +27,15 @@ namespace Signum.Engine
 
                 if (oldVal == null)
                 {
-                    if (createNew != null)
-                        createNew(key, newVal);
+                    createNew?.Invoke(key, newVal);
                 }
                 else if (newVal == null)
                 {
-                    if (removeOld != null)
-                        removeOld(key, oldVal);
+                    removeOld?.Invoke(key, oldVal);
                 }
                 else
                 {
-                    if (merge != null)
-                        merge(key, newVal, oldVal);
+                    merge?.Invoke(key, newVal, oldVal);
                 }
             }
         }
@@ -62,18 +59,15 @@ namespace Signum.Engine
 
                 if (oldVal == null)
                 {
-                    if (createNew != null)
-                        createNew(key, newVal);
+                    createNew?.Invoke(key, newVal);
                 }
                 else if (newVal == null)
                 {
-                    if (removeOld != null)
-                        removeOld(key, oldVal);
+                    removeOld?.Invoke(key, oldVal);
                 }
                 else
                 {
-                    if (merge != null)
-                        merge(key, newVal, oldVal);
+                    merge?.Invoke(key, newVal, oldVal);
                 }
             });
         }
@@ -105,18 +99,15 @@ namespace Signum.Engine
 
                 if (oldVal == null)
                 {
-                    if (createNew != null)
-                        createNew(key, newVal);
+                    createNew?.Invoke(key, newVal);
                 }
                 else if (newVal == null)
                 {
-                    if (removeOld != null)
-                        removeOld(key, oldVal);
+                    removeOld?.Invoke(key, oldVal);
                 }
                 else
                 {
-                    if (merge != null)
-                        merge(key, newVal, oldVal);
+                    merge?.Invoke(key, newVal, oldVal);
                 }
             }
         }
@@ -396,8 +387,7 @@ namespace Signum.Engine
                 if (answer == "")
                     return new Selection(oldValue, newValues[0]);
 
-                int option = 0;
-                if (int.TryParse(answer, out option))
+                if (int.TryParse(answer, out int option))
                     return new Selection(oldValue, newValues[option]);
 
                 Console.WriteLine("Error");

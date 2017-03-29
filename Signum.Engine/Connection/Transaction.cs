@@ -183,8 +183,7 @@ namespace Signum.Engine
                 {
                     Transaction.Rollback();
                     IsRolledback = ex;
-                    if (Rolledback != null)
-                        Rolledback(this.userData);
+                    Rolledback?.Invoke(this.userData);
                 }
             }
 
@@ -259,8 +258,7 @@ namespace Signum.Engine
                 {
                     Connector.Current.RollbackTransactionPoint(Transaction, savePointName);
                     IsRolledback = ex;
-                    if (Rolledback != null)
-                        Rolledback(this.UserData);
+                    Rolledback?.Invoke(this.UserData);
                 }
             }
 
@@ -356,8 +354,7 @@ namespace Signum.Engine
                 {
                     //Transaction.Rollback();
                     IsRolledback = ex;
-                    if (Rolledback != null)
-                        Rolledback(this.UserData);
+                    Rolledback?.Invoke(this.UserData);
                 }
             }
 

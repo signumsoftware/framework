@@ -88,8 +88,7 @@ namespace Signum.Utilities
         private static int? GetOldComponentServicePack(RegistryKey k)
         {
             string[] e = ((string)k.GetValue("Version")).Split(',');
-            int sp;
-            if (int.TryParse(e.LastOrDefault(), out sp))
+            if (int.TryParse(e.LastOrDefault(), out int sp))
                 return Extensions.DefaultToNull(sp);
             else
                 return null;

@@ -183,12 +183,10 @@ namespace Signum.Windows
         {
             fe.DataContextChanged += (object sender, DependencyPropertyChangedEventArgs e) =>
             {
-                INotifyPropertyChanged oldDC = e.OldValue as INotifyPropertyChanged;
-                if (oldDC != null)
+                if (e.OldValue is INotifyPropertyChanged oldDC)
                     oldDC.PropertyChanged -= propertyChanged;
 
-                INotifyPropertyChanged newDC = e.NewValue as INotifyPropertyChanged;
-                if (newDC != null)
+                if (e.NewValue is INotifyPropertyChanged newDC)
                     newDC.PropertyChanged += propertyChanged;
             };
         }
@@ -197,12 +195,10 @@ namespace Signum.Windows
         {
             eb.EntityChanged += (object sender, bool userInteraction, object oldValue, object newValue) =>
             {
-                INotifyPropertyChanged oldDC = oldValue as INotifyPropertyChanged;
-                if (oldDC != null)
+                if (oldValue is INotifyPropertyChanged oldDC)
                     oldDC.PropertyChanged -= propertyChanged;
 
-                INotifyPropertyChanged newDC = newValue as INotifyPropertyChanged;
-                if (newDC != null)
+                if (newValue is INotifyPropertyChanged newDC)
                     newDC.PropertyChanged += propertyChanged;
             };
         }

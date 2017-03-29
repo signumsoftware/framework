@@ -30,13 +30,10 @@ namespace Signum.Engine.DynamicQuery
 
         public DynamicQueryBucket(object queryName, Func<IDynamicQueryCore> lazyQueryCore, Implementations entityImplementations)
         {
-            if (queryName == null)
-                throw new ArgumentNullException("queryName");
-
             if (lazyQueryCore == null)
                 throw new ArgumentNullException("lazyQueryCore");
 
-            this.QueryName = queryName;
+            this.QueryName = queryName ?? throw new ArgumentNullException("queryName");
             this.EntityImplementations = entityImplementations;
 
             this.Core = new Lazy<IDynamicQueryCore>(() =>
@@ -272,8 +269,7 @@ namespace Signum.Engine.DynamicQuery
 
         public static DQueryable<T> Select<T>(this DQueryable<T> query, HashSet<QueryToken> columns)
         {
-            BuildExpressionContext newContext;
-            var selector = TupleConstructor(query.Context, columns, out newContext);
+            var selector = TupleConstructor(query.Context, columns, out BuildExpressionContext newContext);
 
             return new DQueryable<T>(query.Query.Select(selector), newContext);
         }
@@ -285,8 +281,7 @@ namespace Signum.Engine.DynamicQuery
 
         public static DEnumerable<T> Select<T>(this DEnumerable<T> collection, HashSet<QueryToken> columns)
         {
-            BuildExpressionContext newContext;
-            var selector = TupleConstructor(collection.Context, columns, out newContext);
+            var selector = TupleConstructor(collection.Context, columns, out BuildExpressionContext newContext);
 
             return new DEnumerable<T>(collection.Collection.Select(selector.Compile()), newContext);
         }
@@ -464,9 +459,10 @@ namespace Signum.Engine.DynamicQuery
             if (str == null)
                 throw new ApplicationException(str);
 
-            var pairs = orders.Select(o => Tuple.Create(
-                     Expression.Lambda(OnAddaptForOrderBy(o.Token.BuildExpression(query.Context)), query.Context.Parameter),
-                    o.OrderType)).ToList();
+            var pairs = orders.Select(o => (
+            lambda: Expression.Lambda(OnAddaptForOrderBy(o.Token.BuildExpression(query.Context)), query.Context.Parameter),
+            orderType: o.OrderType)
+            ).ToList();
 
             return new DQueryable<T>(query.Query.OrderBy(pairs), query.Context);
         }
@@ -483,16 +479,16 @@ namespace Signum.Engine.DynamicQuery
 
         public static Func<Expression, Expression> AddaptForOrderBy = e => e; 
 
-        public static IQueryable<object> OrderBy(this IQueryable<object> query, List<Tuple<LambdaExpression, OrderType>> orders)
+        public static IQueryable<object> OrderBy(this IQueryable<object> query, List<(LambdaExpression lambda, OrderType orderType)> orders)
         {
             if (orders == null || orders.Count == 0)
                 return query;
 
-            IOrderedQueryable<object> result = query.OrderBy(orders[0].Item1, orders[0].Item2);
+            IOrderedQueryable<object> result = query.OrderBy(orders[0].lambda, orders[0].orderType);
 
             foreach (var order in orders.Skip(1))
             {
-                result = result.ThenBy(order.Item1, order.Item2);
+                result = result.ThenBy(order.lambda, order.orderType);
             }
 
             return result;
@@ -519,9 +515,10 @@ namespace Signum.Engine.DynamicQuery
 
         public static DEnumerable<T> OrderBy<T>(this DEnumerable<T> collection, List<Order> orders)
         {
-            var pairs = orders.Select(o => Tuple.Create(
-                    Expression.Lambda(OnAddaptForOrderBy(o.Token.BuildExpression(collection.Context)), collection.Context.Parameter),
-                   o.OrderType)).ToList();
+            var pairs = orders.Select(o => (
+            lambda: Expression.Lambda(OnAddaptForOrderBy(o.Token.BuildExpression(collection.Context)), collection.Context.Parameter),
+            orderType: o.OrderType
+            )).ToList();
 
 
             return new DEnumerable<T>(collection.Collection.OrderBy(pairs), collection.Context);
@@ -529,24 +526,24 @@ namespace Signum.Engine.DynamicQuery
 
         public static DEnumerableCount<T> OrderBy<T>(this DEnumerableCount<T> collection, List<Order> orders)
         {
-            var pairs = orders.Select(o => Tuple.Create(
-                    Expression.Lambda(OnAddaptForOrderBy(o.Token.BuildExpression(collection.Context)), collection.Context.Parameter),
-                   o.OrderType)).ToList();
-
+            var pairs = orders.Select(o => (
+                lambda: Expression.Lambda(OnAddaptForOrderBy(o.Token.BuildExpression(collection.Context)), collection.Context.Parameter),
+                orderType: o.OrderType))
+            .ToList();
 
             return new DEnumerableCount<T>(collection.Collection.OrderBy(pairs), collection.Context, collection.TotalElements);
         }
 
-        public static IEnumerable<object> OrderBy(this IEnumerable<object> collection, List<Tuple<LambdaExpression, OrderType>> orders)
+        public static IEnumerable<object> OrderBy(this IEnumerable<object> collection, List<(LambdaExpression lambda, OrderType orderType)> orders)
         {
             if (orders == null || orders.Count == 0)
                 return collection;
 
-            IOrderedEnumerable<object> result = collection.OrderBy(orders[0].Item1, orders[0].Item2);
+            IOrderedEnumerable<object> result = collection.OrderBy(orders[0].lambda, orders[0].orderType);
 
             foreach (var order in orders.Skip(1))
             {
-                result = result.ThenBy(order.Item1, order.Item2);
+                result = result.ThenBy(order.lambda, order.orderType);
             }
 
             return result;
@@ -616,17 +613,14 @@ namespace Signum.Engine.DynamicQuery
 
                 return new DEnumerableCount<T>(allList, query.Context, allList.Count);
             }
-            else if(pagination is Pagination.Firsts)
+            else if (pagination is Pagination.Firsts top)
             {
-                var top = (Pagination.Firsts)pagination;
                 var topList = query.Query.Take(top.TopElements).ToList();
 
-                return new DEnumerableCount<T>(topList, query.Context, null); 
+                return new DEnumerableCount<T>(topList, query.Context, null);
             }
-            else if (pagination is Pagination.Paginate)
+            else if (pagination is Pagination.Paginate pag)
             {
-                var pag = (Pagination.Paginate)pagination;
-               
                 int? totalElements = null;
 
                 var q = query.Query.OrderAlsoByKeys();
@@ -658,17 +652,14 @@ namespace Signum.Engine.DynamicQuery
 
                 return new DEnumerableCount<T>(allList, collection.Context, allList.Count);
             }
-            else if (pagination is Pagination.Firsts)
+            else if (pagination is Pagination.Firsts top)
             {
-                var top = (Pagination.Firsts)pagination;
                 var topList = collection.Collection.Take(top.TopElements).ToList();
 
                 return new DEnumerableCount<T>(topList, collection.Context, null);
             }
-            else if (pagination is Pagination.Paginate)
+            else if (pagination is Pagination.Paginate pag)
             {
-                var pag = (Pagination.Paginate)pagination;
-
                 int? totalElements = null;
 
                 var q = collection.Collection;
@@ -697,17 +688,14 @@ namespace Signum.Engine.DynamicQuery
             {
                 return new DEnumerableCount<T>(collection.Collection, collection.Context, collection.TotalElements);
             }
-            else if (pagination is Pagination.Firsts)
+            else if (pagination is Pagination.Firsts top)
             {
-                var top = (Pagination.Firsts)pagination;
                 var topList = collection.Collection.Take(top.TopElements).ToList();
 
                 return new DEnumerableCount<T>(topList, collection.Context, null);
             }
-            else if (pagination is Pagination.Paginate)
+            else if (pagination is Pagination.Paginate pag)
             {
-                var pag = (Pagination.Paginate)pagination;
-
                 var c = collection.Collection;
                 if (pag.CurrentPage != 1)
                     c = c.Skip((pag.CurrentPage - 1) * pag.ElementsPerPage);
@@ -731,8 +719,7 @@ namespace Signum.Engine.DynamicQuery
         {
             var keySelector = KeySelector(collection.Context, keyTokens);
 
-            BuildExpressionContext newContext;
-            LambdaExpression resultSelector = ResultSelectSelectorAndContext(collection.Context, keyTokens, aggregateTokens, keySelector.Body.Type, out newContext);
+            LambdaExpression resultSelector = ResultSelectSelectorAndContext(collection.Context, keyTokens, aggregateTokens, keySelector.Body.Type, out BuildExpressionContext newContext);
 
             var resultCollection = giGroupByE.GetInvoker(typeof(object), keySelector.Body.Type, typeof(object))(collection.Collection, keySelector.Compile(), resultSelector.Compile());
 
@@ -744,8 +731,7 @@ namespace Signum.Engine.DynamicQuery
         {
             var keySelector = KeySelector(query.Context, keyTokens);
 
-            BuildExpressionContext newContext;
-            LambdaExpression resultSelector = ResultSelectSelectorAndContext(query.Context, keyTokens, aggregateTokens, keySelector.Body.Type, out newContext);
+            LambdaExpression resultSelector = ResultSelectSelectorAndContext(query.Context, keyTokens, aggregateTokens, keySelector.Body.Type, out BuildExpressionContext newContext);
 
             var resultQuery = (IQueryable<object>)query.Query.Provider.CreateQuery<object>(Expression.Call(null, miGroupByQ.MakeGenericMethod(typeof(object), keySelector.Body.Type, typeof(object)),
                 new Expression[] { query.Query.Expression, Expression.Quote(keySelector), Expression.Quote(resultSelector) }));
@@ -832,17 +818,19 @@ namespace Signum.Engine.DynamicQuery
         {
             object[] array = collection.Collection as object[] ?? collection.Collection.ToArray();
 
-            var columnAccesors = req.Columns.Select(c => Tuple.Create(c,
-                Expression.Lambda(c.Token.BuildExpression(collection.Context), collection.Context.Parameter))).ToList();
+            var columnAccesors = req.Columns.Select(c =>  (
+                column: c,
+                lambda: Expression.Lambda(c.Token.BuildExpression(collection.Context), collection.Context.Parameter)
+            )).ToList();
 
             return ToResultTable(array, columnAccesors, collection.TotalElements, req.Pagination);
         }
 
-        public static ResultTable ToResultTable(this object[] result, List<Tuple<Column, LambdaExpression>> columnAccesors, int? totalElements,  Pagination pagination)
+        public static ResultTable ToResultTable(this object[] result, List<(Column column, LambdaExpression lambda)> columnAccesors, int? totalElements,  Pagination pagination)
         {
-            var columnValues = columnAccesors.Select(c => new ResultColumn(
-                c.Item1,
-                miGetValues.GetInvoker(c.Item1.Type)(result, c.Item2.Compile()))
+            var columnValues = columnAccesors.Select(c => new ResultColumn( 
+                c.column,
+                miGetValues.GetInvoker(c.column.Type)(result, c.lambda.Compile()))
              ).ToArray();
 
             return new ResultTable(columnValues, totalElements, pagination);

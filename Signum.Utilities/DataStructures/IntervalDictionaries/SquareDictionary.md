@@ -28,7 +28,7 @@ public class SquareDictionary<K1, K2, V>
     IntervalDictionary<K2, int> yDimension;
     V[,] values;
 
-    public SquareDictionary(IEnumerable<Tuple<Square<K1, K2>, V>> dictionary)
+    public SquareDictionary(IEnumerable<(Square<K1, K2> square, V value)> dictionary)
 
     //Retrieves the value for a key (not set available)
     //If no interval throws KeyNotFoundException

@@ -984,14 +984,14 @@ namespace Signum.Utilities
         #endregion
 
         #region Zip
-        public static IEnumerable<Tuple<A, B>> Zip<A, B>(this IEnumerable<A> colA, IEnumerable<B> colB)
+        public static IEnumerable<(A first, B second)> Zip<A, B>(this IEnumerable<A> colA, IEnumerable<B> colB)
         {
             using (var enumA = colA.GetEnumerator())
             using (var enumB = colB.GetEnumerator())
             {
                 while (enumA.MoveNext() && enumB.MoveNext())
                 {
-                    yield return new Tuple<A, B>(enumA.Current, enumB.Current);
+                    yield return (first: enumA.Current, second: enumB.Current);
                 }
             }
         }
@@ -1012,7 +1012,7 @@ namespace Signum.Utilities
             }
         }
 
-        public static IEnumerable<Tuple<A, B>> ZipOrDefault<A, B>(this IEnumerable<A> colA, IEnumerable<B> colB)
+        public static IEnumerable<(A first, B second)> ZipOrDefault<A, B>(this IEnumerable<A> colA, IEnumerable<B> colB)
         {
             bool okA = true, okB = true;
 
@@ -1021,9 +1021,10 @@ namespace Signum.Utilities
             {
                 while ((okA &= enumA.MoveNext()) || (okB &= enumB.MoveNext()))
                 {
-                    yield return new Tuple<A, B>(
-                        okA ? enumA.Current : default(A),
-                        okB ? enumB.Current : default(B));
+                    var first = okA ? enumA.Current : default(A);
+                    var second = okB ? enumB.Current : default(B);
+
+                    yield return (first, second);
                 }
             }
         }
@@ -1040,14 +1041,14 @@ namespace Signum.Utilities
             }
         }
 
-        public static IEnumerable<Tuple<A, B>> ZipStrict<A, B>(this IEnumerable<A> colA, IEnumerable<B> colB)
+        public static IEnumerable<(A first, B second)> ZipStrict<A, B>(this IEnumerable<A> colA, IEnumerable<B> colB)
         {
             using (var enumA = colA.GetEnumerator())
             using (var enumB = colB.GetEnumerator())
             {
                 while (AssertoTwo(enumA.MoveNext(), enumB.MoveNext()))
                 {
-                    yield return new Tuple<A, B>(enumA.Current, enumB.Current);
+                    yield return (first: enumA.Current, second: enumB.Current);
                 }
             }
         }

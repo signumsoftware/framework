@@ -30,8 +30,7 @@ namespace Signum.Engine
             Dictionary<string, DiffTable> database = DefaultGetDatabaseDescription(s.DatabaseNames());
             HashSet<SchemaName> databaseSchemas = DefaultGetSchemas(s.DatabaseNames());
 
-            if (SimplifyDiffTables != null) 
-                SimplifyDiffTables(database);
+            SimplifyDiffTables?.Invoke(database);
 
             replacements.AskForReplacements(database.Keys.ToHashSet(), model.Keys.ToHashSet(), Replacements.KeyTables);
 

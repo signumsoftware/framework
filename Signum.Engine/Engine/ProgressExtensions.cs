@@ -23,9 +23,8 @@ namespace Signum.Engine
         {
             LogWriter writer = GetLogWriter(null);
 
-            IProgressInfo pi;
 
-            var enumerator = collection.ToProgressEnumerator(out pi);
+            var enumerator = collection.ToProgressEnumerator(out IProgressInfo pi);
 
             if (!Console.IsOutputRedirected)
                 SafeConsole.WriteSameLine(pi.ToString());
@@ -70,9 +69,8 @@ namespace Signum.Engine
 
                 LogWriter writer = GetLogWriter(log);
 
-                IProgressInfo pi;
 
-                var enumerator = collection.ToProgressEnumerator(out pi);
+                var enumerator = collection.ToProgressEnumerator(out IProgressInfo pi);
 
                 if (!Console.IsOutputRedirected)
                     SafeConsole.WriteSameLine(pi.ToString());
@@ -117,9 +115,8 @@ namespace Signum.Engine
 
                 LogWriter writer = GetLogWriter(log);
 
-                IProgressInfo pi;
 
-                var enumerator = collection.ToProgressEnumerator(out pi);
+                var enumerator = collection.ToProgressEnumerator(out IProgressInfo pi);
 
                 if (!Console.IsOutputRedirected)
                     SafeConsole.WriteSameLine(pi.ToString());
@@ -161,9 +158,8 @@ namespace Signum.Engine
                 {
                     LogWriter writer = GetLogWriter(log);
 
-                    IProgressInfo pi;
 
-                    var col = collection.ToProgressEnumerator(out pi);
+                    var col = collection.ToProgressEnumerator(out IProgressInfo pi);
 
                     if (!Console.IsOutputRedirected)
                         lock (SafeConsole.SyncKey)
@@ -308,8 +304,10 @@ namespace Signum.Engine
                 fileName = Path.Combine(DefaultLogFolder, fileName);
             }
 
-            var result = new StreamWriter(fileName, append: true);
-            result.AutoFlush = true;
+            var result = new StreamWriter(fileName, append: true)
+            {
+                AutoFlush = true
+            };
             return result;
         }
 

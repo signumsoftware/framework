@@ -155,8 +155,7 @@ namespace Signum.Utilities
             }
 
             Interlocked.Increment(ref Invalidations);
-            if (OnReset != null)
-                OnReset(this, null);
+            OnReset?.Invoke(this, null);
         }
 
         ResetLazyStats IResetLazy.Stats()

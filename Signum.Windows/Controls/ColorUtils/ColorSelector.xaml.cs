@@ -140,9 +140,11 @@ namespace Signum.Windows.ColorUtils
             if (updating) return;
 
             Point p = m_ColorPosition;
-            HsvColor hsv = new HsvColor(PART_ColorSlider.Value, 1, 1);
-            hsv.S = p.X;
-            hsv.V = 1 - p.Y;
+            HsvColor hsv = new HsvColor(PART_ColorSlider.Value, 1, 1)
+            {
+                S = p.X,
+                V = 1 - p.Y
+            };
             Color color = hsv.ToColor();
 
             SelectedColor = Color.FromArgb((byte)(255 * opacitySlider.Value), color.R, color.G, color.B);
