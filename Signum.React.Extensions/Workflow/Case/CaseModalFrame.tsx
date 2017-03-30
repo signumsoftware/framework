@@ -116,24 +116,36 @@ export default class CaseModalFrame extends React.Component<CaseModalFrameProps,
 
     okClicked: boolean;
     handleCancelClicked = () => {
-
         if (this.hasChanges() && !this.props.avoidPromptLooseChange) {
-            if (!confirm(NormalWindowMessage.LoseChanges.niceToString()))
-                return;
-        }
-
+            ModalMessage.show({
+                title: NormalWindowMessage.ThereAreChanges.niceToString(),
+                message: NormalWindowMessage.LoseChanges.niceToString(),
+                buttons: "yes_no",
+                style: "warning",
+                icon: "warning"
+            }).then(result => {
+                if (result == "yes")
                     this.setState({ show: false });
+            }).done();
+        } else {
+            this.setState({ show: false });
+        }
     }
     
     handleOkClicked = (val: any) => {
         if (this.hasChanges()) {
-            alert(JavascriptMessage.saveChangesBeforeOrPressCancel.niceToString());
-            return;
-        }
-
+            ModalMessage.show({
+                title: NormalWindowMessage.ThereAreChanges.niceToString(),
+                message: JavascriptMessage.saveChangesBeforeOrPressCancel.niceToString(),
+                buttons: "ok",
+                style: "warning",
+                icon: "warning"
+            }).done();
+        } else {
             this.okClicked = true;
             this.setState({ show: false });
         }
+    }
 
     handleOnExited = () => {
         this.props.onExited!(this.okClicked ? this.getCaseActivity() : undefined);

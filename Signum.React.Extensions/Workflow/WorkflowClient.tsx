@@ -157,7 +157,7 @@ export function start(options: { routes: JSX.Element[] }) {
     Constructor.registerConstructor(WorkflowConditionEntity, () => WorkflowConditionEntity.New({ eval: WorkflowConditionEval.New() }));
     Constructor.registerConstructor(WorkflowActionEntity, () => WorkflowActionEntity.New({ eval: WorkflowActionEval.New() }));
     Constructor.registerConstructor(WorkflowScriptEntity, () => WorkflowScriptEntity.New({ eval: WorkflowScriptEval.New() }));
-    
+
     registerCustomContexts();
 }
 
@@ -189,7 +189,7 @@ function registerCustomContexts() {
         },
         getCodeContext: cc => {
             addActx(cc);
-            cc.assignments["cctx"] = "actx && actx.subCtx(a => a.case)"; 
+            cc.assignments["cctx"] = "actx && actx.subCtx(a => a.case)";
             return cc.createNewContext("cctx");
         },
         getPropertyRoute: dn => CaseActivityEntity.propertyRoute(a => a.case)
@@ -260,7 +260,7 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Workf
     wf.getXml()
         .then(xml => {
             var model = WorkflowModel.New({
-                diagramXml : xml,
+                diagramXml: xml,
                 entities: Dic.map(wf.state.entities!, (bpmnId, model) => newMListElement(BpmnEntityPair.New({
                     bpmnElementId: bpmnId,
                     model: model
@@ -290,7 +290,7 @@ export function executeWorkflowJumpContextual(coc: Operations.ContextualOperatio
     Navigator.API.fetchAndForget(coc.context.lites[0])
         .then(ca => {
             const jumps = ca.workflowActivity.jumps;
-      
+
             getWorkflowJumpSelector(jumps)
                 .then(dest => dest && defaultContextualClick(coc, event, dest.to));
         })
@@ -319,13 +319,15 @@ function getWorkflowJumpSelector(jumps: MListElement<WorkflowJumpEntity>[]): Pro
 
 export function executeAndClose(eoc: Operations.EntityOperationContext<CaseActivityEntity>) {
 
-    if (!confirmInNecessary(eoc))
-        return;
-    
-    Operations.API.executeEntity(eoc.entity, eoc.operationInfo.key)
-        .then(pack => { eoc.frame.onClose(); return notifySuccess(); })
-        .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
-        .done();
+    confirmInNecessary(eoc).then(conf => {
+        if (!conf)
+            return;
+
+        Operations.API.executeEntity(eoc.entity, eoc.operationInfo.key)
+            .then(pack => { eoc.frame.onClose(); return notifySuccess(); })
+            .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
+            .done();
+    });
 }
 
 export function navigateCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, readOnly?: boolean): Promise<void> {
@@ -335,7 +337,7 @@ export function navigateCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivi
             NP.default.openNavigate(entityOrPack, readOnly).then(resolve, reject);
         });
     });
-} 
+}
 
 export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, readOnly?: boolean): Promise<CaseActivityEntity> {
 
@@ -344,9 +346,9 @@ export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEn
             NP.default.openView(entityOrPack, readOnly).then(resolve, reject);
         });
     });
-} 
+}
 
-export function createNewCase(workflowId: number | string): Promise<CaseEntityPack>{
+export function createNewCase(workflowId: number | string): Promise<CaseEntityPack> {
     return Navigator.API.fetchEntity(WorkflowEntity, workflowId)
         .then(wf => Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow))
         .then(ep => ({
@@ -518,7 +520,7 @@ export interface WorkflowScriptRunnerState {
     CurrentProcessIdentifier: string;
 }
 
-export interface  CaseActivityStats {
+export interface CaseActivityStats {
     CaseActivity: Lite<CaseActivityEntity>;
     PreviousActivity: Lite<CaseActivityEntity>;
     WorkflowActivity: Lite<WorkflowActivityEntity>;
