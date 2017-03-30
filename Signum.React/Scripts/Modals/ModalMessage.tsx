@@ -158,7 +158,7 @@ export default class ModalMessage extends React.Component<ModalMessageProps, { s
 
     render() {
         return (
-            <Modal onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited}>
+            <Modal onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="message-modal">
                 <Modal.Header closeButton={true} className={dialogHeaderClass(this.props.style)}>
                     {this.renderTitle()}
                 </Modal.Header>
