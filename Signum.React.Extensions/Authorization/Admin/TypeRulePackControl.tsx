@@ -229,7 +229,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                     title: "",
                     message: "",
                     buttons: "ok",
-                    defaultStyle: "warning",
+                    style: "warning",
                     icon: "warning"
                 }).done();
             }

@@ -18,6 +18,7 @@ import CaseFromSenderInfo from './CaseFromSenderInfo'
 import CaseButtonBar from './CaseButtonBar'
 import CaseFlowButton from './CaseFlowButton'
 import InlineCaseTags from './InlineCaseTags'
+import { OperationMessage } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
 
 require("../../../../Framework/Signum.React/Scripts/Frames/Frames.css");
 require("./Case.css");
@@ -92,7 +93,7 @@ export default class CaseModalFrame extends React.Component<CaseModalFrameProps,
                 message: NormalWindowMessage.LoseChanges.niceToString(),
                 buttons: "yes_no",
                 icon: "warning",
-                defaultStyle: "warning"
+                style: "warning"
             }).then(result => {
                 if (result != "yes")
                 return;
@@ -121,7 +122,7 @@ export default class CaseModalFrame extends React.Component<CaseModalFrameProps,
                 return;
         }
 
-        this.setState({ show: false });
+                    this.setState({ show: false });
     }
     
     handleOkClicked = (val: any) => {
@@ -130,9 +131,9 @@ export default class CaseModalFrame extends React.Component<CaseModalFrameProps,
             return;
         }
 
-        this.okClicked = true;
-        this.setState({ show: false });
-    }
+            this.okClicked = true;
+            this.setState({ show: false });
+        }
 
     handleOnExited = () => {
         this.props.onExited!(this.okClicked ? this.getCaseActivity() : undefined);

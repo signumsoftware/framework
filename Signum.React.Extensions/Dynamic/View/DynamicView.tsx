@@ -117,7 +117,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
                 message: JavascriptMessage.loseCurrentChanges.niceToString(),
                 buttons: "yes_no",
                 icon: "warning",
-                defaultStyle: "warning"
+                style: "warning"
             }).then(result => { return result == "yes"; });
 
         return Promise.resolve(true);

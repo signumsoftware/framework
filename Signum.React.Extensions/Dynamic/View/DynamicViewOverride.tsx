@@ -81,7 +81,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
                 message: JavascriptMessage.loseCurrentChanges.niceToString(),
                 buttons: "yes_no",
                 icon: "warning",
-                defaultStyle: "warning"
+                style: "warning"
             }).then(result => { return result == "yes" });
 
         return Promise.resolve(true);

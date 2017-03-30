@@ -110,7 +110,7 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
                 title: NormalWindowMessage.ThereAreChanges.niceToString(),
                 message: JavascriptMessage.loseCurrentChanges.niceToString(),
                 buttons: "yes_no",
-                defaultStyle: "warning",
+                style: "warning",
                 icon: "warning"
             }).then(result => { return result == "yes"; });
         }

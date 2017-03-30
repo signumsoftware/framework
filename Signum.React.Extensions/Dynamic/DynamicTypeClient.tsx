@@ -42,7 +42,7 @@ export function start(options: { routes: JSX.Element[] }) {
                             title: NormalControlMessage.Save.niceToString(),
                             message: DynamicTypeMessage.DynamicType0SucessfullySavedGoToDynamicPanelNow.niceToString(eoc.entity.typeName),
                             buttons: "yes_no",
-                            defaultStyle: "success",
+                            style: "success",
                             icon: "success"
                         }).then(result => {
                             window.open(Navigator.currentHistory.createHref("~/dynamic/panel"));
