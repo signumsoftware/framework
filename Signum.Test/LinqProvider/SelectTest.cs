@@ -149,6 +149,7 @@ namespace Signum.Test.LinqProvider
                         select (l.Owner == null ? l : l.Owner.Entity).ToLite()).ToList();
         }
 
+#pragma warning disable IDE0029 // Use coalesce expression
         [TestMethod]
         public void SelectConditionalToLiteNull()
         {
@@ -156,6 +157,7 @@ namespace Signum.Test.LinqProvider
                         let owner = (l.Owner == null ? null : l.Owner).Entity
                         select owner.ToLite(owner.Name)).ToList();
         }
+#pragma warning restore IDE0029 // Use coalesce expression
 
         [TestMethod]
         public void SelectConditionalGetType()
