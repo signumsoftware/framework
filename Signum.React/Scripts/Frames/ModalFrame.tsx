@@ -126,7 +126,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
                 title: NormalWindowMessage.ThereAreChanges.niceToString(),
                 message: JavascriptMessage.saveChangesBeforeOrPressCancel.niceToString(),
                 buttons: "ok",
-                defaultStyle: "warning",
+                style: "warning",
                 icon: "warning"
             }).done();
         }
@@ -158,7 +158,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
                 title: NormalWindowMessage.ThereAreChanges.niceToString(),
                 message: NormalWindowMessage.LoseChanges.niceToString(),
                 buttons: "yes_no",
-                defaultStyle: "warning",
+                style: "warning",
                 icon: "warning"
             }).then(result => {
                 if (result == "yes") {

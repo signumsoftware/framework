@@ -20,7 +20,7 @@ export type ModalMessageResult = "ok" | "cancel" | "yes" | "no";
 interface ModalMessageProps extends React.Props<ModalMessage>, IModalProps {
     title: React.ReactChild;
     message: React.ReactChild;
-    defaultStyle?: ModalMessageStyle;
+    style?: ModalMessageStyle;
     buttons: ModalMessageButtons;
     icon?: ModalMessageIcon;
     customIcon?: string;
@@ -159,11 +159,11 @@ export default class ModalMessage extends React.Component<ModalMessageProps, { s
     render() {
         return (
             <Modal onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited}>
-                <Modal.Header closeButton={true} className={dialogHeaderClass(this.props.defaultStyle)}>
+                <Modal.Header closeButton={true} className={dialogHeaderClass(this.props.style)}>
                     {this.renderTitle()}
                 </Modal.Header>
                 <Modal.Body>
-                    {renderText(this.props.message, this.props.defaultStyle)}
+                    {renderText(this.props.message, this.props.style)}
                 </Modal.Body>
                 <Modal.Footer>
                     {this.renderButtons(this.props.buttons)}
@@ -180,7 +180,7 @@ export default class ModalMessage extends React.Component<ModalMessageProps, { s
                 buttons={options.buttons}
                 icon={options.icon}
                 customIcon={options.customIcon}
-                defaultStyle={options.defaultStyle}
+                style={options.style}
             />
         );
     }
