@@ -296,7 +296,8 @@ export function confirmInNecessary(eoc: EntityOperationContext<Entity>, checkLit
         title: OperationMessage.Confirm.niceToString(),
         message: confirmMessage,
         buttons: "yes_no",
-        icon: "question"
+        icon: "warning",
+        style: "warning",
     }).then(result => { return result == "yes"; });
 }
 
