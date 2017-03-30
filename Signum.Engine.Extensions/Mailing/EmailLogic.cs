@@ -60,14 +60,10 @@ namespace Signum.Engine.Mailing
             {   
                 if (getSmtpClient == null && getSmtpConfiguration != null)
                     getSmtpClient = message => getSmtpConfiguration(message.Template?.Let(EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow)).GenerateSmtpClient();
-
-                if (getSmtpClient == null)
-                    throw new ArgumentNullException("getSmtpClient");
-
                 EmbeddedFilePathLogic.AssertStarted(sb);
                 CultureInfoLogic.AssertStarted(sb);
                 EmailLogic.getConfiguration = getConfiguration;
-                EmailLogic.GetSmtpClient = getSmtpClient;
+                EmailLogic.GetSmtpClient = getSmtpClient ?? throw new ArgumentNullException("getSmtpClient");
                 EmailTemplateLogic.Start(sb, dqm, getSmtpConfiguration);
                 if (attachment != null)
                     FileTypeLogic.Register(EmailFileType.Attachment, attachment);
