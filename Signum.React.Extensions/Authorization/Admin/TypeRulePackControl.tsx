@@ -11,7 +11,7 @@ import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl
 import { TypeContext, ButtonsContext, IRenderButtons } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { EntityLine, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines'
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal'
-import ModalMessage from '../../../../Framework/Signum.React/Scripts/Modals/ModalMessage'
+import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
 
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfo, Binding, GraphExplorer } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -225,7 +225,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
             GraphExplorer.propagateAll(this.props.ctx.value);
 
             if (this.props.ctx.value.modified) {
-                ModalMessage.show({
+                MessageModal.show({
                     title: "",
                     message: "",
                     buttons: "ok",

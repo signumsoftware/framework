@@ -11,7 +11,7 @@ import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator
 import TypeHelpComponent from '../Help/TypeHelpComponent'
 import { AuthInfo } from './AuthInfo'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
-import ModalMessage from '../../../../Framework/Signum.React/Scripts/Modals/ModalMessage'
+import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
 
 
 
@@ -58,7 +58,7 @@ export default class DynamicViewSelectorComponent extends React.Component<Dynami
 
     handleTypeRemove = () => {
         if (this.state.scriptChanged == true)
-            return ModalMessage.show({
+            return MessageModal.show({
                 title: NormalWindowMessage.ThereAreChanges.niceToString(),
                 message: JavascriptMessage.loseCurrentChanges.niceToString(),
                 buttons: "yes_no",

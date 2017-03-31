@@ -26,11 +26,11 @@ import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStr
 import { WorkflowConditionEval, WorkflowActionEval, WorkflowJumpEntity, DecisionResult } from './Signum.Entities.Workflow'
 
 import ActivityWithRemarks from './Case/ActivityWithRemarks'
-import CaseModalFrame from './Case/CaseModalFrame'
-export { CaseModalFrame };
+import CaseFrameModal from './Case/CaseFrameModal'
+export { CaseFrameModal };
 
-import CasePageFrame from './Case/CaseModalFrame'
-export { CasePageFrame };
+import CaseFramePage from './Case/CaseFrameModal'
+export { CaseFramePage };
 
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
@@ -53,8 +53,8 @@ import * as OmniboxClient from '../Omnibox/OmniboxClient'
 export function start(options: { routes: JSX.Element[] }) {
 
     options.routes.push(<Route path="workflow">
-        <Route path="activity/:caseActivityId" getComponent={(loc, cb) => require(["./Case/CasePageFrame"], (Comp) => cb(null, Comp.default))} />
-        <Route path="new/:workflowId" getComponent={(loc, cb) => require(["./Case/CasePageFrame"], (Comp) => cb(null, Comp.default))} />
+        <Route path="activity/:caseActivityId" getComponent={(loc, cb) => require(["./Case/CaseFramePage"], (Comp) => cb(null, Comp.default))} />
+        <Route path="new/:workflowId" getComponent={(loc, cb) => require(["./Case/CaseFramePage"], (Comp) => cb(null, Comp.default))} />
     </Route>);
 
     QuickLinks.registerQuickLink(CaseActivityEntity, ctx => [
@@ -333,7 +333,7 @@ export function executeAndClose(eoc: Operations.EntityOperationContext<CaseActiv
 export function navigateCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, readOnly?: boolean): Promise<void> {
 
     return new Promise<void>((resolve, reject) => {
-        require(["./Case/CaseModalFrame"], function (NP: { default: typeof CaseModalFrame }) {
+        require(["./Case/CaseFrameModal"], function (NP: { default: typeof CaseFrameModal }) {
             NP.default.openNavigate(entityOrPack, readOnly).then(resolve, reject);
         });
     });
@@ -342,7 +342,7 @@ export function navigateCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivi
 export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, readOnly?: boolean): Promise<CaseActivityEntity> {
 
     return new Promise<CaseActivityEntity>((resolve, reject) => {
-        require(["./Case/CaseModalFrame"], function (NP: { default: typeof CaseModalFrame }) {
+        require(["./Case/CaseFrameModal"], function (NP: { default: typeof CaseFrameModal }) {
             NP.default.openView(entityOrPack, readOnly).then(resolve, reject);
         });
     });

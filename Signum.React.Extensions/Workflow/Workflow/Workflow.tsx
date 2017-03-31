@@ -7,7 +7,7 @@ import * as Entities from '../../../../Framework/Signum.React/Scripts/Signum.Ent
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
 import { API, executeWorkflowSave } from '../WorkflowClient'
 import BpmnModelerComponent from '../Bpmn/BpmnModelerComponent'
-import ModalMessage from "../../../../Framework/Signum.React/Scripts/Modals/ModalMessage";
+import MessageModal from "../../../../Framework/Signum.React/Scripts/Modals/MessageModal";
 
 interface WorkflowProps {
     ctx: TypeContext<WorkflowEntity>;
@@ -96,7 +96,7 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
 
     handleMainEntityTypeChange = (entity: ModifiableEntity | Lite<Entity>): Promise<boolean> => {
         if (this.bpmnModelerComponent!.existsMainEntityTypeRelatedNodes()) {
-            return ModalMessage.show({
+            return MessageModal.show({
                 title: JavascriptMessage.error.niceToString(),
                 message: WorkflowMessage.ChangeWorkflowMainEntityTypeIsNotAllowedBecausueWeHaveNodesThatUseIt.niceToString(),
                 buttons: "ok",
