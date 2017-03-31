@@ -5,9 +5,8 @@ import * as Finder from '../Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'
 import { SearchMessage, JavascriptMessage } from '../Signum.Entities'
 import { getQueryNiceName } from '../Reflection'
+import * as Navigator from '../Navigator'
 import SearchControl, { SearchControlProps } from './SearchControl'
-
-
 
 interface SearchPageProps extends ReactRouter.RouteComponentProps<{}, { queryName: string }> {
 
@@ -32,12 +31,25 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchC
 
     calculateState(props: SearchPageProps): SearchControlState {
         return {
-            findOptions: { showFilters: true, ...Finder.parseFindOptionsPath(props.routeParams.queryName, props.location.query) },
+            findOptions: {
+                showFilters: true,
+                ...Finder.parseFindOptionsPath(props.routeParams.queryName, props.location.query)
+            },
         };
     }
 
-    render() {
+    changeUrl() {
 
+        var scl = this.searchControl.searchControlLoaded; 
+
+        var findOptions = Finder.toFindOptions(scl.props.findOptions, scl.props.queryDescription);
+
+        const path = Finder.findOptionsPath(findOptions);
+
+        Navigator.currentHistory.replace(path);
+    }
+
+    render() {
         const fo = this.state.findOptions;
 
         return (
@@ -53,7 +65,8 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchC
                     showBarExtension={true}
                     hideFullScreenButton={true}
                     largeToolbarButtons={true}
-                    findOptions={fo} />
+                    findOptions={fo}
+                    onResult={result => this.changeUrl()} />
             </div>
         );
     }

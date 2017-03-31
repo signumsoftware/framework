@@ -65,16 +65,21 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         super(props);
         this.state = {};
     }
-
-
-
+    
     componentWillMount() {
         this.initialLoad(this.props.findOptions);
     }
 
     componentWillReceiveProps(newProps: SearchControlProps) {
-        if (Finder.findOptionsPath(this.props.findOptions) == Finder.findOptionsPath(newProps.findOptions))
+        var path = Finder.findOptionsPath(newProps.findOptions);
+        if (path == Finder.findOptionsPath(this.props.findOptions))
             return;
+
+        if (this.state.findOptions && this.state.queryDescription) {
+            var fo = Finder.toFindOptions(this.state.findOptions, this.state.queryDescription);
+            if (path == Finder.findOptionsPath(fo))
+                return;
+        }
 
         this.state = {};
         this.forceUpdate();
