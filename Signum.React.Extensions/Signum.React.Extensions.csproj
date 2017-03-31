@@ -293,8 +293,8 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="Workflow\Bpmn\BpmnModelerComponent.tsx" />
     <TypeScriptCompile Include="Workflow\Bpmn\BpmnViewerComponent.tsx" />
-    <TypeScriptCompile Include="Workflow\Case\CaseModalFrame.tsx" />
-    <TypeScriptCompile Include="Workflow\Case\CasePageFrame.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\CaseFrameModal.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\CaseFramePage.tsx" />
     <TypeScriptCompile Include="Workflow\Bpmn\CustomRenderer.ts" />
     <TypeScriptCompile Include="Workflow\Bpmn\ConnectionIcons.ts" />
     <TypeScriptCompile Include="Workflow\Case\InboxFilter.tsx" />

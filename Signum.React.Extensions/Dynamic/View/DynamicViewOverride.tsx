@@ -14,7 +14,7 @@ import { ViewReplacer } from '../../../../Framework/Signum.React/Scripts/Frames/
 import TypeHelpComponent from '../Help/TypeHelpComponent'
 import { AuthInfo } from './AuthInfo'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
-import ModalMessage from '../../../../Framework/Signum.React/Scripts/Modals/ModalMessage'
+import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
 import * as Nodes from '../../../../Extensions/Signum.React.Extensions/Dynamic/View/Nodes';
 
 
@@ -76,7 +76,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
 
     handleTypeRemove = () => {
         if (this.state.scriptChanged == true)
-            return ModalMessage.show({
+            return MessageModal.show({
                 title: NormalWindowMessage.ThereAreChanges.niceToString(),
                 message: JavascriptMessage.loseCurrentChanges.niceToString(),
                 buttons: "yes_no",

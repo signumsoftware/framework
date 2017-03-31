@@ -19,15 +19,15 @@ import InlineCaseTags from './InlineCaseTags'
 require("../../../../Framework/Signum.React/Scripts/Frames/Frames.css");
 require("./Case.css");
 
-interface CasePageFrameProps extends ReactRouter.RouteComponentProps<{}, { workflowId: string; caseActivityId?: string }> {
+interface CaseFramePageProps extends ReactRouter.RouteComponentProps<{}, { workflowId: string; caseActivityId?: string }> {
 }
 
-interface CasePageFrameState {
+interface CaseFramePageState {
     pack?: WorkflowClient.CaseEntityPack;
     getComponent?: (ctx: TypeContext<Entity>) => React.ReactElement<any>;
 }
 
-export default class CasePageFrame extends React.Component<CasePageFrameProps, CasePageFrameState> {
+export default class CaseFramePage extends React.Component<CaseFramePageProps, CaseFramePageState> {
 
     constructor(props: any) {
         super(props);
@@ -43,23 +43,23 @@ export default class CasePageFrame extends React.Component<CasePageFrameProps, C
         this.load(this.props);
     }
     
-    calculateState(props: CasePageFrameProps) {
-        return { getComponent: undefined } as CasePageFrameState;
+    calculateState(props: CaseFramePageProps) {
+        return { getComponent: undefined } as CaseFramePageState;
     }
     
-    componentWillReceiveProps(newProps: CasePageFrameProps) {
+    componentWillReceiveProps(newProps: CaseFramePageProps) {
         this.setState(this.calculateState(newProps), () => {
             this.load(newProps);
         });
     }
 
-    load(props: CasePageFrameProps) {
+    load(props: CaseFramePageProps) {
         this.loadEntity(props)
             .then(() => this.loadComponent())
             .done();
     }
 
-    loadEntity(props: CasePageFrameProps): Promise<void> {
+    loadEntity(props: CaseFramePageProps): Promise<void> {
 
         const routeParams = props.routeParams!;
         if (routeParams.caseActivityId) {
