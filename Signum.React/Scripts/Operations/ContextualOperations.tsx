@@ -8,7 +8,7 @@ import {
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationInfo, OperationType, LambdaMemberType } from '../Reflection';
 import { classes } from '../Globals';
 import * as Navigator from '../Navigator';
-import ModalMessage from '../Modals/ModalMessage'
+import MessageModal from '../Modals/MessageModal'
 import Notify from '../Frames/Notify';
 import { ContextualItemsContext, MenuItemBlock } from '../SearchControl/ContextualItems';
 import { EntityFrame } from '../TypeContext';
@@ -169,7 +169,7 @@ export function confirmInNecessary(coc: ContextualOperationContext<Entity>): Pro
     if (confirmMessage == undefined)
         return Promise.resolve(true);
 
-    return ModalMessage.show({
+    return MessageModal.show({
         title: OperationMessage.Confirm.niceToString(),
         message: confirmMessage,
         buttons: "yes_no",
