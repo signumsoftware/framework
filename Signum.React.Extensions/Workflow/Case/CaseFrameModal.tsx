@@ -1,12 +1,11 @@
-﻿
-import * as React from 'react'
+﻿import * as React from 'react'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { Modal, ModalProps, ModalClass, ButtonToolbar, Button } from 'react-bootstrap'
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals'
 import { TypeContext, StyleOptions, EntityFrame  } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import ModalMessage from '../../../../Framework/Signum.React/Scripts/Modals/ModalMessage'
+import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
 import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
 import { EntityPack, Entity, Lite, JavascriptMessage, NormalWindowMessage, entityInfo, getToString, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from '../../../../Framework/Signum.React/Scripts/Frames/Widgets'
@@ -23,7 +22,7 @@ import { OperationMessage } from "../../../../Framework/Signum.React/Scripts/Sig
 require("../../../../Framework/Signum.React/Scripts/Frames/Frames.css");
 require("./Case.css");
 
-interface CaseModalFrameProps extends React.Props<CaseModalFrame>, IModalProps {
+interface CaseFrameModalProps extends React.Props<CaseFrameModal>, IModalProps {
     title?: string;
     entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack;
     avoidPromptLooseChange?: boolean;
@@ -31,7 +30,7 @@ interface CaseModalFrameProps extends React.Props<CaseModalFrame>, IModalProps {
     isNavigate?: boolean;
 }
 
-interface CaseModalFrameState {
+interface CaseFrameModalState {
     pack?: WorkflowClient.CaseEntityPack;
     getComponent?: (ctx: TypeContext<ICaseMainEntity>) => React.ReactElement<any>;
     show: boolean;
@@ -40,7 +39,7 @@ interface CaseModalFrameState {
 
 var modalCount = 0;
 
-export default class CaseModalFrame extends React.Component<CaseModalFrameProps, CaseModalFrameState>  {
+export default class CaseFrameModal extends React.Component<CaseFrameModalProps, CaseFrameModalState>  {
     prefix = "caseModal" + (modalCount++)
     constructor(props: any) {
         super(props);
@@ -63,7 +62,7 @@ export default class CaseModalFrame extends React.Component<CaseModalFrameProps,
             .done();
     }
 
-    calculateState(props: CaseModalFrameState): CaseModalFrameState {
+    calculateState(props: CaseFrameModalState): CaseFrameModalState {
         return {
             show: true,
         };
@@ -88,7 +87,7 @@ export default class CaseModalFrame extends React.Component<CaseModalFrameProps,
     handleCloseClicked = () => {
 
         if (this.hasChanges() && !this.props.avoidPromptLooseChange) {
-            ModalMessage.show({
+            MessageModal.show({
                 title: NormalWindowMessage.ThereAreChanges.niceToString(),
                 message: NormalWindowMessage.LoseChanges.niceToString(),
                 buttons: "yes_no",
@@ -117,7 +116,7 @@ export default class CaseModalFrame extends React.Component<CaseModalFrameProps,
     okClicked: boolean;
     handleCancelClicked = () => {
         if (this.hasChanges() && !this.props.avoidPromptLooseChange) {
-            ModalMessage.show({
+            MessageModal.show({
                 title: NormalWindowMessage.ThereAreChanges.niceToString(),
                 message: NormalWindowMessage.LoseChanges.niceToString(),
                 buttons: "yes_no",
@@ -134,7 +133,7 @@ export default class CaseModalFrame extends React.Component<CaseModalFrameProps,
     
     handleOkClicked = (val: any) => {
         if (this.hasChanges()) {
-            ModalMessage.show({
+            MessageModal.show({
                 title: NormalWindowMessage.ThereAreChanges.niceToString(),
                 message: JavascriptMessage.saveChangesBeforeOrPressCancel.niceToString(),
                 buttons: "ok",
@@ -317,7 +316,7 @@ export default class CaseModalFrame extends React.Component<CaseModalFrameProps,
 
     static openView(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, readOnly?: boolean): Promise<CaseActivityEntity> {
 
-        return openModal<CaseActivityEntity>(<CaseModalFrame
+        return openModal<CaseActivityEntity>(<CaseFrameModal
             entityOrPack={entityOrPack}
             readOnly={readOnly || false}
             isNavigate={false}
@@ -327,7 +326,7 @@ export default class CaseModalFrame extends React.Component<CaseModalFrameProps,
 
     static openNavigate(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, readOnly? :boolean): Promise<void> {
 
-        return openModal<void>(<CaseModalFrame
+        return openModal<void>(<CaseFrameModal
             entityOrPack={entityOrPack}
             readOnly={readOnly || false}
             isNavigate={true}

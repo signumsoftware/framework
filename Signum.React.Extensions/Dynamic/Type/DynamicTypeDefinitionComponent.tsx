@@ -15,7 +15,7 @@ import { ModifiableEntity, JavascriptMessage, EntityControlMessage, is, Lite, En
 import { QueryEntity, TypeEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { FilterOperation, PaginationMode } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.DynamicQuery'
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal';
-import ModalMessage from '../../../../Framework/Signum.React/Scripts/Modals/ModalMessage'
+import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
 import * as DynamicTypeClient from '../DynamicTypeClient';
 import * as DynamicClient from '../DynamicClient';
 import { DynamicTypeMessage, DynamicTypeEntity, DynamicMixinConnectionEntity } from '../Signum.Entities.Dynamic';
@@ -119,7 +119,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
             if (this.isEmpty(def.operationSave))
                 def.operationSave = undefined;
             else {
-                ModalMessage.show({
+                MessageModal.show({
                     title: EntityControlMessage.Remove.niceToString(),
                     message: DynamicTypeMessage.RemoveSaveOperation.niceToString(),
                     buttons: "yes_no",
