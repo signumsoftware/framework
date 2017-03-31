@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { Modal, ModalProps, ModalClass, ButtonToolbar, Button } from 'react-bootstrap'
 import { openModal, IModalProps } from '../Modals'
-import ModalMessage from '../Modals/ModalMessage'
+import MessageModal from '../Modals/MessageModal'
 import * as Navigator from '../Navigator'
 import ButtonBar from './ButtonBar'
 
@@ -18,7 +18,7 @@ import { EntityOperationContext } from '../Operations'
 
 require("./Frames.css");
 
-interface ModalFrameProps extends React.Props<ModalFrame>, IModalProps {
+interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
     title?: string;
     entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>;
     propertyRoute?: PropertyRoute;
@@ -32,7 +32,7 @@ interface ModalFrameProps extends React.Props<ModalFrame>, IModalProps {
     readOnly?: boolean;
 }
 
-interface ModalFrameState {
+interface FrameModalState {
     pack?: EntityPack<ModifiableEntity>;
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
     propertyRoute?: PropertyRoute;
@@ -41,16 +41,16 @@ interface ModalFrameState {
 
 let modalCount = 0;
 
-export default class ModalFrame extends React.Component<ModalFrameProps, ModalFrameState>  {
+export default class FrameModal extends React.Component<FrameModalProps, FrameModalState>  {
     prefix = "modal" + (modalCount++);
 
-    static defaultProps: ModalFrameProps = {
+    static defaultProps: FrameModalProps = {
         isOperationVisible: undefined,
         viewPromise: undefined,
         entityOrPack: null as any
     }
 
-    constructor(props: ModalFrameProps) {
+    constructor(props: FrameModalProps) {
         super(props);
         this.state = this.calculateState(props);
     }
@@ -62,7 +62,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             .done();
     }
 
-    componentWillReceiveProps(props: ModalFrameProps) {
+    componentWillReceiveProps(props: FrameModalProps) {
         this.setState(this.calculateState(props));
 
         Navigator.toEntityPack(props.entityOrPack)
@@ -84,7 +84,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         return getTypeInfo(typeName);
     }
 
-    calculateState(props: ModalFrameProps): ModalFrameState {
+    calculateState(props: FrameModalProps): FrameModalState {
 
         const typeInfo = this.getTypeInfo();
 
@@ -122,7 +122,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     handleOkClicked = (val: any) => {
         if (this.hasChanges() &&
             (this.props.requiresSaveOperation != undefined ? this.props.requiresSaveOperation : Navigator.typeRequiresSaveOperation(this.state.pack!.entity.Type))) {
-            ModalMessage.show({
+            MessageModal.show({
                 title: NormalWindowMessage.ThereAreChanges.niceToString(),
                 message: JavascriptMessage.saveChangesBeforeOrPressCancel.niceToString(),
                 buttons: "ok",
@@ -154,7 +154,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     handleCancelClicked = () => {
 
         if (this.hasChanges() && !this.props.avoidPromptLooseChange) {
-            ModalMessage.show({
+            MessageModal.show({
                 title: NormalWindowMessage.ThereAreChanges.niceToString(),
                 message: NormalWindowMessage.LoseChanges.niceToString(),
                 buttons: "yes_no",
@@ -302,7 +302,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
     static openView(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, options: Navigator.ViewOptions): Promise<Entity> {
 
-        return openModal<Entity>(<ModalFrame
+        return openModal<Entity>(<FrameModal
             entityOrPack={entityOrPack}
             readOnly={options.readOnly}
             propertyRoute={options.propertyRoute}
@@ -311,7 +311,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             requiresSaveOperation={options.requiresSaveOperation}
             avoidPromptLooseChange={options.avoidPromptLooseChange}
             extraComponentProps={options.extraComponentProps}
-            validate={options.validate == undefined ? ModalFrame.isModelEntity(entityOrPack) : options.validate}
+            validate={options.validate == undefined ? FrameModal.isModelEntity(entityOrPack) : options.validate}
             title={options.title}
             isNavigate={false} />);
     }
@@ -325,7 +325,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
     static openNavigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, options: Navigator.NavigateOptions): Promise<void> {
 
-        return openModal<void>(<ModalFrame
+        return openModal<void>(<FrameModal
             entityOrPack={entityOrPack}
             readOnly={options.readOnly}
             propertyRoute={undefined}

@@ -11,7 +11,7 @@ import { TypeContext } from './TypeContext';
 import * as Finder from './Finder';
 import { needsCanExecute } from './Operations/EntityOperations';
 import * as Operations from './Operations';
-import ModalFrame from './Frames/ModalFrame';
+import FrameModal from './Frames/FrameModal';
 import { ViewReplacer } from './Frames/ReactVisitor'
 import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './Lines/AutocompleteConfig'
 import { FindOptions } from './FindOptions'
@@ -41,8 +41,8 @@ export namespace Expander {
 }
 
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<Route path="view/:type/:id" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(undefined, Comp.default))} ></Route>);
-    options.routes.push(<Route path="create/:type" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(undefined, Comp.default))} ></Route>);
+    options.routes.push(<Route path="view/:type/:id" getComponent={(loc, cb) => require(["./Frames/FramePage"], (Comp) => cb(undefined, Comp.default))} ></Route>);
+    options.routes.push(<Route path="create/:type" getComponent={(loc, cb) => require(["./Frames/FramePage"], (Comp) => cb(undefined, Comp.default))} ></Route>);
 }
 
 export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined) {
@@ -459,7 +459,7 @@ export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<
 
 export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions) {
     return new Promise<ModifiableEntity>((resolve, reject) => {
-        require(["./Frames/ModalFrame"], function (NP: { default: typeof ModalFrame }) {
+        require(["./Frames/FrameModal"], function (NP: { default: typeof FrameModal }) {
             NP.default.openView(entityOrPack, viewOptions || {}).then(resolve, reject);
         });
     });
@@ -486,7 +486,7 @@ export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityP
 
 export function navigateDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        require(["./Frames/ModalFrame"], function (NP: { default: typeof ModalFrame }) {
+        require(["./Frames/FrameModal"], function (NP: { default: typeof FrameModal }) {
             NP.default.openNavigate(entityOrPack, navigateOptions || {}).then(resolve, reject);
         });
     })

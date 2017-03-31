@@ -9,33 +9,33 @@ import { SearchMessage, JavascriptMessage, Lite, Entity, NormalWindowMessage, Bo
 
 require("./Modals.css");
 
-export type ModalMessageStyle = "success" | "info" | "warning" | "error";
+export type MessageModalStyle = "success" | "info" | "warning" | "error";
 
-export type ModalMessageIcon = "info" | "question" | "warning" | "error" | "success";
+export type MessageModalIcon = "info" | "question" | "warning" | "error" | "success";
 
-export type ModalMessageButtons = "ok" | "ok_cancel" | "yes_no" | "yes_no_cancel";
+export type MessageModalButtons = "ok" | "ok_cancel" | "yes_no" | "yes_no_cancel";
 
-export type ModalMessageResult = "ok" | "cancel" | "yes" | "no";
+export type MessageModalResult = "ok" | "cancel" | "yes" | "no";
 
-interface ModalMessageProps extends React.Props<ModalMessage>, IModalProps {
+interface MessageModalProps extends React.Props<MessageModal>, IModalProps {
     title: React.ReactChild;
     message: React.ReactChild;
-    style?: ModalMessageStyle;
-    buttons: ModalMessageButtons;
-    icon?: ModalMessageIcon;
+    style?: MessageModalStyle;
+    buttons: MessageModalButtons;
+    icon?: MessageModalIcon;
     customIcon?: string;
 }
 
-export default class ModalMessage extends React.Component<ModalMessageProps, { show: boolean }> {
+export default class MessageModal extends React.Component<MessageModalProps, { show: boolean }> {
 
-    constructor(props: ModalMessageProps) {
+    constructor(props: MessageModalProps) {
         super(props);
 
         this.state = { show: true };
     }
 
-    selectedValue?: ModalMessageResult;
-    handleButtonClicked = (val: ModalMessageResult) => {
+    selectedValue?: MessageModalResult;
+    handleButtonClicked = (val: MessageModalResult) => {
         this.selectedValue = val;
         this.setState({ show: false });
     }
@@ -48,7 +48,7 @@ export default class ModalMessage extends React.Component<ModalMessageProps, { s
         this.props.onExited!(this.selectedValue);
     }
 
-    renderButtons = (buttons: ModalMessageButtons) => {
+    renderButtons = (buttons: MessageModalButtons) => {
         switch (buttons) {
             case "ok":
                 return (
@@ -172,9 +172,9 @@ export default class ModalMessage extends React.Component<ModalMessageProps, { s
         );
     }
 
-    static show(options: ModalMessageProps): Promise<ModalMessageResult | undefined> {
-        return openModal<ModalMessageResult>(
-            <ModalMessage
+    static show(options: MessageModalProps): Promise<MessageModalResult | undefined> {
+        return openModal<MessageModalResult>(
+            <MessageModal
                 title={options.title}
                 message={options.message}
                 buttons={options.buttons}
@@ -186,7 +186,7 @@ export default class ModalMessage extends React.Component<ModalMessageProps, { s
     }
 }
 
-function dialogHeaderClass(style: ModalMessageStyle | undefined) {
+function dialogHeaderClass(style: MessageModalStyle | undefined) {
     switch (style) {
         case "success":
             return "dialog-header-success";
@@ -201,7 +201,7 @@ function dialogHeaderClass(style: ModalMessageStyle | undefined) {
     }
 }
 
-function dialogTextClass(style?: ModalMessageStyle) {
+function dialogTextClass(style?: MessageModalStyle) {
     switch (style) {
         case "success":
             return "text-success";
@@ -217,7 +217,7 @@ function dialogTextClass(style?: ModalMessageStyle) {
 }
 
 
-function renderText(message: React.ReactChild | null | undefined, style?: ModalMessageStyle): React.ReactFragment | null | undefined {
+function renderText(message: React.ReactChild | null | undefined, style?: MessageModalStyle): React.ReactFragment | null | undefined {
     if (typeof message == "string")
         return message.split("\n").map((p, i) => <p key={i} className={dialogTextClass(style)}>{p}</p>);
 

@@ -216,7 +216,7 @@
     <TypeScriptCompile Include="Scripts\Lines\AutocompleteConfig.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityTable.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EnumCheckboxList.tsx" />
-    <TypeScriptCompile Include="Scripts\Modals\ModalMessage.tsx" />
+    <TypeScriptCompile Include="Scripts\Modals\MessageModal.tsx" />
     <TypeScriptCompile Include="Scripts\Search.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityBase.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityCombo.tsx" />
@@ -243,8 +243,8 @@
     <TypeScriptCompile Include="Scripts\Frames\ButtonBar.tsx" />
     <TypeScriptCompile Include="Scripts\Operations.tsx" />
     <TypeScriptCompile Include="Scripts\Navigator.tsx" />
-    <TypeScriptCompile Include="Scripts\Frames\PageFrame.tsx" />
-    <TypeScriptCompile Include="Scripts\Frames\ModalFrame.tsx" />
+    <TypeScriptCompile Include="Scripts\Frames\FramePage.tsx" />
+    <TypeScriptCompile Include="Scripts\Frames\FrameModal.tsx" />
     <TypeScriptCompile Include="Scripts\Operations\EntityOperations.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\ColumnEditor.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\ContextualItems.tsx" />

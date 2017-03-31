@@ -10,7 +10,7 @@ import { classes, ifError } from '../Globals';
 import { ButtonsContext, IOperationVisible } from '../TypeContext';
 import * as Navigator from '../Navigator';
 import Notify from '../Frames/Notify';
-import ModalMessage from '../Modals/ModalMessage'
+import MessageModal from '../Modals/MessageModal'
 import { ajaxPost, ValidationError } from '../Services';
 import { TypeContext } from '../TypeContext';
 import {
@@ -292,7 +292,7 @@ export function confirmInNecessary(eoc: EntityOperationContext<Entity>, checkLit
     if (confirmMessage == undefined)
         return Promise.resolve(true);
 
-    return ModalMessage.show({
+    return MessageModal.show({
         title: OperationMessage.Confirm.niceToString(),
         message: confirmMessage,
         buttons: "yes_no",

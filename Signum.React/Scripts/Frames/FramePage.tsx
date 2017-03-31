@@ -14,18 +14,18 @@ import ValidationErrors from './ValidationErrors'
 
 require("./Frames.css");
 
-interface PageFrameProps extends ReactRouter.RouteComponentProps<{}, { type: string; id?: string, waitData?: string }> {
+interface FramePageProps extends ReactRouter.RouteComponentProps<{}, { type: string; id?: string, waitData?: string }> {
 }
 
 
-interface PageFrameState {
+interface FramePageState {
     pack?: EntityPack<Entity>;
     getComponent?: (ctx: TypeContext<Entity>) => React.ReactElement<any>;
 }
 
-export default class PageFrame extends React.Component<PageFrameProps, PageFrameState> {
+export default class FramePage extends React.Component<FramePageProps, FramePageState> {
 
-    constructor(props: PageFrameProps) {
+    constructor(props: FramePageProps) {
         super(props);
         this.state = this.calculateState(props);
 
@@ -39,25 +39,25 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
         return getTypeInfo(this.props.routeParams.type);
     }
 
-    calculateState(props: PageFrameProps) {
+    calculateState(props: FramePageProps) {
 
-        return { getComponent: undefined, pack: undefined } as PageFrameState;
+        return { getComponent: undefined, pack: undefined } as FramePageState;
     }
 
 
-    componentWillReceiveProps(newProps: PageFrameProps) {
+    componentWillReceiveProps(newProps: FramePageProps) {
         this.setState(this.calculateState(newProps), () => {
             this.load(newProps);
         });
     }
 
-    load(props: PageFrameProps) {
+    load(props: FramePageProps) {
         this.loadEntity(props)
             .then(() => this.loadComponent())
             .done();
     }
 
-    loadEntity(props: PageFrameProps): Promise<void> {
+    loadEntity(props: FramePageProps): Promise<void> {
 
         if (this.props.location.query.waitData) {
             if (window.opener.dataForChildWindow == undefined) {
