@@ -184,6 +184,7 @@
     <TypeScriptCompile Include="Basics\Templates\DateSpan.tsx" />
     <TypeScriptCompile Include="Basics\Templates\TimeSpan.tsx" />
     <TypeScriptCompile Include="Chart\UserChartToolbarConfig.ts" />
+    <TypeScriptCompile Include="Codemirror\XmlCodeMirror.tsx" />
     <TypeScriptCompile Include="Dashboard\DashboardToolbarConfig.ts" />
     <TypeScriptCompile Include="Dynamic\DynamicClient.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicTypeClient.tsx" />
