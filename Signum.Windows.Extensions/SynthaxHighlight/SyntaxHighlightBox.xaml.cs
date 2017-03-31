@@ -70,7 +70,9 @@ namespace Signum.Windows.SyntaxHighlight
                 lineNumbersCanvas = (DrawingControl)Template.FindName("PART_LineNumbersCanvas", this);
                 scrollViewer = (ScrollViewer)Template.FindName("PART_ContentHost", this);
 
-                lineNumbersCanvas.Width = GetFormattedTextWidth(string.Format("{0:0000}", totalLineCount)) + 5;
+                var dpi = VisualTreeHelper.GetDpi(this);
+
+                lineNumbersCanvas.Width = GetFormattedTextWidth(string.Format("{0:0000}", totalLineCount), dpi) + 5;
 
                 scrollViewer.ScrollChanged += OnScrollChanged;
 
@@ -82,7 +84,10 @@ namespace Signum.Windows.SyntaxHighlight
             {
                 if (e.HeightChanged == false)
                     return;
-                UpdateBlocks();
+
+                var dpi = VisualTreeHelper.GetDpi(this);
+
+                UpdateBlocks(dpi);
                 InvalidateVisual();
             };
 
@@ -103,7 +108,11 @@ namespace Signum.Windows.SyntaxHighlight
         private void OnScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             if (e.VerticalChange != 0)
-                UpdateBlocks();
+            {
+                var dpi = VisualTreeHelper.GetDpi(this);
+                UpdateBlocks(dpi);
+            }
+
             InvalidateVisual();
         }
 
@@ -111,7 +120,7 @@ namespace Signum.Windows.SyntaxHighlight
         // Updating & Block managing
         // -----------------------------------------------------------
 
-        private void UpdateBlocks()
+        private void UpdateBlocks(DpiScale dpi)
         {
             if (blocks.Count == 0)
                 return;
@@ -140,15 +149,17 @@ namespace Signum.Windows.SyntaxHighlight
                     LineHeight);
 
                 block.RawText = block.GetSubString(Text);
-                block.LineNumbers = GetFormattedLineNumbers(block.LineStartIndex, block.LineEndIndex);
+                block.LineNumbers = GetFormattedLineNumbers(block.LineStartIndex, block.LineEndIndex, dpi);
                 blocks.Add(block);
-                FormatBlock(block);
+                FormatBlock(block, dpi);
             }
         }
 
         private void InvalidateBlocks(int changeOffset)
         {
             InnerTextBlock blockChanged = blocks.FirstOrDefault(b=>b.CharStartIndex <= changeOffset && changeOffset <= b.CharEndIndex + 1);
+
+            var dpi = VisualTreeHelper.GetDpi(this);
 
             if (blockChanged == null && changeOffset > 0)
                 blockChanged = blocks.Last();
@@ -179,7 +190,7 @@ namespace Signum.Windows.SyntaxHighlight
                         lineStart + TextUtilities.GetLineCount(blockText) - 1,
                         LineHeight);
                     block.RawText = block.GetSubString(Text);
-                    block.LineNumbers = GetFormattedLineNumbers(block.LineStartIndex, block.LineEndIndex);
+                    block.LineNumbers = GetFormattedLineNumbers(block.LineStartIndex, block.LineEndIndex, dpi);
                     block.IsLast = true;
 
                     foreach (InnerTextBlock b in blocks)
@@ -187,7 +198,7 @@ namespace Signum.Windows.SyntaxHighlight
                             throw new Exception();
 
                     blocks.Add(block);
-                    FormatBlock(block);
+                    FormatBlock(block, dpi);
                     break;
                 }
                 if (localLineCount > maxLineCountInBlock)
@@ -199,14 +210,14 @@ namespace Signum.Windows.SyntaxHighlight
                         lineStart + maxLineCountInBlock - 1,
                         LineHeight);
                     block.RawText = block.GetSubString(Text);
-                    block.LineNumbers = GetFormattedLineNumbers(block.LineStartIndex, block.LineEndIndex);
+                    block.LineNumbers = GetFormattedLineNumbers(block.LineStartIndex, block.LineEndIndex, dpi);
 
                     foreach (InnerTextBlock b in blocks)
                         if (b.LineStartIndex == block.LineStartIndex)
                             throw new Exception();
 
                     blocks.Add(block);
-                    FormatBlock(block);
+                    FormatBlock(block, dpi);
 
                     charStart = i + 1;
                     lineStart += maxLineCountInBlock;
@@ -227,6 +238,9 @@ namespace Signum.Windows.SyntaxHighlight
             if (!IsLoaded || renderCanvas == null || lineNumbersCanvas == null)
                 return;
 
+
+            var dpi = VisualTreeHelper.GetDpi(this);
+
             using (DrawingContext dc = renderCanvas.GetContext())
             using (DrawingContext dc2 = lineNumbersCanvas.GetContext())
             {
@@ -242,7 +256,7 @@ namespace Signum.Windows.SyntaxHighlight
                             dc.DrawText(block.FormattedText, new Point(2 - HorizontalOffset, block.Position.Y - VerticalOffset));
                             if (IsLineNumbersMarginVisible)
                             {
-                                lineNumbersCanvas.Width = GetFormattedTextWidth(string.Format("{0:0000}", totalLineCount)) + 5;
+                                lineNumbersCanvas.Width = GetFormattedTextWidth(string.Format("{0:0000}", totalLineCount), dpi) + 5;
                                 dc2.DrawText(block.LineNumbers, new Point(lineNumbersCanvas.ActualWidth, 1 + block.Position.Y - VerticalOffset));
                             }
                         }
@@ -285,9 +299,9 @@ namespace Signum.Windows.SyntaxHighlight
         /// <summary>
         /// Formats and Highlights the text of a block.
         /// </summary>
-        private void FormatBlock(InnerTextBlock currentBlock)
+        private void FormatBlock(InnerTextBlock currentBlock, DpiScale dpi)
         {
-            currentBlock.FormattedText = GetFormattedText(currentBlock.RawText);
+            currentBlock.FormattedText = GetFormattedText(currentBlock.RawText, dpi);
             if (CurrentHighlighter != null)
             {
                 ThreadPool.QueueUserWorkItem(p =>
@@ -301,7 +315,7 @@ namespace Signum.Windows.SyntaxHighlight
         /// <summary>
         /// Returns a formatted text object from the given string
         /// </summary>
-        private FormattedText GetFormattedText(string text)
+        private FormattedText GetFormattedText(string text, DpiScale dpi)
         {
             FormattedText ft = new FormattedText(
                 text,
@@ -309,7 +323,8 @@ namespace Signum.Windows.SyntaxHighlight
                 FlowDirection.LeftToRight,
                 new Typeface(FontFamily, FontStyle, FontWeight, FontStretch),
                 FontSize,
-                Brushes.Black)
+                Brushes.Black, 
+                dpi.PixelsPerDip)
             {
                 Trimming = TextTrimming.None,
                 LineHeight = lineHeight
@@ -320,7 +335,7 @@ namespace Signum.Windows.SyntaxHighlight
         /// <summary>
         /// Returns a string containing a list of numbers separated with newlines.
         /// </summary>
-        private FormattedText GetFormattedLineNumbers(int firstIndex, int lastIndex)
+        private FormattedText GetFormattedLineNumbers(int firstIndex, int lastIndex, DpiScale dpi)
         {
             string text = "";
             for (int i = firstIndex + 1; i <= lastIndex + 1; i++)
@@ -333,7 +348,7 @@ namespace Signum.Windows.SyntaxHighlight
                 FlowDirection.LeftToRight,
                 new Typeface(FontFamily, FontStyle, FontWeight, FontStretch),
                 FontSize,
-                new SolidColorBrush(Color.FromRgb(0x21, 0xA1, 0xD8)))
+                new SolidColorBrush(Color.FromRgb(0x21, 0xA1, 0xD8)), dpi.PixelsPerDip)
             {
                 Trimming = TextTrimming.None,
                 LineHeight = lineHeight,
@@ -345,7 +360,7 @@ namespace Signum.Windows.SyntaxHighlight
         /// <summary>
         /// Returns the width of a text once formatted.
         /// </summary>
-        private double GetFormattedTextWidth(string text)
+        private double GetFormattedTextWidth(string text, DpiScale dpi)
         {
             FormattedText ft = new FormattedText(
                 text,
@@ -353,7 +368,8 @@ namespace Signum.Windows.SyntaxHighlight
                 FlowDirection.LeftToRight,
                 new Typeface(FontFamily, FontStyle, FontWeight, FontStretch),
                 FontSize,
-                Brushes.Black)
+                Brushes.Black, 
+                dpi.PixelsPerDip)
             {
                 Trimming = TextTrimming.None,
                 LineHeight = lineHeight
