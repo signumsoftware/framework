@@ -291,6 +291,30 @@ export function setFilters(e: Entity, filterOptionsParsed: FilterOptionParsed[])
     }).filter(p => !!p)).then(() => e);
 }
 
+export function toFindOptions(fo: FindOptionsParsed, queryDescription: QueryDescription) {
+
+    const pair = smartColumns(fo.columnOptions, Dic.getValues(queryDescription.columns));
+
+    const qs = getQuerySettings(fo.queryKey);
+
+    const defPagination = qs && qs.pagination || defaultPagination;
+
+    function equalsPagination(p1: Pagination, p2: Pagination) {
+        return p1.mode == p2.mode && p1.elementsPerPage == p2.elementsPerPage && p1.currentPage == p2.currentPage;
+    }
+
+    var findOptions = {
+        queryName: fo.queryKey,
+        filterOptions: fo.filterOptions.filter(a => !!a.token).map(f => ({ columnName: f.token!.fullKey, operation: f.operation, value: f.value, frozen: f.frozen }) as FilterOption),
+        orderOptions: fo.orderOptions.filter(a => !!a.token).map(o => ({ columnName: o.token.fullKey, orderType: o.orderType }) as OrderOption),
+        columnOptions: pair.columns,
+        columnOptionsMode: pair.mode,
+        pagination: fo.pagination && !equalsPagination(fo.pagination, defPagination) ? fo.pagination : undefined
+    } as FindOptions;
+
+    return findOptions;
+}
+
 export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription): Promise<FindOptionsParsed> {
 
     const fo: FindOptions= { ...findOptions };
@@ -337,8 +361,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
             create: fo.create != null ? fo.create :tis.some(ti => isCreable(ti, false, true)),
             navigate: fo.navigate != null ? fo.navigate :tis.some(ti => isNavigable(ti, undefined, true)),
             pagination: fo.pagination != null ? fo.pagination :qs && qs.pagination || defaultPagination,
-            contextMenu: fo.contextMenu != null ? fo.contextMenu :true,
-
+            contextMenu: fo.contextMenu != null ? fo.contextMenu : true,
 
             columnOptions: (fo.columnOptions || []).map(co => ({
                 token: completer.get(co.columnName),
