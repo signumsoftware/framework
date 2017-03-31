@@ -19,7 +19,9 @@ using Signum.Entities.Internal;
 
 namespace Signum.Entities
 {
+#pragma warning disable IDE1006
     public interface Lite<out T> : IComparable, IComparable<Lite<Entity>>
+#pragma warning restore IDE1006
         where T : class, IEntity
     {
         T Entity { get; }
