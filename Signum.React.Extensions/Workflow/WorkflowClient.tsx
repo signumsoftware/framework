@@ -564,11 +564,12 @@ export interface CaseConnectionStats {
     Connection: Lite<WorkflowConnectionEntity>;
     DoneDate: string;
     DoneBy: Lite<IUserEntity>;
-
+    DoneType: DoneType;
 }
 
 export interface CaseFlow {
     Activities: { [bpmnElementId: string]: CaseActivityStats[] };
     Connections: { [bpmnElementId: string]: CaseConnectionStats[] };
+    Jumps: CaseConnectionStats[];
     AllNodes: string[];
 }

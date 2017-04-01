@@ -207,10 +207,12 @@ namespace Signum.Entities.Workflow
         TimerOrConditionalStartEventsCanNotGoToJoinGateways,
         [Description("Gateway '{0}' should has condition on each output.")]
         Gateway0ShouldHasConditionOnEachOutput,
-        [Description("Gateway '{0}' should has condition on each output except the last one.")]
-        Gateway0ShouldHasConditionOnEachOutputExceptTheLast,
+        [Description("Gateway '{0}' should has condition or decision on each output except the last one.")]
+        Gateway0ShouldHasConditionOrDecisionOnEachOutputExceptTheLast,
         _0CanNotBeConnectodToAParallelJoinBecauseHasNoPreviousParallelSplit,
         [Description("Activity '{0}' with decision type should go to an exclusive or inclusive gateways.")]
-        Activity0WithDecisionTypeShouldGoToAnExclusiveOrInclusiveGateways
+        Activity0WithDecisionTypeShouldGoToAnExclusiveOrInclusiveGateways,
+        [Description("Activity '{0}' should be decision.")]
+        Activity0ShouldBeDecision
     }
 }

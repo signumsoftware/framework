@@ -374,10 +374,32 @@ namespace Signum.Engine.Workflow
 
                 if (g.Direction == WorkflowGatewayDirection.Split)
                 {
-                    if (g.Type == WorkflowGatewayType.Exclusive && g.NextConnections().OrderByDescending(a => a.Order).Skip(1).Any(c => c.Condition == null))
-                        errors.Add(WorkflowValidationMessage.Gateway0ShouldHasConditionOnEachOutputExceptTheLast .NiceToString(g));
+                    if (g.Type == WorkflowGatewayType.Exclusive || g.Type == WorkflowGatewayType.Inclusive)
+                    {
+                        if (wg.NextGraph.RelatedTo(g).OrderByDescending(a => a.Value.Order).Any(c => c.Value.DecisonResult != null))
+                        {
+                            List<WorkflowActivityEntity> previousActivities = new List<WorkflowActivityEntity>();
 
-                    if (g.Type == WorkflowGatewayType.Inclusive && g.NextConnections().Any(c => c.Condition == null))
+                            wg.PreviousGraph.DepthExploreConnections(g, (prev, conn, next) =>
+                            {
+                                if (next is WorkflowActivityEntity a)
+                                {
+                                    previousActivities.Add(a);
+                                    return false;
+                                }
+
+                                return true;
+                            });
+
+                            foreach (var act in previousActivities.Where(a => a.Type != WorkflowActivityType.Decision))
+                                errors.Add(WorkflowValidationMessage.Activity0ShouldBeDecision.NiceToString(act));
+                        }
+                    }
+
+                    if (g.Type == WorkflowGatewayType.Exclusive && wg.NextGraph.RelatedTo(g).OrderByDescending(a => a.Value.Order).Skip(1).Any(c => c.Value.DecisonResult == null && c.Value.Condition == null))
+                        errors.Add(WorkflowValidationMessage.Gateway0ShouldHasConditionOrDecisionOnEachOutputExceptTheLast.NiceToString(g));
+
+                    if (g.Type == WorkflowGatewayType.Inclusive && wg.NextGraph.RelatedTo(g).Any(c => c.Value.DecisonResult == null && c.Value.Condition == null))
                         errors.Add(WorkflowValidationMessage.Gateway0ShouldHasConditionOnEachOutput.NiceToString(g));
                 }
             });
