@@ -622,11 +622,15 @@ namespace Signum.Engine.Workflow
         {
             var bpmnElementId = @event.Attribute("id").Value;
             we.BpmnElementId = bpmnElementId;
-            we.Type = WorkflowBuilder.LaneBuilder.WorkflowEventTypes.First(kvp => kvp.Value == @event.Name.LocalName).Key;
             var model = locator.GetModelEntity<WorkflowEventModel>(bpmnElementId);
             if (model != null)
                 we.SetModel(model);
-            we.Name = @event.Attribute("name")?.Value;
+            else
+            {
+                we.Name = @event.Attribute("name")?.Value;
+                we.Type = WorkflowBuilder.LaneBuilder.WorkflowEventTypes.First(kvp => kvp.Value == @event.Name.LocalName).Key;
+            }
+
             we.Xml.DiagramXml = locator.GetDiagram(bpmnElementId).ToString();
 
             if (GraphExplorer.HasChanges(we))
