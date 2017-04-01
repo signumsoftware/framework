@@ -137,12 +137,12 @@ namespace Signum.Entities.Basics
     [Serializable]
     public class DeleteLogParametersEntity : EmbeddedEntity
     {
-        [Unit("Days"), NumberIsValidator(ComparisonType.GreaterThan, 0)]
+        [Unit("Days"), NumberIsValidator(ComparisonType.GreaterThan, -1)]
         public int DeleteLogsWithMoreThan { get; set; } = 30 * 6;
 
         public DateTime DateLimit
         {
-            get { return TimeZoneManager.Now.Date.AddDays(-DeleteLogsWithMoreThan); }
+            get { return DeleteLogsWithMoreThan == 0 ? TimeZoneManager.Now.TrimToHours() : TimeZoneManager.Now.Date.AddDays(-DeleteLogsWithMoreThan); }
         }
 
         public int ChunkSize { get; set; } = 1000;
