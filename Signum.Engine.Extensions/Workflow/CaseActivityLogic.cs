@@ -952,6 +952,7 @@ namespace Signum.Engine.Workflow
                                     .Select(gr => gr.SingleOrDefaultEx(c => c.Applicable(ctx)))
                                     .NotNull()
                                     .FirstEx();
+
                                 return FindNext(firstConnection, ctx);
                             }
                             else //if (gateway.Direction == WorkflowGatewayDirection.Join)
@@ -964,7 +965,7 @@ namespace Signum.Engine.Workflow
                         case WorkflowGatewayType.Inclusive:
                             if (gateway.Direction == WorkflowGatewayDirection.Split)
                             {
-                                var applicable = gateway.NextConnections().ToList().Where(c =>
+                                var applicable = gateway.NextConnectionsFromCache().ToList().Where(c =>
                                 {
                                     var app = c.Applicable(ctx);
                                     if (!app && gateway.Type == WorkflowGatewayType.Parallel)
@@ -973,14 +974,16 @@ namespace Signum.Engine.Workflow
                                 }).ToList();
 
                                 if (applicable.IsEmpty())
-                                    throw new InvalidOperationException("No condition applied");
-
-                                foreach (var con in applicable)
                                 {
-                                    FindNext(con, ctx);
+                                    var join = WorkflowLogic.GetWorkflowNodeGraph(gateway.Lane.Pool.Workflow.ToLite()).ParallelWorkflowPairs.GetOrThrow(gateway);
+                                    return FindNext(join, ctx);
                                 }
-
-                                return true;
+                                else
+                                {
+                                    foreach (var con in applicable)
+                                        FindNext(con, ctx);
+                                    return true;
+                                }
                             }
                             else //if (gateway.Direction == WorkflowGatewayDirection.Join)
                             {
@@ -1007,12 +1010,13 @@ namespace Signum.Engine.Workflow
                     if (wa.Is(ctx.CaseActivity.WorkflowActivity))
                         return true;
 
+                    // Parallel gateways always have CaseActivity but for Inclusive gateways maybe not be created because of conditions
                     var last = ctx.Case.CaseActivities().Where(a => a.WorkflowActivity == wa).OrderBy(a => a.StartDate).LastOrDefault();
                     if (last != null)
                         return (last.DoneDate.HasValue);
                     else
                     {
-                        //Conditions of Inclusive
+                        // We should continue backtracking reaching an CaseActivity or gateways with split direction
                         var prevsConnections = node.PreviousConnectionsFromCache().Select(a => a.From).ToList();
                         return prevsConnections.All(wn => FindPrevious(depth, wn, ctx));
                     }

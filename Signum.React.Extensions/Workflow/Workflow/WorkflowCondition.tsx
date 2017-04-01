@@ -4,7 +4,7 @@ import { PropertyRoute, Binding } from '../../../../Framework/Signum.React/Scrip
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import CSharpCodeMirror from '../../../../Extensions/Signum.React.Extensions/Codemirror/CSharpCodeMirror'
 import { WorkflowConditionEntity, ICaseMainEntity, DecisionResult } from '../Signum.Entities.Workflow'
-import { WorkflowConditionTestResponse, API, DecisionResultValues } from '../WorkflowClient'
+import { WorkflowConditionTestResponse, API, DecisionResultValues, showWorkflowTransitionContextCodeHelp } from '../WorkflowClient'
 import TypeHelpComponent from '../../Dynamic/Help/TypeHelpComponent'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
@@ -58,8 +58,11 @@ export default class WorkflowConditionComponent extends React.Component<Workflow
                         <div className="row">
                             <div className="col-sm-7">
                                 {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handleEvaluate}><i className="fa fa-play" aria-hidden="true"></i> Evaluate</button>}
+                                <div className="btn-group" style={{ marginBottom: "3px" }}>
+                                    <input type="button" className="btn btn-success btn-xs sf-button" value="ctx" onClick={() => showWorkflowTransitionContextCodeHelp()} />
+                                </div>
                                 <div className="code-container">
-                                    <pre style={{ border: "0px", margin: "0px" }}>{"boolean Evaluate(" + ctx.value.mainEntityType.cleanName + " e, WorkflowTransitionContext ctx)\n{"}</pre>
+                                    <pre style={{ border: "0px", margin: "0px" }}>{"boolean Evaluate(" + ctx.value.mainEntityType.cleanName + "Entity e, WorkflowTransitionContext ctx)\n{"}</pre>
                                     <CSharpCodeMirror script={ctx.value.eval!.script || ""} onChange={this.handleCodeChange} />
                                     <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
                                 </div>

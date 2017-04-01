@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { Link } from 'react-router'
 import * as d3 from 'd3'
-import * as numeral from 'numeral'
+import * as numbro from 'numbro'
 import * as moment from 'moment'
 import { } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
