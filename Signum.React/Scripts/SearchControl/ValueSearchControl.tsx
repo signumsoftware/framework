@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as numeral from 'numeral'
+import * as numbro from 'numbro'
 import * as moment from 'moment'
 import { DropdownButton, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { Dic, DomUtils, classes } from '../Globals'
@@ -9,7 +9,7 @@ import {
     toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, QueryCountRequest, QueryRequest
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, is, Entity, getToString, EmbeddedEntity } from '../Signum.Entities'
-import { getTypeInfos, IsByAll, getQueryKey, TypeInfo, EntityData, getQueryNiceName, toNumeralFormat, toMomentFormat, getEnumInfo } from '../Reflection'
+import { getTypeInfos, IsByAll, getQueryKey, TypeInfo, EntityData, getQueryNiceName, toNumbroFormat, toMomentFormat, getEnumInfo } from '../Reflection'
 import * as Navigator from '../Navigator'
 import { StyleContext } from '../Typecontext'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
@@ -165,8 +165,8 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
         switch (token.filterType) {
             case "Integer":
             case "Decimal":
-                const numeralFormat = toNumeralFormat(this.props.format || token.format);
-                return numeral(value).format(numeralFormat);
+                const numbroFormat = toNumbroFormat(this.props.format || token.format);
+                return numbro(value).format(numbroFormat);
             case "DateTime":
                 const momentFormat = toMomentFormat(this.props.format || token.format);
                 return moment(value).format(momentFormat);
