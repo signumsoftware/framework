@@ -209,6 +209,8 @@ namespace Signum.Entities.Workflow
         Gateway0ShouldHasConditionOnEachOutput,
         [Description("Gateway '{0}' should has condition on each output except the last one.")]
         Gateway0ShouldHasConditionOnEachOutputExceptTheLast,
-        _0CanNotBeConnectodToAParallelJoinBecauseHasNoPreviousParallelSplit
+        _0CanNotBeConnectodToAParallelJoinBecauseHasNoPreviousParallelSplit,
+        [Description("Activity '{0}' with decision type should go to an exclusive or inclusive gateways.")]
+        Activity0WithDecisionTypeShouldGoToAnExclusiveOrInclusiveGateways
     }
 }
