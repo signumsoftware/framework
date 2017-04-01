@@ -32,7 +32,7 @@ namespace Signum.Engine.Workflow
                 EstimatedDuration = ca.WorkflowActivity.EstimatedDuration,
             }).ToDictionary(a => a.CaseActivity);
 
-            var gr = WorkflowLogic.WorkflowGraphLazy.Value.TryGetC(@case.Workflow.ToLite());
+            var gr = WorkflowLogic.GetWorkflowNodeGraph(@case.Workflow.ToLite());
 
             var connections = caseActivities.Values
                 .Where(cs => cs.PreviousActivity != null && caseActivities.ContainsKey(cs.PreviousActivity))
@@ -49,8 +49,8 @@ namespace Signum.Engine.Workflow
                         {
                             BpmnElementId = c.BpmnElementId,
                             Connection = c.ToLite(),
-                            FromBpmnElementId = from.BpmnElementId,
-                            ToBpmnElementId = to.BpmnElementId,
+                            FromBpmnElementId = c.From.BpmnElementId,
+                            ToBpmnElementId = c.To.BpmnElementId,
                             DoneBy = prev.DoneBy,
                             DoneDate = prev.DoneDate.Value,
                             DoneType = prev.DoneType.Value

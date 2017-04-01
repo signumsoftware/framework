@@ -216,6 +216,7 @@
     <Compile Include="Word\TemplateRenderer.cs" />
     <Compile Include="Workflow\CaseFlowLogic.cs" />
     <Compile Include="Workflow\WorkflowEventTaskLogic.cs" />
+    <Compile Include="Workflow\WorkflowNodeGraph.cs" />
     <Compile Include="Workflow\WorkflowScriptRunner.cs" />
     <Compile Include="Workflow\CaseActivityLogic.cs" />
     <Compile Include="Workflow\LaneBuilder.cs" />
