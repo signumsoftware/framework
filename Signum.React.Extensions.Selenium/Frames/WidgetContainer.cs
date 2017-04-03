@@ -34,9 +34,9 @@ namespace Signum.React.Selenium
             return element.CaptureOnClick();
         }
 
-        public static SearchPopupProxy QuickLinkClickSearch(this IWidgetContainer container, string name)
+        public static SearchModalProxy QuickLinkClickSearch(this IWidgetContainer container, string name)
         {
-            return new SearchPopupProxy(container.QuickLinkClick(name));
+            return new SearchModalProxy(container.QuickLinkClick(name));
         }
     }
 }

@@ -36,9 +36,6 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Signum.Analyzer">
-      <HintPath>..\..\Framework\Signum.Analyzer\Binaries\Signum.Analyzer.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -66,29 +63,62 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BrowserProxy.cs" />
-    <Compile Include="EntityButtonContainer.cs" />
-    <Compile Include="LineContainer.cs" />
-    <Compile Include="LineProxies.cs" />
-    <Compile Include="Popup.cs" />
+    <Compile Include="ModalProxies\MessageModalProxy.cs" />
+    <Compile Include="Search\ColumnEditorProxy.cs" />
+    <Compile Include="Search\EntityContextMenuProxy.cs" />
+    <Compile Include="Search\FilterOptionProxy.cs" />
+    <Compile Include="Search\FiltersProxy.cs" />
+    <Compile Include="Frames\EntityButtonContainer.cs" />
+    <Compile Include="Frames\FrameModalProxy.cs" />
+    <Compile Include="Frames\FramePageProxy.cs" />
+    <Compile Include="Frames\LineContainer.cs" />
+    <Compile Include="LineProxies\BaseLineProxy.cs" />
+    <Compile Include="LineProxies\EntityBaseProxy.cs" />
+    <Compile Include="LineProxies\EntityComboProxy.cs" />
+    <Compile Include="LineProxies\EntityDetailProxy.cs" />
+    <Compile Include="LineProxies\EntityLineProxy.cs" />
+    <Compile Include="LineProxies\EntityListCheckBoxProxy.cs" />
+    <Compile Include="LineProxies\EntityListProxy.cs" />
+    <Compile Include="LineProxies\EntityRepeaterProxy.cs" />
+    <Compile Include="LineProxies\EntityStripProxy.cs" />
+    <Compile Include="LineProxies\EntityTabRepeaterProxy.cs" />
+    <Compile Include="LineProxies\FileLineProxy.cs" />
+    <Compile Include="LineProxies\ValueLineProxy.cs" />
+    <Compile Include="ModalProxies\ModalProxy.cs" />
+    <Compile Include="Search\PaginationSelectorProxy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SearchDialogProxy.cs" />
+    <Compile Include="Search\QueryTokenBuilderProxy.cs" />
+    <Compile Include="Search\QueryTokenPartProxy.cs" />
+    <Compile Include="Search\ResultTableProxy.cs" />
+    <Compile Include="Search\SearchControlProxy.cs" />
+    <Compile Include="Search\SearchModalProxy.cs" />
+    <Compile Include="Search\SearchPageProxy.cs" />
+    <Compile Include="ModalProxies\SelectorModalProxy.cs" />
     <Compile Include="SeleniumExtensions.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ValidationSummaryContainer.cs" />
-    <Compile Include="WidgetContainer.cs" />
+    <Compile Include="Frames\ValidationSummaryContainer.cs" />
+    <Compile Include="ModalProxies\ValueLineModalProxy.cs" />
+    <Compile Include="WebElementLocator.cs" />
+    <Compile Include="Frames\WidgetContainer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\..\Framework\Signum.Analyzer\Binaries\Signum.Analyzer.dll" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj">
-      <Project>{7F2DB6FE-C109-4057-B207-C62A767F905D}</Project>
+      <Project>{7f2db6fe-c109-4057-b207-c62a767f905d}</Project>
       <Name>Signum.Engine</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj">
-      <Project>{F2B51D08-498D-4C9F-8112-9521A7762B02}</Project>
+      <Project>{f2b51d08-498d-4c9f-8112-9521a7762b02}</Project>
       <Name>Signum.Entities</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Framework\Signum.Utilities\Signum.Utilities.csproj">
-      <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
+      <Project>{f7d3f72d-741d-4f67-8cf8-cd41b9035fed}</Project>
       <Name>Signum.Utilities</Name>
     </ProjectReference>
     <ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj">
@@ -99,9 +129,6 @@
       <Project>{7d851227-5294-4beb-990e-56b4fbb7a148}</Project>
       <Name>Signum.Entities.Extensions</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

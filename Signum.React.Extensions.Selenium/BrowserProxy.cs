@@ -58,19 +58,19 @@ namespace Signum.React.Selenium
         }
 
 
-        public PageFrame<T> NormalPage<T>(PrimaryKey id) where T : Entity
+        public FramePageProxy<T> NormalPage<T>(PrimaryKey id) where T : Entity
         {
             return NormalPage<T>(Lite.Create<T>(id));
         }
 
-        public PageFrame<T> NormalPage<T>() where T : Entity
+        public FramePageProxy<T> NormalPage<T>() where T : Entity
         {
             var url = Url(NavigateRoute(typeof(T), null));
 
             return AsNormalPage<T>(url);
         }
 
-        public PageFrame<T> NormalPage<T>(Lite<T> lite) where T : Entity
+        public FramePageProxy<T> NormalPage<T>(Lite<T> lite) where T : Entity
         {
             if(lite != null && lite.EntityType != typeof(T))
                 throw new InvalidOperationException("Use NormalPage<{0}> instead".FormatWith(lite.EntityType.Name));
@@ -80,11 +80,11 @@ namespace Signum.React.Selenium
             return AsNormalPage<T>(url);
         }
 
-        public PageFrame<T> AsNormalPage<T>(string url) where T : Entity
+        public FramePageProxy<T> AsNormalPage<T>(string url) where T : Entity
         {
             Selenium.Url = url;
 
-            return new PageFrame<T>(Selenium);
+            return new FramePageProxy<T>(Selenium);
         }
 
         public virtual string NavigateRoute(Type type, PrimaryKey? id)

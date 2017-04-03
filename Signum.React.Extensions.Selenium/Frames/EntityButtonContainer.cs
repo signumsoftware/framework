@@ -7,6 +7,7 @@ using OpenQA.Selenium.Remote;
 using Signum.Entities;
 using Signum.Utilities;
 using Signum.React.Selenium;
+using Signum.React.Selenium.ModalProxies;
 
 namespace Signum.React.Selenium
 {
@@ -90,7 +91,7 @@ namespace Signum.React.Selenium
             {
                 container.OperationClick(symbol);
                 if (consumeAlert)
-                    container.Element.GetDriver().ConsumeAlert();
+                    container.Element.GetDriver().CloseMessageModal(MessageModalButton.Yes);
             });
 
             var vs = container as IValidationSummaryContainer;
@@ -115,26 +116,26 @@ namespace Signum.React.Selenium
                 throw new InvalidOperationException("Validation Errors found: \r\n" + errors.ToString("\r\n").Indent(4));
         }
 
-        public static void Delete<T>(this PopupFrame<T> container, DeleteSymbol<T> symbol, bool consumeAlert = true)
+        public static void Delete<T>(this FrameModalProxy<T> container, DeleteSymbol<T> symbol, bool consumeAlert = true)
               where T : Entity
         {
             container.OperationClick(symbol);
             if (consumeAlert)
-                container.Selenium.ConsumeAlert();
+                container.Selenium.CloseMessageModal(MessageModalButton.Yes);
 
             container.WaitNotVisible();
         }
 
-        public static PopupFrame<T> ConstructFrom<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
+        public static FrameModalProxy<T> ConstructFrom<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
             where T : Entity
             where F : Entity
         {
             var element = container.OperationClickCapture(symbol);
 
-            return new PopupFrame<T>(element).WaitLoaded();
+            return new FrameModalProxy<T>(element).WaitLoaded();
         }
 
-        public static PageFrame<T> ConstructFromNormalPage<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
+        public static FramePageProxy<T> ConstructFromNormalPage<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
             where T : Entity
             where F : Entity
         {
@@ -142,7 +143,7 @@ namespace Signum.React.Selenium
 
             container.Element.GetDriver().Wait(() => { try { return container.EntityInfo().IsNew; } catch { return false; } });
 
-            return new PageFrame<T>(container.Element.GetDriver());
+            return new FramePageProxy<T>(container.Element.GetDriver());
         }
 
         public static long? TestTicks(this IEntityButtonContainer container)
