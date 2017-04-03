@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { Link } from 'react-router'
-import * as numeral from 'numeral'
+import * as numbro from 'numbro'
 import * as moment from 'moment'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
