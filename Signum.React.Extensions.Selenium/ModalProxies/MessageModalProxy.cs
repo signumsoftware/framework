@@ -11,12 +11,8 @@ namespace Signum.React.Selenium.ModalProxies
 {
     public class MessageModalProxy : ModalProxy
     {
-        public RemoteWebDriver Selenium { get; private set; }
-
         public MessageModalProxy(IWebElement element) : base(element)
-        {
-            this.Selenium = element.GetDriver();
-        
+        {        
             if (!this.Element.HasClass("modal", "fade", "in"))
                 throw new InvalidOperationException("Not a valid modal");
         }
