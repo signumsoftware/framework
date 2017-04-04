@@ -17,6 +17,9 @@ import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { confirmInNecessary, notifySuccess, defaultExecuteEntity } from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 import { defaultContextualClick } from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
 
+import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
+import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
+
 import { UserEntity } from '../../../Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization'
 import * as DynamicViewClient from '../../../Extensions/Signum.React.Extensions/Dynamic/DynamicViewClient'
 import { CodeContext } from '../../../Extensions/Signum.React.Extensions/Dynamic/View/NodeUtils'
@@ -119,7 +122,14 @@ export function start(options: { routes: JSX.Element[] }) {
         onView: (entityOrPack, options) => viewCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options && options.readOnly),
     }));
 
-    Constructor.registerConstructor(WorkflowTimeoutEntity, () => Constructor.construct(TimeSpanEntity).then(ep => ep && WorkflowTimeoutEntity.New({ timeout: ep.entity })));
+    Operations.addSettings(new EntityOperationSettings(WorkflowOperation.SetMainEntityStrategy,
+        {
+            isVisible: ctx => false,
+            onClick: (eoc) => chooseWorkflowMainEntityStrategy().then(s => s && EntityOperations.defaultExecuteLite(eoc, s)).done(),
+            contextual: { isVisible: ctx => true, onClick: (coc, e) => chooseWorkflowMainEntityStrategy().then(s => s && ContextualOperations.defaultContextualClick(coc, e, s)).done() },
+            contextualFromMany: { isVisible: ctx => false },
+        }));
+
 
     Operations.addSettings(new EntityOperationSettings(CaseOperation.SetTags, { isVisible: ctx => false }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { hideOnCanExecute: true, style: "primary" }));
@@ -160,6 +170,7 @@ export function start(options: { routes: JSX.Element[] }) {
     Constructor.registerConstructor(WorkflowConditionEntity, () => WorkflowConditionEntity.New({ eval: WorkflowConditionEval.New() }));
     Constructor.registerConstructor(WorkflowActionEntity, () => WorkflowActionEntity.New({ eval: WorkflowActionEval.New() }));
     Constructor.registerConstructor(WorkflowScriptEntity, () => WorkflowScriptEntity.New({ eval: WorkflowScriptEval.New() }));
+    Constructor.registerConstructor(WorkflowTimeoutEntity, () => Constructor.construct(TimeSpanEntity).then(ep => ep && WorkflowTimeoutEntity.New({ timeout: ep.entity })));
 
     registerCustomContexts();
 }
@@ -460,6 +471,17 @@ export function getViewPromise<T extends ICaseMainEntity>(entity: T, activityVie
 
 export function getViewNames(typeName: string) {
     return Dic.getKeys(registeredActivityViews[typeName] || {});
+}
+
+function chooseWorkflowMainEntityStrategy(): Promise<WorkflowMainEntityStrategy | undefined> {
+    return SelectorModal.chooseElement(WorkflowMainEntityStrategy.values(), {
+        title: WorkflowMainEntityStrategy.niceName(),
+        display: v => WorkflowMainEntityStrategy.niceName(v)!,
+    }).then(val => {
+        if (!val)
+            return undefined;
+        return val;
+    });
 }
 
 export namespace API {

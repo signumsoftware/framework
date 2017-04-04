@@ -210,6 +210,7 @@ namespace Signum.Engine.Workflow
                         e.Id,
                         e.Name,
                         e.MainEntityType,
+                        e.MainEntityStrategy,
                     });
 
                 WorkflowGraph.Register();
@@ -508,6 +509,22 @@ namespace Signum.Engine.Workflow
                         var result = wb.Clone();
 
                         return result;
+                    }
+                }.Register();
+
+                new Execute(WorkflowOperation.SetMainEntityStrategy)
+                {
+                    Execute = (e, args) =>
+                    {
+                        var newStrategy = args.GetArg<string>();
+                        e.MainEntityStrategy = (WorkflowMainEntityStrategy)Enum.Parse(typeof(WorkflowMainEntityStrategy), newStrategy);
+
+                        if (e.IsGraphModified) {
+                            e.Save();
+
+                            var wb = new WorkflowBuilder(e);
+                            wb.ValidateGraph();
+                        }
                     }
                 }.Register();
             }

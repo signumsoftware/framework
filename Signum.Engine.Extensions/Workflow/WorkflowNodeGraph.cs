@@ -67,7 +67,7 @@ namespace Signum.Engine.Workflow
             if (Workflow.MainEntityStrategy != WorkflowMainEntityStrategy.CreateNew)
                 if (Events.Count(a => a.Value.Type == WorkflowEventType.Start) == 0)
                     errors.Add(WorkflowValidationMessage.NormalStartEventIsRequiredWhenThe0Are1Or2.NiceToString(
-                        Workflow.MainEntityStrategy.NiceToString(), 
+                        Workflow.MainEntityStrategy.GetType().NiceName(), 
                         WorkflowMainEntityStrategy.SelectByUser.NiceToString(), 
                         WorkflowMainEntityStrategy.Both.NiceToString()));
 
