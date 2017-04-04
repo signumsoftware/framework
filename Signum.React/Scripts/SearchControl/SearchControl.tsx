@@ -40,6 +40,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     onSelectionChanged?: (entity: Lite<Entity>[]) => void;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
     onResult?: (table: ResultTable) => void;
+    onSearch?: (fo: FindOptionsParsed) => void;
     hideFullScreenButton?: boolean;
     showBarExtension?: boolean;
     largeToolbarButtons?: boolean; 
@@ -131,7 +132,8 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             entityFormatter={this.props.entityFormatter}
             showContextMenu={this.props.showContextMenu}
             onSelectionChanged={this.props.onSelectionChanged}
-            onFiltersChanged= {this.props.onFiltersChanged}
+            onFiltersChanged={this.props.onFiltersChanged}
+            onSearch={this.props.onSearch}
             onResult={this.props.onResult}
             hideFullScreenButton={this.props.hideFullScreenButton}
             showBarExtension={this.props.showBarExtension}
