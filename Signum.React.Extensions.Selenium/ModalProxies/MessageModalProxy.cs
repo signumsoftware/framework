@@ -12,7 +12,7 @@ namespace Signum.React.Selenium.ModalProxies
     public class MessageModalProxy : ModalProxy
     {
         public MessageModalProxy(IWebElement element) : base(element)
-        {        
+        {
             if (!this.Element.HasClass("modal", "fade", "in"))
                 throw new InvalidOperationException("Not a valid modal");
         }
@@ -20,8 +20,8 @@ namespace Signum.React.Selenium.ModalProxies
         public IWebElement GetButton(MessageModalButton button)
         {
             var className =
-                button == MessageModalButton.Yes ? "sf-yes-button": 
-                button == MessageModalButton.No ? "sf-no-button":
+                button == MessageModalButton.Yes ? "sf-yes-button" :
+                button == MessageModalButton.No ? "sf-no-button" :
                 button == MessageModalButton.Ok ? "sf-ok-button" :
                 button == MessageModalButton.Cancel ? "sf-cancel-button" :
             throw new NotImplementedException("Unexpected button");
@@ -53,39 +53,28 @@ namespace Signum.React.Selenium.ModalProxies
     public static class MessageModalProxyExtensions
     {
         public static bool IsMessageModalPresent(this RemoteWebDriver selenium)
-        {
-            try
-            {
-                var ret = GetMessageModal(selenium);
-                if (ret != null)
-                    return true;
+        {       
+            var message = GetMessageModal(selenium);
+
+            if (message == null)
                 return false;
-            }
-            catch (NoAlertPresentException)
-            {
-                return false;
-            }
+
+            return true;
         }
 
         public static MessageModalProxy GetMessageModal(this RemoteWebDriver selenium)
         {
-            try
-            {
-                var element = selenium.FindElementByClassName("message-modal");
-                return new MessageModalProxy(element);
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
+            var element = selenium.TryFindElement(By.ClassName("message-modal"));
 
-        }  
+            if (element == null)
+                 return null;
+
+            return new MessageModalProxy(element);
+        }
 
         public static void CloseMessageModal(this RemoteWebDriver selenium, MessageModalButton button)
         {
-            var messagePresent = selenium.Wait(() => IsMessageModalPresent(selenium));
-
-            var message = selenium.Wait(() => GetMessageModal(selenium)); 
+            var message = selenium.Wait(() => GetMessageModal(selenium));
 
             message.Click(button);
         }
