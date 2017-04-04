@@ -42,6 +42,15 @@ namespace Signum.Engine.Migrations
                         e.UniqueName,
                         e.ExecutionDate,
                     });
+
+                sb.Include<RunProcessEntity>()
+                    .WithQuery(dqm, e => new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.ProcessName,
+                        e.ExecutionDate,
+                    });
             }
         }
 
