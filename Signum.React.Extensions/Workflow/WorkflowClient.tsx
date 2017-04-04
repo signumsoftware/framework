@@ -42,20 +42,21 @@ import {
     CaseActivityOperation, CaseEntity, CaseNotificationEntity, CaseNotificationState, InboxFilterModel, WorkflowOperation, WorkflowPoolEntity, WorkflowScriptEntity, WorkflowScriptEval,
     WorkflowActivityOperation, WorkflowReplacementModel, WorkflowModel, BpmnEntityPair, WorkflowActivityModel, ICaseMainEntity, WorkflowGatewayEntity, WorkflowEventEntity,
     WorkflowLaneModel, WorkflowConnectionModel, IWorkflowNodeEntity, WorkflowActivityMessage, WorkflowTimeoutEntity, CaseTagEntity, CaseTagsModel, CaseTagTypeEntity,
-    WorkflowScriptRunnerPanelPermission, WorkflowEventModel, WorkflowEventTaskEntity, DoneType, CaseOperation
+    WorkflowScriptRunnerPanelPermission, WorkflowEventModel, WorkflowEventTaskEntity, DoneType, CaseOperation, WorkflowMainEntityStrategy
 } from './Signum.Entities.Workflow'
 
 import InboxFilter from './Case/InboxFilter'
 import Workflow from './Workflow/Workflow'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
-
+import { SearchControl } from "../../../Framework/Signum.React/Scripts/Search";
+import { getTypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection";
 
 export function start(options: { routes: JSX.Element[] }) {
 
     options.routes.push(<Route path="workflow">
         <Route path="activity/:caseActivityId" getComponent={(loc, cb) => require(["./Case/CaseFramePage"], (Comp) => cb(null, Comp.default))} />
-        <Route path="new/:workflowId" getComponent={(loc, cb) => require(["./Case/CaseFramePage"], (Comp) => cb(null, Comp.default))} />
+        <Route path="new/:workflowId/:mainEntityStrategy" getComponent={(loc, cb) => require(["./Case/CaseFramePage"], (Comp) => cb(null, Comp.default))} />
     </Route>);
 
     QuickLinks.registerQuickLink(CaseActivityEntity, ctx => [
@@ -155,6 +156,7 @@ export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(WorkflowEventModel, w => new ViewPromise(m => require(['./Workflow/WorkflowEventModel'], m))));
     Navigator.addSettings(new EntitySettings(WorkflowEventTaskEntity, w => new ViewPromise(m => require(['./Workflow/WorkflowEventTask'], m))));
 
+    Constructor.registerConstructor(WorkflowEntity, () => WorkflowEntity.New({ mainEntityStrategy: WorkflowMainEntityStrategy.value("CreateNew") }));
     Constructor.registerConstructor(WorkflowConditionEntity, () => WorkflowConditionEntity.New({ eval: WorkflowConditionEval.New() }));
     Constructor.registerConstructor(WorkflowActionEntity, () => WorkflowActionEntity.New({ eval: WorkflowActionEval.New() }));
     Constructor.registerConstructor(WorkflowScriptEntity, () => WorkflowScriptEntity.New({ eval: WorkflowScriptEval.New() }));
@@ -374,10 +376,22 @@ export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEn
     });
 }
 
-export function createNewCase(workflowId: number | string): Promise<CaseEntityPack> {
+export function createNewCase(workflowId: number | string, mainEntityStrategy: WorkflowMainEntityStrategy): Promise<CaseEntityPack | undefined> {
     return Navigator.API.fetchEntity(WorkflowEntity, workflowId)
-        .then(wf => Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow))
-        .then(ep => ({
+        .then(wf => {
+            if (mainEntityStrategy == "SelectByUser")
+                return Finder.find({ queryName: wf.mainEntityType!.cleanName })
+                    .then(lite => {
+                        if (!lite)
+                            return undefined;
+
+                        return Navigator.API.fetchAndForget(lite!)
+                            .then(entity => Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow, entity))
+                    });
+
+            return Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow);
+        })
+        .then(ep => ep && ({
             activity: ep.entity,
             canExecuteActivity: ep.canExecute,
             canExecuteMainEntity: {}
@@ -457,8 +471,8 @@ export namespace API {
         return ajaxGet<CaseTagTypeEntity[]>({ url: `~/api/workflow/tags/${caseLite.id}` });
     }
 
-    export function starts(): Promise<Array<Lite<WorkflowEntity>>> {
-        return ajaxGet<Array<Lite<WorkflowEntity>>>({ url: `~/api/workflow/starts` });
+    export function starts(): Promise<Array<WorkflowEntity>> {
+        return ajaxGet<Array<WorkflowEntity>>({ url: `~/api/workflow/starts` });
     }
 
     export function getWorkflowModel(workflow: Lite<WorkflowEntity>): Promise<WorkflowModel> {

@@ -181,6 +181,7 @@ namespace Signum.Engine.Workflow
                 {
                     throw new InvalidOperationException($"Unexpected direction of gateway '{g}' (Should be '{newDirection.NiceToString()}'). Consider saving Workflow '{workflow}'.");
                 });
+
                 if (errors.HasItems())
                     throw new ApplicationException("Errors in Workflow '" + workflow + "':\r\n" + errors.ToString("\r\n").Indent(4));
 
@@ -535,14 +536,13 @@ namespace Signum.Engine.Workflow
            actor.Is(user.Role);
 
 
-        public static List<Lite<WorkflowEntity>> GetAllowedStarts()
+        public static List<WorkflowEntity> GetAllowedStarts()
         {
             return (from w in Database.Query<WorkflowEntity>()
                     let s = w.WorkflowEvents().Single(a => a.Type == WorkflowEventType.Start)
                     let a = (WorkflowActivityEntity)s.NextConnections().Single().To
                     where a.Lane.Actors.Any(a => IsCurrentUserActor.Evaluate(a, UserEntity.Current))
-                    select w.ToLite())
-                    .ToList();
+                    select w).ToList();
         }
 
         public static WorkflowModel GetWorkflowModel(WorkflowEntity workflow)

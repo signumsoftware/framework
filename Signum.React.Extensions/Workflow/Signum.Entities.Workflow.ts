@@ -401,6 +401,7 @@ export interface WorkflowEntity extends Entities.Entity {
     Type: "Workflow";
     name?: string | null;
     mainEntityType?: Basics.TypeEntity | null;
+    mainEntityStrategy?: WorkflowMainEntityStrategy;
 }
 
 export const WorkflowEventEntity = new Type<WorkflowEventEntity>("WorkflowEvent");
@@ -550,6 +551,12 @@ export module WorkflowLaneOperation {
     export const Delete : Entities.DeleteSymbol<WorkflowLaneEntity> = registerSymbol("Operation", "WorkflowLaneOperation.Delete");
 }
 
+export const WorkflowMainEntityStrategy = new EnumType<WorkflowMainEntityStrategy>("WorkflowMainEntityStrategy");
+export type WorkflowMainEntityStrategy =
+    "CreateNew" |
+    "SelectByUser" |
+    "Both";
+
 export module WorkflowMessage {
     export const _0BelongsToADifferentWorkflow = new MessageKey("WorkflowMessage", "_0BelongsToADifferentWorkflow");
     export const Condition0IsDefinedFor1Not2 = new MessageKey("WorkflowMessage", "Condition0IsDefinedFor1Not2");
@@ -669,6 +676,7 @@ export module WorkflowValidationMessage {
     export const ParticipantsAndProcessesAreNotSynchronized = new MessageKey("WorkflowValidationMessage", "ParticipantsAndProcessesAreNotSynchronized");
     export const MultipleStartEventsAreNotAllowed = new MessageKey("WorkflowValidationMessage", "MultipleStartEventsAreNotAllowed");
     export const SomeStartEventIsRequired = new MessageKey("WorkflowValidationMessage", "SomeStartEventIsRequired");
+    export const NormalStartEventIsRequiredWhenThe0Are1Or2 = new MessageKey("WorkflowValidationMessage", "NormalStartEventIsRequiredWhenThe0Are1Or2");
     export const TheFollowingTasksAreGoingToBeDeleted = new MessageKey("WorkflowValidationMessage", "TheFollowingTasksAreGoingToBeDeleted");
     export const FinishEventIsRequired = new MessageKey("WorkflowValidationMessage", "FinishEventIsRequired");
     export const Activity0CanNotRejectToStart = new MessageKey("WorkflowValidationMessage", "Activity0CanNotRejectToStart");
@@ -691,7 +699,7 @@ export module WorkflowValidationMessage {
     export const TimerOrConditionalStartEventsCanNotGoToJoinGateways = new MessageKey("WorkflowValidationMessage", "TimerOrConditionalStartEventsCanNotGoToJoinGateways");
     export const Gateway0ShouldHasConditionOnEachOutput = new MessageKey("WorkflowValidationMessage", "Gateway0ShouldHasConditionOnEachOutput");
     export const Gateway0ShouldHasConditionOrDecisionOnEachOutputExceptTheLast = new MessageKey("WorkflowValidationMessage", "Gateway0ShouldHasConditionOrDecisionOnEachOutputExceptTheLast");
-    export const _0CanNotBeConnectodToAParallelJoinBecauseHasNoPreviousParallelSplit = new MessageKey("WorkflowValidationMessage", "_0CanNotBeConnectodToAParallelJoinBecauseHasNoPreviousParallelSplit");
+    export const _0CanNotBeConnectedToAParallelJoinBecauseHasNoPreviousParallelSplit = new MessageKey("WorkflowValidationMessage", "_0CanNotBeConnectedToAParallelJoinBecauseHasNoPreviousParallelSplit");
     export const Activity0WithDecisionTypeShouldGoToAnExclusiveOrInclusiveGateways = new MessageKey("WorkflowValidationMessage", "Activity0WithDecisionTypeShouldGoToAnExclusiveOrInclusiveGateways");
     export const Activity0ShouldBeDecision = new MessageKey("WorkflowValidationMessage", "Activity0ShouldBeDecision");
 }

@@ -9,7 +9,7 @@ import { EntityPack, Entity, Lite, JavascriptMessage, entityInfo, getToString, t
 import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from '../../../../Framework/Signum.React/Scripts/Frames/Widgets'
 import ValidationErrors from '../../../../Framework/Signum.React/Scripts/Frames/ValidationErrors'
 import ButtonBar from '../../../../Framework/Signum.React/Scripts/Frames/ButtonBar'
-import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperation } from '../Signum.Entities.Workflow'
+import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperation, WorkflowMainEntityStrategy } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 import CaseFromSenderInfo from './CaseFromSenderInfo'
 import CaseButtonBar from './CaseButtonBar'
@@ -19,7 +19,7 @@ import InlineCaseTags from './InlineCaseTags'
 require("../../../../Framework/Signum.React/Scripts/Frames/Frames.css");
 require("./Case.css");
 
-interface CaseFramePageProps extends ReactRouter.RouteComponentProps<{}, { workflowId: string; caseActivityId?: string }> {
+interface CaseFramePageProps extends ReactRouter.RouteComponentProps<{}, { workflowId: string; mainEntityStrategy: string; caseActivityId?: string }> {
 }
 
 interface CaseFramePageState {
@@ -68,7 +68,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
 
         } else if (routeParams.workflowId) {
             const ti = getTypeInfo(WorkflowEntity);
-            return WorkflowClient.createNewCase(parseId(ti, routeParams.workflowId))
+            return WorkflowClient.createNewCase(parseId(ti, routeParams.workflowId), (routeParams.mainEntityStrategy as WorkflowMainEntityStrategy))
                 .then(pack => this.setState({ pack }));
 
         } else
@@ -76,6 +76,9 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     }
 
     loadComponent(): Promise<void> {
+        if (!this.state.pack)
+            return new Promise<void>((resolve, error) => { });
+
         const a = this.state.pack!.activity;
         if (a.workflowActivity) {
             return WorkflowClient.getViewPromise(a.case.mainEntity, a.workflowActivity.viewName).promise
