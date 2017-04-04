@@ -7,9 +7,10 @@ import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 import { ValueLine, EntityLine, TypeContext } from '../../../../Framework/Signum.React/Scripts/Lines'
 
-import { ModifiableEntity, Entity, Lite, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { ModifiableEntity, Entity, Lite, JavascriptMessage, NormalWindowMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { getTypeInfo, Binding, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal'
+import ModalMessage from '../../../../Framework/Signum.React/Scripts/Modals/ModalMessage'
 import { DynamicViewTree } from './DynamicViewTree'
 import { DynamicViewInspector, CollapsableTypeHelp } from './Designer'
 import { NodeConstructor, BaseNode } from './Nodes'
@@ -111,7 +112,13 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
 
     handleTypeRemove = () => {
         if (this.props.ctx.value.modified || this.props.ctx.value.viewContent != JSON.stringify(this.state.rootNode!))
-            return Promise.resolve(confirm(JavascriptMessage.loseCurrentChanges.niceToString()));
+            return ModalMessage.show({
+                title: NormalWindowMessage.ThereAreChanges.niceToString(),
+                message: JavascriptMessage.loseCurrentChanges.niceToString(),
+                buttons: "yes_no",
+                icon: "warning",
+                defaultStyle: "warning"
+            }).then(result => { return result == "yes"; });
 
         return Promise.resolve(true);
     }

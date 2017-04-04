@@ -86,8 +86,8 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
         const no = NodeUtils.registeredNodes[dn.node.kind];
 
         const cn = dn.node as ContainerNode;
-        
-        const isRoot = (dn == this.props.rootNode);
+
+        const isRoot = (dn.node == this.props.rootNode.node);
         
         return (
                 <ContextMenu position={cm.position} onHide={this.handleContextOnHide}>

@@ -105,4 +105,12 @@ namespace Signum.Entities.Workflow
     {
         public static readonly ExecuteSymbol<CaseTagTypeEntity> Save;
     }
+
+    [InTypeScript(true), DescriptionOptions(DescriptionOptions.Members)]
+    public enum CaseFlowColor
+    {
+        CaseMaxDuration,
+        AverageDuration,
+        EstimatedDuration
+    }
 }

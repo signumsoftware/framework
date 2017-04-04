@@ -98,7 +98,9 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string Name { get; set; }
 
-        public bool IsBranching { get; set; }
+        public bool NeedDecisonResult { get; set; }
+        public bool NeedCondition { get; set; }
+        public bool NeedOrder { get; set; }
 
         public DecisionResult? DecisonResult { get; set; }
 

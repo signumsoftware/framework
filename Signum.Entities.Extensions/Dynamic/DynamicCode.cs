@@ -11,9 +11,9 @@ namespace Signum.Entities.Dynamic
     public static class DynamicCode
     {
         public static string AssemblyDirectory = Path.GetDirectoryName(new Uri(typeof(Entity).Assembly.CodeBase).LocalPath);
-        public static string CodeGenEntitiesNamespace;
-        public static string CodeGenDirectory;
-        public static string CodeGenAssembly;
+        public static string CodeGenEntitiesNamespace = "Signum.Entities.CodeGen";
+        public static string CodeGenDirectory = "CodeGen";
+        public static string CodeGenAssembly = "CodeGenAssymbly.dll";
         public static string CodeGenAssemblyPath;
 
         public static HashSet<string> Namespaces = new HashSet<string>

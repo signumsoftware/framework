@@ -21,6 +21,7 @@ namespace Signum.Engine.Workflow
         {
             WorkflowLogic.Start(sb, dqm, getConfiguration);
             CaseActivityLogic.Start(sb, dqm);
+            WorkflowEventTaskLogic.Start(sb, dqm);
         }
     }
 }

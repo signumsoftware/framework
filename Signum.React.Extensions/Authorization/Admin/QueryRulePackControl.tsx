@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { Button } from 'react-bootstrap'
 import { Link } from 'react-router'
-import * as numbro from 'numbro'
+import * as numeral from 'numeral'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { notifySuccess }from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'

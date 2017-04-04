@@ -7,11 +7,12 @@ import { ajaxPost, ajaxGet, ValidationError } from '../../../Framework/Signum.Re
 import { SearchControl, ValueSearchControlLine } from '../../../Framework/Signum.React/Scripts/Search'
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
+import ModalMessage from '../../../Framework/Signum.React/Scripts/Modals/ModalMessage'
 import { EntityData, EntityKind, symbolNiceName } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
-import { Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { Entity, NormalControlMessage, NormalWindowMessage } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
 import * as QuickLink from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import { StyleContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
@@ -36,10 +37,18 @@ export function start(options: { routes: JSX.Element[] }) {
             Operations.API.executeEntity(eoc.entity, eoc.operationInfo.key)
                 .then(pack => { eoc.frame.onReload(pack); EntityOperations.notifySuccess(); })
                 .then(() => {
-                    if (AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel) &&
-                        confirm(DynamicTypeMessage.DynamicType0SucessfullySavedGoToDynamicPanelNow.niceToString(eoc.entity.typeName)))
-                        window.open(Navigator.currentHistory.createHref("~/dynamic/panel"));
-                }) 
+                    if (AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel)) {
+                        ModalMessage.show({
+                            title: NormalControlMessage.Save.niceToString(),
+                            message: DynamicTypeMessage.DynamicType0SucessfullySavedGoToDynamicPanelNow.niceToString(eoc.entity.typeName),
+                            buttons: "yes_no",
+                            defaultStyle: "success",
+                            icon: "success"
+                        }).then(result => {
+                            window.open(Navigator.currentHistory.createHref("~/dynamic/panel"));
+                        }).done();
+                    }
+                })
                 .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
                 .done();
         }
@@ -90,7 +99,7 @@ export interface DynamicTypeDefinition {
     customTypes?: DynamicTypeCustomCode;
     customBeforeSchema?: DynamicTypeCustomCode;
     queryFields: string[];
-    multiColumnUniqueIndex?: MultiColumnUniqueIndex; 
+    multiColumnUniqueIndex?: MultiColumnUniqueIndex;
     properties: DynamicProperty[];
     toStringExpression?: string;
 }
@@ -159,15 +168,15 @@ export namespace Validators {
     export interface DynamicValidator {
         type: string;
     }
-    
+
     export interface StringLength extends DynamicValidator {
         type: 'StringLength';
         allowNulls: boolean;
         multiLine: boolean;
-        min ?: number;
-        max ?: number;
-        allowLeadingSpaces ?: boolean;
-        allowTrailingSpaces ?: boolean;
+        min?: number;
+        max?: number;
+        allowLeadingSpaces?: boolean;
+        allowTrailingSpaces?: boolean;
     }
 
     export interface Decimals extends DynamicValidator {
@@ -212,7 +221,7 @@ export namespace Validators {
         textCase: string;
     }
 
-    export const StringCaseTypeValues = ["UpperCase", "LowerCase"];   
+    export const StringCaseTypeValues = ["UpperCase", "LowerCase"];
 
 }
 

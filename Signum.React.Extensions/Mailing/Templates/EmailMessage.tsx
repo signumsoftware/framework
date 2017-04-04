@@ -11,7 +11,7 @@ import { EmailMessageEntity, EmailAddressEntity, EmailRecipientEntity, EmailAtta
 import { EmailTemplateEntity, EmailTemplateContactEntity, EmailTemplateRecipientEntity, EmailTemplateMessageEntity, EmailTemplateViewMessage, EmailTemplateMessage } from '../Signum.Entities.Mailing'
 import FileLine from '../../Files/FileLine'
 import IFrameRenderer from './IFrameRenderer'
-import HtmlCodemirror from './HtmlCodemirror'
+import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
 
 
 export default class EmailMessage extends React.Component<{ ctx: TypeContext<EmailMessageEntity> }, void> {

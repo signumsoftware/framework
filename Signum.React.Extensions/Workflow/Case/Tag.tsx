@@ -16,7 +16,7 @@ require("./Tag.css");
 export default class Tag extends React.Component<{ tag: CaseTagTypeEntity }, void> {
     render() {
         const tag = this.props.tag;
-        var color = Color.parse(tag.color!) || Color.Black;
+        var color = Color.tryParse(tag.color!) || Color.Black;
 
         return (
             <span className="case-tag" style={{

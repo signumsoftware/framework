@@ -82,7 +82,9 @@ namespace Signum.Web.Profiler
 
         private void Dispose(ViewDataDictionary viewData, string key)
         {
-            IDisposable elapsed = (IDisposable)viewData.TryGetC(key);
+            //IDisposable elapsed = (IDisposable)viewData.TryGetC(key);
+            IDisposable elapsed = viewData.ContainsKey(key) ? (IDisposable)viewData[key] : null;
+
             if (elapsed != null)
             {
                 elapsed.Dispose();

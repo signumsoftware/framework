@@ -195,7 +195,7 @@ namespace Signum.Web.Auth
             {
                 UserEntity user = ResetPasswordRequestLogic.GetUserByEmail(email);
 
-                if(user == null)
+                if (user == null)
                 {
                     ModelState.AddModelError("email", AuthMessage.ThereSNotARegisteredUserWithThatEmailAddress.NiceToString());
                     return View(AuthClient.ResetPasswordView);
@@ -253,8 +253,13 @@ namespace Signum.Web.Auth
 
                 var context = user.ApplyChanges(this, UserMapping.ChangePassword, "").Validate();
 
-                if (!context.Errors.TryGetC(UserMapping.NewPasswordKey).IsNullOrEmpty() ||
-                    !context.Errors.TryGetC(UserMapping.NewPasswordBisKey).IsNullOrEmpty())
+
+                HashSet<string> errorNpk = null;
+                HashSet<string> errorNpbk = null;
+                context.Errors.TryGetValue(UserMapping.NewPasswordKey, out errorNpk);
+                context.Errors.TryGetValue(UserMapping.NewPasswordBisKey, out errorNpbk);
+
+                if (!errorNpk.IsNullOrEmpty() || !errorNpbk.IsNullOrEmpty())
                 {
                     ViewData["Title"] = AuthMessage.ChangePassword.NiceToString();
                     ModelState.FromContext(context);
@@ -316,7 +321,7 @@ namespace Signum.Web.Auth
             if (string.IsNullOrEmpty(password))
                 return LoginError("password", AuthMessage.PasswordMustHaveAValue.NiceToString());
 
-            if(UserEntity.Current != null)
+            if (UserEntity.Current != null)
             {
                 if (UserLoggingOut != null)
                     UserLoggingOut();
@@ -359,7 +364,7 @@ namespace Signum.Web.Auth
                 UserTicketClient.SaveCookie();
             }
 
-           
+
 
             TempData["Message"] = AuthLogic.OnLoginMessage();
 
@@ -382,7 +387,7 @@ namespace Signum.Web.Auth
             return View(AuthClient.LoginView);
         }
 
-      
+
         #endregion
 
 
@@ -422,7 +427,7 @@ namespace Signum.Web.Auth
                 UserLoggingOut();
 
             UserTicketClient.RemoveCookie();
-            
+
             httpContext.Session.Abandon();
         }
     }
