@@ -103,8 +103,14 @@ export function explore(findOptions: FindOptions): Promise<void> {
 
 export function findOptionsPath(fo: FindOptions, extra?: any): string {
 
+    const query = findOptionsPathQuery(fo, extra);
+
+    return currentHistory.createPath({ pathname: "~/find/" + getQueryKey(fo.queryName), query: query });
+}
+
+export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
     fo = expandParentColumn(fo);
-    
+
     const query = {
         columnMode: !fo.columnOptionsMode || fo.columnOptionsMode == "Add" as ColumnOptionsMode ? undefined : fo.columnOptionsMode,
         create: fo.create,
@@ -120,12 +126,12 @@ export function findOptionsPath(fo: FindOptions, extra?: any): string {
         currentPage: fo.pagination && fo.pagination.currentPage,
         ...extra
     };
-    
+
     Encoder.encodeFilters(query, fo.filterOptions);
     Encoder.encodeOrders(query, fo.orderOptions);
     Encoder.encodeColumns(query, fo.columnOptions);
 
-    return currentHistory.createPath({ pathname: "~/find/" + getQueryKey(fo.queryName), query: query });
+    return query;
 }
 
 export function getTypeNiceName(tr: TypeReference) {
