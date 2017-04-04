@@ -101,7 +101,7 @@ namespace Signum.Engine.Migrations
                 action();
                 log.End = TimeZoneManager.Now;
                 log.Save();
-                Console.WriteLine("------- Executed {0} (took {1})".FormatWith(showDescription, (log.Start - log.End.Value).NiceToString()).PadRight(Console.WindowWidth - 2, '-'));
+                Console.WriteLine("------- Executed {0} (took {1})".FormatWith(showDescription, (log.End.Value - log.Start).NiceToString()).PadRight(Console.WindowWidth - 2, '-'));
 
                 return null;
             }
