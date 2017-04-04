@@ -78,13 +78,13 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
                 return (
                     <div>
                         <button
-                            className="btn btn-primary sf-close-button sf-ok-button"
+                            className="btn btn-primary sf-close-button sf-yes-button"
                             onClick={() => this.handleButtonClicked("yes")}
                             name="yes">
                             {BooleanEnum.niceName("True")}
                         </button>
                         <button
-                            className="btn btn-default sf-close-button sf-button"
+                            className="btn btn-default sf-close-button sf-no-button"
                             onClick={() => this.handleButtonClicked("no")}
                             name="no">
                             {BooleanEnum.niceName("False")}
@@ -94,19 +94,19 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
                 return (
                     <div>
                         <button
-                            className="btn btn-primary sf-close-button sf-ok-button"
+                            className="btn btn-primary sf-close-button sf-yes-button"
                             onClick={() => this.handleButtonClicked("yes")}
                             name="yes">
                             {BooleanEnum.niceName("True")}
                         </button>
                         <button
-                            className="btn btn-default sf-close-button sf-button"
+                            className="btn btn-default sf-close-button sf-no-button"
                             onClick={() => this.handleButtonClicked("no")}
                             name="no">
                             {BooleanEnum.niceName("False")}
                         </button>
                         <button
-                            className="btn btn-default sf-close-button sf-button"
+                            className="btn btn-default sf-close-button sf-cancel-button"
                             onClick={() => this.handleButtonClicked("cancel")}
                             name="cancel">
                             {JavascriptMessage.cancel.niceToString()}
