@@ -35,6 +35,7 @@ export { CaseFramePage };
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
 import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal'
+import ValueLineModal from '../../../Framework/Signum.React/Scripts/ValueLineModal'
 
 import {
     WorkflowEntity, WorkflowLaneEntity, WorkflowActivityEntity, WorkflowConnectionEntity, WorkflowConditionEntity, WorkflowActionEntity, CaseActivityQuery, CaseActivityEntity,
@@ -224,7 +225,8 @@ function registerCustomContexts() {
 }
 
 export function getCaseActivityContext(ctx: TypeContext<any>): TypeContext<CaseActivityEntity> | undefined {
-    const fc = ctx.frame!.frameComponent as any;
+    const f = ctx.frame;
+    const fc = f && f.frameComponent as any;
     const activity = fc && fc.getCaseActivity && fc.getCaseActivity() as CaseActivityEntity;
     return activity && TypeContext.root(activity, undefined, ctx);
 }
@@ -238,6 +240,30 @@ export function getDefaultInboxUrl() {
             value: ["New", "Opened", "InProgress"]
         }]
     });
+}
+
+export function showWorkflowTransitionContextCodeHelp() {
+
+    var value = `public CaseActivityEntity PreviousCaseActivity { get; internal set; }
+public DecisionResult? DecisionResult { get; internal set; }
+public IWorkflowTransition Connection { get; internal set; }
+public CaseEntity Case { get; set; }
+
+public interface IWorkflowTransition
+{
+    Lite<WorkflowConditionEntity> Condition { get; }
+    Lite<WorkflowActionEntity> Action { get; }
+}`;
+
+    ValueLineModal.show({
+        type: { name: "string" },
+        initialValue: value,
+        valueLineType: "TextArea",
+        title: "WorkflowTransitionContext Members",
+        message: "Copy to clipboard: Ctrl+C, ESC",
+        initiallyFocused: true,
+        valueHtmlProps: { style: { height: 215 } },
+    }).done();
 }
 
 function caseActivityOperation(operation: ExecuteSymbol<CaseActivityEntity>, style: Operations.BsStyle) {
@@ -538,11 +564,12 @@ export interface CaseConnectionStats {
     Connection: Lite<WorkflowConnectionEntity>;
     DoneDate: string;
     DoneBy: Lite<IUserEntity>;
-
+    DoneType: DoneType;
 }
 
 export interface CaseFlow {
     Activities: { [bpmnElementId: string]: CaseActivityStats[] };
     Connections: { [bpmnElementId: string]: CaseConnectionStats[] };
+    Jumps: CaseConnectionStats[];
     AllNodes: string[];
 }

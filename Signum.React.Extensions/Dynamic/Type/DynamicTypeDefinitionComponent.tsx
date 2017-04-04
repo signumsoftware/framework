@@ -391,17 +391,18 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                         onCreate={() => ({ code: "" })}
                         renderContent={e =>
                             <div>
-                                <div className="btn-group" style={{ marginBottom: "3px" }}>
-                                    {dt.baseType == "Entity" &&
-                                        <input type="button" className="btn btn-success btn-xs sf-button" value="Workflow" onClick={this.handleWithWorkflowClick} />}
-                                </div>
+                                {dt.baseType == "Entity" &&
+                                    <div className="btn-group" style={{ marginBottom: "3px" }}>
+                                        <input type="button" className="btn btn-success btn-xs sf-button" value="Workflow" onClick={this.handleWithWorkflowClick} />
+                                        <input type="button" className="btn btn-warning btn-xs sf-button" value="Register Operations" onClick={this.handleRegisterOperationsClick} />
+                                        <input type="button" className="btn btn-danger btn-xs sf-button" value="Register Expressions" onClick={this.handleRegisterExpressionsClick} />
+                                    </div>}
                                 <div className="code-container">
                                     <pre style={{ border: "0px", margin: "0px" }}>{`SchemaBuilder sb, DynamicQueryManager dqm, FluentInclude<${entityName}> fi`}</pre>
                                     <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
                                 </div>
                             </div>
-                        }
-                    />
+                        } />
 
                     <CustomCodeFieldsetComponent
                         binding={Binding.create(def, d => d.customLogicMembers)}
@@ -409,7 +410,11 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                         onCreate={() => ({ code: "" })}
                         renderContent={e =>
                             <div>
-
+                                {dt.baseType == "Entity" &&
+                                    <div className="btn-group" style={{ marginBottom: "3px" }}>
+                                        <input type="button" className="btn btn-success btn-xs sf-button" value="Query Expression" onClick={this.handleQueryExpressionClick} />
+                                        <input type="button" className="btn btn-warning btn-xs sf-button" value="Scalar Expression" onClick={this.handleScalarExpressionClick} />
+                                    </div>}
                                 <div className="code-container">
                                     <pre style={{ border: "0px", margin: "0px" }}>{`public static class ${dt.typeName}Logic
 {`}</pre>
@@ -426,10 +431,13 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                         onCreate={() => ({ code: "" })}
                         renderContent={e =>
                             <div>
-
+                                <div className="btn-group" style={{ marginBottom: "3px" }}>
+                                    <input type="button" className="btn btn-success btn-xs sf-button" value="Enum" onClick={this.handleEnumClick} />
+                                    {dt.baseType == "Entity" && <input type="button" className="btn btn-warning btn-xs sf-button" value="Operation" onClick={this.handleOperationClick} />}
+                                </div>
                                 <div className="code-container">
                                     <pre style={{ border: "0px", margin: "0px" }}>{`public namespace Signum.Entities.CodeGen
-{`}</pre>
+    {`}</pre>
                                     <CSharpExpressionCodeMirror binding={Binding.create(e, d => d.code)} />
                                     <pre style={{ border: "0px", margin: "0px" }}>{`}`}</pre>
                                 </div>
@@ -441,10 +449,12 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                     <CustomCodeFieldsetComponent
                         binding={Binding.create(def, d => d.customBeforeSchema)}
                         title="Before Schema"
-                        onCreate={() => ({ code: "sb.Schema.Settings.FieldAttributes((StaticType ua) => ua.Property).Replace(new ImplementedByAttribute(typeof(YourDynamicTypeEntity)));" })}
+                        onCreate={() => ({ code: "" })}
                         renderContent={e =>
                             <div>
-
+                                <div className="btn-group" style={{ marginBottom: "3px" }}>
+                                    <input type="button" className="btn btn-success btn-xs sf-button" value="Override" onClick={this.handleOverrideClick} />
+                                </div>
                                 <div className="code-container">
                                     <pre style={{ border: "0px", margin: "0px" }}>{`public void OverrideSchema(SchemaBuilder sb)
 {`}</pre>
@@ -518,7 +528,133 @@ constructor: () => ${oc ? `{ ${oc.construct} }` : `new ${entityName}Entity()`},
 save: e => ${os ? `e.Execute(${entityName}Operation.Save)` : "e.Save()"}
 );`;
 
-        this.popupEventsTemplate(entityName + "Entity", "WithWorkflow", text);
+        ValueLineModal.show({
+            type: { name: "string" },
+            initialValue: text,
+            valueLineType: "TextArea",
+            title: "WithWorkflow",
+            message: "Copy to clipboard: Ctrl+C, ESC",
+            initiallyFocused: true,
+            valueHtmlProps: { style: { height: 200 } }
+        }).done();
+    }
+
+    handleRegisterOperationsClick = () => {
+
+        let entityName = this.props.dynamicType.typeName!;
+        const text = `// Sample for Delete symbol operations
+new Graph<${entityName}Entity>.Delete(${entityName}Operation.Delete)
+{
+    FromStates = { },
+    CanDelete = e => return null or a message string,
+    Delete = (e) => { e.Delete(); },
+}.Register();
+
+// Sample for Execute symbol operations
+new Graph<${entityName}Entity>.Execute(${entityName}Operation.Save)
+{
+    FromStates = { },
+    ToStates = { },
+    CanExecute = e => return null or a message string,
+    Execute = (e, args) => { e.Save(); },
+}.Register();`
+
+        ValueLineModal.show({
+            type: { name: "string" },
+            initialValue: text,
+            valueLineType: "TextArea",
+            title: "Register Operations",
+            message: "Copy to clipboard: Ctrl+C, ESC",
+            initiallyFocused: true,
+            valueHtmlProps: { style: { height: 350 } }
+        }).done();
+    }
+
+    handleRegisterExpressionsClick = () => {
+
+        let entityName = this.props.dynamicType.typeName!;
+        const text = `dqm.RegisterExpression((${entityName}Entity e) => e.[Expression Name]());`
+        ValueLineModal.show({
+            type: { name: "string" },
+            initialValue: text,
+            valueLineType: "TextArea",
+            title: "Register Expressions",
+            message: "Copy to clipboard: Ctrl+C, ESC",
+            initiallyFocused: true,
+        }).done();
+    }
+
+    handleQueryExpressionClick = () => {
+        let entityName = this.props.dynamicType.typeName!;
+        const text = `static Expression<Func<[Your Entity], IQueryable<${entityName}Entity>>> QueryExpression =
+    e => Database.Query<${entityName}Entity>().Where(a => [Your conditions here]);
+[ExpressionField]
+public static IQueryable<${entityName}Entity> Queries(this [Your Entity] e)
+{
+    return QueryExpression.Evaluate(e);
+}`;
+
+        ValueLineModal.show({
+            type: { name: "string" },
+            initialValue: text,
+            valueLineType: "TextArea",
+            title: "Query Expressions",
+            message: "Copy to clipboard: Ctrl+C, ESC",
+            initiallyFocused: true,
+            valueHtmlProps: { style: { height: 150 } }
+        }).done();
+    }
+
+    handleScalarExpressionClick = () => {
+        let entityName = this.props.dynamicType.typeName!;
+        const text = `static Expression<Func<${entityName}Entity, bool>> IsDisabledExpression =
+    e => [Your conditions here] ;
+[ExpressionField]
+public static bool IsDisabled(this ${entityName}Entity entity)
+{
+    return IsDisabledExpression.Evaluate(entity);
+}`;
+
+        ValueLineModal.show({
+            type: { name: "string" },
+            initialValue: text,
+            valueLineType: "TextArea",
+            title: "Scalar Expressions",
+            message: "Copy to clipboard: Ctrl+C, ESC",
+            initiallyFocused: true,
+            valueHtmlProps: { style: { height: 150 } }
+        }).done();
+    }
+
+    handleEnumClick = () => {
+        let entityName = this.props.dynamicType.typeName!;
+        const text = `public enum EnumName 
+{ 
+    Item1, 
+    Item2, 
+    ....  
+};`
+
+        this.popupEventsTemplate(entityName, "Enum", text);
+    }
+
+    handleOperationClick = () => {
+        let entityName = this.props.dynamicType.typeName!;
+        const text = `[AutoInit]
+public static class ${entityName}Operation2
+{
+    public static readonly ConstructSymbol<${entityName}Entity>.From<Your Entity> CreateFrom;
+    public static readonly ExecuteSymbol<${entityName}Entity> DoSomething;
+    public static readonly DeleteSymbol<${entityName}Entity> DeleteSomething;
+}`
+
+        this.popupEventsTemplate(entityName, "Enum", text);
+    }
+
+    handleOverrideClick = () => {
+        let entityName = this.props.dynamicType.typeName!;
+        const text = `sb.Schema.Settings.FieldAttributes((StaticType ua) => ua.Property).Replace(new ImplementedByAttribute(typeof(YourDynamicTypeEntity)));`;
+        this.popupEventsTemplate(entityName, "Override", text);
     }
 
     popupEventsTemplate(entityName: string, eventName: string, text: string) {
@@ -529,7 +665,7 @@ save: e => ${os ? `e.Execute(${entityName}Operation.Save)` : "e.Save()"}
             title: `${entityName} -> ${eventName}`,
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-            valueHtmlProps: { style: { height: "115px" } },
+            valueHtmlProps: { style: { height: 150 } },
         }).done();
     }
 }

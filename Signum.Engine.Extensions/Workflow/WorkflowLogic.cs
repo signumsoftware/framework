@@ -1,12 +1,10 @@
 ﻿using Signum.Entities.Workflow;
-using Signum.Engine;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Utilities;
-using Signum.Utilities.DataStructures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,7 +42,7 @@ namespace Signum.Engine.Workflow
 
         public static IEnumerable<WorkflowActivityEntity> WorkflowActivitiesFromCache(this WorkflowEntity e)
         {
-            return WorkflowGraphLazy.Value.GetOrThrow(e.ToLite()).NextGraph.OfType<WorkflowActivityEntity>();
+            return GetWorkflowNodeGraph(e.ToLite()).NextGraph.OfType<WorkflowActivityEntity>();
         }
 
         static Expression<Func<WorkflowEntity, IQueryable<WorkflowEventEntity>>> WorkflowEventsExpression =
@@ -57,7 +55,7 @@ namespace Signum.Engine.Workflow
 
         public static IEnumerable<WorkflowEventEntity> WorkflowEventsFromCache(this WorkflowEntity e)
         {
-            return WorkflowGraphLazy.Value.GetOrThrow(e.ToLite()).NextGraph.OfType<WorkflowEventEntity>();
+            return GetWorkflowNodeGraph(e.ToLite()).NextGraph.OfType<WorkflowEventEntity>();
         }
 
         static Expression<Func<WorkflowEntity, IQueryable<WorkflowGatewayEntity>>> WorkflowGatewaysExpression =
@@ -70,11 +68,11 @@ namespace Signum.Engine.Workflow
 
         public static IEnumerable<WorkflowGatewayEntity> WorkflowGatewaysFromCache(this WorkflowEntity e)
         {
-            return WorkflowGraphLazy.Value.GetOrThrow(e.ToLite()).NextGraph.OfType<WorkflowGatewayEntity>();
+            return GetWorkflowNodeGraph(e.ToLite()).NextGraph.OfType<WorkflowGatewayEntity>();
         }
 
         static Expression<Func<WorkflowEntity, IQueryable<WorkflowConnectionEntity>>> WorkflowConnectionsExpression =
-          e => Database.Query<WorkflowConnectionEntity>().Where(a => a.From.Lane.Pool.Workflow == e && a.To.Lane.Pool.Workflow == e );
+          e => Database.Query<WorkflowConnectionEntity>().Where(a => a.From.Lane.Pool.Workflow == e && a.To.Lane.Pool.Workflow == e);
         [ExpressionField]
         public static IQueryable<WorkflowConnectionEntity> WorkflowConnections(this WorkflowEntity e)
         {
@@ -83,7 +81,7 @@ namespace Signum.Engine.Workflow
 
         public static IEnumerable<WorkflowConnectionEntity> WorkflowConnectionsFromCache(this WorkflowEntity e)
         {
-            return WorkflowGraphLazy.Value.GetOrThrow(e.ToLite()).NextGraph.EdgesWithValue.Select(edge => edge.Value);
+            return GetWorkflowNodeGraph(e.ToLite()).NextGraph.EdgesWithValue.Select(edge => edge.Value);
         }
 
         static Expression<Func<WorkflowEntity, IQueryable<WorkflowConnectionEntity>>> WorkflowMessageConnectionsExpression =
@@ -144,7 +142,7 @@ namespace Signum.Engine.Workflow
 
         public static IEnumerable<WorkflowConnectionEntity> NextConnectionsFromCache(this IWorkflowNodeEntity e)
         {
-            return WorkflowGraphLazy.Value.GetOrThrow(e.Lane.Pool.Workflow.ToLite()).NextGraph.RelatedTo(e).Values;
+            return GetWorkflowNodeGraph(e.Lane.Pool.Workflow.ToLite()).NextGraph.RelatedTo(e).Values;
         }
 
         static Expression<Func<IWorkflowNodeEntity, IQueryable<WorkflowConnectionEntity>>> PreviousConnectionsExpression =
@@ -157,7 +155,7 @@ namespace Signum.Engine.Workflow
 
         public static IEnumerable<WorkflowConnectionEntity> PreviousConnectionsFromCache(this IWorkflowNodeEntity e)
         {
-            return WorkflowGraphLazy.Value.GetOrThrow(e.Lane.Pool.Workflow.ToLite()).PreviousGraph.RelatedTo(e).Values;
+            return GetWorkflowNodeGraph(e.Lane.Pool.Workflow.ToLite()).PreviousGraph.RelatedTo(e).Values;
         }
 
 
@@ -166,6 +164,28 @@ namespace Signum.Engine.Workflow
         public static List<Lite<IWorkflowNodeEntity>> AutocompleteNodes(Lite<WorkflowEntity> workflow, string subString, int count, List<Lite<IWorkflowNodeEntity>> excludes)
         {
             return WorkflowGraphLazy.Value.GetOrThrow(workflow).Autocomplete(subString, count, excludes);
+        }
+
+        public static WorkflowNodeGraph GetWorkflowNodeGraph(Lite<WorkflowEntity> workflow)
+        {
+            var graph = WorkflowGraphLazy.Value.GetOrThrow(workflow);
+            if (graph.TrackId != null)
+                return graph;
+
+            lock (graph)
+            {
+                if (graph.TrackId != null)
+                    return graph;
+
+                var errors = graph.Validate((g, newDirection)=>
+                {
+                    throw new InvalidOperationException($"Unexpected direction of gateway '{g}' (Should be '{newDirection.NiceToString()}'). Consider saving Workflow '{workflow}'.");
+                });
+                if (errors.HasItems())
+                    throw new ApplicationException("Errors in Workflow '" + workflow + "':\r\n" + errors.ToString("\r\n").Indent(4));
+
+                return graph;
+            }
         }
 
         static Func<WorkflowConfigurationEntity> getConfiguration;
@@ -190,9 +210,9 @@ namespace Signum.Engine.Workflow
                         e.Name,
                         e.MainEntityType,
                     });
-                
+
                 WorkflowGraph.Register();
-                
+
 
                 sb.Include<WorkflowPoolEntity>()
                     .WithUniqueIndex(wp => new { wp.Workflow, wp.Name })
@@ -259,7 +279,8 @@ namespace Signum.Engine.Workflow
 
                 new Graph<WorkflowEventEntity>.Delete(WorkflowEventOperation.Delete)
                 {
-                    Delete = (e, _) => {
+                    Delete = (e, _) =>
+                    {
 
                         if (e.Type.IsTimerOrConditionalStart())
                         {
@@ -420,7 +441,7 @@ namespace Signum.Engine.Workflow
 
                 Scripts = sb.GlobalLazy(() => Database.Query<WorkflowScriptEntity>().ToDictionary(a => a.ToLite()),
                     new InvalidateWith(typeof(WorkflowScriptEntity)));
-                
+
                 sb.Include<WorkflowScriptRetryStrategyEntity>()
                     .WithSave(WorkflowScriptRetryStrategyOperation.Save)
                     .WithDelete(WorkflowScriptRetryStrategyOperation.Delete)
@@ -509,11 +530,11 @@ namespace Signum.Engine.Workflow
             return WorkflowLogic.Scripts.Value.GetOrThrow(ws);
         }
 
-        public static Expression<Func<Lite<Entity>, UserEntity,  bool>> IsCurrentUserActor = (actor, user) =>
-            actor.RefersTo(user) ||
-            actor.Is(user.Role);
+        public static Expression<Func<Lite<Entity>, UserEntity, bool>> IsCurrentUserActor = (actor, user) =>
+           actor.RefersTo(user) ||
+           actor.Is(user.Role);
 
-      
+
         public static List<Lite<WorkflowEntity>> GetAllowedStarts()
         {
             return (from w in Database.Query<WorkflowEntity>()
@@ -545,7 +566,7 @@ namespace Signum.Engine.Workflow
             if (model == null)
                 throw new ArgumentNullException(nameof(model));
 
-         
+
             var wb = new WorkflowBuilder(workflow);
             if (workflow.IsNew)
                 workflow.Save();
@@ -556,48 +577,4 @@ namespace Signum.Engine.Workflow
             workflow.Save();
         }
     }
-
-    public class WorkflowNodeGraph
-    {
-        public WorkflowEntity Workflow { get; internal set; }
-        public DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity> NextGraph { get; internal set; }
-        public DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity> PreviousGraph { get; internal set; }
-
-        public Dictionary<Lite<WorkflowEventEntity>, WorkflowEventEntity> Events { get; internal set; }
-        public Dictionary<Lite<WorkflowActivityEntity>, WorkflowActivityEntity> Activities { get; internal set; }
-        public Dictionary<Lite<WorkflowGatewayEntity>, WorkflowGatewayEntity> Gateways { get; internal set; }
-        public Dictionary<Lite<WorkflowConnectionEntity>, WorkflowConnectionEntity> Connections { get; internal set; }
-
-        internal List<Lite<IWorkflowNodeEntity>> Autocomplete(string subString, int count, List<Lite<IWorkflowNodeEntity>> excludes)
-        {
-            var events = AutocompleteUtils.Autocomplete(Events.Where(a => a.Value.Type == WorkflowEventType.Finish).Select(a => a.Key), subString, count);
-            var activities = AutocompleteUtils.Autocomplete(Activities.Keys, subString, count);
-            var gateways = AutocompleteUtils.Autocomplete(Gateways.Keys, subString, count);
-            return new Sequence<Lite<IWorkflowNodeEntity>>()
-                {
-                    events,
-                    activities,
-                    gateways
-                }
-            .Except(excludes.EmptyIfNull())
-            .OrderByDescending(a => a.ToString().Length)
-            .Take(count)
-            .ToList();
-        }
-
-        internal void FillGraphs()
-        {
-            var graph = new DirectedEdgedGraph<IWorkflowNodeEntity, WorkflowConnectionEntity>();
-
-            foreach (var e in this.Events.Values) graph.Add(e);
-            foreach (var a in this.Activities.Values) graph.Add(a);
-            foreach (var g in this.Gateways.Values) graph.Add(g);
-            foreach (var c in this.Connections.Values) graph.Add(c.From, c.To, c);
-
-            this.NextGraph = graph;
-            this.PreviousGraph = graph.Inverse();
-        }
-    }
-
-
 }

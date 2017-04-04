@@ -4,7 +4,7 @@ import { PropertyRoute, Binding } from '../../../../Framework/Signum.React/Scrip
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import CSharpCodeMirror from '../../../../Extensions/Signum.React.Extensions/Codemirror/CSharpCodeMirror'
 import { WorkflowActionEntity } from '../Signum.Entities.Workflow'
-import { WorkflowConditionTestResponse, API, DecisionResultValues } from '../WorkflowClient'
+import { WorkflowConditionTestResponse, API, DecisionResultValues, showWorkflowTransitionContextCodeHelp } from '../WorkflowClient'
 import TypeHelpComponent from '../../Dynamic/Help/TypeHelpComponent'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
@@ -42,7 +42,10 @@ export default class WorkflowConditionComponent extends React.Component<Workflow
                         <div className="row">
                             <div className="col-sm-7">
                                 <div className="code-container">
-                                    <pre style={{ border: "0px", margin: "0px" }}>{"void Action(" + ctx.value.mainEntityType.cleanName + " e, WorkflowTransitionContext ctx)\n{"}</pre>
+                                    <div className="btn-group" style={{ marginBottom: "3px" }}>
+                                        <input type="button" className="btn btn-success btn-xs sf-button" value="ctx" onClick={() => showWorkflowTransitionContextCodeHelp()} />
+                                    </div>
+                                    <pre style={{ border: "0px", margin: "0px" }}>{"void Action(" + ctx.value.mainEntityType.cleanName + "Entity e, WorkflowTransitionContext ctx)\n{"}</pre>
                                     <CSharpCodeMirror script={ctx.value.eval!.script || ""} onChange={this.handleCodeChange} />
                                     <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
                                 </div>

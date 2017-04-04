@@ -79,10 +79,20 @@ export class CaseFlowRenderer extends CustomRenderer {
                     result.style.setProperty('stroke', color.lerp(0.5, Color.Black).toString());
                     result.style.setProperty('fill', color.toString());
                 }
-                
-                var grandParent = ((result.parentNode as SVGElement).parentNode as SVGElement);
-                var title = Array.toArray(grandParent.childNodes).filter((a: SVGElement) => a.nodeName == "title").firstOrNull() || grandParent.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
+
+                var gParent = ((result.parentNode as SVGGElement).parentNode as SVGGElement);
+                var title = Array.toArray(gParent.childNodes).filter((a: SVGElement) => a.nodeName == "title").firstOrNull() || gParent.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
                 title.textContent = stats.map(a => getTitle(a)).join("\n");
+
+                var ggParent = gParent.parentNode as SVGGElement;
+                var path = Array.toArray(ggParent.childNodes).filter((a: SVGElement) => a.nodeName == "path").firstOrNull() as SVGPathElement || ggParent.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "path"));
+                //debugger;
+                //path.setAttribute("d", `m  ${element.x},${element.y}L${element.x + element.width},${element.y + element.height}`);
+                //path.style.setProperty("fill", "none");
+                //path.style.setProperty("stroke-width", "2px");
+                //path.style.setProperty("stroke", "black");
+                //path.style.setProperty("stroke-linejoin", "round");
+                //path.style.setProperty("marker-end", "url(#sequenceflow-end-white-black)");
             }
         }
       

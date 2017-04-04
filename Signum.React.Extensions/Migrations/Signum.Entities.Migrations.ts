@@ -14,11 +14,14 @@ export interface CSharpMigrationEntity extends Entities.Entity {
     executionDate?: string;
 }
 
-export const RunProcessEntity = new Type<RunProcessEntity>("RunProcess");
-export interface RunProcessEntity extends Entities.Entity {
-    Type: "RunProcess";
-    processName?: string | null;
-    executionDate?: string;
+export const ExecutedLoadProcessEntity = new Type<ExecutedLoadProcessEntity>("ExecutedLoadProcess");
+export interface ExecutedLoadProcessEntity extends Entities.Entity {
+    Type: "ExecutedLoadProcess";
+    methodName?: string | null;
+    className?: string | null;
+    description?: string | null;
+    start?: string;
+    end?: string | null;
     exception?: Entities.Lite<Basics.ExceptionEntity> | null;
 }
 
