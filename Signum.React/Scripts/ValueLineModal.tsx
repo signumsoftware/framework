@@ -31,7 +31,8 @@ export default class ValueLineModal extends React.Component<ValueLineModalProps,
     }
 
     handleCancelClicked = () => {
-        this.setState({ show: false });
+        this.selectedValue = undefined;
+        this.setState({ show: false });   
     }
 
     handleOnExited = () => {
@@ -61,8 +62,11 @@ export default class ValueLineModal extends React.Component<ValueLineModalProps,
                     formGroupStyle={valueLineProps.labelText ? "Basic" : "SrOnly"} {...valueLineProps} />
             </Modal.Body>
             <Modal.Footer>
-                <button className ="btn btn-primary sf-entity-button sf-close-button sf-ok-button" onClick={this.handleOkClick}>
+                <button className="btn btn-primary sf-entity-button sf-ok-button" onClick={this.handleOkClick}>
                     {JavascriptMessage.ok.niceToString()}
+                </button>
+                <button className="btn btn-default sf-entity-button sf-close-button" onClick={this.handleCancelClicked}>
+                    {JavascriptMessage.cancel.niceToString()}
                 </button>
             </Modal.Footer>
         </Modal>;

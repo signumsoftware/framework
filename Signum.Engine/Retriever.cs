@@ -102,8 +102,8 @@ namespace Signum.Engine
             if (cc != null && cc.Enabled)
             {
                 T entityFromCache = EntityCache.Construct<T>(id.Value);
+                retrieved.Add(tuple, entityFromCache); //Cycles
                 cc.Complete(entityFromCache, this);
-                retrieved.Add(tuple, entityFromCache);
                 return entityFromCache;
             }
 

@@ -27,7 +27,7 @@ namespace Signum.Utilities
 
             Console.WriteLine(str);
 
-            Console.SetCursorPosition(Console.CursorLeft, Console.CursorTop - 1);
+            Console.SetCursorPosition(Console.CursorLeft, Console.CursorTop==0? 0: Console.CursorTop - 1);
             needToClear = true;
         }
 
@@ -37,7 +37,7 @@ namespace Signum.Utilities
             {
                 Console.WriteLine(new string(' ', Console.BufferWidth - 1));
 
-                Console.SetCursorPosition(Console.CursorLeft, Console.CursorTop - 1);
+                Console.SetCursorPosition(Console.CursorLeft, Console.CursorTop == 0 ? 0 : Console.CursorTop - 1);
             }
             needToClear = false;
         }

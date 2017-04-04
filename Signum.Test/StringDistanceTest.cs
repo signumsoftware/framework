@@ -118,7 +118,7 @@ Adios Juani";
             var result = d.DiffText(text1, text2);
 
             var str = result.ToString(l => (l.Action == StringDistance.DiffAction.Added ? "[+]" :
-                l.Action == StringDistance.DiffAction.Removed ? "[-]" : "[=]") + l.Value.ToString(""), "\r\n");
+                l.Action == StringDistance.DiffAction.Removed ? "[-]" : "[=]") + l.Value.ToString(""), "\n");
 
             Assert.AreEqual(
 @"[=]  Hola -Pedro+Pedri

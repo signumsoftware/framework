@@ -36,6 +36,11 @@ namespace Signum.React.Json
 
         private bool ValidateModifiableEntity(ValidationContext validationContext, ModifiableEntity mod)
         {
+            if (mod is Entity && validationContext.Visited.Contains(mod))
+                return true;
+
+            validationContext.Visited.Add(mod);
+
             bool isValid = true;
             PropertyScope propertyScope = new PropertyScope();
             validationContext.KeyBuilders.Push(propertyScope);
@@ -83,6 +88,8 @@ namespace Signum.React.Json
             }
 
             validationContext.KeyBuilders.Pop();
+
+            validationContext.Visited.Remove(mod);
             return isValid;
         }
 

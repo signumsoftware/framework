@@ -72,13 +72,13 @@ namespace Signum.Web
             return qr;
         }
 
-        public static List<Signum.Entities.DynamicQuery.Filter> ExtractFilterOptions(HttpContextBase httpContext, QueryDescription queryDescription, bool canAggregate)
+        public static List<Signum.Entities.DynamicQuery.Filter> ExtractFilterOptions(HttpContextBase httpContext, QueryDescription queryDescription, bool canAggregate, string key = null)
         {
             List<Signum.Entities.DynamicQuery.Filter> result = new List<Signum.Entities.DynamicQuery.Filter>();
 
             NameValueCollection parameters = httpContext.Request.Params;
             
-            string field = parameters["filters"];
+            string field = parameters[key ?? "filters"];
             if (!field.HasText())
                 return result;
 

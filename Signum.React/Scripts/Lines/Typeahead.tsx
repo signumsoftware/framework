@@ -8,7 +8,7 @@ export interface TypeaheadProps {
     onChange?: (newValue: string) => void;
     onBlur?: () => void;
     getItems: (query: string) => Promise<any[]>;
-    getItemsTimeout?: number;
+    getItemsDelay?: number;
     minLength?: number;
     renderList?: (typeAhead: Typeahead) => React.ReactNode;
     renderItem?: (item: any, query: string) => React.ReactNode;
@@ -58,7 +58,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
     static defaultProps: TypeaheadProps = {
         getItems: undefined as any,
-        getItemsTimeout: 200,
+        getItemsDelay: 200,
         minLength: 1,
         renderItem: Typeahead.highlightedText,
         onSelect: (elem, event) => elem,
@@ -70,14 +70,14 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     handle: number;
 
     lookup() {
-        if (!this.props.getItemsTimeout) {
-            this.popupate();
+        if (!this.props.getItemsDelay) {
+            this.populate();
         }
         else {
             if (this.handle)
                 clearTimeout(this.handle);
 
-            setTimeout(() => this.popupate(), this.props.getItemsTimeout);
+            this.handle = setTimeout(() => this.populate(), this.props.getItemsDelay);
         }
     }
 
@@ -86,7 +86,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
             clearTimeout(this.handle);
     }
 
-    popupate() {
+    populate() {
 
         if (this.props.minLength == null || this.input.value.length < this.props.minLength) {
             this.setState({ shown: false, items: undefined, selectedIndex: undefined });

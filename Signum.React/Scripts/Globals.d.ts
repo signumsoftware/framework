@@ -22,6 +22,8 @@ interface Array<T> {
     groupWhenChange(this: Array<T>, keySelector: (element: T) => string): { key: string, elements: T[]}[];
     orderBy<V>(this: Array<T>, keySelector: (element: T) => V): T[];
     orderByDescending<V>(this: Array<T>, keySelector: (element: T) => V): T[];
+    withMin<V>(this: Array<T>, keySelector: (element: T) => V): T | undefined;
+    withMax<V>(this: Array<T>, keySelector: (element: T) => V): T | undefined;
     toObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T };
     toObject<V>(this: Array<T>, keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
     toObjectDistinct(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T };
@@ -52,6 +54,7 @@ interface Array<T> {
 interface ArrayConstructor {
 
     range(min: number, maxNotIncluded: number): number[];
+    toArray<T>(arrayish: { length: number; [index: number]: T }): T[];
     repeat<T>(count: number, value: T): T[];
 }
 

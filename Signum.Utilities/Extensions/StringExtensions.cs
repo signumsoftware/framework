@@ -365,7 +365,7 @@ namespace Signum.Utilities
             if (start == -1)
                 throw NotFound(str, firstSeparator);
 
-            start = start + 1;
+            start = start+firstSeparator.Length ;
 
             int end = str.IndexOf(secondSeparator, start);
             if (start == -1)

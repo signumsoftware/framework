@@ -287,11 +287,18 @@ namespace Signum.Utilities
     {
         public static T ChooseConsole<T>(this IEnumerable<T> collection, Func<T, string> getString = null, string message = null) where T : class
         {
+            return ChooseConsoleWithFilter(collection, t => true, getString, message);
+        }
+
+
+        public static T ChooseConsoleWithFilter<T>(this IEnumerable<T> collection, Func<T,bool> predicate, Func<T, string> getString = null,
+            string message = null) where T : class
+        {
             if (message != null)
                 Console.WriteLine(message);
 
             var cs = new ConsoleSwitch<int, T>();
-            cs.Load(collection.ToList(), getString);
+            cs.Load(collection.Where(predicate).ToList(), getString);
             return cs.Choose();
         }
 
