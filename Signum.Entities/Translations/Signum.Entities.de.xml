@@ -228,6 +228,7 @@
     <Member Name="User" Description="Benutzer" />
   </Type>
   <Type Name="OperationMessage">
+    <Member Name="Confirm" Description="Bestätigen" />
     <Member Name="Create" Description="Erstellen..." />
     <Member Name="CreateFromRegex" Description="^Erstellen (.*) aus .*$" />
     <Member Name="InUserInterface" Description="(in der Benutzeroberfläche)" />
