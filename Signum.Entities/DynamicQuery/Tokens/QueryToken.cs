@@ -168,7 +168,7 @@ namespace Signum.Entities.DynamicQuery
                 return StepTokens(this, 4).AndHasValue(this);
 
             if (ut == typeof(int) || ut == typeof(long) || ut == typeof(short))
-                return StepTokens(this, 0).AndHasValue(this); ;
+                return StepTokens(this, 0).AndHasValue(this);
 
             if (ut == typeof(string))
                 return StringTokens().AndHasValue(this);
@@ -188,7 +188,7 @@ namespace Signum.Entities.DynamicQuery
                 return implementations.Value.Types.Select(t => (QueryToken)new AsTypeToken(this, t)).ToList().AndHasValue(this);
             }
 
-            if (type.IsEmbeddedEntity())
+            if (type.IsEmbeddedEntity() || type.IsModelEntity())
             {
                 return EntityProperties(type).OrderBy(a => a.ToString()).ToList().AndHasValue(this);
             }
