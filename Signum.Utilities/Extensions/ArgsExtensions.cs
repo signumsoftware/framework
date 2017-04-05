@@ -36,8 +36,10 @@ namespace Signum.Utilities
                 return Enumerable.Empty<T>();
 
             return args
-                .Where(o => o is T || o is List<object> && typeof(T).IsInstantiationOf(typeof(List<>)))
-                .Select(o => o is T ? (T) o : (T)giConvertListTo.GetInvoker(typeof(T).ElementType())((List<object>) o));
+                .Where(o => o is T || (o is string && typeof(T).IsEnum) || (o is List<object> && typeof(T).IsInstantiationOf(typeof(List<>))))
+                .Select(o => o is T ? (T)o :
+                                o is string ? (T)Enum.Parse(typeof(T), (string)o) :
+                                    (T)giConvertListTo.GetInvoker(typeof(T).ElementType())((List<object>)o));
         }
 
         static readonly GenericInvoker<Func<List<object>,IList>> giConvertListTo = new GenericInvoker<Func<List<object>, IList>>(list => ConvertListTo<int>(list));
