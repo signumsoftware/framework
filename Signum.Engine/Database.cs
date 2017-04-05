@@ -72,6 +72,9 @@ namespace Signum.Engine
         #endregion
 
         #region Retrieve
+
+        public static event PreRetriveEventHandler PreRetrive;
+
         public static T Retrieve<T>(this Lite<T> lite) where T : class, IEntity
         {
             if (lite == null)
@@ -124,7 +127,31 @@ namespace Signum.Engine
                     }
                 }
 
-                var retrieved = Database.Query<T>().SingleOrDefaultEx(a => a.Id == id);
+               
+
+
+                {
+                    var arg = new PreRetriveEventArgs();
+                    PreRetrive.Invoke(id, typeof(T), arg);
+
+                    if (arg.Cancel)
+                        throw new EntityNotFoundException(typeof(T), id);
+
+                    if (arg.Entity != null)
+                    {
+                        if (!arg.AvoidAccesVerify)
+                        {
+                            var verifyAcces = Database.Query<T>().Where(a => a.Id == id).Any();
+                            if (!verifyAcces)
+                                throw new EntityNotFoundException(typeof(T), id);
+                        }
+                        return (T)arg.Entity;
+                    }
+
+                }
+                    
+
+               T retrieved = Database.Query<T>().SingleOrDefaultEx(a => a.Id == id);
 
                 if (retrieved == null)
                     throw new EntityNotFoundException(typeof(T), id);
@@ -1013,6 +1040,18 @@ namespace Signum.Engine
 
         #endregion
     }
+
+    public class PreRetriveEventArgs
+    {
+        public bool AvoidAccesVerify { get; set; }
+        public bool Cancel { get; set; }
+        public Entity Entity { get; set; }
+       
+    }
+
+    public delegate void PreRetriveEventHandler(PrimaryKey id,Type type, PreRetriveEventArgs args) ;
+ 
+
 
     public class MListElement<E, V> where E : Entity
     {
