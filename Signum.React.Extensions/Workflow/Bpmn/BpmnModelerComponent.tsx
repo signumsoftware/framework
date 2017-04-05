@@ -197,7 +197,9 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     }
 
     handleElementDoubleClick = (obj: BPMN.DoubleClickEvent) => {
-        console.log(obj);
+        if (BpmnUtils.isEndEvent(obj.element.type))
+            return;
+
         var model = this.props.entities[obj.element.id] as (ModelEntity | undefined);
         if (!model) {
             model = this.newModel(obj.element);

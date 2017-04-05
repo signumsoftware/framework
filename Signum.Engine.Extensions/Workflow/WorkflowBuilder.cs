@@ -95,7 +95,9 @@ namespace Signum.Engine.Workflow
             dic.AddRange(lanes.Select(lb => lb.lane.ToModelKVP()));
 
             dic.AddRange(lanes.SelectMany(lb => lb.GetActivities()).Select(a => a.ToModelKVP()));
-            dic.AddRange(lanes.SelectMany(lb => lb.GetEvents()).Select(a => a.ToModelKVP()));
+
+            // Only Start events because end event has no model and extra properties for now
+            dic.AddRange(lanes.SelectMany(lb => lb.GetEvents().Where(e => e.Entity.Type.IsStart())).Select(a => a.ToModelKVP()));
 
             dic.AddRange(this.messageFlows.Select(mf => mf.ToModelKVP()));
             dic.AddRange(this.pools.Values.SelectMany(pb => pb.GetSequenceFlows()).Select(sf => sf.ToModelKVP()));

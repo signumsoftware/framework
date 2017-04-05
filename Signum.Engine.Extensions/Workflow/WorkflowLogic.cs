@@ -516,14 +516,13 @@ namespace Signum.Engine.Workflow
                 {
                     Execute = (e, args) =>
                     {
-                        var newStrategy = args.GetArg<string>();
-                        e.MainEntityStrategy = (WorkflowMainEntityStrategy)Enum.Parse(typeof(WorkflowMainEntityStrategy), newStrategy);
+                        e.MainEntityStrategy = args.GetArg<WorkflowMainEntityStrategy>();
 
                         if (e.IsGraphModified) {
                             e.Save();
 
                             var wb = new WorkflowBuilder(e);
-                            wb.ValidateGraph();
+                            wb.ValidateGraph();     
                         }
                     }
                 }.Register();
