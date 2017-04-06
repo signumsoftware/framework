@@ -63,14 +63,14 @@ export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<
 
 
 
-function defaultConstructFromMany(coc: ContextualOperationContext<Entity>, event: React.MouseEvent<any>, ...args: any[]) {
+function defaultConstructFromMany(coc: ContextualOperationContext<Entity>,...args: any[]) {
 
     confirmInNecessary(coc).then(conf => {
         if (!conf)
             return;
 
         API.constructFromMany<Entity, Entity>(coc.context.lites, coc.operationInfo.key, ...args).then(pack => {
-            Navigator.createNavigateOrTab(pack, event);
+            Navigator.createNavigateOrTab(pack, coc.event!);
         }).done();
     }).done();
 
@@ -199,7 +199,7 @@ export namespace MenuItemConstructor { //To allow monkey patching
         const array = new RegExp(OperationMessage.CreateFromRegex.niceToString()).exec(niceName);
         return array ? (niceName.tryBefore(array[1]) || "") + array[1].firstUpper() : niceName;
     }
-    export function createContextualMenuItem(coc: ContextualOperationContext<Entity>, defaultClick: (coc: ContextualOperationContext<Entity>, event: React.MouseEvent<any>) => void, key: any) {
+    export function createContextualMenuItem(coc: ContextualOperationContext<Entity>, defaultClick: (coc: ContextualOperationContext<Entity>) => void, key: any) {
 
         const text = coc.settings && coc.settings.text ? coc.settings.text() :
             coc.entityOperationSettings && coc.entityOperationSettings.text ? coc.entityOperationSettings.text() :
@@ -210,9 +210,10 @@ export namespace MenuItemConstructor { //To allow monkey patching
 
         const disabled = !!coc.canExecute;
 
-        const onClick = coc.settings && coc.settings.onClick ?
-            (me: React.MouseEvent<any>) => coc.settings!.onClick!(coc, me) :
-            (me: React.MouseEvent<any>) => defaultClick(coc, me)
+        const onClick = (me: React.MouseEvent<any>) => {
+            coc.event = me;
+            coc.settings && coc.settings.onClick ? coc.settings!.onClick!(coc) : defaultClick(coc)
+        }
 
         const menuItem = <MenuItem
             className={disabled ? "disabled" : undefined}
@@ -234,10 +235,9 @@ export namespace MenuItemConstructor { //To allow monkey patching
 }
 
 
+export function defaultContextualClick(coc: ContextualOperationContext<Entity>,...args: any[]) {
 
-export function defaultContextualClick(coc: ContextualOperationContext<Entity>, event: React.MouseEvent<any>, ...args: any[]) {
-
-    event.persist();
+    coc.event!.persist();
 
     confirmInNecessary(coc).then(conf => {
         if (!conf)
@@ -249,7 +249,7 @@ export function defaultContextualClick(coc: ContextualOperationContext<Entity>, 
                     API.constructFromLite(coc.context.lites[0], coc.operationInfo.key, ...args)
                         .then(pack => {
                             coc.context.markRows({});
-                            Navigator.createNavigateOrTab(pack, event);
+                            Navigator.createNavigateOrTab(pack, coc.event!);
                         })
                         .done();
                 } else {
