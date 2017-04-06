@@ -66,7 +66,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchC
                     hideFullScreenButton={true}
                     largeToolbarButtons={true}
                     findOptions={fo}
-                    onResult={result => this.changeUrl()} />
+                    onSearch={result => this.changeUrl()} />
             </div>
         );
     }

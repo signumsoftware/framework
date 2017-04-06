@@ -157,6 +157,11 @@ namespace Signum.Entities.Reflection
             return typeof(EmbeddedEntity).IsAssignableFrom(t);
         }
 
+        public static bool IsModelEntity(this Type t)
+        {
+            return typeof(ModelEntity).IsAssignableFrom(t);
+        }
+
         public static FieldInfo[] InstanceFieldsInOrder(Type type)
         {
             var result = type.For(t => t != typeof(object), t => t.BaseType)
