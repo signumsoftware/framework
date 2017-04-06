@@ -71,14 +71,42 @@ export default class Notify extends React.Component<void, NotifyState>{
         else
             this.clear();
     }
-    
+
+    getIcon() {
+        if (!this.state.type) {
+            return undefined;
+        }
+
+        var icon: string | undefined;
+        switch (this.state.type) {
+            case "loading":
+                icon = "fa fa-cog fa-spin fa-fw";
+                break;
+            case "error":
+            case "warning":
+                icon = "fa fa-exclamation fa-fw";
+                break;
+            case "success":
+                icon = "fa fa-check fa-fw";
+                break;
+            default:
+                break;
+        }
+
+        if (icon) {
+            return <span className={icon} style={{ fontSize: "large" }}> </span>
+        }
+        else {
+            return undefined;
+        }
+    }
 
     render() {
         
         return (
             <div id="sfNotify">
                 <Transition in={this.state.text != undefined} className='notify' enteredClassName='in' enteringClassName='in' >
-                    <span className={this.state.type}>{this.state.text}</span>
+                    <span className={this.state.type}>{this.getIcon()}{this.state.text}</span>
                 </Transition>
             </div>
         );
