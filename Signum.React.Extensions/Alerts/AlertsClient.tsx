@@ -43,9 +43,9 @@ export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeN
     }));
 
     Operations.addSettings(new EntityOperationSettings(AlertOperation.Delay, {
-        onClick: (eoc) => chooseDate().then(d => d && EntityOperations.defaultExecuteLite(eoc, d.format())).done(),
-        contextual: { onClick: (coc, e) => chooseDate().then(d => d && ContextualOperations.defaultContextualClick(coc, e, d.format())).done() },
-        contextualFromMany: { onClick: (coc, e) => chooseDate().then(d => d && ContextualOperations.defaultContextualClick(coc, e, d.format())).done() }
+        onClick: (eoc) => chooseDate().then(d => d && eoc.defaultClick(d.format())).done(),
+        contextual: { onClick: (coc) => chooseDate().then(d => d && coc.defaultContextualClick(d.format())).done() },
+        contextualFromMany: { onClick: (coc) => chooseDate().then(d => d && coc.defaultContextualClick(d.format())).done() }
     }));
 }
 

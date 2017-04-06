@@ -311,14 +311,14 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Workf
         }).done();
 }
 
-export function executeWorkflowJumpContextual(coc: Operations.ContextualOperationContext<CaseActivityEntity>, event: React.MouseEvent<HTMLButtonElement>) {
+export function executeWorkflowJumpContextual(coc: Operations.ContextualOperationContext<CaseActivityEntity>) {
 
     Navigator.API.fetchAndForget(coc.context.lites[0])
         .then(ca => {
             const jumps = ca.workflowActivity.jumps;
 
             getWorkflowJumpSelector(jumps)
-                .then(dest => dest && defaultContextualClick(coc, event, dest.to));
+                .then(dest => dest && coc.defaultContextualClick(dest.to));
         })
         .done();
 }

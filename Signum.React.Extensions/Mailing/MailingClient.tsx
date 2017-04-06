@@ -44,12 +44,12 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
     Navigator.addSettings(new EntitySettings(EmailConfigurationEntity, e => new ViewPromise(resolve => require(['./Templates/EmailConfiguration'], resolve))));
 
     Operations.addSettings(new EntityOperationSettings(EmailMessageOperation.CreateMailFromTemplate, {
-        onClick: (ctx,e) => {
+        onClick: (ctx) => {
             Finder.find({ queryName: ctx.entity.query!.key }).then(lite => {
                 if (!lite)
                     return;
                 Navigator.API.fetchAndForget(lite).then(entity =>
-                    EntityOperations.defaultConstructFromEntity(ctx, e, entity))
+                    ctx.defaultClick(entity))
                     .done();
             }).done();
         }
