@@ -89,7 +89,7 @@ function monkeyPatchCreateContextualMenuItem(){
         const disabled = !!coc.canExecute;
 
         const onClick = coc.settings && coc.settings.onClick ?
-            (me: React.MouseEvent<any>) => coc.settings.onClick!(coc, me) :
+            (me: React.MouseEvent<any>) => coc.settings!.onClick!(coc, me) :
             (me: React.MouseEvent<any>) => defaultClick(coc, me);
 
         const menuItem = <MenuItem
