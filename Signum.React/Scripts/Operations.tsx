@@ -17,8 +17,8 @@ import * as QuickLinks from './QuickLinks';
 import * as ContexualItems from './SearchControl/ContextualItems';
 import ButtonBar from './Frames/ButtonBar';
 import { getEntityOperationButtons } from './Operations/EntityOperations';
-import { getConstructFromManyContextualItems, getEntityOperationsContextualItems } from './Operations/ContextualOperations';
-import { ContextualItemsContext } from './SearchControl/ContextualItems';
+import { getConstructFromManyContextualItems, getEntityOperationsContextualItems, defaultContextualClick } from './Operations/ContextualOperations';
+import { ContextualItemsContext} from './SearchControl/ContextualItems';
 
 export function start() {
     ButtonBar.onButtonBarRender.push(getEntityOperationButtons);
@@ -138,15 +138,16 @@ export interface ContextualOperationOptions<T extends Entity> {
     order?: number;
 }
 
-export interface ContextualOperationContext<T extends Entity> {
+export class ContextualOperationContext<T extends Entity> {
     context: ContextualItemsContext<T>
     operationInfo: OperationInfo;
-    settings: ContextualOperationSettings<T>;
-    entityOperationSettings: EntityOperationSettings<T>;
-    canExecute: string | undefined;
+    settings?: ContextualOperationSettings<T>; 
+    entityOperationSettings?: EntityOperationSettings<T>;
+    canExecute?: string;
+    defaultContextualClick(e: React.MouseEvent<any>, ...args: any[]) {
+        defaultContextualClick(this, e, ...args);
+    }
 }
-
-
 
 export interface EntityOperationContext<T extends Entity> {
     frame: EntityFrame<T>;
@@ -154,7 +155,7 @@ export interface EntityOperationContext<T extends Entity> {
     entity: T;
     operationInfo: OperationInfo;
     settings: EntityOperationSettings<T>;
-    canExecute: string | undefined;
+    canExecute?: string;
     closeRequested?: boolean;
 }
 

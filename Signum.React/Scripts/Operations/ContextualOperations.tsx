@@ -93,12 +93,11 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
             const eos = getSettings(oi.key) as EntityOperationSettings<Entity> | undefined;
             const cos = eos == undefined ? undefined :
                 ctx.lites.length == 1 ? eos.contextual : eos.contextualFromMany
-            const coc = {
-                context: ctx,
-                operationInfo: oi,
-                settings: cos,
-                entityOperationSettings: eos,
-            } as ContextualOperationContext<Entity>;
+            const coc = new ContextualOperationContext<Entity>();
+            coc.context = ctx;
+            coc.operationInfo = oi;
+            coc.settings = cos;
+            coc.entityOperationSettings = eos;
 
             const visibleByDefault = oi.lite && (ctx.lites.length == 1 || oi.operationType != OperationType.ConstructorFrom)
 
@@ -212,7 +211,7 @@ export namespace MenuItemConstructor { //To allow monkey patching
         const disabled = !!coc.canExecute;
 
         const onClick = coc.settings && coc.settings.onClick ?
-            (me: React.MouseEvent<any>) => coc.settings.onClick!(coc, me) :
+            (me: React.MouseEvent<any>) => coc.settings!.onClick!(coc, me) :
             (me: React.MouseEvent<any>) => defaultClick(coc, me)
 
         const menuItem = <MenuItem
