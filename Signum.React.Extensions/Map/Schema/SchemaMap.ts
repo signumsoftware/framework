@@ -215,7 +215,7 @@ export class SchemaMapD3 {
                     p.startsWith("-") ? { isPositive: false, token: p.after("-") } :
                         { isPositive: true, token: p };
 
-                if (pair.token == "*" || str.contains(pair.token))
+                if (pair.token == "*" || str.toLowerCase().contains(pair.token.toLowerCase()))
                     return pair.isPositive;
             }
 
