@@ -10,8 +10,6 @@ import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
-import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 import { EmailMessageEntity, EmailTemplateMessageEntity, EmailMasterTemplateEntity, EmailMasterTemplateMessageEntity, EmailMessageOperation, EmailPackageEntity, EmailRecipientEntity, EmailConfigurationEntity, EmailTemplateEntity, AsyncEmailSenderPermission } from './Signum.Entities.Mailing'
 import { SmtpConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, Pop3ReceptionExceptionEntity, EmailAddressEntity } from './Signum.Entities.Mailing'
 import { NewsletterEntity, NewsletterDeliveryEntity, SendEmailTaskEntity } from './Signum.Entities.Mailing'

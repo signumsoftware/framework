@@ -11,8 +11,6 @@ import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName, getTypeInfo } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
-import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
 import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal'
 import ValueLineModal from '../../../Framework/Signum.React/Scripts/ValueLineModal'
 import { AlertEntity, AlertTypeEntity, AlertOperation, DelayOption, AlertMessage } from './Signum.Entities.Alerts'

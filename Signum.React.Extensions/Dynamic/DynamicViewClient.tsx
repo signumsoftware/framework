@@ -10,7 +10,6 @@ import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scr
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 import { TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
 import { isTypeEntity, getTypeInfo, PropertyRoute } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { Entity, ModifiableEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -44,7 +43,7 @@ export function start(options: { routes: JSX.Element[] }) {
     Operations.addSettings(new EntityOperationSettings(DynamicViewOperation.Save, {
         onClick: ctx => {
             (ctx.frame.entityComponent as DynamicViewEntityComponent).beforeSave();
-            EntityOperations.defaultExecuteEntity(ctx);
+            ctx.defaultClick();
         }
     }));
 

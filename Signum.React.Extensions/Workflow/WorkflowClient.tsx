@@ -14,8 +14,7 @@ import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { EntityOperationSettings, addSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import { confirmInNecessary, notifySuccess, defaultExecuteEntity } from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
-import { defaultContextualClick } from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
+import { confirmInNecessary, notifySuccess } from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 
 import { UserEntity } from '../../../Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization'
 import * as DynamicViewClient from '../../../Extensions/Signum.React.Extensions/Dynamic/DynamicViewClient'
@@ -299,13 +298,13 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Workf
 
             promise.then(pr => {
                 if (!pr || pr.Model.replacements.length == 0)
-                    defaultExecuteEntity(eoc, model);
+                    eoc.defaultClick(model);
                 else
                     Navigator.view(pr.Model, { extraComponentProps: { previewTasks: pr.NewTasks } }).then(replacementModel => {
                         if (!replacementModel)
                             return;
 
-                        defaultExecuteEntity(eoc, model, replacementModel);
+                        eoc.defaultClick(model, replacementModel);
                     }).done();
             }).done();
         }).done();
@@ -328,7 +327,7 @@ export function executeWorkflowJump(eoc: Operations.EntityOperationContext<CaseA
     var jumps = eoc.entity.workflowActivity.jumps;
 
     getWorkflowJumpSelector(jumps)
-        .then(dest => dest && defaultExecuteEntity(eoc, dest.to))
+        .then(dest => dest && eoc.defaultClick(dest.to))
         .done();
 }
 
