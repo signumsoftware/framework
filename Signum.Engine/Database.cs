@@ -129,7 +129,7 @@ namespace Signum.Engine
 
                
 
-
+                if(PreRetrive!=null)
                 {
                     var arg = new PreRetriveEventArgs();
                     PreRetrive.Invoke(id, typeof(T), arg);
