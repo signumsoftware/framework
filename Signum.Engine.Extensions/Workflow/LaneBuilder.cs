@@ -328,11 +328,19 @@ namespace Signum.Engine.Workflow
                     Lane = newLane,
                     Name = a.Name,
                     BpmnElementId = a.BpmnElementId,
-                    Comments = a.Comments,
-                    Type = a.Type,
-                    ValidationRules = a.ValidationRules.Select(vr => vr.Clone()).ToMList(),
-                    ViewName = a.ViewName,
                     Xml = a.Xml,
+                    Type = a.Type,
+                    ViewName = a.ViewName,
+                    RequiresOpen = a.RequiresOpen,
+                    ValidationRules = a.ValidationRules.Select(vr => vr.Clone()).ToMList(),
+                    Reject = a.Reject,
+                    Timeout = a.Timeout,
+                    EstimatedDuration = a.EstimatedDuration,
+                    Jumps = a.Jumps.Select(j => j.Clone()).ToMList(),
+                    Script = a.Script,
+                    SubWorkflow = a.SubWorkflow,
+                    UserHelp = a.UserHelp,
+                    Comments = a.Comments,
                 });
                 newActivities.Values.SaveList();
                 nodes.AddRange(newActivities.ToDictionary(kvp => (IWorkflowNodeEntity)kvp.Key, kvp => (IWorkflowNodeEntity)kvp.Value));

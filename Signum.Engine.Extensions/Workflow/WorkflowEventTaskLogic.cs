@@ -113,7 +113,11 @@ namespace Signum.Engine.Workflow
                     {
                         var task = (schedule.Task as WorkflowEventTaskEntity);
                         schedule.Suspended = model.Suspended;
-                        schedule.Rule = model.Rule;
+                        if (!object.ReferenceEquals(schedule.Rule, model.Rule))
+                        {
+                            schedule.Rule = null;
+                            schedule.Rule = model.Rule;
+                        }
                         task.TriggeredOn = model.TriggeredOn;
 
                         if (model.Condition != null)

@@ -195,6 +195,16 @@ namespace Signum.Entities.Workflow
         public Lite<WorkflowConditionEntity> Condition { get; set; }
 
         public Lite<WorkflowActionEntity> Action { get; set; }
+
+        public WorkflowJumpEntity Clone()
+        {
+            return new WorkflowJumpEntity
+            {
+                To = this.To,
+                Condition = this.Condition,
+                Action = this.Action
+            };
+        }
     }
 
     public enum WorkflowActivityType
