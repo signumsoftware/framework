@@ -317,6 +317,7 @@ namespace Signum.Engine.Workflow
                 {
                     Pool = pool,
                     Name = oldLane.Name,
+                    BpmnElementId = oldLane.BpmnElementId,
                     Actors = oldLane.Actors.ToMList(),
                     ActorsEval = oldLane.ActorsEval,
                     Xml = oldLane.Xml,
@@ -326,6 +327,7 @@ namespace Signum.Engine.Workflow
                 {
                     Lane = newLane,
                     Name = a.Name,
+                    BpmnElementId = a.BpmnElementId,
                     Comments = a.Comments,
                     Type = a.Type,
                     ValidationRules = a.ValidationRules.Select(vr => vr.Clone()).ToMList(),
@@ -339,6 +341,7 @@ namespace Signum.Engine.Workflow
                 {
                     Lane = newLane,
                     Name = e.Name,
+                    BpmnElementId = e.BpmnElementId,
                     Type = e.Type,
                     Xml = e.Xml,
                 });
@@ -349,6 +352,7 @@ namespace Signum.Engine.Workflow
                 {
                     Lane = newLane,
                     Name = g.Name,
+                    BpmnElementId = g.BpmnElementId,
                     Type = g.Type,
                     Direction = g.Direction,
                     Xml = g.Xml,

@@ -383,7 +383,6 @@ namespace Signum.Engine.Workflow
                        e.Eval.Script
                    });
 
-
                 new Graph<WorkflowConditionEntity>.Delete(WorkflowConditionOperation.Delete)
                 {
                     Delete = (e, _) =>
@@ -393,6 +392,17 @@ namespace Signum.Engine.Workflow
                     },
                 }.Register();
 
+                new Graph<WorkflowConditionEntity>.ConstructFrom<WorkflowConditionEntity>(WorkflowConditionOperation.Clone)
+                {
+                    Construct = (e, args) =>
+                    {
+                        return new WorkflowConditionEntity
+                        {
+                            MainEntityType = e.MainEntityType,
+                            Eval = new WorkflowConditionEval { Script = e.Eval.Script }
+                        };
+                    },
+                }.Register();
 
                 WorkflowEventTaskEntity.GetWorkflowEntity = lite => WorkflowGraphLazy.Value.GetOrThrow(lite).Workflow;
 
@@ -416,6 +426,18 @@ namespace Signum.Engine.Workflow
                     {
                         ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Action == e.ToLite()), e);
                         e.Delete();
+                    },
+                }.Register();
+
+                new Graph<WorkflowActionEntity>.ConstructFrom<WorkflowActionEntity>(WorkflowActionOperation.Clone)
+                {
+                    Construct = (e, args) =>
+                    {
+                        return new WorkflowActionEntity
+                        {
+                            MainEntityType = e.MainEntityType,
+                            Eval = new WorkflowActionEval { Script = e.Eval.Script }
+                        };
                     },
                 }.Register();
 

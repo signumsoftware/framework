@@ -12,6 +12,7 @@ namespace Signum.Entities.Scheduler
     public interface IScheduleRuleEntity : IEntity
     {
         DateTime Next(DateTime now);
+        IScheduleRuleEntity Clone();
     }
 
 
@@ -40,6 +41,13 @@ namespace Signum.Entities.Scheduler
             return SchedulerMessage.Each0Minutes.NiceToString().FormatWith(EachMinutes.ToString());
         }
 
+        public IScheduleRuleEntity Clone()
+        {
+            return new ScheduleRuleMinutelyEntity
+            {
+                EachMinutes = EachMinutes,
+            };
+        }
     }
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
@@ -118,6 +126,24 @@ namespace Signum.Entities.Scheduler
                 SchedulerMessage.ScheduleRuleWeekDaysDN_At.NiceToString(),
                 StartingOn.ToUserInterface().ToShortTimeString());
         }
+
+        public IScheduleRuleEntity Clone()
+        {
+            return new ScheduleRuleWeekDaysEntity
+            {
+                Calendar = Calendar,
+                Holiday = Holiday,
+
+                Monday = Monday,
+                Tuesday = Tuesday,
+                Wednesday = Wednesday,
+                Thursday = Thursday,
+                Friday = Friday,
+                Saturday = Saturday,
+                Sunday = Sunday,
+                StartingOn = StartingOn
+            };
+        }
     }
 
 
@@ -185,6 +211,26 @@ namespace Signum.Entities.Scheduler
             var monthNames = 0.To(12).Where(i => IsAllowed(i + 1)).CommaAnd(i => CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames[i]);
 
             return SchedulerMessage.Day0At1In2.NiceToString(StartingOn.Day, StartingOn.ToUserInterface().ToShortTimeString(), monthNames);
+        }
+
+        public IScheduleRuleEntity Clone()
+        {
+            return new ScheduleRuleMonthsEntity
+            {
+                January = January,
+                February = February,
+                March = March,
+                April = April,
+                May = May,
+                June = June,
+                July = July,
+                August = August,
+                September = September,
+                October = October,
+                November = November,
+                December = December,
+                StartingOn = StartingOn,
+            };
         }
     }
 

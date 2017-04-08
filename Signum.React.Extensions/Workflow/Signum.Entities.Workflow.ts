@@ -264,6 +264,7 @@ export interface WorkflowActionEval extends Dynamic.EvalEntity<IWorkflowActionEx
 }
 
 export module WorkflowActionOperation {
+    export const Clone : Entities.ConstructSymbol_From<WorkflowActionEntity, WorkflowActionEntity> = registerSymbol("Operation", "WorkflowActionOperation.Clone");
     export const Save : Entities.ExecuteSymbol<WorkflowActionEntity> = registerSymbol("Operation", "WorkflowActionOperation.Save");
     export const Delete : Entities.DeleteSymbol<WorkflowActionEntity> = registerSymbol("Operation", "WorkflowActionOperation.Delete");
 }
@@ -351,6 +352,7 @@ export interface WorkflowConditionEval extends Dynamic.EvalEntity<IWorkflowCondi
 }
 
 export module WorkflowConditionOperation {
+    export const Clone : Entities.ConstructSymbol_From<WorkflowConditionEntity, WorkflowConditionEntity> = registerSymbol("Operation", "WorkflowConditionOperation.Clone");
     export const Save : Entities.ExecuteSymbol<WorkflowConditionEntity> = registerSymbol("Operation", "WorkflowConditionOperation.Save");
     export const Delete : Entities.DeleteSymbol<WorkflowConditionEntity> = registerSymbol("Operation", "WorkflowConditionOperation.Delete");
 }
