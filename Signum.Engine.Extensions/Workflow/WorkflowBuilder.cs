@@ -280,6 +280,7 @@ namespace Signum.Engine.Workflow
                 allConnections.Values.Select(c => new WorkflowConnectionEntity
                 {
                     Name = c.Entity.Name,
+                    BpmnElementId = c.bpmnElementId,
                     Action = c.Entity.Action,
                     Condition = c.Entity.Condition,
                     DecisonResult = c.Entity.DecisonResult,
@@ -288,6 +289,11 @@ namespace Signum.Engine.Workflow
                     From = nodes.GetOrThrow(c.Entity.From),
                     To = nodes.GetOrThrow(c.Entity.To),
                 }).SaveList();
+            }
+            
+            foreach (var item in nodes.Where(a => a.Key is WorkflowEventEntity e && (e.Type == WorkflowEventType.ConditionalStart || e.Type == WorkflowEventType.TimerStart)))
+            {
+                WorkflowEventTaskLogic.CloneScheduledTasks((WorkflowEventEntity)item.Key, (WorkflowEventEntity)item.Value);
             }
 
             WorkflowBuilder wb = new WorkflowBuilder(newWorkflow, useCache: false);
