@@ -84,8 +84,8 @@ export class CaseFlowRenderer extends CustomRenderer {
                 var title = Array.toArray(gParent.childNodes).filter((a: SVGElement) => a.nodeName == "title").firstOrNull() || gParent.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
                 title.textContent = stats.map(a => getTitle(a)).join("\n");
 
-                var ggParent = gParent.parentNode as SVGGElement;
-                var path = Array.toArray(ggParent.childNodes).filter((a: SVGElement) => a.nodeName == "path").firstOrNull() as SVGPathElement || ggParent.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "path"));
+                //var ggParent = gParent.parentNode as SVGGElement;
+                //var path = Array.toArray(ggParent.childNodes).filter((a: SVGElement) => a.nodeName == "path").firstOrNull() as SVGPathElement || ggParent.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "path"));
                 //debugger;
                 //path.setAttribute("d", `m  ${element.x},${element.y}L${element.x + element.width},${element.y + element.height}`);
                 //path.style.setProperty("fill", "none");
