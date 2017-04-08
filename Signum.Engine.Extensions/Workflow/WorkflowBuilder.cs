@@ -30,7 +30,7 @@ namespace Signum.Engine.Workflow
 
         public object HasMultipleInputsAndOutputsAtTheSameTime { get; private set; }
 
-        public WorkflowBuilder(WorkflowEntity wf, bool useCache = true)
+        public WorkflowBuilder(WorkflowEntity wf)
         {
             using (HeavyProfiler.Log("WorkflowBuilder"))
             using (new EntityCache())
@@ -48,13 +48,6 @@ namespace Signum.Engine.Workflow
                     events = new List<WorkflowEventEntity>();
                     activities = new List<WorkflowActivityEntity>();
                     gateways = new List<WorkflowGatewayEntity>();
-                }
-                else if (useCache)
-                {
-                    connections = wf.WorkflowConnectionsFromCache().Select(a => a.ToLite()).RetrieveFromListOfLite().ToList();
-                    events = wf.WorkflowEventsFromCache().Select(a => a.ToLite()).RetrieveFromListOfLite().ToList();
-                    activities = wf.WorkflowActivitiesFromCache().Select(a => a.ToLite()).RetrieveFromListOfLite().ToList();
-                    gateways = wf.WorkflowGatewaysFromCache().Select(a => a.ToLite()).RetrieveFromListOfLite().ToList();
                 }
                 else
                 {
@@ -296,7 +289,8 @@ namespace Signum.Engine.Workflow
                 WorkflowEventTaskLogic.CloneScheduledTasks((WorkflowEventEntity)item.Key, (WorkflowEventEntity)item.Value);
             }
 
-            WorkflowBuilder wb = new WorkflowBuilder(newWorkflow, useCache: false);
+
+            WorkflowBuilder wb = new WorkflowBuilder(newWorkflow);
             newWorkflow.FullDiagramXml = new WorkflowXmlEntity { DiagramXml = wb.GetXDocument().ToString() };
             newWorkflow.Save();
 
