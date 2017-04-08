@@ -37,6 +37,7 @@ export interface SearchControlLoadedProps {
     entityFormatter?: EntityFormatter;
     onSelectionChanged?: (entity: Lite<Entity>[]) => void;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
+    onSearch?: (fo: FindOptionsParsed) => void;
     onResult?: (table: ResultTable) => void;
     hideFullScreenButton?: boolean;
     showBarExtension?: boolean;
@@ -138,7 +139,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     };
 
     doSearch(): Promise<void> {
-        return this.getFindOptionsWithSFB().then(fo => {
+        return this.getFindOptionsWithSFB().then(fop => {
+            if (this.props.onSearch)
+                this.props.onSearch(fop);
+
             this.setState({ loading: false, editingColumn: undefined });
             return Finder.API.executeQuery(this.getQueryRequest()).then(rt => {
                 this.setState({
