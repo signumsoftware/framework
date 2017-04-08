@@ -45,7 +45,8 @@ export function start(options: { routes: JSX.Element[] }) {
                             style: "success",
                             icon: "success"
                         }).then(result => {
-                            window.open(Navigator.currentHistory.createHref("~/dynamic/panel"));
+                            if (result == "yes")
+                                window.open(Navigator.currentHistory.createHref("~/dynamic/panel"));
                         }).done();
                     }
                 })
