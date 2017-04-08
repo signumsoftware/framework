@@ -75,7 +75,7 @@ namespace Signum.Entities.Scheduler
 
         public DateTime Next(DateTime now)
         {
-            DateTime result = DateTimeExtensions.Max(now.Date, StartingOn.Date).Add(StartingOn.TimeOfDay);
+            DateTime result = DateTimeExtensions.Max(now, StartingOn).Date.Add(StartingOn.TimeOfDay);
 
             if (result < now)
                 result = result.AddDays(1);
@@ -167,7 +167,7 @@ namespace Signum.Entities.Scheduler
         
         public DateTime Next(DateTime now)
         {
-            DateTime result = DateTimeExtensions.Max(now.Date, StartingOn.Date).MonthStart().AddDays(StartingOn.Day).Add(StartingOn.TimeOfDay);
+            DateTime result = DateTimeExtensions.Max(now, StartingOn).MonthStart().AddDays(StartingOn.Day - 1).Add(StartingOn.TimeOfDay);
 
             if (result < now)
                 result = result.AddMonths(1);
