@@ -285,16 +285,16 @@ namespace Signum.Entities
         [HiddenProperty]
         public string Error
         {
-            get { return IntegrityCheck()?.Values.ToString("\r\n"); }
+            get { return IntegrityCheck()?.Errors.Values.ToString("\r\n"); }
         }
 
-        public Dictionary<string, string> IntegrityCheck()
+        public IntegrityCheck IntegrityCheck()
         {
             using (var log = HeavyProfiler.LogNoStackTrace("IntegrityCheck"))
             {
                 var validators = Validator.GetPropertyValidators(GetType());
 
-                Dictionary<string, string> result = null;
+                Dictionary<string, string> dic = null;
 
                 foreach (var pv in validators.Values)
                 {
@@ -302,14 +302,16 @@ namespace Signum.Entities
 
                     if (error != null)
                     {
-                        if (result == null)
-                            result = new Dictionary<string, string>();
+                        if (dic == null)
+                            dic = new Dictionary<string, string>();
 
-                        result.Add(pv.PropertyInfo.Name, error);
+                        dic.Add(pv.PropertyInfo.Name, error);
                     }
                 }
+                if (dic == null)
+                    return null;
 
-                return result;
+                return new Entities.IntegrityCheck(this, dic);
             }
         }
 
@@ -351,7 +353,7 @@ namespace Signum.Entities
             Validator.PropertyValidator(property).StaticPropertyValidation += validate;
         }
 
-        public Dictionary<Guid, Dictionary<string, string>> FullIntegrityCheck()
+        public Dictionary<Guid, IntegrityCheck> FullIntegrityCheck()
         {
             var graph = GraphExplorer.FromRoot(this);
             return GraphExplorer.FullIntegrityCheck(graph);
@@ -409,6 +411,29 @@ namespace Signum.Entities
             this.temporalErrors.Remove(propertyName);
             NotifyPrivate(propertyName);
             NotifyError();
+        }
+    }
+
+    [Serializable]
+    public class IntegrityCheck
+    {
+        public IntegrityCheck(ModifiableEntity me, Dictionary<string, string> errors)
+        {
+            this.TemporalId = me.temporalId;
+            this.Type = me.GetType();
+            this.Id = me is Entity e ? e.id : null;
+            Errors = errors ?? throw new ArgumentNullException(nameof(errors));
+        }
+
+        public Guid TemporalId { get; private set; }
+        public Type Type { get; private set; }
+        public PrimaryKey? Id { get; private set; }
+        public Dictionary<string, string> Errors { get; private set; }
+
+        public override string ToString()
+        {
+            return Type.NiceName() + (Id == null ? "" : (" (" + Id + ")")) + "\r\n" 
+                + Errors.ToString(kvp => "    {0}: {1}".FormatWith(kvp.Key, kvp.Value), "\r\n");
         }
     }
 }
