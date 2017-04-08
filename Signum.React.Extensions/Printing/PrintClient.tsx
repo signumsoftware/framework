@@ -9,7 +9,6 @@ import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import { PseudoType, QueryKey, GraphExplorer, OperationType, IType, Type, KindOfType } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
 import { PrintLineEntity, PrintLineState, PrintPackageEntity, PrintPermission, PrintPackageProcess } from './Signum.Entities.Printing'
 import { ProcessEntity } from '../Processes/Signum.Entities.Processes'
 import { FileTypeSymbol } from '../Files/Signum.Entities.Files'

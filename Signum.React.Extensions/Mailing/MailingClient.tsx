@@ -10,8 +10,6 @@ import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
-import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 import { EmailMessageEntity, EmailTemplateMessageEntity, EmailMasterTemplateEntity, EmailMasterTemplateMessageEntity, EmailMessageOperation, EmailPackageEntity, EmailRecipientEntity, EmailConfigurationEntity, EmailTemplateEntity, AsyncEmailSenderPermission } from './Signum.Entities.Mailing'
 import { SmtpConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, Pop3ReceptionExceptionEntity, EmailAddressEntity } from './Signum.Entities.Mailing'
 import { NewsletterEntity, NewsletterDeliveryEntity, SendEmailTaskEntity } from './Signum.Entities.Mailing'
@@ -44,12 +42,12 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
     Navigator.addSettings(new EntitySettings(EmailConfigurationEntity, e => new ViewPromise(resolve => require(['./Templates/EmailConfiguration'], resolve))));
 
     Operations.addSettings(new EntityOperationSettings(EmailMessageOperation.CreateMailFromTemplate, {
-        onClick: (ctx,e) => {
+        onClick: (ctx) => {
             Finder.find({ queryName: ctx.entity.query!.key }).then(lite => {
                 if (!lite)
                     return;
                 Navigator.API.fetchAndForget(lite).then(entity =>
-                    EntityOperations.defaultConstructFromEntity(ctx, e, entity))
+                    ctx.defaultClick(entity))
                     .done();
             }).done();
         }

@@ -2,7 +2,6 @@
 import { WorkflowEntity, WorkflowModel, WorkflowEntitiesDictionary, BpmnEntityPair, WorkflowOperation, WorkflowMessage } from '../Signum.Entities.Workflow'
 import { TypeContext, ValueLine, EntityLine, LiteAutocompleteConfig } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { is, JavascriptMessage, toLite, ModifiableEntity, Lite, Entity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { createEntityOperationContext } from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 import * as Entities from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
 import { API, executeWorkflowSave } from '../WorkflowClient'

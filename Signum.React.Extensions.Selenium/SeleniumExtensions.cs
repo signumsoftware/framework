@@ -14,7 +14,7 @@ using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support;
 using OpenQA.Selenium.Support.UI;
 using Signum.Utilities;
-using System.Collections.ObjectModel;
+using Signum.React.Selenium.ModalProxies;
 
 namespace Signum.React.Selenium
 {
@@ -214,23 +214,23 @@ namespace Signum.React.Selenium
                 throw new InvalidOperationException();
         }
 
-        [DebuggerStepThrough]
-        public static bool IsAlertPresent(this RemoteWebDriver selenium)
-        {
-            try
-            {
-                selenium.SwitchTo().Alert();
-                return true;
-            }
-            catch (NoAlertPresentException)
-            {
-                return false;
-            }
-        }
+        //[DebuggerStepThrough]
+        //public static bool IsAlertPresent(this RemoteWebDriver selenium)
+        //{
+        //    try
+        //    {
+        //        selenium.SwitchTo().Alert();
+        //        return true;
+        //    }
+        //    catch (NoAlertPresentException)
+        //    {
+        //        return false;
+        //    }
+        //}
 
         public static void ConsumeAlert(this RemoteWebDriver selenium)
         {
-            var alertPresent = selenium.Wait(() => selenium.IsAlertPresent());
+            var alertPresent = selenium.Wait(() => MessageModalProxyExtensions.IsMessageModalPresent(selenium));
 
             var alert = selenium.Wait(() => selenium.SwitchTo().Alert());
             
@@ -410,82 +410,4 @@ namespace Signum.React.Selenium
             return new WebElementLocator(element, locator);
         }
     }
-
-    public class WebElementLocator
-    {
-        public IWebElement ParentElement;
-        public By Locator; 
-
-        public WebElementLocator(IWebElement parentElement, By locator)
-        {
-            this.ParentElement = parentElement;
-            this.Locator = locator;
-        }
-
-        public IWebElement Find()
-        {
-           return ParentElement.FindElement(this.Locator);
-        }
-
-        public ReadOnlyCollection<IWebElement> FindElements()
-        {
-            return ParentElement.FindElements(this.Locator);
-        }
-
-        public IWebElement TryFind()
-        {
-            return ParentElement.TryFindElement(this.Locator);
-        }
-
-        public bool IsPresent()
-        {
-            return ParentElement.IsElementPresent(this.Locator);
-        }
-
-        public bool IsVisible()
-        {
-            return ParentElement.IsElementVisible(this.Locator);
-        }
-
-        public IWebElement WaitPresent()
-        {
-            return ParentElement.WaitElementPresent(this.Locator);
-        }
-        public void WaitNoPresent()
-        {
-            ParentElement.WaitElementNotPresent(this.Locator);
-        }
-
-        public IWebElement WaitVisible()
-        {
-            return ParentElement.WaitElementVisible(this.Locator);
-        }
-
-        public void WaitNoVisible()
-        {
-            ParentElement.WaitElementNotVisible(this.Locator);
-        }
-
-        public void AssertNotPresent()
-        {
-            ParentElement.AssertElementNotPresent(this.Locator);
-        }
-
-        public void AssertNotVisible()
-        {
-            ParentElement.AssertElementNotVisible(this.Locator);
-        }
-
-        public void AssertPresent()
-        {
-            ParentElement.AssertElementPresent(this.Locator);
-        }
-
-        public WebElementLocator CombineCss(string cssSelectorSuffix)
-        {
-            return new WebElementLocator(this.ParentElement, this.Locator.CombineCss(cssSelectorSuffix));
-        }
-
-    }
-
 }

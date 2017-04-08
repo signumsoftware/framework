@@ -66,7 +66,7 @@
       throw errors.join() + " not compatible with '" + data.columns.c1.displayName + "'";  
     
      dim0 = d3.nest()
-      .key(function(r){return r.c0.toString(); })
+      .key(function(r){return "k" + r.c0.toString(); })
       .rollup(function(r){return r[0].c0 })
       .entries(data.rows)
       .map(function(g){return g.values;});
@@ -85,13 +85,13 @@
           key : c1.key,
           color: c1.color,
           niceName : c1.niceToString(),
-          points : dim0.map(function(dim0){ 
-            var row = obj[dim0];
+          points : dim0.map(function(d0){ 
+            var row = obj[d0];
             return {
               rowClick: row, 
               value: row == null ? null: row.c2,
               niceToString : row == null ? null: (row.c0.niceToString() + ', ' + row.c1.niceToString() + ': ' + row.c2.niceToString()),
-              dim0: dim0
+              dim0: d0
           	}; })
         };
       })

@@ -11,8 +11,6 @@ import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName, getTypeInfo } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
-import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
 import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal'
 import ValueLineModal from '../../../Framework/Signum.React/Scripts/ValueLineModal'
 import { AlertEntity, AlertTypeEntity, AlertOperation, DelayOption, AlertMessage } from './Signum.Entities.Alerts'
@@ -43,9 +41,9 @@ export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeN
     }));
 
     Operations.addSettings(new EntityOperationSettings(AlertOperation.Delay, {
-        onClick: (eoc) => chooseDate().then(d => d && EntityOperations.defaultExecuteLite(eoc, d.format())).done(),
-        contextual: { onClick: (coc, e) => chooseDate().then(d => d && ContextualOperations.defaultContextualClick(coc, e, d.format())).done() },
-        contextualFromMany: { onClick: (coc, e) => chooseDate().then(d => d && ContextualOperations.defaultContextualClick(coc, e, d.format())).done() }
+        onClick: (eoc) => chooseDate().then(d => d && eoc.defaultClick(d.format())).done(),
+        contextual: { onClick: (coc) => chooseDate().then(d => d && coc.defaultContextualClick(d.format())).done() },
+        contextualFromMany: { onClick: (coc) => chooseDate().then(d => d && coc.defaultContextualClick(d.format())).done() }
     }));
 }
 
