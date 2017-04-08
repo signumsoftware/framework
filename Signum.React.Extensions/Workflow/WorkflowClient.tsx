@@ -124,8 +124,8 @@ export function start(options: { routes: JSX.Element[] }) {
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.SetMainEntityStrategy,
         {
             isVisible: ctx => false,
-            onClick: (eoc) => chooseWorkflowMainEntityStrategy().then(s => s && EntityOperations.defaultExecuteLite(eoc, s)).done(),
-            contextual: { isVisible: ctx => true, onClick: (coc, e) => chooseWorkflowMainEntityStrategy().then(s => s && ContextualOperations.defaultContextualClick(coc, e, s)).done() },
+            onClick: eoc => chooseWorkflowMainEntityStrategy().then(s => s && eoc.defaultClick(s)).done(),
+            contextual: { isVisible: ctx => true, onClick: coc => chooseWorkflowMainEntityStrategy().then(s => s && coc.defaultContextualClick(s)).done() },
             contextualFromMany: { isVisible: ctx => false },
         }));
 
