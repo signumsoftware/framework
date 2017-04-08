@@ -113,7 +113,7 @@ export function start(options: { routes: JSX.Element[] }) {
     });
 
     Navigator.addSettings(new EntitySettings(CaseEntity, w => new ViewPromise(m => require(['./Case/Case'], m))));
-    Navigator.addSettings(new EntitySettings(CaseTagEntity, w => new ViewPromise(m => require(['./Case/CaseTag'], m))));
+    Navigator.addSettings(new EntitySettings(CaseTagTypeEntity, w => new ViewPromise(m => require(['./Case/CaseTagType'], m))));
     Navigator.addSettings(new EntitySettings(CaseTagsModel, w => new ViewPromise(m => require(['./Case/CaseTagsModel'], m))));
 
     Navigator.addSettings(new EntitySettings(CaseActivityEntity, undefined, {
