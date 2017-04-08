@@ -141,7 +141,7 @@ namespace Signum.Engine.SMS
 
                     MultipleSMSModel model = args.GetArg<MultipleSMSModel>();
 
-                    Dictionary<string, string> str = model.IntegrityCheck();
+                    IntegrityCheck ic = model.IntegrityCheck();
 
                     if (!model.Message.HasText())
                         throw new ApplicationException("The text for the SMS message has not been set");
