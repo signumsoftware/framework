@@ -102,6 +102,7 @@ export default class BpmnViewerComponent extends React.Component<BpmnViewerCompo
             return mod && mod.decisonResult || undefined;
         }
 
+        caseFlowRenderer.viewer = this.viewer;
         caseFlowRenderer.caseFlow = this.props.caseFlow;
         caseFlowRenderer.maxDuration = Dic.getValues(this.props.caseFlow.Activities).map(a => a.map(a => a.Duration || 0).sum()).max()!;
         caseFlowRenderer.caseFlowColor = this.state.caseFlowColor;

@@ -83,8 +83,16 @@ declare namespace BPMN {
         di: DiElement;
         name: string;
         $type: string;
+        bounds: BoundsElement;
         lanes: ModdleElement[];
         eventDefinitions?: ModdleElement[];
+    }
+
+    interface BoundsElement extends ModdleElement {
+        height: number;
+        width: number;
+        x: number;
+        y: number;
     }
 
     interface ConnectionModdleElemnet extends ModdleElement {

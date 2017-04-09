@@ -576,10 +576,14 @@ export interface CaseActivityStats {
 
 }
 export interface CaseConnectionStats {
-    Connection: Lite<WorkflowConnectionEntity>;
+    Connection?: Lite<WorkflowConnectionEntity>;
     DoneDate: string;
     DoneBy: Lite<IUserEntity>;
     DoneType: DoneType;
+
+    BpmnElementId?: string;
+    FromBpmnElementId: string;
+    ToBpmnElementId: string;
 }
 
 export interface CaseFlow {
