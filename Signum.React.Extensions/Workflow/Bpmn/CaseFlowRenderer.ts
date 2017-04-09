@@ -86,7 +86,8 @@ export class CaseFlowRenderer extends CustomRenderer {
 
                 var gParent = ((result.parentNode as SVGGElement).parentNode as SVGGElement);
                 var title = Array.toArray(gParent.childNodes).filter((a: SVGElement) => a.nodeName == "title").firstOrNull() || gParent.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
-                title.textContent = stats.map(a => getTitle(a)).join("\n");
+                title.textContent = stats.map((a, i) => i == 0 || i == stats.length - 1 ? getTitle(a) :
+                    i == 1 ? `(…${CaseActivityEntity.niceCount(stats.length - 2)})` : "").filter(a => a).join("\n\n");
 
                 var ggParent = gParent.parentNode as SVGGElement;
 
@@ -146,7 +147,7 @@ export class CaseFlowRenderer extends CustomRenderer {
 
 function getTitle(stats: CaseActivityStats) {
     var result = `${stats.WorkflowActivity.toStr} (${CaseNotificationEntity.nicePluralName()} ${stats.Notifications})
-${CaseActivityEntity.nicePropertyName(a => a.startDate)}: ${moment(stats.StartOn).format("L LT")} (${moment(stats.StartOn).fromNow()})`;
+${CaseActivityEntity.nicePropertyName(a => a.startDate)}: ${moment(stats.StartDate).format("L LT")} (${moment(stats.StartDate).fromNow()})`;
 
     if (stats.DoneDate != null)
         result += `
@@ -156,8 +157,7 @@ ${CaseActivityEntity.nicePropertyName(a => a.duration)}: ${formatDuration(stats.
 
     result += `
 ${CaseFlowColor.niceName("AverageDuration")}: ${formatDuration(stats.AverageDuration)}
-${CaseFlowColor.niceName("EstimatedDuration")}: ${formatDuration(stats.EstimatedDuration)}
-`;
+${CaseFlowColor.niceName("EstimatedDuration")}: ${formatDuration(stats.EstimatedDuration)}`;
 
     return result;
 }

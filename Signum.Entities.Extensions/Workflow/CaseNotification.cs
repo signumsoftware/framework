@@ -59,9 +59,12 @@ namespace Signum.Entities.Workflow
 
     }
 
-    public enum InboxFilterModelMessage
+    public enum InboxMessage
     {
         Clear,
+        Activity,
+        SenderNote,
+        Sender,
     }
 
     public enum DateFilterRange

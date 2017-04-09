@@ -4,7 +4,7 @@ import { Button } from "react-bootstrap"
 import { Binding, LambdaMemberType } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { newMListElement } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { InboxFilterModel, InboxFilterModelMessage, CaseNotificationState } from '../Signum.Entities.Workflow'
+import { InboxFilterModel, InboxMessage, CaseNotificationState } from '../Signum.Entities.Workflow'
 import { TypeContext, ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EnumCheckboxList, FormGroup, FormGroupStyle, FormGroupSize } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl, ValueSearchControl, FilterOperation, OrderType, PaginationMode, ISimpleFilterBuilder, FilterOption, FindOptionsParsed } from '../../../../Framework/Signum.React/Scripts/Search'
 
@@ -48,7 +48,7 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
                         <ValueLine ctx={ctx.subCtx(o => o.toDate) } />
                     </div>
                 </div>
-                <Button bsStyle="warning" style={{ marginTop: 15, marginLeft: 15 }} onClick={ this.handleOnClearFiltersClick } > { InboxFilterModelMessage.Clear.niceToString() } </Button>
+                <Button bsStyle="warning" style={{ marginTop: 15, marginLeft: 15 }} onClick={ this.handleOnClearFiltersClick } > { InboxMessage.Clear.niceToString() } </Button>
             </div>);
     }
 

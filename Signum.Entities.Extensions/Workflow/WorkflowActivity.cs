@@ -371,10 +371,12 @@ namespace Signum.Entities.Workflow
         public SubWorkflowEntity SubWorkflow { get; set; }
     }
 
-    public enum WorkflowActivityMessage {
+    public enum WorkflowActivityMessage
+    {
         [Description("Duplicate view name found: {0}")]
         DuplicateViewNameFound0,
         ChooseADestinationForWorkflowJumping,
         CaseFlow,
+        AverageDuration,
     }
 }

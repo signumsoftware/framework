@@ -9,6 +9,7 @@ import {
 } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { API, CaseFlow } from '../WorkflowClient'
 import BpmnViewerComponent from '../Bpmn/BpmnViewerComponent'
+import InlineCaseTags from "../Case/InlineCaseTags";
 
 interface CaseComponentProps {
     ctx: TypeContext<CaseEntity>;
@@ -59,6 +60,8 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
         var ctx = this.props.ctx.subCtx({ readOnly: true, labelColumns: 4 });
         return (
             <div>
+                <div className="inline-tags"> <InlineCaseTags case={toLite(this.props.ctx.value)} /></div>
+                <br />
                 <div className="row">
                     <div className="col-sm-6">
                         <EntityLine ctx={ctx.subCtx(a => a.workflow)} />
@@ -79,6 +82,7 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
                                 diagramXML={this.state.initialXmlDiagram}
                                 entities={this.state.entities}
                                 caseFlow={this.state.caseFlow}
+                                case={ctx.value}
                                 caseActivity={this.props.caseActivity}
                             /></div> :
                         <h3>{JavascriptMessage.loading.niceToString()}</h3>}

@@ -288,6 +288,7 @@
     <TypeScriptCompile Include="Workflow\Case\InlineCaseTags.tsx" />
     <TypeScriptCompile Include="Workflow\Case\Tag.tsx" />
     <TypeScriptCompile Include="Workflow\Case\CaseTagType.tsx" />
+    <TypeScriptCompile Include="Workflow\Case\CaseActivityStatsModal.tsx" />
     <TypeScriptCompile Include="Workflow\Signum.Entities.Workflow.ts">
       <DependentUpon>Signum.Entities.Workflow.t4s</DependentUpon>
     </TypeScriptCompile>

@@ -44,7 +44,7 @@ import {
     CaseActivityOperation, CaseEntity, CaseNotificationEntity, CaseNotificationState, InboxFilterModel, WorkflowOperation, WorkflowPoolEntity, WorkflowScriptEntity, WorkflowScriptEval,
     WorkflowActivityOperation, WorkflowReplacementModel, WorkflowModel, BpmnEntityPair, WorkflowActivityModel, ICaseMainEntity, WorkflowGatewayEntity, WorkflowEventEntity,
     WorkflowLaneModel, WorkflowConnectionModel, IWorkflowNodeEntity, WorkflowActivityMessage, WorkflowTimeoutEntity, CaseTagEntity, CaseTagsModel, CaseTagTypeEntity,
-    WorkflowScriptRunnerPanelPermission, WorkflowEventModel, WorkflowEventTaskEntity, DoneType, CaseOperation, WorkflowMainEntityStrategy
+    WorkflowScriptRunnerPanelPermission, WorkflowEventModel, WorkflowEventTaskEntity, DoneType, CaseOperation, WorkflowMainEntityStrategy, WorkflowActivityType
 } from './Signum.Entities.Workflow'
 
 import InboxFilter from './Case/InboxFilter'
@@ -65,6 +65,7 @@ export function start(options: { routes: JSX.Element[] }) {
         new QuickLinks.QuickLinkAction("caseFlow", WorkflowActivityMessage.CaseFlow.niceToString(), e => {
             Navigator.API.fetchAndForget(ctx.lite)
                 .then(ca => Navigator.navigate(ca.case, { extraComponentProps: { caseActivity: ca } }))
+                .then(() => ctx.contextualContext && ctx.contextualContext.markRows({}))
                 .done();
         }, { icon: "fa fa-random", iconColor: "green" })
     ]);
@@ -77,7 +78,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(WorkflowScriptRunnerPanelPermission.ViewWorkflowScriptRunnerPanel),
-        key: "WorlflowScriptRunnerPanel",
+        key: "WorkflowScriptRunnerPanel",
         onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/workflow/panel"))
     });
 
@@ -565,8 +566,10 @@ export interface CaseActivityStats {
     CaseActivity: Lite<CaseActivityEntity>;
     PreviousActivity: Lite<CaseActivityEntity>;
     WorkflowActivity: Lite<WorkflowActivityEntity>;
+    WorkflowActivityType: WorkflowActivityType;
+    SubWorkflow: Lite<WorkflowEntity>;
     Notifications: number;
-    StartOn: string;
+    StartDate: string;
     DoneDate?: string;
     DoneType?: DoneType;
     DoneBy: Lite<IUserEntity>;

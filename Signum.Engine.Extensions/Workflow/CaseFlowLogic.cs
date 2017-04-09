@@ -21,9 +21,11 @@ namespace Signum.Engine.Workflow
                 CaseActivity = ca.ToLite(),
                 PreviousActivity = ca.Previous,
                 WorkflowActivity = ca.WorkflowActivity.ToLite(),
+                WorkflowActivityType = ca.WorkflowActivity.Type,
+                SubWorkflow = ca.WorkflowActivity.SubWorkflow.Workflow.ToLite(),
                 BpmnElementId = ca.WorkflowActivity.BpmnElementId,
                 Notifications = ca.Notifications().Count(),
-                StartOn = ca.StartDate,
+                StartDate = ca.StartDate,
                 DoneDate = ca.DoneDate,
                 DoneType = ca.DoneType,
                 DoneBy = ca.DoneBy,
@@ -86,7 +88,7 @@ namespace Signum.Engine.Workflow
                     FromBpmnElementId = c.From.BpmnElementId,
                     ToBpmnElementId = c.To.BpmnElementId,
                     DoneBy = f.DoneBy,
-                    DoneDate = f.StartOn,
+                    DoneDate = f.StartDate,
                 }));
             }
 
@@ -204,8 +206,10 @@ namespace Signum.Engine.Workflow
         public Lite<CaseActivityEntity> CaseActivity;
         public Lite<CaseActivityEntity> PreviousActivity;
         public Lite<WorkflowActivityEntity> WorkflowActivity;
+        public WorkflowActivityType WorkflowActivityType;
+        public Lite<WorkflowEntity> SubWorkflow;
         public int Notifications;
-        public DateTime StartOn;
+        public DateTime StartDate;
         public DateTime? DoneDate;
         public DoneType? DoneType;
         public Lite<IUserEntity> DoneBy;

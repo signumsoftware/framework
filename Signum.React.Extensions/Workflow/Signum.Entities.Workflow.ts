@@ -64,6 +64,7 @@ export module CaseActivityMessage {
     export const Activity0HasNoTimeout = new MessageKey("CaseActivityMessage", "Activity0HasNoTimeout");
     export const ThereIsNoPreviousActivity = new MessageKey("CaseActivityMessage", "ThereIsNoPreviousActivity");
     export const OnlyForScriptWorkflowActivities = new MessageKey("CaseActivityMessage", "OnlyForScriptWorkflowActivities");
+    export const Pending = new MessageKey("CaseActivityMessage", "Pending");
 }
 
 export module CaseActivityOperation {
@@ -210,8 +211,11 @@ export interface InboxFilterModel extends Entities.ModelEntity {
     toDate?: string | null;
 }
 
-export module InboxFilterModelMessage {
-    export const Clear = new MessageKey("InboxFilterModelMessage", "Clear");
+export module InboxMessage {
+    export const Clear = new MessageKey("InboxMessage", "Clear");
+    export const Activity = new MessageKey("InboxMessage", "Activity");
+    export const SenderNote = new MessageKey("InboxMessage", "SenderNote");
+    export const Sender = new MessageKey("InboxMessage", "Sender");
 }
 
 export interface IWorkflowNodeEntity extends IWorkflowObjectEntity, Entities.Entity {
@@ -294,6 +298,7 @@ export module WorkflowActivityMessage {
     export const DuplicateViewNameFound0 = new MessageKey("WorkflowActivityMessage", "DuplicateViewNameFound0");
     export const ChooseADestinationForWorkflowJumping = new MessageKey("WorkflowActivityMessage", "ChooseADestinationForWorkflowJumping");
     export const CaseFlow = new MessageKey("WorkflowActivityMessage", "CaseFlow");
+    export const AverageDuration = new MessageKey("WorkflowActivityMessage", "AverageDuration");
 }
 
 export const WorkflowActivityModel = new Type<WorkflowActivityModel>("WorkflowActivityModel");
