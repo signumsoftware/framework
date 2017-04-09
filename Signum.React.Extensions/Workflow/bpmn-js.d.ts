@@ -201,6 +201,7 @@ declare module 'bpmn-js/lib/features/popup-menu/ReplaceMenuProvider' {
         constructor(popupMenu: any, modeling: any, moddle: BPMN.ModdleElement, bpmnReplace: any, rules: any, translate: any);
 
         _createMenuEntry(definition: any, element: BPMN.DiElement, action: any): any;
+        _createEntries(element: BPMN.DiElement, replaceOptions: any): any;
     }
 
     export = BpmnReplaceMenuProvider
