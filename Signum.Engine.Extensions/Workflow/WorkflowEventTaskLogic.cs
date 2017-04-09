@@ -174,6 +174,7 @@ namespace Signum.Engine.Workflow
             var newTask = new WorkflowEventTaskEntity()
             {
                 Workflow = newEvent.Lane.Pool.Workflow.ToLite(),
+                fullWorkflow = newEvent.Lane.Pool.Workflow,
                 Event = newEvent.ToLite(),
                 TriggeredOn = task.TriggeredOn,
                 Condition = task.Condition != null ? new WorkflowEventTaskConditionEval() { Script = task.Condition.Script } : null,

@@ -160,6 +160,16 @@ namespace Signum.Entities.Workflow
         Lite<WorkflowConditionEntity> IWorkflowTransition.Condition => null;
 
         Lite<WorkflowActionEntity> IWorkflowTransition.Action => null;
+
+        public WorkflowScriptPartEntity Clone()
+        {
+            return new WorkflowScriptPartEntity()
+            {
+                Script = this.Script,
+                RetryStrategy = this.RetryStrategy,
+                OnFailureJump = this.OnFailureJump,
+            };
+        }
     }
 
     [Serializable]
@@ -254,6 +264,15 @@ namespace Signum.Entities.Workflow
         [NotNullable]
         [NotNullValidator, NotifyChildProperty]
         public SubEntitiesEval SubEntitiesEval { get; set; }
+
+        public SubWorkflowEntity Clone()
+        {
+            return new SubWorkflowEntity()
+            {
+                Workflow = this.Workflow,
+                SubEntitiesEval = this.SubEntitiesEval.Clone(),
+            };
+        }
     }
 
     [Serializable]
@@ -287,6 +306,14 @@ namespace Signum.Entities.Workflow
                             }
                         }                  
                     }");
+        }
+
+        public SubEntitiesEval Clone()
+        {
+            return new SubEntitiesEval()
+            {
+                Script = this.Script
+            };
         }
     }
 

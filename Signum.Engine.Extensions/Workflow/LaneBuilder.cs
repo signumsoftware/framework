@@ -319,7 +319,7 @@ namespace Signum.Engine.Workflow
                     Name = oldLane.Name,
                     BpmnElementId = oldLane.BpmnElementId,
                     Actors = oldLane.Actors.ToMList(),
-                    ActorsEval = oldLane.ActorsEval,
+                    ActorsEval = oldLane.ActorsEval.Clone(),
                     Xml = oldLane.Xml,
                 }.Save();
 
@@ -337,8 +337,8 @@ namespace Signum.Engine.Workflow
                     Timeout = a.Timeout,
                     EstimatedDuration = a.EstimatedDuration,
                     Jumps = a.Jumps.Select(j => j.Clone()).ToMList(),
-                    Script = a.Script,
-                    SubWorkflow = a.SubWorkflow,
+                    Script = a.Script?.Clone(),
+                    SubWorkflow = a.SubWorkflow?.Clone(),
                     UserHelp = a.UserHelp,
                     Comments = a.Comments,
                 });

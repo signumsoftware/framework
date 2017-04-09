@@ -96,6 +96,11 @@ namespace Signum.Entities.Workflow
                         }                  
                     }");
         }
+
+        public WorkflowLaneActorsEval Clone()
+        {
+            return new WorkflowLaneActorsEval() { Script = this.Script };
+        }
     }
 
     public interface IWorkflowLaneActorsEvaluator
