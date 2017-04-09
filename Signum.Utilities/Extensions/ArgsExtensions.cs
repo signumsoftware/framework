@@ -11,18 +11,18 @@ namespace Signum.Utilities
     {
         public static T GetArg<T>(this IEnumerable<object> args)
         {
-            return args.OfTypeOrEmpty<T>().SingleEx(() => "{0} in the argument list".FormatWith(typeof(T))); ;
+            return args.SmartConvertTo<T>().SingleEx(() => "{0} in the argument list".FormatWith(typeof(T))); ;
         }
 
         public static T TryGetArgC<T>(this IEnumerable<object> args) where T : class
         {
-            return args.OfTypeOrEmpty<T>().SingleOrDefaultEx(
+            return args.SmartConvertTo<T>().SingleOrDefaultEx(
                 () => "There are more than one {0} in the argument list".FormatWith(typeof(T)));
         }
 
         public static T? TryGetArgS<T>(this IEnumerable<object> args) where T : struct
         {
-            var casted = args.OfTypeOrEmpty<T>();
+            var casted = args.SmartConvertTo<T>();
 
             if (casted.IsEmpty())
                 return null;
@@ -30,16 +30,32 @@ namespace Signum.Utilities
             return casted.SingleEx(() => "{0} in the argument list".FormatWith(typeof(T)));
         }
 
-        static IEnumerable<T> OfTypeOrEmpty<T>(this IEnumerable<object> args)
+        static IEnumerable<T> SmartConvertTo<T>(this IEnumerable<object> args)
         {
             if (args == null)
-                return Enumerable.Empty<T>();
+                yield break;
 
-            return args
-                .Where(o => o is T || (o is string && typeof(T).IsEnum) || (o is List<object> && typeof(T).IsInstantiationOf(typeof(List<>))))
-                .Select(o => o is T ? (T)o :
-                                o is string ? (T)Enum.Parse(typeof(T), (string)o) :
-                                    (T)giConvertListTo.GetInvoker(typeof(T).ElementType())((List<object>)o));
+            foreach (var obj in args)
+            {
+                switch (obj)
+                {
+                    case T t:
+                        yield return t;
+                        break;
+
+                    case string s when typeof(T).IsEnum && Enum.IsDefined(typeof(T), s):
+                        yield return (T)Enum.Parse(typeof(T), s);
+                        break;
+
+                    case List<object> list:
+                        yield return (T)giConvertListTo.GetInvoker(typeof(T).ElementType())(list);
+                        break;
+
+                    default:
+                        //Skip
+                        break;
+                }
+            }
         }
 
         static readonly GenericInvoker<Func<List<object>,IList>> giConvertListTo = new GenericInvoker<Func<List<object>, IList>>(list => ConvertListTo<int>(list));
