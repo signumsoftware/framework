@@ -83,6 +83,7 @@ namespace Signum.Engine.Dynamic
                                 Replacements.AutoReplacement = ctx =>
                                 {
                                     var currentName =
+                                    ctx.ReplacementKey.StartsWith("Enums:") ? AutoReplacementEnums(ctx):
                                     ctx.ReplacementKey.Contains(":") ? DynamicAutoReplacementsProperties(ctx, lastRenames) :
                                     ctx.ReplacementKey == Replacements.KeyTables ? DynamicAutoReplacementsTable(ctx, lastRenames) :
                                     ctx.ReplacementKey == typeof(OperationSymbol).Name ? DynamicAutoReplacementsOperations(ctx, lastRenames) :
@@ -159,10 +160,16 @@ namespace Signum.Engine.Dynamic
             }
             
         }
-
+        
         public static void AddDynamicRename(string replacementKey, string oldName, string newName)
         {
             new DynamicRenameEntity { ReplacementKey = replacementKey, OldName = oldName, NewName = newName }.Save();
+        }
+
+        private static string AutoReplacementEnums(Replacements.AutoReplacementContext ctx)
+        {
+            StringDistance sd = new StringDistance();
+            return ctx.NewValues.WithMin(nv => sd.LevenshteinDistance(nv, ctx.OldValue));
         }
 
         public static string DynamicAutoReplacementsSimple(Replacements.AutoReplacementContext ctx, List<DynamicRenameEntity> lastRenames, string replacementKey)
