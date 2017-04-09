@@ -69,7 +69,12 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
         } else if (routeParams.workflowId) {
             const ti = getTypeInfo(WorkflowEntity);
             return WorkflowClient.createNewCase(parseId(ti, routeParams.workflowId), (routeParams.mainEntityStrategy as WorkflowMainEntityStrategy))
-                .then(pack => this.setState({ pack }));
+                .then(pack => {
+                    if (!pack)
+                        Navigator.currentHistory.goBack();
+                    else
+                        this.setState({ pack });
+                });        
 
         } else
             throw new Error("No caseActivityId or workflowId set");
@@ -77,7 +82,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
 
     loadComponent(): Promise<void> {
         if (!this.state.pack)
-            return new Promise<void>((resolve, error) => { });
+            return Promise.resolve(undefined);
 
         const a = this.state.pack!.activity;
         if (a.workflowActivity) {
