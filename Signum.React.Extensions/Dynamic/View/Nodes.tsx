@@ -714,7 +714,7 @@ NodeUtils.register<EntityTableNode>({
         columns: ({ __code__: "EntityTable.typedColumns<YourEntityHere>(" + cc.stringifyObject(node.children.map((col: EntityTableColumnNode) => ({ __code__: NodeUtils.renderCode(col, cc) }))) + ")" })
     }),
     render: (dn, ctx) => (<EntityTable
-        columns={dn.node.children.filter(c => NodeUtils.validate(dn.createChild(c), ctx) == null).map((col: EntityTableColumnNode) => NodeUtils.render(dn.createChild(col), ctx) as any)}
+        columns={dn.node.children.length == 0 ? undefined : dn.node.children.filter(c => NodeUtils.validate(dn.createChild(c), ctx) == null).map((col: EntityTableColumnNode) => NodeUtils.render(dn.createChild(col), ctx) as any)}
         {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: true, avoidGetComponent: true }) } />),
 
     renderDesigner: dn => <div>
@@ -857,6 +857,12 @@ export namespace NodeConstructor {
         } as DivNode;
     }
 
+    export function createEntityTableSubChildren(pr: PropertyRoute): BaseNode[] {
+
+        const subMembers = pr.subMembers();
+
+        return Dic.map(subMembers, (field, mi) => ({ kind: "EntityTableColumn", property: field, children: [] }) as BaseNode).filter(a => (a as any).property != "Id");
+    }
 
     export function createSubChildren(pr: PropertyRoute): BaseNode[] {
 
@@ -886,7 +892,7 @@ export namespace NodeConstructor {
 
         if (tr.isCollection) {
             if (tr.isEmbedded || ti!.entityKind == "Part" || ti!.entityKind == "SharedPart")
-                return { kind: "EntityRepeater", field, children: [] } as EntityRepeaterNode;
+                return { kind: "EntityTable", field, children: [] } as EntityTableNode;
             else if (ti!.isLowPopulation)
                 return { kind: "EntityCheckboxList", field, children: [] } as EntityCheckboxListNode;
             else
