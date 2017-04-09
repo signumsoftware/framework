@@ -54,6 +54,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
             var elementPr = state.ctx.propertyRoute.add(a => a[0].element);
 
             state.columns = Dic.getKeys(elementPr.subMembers())
+                .filter(a => a != "Id")
                 .map(memberName => ({
                     property: eval("(function(e){ return e." + memberName.firstLower() + "; })")
                 }) as EntityTableColumn<ModifiableEntity, any>);
