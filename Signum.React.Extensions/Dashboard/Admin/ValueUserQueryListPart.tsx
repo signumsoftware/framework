@@ -29,7 +29,7 @@ export default class ValueUserQueryListPart extends React.Component<{ ctx: TypeC
             <div className="form-inline repeater-inline">
                 <ValueLine ctx={tc.subCtx(cuq => cuq.label) }  />
                 &nbsp;
-                <EntityLine ctx={tc.subCtx(cuq => cuq.userQuery) }  formGroupHtmlProps={{ style: { maxWidth: "300px" } }} />
+                <EntityLine ctx={tc.subCtx(cuq => cuq.userQuery) }  formGroupHtmlAttributes={{ style: { maxWidth: "300px" } }} />
                 &nbsp;
                 <ValueLine ctx={tc.subCtx(cuq => cuq.href) }  />
             </div>

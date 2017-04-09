@@ -198,7 +198,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
                 label: ev.name
             } as OptionItem));
 
-            vl.valueHtmlProps = { size: null as any };
+            vl.valueHtmlAttributes = { size: null as any };
         }
 
         vl.onChange = this.handleOnRedraw;

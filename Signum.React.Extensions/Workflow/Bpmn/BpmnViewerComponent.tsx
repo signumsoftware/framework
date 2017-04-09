@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { DropdownButton, MenuItem, Button } from 'react-bootstrap'
-import { WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity, IWorkflowNodeEntity, CaseFlowColor, CaseActivityEntity } from '../Signum.Entities.Workflow'
+import { WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity, IWorkflowNodeEntity, CaseFlowColor, CaseActivityEntity, CaseEntity } from '../Signum.Entities.Workflow'
 import { JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { CaseFlow } from '../WorkflowClient'
@@ -9,6 +9,7 @@ import * as caseFlowRenderer from './CaseFlowRenderer'
 import * as connectionIcons from './ConnectionIcons'
 import * as searchPad from 'bpmn-js/lib/features/search';
 import * as BpmnUtils from './BpmnUtils'
+import CaseActivityStatsModal from "../Case/CaseActivityStatsModal";
 
 require("bpmn-js/assets/bpmn-font/css/bpmn-embedded.css");
 require("diagram-js/assets/diagram-js.css");
@@ -18,6 +19,7 @@ export interface BpmnViewerComponentProps {
     diagramXML?: string;
     entities: WorkflowEntitiesDictionary;
     caseFlow: CaseFlow;
+    case: CaseEntity,
     caseActivity?: CaseActivityEntity;
 }
 
@@ -68,8 +70,21 @@ export default class BpmnViewerComponent extends React.Component<BpmnViewerCompo
             ]
         });
         this.configureModules();
-        if (this.props.diagramXML && this.props.diagramXML.trim() != "")
+        if (this.props.diagramXML && this.props.diagramXML.trim() != "") {
+            this.viewer.on('element.dblclick', 1500, this.handleElementDoubleClick);
             this.viewer.importXML(this.props.diagramXML, this.handleOnModelError);
+        }
+    }
+
+    handleElementDoubleClick = (obj: BPMN.DoubleClickEvent) => {
+
+        const stats = this.props.caseFlow.Activities[obj.element.id];
+        if (stats) {
+            obj.preventDefault();
+            obj.stopPropagation();
+
+            CaseActivityStatsModal.show(this.props.case, stats);
+        }
     }
 
     componentWillUnmount() {
@@ -102,6 +117,7 @@ export default class BpmnViewerComponent extends React.Component<BpmnViewerCompo
             return mod && mod.decisonResult || undefined;
         }
 
+        caseFlowRenderer.viewer = this.viewer;
         caseFlowRenderer.caseFlow = this.props.caseFlow;
         caseFlowRenderer.maxDuration = Dic.getValues(this.props.caseFlow.Activities).map(a => a.map(a => a.Duration || 0).sum()).max()!;
         caseFlowRenderer.caseFlowColor = this.state.caseFlowColor;

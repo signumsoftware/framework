@@ -64,6 +64,7 @@ export module CaseActivityMessage {
     export const Activity0HasNoTimeout = new MessageKey("CaseActivityMessage", "Activity0HasNoTimeout");
     export const ThereIsNoPreviousActivity = new MessageKey("CaseActivityMessage", "ThereIsNoPreviousActivity");
     export const OnlyForScriptWorkflowActivities = new MessageKey("CaseActivityMessage", "OnlyForScriptWorkflowActivities");
+    export const Pending = new MessageKey("CaseActivityMessage", "Pending");
 }
 
 export module CaseActivityOperation {
@@ -210,8 +211,11 @@ export interface InboxFilterModel extends Entities.ModelEntity {
     toDate?: string | null;
 }
 
-export module InboxFilterModelMessage {
-    export const Clear = new MessageKey("InboxFilterModelMessage", "Clear");
+export module InboxMessage {
+    export const Clear = new MessageKey("InboxMessage", "Clear");
+    export const Activity = new MessageKey("InboxMessage", "Activity");
+    export const SenderNote = new MessageKey("InboxMessage", "SenderNote");
+    export const Sender = new MessageKey("InboxMessage", "Sender");
 }
 
 export interface IWorkflowNodeEntity extends IWorkflowObjectEntity, Entities.Entity {
@@ -264,6 +268,7 @@ export interface WorkflowActionEval extends Dynamic.EvalEntity<IWorkflowActionEx
 }
 
 export module WorkflowActionOperation {
+    export const Clone : Entities.ConstructSymbol_From<WorkflowActionEntity, WorkflowActionEntity> = registerSymbol("Operation", "WorkflowActionOperation.Clone");
     export const Save : Entities.ExecuteSymbol<WorkflowActionEntity> = registerSymbol("Operation", "WorkflowActionOperation.Save");
     export const Delete : Entities.DeleteSymbol<WorkflowActionEntity> = registerSymbol("Operation", "WorkflowActionOperation.Delete");
 }
@@ -293,6 +298,7 @@ export module WorkflowActivityMessage {
     export const DuplicateViewNameFound0 = new MessageKey("WorkflowActivityMessage", "DuplicateViewNameFound0");
     export const ChooseADestinationForWorkflowJumping = new MessageKey("WorkflowActivityMessage", "ChooseADestinationForWorkflowJumping");
     export const CaseFlow = new MessageKey("WorkflowActivityMessage", "CaseFlow");
+    export const AverageDuration = new MessageKey("WorkflowActivityMessage", "AverageDuration");
 }
 
 export const WorkflowActivityModel = new Type<WorkflowActivityModel>("WorkflowActivityModel");
@@ -351,6 +357,7 @@ export interface WorkflowConditionEval extends Dynamic.EvalEntity<IWorkflowCondi
 }
 
 export module WorkflowConditionOperation {
+    export const Clone : Entities.ConstructSymbol_From<WorkflowConditionEntity, WorkflowConditionEntity> = registerSymbol("Operation", "WorkflowConditionOperation.Clone");
     export const Save : Entities.ExecuteSymbol<WorkflowConditionEntity> = registerSymbol("Operation", "WorkflowConditionOperation.Save");
     export const Delete : Entities.DeleteSymbol<WorkflowConditionEntity> = registerSymbol("Operation", "WorkflowConditionOperation.Delete");
 }
@@ -401,6 +408,7 @@ export interface WorkflowEntity extends Entities.Entity {
     Type: "Workflow";
     name?: string | null;
     mainEntityType?: Basics.TypeEntity | null;
+    mainEntityStrategy?: WorkflowMainEntityStrategy;
 }
 
 export const WorkflowEventEntity = new Type<WorkflowEventEntity>("WorkflowEvent");
@@ -550,6 +558,12 @@ export module WorkflowLaneOperation {
     export const Delete : Entities.DeleteSymbol<WorkflowLaneEntity> = registerSymbol("Operation", "WorkflowLaneOperation.Delete");
 }
 
+export const WorkflowMainEntityStrategy = new EnumType<WorkflowMainEntityStrategy>("WorkflowMainEntityStrategy");
+export type WorkflowMainEntityStrategy =
+    "CreateNew" |
+    "SelectByUser" |
+    "Both";
+
 export module WorkflowMessage {
     export const _0BelongsToADifferentWorkflow = new MessageKey("WorkflowMessage", "_0BelongsToADifferentWorkflow");
     export const Condition0IsDefinedFor1Not2 = new MessageKey("WorkflowMessage", "Condition0IsDefinedFor1Not2");
@@ -669,6 +683,7 @@ export module WorkflowValidationMessage {
     export const ParticipantsAndProcessesAreNotSynchronized = new MessageKey("WorkflowValidationMessage", "ParticipantsAndProcessesAreNotSynchronized");
     export const MultipleStartEventsAreNotAllowed = new MessageKey("WorkflowValidationMessage", "MultipleStartEventsAreNotAllowed");
     export const SomeStartEventIsRequired = new MessageKey("WorkflowValidationMessage", "SomeStartEventIsRequired");
+    export const NormalStartEventIsRequiredWhenThe0Are1Or2 = new MessageKey("WorkflowValidationMessage", "NormalStartEventIsRequiredWhenThe0Are1Or2");
     export const TheFollowingTasksAreGoingToBeDeleted = new MessageKey("WorkflowValidationMessage", "TheFollowingTasksAreGoingToBeDeleted");
     export const FinishEventIsRequired = new MessageKey("WorkflowValidationMessage", "FinishEventIsRequired");
     export const Activity0CanNotRejectToStart = new MessageKey("WorkflowValidationMessage", "Activity0CanNotRejectToStart");
@@ -691,7 +706,7 @@ export module WorkflowValidationMessage {
     export const TimerOrConditionalStartEventsCanNotGoToJoinGateways = new MessageKey("WorkflowValidationMessage", "TimerOrConditionalStartEventsCanNotGoToJoinGateways");
     export const Gateway0ShouldHasConditionOnEachOutput = new MessageKey("WorkflowValidationMessage", "Gateway0ShouldHasConditionOnEachOutput");
     export const Gateway0ShouldHasConditionOrDecisionOnEachOutputExceptTheLast = new MessageKey("WorkflowValidationMessage", "Gateway0ShouldHasConditionOrDecisionOnEachOutputExceptTheLast");
-    export const _0CanNotBeConnectodToAParallelJoinBecauseHasNoPreviousParallelSplit = new MessageKey("WorkflowValidationMessage", "_0CanNotBeConnectodToAParallelJoinBecauseHasNoPreviousParallelSplit");
+    export const _0CanNotBeConnectedToAParallelJoinBecauseHasNoPreviousParallelSplit = new MessageKey("WorkflowValidationMessage", "_0CanNotBeConnectedToAParallelJoinBecauseHasNoPreviousParallelSplit");
     export const Activity0WithDecisionTypeShouldGoToAnExclusiveOrInclusiveGateways = new MessageKey("WorkflowValidationMessage", "Activity0WithDecisionTypeShouldGoToAnExclusiveOrInclusiveGateways");
     export const Activity0ShouldBeDecision = new MessageKey("WorkflowValidationMessage", "Activity0ShouldBeDecision");
 }

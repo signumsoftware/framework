@@ -32,7 +32,7 @@ export default class SmtpConfiguration extends React.Component<{ ctx: TypeContex
                 <ValueLine ctx={sc.subCtx(s => s.host)}  />
                 <ValueLine ctx={sc.subCtx(s => s.useDefaultCredentials)}  />
                 <ValueLine ctx={sc.subCtx(s => s.username)}  />
-                <ValueLine ctx={sc.subCtx(s => s.password)}  valueHtmlProps={{type: "password"}} />
+                <ValueLine ctx={sc.subCtx(s => s.password)}  valueHtmlAttributes={{type: "password"}} />
                 <ValueLine ctx={sc.subCtx(s => s.enableSSL)}  />
                 <EntityRepeater ctx={sc.subCtx(s => s.clientCertificationFiles)} getComponent={this.renderClientCertification} />
             </div>

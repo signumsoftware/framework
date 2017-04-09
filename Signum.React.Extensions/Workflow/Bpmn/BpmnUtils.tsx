@@ -55,7 +55,7 @@ export function isScriptTask(elementType: string): boolean {
 }
 
 export function isGatewayAnyKind(elementType: string): boolean {
-    return isExclusiveGateway(elementType) || isInclusiveGateway(elementType) || isParallelGateway(elementType) || (elementType == "bpmn:EventBasedGateway") || (elementType == "bpmn:ComplexGateway");
+    return isExclusiveGateway(elementType) || isInclusiveGateway(elementType) || isParallelGateway(elementType);
 }
 
 export function isExclusiveGateway(elementType: string): boolean {

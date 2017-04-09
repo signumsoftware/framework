@@ -52,7 +52,7 @@ namespace Signum.React.Workflow
         }
 
         [Route("api/workflow/starts"), HttpGet]
-        public List<Lite<WorkflowEntity>> Starts()
+        public List<WorkflowEntity> Starts()
         {
             return WorkflowLogic.GetAllowedStarts();
         }

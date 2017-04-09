@@ -63,6 +63,14 @@ namespace Signum.Engine.Workflow
 
             if (Events.Count(a => a.Value.Type.IsStart()) == 0)
                 errors.Add(WorkflowValidationMessage.SomeStartEventIsRequired.NiceToString());
+
+            if (Workflow.MainEntityStrategy != WorkflowMainEntityStrategy.CreateNew)
+                if (Events.Count(a => a.Value.Type == WorkflowEventType.Start) == 0)
+                    errors.Add(WorkflowValidationMessage.NormalStartEventIsRequiredWhenThe0Are1Or2.NiceToString(
+                        Workflow.MainEntityStrategy.GetType().NiceName(), 
+                        WorkflowMainEntityStrategy.SelectByUser.NiceToString(), 
+                        WorkflowMainEntityStrategy.Both.NiceToString()));
+
             if (Events.Count(a => a.Value.Type == WorkflowEventType.Start) > 1)
                 errors.Add(WorkflowValidationMessage.MultipleStartEventsAreNotAllowed.NiceToString());
 
@@ -180,7 +188,7 @@ namespace Signum.Engine.Workflow
                             var split = TrackCreatedBy.TryGetC(prevTrackId);
                             if (split == null)
                             {
-                                errors.Add(WorkflowValidationMessage._0CanNotBeConnectodToAParallelJoinBecauseHasNoPreviousParallelSplit.NiceToString(prev));
+                                errors.Add(WorkflowValidationMessage._0CanNotBeConnectedToAParallelJoinBecauseHasNoPreviousParallelSplit.NiceToString(prev));
                                 return false;
                             }
                             

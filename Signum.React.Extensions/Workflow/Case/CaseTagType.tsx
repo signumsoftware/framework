@@ -10,7 +10,7 @@ import {
 import { SearchControl, ValueSearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import Tag from './Tag'
 
-export default class CaseTagComponent extends React.Component<{ ctx: TypeContext<CaseTagTypeEntity> }, void> {
+export default class CaseTagTypeComponent extends React.Component < { ctx: TypeContext<CaseTagTypeEntity> }, void> {
 
     render() {
         var ctx = this.props.ctx;

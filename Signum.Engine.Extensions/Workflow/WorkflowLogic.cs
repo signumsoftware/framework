@@ -181,6 +181,7 @@ namespace Signum.Engine.Workflow
                 {
                     throw new InvalidOperationException($"Unexpected direction of gateway '{g}' (Should be '{newDirection.NiceToString()}'). Consider saving Workflow '{workflow}'.");
                 });
+
                 if (errors.HasItems())
                     throw new ApplicationException("Errors in Workflow '" + workflow + "':\r\n" + errors.ToString("\r\n").Indent(4));
 
@@ -209,6 +210,7 @@ namespace Signum.Engine.Workflow
                         e.Id,
                         e.Name,
                         e.MainEntityType,
+                        e.MainEntityStrategy,
                     });
 
                 WorkflowGraph.Register();
@@ -381,7 +383,6 @@ namespace Signum.Engine.Workflow
                        e.Eval.Script
                    });
 
-
                 new Graph<WorkflowConditionEntity>.Delete(WorkflowConditionOperation.Delete)
                 {
                     Delete = (e, _) =>
@@ -391,6 +392,17 @@ namespace Signum.Engine.Workflow
                     },
                 }.Register();
 
+                new Graph<WorkflowConditionEntity>.ConstructFrom<WorkflowConditionEntity>(WorkflowConditionOperation.Clone)
+                {
+                    Construct = (e, args) =>
+                    {
+                        return new WorkflowConditionEntity
+                        {
+                            MainEntityType = e.MainEntityType,
+                            Eval = new WorkflowConditionEval { Script = e.Eval.Script }
+                        };
+                    },
+                }.Register();
 
                 WorkflowEventTaskEntity.GetWorkflowEntity = lite => WorkflowGraphLazy.Value.GetOrThrow(lite).Workflow;
 
@@ -414,6 +426,18 @@ namespace Signum.Engine.Workflow
                     {
                         ThrowConnectionError(Database.Query<WorkflowConnectionEntity>().Where(a => a.Action == e.ToLite()), e);
                         e.Delete();
+                    },
+                }.Register();
+
+                new Graph<WorkflowActionEntity>.ConstructFrom<WorkflowActionEntity>(WorkflowActionOperation.Clone)
+                {
+                    Construct = (e, args) =>
+                    {
+                        return new WorkflowActionEntity
+                        {
+                            MainEntityType = e.MainEntityType,
+                            Eval = new WorkflowActionEval { Script = e.Eval.Script }
+                        };
                     },
                 }.Register();
 
@@ -535,14 +559,13 @@ namespace Signum.Engine.Workflow
            actor.Is(user.Role);
 
 
-        public static List<Lite<WorkflowEntity>> GetAllowedStarts()
+        public static List<WorkflowEntity> GetAllowedStarts()
         {
             return (from w in Database.Query<WorkflowEntity>()
                     let s = w.WorkflowEvents().Single(a => a.Type == WorkflowEventType.Start)
                     let a = (WorkflowActivityEntity)s.NextConnections().Single().To
                     where a.Lane.Actors.Any(a => IsCurrentUserActor.Evaluate(a, UserEntity.Current))
-                    select w.ToLite())
-                    .ToList();
+                    select w).ToList();
         }
 
         public static WorkflowModel GetWorkflowModel(WorkflowEntity workflow)

@@ -174,6 +174,7 @@ namespace Signum.Engine.Workflow
                 {
                     Workflow = wf,
                     Name = oldPool.Name,
+                    BpmnElementId = oldPool.BpmnElementId,
                     Xml = oldPool.Xml,
                 }.Save();
 

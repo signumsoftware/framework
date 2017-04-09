@@ -167,8 +167,8 @@ ${childrenString}
         var result : any/*: EntityBaseProps*/ = {
             ctx: this.subCtxCode(node.field, node.styleOptions),
             labelText: node.labelText,
-            labelHtmlProps: node.labelHtmlAttributes,
-            formGroupHtmlProps: node.formGroupHtmlAttributes,
+            labelHtmlAttributes: node.labelHtmlAttributes,
+            formGroupHtmlAttributes: node.formGroupHtmlAttributes,
             visible: node.visible,
             readOnly: node.readOnly,
             create: node.create,
@@ -672,8 +672,8 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
     var result: EntityBaseProps = {
         ctx: parentCtx.subCtx(asFieldFunction(dn.node.field), toStyleOptions(parentCtx, dn.node.styleOptions)),
         labelText: evaluateAndValidate(parentCtx, dn.node, n => n.labelText, isStringOrNull),
-        labelHtmlProps: toHtmlAttributes(parentCtx, dn.node.labelHtmlAttributes),
-        formGroupHtmlProps: toHtmlAttributes(parentCtx, dn.node.formGroupHtmlAttributes),
+        labelHtmlAttributes: toHtmlAttributes(parentCtx, dn.node.labelHtmlAttributes),
+        formGroupHtmlAttributes: toHtmlAttributes(parentCtx, dn.node.formGroupHtmlAttributes),
         visible: evaluateAndValidate(parentCtx, dn.node, n => n.visible, isBooleanOrNull),
         readOnly: evaluateAndValidate(parentCtx, dn.node, n => n.readOnly, isBooleanOrNull),
         create: evaluateAndValidate(parentCtx, dn.node, n => n.create, isBooleanOrNull),

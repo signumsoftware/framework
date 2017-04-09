@@ -75,7 +75,7 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
                 <span style={{ margin: "0px 10px" }}>
                     <ValueLine ctx={ctx2.subCtx(e => e.operation) } />
                 </span>
-                <ValueLine ctx={ctx2.subCtx(e => e.valueString) } valueHtmlProps={{ size: 50 }} />
+                <ValueLine ctx={ctx2.subCtx(e => e.valueString) } valueHtmlAttributes={{ size: 50 }} />
             </div>
         );
     }
