@@ -139,7 +139,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                             <EntityTable ctx={ctx.subCtx(d => d.validationRules)} columns={EntityTable.typedColumns<WorkflowActivityValidationEntity>([
                             {
                                 property: wav => wav.rule,
-                                headerProps: { style: { width: "100%" } },
+                                headerHtmlAttributes: { style: { width: "100%" } },
                                 template: ctx => <EntityLine ctx={ctx.subCtx(wav => wav.rule)} findOptions={{
                                     queryName: DynamicValidationEntity,
                                     filterOptions: [
@@ -150,13 +150,13 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                             },
                             ctx.value.type == "Decision" ? {
                                 property: wav => wav.onAccept,
-                                cellProps: ctx => ({ style: { verticalAlign: "middle" } }),
-                                template: ctx => <ValueLine ctx={ctx.subCtx(wav => wav.onAccept)} formGroupStyle="None" valueHtmlProps={{ style: { margin: "0 auto" } }} />,
+                                cellHtmlAttributes: ctx => ({ style: { verticalAlign: "middle" } }),
+                                template: ctx => <ValueLine ctx={ctx.subCtx(wav => wav.onAccept)} formGroupStyle="None" valueHtmlAttributes={{ style: { margin: "0 auto" } }} />,
                             } : null,
                             ctx.value.type == "Decision" ? {
                                 property: wav => wav.onDecline,
-                                cellProps: ctx => ({ style: { verticalAlign: "middle" } }),
-                                template: ctx => <ValueLine ctx={ctx.subCtx(wav => wav.onDecline)} formGroupStyle="None" valueHtmlProps={{ style: { margin: "0 auto" } }} />,
+                                cellHtmlAttributes: ctx => ({ style: { verticalAlign: "middle" } }),
+                                template: ctx => <ValueLine ctx={ctx.subCtx(wav => wav.onDecline)} formGroupStyle="None" valueHtmlAttributes={{ style: { margin: "0 auto" } }} />,
                             } : null,
                         ])} />
                             : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.validationRules), ctx.niceName(e => e.mainEntityType))}</div>}
@@ -196,11 +196,11 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                                                 autoComplete={new LiteAutocompleteConfig(str => API.findNode(({ workflowId: ctx.value.workflow!.id, subString: str, count: 5, excludes: this.getCurrentJumpsTo() })), false)}
                                                 find={false} />
                                         },
-                                        headerProps: { width: "40%" }
+                                        headerHtmlAttributes: { width: "40%" }
                                     },
                                     {
                                         property: wj => wj.action,
-                                        headerProps: { width: "30%" },
+                                        headerHtmlAttributes: { width: "30%" },
                                         template: (jctx, row, state) => {
                                             return <EntityLine ctx={jctx.subCtx(wj => wj.action)} findOptions={{
                                                 queryName: WorkflowActionEntity,
@@ -211,7 +211,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                                     },
                                     {
                                         property: wj => wj.condition,
-                                        headerProps: { width: "20%" },
+                                        headerHtmlAttributes: { width: "20%" },
                                         template: (jctx, row, state) => {
                                             return <EntityLine ctx={jctx.subCtx(wj => wj.condition)} findOptions={{
                                                 queryName: WorkflowConditionEntity,

@@ -84,7 +84,7 @@ class MyResponse {}`,
             title: "REST Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-            valueHtmlProps: { style: { height: "115px" } },
+            valueHtmlAttributes: { style: { height: "115px" } },
         }).done();
     }
 
@@ -98,7 +98,7 @@ e.[Property Name] = lib;`,
             title: "SOAP Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-            valueHtmlProps: { style: { height: "115px" } },
+            valueHtmlAttributes: { style: { height: "115px" } },
         }).done();
     }
 
@@ -113,7 +113,7 @@ int RetryCount;`,
             title: hint,
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-            valueHtmlProps: { style: { height: "115px" } },
+            valueHtmlAttributes: { style: { height: "115px" } },
         }).done();
     }
 
@@ -132,7 +132,7 @@ catch (Exception e)
             title: "Try/Catch block",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-            valueHtmlProps: { style: { height: "180px" } },
+            valueHtmlAttributes: { style: { height: "180px" } },
         }).done();
     }
 }

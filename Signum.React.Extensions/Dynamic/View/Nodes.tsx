@@ -429,8 +429,8 @@ NodeUtils.register<ValueLineNode>({
     renderCode: (node, cc) => cc.elementCode("ValueLine", {
         ctx: cc.subCtxCode(node.field, node.styleOptions),
         labelText: node.labelText,
-        labelHtmlProps: node.labelHtmlAttributes,
-        formGroupHtmlProps: node.formGroupHtmlAttributes,
+        labelHtmlAttributes: node.labelHtmlAttributes,
+        formGroupHtmlAttributes: node.formGroupHtmlAttributes,
         unitText: node.unitText,
         formatText: node.formatText,
         readOnly: node.readOnly,
@@ -442,8 +442,8 @@ NodeUtils.register<ValueLineNode>({
     render: (dn, ctx) => (<ValueLine
         ctx={ctx.subCtx(NodeUtils.asFieldFunction(dn.node.field), toStyleOptions(ctx, dn.node.styleOptions))}
         labelText={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
-        labelHtmlProps={toHtmlAttributes(ctx, dn.node.labelHtmlAttributes)}
-        formGroupHtmlProps={toHtmlAttributes(ctx, dn.node.formGroupHtmlAttributes)}
+        labelHtmlAttributes={toHtmlAttributes(ctx, dn.node.labelHtmlAttributes)}
+        formGroupHtmlAttributes={toHtmlAttributes(ctx, dn.node.formGroupHtmlAttributes)}
         unitText={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.unitText, NodeUtils.isStringOrNull)}
         formatText={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.formatText, NodeUtils.isStringOrNull)}
         readOnly={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
@@ -742,15 +742,15 @@ NodeUtils.register<EntityTableColumnNode>({
     renderCode: (node, cc) => cc.stringifyObject({
         property: node.property && { __code__: "a => a." + node.property },
         header: node.header,
-        headerProps: node.headerHtmlAttributes,
-        cellProps: node.cellHtmlAttributes,
+        headerHtmlAttributes: node.headerHtmlAttributes,
+        cellHtmlAttributes: node.cellHtmlAttributes,
         template: cc.getGetComponentEx(node, false)
     }),
     render: (dn, ctx) => ({
         property: dn.node.property && NodeUtils.asFieldFunction(dn.node.property),
         header: NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.header, NodeUtils.isStringOrNull),
-        headerProps: toHtmlAttributes(ctx, dn.node.headerHtmlAttributes),
-        cellProps: toHtmlAttributes(ctx, dn.node.cellHtmlAttributes),
+        headerHtmlAttributes: toHtmlAttributes(ctx, dn.node.headerHtmlAttributes),
+        cellHtmlAttributes: toHtmlAttributes(ctx, dn.node.cellHtmlAttributes),
         template: NodeUtils.getGetComponent(dn) 
     }) as EntityTableColumn<ModifiableEntity, any> as any, //HACK
     renderDesigner: dn => <div>
@@ -818,8 +818,8 @@ NodeUtils.register<ValueSearchControlLineNode>({
         isFormControl: node.isFormControl,
         findButton: node.findButton,
         viewEntityButton: node.viewEntityButton,
-        labelProps: node.labelHtmlAttributes,
-        formGroupHtmlProps: node.formGroupHtmlAttributes,
+        labelHtmlAttributes: node.labelHtmlAttributes,
+        formGroupHtmlAttributes: node.formGroupHtmlAttributes,
     }),
     render: (dn, ctx) => <ValueSearchControlLine ctx={ctx}
         findOptions={dn.node.findOptions && toFindOptions(ctx, dn.node.findOptions!)}
@@ -830,8 +830,8 @@ NodeUtils.register<ValueSearchControlLineNode>({
         isFormControl={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.isFormControl, NodeUtils.isBooleanOrNull)}
         findButton={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.findButton, NodeUtils.isBooleanOrNull)}
         viewEntityButton={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.viewEntityButton, NodeUtils.isBooleanOrNull)}
-        labelProps={toHtmlAttributes(ctx, dn.node.labelHtmlAttributes)}
-        formGroupHtmlProps={toHtmlAttributes(ctx, dn.node.formGroupHtmlAttributes)}
+        labelHtmlAttributes={toHtmlAttributes(ctx, dn.node.labelHtmlAttributes)}
+        formGroupHtmlAttributes={toHtmlAttributes(ctx, dn.node.formGroupHtmlAttributes)}
         />,
     renderDesigner: dn => <div>
         <QueryTokenLine dn={dn} binding={Binding.create(dn.node, a => a.valueToken)} queryKey={dn.node.findOptions && dn.node.findOptions.queryName || dn.route!.findRootType().name}

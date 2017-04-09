@@ -67,7 +67,7 @@ export default class WorkflowEventTaskActionComponent extends React.Component<Wo
             title: "Create case Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-            valueHtmlProps: { style: { height: "115px" } },
+            valueHtmlAttributes: { style: { height: "115px" } },
         }).done();
     }
 }

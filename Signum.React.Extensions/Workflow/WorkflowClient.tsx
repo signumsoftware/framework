@@ -265,7 +265,7 @@ public interface IWorkflowTransition
         title: "WorkflowTransitionContext Members",
         message: "Copy to clipboard: Ctrl+C, ESC",
         initiallyFocused: true,
-        valueHtmlProps: { style: { height: 215 } },
+        valueHtmlAttributes: { style: { height: 215 } },
     }).done();
 }
 

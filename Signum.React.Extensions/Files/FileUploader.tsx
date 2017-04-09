@@ -26,7 +26,7 @@ export interface FileUploaderProps {
     dragAndDropMessage?: string;
     accept?: string;
     multiple?: boolean
-    divHtmlProps?: React.HTMLAttributes<HTMLDivElement>
+    divHtmlAttributes?: React.HTMLAttributes<HTMLDivElement>
 }
 
 export interface FileUploaderState {
@@ -106,7 +106,7 @@ export default class FileUploader extends React.Component<FileUploaderProps, Fil
 
     render() {
         return (
-            <div {...this.props.divHtmlProps}>
+            <div {...this.props.divHtmlAttributes}>
                 <input type='file' className='form-control' accept={this.props.accept} onChange={this.handleFileChange} multiple={this.props.multiple}/>
                 {this.state.isLoading ? <div className="sf-file-drop">{JavascriptMessage.loading.niceToString()}</div> :
                     (this.props.dragAndDrop && <div className={classes("sf-file-drop", this.state.isOver ? "sf-file-drop-over" : undefined)}

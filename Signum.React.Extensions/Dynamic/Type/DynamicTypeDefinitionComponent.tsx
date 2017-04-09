@@ -535,7 +535,7 @@ save: e => ${os ? `e.Execute(${entityName}Operation.Save)` : "e.Save()"}
             title: "WithWorkflow",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-            valueHtmlProps: { style: { height: 200 } }
+            valueHtmlAttributes: { style: { height: 200 } }
         }).done();
     }
 
@@ -566,7 +566,7 @@ new Graph<${entityName}Entity>.Execute(${entityName}Operation.Save)
             title: "Register Operations",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-            valueHtmlProps: { style: { height: 350 } }
+            valueHtmlAttributes: { style: { height: 350 } }
         }).done();
     }
 
@@ -601,7 +601,7 @@ public static IQueryable<${entityName}Entity> Queries(this [Your Entity] e)
             title: "Query Expressions",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-            valueHtmlProps: { style: { height: 150 } }
+            valueHtmlAttributes: { style: { height: 150 } }
         }).done();
     }
 
@@ -622,7 +622,7 @@ public static bool IsDisabled(this ${entityName}Entity entity)
             title: "Scalar Expressions",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-            valueHtmlProps: { style: { height: 150 } }
+            valueHtmlAttributes: { style: { height: 150 } }
         }).done();
     }
 
@@ -665,7 +665,7 @@ public static class ${entityName}Operation2
             title: `${entityName} -> ${eventName}`,
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-            valueHtmlProps: { style: { height: 150 } },
+            valueHtmlAttributes: { style: { height: 150 } },
         }).done();
     }
 }

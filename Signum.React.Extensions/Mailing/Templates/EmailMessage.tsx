@@ -57,7 +57,7 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
                     <ValueLine ctx={sc1.subCtx(f => f.isBodyHtml) } inlineCheckbox={true} onChange={() => this.forceUpdate()} />
                     {sc1.value.state != "Created" ? <IFrameRenderer style={{ width: "100%" }} html={e.value.body} /> :
                         sc1.value.isBodyHtml ? <div className="code-container"><HtmlCodemirror ctx={e.subCtx(f => f.body)} /></div> :
-                            <ValueLine ctx={e.subCtx(f => f.body) } valueLineType="TextArea" valueHtmlProps={{ style: { width: "100%", height: "180px" } }} formGroupStyle="SrOnly"/>
+                            <ValueLine ctx={e.subCtx(f => f.body) } valueLineType="TextArea" valueHtmlAttributes={{ style: { width: "100%", height: "180px" } }} formGroupStyle="SrOnly"/>
                     }
                 </Tab>
                 {getMixin(e.value, EmailReceptionMixin) && getMixin(e.value, EmailReceptionMixin).receptionInfo && this.renderEmailReceptionMixin()}
