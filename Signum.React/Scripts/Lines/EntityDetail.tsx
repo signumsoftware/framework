@@ -40,7 +40,7 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
 
         return (
             <fieldset className={classes("sf-entity-line-details", s.ctx.errorClass) }
-                {...{ ...this.baseHtmlProps(), ...EntityBase.entityHtmlProps(s.ctx.value), ...s.formGroupHtmlProps}}>
+                {...{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes}}>
                 <legend>
                     <div>
                         <span>{s.labelText}</span>

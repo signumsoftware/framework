@@ -19,7 +19,7 @@ export interface EntityStripProps extends EntityListBaseProps {
     vertical?: boolean;
     autoComplete?: AutocompleteConfig<any> | null;
     onRenderItem?: (item: Lite<Entity> | ModifiableEntity) => React.ReactNode; 
-    onItemHtmlProps?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+    onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
 }
 
 export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripProps> {
@@ -41,7 +41,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         const s = this.state;
         const readOnly = this.state.ctx.readOnly;
         return (
-            <FormGroup ctx={s.ctx!} labelText={s.labelText} labelProps={s.labelHtmlProps} helpBlock={s.helpBlock} {...{ ...this.baseHtmlProps(), ...this.state.formGroupHtmlProps } }>
+            <FormGroup ctx={s.ctx!} labelText={s.labelText} labelHtmlAttributes={s.labelHtmlAttributes} helpBlock={s.helpBlock} {...{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes } }>
                 <div className="SF-entity-strip SF-control-container">
                     <ul className={classes("sf-strip", this.props.vertical ? "sf-strip-vertical" : "sf-strip-horizontal") }>
                         {
@@ -50,7 +50,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                                     ctx={mlec}
                                     autoComplete={s.autoComplete}
                                     onRenderItem={s.onRenderItem}
-                                    onItemHtmlProps={s.onItemHtmlProps}
+                                    onItemHtmlAttributes={s.onItemHtmlAttributes}
                                     onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
                                     onView={this.canView(mlec.value) ? e => this.handleViewElement(e, i) : undefined}
                                     />))
@@ -143,7 +143,7 @@ export interface EntityStripElementProps {
     ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
     autoComplete?: AutocompleteConfig<any> | null;
     onRenderItem?: (item: Lite<Entity> | ModifiableEntity) => React.ReactNode;
-    onItemHtmlProps?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+    onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
 }
 
 export interface EntityStripElementState {
@@ -188,17 +188,17 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
                 this.state.currentItem && this.state.currentItem.item ? this.props.autoComplete!.renderItem(this.state.currentItem.item) :
                     getToString(this.props.ctx.value);
 
-        const htmlProps = this.props.onItemHtmlProps && this.props.onItemHtmlProps(this.props.ctx.value);
+        const htmlAttributes = this.props.onItemHtmlAttributes && this.props.onItemHtmlAttributes(this.props.ctx.value);
 
         return (
-            <li className="sf-strip-element input-group" {...EntityListBase.entityHtmlProps(this.props.ctx.value) }>
+            <li className="sf-strip-element input-group" {...EntityListBase.entityHtmlAttributes(this.props.ctx.value) }>
                 {
                     this.props.onView ?
-                        <a className="sf-entitStrip-link" href="" onClick={this.props.onView} {...htmlProps}>
+                        <a className="sf-entitStrip-link" href="" onClick={this.props.onView} {...htmlAttributes}>
                             {toStr}
                         </a>
                         :
-                        <span className="sf-entitStrip-link" {...htmlProps}>
+                        <span className="sf-entitStrip-link" {...htmlAttributes}>
                             {toStr}
                         </span>
                 }

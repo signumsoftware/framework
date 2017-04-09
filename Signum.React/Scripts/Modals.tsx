@@ -1,4 +1,5 @@
 ﻿import * as Services from './Services';
+import * as Navigator from './Navigator';
 
 import * as React from 'react'
 
@@ -7,7 +8,8 @@ export interface IModalProps {
 }
 
 export interface GlobalModalContainerState {
-    modals: React.ReactElement<IModalProps>[]
+    modals: React.ReactElement<IModalProps>[];
+    currentUrl: string;
 }
 
 let current: GlobalModalContainer;
@@ -15,12 +17,15 @@ let current: GlobalModalContainer;
 export class GlobalModalContainer extends React.Component<{}, GlobalModalContainerState> {
     constructor(props: {}) {
         super(props);
-        this.state = { modals: [] };
+        this.state = { modals: [], currentUrl: Navigator.currentHistory.getCurrentLocation().pathname };
         current = this;
     }
 
     componentWillReceiveProps(nextProps: {}, nextContext: any): void {
-        this.setState({ modals: [] });
+        var newUrl = Navigator.currentHistory.getCurrentLocation().pathname;
+
+        if (newUrl != this.state.currentUrl)
+            this.setState({ modals: [], currentUrl: newUrl });
     }
 
     render() {

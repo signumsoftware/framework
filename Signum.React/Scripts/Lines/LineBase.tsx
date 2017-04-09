@@ -13,8 +13,8 @@ export interface FormGroupProps extends React.Props<FormGroup> {
     labelText?: React.ReactChild;
     controlId?: string;
     ctx: StyleContext;
-    labelProps?: React.HTMLAttributes<HTMLLabelElement>;
-    htmlProps?: React.HTMLAttributes<HTMLDivElement>;
+    labelHtmlAttributes?: React.HTMLAttributes<HTMLLabelElement>;
+    htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
     helpBlock?: React.ReactChild;
 }
 
@@ -33,7 +33,7 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
             const c = this.props.children as React.ReactElement<any>;
 
             return (
-                <span {...this.props.htmlProps} className={errorClass}>
+                <span {...this.props.htmlAttributes} className={errorClass}>
                     {c}
                 </span>
             );
@@ -41,13 +41,13 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
 
         const labelClasses = classes(ctx.formGroupStyle == "SrOnly" && "sr-only", ctx.formGroupStyle == "LabelColumns" && ("control-label " + ctx.labelColumnsCss));
         const label = (
-            <label htmlFor={this.props.controlId} {...this.props.labelProps } className={addClass(this.props.labelProps, labelClasses)} >
+            <label htmlFor={this.props.controlId} {...this.props.labelHtmlAttributes } className={addClass(this.props.labelHtmlAttributes, labelClasses)} >
                 {this.props.labelText || tCtx.propertyRoute && tCtx.propertyRoute.member!.niceName}
             </label>
         );
 
         const formGroupClasses = classes("form-group", this.props.ctx.formGroupSizeCss, errorClass);
-        return <div {...this.props.htmlProps} className={addClass(this.props.htmlProps, formGroupClasses)}>
+        return <div {...this.props.htmlAttributes} className={addClass(this.props.htmlAttributes, formGroupClasses)}>
             {ctx.formGroupStyle != "BasicDown" && label}
             {
                 ctx.formGroupStyle != "LabelColumns" ? this.props.children :
@@ -67,7 +67,7 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
 
 export interface FormControlStaticProps extends React.Props<FormControlStatic> {
     ctx: StyleContext;
-    htmlProps?: React.HTMLAttributes<HTMLParagraphElement>;
+    htmlAttributes?: React.HTMLAttributes<HTMLParagraphElement>;
     className?: string
 }
 
@@ -76,7 +76,7 @@ export class FormControlStatic extends React.Component<FormControlStaticProps, {
     render() {
         const ctx = this.props.ctx;
 
-        var p = this.props.htmlProps;
+        var p = this.props.htmlAttributes;
 
         return (
             <p {...p} className={classes(ctx.formControlClassReadonly, p && p.className, this.props.className)} >
@@ -99,8 +99,8 @@ export interface LineBaseProps extends StyleOptions {
     hideIfNull?: boolean;
     onChange?: (e: ChangeEvent) => void;
     onValidate?: (val: any) => string;
-    labelHtmlProps?: React.HTMLAttributes<HTMLLabelElement>;
-    formGroupHtmlProps?: React.HTMLAttributes<any>;
+    labelHtmlAttributes?: React.HTMLAttributes<HTMLLabelElement>;
+    formGroupHtmlAttributes?: React.HTMLAttributes<any>;
     helpBlock?: React.ReactChild;
 }
 
@@ -176,12 +176,12 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
     }
 
     overrideProps(state: S, overridenProps: S) {
-        const labelHtmlProps = { ...state.labelHtmlProps, ...Dic.simplify(overridenProps.labelHtmlProps) };
+        const labelHtmlAttributes = { ...state.labelHtmlAttributes, ...Dic.simplify(overridenProps.labelHtmlAttributes) };
         Dic.assign(state, Dic.simplify(overridenProps))
-        state.labelHtmlProps = labelHtmlProps;
+        state.labelHtmlAttributes = labelHtmlAttributes;
     }
 
-    baseHtmlProps(): React.HTMLAttributes<any> {
+    baseHtmlAttributes(): React.HTMLAttributes<any> {
         return {
             'data-propertyPath': this.state.ctx.propertyPath,
             'data-changes': this.changes

@@ -34,7 +34,8 @@ namespace Signum.Entities.DynamicQuery
 
         public override string ToString()
         {
-            return QueryTokenMessage.As0.NiceToString().FormatWith(Type.NiceName());
+            var cleanType = EnumEntity.Extract(entityType) ?? entityType;
+            return QueryTokenMessage.As0.NiceToString().FormatWith(cleanType.NiceName());
         }
 
         public override string Key
@@ -89,7 +90,8 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return QueryTokenMessage._0As1.NiceToString().FormatWith(Parent.ToString(), entityType.NiceName());
+            var cleanType = EnumEntity.Extract(entityType) ?? entityType;
+            return QueryTokenMessage._0As1.NiceToString().FormatWith(Parent.ToString(), cleanType.NiceName());
         }
 
         public override QueryToken Clone()
