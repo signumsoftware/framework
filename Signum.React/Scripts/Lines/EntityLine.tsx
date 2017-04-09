@@ -18,7 +18,7 @@ export interface EntityLineProps extends EntityBaseProps {
     ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
     autoComplete?: AutocompleteConfig<any> | null;
     renderItem?: React.ReactNode; 
-    itemHtmlProps?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+    itemHtmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
 }
 
 export interface EntityLineState extends EntityLineProps {
@@ -117,8 +117,8 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock}
-                htmlProps={{ ...this.baseHtmlProps(), ...EntityBase.entityHtmlProps(s.ctx.value!), ...s.formGroupHtmlProps }}
-                labelProps={s.labelHtmlProps}>
+                htmlAttributes={{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value!), ...s.formGroupHtmlAttributes }}
+                labelHtmlAttributes={s.labelHtmlAttributes}>
                 <div className="SF-entity-line">
                     {
                         !EntityBase.hasChildrens(buttons) ?
@@ -172,13 +172,13 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
             return (
                 <a href="#" onClick={this.handleViewClick}
                     className="form-control btn-default sf-entity-line-entity"
-                    title={JavascriptMessage.navigate.niceToString()} {...s.itemHtmlProps}>
+                    title={JavascriptMessage.navigate.niceToString()} {...s.itemHtmlAttributes}>
                     {str}
                 </a>
             );
         } else {
             return (
-                <span className="form-control btn-default sf-entity-line-entity" {...s.itemHtmlProps}>
+                <span className="form-control btn-default sf-entity-line-entity" {...s.itemHtmlAttributes}>
                     {str }
                 </span>
             );

@@ -235,7 +235,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         );
     }
 
-    static entityHtmlProps(entity: ModifiableEntity | Lite<Entity> | undefined | null): React.HTMLAttributes<any> {
+    static entityHtmlAttributes(entity: ModifiableEntity | Lite<Entity> | undefined | null): React.HTMLAttributes<any> {
 
         return {
             'data-entity': entityInfo(entity)
