@@ -418,6 +418,7 @@ export interface ValueLineNode extends LineBaseNode {
     formatText?: ExpressionOrValue<string>;
     autoTrim?: ExpressionOrValue<boolean>;
     inlineCheckbox?: ExpressionOrValue<boolean>;
+    valueHtmlAttributes?: HtmlAttributesExpression;
 }
 
 NodeUtils.register<ValueLineNode>({
@@ -431,6 +432,7 @@ NodeUtils.register<ValueLineNode>({
         labelText: node.labelText,
         labelHtmlAttributes: node.labelHtmlAttributes,
         formGroupHtmlAttributes: node.formGroupHtmlAttributes,
+        valueHtmlAttributes: node.valueHtmlAttributes,
         unitText: node.unitText,
         formatText: node.formatText,
         readOnly: node.readOnly,
@@ -444,6 +446,7 @@ NodeUtils.register<ValueLineNode>({
         labelText={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
         labelHtmlAttributes={toHtmlAttributes(ctx, dn.node.labelHtmlAttributes)}
         formGroupHtmlAttributes={toHtmlAttributes(ctx, dn.node.formGroupHtmlAttributes)}
+        valueHtmlAttributes={toHtmlAttributes(ctx, dn.node.valueHtmlAttributes)}
         unitText={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.unitText, NodeUtils.isStringOrNull)}
         formatText={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.formatText, NodeUtils.isStringOrNull)}
         readOnly={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
@@ -460,6 +463,7 @@ NodeUtils.register<ValueLineNode>({
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
             <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
             <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
+            <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.valueHtmlAttributes)} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.unitText)} type="string" defaultValue={m && m.unit || ""} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.formatText)} type="string" defaultValue={m && m.format || ""} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
