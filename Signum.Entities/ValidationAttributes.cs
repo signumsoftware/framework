@@ -462,7 +462,7 @@ namespace Signum.Entities
             IComparable val = (IComparable)value;
 
             if (number.GetType() != value.GetType())
-                number = (IComparable)Convert.ChangeType(number, value.GetType()); // asi se hace solo una vez 
+                number = (IComparable)Convert.ChangeType(number, value.GetType()); // made just once
 
             bool ok = (ComparisonType == ComparisonType.EqualTo && val.CompareTo(number) == 0) ||
                       (ComparisonType == ComparisonType.DistinctTo && val.CompareTo(number) != 0) ||
