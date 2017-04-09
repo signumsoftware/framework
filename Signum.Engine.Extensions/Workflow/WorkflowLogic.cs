@@ -533,21 +533,6 @@ namespace Signum.Engine.Workflow
                         return result;
                     }
                 }.Register();
-
-                new Execute(WorkflowOperation.SetMainEntityStrategy)
-                {
-                    Execute = (e, args) =>
-                    {
-                        e.MainEntityStrategy = args.GetArg<WorkflowMainEntityStrategy>();
-
-                        if (e.IsGraphModified) {
-                            e.Save();
-
-                            var wb = new WorkflowBuilder(e);
-                            wb.ValidateGraph();     
-                        }
-                    }
-                }.Register();
             }
         }
 

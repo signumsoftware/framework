@@ -121,15 +121,6 @@ export function start(options: { routes: JSX.Element[] }) {
         onView: (entityOrPack, options) => viewCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options && options.readOnly),
     }));
 
-    Operations.addSettings(new EntityOperationSettings(WorkflowOperation.SetMainEntityStrategy,
-        {
-            isVisible: ctx => false,
-            onClick: eoc => chooseWorkflowMainEntityStrategy().then(s => s && eoc.defaultClick(s)).done(),
-            contextual: { isVisible: ctx => true, onClick: coc => chooseWorkflowMainEntityStrategy().then(s => s && coc.defaultContextualClick(s)).done() },
-            contextualFromMany: { isVisible: ctx => false },
-        }));
-
-
     Operations.addSettings(new EntityOperationSettings(CaseOperation.SetTags, { isVisible: ctx => false }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { hideOnCanExecute: true, style: "primary" }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Delete, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
@@ -470,17 +461,6 @@ export function getViewPromise<T extends ICaseMainEntity>(entity: T, activityVie
 
 export function getViewNames(typeName: string) {
     return Dic.getKeys(registeredActivityViews[typeName] || {});
-}
-
-function chooseWorkflowMainEntityStrategy(): Promise<WorkflowMainEntityStrategy | undefined> {
-    return SelectorModal.chooseElement(WorkflowMainEntityStrategy.values(), {
-        title: WorkflowMainEntityStrategy.niceName(),
-        display: v => WorkflowMainEntityStrategy.niceName(v)!,
-    }).then(val => {
-        if (!val)
-            return undefined;
-        return val;
-    });
 }
 
 export namespace API {

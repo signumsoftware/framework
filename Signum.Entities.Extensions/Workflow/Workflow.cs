@@ -45,7 +45,6 @@ namespace Signum.Entities.Workflow
         public static readonly ConstructSymbol<WorkflowEntity>.From<WorkflowEntity> Clone;
         public static readonly ExecuteSymbol<WorkflowEntity> Save;
         public static readonly DeleteSymbol<WorkflowEntity> Delete;
-        public static readonly ExecuteSymbol<WorkflowEntity> SetMainEntityStrategy;
     }
 
     public enum WorkflowMainEntityStrategy
