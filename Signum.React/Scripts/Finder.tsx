@@ -9,7 +9,7 @@ import {
     QueryDescription, QueryCountRequest, QueryRequest, QueryEntitiesRequest, FindOptions, 
     FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, CountOptionsParsed,
     QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination, ResultColumn,
-    ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest
+    ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions
 } from './FindOptions';
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType, QueryTokenMessage } from './Signum.Entities.DynamicQuery';
@@ -57,30 +57,30 @@ export function isFindable(queryName: PseudoType | QueryKey): boolean {
     return isFindableEvent.every(f=> f(queryKey));
 }
 
-export function find(findOptions: FindOptions): Promise<Lite<Entity> | undefined>;
-export function find<T extends Entity>(type: Type<T>): Promise<Lite<T> | undefined>;
-export function find(obj: FindOptions | Type<any>): Promise<Lite<Entity> | undefined> {
+export function find(findOptions: FindOptions, modalOptions?:ModalFindOptions): Promise<Lite<Entity> | undefined>;
+export function find<T extends Entity>(type: Type<T>, modalOptions?: ModalFindOptions): Promise<Lite<T> | undefined>;
+export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptions): Promise<Lite<Entity> | undefined> {
 
     const fo = (obj as FindOptions).queryName ? obj as FindOptions :
         { queryName: obj as Type<any> } as FindOptions;
     
     return new Promise<Lite<Entity>>((resolve, reject) => {
         require(["./SearchControl/SearchModal"], function (SP: { default: typeof SearchModal }) {
-            SP.default.open(fo).then(resolve, reject);
+            SP.default.open(fo, modalOptions).then(resolve, reject);
         });
     });
 }
 
-export function findMany(findOptions: FindOptions): Promise<Lite<Entity>[] | undefined>;
-export function findMany<T extends Entity>(type: Type<T>): Promise<Lite<T>[] | undefined>;
-export function findMany(findOptions: FindOptions | Type<any>): Promise<Lite<Entity>[] | undefined> {
+export function findMany(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<Entity>[] | undefined>;
+export function findMany<T extends Entity>(type: Type<T>, modalOptions?: ModalFindOptions): Promise<Lite<T>[] | undefined>;
+export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: ModalFindOptions): Promise<Lite<Entity>[] | undefined> {
 
     const fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
         { queryName: findOptions as Type<any> } as FindOptions;
 
     return new Promise<Lite<Entity>[]>((resolve, reject) => {
         require(["./SearchControl/SearchModal"], function (SP: { default: typeof SearchModal }) {
-            SP.default.openMany(fo).then(resolve, reject);
+            SP.default.openMany(fo, modalOptions).then(resolve, reject);
         });
     });
 }
@@ -92,11 +92,11 @@ export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent
         explore(findOptions).done();
 }
 
-export function explore(findOptions: FindOptions): Promise<void> {
+export function explore(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<void> {
 
     return new Promise<void>((resolve, reject) => {
         require(["./SearchControl/SearchModal"], function (SP: { default: typeof SearchModal }) {
-            SP.default.explore(findOptions).then(resolve, reject);
+            SP.default.explore(findOptions, modalOptions).then(resolve, reject);
         });
     });
 }

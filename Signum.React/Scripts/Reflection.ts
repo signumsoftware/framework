@@ -688,7 +688,7 @@ export class Type<T extends ModifiableEntity> implements IType {
         const result = this.tryTypeInfo();
 
         if (!result)
-            throw new Error(`Type ${this.typeName} has no TypeInfo. Maybe is an embedded?`);
+            throw new Error(`Type ${this.typeName} has no TypeInfo. If is an embedded? Then start from some main entity type containing it to get metadata for the embedded properties (i.e. MyEntity.propertyRoute(m => m.myEmbedded.someProperty)`);
 
         return result;
     }
