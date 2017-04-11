@@ -86,7 +86,7 @@ export function findMany(findOptions: FindOptions | Type<any>): Promise<Lite<Ent
 }
 
 export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent<any>) {
-    if (e.ctrlKey || e.button == 2)
+    if (e.ctrlKey || e.button == 1)
         window.open(findOptionsPath(findOptions));
     else
         explore(findOptions).done();
