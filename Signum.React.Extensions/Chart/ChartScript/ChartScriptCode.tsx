@@ -26,7 +26,7 @@ export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<
         this.props.ctx.value.script = newValue;
         this.props.ctx.value.modified = true;
 
-        if (opener != undefined && opener != undefined) {
+        if (opener != undefined) {
             clearTimeout(this.changedHandler);
             this.changedHandler = setTimeout(this.updatePreview, 150);
         }

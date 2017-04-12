@@ -86,6 +86,15 @@ namespace Signum.Engine.Workflow
             return CaseActivitiesFromWorkflowActivityExpression.Evaluate(e);
         }
 
+
+        static Expression<Func<WorkflowActivityEntity, double?>> AverageDurationExpression =
+        wa => wa.CaseActivities().Average(a => a.Duration);
+        [ExpressionField]
+        public static double? AverageDuration(this WorkflowActivityEntity wa)
+        {
+            return AverageDurationExpression.Evaluate(wa);
+        }
+
         static Expression<Func<CaseEntity, IQueryable<CaseActivityEntity>>> CaseActivitiesFromCaseExpression =
             e => Database.Query<CaseActivityEntity>().Where(a => a.Case == e);
         [ExpressionField]
@@ -186,6 +195,8 @@ namespace Signum.Engine.Workflow
                         e.WorkflowActivity,
                     });
 
+                dqm.RegisterExpression((WorkflowActivityEntity a) => a.AverageDuration(), () => WorkflowActivityMessage.AverageDuration.NiceToString());
+
                 SimpleTaskLogic.Register(CaseActivityTask.Timeout, () =>
                 {
                     var candidates = Database.Query<CaseActivityEntity>()
@@ -227,7 +238,7 @@ namespace Signum.Engine.Workflow
                 }.Register();
 
 
-                dqm.RegisterQuery(CaseActivityQuery.Inbox, () =>
+                dqm.RegisterQuery(CaseActivityQuery.Inbox, () => DynamicQueryCore.Auto(
                         from cn in Database.Query<CaseNotificationEntity>()
                         where cn.User == UserEntity.Current.ToLite()
                         let ca = cn.CaseActivity.Entity
@@ -244,14 +255,18 @@ namespace Signum.Engine.Workflow
                                 notification = cn.ToLite(),
                                 remarks = cn.Remarks,
                                 alerts = ca.MyActiveAlerts().Count(),
-                                tags = ca.Case.Tags().Select(a=>a.TagType).ToList(),
+                                tags = ca.Case.Tags().Select(a => a.TagType).ToList(),
                             },
-                            Case = ca.Case.Description,
+                            MainEntity = ca.Case.MainEntity.ToLite(ca.Case.ToString()),
                             Sender = previous.DoneBy,
                             SenderNote = previous.Note,
                             cn.State,
                             cn.Actor,
-                        });
+                        })
+                        .ColumnDisplayName(a => a.Activity, () => InboxMessage.Activity.NiceToString())
+                        .ColumnDisplayName(a => a.Sender, () => InboxMessage.Sender.NiceToString())
+                        .ColumnDisplayName(a => a.SenderNote, () => InboxMessage.SenderNote.NiceToString())
+                        );
 
                 sb.Schema.WhenIncluded<DynamicTypeEntity>(() =>
                 {

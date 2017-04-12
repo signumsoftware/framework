@@ -83,8 +83,16 @@ declare namespace BPMN {
         di: DiElement;
         name: string;
         $type: string;
+        bounds: BoundsElement;
         lanes: ModdleElement[];
         eventDefinitions?: ModdleElement[];
+    }
+
+    interface BoundsElement extends ModdleElement {
+        height: number;
+        width: number;
+        x: number;
+        y: number;
     }
 
     interface ConnectionModdleElemnet extends ModdleElement {
@@ -193,6 +201,7 @@ declare module 'bpmn-js/lib/features/popup-menu/ReplaceMenuProvider' {
         constructor(popupMenu: any, modeling: any, moddle: BPMN.ModdleElement, bpmnReplace: any, rules: any, translate: any);
 
         _createMenuEntry(definition: any, element: BPMN.DiElement, action: any): any;
+        _createEntries(element: BPMN.DiElement, replaceOptions: any): any;
     }
 
     export = BpmnReplaceMenuProvider

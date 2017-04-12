@@ -171,6 +171,7 @@ namespace Signum.Entities.Workflow
         Activity0HasNoTimeout,
         ThereIsNoPreviousActivity,
         OnlyForScriptWorkflowActivities,
+        Pending
     }
 
 

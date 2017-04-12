@@ -23,6 +23,8 @@ namespace Signum.Entities.Workflow
         [NotNullValidator]
         public TypeEntity MainEntityType { get; set; }
 
+        public WorkflowMainEntityStrategy MainEntityStrategy { get; set; }
+
         /// <summary>
         /// REDUNDANT! Only for diff logging
         /// </summary>
@@ -43,6 +45,13 @@ namespace Signum.Entities.Workflow
         public static readonly ConstructSymbol<WorkflowEntity>.From<WorkflowEntity> Clone;
         public static readonly ExecuteSymbol<WorkflowEntity> Save;
         public static readonly DeleteSymbol<WorkflowEntity> Delete;
+    }
+
+    public enum WorkflowMainEntityStrategy
+    {
+        CreateNew,
+        SelectByUser,
+        Both
     }
 
     [Serializable, InTypeScript(Undefined = false)]
@@ -171,8 +180,10 @@ namespace Signum.Entities.Workflow
         ParticipantsAndProcessesAreNotSynchronized,
         [Description("Multiple start events are not allowed.")]
         MultipleStartEventsAreNotAllowed,
-        [Description("Start event is required. each workflow could have one and only one start event.")]
+        [Description("Start event is required. Each workflow could have one and only one start event.")]
         SomeStartEventIsRequired,
+        [Description("Normal start event is required when the '{0}' are '{1}' or '{2}'.")]
+        NormalStartEventIsRequiredWhenThe0Are1Or2,
         [Description("The following tasks are going to be deleted :")]
         TheFollowingTasksAreGoingToBeDeleted,
         FinishEventIsRequired,
@@ -209,7 +220,8 @@ namespace Signum.Entities.Workflow
         Gateway0ShouldHasConditionOnEachOutput,
         [Description("Gateway '{0}' should has condition or decision on each output except the last one.")]
         Gateway0ShouldHasConditionOrDecisionOnEachOutputExceptTheLast,
-        _0CanNotBeConnectodToAParallelJoinBecauseHasNoPreviousParallelSplit,
+        [Description("'{0}' can not be connected to a parallel join because has no previous parallel split.")]
+        _0CanNotBeConnectedToAParallelJoinBecauseHasNoPreviousParallelSplit,
         [Description("Activity '{0}' with decision type should go to an exclusive or inclusive gateways.")]
         Activity0WithDecisionTypeShouldGoToAnExclusiveOrInclusiveGateways,
         [Description("Activity '{0}' should be decision.")]

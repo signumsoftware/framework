@@ -36,6 +36,7 @@ namespace Signum.Entities.Workflow
     [AutoInit]
     public static class WorkflowActionOperation
     {
+        public static readonly ConstructSymbol<WorkflowActionEntity>.From<WorkflowActionEntity> Clone;
         public static readonly ExecuteSymbol<WorkflowActionEntity> Save;
         public static readonly DeleteSymbol<WorkflowActionEntity> Delete;
     }

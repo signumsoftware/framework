@@ -24,7 +24,7 @@ class CustomModeler extends Modeler {
 }
 
 CustomModeler.prototype._modules =
-    CustomModeler.prototype._modules.concat([customRenderer/*, customPopupMenu*/]);
+    CustomModeler.prototype._modules.concat([customRenderer, customPopupMenu]);
 
 export default class BpmnModelerComponent extends React.Component<BpmnModelerComponentProps, void> {
 
@@ -74,8 +74,10 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     }
 
     private handleOnModelError = (err : string) => {
-        if (err) 
+        if (err)
             throw new Error('Error rendering the model ' + err);
+        else
+            this.modeler.get<connectionIcons.ConnectionIcons>('connectionIcons').show();
     }
 
     configureModules() {
@@ -197,7 +199,9 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     }
 
     handleElementDoubleClick = (obj: BPMN.DoubleClickEvent) => {
-        console.log(obj);
+        if (BpmnUtils.isEndEvent(obj.element.type))
+            return;
+
         var model = this.props.entities[obj.element.id] as (ModelEntity | undefined);
         if (!model) {
             model = this.newModel(obj.element);
