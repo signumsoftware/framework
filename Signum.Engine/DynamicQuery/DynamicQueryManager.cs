@@ -188,6 +188,16 @@ namespace Signum.Engine.DynamicQuery
         {
             QueryToken.EntityExtensions = parent => DynamicQueryManager.Current.GetExtensions(parent);
             ExtensionToken.BuildExtension = (parentType, key, parentExpression) => DynamicQueryManager.Current.BuildExtension(parentType, key, parentExpression);
+            QueryToken.ImplementedByAllSubTokens = GetImplementedByAllSubTokens;
+        }
+
+        static List<QueryToken> GetImplementedByAllSubTokens(QueryToken queryToken, Type type, SubTokensOptions options)
+        {
+            var cleanType = type.CleanType();
+            return Schema.Current.Tables.Keys
+                .Where(t => cleanType.IsAssignableFrom(t))
+                .Select(t => (QueryToken)new AsTypeToken(queryToken, t))
+                .ToList();
         }
 
         private Expression BuildExtension(Type parentType, string key, Expression parentExpression)

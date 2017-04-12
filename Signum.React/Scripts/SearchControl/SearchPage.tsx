@@ -44,9 +44,12 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchC
 
         var findOptions = Finder.toFindOptions(scl.props.findOptions, scl.props.queryDescription);
 
-        const path = Finder.findOptionsPath(findOptions);
+        const newPath = Finder.findOptionsPath(findOptions);
 
-        Navigator.currentHistory.replace(path);
+        var currentLocation = Navigator.currentHistory.getCurrentLocation();
+
+        if (currentLocation.pathname + currentLocation.search != newPath)
+            Navigator.currentHistory.replace(newPath);
     }
 
     render() {

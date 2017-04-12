@@ -20,14 +20,14 @@ export interface EntityTableProps extends EntityListBaseProps {
     /**Consider using EntityTable.typedColumns to get Autocompletion**/
     columns?: EntityTableColumn<ModifiableEntity, any>[],
     fetchRowState?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow) => Promise<any>;
-    rowProps?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow, rowState: any) => React.HTMLProps<any> | null | undefined;
+    onRowHtmlAttributes?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow, rowState: any) => React.HTMLAttributes<any> | null | undefined;
 }
 
 export interface EntityTableColumn<T, RS> {
     property?: (a: T) => any;
     header?: React.ReactNode | null;
-    headerProps?: React.HTMLProps<any>;
-    cellProps?:(ctx: TypeContext<T>, row: EntityTableRow, rowState: RS) => React.HTMLProps<any> | null | undefined;
+    headerHtmlAttributes?: React.HTMLAttributes<any>;
+    cellHtmlAttributes?: (ctx: TypeContext<T>, row: EntityTableRow, rowState: RS) => React.HTMLAttributes<any> | null | undefined;
     template?: (ctx: TypeContext<T>, row: EntityTableRow, rowState: RS) => React.ReactChild | null | undefined;
 }
 
@@ -54,6 +54,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
             var elementPr = state.ctx.propertyRoute.add(a => a[0].element);
 
             state.columns = Dic.getKeys(elementPr.subMembers())
+                .filter(a => a != "Id")
                 .map(memberName => ({
                     property: eval("(function(e){ return e." + memberName.firstLower() + "; })")
                 }) as EntityTableColumn<ModifiableEntity, any>);
@@ -80,7 +81,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
         const elementPr = ctx.propertyRoute.add(a => a[0].element);
 
         return (
-            <fieldset className={classes("SF-table-field SF-control-container", ctx.errorClass)} {...this.baseHtmlProps() } {...this.state.formGroupHtmlProps}>
+            <fieldset className={classes("SF-table-field SF-control-container", ctx.errorClass)} {...this.baseHtmlAttributes() } {...this.state.formGroupHtmlAttributes}>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>
@@ -92,7 +93,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                         <tr>
                             <th></th>
                             {
-                                this.state.columns!.map((c, i) => <th key={i} {...c.headerProps}>
+                                this.state.columns!.map((c, i) => <th key={i} {...c.headerHtmlAttributes}>
                                     {c.header === undefined && c.property ? elementPr.add(c.property).member!.niceName : c.header}
                                 </th>)
                             }
@@ -102,7 +103,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                         {
                             mlistItemContext(ctx).map((mlec, i) =>
                                 (<EntityTableRow key={i} index={i}
-                                    rowProps={this.props.rowProps}
+                                    onRowHtmlAttributes={this.props.onRowHtmlAttributes}
                                     fetchRowState={this.props.fetchRowState}
                                     onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
                                     onMoveDown={this.canMove(mlec.value) && !readOnly ? e => this.moveDown(i) : undefined}
@@ -138,8 +139,8 @@ export interface EntityTableRowProps {
     onRemove?: (event: React.MouseEvent<any>) => void;
     onMoveUp?: (event: React.MouseEvent<any>) => void;
     onMoveDown?: (event: React.MouseEvent<any>) => void;
-    fetchRowState?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow) => Promise<any>; 
-    rowProps?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow, rowState: any) => React.HTMLProps<any> | null | undefined;
+    fetchRowState?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow) => Promise<any>;
+    onRowHtmlAttributes?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow, rowState: any) => React.HTMLAttributes<any> | null | undefined;
 }
 
 export class EntityTableRow extends React.Component<EntityTableRowProps, { rowState?: any }> {
@@ -157,7 +158,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
 
     render() {
         var ctx = this.props.ctx;
-        var rowAtts = this.props.rowProps && this.props.rowProps(ctx, this, this.state.rowState);
+        var rowAtts = this.props.onRowHtmlAttributes && this.props.onRowHtmlAttributes(ctx, this, this.state.rowState);
         return (
             <tr style={{ backgroundColor: rowAtts && rowAtts.style && rowAtts.style.backgroundColor }}>
                 <td>
@@ -181,7 +182,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
                         </a>}
                     </div>
                 </td>
-                {this.props.columns.map((c, i) => <td key={i} {...c.cellProps && c.cellProps(ctx, this, this.state.rowState) }>{this.getTemplate(c)}</td>)}
+                {this.props.columns.map((c, i) => <td key={i} {...c.cellHtmlAttributes && c.cellHtmlAttributes(ctx, this, this.state.rowState) }>{this.getTemplate(c)}</td>)}
             </tr>
         );
     }

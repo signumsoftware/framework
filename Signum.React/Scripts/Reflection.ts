@@ -724,6 +724,10 @@ export class Type<T extends ModifiableEntity> implements IType {
         return ti.nicePluralName;
     }
 
+    niceCount(count: number): string {
+        return count + " " + (count == 1 ? this.niceName() : this.nicePluralName());
+    }
+
     nicePropertyName(lambdaToProperty: (v: T) => any): string  {
         const member = this.memberInfo(lambdaToProperty);
 

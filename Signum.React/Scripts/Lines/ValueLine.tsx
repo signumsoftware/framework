@@ -19,7 +19,7 @@ export interface ValueLineProps extends LineBaseProps, React.Props<ValueLine> {
     inlineCheckbox?: boolean;
     comboBoxItems?: (OptionItem | MemberInfo | string)[];
     onTextboxBlur?: (val: any) => void;
-    valueHtmlProps?: React.HTMLAttributes<any>;
+    valueHtmlAttributes?: React.HTMLAttributes<any>;
     extraButtons?: (vl: ValueLine) => React.ReactNode;
     initiallyFocused?: boolean;
 }
@@ -95,9 +95,9 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
 
     overrideProps(state: ValueLineProps, overridenProps: ValueLineProps) {
 
-        const valueHtmlProps = { ...state.valueHtmlProps, ...Dic.simplify(overridenProps.valueHtmlProps) };
+        const valueHtmlAttributes = { ...state.valueHtmlAttributes, ...Dic.simplify(overridenProps.valueHtmlAttributes) };
         super.overrideProps(state, overridenProps);
-        state.valueHtmlProps = valueHtmlProps;
+        state.valueHtmlAttributes = valueHtmlAttributes;
     }
 
     static renderers: {
@@ -171,17 +171,17 @@ ValueLine.renderers["Boolean" as ValueLineType] = (vl) => {
 
     if (s.inlineCheckbox) {
         return (
-            <label className={vl.state.ctx.error} {...vl.baseHtmlProps() }>
-                <input type="checkbox" {...vl.state.valueHtmlProps} checked={s.ctx.value || false} onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly} />
+            <label className={vl.state.ctx.error} {...vl.baseHtmlAttributes() }>
+                <input type="checkbox" {...vl.state.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly} />
                 {" " + s.labelText}
             </label>
         );
     }
     else {
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }}>
-                <input type="checkbox" {...vl.state.valueHtmlProps} checked={s.ctx.value || false} onChange={handleCheckboxOnChange}
-                    className={addClass(vl.state.valueHtmlProps, "form-control")} disabled={s.ctx.readOnly} />
+            <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }}>
+                <input type="checkbox" {...vl.state.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange}
+                    className={addClass(vl.state.valueHtmlAttributes, "form-control")} disabled={s.ctx.readOnly} />
             </FormGroup>
         );
     }
@@ -238,9 +238,9 @@ function internalComboBox(vl: ValueLine) {
         }
 
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
+            <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
                 {ValueLine.withItemGroup(vl,
-                    <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx}>
+                    <FormControlStatic htmlAttributes={vl.state.valueHtmlAttributes} ctx={s.ctx}>
                         {label}
                     </FormControlStatic>)}
             </FormGroup>
@@ -261,9 +261,9 @@ function internalComboBox(vl: ValueLine) {
     };
 
     return (
-        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
+        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
             {ValueLine.withItemGroup(vl,
-                <select {...vl.state.valueHtmlProps} value={toStr(s.ctx.value)} className={addClass(vl.state.valueHtmlProps, "form-control")} onChange={handleEnumOnChange} >
+                <select {...vl.state.valueHtmlAttributes} value={toStr(s.ctx.value)} className={addClass(vl.state.valueHtmlAttributes, "form-control")} onChange={handleEnumOnChange} >
                     {optionItems.map((oi, i) => <option key={i} value={toStr(oi.value)}>{oi.label}</option>)}
                 </select>)
             }
@@ -278,8 +278,8 @@ ValueLine.renderers["TextBox" as ValueLineType] = (vl) => {
 
     if (s.ctx.readOnly)
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
-                {ValueLine.withItemGroup(vl, <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx}>{s.ctx.value}</FormControlStatic>)}
+            <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+                {ValueLine.withItemGroup(vl, <FormControlStatic htmlAttributes={vl.state.valueHtmlAttributes} ctx={s.ctx}>{s.ctx.value}</FormControlStatic>)}
             </FormGroup>
         );
 
@@ -302,10 +302,10 @@ ValueLine.renderers["TextBox" as ValueLineType] = (vl) => {
 
 
     return (
-        <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
+        <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
             {ValueLine.withItemGroup(vl,
-                <input type="text" {...vl.state.valueHtmlProps}
-                    className={addClass(vl.state.valueHtmlProps, "form-control")}
+                <input type="text" {...vl.state.valueHtmlAttributes}
+                    className={addClass(vl.state.valueHtmlAttributes, "form-control")}
                     value={s.ctx.value || ""}
                     onBlur={handleBlur}
                     onChange={handleTextOnChange} //https://github.com/facebook/react/issues/7211
@@ -330,8 +330,8 @@ ValueLine.renderers["TextArea" as ValueLineType] = (vl) => {
 
     if (s.ctx.readOnly)
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
-                {ValueLine.withItemGroup(vl, <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx}>{s.ctx.value}</FormControlStatic>)}
+            <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+                {ValueLine.withItemGroup(vl, <FormControlStatic htmlAttributes={vl.state.valueHtmlAttributes} ctx={s.ctx}>{s.ctx.value}</FormControlStatic>)}
             </FormGroup>
         );
 
@@ -353,8 +353,8 @@ ValueLine.renderers["TextArea" as ValueLineType] = (vl) => {
     }
 
     return (
-        <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
-            <textarea {...vl.state.valueHtmlProps} className={addClass(vl.state.valueHtmlProps, "form-control")} value={s.ctx.value || ""}
+        <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+            <textarea {...vl.state.valueHtmlAttributes} className={addClass(vl.state.valueHtmlAttributes, "form-control")} value={s.ctx.value || ""}
                 onChange={handleTextOnChange} //https://github.com/facebook/react/issues/7211
                 onInput={handleTextOnChange}
                 onBlur={handleBlur}
@@ -379,9 +379,9 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler<a
 
     if (s.ctx.readOnly)
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
+            <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
                 {ValueLine.withItemGroup(vl,
-                    <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx} className="numeric">
+                    <FormControlStatic htmlAttributes={vl.state.valueHtmlAttributes} ctx={s.ctx} className="numeric">
                         {s.ctx.value == null ? "" : numbro(s.ctx.value).format(numbroFormat)}
                     </FormControlStatic>)}
             </FormGroup>
@@ -391,16 +391,16 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler<a
         vl.setValue(newValue);
     };
 
-    const htmlProps = {
+    const htmlAttributes = {
         placeholder: s.ctx.placeholderLabels ? asString(s.labelText) : undefined,
-        ...vl.props.valueHtmlProps
+        ...vl.props.valueHtmlAttributes
     } as React.HTMLAttributes<HTMLInputElement>;
 
     return (
-        <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
+        <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
             {ValueLine.withItemGroup(vl,
                 <NumericTextBox
-                    htmlProps={htmlProps}
+                    htmlAttributes={htmlAttributes}
                     value={s.ctx.value}
                     onChange={handleOnChange}
                     validateKey={validateKey}
@@ -416,7 +416,7 @@ export interface NumericTextBoxProps {
     onChange: (newValue: number | null) => void;
     validateKey: React.KeyboardEventHandler<any>;
     format?: string;
-    htmlProps: React.HTMLAttributes<HTMLInputElement>;
+    htmlAttributes: React.HTMLAttributes<HTMLInputElement>;
 }
 
 export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?: string }> {
@@ -432,7 +432,7 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?
             this.props.value != undefined ? numbro(this.props.value).format(this.props.format) :
                 "";
 
-        return <input {...this.props.htmlProps} type="text" className={addClass(this.props.htmlProps, "form-control numeric")} value={value}
+        return <input {...this.props.htmlAttributes} type="text" className={addClass(this.props.htmlAttributes, "form-control numeric")} value={value}
             onBlur={this.handleOnBlur}
             onChange={this.handleOnChange} //https://github.com/facebook/react/issues/7211
             onInput={this.handleOnChange}
@@ -469,8 +469,8 @@ ValueLine.renderers["DateTime" as ValueLineType] = (vl) => {
 
     if (s.ctx.readOnly)
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
-                {ValueLine.withItemGroup(vl, <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx}>{m && m.format(momentFormat)}</FormControlStatic>)}
+            <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+                {ValueLine.withItemGroup(vl, <FormControlStatic htmlAttributes={vl.state.valueHtmlAttributes} ctx={s.ctx}>{m && m.format(momentFormat)}</FormControlStatic>)}
             </FormGroup>
         );
 
@@ -485,7 +485,7 @@ ValueLine.renderers["DateTime" as ValueLineType] = (vl) => {
         currentDate = currentDate.startOf("day");
 
     return (
-        <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
+        <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
             {ValueLine.withItemGroup(vl,
                 <DateTimePicker value={m && m.toDate()} onChange={handleDatePickerOnChange} format={momentFormat} time={showTime} defaultCurrentDate={currentDate.toDate()} />
             )}
@@ -508,9 +508,9 @@ function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler<
     if (s.ctx.readOnly) {
         const d = s.ctx.value ? moment.duration(s.ctx.value / ticksPerMillisecond) : undefined;
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
+            <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
                 {ValueLine.withItemGroup(vl,
-                    <FormControlStatic htmlProps={vl.state.valueHtmlProps} ctx={s.ctx} className={addClass(vl.state.valueHtmlProps, "numeric")}>{d && d.format(durationFormat)}</FormControlStatic>
+                    <FormControlStatic htmlAttributes={vl.state.valueHtmlAttributes} ctx={s.ctx} className={addClass(vl.state.valueHtmlAttributes, "numeric")}>{d && d.format(durationFormat)}</FormControlStatic>
                 )}
             </FormGroup>
         );
@@ -522,15 +522,15 @@ function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler<
         vl.setValue(moment.isDuration(d) ? (d.asMilliseconds() * ticksPerMillisecond) : null);
     };
 
-    const htmlProps = {
+    const htmlAttributes = {
         placeholder: s.ctx.placeholderLabels ? asString(s.labelText) : undefined,
-        ...vl.props.valueHtmlProps
+        ...vl.props.valueHtmlAttributes
     } as React.HTMLAttributes<HTMLInputElement>;
 
     return (
-        <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlProps={{ ...vl.baseHtmlProps(), ...s.formGroupHtmlProps }} labelProps={s.labelHtmlProps}>
+        <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
             {ValueLine.withItemGroup(vl,
-                <DurationTextBox htmlProps={htmlProps} value={s.ctx.value} onChange={handleOnChange} validateKey={validateKey} format={durationFormat} />
+                <DurationTextBox htmlAttributes={htmlAttributes} value={s.ctx.value} onChange={handleOnChange} validateKey={validateKey} format={durationFormat} />
             )}
         </FormGroup>
     );
@@ -541,7 +541,7 @@ export interface DurationTextBoxProps {
     onChange: (newValue: number | null) => void;
     validateKey: React.KeyboardEventHandler<any>;
     format?: string;
-    htmlProps: React.HTMLAttributes<HTMLInputElement>;
+    htmlAttributes: React.HTMLAttributes<HTMLInputElement>;
 }
 
 export class DurationTextBox extends React.Component<DurationTextBoxProps, { text?: string }> {
@@ -557,7 +557,7 @@ export class DurationTextBox extends React.Component<DurationTextBoxProps, { tex
             this.props.value != undefined ? moment.duration(this.props.value / ticksPerMillisecond).format(this.props.format) :
                 "";
 
-        return <input {...this.props.htmlProps} type="text" className={addClass(this.props.htmlProps, "form-control numeric")} value={value}
+        return <input {...this.props.htmlAttributes} type="text" className={addClass(this.props.htmlAttributes, "form-control numeric")} value={value}
             onBlur={this.handleOnBlur}
             onChange={this.handleOnChange} //https://github.com/facebook/react/issues/7211
             onInput={this.handleOnChange}
