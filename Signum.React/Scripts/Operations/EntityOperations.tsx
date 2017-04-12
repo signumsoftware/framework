@@ -292,7 +292,7 @@ export function confirmInNecessary(eoc: EntityOperationContext<Entity>, checkLit
 }
 
 function getConfirmMessage(eoc: EntityOperationContext<Entity>) {
-    if (eoc.settings && eoc.settings.confirmMessage === undefined)
+    if (eoc.settings && eoc.settings.confirmMessage === null)
         return undefined;
 
     if (eoc.settings && eoc.settings.confirmMessage != undefined)
@@ -304,10 +304,6 @@ function getConfirmMessage(eoc: EntityOperationContext<Entity>) {
 
     return undefined;
 }
-
-
-
-
 
 export function needsCanExecute(entity: ModifiableEntity) {
 
