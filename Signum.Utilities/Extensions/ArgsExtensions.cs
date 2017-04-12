@@ -37,24 +37,12 @@ namespace Signum.Utilities
 
             foreach (var obj in args)
             {
-                switch (obj)
-                {
-                    case T t:
-                        yield return t;
-                        break;
-
-                    case string s when typeof(T).IsEnum && Enum.IsDefined(typeof(T), s):
-                        yield return (T)Enum.Parse(typeof(T), s);
-                        break;
-
-                    case List<object> list:
-                        yield return (T)giConvertListTo.GetInvoker(typeof(T).ElementType())(list);
-                        break;
-
-                    default:
-                        //Skip
-                        break;
-                }
+                if (obj is T t)
+                    yield return t;
+                else if (obj is string s && typeof(T).IsEnum && Enum.IsDefined(typeof(T), s))
+                    yield return (T)Enum.Parse(typeof(T), s);
+                else if (obj is List<object> list)
+                    yield return (T)giConvertListTo.GetInvoker(typeof(T).ElementType())(list);
             }
         }
 
