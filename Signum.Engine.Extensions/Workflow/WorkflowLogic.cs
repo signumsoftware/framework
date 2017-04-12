@@ -538,11 +538,11 @@ namespace Signum.Engine.Workflow
                 {
                     CanDelete = w => 
                     {
-                        var usedWorkflows = Database.Query<WorkflowActivityEntity>()
-                                                .Where(wa => wa.SubWorkflow != null && wa.SubWorkflow.Workflow.Is(w))
-                                                .Select(wa => wa.Lane.Pool.Workflow)
-                                                .Where(wf => wf.Cases().Any())
+                        var usedWorkflows = Database.Query<CaseEntity>()
+                                                .Where(c => c.Workflow.Is(w) && c.ParentCase != null)
+                                                .Select(c => c.ParentCase.Workflow)
                                                 .ToList();
+
                         if (usedWorkflows.Any())
                             return WorkflowMessage.WorkflowUsedIn0ForDecompositionOrCallWorkflow.NiceToString(usedWorkflows.ToString(", "));
 
