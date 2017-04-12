@@ -160,6 +160,16 @@ namespace Signum.Entities.Workflow
         Lite<WorkflowConditionEntity> IWorkflowTransition.Condition => null;
 
         Lite<WorkflowActionEntity> IWorkflowTransition.Action => null;
+
+        public WorkflowScriptPartEntity Clone()
+        {
+            return new WorkflowScriptPartEntity()
+            {
+                Script = this.Script,
+                RetryStrategy = this.RetryStrategy,
+                OnFailureJump = this.OnFailureJump,
+            };
+        }
     }
 
     [Serializable]
@@ -195,6 +205,16 @@ namespace Signum.Entities.Workflow
         public Lite<WorkflowConditionEntity> Condition { get; set; }
 
         public Lite<WorkflowActionEntity> Action { get; set; }
+
+        public WorkflowJumpEntity Clone()
+        {
+            return new WorkflowJumpEntity
+            {
+                To = this.To,
+                Condition = this.Condition,
+                Action = this.Action
+            };
+        }
     }
 
     public enum WorkflowActivityType
@@ -244,6 +264,15 @@ namespace Signum.Entities.Workflow
         [NotNullable]
         [NotNullValidator, NotifyChildProperty]
         public SubEntitiesEval SubEntitiesEval { get; set; }
+
+        public SubWorkflowEntity Clone()
+        {
+            return new SubWorkflowEntity()
+            {
+                Workflow = this.Workflow,
+                SubEntitiesEval = this.SubEntitiesEval.Clone(),
+            };
+        }
     }
 
     [Serializable]
@@ -277,6 +306,14 @@ namespace Signum.Entities.Workflow
                             }
                         }                  
                     }");
+        }
+
+        public SubEntitiesEval Clone()
+        {
+            return new SubEntitiesEval()
+            {
+                Script = this.Script
+            };
         }
     }
 
@@ -334,10 +371,12 @@ namespace Signum.Entities.Workflow
         public SubWorkflowEntity SubWorkflow { get; set; }
     }
 
-    public enum WorkflowActivityMessage {
+    public enum WorkflowActivityMessage
+    {
         [Description("Duplicate view name found: {0}")]
         DuplicateViewNameFound0,
         ChooseADestinationForWorkflowJumping,
         CaseFlow,
+        AverageDuration,
     }
 }

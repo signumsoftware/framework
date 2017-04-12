@@ -317,8 +317,9 @@ namespace Signum.Engine.Workflow
                 {
                     Pool = pool,
                     Name = oldLane.Name,
+                    BpmnElementId = oldLane.BpmnElementId,
                     Actors = oldLane.Actors.ToMList(),
-                    ActorsEval = oldLane.ActorsEval,
+                    ActorsEval = oldLane.ActorsEval.Clone(),
                     Xml = oldLane.Xml,
                 }.Save();
 
@@ -326,11 +327,20 @@ namespace Signum.Engine.Workflow
                 {
                     Lane = newLane,
                     Name = a.Name,
-                    Comments = a.Comments,
-                    Type = a.Type,
-                    ValidationRules = a.ValidationRules.Select(vr => vr.Clone()).ToMList(),
-                    ViewName = a.ViewName,
+                    BpmnElementId = a.BpmnElementId,
                     Xml = a.Xml,
+                    Type = a.Type,
+                    ViewName = a.ViewName,
+                    RequiresOpen = a.RequiresOpen,
+                    ValidationRules = a.ValidationRules.Select(vr => vr.Clone()).ToMList(),
+                    Reject = a.Reject,
+                    Timeout = a.Timeout,
+                    EstimatedDuration = a.EstimatedDuration,
+                    Jumps = a.Jumps.Select(j => j.Clone()).ToMList(),
+                    Script = a.Script?.Clone(),
+                    SubWorkflow = a.SubWorkflow?.Clone(),
+                    UserHelp = a.UserHelp,
+                    Comments = a.Comments,
                 });
                 newActivities.Values.SaveList();
                 nodes.AddRange(newActivities.ToDictionary(kvp => (IWorkflowNodeEntity)kvp.Key, kvp => (IWorkflowNodeEntity)kvp.Value));
@@ -339,6 +349,7 @@ namespace Signum.Engine.Workflow
                 {
                     Lane = newLane,
                     Name = e.Name,
+                    BpmnElementId = e.BpmnElementId,
                     Type = e.Type,
                     Xml = e.Xml,
                 });
@@ -349,6 +360,7 @@ namespace Signum.Engine.Workflow
                 {
                     Lane = newLane,
                     Name = g.Name,
+                    BpmnElementId = g.BpmnElementId,
                     Type = g.Type,
                     Direction = g.Direction,
                     Xml = g.Xml,

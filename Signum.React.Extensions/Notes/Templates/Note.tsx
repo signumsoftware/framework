@@ -35,7 +35,7 @@ export default class Note extends React.Component<{ ctx: TypeContext<NoteEntity>
                 <hr/>
                 <ValueLine ctx={ec.subCtx(n => n.title)} />
                 <EntityCombo ctx={ec.subCtx(n => n.noteType)} remove={true} />
-                <ValueLine ctx={ec.subCtx(n => n.text)} valueLineType="TextArea" valueHtmlProps={{ style: {height: "180px" } }}/>
+                <ValueLine ctx={ec.subCtx(n => n.text)} valueLineType="TextArea" valueHtmlAttributes={{ style: {height: "180px" } }}/>
             </div>
         );
     }

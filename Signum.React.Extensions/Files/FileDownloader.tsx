@@ -23,7 +23,7 @@ export interface FileDownloaderProps {
     entityOrLite: ModifiableEntity & IFile | Lite<IFile & Entity>;
     download?: DownloadBehaviour;
     configuration?: FileDownloaderConfiguration<IFile>;
-    htmlProps: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>
+    htmlAttributes: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>
 }
 
 export default class FileDownloader extends React.Component<FileDownloaderProps, void> {
@@ -54,7 +54,7 @@ export default class FileDownloader extends React.Component<FileDownloaderProps,
             (entityOrLite as IFile & Entity);
 
         if (!entity)
-            return <span {...this.props.htmlProps}>{JavascriptMessage.loading.niceToString()}</span>;
+            return <span {...this.props.htmlAttributes}>{JavascriptMessage.loading.niceToString()}</span>;
 
 
         const configuration = this.props.configuration || FileDownloader.configurtions[entity.Type];
@@ -68,7 +68,7 @@ export default class FileDownloader extends React.Component<FileDownloaderProps,
                 download={this.props.download == "View" ? undefined : entity.fileName }
                 title={entity.fileName || undefined}
                 target="_blank"
-                {...this.props.htmlProps}>
+                {...this.props.htmlAttributes}>
                 {entity.fileName}
             </a>
         );

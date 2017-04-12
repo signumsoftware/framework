@@ -78,6 +78,7 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
                     find={false}
                     onRemove={this.handleMainEntityTypeChange} />
 
+                <ValueLine ctx={ctx.subCtx(d => d.mainEntityStrategy)} />
                 <fieldset>
                     {this.state.initialXmlDiagram ?
                         <div className="code-container">

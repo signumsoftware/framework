@@ -20,10 +20,13 @@ namespace Signum.Entities.Workflow
         [NotNullValidator]
         public Lite<WorkflowEntity> Workflow { get; set; }
 
+        [Ignore]
+        internal WorkflowEntity fullWorkflow { get; set; }
+
         public static Func<Lite<WorkflowEntity>, WorkflowEntity> GetWorkflowEntity;
         public WorkflowEntity GetWorkflow()
         {
-            return GetWorkflowEntity(this.Workflow);
+            return fullWorkflow ?? GetWorkflowEntity(this.Workflow);
         }
         
         [NotNullable]

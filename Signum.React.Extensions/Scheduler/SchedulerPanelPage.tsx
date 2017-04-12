@@ -73,7 +73,7 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
                         searchOnLoad: true,
                         showFilters: false,
                         pagination: { elementsPerPage: 10, mode: "Firsts" }
-                    }}/>
+                    }} />
 
 
                     <br />
@@ -84,7 +84,7 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
                         searchOnLoad: true,
                         showFilters: false,
                         pagination: { elementsPerPage: 10, mode: "Firsts" }
-                    }}/>
+                    }} />
                 </div>
             </div>
         );
@@ -109,7 +109,7 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
                     <tbody>
                         {s.Queue.map((item, i) =>
                             <tr key={i}>
-                                <td><EntityLink lite={item.ScheduledTask} inSearch={true} /></td>
+                                <td><EntityLink lite={item.ScheduledTask} inSearch={true} onNavigated={() => this.loadState().done()} /></td>
                                 <td>{item.Rule} </td>
                                 <td>{item.NextExecution} ({item.NextExecution == undefined ? "-None-" : moment(item.NextExecution).fromNow()}) </td>
                             </tr>)

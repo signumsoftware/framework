@@ -19,7 +19,7 @@ export default class Pop3Configuration extends React.Component<{ ctx: TypeContex
                 <ValueLine ctx={sc.subCtx(s => s.port)}  />
                 <ValueLine ctx={sc.subCtx(s => s.host)}  />
                 <ValueLine ctx={sc.subCtx(s => s.username)}  />
-                <ValueLine ctx={sc.subCtx(s => s.password)} valueHtmlProps={{type: "password"}}  />
+                <ValueLine ctx={sc.subCtx(s => s.password)} valueHtmlAttributes={{type: "password"}}  />
                 <ValueLine ctx={sc.subCtx(s => s.enableSSL)}  />
                 <ValueLine ctx={sc.subCtx(s => s.readTimeout)}  />
                 <ValueLine ctx={sc.subCtx(s => s.deleteMessagesAfter)}  />

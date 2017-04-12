@@ -30,7 +30,7 @@ namespace Signum.Engine.Workflow
 
         public object HasMultipleInputsAndOutputsAtTheSameTime { get; private set; }
 
-        public WorkflowBuilder(WorkflowEntity wf, bool useCache = true)
+        public WorkflowBuilder(WorkflowEntity wf)
         {
             using (HeavyProfiler.Log("WorkflowBuilder"))
             using (new EntityCache())
@@ -48,13 +48,6 @@ namespace Signum.Engine.Workflow
                     events = new List<WorkflowEventEntity>();
                     activities = new List<WorkflowActivityEntity>();
                     gateways = new List<WorkflowGatewayEntity>();
-                }
-                else if (useCache)
-                {
-                    connections = wf.WorkflowConnectionsFromCache().Select(a => a.ToLite()).RetrieveFromListOfLite().ToList();
-                    events = wf.WorkflowEventsFromCache().Select(a => a.ToLite()).RetrieveFromListOfLite().ToList();
-                    activities = wf.WorkflowActivitiesFromCache().Select(a => a.ToLite()).RetrieveFromListOfLite().ToList();
-                    gateways = wf.WorkflowGatewaysFromCache().Select(a => a.ToLite()).RetrieveFromListOfLite().ToList();
                 }
                 else
                 {
@@ -95,7 +88,9 @@ namespace Signum.Engine.Workflow
             dic.AddRange(lanes.Select(lb => lb.lane.ToModelKVP()));
 
             dic.AddRange(lanes.SelectMany(lb => lb.GetActivities()).Select(a => a.ToModelKVP()));
-            dic.AddRange(lanes.SelectMany(lb => lb.GetEvents()).Select(a => a.ToModelKVP()));
+
+            // Only Start events because end event has no model and extra properties for now
+            dic.AddRange(lanes.SelectMany(lb => lb.GetEvents().Where(e => e.Entity.Type.IsStart())).Select(a => a.ToModelKVP()));
 
             dic.AddRange(this.messageFlows.Select(mf => mf.ToModelKVP()));
             dic.AddRange(this.pools.Values.SelectMany(pb => pb.GetSequenceFlows()).Select(sf => sf.ToModelKVP()));
@@ -278,6 +273,7 @@ namespace Signum.Engine.Workflow
                 allConnections.Values.Select(c => new WorkflowConnectionEntity
                 {
                     Name = c.Entity.Name,
+                    BpmnElementId = c.bpmnElementId,
                     Action = c.Entity.Action,
                     Condition = c.Entity.Condition,
                     DecisonResult = c.Entity.DecisonResult,
@@ -287,8 +283,14 @@ namespace Signum.Engine.Workflow
                     To = nodes.GetOrThrow(c.Entity.To),
                 }).SaveList();
             }
+            
+            foreach (var item in nodes.Where(a => a.Key is WorkflowEventEntity e && (e.Type == WorkflowEventType.ConditionalStart || e.Type == WorkflowEventType.TimerStart)))
+            {
+                WorkflowEventTaskLogic.CloneScheduledTasks((WorkflowEventEntity)item.Key, (WorkflowEventEntity)item.Value);
+            }
 
-            WorkflowBuilder wb = new WorkflowBuilder(newWorkflow, useCache: false);
+
+            WorkflowBuilder wb = new WorkflowBuilder(newWorkflow);
             newWorkflow.FullDiagramXml = new WorkflowXmlEntity { DiagramXml = wb.GetXDocument().ToString() };
             newWorkflow.Save();
 

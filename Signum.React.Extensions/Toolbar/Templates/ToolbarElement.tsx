@@ -52,7 +52,7 @@ export default class ToolbarElement extends React.Component<{ ctx: TypeContext<T
                             {ctx4.value.iconName && <span className={ctx4.value.iconName} style={{ backgroundColor: bgColor, color: ctx4.value.iconColor, fontSize: "25px", marginTop: "17px" }} />}
                         </div>
                         <div className="col-sm-5">
-                            <ValueLine ctx={ctx2.subCtx(t => t.label)} valueHtmlProps={{ placeholder: content && content.toStr || undefined }} />
+                            <ValueLine ctx={ctx2.subCtx(t => t.label)} valueHtmlAttributes={{ placeholder: content && content.toStr || undefined }} />
                             {content && (content.EntityType == "UserQuery" || content.EntityType == "Query") &&
                                 <div>
                                     <ValueLine ctx={ctx6.subCtx(t => t.openInPopup)}  />
