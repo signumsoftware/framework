@@ -235,6 +235,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
 
             if (me) {
                 this.props.entities[obj.element.id] = me;
+
                 obj.element.businessObject.name = (me as any).name;
 
                 if (BpmnUtils.isTaskAnyKind(obj.element.type)) {
@@ -264,12 +265,9 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                     }
                 }
 
-                this.fireElementChanged(obj.element);
-
-                if (obj.element.label) {
-                    var labelObj = this.elementRegistry.get(obj.element.label.id);
-                    this.fireElementChanged(labelObj);
-                };           
+                this.modeler.get<any>("modeling").updateProperties(obj.element, {
+                    name: (me as any).name,
+                });
             };
         }).done();
     }
