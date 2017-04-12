@@ -297,6 +297,20 @@ namespace Signum.Engine.Workflow
             return newWorkflow;
         }
 
+        public void Delete() {
+            this.pools.First().Value.DeleteAll(null);
+            this.workflow.Cases().UnsafeDelete();
+            this.workflow.Delete();
+        }
+
+        private void CleanSubWorkflow(WorkflowEntity parent)
+        {
+            this.pools.First().Value.CleanAll();
+            Database.Query<CaseEntity>()
+                .Where(c => c.Workflow.Is(this.workflow) && c.ParentCase != null && c.ParentCase.Workflow.Is(parent))
+                .UnsafeDelete();
+        }
+
         private IEnumerable<XmlEntity<WorkflowConnectionEntity>> GetAllConnections()
         {
             return this.messageFlows.Concat(this.pools.Values.SelectMany(p => p.GetSequenceFlows()));

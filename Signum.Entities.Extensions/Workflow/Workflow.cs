@@ -104,7 +104,10 @@ namespace Signum.Entities.Workflow
         [Description("To use '{0}', you should set the workflow '{1}'")]
         ToUse0YouSouldSetTheWorkflow1,
         [Description("Change workflow main entity type is not allowed because we have nodes that use it.")]
-        ChangeWorkflowMainEntityTypeIsNotAllowedBecausueWeHaveNodesThatUseIt
+        ChangeWorkflowMainEntityTypeIsNotAllowedBecausueWeHaveNodesThatUseIt,
+        [Description("Workflow uses in {0} for decomposition or call workflow.")]
+        WorkflowUsedIn0ForDecompositionOrCallWorkflow,
+        ResetZoom,
     }
 
     [Serializable]

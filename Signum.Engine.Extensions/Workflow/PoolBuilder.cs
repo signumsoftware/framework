@@ -153,6 +153,12 @@ namespace Signum.Engine.Workflow
                 this.pool.Entity.Delete(WorkflowPoolOperation.Delete);
             }
 
+            internal void CleanAll()
+            {
+                foreach (var lb in lanes.Values)
+                    lb.CleanAll();
+            }
+
             internal IEnumerable<XmlEntity<WorkflowActivityEntity>> GetAllActivities()
             {
                 return this.lanes.Values.SelectMany(la => la.GetActivities());

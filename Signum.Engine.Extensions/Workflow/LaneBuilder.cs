@@ -167,8 +167,6 @@ namespace Signum.Engine.Workflow
                 return (!this.GetActivities().Any() && !this.GetEvents().Any() && !this.GetGateways().Any());
             }
 
-    
-
             internal string GetBpmnElementId(IWorkflowNodeEntity node)
             {
                 return (node is WorkflowEventEntity) ? events.Values.Single(a => a.Entity.Is(node)).bpmnElementId :
@@ -267,6 +265,12 @@ namespace Signum.Engine.Workflow
                 return result;
             }
 
+            internal void CleanAll()
+            {
+                foreach (var ac in activities.Values.Select(a => a.Entity))
+                    DeleteCases(ac: ac, deleteWorkflowActivity: false);
+            }
+
             internal void DeleteAll(Locator locator)
             {
                 foreach (var c in connections.Values.Select(a => a.Entity))
@@ -286,10 +290,45 @@ namespace Signum.Engine.Workflow
 
                 foreach (var ac in activities.Values.Select(a => a.Entity))
                 {
-                    MoveCasesAndDelete(ac, locator);
+                    if (locator != null)
+                        MoveCasesAndDelete(ac, locator);
+                    else
+                        DeleteCases(ac: ac, deleteWorkflowActivity: true);
                 }
-                
+
                 this.lane.Entity.Delete(WorkflowLaneOperation.Delete);
+            }
+
+            private static void DeleteCases(WorkflowActivityEntity ac, bool deleteWorkflowActivity)
+            {
+                if (ac.Type == WorkflowActivityType.DecompositionWorkflow || ac.Type == WorkflowActivityType.CallWorkflow)
+                {
+                    var sw = ac.SubWorkflow.Workflow;
+                    var wb = new WorkflowBuilder(sw);
+                    wb.CleanSubWorkflow(ac.Lane.Pool.Workflow);
+                }
+                else
+                {
+                    var cases = ac.CaseActivities();
+                    if (cases.Any())
+                    {
+                        var notifications = cases.SelectMany(a => a.Notifications());
+
+                        if (notifications.Any())
+                            notifications.UnsafeDelete();
+
+                        Database.Query<CaseActivityEntity>()
+                            .Where(ca => ca.Previous.Entity.WorkflowActivity.Is(ac)) // Or .Where(ca => cases.Contains(ca.Previous)) ?
+                            .UnsafeUpdate()
+                            .Set(ca => ca.Previous, ca => null)
+                            .Execute();
+
+                        cases.UnsafeDelete();
+                    }
+                }
+
+                if (deleteWorkflowActivity)
+                    ac.Delete(WorkflowActivityOperation.Delete);
             }
 
             private static void MoveCasesAndDelete(WorkflowActivityEntity ac, Locator locator)
@@ -302,7 +341,7 @@ namespace Signum.Engine.Workflow
                 if (ac.CaseActivities().Any())
                 {
                     ac.CaseActivities()
-                         .UnsafeUpdate()
+                        .UnsafeUpdate()
                         .Set(a => a.WorkflowActivity, a => locator.GetReplacement(ac.ToLite()))
                         .Execute();
                 }

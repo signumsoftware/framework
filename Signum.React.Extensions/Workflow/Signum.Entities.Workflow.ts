@@ -573,6 +573,8 @@ export module WorkflowMessage {
     export const ToUseNewNodesOnJumpsYouSouldSaveWorkflow = new MessageKey("WorkflowMessage", "ToUseNewNodesOnJumpsYouSouldSaveWorkflow");
     export const ToUse0YouSouldSetTheWorkflow1 = new MessageKey("WorkflowMessage", "ToUse0YouSouldSetTheWorkflow1");
     export const ChangeWorkflowMainEntityTypeIsNotAllowedBecausueWeHaveNodesThatUseIt = new MessageKey("WorkflowMessage", "ChangeWorkflowMainEntityTypeIsNotAllowedBecausueWeHaveNodesThatUseIt");
+    export const WorkflowUsedIn0ForDecompositionOrCallWorkflow = new MessageKey("WorkflowMessage", "WorkflowUsedIn0ForDecompositionOrCallWorkflow");
+    export const ResetZoom = new MessageKey("WorkflowMessage", "ResetZoom");
 }
 
 export const WorkflowModel = new Type<WorkflowModel>("WorkflowModel");

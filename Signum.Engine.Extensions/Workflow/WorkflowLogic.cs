@@ -533,6 +533,28 @@ namespace Signum.Engine.Workflow
                         return result;
                     }
                 }.Register();
+
+                new Delete(WorkflowOperation.Delete)
+                {
+                    CanDelete = w => 
+                    {
+                        var usedWorkflows = Database.Query<WorkflowActivityEntity>()
+                                                .Where(wa => wa.SubWorkflow != null && wa.SubWorkflow.Workflow.Is(w))
+                                                .Select(wa => wa.Lane.Pool.Workflow)
+                                                .Where(wf => wf.Cases().Any())
+                                                .ToList();
+                        if (usedWorkflows.Any())
+                            return WorkflowMessage.WorkflowUsedIn0ForDecompositionOrCallWorkflow.NiceToString(usedWorkflows.ToString(", "));
+
+                        return null;
+                    },
+
+                    Delete = (w, _) =>
+                    {
+                        var wb = new WorkflowBuilder(w);
+                        wb.Delete();
+                    }
+                }.Register();
             }
         }
 
