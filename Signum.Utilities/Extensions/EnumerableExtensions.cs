@@ -372,7 +372,6 @@ namespace Signum.Utilities
 
     public static class EnumerableExtensions
     {
-        [MethodExpander(typeof(IsEmptyExpander))]
         public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T> collection)
         {
             if (collection == null)
