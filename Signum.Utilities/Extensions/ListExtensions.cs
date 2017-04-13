@@ -65,5 +65,13 @@ namespace Signum.Utilities
             }
         }
 
+        public static void AddAllRanges<T>(this IList<T> list, params IEnumerable<T>[] ranges)
+        {
+            foreach (var range in ranges)
+            {
+                list.AddRange(range);
+            }
+        }
+
     }
 }
