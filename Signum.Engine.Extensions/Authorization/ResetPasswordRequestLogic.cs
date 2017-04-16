@@ -38,7 +38,7 @@ namespace Signum.Engine.Authorization
 
                 SystemEmailLogic.RegisterSystemEmail<ResetPasswordRequestMail>(() => new EmailTemplateEntity
                 {
-                    Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageEntity(culture)
+                    Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageEmbedded(culture)
                     {
                         Text = "<p>{0}</p>".FormatWith(AuthEmailMessage.YouRecentlyRequestedANewPassword.NiceToString()) +
                             "<p>{0} @[User.UserName]</p>".FormatWith(AuthEmailMessage.YourUsernameIs.NiceToString()) +

@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Signum.Utilities.DataStructures;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Workflow
 {
@@ -98,7 +99,7 @@ namespace Signum.Engine.Workflow
             return new WorkflowModel
             {
                 DiagramXml = xml.ToString(),
-                Entities = dic.Select(kvp => new BpmnEntityPair { BpmnElementId = kvp.Key, Model = kvp.Value }).ToMList()
+                Entities = dic.Select(kvp => new BpmnEntityPairEmbedded { BpmnElementId = kvp.Key, Model = kvp.Value }).ToMList()
             };
         }
 
@@ -167,7 +168,7 @@ namespace Signum.Engine.Workflow
             Synchronizer.Synchronize(participants, oldPools,
                 (id, pa) =>
                 {
-                    var wp = new WorkflowPoolEntity { Xml = new WorkflowXmlEntity(), Workflow = this.workflow }.ApplyXml(pa, locator);
+                    var wp = new WorkflowPoolEntity { Xml = new WorkflowXmlEmbedded(), Workflow = this.workflow }.ApplyXml(pa, locator);
                     var pb = new PoolBuilder(wp, Enumerable.Empty<LaneBuilder>(), Enumerable.Empty<XmlEntity<WorkflowConnectionEntity>>());
                     this.pools.Add(wp.ToLite(), pb);
                     pb.ApplyChanges(processElements.GetOrThrow(pa.Attribute("processRef").Value), locator);
@@ -189,7 +190,7 @@ namespace Signum.Engine.Workflow
             Synchronizer.Synchronize(messageFlows, oldMessageFlows,
                 (id, mf) =>
                 {
-                    var wc = new WorkflowConnectionEntity { Xml = new WorkflowXmlEntity() }.ApplyXml(mf, locator);
+                    var wc = new WorkflowConnectionEntity { Xml = new WorkflowXmlEmbedded() }.ApplyXml(mf, locator);
                     this.messageFlows.Add(new XmlEntity<WorkflowConnectionEntity>(wc));
                 },
                 (id, omf) =>
@@ -231,7 +232,7 @@ namespace Signum.Engine.Workflow
                 Model = new WorkflowReplacementModel
                 {
                     Replacements = oldTasks.Where(kvp => !newElements.ContainsKey(kvp.Key) && kvp.Value.Entity.CaseActivities().Any(c => c.DoneDate == null))
-                    .Select(a => new WorkflowReplacementItemEntity { OldTask = a.Value.Entity.ToLite() })
+                    .Select(a => new WorkflowReplacementItemEmbedded { OldTask = a.Value.Entity.ToLite() })
                     .ToMList(),
 
                 },
@@ -291,23 +292,23 @@ namespace Signum.Engine.Workflow
 
 
             WorkflowBuilder wb = new WorkflowBuilder(newWorkflow);
-            newWorkflow.FullDiagramXml = new WorkflowXmlEntity { DiagramXml = wb.GetXDocument().ToString() };
+            newWorkflow.FullDiagramXml = new WorkflowXmlEmbedded { DiagramXml = wb.GetXDocument().ToString() };
             newWorkflow.Save();
 
             return newWorkflow;
         }
 
         public void Delete() {
-            this.pools.First().Value.DeleteAll(null);
+            this.pools.SingleEx().Value.DeleteAll(null);
             this.workflow.Cases().UnsafeDelete();
             this.workflow.Delete();
         }
 
-        private void CleanSubWorkflow(WorkflowEntity parent)
+        private void DeleteCases(Expression<Func<CaseEntity, bool>> filter)
         {
-            this.pools.First().Value.CleanAll();
+            this.pools.SingleEx().Value.DeleteCaseActivities(filter);
             Database.Query<CaseEntity>()
-                .Where(c => c.Workflow.Is(this.workflow) && c.ParentCase != null && c.ParentCase.Workflow.Is(parent))
+                .Where(c => c.Workflow.Is(this.workflow) && filter.Evaluate(c))
                 .UnsafeDelete();
         }
 

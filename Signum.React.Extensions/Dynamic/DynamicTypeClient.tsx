@@ -82,8 +82,6 @@ export namespace API {
     }
 }
 
-export type DynamicBaseType = "Entity" | "Mixin";
-
 export interface DynamicTypeDefinition {
     primaryKey?: DynamicTypePrimaryKeyDefinition;
     ticks?: DynamicTypeTicksDefinition;

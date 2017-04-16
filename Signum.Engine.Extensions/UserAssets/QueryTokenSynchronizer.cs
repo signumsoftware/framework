@@ -294,7 +294,7 @@ namespace Signum.Engine.UserAssets
             });
         }
 
-        public static FixTokenResult FixToken(Replacements replacements, ref QueryTokenEntity token, QueryDescription qd, SubTokensOptions options, string remainingText, bool allowRemoveToken, bool allowReCreate)
+        public static FixTokenResult FixToken(Replacements replacements, ref QueryTokenEmbedded token, QueryDescription qd, SubTokensOptions options, string remainingText, bool allowRemoveToken, bool allowReCreate)
         {
             SafeConsole.WriteColor(token.ParseException == null ? ConsoleColor.Gray : ConsoleColor.Red, "  " + token.TokenString);
             Console.WriteLine(" " + remainingText);
@@ -305,7 +305,7 @@ namespace Signum.Engine.UserAssets
             FixTokenResult result = FixToken(replacements, token.TokenString, out QueryToken resultToken, qd, options, remainingText, allowRemoveToken, allowReCreate);
 
             if (result == FixTokenResult.Fix)
-                token = new QueryTokenEntity(resultToken);
+                token = new QueryTokenEmbedded(resultToken);
 
             return result;
         }

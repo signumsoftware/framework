@@ -63,7 +63,7 @@ namespace Signum.Engine.Chart
 
             for (int i = 0; i < list.Count; i++)
             {
-                list[i].Color = ColorEntity.FromRGBHex(cats[i % cats.Length]);
+                list[i].Color = ColorEmbedded.FromRGBHex(cats[i % cats.Length]);
             }
 
             list.SaveList();
@@ -121,7 +121,7 @@ namespace Signum.Engine.Chart
                 Colors = Database.RetrieveAllLite(type).Select(l => new ChartColorEntity
                 {
                     Related = (Lite<Entity>)l,
-                    Color = dic.TryGetS(l.Id)?.Let(c => new ColorEntity { Argb = c.ToArgb() })
+                    Color = dic.TryGetS(l.Id)?.Let(c => new ColorEmbedded { Argb = c.ToArgb() })
                 }).ToMList()
             };
         }

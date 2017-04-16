@@ -38,9 +38,9 @@ namespace Signum.Entities.Workflow
 
         public bool RequiresOpen { get; set; }
 
-        public WorkflowRejectEntity Reject { get; set; }
+        public WorkflowRejectEmbedded Reject { get; set; }
 
-        public WorkflowTimeoutEntity Timeout { get; set; }
+        public WorkflowTimeoutEmbedded Timeout { get; set; }
         
         [Unit("min")]
         public double? EstimatedDuration { get; set; }
@@ -50,21 +50,21 @@ namespace Signum.Entities.Workflow
 
         [NotNullable]
         [NotNullValidator, NoRepeatValidator]
-        public MList<WorkflowActivityValidationEntity> ValidationRules { get; set; } = new MList<WorkflowActivityValidationEntity>();
+        public MList<WorkflowActivityValidationEmbedded> ValidationRules { get; set; } = new MList<WorkflowActivityValidationEmbedded>();
 
         [NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
-        public MList<WorkflowJumpEntity> Jumps { get; set; } = new MList<WorkflowJumpEntity>();
+        public MList<WorkflowJumpEmbedded> Jumps { get; set; } = new MList<WorkflowJumpEmbedded>();
 
         [NotifyChildProperty]
-        public WorkflowScriptPartEntity Script { get; set; }
+        public WorkflowScriptPartEmbedded Script { get; set; }
 
         [NotNullable]
         [NotNullValidator]
-        public WorkflowXmlEntity Xml { get; set; }
+        public WorkflowXmlEmbedded Xml { get; set; }
         
         [NotifyChildProperty]
-        public SubWorkflowEntity SubWorkflow { get; set; }
+        public SubWorkflowEmbedded SubWorkflow { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = true, MultiLine = true)]
@@ -145,7 +145,7 @@ namespace Signum.Entities.Workflow
     }
     
     [Serializable]
-    public class WorkflowScriptPartEntity : EmbeddedEntity, IWorkflowTransitionTo
+    public class WorkflowScriptPartEmbedded : EmbeddedEntity, IWorkflowTransitionTo
     {
         public Lite<WorkflowScriptEntity> Script { get; set; }
 
@@ -161,9 +161,9 @@ namespace Signum.Entities.Workflow
 
         Lite<WorkflowActionEntity> IWorkflowTransition.Action => null;
 
-        public WorkflowScriptPartEntity Clone()
+        public WorkflowScriptPartEmbedded Clone()
         {
-            return new WorkflowScriptPartEntity()
+            return new WorkflowScriptPartEmbedded()
             {
                 Script = this.Script,
                 RetryStrategy = this.RetryStrategy,
@@ -173,7 +173,7 @@ namespace Signum.Entities.Workflow
     }
 
     [Serializable]
-    public class WorkflowRejectEntity : EmbeddedEntity, IWorkflowTransition
+    public class WorkflowRejectEmbedded : EmbeddedEntity, IWorkflowTransition
     {
         public Lite<WorkflowConditionEntity> Condition { get; set; }
 
@@ -181,11 +181,11 @@ namespace Signum.Entities.Workflow
     }
 
     [Serializable]
-    public class WorkflowTimeoutEntity : EmbeddedEntity, IWorkflowTransitionTo
+    public class WorkflowTimeoutEmbedded : EmbeddedEntity, IWorkflowTransitionTo
     {
         [NotNullable]
         [NotNullValidator]
-        public TimeSpanEntity Timeout { get; set; }
+        public TimeSpanEmbedded Timeout { get; set; }
 
         [NotNullable, ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity), typeof(WorkflowGatewayEntity))]
         [NotNullValidator]
@@ -197,7 +197,7 @@ namespace Signum.Entities.Workflow
     }
 
     [Serializable]
-    public class WorkflowJumpEntity : EmbeddedEntity, IWorkflowTransitionTo
+    public class WorkflowJumpEmbedded : EmbeddedEntity, IWorkflowTransitionTo
     {
         [ImplementedBy(typeof(WorkflowActivityEntity), typeof(WorkflowEventEntity), typeof(WorkflowGatewayEntity))]
         public Lite<IWorkflowNodeEntity> To { get; set; }
@@ -206,9 +206,9 @@ namespace Signum.Entities.Workflow
 
         public Lite<WorkflowActionEntity> Action { get; set; }
 
-        public WorkflowJumpEntity Clone()
+        public WorkflowJumpEmbedded Clone()
         {
-            return new WorkflowJumpEntity
+            return new WorkflowJumpEmbedded
             {
                 To = this.To,
                 Condition = this.Condition,
@@ -234,7 +234,7 @@ namespace Signum.Entities.Workflow
     }
 
     [Serializable]
-    public class WorkflowActivityValidationEntity : EmbeddedEntity
+    public class WorkflowActivityValidationEmbedded : EmbeddedEntity
     {
         [NotNullable]
         [NotNullValidator]
@@ -243,9 +243,9 @@ namespace Signum.Entities.Workflow
         public bool OnAccept { get; set; }
         public bool OnDecline { get; set; }
 
-        public WorkflowActivityValidationEntity Clone()
+        public WorkflowActivityValidationEmbedded Clone()
         {
-            return new WorkflowActivityValidationEntity
+            return new WorkflowActivityValidationEmbedded
             {
                 Rule = this.Rule,
                 OnAccept = this.OnAccept,
@@ -255,7 +255,7 @@ namespace Signum.Entities.Workflow
     }
 
     [Serializable]
-    public class SubWorkflowEntity : EmbeddedEntity
+    public class SubWorkflowEmbedded : EmbeddedEntity
     {
         [NotNullable]
         [NotNullValidator]
@@ -265,9 +265,9 @@ namespace Signum.Entities.Workflow
         [NotNullValidator, NotifyChildProperty]
         public SubEntitiesEval SubEntitiesEval { get; set; }
 
-        public SubWorkflowEntity Clone()
+        public SubWorkflowEmbedded Clone()
         {
-            return new SubWorkflowEntity()
+            return new SubWorkflowEmbedded()
             {
                 Workflow = this.Workflow,
                 SubEntitiesEval = this.SubEntitiesEval.Clone(),
@@ -276,11 +276,11 @@ namespace Signum.Entities.Workflow
     }
 
     [Serializable]
-    public class SubEntitiesEval : EvalEntity<ISubEntitiesEvaluator>
+    public class SubEntitiesEval : EvalEmbedded<ISubEntitiesEvaluator>
     {
         protected override CompilationResult Compile()
         {
-            var decomposition = (SubWorkflowEntity)this.GetParentEntity();
+            var decomposition = (SubWorkflowEmbedded)this.GetParentEntity();
             var activity = (WorkflowActivityEntity)decomposition.GetParentEntity();
 
             var script = this.Script.Trim();
@@ -289,7 +289,7 @@ namespace Signum.Entities.Workflow
             var SubEntityTypeName = decomposition.Workflow.MainEntityType.ToType().FullName;
 
             return Compile(DynamicCode.GetAssemblies(),
-                DynamicCode.GetNamespaces() +
+                DynamicCode.GetUsingNamespaces() +
                     @"
                     namespace Signum.Entities.Workflow
                     {
@@ -340,22 +340,22 @@ namespace Signum.Entities.Workflow
 
         public bool RequiresOpen { get; set; }
 
-        public WorkflowRejectEntity Reject { get; set; }
+        public WorkflowRejectEmbedded Reject { get; set; }
 
-        public WorkflowTimeoutEntity Timeout { get; set; }
+        public WorkflowTimeoutEmbedded Timeout { get; set; }
 
         [Unit("min")]
         public double? EstimatedDuration { get; set; }
 
         [NotNullable]
         [NotNullValidator, NoRepeatValidator]
-        public MList<WorkflowActivityValidationEntity> ValidationRules { get; set; } = new MList<WorkflowActivityValidationEntity>();
+        public MList<WorkflowActivityValidationEmbedded> ValidationRules { get; set; } = new MList<WorkflowActivityValidationEmbedded>();
 
         [NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
-        public MList<WorkflowJumpEntity> Jumps { get; set; } = new MList<WorkflowJumpEntity>();
+        public MList<WorkflowJumpEmbedded> Jumps { get; set; } = new MList<WorkflowJumpEmbedded>();
 
-        public WorkflowScriptPartEntity Script { get; set; }
+        public WorkflowScriptPartEmbedded Script { get; set; }
 
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 255)]
         public string ViewName { get; set; }
@@ -368,7 +368,7 @@ namespace Signum.Entities.Workflow
         [StringLengthValidator(AllowNulls = true, MultiLine = true)]
         public string UserHelp { get; set; }
 
-        public SubWorkflowEntity SubWorkflow { get; set; }
+        public SubWorkflowEmbedded SubWorkflow { get; set; }
     }
 
     public enum WorkflowActivityMessage

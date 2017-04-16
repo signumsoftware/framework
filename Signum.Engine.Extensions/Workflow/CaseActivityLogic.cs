@@ -581,7 +581,7 @@ namespace Signum.Engine.Workflow
                     {
                         CheckRequiresOpen(ca);
                         var to = args.GetArg<Lite<IWorkflowNodeEntity>>();
-                        WorkflowJumpEntity jump = ca.WorkflowActivity.Jumps.SingleEx(j => j.To.Is(to));
+                        WorkflowJumpEmbedded jump = ca.WorkflowActivity.Jumps.SingleEx(j => j.To.Is(to));
                         ExecuteStep(ca, null, jump);
                     },
                 }.Register();
@@ -751,10 +751,10 @@ namespace Signum.Engine.Workflow
 
                     ca.DoneBy = UserEntity.Current.ToLite();
                     ca.DoneDate = TimeZoneManager.Now;
-                    ca.DoneType = transition is WorkflowJumpEntity ? DoneType.Jump :
-                                  transition is WorkflowRejectEntity ? DoneType.Rejected :
-                                  transition is WorkflowTimeoutEntity ? DoneType.Timeout :
-                                  transition is WorkflowScriptPartEntity ? DoneType.ScriptFailure :
+                    ca.DoneType = transition is WorkflowJumpEmbedded ? DoneType.Jump :
+                                  transition is WorkflowRejectEmbedded ? DoneType.Rejected :
+                                  transition is WorkflowTimeoutEmbedded ? DoneType.Timeout :
+                                  transition is WorkflowScriptPartEmbedded ? DoneType.ScriptFailure :
                                   decisionResult == DecisionResult.Approve ? DoneType.Approve :
                                   decisionResult == DecisionResult.Decline ? DoneType.Decline :
                                   ca.WorkflowActivity.Type == WorkflowActivityType.Script ? DoneType.ScriptSuccess :
@@ -777,10 +777,10 @@ namespace Signum.Engine.Workflow
                     if (transition != null)
                     {
                         var to =
-                            transition is WorkflowJumpEntity ? ((WorkflowJumpEntity)transition).To.Retrieve() :
-                            transition is WorkflowTimeoutEntity ? ((WorkflowTimeoutEntity)transition).To.Retrieve() :
-                            transition is WorkflowScriptPartEntity ? ((IWorkflowTransitionTo)transition).To.Retrieve() :
-                            transition is WorkflowRejectEntity ? ca.Previous.Retrieve().WorkflowActivity :
+                            transition is WorkflowJumpEmbedded ? ((WorkflowJumpEmbedded)transition).To.Retrieve() :
+                            transition is WorkflowTimeoutEmbedded ? ((WorkflowTimeoutEmbedded)transition).To.Retrieve() :
+                            transition is WorkflowScriptPartEmbedded ? ((IWorkflowTransitionTo)transition).To.Retrieve() :
+                            transition is WorkflowRejectEmbedded ? ca.Previous.Retrieve().WorkflowActivity :
                             throw new NotImplementedException();
 
                         if (transition.Condition != null)
@@ -833,7 +833,7 @@ namespace Signum.Engine.Workflow
                         if (t2.Type == WorkflowActivityType.DecompositionWorkflow || t2.Type == WorkflowActivityType.CallWorkflow)
                         {
                             var lastConn =
-                                (IWorkflowTransition)ctx.Connections.OfType<WorkflowJumpEntity>().SingleOrDefaultEx() ??
+                                (IWorkflowTransition)ctx.Connections.OfType<WorkflowJumpEmbedded>().SingleOrDefaultEx() ??
                                 (IWorkflowTransition)ctx.Connections.OfType<WorkflowConnectionEntity>().Single(a => a.To.Is(t2));
 
                             Decompose(@case, ca, t2, lastConn);
@@ -886,7 +886,7 @@ namespace Signum.Engine.Workflow
                     WorkflowActivity = workflowActivity,
                     OriginalWorkflowActivityName = workflowActivity.Name,
                     Case = @case,
-                    ScriptExecution = workflowActivity.Type == WorkflowActivityType.Script ? new ScriptExecutionEntity
+                    ScriptExecution = workflowActivity.Type == WorkflowActivityType.Script ? new ScriptExecutionEmbedded
                     {
                         NextExecution = TimeZoneManager.Now,
                         RetryCount = 0,

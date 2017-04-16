@@ -70,12 +70,17 @@ export default class DynamicTypeComponent extends React.Component<DynamicTypeCom
         const ctx = this.props.ctx;
         const dc = { refreshView: () => this.forceUpdate() };
 
+        const suffix =
+            ctx.value.baseType == "MixinEntity" ? "Mixin" :
+                ctx.value.baseType == "EmbeddedEntity" ? "Embedded" :
+                    "Entity";
+
         return (
             <div>
                 <div className="row">
                     <div className="col-sm-8">
-                        {ctx.value.isNew && <ValueLine ctx={ctx.subCtx(dt => dt.baseType)} labelColumns={3} onChange={() => this.forceUpdate()} />}
-                        <ValueLine ctx={ctx.subCtx(dt => dt.typeName)} labelColumns={3} onChange={() => this.forceUpdate()} unitText={ctx.value.baseType} />
+                        <ValueLine ctx={ctx.subCtx(dt => dt.baseType)} labelColumns={3} onChange={() => this.forceUpdate()} readOnly={!ctx.value.isNew} />
+                        <ValueLine ctx={ctx.subCtx(dt => dt.typeName)} labelColumns={3} onChange={() => this.forceUpdate()} unitText={suffix} />
                     </div>
                     <div className="col-sm-4">
                         <button className={classes("btn btn-xs btn-success pull-right", this.state.showDatabaseMapping && "active")}

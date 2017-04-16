@@ -33,7 +33,7 @@ namespace Signum.React.Dynamic
             try
             {
                 var code = $@"
-{DynamicCode.GetNamespaces()}
+{DynamicCode.GetUsingNamespaces()}
 
 namespace Signum.Entities.Dynamic 
 {{
@@ -53,7 +53,7 @@ namespace Signum.Entities.Dynamic
     }}                   
 }}";
 
-                var res = EvalEntity<IDynamicExpressionEvaluator>.Compile(DynamicCode.GetAssemblies(), code);
+                var res = EvalEmbedded<IDynamicExpressionEvaluator>.Compile(DynamicCode.GetAssemblies(), code);
 
                 if (res.CompilationErrors.HasText())
                     throw new InvalidOperationException(res.CompilationErrors);

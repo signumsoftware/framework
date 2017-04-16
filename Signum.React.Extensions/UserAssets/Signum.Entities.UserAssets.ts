@@ -27,9 +27,9 @@ export interface IUserAssetEntity extends Entities.Entity {
     guid?: string;
 }
 
-export const QueryTokenEntity = new Type<QueryTokenEntity>("QueryTokenEntity");
-export interface QueryTokenEntity extends Entities.EmbeddedEntity {
-    Type: "QueryTokenEntity";
+export const QueryTokenEmbedded = new Type<QueryTokenEmbedded>("QueryTokenEmbedded");
+export interface QueryTokenEmbedded extends Entities.EmbeddedEntity {
+    Type: "QueryTokenEmbedded";
     tokenString: string;
 }
 
@@ -46,9 +46,9 @@ export module UserAssetPermission {
     export const UserAssetsToXML : Authorization.PermissionSymbol = registerSymbol("Permission", "UserAssetPermission.UserAssetsToXML");
 }
 
-export const UserAssetPreviewLine = new Type<UserAssetPreviewLine>("UserAssetPreviewLine");
-export interface UserAssetPreviewLine extends Entities.EmbeddedEntity {
-    Type: "UserAssetPreviewLine";
+export const UserAssetPreviewLineEmbedded = new Type<UserAssetPreviewLineEmbedded>("UserAssetPreviewLineEmbedded");
+export interface UserAssetPreviewLineEmbedded extends Entities.EmbeddedEntity {
+    Type: "UserAssetPreviewLineEmbedded";
     type?: Basics.TypeEntity | null;
     text?: string | null;
     action?: EntityAction;
@@ -59,7 +59,7 @@ export interface UserAssetPreviewLine extends Entities.EmbeddedEntity {
 export const UserAssetPreviewModel = new Type<UserAssetPreviewModel>("UserAssetPreviewModel");
 export interface UserAssetPreviewModel extends Entities.ModelEntity {
     Type: "UserAssetPreviewModel";
-    lines: Entities.MList<UserAssetPreviewLine>;
+    lines: Entities.MList<UserAssetPreviewLineEmbedded>;
 }
 
 

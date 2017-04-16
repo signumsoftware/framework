@@ -27,7 +27,7 @@ namespace Signum.Entities.Help
 
         [NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
-        public MList<QueryColumnHelpEntity> Columns { get; set; } = new MList<QueryColumnHelpEntity>();
+        public MList<QueryColumnHelpEmbedded> Columns { get; set; } = new MList<QueryColumnHelpEmbedded>();
 
         public bool IsEmpty
         {
@@ -51,7 +51,7 @@ namespace Signum.Entities.Help
     }
 
     [Serializable]
-    public class QueryColumnHelpEntity : EmbeddedEntity
+    public class QueryColumnHelpEmbedded : EmbeddedEntity
     {
         [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]

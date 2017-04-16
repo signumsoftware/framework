@@ -197,7 +197,7 @@ namespace Signum.Engine.Workflow
             workflowEventTask.Delete(WorkflowEventTaskOperation.Delete);
         }
 
-        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEntity parameters)
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters)
         {
             Database.Query<WorkflowEventTaskConditionResultEntity>()
                .Where(a => a.CreationDate < parameters.DateLimit)

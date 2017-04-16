@@ -20,7 +20,7 @@ namespace Signum.Entities.Translation
 
         [NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
-        public MList<TranslatorUserCultureEntity> Cultures { get; set; } = new MList<TranslatorUserCultureEntity>();
+        public MList<TranslatorUserCultureEmbedded> Cultures { get; set; } = new MList<TranslatorUserCultureEmbedded>();
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
@@ -42,7 +42,7 @@ namespace Signum.Entities.Translation
     }
 
     [Serializable]
-    public class TranslatorUserCultureEntity : EmbeddedEntity
+    public class TranslatorUserCultureEmbedded : EmbeddedEntity
     {
         [NotNullable]
         [NotNullValidator]

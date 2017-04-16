@@ -7,9 +7,9 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 
 
-export const ToolbarElementEntity = new Type<ToolbarElementEntity>("ToolbarElementEntity");
-export interface ToolbarElementEntity extends Entities.EmbeddedEntity {
-    Type: "ToolbarElementEntity";
+export const ToolbarElementEmbedded = new Type<ToolbarElementEmbedded>("ToolbarElementEmbedded");
+export interface ToolbarElementEmbedded extends Entities.EmbeddedEntity {
+    Type: "ToolbarElementEmbedded";
     type?: ToolbarElementType;
     label?: string | null;
     iconName?: string | null;
@@ -32,7 +32,7 @@ export interface ToolbarEntity extends Entities.Entity, UserAssets.IUserAssetEnt
     owner?: Entities.Lite<Entities.Entity> | null;
     name?: string | null;
     priority?: number | null;
-    elements: Entities.MList<ToolbarElementEntity>;
+    elements: Entities.MList<ToolbarElementEmbedded>;
     guid?: string;
 }
 
@@ -41,7 +41,7 @@ export interface ToolbarMenuEntity extends Entities.Entity, UserAssets.IUserAsse
     Type: "ToolbarMenu";
     guid?: string;
     name?: string | null;
-    elements: Entities.MList<ToolbarElementEntity>;
+    elements: Entities.MList<ToolbarElementEmbedded>;
 }
 
 export module ToolbarMenuOperation {

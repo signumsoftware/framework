@@ -17,25 +17,25 @@ namespace Signum.Engine.Files
 {
     public static class EmbeddedFilePathLogic
     {
-        static Expression<Func<EmbeddedFilePathEntity, FileTypeSymbol, WebImage>> WebImageExpression =
+        static Expression<Func<FilePathEmbedded, FileTypeSymbol, WebImage>> WebImageExpression =
             (efp, ft) => efp == null ? null : new WebImage
             {
                 FullWebPath = efp.FullWebPath()
             };
         [ExpressionField]
-        public static WebImage WebImage(this EmbeddedFilePathEntity efp, FileTypeSymbol fileType)
+        public static WebImage WebImage(this FilePathEmbedded efp, FileTypeSymbol fileType)
         {
             return WebImageExpression.Evaluate(efp, fileType);
         }
 
-        static Expression<Func<EmbeddedFilePathEntity, FileTypeSymbol, WebDownload>> WebDownloadExpression =
+        static Expression<Func<FilePathEmbedded, FileTypeSymbol, WebDownload>> WebDownloadExpression =
            (efp, ft) => efp == null ? null : new WebDownload
            {
                FullWebPath = efp.FullWebPath(),
                FileName = efp.FileName
            };
         [ExpressionField]
-        public static WebDownload WebDownload(this EmbeddedFilePathEntity fp, FileTypeSymbol fileType)
+        public static WebDownload WebDownload(this FilePathEmbedded fp, FileTypeSymbol fileType)
         {
             return WebDownloadExpression.Evaluate(fp, fileType);
         }
@@ -51,7 +51,7 @@ namespace Signum.Engine.Files
             {
                 FileTypeLogic.Start(sb, dqm);
 
-                EmbeddedFilePathEntity.OnPreSaving += efp =>
+                FilePathEmbedded.OnPreSaving += efp =>
                 {
                     if(efp.BinaryFile != null) //First time
                     {
@@ -59,34 +59,34 @@ namespace Signum.Engine.Files
                     }
                 };
 
-                EmbeddedFilePathEntity.CalculatePrefixPair += CalculatePrefixPair;
+                FilePathEmbedded.CalculatePrefixPair += CalculatePrefixPair;
             }
         }
 
-        static PrefixPair CalculatePrefixPair(this EmbeddedFilePathEntity efp)
+        static PrefixPair CalculatePrefixPair(this FilePathEmbedded efp)
         {
             using (new EntityCache(EntityCacheType.ForceNew))
                 return efp.FileType.GetAlgorithm().GetPrefixPair(efp);
         }
 
-        public static byte[] GetByteArray(this EmbeddedFilePathEntity efp)
+        public static byte[] GetByteArray(this FilePathEmbedded efp)
         {
             return efp.BinaryFile ?? efp.FileType.GetAlgorithm().ReadAllBytes(efp);
         }
 
-        public static Stream OpenRead(this EmbeddedFilePathEntity efp)
+        public static Stream OpenRead(this FilePathEmbedded efp)
         {
             return efp.FileType.GetAlgorithm().OpenRead(efp);
         }
 
-        public static EmbeddedFilePathEntity SaveFile(this EmbeddedFilePathEntity efp)
+        public static FilePathEmbedded SaveFile(this FilePathEmbedded efp)
         {
             efp.FileType.GetAlgorithm().SaveFile(efp);
             efp.BinaryFile = null;
             return efp;
         }
 
-        public static void DeleteFileOnCommit(this EmbeddedFilePathEntity efp)
+        public static void DeleteFileOnCommit(this FilePathEmbedded efp)
         {
             Transaction.PostRealCommit += dic =>
             {

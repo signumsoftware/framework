@@ -24,15 +24,15 @@ namespace Signum.React.UserAssets
             started = true;
 
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
-            ReflectionServer.RegisterLike(typeof(QueryTokenEntity));
+            ReflectionServer.RegisterLike(typeof(QueryTokenEmbedded));
 
 
-            var pcs = PropertyConverter.GetPropertyConverters(typeof(QueryTokenEntity));
+            var pcs = PropertyConverter.GetPropertyConverters(typeof(QueryTokenEmbedded));
             pcs.Add("token", new PropertyConverter()
             {   
                 CustomWriteJsonProperty = ctx =>
                 {
-                    var qte = (QueryTokenEntity)ctx.Entity;
+                    var qte = (QueryTokenEmbedded)ctx.Entity;
 
                     ctx.JsonWriter.WritePropertyName(ctx.LowerCaseName);
                     ctx.JsonSerializer.Serialize(ctx.JsonWriter, qte.TryToken == null ? null : new QueryTokenTS(qte.TryToken, true));
@@ -48,7 +48,7 @@ namespace Signum.React.UserAssets
             {
                 CustomWriteJsonProperty = ctx =>
                 {
-                    var qte = (QueryTokenEntity)ctx.Entity;
+                    var qte = (QueryTokenEmbedded)ctx.Entity;
 
                     ctx.JsonWriter.WritePropertyName(ctx.LowerCaseName);
                     ctx.JsonSerializer.Serialize(ctx.JsonWriter, qte.ParseException?.Message);
@@ -62,7 +62,7 @@ namespace Signum.React.UserAssets
             });
             pcs.GetOrThrow("tokenString").CustomWriteJsonProperty = ctx =>
             {
-                var qte = (QueryTokenEntity)ctx.Entity;
+                var qte = (QueryTokenEmbedded)ctx.Entity;
 
                 ctx.JsonWriter.WritePropertyName(ctx.LowerCaseName);
                 ctx.JsonWriter.WriteValue(qte.TryToken?.FullKey() ?? qte.TokenString);

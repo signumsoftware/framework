@@ -145,7 +145,7 @@ namespace Signum.Engine.Chart
             
             cr.Columns.ZipForeach(userChart.Columns, (a, b) =>
             {
-                a.Token = b.Token == null ? null : new QueryTokenEntity(b.Token.Token);
+                a.Token = b.Token == null ? null : new QueryTokenEmbedded(b.Token.Token);
                 a.DisplayName = b.DisplayName;
             });
 
@@ -207,7 +207,7 @@ namespace Signum.Engine.Chart
                         Console.WriteLine(" Filters:");
                         foreach (var item in uc.Filters.ToList())
                         {
-                            QueryTokenEntity token = item.Token;
+                            QueryTokenEmbedded token = item.Token;
                             switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate, "{0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false))
                             {
                                 case FixTokenResult.Nothing: break;
@@ -225,7 +225,7 @@ namespace Signum.Engine.Chart
                         Console.WriteLine(" Columns:");
                         foreach (var item in uc.Columns.ToList())
                         {
-                            QueryTokenEntity token = item.Token;
+                            QueryTokenEmbedded token = item.Token;
                             if (item.Token == null)
                                 continue;
 
@@ -246,7 +246,7 @@ namespace Signum.Engine.Chart
                         Console.WriteLine(" Orders:");
                         foreach (var item in uc.Orders.ToList())
                         {
-                            QueryTokenEntity token = item.Token;
+                            QueryTokenEmbedded token = item.Token;
                             switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | canAggregate, item.OrderType.ToString(), allowRemoveToken: true, allowReCreate: false))
                             {
                                 case FixTokenResult.Nothing: break;
@@ -333,7 +333,7 @@ namespace Signum.Engine.Chart
             }
         }
 
-        private static FixTokenResult FixParameter(ChartParameterEntity item, ref string val)
+        private static FixTokenResult FixParameter(ChartParameterEmbedded item, ref string val)
         {
             var error = item.PropertyCheck(nameof(item.Value));
             if (error == null)

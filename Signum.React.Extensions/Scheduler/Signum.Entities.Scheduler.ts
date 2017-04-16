@@ -20,7 +20,7 @@ export const HolidayCalendarEntity = new Type<HolidayCalendarEntity>("HolidayCal
 export interface HolidayCalendarEntity extends Entities.Entity {
     Type: "HolidayCalendar";
     name?: string | null;
-    holidays: Entities.MList<HolidayEntity>;
+    holidays: Entities.MList<HolidayEmbedded>;
 }
 
 export module HolidayCalendarOperation {
@@ -28,9 +28,9 @@ export module HolidayCalendarOperation {
     export const Delete : Entities.DeleteSymbol<HolidayCalendarEntity> = registerSymbol("Operation", "HolidayCalendarOperation.Delete");
 }
 
-export const HolidayEntity = new Type<HolidayEntity>("HolidayEntity");
-export interface HolidayEntity extends Entities.EmbeddedEntity {
-    Type: "HolidayEntity";
+export const HolidayEmbedded = new Type<HolidayEmbedded>("HolidayEmbedded");
+export interface HolidayEmbedded extends Entities.EmbeddedEntity {
+    Type: "HolidayEmbedded";
     date?: string;
     name?: string | null;
 }

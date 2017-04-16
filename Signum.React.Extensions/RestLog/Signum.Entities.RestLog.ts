@@ -7,9 +7,9 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 
 
-export const QueryStringValue = new Type<QueryStringValue>("QueryStringValue");
-export interface QueryStringValue extends Entities.EmbeddedEntity {
-    Type: "QueryStringValue";
+export const QueryStringValueEmbedded = new Type<QueryStringValueEmbedded>("QueryStringValueEmbedded");
+export interface QueryStringValueEmbedded extends Entities.EmbeddedEntity {
+    Type: "QueryStringValueEmbedded";
     key?: string | null;
     value?: string | null;
 }
@@ -20,7 +20,7 @@ export interface RestLogEntity extends Entities.Entity {
     url: string;
     startDate: string;
     requestBody: string;
-    queryString: Entities.MList<QueryStringValue>;
+    queryString: Entities.MList<QueryStringValueEmbedded>;
     user: Entities.Lite<Basics.IUserEntity> | null;
     controller: string;
     action: string;

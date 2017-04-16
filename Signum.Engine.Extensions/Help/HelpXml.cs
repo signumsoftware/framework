@@ -193,7 +193,7 @@ namespace Signum.Engine.Help
                         }
                         else
                         {
-                            entity.Columns.Add(new QueryColumnHelpEntity
+                            entity.Columns.Add(new QueryColumnHelpEmbedded
                             {
                                 ColumnName = name,
                                 Description = item.Value
@@ -329,7 +329,7 @@ namespace Signum.Engine.Help
                         }
                         else
                         {
-                            entity.Properties.Add(new PropertyRouteHelpEntity
+                            entity.Properties.Add(new PropertyRouteHelpEmbedded
                             {
                                 Property = property,
                                 Description = item.Value

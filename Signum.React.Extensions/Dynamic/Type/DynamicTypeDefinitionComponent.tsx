@@ -298,7 +298,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                         <CustomCodeTab definition={def} dynamicType={dt} />
                     </Tab>
 
-                    {!dt.isNew && dt.baseType == "Mixin" &&
+                    {!dt.isNew && dt.baseType == "MixinEntity" &&
                         <Tab eventKey="connections" title="Apply To">
                             <SearchControl findOptions={{
                                 queryName: DynamicMixinConnectionEntity,
@@ -410,11 +410,10 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                         onCreate={() => ({ code: "" })}
                         renderContent={e =>
                             <div>
-                                {dt.baseType == "Entity" &&
-                                    <div className="btn-group" style={{ marginBottom: "3px" }}>
-                                        <input type="button" className="btn btn-success btn-xs sf-button" value="Query Expression" onClick={this.handleQueryExpressionClick} />
-                                        <input type="button" className="btn btn-warning btn-xs sf-button" value="Scalar Expression" onClick={this.handleScalarExpressionClick} />
-                                    </div>}
+                                <div className="btn-group" style={{ marginBottom: "3px" }}>
+                                    {dt.baseType == "Entity" && <input type="button" className="btn btn-success btn-xs sf-button" value="Query Expression" onClick={this.handleQueryExpressionClick} />}
+                                    {dt.baseType == "Entity" || dt.baseType == "EmbeddedEntity" && <input type="button" className="btn btn-warning btn-xs sf-button" value="Scalar Expression" onClick={this.handleScalarExpressionClick} />}
+                                </div>
                                 <div className="code-container">
                                     <pre style={{ border: "0px", margin: "0px" }}>{`public static class ${dt.typeName}Logic
 {`}</pre>
@@ -475,7 +474,10 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
     }
 
     getDynamicTypeFullName() {
-        return `${this.props.dynamicType.typeName}${this.props.dynamicType.baseType}`;
+
+        var suffix = this.props.dynamicType.baseType == "MixinEntity" ? "Mixin" : "Entity";
+
+        return `${this.props.dynamicType.typeName}${suffix}`;
     }
 
     handleWorkflowCustomInheritanceClick = () => {
@@ -992,7 +994,14 @@ export class TypeCombo extends React.Component<{ dc: DynamicTypeDesignContext; b
     }
 
     handleGetItems = (query: string) => {
-        return DynamicClient.API.autocompleteType({ query: query, limit: 5, includeBasicTypes: true, includeEntities: true, includeMList: true });
+        return DynamicClient.API.autocompleteType({
+            query: query,
+            limit: 5,
+            includeBasicTypes: true,
+            includeEntities: true,
+            includeEmbeddedEntities: true,
+            includeMList: true
+        });
     }
 
     handleOnChange = (newValue: string) => {

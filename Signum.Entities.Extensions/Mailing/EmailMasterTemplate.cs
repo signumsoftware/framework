@@ -21,7 +21,7 @@ namespace Signum.Entities.Mailing
         public string Name { get; set; }
 
         [NotifyCollectionChanged, NotNullable]
-        public MList<EmailMasterTemplateMessageEntity> Messages { get; set; } = new MList<EmailMasterTemplateMessageEntity>();
+        public MList<EmailMasterTemplateMessageEmbedded> Messages { get; set; } = new MList<EmailMasterTemplateMessageEmbedded>();
 
         public static readonly Regex MasterTemplateContentRegex = new Regex(@"\@\[content\]");
 
@@ -51,11 +51,11 @@ namespace Signum.Entities.Mailing
             if (sender == Messages)
             {
                 if (args.OldItems != null)
-                    foreach (var item in args.OldItems.Cast<EmailMasterTemplateMessageEntity>())
+                    foreach (var item in args.OldItems.Cast<EmailMasterTemplateMessageEmbedded>())
                         item.MasterTemplate = null;
 
                 if (args.NewItems != null)
-                    foreach (var item in args.NewItems.Cast<EmailMasterTemplateMessageEntity>())
+                    foreach (var item in args.NewItems.Cast<EmailMasterTemplateMessageEmbedded>())
                         item.MasterTemplate = this;
             }
         }
@@ -76,11 +76,11 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable]
-    public class EmailMasterTemplateMessageEntity : EmbeddedEntity
+    public class EmailMasterTemplateMessageEmbedded : EmbeddedEntity
     {
-        private EmailMasterTemplateMessageEntity() { }
+        private EmailMasterTemplateMessageEmbedded() { }
 
-        public EmailMasterTemplateMessageEntity(CultureInfoEntity culture)
+        public EmailMasterTemplateMessageEmbedded(CultureInfoEntity culture)
         {
             this.CultureInfo = culture;
         }

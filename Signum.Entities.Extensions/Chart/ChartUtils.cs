@@ -89,7 +89,7 @@ namespace Signum.Entities.Chart
 			{
 				if (chart.Columns.Count <= i)
 				{
-					chart.Columns.Add(new ChartColumnEntity());
+					chart.Columns.Add(new ChartColumnEmbedded());
 					result = true;
 				}
 
@@ -138,7 +138,7 @@ namespace Signum.Entities.Chart
 						}
 						else
 						{
-							cp = new ChartParameterEntity
+							cp = new ChartParameterEmbedded
 							{
 								Name = sp.Name,
 								parentChart = chart,
@@ -178,16 +178,16 @@ namespace Signum.Entities.Chart
 				GroupResults = request.GroupResults,
 				ChartScript = request.ChartScript,
 
-				Filters = request.Filters.Select(f => new QueryFilterEntity
+				Filters = request.Filters.Select(f => new QueryFilterEmbedded
 				{
-					Token = new QueryTokenEntity(f.Token),
+					Token = new QueryTokenEmbedded(f.Token),
 					Operation = f.Operation,
 					ValueString = FilterValueConverter.ToString(f.Value, f.Token.Type),
 				}).ToMList(),
 
-				Orders = request.Orders.Select(o => new QueryOrderEntity
+				Orders = request.Orders.Select(o => new QueryOrderEmbedded
 				{
-					Token = new QueryTokenEntity(o.Token),
+					Token = new QueryTokenEmbedded(o.Token),
 					OrderType = o.OrderType
 				}).ToMList()
 			};
@@ -279,7 +279,7 @@ namespace Signum.Entities.Chart
 			};
 		}
 
-		private static Func<ResultRow, object> Converter(this ChartColumnEntity ct, int columnIndex)
+		private static Func<ResultRow, object> Converter(this ChartColumnEmbedded ct, int columnIndex)
 		{
 			if (ct == null || ct.Token == null)
 				return null;
@@ -384,7 +384,7 @@ namespace Signum.Entities.Chart
 			return result;
 		}
 
-		internal static void FixParameters(ChartRequest chartRequest, ChartColumnEntity chartColumn)
+		internal static void FixParameters(ChartRequest chartRequest, ChartColumnEmbedded chartColumn)
 		{
 			int index = chartRequest.Columns.IndexOf(chartColumn);
 

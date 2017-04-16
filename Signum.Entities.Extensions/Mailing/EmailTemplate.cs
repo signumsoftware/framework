@@ -51,7 +51,7 @@ namespace Signum.Entities.Mailing
 
         public bool SendDifferentMessages { get; set; }
 
-        public EmailTemplateContactEntity From { get; set; }
+        public EmailTemplateContactEmbedded From { get; set; }
 
         [NotNullable]
         [NotNullValidator, NoRepeatValidator]
@@ -66,7 +66,7 @@ namespace Signum.Entities.Mailing
         public bool IsBodyHtml { get; set; } = true;
 
         [NotifyCollectionChanged, NotifyChildProperty]
-        public MList<EmailTemplateMessageEntity> Messages { get; set; } = new MList<EmailTemplateMessageEntity>();
+        public MList<EmailTemplateMessageEmbedded> Messages { get; set; } = new MList<EmailTemplateMessageEmbedded>();
 
         public bool Active { get; set; }
 
@@ -123,9 +123,9 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable]
-    public class EmailTemplateContactEntity : EmbeddedEntity
+    public class EmailTemplateContactEmbedded : EmbeddedEntity
     {
-        public QueryTokenEntity Token { get; set; }
+        public QueryTokenEmbedded Token { get; set; }
 
         public string EmailAddress { get; set; }
 
@@ -155,7 +155,7 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable]
-    public class EmailTemplateRecipientEntity : EmailTemplateContactEntity
+    public class EmailTemplateRecipientEntity : EmailTemplateContactEmbedded
     {
         public EmailRecipientKind Kind { get; set; }
 
@@ -166,11 +166,11 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable]
-    public class EmailTemplateMessageEntity : EmbeddedEntity
+    public class EmailTemplateMessageEmbedded : EmbeddedEntity
     {
-        private EmailTemplateMessageEntity() { }
+        private EmailTemplateMessageEmbedded() { }
 
-        public EmailTemplateMessageEntity(CultureInfoEntity culture)
+        public EmailTemplateMessageEmbedded(CultureInfoEntity culture)
         {
             this.CultureInfo = culture;
         }

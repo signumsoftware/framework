@@ -42,7 +42,7 @@ namespace Signum.Entities.Workflow
     }
 
     [Serializable]
-    public class WorkflowActionEval : EvalEntity<IWorkflowActionExecutor>
+    public class WorkflowActionEval : EvalEmbedded<IWorkflowActionExecutor>
     {
         protected override CompilationResult Compile()
         {
@@ -52,7 +52,7 @@ namespace Signum.Entities.Workflow
             var WorkflowEntityTypeName = parent.MainEntityType.ToType().FullName;
 
             return Compile(DynamicCode.GetAssemblies(),
-                DynamicCode.GetNamespaces() +
+                DynamicCode.GetUsingNamespaces() +
                     @"
                     namespace Signum.Entities.Workflow
                     {

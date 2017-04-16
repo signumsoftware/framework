@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Signum.Entities.Files
 {
     [Serializable]
-    public class EmbeddedFileEntity : EmbeddedEntity, IFile
+    public class FileEmbedded : EmbeddedEntity, IFile
     {
         [NotNullable]
         [StringLengthValidator(Min = 3)]

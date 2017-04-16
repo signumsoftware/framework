@@ -29,7 +29,7 @@ namespace Signum.Entities.Workflow
         /// REDUNDANT! Only for diff logging
         /// </summary>
         [InTypeScript(false)]
-        public WorkflowXmlEntity FullDiagramXml { get; set; }
+        public WorkflowXmlEmbedded FullDiagramXml { get; set; }
 
         static Expression<Func<WorkflowEntity, string>> ToStringExpression = @this => @this.Name;
         [ExpressionField]
@@ -61,11 +61,11 @@ namespace Signum.Entities.Workflow
         [NotNullValidator]
         public string DiagramXml { get; set;  }
 
-        public MList<BpmnEntityPair> Entities { get; set; } = new MList<BpmnEntityPair>();
+        public MList<BpmnEntityPairEmbedded> Entities { get; set; } = new MList<BpmnEntityPairEmbedded>();
     }
 
     [Serializable, InTypeScript(Undefined = false)]
-    public class BpmnEntityPair : EmbeddedEntity
+    public class BpmnEntityPairEmbedded : EmbeddedEntity
     {
         [NotNullable]
         [NotNullValidator]
@@ -111,7 +111,7 @@ namespace Signum.Entities.Workflow
     }
 
     [Serializable]
-    public class WorkflowXmlEntity : EmbeddedEntity
+    public class WorkflowXmlEmbedded : EmbeddedEntity
     {
         [NotNullable, SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = int.MaxValue, MultiLine = true)]
@@ -120,7 +120,7 @@ namespace Signum.Entities.Workflow
 
     public interface IWorkflowObjectEntity : IEntity
     {
-        WorkflowXmlEntity Xml { get; set; }
+        WorkflowXmlEmbedded Xml { get; set; }
         string Name { get; set; }
         string BpmnElementId { get; set; }
     }
@@ -145,11 +145,11 @@ namespace Signum.Entities.Workflow
     [Serializable]
     public class WorkflowReplacementModel: ModelEntity
     {
-        public MList<WorkflowReplacementItemEntity> Replacements { get; set; } = new MList<WorkflowReplacementItemEntity>();
+        public MList<WorkflowReplacementItemEmbedded> Replacements { get; set; } = new MList<WorkflowReplacementItemEmbedded>();
     }
 
     [Serializable]
-    public class WorkflowReplacementItemEntity : EmbeddedEntity
+    public class WorkflowReplacementItemEmbedded : EmbeddedEntity
     {
         [NotNullable]
         [NotNullValidator, InTypeScript(Undefined = false, Null= false)]

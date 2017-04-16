@@ -28,7 +28,7 @@ export interface EntityHelpEntity extends Entities.Entity {
     type?: Signum.TypeEntity | null;
     culture?: Basics.CultureInfoEntity | null;
     description?: string | null;
-    properties: Entities.MList<PropertyRouteHelpEntity>;
+    properties: Entities.MList<PropertyRouteHelpEmbedded>;
     operations: Entities.MList<OperationHelpEntity>;
     queries: Entities.MList<QueryHelpEntity>;
     isEmpty?: boolean;
@@ -157,16 +157,16 @@ export module OperationHelpOperation {
     export const Save : Entities.ExecuteSymbol<OperationHelpEntity> = registerSymbol("Operation", "OperationHelpOperation.Save");
 }
 
-export const PropertyRouteHelpEntity = new Type<PropertyRouteHelpEntity>("PropertyRouteHelpEntity");
-export interface PropertyRouteHelpEntity extends Entities.EmbeddedEntity {
-    Type: "PropertyRouteHelpEntity";
+export const PropertyRouteHelpEmbedded = new Type<PropertyRouteHelpEmbedded>("PropertyRouteHelpEmbedded");
+export interface PropertyRouteHelpEmbedded extends Entities.EmbeddedEntity {
+    Type: "PropertyRouteHelpEmbedded";
     property?: Signum.PropertyRouteEntity | null;
     description?: string | null;
 }
 
-export const QueryColumnHelpEntity = new Type<QueryColumnHelpEntity>("QueryColumnHelpEntity");
-export interface QueryColumnHelpEntity extends Entities.EmbeddedEntity {
-    Type: "QueryColumnHelpEntity";
+export const QueryColumnHelpEmbedded = new Type<QueryColumnHelpEmbedded>("QueryColumnHelpEmbedded");
+export interface QueryColumnHelpEmbedded extends Entities.EmbeddedEntity {
+    Type: "QueryColumnHelpEmbedded";
     columnName?: string | null;
     description?: string | null;
 }
@@ -177,7 +177,7 @@ export interface QueryHelpEntity extends Entities.Entity {
     query?: Signum.QueryEntity | null;
     culture?: Basics.CultureInfoEntity | null;
     description?: string | null;
-    columns: Entities.MList<QueryColumnHelpEntity>;
+    columns: Entities.MList<QueryColumnHelpEmbedded>;
     isEmpty?: boolean;
 }
 

@@ -117,7 +117,7 @@ namespace Signum.Engine.ViewLog
             });
         }
 
-        static void ExceptionLogic_DeleteLogs(DeleteLogParametersEntity parameters)
+        static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters)
         {
             Database.Query<ViewLogEntity>().Where(view => view.StartDate < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
         }

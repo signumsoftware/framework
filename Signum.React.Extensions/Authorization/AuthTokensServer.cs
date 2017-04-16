@@ -22,9 +22,9 @@ namespace Signum.React.Authorization
 {
     public class AuthTokenServer
     {
-        static Func<AuthTokenConfigurationEntity> Configuration;
+        static Func<AuthTokenConfigurationEmbedded> Configuration;
 
-        public static void Start(Func<AuthTokenConfigurationEntity> tokenConfig, string hashableEncryptionKey)
+        public static void Start(Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
         {
             Configuration = tokenConfig;
             CryptoKey = new MD5CryptoServiceProvider().Using(p => p.ComputeHash(UTF8Encoding.UTF8.GetBytes(hashableEncryptionKey)));

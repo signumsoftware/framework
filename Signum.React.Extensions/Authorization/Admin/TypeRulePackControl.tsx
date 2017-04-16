@@ -19,7 +19,7 @@ import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString,
 import { Api, properties, queries, operations } from '../AuthClient'
 import {
     TypeRulePack, AuthAdminMessage, PermissionSymbol, AuthMessage, TypeAllowed, TypeAllowedRule,
-    TypeAllowedAndConditions, TypeAllowedBasic, TypeConditionRule, AuthThumbnail, PropertyRulePack, OperationRulePack, QueryRulePack
+    TypeAllowedAndConditions, TypeAllowedBasic, TypeConditionRuleEmbedded, AuthThumbnail, PropertyRulePack, OperationRulePack, QueryRulePack
 } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import { TypeConditionSymbol } from '../../Basics/Signum.Entities.Basics'
@@ -112,7 +112,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                 if (!tc)
                     return;
 
-                taac.conditions.push(TypeConditionRule.New({
+                taac.conditions.push(TypeConditionRuleEmbedded.New({
                     typeCondition : tc!,
                     allowed : "None"
                 }));
@@ -122,7 +122,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
             .done();
     }
 
-    handleRemoveConditionClick = (taac: TypeAllowedAndConditions, con: TypeConditionRule) => {
+    handleRemoveConditionClick = (taac: TypeAllowedAndConditions, con: TypeConditionRuleEmbedded) => {
         taac.conditions!.remove(con);
         this.forceUpdate();
     }

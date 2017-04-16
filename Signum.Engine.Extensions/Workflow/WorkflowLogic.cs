@@ -189,13 +189,13 @@ namespace Signum.Engine.Workflow
             }
         }
 
-        static Func<WorkflowConfigurationEntity> getConfiguration;
-        public static WorkflowConfigurationEntity Configuration
+        static Func<WorkflowConfigurationEmbedded> getConfiguration;
+        public static WorkflowConfigurationEmbedded Configuration
         {
             get { return getConfiguration(); }
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<WorkflowConfigurationEntity> getConfiguration)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<WorkflowConfigurationEmbedded> getConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -618,7 +618,7 @@ namespace Signum.Engine.Workflow
 
             wb.ApplyChanges(model, replacements);
             wb.ValidateGraph();
-            workflow.FullDiagramXml = new WorkflowXmlEntity { DiagramXml = wb.GetXDocument().ToString() };
+            workflow.FullDiagramXml = new WorkflowXmlEmbedded { DiagramXml = wb.GetXDocument().ToString() };
             workflow.Save();
         }
     }

@@ -111,7 +111,7 @@ namespace Signum.Entities.Workflow
     }
 
     [Serializable]
-    public class WorkflowEventTaskConditionEval : EvalEntity<IWorkflowEventTaskConditionEvaluator>
+    public class WorkflowEventTaskConditionEval : EvalEmbedded<IWorkflowEventTaskConditionEvaluator>
     {
         protected override CompilationResult Compile()
         {
@@ -122,7 +122,7 @@ namespace Signum.Entities.Workflow
             var WorkflowEntityTypeName = parent.GetWorkflow().MainEntityType.ToType().FullName;
 
             return Compile(DynamicCode.GetAssemblies(),
-                DynamicCode.GetNamespaces() +
+                DynamicCode.GetUsingNamespaces() +
                     @"
                     namespace Signum.Entities.Workflow
                     {
@@ -143,7 +143,7 @@ namespace Signum.Entities.Workflow
     }
 
     [Serializable]
-    public class WorkflowEventTaskActionEval : EvalEntity<IWorkflowEventTaskActionEval>
+    public class WorkflowEventTaskActionEval : EvalEmbedded<IWorkflowEventTaskActionEval>
     {
         protected override CompilationResult Compile()
         {
@@ -154,7 +154,7 @@ namespace Signum.Entities.Workflow
             var WorkflowEntityTypeName = parent.GetWorkflow().MainEntityType.ToType().FullName;
 
             return Compile(DynamicCode.GetAssemblies(),
-                DynamicCode.GetNamespaces() +
+                DynamicCode.GetUsingNamespaces() +
                     @"
                     namespace Signum.Entities.Workflow
                     {

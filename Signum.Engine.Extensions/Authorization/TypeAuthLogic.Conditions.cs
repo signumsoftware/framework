@@ -616,7 +616,7 @@ namespace Signum.Engine.Authorization
                 Role = role,
                 Resource = resource,
                 Allowed = allowed.Fallback.Value,
-                Conditions = allowed.Conditions.Select(a => new RuleTypeConditionEntity
+                Conditions = allowed.Conditions.Select(a => new RuleTypeConditionEmbedded
                 {
                     Allowed = a.Allowed,
                     Condition = a.TypeCondition
@@ -627,7 +627,7 @@ namespace Signum.Engine.Authorization
         public static TypeAllowedAndConditions ToTypeAllowedAndConditions(this RuleTypeEntity rule)
         {
             return new TypeAllowedAndConditions(rule.Allowed,
-                rule.Conditions.Select(c => new TypeConditionRule(c.Condition, c.Allowed)).ToReadOnly());
+                rule.Conditions.Select(c => new TypeConditionRuleEmbedded(c.Condition, c.Allowed)).ToReadOnly());
         }
 
         static SqlPreCommand Schema_Synchronizing(Replacements rep)

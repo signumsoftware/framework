@@ -22,7 +22,7 @@ export interface DisconnectedExportEntity extends Entities.Entity {
     createDatabase?: number | null;
     createSchema?: number | null;
     disableForeignKeys?: number | null;
-    copies: Entities.MList<DisconnectedExportTableEntity>;
+    copies: Entities.MList<DisconnectedExportTableEmbedded>;
     enableForeignKeys?: number | null;
     reseedIds?: number | null;
     backupDatabase?: number | null;
@@ -38,9 +38,9 @@ export type DisconnectedExportState =
     "Completed" |
     "Error";
 
-export const DisconnectedExportTableEntity = new Type<DisconnectedExportTableEntity>("DisconnectedExportTableEntity");
-export interface DisconnectedExportTableEntity extends Entities.EmbeddedEntity {
-    Type: "DisconnectedExportTableEntity";
+export const DisconnectedExportTableEmbedded = new Type<DisconnectedExportTableEmbedded>("DisconnectedExportTableEmbedded");
+export interface DisconnectedExportTableEmbedded extends Entities.EmbeddedEntity {
+    Type: "DisconnectedExportTableEmbedded";
     type?: Entities.Lite<Basics.TypeEntity> | null;
     copyTable?: number | null;
     errors?: string | null;
@@ -54,7 +54,7 @@ export interface DisconnectedImportEntity extends Entities.Entity {
     restoreDatabase?: number | null;
     synchronizeSchema?: number | null;
     disableForeignKeys?: number | null;
-    copies: Entities.MList<DisconnectedImportTableEntity>;
+    copies: Entities.MList<DisconnectedImportTableEmbedded>;
     unlock?: number | null;
     enableForeignKeys?: number | null;
     dropDatabase?: number | null;
@@ -69,9 +69,9 @@ export type DisconnectedImportState =
     "Completed" |
     "Error";
 
-export const DisconnectedImportTableEntity = new Type<DisconnectedImportTableEntity>("DisconnectedImportTableEntity");
-export interface DisconnectedImportTableEntity extends Entities.EmbeddedEntity {
-    Type: "DisconnectedImportTableEntity";
+export const DisconnectedImportTableEmbedded = new Type<DisconnectedImportTableEmbedded>("DisconnectedImportTableEmbedded");
+export interface DisconnectedImportTableEmbedded extends Entities.EmbeddedEntity {
+    Type: "DisconnectedImportTableEmbedded";
     type?: Entities.Lite<Basics.TypeEntity> | null;
     copyTable?: number | null;
     disableForeignKeys?: boolean | null;
