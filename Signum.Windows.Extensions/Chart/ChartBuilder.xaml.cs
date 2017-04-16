@@ -77,7 +77,7 @@ namespace Signum.Windows.Chart
             vl.Bind(ValueLine.ValueLineTypeProperty, "ScriptParameter.Type", ParameterType);
         }
 
-        public static IValueConverter EnumValues = ConverterFactory.New((ChartParameterEntity cp) =>
+        public static IValueConverter EnumValues = ConverterFactory.New((ChartParameterEmbedded cp) =>
         {
             if (cp == null || cp.ScriptParameter.Type != ChartParameterType.Enum)
                 return null;

@@ -7,7 +7,7 @@
     MinWidth="300">
     <ItemsControl ItemsSource="{Binding Links}" Grid.IsSharedSizeScope="True">
         <ItemsControl.ItemTemplate>
-            <DataTemplate DataType="{x:Type d:LinkElementEntity}">
+            <DataTemplate DataType="{x:Type d:LinkElementEmbedded}">
                 <TextBlock Margin="4,2">
                     <Hyperlink NavigateUri="{Binding Link}" Click="Hyperlink_Click_1" Focusable="False">
                         <TextBlock Text="{Binding Label}"/>

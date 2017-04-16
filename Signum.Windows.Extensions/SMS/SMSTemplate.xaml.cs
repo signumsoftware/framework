@@ -74,7 +74,7 @@ namespace Signum.Windows.SMS
         private void deleteMessage_Click(object sender, RoutedEventArgs e)
         {
             var b = (Button)sender;
-            SMSTemplateMessageEntity message = (SMSTemplateMessageEntity)b.DataContext;
+            SMSTemplateMessageEmbedded message = (SMSTemplateMessageEmbedded)b.DataContext;
             ((SMSTemplateEntity)DataContext).Messages.Remove(message);
         }
 
@@ -93,7 +93,7 @@ namespace Signum.Windows.SMS
 
         private void createMessage_Click(object sender, RoutedEventArgs e)
         {
-            ((SMSTemplateEntity)DataContext).Messages.Add(new SMSTemplateMessageEntity(DefaultCulture));
+            ((SMSTemplateEntity)DataContext).Messages.Add(new SMSTemplateMessageEmbedded(DefaultCulture));
             tabCulture.SelectedIndex = ((SMSTemplateEntity)DataContext).Messages.Count - 1;
 
         }
