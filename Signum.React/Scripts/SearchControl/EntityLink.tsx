@@ -1,12 +1,12 @@
 ﻿import * as React from "react"
-import { Router, Route, Redirect, IndexRoute } from "react-router"
+import { Router, Route, Redirect } from "react-router"
 
 import { Dic } from '../Globals';
 import { Lite, Entity, liteKey } from '../Signum.Entities';
 import * as Navigator from '../Navigator';
-import { Link  } from 'react-router';
+import { Link  } from 'react-router-dom';
 
-export interface EntityLinkProps extends React.HTMLAttributes<Link>, React.Props<EntityLink> {
+export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement>, React.Props<EntityLink> {
     lite: Lite<Entity>;
     inSearch?: boolean;
     onNavigated?: (lite: Lite<Entity>) => void;
@@ -28,7 +28,7 @@ export default class EntityLink extends React.Component<EntityLinkProps, void>{
                 title={lite.toStr}
                 onClick={this.handleClick}
                 data-entity={liteKey(lite)}
-                {...(htmlAtts as React.HTMLAttributes<Link>) }>
+                {...(htmlAtts as React.HTMLAttributes<HTMLAnchorElement>) }>
                 {children || lite.toStr}                
             </Link>
         );

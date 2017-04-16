@@ -1,7 +1,8 @@
 ﻿import * as React from "react";
 import * as moment from "moment"
 import * as numbro from "numbro"
-import { Router, Route, Redirect, IndexRoute } from "react-router"
+import { Router, Route, Redirect } from "react-router"
+import * as QueryString from "query-string"
 import { Dic } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
@@ -27,14 +28,15 @@ import { navigateRoute, isNavigable, currentHistory, API as NavAPI, isCreable, t
 import SearchModal from './SearchControl/SearchModal';
 import EntityLink from './SearchControl/EntityLink';
 import SearchControlLoaded from './SearchControl/SearchControlLoaded';
+import { LoadRoute } from "./LoadComponent";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
 
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<Route path="find">
-        <Route path=":queryName" getComponent={ (loc, cb) => require(["./SearchControl/SearchPage"], (Comp) => cb(undefined, Comp.default)) } />
-        </Route>);
+        <LoadRoute path=":queryName" onLoadModule={() => _import("./SearchControl/SearchPage")} />
+    </Route>);
 }
 
 export function addSettings(...settings: QuerySettings[]) {
@@ -63,12 +65,9 @@ export function find(obj: FindOptions | Type<any>): Promise<Lite<Entity> | undef
 
     const fo = (obj as FindOptions).queryName ? obj as FindOptions :
         { queryName: obj as Type<any> } as FindOptions;
-    
-    return new Promise<Lite<Entity>>((resolve, reject) => {
-        require(["./SearchControl/SearchModal"], function (SP: { default: typeof SearchModal }) {
-            SP.default.open(fo).then(resolve, reject);
-        });
-    });
+
+    return _import<{ default: typeof SearchModal }>("./SearchControl/SearchModal")
+        .then(a => a.default.open(fo));
 }
 
 export function findMany(findOptions: FindOptions): Promise<Lite<Entity>[] | undefined>;
@@ -78,11 +77,8 @@ export function findMany(findOptions: FindOptions | Type<any>): Promise<Lite<Ent
     const fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
         { queryName: findOptions as Type<any> } as FindOptions;
 
-    return new Promise<Lite<Entity>[]>((resolve, reject) => {
-        require(["./SearchControl/SearchModal"], function (SP: { default: typeof SearchModal }) {
-            SP.default.openMany(fo).then(resolve, reject);
-        });
-    });
+    return _import<{ default: typeof SearchModal }>("./SearchControl/SearchModal")
+        .then(a => a.default.openMany(fo));
 }
 
 export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent<any>) {
@@ -94,18 +90,15 @@ export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent
 
 export function explore(findOptions: FindOptions): Promise<void> {
 
-    return new Promise<void>((resolve, reject) => {
-        require(["./SearchControl/SearchModal"], function (SP: { default: typeof SearchModal }) {
-            SP.default.explore(findOptions).then(resolve, reject);
-        });
-    });
+    return _import<{ default: typeof SearchModal }>("./SearchControl/SearchModal")
+        .then(a => a.default.explore(findOptions));
 }
 
 export function findOptionsPath(fo: FindOptions, extra?: any): string {
 
     const query = findOptionsPathQuery(fo, extra);
 
-    return currentHistory.createPath({ pathname: "~/find/" + getQueryKey(fo.queryName), query: query });
+    return currentHistory.createHref({ pathname: "~/find/" + getQueryKey(fo.queryName), search: QueryString.stringify(query) });
 }
 
 export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
@@ -645,19 +638,19 @@ export module API {
     
     export function fetchAllLites(request: { types: string }): Promise<Lite<Entity>[]> {
         return ajaxGet<Lite<Entity>[]>({
-            url: currentHistory.createHref({ pathname: "~/api/query/allLites", query: request })
+            url: currentHistory.createHref({ pathname: "~/api/query/allLites", search: QueryString.stringify(request) })
         });
     }
 
     export function findTypeLike(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {
         return ajaxGet<Lite<TypeEntity>[]>({
-            url: currentHistory.createHref({ pathname: "~/api/query/findTypeLike", query: request })
+            url: currentHistory.createHref({ pathname: "~/api/query/findTypeLike", search: QueryString.stringify(request) })
         });
     }
 
     export function findLiteLike(request: { types: string, subString: string, count: number }): Promise<Lite<Entity>[]> {
         return ajaxGet<Lite<Entity>[]>({
-            url: currentHistory.createHref({ pathname: "~/api/query/findLiteLike", query: request })
+            url: currentHistory.createHref({ pathname: "~/api/query/findLiteLike", search: QueryString.stringify(request) })
         });
     }
 

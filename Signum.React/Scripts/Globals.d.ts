@@ -1,10 +1,9 @@
 ﻿/// <reference path="../typings/es6-promise/es6-promise.d.ts" />
 
-declare const require: {
-    <T>(path: string): T;
-    (paths: string[], callback: (...modules: any[]) => void): void;
-    ensure: (paths: string[], callback: (require: <T>(path: string) => T) => void) => void;
-};
+declare function require<T>(path: string): T;
+
+ //Necessary till typescript has direct support https://github.com/Microsoft/TypeScript/issues/12364
+declare function _import<T>(path: string): Promise<T>;
 
 declare interface Promise<T> {
     done(this: Promise<T>): void;

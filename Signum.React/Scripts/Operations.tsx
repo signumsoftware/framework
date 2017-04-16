@@ -1,5 +1,5 @@
 ﻿import * as React from "react"
-import { Router, Route, Redirect, IndexRoute } from "react-router"
+import { Router, Route, Redirect } from "react-router"
 import { Button, OverlayTrigger, Tooltip, MenuItem, DropdownButton } from "react-bootstrap"
 import { Dic } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';

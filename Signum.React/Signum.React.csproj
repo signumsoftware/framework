@@ -211,6 +211,7 @@
     <TypeScriptCompile Include="Scripts\Frames\ReactVisitor.tsx" />
     <TypeScriptCompile Include="Scripts\Frames\Widgets.tsx" />
     <TypeScriptCompile Include="Scripts\Globals.d.ts" />
+    <TypeScriptCompile Include="Scripts\LoadComponent.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\DynamicComponent.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\AutocompleteConfig.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityTable.tsx" />

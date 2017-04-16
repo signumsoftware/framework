@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
 import { Tab, Tabs } from 'react-bootstrap'
 import { classes, Dic } from '../Globals'
 import * as Navigator from '../Navigator'

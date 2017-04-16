@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
 import { classes } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'

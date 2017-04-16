@@ -1,6 +1,6 @@
 ﻿import * as React from "react"
 import * as HistoryModule from "history"
-import { Router, Route, Redirect, IndexRoute } from "react-router"
+import { Router, Route, Redirect } from "react-router"
 import { Dic, } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
@@ -15,6 +15,7 @@ import FrameModal from './Frames/FrameModal';
 import { ViewReplacer } from './Frames/ReactVisitor'
 import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './Lines/AutocompleteConfig'
 import { FindOptions } from './FindOptions'
+import { LoadComponent, LoadRoute } from "./LoadComponent";
 
 
 Dic.skipClasses.push(React.Component);
@@ -41,8 +42,8 @@ export namespace Expander {
 }
 
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<Route path="view/:type/:id" getComponent={(loc, cb) => require(["./Frames/FramePage"], (Comp) => cb(undefined, Comp.default))} ></Route>);
-    options.routes.push(<Route path="create/:type" getComponent={(loc, cb) => require(["./Frames/FramePage"], (Comp) => cb(undefined, Comp.default))} ></Route>);
+    options.routes.push(<LoadRoute path="view/:type/:id" onLoadModule={() => _import("./Frames/FramePage")} />);
+    options.routes.push(<LoadRoute path="create/:type" onLoadModule={() => _import("./Frames/FramePage")} />);
 }
 
 export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined) {
@@ -155,7 +156,7 @@ export class DynamicComponentViewDispatcher implements ViewDispatcher {
         const settings = getSettings(entity.Type) as EntitySettings<ModifiableEntity>;
 
         if (!settings || !settings.getViewPromise)
-            return new ViewPromise<ModifiableEntity>(resolve => require(['./Lines/DynamicComponent'], resolve));
+            return new ViewPromise<ModifiableEntity>(_import('./Lines/DynamicComponent'));
 
         return settings.getViewPromise(entity).applyViewOverrides(settings);
     }
@@ -474,11 +475,8 @@ export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<
 }
 
 export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions) {
-    return new Promise<ModifiableEntity>((resolve, reject) => {
-        require(["./Frames/FrameModal"], function (NP: { default: typeof FrameModal }) {
-            NP.default.openView(entityOrPack, viewOptions || {}).then(resolve, reject);
-        });
-    });
+   return  _import("./Frames/FrameModal")
+        .then((NP: { default: typeof FrameModal }) => NP.default.openView(entityOrPack, viewOptions || {}));
 }
 
 export interface NavigateOptions {
@@ -501,11 +499,8 @@ export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityP
 }
 
 export function navigateDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        require(["./Frames/FrameModal"], function (NP: { default: typeof FrameModal }) {
-            NP.default.openNavigate(entityOrPack, navigateOptions || {}).then(resolve, reject);
-        });
-    })
+    return _import("./Frames/FrameModal")
+        .then((NP: { default: typeof FrameModal }) => NP.default.openNavigate(entityOrPack, navigateOptions || {}));
 }
 
 export function createInNewTab(pack: EntityPack<ModifiableEntity>) {
@@ -667,10 +662,10 @@ export class EntitySettings<T extends ModifiableEntity> {
         this.viewOverrides.push(override);
     }
 
-    constructor(type: Type<T>, getViewPromise?: (entity: T) => ViewPromise<any>, options?: EntitySettingsOptions<T>) {
+    constructor(type: Type<T>, getViewPromise?: (entity: T) => Promise<ViewModule<any>>, options?: EntitySettingsOptions<T>) {
 
         this.type = type;
-        this.getViewPromise = getViewPromise;
+        this.getViewPromise = getViewPromise && (entity => new ViewPromise(getViewPromise(entity)));
 
         Dic.assign(this, options);
     }
@@ -681,9 +676,9 @@ export type ViewModule<T extends ModifiableEntity> = { default: React.ComponentC
 export class ViewPromise<T extends ModifiableEntity> {
     promise: Promise<(ctx: TypeContext<T>) => React.ReactElement<any>>;
 
-    constructor(callback?: (loadModule: (module: ViewModule<T>) => void) => void) {
-        if (callback)
-            this.promise = new Promise<ViewModule<T>>(callback)
+    constructor(promise?: Promise<ViewModule<T>>) {
+        if (promise)
+            this.promise = promise
                 .then(mod => {
                     return (ctx: TypeContext<T>) => React.createElement(mod.default, { ctx });
                 });
@@ -813,8 +808,6 @@ export function useAppRelativeBasename(history: HistoryModule.History) {
     history.push = fixBaseName(history.push);
     history.replace = fixBaseName(history.replace);
     history.createHref = fixBaseName(history.createHref);
-    history.createPath = fixBaseName(history.createPath);
-    history.createLocation = fixBaseName(history.createLocation);
 }
 
 export function tryConvert(value: any, type: TypeReference): Promise<any> | undefined {

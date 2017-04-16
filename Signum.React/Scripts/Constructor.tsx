@@ -1,5 +1,5 @@
 ﻿import * as React from "react"
-import { Router, Route, Redirect, IndexRoute } from "react-router"
+import { Router, Route, Redirect } from "react-router"
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
 import { Dic } from './Globals';

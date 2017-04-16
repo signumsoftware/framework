@@ -1,5 +1,5 @@
 ﻿import * as React from "react"
-import { Router, Route, Redirect, IndexRoute } from "react-router"
+import { Router, Route, Redirect } from "react-router"
 import { Button, OverlayTrigger, Tooltip, MenuItem } from "react-bootstrap"
 import {
     Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, toLite, JavascriptMessage,

@@ -1,5 +1,6 @@
 ﻿
 import * as React from 'react'
+import { RouteComponentProps } from 'react-router'
 import { Dic } from '../Globals'
 import * as Finder from '../Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'
@@ -7,8 +8,9 @@ import { SearchMessage, JavascriptMessage } from '../Signum.Entities'
 import { getQueryNiceName } from '../Reflection'
 import * as Navigator from '../Navigator'
 import SearchControl, { SearchControlProps } from './SearchControl'
+import * as QueryString from 'query-string'
 
-interface SearchPageProps extends ReactRouter.RouteComponentProps<{}, { queryName: string }> {
+interface SearchPageProps extends RouteComponentProps<{ queryName: string }> {
 
 }
 
@@ -33,7 +35,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchC
         return {
             findOptions: {
                 showFilters: true,
-                ...Finder.parseFindOptionsPath(props.routeParams.queryName, props.location.query)
+                ...Finder.parseFindOptionsPath(props.match.params.queryName, QueryString.parse(props.location.search))
             },
         };
     }

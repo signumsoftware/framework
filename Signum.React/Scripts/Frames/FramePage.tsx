@@ -1,5 +1,6 @@
 ﻿
 import * as React from 'react'
+import { RouteComponentProps } from 'react-router'
 import { Dic } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
@@ -11,10 +12,10 @@ import { TypeContext, StyleOptions, EntityFrame } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos, GraphExplorer, parseId } from '../Reflection'
 import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from './Widgets'
 import ValidationErrors from './ValidationErrors'
-
+import * as QueryString from 'query-string'
 require("./Frames.css");
 
-interface FramePageProps extends ReactRouter.RouteComponentProps<{}, { type: string; id?: string, waitData?: string }> {
+interface FramePageProps extends RouteComponentProps<{ type: string; id?: string, waitData?: string }> {
 }
 
 
@@ -36,7 +37,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
     }
 
     getTypeInfo(): TypeInfo {
-        return getTypeInfo(this.props.routeParams.type);
+        return getTypeInfo(this.props.match.params.type);
     }
 
     calculateState(props: FramePageProps) {
@@ -59,7 +60,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
 
     loadEntity(props: FramePageProps): Promise<void> {
 
-        if (this.props.location.query.waitData) {
+        if (QueryString.parse(this.props.location.search).waitData) {
             if (window.opener.dataForChildWindow == undefined) {
                 throw new Error("No dataForChildWindow in parent found!")
             }
@@ -72,11 +73,11 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
 
         const ti = this.getTypeInfo();
 
-        if (this.props.routeParams.id) {
+        if (this.props.match.params.id) {
             
             const lite: Lite<Entity> = {
                 EntityType: ti.name,
-                id: parseId(ti, props.routeParams.id!),
+                id: parseId(ti, props.match.params.id!),
             };
 
             return Navigator.API.fetchEntityPack(lite)

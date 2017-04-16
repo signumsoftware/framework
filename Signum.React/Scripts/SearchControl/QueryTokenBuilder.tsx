@@ -110,7 +110,7 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
         return { parentToken: this.props.parentToken };
     }
 
-    static childContextTypes: React.ValidationMap<QueryTokenOptionalItem> = { "parentToken": React.PropTypes.object };
+    static childContextTypes = { "parentToken": React.PropTypes.object };
 
     handleOnChange = (value: any) => {
         this.props.onTokenSelected(value || this.props.parentToken);
@@ -163,7 +163,7 @@ export class QueryTokenItem extends React.Component<{ item: QueryToken | null },
 
 export class QueryTokenOptionalItem extends React.Component<{ item: QueryToken | null }, {}> {
 
-    static contextTypes: React.ValidationMap<QueryTokenOptionalItem> = { "parentToken": React.PropTypes.object };
+    static contextTypes = { "parentToken": React.PropTypes.object };
 
 
     render() {
