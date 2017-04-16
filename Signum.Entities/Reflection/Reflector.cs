@@ -92,6 +92,9 @@ namespace Signum.Entities.Reflection
             if (t.Name.EndsWith("Entity"))
                 return t.Name.RemoveSuffix("Entity");
 
+            if (t.Name.EndsWith("Embedded"))
+                return t.Name.RemoveSuffix("Embedded");
+
             if (t.Name.EndsWith("Model"))
                 return t.Name.RemoveSuffix("Model");
 
