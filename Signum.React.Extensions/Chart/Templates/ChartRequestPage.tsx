@@ -1,5 +1,6 @@
 ﻿import * as React from 'react'
 import { DropdownButton, MenuItem, Tabs, Tab} from 'react-bootstrap'
+import * as QueryString from "query-string"
 import { Dic, classes, ifError } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { Lite, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -12,8 +13,9 @@ import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity,
     ChartColorEntity, ChartScriptEntity, ChartParameterEntity, ChartParameterType } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import ChartRequestView from './ChartRequestView'
+import { RouteComponentProps } from "react-router";
 
-interface ChartRequestPageProps extends ReactRouter.RouteComponentProps<{}, { queryName: string }> {
+interface ChartRequestPageProps extends RouteComponentProps<{ queryName: string }> {
 
 }
 
@@ -35,7 +37,7 @@ export default class ChartRequestPage extends React.Component<ChartRequestPagePr
     }
 
     load(props: ChartRequestPageProps) {
-        ChartClient.Decoder.parseChartRequest(props.routeParams.queryName, props.location.query).then(cr => {
+        ChartClient.Decoder.parseChartRequest(props.match.params.queryName, QueryString.parse(props.location.search)).then(cr => {
             this.setState({ chartRequest: cr });
         }).done();
     }

@@ -10,11 +10,12 @@ import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { CachePermission } from './Signum.Entities.Cache'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
+import { LoadRoute } from "../../../Framework/Signum.React/Scripts/LoadComponent";
 
 
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<Route path="cache">
-        <Route path="statistics" getComponent={(loc, cb) => require(["./CacheStatisticsPage"], (Comp) => cb(undefined, Comp.default))}/>
+        <LoadRoute path="statistics" onLoadModule={() => _import("./CacheStatisticsPage")} />
     </Route>);
 
     OmniboxClient.registerSpecialAction({

@@ -1,6 +1,8 @@
 ﻿import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import * as d3 from 'd3'
+import * as QueryString from "query-string"
+import { RouteComponentProps } from 'react-router'
 import { DomUtils, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
@@ -13,7 +15,7 @@ const colorbrewer = require("colorbrewer");
 
 require("./operationMap.css");
 
-interface OperationMapPageProps extends ReactRouter.RouteComponentProps<{}, { type: string}> {
+interface OperationMapPageProps extends RouteComponentProps<{ type: string}> {
     
 }
 
@@ -46,7 +48,7 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
             Navigator.Expander.setExpanded(true);
         }
 
-        MapClient.API.operations(this.props.routeParams.type)
+        MapClient.API.operations(this.props.match.params.type)
             .then(omi => {
                 const parsedQuery = this.getParsedQuery();
 
@@ -71,7 +73,7 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
     
         const result: ParsedQueryString = { nodes: {} };
 
-        const query = this.props.location.query as { [name: string]: string };
+        const query = QueryString.parse(this.props.location.search) as { [name: string]: string };
         if (!query)
             return result;
 
@@ -113,7 +115,7 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
                 {this.renderFilter() }
                 {!s.operationMapInfo || this.div == undefined ?
                     <span>{ JavascriptMessage.loading.niceToString() }</span> :
-                    <OperationMapRenderer operationMapInfo={s.operationMapInfo} parsedQuery={s.parsedQuery!} color={s.color!}  height={s.height!} width={s.width!} queryName={this.props.routeParams.type} />}
+                    <OperationMapRenderer operationMapInfo={s.operationMapInfo} parsedQuery={s.parsedQuery!} color={s.color!}  height={s.height!} width={s.width!} queryName={this.props.match.params.type} />}
             </div>
         );
     }
@@ -138,8 +140,8 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
         var query = { ...tables, color: s.color };
 
         const url = Navigator.currentHistory.createHref({
-            pathname: "~/map/" + this.props.routeParams.type,
-            query: query
+            pathname: "~/map/" + this.props.match.params.type,
+            search: QueryString.stringify(query)
         });
 
         window.open(url);

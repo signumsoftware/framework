@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
+import { RouteComponentProps } from 'react-router'
 import * as d3 from 'd3'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
@@ -14,7 +14,7 @@ import { API, HeavyProfilerEntry} from '../ProfilerClient'
 
 require("./Profiler.css");
 
-interface HeavyListProps extends ReactRouter.RouteComponentProps<{}, {}> {
+interface HeavyListProps extends RouteComponentProps<{}> {
 
 }
 

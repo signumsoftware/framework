@@ -16,7 +16,7 @@ import { DynamicTypeConditionEntity, DynamicTypeConditionEval } from './Signum.E
 
 export function start(options: { routes: JSX.Element[] }) {
 
-    Navigator.addSettings(new EntitySettings(DynamicTypeConditionEntity, w => new ViewPromise(resolve => require(['./TypeCondition/DynamicTypeCondition'], resolve))));
+    Navigator.addSettings(new EntitySettings(DynamicTypeConditionEntity, w => _import('./TypeCondition/DynamicTypeCondition')));
     Constructor.registerConstructor(DynamicTypeConditionEntity, () => DynamicTypeConditionEntity.New({ eval: DynamicTypeConditionEval.New() }));
     DynamicClient.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeConditionEntity }} />);
     DynamicClient.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeConditionEntity, parentColumn: "EntityType.CleanName", parentValue: type }} />);

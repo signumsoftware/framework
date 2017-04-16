@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
+import { RouteComponentProps } from 'react-router'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
@@ -12,7 +12,7 @@ import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString,
 import { API } from './UserAssetClient'
 import { UserAssetMessage, UserAssetPreviewModel, UserAssetPreviewLine, IUserAssetEntity, EntityAction } from './Signum.Entities.UserAssets'
 
-interface ImportAssetsPageProps extends ReactRouter.RouteComponentProps<{}, {}> {
+interface ImportAssetsPageProps extends RouteComponentProps<{}> {
 
 }
 

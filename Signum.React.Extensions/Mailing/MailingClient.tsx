@@ -18,12 +18,13 @@ import { NewsletterEntity, NewsletterDeliveryEntity, SendEmailTaskEntity } from 
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
+import { LoadRoute } from "../../../Framework/Signum.React/Scripts/LoadComponent";
 
 require("./Mailing.css");
 
 export function start(options: { routes: JSX.Element[], smtpConfig: boolean, newsletter: boolean, pop3Config: boolean, sendEmailTask: boolean, quickLinksFrom: PseudoType[] | undefined }) {
     options.routes.push(<Route path="asyncEmailSender">
-        <Route path="view" getComponent={(loc, cb) => require(["./AsyncEmailSenderPage"], (Comp) => cb(undefined, Comp.default)) }/>
+        <LoadRoute path="view" onLoadModule={() => _import("./AsyncEmailSenderPage")} />
     </Route>);
 
     OmniboxClient.registerSpecialAction({
@@ -35,13 +36,13 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
     registerToString(EmailTemplateMessageEntity, a => a.cultureInfo == undefined ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName!);
     registerToString(EmailMasterTemplateMessageEntity, a => a.cultureInfo == undefined ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName!);
 
-    Navigator.addSettings(new EntitySettings(EmailMessageEntity, e => new ViewPromise(resolve => require(['./Templates/EmailMessage'], resolve))));
-    Navigator.addSettings(new EntitySettings(EmailTemplateEntity, e => new ViewPromise(resolve => require(['./Templates/EmailTemplate'], resolve))));
-    Navigator.addSettings(new EntitySettings(EmailMasterTemplateEntity, e => new ViewPromise(resolve => require(['./Templates/EmailMasterTemplate'], resolve))));
-    Navigator.addSettings(new EntitySettings(EmailPackageEntity, e => new ViewPromise(resolve => require(['./Templates/EmailPackage'], resolve))));
-    Navigator.addSettings(new EntitySettings(EmailRecipientEntity, e => new ViewPromise(resolve => require(['./Templates/EmailRecipient'], resolve))));
-    Navigator.addSettings(new EntitySettings(EmailAddressEntity, e => new ViewPromise(resolve => require(['./Templates/EmailAddress'], resolve))));
-    Navigator.addSettings(new EntitySettings(EmailConfigurationEntity, e => new ViewPromise(resolve => require(['./Templates/EmailConfiguration'], resolve))));
+    Navigator.addSettings(new EntitySettings(EmailMessageEntity, e => _import('./Templates/EmailMessage')));
+    Navigator.addSettings(new EntitySettings(EmailTemplateEntity, e => _import('./Templates/EmailTemplate')));
+    Navigator.addSettings(new EntitySettings(EmailMasterTemplateEntity, e => _import('./Templates/EmailMasterTemplate')));
+    Navigator.addSettings(new EntitySettings(EmailPackageEntity, e => _import('./Templates/EmailPackage')));
+    Navigator.addSettings(new EntitySettings(EmailRecipientEntity, e => _import('./Templates/EmailRecipient')));
+    Navigator.addSettings(new EntitySettings(EmailAddressEntity, e => _import('./Templates/EmailAddress')));
+    Navigator.addSettings(new EntitySettings(EmailConfigurationEntity, e => _import('./Templates/EmailConfiguration')));
 
     Operations.addSettings(new EntityOperationSettings(EmailMessageOperation.CreateMailFromTemplate, {
         onClick: (ctx,e) => {
@@ -56,21 +57,21 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
     }));
 
     if (options.smtpConfig) {
-        Navigator.addSettings(new EntitySettings(SmtpConfigurationEntity, e => new ViewPromise(resolve => require(['./Templates/SmtpConfiguration'], resolve))));
+        Navigator.addSettings(new EntitySettings(SmtpConfigurationEntity, e => _import('./Templates/SmtpConfiguration')));
     }
 
     if (options.newsletter) {
-        Navigator.addSettings(new EntitySettings(NewsletterEntity, e => new ViewPromise(resolve => require(['./Newsletters/Newsletter'], resolve))));
-        Navigator.addSettings(new EntitySettings(NewsletterDeliveryEntity, e => new ViewPromise(resolve => require(['./Newsletters/NewsletterDelivery'], resolve))));
+        Navigator.addSettings(new EntitySettings(NewsletterEntity, e => _import('./Newsletters/Newsletter')));
+        Navigator.addSettings(new EntitySettings(NewsletterDeliveryEntity, e => _import('./Newsletters/NewsletterDelivery')));
     }
 
     if (options.sendEmailTask) {
-        Navigator.addSettings(new EntitySettings(SendEmailTaskEntity, e => new ViewPromise(resolve => require(['./Templates/SendEmailTask'], resolve))));
+        Navigator.addSettings(new EntitySettings(SendEmailTaskEntity, e => _import('./Templates/SendEmailTask')));
     }
 
     if (options.pop3Config) {
-        Navigator.addSettings(new EntitySettings(Pop3ConfigurationEntity, e => new ViewPromise(resolve => require(['./Pop3/Pop3Configuration'], resolve))));
-        Navigator.addSettings(new EntitySettings(Pop3ReceptionEntity, e => new ViewPromise(resolve => require(['./Pop3/Pop3Reception'], resolve))));
+        Navigator.addSettings(new EntitySettings(Pop3ConfigurationEntity, e => _import('./Pop3/Pop3Configuration')));
+        Navigator.addSettings(new EntitySettings(Pop3ReceptionEntity, e => _import('./Pop3/Pop3Reception')));
     }
 
     if (options.quickLinksFrom) {

@@ -16,9 +16,9 @@ import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEntity, ToolbarElementT
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
 
 export function start(...configs: ToolbarConfig<any>[]) {
-    Navigator.addSettings(new EntitySettings(ToolbarEntity, t => new ViewPromise(resolve => require(['./Templates/Toolbar'], resolve))));
-    Navigator.addSettings(new EntitySettings(ToolbarMenuEntity, t => new ViewPromise(resolve => require(['./Templates/ToolbarMenu'], resolve))));
-    Navigator.addSettings(new EntitySettings(ToolbarElementEntity, t => new ViewPromise(resolve => require(['./Templates/ToolbarElement'], resolve))));   
+    Navigator.addSettings(new EntitySettings(ToolbarEntity, t => _import('./Templates/Toolbar')));
+    Navigator.addSettings(new EntitySettings(ToolbarMenuEntity, t => _import('./Templates/ToolbarMenu')));
+    Navigator.addSettings(new EntitySettings(ToolbarElementEntity, t => _import('./Templates/ToolbarElement')));   
 
 
     Finder.addSettings({ queryName: ToolbarEntity, defaultOrderColumn: "Priority", defaultOrderType: "Descending" });

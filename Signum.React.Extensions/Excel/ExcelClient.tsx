@@ -24,7 +24,7 @@ import ExcelMenu from './ExcelMenu'
 export function start(options: { routes: JSX.Element[], plainExcel: boolean, excelReport: boolean }) {
     
     if (options.excelReport) {
-        Navigator.addSettings(new EntitySettings(ExcelReportEntity, e => new ViewPromise(resolve => require(['./Templates/ExcelReport'], resolve))));
+        Navigator.addSettings(new EntitySettings(ExcelReportEntity, e => _import('./Templates/ExcelReport')));
     }
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {

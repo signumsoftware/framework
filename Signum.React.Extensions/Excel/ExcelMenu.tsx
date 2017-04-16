@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import {RouteComponentProps, Router, RouteContext } from 'react-router'
+import { RouteComponentProps } from 'react-router'
 import { DropdownButton, MenuItem } from 'react-bootstrap'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'

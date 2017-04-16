@@ -15,14 +15,15 @@ import { ProcessEntity } from '../Processes/Signum.Entities.Processes'
 import { FileTypeSymbol } from '../Files/Signum.Entities.Files'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
+import { LoadRoute } from "../../../Framework/Signum.React/Scripts/LoadComponent";
 
 export function start(options: { routes: JSX.Element[],}) {
   
-    Navigator.addSettings(new EntitySettings(PrintLineEntity, e => new ViewPromise(resolve => require(['./Templates/PrintLine'], resolve))));
-    Navigator.addSettings(new EntitySettings(PrintPackageEntity, e => new ViewPromise(resolve => require(['./Templates/PrintPackage'], resolve))));
+    Navigator.addSettings(new EntitySettings(PrintLineEntity, e => _import('./Templates/PrintLine')));
+    Navigator.addSettings(new EntitySettings(PrintPackageEntity, e => _import('./Templates/PrintPackage')));
 
     options.routes.push(<Route path="printing">
-        <Route path="view" getComponent={(loc, cb) => require(["./PrintPanelPage"], (Comp) => cb(undefined, Comp.default))} />
+        <LoadRoute path="view" onLoadModule={() => _import("./PrintPanelPage")} />
     </Route>);
 
     

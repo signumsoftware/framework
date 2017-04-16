@@ -14,26 +14,27 @@ import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/O
 import { ProfilerPermission } from './Signum.Entities.Profiler'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
+import { LoadRoute } from "../../../Framework/Signum.React/Scripts/LoadComponent";
 
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<Route path="profiler">
-        <Route path="times" getComponent={(loc, cb) => require(["./Times/TimesPage"], (Comp) => cb(undefined, Comp.default))}/>
-        <Route path="heavy" getComponent={(loc, cb) => require(["./Heavy/HeavyListPage"], (Comp) => cb(undefined, Comp.default)) }/>
-        <Route path="heavy/entry/:selectedIndex" getComponent={(loc, cb) => require(["./Heavy/HeavyEntryPage"], (Comp) => cb(undefined, Comp.default)) }/>
+        <LoadRoute path="times" onLoadModule={() => _import("./Times/TimesPage")} />
+        <LoadRoute path="heavy" onLoadModule={() => _import("./Heavy/HeavyListPage")} />
+        <LoadRoute path="heavy/entry/:selectedIndex" onLoadModule={() => _import("./Heavy/HeavyEntryPage")} />
     </Route>);
 
-    //Navigator.addSettings(new EntitySettings(ProcessEntity, e => new ViewPromise(resolve => require(['./Templates/Process'], resolve))));
+    //Navigator.addSettings(new EntitySettings(ProcessEntity, e => _import('./Templates/Process')));
 
     //if (options.packages || options.packageOperations) {
-    //    Navigator.addSettings(new EntitySettings(PackageLineEntity, e => new ViewPromise(resolve => require(['./Templates/PackageLine'], resolve))));
+    //    Navigator.addSettings(new EntitySettings(PackageLineEntity, e => _import('./Templates/PackageLine')));
     //}
 
     //if (options.packages) {
-    //    Navigator.addSettings(new EntitySettings(PackageEntity, e => new ViewPromise(resolve => require(['./Templates/Package'], resolve))));
+    //    Navigator.addSettings(new EntitySettings(PackageEntity, e => _import('./Templates/Package')));
     //}
 
     //if (options.packageOperations) {
-    //    Navigator.addSettings(new EntitySettings(PackageOperationEntity, e => new ViewPromise(resolve => require(['./Templates/PackageOperation'], resolve))));
+    //    Navigator.addSettings(new EntitySettings(PackageOperationEntity, e => _import('./Templates/PackageOperation')));
     //}
 
     OmniboxClient.registerSpecialAction({

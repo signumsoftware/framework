@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
-import { Link } from 'react-router'
+import { RouteComponentProps } from 'react-router'
 import { Tabs, Tab } from 'react-bootstrap'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
@@ -19,7 +19,7 @@ import { CaseActivityEntity, WorkflowActivityType, DoneType, WorkflowScriptRunne
 import * as AuthClient from '../../Authorization/AuthClient'
 
 
-interface WorkflowScriptRunnerPanelPageProps extends ReactRouter.RouteComponentProps<{}, {}> {
+interface WorkflowScriptRunnerPanelPageProps extends RouteComponentProps<{}> {
 
 }
 

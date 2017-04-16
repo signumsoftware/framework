@@ -18,8 +18,8 @@ import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 
 export function start(options: { routes: JSX.Element[] }) {
-    Navigator.addSettings(new EntitySettings(TimeSpanEntity, e => new ViewPromise(resolve => require(['./Templates/TimeSpan'], resolve))));
-    Navigator.addSettings(new EntitySettings(DateSpanEntity, e => new ViewPromise(resolve => require(['./Templates/DateSpan'], resolve))));
+    Navigator.addSettings(new EntitySettings(TimeSpanEntity, e => _import('./Templates/TimeSpan')));
+    Navigator.addSettings(new EntitySettings(DateSpanEntity, e => _import('./Templates/DateSpan')));
     Constructor.registerConstructor(TimeSpanEntity, () => TimeSpanEntity.New({ days: 0, hours: 0, minutes: 0, seconds: 0 }));
     Constructor.registerConstructor(DateSpanEntity, () => DateSpanEntity.New({ years: 0, months: 0, days: 0 }));
 }

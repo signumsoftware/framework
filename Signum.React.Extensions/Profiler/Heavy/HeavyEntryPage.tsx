@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
+import { Link } from 'react-router-dom'
 import * as d3 from 'd3'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
@@ -11,11 +11,12 @@ import {ValueSearchControl, SearchControl } from '../../../../Framework/Signum.R
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { API, HeavyProfilerEntry, StackTraceTS} from '../ProfilerClient'
+import { API, HeavyProfilerEntry, StackTraceTS } from '../ProfilerClient'
+import { RouteComponentProps } from "react-router";
 
 require("./Profiler.css");
 
-interface HeavyEntryProps extends ReactRouter.RouteComponentProps<{}, {selectedIndex : string }> {
+interface HeavyEntryProps extends RouteComponentProps<{selectedIndex : string }> {
 
 }
 
@@ -34,7 +35,7 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
     }
 
     componentWillReceiveProps(newProps: HeavyEntryProps){
-        if(this.state.entries == undefined || !this.state.entries.some(a=>a.FullIndex == newProps.routeParams.selectedIndex))
+        if(this.state.entries == undefined || !this.state.entries.some(a=>a.FullIndex == newProps.match.params.selectedIndex))
             this.loadEntries(newProps);
 
         this.loadStackTrace(newProps);
@@ -42,7 +43,7 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
 
     loadEntries(props: HeavyEntryProps) {
 
-        let selectedIndex = props.routeParams.selectedIndex;
+        let selectedIndex = props.match.params.selectedIndex;
 
         return API.Heavy.details(selectedIndex.tryBefore(".") || selectedIndex)
             .then(entries => this.setState({entries}))
@@ -51,14 +52,14 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
 
 
     loadStackTrace(props: HeavyEntryProps){
-        return API.Heavy.stackTrace(props.routeParams.selectedIndex)
+        return API.Heavy.stackTrace(props.match.params.selectedIndex)
             .then(stackTrace => this.setState({stackTrace}))
             .done();
     }
     
     handleDownload = () => {
 
-        let selectedIndex = this.props.routeParams.selectedIndex;
+        let selectedIndex = this.props.match.params.selectedIndex;
 
         API.Heavy.download(selectedIndex.tryBefore(".") || selectedIndex);
     }
@@ -66,13 +67,13 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
 
     render() {
 
-        const index = this.props.routeParams.selectedIndex;
+        const index = this.props.match.params.selectedIndex;
 
         document.title = "Heavy Profiler > Entry " + index;
         if (this.state.entries == undefined)
             return <h3>Heavy Profiler > Entry {index} (loading...) </h3>;
 
-        let current = this.state.entries.filter(a => a.FullIndex == this.props.routeParams.selectedIndex).single();
+        let current = this.state.entries.filter(a => a.FullIndex == this.props.match.params.selectedIndex).single();
         return (
             <div>
                 <h2><Link to="~/profiler/heavy">Heavy Profiler</Link> > Entry {index}</h2>

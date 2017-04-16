@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { Route, Link } from 'react-router'
+import { Route } from 'react-router'
+import * as QueryString from 'query-string';
 import { ifError, Dic } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -49,13 +50,14 @@ import InboxFilter from './Case/InboxFilter'
 import Workflow from './Workflow/Workflow'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
+import { LoadRoute } from "../../../Framework/Signum.React/Scripts/LoadComponent";
 
 
 export function start(options: { routes: JSX.Element[] }) {
 
     options.routes.push(<Route path="workflow">
-        <Route path="activity/:caseActivityId" getComponent={(loc, cb) => require(["./Case/CaseFramePage"], (Comp) => cb(null, Comp.default))} />
-        <Route path="new/:workflowId" getComponent={(loc, cb) => require(["./Case/CaseFramePage"], (Comp) => cb(null, Comp.default))} />
+        <LoadRoute path="activity/:caseActivityId" onLoadModule={() => _import("./Case/CaseFramePage")} />
+        <LoadRoute path="new/:workflowId" onLoadModule={() => _import("./Case/CaseFramePage")} />
     </Route>);
 
     QuickLinks.registerQuickLink(CaseActivityEntity, ctx => [
@@ -67,10 +69,9 @@ export function start(options: { routes: JSX.Element[] }) {
     ]);
 
     options.routes.push(<Route path="workflow">
-        <Route path="panel" getComponent={(loc, cb) => require(["./Workflow/WorkflowScriptRunnerPanelPage"], (Comp) => cb(undefined, Comp.default))} />
+        <LoadRoute path="panel" onLoadModule={() => _import("./Workflow/WorkflowScriptRunnerPanelPage")} />
     </Route>);
 
-    Link
 
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(WorkflowScriptRunnerPanelPermission.ViewWorkflowScriptRunnerPanel),
@@ -108,9 +109,9 @@ export function start(options: { routes: JSX.Element[] }) {
         }
     });
 
-    Navigator.addSettings(new EntitySettings(CaseEntity, w => new ViewPromise(m => require(['./Case/Case'], m))));
-    Navigator.addSettings(new EntitySettings(CaseTagEntity, w => new ViewPromise(m => require(['./Case/CaseTag'], m))));
-    Navigator.addSettings(new EntitySettings(CaseTagsModel, w => new ViewPromise(m => require(['./Case/CaseTagsModel'], m))));
+    Navigator.addSettings(new EntitySettings(CaseEntity, w => _import('./Case/Case')));
+    Navigator.addSettings(new EntitySettings(CaseTagEntity, w => _import('./Case/CaseTag')));
+    Navigator.addSettings(new EntitySettings(CaseTagsModel, w => _import('./Case/CaseTagsModel')));
 
     Navigator.addSettings(new EntitySettings(CaseActivityEntity, undefined, {
         onNavigateRoute: (typeName, id) => Navigator.currentHistory.createHref("~/workflow/activity/" + id),
@@ -136,7 +137,7 @@ export function start(options: { routes: JSX.Element[] }) {
     caseActivityOperation(CaseActivityOperation.Decline, "warning");
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { style: "primary", onClick: executeWorkflowSave }));
 
-    Navigator.addSettings(new EntitySettings(WorkflowEntity, w => new ViewPromise(m => require(['./Workflow/Workflow'], m)), { avoidPopup: true }));
+    Navigator.addSettings(new EntitySettings(WorkflowEntity, w => _import('./Workflow/Workflow'), { avoidPopup: true }));
 
     hide(WorkflowPoolEntity);
     hide(WorkflowLaneEntity);
@@ -145,15 +146,15 @@ export function start(options: { routes: JSX.Element[] }) {
     hide(WorkflowEventEntity);
     hide(WorkflowConnectionEntity);
 
-    Navigator.addSettings(new EntitySettings(WorkflowActivityModel, w => new ViewPromise(m => require(['./Workflow/WorkflowActivityModel'], m))));
-    Navigator.addSettings(new EntitySettings(WorkflowConnectionModel, w => new ViewPromise(m => require(['./Workflow/WorkflowConnectionModel'], m))));
-    Navigator.addSettings(new EntitySettings(WorkflowReplacementModel, w => new ViewPromise(m => require(['./Workflow/WorkflowReplacementComponent'], m))));
-    Navigator.addSettings(new EntitySettings(WorkflowConditionEntity, w => new ViewPromise(m => require(['./Workflow/WorkflowCondition'], m))));
-    Navigator.addSettings(new EntitySettings(WorkflowActionEntity, w => new ViewPromise(m => require(['./Workflow/WorkflowAction'], m))));
-    Navigator.addSettings(new EntitySettings(WorkflowScriptEntity, w => new ViewPromise(m => require(['./Workflow/WorkflowScript'], m))));
-    Navigator.addSettings(new EntitySettings(WorkflowLaneModel, w => new ViewPromise(m => require(['./Workflow/WorkflowLaneModel'], m))));
-    Navigator.addSettings(new EntitySettings(WorkflowEventModel, w => new ViewPromise(m => require(['./Workflow/WorkflowEventModel'], m))));
-    Navigator.addSettings(new EntitySettings(WorkflowEventTaskEntity, w => new ViewPromise(m => require(['./Workflow/WorkflowEventTask'], m))));
+    Navigator.addSettings(new EntitySettings(WorkflowActivityModel, w => _import('./Workflow/WorkflowActivityModel')));
+    Navigator.addSettings(new EntitySettings(WorkflowConnectionModel, w => _import('./Workflow/WorkflowConnectionModel')));
+    Navigator.addSettings(new EntitySettings(WorkflowReplacementModel, w => _import('./Workflow/WorkflowReplacementComponent')));
+    Navigator.addSettings(new EntitySettings(WorkflowConditionEntity, w => _import('./Workflow/WorkflowCondition')));
+    Navigator.addSettings(new EntitySettings(WorkflowActionEntity, w => _import('./Workflow/WorkflowAction')));
+    Navigator.addSettings(new EntitySettings(WorkflowScriptEntity, w => _import('./Workflow/WorkflowScript')));
+    Navigator.addSettings(new EntitySettings(WorkflowLaneModel, w => _import('./Workflow/WorkflowLaneModel')));
+    Navigator.addSettings(new EntitySettings(WorkflowEventModel, w => _import('./Workflow/WorkflowEventModel')));
+    Navigator.addSettings(new EntitySettings(WorkflowEventTaskEntity, w => _import('./Workflow/WorkflowEventTask')));
 
     Constructor.registerConstructor(WorkflowConditionEntity, () => WorkflowConditionEntity.New({ eval: WorkflowConditionEval.New() }));
     Constructor.registerConstructor(WorkflowActionEntity, () => WorkflowActionEntity.New({ eval: WorkflowActionEval.New() }));
@@ -358,20 +359,14 @@ export function executeAndClose(eoc: Operations.EntityOperationContext<CaseActiv
 
 export function navigateCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, readOnly?: boolean): Promise<void> {
 
-    return new Promise<void>((resolve, reject) => {
-        require(["./Case/CaseFrameModal"], function (NP: { default: typeof CaseFrameModal }) {
-            NP.default.openNavigate(entityOrPack, readOnly).then(resolve, reject);
-        });
-    });
+    return _import("./Case/CaseFrameModal")
+        .then((NP: { default: typeof CaseFrameModal }) => NP.default.openNavigate(entityOrPack, readOnly));
 }
 
 export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, readOnly?: boolean): Promise<CaseActivityEntity> {
-
-    return new Promise<CaseActivityEntity>((resolve, reject) => {
-        require(["./Case/CaseFrameModal"], function (NP: { default: typeof CaseFrameModal }) {
-            NP.default.openView(entityOrPack, readOnly).then(resolve, reject);
-        });
-    });
+    return _import("./Case/CaseFrameModal")
+        .then((NP: { default: typeof CaseFrameModal }) => NP.default.openView(entityOrPack, readOnly));
+    
 }
 
 export function createNewCase(workflowId: number | string): Promise<CaseEntityPack> {
@@ -440,8 +435,7 @@ export function getViewPromise<T extends ICaseMainEntity>(entity: T, activityVie
         DynamicViewClient.createDefaultDynamicView(entity.Type) :
         DynamicViewClient.API.getDynamicView(entity.Type, activityViewName);
 
-    return ViewPromise.flat(promise.then(dv => new ViewPromise(resolve => require(['../../../Extensions/Signum.React.Extensions/Dynamic/View/DynamicViewComponent'], resolve))
-        .withProps({ initialDynamicView: dv })));
+    return ViewPromise.flat(promise.then(dv => new ViewPromise(_import('../../../Extensions/Signum.React.Extensions/Dynamic/View/DynamicViewComponent')).withProps({ initialDynamicView: dv })));
 }
 
 export function getViewNames(typeName: string) {
@@ -471,7 +465,7 @@ export namespace API {
 
     export function findMainEntityType(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {
         return ajaxGet<Lite<TypeEntity>[]>({
-            url: Navigator.currentHistory.createHref({ pathname: "~/api/workflow/findMainEntityType", query: request })
+            url: Navigator.currentHistory.createHref({ pathname: "~/api/workflow/findMainEntityType", search: QueryString.stringify(request) })
         });
     }
 

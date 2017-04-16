@@ -16,10 +16,11 @@ import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStr
 import { DynamicTypeEntity, DynamicTypeOperation, DynamicPanelPermission, DynamicSqlMigrationEntity } from './Signum.Entities.Dynamic'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
+import { LoadRoute } from "../../../Framework/Signum.React/Scripts/LoadComponent";
 
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<Route path="dynamic">
-        <Route path="panel" getComponent={(loc, cb) => require(["./DynamicPanelPage"], (Comp) => cb(undefined, Comp.default))} />
+        <LoadRoute path="panel" onLoadModule={() => _import("./DynamicPanelPage")} />
     </Route>);
 
 

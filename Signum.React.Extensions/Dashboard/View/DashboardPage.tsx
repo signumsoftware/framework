@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { Link } from 'react-router'
+import { Link } from 'react-router-dom'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
@@ -13,18 +13,23 @@ import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntity
 import FileLine, { FileTypeSymbol } from '../../Files/FileLine'
 import { DashboardEntity, PanelPartEntity, IPartEntity } from '../Signum.Entities.Dashboard'
 import DashboardView from './DashboardView'
-
+import { RouteComponentProps } from "react-router";
+import * as QueryString from 'query-string'
 
 
 require("../Dashboard.css");
 
-interface DashboardPageProps extends ReactRouter.RouteComponentProps<{}, { dashboardId: string }> {
+interface DashboardPageProps extends RouteComponentProps<{ dashboardId: string }> {
 
 }
 
 interface DashboardPageState {
     dashboard?: DashboardEntity;
     entity?: Entity;
+}
+
+function getQueryEntity(props: DashboardPageProps): string{
+    return QueryString.parse(props.location.search).entity as string;
 }
 
 export default class DashboardPage extends React.Component<DashboardPageProps, DashboardPageState> {
@@ -37,24 +42,25 @@ export default class DashboardPage extends React.Component<DashboardPageProps, D
     }
 
     componentWillReceiveProps(nextProps: DashboardPageProps) {
-        if (this.props.routeParams.dashboardId != nextProps.routeParams.dashboardId)
+        if (this.props.match.params.dashboardId != nextProps.match.params.dashboardId)
             this.loadDashboard(nextProps);
 
-        if (this.props.location.query.entity != nextProps.location.query.entity)
+        if (getQueryEntity(this.props) != getQueryEntity(nextProps))
             this.loadEntity(nextProps);
     }
 
     loadDashboard(props: DashboardPageProps) {
         this.setState({ dashboard: undefined });
-        Navigator.API.fetchEntity(DashboardEntity, props.routeParams.dashboardId)
+        Navigator.API.fetchEntity(DashboardEntity, props.match.params.dashboardId)
             .then(d => this.setState({ dashboard: d }))
             .done();
     }
 
     loadEntity(props: DashboardPageProps) {
         this.setState({ entity: undefined });
-        if (props.location.query.entity)
-            Navigator.API.fetchAndForget(parseLite(props.location.query.entity))
+        const entityKey = getQueryEntity(props);
+        if (entityKey)
+            Navigator.API.fetchAndForget(parseLite(entityKey))
                 .then(e => this.setState({ entity: e }))
                 .done();
     }
@@ -64,11 +70,11 @@ export default class DashboardPage extends React.Component<DashboardPageProps, D
         const dashboard = this.state.dashboard;
         const entity = this.state.entity;
 
-        const withEntity = (this.props.location.query as any)["entity"];
+        const entityKey = getQueryEntity(this.props);
 
         return (
             <div>
-                {withEntity &&
+                {entityKey &&
                     <div style={{ float: "right", textAlign: "right" }}>
                         {!entity ? <h3>{JavascriptMessage.loading.niceToString()}</h3> :
                             <h3>
@@ -89,7 +95,7 @@ export default class DashboardPage extends React.Component<DashboardPageProps, D
                             <span>{getToString(dashboard)}</span>
                         }
                     </h2>}
-                {dashboard && (!withEntity || entity) && <DashboardView dashboard={dashboard} entity={entity}/>}
+                {dashboard && (!entityKey || entity) && <DashboardView dashboard={dashboard} entity={entity}/>}
             </div>
         );
     }

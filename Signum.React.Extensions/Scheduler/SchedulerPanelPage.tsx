@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
+import { RouteComponentProps } from 'react-router'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
@@ -11,7 +11,7 @@ import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString,
 import { API, SchedulerState } from './SchedulerClient'
 import { ScheduledTaskLogEntity, ScheduledTaskEntity} from './Signum.Entities.Scheduler'
 
-interface SchedulerPanelProps extends ReactRouter.RouteComponentProps<{}, {}> {
+interface SchedulerPanelProps extends RouteComponentProps<{}> {
 
 }
 

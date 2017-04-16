@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { Link } from 'react-router'
+import { Link, RouteComponentProps } from 'react-router-dom'
 import { Tabs, Tab } from 'react-bootstrap'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
@@ -9,7 +9,7 @@ import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString,
 import { API, CacheTableStats, ResetLazyStats, CacheState } from './CacheClient'
 
 
-interface CacheStatisticsPageProps extends ReactRouter.RouteComponentProps<{}, {}> {
+interface CacheStatisticsPageProps extends RouteComponentProps<{}> {
 
 }
 

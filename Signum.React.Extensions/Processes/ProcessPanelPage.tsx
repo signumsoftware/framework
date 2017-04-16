@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
+import { RouteComponentProps } from 'react-router-dom'
 import * as numbro from 'numbro'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import EntityLink from '../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
@@ -12,7 +12,7 @@ import { ProcessEntity } from './Signum.Entities.Processes'
 
 
 
-interface ProcessPanelProps extends ReactRouter.RouteComponentProps<{}, {}> {
+interface ProcessPanelProps extends RouteComponentProps<{}> {
 
 }
 

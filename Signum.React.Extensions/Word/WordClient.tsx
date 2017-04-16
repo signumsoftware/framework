@@ -17,7 +17,7 @@ import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 
 export function start(options: { routes: JSX.Element[] }) {
-    Navigator.addSettings(new EntitySettings(WordTemplateEntity, e => new ViewPromise(resolve => require(['./Templates/WordTemplate'], resolve))));
+    Navigator.addSettings(new EntitySettings(WordTemplateEntity, e => _import('./Templates/WordTemplate')));
 
     Operations.addSettings(new EntityOperationSettings(WordTemplateOperation.CreateWordReport, {
         onClick: ctx => {

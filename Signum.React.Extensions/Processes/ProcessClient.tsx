@@ -14,28 +14,29 @@ import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/O
 import { ProcessState, ProcessEntity, ProcessPermission, PackageLineEntity, PackageEntity, PackageOperationEntity } from './Signum.Entities.Processes'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
+import { LoadRoute } from "../../../Framework/Signum.React/Scripts/LoadComponent";
 
 require("./Processes.css");
 
 export function start(options: { routes: JSX.Element[], packages: boolean, packageOperations: boolean }) {
   
 
-    Navigator.addSettings(new EntitySettings(ProcessEntity, e => new ViewPromise(resolve => require(['./Templates/Process'], resolve)), { isCreable : "Never" }));
+    Navigator.addSettings(new EntitySettings(ProcessEntity, e => _import('./Templates/Process'), { isCreable : "Never" }));
 
     if (options.packages || options.packageOperations) {
-        Navigator.addSettings(new EntitySettings(PackageLineEntity, e => new ViewPromise(resolve => require(['./Templates/PackageLine'], resolve))));
+        Navigator.addSettings(new EntitySettings(PackageLineEntity, e => _import('./Templates/PackageLine')));
     }
 
     if (options.packages) {
-        Navigator.addSettings(new EntitySettings(PackageEntity, e => new ViewPromise(resolve => require(['./Templates/Package'], resolve)), { isCreable: "Never" }));
+        Navigator.addSettings(new EntitySettings(PackageEntity, e => _import('./Templates/Package'), { isCreable: "Never" }));
     }
 
     if (options.packageOperations) {
-        Navigator.addSettings(new EntitySettings(PackageOperationEntity, e => new ViewPromise(resolve => require(['./Templates/PackageOperation'], resolve)), { isCreable: "Never" }));
+        Navigator.addSettings(new EntitySettings(PackageOperationEntity, e => _import('./Templates/PackageOperation'), { isCreable: "Never" }));
     }
 
     options.routes.push(<Route path="processes">
-        <Route path="view" getComponent={(loc, cb) => require(["./ProcessPanelPage"], (Comp) => cb(undefined, Comp.default))} />
+        <LoadRoute path="view" onLoadModule={() => _import("./ProcessPanelPage")} />
     </Route>);
     
     OmniboxClient.registerSpecialAction({
@@ -128,7 +129,7 @@ function defaultConstructFromMany(coc: Operations.ContextualOperationContext<Ent
 
         const es = Navigator.getSettings(pack.entity.Type);
         if (es && es.avoidPopup || event.ctrlKey || event.button == 1) {
-            Navigator.currentHistory.pushState(pack, '/Create/');
+            Navigator.currentHistory.push('~/Create/', pack);
             return;
         }
         else {

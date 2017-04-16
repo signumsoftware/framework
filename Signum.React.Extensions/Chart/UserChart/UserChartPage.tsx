@@ -13,9 +13,10 @@ import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity,
 import * as ChartClient from '../ChartClient'
 import * as UserChartClient from './UserChartClient'
 import ChartRequestView from '../Templates/ChartRequestView'
+import { RouteComponentProps } from "react-router";
 
 
-interface UserChartPageProps extends ReactRouter.RouteComponentProps<{}, { userChartId: string; entity?: string }> {
+interface UserChartPageProps extends RouteComponentProps<{ userChartId: string; entity?: string }> {
 
 }
 
@@ -39,7 +40,7 @@ export default class UserChartPage extends React.Component<UserChartPageProps, {
 
     load(props: UserChartPageProps) {
 
-        const {userChartId, entity } = this.props.routeParams!;
+        const {userChartId, entity } = this.props.match.params;
 
         const lite = entity == undefined ? undefined : parseLite(entity);
 

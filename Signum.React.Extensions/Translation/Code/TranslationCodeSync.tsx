@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
+import { RouteComponentProps } from 'react-router'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
@@ -18,7 +18,7 @@ import { TranslationTypeTable } from './TranslationCodeView'
 
 require("../Translation.css");
 
-interface TranslationCodeSyncProps extends ReactRouter.RouteComponentProps<{}, { culture: string; assembly: string }> {
+interface TranslationCodeSyncProps extends RouteComponentProps<{ culture: string; assembly: string }> {
 
 }
 
@@ -36,19 +36,19 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
     }
 
     loadSync() {
-        const { assembly, culture } = this.props.routeParams!;
+        const { assembly, culture } = this.props.match.params;
         return API.sync(assembly, culture).then(result => this.setState({ result }))
     }
 
     render() {
 
-        const { assembly, culture } = this.props.routeParams!;
+        const { assembly, culture } = this.props.match.params;
 
 
         if (this.state.result && this.state.result.totalTypes == 0) {
             return (
                 <div>
-                    <h2>{TranslationMessage._0AlreadySynchronized.niceToString(this.props.routeParams.assembly) }</h2>
+                    <h2>{TranslationMessage._0AlreadySynchronized.niceToString(this.props.match.params.assembly)}</h2>
                 </div>
             );
         }
@@ -72,7 +72,7 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
 
 
     handleSearch = (filter: string) => {
-        const {assembly, culture } = this.props.routeParams!;
+        const { assembly, culture } = this.props.match.params;
 
         return API.retrieve(assembly, culture || "", filter)
             .then(result => this.setState({ result: result }))
@@ -90,7 +90,7 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
 
         return (
             <div>
-                { Dic.getValues(this.state.result.types).map(type => <TranslationTypeTable key={type.type} type={type} result={this.state.result!} currentCulture={this.props.routeParams.culture} />) }
+                {Dic.getValues(this.state.result.types).map(type => <TranslationTypeTable key={type.type} type={type} result={this.state.result!} currentCulture={this.props.match.params.culture} />)}
                 <input type="submit" value={ TranslationMessage.Save.niceToString() } className="btn btn-primary" onClick={this.handleSave}/>
             </div>
         );
@@ -98,7 +98,7 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
 
     handleSave = (e: React.FormEvent<any>) => {
         e.preventDefault();
-        const params = this.props.routeParams!;
+        const params = this.props.match.params;
         API.save(params.assembly, params.culture || "", this.state.result!)
             .then(() => notifySuccess())
             .then(() => this.loadSync())

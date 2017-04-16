@@ -1,7 +1,4 @@
-﻿/// <reference path="../../../../framework/signum.react/scripts/globals.ts" />
-
-import * as React from 'react'
-import { Link } from 'react-router'
+﻿import * as React from 'react'
 import { NavDropdown, MenuItem, NavItem } from 'react-bootstrap'
 import { LinkContainer } from 'react-router-bootstrap'
 import { AuthMessage, UserEntity } from '../Signum.Entities.Authorization'

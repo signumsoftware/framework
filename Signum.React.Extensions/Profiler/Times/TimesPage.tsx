@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
 import { Tabs, Tab } from 'react-bootstrap'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
@@ -9,11 +8,12 @@ import {ValueSearchControl, SearchControl } from '../../../../Framework/Signum.R
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { API, TimeTrackerEntry} from '../ProfilerClient'
+import { API, TimeTrackerEntry } from '../ProfilerClient'
+import { RouteComponentProps } from "react-router";
 
 require("./Times.css");
 
-interface TimesPageProps extends ReactRouter.RouteComponentProps<{}, {}> {
+interface TimesPageProps extends RouteComponentProps<{}> {
 
 }
 

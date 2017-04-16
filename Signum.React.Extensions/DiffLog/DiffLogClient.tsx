@@ -19,7 +19,7 @@ import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 
 export function start(options: { routes: JSX.Element[] }) {
 
-    Navigator.addSettings(new EntitySettings(OperationLogEntity, e => new ViewPromise(resolve => require(['./Templates/OperationLog'], resolve))))    
+    Navigator.addSettings(new EntitySettings(OperationLogEntity, e => _import('./Templates/OperationLog')))    
 }
 
 export namespace API {

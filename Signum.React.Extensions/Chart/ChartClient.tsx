@@ -1,5 +1,6 @@
 ﻿import * as React from 'react'
 import { Route } from 'react-router'
+import * as QueryString from 'query-string'
 import { Dic } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -23,12 +24,12 @@ import { QueryTokenEntity } from '../UserAssets/Signum.Entities.UserAssets'
 import ChartButton from './ChartButton'
 import ChartRequestView from './Templates/ChartRequestView'
 import * as UserChartClient from './UserChart/UserChartClient'
-
+import { LoadRoute } from "../../../Framework/Signum.React/Scripts/LoadComponent";
 
 export function start(options: { routes: JSX.Element[] }) {
 
     options.routes.push(<Route path="chart">
-        <Route path=":queryName" getComponent={ (loc, cb) => require(["./Templates/ChartRequestPage"], (Comp) => cb(undefined, Comp.default)) } />
+        <LoadRoute path=":queryName" onLoadModule={() => _import("./Templates/ChartRequestPage")} />
     </Route>);
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
@@ -38,7 +39,7 @@ export function start(options: { routes: JSX.Element[] }) {
         return <ChartButton searchControl={ctx.searchControl}/>;
     });
 
-    Navigator.addSettings(new EntitySettings(ChartScriptEntity, e => new ViewPromise(resolve => require(['./ChartScript/ChartScript'], resolve))));
+    Navigator.addSettings(new EntitySettings(ChartScriptEntity, e => _import('./ChartScript/ChartScript')));
 
     UserChartClient.start({ routes: options.routes });
 }
@@ -302,8 +303,8 @@ export module Encoder {
         encodeParameters(query, cr.parameters);
 
         encodeColumn(query, cr.columns);
-        
-        return Navigator.currentHistory.createPath({ pathname: "~/Chart/" + cr.queryKey, query: query });
+
+        return Navigator.currentHistory.createHref({ pathname: "~/Chart/" + cr.queryKey, search: QueryString.stringify(query) });
     }
 
     const scapeTilde = Finder.Encoder.scapeTilde;

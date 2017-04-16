@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
 import { classes, Dic } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Services from '../../../Framework/Signum.React/Scripts/Services'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'

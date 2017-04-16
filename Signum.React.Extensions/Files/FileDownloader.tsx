@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
+import { Link } from 'react-router-dom'
 import { classes, Dic } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Services from '../../../Framework/Signum.React/Scripts/Services'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -13,6 +13,7 @@ import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage
 import { IFile, IFilePath, FileMessage, FileTypeSymbol, FileEntity, FilePathEntity, EmbeddedFileEntity, EmbeddedFilePathEntity } from './Signum.Entities.Files'
 import Typeahead from '../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import { EntityBase, EntityBaseProps} from '../../../Framework/Signum.React/Scripts/Lines/EntityBase'
+import * as QueryString from 'query-string'
 
 require("./Files.css");
 
@@ -97,7 +98,7 @@ FileDownloader.configurtions[EmbeddedFilePathEntity.typeName] = {
     downloadClick: (event, file) => downloadUrl(event,
         Navigator.currentHistory.createHref({
             pathname: "~/api/files/downloadEmbeddedFilePath/" + file.fileType!.key,
-            query: { suffix: file.suffix, fileName: file.fileName }
+            search: QueryString.stringify({ suffix: file.suffix, fileName: file.fileName })
         }))
 } as FileDownloaderConfiguration<EmbeddedFilePathEntity>;
 

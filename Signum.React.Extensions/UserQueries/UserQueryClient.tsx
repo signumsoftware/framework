@@ -16,6 +16,7 @@ import { UserQueryEntity, UserQueryPermission, UserQueryMessage,
 import { QueryTokenEntity, } from '../UserAssets/Signum.Entities.UserAssets'
 import UserQueryMenu from './UserQueryMenu'
 import * as UserAssetsClient from '../UserAssets/UserAssetClient'
+import { LoadRoute } from "../../../Framework/Signum.React/Scripts/LoadComponent";
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -23,7 +24,7 @@ export function start(options: { routes: JSX.Element[] }) {
     UserAssetsClient.registerExportAssertLink(UserQueryEntity);
 
     options.routes.push(<Route path="userQuery">
-        <Route path=":userQueryId(/:entity)" getComponent={ (loc, cb) => require(["./Templates/UserQueryPage"], (Comp) => cb(undefined, Comp.default)) } />
+        <LoadRoute path=":userQueryId(/:entity)" onLoadModule={() => _import("./Templates/UserQueryPage")} />
     </Route>);
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
@@ -65,7 +66,7 @@ export function start(options: { routes: JSX.Element[] }) {
     Constructor.registerConstructor<QueryOrderEntity>(QueryOrderEntity, () => QueryOrderEntity.New({token : QueryTokenEntity.New() }));
     Constructor.registerConstructor<QueryColumnEntity>(QueryColumnEntity, () => QueryColumnEntity.New({ token : QueryTokenEntity.New() }));
 
-    Navigator.addSettings(new EntitySettings(UserQueryEntity, e => new ViewPromise(resolve => require(['./Templates/UserQuery'], resolve)), { isCreable: "Never" }));
+    Navigator.addSettings(new EntitySettings(UserQueryEntity, e => _import('./Templates/UserQuery'), { isCreable: "Never" }));
 }
 
 

@@ -10,6 +10,7 @@ import { CultureInfoEntity } from '../Basics/Signum.Entities.Basics'
 import { TranslationPermission } from './Signum.Entities.Translation'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
+import { LoadRoute } from "../../../Framework/Signum.React/Scripts/LoadComponent";
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -21,9 +22,9 @@ export function start(options: { routes: JSX.Element[] }) {
 
     options.routes.push(
         <Route path="translation" >
-            <Route path="status" getComponent= {(loc, cb) => require(["./Code/TranslationCodeStatus"], (Comp) => cb(undefined, Comp.default)) }/>
-            <Route path="view/:assembly(/:culture)" getComponent= {(loc, cb) => require(["./Code/TranslationCodeView"], (Comp) => cb(undefined, Comp.default)) }/>
-            <Route path="sync/:assembly/:culture" getComponent= {(loc, cb) => require(["./Code/TranslationCodeSync"], (Comp) => cb(undefined, Comp.default)) }/>
+            <LoadRoute path="status" onLoadModule={() => _import("./Code/TranslationCodeStatus")} />
+            <LoadRoute path="view/:assembly(/:culture)" onLoadModule={() => _import("./Code/TranslationCodeView")} />
+            <LoadRoute path="sync/:assembly/:culture" onLoadModule={() => _import("./Code/TranslationCodeSync")} />
         </Route>
     );
 }

@@ -18,6 +18,7 @@ import { QueryTokenEntity } from '../../UserAssets/Signum.Entities.UserAssets'
 import UserChartMenu from './UserChartMenu'
 import * as ChartClient from '../ChartClient'
 import * as UserAssetsClient from '../../UserAssets/UserAssetClient'
+import { LoadRoute } from "../../../../Framework/Signum.React/Scripts/LoadComponent";
 
 
 export function start(options: { routes: JSX.Element[] }) {
@@ -26,7 +27,7 @@ export function start(options: { routes: JSX.Element[] }) {
     UserAssetsClient.registerExportAssertLink(UserChartEntity);
 
     options.routes.push(<Route path="userChart">
-        <Route path=":userChartId(/:entity)" getComponent={ (loc, cb) => require(["./UserChartPage"], (Comp) => cb(undefined, Comp.default)) } />
+        <LoadRoute path=":userChartId(/:entity)" onLoadModule={() => _import("./UserChartPage")} />
     </Route>);
 
 
@@ -66,7 +67,7 @@ export function start(options: { routes: JSX.Element[] }) {
         }, { isVisible: AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) }));
 
 
-    Navigator.addSettings(new EntitySettings(UserChartEntity, e => new ViewPromise(resolve => require(['./UserChart'], resolve)), { isCreable: "Never" }));
+    Navigator.addSettings(new EntitySettings(UserChartEntity, e => _import('./UserChart'), { isCreable: "Never" }));
 }
 
 
