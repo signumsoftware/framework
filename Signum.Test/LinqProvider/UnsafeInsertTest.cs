@@ -100,7 +100,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             using (Transaction tr = new Transaction())
             {
                 int value = Database.MListQuery((AlbumEntity a) => a.Songs)
-                    .UnsafeInsertMList((AlbumEntity a) => a.Songs, mle => new MListElement<AlbumEntity, SongEntity>
+                    .UnsafeInsertMList((AlbumEntity a) => a.Songs, mle => new MListElement<AlbumEntity, SongEmbedded>
                 {
                     Parent = mle.Parent,
                     Element = mle.Element,
@@ -117,7 +117,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
             using (Transaction tr = new Transaction())
             {
                 int value = Database.MListQuery((AlbumEntity a) => a.Songs)
-                    .Select(mle => new MListElement<AlbumEntity, SongEntity>
+                    .Select(mle => new MListElement<AlbumEntity, SongEmbedded>
                     {
                         Parent = mle.Parent,
                         Element = mle.Element,
@@ -137,7 +137,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 using (Administrator.DisableIdentity((AlbumEntity a)=>a.Songs))
                 {
                     int value = Database.MListQuery((AlbumEntity a) => a.Songs)
-                        .UnsafeInsertMList((AlbumEntity a) => a.Songs, mle => new MListElement<AlbumEntity, SongEntity>
+                        .UnsafeInsertMList((AlbumEntity a) => a.Songs, mle => new MListElement<AlbumEntity, SongEmbedded>
                         {
                             Parent = mle.Parent,
                             Element = mle.Element,

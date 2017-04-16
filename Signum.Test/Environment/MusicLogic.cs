@@ -273,7 +273,7 @@ namespace Signum.Test.Environment
                     {
                         Author = g.Author,
                         Label = g.Label,
-                        BonusTrack = new SongEntity
+                        BonusTrack = new SongEmbedded
                         {
                             Name = "Clone bonus track"
                         }

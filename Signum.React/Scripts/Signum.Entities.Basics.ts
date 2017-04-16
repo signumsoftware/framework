@@ -6,15 +6,15 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from './Reflecti
 import * as Entities from './Signum.Entities'
 
 
-export const ColorEntity = new Type<ColorEntity>("ColorEntity");
-export interface ColorEntity extends Entities.EmbeddedEntity {
-    Type: "ColorEntity";
+export const ColorEmbedded = new Type<ColorEmbedded>("ColorEmbedded");
+export interface ColorEmbedded extends Entities.EmbeddedEntity {
+    Type: "ColorEmbedded";
     argb?: number;
 }
 
-export const DeleteLogParametersEntity = new Type<DeleteLogParametersEntity>("DeleteLogParametersEntity");
-export interface DeleteLogParametersEntity extends Entities.EmbeddedEntity {
-    Type: "DeleteLogParametersEntity";
+export const DeleteLogParametersEmbedded = new Type<DeleteLogParametersEmbedded>("DeleteLogParametersEmbedded");
+export interface DeleteLogParametersEmbedded extends Entities.EmbeddedEntity {
+    Type: "DeleteLogParametersEmbedded";
     deleteLogsWithMoreThan?: number;
     dateLimit?: string;
     chunkSize?: number;

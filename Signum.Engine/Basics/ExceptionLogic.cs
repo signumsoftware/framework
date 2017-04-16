@@ -114,11 +114,11 @@ namespace Signum.Engine.Basics
 		}
 
 
-		public static event Action<DeleteLogParametersEntity> DeleteLogs;
+		public static event Action<DeleteLogParametersEmbedded> DeleteLogs;
 
 		public static int DeleteLogsTimeOut = 10 * 60 * 1000; 
 
-		public static void DeleteLogsAndExceptions(DeleteLogParametersEntity parameters)
+		public static void DeleteLogsAndExceptions(DeleteLogParametersEmbedded parameters)
 		{
 			using(Connector.CommandTimeoutScope(DeleteLogsTimeOut))
 			{
