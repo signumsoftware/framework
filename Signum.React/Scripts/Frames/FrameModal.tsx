@@ -290,7 +290,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
     handlePopupFullScreen = (e: React.MouseEvent<any>) => {
 
-        if (e.ctrlKey || e.buttons) {
+        if (e.ctrlKey || e.button == 1) {
 
         } else {
 
