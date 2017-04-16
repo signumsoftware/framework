@@ -22,10 +22,10 @@ import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/O
 import { UserEntity } from '../../../Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization'
 import * as DynamicViewClient from '../../../Extensions/Signum.React.Extensions/Dynamic/DynamicViewClient'
 import { CodeContext } from '../../../Extensions/Signum.React.Extensions/Dynamic/View/NodeUtils'
-import { TimeSpanEntity } from '../../../Extensions/Signum.React.Extensions/Basics/Signum.Entities.Basics'
+import { TimeSpanEmbedded } from '../../../Extensions/Signum.React.Extensions/Basics/Signum.Entities.Basics'
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
-import { WorkflowConditionEval, WorkflowActionEval, WorkflowJumpEntity, DecisionResult } from './Signum.Entities.Workflow'
+import { WorkflowConditionEval, WorkflowActionEval, WorkflowJumpEmbedded, DecisionResult } from './Signum.Entities.Workflow'
 
 import ActivityWithRemarks from './Case/ActivityWithRemarks'
 import CaseFrameModal from './Case/CaseFrameModal'
@@ -42,8 +42,8 @@ import ValueLineModal from '../../../Framework/Signum.React/Scripts/ValueLineMod
 import {
     WorkflowEntity, WorkflowLaneEntity, WorkflowActivityEntity, WorkflowConnectionEntity, WorkflowConditionEntity, WorkflowActionEntity, CaseActivityQuery, CaseActivityEntity,
     CaseActivityOperation, CaseEntity, CaseNotificationEntity, CaseNotificationState, InboxFilterModel, WorkflowOperation, WorkflowPoolEntity, WorkflowScriptEntity, WorkflowScriptEval,
-    WorkflowActivityOperation, WorkflowReplacementModel, WorkflowModel, BpmnEntityPair, WorkflowActivityModel, ICaseMainEntity, WorkflowGatewayEntity, WorkflowEventEntity,
-    WorkflowLaneModel, WorkflowConnectionModel, IWorkflowNodeEntity, WorkflowActivityMessage, WorkflowTimeoutEntity, CaseTagEntity, CaseTagsModel, CaseTagTypeEntity,
+    WorkflowActivityOperation, WorkflowReplacementModel, WorkflowModel, BpmnEntityPairEmbedded, WorkflowActivityModel, ICaseMainEntity, WorkflowGatewayEntity, WorkflowEventEntity,
+    WorkflowLaneModel, WorkflowConnectionModel, IWorkflowNodeEntity, WorkflowActivityMessage, WorkflowTimeoutEmbedded, CaseTagEntity, CaseTagsModel, CaseTagTypeEntity,
     WorkflowScriptRunnerPanelPermission, WorkflowEventModel, WorkflowEventTaskEntity, DoneType, CaseOperation, WorkflowMainEntityStrategy, WorkflowActivityType
 } from './Signum.Entities.Workflow'
 
@@ -162,7 +162,7 @@ export function start(options: { routes: JSX.Element[] }) {
     Constructor.registerConstructor(WorkflowConditionEntity, () => WorkflowConditionEntity.New({ eval: WorkflowConditionEval.New() }));
     Constructor.registerConstructor(WorkflowActionEntity, () => WorkflowActionEntity.New({ eval: WorkflowActionEval.New() }));
     Constructor.registerConstructor(WorkflowScriptEntity, () => WorkflowScriptEntity.New({ eval: WorkflowScriptEval.New() }));
-    Constructor.registerConstructor(WorkflowTimeoutEntity, () => Constructor.construct(TimeSpanEntity).then(ep => ep && WorkflowTimeoutEntity.New({ timeout: ep.entity })));
+    Constructor.registerConstructor(WorkflowTimeoutEmbedded, () => Constructor.construct(TimeSpanEmbedded).then(ep => ep && WorkflowTimeoutEmbedded.New({ timeout: ep.entity })));
 
     registerCustomContexts();
 }
@@ -292,7 +292,7 @@ export function executeWorkflowSave(eoc: Operations.EntityOperationContext<Workf
         .then(xml => {
             var model = WorkflowModel.New({
                 diagramXml: xml,
-                entities: Dic.map(wf.state.entities!, (bpmnId, model) => newMListElement(BpmnEntityPair.New({
+                entities: Dic.map(wf.state.entities!, (bpmnId, model) => newMListElement(BpmnEntityPairEmbedded.New({
                     bpmnElementId: bpmnId,
                     model: model
                 })))
@@ -337,7 +337,7 @@ export function executeWorkflowJump(eoc: Operations.EntityOperationContext<CaseA
         .done();
 }
 
-function getWorkflowJumpSelector(jumps: MListElement<WorkflowJumpEntity>[]): Promise<WorkflowJumpEntity | undefined> {
+function getWorkflowJumpSelector(jumps: MListElement<WorkflowJumpEmbedded>[]): Promise<WorkflowJumpEmbedded | undefined> {
 
     var opts = jumps.map(j => j.element);
     return SelectorModal.chooseElement(opts,

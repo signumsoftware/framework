@@ -10,13 +10,13 @@ import { SearchMessage, JavascriptMessage, parseLite, is } from '../../../../Fra
 import { getTypeInfos, TypeInfo, isTypeEnum } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { ValueLine, FormGroup } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { ChartColumnEntity, ChartScriptColumnEntity, IChartBase, GroupByChart, ChartMessage, ChartColorEntity } from '../Signum.Entities.Chart'
+import { ChartColumnEmbedded, ChartScriptColumnEmbedded, IChartBase, GroupByChart, ChartMessage, ChartColorEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 
 export interface ChartColumnProps {
-    ctx: TypeContext<ChartColumnEntity>;
-    scriptColumn: ChartScriptColumnEntity;
+    ctx: TypeContext<ChartColumnEmbedded>;
+    scriptColumn: ChartScriptColumnEmbedded;
     chartBase: IChartBase;
     queryKey: string;
     onToggleInfo: () => void;
@@ -76,7 +76,7 @@ export class ChartColumn extends React.Component<ChartColumnProps, { }> {
 
 
 export interface ChartColumnInfoProps {
-    ctx: TypeContext<ChartColumnEntity>;
+    ctx: TypeContext<ChartColumnEmbedded>;
     onRedraw: () => void;
     colorPalettes: string[];
 }

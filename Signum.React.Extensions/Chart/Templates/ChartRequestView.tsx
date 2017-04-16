@@ -12,8 +12,8 @@ import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator
 import FilterBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/FilterBuilder'
 import ValidationErrors from '../../../../Framework/Signum.React/Scripts/Frames/ValidationErrors'
 import { ValueLine, FormGroup, ValueLineProps, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity, ChartRequest, GroupByChart, ChartMessage,
-    ChartColorEntity, ChartScriptEntity, ChartParameterEntity, ChartParameterType, UserChartEntity } from '../Signum.Entities.Chart'
+import { ChartColumnEmbedded, ChartScriptColumnEmbedded, ChartScriptParameterEmbedded, ChartRequest, GroupByChart, ChartMessage,
+    ChartColorEntity, ChartScriptEntity, ChartParameterEmbedded, ChartParameterType, UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import { ChartColumn, ChartColumnInfo }from './ChartColumn'

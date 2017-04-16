@@ -10,8 +10,8 @@ import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import { EmailMessageEntity, EmailTemplateMessageEntity, EmailMasterTemplateEntity, EmailMasterTemplateMessageEntity, EmailMessageOperation, EmailPackageEntity, EmailRecipientEntity, EmailConfigurationEntity, EmailTemplateEntity, AsyncEmailSenderPermission } from './Signum.Entities.Mailing'
-import { SmtpConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, Pop3ReceptionExceptionEntity, EmailAddressEntity } from './Signum.Entities.Mailing'
+import { EmailMessageEntity, EmailTemplateMessageEmbedded, EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailMessageOperation, EmailPackageEntity, EmailRecipientEntity, EmailConfigurationEmbedded, EmailTemplateEntity, AsyncEmailSenderPermission } from './Signum.Entities.Mailing'
+import { SmtpConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, Pop3ReceptionExceptionEntity, EmailAddressEmbedded} from './Signum.Entities.Mailing'
 import { NewsletterEntity, NewsletterDeliveryEntity, SendEmailTaskEntity } from './Signum.Entities.Mailing'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
@@ -30,16 +30,16 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
         onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/asyncEmailSender/view"))
     });
 
-    registerToString(EmailTemplateMessageEntity, a => a.cultureInfo == undefined ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName!);
-    registerToString(EmailMasterTemplateMessageEntity, a => a.cultureInfo == undefined ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName!);
+    registerToString(EmailTemplateMessageEmbedded, a => a.cultureInfo == undefined ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName!);
+    registerToString(EmailMasterTemplateMessageEmbedded, a => a.cultureInfo == undefined ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName!);
 
     Navigator.addSettings(new EntitySettings(EmailMessageEntity, e => new ViewPromise(resolve => require(['./Templates/EmailMessage'], resolve))));
     Navigator.addSettings(new EntitySettings(EmailTemplateEntity, e => new ViewPromise(resolve => require(['./Templates/EmailTemplate'], resolve))));
     Navigator.addSettings(new EntitySettings(EmailMasterTemplateEntity, e => new ViewPromise(resolve => require(['./Templates/EmailMasterTemplate'], resolve))));
     Navigator.addSettings(new EntitySettings(EmailPackageEntity, e => new ViewPromise(resolve => require(['./Templates/EmailPackage'], resolve))));
     Navigator.addSettings(new EntitySettings(EmailRecipientEntity, e => new ViewPromise(resolve => require(['./Templates/EmailRecipient'], resolve))));
-    Navigator.addSettings(new EntitySettings(EmailAddressEntity, e => new ViewPromise(resolve => require(['./Templates/EmailAddress'], resolve))));
-    Navigator.addSettings(new EntitySettings(EmailConfigurationEntity, e => new ViewPromise(resolve => require(['./Templates/EmailConfiguration'], resolve))));
+    Navigator.addSettings(new EntitySettings(EmailAddressEmbedded, e => new ViewPromise(resolve => require(['./Templates/EmailAddress'], resolve))));
+    Navigator.addSettings(new EntitySettings(EmailConfigurationEmbedded, e => new ViewPromise(resolve => require(['./Templates/EmailConfiguration'], resolve))));
 
     Operations.addSettings(new EntityOperationSettings(EmailMessageOperation.CreateMailFromTemplate, {
         onClick: (ctx) => {

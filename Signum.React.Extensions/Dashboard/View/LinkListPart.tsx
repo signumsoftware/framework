@@ -12,7 +12,7 @@ import { ValueSearchControl } from '../../../../Framework/Signum.React/Scripts/S
 import { TypeContext, FormGroupStyle, mlistItemContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
-import { LinkListPartEntity, LinkElementEntity} from '../Signum.Entities.Dashboard'
+import { LinkListPartEntity, LinkElementEmbedded } from '../Signum.Entities.Dashboard'
 
 export default class LinkListPart extends React.Component<{ part: LinkListPartEntity }, void> {
 

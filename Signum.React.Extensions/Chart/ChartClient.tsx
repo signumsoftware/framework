@@ -15,11 +15,12 @@ import {
     FindOptions, FilterOption, FilterOptionParsed, FilterOperation, OrderOption, OrderOptionParsed, ColumnOption,
     FilterRequest, QueryRequest, Pagination, QueryTokenType, QueryToken, FilterType, SubTokensOptions, ResultTable, OrderRequest } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import * as AuthClient  from '../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
-import { QueryFilterEntity, QueryColumnEntity, QueryOrderEntity } from '../UserQueries/Signum.Entities.UserQueries'
+import { QueryFilterEmbedded, QueryColumnEmbedded, QueryOrderEmbedded } from '../UserQueries/Signum.Entities.UserQueries'
 
-import { UserChartEntity, ChartPermission, ChartMessage, ChartColumnEntity, ChartParameterEntity, ChartScriptEntity, ChartScriptParameterEntity, ChartRequest,
+import {
+    UserChartEntity, ChartPermission, ChartMessage, ChartColumnEmbedded, ChartParameterEmbedded, ChartScriptEntity, ChartScriptParameterEmbedded, ChartRequest,
     GroupByChart, ChartColumnType, IChartBase } from './Signum.Entities.Chart'
-import { QueryTokenEntity } from '../UserAssets/Signum.Entities.UserAssets'
+import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import ChartButton from './ChartButton'
 import ChartRequestView from './Templates/ChartRequestView'
 import * as UserChartClient from './UserChart/UserChartClient'
@@ -192,7 +193,7 @@ export function synchronizeColumns(chart: IChartBase) {
 
     for (let i = 0; i < chartScript.columns!.length; i++) {
         if (chart.columns.length <= i) {
-            chart.columns.push({ rowId: null, element: ChartColumnEntity.New() });
+            chart.columns.push({ rowId: null, element: ChartColumnEmbedded.New() });
         }
     }
 
@@ -211,7 +212,7 @@ export function synchronizeColumns(chart: IChartBase) {
             let cp = byName[sp.element.name!];
 
             if (cp == undefined) {
-                cp = ChartParameterEntity.New();
+                cp = ChartParameterEmbedded.New();
                 cp.name = sp.element.name;
                 const column = sp.element.columnIndex == undefined ? undefined : chart.columns![sp.element.columnIndex].element;
                 cp.value = defaultParameterValue(sp.element, column && column.token && column.token.token);
@@ -243,7 +244,7 @@ export function synchronizeColumns(chart: IChartBase) {
             const sc = chart.chartScript!.columns![i]
             if (chart.groupResults == false || sc && sc.element.isGroupKey) {
                 const parentToken = cc.token.token!.parent;
-                cc.token = parentToken == undefined ? undefined : QueryTokenEntity.New({
+                cc.token = parentToken == undefined ? undefined : QueryTokenEmbedded.New({
                     tokenString : parentToken && parentToken.fullKey,
                     token : parentToken
                 });
@@ -265,7 +266,7 @@ export function synchronizeColumns(chart: IChartBase) {
     }
 }
 
-function isValidParameterValue(value: string | null | undefined, scrptParameter: ChartScriptParameterEntity, relatedColumn: QueryToken | null | undefined) {
+function isValidParameterValue(value: string | null | undefined, scrptParameter: ChartScriptParameterEmbedded, relatedColumn: QueryToken | null | undefined) {
 
     switch (scrptParameter.type) {
         case "Enum": return scrptParameter.enumValues.filter(a => a.typeFilter == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, a.typeFilter)).some(a => a.name == value);
@@ -276,7 +277,7 @@ function isValidParameterValue(value: string | null | undefined, scrptParameter:
 
 }
 
-function defaultParameterValue(scriptParameter: ChartScriptParameterEntity, relatedColumn: QueryToken | null |  undefined) {
+function defaultParameterValue(scriptParameter: ChartScriptParameterEmbedded, relatedColumn: QueryToken | null |  undefined) {
 
     switch (scriptParameter.type) {
         case "Enum": return scriptParameter.enumValues.filter(a => a.typeFilter == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, a.typeFilter)).first().name;
@@ -308,11 +309,11 @@ export module Encoder {
 
     const scapeTilde = Finder.Encoder.scapeTilde;
 
-    export function encodeColumn(query: any, columns: MList<ChartColumnEntity>) {
+    export function encodeColumn(query: any, columns: MList<ChartColumnEmbedded>) {
         if (columns)
             columns.forEach((co, i) => query["column" + i] = (co.element.token ? co.element.token.tokenString : "") + (co.element.displayName ? ("~" + scapeTilde(co.element.displayName)) : ""));
     }
-    export function encodeParameters(query: any, parameters: MList<ChartParameterEntity>) {
+    export function encodeParameters(query: any, parameters: MList<ChartParameterEmbedded>) {
         if (parameters)
             parameters.map((p, i) => query["param" + i] = scapeTilde(p.element.name!) + "~" + scapeTilde(p.element.value!));
     }
@@ -363,14 +364,14 @@ export module Decoder {
     const unscapeTildes = Finder.Decoder.unscapeTildes;
     const valuesInOrder = Finder.Decoder.valuesInOrder;
 
-    export function decodeColumns(query: any): MList<ChartColumnEntity> {
+    export function decodeColumns(query: any): MList<ChartColumnEmbedded> {
         return valuesInOrder(query, "column").map(val => {
             const ts = (val.contains("~") ? val.before("~") : val).trim();
 
             return ({
                 rowId: null,
-                element: ChartColumnEntity.New({
-                    token: !!ts ? QueryTokenEntity.New({
+                element: ChartColumnEmbedded.New({
+                    token: !!ts ? QueryTokenEmbedded.New({
                         tokenString: ts,
                     }) : undefined,
                     displayName: unscapeTildes(val.tryAfter("~")),
@@ -379,10 +380,10 @@ export module Decoder {
         });
     }
 
-    export function decodeParameters(query: any): MList<ChartParameterEntity> {
+    export function decodeParameters(query: any): MList<ChartParameterEmbedded> {
         return valuesInOrder(query, "param").map(val => ({
             rowId: null,
-            element: ChartParameterEntity.New({
+            element: ChartParameterEmbedded.New({
                 name : unscapeTildes(val.before("~")),
                 value : unscapeTildes(val.after("~")),
             })

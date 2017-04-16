@@ -11,7 +11,7 @@ import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constru
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import FileLine, { FileTypeSymbol } from '../../Files/FileLine'
-import { DashboardEntity, PanelPartEntity, IPartEntity } from '../Signum.Entities.Dashboard'
+import { DashboardEntity, PanelPartEmbedded, IPartEntity } from '../Signum.Entities.Dashboard'
 import DashboardView from './DashboardView'
 
 

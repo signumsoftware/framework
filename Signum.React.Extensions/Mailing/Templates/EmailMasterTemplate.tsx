@@ -4,7 +4,7 @@ import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, Ent
 import { SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { EmailMasterTemplateEntity, EmailMasterTemplateMessageEntity, EmailTemplateViewMessage, EmailTemplateMessage } from '../Signum.Entities.Mailing'
+import { EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailTemplateViewMessage, EmailTemplateMessage } from '../Signum.Entities.Mailing'
 import TemplateControls from '../../Templating/TemplateControls'
 import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
 import IFrameRenderer from './IFrameRenderer'
@@ -17,8 +17,8 @@ export default class EmailMasterTemplate extends React.Component<{ ctx: TypeCont
 
         return (
             <div>
-                <ValueLine ctx={e.subCtx(f => f.name) }  />
-                <EntityTabRepeater ctx={e.subCtx(a => a.messages) } onChange={() => this.forceUpdate() } getComponent={(ctx: TypeContext<EmailMasterTemplateMessageEntity>) =>
+                <ValueLine ctx={e.subCtx(f => f.name)} />
+                <EntityTabRepeater ctx={e.subCtx(a => a.messages)} onChange={() => this.forceUpdate()} getComponent={(ctx: TypeContext<EmailMasterTemplateMessageEmbedded>) =>
                     <EmailTemplateMessageComponent ctx={ctx} invalidate={() => this.forceUpdate() } /> } />
             </div>
         );
@@ -26,7 +26,7 @@ export default class EmailMasterTemplate extends React.Component<{ ctx: TypeCont
 }
 
 export interface EmailMasterTemplateMessageComponentProps {
-    ctx: TypeContext<EmailMasterTemplateMessageEntity>;
+    ctx: TypeContext<EmailMasterTemplateMessageEmbedded>;
     invalidate: () => void;
 }
 

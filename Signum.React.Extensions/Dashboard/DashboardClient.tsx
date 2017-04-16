@@ -19,10 +19,10 @@ import * as AuthClient  from '../../../Extensions/Signum.React.Extensions/Author
 import * as ChartClient from '../../../Extensions/Signum.React.Extensions/Chart/ChartClient'
 import * as UserChartClient from '../../../Extensions/Signum.React.Extensions/Chart/UserChart/UserChartClient'
 import * as UserQueryClient from '../../../Extensions/Signum.React.Extensions/UserQueries/UserQueryClient'
-import { QueryFilterEntity, QueryColumnEntity, QueryOrderEntity } from '../UserQueries/Signum.Entities.UserQueries'
+import { QueryFilterEmbedded, QueryColumnEmbedded, QueryOrderEmbedded } from '../UserQueries/Signum.Entities.UserQueries'
 
 import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, DashboardEmbedededInEntity } from './Signum.Entities.Dashboard'
-import { QueryTokenEntity } from '../UserAssets/Signum.Entities.UserAssets'
+import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 
 

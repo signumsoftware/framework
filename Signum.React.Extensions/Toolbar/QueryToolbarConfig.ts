@@ -9,7 +9,7 @@ import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { QueryEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From, registerToString, JavascriptMessage, toLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEntity, ToolbarElementType } from './Signum.Entities.Toolbar'
+import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType } from './Signum.Entities.Toolbar'
 import { ToolbarConfig, ToolbarResponse } from './ToolbarClient'
 
 export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {

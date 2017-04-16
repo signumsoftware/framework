@@ -9,7 +9,7 @@ import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import FileLine, {FileTypeSymbol} from '../../Files/FileLine'
-import { LinkListPartEntity, LinkElementEntity} from '../Signum.Entities.Dashboard'
+import { LinkListPartEntity, LinkElementEmbedded } from '../Signum.Entities.Dashboard'
 
 
 export default class ValueSearchControlPart extends React.Component<{ ctx: TypeContext<LinkListPartEntity> }, void> {
@@ -24,7 +24,7 @@ export default class ValueSearchControlPart extends React.Component<{ ctx: TypeC
         );
     }
 
-    renderLink = (tc: TypeContext<LinkElementEntity>) => {
+    renderLink = (tc: TypeContext<LinkElementEmbedded>) => {
         return (
             <div>
                 <ValueLine ctx={tc.subCtx(cuq => cuq.label) }  />

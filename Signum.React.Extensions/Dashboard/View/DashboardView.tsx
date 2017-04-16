@@ -13,7 +13,7 @@ import { TypeContext, FormGroupStyle, mlistItemContext } from '../../../../Frame
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import FileLine, { FileTypeSymbol } from '../../Files/FileLine'
 import * as DashboardClient from '../DashboardClient'
-import { DashboardEntity, PanelPartEntity, IPartEntity } from '../Signum.Entities.Dashboard'
+import { DashboardEntity, PanelPartEmbedded, IPartEntity } from '../Signum.Entities.Dashboard'
 
 
 
@@ -57,7 +57,7 @@ export default class DashboardView extends React.Component<{ dashboard: Dashboar
 }
 
 export interface PanelPartProps {
-    ctx: TypeContext<PanelPartEntity>;
+    ctx: TypeContext<PanelPartEmbedded>;
     entity?: Entity;
 }
 

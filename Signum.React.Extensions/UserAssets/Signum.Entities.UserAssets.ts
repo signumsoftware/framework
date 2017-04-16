@@ -10,7 +10,7 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 import { QueryToken } from '../../../Framework/Signum.React/Scripts/FindOptions' 
 
-export interface QueryTokenEntity {
+export interface QueryTokenEmbedded {
     token?: QueryToken;
     parseException?: string;
 }
