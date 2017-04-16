@@ -6,11 +6,11 @@ import { SubTokensOptions, QueryToken, QueryTokenType, hasAnyOrAll } from '../..
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString, getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { ToolbarElementEntity } from '../Signum.Entities.Toolbar'
+import { ToolbarElementEmbedded } from '../Signum.Entities.Toolbar'
 import { ColorTypeaheadLine } from '../../Basics/Templates/ColorTypeahead'
 import { IconTypeaheadLine } from '../../Basics/Templates/IconTypeahead'
 
-export default class ToolbarElement extends React.Component<{ ctx: TypeContext<ToolbarElementEntity> }, void> {
+export default class ToolbarElement extends React.Component<{ ctx: TypeContext<ToolbarElementEmbedded> }, void> {
 
     handleTypeChanges = () => {
         var a = this.props.ctx.value;

@@ -5,10 +5,10 @@ import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, Ent
 import { SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString, getMixin }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { EmailMessageEntity, EmailAddressEntity, EmailRecipientEntity, EmailAttachmentEntity,
+import { EmailMessageEntity, EmailAddressEmbedded, EmailRecipientEntity, EmailAttachmentEmbedded,
     EmailReceptionMixin, EmailFileType
 } from '../Signum.Entities.Mailing'
-import { EmailTemplateEntity, EmailTemplateContactEntity, EmailTemplateRecipientEntity, EmailTemplateMessageEntity, EmailTemplateViewMessage, EmailTemplateMessage } from '../Signum.Entities.Mailing'
+import { EmailTemplateEntity, EmailTemplateContactEmbedded, EmailTemplateRecipientEntity, EmailTemplateMessageEmbedded, EmailTemplateViewMessage, EmailTemplateMessage } from '../Signum.Entities.Mailing'
 import FileLine from '../../Files/FileLine'
 import IFrameRenderer from './IFrameRenderer'
 import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
@@ -88,7 +88,7 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
     };
 
 
-    renderAttachment = (ec: TypeContext<EmailAttachmentEntity>) => {
+    renderAttachment = (ec: TypeContext<EmailAttachmentEmbedded>) => {
         const sc = ec.subCtx({ formGroupStyle: "SrOnly" });
         return (
             <div>

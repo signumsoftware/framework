@@ -9,7 +9,7 @@ import { FindOptions, ValueSearchControl } from '../../../Framework/Signum.React
 import { QueryEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { Lite, Entity, EntityPack, liteKey } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEntity, ToolbarElementType } from '../Toolbar/Signum.Entities.Toolbar'
+import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType } from '../Toolbar/Signum.Entities.Toolbar'
 import { ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
 import * as UserQueryClient from './UserQueryClient'
 import { UserQueryEntity } from './Signum.Entities.UserQueries'

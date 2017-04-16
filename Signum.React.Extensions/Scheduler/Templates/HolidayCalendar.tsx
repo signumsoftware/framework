@@ -3,7 +3,7 @@ import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
 import {SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { HolidayCalendarEntity, HolidayEntity } from '../Signum.Entities.Scheduler'
+import { HolidayCalendarEntity, HolidayEmbedded } from '../Signum.Entities.Scheduler'
 
 export default class HolidayCalendar extends React.Component<{ ctx: TypeContext<HolidayCalendarEntity> }, void> {
 
@@ -15,7 +15,7 @@ export default class HolidayCalendar extends React.Component<{ ctx: TypeContext<
             <div>    
                 <ValueLine ctx={e.subCtx(f => f.name)}  />
                 <div>
-                    <EntityRepeater ctx={e.subCtx(f => f.holidays) } getComponent={(ctx: TypeContext<HolidayEntity>) => {
+                    <EntityRepeater ctx={e.subCtx(f => f.holidays)} getComponent={(ctx: TypeContext<HolidayEmbedded>) => {
                         const ct4 = ctx.subCtx({ labelColumns: { sm: 4 } });
                         return (
                             <div className="row">

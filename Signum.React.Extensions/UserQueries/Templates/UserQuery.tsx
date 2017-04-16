@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { UserQueryEntity, UserQueryMessage, QueryFilterEntity, QueryOrderEntity, QueryColumnEntity } from '../Signum.Entities.UserQueries'
+import { UserQueryEntity, UserQueryMessage, QueryFilterEmbedded, QueryOrderEmbedded, QueryColumnEmbedded } from '../Signum.Entities.UserQueries'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
@@ -64,7 +64,7 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
         );
     }
 
-    renderFilter = (ctx: TypeContext<QueryFilterEntity>) => {
+    renderFilter = (ctx: TypeContext<QueryFilterEmbedded>) => {
         const ctx2 = ctx.subCtx({ formGroupStyle: "None" });
         return (
             <div>
@@ -80,7 +80,7 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
         );
     }
 
-    renderColumn = (ctx: TypeContext<QueryColumnEntity>) => {
+    renderColumn = (ctx: TypeContext<QueryColumnEmbedded>) => {
         const ctx2 = ctx.subCtx({ formGroupStyle: "None" });
         return (
             <div>
@@ -95,7 +95,7 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
         );
     }
 
-    renderOrder = (ctx: TypeContext<QueryOrderEntity>) => {
+    renderOrder = (ctx: TypeContext<QueryOrderEmbedded>) => {
         const ctx2 = ctx.subCtx({ formGroupStyle: "None" });
         return (
             <div>

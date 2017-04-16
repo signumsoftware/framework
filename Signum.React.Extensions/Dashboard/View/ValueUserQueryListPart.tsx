@@ -12,7 +12,7 @@ import { ValueSearchControlLine } from '../../../../Framework/Signum.React/Scrip
 import { TypeContext, FormGroupStyle, mlistItemContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
-import { ValueUserQueryListPartEntity, ValueUserQueryElementEntity } from '../Signum.Entities.Dashboard'
+import { ValueUserQueryListPartEntity, ValueUserQueryElementEmbedded } from '../Signum.Entities.Dashboard'
 
 export default class ValueUserQueryListPart extends React.Component<{ part: ValueUserQueryListPartEntity; entity: Lite<Entity>}, void> {
     
@@ -35,7 +35,7 @@ export default class ValueUserQueryListPart extends React.Component<{ part: Valu
 }
 
 export interface ValueUserQueryElementProps {
-    ctx: TypeContext<ValueUserQueryElementEntity>
+    ctx: TypeContext<ValueUserQueryElementEmbedded>
     entity?: Lite<Entity>; 
 }
 

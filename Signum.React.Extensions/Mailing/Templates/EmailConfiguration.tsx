@@ -4,9 +4,9 @@ import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, Ent
 import { SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { EmailConfigurationEntity } from '../Signum.Entities.Mailing'
+import { EmailConfigurationEmbedded } from '../Signum.Entities.Mailing'
 
-export default class EmailConfiguration extends React.Component<{ ctx: TypeContext<EmailConfigurationEntity> }, void> {
+export default class EmailConfiguration extends React.Component<{ ctx: TypeContext<EmailConfigurationEmbedded> }, void> {
 
     render() {
 

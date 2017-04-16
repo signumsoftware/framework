@@ -25,7 +25,7 @@ export interface ChartRequest {
     orders: OrderRequest[];
 }
 
-export interface ChartScriptParameterEntity {
+export interface ChartScriptParameterEmbedded {
     enumValues: { name: string, typeFilter : ChartColumnType }[];
 }
 

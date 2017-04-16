@@ -11,18 +11,18 @@ import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEntity, ToolbarElementType } from './Signum.Entities.Toolbar'
+import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType } from './Signum.Entities.Toolbar'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
 
 export function start(...configs: ToolbarConfig<any>[]) {
     Navigator.addSettings(new EntitySettings(ToolbarEntity, t => new ViewPromise(resolve => require(['./Templates/Toolbar'], resolve))));
     Navigator.addSettings(new EntitySettings(ToolbarMenuEntity, t => new ViewPromise(resolve => require(['./Templates/ToolbarMenu'], resolve))));
-    Navigator.addSettings(new EntitySettings(ToolbarElementEntity, t => new ViewPromise(resolve => require(['./Templates/ToolbarElement'], resolve))));   
+    Navigator.addSettings(new EntitySettings(ToolbarElementEmbedded, t => new ViewPromise(resolve => require(['./Templates/ToolbarElement'], resolve))));   
 
 
     Finder.addSettings({ queryName: ToolbarEntity, defaultOrderColumn: "Priority", defaultOrderType: "Descending" });
 
-    Constructor.registerConstructor(ToolbarElementEntity, tn => ToolbarElementEntity.New({ type : "Link" }));
+    Constructor.registerConstructor(ToolbarElementEmbedded, tn => ToolbarElementEmbedded.New({ type: "Link" }));
 
     configs.forEach(c => registerConfig(c));
 }

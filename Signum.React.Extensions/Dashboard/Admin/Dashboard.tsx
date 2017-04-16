@@ -11,7 +11,7 @@ import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorMo
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import FileLine, {FileTypeSymbol} from '../../Files/FileLine'
-import { DashboardEntity, PanelPartEntity, IPartEntity } from '../Signum.Entities.Dashboard'
+import { DashboardEntity, PanelPartEmbedded, IPartEntity } from '../Signum.Entities.Dashboard'
 import { EntityGridRepeater, EntityGridItem } from './EntityGridRepeater'
 
 
@@ -69,14 +69,14 @@ export default class Dashboard extends React.Component<{ ctx: TypeContext<Dashbo
                 if (ti == undefined)
                     return undefined;
 
-                return PanelPartEntity.New({
+                return PanelPartEmbedded.New({
                     content : basicConstruct(ti.name) as any as IPartEntity,
                     style : "Default"
                 });
             });
     }
 
-    renderPart = (tc: TypeContext<PanelPartEntity>) => {
+    renderPart = (tc: TypeContext<PanelPartEmbedded>) => {
 
         const title = (
             <div>

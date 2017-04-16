@@ -1,8 +1,8 @@
 ﻿import * as React from 'react'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOptionParsed, OrderOptionParsed, OrderType } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity, ChartRequest, GroupByChart, ChartMessage,
-   ChartColorEntity, ChartScriptEntity, ChartParameterEntity, ChartParameterType } from '../Signum.Entities.Chart'
+import { ChartColumnEmbedded, ChartScriptColumnEmbedded, ChartScriptParameterEmbedded, ChartRequest, GroupByChart, ChartMessage,
+   ChartColorEntity, ChartScriptEntity, ChartParameterEmbedded, ChartParameterType } from '../Signum.Entities.Chart'
 
 export default class ChartTable extends React.Component<{ resultTable: ResultTable, chartRequest: ChartRequest, onRedraw: () => void }, void> {
 

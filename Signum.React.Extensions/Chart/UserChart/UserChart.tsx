@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
-import { UserQueryEntity, UserQueryMessage, QueryFilterEntity, QueryOrderEntity, QueryColumnEntity } from '../../UserQueries/Signum.Entities.UserQueries'
+import { UserQueryEntity, UserQueryMessage, QueryFilterEmbedded, QueryOrderEmbedded, QueryColumnEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
 import ChartBuilder from '../Templates/ChartBuilder'
-import { UserChartEntity, ChartColumnEntity} from '../Signum.Entities.Chart'
+import { UserChartEntity, ChartColumnEmbedded } from '../Signum.Entities.Chart'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
@@ -73,7 +73,7 @@ export default class UserChart extends React.Component<{ ctx: TypeContext<UserCh
         }
     }
 
-    renderFilter = (ctx: TypeContext<QueryFilterEntity>) => {
+    renderFilter = (ctx: TypeContext<QueryFilterEmbedded>) => {
         const ctx2 = ctx.subCtx({ formGroupStyle: "None" });
         return (
             <div>
@@ -89,7 +89,7 @@ export default class UserChart extends React.Component<{ ctx: TypeContext<UserCh
         );
     }
 
-    renderOrder = (ctx: TypeContext<QueryOrderEntity>) => {
+    renderOrder = (ctx: TypeContext<QueryOrderEmbedded>) => {
         const ctx2 = ctx.subCtx({ formGroupStyle: "None" });
         return (
             <div>

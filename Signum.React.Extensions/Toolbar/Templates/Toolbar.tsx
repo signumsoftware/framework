@@ -6,7 +6,7 @@ import { SubTokensOptions, QueryToken, QueryTokenType, hasAnyOrAll } from '../..
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString, getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { ToolbarEntity, ToolbarElementEntity } from '../Signum.Entities.Toolbar'
+import { ToolbarEntity, ToolbarElementEmbedded } from '../Signum.Entities.Toolbar'
 
 export default class Toolbar extends React.Component<{ ctx: TypeContext<ToolbarEntity> }, void> {
     
