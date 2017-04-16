@@ -129,10 +129,32 @@ function updateHtmlEditorTextArea(idTargetTextArea: string) {
     SF.setHasChanges(idTargetTextArea.get());
 };
 
-export function initHtmlEditor(idTargetTextArea: string, culture: string) {
+export function initHtmlEditor(idTargetTextArea: string, culture: string, mobile: boolean) {
 
     CKEDITOR.config.scayt_sLang = culture.replace("-", "_");
-    CKEDITOR.replace(idTargetTextArea);
+
+    if (mobile) {
+        var toolbarMobile = [
+            //{ name: 'document', items: ['Source'] },
+            //{ name: 'clipboard', items: ['Cut', 'Copy', 'Paste', 'PasteText'] },
+            //{ name: 'editing', items: ['SelectAll', '-', 'Scayt'] },
+            //{ name: 'insert', items: ['Link', 'Unlink', 'addImage', 'Table'] },
+            //{ name: 'tools', items: ['Preview', '-', 'Maximize'] },
+            //{ name: 'styles', items: ['Font', 'FontSize'] },
+            { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', '-', 'RemoveFormat'] },
+            { name: 'colors', items: ['TextColor', 'BGColor'] },
+            { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote'] },
+        ];
+
+        //var config = {};
+        var config = CKEDITOR.config;
+        config.toolbar = toolbarMobile;
+        //CKEDITOR.instances.editor1.destroy();//destroy the existing editor
+        CKEDITOR.replace(idTargetTextArea, config);
+    }
+    else {
+        CKEDITOR.replace(idTargetTextArea);
+    }
 
     // Update origin textarea
     // Make this more elegant once http://dev.ckeditor.com/ticket/9794 is fixed.
@@ -153,7 +175,7 @@ export function initHtmlEditor(idTargetTextArea: string, culture: string) {
 
 export function initHtmlEditorMasterTemplate(idTargetTextArea: string, culture: string) {
 
-    initHtmlEditor(idTargetTextArea, culture);
+    initHtmlEditor(idTargetTextArea, culture,false);
 
     var $insertContent = $("#" + idTargetTextArea).closest(".sf-email-template-message")
         .find(".sf-master-template-insert-content");
@@ -166,7 +188,7 @@ export function initHtmlEditorMasterTemplate(idTargetTextArea: string, culture: 
 
 export function initHtmlEditorWithTokens(idTargetTextArea: string, culture: string) {
 
-    initHtmlEditor(idTargetTextArea, culture);
+    initHtmlEditor(idTargetTextArea, culture,false);
 
     var lastCursorPosition;
 
