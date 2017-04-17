@@ -4,9 +4,10 @@ import {
     FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityTable,
     EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip, RenderEntity
 } from '../../../../Framework/Signum.React/Scripts/Lines'
+
 import { ModifiableEntity, Entity, Lite, isEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
+import * as Finder from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { FindOptions, SearchControl, ValueSearchControlLine } from '../../../../Framework/Signum.React/Scripts/Search'
 import {
@@ -28,6 +29,9 @@ import { getDynamicViewPromise, registeredCustomContexts } from '../DynamicViewC
 import { toFindOptions, FindOptionsExpr } from './FindOptionsExpression'
 import { toHtmlAttributes, HtmlAttributesExpression, withClassName } from './HtmlAttributesExpression'
 import { toStyleOptions, subCtx, StyleOptionsExpression } from './StyleOptionsExpression'
+import FileLine from "../../Files/FileLine";
+import { DownloadBehaviour } from "../../Files/FileDownloader";
+import { registerSymbol } from "../../../../Framework/Signum.React/Scripts/Reflection";
 
 export interface BaseNode {
     kind: string;
@@ -538,6 +542,90 @@ NodeUtils.register<EntityDetailNode>({
     renderDesigner: dn => NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: false, showAutoComplete: false }),
 });
 
+export interface FileLineNode extends EntityBaseNode {
+    kind: "FileLine",
+    download?: ExpressionOrValue<DownloadBehaviour>;
+    dragAndDrop?: ExpressionOrValue<boolean>;
+    dragAndDropMessage?: ExpressionOrValue<string>;
+    fileType?: ExpressionOrValue<string>;
+    accept?: ExpressionOrValue<string>;
+}
+
+const DownloadBehaviours: DownloadBehaviour[] = ["SaveAs", "View", "None"];
+
+NodeUtils.register<FileLineNode>({
+    kind: "FileLine",
+    group: "Property",
+    order: 4,
+    isContainer: false,
+    hasEntity: true,
+    validate: (dn, ctx) => NodeUtils.validateFieldMandatory(dn),
+    renderTreeNode: NodeUtils.treeNodeKindField,
+    renderCode: (node, cc) => cc.elementCode("FileLine", {
+        ctx: cc.subCtxCode(node.field, node.styleOptions),
+        labelText: node.labelText,
+        labelHtmlAttributes: node.labelHtmlAttributes,
+        formGroupHtmlAttributes: node.formGroupHtmlAttributes,
+        visible: node.visible,
+        readOnly: node.readOnly,
+        remove: node.remove,
+        download: node.download,
+        dragAndDrop: node.dragAndDrop,
+        dragAndDropMessage: node.dragAndDropMessage,
+        fileType: bindExpr(key => registerSymbol("FileType", key), node.fileType),
+        accept: node.accept,
+        onChange: cc.evaluateOnChange(node.redrawOnChange)
+    }),
+    render: (dn, parentCtx) => (<FileLine
+        ctx={parentCtx.subCtx(NodeUtils.asFieldFunction(dn.node.field), toStyleOptions(parentCtx, dn.node.styleOptions))}
+        labelText={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
+        labelHtmlAttributes={toHtmlAttributes(parentCtx, dn.node.labelHtmlAttributes)}
+        formGroupHtmlAttributes={toHtmlAttributes(parentCtx, dn.node.formGroupHtmlAttributes)}
+        visible={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.visible, NodeUtils.isBooleanOrNull)}
+        readOnly={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
+        remove={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.remove, NodeUtils.isBooleanOrNull)}
+        download={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.download, a => NodeUtils.isInListOrNull(a, DownloadBehaviours))}
+        dragAndDrop={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.dragAndDrop, NodeUtils.isBooleanOrNull)}
+        dragAndDropMessage={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.dragAndDropMessage, NodeUtils.isStringOrNull)}
+        fileType={toFileTypeSymbol(NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.fileType, NodeUtils.isStringOrNull))}
+        accept={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.accept, NodeUtils.isStringOrNull)}
+        onChange={NodeUtils.evaluateOnChange(parentCtx, dn)}
+    />),
+    renderDesigner: dn => {
+        const m = dn.route && dn.route.member;
+        return (
+            <div>
+                <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
+                <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
+                <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
+                <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
+                <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
+                <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
+                <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.remove)} type="boolean" defaultValue={null} />
+                <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.download)} type="string" defaultValue={null} options={DownloadBehaviours} />
+                <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.dragAndDrop)} type="boolean" defaultValue={null} />
+                <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.dragAndDropMessage)} type="string" defaultValue={null} />
+                <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.fileType)} type="string" defaultValue={null} options={getFileTypes()} />
+                <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.accept)} type="string" defaultValue={null} />
+                <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.redrawOnChange)} type="boolean" defaultValue={null} />
+            </div>
+        );
+    }
+});
+
+function getFileTypes() {
+    return getAllTypes()
+        .filter(a => a.kind == "SymbolContainer" && a.name.endsWith("FileType"))
+        .flatMap(t => Dic.getValues(t.members).map(m => t.name + "." + m.name));
+}
+
+function toFileTypeSymbol(fileTypeKey?: string)
+{
+    if (fileTypeKey == undefined)
+        return undefined;
+
+    return registerSymbol("FileType", fileTypeKey);
+}
 
 export interface EnumCheckboxListNode extends LineBaseNode {
     kind: "EnumCheckboxList",
