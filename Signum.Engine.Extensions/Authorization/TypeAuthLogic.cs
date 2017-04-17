@@ -276,7 +276,7 @@ namespace Signum.Engine.Authorization
                 return new TypeAllowedAndConditions(null);
 
             return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback.Value)),
-                conditions.Select((c, i) => new TypeConditionRule(c, maxMerge(baseRules.Where(br => !br.Conditions.IsNullOrEmpty()).Select(br => br.Conditions[i].Allowed)))).ToArray());
+                conditions.Select((c, i) => new TypeConditionRuleEmbedded(c, maxMerge(baseRules.Where(br => !br.Conditions.IsNullOrEmpty()).Select(br => br.Conditions[i].Allowed)))).ToArray());
         }
 
 

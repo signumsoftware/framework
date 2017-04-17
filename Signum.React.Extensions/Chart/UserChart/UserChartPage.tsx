@@ -8,8 +8,8 @@ import { TypeContext, FormGroupSize, FormGroupStyle, StyleOptions, StyleContext,
 import { SearchMessage, JavascriptMessage, parseLite, is, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { PropertyRoute, getQueryNiceName, getTypeInfo, Binding, GraphExplorer }  from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity, ChartRequest, GroupByChart, ChartMessage,
-    ChartColorEntity, ChartScriptEntity, ChartParameterEntity, ChartParameterType, UserChartEntity } from '../Signum.Entities.Chart'
+import { ChartColumnEmbedded, ChartScriptColumnEmbedded, ChartScriptParameterEmbedded, ChartRequest, GroupByChart, ChartMessage,
+    ChartColorEntity, ChartScriptEntity, ChartParameterEmbedded, ChartParameterType, UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import * as UserChartClient from './UserChartClient'
 import ChartRequestView from '../Templates/ChartRequestView'

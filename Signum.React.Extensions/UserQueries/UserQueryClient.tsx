@@ -12,8 +12,8 @@ import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import { FindOptionsParsed, FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption, FilterRequest, QueryRequest, Pagination } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import * as AuthClient  from '../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
 import { UserQueryEntity, UserQueryPermission, UserQueryMessage,
-    QueryFilterEntity, QueryColumnEntity, QueryOrderEntity} from './Signum.Entities.UserQueries'
-import { QueryTokenEntity, } from '../UserAssets/Signum.Entities.UserAssets'
+    QueryFilterEmbedded, QueryColumnEmbedded, QueryOrderEmbedded } from './Signum.Entities.UserQueries'
+import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import UserQueryMenu from './UserQueryMenu'
 import * as UserAssetsClient from '../UserAssets/UserAssetClient'
 import { LoadRoute } from "../../../Framework/Signum.React/Scripts/LoadComponent";
@@ -62,9 +62,9 @@ export function start(options: { routes: JSX.Element[] }) {
             }).done();
         }, { isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery) }));
 
-    Constructor.registerConstructor<QueryFilterEntity>(QueryFilterEntity, () => QueryFilterEntity.New({ token: QueryTokenEntity.New() }));
-    Constructor.registerConstructor<QueryOrderEntity>(QueryOrderEntity, () => QueryOrderEntity.New({token : QueryTokenEntity.New() }));
-    Constructor.registerConstructor<QueryColumnEntity>(QueryColumnEntity, () => QueryColumnEntity.New({ token : QueryTokenEntity.New() }));
+    Constructor.registerConstructor<QueryFilterEmbedded>(QueryFilterEmbedded, () => QueryFilterEmbedded.New({ token: QueryTokenEmbedded.New() }));
+    Constructor.registerConstructor<QueryOrderEmbedded>(QueryOrderEmbedded, () => QueryOrderEmbedded.New({token : QueryTokenEmbedded.New() }));
+    Constructor.registerConstructor<QueryColumnEmbedded>(QueryColumnEmbedded, () => QueryColumnEmbedded.New({ token : QueryTokenEmbedded.New() }));
 
     Navigator.addSettings(new EntitySettings(UserQueryEntity, e => _import('./Templates/UserQuery'), { isCreable: "Never" }));
 }

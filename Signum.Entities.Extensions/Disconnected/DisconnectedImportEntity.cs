@@ -26,7 +26,7 @@ namespace Signum.Entities.Disconnected
         public int? DisableForeignKeys { get; set; }
 
         [NotNullable, PreserveOrder]
-        public MList<DisconnectedImportTableEntity> Copies { get; set; } = new MList<DisconnectedImportTableEntity>();
+        public MList<DisconnectedImportTableEmbedded> Copies { get; set; } = new MList<DisconnectedImportTableEmbedded>();
 
         [Unit("ms")]
         public int? Unlock { get; set; }
@@ -106,7 +106,7 @@ namespace Signum.Entities.Disconnected
     }
 
     [Serializable]
-    public class DisconnectedImportTableEntity : EmbeddedEntity
+    public class DisconnectedImportTableEmbedded : EmbeddedEntity
     {
         [NotNullValidator]
         public Lite<TypeEntity> Type { get; set; }

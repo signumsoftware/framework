@@ -11,7 +11,7 @@ import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { Type } from '../../../Framework/Signum.React/Scripts/Reflection'
 import DynamicComponent from '../../../Framework/Signum.React/Scripts/Lines/DynamicComponent'
-import { FileEntity, FilePathEntity, EmbeddedFileEntity, EmbeddedFilePathEntity, IFile } from './Signum.Entities.Files'
+import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded, IFile } from './Signum.Entities.Files'
 import FileLine from './FileLine'
 import CellFormatter = Finder.CellFormatter;
 import { Lite, Entity, ModifiableEntity } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
@@ -19,11 +19,11 @@ import { Lite, Entity, ModifiableEntity } from "../../../Framework/Signum.React/
 export function start(options: { routes: JSX.Element[] }) {
 
     registerAutoFileLine(FileEntity);
-    registerAutoFileLine(EmbeddedFileEntity);
+    registerAutoFileLine(FileEmbedded);
 
     //Requires FileType
     //registerAutoFileLine(FilePathEntity);
-    //registerAutoFileLine(EmbeddedFilePathEntity);
+    //registerAutoFileLine(FilePathEmbedded);
 
 
     Finder.formatRules.push({

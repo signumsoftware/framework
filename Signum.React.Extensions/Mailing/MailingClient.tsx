@@ -10,10 +10,8 @@ import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
-import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
-import { EmailMessageEntity, EmailTemplateMessageEntity, EmailMasterTemplateEntity, EmailMasterTemplateMessageEntity, EmailMessageOperation, EmailPackageEntity, EmailRecipientEntity, EmailConfigurationEntity, EmailTemplateEntity, AsyncEmailSenderPermission } from './Signum.Entities.Mailing'
-import { SmtpConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, Pop3ReceptionExceptionEntity, EmailAddressEntity } from './Signum.Entities.Mailing'
+import { EmailMessageEntity, EmailTemplateMessageEmbedded, EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailMessageOperation, EmailPackageEntity, EmailRecipientEntity, EmailConfigurationEmbedded, EmailTemplateEntity, AsyncEmailSenderPermission } from './Signum.Entities.Mailing'
+import { SmtpConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, Pop3ReceptionExceptionEntity, EmailAddressEmbedded} from './Signum.Entities.Mailing'
 import { NewsletterEntity, NewsletterDeliveryEntity, SendEmailTaskEntity } from './Signum.Entities.Mailing'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
@@ -33,24 +31,24 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
         onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/asyncEmailSender/view"))
     });
 
-    registerToString(EmailTemplateMessageEntity, a => a.cultureInfo == undefined ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName!);
-    registerToString(EmailMasterTemplateMessageEntity, a => a.cultureInfo == undefined ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName!);
+    registerToString(EmailTemplateMessageEmbedded, a => a.cultureInfo == undefined ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName!);
+    registerToString(EmailMasterTemplateMessageEmbedded, a => a.cultureInfo == undefined ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName!);
 
     Navigator.addSettings(new EntitySettings(EmailMessageEntity, e => _import('./Templates/EmailMessage')));
     Navigator.addSettings(new EntitySettings(EmailTemplateEntity, e => _import('./Templates/EmailTemplate')));
     Navigator.addSettings(new EntitySettings(EmailMasterTemplateEntity, e => _import('./Templates/EmailMasterTemplate')));
     Navigator.addSettings(new EntitySettings(EmailPackageEntity, e => _import('./Templates/EmailPackage')));
     Navigator.addSettings(new EntitySettings(EmailRecipientEntity, e => _import('./Templates/EmailRecipient')));
-    Navigator.addSettings(new EntitySettings(EmailAddressEntity, e => _import('./Templates/EmailAddress')));
-    Navigator.addSettings(new EntitySettings(EmailConfigurationEntity, e => _import('./Templates/EmailConfiguration')));
+    Navigator.addSettings(new EntitySettings(EmailAddressEmbedded, e => _import('./Templates/EmailAddress')));
+    Navigator.addSettings(new EntitySettings(EmailConfigurationEmbedded, e => _import('./Templates/EmailConfiguration')));
 
     Operations.addSettings(new EntityOperationSettings(EmailMessageOperation.CreateMailFromTemplate, {
-        onClick: (ctx,e) => {
+        onClick: (ctx) => {
             Finder.find({ queryName: ctx.entity.query!.key }).then(lite => {
                 if (!lite)
                     return;
                 Navigator.API.fetchAndForget(lite).then(entity =>
-                    EntityOperations.defaultConstructFromEntity(ctx, e, entity))
+                    ctx.defaultClick(entity))
                     .done();
             }).done();
         }

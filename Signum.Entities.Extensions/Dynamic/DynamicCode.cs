@@ -92,10 +92,15 @@ namespace Signum.Entities.Dynamic
                         .EmptyIfNull();
         }
 
-        public static string GetNamespaces()
+        public static string GetUsingNamespaces()
         {
-            return DynamicCode.CreateUsings(DynamicCode.Namespaces
-                .And(DynamicCode.CodeGenEntitiesNamespace).NotNull());
+            return DynamicCode.CreateUsings(GetNamespaces());
+        }
+
+        public static IEnumerable<string> GetNamespaces()
+        {
+            return DynamicCode.Namespaces
+                            .And(DynamicCode.CodeGenEntitiesNamespace).NotNull();
         }
 
         public static string CreateUsings(IEnumerable<string> namespaces)

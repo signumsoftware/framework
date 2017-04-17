@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Signum.Entities.Reflection;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Workflow
 {
@@ -58,7 +59,7 @@ namespace Signum.Engine.Workflow
                            already.Lane = this.lane.Entity;
                        }
 
-                       var we = (already ?? new WorkflowEventEntity { Xml = new WorkflowXmlEntity(), Lane = this.lane.Entity }).ApplyXml(e, locator);
+                       var we = (already ?? new WorkflowEventEntity { Xml = new WorkflowXmlEmbedded(), Lane = this.lane.Entity }).ApplyXml(e, locator);
                        this.events.Add(id, new XmlEntity<WorkflowEventEntity>(we));
                    },
                    (id, oe) =>
@@ -87,7 +88,7 @@ namespace Signum.Engine.Workflow
                            already.Lane = this.lane.Entity;
                        }
 
-                       var wa = (already ?? new WorkflowActivityEntity { Xml = new WorkflowXmlEntity(), Lane = this.lane.Entity }).ApplyXml(a, locator);
+                       var wa = (already ?? new WorkflowActivityEntity { Xml = new WorkflowXmlEmbedded(), Lane = this.lane.Entity }).ApplyXml(a, locator);
                        this.activities.Add(id, new XmlEntity<WorkflowActivityEntity>(wa));
                    },
                    (id, oa) =>
@@ -118,7 +119,7 @@ namespace Signum.Engine.Workflow
                            already.Lane = this.lane.Entity;
                        }
 
-                       var wg = (already ?? new WorkflowGatewayEntity { Xml = new WorkflowXmlEntity(), Lane = this.lane.Entity }).ApplyXml(g, locator);
+                       var wg = (already ?? new WorkflowGatewayEntity { Xml = new WorkflowXmlEmbedded(), Lane = this.lane.Entity }).ApplyXml(g, locator);
                        this.gateways.Add(id, new XmlEntity<WorkflowGatewayEntity>(wg));
                    },
                    (id, og) =>
@@ -166,8 +167,6 @@ namespace Signum.Engine.Workflow
             {
                 return (!this.GetActivities().Any() && !this.GetEvents().Any() && !this.GetGateways().Any());
             }
-
-    
 
             internal string GetBpmnElementId(IWorkflowNodeEntity node)
             {
@@ -267,6 +266,7 @@ namespace Signum.Engine.Workflow
                 return result;
             }
 
+          
             internal void DeleteAll(Locator locator)
             {
                 foreach (var c in connections.Values.Select(a => a.Entity))
@@ -286,10 +286,51 @@ namespace Signum.Engine.Workflow
 
                 foreach (var ac in activities.Values.Select(a => a.Entity))
                 {
-                    MoveCasesAndDelete(ac, locator);
+                    if (locator != null)
+                        MoveCasesAndDelete(ac, locator);
+                    else
+                    {
+                        DeleteCaseActivities(ac, c => true);
+                        ac.Delete(WorkflowActivityOperation.Delete);
+                    }
                 }
-                
+
                 this.lane.Entity.Delete(WorkflowLaneOperation.Delete);
+            }
+
+            internal void DeleteCaseActivities(Expression<Func<CaseEntity, bool>> filter)
+            {
+                foreach (var ac in activities.Values.Select(a => a.Entity))
+                    DeleteCaseActivities(ac, filter);
+            }
+
+            private static void DeleteCaseActivities(WorkflowActivityEntity ac, Expression<Func<CaseEntity, bool>> filter)
+            {
+                if (ac.Type == WorkflowActivityType.DecompositionWorkflow || ac.Type == WorkflowActivityType.CallWorkflow)
+                {
+                    var sw = ac.SubWorkflow.Workflow;
+                    var wb = new WorkflowBuilder(sw);
+                    wb.DeleteCases(c => filter.Evaluate(c.ParentCase) && c.ParentCase.Workflow == ac.Lane.Pool.Workflow);
+                }
+                else
+                {
+                    var caseActivities = ac.CaseActivities().Where(ca => filter.Evaluate(ca.Case));
+                    if (caseActivities.Any())
+                    {
+                        var notifications = caseActivities.SelectMany(a => a.Notifications());
+
+                        if (notifications.Any())
+                            notifications.UnsafeDelete();
+
+                        Database.Query<CaseActivityEntity>()
+                            .Where(ca => ca.Previous.Entity.WorkflowActivity.Is(ac) && filter.Evaluate(ca.Previous.Entity.Case))
+                            .UnsafeUpdate()
+                            .Set(ca => ca.Previous, ca => null)
+                            .Execute();
+
+                        caseActivities.UnsafeDelete();
+                    }
+                } 
             }
 
             private static void MoveCasesAndDelete(WorkflowActivityEntity ac, Locator locator)
@@ -302,7 +343,7 @@ namespace Signum.Engine.Workflow
                 if (ac.CaseActivities().Any())
                 {
                     ac.CaseActivities()
-                         .UnsafeUpdate()
+                        .UnsafeUpdate()
                         .Set(a => a.WorkflowActivity, a => locator.GetReplacement(ac.ToLite()))
                         .Execute();
                 }
@@ -317,8 +358,9 @@ namespace Signum.Engine.Workflow
                 {
                     Pool = pool,
                     Name = oldLane.Name,
+                    BpmnElementId = oldLane.BpmnElementId,
                     Actors = oldLane.Actors.ToMList(),
-                    ActorsEval = oldLane.ActorsEval,
+                    ActorsEval = oldLane.ActorsEval.Clone(),
                     Xml = oldLane.Xml,
                 }.Save();
 
@@ -326,11 +368,20 @@ namespace Signum.Engine.Workflow
                 {
                     Lane = newLane,
                     Name = a.Name,
-                    Comments = a.Comments,
-                    Type = a.Type,
-                    ValidationRules = a.ValidationRules.Select(vr => vr.Clone()).ToMList(),
-                    ViewName = a.ViewName,
+                    BpmnElementId = a.BpmnElementId,
                     Xml = a.Xml,
+                    Type = a.Type,
+                    ViewName = a.ViewName,
+                    RequiresOpen = a.RequiresOpen,
+                    ValidationRules = a.ValidationRules.Select(vr => vr.Clone()).ToMList(),
+                    Reject = a.Reject,
+                    Timeout = a.Timeout,
+                    EstimatedDuration = a.EstimatedDuration,
+                    Jumps = a.Jumps.Select(j => j.Clone()).ToMList(),
+                    Script = a.Script?.Clone(),
+                    SubWorkflow = a.SubWorkflow?.Clone(),
+                    UserHelp = a.UserHelp,
+                    Comments = a.Comments,
                 });
                 newActivities.Values.SaveList();
                 nodes.AddRange(newActivities.ToDictionary(kvp => (IWorkflowNodeEntity)kvp.Key, kvp => (IWorkflowNodeEntity)kvp.Value));
@@ -339,6 +390,7 @@ namespace Signum.Engine.Workflow
                 {
                     Lane = newLane,
                     Name = e.Name,
+                    BpmnElementId = e.BpmnElementId,
                     Type = e.Type,
                     Xml = e.Xml,
                 });
@@ -349,6 +401,7 @@ namespace Signum.Engine.Workflow
                 {
                     Lane = newLane,
                     Name = g.Name,
+                    BpmnElementId = g.BpmnElementId,
                     Type = g.Type,
                     Direction = g.Direction,
                     Xml = g.Xml,

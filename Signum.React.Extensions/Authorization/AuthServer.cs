@@ -32,7 +32,7 @@ namespace Signum.React.Authorization
         public static Action UserLoggingOut;
         
 
-        public static void Start(HttpConfiguration config, Func<AuthTokenConfigurationEntity> tokenConfig, string hashableEncryptionKey)
+        public static void Start(HttpConfiguration config, Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 

@@ -49,18 +49,18 @@ namespace Signum.Entities.Authorization
     public class RuleTypeEntity : RuleEntity<TypeEntity, TypeAllowed>
     {
         [NotNullable, PreserveOrder]
-        public MList<RuleTypeConditionEntity> Conditions { get; set; } = new MList<RuleTypeConditionEntity>();
+        public MList<RuleTypeConditionEmbedded> Conditions { get; set; } = new MList<RuleTypeConditionEmbedded>();
     }
 
     [Serializable]
-    public class RuleTypeConditionEntity : EmbeddedEntity, IEquatable<RuleTypeConditionEntity>
+    public class RuleTypeConditionEmbedded : EmbeddedEntity, IEquatable<RuleTypeConditionEmbedded>
     {
         [NotNullValidator]
         public TypeConditionSymbol Condition { get; set; }
 
         public TypeAllowed Allowed { get; set; }
 
-        public bool Equals(RuleTypeConditionEntity other)
+        public bool Equals(RuleTypeConditionEmbedded other)
         {
             return this.Condition.Equals(other.Condition)
                 && this.Allowed == other.Allowed;

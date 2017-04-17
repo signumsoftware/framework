@@ -31,9 +31,9 @@ namespace Signum.Windows.Scheduler
         {
             HolidayCalendarEntity cal = ((HolidayCalendarEntity)DataContext);
             if (cal == null || cal.Holidays == null || cal.Holidays.Count == 0)
-                return new HolidayEntity { Date = DateTime.Today };
+                return new HolidayEmbedded { Date = DateTime.Today };
             else
-                return new HolidayEntity { Date = cal.Holidays.Max(a => a.Date) }; 
+                return new HolidayEmbedded { Date = cal.Holidays.Max(a => a.Date) }; 
         }
     }
 }

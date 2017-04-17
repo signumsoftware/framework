@@ -176,7 +176,7 @@ namespace Signum.Engine.Help
                 entity.Properties.AddRange(
                    PropertyRouteLogic.RetrieveOrGenerateProperties(this.Type.ToTypeEntity())
                    .Except(entity.Properties.Select(a => a.Property))
-                   .Select(pr => new PropertyRouteHelpEntity
+                   .Select(pr => new PropertyRouteHelpEmbedded
                    {
                        Property = pr,
                        Description = null,
@@ -322,7 +322,7 @@ namespace Signum.Engine.Help
                 entity.Columns.AddRange(
                      DynamicQueryManager.Current.GetQuery(this.QueryName).Core.Value.StaticColumns.Select(a => a.Name)
                      .Except(entity.Columns.Select(a => a.ColumnName))
-                     .Select(pr => new QueryColumnHelpEntity
+                     .Select(pr => new QueryColumnHelpEmbedded
                      {
                          ColumnName = pr,
                          Description = null,

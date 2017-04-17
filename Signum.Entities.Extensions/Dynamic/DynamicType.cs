@@ -238,7 +238,8 @@ namespace Signum.Entities.Dynamic
     public enum DynamicBaseType
     {
         Entity,
-        Mixin
+        MixinEntity,
+        EmbeddedEntity,
     }
 
     public class DynamicProperty
@@ -350,6 +351,9 @@ namespace Signum.Entities.Dynamic
 
         string Value(object obj)
         {
+            if (obj is decimal)
+                obj = (double)(decimal)obj;
+
             return CSharpRenderer.Value(obj, obj.GetType(), null);
         }
 

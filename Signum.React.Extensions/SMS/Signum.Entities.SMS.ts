@@ -35,9 +35,9 @@ export module SMSCharactersMessage {
     export const Replacements = new MessageKey("SMSCharactersMessage", "Replacements");
 }
 
-export const SMSConfigurationEntity = new Type<SMSConfigurationEntity>("SMSConfigurationEntity");
-export interface SMSConfigurationEntity extends Entities.EmbeddedEntity {
-    Type: "SMSConfigurationEntity";
+export const SMSConfigurationEmbedded = new Type<SMSConfigurationEmbedded>("SMSConfigurationEmbedded");
+export interface SMSConfigurationEmbedded extends Entities.EmbeddedEntity {
+    Type: "SMSConfigurationEmbedded";
     defaultCulture?: Basics.CultureInfoEntity | null;
 }
 
@@ -99,7 +99,7 @@ export interface SMSTemplateEntity extends Entities.Entity {
     certified?: boolean;
     editableMessage?: boolean;
     associatedType?: Signum.TypeEntity | null;
-    messages: Entities.MList<SMSTemplateMessageEntity>;
+    messages: Entities.MList<SMSTemplateMessageEmbedded>;
     from?: string | null;
     messageLengthExceeded?: MessageLengthExceeded;
     removeNoSMSCharacters?: boolean;
@@ -116,9 +116,9 @@ export module SMSTemplateMessage {
     export const NewCulture = new MessageKey("SMSTemplateMessage", "NewCulture");
 }
 
-export const SMSTemplateMessageEntity = new Type<SMSTemplateMessageEntity>("SMSTemplateMessageEntity");
-export interface SMSTemplateMessageEntity extends Entities.EmbeddedEntity {
-    Type: "SMSTemplateMessageEntity";
+export const SMSTemplateMessageEmbedded = new Type<SMSTemplateMessageEmbedded>("SMSTemplateMessageEmbedded");
+export interface SMSTemplateMessageEmbedded extends Entities.EmbeddedEntity {
+    Type: "SMSTemplateMessageEmbedded";
     template?: SMSTemplateEntity | null;
     cultureInfo?: Basics.CultureInfoEntity | null;
     message?: string | null;

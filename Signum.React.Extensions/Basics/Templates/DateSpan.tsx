@@ -6,14 +6,14 @@ import { SubTokensOptions, QueryToken, QueryTokenType, hasAnyOrAll } from '../..
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString, getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { DateSpanEntity } from '../Signum.Entities.Basics'
+import { DateSpanEmbedded } from '../Signum.Entities.Basics'
 import { TemplateTokenMessage } from '../../Templating/Signum.Entities.Templating'
 import FileLine from '../../Files/FileLine'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import TemplateControls from '../../Templating/TemplateControls'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
-export default class DateSpan extends React.Component<{ ctx: TypeContext<DateSpanEntity> }, void> {
+export default class DateSpan extends React.Component<{ ctx: TypeContext<DateSpanEmbedded> }, void> {
 
     render() {
 

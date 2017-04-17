@@ -31,7 +31,7 @@ namespace Signum.Entities.Disconnected
         public int? DisableForeignKeys { get; set; }
 
         [NotNullable, PreserveOrder]
-        public MList<DisconnectedExportTableEntity> Copies { get; set; } = new MList<DisconnectedExportTableEntity>();
+        public MList<DisconnectedExportTableEmbedded> Copies { get; set; } = new MList<DisconnectedExportTableEmbedded>();
 
         [Unit("ms")]
         public int? EnableForeignKeys { get; set; }
@@ -126,7 +126,7 @@ namespace Signum.Entities.Disconnected
                 Lock = Lock,
                 CreateDatabase = CreateDatabase,
                 DisableForeignKeys = DisableForeignKeys,
-                Copies = Copies.Select(c => new DisconnectedExportTableEntity
+                Copies = Copies.Select(c => new DisconnectedExportTableEmbedded
                 {
                     Type = c.Type,
                     CopyTable = c.CopyTable,
@@ -151,7 +151,7 @@ namespace Signum.Entities.Disconnected
     }
 
     [Serializable]
-    public class DisconnectedExportTableEntity : EmbeddedEntity
+    public class DisconnectedExportTableEmbedded : EmbeddedEntity
     {
         [NotNullValidator]
         public Lite<TypeEntity> Type { get; set; }

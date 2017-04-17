@@ -16,18 +16,18 @@ using Signum.Entities.UserAssets;
 namespace Signum.Entities.Chart
 {
     [Serializable]
-    public class ChartColumnEntity : EmbeddedEntity
+    public class ChartColumnEmbedded : EmbeddedEntity
     {
         [Ignore]
-        ChartScriptColumnEntity scriptColumn;
+        ChartScriptColumnEmbedded scriptColumn;
         [HiddenProperty]
-        public ChartScriptColumnEntity ScriptColumn
+        public ChartScriptColumnEmbedded ScriptColumn
         {
             get { return scriptColumn; }
             set { scriptColumn = value; Notify(() => ScriptColumn); } 
         }
         
-        public ChartColumnEntity()
+        public ChartColumnEmbedded()
         {
         }
 
@@ -43,8 +43,8 @@ namespace Signum.Entities.Chart
             }
         }
 
-        QueryTokenEntity token;
-        public QueryTokenEntity Token
+        QueryTokenEmbedded token;
+        public QueryTokenEmbedded Token
         {
             get { return token; }
             set
@@ -175,7 +175,7 @@ namespace Signum.Entities.Chart
 
         internal void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Token = element.Attribute("Token")?.Let(a => new QueryTokenEntity(a.Value));
+            Token = element.Attribute("Token")?.Let(a => new QueryTokenEmbedded(a.Value));
             DisplayName = element.Attribute("DisplayName")?.Value;
         }
 

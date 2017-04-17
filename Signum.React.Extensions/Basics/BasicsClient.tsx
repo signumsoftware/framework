@@ -11,15 +11,14 @@ import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
-import { TimeSpanEntity, DateSpanEntity } from './Signum.Entities.Basics'
+import { TimeSpanEmbedded, DateSpanEmbedded } from './Signum.Entities.Basics'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 
 export function start(options: { routes: JSX.Element[] }) {
-    Navigator.addSettings(new EntitySettings(TimeSpanEntity, e => _import('./Templates/TimeSpan')));
-    Navigator.addSettings(new EntitySettings(DateSpanEntity, e => _import('./Templates/DateSpan')));
-    Constructor.registerConstructor(TimeSpanEntity, () => TimeSpanEntity.New({ days: 0, hours: 0, minutes: 0, seconds: 0 }));
-    Constructor.registerConstructor(DateSpanEntity, () => DateSpanEntity.New({ years: 0, months: 0, days: 0 }));
+    Navigator.addSettings(new EntitySettings(TimeSpanEmbedded, e => _import('./Templates/TimeSpan')));
+    Navigator.addSettings(new EntitySettings(DateSpanEmbedded, e => _import('./Templates/DateSpan')));
+    Constructor.registerConstructor(TimeSpanEmbedded, () => TimeSpanEmbedded.New({ days: 0, hours: 0, minutes: 0, seconds: 0 }));
+    Constructor.registerConstructor(DateSpanEmbedded, () => DateSpanEmbedded.New({ years: 0, months: 0, days: 0 }));
 }

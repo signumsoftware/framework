@@ -85,7 +85,7 @@ namespace Signum.Engine.DiffLog
                  log.Mixin<DiffLogMixin>().FinalState == null ? null : logs.Where(a => a.Start > log.End).OrderBy(a => a.Start).FirstOrDefault());
         }
 
-        public static void DiffLogic_DeleteLogs(DeleteLogParametersEntity parameters)
+        public static void DiffLogic_DeleteLogs(DeleteLogParametersEmbedded parameters)
         {
             Database.Query<OperationLogEntity>().Where(o => o.Start < parameters.DateLimit && o.Exception != null).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
             Database.Query<OperationLogEntity>().Where(o => o.Start < parameters.DateLimit && !o.Mixin<DiffLogMixin>().Cleaned).UnsafeUpdate()

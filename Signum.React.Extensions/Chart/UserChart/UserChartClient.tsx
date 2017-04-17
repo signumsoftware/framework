@@ -11,10 +11,10 @@ import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constru
 import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
 import * as QuickLinks from '../../../../Framework/Signum.React/Scripts/QuickLinks'
 import { FindOptions, QueryToken, FilterOption, FilterOptionParsed, FilterOperation, OrderOption, OrderOptionParsed, ColumnOption, FilterRequest, QueryRequest, Pagination, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import * as AuthClient  from '../../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
-import { UserChartEntity, ChartPermission, ChartMessage, ChartRequest, ChartParameterEntity, ChartColumnEntity  } from '../Signum.Entities.Chart'
-import { QueryFilterEntity, QueryOrderEntity } from '../../UserQueries/Signum.Entities.UserQueries'
-import { QueryTokenEntity } from '../../UserAssets/Signum.Entities.UserAssets'
+import * as AuthClient from '../../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
+import { UserChartEntity, ChartPermission, ChartMessage, ChartRequest, ChartParameterEmbedded, ChartColumnEmbedded } from '../Signum.Entities.Chart'
+import { QueryFilterEmbedded, QueryOrderEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
+import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'
 import UserChartMenu from './UserChartMenu'
 import * as ChartClient from '../ChartClient'
 import * as UserAssetsClient from '../../UserAssets/UserAssetClient'
@@ -102,7 +102,7 @@ export module Converter {
             
             cr.parameters = uq.parameters!.map(mle => ({
                 rowId: null,
-                element: ChartParameterEntity.New({
+                element: ChartParameterEmbedded.New({
                     name : mle.element.name,
                     value : mle.element.value,
                 })
@@ -113,10 +113,10 @@ export module Converter {
 
                 return ({
                     rowId: null,
-                    element: ChartColumnEntity.New({
+                    element: ChartColumnEmbedded.New({
                         displayName: mle.element.displayName,
 
-                        token: t && QueryTokenEntity.New({
+                        token: t && QueryTokenEmbedded.New({
                             token: t!.token,
                             tokenString: t!.tokenString
                         })

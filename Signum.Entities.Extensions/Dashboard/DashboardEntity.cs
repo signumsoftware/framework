@@ -51,7 +51,7 @@ namespace Signum.Entities.Dashboard
 
         [NotifyCollectionChanged, NotifyChildProperty, NotNullable]
         [NoRepeatValidator]
-        public MList<PanelPartEntity> Parts { get; set; } = new MList<PanelPartEntity>();
+        public MList<PanelPartEmbedded> Parts { get; set; } = new MList<PanelPartEmbedded>();
 
         [UniqueIndex]
         public Guid Guid { get; set; } = Guid.NewGuid();
@@ -70,7 +70,7 @@ namespace Signum.Entities.Dashboard
 
         protected override string ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
         {
-            if (sender is PanelPartEntity part)
+            if (sender is PanelPartEmbedded part)
             {
                 if (pi.Name == nameof(part.StartColumn))
                 {
@@ -114,7 +114,7 @@ namespace Signum.Entities.Dashboard
         bool invalidating = false;
         protected override void ChildPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (!invalidating && sender is PanelPartEntity && (e.PropertyName == "Row" || e.PropertyName == "Column"))
+            if (!invalidating && sender is PanelPartEmbedded && (e.PropertyName == "Row" || e.PropertyName == "Column"))
             {
                 invalidating = true;
                 foreach (var pp in Parts)

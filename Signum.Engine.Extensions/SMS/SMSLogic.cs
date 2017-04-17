@@ -27,7 +27,7 @@ namespace Signum.Engine.SMS
 
     public static class SMSLogic
     {
-        public static SMSTemplateMessageEntity GetCultureMessage(this SMSTemplateEntity template, CultureInfo ci)
+        public static SMSTemplateMessageEmbedded GetCultureMessage(this SMSTemplateEntity template, CultureInfo ci)
         {
             return template.Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo() == ci);
         }
@@ -58,8 +58,8 @@ namespace Signum.Engine.SMS
 
 
 
-        static Func<SMSConfigurationEntity> getConfiguration;
-        public static SMSConfigurationEntity Configuration
+        static Func<SMSConfigurationEmbedded> getConfiguration;
+        public static SMSConfigurationEmbedded Configuration
         {
             get { return getConfiguration(); }
         }
@@ -71,7 +71,7 @@ namespace Signum.Engine.SMS
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null, null, null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, ISMSProvider provider, Func<SMSConfigurationEntity> getConfiguration)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, ISMSProvider provider, Func<SMSConfigurationEmbedded> getConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -141,7 +141,7 @@ namespace Signum.Engine.SMS
 
                     MultipleSMSModel model = args.GetArg<MultipleSMSModel>();
 
-                    Dictionary<string, string> str = model.IntegrityCheck();
+                    IntegrityCheck ic = model.IntegrityCheck();
 
                     if (!model.Message.HasText())
                         throw new ApplicationException("The text for the SMS message has not been set");
@@ -349,7 +349,7 @@ namespace Signum.Engine.SMS
             public string Value;
         }
 
-        static string CombineText(SMSTemplateEntity template, SMSTemplateMessageEntity templateMessage, List<Combination> combinations)
+        static string CombineText(SMSTemplateEntity template, SMSTemplateMessageEmbedded templateMessage, List<Combination> combinations)
         {
             string text = templateMessage.Message;
 

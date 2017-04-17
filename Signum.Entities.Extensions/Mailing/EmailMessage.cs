@@ -38,7 +38,7 @@ namespace Signum.Entities.Mailing
 
         [NotNullable]
         [NotNullValidator]
-        public EmailAddressEntity From { get; set; }
+        public EmailAddressEmbedded From { get; set; }
 
         public Lite<EmailTemplateEntity> Template { get; set; }
 
@@ -97,7 +97,7 @@ namespace Signum.Entities.Mailing
 
         [NotNullable]
         [NotNullValidator, NoRepeatValidator]
-        public MList<EmailAttachmentEntity> Attachments { get; set; } = new MList<EmailAttachmentEntity>();
+        public MList<EmailAttachmentEmbedded> Attachments { get; set; } = new MList<EmailAttachmentEmbedded>();
 
         static StateValidator<EmailMessageEntity, EmailMessageState> validator = new StateValidator<EmailMessageEntity, EmailMessageState>(
             m => m.State, m => m.Exception, m => m.Sent, m => m.ReceptionNotified, m => m.Package)
@@ -125,11 +125,11 @@ namespace Signum.Entities.Mailing
         {
         }
 
-        public EmailReceptionInfoEntity ReceptionInfo { get; set; }
+        public EmailReceptionInfoEmbedded ReceptionInfo { get; set; }
     }
 
     [Serializable]
-    public class EmailReceptionInfoEntity : EmbeddedEntity
+    public class EmailReceptionInfoEmbedded : EmbeddedEntity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex(AllowMultipleNulls = true)]
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
@@ -150,14 +150,14 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable]
-    public class EmailAttachmentEntity : EmbeddedEntity
+    public class EmailAttachmentEmbedded : EmbeddedEntity
     {
         public EmailAttachmentType Type { get; set; }
 
         [NotNullable]
-        EmbeddedFilePathEntity file;
+        FilePathEmbedded file;
         [NotNullValidator]
-        public EmbeddedFilePathEntity File
+        public FilePathEmbedded File
         {
             get { return file; }
             set
@@ -174,9 +174,9 @@ namespace Signum.Entities.Mailing
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 300)]
         public string ContentId { get; set; }
 
-        public EmailAttachmentEntity Clone()
+        public EmailAttachmentEmbedded Clone()
         {
-            return new EmailAttachmentEntity
+            return new EmailAttachmentEmbedded
             {
                 ContentId = ContentId,
                 File = file,
@@ -184,7 +184,7 @@ namespace Signum.Entities.Mailing
             };
         }
 
-        internal bool Similar(EmailAttachmentEntity a)
+        internal bool Similar(EmailAttachmentEmbedded a)
         {
             return ContentId == a.ContentId || File.FileName == a.File.FileName;
         }
@@ -202,7 +202,7 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable]
-    public class EmailRecipientEntity : EmailAddressEntity, IEquatable<EmailRecipientEntity>
+    public class EmailRecipientEntity : EmailAddressEmbedded, IEquatable<EmailRecipientEntity>
     {
         public EmailRecipientEntity() { }
 
@@ -232,12 +232,12 @@ namespace Signum.Entities.Mailing
 
         public bool Equals(EmailRecipientEntity other)
         {
-            return base.Equals((EmailAddressEntity)other) && Kind == other.Kind;
+            return base.Equals((EmailAddressEmbedded)other) && Kind == other.Kind;
         }
 
         public override bool Equals(object obj)
         {
-            return obj is EmailAddressEntity && Equals((EmailAddressEntity)obj);
+            return obj is EmailAddressEmbedded && Equals((EmailAddressEmbedded)obj);
         }
 
         public override int GetHashCode()
@@ -264,18 +264,18 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable]
-    public class EmailAddressEntity : EmbeddedEntity, IEquatable<EmailAddressEntity>
+    public class EmailAddressEmbedded : EmbeddedEntity, IEquatable<EmailAddressEmbedded>
     {
-        public EmailAddressEntity() { }
+        public EmailAddressEmbedded() { }
 
-        public EmailAddressEntity(EmailOwnerData data)
+        public EmailAddressEmbedded(EmailOwnerData data)
         {
             EmailOwner = data.Owner;
             EmailAddress = data.Email;
             DisplayName = data.DisplayName;
         }
 
-        public EmailAddressEntity(MailAddress mailAddress)
+        public EmailAddressEmbedded(MailAddress mailAddress)
         {
             DisplayName = mailAddress.DisplayName;
             EmailAddress = mailAddress.Address;
@@ -305,9 +305,9 @@ namespace Signum.Entities.Mailing
             return "{0} <{1}>".FormatWith(DisplayName, EmailAddress);
         }
 
-        public EmailAddressEntity Clone()
+        public EmailAddressEmbedded Clone()
         {
-            return new EmailAddressEntity
+            return new EmailAddressEmbedded
             {
                 DisplayName = DisplayName,
                 EmailAddress = EmailAddress,
@@ -315,14 +315,14 @@ namespace Signum.Entities.Mailing
             };
         }
 
-        public bool Equals(EmailAddressEntity other)
+        public bool Equals(EmailAddressEmbedded other)
         {
             return other.EmailAddress == EmailAddress && other.DisplayName == DisplayName;
         }
 
         public override bool Equals(object obj)
         {
-            return obj is EmailAddressEntity && Equals((EmailAddressEntity)obj);
+            return obj is EmailAddressEmbedded && Equals((EmailAddressEmbedded)obj);
         }
 
         public override int GetHashCode()

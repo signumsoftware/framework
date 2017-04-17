@@ -58,11 +58,11 @@ namespace Signum.Engine.Excel
 
                     var bytes = ExcelLogic.ExecutePlainExcel(request, title);
 
-                    return new List<EmailAttachmentEntity>
+                    return new List<EmailAttachmentEmbedded>
                         {
-                            new EmailAttachmentEntity
+                            new EmailAttachmentEmbedded
                             {
-                                File = Files.EmbeddedFilePathLogic.SaveFile(new Entities.Files.EmbeddedFilePathEntity(EmailFileType.Attachment, fileName, bytes)),
+                                File = Files.EmbeddedFilePathLogic.SaveFile(new Entities.Files.FilePathEmbedded(EmailFileType.Attachment, fileName, bytes)),
                                 Type = EmailAttachmentType.Attachment,
                             }
                         };

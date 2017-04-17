@@ -101,7 +101,7 @@ namespace Signum.Engine.UserQueries
             }
         }
 
-        private static Column ToColumn(QueryColumnEntity co)
+        private static Column ToColumn(QueryColumnEmbedded co)
         {
             return new Column(co.Token.Token, co.DisplayName.DefaultText(co.Token.Token.NiceName()));
         }
@@ -219,7 +219,7 @@ namespace Signum.Engine.UserQueries
                         Console.WriteLine(" Filters:");
                         foreach (var item in uq.Filters.ToList())
                         {
-                            QueryTokenEntity token = item.Token;
+                            QueryTokenEmbedded token = item.Token;
                             switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement, "{0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false))
                             {
                                 case FixTokenResult.Nothing: break;
@@ -237,7 +237,7 @@ namespace Signum.Engine.UserQueries
                         Console.WriteLine(" Columns:");
                         foreach (var item in uq.Columns.ToList())
                         {
-                            QueryTokenEntity token = item.Token;
+                            QueryTokenEmbedded token = item.Token;
                             switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, item.DisplayName.HasText() ? "'{0}'".FormatWith(item.DisplayName) : null, allowRemoveToken: true, allowReCreate: false))
                             {
                                 case FixTokenResult.Nothing: break;
@@ -255,7 +255,7 @@ namespace Signum.Engine.UserQueries
                         Console.WriteLine(" Orders:");
                         foreach (var item in uq.Orders.ToList())
                         {
-                            QueryTokenEntity token = item.Token;
+                            QueryTokenEmbedded token = item.Token;
                             switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, item.OrderType.ToString(), allowRemoveToken: true, allowReCreate: false))
                             {
                                 case FixTokenResult.Nothing: break;

@@ -9,7 +9,7 @@ import { TypeContext, FormGroupSize, FormGroupStyle, StyleOptions, StyleContext,
 import { SearchMessage, JavascriptMessage, parseLite, is, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { ValueLine, FormGroup, ValueLineProps, ValueLineType, OptionItem } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity, IChartBase, GroupByChart, ChartMessage, ChartColorEntity, ChartScriptEntity, ChartParameterEntity, ChartParameterType } from '../Signum.Entities.Chart'
+import { ChartColumnEmbedded, ChartScriptColumnEmbedded, ChartScriptParameterEmbedded, IChartBase, GroupByChart, ChartMessage, ChartColorEntity, ChartScriptEntity, ChartParameterEmbedded, ChartParameterType } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import { ChartColumn, ChartColumnInfo }from './ChartColumn'
@@ -172,7 +172,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
 
 
 
-    getParameterValueLine(ctx: TypeContext<ChartParameterEntity>, scriptParameter: ChartScriptParameterEntity) {
+    getParameterValueLine(ctx: TypeContext<ChartParameterEmbedded>, scriptParameter: ChartScriptParameterEmbedded) {
 
         const chart = this.props.ctx.value;
 
@@ -198,7 +198,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
                 label: ev.name
             } as OptionItem));
 
-            vl.valueHtmlProps = { size: null as any };
+            vl.valueHtmlAttributes = { size: null as any };
         }
 
         vl.onChange = this.handleOnRedraw;

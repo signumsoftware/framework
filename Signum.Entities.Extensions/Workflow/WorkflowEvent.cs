@@ -35,7 +35,7 @@ namespace Signum.Entities.Workflow
 
         [NotNullable]
         [NotNullValidator]
-        public WorkflowXmlEntity Xml { get; set; }
+        public WorkflowXmlEmbedded Xml { get; set; }
 
         static Expression<Func<WorkflowEventEntity, string>> ToStringExpression = @this => @this.Name ?? @this.BpmnElementId;
         [ExpressionField]

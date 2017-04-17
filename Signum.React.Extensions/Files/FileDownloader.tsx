@@ -10,7 +10,7 @@ import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../../.
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, basicConstruct, getTypeName } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { IFile, IFilePath, FileMessage, FileTypeSymbol, FileEntity, FilePathEntity, EmbeddedFileEntity, EmbeddedFilePathEntity } from './Signum.Entities.Files'
+import { IFile, IFilePath, FileMessage, FileTypeSymbol, FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from './Signum.Entities.Files'
 import Typeahead from '../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import { EntityBase, EntityBaseProps} from '../../../Framework/Signum.React/Scripts/Lines/EntityBase'
 import * as QueryString from 'query-string'
@@ -24,7 +24,7 @@ export interface FileDownloaderProps {
     entityOrLite: ModifiableEntity & IFile | Lite<IFile & Entity>;
     download?: DownloadBehaviour;
     configuration?: FileDownloaderConfiguration<IFile>;
-    htmlProps: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>
+    htmlAttributes: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>
 }
 
 export default class FileDownloader extends React.Component<FileDownloaderProps, void> {
@@ -55,7 +55,7 @@ export default class FileDownloader extends React.Component<FileDownloaderProps,
             (entityOrLite as IFile & Entity);
 
         if (!entity)
-            return <span {...this.props.htmlProps}>{JavascriptMessage.loading.niceToString()}</span>;
+            return <span {...this.props.htmlAttributes}>{JavascriptMessage.loading.niceToString()}</span>;
 
 
         const configuration = this.props.configuration || FileDownloader.configurtions[entity.Type];
@@ -69,7 +69,7 @@ export default class FileDownloader extends React.Component<FileDownloaderProps,
                 download={this.props.download == "View" ? undefined : entity.fileName }
                 title={entity.fileName || undefined}
                 target="_blank"
-                {...this.props.htmlProps}>
+                {...this.props.htmlAttributes}>
                 {entity.fileName}
             </a>
         );
@@ -90,17 +90,17 @@ FileDownloader.configurtions[FilePathEntity.typeName] = {
     downloadClick: (event, file) => downloadUrl(event, Navigator.currentHistory.createHref("~/api/files/downloadFilePath/" + file.id.toString()))
 } as FileDownloaderConfiguration<FilePathEntity>;
 
-FileDownloader.configurtions[EmbeddedFileEntity.typeName] = {
+FileDownloader.configurtions[FileEmbedded.typeName] = {
     downloadClick: (event, file) => downloadBase64(event, file.binaryFile!, file.fileName!)
-} as FileDownloaderConfiguration<EmbeddedFileEntity>;
+} as FileDownloaderConfiguration<FileEmbedded>;
 
-FileDownloader.configurtions[EmbeddedFilePathEntity.typeName] = {
+FileDownloader.configurtions[FilePathEmbedded.typeName] = {
     downloadClick: (event, file) => downloadUrl(event,
         Navigator.currentHistory.createHref({
             pathname: "~/api/files/downloadEmbeddedFilePath/" + file.fileType!.key,
             search: QueryString.stringify({ suffix: file.suffix, fileName: file.fileName })
         }))
-} as FileDownloaderConfiguration<EmbeddedFilePathEntity>;
+} as FileDownloaderConfiguration<FilePathEmbedded>;
 
 
 function downloadUrl(e: React.MouseEvent<any>, url: string) {

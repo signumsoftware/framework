@@ -3,7 +3,7 @@ import { ValueLine, EntityLine, EntityDetail, TypeContext, FormGroup, ValueLineT
 import { PropertyRoute, Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import CSharpCodeMirror from '../../../../Extensions/Signum.React.Extensions/Codemirror/CSharpCodeMirror'
-import { WorkflowScriptEntity, WorkflowScriptPartEntity } from '../Signum.Entities.Workflow'
+import { WorkflowScriptEntity, WorkflowScriptPartEmbedded } from '../Signum.Entities.Workflow'
 import TypeHelpComponent from '../../Dynamic/Help/TypeHelpComponent'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 import { API } from '../WorkflowClient'
@@ -84,7 +84,7 @@ class MyResponse {}`,
             title: "REST Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-            valueHtmlProps: { style: { height: "115px" } },
+            valueHtmlAttributes: { style: { height: "115px" } },
         }).done();
     }
 
@@ -98,7 +98,7 @@ e.[Property Name] = lib;`,
             title: "SOAP Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-            valueHtmlProps: { style: { height: "115px" } },
+            valueHtmlAttributes: { style: { height: "115px" } },
         }).done();
     }
 
@@ -113,7 +113,7 @@ int RetryCount;`,
             title: hint,
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-            valueHtmlProps: { style: { height: "115px" } },
+            valueHtmlAttributes: { style: { height: "115px" } },
         }).done();
     }
 
@@ -132,7 +132,7 @@ catch (Exception e)
             title: "Try/Catch block",
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
-            valueHtmlProps: { style: { height: "180px" } },
+            valueHtmlAttributes: { style: { height: "180px" } },
         }).done();
     }
 }

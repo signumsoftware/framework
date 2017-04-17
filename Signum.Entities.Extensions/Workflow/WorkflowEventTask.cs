@@ -20,10 +20,13 @@ namespace Signum.Entities.Workflow
         [NotNullValidator]
         public Lite<WorkflowEntity> Workflow { get; set; }
 
+        [Ignore]
+        internal WorkflowEntity fullWorkflow { get; set; }
+
         public static Func<Lite<WorkflowEntity>, WorkflowEntity> GetWorkflowEntity;
         public WorkflowEntity GetWorkflow()
         {
-            return GetWorkflowEntity(this.Workflow);
+            return fullWorkflow ?? GetWorkflowEntity(this.Workflow);
         }
         
         [NotNullable]
@@ -108,7 +111,7 @@ namespace Signum.Entities.Workflow
     }
 
     [Serializable]
-    public class WorkflowEventTaskConditionEval : EvalEntity<IWorkflowEventTaskConditionEvaluator>
+    public class WorkflowEventTaskConditionEval : EvalEmbedded<IWorkflowEventTaskConditionEvaluator>
     {
         protected override CompilationResult Compile()
         {
@@ -119,7 +122,7 @@ namespace Signum.Entities.Workflow
             var WorkflowEntityTypeName = parent.GetWorkflow().MainEntityType.ToType().FullName;
 
             return Compile(DynamicCode.GetAssemblies(),
-                DynamicCode.GetNamespaces() +
+                DynamicCode.GetUsingNamespaces() +
                     @"
                     namespace Signum.Entities.Workflow
                     {
@@ -140,7 +143,7 @@ namespace Signum.Entities.Workflow
     }
 
     [Serializable]
-    public class WorkflowEventTaskActionEval : EvalEntity<IWorkflowEventTaskActionEval>
+    public class WorkflowEventTaskActionEval : EvalEmbedded<IWorkflowEventTaskActionEval>
     {
         protected override CompilationResult Compile()
         {
@@ -151,7 +154,7 @@ namespace Signum.Entities.Workflow
             var WorkflowEntityTypeName = parent.GetWorkflow().MainEntityType.ToType().FullName;
 
             return Compile(DynamicCode.GetAssemblies(),
-                DynamicCode.GetNamespaces() +
+                DynamicCode.GetUsingNamespaces() +
                     @"
                     namespace Signum.Entities.Workflow
                     {

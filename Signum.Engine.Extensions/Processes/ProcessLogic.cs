@@ -162,14 +162,14 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEntity parameters)
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters)
         {
             Remove(ProcessState.Canceled, parameters);
             Remove(ProcessState.Finished, parameters);
             Remove(ProcessState.Error, parameters);
         }
 
-        private static void Remove(ProcessState processState, DeleteLogParametersEntity parameters)
+        private static void Remove(ProcessState processState, DeleteLogParametersEmbedded parameters)
         {
             var query = Database.Query<ProcessEntity>().Where(p => p.State == processState && p.CreationDate < parameters.DateLimit);
 

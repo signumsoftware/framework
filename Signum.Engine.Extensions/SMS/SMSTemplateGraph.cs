@@ -15,9 +15,9 @@ namespace Signum.Engine.SMS
             {
                 Construct = _ => new SMSTemplateEntity
                 {
-                    Messages = new Entities.MList<SMSTemplateMessageEntity> 
+                    Messages = new Entities.MList<SMSTemplateMessageEmbedded> 
                     {
-                        new SMSTemplateMessageEntity
+                        new SMSTemplateMessageEmbedded
                         {
                             CultureInfo = SMSLogic.Configuration.DefaultCulture
                         }

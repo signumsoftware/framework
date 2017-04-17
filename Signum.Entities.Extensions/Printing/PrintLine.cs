@@ -22,7 +22,7 @@ namespace Signum.Entities.Printing
 
         [NotNullable]
         [NotNullValidator]
-        public EmbeddedFilePathEntity File { get; set; }
+        public FilePathEmbedded File { get; set; }
 
         public Lite<PrintPackageEntity> Package { get; set; }
 

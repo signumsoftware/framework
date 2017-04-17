@@ -6,11 +6,11 @@ import { SubTokensOptions, QueryToken, QueryTokenType, hasAnyOrAll } from '../..
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString, getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { ToolbarElementEntity } from '../Signum.Entities.Toolbar'
+import { ToolbarElementEmbedded } from '../Signum.Entities.Toolbar'
 import { ColorTypeaheadLine } from '../../Basics/Templates/ColorTypeahead'
 import { IconTypeaheadLine } from '../../Basics/Templates/IconTypeahead'
 
-export default class ToolbarElement extends React.Component<{ ctx: TypeContext<ToolbarElementEntity> }, void> {
+export default class ToolbarElement extends React.Component<{ ctx: TypeContext<ToolbarElementEmbedded> }, void> {
 
     handleTypeChanges = () => {
         var a = this.props.ctx.value;
@@ -52,7 +52,7 @@ export default class ToolbarElement extends React.Component<{ ctx: TypeContext<T
                             {ctx4.value.iconName && <span className={ctx4.value.iconName} style={{ backgroundColor: bgColor, color: ctx4.value.iconColor, fontSize: "25px", marginTop: "17px" }} />}
                         </div>
                         <div className="col-sm-5">
-                            <ValueLine ctx={ctx2.subCtx(t => t.label)} valueHtmlProps={{ placeholder: content && content.toStr || undefined }} />
+                            <ValueLine ctx={ctx2.subCtx(t => t.label)} valueHtmlAttributes={{ placeholder: content && content.toStr || undefined }} />
                             {content && (content.EntityType == "UserQuery" || content.EntityType == "Query") &&
                                 <div>
                                     <ValueLine ctx={ctx6.subCtx(t => t.openInPopup)}  />

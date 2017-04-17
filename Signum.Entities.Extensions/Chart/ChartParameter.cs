@@ -12,7 +12,7 @@ using System.Xml.Linq;
 namespace Signum.Entities.Chart
 {
     [Serializable]
-    public class ChartParameterEntity : EmbeddedEntity
+    public class ChartParameterEmbedded : EmbeddedEntity
     {
         [Ignore]
         internal IChartBase parentChart;
@@ -21,9 +21,9 @@ namespace Signum.Entities.Chart
         public IChartBase ParentChart { get { return parentChart; } }
 
         [Ignore]
-        ChartScriptParameterEntity scriptParameter;
+        ChartScriptParameterEmbedded scriptParameter;
         [InTypeScript(false)]
-        public ChartScriptParameterEntity ScriptParameter
+        public ChartScriptParameterEmbedded ScriptParameter
         {
             get { return scriptParameter; }
             set { scriptParameter = value; Notify(() => ScriptParameter); }

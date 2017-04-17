@@ -46,7 +46,7 @@ namespace Signum.React.Files
         {
             var fileType = SymbolLogic<FileTypeSymbol>.ToSymbol(fileTypeKey);
 
-            var virtualFile = new EmbeddedFilePathEntity(fileType)
+            var virtualFile = new FilePathEmbedded(fileType)
             {
                 Suffix = suffix,
                 FileName = fileName,

@@ -49,7 +49,7 @@ namespace Signum.Entities.Dynamic
         public static readonly ExecuteSymbol<DynamicValidationEntity> Save;
     }
 
-    public class DynamicValidationEval : EvalEntity<IDynamicValidationEvaluator>
+    public class DynamicValidationEval : EvalEmbedded<IDynamicValidationEvaluator>
     {
         protected override CompilationResult Compile()
         {
@@ -58,7 +58,7 @@ namespace Signum.Entities.Dynamic
             var entityTypeName = DynamicValidationEntity.GetMainType((DynamicValidationEntity)this.GetParentEntity()).FullName;
 
             return Compile(DynamicCode.GetAssemblies(),
-                DynamicCode.GetNamespaces() +
+                DynamicCode.GetUsingNamespaces() +
 @"
 namespace Signum.Entities.Dynamic
 {

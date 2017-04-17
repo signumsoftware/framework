@@ -64,7 +64,7 @@ namespace Signum.Engine.Disconnected
             Lite<DisconnectedExportEntity> export = new DisconnectedExportEntity
             {
                 Machine = machine.ToLite(),
-                Copies = downloadTables.Select(t => new DisconnectedExportTableEntity
+                Copies = downloadTables.Select(t => new DisconnectedExportTableEmbedded
                 {
                     Type = t.Type.ToTypeEntity().ToLite()
                 }).ToMList()

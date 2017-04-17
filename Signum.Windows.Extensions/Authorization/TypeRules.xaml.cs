@@ -378,7 +378,7 @@ namespace Signum.Windows.Authorization
 
                 AllowedBase = AllowedBase,
                 Allowed = new TypeAllowedAndConditions(Allowed.TypeAllowed, 
-                    Conditions.Select(a => new TypeConditionRule(a.TypeCondition, a.Allowed.TypeAllowed.Value)).ToReadOnly()),
+                    Conditions.Select(a => new TypeConditionRuleEmbedded(a.TypeCondition, a.Allowed.TypeAllowed.Value)).ToReadOnly()),
 
                 AvailableConditions = this.AvailableConditions,
 
@@ -398,7 +398,7 @@ namespace Signum.Windows.Authorization
                     return true;
 
                 return !allowedBase.Conditions.SequenceEqual(Conditions.Select(a =>
-                    new TypeConditionRule(a.TypeCondition, a.Allowed.TypeAllowed.Value)));
+                    new TypeConditionRuleEmbedded(a.TypeCondition, a.Allowed.TypeAllowed.Value)));
             }
         }
 

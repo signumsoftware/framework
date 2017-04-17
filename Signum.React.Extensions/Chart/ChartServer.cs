@@ -28,11 +28,11 @@ namespace Signum.React.Chart
 
             CustomizeChartRequest();
 
-            PropertyConverter.GetPropertyConverters(typeof(ChartScriptParameterEntity)).Add("enumValues", new PropertyConverter()
+            PropertyConverter.GetPropertyConverters(typeof(ChartScriptParameterEmbedded)).Add("enumValues", new PropertyConverter()
             {
                 CustomWriteJsonProperty = ctx =>
                 {
-                    var csp = (ChartScriptParameterEntity)ctx.Entity;
+                    var csp = (ChartScriptParameterEmbedded)ctx.Entity;
 
                     if (csp.Type == ChartParameterType.Enum)
                     {

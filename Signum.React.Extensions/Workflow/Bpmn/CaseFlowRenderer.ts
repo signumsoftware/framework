@@ -8,7 +8,9 @@ import { CustomRenderer } from './CustomRenderer'
 import { Color, Gradient } from '../../Basics/Color'
 import { CaseFlow, CaseConnectionStats, CaseActivityStats  } from '../WorkflowClient'
 import * as BpmnUtils from './BpmnUtils'
+import { calculatePoint, Rectangle } from "../../Map/Utils";
 require("moment-duration-format");
+import NavigatedViewer = require("bpmn-js/lib/NavigatedViewer");
 
 export class CaseFlowRenderer extends CustomRenderer {
 
@@ -17,6 +19,8 @@ export class CaseFlowRenderer extends CustomRenderer {
     }
 
     caseFlow: CaseFlow;
+
+    viewer: NavigatedViewer;
 
     drawConnection(visuals: any, element: BPMN.DiElement) {
 
@@ -82,17 +86,58 @@ export class CaseFlowRenderer extends CustomRenderer {
 
                 var gParent = ((result.parentNode as SVGGElement).parentNode as SVGGElement);
                 var title = Array.toArray(gParent.childNodes).filter((a: SVGElement) => a.nodeName == "title").firstOrNull() || gParent.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title"));
-                title.textContent = stats.map(a => getTitle(a)).join("\n");
+                title.textContent = stats.map((a, i) => i == 0 || i == stats.length - 1 ? getTitle(a) :
+                    i == 1 ? `(…${CaseActivityEntity.niceCount(stats.length - 2)})` : "").filter(a => a).join("\n\n");
 
                 var ggParent = gParent.parentNode as SVGGElement;
-                var path = Array.toArray(ggParent.childNodes).filter((a: SVGElement) => a.nodeName == "path").firstOrNull() as SVGPathElement || ggParent.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "path"));
-                //debugger;
-                //path.setAttribute("d", `m  ${element.x},${element.y}L${element.x + element.width},${element.y + element.height}`);
-                //path.style.setProperty("fill", "none");
-                //path.style.setProperty("stroke-width", "2px");
-                //path.style.setProperty("stroke", "black");
-                //path.style.setProperty("stroke-linejoin", "round");
-                //path.style.setProperty("marker-end", "url(#sequenceflow-end-white-black)");
+
+                var paths = Array.toArray(ggParent.childNodes).filter((a: SVGElement) => a.nodeName == "path") as SVGPathElement[];
+                var jumps = this.caseFlow.Jumps.filter(j => j.FromBpmnElementId == element.id);
+
+
+                const toCenteredRectangle = (bounds: BPMN.BoundsElement) => ({
+                    x: bounds.x + bounds.width / 2,
+                    y: bounds.y + bounds.height / 2,
+                    width: bounds.width,
+                    height: bounds.height
+                }) as Rectangle;
+
+                paths.slice(jumps.length).forEach(path => (path.parentNode as SVGGElement).removeChild(path));
+
+                if (jumps.length) {
+                    var moddleElements = ((this.viewer as any).definitions.diagrams[0].plane.planeElement as BPMN.ModdleElement[]);
+
+                    var fromModdle = moddleElements.filter(a => a.id == (element.id + "_di")).single();
+                    var fromRec: Rectangle = toCenteredRectangle(fromModdle.bounds);
+
+                    jumps.forEach((jump, i) => {
+
+                        var path = paths[i] || ggParent.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "path"));
+                        var toModdle = moddleElements.filter(a => a.id == (jump.ToBpmnElementId + "_di")).single();
+                        var toRec: Rectangle = toCenteredRectangle(toModdle.bounds);
+
+                        var fromPoint = calculatePoint(fromRec, toRec);
+                        var toPoint = calculatePoint(toRec, fromRec);
+                        const curveness = 0.2;
+                        var controlPoint = {
+                            x: (fromPoint.x! + toPoint.x!) / 2 + (toPoint.y! - fromPoint.y!) * curveness,
+                            y: (fromPoint.y! + toPoint.y!) / 2 - (toPoint.x! - fromPoint.x!) * curveness,
+                        };
+
+                        path.setAttribute("d", `M${fromPoint.x} ${fromPoint.y} Q ${controlPoint.x} ${controlPoint.y} ${toPoint.x} ${toPoint.y}`);
+                        path.style.setProperty("fill", "transparent");
+                        path.style.setProperty("stroke-width", "2px");
+                        path.style.setProperty("stroke",
+                            jump.DoneType == "Jump" ? "#ff7504" :
+                                jump.DoneType == "Rejected" ? "red" :
+                                    jump.DoneType == "Timeout" ? "gold" :
+                                        jump.DoneType == "ScriptFailure" ? "violet": "magenta");
+                        path.style.setProperty("stroke-linejoin", "round");
+                        path.style.setProperty("stroke-dasharray", "5 5");
+                        path.style.setProperty("marker-end", "url(#sequenceflow-end-white-black)");
+
+                    });
+                }
             }
         }
       
@@ -102,7 +147,7 @@ export class CaseFlowRenderer extends CustomRenderer {
 
 function getTitle(stats: CaseActivityStats) {
     var result = `${stats.WorkflowActivity.toStr} (${CaseNotificationEntity.nicePluralName()} ${stats.Notifications})
-${CaseActivityEntity.nicePropertyName(a => a.startDate)}: ${moment(stats.StartOn).format("L LT")} (${moment(stats.StartOn).fromNow()})`;
+${CaseActivityEntity.nicePropertyName(a => a.startDate)}: ${moment(stats.StartDate).format("L LT")} (${moment(stats.StartDate).fromNow()})`;
 
     if (stats.DoneDate != null)
         result += `
@@ -112,8 +157,7 @@ ${CaseActivityEntity.nicePropertyName(a => a.duration)}: ${formatDuration(stats.
 
     result += `
 ${CaseFlowColor.niceName("AverageDuration")}: ${formatDuration(stats.AverageDuration)}
-${CaseFlowColor.niceName("EstimatedDuration")}: ${formatDuration(stats.EstimatedDuration)}
-`;
+${CaseFlowColor.niceName("EstimatedDuration")}: ${formatDuration(stats.EstimatedDuration)}`;
 
     return result;
 }

@@ -113,7 +113,11 @@ namespace Signum.Engine.Workflow
                     {
                         var task = (schedule.Task as WorkflowEventTaskEntity);
                         schedule.Suspended = model.Suspended;
-                        schedule.Rule = model.Rule;
+                        if (!object.ReferenceEquals(schedule.Rule, model.Rule))
+                        {
+                            schedule.Rule = null;
+                            schedule.Rule = model.Rule;
+                        }
                         task.TriggeredOn = model.TriggeredOn;
 
                         if (model.Condition != null)
@@ -155,7 +159,36 @@ namespace Signum.Engine.Workflow
             }
         }
 
-        
+
+
+        internal static void CloneScheduledTasks(WorkflowEventEntity oldEvent, WorkflowEventEntity newEvent)
+        {
+            var task = Database.Query<WorkflowEventTaskEntity>().SingleOrDefault(a => a.Event.RefersTo(oldEvent));
+            if (task == null)
+                return;
+
+            var st = Database.Query<ScheduledTaskEntity>().SingleOrDefaultEx(a => a.Task == task);
+            if (st == null)
+                return;
+
+            var newTask = new WorkflowEventTaskEntity()
+            {
+                Workflow = newEvent.Lane.Pool.Workflow.ToLite(),
+                fullWorkflow = newEvent.Lane.Pool.Workflow,
+                Event = newEvent.ToLite(),
+                TriggeredOn = task.TriggeredOn,
+                Condition = task.Condition != null ? new WorkflowEventTaskConditionEval() { Script = task.Condition.Script } : null,
+                Action = new WorkflowEventTaskActionEval() { Script = task.Action.Script },
+            }.Execute(WorkflowEventTaskOperation.Save);
+
+            new ScheduledTaskEntity()
+            {
+                Suspended = st.Suspended,
+                Rule = st.Rule.Clone(),
+                Task = newTask,
+                User = AuthLogic.SystemUser.ToLite(),
+            }.Execute(ScheduledTaskOperation.Save);
+        }
 
         public static void DeleteWorkflowEventScheduledTask(ScheduledTaskEntity schedule)
         {
@@ -164,7 +197,7 @@ namespace Signum.Engine.Workflow
             workflowEventTask.Delete(WorkflowEventTaskOperation.Delete);
         }
 
-        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEntity parameters)
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters)
         {
             Database.Query<WorkflowEventTaskConditionResultEntity>()
                .Where(a => a.CreationDate < parameters.DateLimit)

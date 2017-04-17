@@ -74,9 +74,9 @@ export module TranslationReplacementOperation {
     export const Delete : Entities.DeleteSymbol<TranslationReplacementEntity> = registerSymbol("Operation", "TranslationReplacementOperation.Delete");
 }
 
-export const TranslatorUserCultureEntity = new Type<TranslatorUserCultureEntity>("TranslatorUserCultureEntity");
-export interface TranslatorUserCultureEntity extends Entities.EmbeddedEntity {
-    Type: "TranslatorUserCultureEntity";
+export const TranslatorUserCultureEmbedded = new Type<TranslatorUserCultureEmbedded>("TranslatorUserCultureEmbedded");
+export interface TranslatorUserCultureEmbedded extends Entities.EmbeddedEntity {
+    Type: "TranslatorUserCultureEmbedded";
     culture?: Basics.CultureInfoEntity | null;
     action?: TranslatedCultureAction;
 }
@@ -85,7 +85,7 @@ export const TranslatorUserEntity = new Type<TranslatorUserEntity>("TranslatorUs
 export interface TranslatorUserEntity extends Entities.Entity {
     Type: "TranslatorUser";
     user?: Entities.Lite<Signum.IUserEntity> | null;
-    cultures: Entities.MList<TranslatorUserCultureEntity>;
+    cultures: Entities.MList<TranslatorUserCultureEmbedded>;
 }
 
 export module TranslatorUserOperation {

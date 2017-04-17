@@ -202,7 +202,7 @@ namespace Signum.Entities.Authorization
                     {
                         pr.Allowed = ar.Allowed.Fallback.Value;
 
-                        var shouldConditions = ar.Allowed.Conditions.Select(a => new RuleTypeConditionEntity
+                        var shouldConditions = ar.Allowed.Conditions.Select(a => new RuleTypeConditionEmbedded
                         {
                             Allowed = a.Allowed,
                             Condition = a.TypeCondition,
@@ -417,12 +417,12 @@ namespace Signum.Entities.Authorization
                 }, Spacing.Double);
         }
 
-        private static MList<RuleTypeConditionEntity> Conditions(XElement xr, Replacements replacements)
+        private static MList<RuleTypeConditionEmbedded> Conditions(XElement xr, Replacements replacements)
         {
             return (from xc in xr.Elements("Condition")
                     let cn = SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, xc.Attribute("Name").Value))
                     where cn != null
-                    select new RuleTypeConditionEntity
+                    select new RuleTypeConditionEmbedded
                     {
                         Condition = cn,
                         Allowed = xc.Attribute("Allowed").Value.ToEnum<TypeAllowed>()

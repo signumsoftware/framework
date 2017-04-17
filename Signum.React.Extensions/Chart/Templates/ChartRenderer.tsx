@@ -7,8 +7,9 @@ import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator
 import { is, SearchMessage, parseLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as ChartUtils from "./ChartUtils"
 import { ResultTable, FindOptions, FilterOptionParsed, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption, hasAggregate } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity, ChartRequest, GroupByChart, ChartMessage,
-   ChartColorEntity, ChartScriptEntity, ChartParameterEntity, ChartParameterType } from '../Signum.Entities.Chart'
+import {
+    ChartColumnEmbedded, ChartScriptColumnEmbedded, ChartScriptParameterEmbedded, ChartRequest, GroupByChart, ChartMessage,
+   ChartColorEntity, ChartScriptEntity, ChartParameterEmbedded, ChartParameterType } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 
 const colorbrewer = require("colorbrewer");
