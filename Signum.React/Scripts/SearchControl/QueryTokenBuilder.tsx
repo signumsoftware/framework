@@ -34,7 +34,7 @@ export default class QueryTokenBuilder extends React.Component<QueryTokenBuilder
 
         return (
             <div className={classes("sf-query-token-builder", this.props.className)} onKeyDown={this.handleKeyDown}>
-                {tokenList.map((a, i) => <QueryTokenPart key={a ? a.fullKey : i > 0 ? tokenList[i - 1]!.fullKey + "_new" : "_first_" }
+                {tokenList.map((a, i) => <QueryTokenPart key={i == 0 ? "__first__" : tokenList[i - 1]!.fullKey }
                     queryKey={this.props.queryKey}
                     readOnly={this.props.readOnly}
                     onTokenSelected={qt => {

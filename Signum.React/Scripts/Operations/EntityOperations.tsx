@@ -30,14 +30,13 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
         .map(oi => {
             const eos = getSettings(oi.key) as EntityOperationSettings<Entity>;
 
-            const eoc: EntityOperationContext<Entity> = {
-                entity: ctx.pack.entity as Entity,
-                frame: ctx.frame,
-                tag: ctx.tag,
-                canExecute: ctx.pack.canExecute[oi.key],
-                operationInfo: oi,
-                settings: eos
-            };
+            const eoc = new EntityOperationContext<Entity>();
+            eoc.entity = ctx.pack.entity as Entity;
+            eoc.frame = ctx.frame;
+            eoc.tag = ctx.tag;
+            eoc.canExecute = ctx.pack.canExecute[oi.key];
+            eoc.operationInfo = oi;
+            eoc.settings = eos;
 
             if (ctx.isOperationVisible && !ctx.isOperationVisible(eoc))
                 return undefined;
@@ -95,20 +94,6 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
     return result.orderBy(a => a.order).map(a => a.button);
 }
 
-export function createEntityOperationContext<T extends Entity>(ctx: TypeContext<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<T, any>): EntityOperationContext<T> {
-
-    if (!ctx.frame)
-        throw new Error("a frame is necessary");
-
-    return {
-        frame: ctx.frame,
-        entity: ctx.value,
-        settings: getSettings(operation) as EntityOperationSettings<T>,
-        operationInfo: getTypeInfo(ctx.value.Type).operations![operation.key!],
-        canExecute: undefined,
-    };
-}
-
 function getGroup(eoc: EntityOperationContext<Entity>) {
     if (eoc.settings != undefined && eoc.settings.group !== undefined) {
         return eoc.settings.group;
@@ -164,23 +149,28 @@ function createDefaultButton(eoc: EntityOperationContext<Entity>, group: EntityO
 }
 
 function onClick(eoc: EntityOperationContext<Entity>, event: React.MouseEvent<any>): void {
-
+    eoc.event = event;
     event.persist();
 
     if (eoc.settings && eoc.settings.onClick)
-        return eoc.settings.onClick(eoc, event);
+        return eoc.settings.onClick(eoc);
 
+    defaultOnClick(eoc);
+}
+
+export function defaultOnClick(eoc: EntityOperationContext<Entity>, ... args:any[])
+{
     if (eoc.operationInfo.lite) {
         switch (eoc.operationInfo.operationType) {
-            case OperationType.ConstructorFrom: defaultConstructFromLite(eoc, event); return;
-            case OperationType.Execute: defaultExecuteLite(eoc); return;
-            case OperationType.Delete: defaultDeleteLite(eoc); return;
+            case OperationType.ConstructorFrom: defaultConstructFromLite(eoc, ...args); return;
+            case OperationType.Execute: defaultExecuteLite(eoc, ...args); return;
+            case OperationType.Delete: defaultDeleteLite(eoc, ...args); return;
         }
     } else {
         switch (eoc.operationInfo.operationType) {
-            case OperationType.ConstructorFrom: defaultConstructFromEntity(eoc, event); return;
-            case OperationType.Execute: defaultExecuteEntity(eoc); return;
-            case OperationType.Delete: defaultDeleteEntity(eoc); return;
+            case OperationType.ConstructorFrom: defaultConstructFromEntity(eoc, ...args); return;
+            case OperationType.Execute: defaultExecuteEntity(eoc, ...args); return;
+            case OperationType.Delete: defaultDeleteEntity(eoc, ...args); return;
         }
     }
 
@@ -191,7 +181,7 @@ export function notifySuccess() {
     Notify.singletone.notifyTimeout({ text: JavascriptMessage.executed.niceToString(), type: "success" });
 }
 
-export function defaultConstructFromEntity(eoc: EntityOperationContext<Entity>, event: React.MouseEvent<any>, ...args: any[]) {
+export function defaultConstructFromEntity(eoc: EntityOperationContext<Entity>, ...args: any[]) {
 
     confirmInNecessary(eoc).then(conf => {
         if (!conf)
@@ -200,14 +190,14 @@ export function defaultConstructFromEntity(eoc: EntityOperationContext<Entity>, 
         API.constructFromEntity(eoc.entity, eoc.operationInfo.key, ...args)
             .then(pack => {
                 notifySuccess();
-                Navigator.createNavigateOrTab(pack, event);
+                Navigator.createNavigateOrTab(pack, eoc.event!);
             })
             .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
             .done();
     }).done();
 }
 
-export function defaultConstructFromLite(eoc: EntityOperationContext<Entity>, event: React.MouseEvent<any>, ...args: any[]) {
+export function defaultConstructFromLite(eoc: EntityOperationContext<Entity>, ...args: any[]) {
 
     confirmInNecessary(eoc).then(conf => {
         if (!conf)
@@ -216,7 +206,7 @@ export function defaultConstructFromLite(eoc: EntityOperationContext<Entity>, ev
         API.constructFromLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
             .then(pack => {
                 notifySuccess();
-                Navigator.createNavigateOrTab(pack, event);
+                Navigator.createNavigateOrTab(pack, eoc.event!);
             })
             .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
             .done();
@@ -302,7 +292,7 @@ export function confirmInNecessary(eoc: EntityOperationContext<Entity>, checkLit
 }
 
 function getConfirmMessage(eoc: EntityOperationContext<Entity>) {
-    if (eoc.settings && eoc.settings.confirmMessage === undefined)
+    if (eoc.settings && eoc.settings.confirmMessage === null)
         return undefined;
 
     if (eoc.settings && eoc.settings.confirmMessage != undefined)
@@ -314,10 +304,6 @@ function getConfirmMessage(eoc: EntityOperationContext<Entity>) {
 
     return undefined;
 }
-
-
-
-
 
 export function needsCanExecute(entity: ModifiableEntity) {
 

@@ -64,6 +64,5 @@ namespace Signum.Utilities
                 list.Add(item); 
             }
         }
-
     }
 }

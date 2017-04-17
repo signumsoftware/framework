@@ -39,7 +39,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
 
 		return (
 			<fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass) }
-                {...this.baseHtmlProps() } {...this.state.formGroupHtmlProps}>
+                {...this.baseHtmlAttributes() } {...this.state.formGroupHtmlAttributes}>
 				<legend>
 					<div>
 						<span>{this.state.labelText}</span>
@@ -49,7 +49,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                 <Tabs id={ctx.compose("tabs")} unmountOnExit={true}>
 					{
 						mlistItemContext(ctx).map((mlec, i) =>
-							<Tab className="sf-repeater-element" eventKey={i} key={i} {...EntityListBase.entityHtmlProps(mlec.value) }
+							<Tab className="sf-repeater-element" eventKey={i} key={i} {...EntityListBase.entityHtmlAttributes(mlec.value) }
 								title={
 									<div>
 										{ getToString(mlec.value) }

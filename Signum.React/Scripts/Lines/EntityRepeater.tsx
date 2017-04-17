@@ -40,7 +40,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
 
         return (
             <fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass)}
-                {...{ ...this.baseHtmlProps(), ...this.state.formGroupHtmlProps }}>
+                {...{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes }}>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>
@@ -87,7 +87,7 @@ export class EntityRepeaterElement extends React.Component<EntityRepeaterElement
 {
     render() {
         return (
-            <fieldset className="sf-repeater-element" {...EntityListBase.entityHtmlProps(this.props.ctx.value) }>
+            <fieldset className="sf-repeater-element" {...EntityListBase.entityHtmlAttributes(this.props.ctx.value) }>
                 <legend>
                     <div className="item-group">
                         { this.props.onRemove && <a className={classes("sf-line-button", "sf-remove") }

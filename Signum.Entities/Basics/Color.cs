@@ -9,39 +9,39 @@ using Signum.Utilities;
 namespace Signum.Entities.Basics
 {
     [Serializable]
-    public class ColorEntity : EmbeddedEntity
+    public class ColorEmbedded : EmbeddedEntity
     {
-        public ColorEntity()
+        public ColorEmbedded()
         {
         }
 
         public override bool Equals(object color)
         {
-           return this.Argb == ((ColorEntity)color).Argb;
+           return this.Argb == ((ColorEmbedded)color).Argb;
         }
 
         public override int GetHashCode()
         {
             return this.Argb;  
         }
-        public static ColorEntity FromARGB(byte a, byte r, byte g, byte b)
+        public static ColorEmbedded FromARGB(byte a, byte r, byte g, byte b)
         {
-            return new ColorEntity { Argb = a << 0x18 | r << 0x10 | g << 0x8 | b };
+            return new ColorEmbedded { Argb = a << 0x18 | r << 0x10 | g << 0x8 | b };
         }
 
-        public static ColorEntity FromARGB(byte a, int rgb)
+        public static ColorEmbedded FromARGB(byte a, int rgb)
         {
-            return new ColorEntity { Argb = a << 0x18 | rgb };
+            return new ColorEmbedded { Argb = a << 0x18 | rgb };
         }
 
-        public static ColorEntity FromARGB(int argb)
+        public static ColorEmbedded FromARGB(int argb)
         {
-            return new ColorEntity { Argb = argb };
+            return new ColorEmbedded { Argb = argb };
         }
 
-        public static ColorEntity FromRGBHex(string htmlColor)
+        public static ColorEmbedded FromRGBHex(string htmlColor)
         {
-            return ColorEntity.FromARGB(ColorTranslator.FromHtml(htmlColor).ToArgb());
+            return ColorEmbedded.FromARGB(ColorTranslator.FromHtml(htmlColor).ToArgb());
         }
 
         public int Argb { get; set; }

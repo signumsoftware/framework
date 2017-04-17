@@ -129,12 +129,12 @@ export function taskSetHtmlProperties(lineBase: LineBase<any, any>, state: LineB
 
         if (member.maxLength != undefined && !s.ctx.readOnly) {
 
-            if (!s.valueHtmlProps)
-                s.valueHtmlProps = {};
+            if (!s.valueHtmlAttributes)
+                s.valueHtmlAttributes = {};
 
-            s.valueHtmlProps.maxLength = member.maxLength;
+            s.valueHtmlAttributes.maxLength = member.maxLength;
 
-            s.valueHtmlProps.size = maxValueLineSize == undefined ? member.maxLength : Math.min(maxValueLineSize, member.maxLength);
+            s.valueHtmlAttributes.size = maxValueLineSize == undefined ? member.maxLength : Math.min(maxValueLineSize, member.maxLength);
         }
 
         if (member.isMultiline)

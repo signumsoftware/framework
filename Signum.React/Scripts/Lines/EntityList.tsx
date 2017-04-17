@@ -55,12 +55,12 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
 
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText}
-                {...{ ...this.baseHtmlProps(), ...this.state.formGroupHtmlProps }}
-                labelProps={s.labelHtmlProps}>
+                {...{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes }}
+                labelHtmlAttributes={s.labelHtmlAttributes}>
                 <div className="SF-entity-line">
                     <div className="input-group">
                         <select className="form-control" size={this.props.size} onChange={this.handleOnSelect}>
-                            {list.map((e, i) => <option  key={i} title={this.getTitle(e.element)} {...EntityListBase.entityHtmlProps(e.element) }>{e.element.toStr}</option>)}
+                            {list.map((e, i) => <option  key={i} title={this.getTitle(e.element)} {...EntityListBase.entityHtmlAttributes(e.element) }>{e.element.toStr}</option>)}
                         </select>
                         <span className="input-group-btn btn-group-vertical">
                             {this.renderCreateButton(true)}

@@ -43,8 +43,8 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
 
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock}
-                htmlProps={{ ...this.baseHtmlProps(), ...EntityBase.entityHtmlProps(s.ctx.value), ...s.formGroupHtmlProps }}
-                labelProps={s.labelHtmlProps} >
+                htmlAttributes={{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes }}
+                labelHtmlAttributes={s.labelHtmlAttributes} >
                 <div className="SF-entity-combo">
                     <div className={EntityBase.hasChildrens(buttons) ? "input-group" : undefined}>
                         <EntityComboSelect ctx={s.ctx}

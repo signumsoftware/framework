@@ -123,7 +123,7 @@ namespace Signum.Engine.Operations
             }
         }
 
-        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEntity parameters)
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters)
         {
             Database.Query<OperationLogEntity>().Where(o => o.Start < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
         }

@@ -213,7 +213,7 @@ namespace Signum.Windows
 
             if (type.IsEnum)
                 return ValueLineType.Enum;
-            else if (type == typeof(ColorEntity))
+            else if (type == typeof(ColorEmbedded))
                 return ValueLineType.Color;
             else if (type == typeof(TimeSpan))
                 return ValueLineType.TimeSpan;

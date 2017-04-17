@@ -85,3 +85,21 @@ nums.AddRange(3,4);
 nums.AddRange(6.To(10)); 
 //nums = new List<int> { 1, 2, 3, 4, 6, 7, 8, 9 };
 ```
+
+### AddAllRanges
+
+Adds all items from all ranges in one operation (works over any IList):
+
+```c#
+public static void AddAllRanges<T>(this IList<T> list, params IEnumerable<T>[] ranges)
+```
+
+Example:
+
+```c#
+IList<int> nums = new List<int> { 1, 2 };
+IList<int> range1 = new List<int> { 3, 4 };
+IList<int> range2 = new List<int> { 5, 6 };
+nums.AddAllRanges(range1, range2);
+//nums = new List<int> { 1, 2, 3, 4, 6 };
+```

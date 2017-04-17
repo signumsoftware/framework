@@ -48,6 +48,8 @@ interface Array<T> {
     clone(this: Array<T>, ): T[];
     joinComma(this: Array<T>, lastSeparator: string): string;
     extract(this: Array<T>, filter: (element: T) => boolean): T[];
+    findIndex(this: Array<T>, filter: (element: T) => boolean): number;
+    findLastIndex(this: Array<T>, filter: (element: T) => boolean): number;
 }
 
 interface ArrayConstructor {

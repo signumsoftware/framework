@@ -372,6 +372,27 @@ Array.prototype.extract = function (this: any[], predicate: (element: any) => bo
     return result;
 };
 
+
+Array.prototype.findIndex = function (this: any[], predicate: (element: any) => boolean) {
+    const result = this.filter(predicate);
+
+    for (var i = 0; i < this.length; i++)
+        if (predicate(this[i]))
+            return i;
+
+    return -1;
+};
+
+Array.prototype.findLastIndex = function (this: any[], predicate: (element: any) => boolean) {
+    const result = this.filter(predicate);
+
+    for (var i = this.length - 1; i >= 0; i--)
+        if (predicate(this[i]))
+            return i;
+
+    return -1;
+};
+
 Array.range = function (min: number, maxNotIncluded: number) {
     const length = maxNotIncluded - min;
 

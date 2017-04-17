@@ -186,7 +186,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     handleClick = (e: React.MouseEvent<any>) => {
         e.preventDefault();
 
-        if (e.ctrlKey || e.button == 2)
+        if (e.ctrlKey || e.button == 1)
             window.open(Finder.findOptionsPath(this.props.findOptions));
         else
             Finder.explore(this.props.findOptions).then(() => {

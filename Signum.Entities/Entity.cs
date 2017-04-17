@@ -102,7 +102,7 @@ namespace Signum.Entities
             return false;
         }
 
-        public virtual Dictionary<Guid, Dictionary<string, string>> EntityIntegrityCheck()
+        public virtual Dictionary<Guid, IntegrityCheck> EntityIntegrityCheck()
         {
             using (Mixins.OfType<CorruptMixin>().Any(c => c.Corrupt) ? Corruption.AllowScope() : null)
             {
@@ -110,7 +110,7 @@ namespace Signum.Entities
             }
         }
 
-        internal virtual Dictionary<Guid, Dictionary<string, string>> EntityIntegrityCheckBase()
+        internal virtual Dictionary<Guid, IntegrityCheck> EntityIntegrityCheckBase()
         {
             using (HeavyProfiler.LogNoStackTrace("EntityIntegrityCheckBase", () => GetType().Name))
                 return GraphExplorer.EntityIntegrityCheck(GraphExplorer.FromRootEntity(this));

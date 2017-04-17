@@ -167,7 +167,7 @@ namespace Signum.Engine
                 var ic = e.IntegrityCheck();
 
                 if (ic != null)
-                    throw new IntegrityCheckException(new Dictionary<Guid, Dictionary<string, string>> { { e.temporalId, ic } });
+                    throw new IntegrityCheckException(new Dictionary<Guid, IntegrityCheck> { { e.temporalId, ic } });
             }
         }
 
