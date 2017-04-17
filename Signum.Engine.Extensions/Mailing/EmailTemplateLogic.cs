@@ -29,7 +29,8 @@ namespace Signum.Engine.Mailing
 {
     public static class EmailTemplateLogic
     {
-        public static bool AvoidSynchronize = false;
+        public static bool AvoidSynchronizeTokens = false;
+        public static bool AvoidSynchronizeDefaultTemplates = true;
 
         public static EmailTemplateMessageEmbedded GetCultureMessage(this EmailTemplateEntity template, CultureInfo ci)
         {
@@ -280,7 +281,7 @@ namespace Signum.Engine.Mailing
 
         static SqlPreCommand Schema_Synchronize_Tokens(Replacements replacements)
         {
-            if (AvoidSynchronize)
+            if (AvoidSynchronizeTokens)
                 return null;
 
             StringDistance sd = new StringDistance();
@@ -296,7 +297,7 @@ namespace Signum.Engine.Mailing
 
         static SqlPreCommand Schema_Syncronize_DefaultTemplates(Replacements replacements)
         {
-            if (AvoidSynchronize)
+            if (AvoidSynchronizeDefaultTemplates)
                 return null;
 
             var table = Schema.Current.Table(typeof(EmailTemplateEntity));
