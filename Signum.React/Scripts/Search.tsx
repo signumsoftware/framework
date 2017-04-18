@@ -18,3 +18,12 @@ export { ValueSearchControl, ValueSearchControlProps };
 
 import ValueSearchControlLine, { ValueSearchControlLineProps } from './SearchControl/ValueSearchControlLine'
 export { ValueSearchControlLine, ValueSearchControlLineProps };
+
+export function extractFilterValue(filters: FilterOptionParsed[], columnName: string, operation: FilterOperation): any {
+    var f = filters.filter(f => f.token!.fullKey == columnName && f.operation == operation).firstOrNull();
+    if (!f)
+        return null;
+
+    filters.remove(f);
+    return f.value;
+}
