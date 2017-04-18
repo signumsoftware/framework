@@ -62,7 +62,7 @@ namespace Signum.Engine.Excel
                         {
                             new EmailAttachmentEmbedded
                             {
-                                File = Files.EmbeddedFilePathLogic.SaveFile(new Entities.Files.FilePathEmbedded(EmailFileType.Attachment, fileName, bytes)),
+                                File = Files.FilePathEmbeddedLogic.SaveFile(new Entities.Files.FilePathEmbedded(EmailFileType.Attachment, fileName, bytes)),
                                 Type = EmailAttachmentType.Attachment,
                             }
                         };

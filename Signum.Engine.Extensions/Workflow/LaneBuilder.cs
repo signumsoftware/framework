@@ -312,43 +312,43 @@ namespace Signum.Engine.Workflow
                     var wb = new WorkflowBuilder(sw);
                     wb.DeleteCases(c => filter.Evaluate(c.ParentCase) && c.ParentCase.Workflow == ac.Lane.Pool.Workflow);
                 }
-                else
+
+                var caseActivities = ac.CaseActivities().Where(ca => filter.Evaluate(ca.Case));
+                if (caseActivities.Any())
                 {
-                    var caseActivities = ac.CaseActivities().Where(ca => filter.Evaluate(ca.Case));
-                    if (caseActivities.Any())
-                    {
-                        var notifications = caseActivities.SelectMany(a => a.Notifications());
+                    var notifications = caseActivities.SelectMany(a => a.Notifications());
 
-                        if (notifications.Any())
-                            notifications.UnsafeDelete();
+                    if (notifications.Any())
+                        notifications.UnsafeDelete();
 
-                        Database.Query<CaseActivityEntity>()
-                            .Where(ca => ca.Previous.Entity.WorkflowActivity.Is(ac) && filter.Evaluate(ca.Previous.Entity.Case))
-                            .UnsafeUpdate()
-                            .Set(ca => ca.Previous, ca => null)
-                            .Execute();
+                    Database.Query<CaseActivityEntity>()
+                        .Where(ca => ca.Previous.Entity.WorkflowActivity.Is(ac) && filter.Evaluate(ca.Previous.Entity.Case))
+                        .UnsafeUpdate()
+                        .Set(ca => ca.Previous, ca => null)
+                        .Execute();
 
-                        caseActivities.UnsafeDelete();
-                    }
-                } 
+                    caseActivities.UnsafeDelete();
+                }
             }
 
-            private static void MoveCasesAndDelete(WorkflowActivityEntity ac, Locator locator)
+            private static void MoveCasesAndDelete(WorkflowActivityEntity wa, Locator locator)
             {
-                ac.CaseActivities().Where(a => a.DoneDate.HasValue)
-                    .UnsafeUpdate()
-                    .Set(a => a.WorkflowActivity, a => null)
-                    .Execute();
-
-                if (ac.CaseActivities().Any())
+                if (wa.CaseActivities().Any())
                 {
-                    ac.CaseActivities()
-                        .UnsafeUpdate()
-                        .Set(a => a.WorkflowActivity, a => locator.GetReplacement(ac.ToLite()))
-                        .Execute();
+                    if (locator.HasReplacement(wa.ToLite()))
+                    {
+                        wa.CaseActivities()
+                            .UnsafeUpdate()
+                            .Set(ca => ca.WorkflowActivity, ca => locator.GetReplacement(wa.ToLite()))
+                            .Execute();
+                    }
+                    else
+                    {
+                        DeleteCaseActivities(wa, a => true);
+                    }
                 }
 
-                ac.Delete(WorkflowActivityOperation.Delete);
+                wa.Delete(WorkflowActivityOperation.Delete);
             }
 
             internal void Clone(WorkflowPoolEntity pool, Dictionary<IWorkflowNodeEntity, IWorkflowNodeEntity> nodes)

@@ -15,7 +15,7 @@ using System.Web;
 
 namespace Signum.Engine.Files
 {
-    public static class EmbeddedFilePathLogic
+    public static class FilePathEmbeddedLogic
     {
         static Expression<Func<FilePathEmbedded, FileTypeSymbol, WebImage>> WebImageExpression =
             (efp, ft) => efp == null ? null : new WebImage
@@ -42,7 +42,7 @@ namespace Signum.Engine.Files
         
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmbeddedFilePathLogic.Start(null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => FilePathEmbeddedLogic.Start(null, null)));
         }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
