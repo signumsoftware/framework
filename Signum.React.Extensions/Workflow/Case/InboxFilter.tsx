@@ -6,7 +6,8 @@ import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { newMListElement } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { InboxFilterModel, InboxMessage, CaseNotificationState } from '../Signum.Entities.Workflow'
 import { TypeContext, ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EnumCheckboxList, FormGroup, FormGroupStyle, FormGroupSize } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { SearchControl, ValueSearchControl, FilterOperation, OrderType, PaginationMode, ISimpleFilterBuilder, FilterOption, FindOptionsParsed } from '../../../../Framework/Signum.React/Scripts/Search'
+import { SearchControl, ValueSearchControl, FilterOperation, OrderType, PaginationMode, ISimpleFilterBuilder, extractFilterValue, FilterOption, FindOptionsParsed } from '../../../../Framework/Signum.React/Scripts/Search'
+import { FilterOptionParsed } from "../../../../Framework/Signum.React/Scripts/FindOptions";
 
 export default class InboxFilter extends React.Component<{ ctx: TypeContext<InboxFilterModel> }, void> implements ISimpleFilterBuilder {
 
@@ -106,23 +107,14 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
         return result;
     }
 
-    static extract(fo: FindOptionsParsed): InboxFilterModel | null {
-        var filters = fo.filterOptions.clone();
-
-        var extract = (columnName: string, operation: FilterOperation) => {
-            var f = filters.filter(f => f.token!.fullKey == columnName && f.operation == operation).firstOrNull();
-            if (!f)
-                return null;
-
-            filters.remove(f);
-            return f.value;
-        }
+    static extract(fos: FilterOptionParsed[]): InboxFilterModel | null {
+        var filters = fos.clone();
 
         var result = InboxFilterModel.New({
-            range: extract("Range", "EqualTo"),
-            states: (extract("State", "IsIn") as CaseNotificationState[] || []).map(b => newMListElement(b)),
-            fromDate: extract("StartDate", "GreaterThanOrEqual"),
-            toDate: extract("StartDate", "LessThanOrEqual"),
+            range: extractFilterValue(filters, "Range", "EqualTo"),
+            states: (extractFilterValue(filters, "State", "IsIn") as CaseNotificationState[] || []).map(b => newMListElement(b)),
+            fromDate: extractFilterValue(filters, "StartDate", "GreaterThanOrEqual"),
+            toDate: extractFilterValue(filters, "StartDate", "LessThanOrEqual"),
         });
 
         if (filters.length)
