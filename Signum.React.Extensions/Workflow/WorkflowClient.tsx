@@ -546,6 +546,7 @@ export interface PreviewResult {
 export interface PreviewTask {
     BpmnId: string;
     Name: string;
+    SubWorkflow: Lite<WorkflowEntity>;
 }
 
 export interface CaseEntityPack {

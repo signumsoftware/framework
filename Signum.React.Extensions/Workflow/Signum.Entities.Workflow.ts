@@ -621,6 +621,7 @@ export const WorkflowReplacementItemEmbedded = new Type<WorkflowReplacementItemE
 export interface WorkflowReplacementItemEmbedded extends Entities.EmbeddedEntity {
     Type: "WorkflowReplacementItemEmbedded";
     oldTask: Entities.Lite<WorkflowActivityEntity>;
+    subWorkflow?: Entities.Lite<WorkflowEntity> | null;
     newTask?: string | null;
 }
 

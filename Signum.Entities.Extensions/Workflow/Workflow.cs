@@ -155,7 +155,8 @@ namespace Signum.Entities.Workflow
         [NotNullValidator, InTypeScript(Undefined = false, Null= false)]
         public Lite<WorkflowActivityEntity> OldTask { get; set; }
         
-        [NotNullValidator]
+        public Lite<WorkflowEntity> SubWorkflow { get; set; }
+       
         public string NewTask { get; set; }
     }
 

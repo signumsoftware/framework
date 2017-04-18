@@ -1,8 +1,10 @@
 ﻿import * as React from 'react'
-import { WorkflowReplacementModel, WorkflowReplacementItemEmbedded, CaseActivityEntity } from '../Signum.Entities.Workflow'
+import { WorkflowReplacementModel, WorkflowReplacementItemEmbedded, CaseActivityEntity, WorkflowOperation, WorkflowEntity } from '../Signum.Entities.Workflow'
 import { TypeContext, ValueLine, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl, ValueSearchControlLine } from '../../../../Framework/Signum.React/Scripts/Search'
+import { symbolNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { PreviewTask } from '../WorkflowClient'
+import { is } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
 
 export default class WorkflowReplacementComponent extends React.Component<{ ctx: TypeContext<WorkflowReplacementModel>, previewTasks: PreviewTask[] }, void> {
 
@@ -34,7 +36,7 @@ export default class WorkflowReplacementComponent extends React.Component<{ ctx:
                                     </td>
                                     <td>
                                         <WorkflowReplacementItemCombo
-                                            ctx={ectx.subCtx(a => a.newTask)}
+                                            ctx={ectx}
                                             previewTasks={this.props.previewTasks}/>
                                     </td>
                                 </tr>)
@@ -46,19 +48,20 @@ export default class WorkflowReplacementComponent extends React.Component<{ ctx:
     }
 }
 
-export class WorkflowReplacementItemCombo extends React.Component<{ ctx: TypeContext<string | null | undefined>, previewTasks: PreviewTask[] }, void> {
+export class WorkflowReplacementItemCombo extends React.Component<{ ctx: TypeContext<WorkflowReplacementItemEmbedded>, previewTasks: PreviewTask[] }, void> {
 
     handleChange = (e: React.FormEvent<any>) => {
-        this.props.ctx.value = (e.currentTarget as HTMLSelectElement).value;
+        this.props.ctx.subCtx(a => a.newTask).value = (e.currentTarget as HTMLSelectElement).value;
         this.forceUpdate();
     }
 
     render() {
         const ctx = this.props.ctx;
         return (
-            <select value={ctx.value || ""} className="form-control" onChange={this.handleChange}>
-                <option value="">{" - "}</option>
-                {this.props.previewTasks.map(pt => <option value={pt.BpmnId}>{pt.Name}</option>)}
+            <select value={ctx.value.newTask || ""} className="form-control" onChange={this.handleChange}>
+                <option value=""> - {symbolNiceName(WorkflowOperation.Delete).toUpperCase()} - </option>
+                {this.props.previewTasks.filter(pt => is(pt.SubWorkflow, ctx.value.subWorkflow))
+                    .map(pt => <option value={pt.BpmnId}>{pt.Name}</option>)}
             </select>
         );
     }
