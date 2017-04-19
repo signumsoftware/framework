@@ -24,7 +24,7 @@ import { QueryFilterEmbedded, QueryColumnEmbedded, QueryOrderEmbedded } from '..
 import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, DashboardEmbedededInEntity } from './Signum.Entities.Dashboard'
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
-import { LoadRoute, ComponentModule } from "../../../Framework/Signum.React/Scripts/LoadComponent";
+import { ImportRoute, ComponentModule } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 
 export interface PanelPartContentProps<T extends IPartEntity> {
@@ -56,7 +56,7 @@ export function start(options: { routes: JSX.Element[] }) {
     Finder.addSettings({ queryName: DashboardEntity, defaultOrderColumn: "DashboardPriority", defaultOrderType: "Descending" });
 
     options.routes.push(<Route path="dashboard">
-        <LoadRoute path=":dashboardId" onLoadModule={() => _import("./View/DashboardPage")} />
+        <ImportRoute path=":dashboardId" onImportModule={() => _import("./View/DashboardPage")} />
     </Route>);
 
     registerRenderer(ValueUserQueryListPartEntity, {

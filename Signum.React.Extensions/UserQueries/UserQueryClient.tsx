@@ -16,7 +16,7 @@ import { UserQueryEntity, UserQueryPermission, UserQueryMessage,
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import UserQueryMenu from './UserQueryMenu'
 import * as UserAssetsClient from '../UserAssets/UserAssetClient'
-import { LoadRoute } from "../../../Framework/Signum.React/Scripts/LoadComponent";
+import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -24,7 +24,7 @@ export function start(options: { routes: JSX.Element[] }) {
     UserAssetsClient.registerExportAssertLink(UserQueryEntity);
 
     options.routes.push(<Route path="userQuery">
-        <LoadRoute path=":userQueryId(/:entity)" onLoadModule={() => _import("./Templates/UserQueryPage")} />
+        <ImportRoute path=":userQueryId(/:entity)" onImportModule={() => _import("./Templates/UserQueryPage")} />
     </Route>);
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {

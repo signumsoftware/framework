@@ -53,7 +53,7 @@ import Workflow from './Workflow/Workflow'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 
-import { LoadRoute } from "../../../Framework/Signum.React/Scripts/LoadComponent";
+import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 import { SearchControl } from "../../../Framework/Signum.React/Scripts/Search";
 import { getTypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection";
@@ -61,8 +61,8 @@ import { getTypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection"
 export function start(options: { routes: JSX.Element[] }) {
 
     options.routes.push(<Route path="workflow">
-        <LoadRoute path="activity/:caseActivityId" onLoadModule={() => _import("./Case/CaseFramePage")} />
-        <LoadRoute path="new/:workflowId/:mainEntityStrategy" onLoadModule={() => _import("./Case/CaseFramePage")} />
+        <ImportRoute path="activity/:caseActivityId" onImportModule={() => _import("./Case/CaseFramePage")} />
+        <ImportRoute path="new/:workflowId/:mainEntityStrategy" onImportModule={() => _import("./Case/CaseFramePage")} />
     </Route>);
 
     QuickLinks.registerQuickLink(CaseActivityEntity, ctx => [
@@ -75,7 +75,7 @@ export function start(options: { routes: JSX.Element[] }) {
     ]);
 
     options.routes.push(<Route path="workflow">
-        <LoadRoute path="panel" onLoadModule={() => _import("./Workflow/WorkflowScriptRunnerPanelPage")} />
+        <ImportRoute path="panel" onImportModule={() => _import("./Workflow/WorkflowScriptRunnerPanelPage")} />
     </Route>);
 
 

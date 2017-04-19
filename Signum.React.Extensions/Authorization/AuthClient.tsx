@@ -18,7 +18,7 @@ import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowe
 import { PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack} from './Signum.Entities.Authorization'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import Login from './Login/Login';
-import { LoadRoute } from "../../../Framework/Signum.React/Scripts/LoadComponent";
+import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 export let userTicket: boolean;
 export let resetPassword: boolean;
@@ -30,10 +30,8 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
     userTicket = options.userTicket;
     resetPassword = options.resetPassword;
 
-    options.routes.push(<Route path="auth">
-        <LoadRoute path="login" onLoadModule={() => _import("./Login/Login")} />
-        <LoadRoute path="changePassword" onLoadModule={() => _import("./Login/ChangePassword")} />
-    </Route>);
+    options.routes.push(<ImportRoute path="/auth/login" onImportModule={() => _import("./Login/Login")} />);
+    options.routes.push(<ImportRoute path="/auth/changePassword" onImportModule={() => _import("./Login/ChangePassword")} />);
 }
 
 export let types: boolean;

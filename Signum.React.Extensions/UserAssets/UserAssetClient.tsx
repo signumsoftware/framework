@@ -14,7 +14,7 @@ import { FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption, 
 import * as AuthClient  from '../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
 import { IUserAssetEntity, UserAssetMessage, UserAssetPreviewModel, UserAssetPermission }  from './Signum.Entities.UserAssets'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
-import { LoadRoute } from "../../../Framework/Signum.React/Scripts/LoadComponent";
+import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 
 let started = false;
@@ -23,7 +23,7 @@ export function start(options: { routes: JSX.Element[] }) {
         return;
 
     options.routes.push(<Route path="userAssets">
-        <LoadRoute path="import" onLoadModule={() => _import("./ImportAssetsPage")} />
+        <ImportRoute path="import" onImportModule={() => _import("./ImportAssetsPage")} />
     </Route>);
 
     OmniboxClient.registerSpecialAction({

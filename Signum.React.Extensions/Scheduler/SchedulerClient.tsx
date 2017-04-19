@@ -12,12 +12,12 @@ import { ScheduledTaskLogEntity, ScheduledTaskEntity, ScheduleRuleMinutelyEntity
     ScheduleRuleWeekDaysEntity, HolidayCalendarEntity, SchedulerPermission } from './Signum.Entities.Scheduler'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
-import { LoadRoute } from "../../../Framework/Signum.React/Scripts/LoadComponent";
+import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<Route path="scheduler">
-        <LoadRoute path="view" onLoadModule={() => _import("./SchedulerPanelPage")} />
+        <ImportRoute path="view" onImportModule={() => _import("./SchedulerPanelPage")} />
     </Route>);
 
     Navigator.addSettings(new EntitySettings(ScheduledTaskEntity, e => _import('./Templates/SchedulerTask')));

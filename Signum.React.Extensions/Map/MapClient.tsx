@@ -21,7 +21,7 @@ import { SchemaMapInfo, ClientColorProvider } from './Schema/SchemaMap'
 import { OperationMapInfo } from './Operation/OperationMap'
 
 import { } from './Signum.Entities.Map'
-import { LoadRoute } from "../../../Framework/Signum.React/Scripts/LoadComponent";
+import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 
 export const getProviders: Array<(info: SchemaMapInfo) => Promise<ClientColorProvider[]>> = []; 
@@ -33,8 +33,8 @@ export function getAllProviders(info: SchemaMapInfo): Promise<ClientColorProvide
 export function start(options: { routes: JSX.Element[], auth: boolean; cache: boolean; disconnected: boolean; isolation: boolean }) {
 
     options.routes.push(<Route path="map">
-        <LoadRoute path="" exact onLoadModule={() => _import("./Schema/SchemaMapPage")} />
-        <LoadRoute path=":type" onLoadModule={() => _import("./Operation/OperationMapPage")} />
+        <ImportRoute path="" exact onImportModule={() => _import("./Schema/SchemaMapPage")} />
+        <ImportRoute path=":type" onImportModule={() => _import("./Operation/OperationMapPage")} />
     </Route>);
 
     getProviders.push(smi => _import("./Schema/ColorProviders/Default").then((c: any) => c.default(smi)));

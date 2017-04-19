@@ -13,13 +13,13 @@ import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { ProfilerPermission } from './Signum.Entities.Profiler'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
-import { LoadRoute } from "../../../Framework/Signum.React/Scripts/LoadComponent";
+import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<Route path="profiler">
-        <LoadRoute path="times" onLoadModule={() => _import("./Times/TimesPage")} />
-        <LoadRoute path="heavy" onLoadModule={() => _import("./Heavy/HeavyListPage")} />
-        <LoadRoute path="heavy/entry/:selectedIndex" onLoadModule={() => _import("./Heavy/HeavyEntryPage")} />
+        <ImportRoute path="times" onImportModule={() => _import("./Times/TimesPage")} />
+        <ImportRoute path="heavy" onImportModule={() => _import("./Heavy/HeavyListPage")} />
+        <ImportRoute path="heavy/entry/:selectedIndex" onImportModule={() => _import("./Heavy/HeavyEntryPage")} />
     </Route>);
 
     //Navigator.addSettings(new EntitySettings(ProcessEntity, e => _import('./Templates/Process')));

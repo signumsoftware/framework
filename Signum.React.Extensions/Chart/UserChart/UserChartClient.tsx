@@ -18,7 +18,7 @@ import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'
 import UserChartMenu from './UserChartMenu'
 import * as ChartClient from '../ChartClient'
 import * as UserAssetsClient from '../../UserAssets/UserAssetClient'
-import { LoadRoute } from "../../../../Framework/Signum.React/Scripts/LoadComponent";
+import { ImportRoute } from "../../../../Framework/Signum.React/Scripts/AsyncImport";
 
 
 export function start(options: { routes: JSX.Element[] }) {
@@ -27,7 +27,7 @@ export function start(options: { routes: JSX.Element[] }) {
     UserAssetsClient.registerExportAssertLink(UserChartEntity);
 
     options.routes.push(<Route path="userChart">
-        <LoadRoute path=":userChartId(/:entity)" onLoadModule={() => _import("./UserChartPage")} />
+        <ImportRoute path=":userChartId(/:entity)" onImportModule={() => _import("./UserChartPage")} />
     </Route>);
 
 

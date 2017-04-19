@@ -14,7 +14,7 @@ import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/O
 import { ProcessState, ProcessEntity, ProcessPermission, PackageLineEntity, PackageEntity, PackageOperationEntity } from './Signum.Entities.Processes'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
-import { LoadRoute } from "../../../Framework/Signum.React/Scripts/LoadComponent";
+import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 require("./Processes.css");
 
@@ -36,7 +36,7 @@ export function start(options: { routes: JSX.Element[], packages: boolean, packa
     }
 
     options.routes.push(<Route path="processes">
-        <LoadRoute path="view" onLoadModule={() => _import("./ProcessPanelPage")} />
+        <ImportRoute path="view" onImportModule={() => _import("./ProcessPanelPage")} />
     </Route>);
     
     OmniboxClient.registerSpecialAction({

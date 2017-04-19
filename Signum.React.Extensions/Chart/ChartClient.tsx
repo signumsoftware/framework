@@ -25,12 +25,12 @@ import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import ChartButton from './ChartButton'
 import ChartRequestView from './Templates/ChartRequestView'
 import * as UserChartClient from './UserChart/UserChartClient'
-import { LoadRoute } from "../../../Framework/Signum.React/Scripts/LoadComponent";
+import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 export function start(options: { routes: JSX.Element[] }) {
 
     options.routes.push(<Route path="chart">
-        <LoadRoute path=":queryName" onLoadModule={() => _import("./Templates/ChartRequestPage")} />
+        <ImportRoute path=":queryName" onImportModule={() => _import("./Templates/ChartRequestPage")} />
     </Route>);
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {

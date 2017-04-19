@@ -14,7 +14,7 @@ import { ProcessEntity } from '../Processes/Signum.Entities.Processes'
 import { FileTypeSymbol } from '../Files/Signum.Entities.Files'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
-import { LoadRoute } from "../../../Framework/Signum.React/Scripts/LoadComponent";
+import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 export function start(options: { routes: JSX.Element[],}) {
   
@@ -22,7 +22,7 @@ export function start(options: { routes: JSX.Element[],}) {
     Navigator.addSettings(new EntitySettings(PrintPackageEntity, e => _import('./Templates/PrintPackage')));
 
     options.routes.push(<Route path="printing">
-        <LoadRoute path="view" onLoadModule={() => _import("./PrintPanelPage")} />
+        <ImportRoute path="view" onImportModule={() => _import("./PrintPanelPage")} />
     </Route>);
 
     
