@@ -9,6 +9,7 @@ import { FilterOperation, FilterOption, QueryDescription, QueryToken, SubTokensO
 import { SearchMessage, JavascriptMessage } from '../Signum.Entities'
 import * as Reflection from '../Reflection'
 import { default as SearchControl, SearchControlProps} from './SearchControl'
+import * as PropTypes from "prop-types";
 
 
 require("./QueryTokenBuilder.css");
@@ -110,7 +111,7 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
         return { parentToken: this.props.parentToken };
     }
 
-    static childContextTypes = { "parentToken": React.PropTypes.object };
+    static childContextTypes = { "parentToken": PropTypes.object };
 
     handleOnChange = (value: any) => {
         this.props.onTokenSelected(value || this.props.parentToken);
@@ -142,7 +143,7 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
     }
 }
 
-export class QueryTokenItem extends React.Component<{ item: QueryToken | null }, {}> {
+export class QueryTokenItem extends React.Component<{ item: QueryToken | null }, void> {
     render() {
 
         const item = this.props.item;
@@ -161,9 +162,9 @@ export class QueryTokenItem extends React.Component<{ item: QueryToken | null },
 }
   
 
-export class QueryTokenOptionalItem extends React.Component<{ item: QueryToken | null }, {}> {
+export class QueryTokenOptionalItem extends React.Component<{ item: QueryToken | null }, void> {
 
-    static contextTypes = { "parentToken": React.PropTypes.object };
+    static contextTypes = { "parentToken": PropTypes.object };
 
 
     render() {

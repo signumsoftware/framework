@@ -1,35 +1,35 @@
 ﻿import * as React from "react";
 import { match, Route, RouterChildContext, matchPath } from "react-router-dom";
 import * as H from "history";
-
+import * as PropTypes from "prop-types";
 
 export interface ComponentModule {
     default: React.ComponentClass<any>;
 }
 
-interface LoadComponentProps {
-    onLoadModule: () => Promise<ComponentModule>;
+interface ImportComponentProps {
+    onImportModule: () => Promise<ComponentModule>;
     componentProps?: any;
     onRender?: (module: ComponentModule) => React.ReactElement<any>;
 }
 
-interface LoadComponentState {
+interface ImportComponentState {
     module?: ComponentModule;
 }
 
-export class LoadComponent extends React.Component<LoadComponentProps, LoadComponentState> {
+export class ImportComponent extends React.Component<ImportComponentProps, ImportComponentState> {
 
-    constructor(props: LoadComponentProps) {
+    constructor(props: ImportComponentProps) {
         super(props);
         this.state = { module: undefined };
     }
 
     componentWillMount() {
-        this.loadData(this.props);
+        this.importModule(this.props);
     }
     
-    loadData(props: LoadComponentProps) {
-        this.props.onLoadModule()
+    importModule(props: ImportComponentProps) {
+        this.props.onImportModule()
             .then(mod => this.setState({ module: mod }))
             .done();
     }
@@ -46,32 +46,32 @@ export class LoadComponent extends React.Component<LoadComponentProps, LoadCompo
 }
 
 
-interface LoadRouteProps {
+interface ImportRouteProps {
     path?: string;
     exact?: boolean;
     strict?: boolean;
-    onLoadModule: () => Promise<ComponentModule>;
+    onImportModule: () => Promise<ComponentModule>;
 
     location?: H.Location;
     computedMatch?: match<any>; //For Switch component
 }
 
-interface LoadRouteState {
+interface ImportRouteState {
     match: match<any> | null;
 }
 
-export class LoadRoute extends React.Component<LoadRouteProps, LoadRouteState> {
-    
+export class ImportRoute extends React.Component<ImportRouteProps, ImportRouteState> {
+
     static contextTypes = {
-        router: React.PropTypes.shape({
-            history: React.PropTypes.object.isRequired,
-            route: React.PropTypes.object.isRequired,
-            staticContext: React.PropTypes.object
+        router: PropTypes.shape({
+            history: PropTypes.object.isRequired,
+            route: PropTypes.object.isRequired,
+            staticContext: PropTypes.object
         })
     }
 
     static childContextTypes = {
-        router: React.PropTypes.object.isRequired
+        router: PropTypes.object.isRequired
     }
 
     getChildContext() {
@@ -86,19 +86,19 @@ export class LoadRoute extends React.Component<LoadRouteProps, LoadRouteState> {
         }
     }
 
-    constructor(props: LoadRouteProps) {
+    constructor(props: ImportRouteProps) {
         super(props);
         this.state = { match: this.computeMatch(props, this.context) };
     }
 
-    componentWillReceiveProps(nextProps: LoadRouteProps, nextContext: RouterChildContext<any>) {
+    componentWillReceiveProps(nextProps: ImportRouteProps, nextContext: RouterChildContext<any>) {
         this.setState({
             match: this.computeMatch(nextProps, nextContext)
         });
     }
 
 
-    computeMatch(props: LoadRouteProps, ctx: RouterChildContext<any>): match<any> | null {
+    computeMatch(props: ImportRouteProps, ctx: RouterChildContext<any>): match<any> | null {
         if (props.computedMatch)
             return props.computedMatch // <Switch> already computed the match for us
 
@@ -111,6 +111,6 @@ export class LoadRoute extends React.Component<LoadRouteProps, LoadRouteState> {
         if (!this.state.match)
             return null;
 
-        return <LoadComponent onLoadModule={this.props.onLoadModule} componentProps={this.props} />
+        return <ImportComponent onImportModule={this.props.onImportModule} componentProps={{ ... this.props, ... this.state }} />
     }
 }

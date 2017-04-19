@@ -28,15 +28,13 @@ import { navigateRoute, isNavigable, currentHistory, API as NavAPI, isCreable, t
 import SearchModal from './SearchControl/SearchModal';
 import EntityLink from './SearchControl/EntityLink';
 import SearchControlLoaded from './SearchControl/SearchControlLoaded';
-import { LoadRoute } from "./LoadComponent";
+import { ImportRoute } from "./AsyncImport";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
 
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<Route path="find">
-        <LoadRoute path=":queryName" onLoadModule={() => _import("./SearchControl/SearchPage")} />
-    </Route>);
+    options.routes.push(<ImportRoute path="/find/:queryName" onImportModule={() => _import("./SearchControl/SearchPage")} />);
 }
 
 export function addSettings(...settings: QuerySettings[]) {
@@ -638,19 +636,19 @@ export module API {
     
     export function fetchAllLites(request: { types: string }): Promise<Lite<Entity>[]> {
         return ajaxGet<Lite<Entity>[]>({
-            url: currentHistory.createHref({ pathname: "~/api/query/allLites", search: QueryString.stringify(request) })
+            url: "~/api/query/allLites" + QueryString.stringify(request)
         });
     }
 
     export function findTypeLike(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {
         return ajaxGet<Lite<TypeEntity>[]>({
-            url: currentHistory.createHref({ pathname: "~/api/query/findTypeLike", search: QueryString.stringify(request) })
+            url: "~/api/query/findTypeLike" + QueryString.stringify(request)
         });
     }
 
     export function findLiteLike(request: { types: string, subString: string, count: number }): Promise<Lite<Entity>[]> {
         return ajaxGet<Lite<Entity>[]>({
-            url: currentHistory.createHref({ pathname: "~/api/query/findLiteLike", search: QueryString.stringify(request) })
+            url: "~/api/query/findLiteLike" + QueryString.stringify(request)
         });
     }
 

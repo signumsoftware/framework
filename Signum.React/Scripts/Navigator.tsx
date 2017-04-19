@@ -15,7 +15,7 @@ import FrameModal from './Frames/FrameModal';
 import { ViewReplacer } from './Frames/ReactVisitor'
 import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './Lines/AutocompleteConfig'
 import { FindOptions } from './FindOptions'
-import { LoadComponent, LoadRoute } from "./LoadComponent";
+import { ImportRoute } from "./AsyncImport";
 
 
 Dic.skipClasses.push(React.Component);
@@ -42,8 +42,8 @@ export namespace Expander {
 }
 
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<LoadRoute path="view/:type/:id" onLoadModule={() => _import("./Frames/FramePage")} />);
-    options.routes.push(<LoadRoute path="create/:type" onLoadModule={() => _import("./Frames/FramePage")} />);
+    options.routes.push(<ImportRoute path="view/:type/:id" onImportModule={() => _import("./Frames/FramePage")} />);
+    options.routes.push(<ImportRoute path="create/:type" onImportModule={() => _import("./Frames/FramePage")} />);
 }
 
 export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined) {

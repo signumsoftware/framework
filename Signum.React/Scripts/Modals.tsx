@@ -17,12 +17,12 @@ let current: GlobalModalContainer;
 export class GlobalModalContainer extends React.Component<{}, GlobalModalContainerState> {
     constructor(props: {}) {
         super(props);
-        this.state = { modals: [], currentUrl: Navigator.currentHistory.getCurrentLocation().pathname };
+        this.state = { modals: [], currentUrl: Navigator.currentHistory.location.pathname };
         current = this;
     }
 
     componentWillReceiveProps(nextProps: {}, nextContext: any): void {
-        var newUrl = Navigator.currentHistory.getCurrentLocation().pathname;
+        var newUrl = Navigator.currentHistory.location.pathname;
 
         if (newUrl != this.state.currentUrl)
             this.setState({ modals: [], currentUrl: newUrl });
