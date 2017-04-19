@@ -22,9 +22,7 @@ export function start(options: { routes: JSX.Element[] }) {
     if (started)
         return;
 
-    options.routes.push(<Route path="userAssets">
-        <ImportRoute path="import" onImportModule={() => _import("./ImportAssetsPage")} />
-    </Route>);
+    options.routes.push(<ImportRoute path="~/userAssets/import" onImportModule={() => _import("./ImportAssetsPage")} />);
 
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML),

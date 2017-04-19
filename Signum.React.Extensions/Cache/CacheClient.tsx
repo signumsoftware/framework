@@ -1,4 +1,4 @@
-﻿
+
 import * as React from 'react'
 import { Route } from 'react-router'
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
@@ -14,9 +14,7 @@ import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport
 
 
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<Route path="cache">
-        <ImportRoute path="statistics" onImportModule={() => _import("./CacheStatisticsPage")} />
-    </Route>);
+    options.routes.push(<ImportRoute path="~/cache/statistics" onImportModule={() => _import("./CacheStatisticsPage")} />);
 
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(CachePermission.InvalidateCache),

@@ -16,9 +16,7 @@ import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport
 
 
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<Route path="scheduler">
-        <ImportRoute path="view" onImportModule={() => _import("./SchedulerPanelPage")} />
-    </Route>);
+    options.routes.push(<ImportRoute path="~/scheduler/view" onImportModule={() => _import("./SchedulerPanelPage")} />);
 
     Navigator.addSettings(new EntitySettings(ScheduledTaskEntity, e => _import('./Templates/SchedulerTask')));
     Navigator.addSettings(new EntitySettings(ScheduleRuleMinutelyEntity, e => _import('./Templates/ScheduleRuleMinutely')));

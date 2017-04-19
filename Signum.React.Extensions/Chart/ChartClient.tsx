@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { Route } from 'react-router'
 import * as QueryString from 'query-string'
 import { Dic } from '../../../Framework/Signum.React/Scripts/Globals';
@@ -29,9 +29,7 @@ import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport
 
 export function start(options: { routes: JSX.Element[] }) {
 
-    options.routes.push(<Route path="chart">
-        <ImportRoute path=":queryName" onImportModule={() => _import("./Templates/ChartRequestPage")} />
-    </Route>);
+    options.routes.push(<ImportRoute path="~/chart/:queryName" onImportModule={() => _import("./Templates/ChartRequestPage")} />);
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
         if (!ctx.searchControl.props.showBarExtension || !AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting))

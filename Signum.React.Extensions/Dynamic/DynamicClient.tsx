@@ -18,9 +18,7 @@ import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<Route path="dynamic">
-        <ImportRoute path="panel" onImportModule={() => _import("./DynamicPanelPage")} />
-    </Route>);
+    options.routes.push(<ImportRoute path="~/dynamic/panel" onImportModule={() => _import("./DynamicPanelPage")} />);
 
 
     OmniboxClient.registerSpecialAction({

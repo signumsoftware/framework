@@ -55,9 +55,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
     Finder.addSettings({ queryName: DashboardEntity, defaultOrderColumn: "DashboardPriority", defaultOrderType: "Descending" });
 
-    options.routes.push(<Route path="dashboard">
-        <ImportRoute path=":dashboardId" onImportModule={() => _import("./View/DashboardPage")} />
-    </Route>);
+    options.routes.push(<ImportRoute path="~/dashboard/:dashboardId" onImportModule={() => _import("./View/DashboardPage")} />);
 
     registerRenderer(ValueUserQueryListPartEntity, {
         component: () => _import<ComponentModule>('./View/ValueUserQueryListPart').then(a => a.default)

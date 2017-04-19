@@ -21,9 +21,7 @@ export function start(options: { routes: JSX.Element[],}) {
     Navigator.addSettings(new EntitySettings(PrintLineEntity, e => _import('./Templates/PrintLine')));
     Navigator.addSettings(new EntitySettings(PrintPackageEntity, e => _import('./Templates/PrintPackage')));
 
-    options.routes.push(<Route path="printing">
-        <ImportRoute path="view" onImportModule={() => _import("./PrintPanelPage")} />
-    </Route>);
+    options.routes.push(<ImportRoute path="~/printing/view" onImportModule={() => _import("./PrintPanelPage")} />);
 
     
     OmniboxClient.registerSpecialAction({

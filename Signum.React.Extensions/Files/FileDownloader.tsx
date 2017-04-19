@@ -96,10 +96,8 @@ FileDownloader.configurtions[FileEmbedded.typeName] = {
 
 FileDownloader.configurtions[FilePathEmbedded.typeName] = {
     downloadClick: (event, file) => downloadUrl(event,
-        Navigator.currentHistory.createHref({
-            pathname: "~/api/files/downloadEmbeddedFilePath/" + file.fileType!.key,
-            search: QueryString.stringify({ suffix: file.suffix, fileName: file.fileName })
-        }))
+        Services.fixUrl("~/api/files/downloadEmbeddedFilePath/" + file.fileType!.key +
+            QueryString.stringify({ suffix: file.suffix, fileName: file.fileName })))
 } as FileDownloaderConfiguration<FilePathEmbedded>;
 
 

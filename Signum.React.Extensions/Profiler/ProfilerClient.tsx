@@ -16,11 +16,11 @@ import * as AuthClient from '../Authorization/AuthClient'
 import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<Route path="profiler">
-        <ImportRoute path="times" onImportModule={() => _import("./Times/TimesPage")} />
-        <ImportRoute path="heavy" onImportModule={() => _import("./Heavy/HeavyListPage")} />
-        <ImportRoute path="heavy/entry/:selectedIndex" onImportModule={() => _import("./Heavy/HeavyEntryPage")} />
-    </Route>);
+    options.routes.push(
+        <ImportRoute path="~/profiler/times" onImportModule={() => _import("./Times/TimesPage")} />,
+        <ImportRoute path="~/profiler/heavy" onImportModule={() => _import("./Heavy/HeavyListPage")} />,
+        <ImportRoute path="~/profiler/heavy/entry/:selectedIndex" onImportModule={() => _import("./Heavy/HeavyEntryPage")} />
+    );
 
     //Navigator.addSettings(new EntitySettings(ProcessEntity, e => _import('./Templates/Process')));
 

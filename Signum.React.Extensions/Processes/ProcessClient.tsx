@@ -35,9 +35,7 @@ export function start(options: { routes: JSX.Element[], packages: boolean, packa
         Navigator.addSettings(new EntitySettings(PackageOperationEntity, e => _import('./Templates/PackageOperation'), { isCreable: "Never" }));
     }
 
-    options.routes.push(<Route path="processes">
-        <ImportRoute path="view" onImportModule={() => _import("./ProcessPanelPage")} />
-    </Route>);
+    options.routes.push(<ImportRoute path="~/processes/view" onImportModule={() => _import("./ProcessPanelPage")} />);
     
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(ProcessPermission.ViewProcessPanel),

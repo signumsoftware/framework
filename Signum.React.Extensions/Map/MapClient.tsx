@@ -32,10 +32,10 @@ export function getAllProviders(info: SchemaMapInfo): Promise<ClientColorProvide
 
 export function start(options: { routes: JSX.Element[], auth: boolean; cache: boolean; disconnected: boolean; isolation: boolean }) {
 
-    options.routes.push(<Route path="map">
-        <ImportRoute path="" exact onImportModule={() => _import("./Schema/SchemaMapPage")} />
-        <ImportRoute path=":type" onImportModule={() => _import("./Operation/OperationMapPage")} />
-    </Route>);
+    options.routes.push(
+        <ImportRoute path="~/map" exact onImportModule={() => _import("./Schema/SchemaMapPage")} />,
+        <ImportRoute path="~/map/:type" onImportModule={() => _import("./Operation/OperationMapPage")} />
+    );
 
     getProviders.push(smi => _import("./Schema/ColorProviders/Default").then((c: any) => c.default(smi)));
     if (options.auth)

@@ -21,9 +21,7 @@ import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport
 require("./Mailing.css");
 
 export function start(options: { routes: JSX.Element[], smtpConfig: boolean, newsletter: boolean, pop3Config: boolean, sendEmailTask: boolean, quickLinksFrom: PseudoType[] | undefined }) {
-    options.routes.push(<Route path="asyncEmailSender">
-        <ImportRoute path="view" onImportModule={() => _import("./AsyncEmailSenderPage")} />
-    </Route>);
+    options.routes.push(<ImportRoute path="~/asyncEmailSender/view" onImportModule={() => _import("./AsyncEmailSenderPage")} />);
 
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel),

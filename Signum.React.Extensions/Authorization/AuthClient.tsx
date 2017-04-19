@@ -30,8 +30,8 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
     userTicket = options.userTicket;
     resetPassword = options.resetPassword;
 
-    options.routes.push(<ImportRoute path="/auth/login" onImportModule={() => _import("./Login/Login")} />);
-    options.routes.push(<ImportRoute path="/auth/changePassword" onImportModule={() => _import("./Login/ChangePassword")} />);
+    options.routes.push(<ImportRoute path="~/auth/login" onImportModule={() => _import("./Login/Login")} />);
+    options.routes.push(<ImportRoute path="~/auth/changePassword" onImportModule={() => _import("./Login/ChangePassword")} />);
 }
 
 export let types: boolean;

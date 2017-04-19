@@ -60,10 +60,11 @@ import { getTypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection"
 
 export function start(options: { routes: JSX.Element[] }) {
 
-    options.routes.push(<Route path="workflow">
-        <ImportRoute path="activity/:caseActivityId" onImportModule={() => _import("./Case/CaseFramePage")} />
-        <ImportRoute path="new/:workflowId/:mainEntityStrategy" onImportModule={() => _import("./Case/CaseFramePage")} />
-    </Route>);
+    options.routes.push(
+        <ImportRoute path="~/workflow/activity/:caseActivityId" onImportModule={() => _import("./Case/CaseFramePage")} />,
+        <ImportRoute path="~/workflow/new/:workflowId/:mainEntityStrategy" onImportModule={() => _import("./Case/CaseFramePage")} />,
+        <ImportRoute path="~/workflow/panel" onImportModule={() => _import("./Workflow/WorkflowScriptRunnerPanelPage")} />
+    );
 
     QuickLinks.registerQuickLink(CaseActivityEntity, ctx => [
         new QuickLinks.QuickLinkAction("caseFlow", WorkflowActivityMessage.CaseFlow.niceToString(), e => {
@@ -73,12 +74,7 @@ export function start(options: { routes: JSX.Element[] }) {
                 .done();
         }, { icon: "fa fa-random", iconColor: "green" })
     ]);
-
-    options.routes.push(<Route path="workflow">
-        <ImportRoute path="panel" onImportModule={() => _import("./Workflow/WorkflowScriptRunnerPanelPage")} />
-    </Route>);
-
-
+    
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(WorkflowScriptRunnerPanelPermission.ViewWorkflowScriptRunnerPanel),
         key: "WorkflowScriptRunnerPanel",
@@ -484,7 +480,7 @@ export namespace API {
 
     export function findMainEntityType(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {
         return ajaxGet<Lite<TypeEntity>[]>({
-            url: Navigator.currentHistory.createHref({ pathname: "~/api/workflow/findMainEntityType", search: QueryString.stringify(request) })
+            url: "~/api/workflow/findMainEntityType" + QueryString.stringify(request)
         });
     }
 

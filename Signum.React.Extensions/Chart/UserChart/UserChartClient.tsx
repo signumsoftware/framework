@@ -26,9 +26,7 @@ export function start(options: { routes: JSX.Element[] }) {
     UserAssetsClient.start({ routes: options.routes });
     UserAssetsClient.registerExportAssertLink(UserChartEntity);
 
-    options.routes.push(<Route path="userChart">
-        <ImportRoute path=":userChartId(/:entity)" onImportModule={() => _import("./UserChartPage")} />
-    </Route>);
+    options.routes.push(<ImportRoute path="~/userChart/:userChartId(/:entity)" onImportModule={() => _import("./UserChartPage")} />);
 
 
     ChartClient.ButtonBarChart.onButtonBarElements.push(ctx => {
