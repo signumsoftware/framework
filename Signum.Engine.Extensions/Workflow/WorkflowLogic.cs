@@ -603,7 +603,7 @@ namespace Signum.Engine.Workflow
 
             var document = XDocument.Parse(model.DiagramXml);
             var wb = new WorkflowBuilder(workflow);
-            return wb.PreviewChanges(document);
+            return wb.PreviewChanges(document, model);
         }
 
         public static void ApplyDocument(WorkflowEntity workflow, WorkflowModel model, WorkflowReplacementModel replacements)

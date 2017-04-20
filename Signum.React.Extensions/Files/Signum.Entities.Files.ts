@@ -15,7 +15,7 @@ export interface IFile
 }
 
 export interface FileEntity extends IFile { }
-export interface EmbeddedFileEntity extends IFile { }
+export interface FileEmbedded extends IFile { }
 
 export interface IFilePath extends IFile
 {
@@ -25,7 +25,7 @@ export interface IFilePath extends IFile
 }
 
 export interface FilePathEntity extends IFilePath { }
-export interface EmbeddedFilePathEntity extends IFilePath { }
+export interface FilePathEmbedded extends IFilePath { }
 export const FileEmbedded = new Type<FileEmbedded>("FileEmbedded");
 export interface FileEmbedded extends Entities.EmbeddedEntity {
     Type: "FileEmbedded";

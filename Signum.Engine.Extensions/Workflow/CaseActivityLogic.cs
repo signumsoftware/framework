@@ -131,6 +131,8 @@ namespace Signum.Engine.Workflow
                         Entity = e,
                         e.Id,
                         e.Description,
+                        e.Workflow,
+                        e.MainEntity,
                     });
 
                 sb.Include<CaseTagTypeEntity>()

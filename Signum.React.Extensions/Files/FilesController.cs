@@ -42,7 +42,7 @@ namespace Signum.React.Files
         }
 
         [Route("api/files/downloadEmbeddedFilePath/{fileTypeKey}"), HttpGet]
-        public HttpResponseMessage DownloadEmbeddedFilePath(string fileTypeKey, string suffix, string fileName)
+        public HttpResponseMessage DownloadFilePathEmbedded(string fileTypeKey, string suffix, string fileName)
         {
             var fileType = SymbolLogic<FileTypeSymbol>.ToSymbol(fileTypeKey);
 

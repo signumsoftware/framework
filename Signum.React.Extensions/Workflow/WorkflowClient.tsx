@@ -101,8 +101,8 @@ export function start(options: { routes: JSX.Element[] }) {
             "Activity": new Finder.CellFormatter(cell => <ActivityWithRemarks data={cell} />)
         },
         defaultOrderColumn: "StartDate",
-        simpleFilterBuilder: (qd, fo) => {
-            var model = InboxFilter.extract(fo);
+        simpleFilterBuilder: (qd, fos) => {
+            var model = InboxFilter.extract(fos);
 
             if (!model)
                 return undefined;
@@ -538,6 +538,7 @@ export interface PreviewResult {
 export interface PreviewTask {
     BpmnId: string;
     Name: string;
+    SubWorkflow: Lite<WorkflowEntity>;
 }
 
 export interface CaseEntityPack {

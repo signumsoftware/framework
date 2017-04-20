@@ -326,6 +326,7 @@ namespace Signum.Entities.Workflow
     public class WorkflowActivityModel : ModelEntity
     {
         public Lite<WorkflowActivityEntity>  WorkflowActivity { get; set; }
+
         public WorkflowEntity Workflow { get; set; }
 
         [NotNullable]

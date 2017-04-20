@@ -46,32 +46,30 @@ namespace Signum.Engine.Workflow
                     if (IsNormal(prev.DoneType.Value))
                     {
                         var conns = GetAllConnections(gr, from, to);
-
-                        return conns.Select(c => new CaseConnectionStats
-                        {
-                            BpmnElementId = c.BpmnElementId,
-                            Connection = c.ToLite(),
-                            FromBpmnElementId = c.From.BpmnElementId,
-                            ToBpmnElementId = c.To.BpmnElementId,
-                            DoneBy = prev.DoneBy,
-                            DoneDate = prev.DoneDate.Value,
-                            DoneType = prev.DoneType.Value
-                        });
-                    }
-                    else
-                    {
-                        return new[] 
-                        {
-                            new CaseConnectionStats
+                        if (conns.Any())
+                            return conns.Select(c => new CaseConnectionStats
                             {
-                                FromBpmnElementId = from.BpmnElementId,
-                                ToBpmnElementId = to.BpmnElementId,
+                                BpmnElementId = c.BpmnElementId,
+                                Connection = c.ToLite(),
+                                FromBpmnElementId = c.From.BpmnElementId,
+                                ToBpmnElementId = c.To.BpmnElementId,
                                 DoneBy = prev.DoneBy,
                                 DoneDate = prev.DoneDate.Value,
                                 DoneType = prev.DoneType.Value
-                            }
-                        };
+                            });
                     }
+
+                    return new[]
+                    {
+                        new CaseConnectionStats
+                        {
+                            FromBpmnElementId = from.BpmnElementId,
+                            ToBpmnElementId = to.BpmnElementId,
+                            DoneBy = prev.DoneBy,
+                            DoneDate = prev.DoneDate.Value,
+                            DoneType = prev.DoneType.Value
+                        }
+                    };
                 }).ToList();
 
       

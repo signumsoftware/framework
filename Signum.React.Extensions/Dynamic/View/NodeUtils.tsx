@@ -508,6 +508,10 @@ export function isEnumOrNull(val: any, enumType: EnumType<any>) {
     return val == null || typeof val == "string" && enumType.values().contains(val) ? null : `The returned value (${JSON.stringify(val)}) should be a valid ${enumType.type} (like ${enumType.values().joinComma(" or ")}) or null`;
 }
 
+export function isObject(val: any) {
+    return val != null && typeof val == "object" ? null : `The returned value (${JSON.stringify(val)}) should be an object`;
+}
+
 export function isInList(val: any, values: string[]) {
     return val != null && typeof val == "string" && values.contains(val) ? null : `The returned value (${JSON.stringify(val)}) should be a value like ${values.joinComma(" or ")}`;
 }
