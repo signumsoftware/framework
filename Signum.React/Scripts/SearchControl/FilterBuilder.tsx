@@ -19,7 +19,7 @@ interface FilterBuilderProps extends React.Props<FilterBuilder> {
     filterOptions: FilterOptionParsed[];
     subTokensOptions: SubTokensOptions;
     queryDescription: QueryDescription;
-    onTokenChanged: (token: QueryToken) => void;
+    onTokenChanged?: (token: QueryToken) => void;
     lastToken?: QueryToken;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
 }
@@ -103,7 +103,7 @@ export interface FilterComponentProps extends React.Props<FilterComponent> {
     onDeleteFilter: (fo: FilterOptionParsed) => void;
     queryDescription: QueryDescription;
     subTokenOptions: SubTokensOptions;
-    onTokenChanged: (token: QueryToken) => void;
+    onTokenChanged?: (token: QueryToken) => void;
     onFilterChanged: (filter: FilterOptionParsed) => void;
 }
 
@@ -133,7 +133,8 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
         }
         f.token = newToken;
 
-        this.props.onTokenChanged(newToken);
+        if (this.props.onTokenChanged)
+            this.props.onTokenChanged(newToken);
 
         this.props.onFilterChanged(this.props.filter);
 

@@ -84,7 +84,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         const qs = Finder.getQuerySettings(fo.queryKey);
         const qd = this.props.queryDescription;
 
-        const sfb = qs && qs.simpleFilterBuilder && qs.simpleFilterBuilder(qd, fo);
+        const sfb = qs && qs.simpleFilterBuilder && qs.simpleFilterBuilder(qd, fo.filterOptions);
 
         if (sfb) {
             fo.showFilters = false;
@@ -315,14 +315,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     // TOOLBAR
     handleToggleFilters = () => {
-
-        this.props.findOptions.showFilters = !this.props.findOptions.showFilters;
-
-        if (!this.state.simpleFilterBuilder)
-            this.forceUpdate();
-
         this.getFindOptionsWithSFB().then(() => {
             this.simpleFilterBuilderInstance = undefined;
+            this.props.findOptions.showFilters = !this.props.findOptions.showFilters;
             this.setState({ simpleFilterBuilder: undefined });
         }).done();
     }
