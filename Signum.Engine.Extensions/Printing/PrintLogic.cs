@@ -177,8 +177,8 @@ namespace Signum.Engine.Printing
 
         public static FileContent SavePrintLine(this FileContent file, Entity entity, FileTypeSymbol fileTypeForPrinting)
         {
-            PrintingLogic.CancelPrinting(entity, fileTypeForPrinting);
-            PrintingLogic.CreateLine(entity, fileTypeForPrinting, Path.GetFileName(file.FileName), file.Bytes);
+            CancelPrinting(entity, fileTypeForPrinting);
+            CreateLine(entity, fileTypeForPrinting, Path.GetFileName(file.FileName), file.Bytes);
 
             return file;
         }
