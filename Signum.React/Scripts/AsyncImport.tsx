@@ -27,6 +27,14 @@ export class ImportComponent extends React.Component<ImportComponentProps, Impor
     componentWillMount() {
         this.importModule(this.props);
     }
+
+    componentWillReceiveProps(newprops: ImportComponentProps) {
+        if (newprops.onImportModule != this.props.onImportModule &&
+            newprops.onImportModule.toString() != this.props.onImportModule.toString()) {
+            this.setState({ module: undefined },
+                () => this.importModule(newprops));
+        }
+    }
     
     importModule(props: ImportComponentProps) {
         this.props.onImportModule()
@@ -96,15 +104,15 @@ export class ImportRoute extends React.Component<ImportRouteProps, ImportRouteSt
             match: this.computeMatch(nextProps, nextContext)
         });
     }
+ 
 
-
-    computeMatch(props: ImportRouteProps, ctx: RouterChildContext<any>): match<any> | null {
+    computeMatch(props: ImportRouteProps, context: RouterChildContext<any>): match<any> | null {
         if (props.computedMatch)
             return props.computedMatch // <Switch> already computed the match for us
 
-        const pathname = (props.location || ctx.router.route.location).pathname
+        const pathname = (props.location || context.router.route.location).pathname
 
-        return props.path ? matchPath(pathname, { path: props.path, strict: props.strict, exact: props.exact }) : ctx.router.route.match
+        return props.path ? matchPath(pathname, { path: props.path, strict: props.strict, exact: props.exact }) : context.router.route.match
     }
 
     render() {

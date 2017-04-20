@@ -1,6 +1,6 @@
 ﻿import * as React from "react"
-import * as HistoryModule from "history"
-import { Router, Route, Redirect } from "react-router"
+import * as H from "history"
+import { Router, Route, Redirect, RouterChildContext, RouteProps, Switch, match, matchPath } from "react-router"
 import { Dic, } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
@@ -16,6 +16,7 @@ import { ViewReplacer } from './Frames/ReactVisitor'
 import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './Lines/AutocompleteConfig'
 import { FindOptions } from './FindOptions'
 import { ImportRoute } from "./AsyncImport";
+import * as AppRelativeRoutes from "./AppRelativeRoutes";
 
 
 Dic.skipClasses.push(React.Component);
@@ -26,9 +27,20 @@ export function setCurrentUser(user: IUserEntity | undefined) {
     currentUser = user;
 }
 
-export let currentHistory: HistoryModule.History;
-export function setCurrentHistory(history: HistoryModule.History) {
-    currentHistory = history;
+export let history: H.History;
+export function setCurrentHistory(h: H.History) {
+    history = h;
+}
+
+export function createAppRelativeHistory(): H.History {
+    var h = H.createBrowserHistory({});
+    AppRelativeRoutes.useAppRelativeBasename(h);
+    AppRelativeRoutes.useAppRelativeComputeMatch(Route);
+    AppRelativeRoutes.useAppRelativeComputeMatch(ImportRoute as any);
+    AppRelativeRoutes.useAppRelativeSwitch(Switch);
+    setCurrentHistory(h);
+    return h;
+
 }
 
 export let resetUI: () => void = () => { };
@@ -42,8 +54,8 @@ export namespace Expander {
 }
 
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<ImportRoute path="view/:type/:id" onImportModule={() => _import("./Frames/FramePage")} />);
-    options.routes.push(<ImportRoute path="create/:type" onImportModule={() => _import("./Frames/FramePage")} />);
+    options.routes.push(<ImportRoute path="~/view/:type/:id" onImportModule={() => _import("./Frames/FramePage")} />);
+    options.routes.push(<ImportRoute path="~/create/:type" onImportModule={() => _import("./Frames/FramePage")} />);
 }
 
 export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined) {
@@ -97,12 +109,12 @@ export function navigateRoute(typeOrEntity: Entity | Lite<Entity> | PseudoType, 
 }
 
 export function navigateRouteDefault(typeName: string, id: number | string) {
-    return currentHistory.createHref("~/view/" + typeName.firstLower() + "/" + id);
+    return toAbsoluteUrl("~/view/" + typeName.firstLower() + "/" + id);
 
 }
 
 export function createRoute(type: PseudoType) {
-    return currentHistory.createHref("~/create/" + getTypeName(type));
+    return toAbsoluteUrl("~/create/" + getTypeName(type));
 }
 
 export const entitySettings: { [type: string]: EntitySettings<ModifiableEntity> } = {};
@@ -781,32 +793,15 @@ String.prototype.formatHtml = function (this: string) {
     return React.createElement("span", undefined, ...result);
 };
 
-export function fixUrl(url: string): string {
-    if (url && url.startsWith("~/"))
-        return window.__baseUrl + url.after("~/");
+export function toAbsoluteUrl(appRelativeUrl: string): string {
+    if (appRelativeUrl && appRelativeUrl.startsWith("~/"))
+        return window.__baseUrl + appRelativeUrl.after("~/");
 
-    if (url.startsWith(window.__baseUrl) || url.startsWith("http"))
-        return url;
+    if (appRelativeUrl.startsWith(window.__baseUrl) || appRelativeUrl.startsWith("http"))
+        return appRelativeUrl;
 
-    console.warn(url);
-    return url;
-}
-
-function fixBaseName<T>(baseFunction: (location?: HistoryModule.LocationDescriptorObject | string) => T): (location?: HistoryModule.LocationDescriptorObject | string) => T {
-    return (location) => {
-        if (typeof location === "string") {
-            return baseFunction(fixUrl(location));
-        } else {
-            location!.pathname = fixUrl(location!.pathname!);
-            return baseFunction(location);
-        }
-    };
-}
-
-export function useAppRelativeBasename(history: HistoryModule.History) {
-    history.push = fixBaseName(history.push);
-    history.replace = fixBaseName(history.replace);
-    history.createHref = fixBaseName(history.createHref);
+    console.warn(appRelativeUrl);
+    return appRelativeUrl;
 }
 
 export function tryConvert(value: any, type: TypeReference): Promise<any> | undefined {

@@ -3,6 +3,7 @@ import * as moment from "moment"
 import * as numbro from "numbro"
 import { Router, Route, Redirect } from "react-router"
 import * as QueryString from "query-string"
+import * as Navigator from "./Navigator"
 import { Dic } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
@@ -24,7 +25,6 @@ import {
     TypeInfo, PropertyRoute
 } from './Reflection';
 
-import { navigateRoute, isNavigable, currentHistory, API as NavAPI, isCreable, tryConvert, navigate } from './Navigator';
 import SearchModal from './SearchControl/SearchModal';
 import EntityLink from './SearchControl/EntityLink';
 import SearchControlLoaded from './SearchControl/SearchControlLoaded';
@@ -34,7 +34,7 @@ import { ImportRoute } from "./AsyncImport";
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
 
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<ImportRoute path="/find/:queryName" onImportModule={() => _import("./SearchControl/SearchPage")} />);
+    options.routes.push(<ImportRoute path="~/find/:queryName" onImportModule={() => _import("./SearchControl/SearchPage")} />);
 }
 
 export function addSettings(...settings: QuerySettings[]) {
@@ -96,7 +96,7 @@ export function findOptionsPath(fo: FindOptions, extra?: any): string {
 
     const query = findOptionsPathQuery(fo, extra);
 
-    return currentHistory.createHref({ pathname: "~/find/" + getQueryKey(fo.queryName), search: QueryString.stringify(query) });
+    return Navigator.history.createHref({ pathname: "~/find/" + getQueryKey(fo.queryName), search: QueryString.stringify(query) });
 }
 
 export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
@@ -276,7 +276,7 @@ export function setFilters(e: Entity, filterOptionsParsed: FilterOptionParsed[])
         const mi = getMemberForToken(ti, fo.token!.fullKey);
 
         if (mi && (e as any)[mi.name] == null) {
-            const promise = tryConvert(fo.value, mi.type);
+            const promise = Navigator.tryConvert(fo.value, mi.type);
 
             if (promise == null)
                 return null;
@@ -355,8 +355,8 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
             showFilterButton: fo.showFilterButton != null ? fo.showFilterButton :true,
             showFooter: fo.showFooter != null ? fo.showFooter : true,
             allowChangeColumns: fo.allowChangeColumns != null ? fo.allowChangeColumns : true,
-            create: fo.create != null ? fo.create :tis.some(ti => isCreable(ti, false, true)),
-            navigate: fo.navigate != null ? fo.navigate :tis.some(ti => isNavigable(ti, undefined, true)),
+            create: fo.create != null ? fo.create : tis.some(ti => Navigator.isCreable(ti, false, true)),
+            navigate: fo.navigate != null ? fo.navigate : tis.some(ti => Navigator.isNavigable(ti, undefined, true)),
             pagination: fo.pagination != null ? fo.pagination :qs && qs.pagination || defaultPagination,
             contextMenu: fo.contextMenu != null ? fo.contextMenu : true,
 
@@ -386,7 +386,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
 export function exploreOrNavigate(findOptions: FindOptions): Promise<void> {
     return fetchEntitiesWithFilters(findOptions.queryName, findOptions.filterOptions || [], 2).then(list => {
         if (list.length == 1)
-            return navigate(list[0]);
+            return Navigator.navigate(list[0]);
         else
             return explore(findOptions);
     });
@@ -544,7 +544,7 @@ export function parseFilterValues(filterOptions: FilterOptionParsed[]): Promise<
     if (needToStr.length == 0)
         return Promise.resolve(undefined);
 
-    return NavAPI.fillToStrings(needToStr)
+    return Navigator.API.fillToStrings(needToStr)
 }
 
 
@@ -636,19 +636,19 @@ export module API {
     
     export function fetchAllLites(request: { types: string }): Promise<Lite<Entity>[]> {
         return ajaxGet<Lite<Entity>[]>({
-            url: "~/api/query/allLites" + QueryString.stringify(request)
+            url: "~/api/query/allLites?" + QueryString.stringify(request)
         });
     }
 
     export function findTypeLike(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {
         return ajaxGet<Lite<TypeEntity>[]>({
-            url: "~/api/query/findTypeLike" + QueryString.stringify(request)
+            url: "~/api/query/findTypeLike?" + QueryString.stringify(request)
         });
     }
 
     export function findLiteLike(request: { types: string, subString: string, count: number }): Promise<Lite<Entity>[]> {
         return ajaxGet<Lite<Entity>[]>({
-            url: "~/api/query/findLiteLike" + QueryString.stringify(request)
+            url: "~/api/query/findLiteLike?" + QueryString.stringify(request)
         });
     }
 
@@ -915,7 +915,7 @@ export const entityFormatRules: EntityFormatRule[] = [
     {
         name: "View",
         isApplicable: row=> true,
-        formatter: (row, columns, sc) => !row.entity || !isNavigable(row.entity.EntityType, undefined, true) ? undefined :
+        formatter: (row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, undefined, true) ? undefined :
             <EntityLink lite={row.entity} inSearch={true} onNavigated={sc && sc.handleOnNavigated}>{EntityControlMessage.View.niceToString()}</EntityLink>
     },
 ];

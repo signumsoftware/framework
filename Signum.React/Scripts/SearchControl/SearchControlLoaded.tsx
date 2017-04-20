@@ -409,7 +409,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         if (ev.ctrlKey || ev.button == 1)
             window.open(path);
         else
-            Navigator.currentHistory.push(path);
+            Navigator.history.push(path);
     };
     
     createTitle() {

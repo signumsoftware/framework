@@ -202,6 +202,7 @@
     <Content Include="package.json" />
     <None Include="Scripts\Signum.Entities.t4s" />
     <Content Include="tsconfig.json" />
+    <TypeScriptCompile Include="Scripts\AppRelativeRoutes.tsx" />
     <TypeScriptCompile Include="Scripts\ConfigureReactWidgets.ts" />
     <TypeScriptCompile Include="Scripts\Exceptions\ExceptionClient.tsx" />
     <Content Include="Scripts\fetchWithAbort.js" />

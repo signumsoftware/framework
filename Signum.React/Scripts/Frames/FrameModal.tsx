@@ -294,7 +294,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
         } else {
 
-            Navigator.currentHistory.push(Navigator.navigateRoute(this.state.pack!.entity as Entity));
+            Navigator.history.push(Navigator.navigateRoute(this.state.pack!.entity as Entity));
 
             e.preventDefault();
         }

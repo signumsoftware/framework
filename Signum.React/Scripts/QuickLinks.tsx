@@ -275,9 +275,9 @@ export class QuickLinkLink extends QuickLink {
 
     handleClick = (e: React.MouseEvent<any>) => {
         if (e.ctrlKey || e.button == 1)
-            window.open(Navigator.currentHistory.createHref(this.url));
+            window.open(Navigator.toAbsoluteUrl(this.url));
         else
-            Navigator.currentHistory.push(this.url);
+            Navigator.history.push(this.url);
     }
 }
 

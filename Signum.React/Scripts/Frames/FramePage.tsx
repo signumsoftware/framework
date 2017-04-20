@@ -98,9 +98,9 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
 
     onClose() {
         if (Finder.isFindable(this.state.pack!.entity.Type))
-            Navigator.currentHistory.push(Finder.findOptionsPath({ queryName: this.state.pack!.entity.Type }));
+            Navigator.history.push(Finder.findOptionsPath({ queryName: this.state.pack!.entity.Type }));
         else
-            Navigator.currentHistory.push("~/");
+            Navigator.history.push("~/");
     }
 
 
@@ -130,7 +130,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
             entityComponent: this.entityComponent,
             onReload: pack => {
                 if (pack.entity.id != null && entity.id == null)
-                    Navigator.currentHistory.push(Navigator.navigateRoute(pack.entity));
+                    Navigator.history.push(Navigator.navigateRoute(pack.entity));
                 else
                     this.setState({ pack });
             },

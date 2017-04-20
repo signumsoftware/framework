@@ -365,8 +365,7 @@ namespace Signum.Utilities
 
         public IEnumerable<HeavyProfilerEntry> DescendantsAndSelf()
         {
-            var result = new List<HeavyProfilerEntry>();
-            result.Add(this);
+            var result = new List<HeavyProfilerEntry> { this };
             FillDescendants(result);
             return result;
         }
