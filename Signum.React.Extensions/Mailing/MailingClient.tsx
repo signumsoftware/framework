@@ -26,7 +26,7 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel),
         key: "AsyncEmailSenderPanel",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/asyncEmailSender/view"))
+        onClick: () => Promise.resolve("~/asyncEmailSender/view")
     });
 
     registerToString(EmailTemplateMessageEmbedded, a => a.cultureInfo == undefined ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName!);

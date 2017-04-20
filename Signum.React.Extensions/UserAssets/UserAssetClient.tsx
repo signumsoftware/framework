@@ -27,7 +27,7 @@ export function start(options: { routes: JSX.Element[] }) {
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML),
         key: "ImportUserAssets",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/userAssets/import"))
+        onClick: () => Promise.resolve("~/userAssets/import")
     });
 
 

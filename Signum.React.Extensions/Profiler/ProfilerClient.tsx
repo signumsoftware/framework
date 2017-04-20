@@ -18,40 +18,27 @@ import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(
         <ImportRoute path="~/profiler/times" onImportModule={() => _import("./Times/TimesPage")} />,
-        <ImportRoute path="~/profiler/heavy" onImportModule={() => _import("./Heavy/HeavyListPage")} />,
+        <ImportRoute path="~/profiler/heavy" exact onImportModule={() => _import("./Heavy/HeavyListPage")} />,
         <ImportRoute path="~/profiler/heavy/entry/:selectedIndex" onImportModule={() => _import("./Heavy/HeavyEntryPage")} />
     );
 
-    //Navigator.addSettings(new EntitySettings(ProcessEntity, e => _import('./Templates/Process')));
-
-    //if (options.packages || options.packageOperations) {
-    //    Navigator.addSettings(new EntitySettings(PackageLineEntity, e => _import('./Templates/PackageLine')));
-    //}
-
-    //if (options.packages) {
-    //    Navigator.addSettings(new EntitySettings(PackageEntity, e => _import('./Templates/Package')));
-    //}
-
-    //if (options.packageOperations) {
-    //    Navigator.addSettings(new EntitySettings(PackageOperationEntity, e => _import('./Templates/PackageOperation')));
-    //}
 
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(ProfilerPermission.ViewHeavyProfiler),
         key: "ProfilerHeavy",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/profiler/heavy"))
+        onClick: () => Promise.resolve("~/profiler/heavy")
     });
     
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(ProfilerPermission.ViewTimeTracker),
         key: "ProfilerTimes",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/profiler/times"))
+        onClick: () => Promise.resolve("~/profiler/times")
     });
 
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(ProfilerPermission.OverrideSessionTimeout),
         key: "OverrideSessionTimeout",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/profiler/overrideSessionTimeout"))
+        onClick: () => Promise.resolve("~/profiler/overrideSessionTimeout")
     });
 
 }

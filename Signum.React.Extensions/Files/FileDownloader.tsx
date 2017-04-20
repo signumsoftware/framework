@@ -83,11 +83,11 @@ export interface FileDownloaderConfiguration<T extends IFile> {
 }
 
 FileDownloader.configurtions[FileEntity.typeName] = {
-    downloadClick: (event, file) => downloadUrl(event, Navigator.currentHistory.createHref("~/api/files/downloadFile/" + file.id.toString()))
+    downloadClick: (event, file) => downloadUrl(event, Navigator.toAbsoluteUrl("~/api/files/downloadFile/" + file.id.toString()))
 } as FileDownloaderConfiguration<FileEntity>;
 
 FileDownloader.configurtions[FilePathEntity.typeName] = {
-    downloadClick: (event, file) => downloadUrl(event, Navigator.currentHistory.createHref("~/api/files/downloadFilePath/" + file.id.toString()))
+    downloadClick: (event, file) => downloadUrl(event, Navigator.toAbsoluteUrl("~/api/files/downloadFilePath/" + file.id.toString()))
 } as FileDownloaderConfiguration<FilePathEntity>;
 
 FileDownloader.configurtions[FileEmbedded.typeName] = {
@@ -96,7 +96,7 @@ FileDownloader.configurtions[FileEmbedded.typeName] = {
 
 FileDownloader.configurtions[FilePathEmbedded.typeName] = {
     downloadClick: (event, file) => downloadUrl(event,
-        Services.fixUrl("~/api/files/downloadEmbeddedFilePath/" + file.fileType!.key +
+        Navigator.toAbsoluteUrl(`~/api/files/downloadEmbeddedFilePath/${file.fileType!.key}?` + 
             QueryString.stringify({ suffix: file.suffix, fileName: file.fileName })))
 } as FileDownloaderConfiguration<FilePathEmbedded>;
 

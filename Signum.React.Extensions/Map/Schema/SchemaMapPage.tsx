@@ -175,7 +175,7 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
             ...tables, filter: s.filter, color: s.color
         };
 
-        const url = Navigator.currentHistory.createHref({ pathname: "~/map", search: QueryString.stringify(query) });
+        const url = Navigator.history.createHref({ pathname: "~/map", search: QueryString.stringify(query) });
 
         window.open(url);
     }

@@ -32,7 +32,7 @@ interface DynamicPanelState {
 export default class DynamicPanelPage extends React.Component<DynamicPanelProps, DynamicPanelState> {
 
     handleSelect = (key: any /*string*/) => {
-        Navigator.currentHistory.push("~/dynamic/panel?step=" + key);
+        Navigator.history.push("~/dynamic/panel?step=" + key);
     }
 
     handleErrorClick = (e: React.MouseEvent<any>) => {

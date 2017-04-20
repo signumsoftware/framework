@@ -308,7 +308,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
         } else {
 
-            Navigator.currentHistory.push("~/workflow/activity/" + this.state.pack!.activity.id);
+            Navigator.history.push("~/workflow/activity/" + this.state.pack!.activity.id);
 
             e.preventDefault();
         }

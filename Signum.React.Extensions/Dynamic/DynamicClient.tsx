@@ -24,7 +24,7 @@ export function start(options: { routes: JSX.Element[] }) {
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel),
         key: "DynamicPanel",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/dynamic/panel"))
+        onClick: () => Promise.resolve("~/dynamic/panel")
     });
 }
 

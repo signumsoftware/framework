@@ -38,7 +38,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
         return API.forEntityType(ctx.lite.EntityType).then(uqs =>
             uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), uq.toStr || "", e => {
-                window.open(Navigator.currentHistory.createHref(`~/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
+                window.open(Navigator.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
             }, { icon: "glyphicon glyphicon-list-alt", iconColor: "dodgerblue" })));
     });
 
@@ -46,7 +46,7 @@ export function start(options: { routes: JSX.Element[] }) {
         e => {
             Navigator.API.fetchAndRemember(ctx.lite).then(uq => {
                 if (uq.entityType == undefined)
-                    window.open(Navigator.currentHistory.createHref(`~/userQuery/${uq.id}`));
+                    window.open(Navigator.toAbsoluteUrl(`~/userQuery/${uq.id}`));
                 else
                     Navigator.API.fetchAndForget(uq.entityType)
                         .then(t => Finder.find({ queryName: t.cleanName }))
@@ -54,7 +54,7 @@ export function start(options: { routes: JSX.Element[] }) {
                             if (!lite)
                                 return;
 
-                            window.open(Navigator.currentHistory.createHref(`~/userQuery/${uq.id}/${liteKey(lite)}`));
+                            window.open(Navigator.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(lite)}`));
                         })
                         .done();
             }).done();

@@ -26,8 +26,8 @@ export default class LinkListPart extends React.Component<{ part: LinkListPartEn
                     entity.links!.map(mle => mle.element)
                         .map((le, i) =>
                             <li key={i} >
-                                <a href={Navigator.currentHistory.createHref(le.link!) }
-                                    onClick={le.link!.startsWith("~") ? (e => { e.preventDefault(); Navigator.currentHistory.push(le.link!) }) : undefined}
+                                <a href={Navigator.toAbsoluteUrl(le.link!) }
+                                    onClick={le.link!.startsWith("~") ? (e => { e.preventDefault(); Navigator.history.push(le.link!) }) : undefined}
                                     title={le.label!}>
                                     {le.label}
                                 </a>

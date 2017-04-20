@@ -204,14 +204,14 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
                     return makeCall();
                 }, e2 => {
                     setAuthToken(undefined);
-                    Navigator.currentHistory.push("~/auth/login");
+                    Navigator.history.push("~/auth/login");
                     throw e;
                 });
             }
 
             if (e.httpError.ExceptionType && e.httpError.ExceptionType.endsWith(".AuthenticationException")) {
                 setAuthToken(undefined);
-                Navigator.currentHistory.push("~/auth/login");
+                Navigator.history.push("~/auth/login");
             }
 
             throw e;
@@ -276,11 +276,11 @@ export function logout() {
 
 export namespace Options {
     export let onLogout = () => {
-        Navigator.currentHistory.push("~/");
+        Navigator.history.push("~/");
     }
 
     export let onLogin = (url?: string) => {
-        Navigator.currentHistory.push(url || "~/");
+        Navigator.history.push(url || "~/");
     }
 }
 

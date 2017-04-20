@@ -303,7 +303,7 @@ export module Encoder {
 
         encodeColumn(query, cr.columns);
 
-        return Navigator.currentHistory.createHref({ pathname: "~/Chart/" + cr.queryKey, search: QueryString.stringify(query) });
+        return Navigator.toAbsoluteUrl(`~/chart/${cr.queryKey}?` + QueryString.stringify(query));
     }
 
     const scapeTilde = Finder.Encoder.scapeTilde;

@@ -27,7 +27,7 @@ export function start(options: { routes: JSX.Element[],}) {
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(PrintPermission.ViewPrintPanel),
         key: "PrintPanel",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/printing/view"))
+        onClick: () => Promise.resolve("~/printing/view")
     });
 
 }

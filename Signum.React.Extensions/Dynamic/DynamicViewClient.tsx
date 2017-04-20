@@ -346,12 +346,7 @@ export namespace API {
     
     export function getDynamicView(typeName: string, viewName: string): Promise<DynamicViewEntity> {
         
-            var url = Navigator.currentHistory.createHref({
-                pathname: `~/api/dynamic/view/${typeName}`,
-                search: QueryString.stringify({ viewName })
-            });
-
-            return ajaxGet<DynamicViewEntity>({ url });
+            return ajaxGet<DynamicViewEntity>({ url: `~/api/dynamic/view/${typeName}?` + QueryString.stringify({ viewName}) });
     }
 
     export function getDynamicViewSelector(typeName: string): Promise<DynamicViewSelectorEntity | undefined> {

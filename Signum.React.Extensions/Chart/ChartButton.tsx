@@ -31,7 +31,7 @@ export default class ChartButton extends React.Component<ChartButtonProps, void>
         if (e.ctrlKey || e.button == 1)
             window.open(path);
         else
-            Navigator.currentHistory.push(path);
+            Navigator.history.push(path);
 
     }
     

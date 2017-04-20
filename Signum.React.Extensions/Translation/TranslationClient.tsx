@@ -17,7 +17,7 @@ export function start(options: { routes: JSX.Element[] }) {
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(TranslationPermission.TranslateCode),
         key: "TranslateCode",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/translation/status"))
+        onClick: () => Promise.resolve("~/translation/status")
     });
 
     options.routes.push(

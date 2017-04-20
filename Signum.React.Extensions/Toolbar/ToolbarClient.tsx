@@ -57,7 +57,7 @@ export abstract class ToolbarConfig<T extends Entity> {
             if (openWindow)
                 window.open(url);
             else
-                Navigator.currentHistory.push(url);
+                Navigator.history.push(url);
         }).done();
     }
 }

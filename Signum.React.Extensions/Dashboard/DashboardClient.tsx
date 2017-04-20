@@ -133,7 +133,7 @@ function navigateOrWindowsOpen(e: React.MouseEvent<any>, url: string){
     if (e.ctrlKey || e.button == 1) {
         window.open(url);
     } else {
-        Navigator.currentHistory.push(url);
+        Navigator.history.push(url);
     }
 }
 

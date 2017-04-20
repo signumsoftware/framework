@@ -324,13 +324,13 @@ export class HeavyProfilerDetailsD3 extends React.Component<{entries: HeavyProfi
             }
             else
             {
-                let url = Navigator.currentHistory.createHref("~/profiler/heavy/entry/" + e.FullIndex);
+                let url = "~/profiler/heavy/entry/" + e.FullIndex;
 
                 if (d3.event.ctrlKey) {
-                    window.open(url);
+                    window.open(Navigator.toAbsoluteUrl(url));
                 }
                 else {
-                    Navigator.currentHistory.push(url);
+                    Navigator.history.push(url);
                 }
             }
         });

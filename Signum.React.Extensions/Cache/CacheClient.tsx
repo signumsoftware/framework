@@ -19,7 +19,7 @@ export function start(options: { routes: JSX.Element[] }) {
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(CachePermission.InvalidateCache),
         key: "ViewCache",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/cache/statistics"))
+        onClick: () => Promise.resolve("~/cache/statistics")
     });
 }
 

@@ -40,7 +40,7 @@ export function start(options: { routes: JSX.Element[], packages: boolean, packa
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(ProcessPermission.ViewProcessPanel),
         key: "ProcessPanel",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/processes/view"))
+        onClick: () => Promise.resolve("~/processes/view")
     });
 
     monkeyPatchCreateContextualMenuItem()
@@ -127,7 +127,7 @@ function defaultConstructFromMany(coc: Operations.ContextualOperationContext<Ent
 
         const es = Navigator.getSettings(pack.entity.Type);
         if (es && es.avoidPopup || event.ctrlKey || event.button == 1) {
-            Navigator.currentHistory.push('~/Create/', pack);
+            Navigator.history.push('~/create/', pack);
             return;
         }
         else {

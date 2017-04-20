@@ -78,7 +78,7 @@ export function start(options: { routes: JSX.Element[] }) {
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(WorkflowScriptRunnerPanelPermission.ViewWorkflowScriptRunnerPanel),
         key: "WorkflowScriptRunnerPanel",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/workflow/panel"))
+        onClick: () => Promise.resolve("~/workflow/panel")
     });
 
     Finder.addSettings({
@@ -116,7 +116,7 @@ export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(CaseTagsModel, w => _import('./Case/CaseTagsModel')));
 
     Navigator.addSettings(new EntitySettings(CaseActivityEntity, undefined, {
-        onNavigateRoute: (typeName, id) => Navigator.currentHistory.createHref("~/workflow/activity/" + id),
+        onNavigateRoute: (typeName, id) => Navigator.toAbsoluteUrl("~/workflow/activity/" + id),
         onNavigate: (entityOrPack, options) => navigateCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options && options.readOnly),
         onView: (entityOrPack, options) => viewCase(isEntityPack(entityOrPack) ? entityOrPack.entity : entityOrPack, options && options.readOnly),
     }));
@@ -480,7 +480,7 @@ export namespace API {
 
     export function findMainEntityType(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {
         return ajaxGet<Lite<TypeEntity>[]>({
-            url: "~/api/workflow/findMainEntityType" + QueryString.stringify(request)
+            url: "~/api/workflow/findMainEntityType?" + QueryString.stringify(request)
         });
     }
 

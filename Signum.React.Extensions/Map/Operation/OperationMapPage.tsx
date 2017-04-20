@@ -139,7 +139,7 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
 
         var query = { ...tables, color: s.color };
 
-        const url = Navigator.currentHistory.createHref({
+        const url = Navigator.history.createHref({
             pathname: "~/map/" + this.props.match.params.type,
             search: QueryString.stringify(query)
         });
