@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Web;
 
 namespace Signum.Utilities
 {
@@ -374,6 +376,27 @@ namespace Signum.Utilities
                 return Enumerable.Empty<D>();
 
             return ((MulticastDelegate)(object)multicastDelegate).GetInvocationList().Cast<D>();
+        }
+
+        public static string GetQueryString(object obj)
+        {
+            var result = new List<string>();
+            var props = obj.GetType().GetProperties().Where(p => p.GetValue(obj, null) != null);
+            foreach (var p in props)
+            {
+                var value = p.GetValue(obj, null);
+                var enumerable = value as ICollection;
+                if (enumerable != null)
+                {
+                    result.AddRange(from object v in enumerable select string.Format("{0}={1}", p.Name, HttpUtility.UrlEncode(v?.ToString() ?? "")));
+                }
+                else
+                {
+                    result.Add(string.Format("{0}={1}", p.Name, HttpUtility.UrlEncode(value?.ToString() ?? "")));
+                }
+            }
+
+            return string.Join("&", result.ToArray());
         }
 
     }
