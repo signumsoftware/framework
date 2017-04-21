@@ -1,6 +1,5 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
-import { Link } from "react-router"
 import { Button } from "react-bootstrap"
 import { Binding, LambdaMemberType } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'

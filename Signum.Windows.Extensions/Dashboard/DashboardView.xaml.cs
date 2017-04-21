@@ -38,7 +38,7 @@ namespace Signum.Windows.Dashboard
         private void GroupBox_Loaded(object sender, RoutedEventArgs e)
         {
             GroupBox gb = (GroupBox)sender;
-            PanelPartEntity pp = (PanelPartEntity)gb.DataContext;
+            PanelPartEmbedded pp = (PanelPartEmbedded)gb.DataContext;
             PartView pv = DashboardClient.PartViews.GetOrThrow(pp.Content.GetType());
             if (pv.OnTitleClick != null && (pv.IsTitleEnabled == null || pv.IsTitleEnabled()))
             {
@@ -58,14 +58,14 @@ namespace Signum.Windows.Dashboard
         private void TextBlock_MouseUp(object sender, MouseButtonEventArgs e)
         {
             TextBlock tb = (TextBlock)sender;
-            PanelPartEntity pp = (PanelPartEntity)tb.DataContext;
+            PanelPartEmbedded pp = (PanelPartEmbedded)tb.DataContext;
             DashboardClient.PartViews.GetOrThrow(pp.Content.GetType()).OnTitleClick(pp.Content);
         }
 
         private void fullScreen_Click(object sender, RoutedEventArgs e)
         {
             Button tb = (Button)sender;
-            PanelPartEntity pp = (PanelPartEntity)tb.DataContext;
+            PanelPartEmbedded pp = (PanelPartEmbedded)tb.DataContext;
             DashboardClient.PartViews.GetOrThrow(pp.Content.GetType()).FullScreen(tb, pp.Content);
         }
     }

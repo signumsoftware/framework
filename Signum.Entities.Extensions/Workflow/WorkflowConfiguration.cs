@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Signum.Entities.Workflow
 {
     [Serializable]
-    public class WorkflowConfigurationEntity : EmbeddedEntity
+    public class WorkflowConfigurationEmbedded : EmbeddedEntity
     {
         [Unit("sec")]
         public int ScriptRunnerPeriod { get; set; } = 5 * 60; //5 minutes

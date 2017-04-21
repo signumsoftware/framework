@@ -1,6 +1,5 @@
 ﻿
 import * as React from 'react'
-import { Link } from 'react-router'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
@@ -13,7 +12,7 @@ import { TypeContext, FormGroupStyle, mlistItemContext } from '../../../../Frame
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import FileLine, { FileTypeSymbol } from '../../Files/FileLine'
 import * as DashboardClient from '../DashboardClient'
-import { DashboardEntity, PanelPartEntity, IPartEntity } from '../Signum.Entities.Dashboard'
+import { DashboardEntity, PanelPartEmbedded, IPartEntity } from '../Signum.Entities.Dashboard'
 
 
 
@@ -57,7 +56,7 @@ export default class DashboardView extends React.Component<{ dashboard: Dashboar
 }
 
 export interface PanelPartProps {
-    ctx: TypeContext<PanelPartEntity>;
+    ctx: TypeContext<PanelPartEmbedded>;
     entity?: Entity;
 }
 

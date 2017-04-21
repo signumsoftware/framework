@@ -19,7 +19,7 @@ namespace Signum.Entities.Scheduler
 
         [NotNullable]
         [NotNullValidator]
-        public MList<HolidayEntity> Holidays { get; set; } = new MList<HolidayEntity>();
+        public MList<HolidayEmbedded> Holidays { get; set; } = new MList<HolidayEmbedded>();
 
         public bool IsHoliday(DateTime date)
         {
@@ -58,7 +58,7 @@ namespace Signum.Entities.Scheduler
     }
 
     [Serializable]
-    public class HolidayEntity : EmbeddedEntity
+    public class HolidayEmbedded : EmbeddedEntity
     {
         [DaysPrecissionValidator]
         public DateTime Date { get; set; } = DateTime.Today;

@@ -48,7 +48,7 @@ namespace Signum.Entities.Workflow
         public DoneType? DoneType { get; set; }
 
 
-        public ScriptExecutionEntity ScriptExecution { get; set; }
+        public ScriptExecutionEmbedded ScriptExecution { get; set; }
 
         static Expression<Func<CaseActivityEntity, CaseActivityState>> StateExpression =
         @this => @this.DoneDate.HasValue ? CaseActivityState.Done :
@@ -82,7 +82,7 @@ namespace Signum.Entities.Workflow
     }
 
     [Serializable]
-    public class ScriptExecutionEntity : EmbeddedEntity
+    public class ScriptExecutionEmbedded : EmbeddedEntity
     {
         public DateTime NextExecution { get; set; }
         public int RetryCount { get; set; }

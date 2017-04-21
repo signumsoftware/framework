@@ -3,6 +3,7 @@ import * as React from 'react'
 import { Route } from 'react-router'
 import * as ReactBootstrap from 'react-bootstrap'
 import * as ReactRouterBootstrap from 'react-router-bootstrap'
+import * as QueryString from 'query-string'
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
 import * as Search from '../../../Framework/Signum.React/Scripts/Search'
 import { ValueSearchControlLine } from '../../../Framework/Signum.React/Scripts/Search'
@@ -33,9 +34,9 @@ import * as NodeUtils from './View/NodeUtils' //Typings-only
 
 export function start(options: { routes: JSX.Element[] }) {
     
-    Navigator.addSettings(new EntitySettings(DynamicViewEntity, w => new ViewPromise(resolve => require(['./View/DynamicView'], resolve))));
-    Navigator.addSettings(new EntitySettings(DynamicViewSelectorEntity, w => new ViewPromise(resolve => require(['./View/DynamicViewSelector'], resolve))));
-    Navigator.addSettings(new EntitySettings(DynamicViewOverrideEntity, w => new ViewPromise(resolve => require(['./View/DynamicViewOverride'], resolve))));
+    Navigator.addSettings(new EntitySettings(DynamicViewEntity, w => _import('./View/DynamicView')));
+    Navigator.addSettings(new EntitySettings(DynamicViewSelectorEntity, w => _import('./View/DynamicViewSelector')));
+    Navigator.addSettings(new EntitySettings(DynamicViewOverrideEntity, w => _import('./View/DynamicViewOverride')));
 
     DynamicClient.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicViewEntity, parentColumn: "EntityType.CleanName", parentValue: type }} />);
     DynamicClient.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicViewSelectorEntity, parentColumn: "EntityType.CleanName", parentValue: type }} />);
@@ -90,7 +91,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
     }
 
     dynamicViewComponent(dynamicView: DynamicViewEntity): ViewPromise<ModifiableEntity> {
-        return new ViewPromise(resolve => require(['./View/DynamicViewComponent'], resolve))
+        return new ViewPromise(_import('./View/DynamicViewComponent'))
             .withProps({ initialDynamicView: dynamicView });
     }
 
@@ -100,7 +101,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
         if (!settings || !settings.getViewPromise) {
 
             if (!isTypeEntity(entity.Type))
-               return new ViewPromise(resolve => require(['../../../Framework/Signum.React/Scripts/Lines/DynamicComponent'], resolve));
+                return new ViewPromise(_import('../../../Framework/Signum.React/Scripts/Lines/DynamicComponent'));
 
             return ViewPromise.flat(this.chooseDynamicView(entity.Type, true).then(dv => this.dynamicViewComponent(dv)));
         }
@@ -306,8 +307,7 @@ export function asOverrideFunction(dvr: DynamicViewOverrideEntity): (e: ViewRepl
 
     // ReactRouterBootstrap
     var LinkContainer = ReactRouterBootstrap.LinkContainer;
-    var IndexLinkContainer = ReactRouterBootstrap.IndexLinkContainer;
-
+    
     // Custom
     var DynamicViewPart = DynamicViewComponent.DynamicViewPart;
 
@@ -330,14 +330,14 @@ export function createDefaultDynamicView(typeName: string): Promise<DynamicViewE
 }
 
 export function loadNodes(): Promise<typeof Nodes> {
-    return new Promise<typeof Nodes>(resolve => require(["./View/Nodes"], resolve));
+    return _import<typeof Nodes>("./View/Nodes");
 }
 
 export function getDynamicViewPromise(typeName: string, viewName: string): ViewPromise<ModifiableEntity> {
 
     return ViewPromise.flat(
         API.getDynamicView(typeName, viewName)
-            .then(vn => new ViewPromise(resolve => require(['./View/DynamicViewComponent'], resolve)).withProps({ initialDynamicView: vn }))
+            .then(vn => new ViewPromise(_import('./View/DynamicViewComponent')).withProps({ initialDynamicView: vn }))
     );
 }
 
@@ -346,12 +346,7 @@ export namespace API {
     
     export function getDynamicView(typeName: string, viewName: string): Promise<DynamicViewEntity> {
         
-            var url = Navigator.currentHistory.createHref({
-                pathname: `~/api/dynamic/view/${typeName}`,
-                query: { viewName }
-            });
-
-            return ajaxGet<DynamicViewEntity>({ url });
+            return ajaxGet<DynamicViewEntity>({ url: `~/api/dynamic/view/${typeName}?` + QueryString.stringify({ viewName}) });
     }
 
     export function getDynamicViewSelector(typeName: string): Promise<DynamicViewSelectorEntity | undefined> {

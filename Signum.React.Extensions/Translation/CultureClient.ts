@@ -26,7 +26,7 @@ export function changeCurrentCulture(newCulture: Lite<CultureInfoEntity>) {
     API.setCurrentCulture(newCulture)
         .then(c => {
             //if (!document.cookie.contains("language="))
-                document.cookie = "language=" + c + ";path =" + Navigator.fixUrl("~/");
+                document.cookie = "language=" + c + ";path =" + Navigator.toAbsoluteUrl("~/");
         })
         .then(() => reloadTypes())
         .then(() => Finder.clearQueryDescriptionCache())

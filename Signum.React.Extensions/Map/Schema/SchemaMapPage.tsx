@@ -1,6 +1,7 @@
 ﻿import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import * as d3 from 'd3'
+import * as QueryString from 'query-string'
 import { DomUtils, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
@@ -10,11 +11,12 @@ import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOpti
 import { MapMessage } from '../Signum.Entities.Map'
 import * as MapClient from '../MapClient'
 import { SchemaMapInfo, EntityBaseType, ITableInfo, MListRelationInfo, IRelationInfo, ClientColorProvider, SchemaMapD3 } from './SchemaMap'
+import { RouteComponentProps } from "react-router";
 const colorbrewer = require("colorbrewer");
 
 require("./schemaMap.css");
 
-interface SchemaMapPageProps extends ReactRouter.RouteComponentProps<{}, {}> {
+interface SchemaMapPageProps extends RouteComponentProps<{}> {
 
 }
 
@@ -90,7 +92,7 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
     
         const result: ParsedQueryString = { tables: {} };
 
-        const query = this.props.location.query as { [name: string]: string };
+        const query = QueryString.parse(this.props.location.search) as { [name: string]: string };
         if (!query)
             return result;
 
@@ -173,7 +175,7 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
             ...tables, filter: s.filter, color: s.color
         };
 
-        const url = Navigator.currentHistory.createHref({ pathname: "~/map", query: query });
+        const url = Navigator.history.createHref({ pathname: "~/map", search: QueryString.stringify(query) });
 
         window.open(url);
     }

@@ -1,6 +1,5 @@
 ﻿
 import * as React from 'react'
-import { Link } from 'react-router'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, 
     EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity} from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'

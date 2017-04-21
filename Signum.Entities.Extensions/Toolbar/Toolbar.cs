@@ -32,7 +32,7 @@ namespace Signum.Entities.Toolbar
         
         [NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
-        public MList<ToolbarElementEntity> Elements { get; set; } = new MList<ToolbarElementEntity>();
+        public MList<ToolbarElementEmbedded> Elements { get; set; } = new MList<ToolbarElementEmbedded>();
 
         [UniqueIndex]
         public Guid Guid { get; set; } = Guid.NewGuid();
@@ -72,7 +72,7 @@ namespace Signum.Entities.Toolbar
     }
 
     [Serializable]
-    public class ToolbarElementEntity : EmbeddedEntity
+    public class ToolbarElementEmbedded : EmbeddedEntity
     {
         public ToolbarElementType Type { get; set; }
 
@@ -129,7 +129,7 @@ namespace Signum.Entities.Toolbar
     (Lite<Entity>)ctx.GetQuery(content).ToLite();
         }
 
-        static StateValidator<ToolbarElementEntity, ToolbarElementType> stateValidator = new StateValidator<ToolbarElementEntity, ToolbarElementType>
+        static StateValidator<ToolbarElementEmbedded, ToolbarElementType> stateValidator = new StateValidator<ToolbarElementEmbedded, ToolbarElementType>
                 (n => n.Type,           n => n.Content, n => n.IconName, n => n.Label)
             {
                 { ToolbarElementType.Divider, false,      false,        false  },
@@ -174,7 +174,7 @@ namespace Signum.Entities.Toolbar
 
         [NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
-        public MList<ToolbarElementEntity> Elements { get; set; } = new MList<ToolbarElementEntity>();
+        public MList<ToolbarElementEmbedded> Elements { get; set; } = new MList<ToolbarElementEmbedded>();
 
         public XElement ToXml(IToXmlContext ctx)
         {

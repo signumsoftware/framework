@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
+import { RouteComponentProps } from 'react-router'
 import * as d3 from 'd3'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
@@ -14,7 +14,7 @@ import { API, HeavyProfilerEntry} from '../ProfilerClient'
 
 require("./Profiler.css");
 
-interface HeavyListProps extends ReactRouter.RouteComponentProps<{}, {}> {
+interface HeavyListProps extends RouteComponentProps<{}> {
 
 }
 
@@ -205,13 +205,12 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
         //labelsRight.append('svg:title').text(function (v) { return v.Elapsed + " - " + v.AdditionalData; });
 
         groups.on("click", e => {
-            let url = Navigator.currentHistory.createHref("~/profiler/heavy/entry/" + e.FullIndex);
+            let url = "~/profiler/heavy/entry/" + e.FullIndex;
 
             if (d3.event.ctrlKey) {
-                window.open(url);
+                window.open(Navigator.toAbsoluteUrl(url));
             } else {
-                Navigator.currentHistory.push(url);
-                window.location.href = url;
+                Navigator.history.push(url);
             }
         });
     }

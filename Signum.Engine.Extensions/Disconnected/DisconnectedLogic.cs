@@ -92,6 +92,7 @@ namespace Signum.Engine.Disconnected
                 sb.Schema.SchemaCompleted += AssertDisconnectedStrategies;
 
                 sb.Schema.Synchronizing += Schema_Synchronizing;
+                sb.Schema.Generating += Schema_Generating;
 
                 sb.Schema.EntityEventsGlobal.Saving += new SavingEventHandler<Entity>(EntityEventsGlobal_Saving);
 
@@ -102,6 +103,16 @@ namespace Signum.Engine.Disconnected
             }
         }
 
+        private static SqlPreCommand Schema_Generating()
+        {
+            if (DisconnectedLogic.OfflineMode)
+                return null;
+
+            return GetTablesToSeed()
+                .Select(a => DisconnectedTools.SetNextIdSync(a, ServerSeed))
+                .Combine(Spacing.Simple);
+        }
+
         private static SqlPreCommand Schema_Synchronizing(Replacements arg)
         {
             if (DisconnectedLogic.OfflineMode)
@@ -110,13 +121,18 @@ namespace Signum.Engine.Disconnected
             if (!arg.Interactive && arg.SchemaOnly) // Is ImportManager
                 return null;
 
-            return Schema.Current.Tables.Values
-                .Where(t => GetStrategy(t.Type).Upload != Upload.None)
-                .SelectMany(t => t.TablesMList().Cast<ITable>().PreAnd(t))
-                .Where(t => t.PrimaryKey.Identity)
+            return GetTablesToSeed()
                 .Where(a => DisconnectedTools.GetNextId(a) < ServerSeed)
                 .Select(a => DisconnectedTools.SetNextIdSync(a, ServerSeed))
                 .Combine(Spacing.Simple);
+        }
+
+        static IEnumerable<ITable> GetTablesToSeed()
+        {
+            return Schema.Current.Tables.Values
+                .Where(t => GetStrategy(t.Type).Upload != Upload.None)
+                .SelectMany(t => t.TablesMList().Cast<ITable>().PreAnd(t))
+                .Where(t => t.PrimaryKey.Identity);
         }
 
         static string ValidateDisconnectedMachine(DisconnectedMachineEntity dm, PropertyInfo pi, bool isMin)

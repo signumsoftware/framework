@@ -19,11 +19,12 @@ import * as AuthClient  from '../../../Extensions/Signum.React.Extensions/Author
 import * as ChartClient from '../../../Extensions/Signum.React.Extensions/Chart/ChartClient'
 import * as UserChartClient from '../../../Extensions/Signum.React.Extensions/Chart/UserChart/UserChartClient'
 import * as UserQueryClient from '../../../Extensions/Signum.React.Extensions/UserQueries/UserQueryClient'
-import { QueryFilterEntity, QueryColumnEntity, QueryOrderEntity } from '../UserQueries/Signum.Entities.UserQueries'
+import { QueryFilterEmbedded, QueryColumnEmbedded, QueryOrderEmbedded } from '../UserQueries/Signum.Entities.UserQueries'
 
 import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, DashboardEmbedededInEntity } from './Signum.Entities.Dashboard'
-import { QueryTokenEntity } from '../UserAssets/Signum.Entities.UserAssets'
+import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
+import { ImportRoute, ComponentModule } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 
 export interface PanelPartContentProps<T extends IPartEntity> {
@@ -45,27 +46,25 @@ export function start(options: { routes: JSX.Element[] }) {
     UserAssetClient.start({ routes: options.routes });
     UserAssetClient.registerExportAssertLink(DashboardEntity);
 
-    Navigator.addSettings(new EntitySettings(DashboardEntity, e => new ViewPromise(resolve => require(['./Admin/Dashboard'], resolve))));
+    Navigator.addSettings(new EntitySettings(DashboardEntity, e => _import('./Admin/Dashboard')));
 
-    Navigator.addSettings(new EntitySettings(ValueUserQueryListPartEntity, e => new ViewPromise(resolve => require(['./Admin/ValueUserQueryListPart'], resolve))));
-    Navigator.addSettings(new EntitySettings(LinkListPartEntity, e => new ViewPromise(resolve => require(['./Admin/LinkListPart'], resolve))));
-    Navigator.addSettings(new EntitySettings(UserChartPartEntity, e => new ViewPromise(resolve => require(['./Admin/UserChartPart'], resolve))));
-    Navigator.addSettings(new EntitySettings(UserQueryPartEntity, e => new ViewPromise(resolve => require(['./Admin/UserQueryPart'], resolve))));
+    Navigator.addSettings(new EntitySettings(ValueUserQueryListPartEntity, e => _import('./Admin/ValueUserQueryListPart')));
+    Navigator.addSettings(new EntitySettings(LinkListPartEntity, e => _import('./Admin/LinkListPart')));
+    Navigator.addSettings(new EntitySettings(UserChartPartEntity, e => _import('./Admin/UserChartPart')));
+    Navigator.addSettings(new EntitySettings(UserQueryPartEntity, e => _import('./Admin/UserQueryPart')));
 
     Finder.addSettings({ queryName: DashboardEntity, defaultOrderColumn: "DashboardPriority", defaultOrderType: "Descending" });
 
-    options.routes.push(<Route path="dashboard">
-        <Route path=":dashboardId" getComponent={ (loc, cb) => require(["./View/DashboardPage"], (Comp) => cb(undefined, Comp.default)) } />
-    </Route>);
+    options.routes.push(<ImportRoute path="~/dashboard/:dashboardId" onImportModule={() => _import("./View/DashboardPage")} />);
 
-    registerRenderer(ValueUserQueryListPartEntity, { 
-        component: () => new Promise(resolve => require(['./View/ValueUserQueryListPart'], resolve)).then((a : any) => a.default)
+    registerRenderer(ValueUserQueryListPartEntity, {
+        component: () => _import<ComponentModule>('./View/ValueUserQueryListPart').then(a => a.default)
     });
     registerRenderer(LinkListPartEntity, {
-        component: () =>new Promise(resolve => require(['./View/LinkListPart'], resolve)).then((a: any) => a.default)
+        component: () => _import<ComponentModule>('./View/LinkListPart').then(a => a.default)
     });
     registerRenderer(UserChartPartEntity, {
-        component: () => new Promise(resolve => require(['./View/UserChartPart'], resolve)).then((a: any) => a.default),
+        component: () => _import<ComponentModule>('./View/UserChartPart').then(a => a.default),
         handleTitleClick: (p, e, ev) => {
             ev.preventDefault();
             navigateOrWindowsOpen(ev, Navigator.navigateRoute(p.userChart!));
@@ -79,8 +78,8 @@ export function start(options: { routes: JSX.Element[] }) {
     });
 
 
-    registerRenderer(UserQueryPartEntity, { 
-        component: () => new Promise(resolve => require(['./View/UserQueryPart'], resolve)).then((a: any) => a.default),
+    registerRenderer(UserQueryPartEntity, {
+        component: () => _import('./View/UserQueryPart').then((a: any) => a.default),
         handleTitleClick: (p, e, ev) => {
             ev.preventDefault();
             navigateOrWindowsOpen(ev, Navigator.navigateRoute(p.userQuery!));
@@ -134,7 +133,7 @@ function navigateOrWindowsOpen(e: React.MouseEvent<any>, url: string){
     if (e.ctrlKey || e.button == 1) {
         window.open(url);
     } else {
-        Navigator.currentHistory.push(url);
+        Navigator.history.push(url);
     }
 }
 
@@ -192,7 +191,9 @@ export class DashboardWidget extends React.Component<DashboardWidgetProps, Dashb
                 .then(d => {
                     this.setState({ dashboard: d });
                     if (d && !this.state.component)
-                        require(["./View/DashboardView"], mod => this.setState({ component: mod.default }));
+                        _import<ComponentModule>("./View/DashboardView")
+                            .then(mod => this.setState({ component: mod.default }))
+                            .done();
                 }).done();
         }
     }

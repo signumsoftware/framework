@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Signum.Entities.Reflection;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Workflow
 {
@@ -58,7 +59,7 @@ namespace Signum.Engine.Workflow
                            already.Lane = this.lane.Entity;
                        }
 
-                       var we = (already ?? new WorkflowEventEntity { Xml = new WorkflowXmlEntity(), Lane = this.lane.Entity }).ApplyXml(e, locator);
+                       var we = (already ?? new WorkflowEventEntity { Xml = new WorkflowXmlEmbedded(), Lane = this.lane.Entity }).ApplyXml(e, locator);
                        this.events.Add(id, new XmlEntity<WorkflowEventEntity>(we));
                    },
                    (id, oe) =>
@@ -87,7 +88,7 @@ namespace Signum.Engine.Workflow
                            already.Lane = this.lane.Entity;
                        }
 
-                       var wa = (already ?? new WorkflowActivityEntity { Xml = new WorkflowXmlEntity(), Lane = this.lane.Entity }).ApplyXml(a, locator);
+                       var wa = (already ?? new WorkflowActivityEntity { Xml = new WorkflowXmlEmbedded(), Lane = this.lane.Entity }).ApplyXml(a, locator);
                        this.activities.Add(id, new XmlEntity<WorkflowActivityEntity>(wa));
                    },
                    (id, oa) =>
@@ -118,7 +119,7 @@ namespace Signum.Engine.Workflow
                            already.Lane = this.lane.Entity;
                        }
 
-                       var wg = (already ?? new WorkflowGatewayEntity { Xml = new WorkflowXmlEntity(), Lane = this.lane.Entity }).ApplyXml(g, locator);
+                       var wg = (already ?? new WorkflowGatewayEntity { Xml = new WorkflowXmlEmbedded(), Lane = this.lane.Entity }).ApplyXml(g, locator);
                        this.gateways.Add(id, new XmlEntity<WorkflowGatewayEntity>(wg));
                    },
                    (id, og) =>
@@ -166,8 +167,6 @@ namespace Signum.Engine.Workflow
             {
                 return (!this.GetActivities().Any() && !this.GetEvents().Any() && !this.GetGateways().Any());
             }
-
-    
 
             internal string GetBpmnElementId(IWorkflowNodeEntity node)
             {
@@ -267,6 +266,7 @@ namespace Signum.Engine.Workflow
                 return result;
             }
 
+          
             internal void DeleteAll(Locator locator)
             {
                 foreach (var c in connections.Values.Select(a => a.Entity))
@@ -286,28 +286,69 @@ namespace Signum.Engine.Workflow
 
                 foreach (var ac in activities.Values.Select(a => a.Entity))
                 {
-                    MoveCasesAndDelete(ac, locator);
+                    if (locator != null)
+                        MoveCasesAndDelete(ac, locator);
+                    else
+                    {
+                        DeleteCaseActivities(ac, c => true);
+                        ac.Delete(WorkflowActivityOperation.Delete);
+                    }
                 }
-                
+
                 this.lane.Entity.Delete(WorkflowLaneOperation.Delete);
             }
 
-            private static void MoveCasesAndDelete(WorkflowActivityEntity ac, Locator locator)
+            internal void DeleteCaseActivities(Expression<Func<CaseEntity, bool>> filter)
             {
-                ac.CaseActivities().Where(a => a.DoneDate.HasValue)
-                    .UnsafeUpdate()
-                    .Set(a => a.WorkflowActivity, a => null)
-                    .Execute();
+                foreach (var ac in activities.Values.Select(a => a.Entity))
+                    DeleteCaseActivities(ac, filter);
+            }
 
-                if (ac.CaseActivities().Any())
+            private static void DeleteCaseActivities(WorkflowActivityEntity ac, Expression<Func<CaseEntity, bool>> filter)
+            {
+                if (ac.Type == WorkflowActivityType.DecompositionWorkflow || ac.Type == WorkflowActivityType.CallWorkflow)
                 {
-                    ac.CaseActivities()
-                         .UnsafeUpdate()
-                        .Set(a => a.WorkflowActivity, a => locator.GetReplacement(ac.ToLite()))
-                        .Execute();
+                    var sw = ac.SubWorkflow.Workflow;
+                    var wb = new WorkflowBuilder(sw);
+                    wb.DeleteCases(c => filter.Evaluate(c.ParentCase) && c.ParentCase.Workflow == ac.Lane.Pool.Workflow);
                 }
 
-                ac.Delete(WorkflowActivityOperation.Delete);
+                var caseActivities = ac.CaseActivities().Where(ca => filter.Evaluate(ca.Case));
+                if (caseActivities.Any())
+                {
+                    var notifications = caseActivities.SelectMany(a => a.Notifications());
+
+                    if (notifications.Any())
+                        notifications.UnsafeDelete();
+
+                    Database.Query<CaseActivityEntity>()
+                        .Where(ca => ca.Previous.Entity.WorkflowActivity.Is(ac) && filter.Evaluate(ca.Previous.Entity.Case))
+                        .UnsafeUpdate()
+                        .Set(ca => ca.Previous, ca => null)
+                        .Execute();
+
+                    caseActivities.UnsafeDelete();
+                }
+            }
+
+            private static void MoveCasesAndDelete(WorkflowActivityEntity wa, Locator locator)
+            {
+                if (wa.CaseActivities().Any())
+                {
+                    if (locator.HasReplacement(wa.ToLite()))
+                    {
+                        wa.CaseActivities()
+                            .UnsafeUpdate()
+                            .Set(ca => ca.WorkflowActivity, ca => locator.GetReplacement(wa.ToLite()))
+                            .Execute();
+                    }
+                    else
+                    {
+                        DeleteCaseActivities(wa, a => true);
+                    }
+                }
+
+                wa.Delete(WorkflowActivityOperation.Delete);
             }
 
             internal void Clone(WorkflowPoolEntity pool, Dictionary<IWorkflowNodeEntity, IWorkflowNodeEntity> nodes)

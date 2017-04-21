@@ -9,9 +9,10 @@ import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Ref
 import SearchControl from '../../../../Framework/Signum.React/Scripts/SearchControl/SearchControl'
 import { UserQueryEntity } from '../Signum.Entities.UserQueries'
 import * as UserQueryClient from '../UserQueryClient'
+import { RouteComponentProps } from "react-router";
 
 
-interface UserQueryPageProps extends ReactRouter.RouteComponentProps<{}, { userQueryId: string; entity?: string }> {
+interface UserQueryPageProps extends RouteComponentProps<{ userQueryId: string; entity?: string }> {
 
 }
 
@@ -37,7 +38,7 @@ export default class UserQueryPage extends React.Component<UserQueryPageProps, {
 
     load(props: UserQueryPageProps) {
 
-        const { userQueryId, entity } = this.props.routeParams!;
+        const { userQueryId, entity } = this.props.match.params;
 
         const lite = entity == undefined ? undefined : parseLite(entity);
 

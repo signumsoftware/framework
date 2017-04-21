@@ -238,7 +238,8 @@ namespace Signum.Entities.Dynamic
     public enum DynamicBaseType
     {
         Entity,
-        Mixin
+        MixinEntity,
+        EmbeddedEntity,
     }
 
     public class DynamicProperty

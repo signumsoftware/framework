@@ -11,25 +11,25 @@ using System.Web;
 namespace Signum.Entities.Files
 {
     [Serializable]
-    public class EmbeddedFilePathEntity : EmbeddedEntity, IFile, IFilePath
+    public class FilePathEmbedded : EmbeddedEntity, IFile, IFilePath
     {
         public static string ForceExtensionIfEmpty = ".dat";
 
-        public EmbeddedFilePathEntity() { }
+        public FilePathEmbedded() { }
 
-        public EmbeddedFilePathEntity(FileTypeSymbol fileType)
+        public FilePathEmbedded(FileTypeSymbol fileType)
         {
             this.FileType = fileType;
         }
 
-        public EmbeddedFilePathEntity(FileTypeSymbol fileType, string readFileFrom)
+        public FilePathEmbedded(FileTypeSymbol fileType, string readFileFrom)
             : this(fileType)
         {
             this.FileName = Path.GetFileName(readFileFrom);
             this.BinaryFile = File.ReadAllBytes(readFileFrom);
         }
 
-        public EmbeddedFilePathEntity(FileTypeSymbol fileType, string fileName, byte[] fileData)
+        public FilePathEmbedded(FileTypeSymbol fileType, string fileName, byte[] fileData)
             : this(fileType)
         {
             this.FileName = fileName;
@@ -101,7 +101,7 @@ namespace Signum.Entities.Files
             return this._prefixPair;
         }
 
-        public static Func<EmbeddedFilePathEntity, PrefixPair> CalculatePrefixPair;
+        public static Func<FilePathEmbedded, PrefixPair> CalculatePrefixPair;
 
         public string FullPhysicalPath()
         {
@@ -129,7 +129,7 @@ namespace Signum.Entities.Files
             return "{0} - {1}".FormatWith(FileName, ((long)FileLength).ToComputerSize(true));
         }
 
-        public static Action<EmbeddedFilePathEntity> OnPreSaving;
+        public static Action<FilePathEmbedded> OnPreSaving;
         protected override void PreSaving(ref bool graphModified)
         {
             if (OnPreSaving == null)

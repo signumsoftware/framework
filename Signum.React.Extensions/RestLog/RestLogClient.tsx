@@ -4,5 +4,5 @@ import { EntitySettings, ViewPromise } from "../../../Framework/Signum.React/Scr
 import * as Navigator from "../../../Framework/Signum.React/Scripts/Navigator";
 
 export function start(options: { routes: JSX.Element[] }) {
-    Navigator.addSettings(new EntitySettings(RestLogEntity, e => new ViewPromise(resolve => require(['./Templates/RestLog'], resolve))));
+    Navigator.addSettings(new EntitySettings(RestLogEntity, e => _import('./Templates/RestLog')));
 }

@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace Signum.Entities.Dynamic
 {
     [Serializable]
-    public abstract class EvalEntity<T> : EmbeddedEntity
+    public abstract class EvalEmbedded<T> : EmbeddedEntity
                     where T : class
     {
         public class CompilationResult

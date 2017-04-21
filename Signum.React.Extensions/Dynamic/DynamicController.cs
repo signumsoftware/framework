@@ -114,6 +114,7 @@ namespace Signum.React.Dynamic
             public int limit;
             public bool includeBasicTypes;
             public bool includeEntities;
+            public bool includeEmbeddedEntities;
             public bool includeMList;
             public bool includeQueriable;
         }
@@ -139,6 +140,10 @@ namespace Signum.React.Dynamic
                 result.AddRange(TypeLogic.TypeToEntity.Keys.Select(a => a.Name));
             }
 
+            if(request.includeEmbeddedEntities)
+            {
+                result.AddRange(DynamicTypeLogic.AvailableEmbeddedEntities.Value.Select(a => a.Name));
+            }
         
             if (request.includeMList)
                 return Fix(result, "MList", request.query);

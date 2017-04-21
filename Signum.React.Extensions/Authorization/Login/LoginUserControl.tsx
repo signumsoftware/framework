@@ -1,7 +1,4 @@
-﻿/// <reference path="../../../../framework/signum.react/scripts/globals.ts" />
-
-import * as React from 'react'
-import { Link } from 'react-router'
+﻿import * as React from 'react'
 import { NavDropdown, MenuItem, NavItem } from 'react-bootstrap'
 import { LinkContainer } from 'react-router-bootstrap'
 import { AuthMessage, UserEntity } from '../Signum.Entities.Authorization'
@@ -13,7 +10,7 @@ export default class LoginUserControl extends React.Component<{}, { user: UserEn
         const user = AuthClient.currentUser();
 
         if (!user)
-            return <LinkContainer to="~/auth/login"><NavItem  className="sf-login">{AuthMessage.Login.niceToString() }</NavItem></LinkContainer>;
+            return <LinkContainer to="~/auth/login" className="sf-login"><NavItem>{AuthMessage.Login.niceToString() }</NavItem></LinkContainer>;
 
         return (
             <NavDropdown className="sf-user" title={user.userName!} id="sfUserDropDown">

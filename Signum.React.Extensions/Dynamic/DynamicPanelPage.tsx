@@ -17,10 +17,12 @@ import { API, Options, CompilationError } from './DynamicClient'
 import CSharpCodeMirror from '../Codemirror/CSharpCodeMirror'
 import * as AuthClient from '../Authorization/AuthClient'
 import { DynamicPanelPermission, DynamicTypeMessage } from './Signum.Entities.Dynamic'
+import { RouteComponentProps } from "react-router";
+import * as QueryString from 'query-string';
 
 require("./DynamicPanelPage.css");
 
-interface DynamicPanelProps extends ReactRouter.RouteComponentProps<{}, {}> {
+interface DynamicPanelProps extends RouteComponentProps<{}> {
 }
 
 interface DynamicPanelState {
@@ -30,7 +32,7 @@ interface DynamicPanelState {
 export default class DynamicPanelPage extends React.Component<DynamicPanelProps, DynamicPanelState> {
 
     handleSelect = (key: any /*string*/) => {
-        Navigator.currentHistory.push("~/dynamic/panel?step=" + key);
+        Navigator.history.push("~/dynamic/panel?step=" + key);
     }
 
     handleErrorClick = (e: React.MouseEvent<any>) => {
@@ -53,7 +55,7 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
     render() {
         AuthClient.asserPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel);
 
-        let step = this.props.location.query.step as "compile" | "restartServer" | "migrations" | "refreshClients" | undefined;
+        let step = QueryString.parse(this.props.location.search).step as "compile" | "restartServer" | "migrations" | "refreshClients" | undefined;
 
         const errors = this.state.startErrors
         return (

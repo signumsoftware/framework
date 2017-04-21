@@ -1,6 +1,9 @@
 ﻿import * as React from 'react'
 import { DropdownButton, MenuItem, Button } from 'react-bootstrap'
-import { WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity, IWorkflowNodeEntity, CaseFlowColor, CaseActivityEntity, CaseEntity } from '../Signum.Entities.Workflow'
+import {
+    WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity,
+    IWorkflowNodeEntity, CaseFlowColor, CaseActivityEntity, CaseEntity, WorkflowMessage
+} from '../Signum.Entities.Workflow'
 import { JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { CaseFlow } from '../WorkflowClient'
@@ -146,9 +149,15 @@ export default class BpmnViewerComponent extends React.Component<BpmnViewerCompo
         searchPad.toggle();
     }
 
+    handleZoomClick = (e: React.MouseEvent<Button>) => {
+        var zoomScroll = this.viewer.get<any>("zoomScroll");
+        zoomScroll.reset();
+    }
+
     render() {
         return (
             <div>
+                <Button style={{ marginLeft: "20px" }} onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>{" "}
                 <DropdownButton title={"Color: " + CaseFlowColor.niceName(this.state.caseFlowColor)} id="colorMenu" onSelect={this.handleChangeColor}>
                     {this.menuItem("CaseMaxDuration")}
                     {this.menuItem("AverageDuration")}
@@ -159,6 +168,7 @@ export default class BpmnViewerComponent extends React.Component<BpmnViewerCompo
             </div>
         );
     }
+
 
     menuItem(color: CaseFlowColor) {
         return <MenuItem eventKey={color} selected={this.state.caseFlowColor == color}>{CaseFlowColor.niceName(color)}</MenuItem>

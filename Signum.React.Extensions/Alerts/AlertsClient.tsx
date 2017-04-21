@@ -19,8 +19,8 @@ import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 
 export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeName: string) => boolean }) {
-    Navigator.addSettings(new EntitySettings(AlertEntity, e => new ViewPromise(resolve => require(['./Templates/Alert'], resolve))));
-    Navigator.addSettings(new EntitySettings(AlertTypeEntity, e => new ViewPromise(resolve => require(['./Templates/AlertType'], resolve))));
+    Navigator.addSettings(new EntitySettings(AlertEntity, e => _import('./Templates/Alert')));
+    Navigator.addSettings(new EntitySettings(AlertTypeEntity, e => _import('./Templates/AlertType')));
 
 
     const couldHaveAlerts = options.couldHaveAlerts || (typeName => true);

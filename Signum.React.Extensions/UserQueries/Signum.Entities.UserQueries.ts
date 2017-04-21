@@ -10,25 +10,25 @@ import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
-export const QueryColumnEntity = new Type<QueryColumnEntity>("QueryColumnEntity");
-export interface QueryColumnEntity extends Entities.EmbeddedEntity {
-    Type: "QueryColumnEntity";
-    token?: UserAssets.QueryTokenEntity | null;
+export const QueryColumnEmbedded = new Type<QueryColumnEmbedded>("QueryColumnEmbedded");
+export interface QueryColumnEmbedded extends Entities.EmbeddedEntity {
+    Type: "QueryColumnEmbedded";
+    token?: UserAssets.QueryTokenEmbedded | null;
     displayName?: string | null;
 }
 
-export const QueryFilterEntity = new Type<QueryFilterEntity>("QueryFilterEntity");
-export interface QueryFilterEntity extends Entities.EmbeddedEntity {
-    Type: "QueryFilterEntity";
-    token?: UserAssets.QueryTokenEntity | null;
+export const QueryFilterEmbedded = new Type<QueryFilterEmbedded>("QueryFilterEmbedded");
+export interface QueryFilterEmbedded extends Entities.EmbeddedEntity {
+    Type: "QueryFilterEmbedded";
+    token?: UserAssets.QueryTokenEmbedded | null;
     operation?: DynamicQuery.FilterOperation;
     valueString?: string | null;
 }
 
-export const QueryOrderEntity = new Type<QueryOrderEntity>("QueryOrderEntity");
-export interface QueryOrderEntity extends Entities.EmbeddedEntity {
-    Type: "QueryOrderEntity";
-    token?: UserAssets.QueryTokenEntity | null;
+export const QueryOrderEmbedded = new Type<QueryOrderEmbedded>("QueryOrderEmbedded");
+export interface QueryOrderEmbedded extends Entities.EmbeddedEntity {
+    Type: "QueryOrderEmbedded";
+    token?: UserAssets.QueryTokenEmbedded | null;
     orderType?: DynamicQuery.OrderType;
 }
 
@@ -40,10 +40,10 @@ export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetE
     owner?: Entities.Lite<Entities.Entity> | null;
     displayName?: string | null;
     withoutFilters?: boolean;
-    filters: Entities.MList<QueryFilterEntity>;
-    orders: Entities.MList<QueryOrderEntity>;
+    filters: Entities.MList<QueryFilterEmbedded>;
+    orders: Entities.MList<QueryOrderEmbedded>;
     columnsMode?: DynamicQuery.ColumnOptionsMode;
-    columns: Entities.MList<QueryColumnEntity>;
+    columns: Entities.MList<QueryColumnEmbedded>;
     paginationMode?: DynamicQuery.PaginationMode | null;
     elementsPerPage?: number | null;
     guid?: string;

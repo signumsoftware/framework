@@ -12,19 +12,18 @@ import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import { FindOptionsParsed, FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption, FilterRequest, QueryRequest, Pagination } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import * as AuthClient  from '../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
 import { UserQueryEntity, UserQueryPermission, UserQueryMessage,
-    QueryFilterEntity, QueryColumnEntity, QueryOrderEntity} from './Signum.Entities.UserQueries'
-import { QueryTokenEntity, } from '../UserAssets/Signum.Entities.UserAssets'
+    QueryFilterEmbedded, QueryColumnEmbedded, QueryOrderEmbedded } from './Signum.Entities.UserQueries'
+import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import UserQueryMenu from './UserQueryMenu'
 import * as UserAssetsClient from '../UserAssets/UserAssetClient'
+import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 export function start(options: { routes: JSX.Element[] }) {
 
     UserAssetsClient.start({ routes: options.routes });
     UserAssetsClient.registerExportAssertLink(UserQueryEntity);
 
-    options.routes.push(<Route path="userQuery">
-        <Route path=":userQueryId(/:entity)" getComponent={ (loc, cb) => require(["./Templates/UserQueryPage"], (Comp) => cb(undefined, Comp.default)) } />
-    </Route>);
+    options.routes.push(<ImportRoute path="~/userQuery/:userQueryId(/:entity)" onImportModule={() => _import("./Templates/UserQueryPage")} />);
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
         if (!ctx.searchControl.props.showBarExtension || !AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
@@ -39,7 +38,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
         return API.forEntityType(ctx.lite.EntityType).then(uqs =>
             uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), uq.toStr || "", e => {
-                window.open(Navigator.currentHistory.createHref(`~/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
+                window.open(Navigator.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
             }, { icon: "glyphicon glyphicon-list-alt", iconColor: "dodgerblue" })));
     });
 
@@ -47,7 +46,7 @@ export function start(options: { routes: JSX.Element[] }) {
         e => {
             Navigator.API.fetchAndRemember(ctx.lite).then(uq => {
                 if (uq.entityType == undefined)
-                    window.open(Navigator.currentHistory.createHref(`~/userQuery/${uq.id}`));
+                    window.open(Navigator.toAbsoluteUrl(`~/userQuery/${uq.id}`));
                 else
                     Navigator.API.fetchAndForget(uq.entityType)
                         .then(t => Finder.find({ queryName: t.cleanName }))
@@ -55,17 +54,17 @@ export function start(options: { routes: JSX.Element[] }) {
                             if (!lite)
                                 return;
 
-                            window.open(Navigator.currentHistory.createHref(`~/userQuery/${uq.id}/${liteKey(lite)}`));
+                            window.open(Navigator.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(lite)}`));
                         })
                         .done();
             }).done();
         }, { isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery) }));
 
-    Constructor.registerConstructor<QueryFilterEntity>(QueryFilterEntity, () => QueryFilterEntity.New({ token: QueryTokenEntity.New() }));
-    Constructor.registerConstructor<QueryOrderEntity>(QueryOrderEntity, () => QueryOrderEntity.New({token : QueryTokenEntity.New() }));
-    Constructor.registerConstructor<QueryColumnEntity>(QueryColumnEntity, () => QueryColumnEntity.New({ token : QueryTokenEntity.New() }));
+    Constructor.registerConstructor<QueryFilterEmbedded>(QueryFilterEmbedded, () => QueryFilterEmbedded.New({ token: QueryTokenEmbedded.New() }));
+    Constructor.registerConstructor<QueryOrderEmbedded>(QueryOrderEmbedded, () => QueryOrderEmbedded.New({token : QueryTokenEmbedded.New() }));
+    Constructor.registerConstructor<QueryColumnEmbedded>(QueryColumnEmbedded, () => QueryColumnEmbedded.New({ token : QueryTokenEmbedded.New() }));
 
-    Navigator.addSettings(new EntitySettings(UserQueryEntity, e => new ViewPromise(resolve => require(['./Templates/UserQuery'], resolve)), { isCreable: "Never" }));
+    Navigator.addSettings(new EntitySettings(UserQueryEntity, e => _import('./Templates/UserQuery'), { isCreable: "Never" }));
 }
 
 

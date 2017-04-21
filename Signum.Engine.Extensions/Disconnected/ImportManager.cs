@@ -91,7 +91,7 @@ namespace Signum.Engine.Disconnected
             Lite<DisconnectedImportEntity> import = new DisconnectedImportEntity
             {
                 Machine = machine.ToLite(),
-                Copies = uploadTables.Select(t => new DisconnectedImportTableEntity
+                Copies = uploadTables.Select(t => new DisconnectedImportTableEmbedded
                 {
                     Type = t.Type.ToTypeEntity().ToLite(),
                     DisableForeignKeys = t.Strategy.DisableForeignKeys.Value,
@@ -326,7 +326,7 @@ namespace Signum.Engine.Disconnected
             return "{0}.{1}.Import.{2}.bak".FormatWith(Connector.Current.DatabaseName(), DisconnectedTools.CleanMachineName(machine.MachineName), import.Id);
         }
 
-        private IQueryable<MListElement<DisconnectedImportEntity, DisconnectedImportTableEntity>> ImportTableQuery(Lite<DisconnectedImportEntity> import, TypeEntity type)
+        private IQueryable<MListElement<DisconnectedImportEntity, DisconnectedImportTableEmbedded>> ImportTableQuery(Lite<DisconnectedImportEntity> import, TypeEntity type)
         {
             return Database.MListQuery((DisconnectedImportEntity s) => s.Copies).Where(dst => dst.Parent.ToLite() == import && dst.Element.Type.RefersTo(type));
         }

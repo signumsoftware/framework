@@ -13,7 +13,7 @@ using System.Globalization;
 namespace Signum.Entities.Chart
 {
     [Serializable]
-    public class ChartScriptParameterEntity : EmbeddedEntity
+    public class ChartScriptParameterEmbedded : EmbeddedEntity
     {
         [NotNullable, SqlDbType(Size = 50)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 50)]
@@ -278,9 +278,9 @@ namespace Signum.Entities.Chart
             }
         }
 
-        internal ChartScriptParameterEntity Clone()
+        internal ChartScriptParameterEmbedded Clone()
         {
-            return new ChartScriptParameterEntity
+            return new ChartScriptParameterEmbedded
             {
                 Name = Name,
                 Type = Type,

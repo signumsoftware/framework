@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { WorkflowEntity, WorkflowModel, WorkflowEntitiesDictionary, BpmnEntityPair, WorkflowOperation, WorkflowMessage } from '../Signum.Entities.Workflow'
+import { WorkflowEntity, WorkflowModel, WorkflowEntitiesDictionary, BpmnEntityPairEmbedded, WorkflowOperation, WorkflowMessage } from '../Signum.Entities.Workflow'
 import { TypeContext, ValueLine, EntityLine, LiteAutocompleteConfig } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { is, JavascriptMessage, toLite, ModifiableEntity, Lite, Entity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Entities from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -53,14 +53,12 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
 
     loadXml(w: WorkflowEntity) {
         if (w.isNew) {
-            require(["raw-loader!./InitialWorkflow.xml"], (xml) => {
-                var model = WorkflowModel.New({
+            _import<string>("raw-loader!./InitialWorkflow.xml")
+                .then(xml => this.updateState(WorkflowModel.New({
                     diagramXml: xml,
                     entities: [],
-                });
-
-                this.updateState(model);
-            });
+                })))
+                .done();
         }
         else
             API.getWorkflowModel(toLite(w))

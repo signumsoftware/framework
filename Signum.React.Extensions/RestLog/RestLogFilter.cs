@@ -23,7 +23,7 @@ namespace Signum.React.RestLog
         {
             var queryParams =
              actionContext.Request.GetQueryNameValuePairs()
-                 .Select(a => new QueryStringValue { Key = a.Key, Value = a.Value })
+                 .Select(a => new QueryStringValueEmbedded { Key = a.Key, Value = a.Value })
                  .ToMList();
 
 

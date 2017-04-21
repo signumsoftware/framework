@@ -26,9 +26,9 @@ import * as AuthClient from '../Authorization/AuthClient'
 
 export function start(options: { routes: JSX.Element[] }) {
 
-    Navigator.addSettings(new EntitySettings(DynamicTypeEntity, w => new ViewPromise(resolve => require(['./Type/DynamicType'], resolve))));
-    Navigator.addSettings(new EntitySettings(DynamicMixinConnectionEntity, w => new ViewPromise(resolve => require(['./Type/DynamicMixinConnection'], resolve))));
-    Navigator.addSettings(new EntitySettings(DynamicSqlMigrationEntity, w => new ViewPromise(resolve => require(['./Type/DynamicSqlMigration'], resolve))));
+    Navigator.addSettings(new EntitySettings(DynamicTypeEntity, w => _import('./Type/DynamicType')));
+    Navigator.addSettings(new EntitySettings(DynamicMixinConnectionEntity, w => _import('./Type/DynamicMixinConnection')));
+    Navigator.addSettings(new EntitySettings(DynamicSqlMigrationEntity, w => _import('./Type/DynamicSqlMigration')));
 
     Operations.addSettings(new EntityOperationSettings(DynamicTypeOperation.Save, {
         onClick: eoc => {
@@ -46,7 +46,7 @@ export function start(options: { routes: JSX.Element[] }) {
                             icon: "success"
                         }).then(result => {
                             if (result == "yes")
-                                window.open(Navigator.currentHistory.createHref("~/dynamic/panel"));
+                                window.open(Navigator.toAbsoluteUrl("~/dynamic/panel"));
                         }).done();
                     }
                 })
@@ -81,8 +81,6 @@ export namespace API {
         return ajaxGet<Array<string>>({ url: `~/api/dynamic/type/expressionNames/${typeName}` });
     }
 }
-
-export type DynamicBaseType = "Entity" | "Mixin";
 
 export interface DynamicTypeDefinition {
     primaryKey?: DynamicTypePrimaryKeyDefinition;

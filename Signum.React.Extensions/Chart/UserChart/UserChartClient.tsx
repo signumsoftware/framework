@@ -11,13 +11,14 @@ import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constru
 import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
 import * as QuickLinks from '../../../../Framework/Signum.React/Scripts/QuickLinks'
 import { FindOptions, QueryToken, FilterOption, FilterOptionParsed, FilterOperation, OrderOption, OrderOptionParsed, ColumnOption, FilterRequest, QueryRequest, Pagination, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import * as AuthClient  from '../../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
-import { UserChartEntity, ChartPermission, ChartMessage, ChartRequest, ChartParameterEntity, ChartColumnEntity  } from '../Signum.Entities.Chart'
-import { QueryFilterEntity, QueryOrderEntity } from '../../UserQueries/Signum.Entities.UserQueries'
-import { QueryTokenEntity } from '../../UserAssets/Signum.Entities.UserAssets'
+import * as AuthClient from '../../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
+import { UserChartEntity, ChartPermission, ChartMessage, ChartRequest, ChartParameterEmbedded, ChartColumnEmbedded } from '../Signum.Entities.Chart'
+import { QueryFilterEmbedded, QueryOrderEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
+import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'
 import UserChartMenu from './UserChartMenu'
 import * as ChartClient from '../ChartClient'
 import * as UserAssetsClient from '../../UserAssets/UserAssetClient'
+import { ImportRoute } from "../../../../Framework/Signum.React/Scripts/AsyncImport";
 
 
 export function start(options: { routes: JSX.Element[] }) {
@@ -25,9 +26,7 @@ export function start(options: { routes: JSX.Element[] }) {
     UserAssetsClient.start({ routes: options.routes });
     UserAssetsClient.registerExportAssertLink(UserChartEntity);
 
-    options.routes.push(<Route path="userChart">
-        <Route path=":userChartId(/:entity)" getComponent={ (loc, cb) => require(["./UserChartPage"], (Comp) => cb(undefined, Comp.default)) } />
-    </Route>);
+    options.routes.push(<ImportRoute path="~/userChart/:userChartId(/:entity)" onImportModule={() => _import("./UserChartPage")} />);
 
 
     ChartClient.ButtonBarChart.onButtonBarElements.push(ctx => {
@@ -43,7 +42,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
         return API.forEntityType(ctx.lite.EntityType).then(uqs =>
             uqs.map(uc => new QuickLinks.QuickLinkAction(liteKey(uc), uc.toStr || "", e => {
-                window.open(Navigator.currentHistory.createHref(`~/userChart/${uc.id}/${liteKey(ctx.lite)}`));
+                window.open(Navigator.toAbsoluteUrl(`~/userChart/${uc.id}/${liteKey(ctx.lite)}`));
             }, { icon: "glyphicon glyphicon-list-alt", iconColor: "dodgerblue" })));
     });
 
@@ -51,7 +50,7 @@ export function start(options: { routes: JSX.Element[] }) {
         e => {
             Navigator.API.fetchAndRemember(ctx.lite).then(uc => {
                 if (uc.entityType == undefined)
-                    window.open(Navigator.currentHistory.createHref(`~/userChart/${uc.id}`));
+                    window.open(Navigator.toAbsoluteUrl(`~/userChart/${uc.id}`));
                 else
                     Navigator.API.fetchAndForget(uc.entityType)
                         .then(t => Finder.find({ queryName: t.cleanName }))
@@ -59,14 +58,14 @@ export function start(options: { routes: JSX.Element[] }) {
                             if (!lite)
                                 return;
 
-                            window.open(Navigator.currentHistory.createHref(`~/userChart/${uc.id}/${liteKey(lite)}`));
+                            window.open(Navigator.toAbsoluteUrl(`~/userChart/${uc.id}/${liteKey(lite)}`));
                         })
                         .done();
             }).done();
         }, { isVisible: AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) }));
 
 
-    Navigator.addSettings(new EntitySettings(UserChartEntity, e => new ViewPromise(resolve => require(['./UserChart'], resolve)), { isCreable: "Never" }));
+    Navigator.addSettings(new EntitySettings(UserChartEntity, e => _import('./UserChart'), { isCreable: "Never" }));
 }
 
 
@@ -101,7 +100,7 @@ export module Converter {
             
             cr.parameters = uq.parameters!.map(mle => ({
                 rowId: null,
-                element: ChartParameterEntity.New({
+                element: ChartParameterEmbedded.New({
                     name : mle.element.name,
                     value : mle.element.value,
                 })
@@ -112,10 +111,10 @@ export module Converter {
 
                 return ({
                     rowId: null,
-                    element: ChartColumnEntity.New({
+                    element: ChartColumnEmbedded.New({
                         displayName: mle.element.displayName,
 
-                        token: t && QueryTokenEntity.New({
+                        token: t && QueryTokenEmbedded.New({
                             token: t!.token,
                             tokenString: t!.tokenString
                         })

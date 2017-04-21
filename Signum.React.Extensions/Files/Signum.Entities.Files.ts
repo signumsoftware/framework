@@ -15,7 +15,7 @@ export interface IFile
 }
 
 export interface FileEntity extends IFile { }
-export interface EmbeddedFileEntity extends IFile { }
+export interface FileEmbedded extends IFile { }
 
 export interface IFilePath extends IFile
 {
@@ -25,24 +25,12 @@ export interface IFilePath extends IFile
 }
 
 export interface FilePathEntity extends IFilePath { }
-export interface EmbeddedFilePathEntity extends IFilePath { }
-export const EmbeddedFileEntity = new Type<EmbeddedFileEntity>("EmbeddedFileEntity");
-export interface EmbeddedFileEntity extends Entities.EmbeddedEntity {
-    Type: "EmbeddedFileEntity";
+export interface FilePathEmbedded extends IFilePath { }
+export const FileEmbedded = new Type<FileEmbedded>("FileEmbedded");
+export interface FileEmbedded extends Entities.EmbeddedEntity {
+    Type: "FileEmbedded";
     fileName?: string | null;
     binaryFile?: string | null;
-}
-
-export const EmbeddedFilePathEntity = new Type<EmbeddedFilePathEntity>("EmbeddedFilePathEntity");
-export interface EmbeddedFilePathEntity extends Entities.EmbeddedEntity {
-    Type: "EmbeddedFilePathEntity";
-    fileName?: string | null;
-    binaryFile?: string | null;
-    fileLength?: number;
-    fileLengthString?: string | null;
-    suffix?: string | null;
-    calculatedDirectory?: string | null;
-    fileType?: FileTypeSymbol | null;
 }
 
 export const FileEntity = new Type<FileEntity>("File");
@@ -68,6 +56,18 @@ export module FileMessage {
     export const ViewingHasNotDefaultImplementationFor0 = new MessageKey("FileMessage", "ViewingHasNotDefaultImplementationFor0");
     export const OnlyOneFileIsSupported = new MessageKey("FileMessage", "OnlyOneFileIsSupported");
     export const DragAndDropHere = new MessageKey("FileMessage", "DragAndDropHere");
+}
+
+export const FilePathEmbedded = new Type<FilePathEmbedded>("FilePathEmbedded");
+export interface FilePathEmbedded extends Entities.EmbeddedEntity {
+    Type: "FilePathEmbedded";
+    fileName?: string | null;
+    binaryFile?: string | null;
+    fileLength?: number;
+    fileLengthString?: string | null;
+    suffix?: string | null;
+    calculatedDirectory?: string | null;
+    fileType?: FileTypeSymbol | null;
 }
 
 export const FilePathEntity = new Type<FilePathEntity>("FilePath");

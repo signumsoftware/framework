@@ -25,7 +25,7 @@ namespace Signum.Entities.RestLog
 
         [NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
-        public MList<QueryStringValue> QueryString { get; set; } = new MList<QueryStringValue>();
+        public MList<QueryStringValueEmbedded> QueryString { get; set; } = new MList<QueryStringValueEmbedded>();
 
         public Lite<IUserEntity> User { get; set; }
 
@@ -52,7 +52,7 @@ namespace Signum.Entities.RestLog
     }
 
     [Serializable]
-    public class QueryStringValue : EmbeddedEntity
+    public class QueryStringValueEmbedded : EmbeddedEntity
     {
         [NotNullable, SqlDbType(Size = MaxValue)]
         public string Key { get; set; }

@@ -8,7 +8,7 @@ import { EntityPack, Entity, Lite, JavascriptMessage, entityInfo, getToString } 
 import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from '../../../../Framework/Signum.React/Scripts/Frames/Widgets'
 import ValidationErrors from '../../../../Framework/Signum.React/Scripts/Frames/ValidationErrors'
 import ButtonBar from '../../../../Framework/Signum.React/Scripts/Frames/ButtonBar'
-import { ToolbarElementEntity, ToolbarElementType, ToolbarMenuEntity } from '../Signum.Entities.Toolbar'
+import { ToolbarElementEmbedded, ToolbarElementType, ToolbarMenuEntity } from '../Signum.Entities.Toolbar'
 import * as ToolbarClient from '../ToolbarClient'
 import { Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap'
 import { LinkContainer, IndexLinkContainer } from 'react-router-bootstrap'

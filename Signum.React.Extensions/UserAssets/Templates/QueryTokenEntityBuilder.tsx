@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { ajaxGet, ajaxPost, ServiceError } from '../../../../Framework/Signum.React/Scripts/Services'
-import { QueryTokenEntity } from '../Signum.Entities.UserAssets'
+import { QueryTokenEmbedded } from '../Signum.Entities.UserAssets'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { TypeContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -12,7 +12,7 @@ import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Ref
 const CurrentEntityKey = "[CurrentEntity]";
 
 interface QueryTokenEntityBuilderProps {
-    ctx: TypeContext<QueryTokenEntity | null | undefined>;
+    ctx: TypeContext<QueryTokenEmbedded | null | undefined>;
     queryKey: string;
     subTokenOptions: SubTokensOptions;
     onTokenChanged?: (newToken: QueryToken) => void;
@@ -24,7 +24,7 @@ export default class QueryTokenEntityBuilder extends React.Component<QueryTokenE
         if (newToken == undefined)
             this.props.ctx.value = undefined;
         else
-            this.props.ctx.value = QueryTokenEntity.New({
+            this.props.ctx.value = QueryTokenEmbedded.New({
                 tokenString : newToken.fullKey,
                 token : newToken
             });

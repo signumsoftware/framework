@@ -41,7 +41,7 @@ namespace Signum.Entities.Workflow
 
         [NotNullable]
         [NotNullValidator]
-        public WorkflowXmlEntity Xml { get; set; }
+        public WorkflowXmlEmbedded Xml { get; set; }
 
         public ModelEntity GetModel()
         {

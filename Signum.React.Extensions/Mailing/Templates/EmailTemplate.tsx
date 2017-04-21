@@ -6,7 +6,7 @@ import { SubTokensOptions, QueryToken, QueryTokenType, hasAnyOrAll } from '../..
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString, getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { EmailTemplateEntity, EmailTemplateContactEntity, EmailTemplateRecipientEntity, EmailTemplateMessageEntity, EmailTemplateViewMessage, EmailTemplateMessage } from '../Signum.Entities.Mailing'
+import { EmailTemplateEntity, EmailTemplateContactEmbedded, EmailTemplateRecipientEntity, EmailTemplateMessageEmbedded, EmailTemplateViewMessage, EmailTemplateMessage } from '../Signum.Entities.Mailing'
 import { TemplateTokenMessage } from '../../Templating/Signum.Entities.Templating'
 import FileLine from '../../Files/FileLine'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
@@ -76,14 +76,14 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
                 <ValueLine ctx={ec.subCtx(e => e.isBodyHtml)} />
 
                 <div className="sf-email-replacements-container">
-                    <EntityTabRepeater ctx={ec.subCtx(a => a.messages)} onChange={() => this.forceUpdate()} getComponent={(ctx: TypeContext<EmailTemplateMessageEntity>) =>
+                    <EntityTabRepeater ctx={ec.subCtx(a => a.messages)} onChange={() => this.forceUpdate()} getComponent={(ctx: TypeContext<EmailTemplateMessageEmbedded>) =>
                         <EmailTemplateMessageComponent ctx={ctx} queryKey={ec.value.query!.key!} invalidate={() => this.forceUpdate()} />} />
                 </div>
             </div>
         );
     }
 
-    renderContact = (ec: TypeContext<EmailTemplateContactEntity>) => {
+    renderContact = (ec: TypeContext<EmailTemplateContactEmbedded>) => {
 
         const sc = ec.subCtx({ formGroupStyle: "Basic" });
 
@@ -143,7 +143,7 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
 }
 
 export interface EmailTemplateMessageComponentProps {
-    ctx: TypeContext<EmailTemplateMessageEntity>;
+    ctx: TypeContext<EmailTemplateMessageEmbedded>;
     queryKey: string;
     invalidate: () => void;
 }

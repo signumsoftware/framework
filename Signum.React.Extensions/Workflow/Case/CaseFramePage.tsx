@@ -15,11 +15,12 @@ import CaseFromSenderInfo from './CaseFromSenderInfo'
 import CaseButtonBar from './CaseButtonBar'
 import CaseFlowButton from './CaseFlowButton'
 import InlineCaseTags from './InlineCaseTags'
+import { RouteComponentProps } from "react-router";
 
 require("../../../../Framework/Signum.React/Scripts/Frames/Frames.css");
 require("./Case.css");
 
-interface CaseFramePageProps extends ReactRouter.RouteComponentProps<{}, { workflowId: string; mainEntityStrategy: string; caseActivityId?: string }> {
+interface CaseFramePageProps extends RouteComponentProps<{ workflowId: string; mainEntityStrategy: string; caseActivityId?: string }> {
 }
 
 interface CaseFramePageState {
@@ -61,7 +62,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
 
     loadEntity(props: CaseFramePageProps): Promise<void> {
 
-        const routeParams = props.routeParams!;
+        const routeParams = props.match.params;
         if (routeParams.caseActivityId) {
             return WorkflowClient.API.fetchActivityForViewing({ EntityType: CaseActivityEntity.typeName, id: routeParams.caseActivityId })
                 .then(pack => this.setState({ pack: pack  }));
@@ -71,7 +72,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
             return WorkflowClient.createNewCase(parseId(ti, routeParams.workflowId), (routeParams.mainEntityStrategy as WorkflowMainEntityStrategy))
                 .then(pack => {
                     if (!pack)
-                        Navigator.currentHistory.goBack();
+                        Navigator.history.goBack();
                     else
                         this.setState({ pack });
                 });        
@@ -96,7 +97,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     }
 
     onClose() {
-        Navigator.currentHistory.push(WorkflowClient.getDefaultInboxUrl());
+        Navigator.history.push(WorkflowClient.getDefaultInboxUrl());
     }
 
     entityComponent: React.Component<any, any>;
@@ -125,7 +126,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
             entityComponent: this.entityComponent,
             onReload: newPack => {
                 if (pack.activity.isNew && !newPack.entity.isNew)
-                    Navigator.currentHistory.push("~/workflow/activity/" + newPack.entity.id);
+                    Navigator.history.push("~/workflow/activity/" + newPack.entity.id);
                 else {
                     pack.activity = newPack.entity;
                     pack.canExecuteActivity = newPack.canExecute;

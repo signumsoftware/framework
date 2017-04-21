@@ -30,9 +30,9 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
                 .then(url => {
                     if (url) {
                         if (ctrlKey)
-                            window.open(url);
+                            window.open(Navigator.toAbsoluteUrl(url));
                         else
-                            Navigator.currentHistory.push(url);
+                            Navigator.history.push(url);
                     }
                 }).done();
         }

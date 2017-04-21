@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
-import { Link } from 'react-router'
+import { RouteComponentProps } from 'react-router'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import EntityLink from '../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
 import {ValueSearchControl, SearchControl, OrderType } from '../../../Framework/Signum.React/Scripts/Search'
@@ -12,7 +12,7 @@ import { EmailMessageEntity } from './Signum.Entities.Mailing'
 
 
 
-interface AsyncEmailSenderPageProps extends ReactRouter.RouteComponentProps<{}, {}> {
+interface AsyncEmailSenderPageProps extends RouteComponentProps<{}> {
 
 }
 

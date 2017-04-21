@@ -1,4 +1,4 @@
-﻿
+
 import * as React from 'react'
 import { Route } from 'react-router'
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
@@ -10,17 +10,16 @@ import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { CachePermission } from './Signum.Entities.Cache'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
+import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<Route path="cache">
-        <Route path="statistics" getComponent={(loc, cb) => require(["./CacheStatisticsPage"], (Comp) => cb(undefined, Comp.default))}/>
-    </Route>);
+    options.routes.push(<ImportRoute path="~/cache/statistics" onImportModule={() => _import("./CacheStatisticsPage")} />);
 
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(CachePermission.InvalidateCache),
         key: "ViewCache",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/cache/statistics"))
+        onClick: () => Promise.resolve("~/cache/statistics")
     });
 }
 

@@ -38,7 +38,7 @@
                 </ItemsPanelTemplate>
             </m:EntityRepeater.ItemsPanel>
             <m:EntityRepeater.EntityTemplate>
-                <DataTemplate DataType="{x:Type d:PanelPartEntity}">
+                <DataTemplate DataType="{x:Type d:PanelPartEmbedded}">
                     <StackPanel>
                         <m:ValueLine m:Common.Route="Title" Background="{DynamicResource LightBlue}"/>
                         <m:ValueLine m:Common.Route="Row" Background="{DynamicResource LightBlue}"/>

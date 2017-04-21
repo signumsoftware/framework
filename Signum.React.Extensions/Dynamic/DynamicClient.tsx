@@ -15,17 +15,16 @@ import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStr
 import { DynamicTypeEntity, DynamicTypeOperation, DynamicPanelPermission, DynamicSqlMigrationEntity } from './Signum.Entities.Dynamic'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
+import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<Route path="dynamic">
-        <Route path="panel" getComponent={(loc, cb) => require(["./DynamicPanelPage"], (Comp) => cb(undefined, Comp.default))} />
-    </Route>);
+    options.routes.push(<ImportRoute path="~/dynamic/panel" onImportModule={() => _import("./DynamicPanelPage")} />);
 
 
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel),
         key: "DynamicPanel",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/dynamic/panel"))
+        onClick: () => Promise.resolve("~/dynamic/panel")
     });
 }
 
@@ -77,6 +76,7 @@ export interface AutocompleteTypeRequest {
     limit: number;
     includeBasicTypes: boolean;
     includeEntities?: boolean;
+    includeEmbeddedEntities?: boolean;
     includeMList?: boolean;
     includeQueriable?: boolean;
 }

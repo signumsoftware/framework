@@ -15,7 +15,7 @@ using Signum.Entities.Omnibox;
 namespace Signum.Entities.Dashboard
 {
     [Serializable]
-    public class PanelPartEntity : EmbeddedEntity, IGridEntity
+    public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
     {
         public string Title { get; set; }
 
@@ -53,9 +53,9 @@ namespace Signum.Entities.Dashboard
             return base.PropertyValidation(pi);
         }
 
-        public PanelPartEntity Clone()
+        public PanelPartEmbedded Clone()
         {
-            return new PanelPartEntity
+            return new PanelPartEmbedded
             {
                 Columns = Columns,
                 StartColumn = StartColumn,
@@ -213,7 +213,7 @@ namespace Signum.Entities.Dashboard
     public class ValueUserQueryListPartEntity : Entity, IPartEntity
     {
         [NotNullable]
-        public MList<ValueUserQueryElementEntity> UserQueries { get; set; } = new MList<ValueUserQueryElementEntity>();
+        public MList<ValueUserQueryElementEmbedded> UserQueries { get; set; } = new MList<ValueUserQueryElementEmbedded>();
 
         public override string ToString()
         {
@@ -246,7 +246,7 @@ namespace Signum.Entities.Dashboard
     }
 
     [Serializable]
-    public class ValueUserQueryElementEntity : EmbeddedEntity
+    public class ValueUserQueryElementEmbedded : EmbeddedEntity
     {
         string label;
         public string Label
@@ -260,9 +260,9 @@ namespace Signum.Entities.Dashboard
 
         public string Href { get; set; }
 
-        public ValueUserQueryElementEntity Clone()
+        public ValueUserQueryElementEmbedded Clone()
         {
-            return new ValueUserQueryElementEntity
+            return new ValueUserQueryElementEmbedded
             {
                 Href = this.Href,
                 Label = this.Label,
@@ -290,11 +290,11 @@ namespace Signum.Entities.Dashboard
     public class LinkListPartEntity : Entity, IPartEntity
     {
         [NotNullable]
-        public MList<LinkElementEntity> Links { get; set; } = new MList<LinkElementEntity>();
+        public MList<LinkElementEmbedded> Links { get; set; } = new MList<LinkElementEmbedded>();
 
         public override string ToString()
         {
-            return "{0} {1}".FormatWith(Links.Count, typeof(LinkElementEntity).NicePluralName());
+            return "{0} {1}".FormatWith(Links.Count, typeof(LinkElementEmbedded).NicePluralName());
         }
 
         public bool RequiresTitle
@@ -324,7 +324,7 @@ namespace Signum.Entities.Dashboard
     }
 
     [Serializable]
-    public class LinkElementEntity : EmbeddedEntity
+    public class LinkElementEmbedded : EmbeddedEntity
     {
         [NotNullValidator]
         public string Label { get; set; }
@@ -333,9 +333,9 @@ namespace Signum.Entities.Dashboard
         [URLValidator(absolute: true, aspNetSiteRelative: true), StringLengthValidator(AllowNulls = false)]
         public string Link { get; set; }
 
-        public LinkElementEntity Clone()
+        public LinkElementEmbedded Clone()
         {
-            return new LinkElementEntity
+            return new LinkElementEmbedded
             {
                 Label = this.Label,
                 Link = this.Link

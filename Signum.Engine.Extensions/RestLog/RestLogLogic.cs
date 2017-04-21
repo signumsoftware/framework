@@ -38,7 +38,7 @@ namespace Signum.Engine.RestLog
             ExceptionLogic.DeleteLogs += DeleteRestLogs;
         }
 
-        private static void DeleteRestLogs(DeleteLogParametersEntity parameters)
+        private static void DeleteRestLogs(DeleteLogParametersEmbedded parameters)
         {
             Database.Query<RestLogEntity>().Where(a => a.StartDate < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize,parameters.MaxChunks);
         }

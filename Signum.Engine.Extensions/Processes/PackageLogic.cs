@@ -111,7 +111,7 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEntity parameters)
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters)
         {
             var usedDatas = Database.Query<ProcessEntity>().Select(a => a.Data);
 

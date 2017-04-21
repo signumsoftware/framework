@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Workflow
 {
@@ -51,7 +52,7 @@ namespace Signum.Engine.Workflow
                 Synchronizer.Synchronize(lanes, oldLanes,
                     (id, l) =>
                     {
-                        var wl = new WorkflowLaneEntity { Xml = new WorkflowXmlEntity(), Pool = this.pool.Entity }.ApplyXml(l, locator);
+                        var wl = new WorkflowLaneEntity { Xml = new WorkflowXmlEmbedded(), Pool = this.pool.Entity }.ApplyXml(l, locator);
                         var lb = new LaneBuilder(wl, 
                             Enumerable.Empty<WorkflowActivityEntity>(), 
                             Enumerable.Empty<WorkflowEventEntity>(), 
@@ -85,7 +86,7 @@ namespace Signum.Engine.Workflow
                 Synchronizer.Synchronize(sequenceFlows, oldSequenceFlows,
                     (id, sf) =>
                     {
-                        var wc = new WorkflowConnectionEntity { Xml = new WorkflowXmlEntity() }.ApplyXml(sf, locator);
+                        var wc = new WorkflowConnectionEntity { Xml = new WorkflowXmlEmbedded() }.ApplyXml(sf, locator);
                         this.sequenceFlows.Add(new XmlEntity<WorkflowConnectionEntity>(wc));
                     },
                     null,
@@ -151,6 +152,12 @@ namespace Signum.Engine.Workflow
                 }
 
                 this.pool.Entity.Delete(WorkflowPoolOperation.Delete);
+            }
+
+            internal void DeleteCaseActivities(Expression<Func<CaseEntity, bool>> filter)
+            {
+                foreach (var lb in lanes.Values)
+                    lb.DeleteCaseActivities(filter);
             }
 
             internal IEnumerable<XmlEntity<WorkflowActivityEntity>> GetAllActivities()

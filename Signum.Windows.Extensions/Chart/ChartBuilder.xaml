@@ -74,7 +74,7 @@
             <StackPanel>
                 <ItemsControl Grid.IsSharedSizeScope="True" HorizontalAlignment="Stretch" ItemsSource="{Binding Columns}" x:Name="columnsControl">
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type sce:ChartColumnEntity}">
+                        <DataTemplate DataType="{x:Type sce:ChartColumnEmbedded}">
                             <c:ChartColumn
                             m:Common.PropertyRoute="{m:ContinueRoute Columns/}"
                             GroupResults="{Binding DataContext.GroupResults, ElementName=mecb}"/>
@@ -90,7 +90,7 @@
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type sce:ChartParameterEntity}">
+                        <DataTemplate DataType="{x:Type sce:ChartParameterEmbedded}">
                             <StackPanel m:Common.PropertyRoute="{m:ContinueRoute Parameters/}" MinWidth="150">
                                 <Label Content="{Binding Name}"/>
                                 <m:ValueLine m:Common.Route="Value" Loaded="ValueLine_Loaded" m:Common.LabelVisible="False"/>

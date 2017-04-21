@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import {
-    WorkflowActivityEntity, WorkflowActivityModel, WorkflowActivityValidationEntity, WorkflowMessage, WorkflowActivityMessage, WorkflowConditionEntity, WorkflowActionEntity,
-    WorkflowJumpEntity, WorkflowTimeoutEntity, IWorkflowNodeEntity, SubWorkflowEntity, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEntity, WorkflowScriptEval, WorkflowEntity
+    WorkflowActivityEntity, WorkflowActivityModel, WorkflowActivityValidationEmbedded, WorkflowMessage, WorkflowActivityMessage, WorkflowConditionEntity, WorkflowActionEntity,
+    WorkflowJumpEmbedded, WorkflowTimeoutEmbedded, IWorkflowNodeEntity, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowScriptEval, WorkflowEntity
 } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 import * as DynamicViewClient from '../../../../Extensions/Signum.React.Extensions/Dynamic/DynamicViewClient'
@@ -80,14 +80,14 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
 
         if (wa.type == "Script") {
             if (!wa.script)
-                wa.script = WorkflowScriptPartEntity.New({
+                wa.script = WorkflowScriptPartEmbedded.New({
                 });
             wa.subWorkflow = null;
         }
 
         if (wa.type == "DecompositionWorkflow" || wa.type == "CallWorkflow") {
             if (!wa.subWorkflow)
-                wa.subWorkflow = SubWorkflowEntity.New({
+                wa.subWorkflow = SubWorkflowEmbedded.New({
                     subEntitiesEval: SubEntitiesEval.New()
                 });
             wa.script = null;
@@ -136,7 +136,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
 
                         <ValueLine ctx={ctx.subCtx(a => a.requiresOpen)} />
                         {ctx.value.mainEntityType ?
-                            <EntityTable ctx={ctx.subCtx(d => d.validationRules)} columns={EntityTable.typedColumns<WorkflowActivityValidationEntity>([
+                            <EntityTable ctx={ctx.subCtx(d => d.validationRules)} columns={EntityTable.typedColumns<WorkflowActivityValidationEmbedded>([
                             {
                                 property: wav => wav.rule,
                                 headerHtmlAttributes: { style: { width: "100%" } },
@@ -164,7 +164,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                         <EntityDetail ctx={ctx.subCtx(a => a.reject)} />
 
                         {ctx.value.type == "Task" ? ctx.value.workflow ?
-                            <EntityDetail ctx={ctx.subCtx(a => a.timeout)} getComponent={(tctx: TypeContext<WorkflowTimeoutEntity>) =>
+                            <EntityDetail ctx={ctx.subCtx(a => a.timeout)} getComponent={(tctx: TypeContext<WorkflowTimeoutEmbedded>) =>
                                 <div>
                                     <FormGroup ctx={tctx.subCtx(t => t.timeout)} >
                                         <RenderEntity ctx={tctx.subCtx(t => t.timeout)} />
@@ -187,7 +187,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                             <EntityTable
                                 labelText={<div>{ctx.niceName(d => d.jumps)} : <small style={{ fontWeight: "normal" }}>{WorkflowMessage.ToUseNewNodesOnJumpsYouSouldSaveWorkflow.niceToString()}</small></div>}
                                 ctx={ctx.subCtx(d => d.jumps)}
-                                columns={EntityTable.typedColumns<WorkflowJumpEntity>([
+                                columns={EntityTable.typedColumns<WorkflowJumpEmbedded>([
                                     {
                                         property: wj => wj.to,
                                         template: (jctx, row, state) => {
@@ -256,7 +256,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
     }
 }
 
-class ScriptComponent extends React.Component<{ ctx: TypeContext<WorkflowScriptPartEntity>, mainEntityType: TypeEntity, workflow: WorkflowEntity }, void>{
+class ScriptComponent extends React.Component<{ ctx: TypeContext<WorkflowScriptPartEmbedded>, mainEntityType: TypeEntity, workflow: WorkflowEntity }, void>{
 
 
     render() {
@@ -282,7 +282,7 @@ class ScriptComponent extends React.Component<{ ctx: TypeContext<WorkflowScriptP
     }
 }
 
-class DecompositionComponent extends React.Component<{ ctx: TypeContext<SubWorkflowEntity>, mainEntityType: TypeEntity }, void>{
+class DecompositionComponent extends React.Component<{ ctx: TypeContext<SubWorkflowEmbedded>, mainEntityType: TypeEntity }, void>{
 
     handleCodeChange = (newScript: string) => {
         const subEntitiesEval = this.props.ctx.value.subEntitiesEval!;

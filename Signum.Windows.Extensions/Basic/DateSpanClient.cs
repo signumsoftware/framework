@@ -24,7 +24,7 @@ namespace Signum.Windows
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.AddSetting(new EmbeddedEntitySettings<DateSpanEntity>
+                Navigator.AddSetting(new EmbeddedEntitySettings<DateSpanEmbedded>
                 {
                     View = e => new DateSpan()
                 });

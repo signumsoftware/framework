@@ -164,7 +164,7 @@ namespace Signum.Engine.Toolbar
             };
         }
 
-        private static List<ToolbarResponse> ToResponses(MList<ToolbarElementEntity> elements)
+        private static List<ToolbarResponse> ToResponses(MList<ToolbarElementEmbedded> elements)
         {
             var result = elements.Select(a => ToResponse(a)).NotNull().ToList();
 
@@ -180,7 +180,7 @@ namespace Signum.Engine.Toolbar
             return result;
         }
 
-        private static ToolbarResponse ToResponse(ToolbarElementEntity element)
+        private static ToolbarResponse ToResponse(ToolbarElementEmbedded element)
         {
             if(element.Content != null && !(element.Content is Lite<ToolbarMenuEntity>))
             {

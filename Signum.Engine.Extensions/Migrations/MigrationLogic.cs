@@ -88,7 +88,7 @@ namespace Signum.Engine.Migrations
             string showDescription = description ?? action.Method.Name.SpacePascal(true);
             Console.WriteLine("------- Executing {0} ".FormatWith(showDescription).PadRight(Console.WindowWidth - 2, '-'));
 
-            var log = new ExecutedLoadProcessEntity
+            var log = !Schema.Current.Tables.ContainsKey(typeof(ExecutedLoadProcessEntity)) ? null : new ExecutedLoadProcessEntity
             {
                 Start = TimeZoneManager.Now,
                 ClassName = action.Method.DeclaringType.FullName,
@@ -99,8 +99,11 @@ namespace Signum.Engine.Migrations
             try
             {
                 action();
-                log.End = TimeZoneManager.Now;
-                log.Save();
+                if (log != null)
+                {
+                    log.End = TimeZoneManager.Now;
+                    log.Save();
+                }
                 Console.WriteLine("------- Executed {0} (took {1})".FormatWith(showDescription, (log.End.Value - log.Start).NiceToString()).PadRight(Console.WindowWidth - 2, '-'));
 
                 return null;
@@ -112,11 +115,13 @@ namespace Signum.Engine.Migrations
                 SafeConsole.WriteColor(ConsoleColor.Red, e.GetType() + ": ");
                 SafeConsole.WriteLineColor(ConsoleColor.DarkRed, e.Message);
                 SafeConsole.WriteSameLineColor(ConsoleColor.DarkRed, e.StackTrace);
-
-                var exLog = e.LogException();
-                log.Exception = exLog.ToLite();
-                log.End = TimeZoneManager.Now;
-                log.Save();
+                if (log != null)
+                {
+                    var exLog = e.LogException();
+                    log.Exception = exLog.ToLite();
+                    log.End = TimeZoneManager.Now;
+                    log.Save();
+                }
 
                 return e;
             }

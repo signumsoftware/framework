@@ -13,7 +13,8 @@ interface IDynamicTypeConditionEvaluator {}
 export const DynamicBaseType = new EnumType<DynamicBaseType>("DynamicBaseType");
 export type DynamicBaseType =
     "Entity" |
-    "Mixin";
+    "MixinEntity" |
+    "EmbeddedEntity";
 
 export const DynamicExpressionEntity = new Type<DynamicExpressionEntity>("DynamicExpression");
 export interface DynamicExpressionEntity extends Entities.Entity {
@@ -95,7 +96,7 @@ export interface DynamicTypeConditionEntity extends Entities.Entity {
 }
 
 export const DynamicTypeConditionEval = new Type<DynamicTypeConditionEval>("DynamicTypeConditionEval");
-export interface DynamicTypeConditionEval extends EvalEntity<IDynamicTypeConditionEvaluator> {
+export interface DynamicTypeConditionEval extends EvalEmbedded<IDynamicTypeConditionEvaluator> {
     Type: "DynamicTypeConditionEval";
 }
 
@@ -147,7 +148,7 @@ export interface DynamicValidationEntity extends Entities.Entity {
 }
 
 export const DynamicValidationEval = new Type<DynamicValidationEval>("DynamicValidationEval");
-export interface DynamicValidationEval extends EvalEntity<IDynamicValidationEvaluator> {
+export interface DynamicValidationEval extends EvalEmbedded<IDynamicValidationEvaluator> {
     Type: "DynamicValidationEval";
 }
 
@@ -226,7 +227,7 @@ export module DynamicViewValidationMessage {
     export const AggregateIsMandatoryFor01 = new MessageKey("DynamicViewValidationMessage", "AggregateIsMandatoryFor01");
 }
 
-export interface EvalEntity<T> extends Entities.EmbeddedEntity {
+export interface EvalEmbedded<T> extends Entities.EmbeddedEntity {
     script?: string | null;
 }
 

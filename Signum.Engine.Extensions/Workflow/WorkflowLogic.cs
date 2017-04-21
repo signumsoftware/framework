@@ -189,13 +189,13 @@ namespace Signum.Engine.Workflow
             }
         }
 
-        static Func<WorkflowConfigurationEntity> getConfiguration;
-        public static WorkflowConfigurationEntity Configuration
+        static Func<WorkflowConfigurationEmbedded> getConfiguration;
+        public static WorkflowConfigurationEmbedded Configuration
         {
             get { return getConfiguration(); }
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<WorkflowConfigurationEntity> getConfiguration)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<WorkflowConfigurationEmbedded> getConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -533,6 +533,28 @@ namespace Signum.Engine.Workflow
                         return result;
                     }
                 }.Register();
+
+                new Delete(WorkflowOperation.Delete)
+                {
+                    CanDelete = w => 
+                    {
+                        var usedWorkflows = Database.Query<CaseEntity>()
+                                                .Where(c => c.Workflow.Is(w) && c.ParentCase != null)
+                                                .Select(c => c.ParentCase.Workflow)
+                                                .ToList();
+
+                        if (usedWorkflows.Any())
+                            return WorkflowMessage.WorkflowUsedIn0ForDecompositionOrCallWorkflow.NiceToString(usedWorkflows.ToString(", "));
+
+                        return null;
+                    },
+
+                    Delete = (w, _) =>
+                    {
+                        var wb = new WorkflowBuilder(w);
+                        wb.Delete();
+                    }
+                }.Register();
             }
         }
 
@@ -581,7 +603,7 @@ namespace Signum.Engine.Workflow
 
             var document = XDocument.Parse(model.DiagramXml);
             var wb = new WorkflowBuilder(workflow);
-            return wb.PreviewChanges(document);
+            return wb.PreviewChanges(document, model);
         }
 
         public static void ApplyDocument(WorkflowEntity workflow, WorkflowModel model, WorkflowReplacementModel replacements)
@@ -596,7 +618,7 @@ namespace Signum.Engine.Workflow
 
             wb.ApplyChanges(model, replacements);
             wb.ValidateGraph();
-            workflow.FullDiagramXml = new WorkflowXmlEntity { DiagramXml = wb.GetXDocument().ToString() };
+            workflow.FullDiagramXml = new WorkflowXmlEmbedded { DiagramXml = wb.GetXDocument().ToString() };
             workflow.Save();
         }
     }

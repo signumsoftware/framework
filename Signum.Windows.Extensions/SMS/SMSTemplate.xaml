@@ -54,7 +54,7 @@
                                 </DataTemplate>
                             </TabControl.ItemTemplate>
                             <TabControl.ContentTemplate>
-                                <DataTemplate DataType="{x:Type d:SMSTemplateMessageEntity}">
+                                <DataTemplate DataType="{x:Type d:SMSTemplateMessageEmbedded}">
                                     <w:SMSTemplateMessage m:Common.PropertyRoute="{m:ContinueRoute Messages/}" />
                                 </DataTemplate>
                             </TabControl.ContentTemplate>

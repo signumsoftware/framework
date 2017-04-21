@@ -79,7 +79,7 @@ namespace Signum.Engine.UserAssets
         {
             public Dictionary<Guid, IUserAssetEntity> entities = new Dictionary<Guid, IUserAssetEntity>();
             public Dictionary<Guid, XElement> elements;
-            public Dictionary<Guid, UserAssetPreviewLine> previews = new Dictionary<Guid, UserAssetPreviewLine>();
+            public Dictionary<Guid, UserAssetPreviewLineEmbedded> previews = new Dictionary<Guid, UserAssetPreviewLineEmbedded>();
 
             public PreviewContext(XDocument doc)
             {
@@ -103,7 +103,7 @@ namespace Signum.Engine.UserAssets
 
                     entity.FromXml(element, this);
 
-                    previews.Add(guid, new UserAssetPreviewLine
+                    previews.Add(guid, new UserAssetPreviewLineEmbedded
                     {
                         Text = entity.ToString(),
                         Type = entity.GetType().ToTypeEntity(),

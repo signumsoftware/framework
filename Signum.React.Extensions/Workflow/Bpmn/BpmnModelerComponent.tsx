@@ -1,6 +1,7 @@
 ﻿/// <reference path="../bpmn-js.d.ts" />
 import * as React from 'react'
-import { WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity, IWorkflowNodeEntity } from '../Signum.Entities.Workflow'
+import { Button } from "react-bootstrap";
+import { WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity, IWorkflowNodeEntity, WorkflowMessage } from '../Signum.Entities.Workflow'
 import Modeler = require("bpmn-js/lib/Modeler");
 import { ModelEntity, ValidationMessage, parseLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
@@ -234,6 +235,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
 
             if (me) {
                 this.props.entities[obj.element.id] = me;
+
                 obj.element.businessObject.name = (me as any).name;
 
                 if (BpmnUtils.isTaskAnyKind(obj.element.type)) {
@@ -263,12 +265,9 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                     }
                 }
 
-                this.fireElementChanged(obj.element);
-
-                if (obj.element.label) {
-                    var labelObj = this.elementRegistry.get(obj.element.label.id);
-                    this.fireElementChanged(labelObj);
-                };           
+                this.modeler.get<any>("modeling").updateProperties(obj.element, {
+                    name: (me as any).name,
+                });
             };
         }).done();
     }
@@ -339,7 +338,17 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         }
     }
 
+    handleZoomClick = (e: React.MouseEvent<Button>) => {
+        var zoomScroll = this.modeler.get<any>("zoomScroll");
+        zoomScroll.reset();
+    }
+
     render() {
-        return (<div ref={this.setDiv} />);
+        return (
+            <div>
+                <Button style={{ marginLeft: "20px" }} onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>
+                <div ref={this.setDiv} />
+            </div>
+        );
     }
 }

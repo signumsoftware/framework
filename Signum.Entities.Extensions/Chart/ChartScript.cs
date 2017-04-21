@@ -32,11 +32,11 @@ namespace Signum.Entities.Chart
         public GroupByChart GroupBy { get; set; }
 
         [NotifyCollectionChanged, NotifyChildProperty, NotNullable, PreserveOrder]
-        public MList<ChartScriptColumnEntity> Columns { get; set; } = new MList<ChartScriptColumnEntity>();
+        public MList<ChartScriptColumnEmbedded> Columns { get; set; } = new MList<ChartScriptColumnEmbedded>();
 
         [NotifyCollectionChanged, NotifyChildProperty, NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
-        public MList<ChartScriptParameterEntity> Parameters { get; set; } = new MList<ChartScriptParameterEntity>();
+        public MList<ChartScriptParameterEmbedded> Parameters { get; set; } = new MList<ChartScriptParameterEmbedded>();
 
         [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
@@ -56,7 +56,7 @@ namespace Signum.Entities.Chart
 
         protected override string ChildPropertyValidation(ModifiableEntity sender, System.Reflection.PropertyInfo pi)
         {
-            if (sender is ChartScriptColumnEntity column && pi.Name == nameof(column.IsGroupKey))
+            if (sender is ChartScriptColumnEmbedded column && pi.Name == nameof(column.IsGroupKey))
             {
                 if (column.IsGroupKey)
                 {
@@ -65,7 +65,7 @@ namespace Signum.Entities.Chart
                 }
             }
 
-            if (sender is ChartScriptParameterEntity param && pi.Name == nameof(param.ColumnIndex))
+            if (sender is ChartScriptParameterEmbedded param && pi.Name == nameof(param.ColumnIndex))
             {
                 if (param.ColumnIndex == null && param.ShouldHaveColumnIndex())
                     return ValidationMessage._0IsNecessary.NiceToString(pi.NiceName());
@@ -154,7 +154,7 @@ namespace Signum.Entities.Chart
 
             GroupByChart groupBy = script.Attribute("GroupBy").Value.ToEnum<GroupByChart>();
 
-            List<ChartScriptColumnEntity> columns = script.Element("Columns").Elements("Column").Select(c => new ChartScriptColumnEntity
+            List<ChartScriptColumnEmbedded> columns = script.Element("Columns").Elements("Column").Select(c => new ChartScriptColumnEmbedded
             {
                 DisplayName = c.Attribute("DisplayName").Value,
                 ColumnType = c.Attribute("ColumnType").Value.ToEnum<ChartColumnType>(),
@@ -183,7 +183,7 @@ namespace Signum.Entities.Chart
                 this.Columns = columns.ToMList();
             }
 
-            List<ChartScriptParameterEntity> parameters = script.Element("Parameters").Elements("Parameter").Select(p => new ChartScriptParameterEntity
+            List<ChartScriptParameterEmbedded> parameters = script.Element("Parameters").Elements("Parameter").Select(p => new ChartScriptParameterEmbedded
             {
                 Name = p.Attribute("Name").Value,
                 Type = p.Attribute("Type").Value.ToEnum<ChartParameterType>(),
@@ -239,7 +239,7 @@ namespace Signum.Entities.Chart
             return true;
         }
 
-        private void AsssertColumns(List<ChartScriptColumnEntity> columns)
+        private void AsssertColumns(List<ChartScriptColumnEmbedded> columns)
         {
             string errors = Columns.ZipOrDefault(columns, (o, n) =>
             {

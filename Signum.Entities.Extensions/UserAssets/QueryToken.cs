@@ -9,13 +9,13 @@ using Signum.Utilities;
 namespace Signum.Entities.UserAssets
 {
     [Serializable, InTypeScript(Undefined = false)]
-    public sealed class QueryTokenEntity : EmbeddedEntity, IEquatable<QueryTokenEntity>
+    public sealed class QueryTokenEmbedded : EmbeddedEntity, IEquatable<QueryTokenEmbedded>
     {
-        private QueryTokenEntity()
+        private QueryTokenEmbedded()
         {
         }
 
-        public QueryTokenEntity(QueryToken token)
+        public QueryTokenEmbedded(QueryToken token)
         {
             if (token == null)
                 throw new ArgumentNullException("token");
@@ -23,7 +23,7 @@ namespace Signum.Entities.UserAssets
             this.token = token;
         }
 
-        public QueryTokenEntity(string tokenString)
+        public QueryTokenEmbedded(string tokenString)
         {
             if (string.IsNullOrEmpty(tokenString))
                 throw new ArgumentNullException("tokenString");
@@ -98,7 +98,7 @@ namespace Signum.Entities.UserAssets
             return TokenString;
         }
 
-        public bool Equals(QueryTokenEntity other)
+        public bool Equals(QueryTokenEmbedded other)
         {
             return this.GetTokenString() == other.GetTokenString();
         }
@@ -110,7 +110,7 @@ namespace Signum.Entities.UserAssets
 
         public override bool Equals(object obj)
         {
-            return obj is QueryTokenEntity && this.Equals((QueryTokenEntity)obj);
+            return obj is QueryTokenEmbedded && this.Equals((QueryTokenEmbedded)obj);
         }
 
         public override int GetHashCode()
