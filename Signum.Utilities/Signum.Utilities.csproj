@@ -73,6 +73,7 @@
     <Reference Include="System.ValueTuple, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\..\packages\System.ValueTuple.4.3.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -251,7 +252,6 @@
     <None Include="Extensions\TreeHelper.md" />
     <None Include="index.mdi" />
     <None Include="Introduction.md" />
-    <None Include="MimeTypes.md" />
     <None Include="MyRandom.md" />
     <None Include="NaturalLanguage\NaturalLangageTools.md" />
     <None Include="packages.config" />
