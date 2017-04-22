@@ -7,6 +7,7 @@ using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Authorization;
+using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
@@ -40,6 +41,7 @@ namespace Signum.Engine.Dynamic
 
                 DynamicLogic.GetCodeFiles += GetCodeFiles;
                 DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
+                sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicMixinConnectionEntity>().Where(dm => dm.EntityType.RefersTo(type)));
             }
         }
 
