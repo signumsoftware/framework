@@ -7,7 +7,7 @@ import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator
 import { TypeEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { notifySuccess }from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
-import { TypeContext, ButtonsContext, IRenderButtons } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { TypeContext, ButtonsContext, IRenderButtons, EntityFrame } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { EntityLine, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines'
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal'
 import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
@@ -18,17 +18,20 @@ import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString,
 import { Api, properties, queries, operations } from '../AuthClient'
 import {
     TypeRulePack, AuthAdminMessage, PermissionSymbol, AuthMessage, TypeAllowed, TypeAllowedRule,
-    TypeAllowedAndConditions, TypeAllowedBasic, TypeConditionRuleEmbedded, AuthThumbnail, PropertyRulePack, OperationRulePack, QueryRulePack
+    TypeAllowedAndConditions, TypeAllowedBasic, TypeConditionRuleEmbedded, AuthThumbnail, PropertyRulePack, OperationRulePack, QueryRulePack, RoleEntity
 } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import { TypeConditionSymbol } from '../../Basics/Signum.Entities.Basics'
 import { OperationSymbol, ModelEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { QueryEntity, PropertyRouteEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import { NormalControlMessage } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
 
 
 require("./AuthAdmin.css");
 
-export default class TypesRulesPackControl extends React.Component<{ ctx: TypeContext<TypeRulePack> }, void> implements IRenderButtons {
+export default class TypesRulesPackControl extends React.Component<{ ctx: TypeContext<TypeRulePack>, frame: EntityFrame<TypeRulePack> }, { filter: string }> implements IRenderButtons {
+
+    state = { filter: "" };
 
     handleSaveClick = (bc: ButtonsContext) => {
         let pack = this.props.ctx.value;
@@ -42,14 +45,93 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
             .done();
     }
 
+    handleResetChangesClick = (bc: ButtonsContext) => {
+        let pack = this.props.ctx.value;
+
+        Api.fetchTypeRulePack(pack.role.id!)
+            .then(newPack => {
+                bc.frame.onReload({ entity: newPack, canExecute: {} });
+            })
+            .done();
+    }
+
+    handleSwitchToClick = (bc: ButtonsContext) => {
+        let pack = this.props.ctx.value;
+
+        Finder.find(RoleEntity).then(r => {
+            if (!r)
+                return;
+
+            Api.fetchTypeRulePack(r.id!)
+                .then(newPack => bc.frame.onReload({ entity: newPack, canExecute: {} }))
+                .done();
+        });
+    }
+
+    updateFrame() {
+        this.props.frame.frameComponent.forceUpdate();
+    }
+
     renderButtons(bc: ButtonsContext) {
+
+        GraphExplorer.propagateAll(bc.pack.entity);
+        
+        const hasChanges = bc.pack.entity.modified;
+
         return [
-            <Button bsStyle="primary" onClick={() => this.handleSaveClick(bc) }>{AuthMessage.Save.niceToString() }</Button>
+            <Button bsStyle="primary" disabled={!hasChanges} onClick={() => this.handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button>,
+            <Button bsStyle="warning" disabled={!hasChanges} onClick={() => this.handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button>,
+            <Button bsStyle="info" disabled={hasChanges} onClick={() => this.handleSwitchToClick(bc)}>{AuthAdminMessage.SwitchTo.niceToString()}</Button>
         ];
     }
 
+    handleSetFilter = (e: React.FormEvent<any>) => {
+        this.setState({
+            filter: (e.currentTarget as HTMLInputElement).value
+        });
+    }
 
     render() {
+        const parts = this.state.filter.match(/[+-]?((!?\w+)|\*)/g);
+
+        const isMatch = (rule: TypeAllowedRule): boolean => {
+
+            if (!parts || parts.length == 0)
+                return true;
+
+            const array = [
+                rule.resource.namespace,
+                rule.resource.cleanName,
+                getTypeInfo(rule.resource.cleanName).niceName
+            ];
+
+  
+            const str = array.join("|");
+
+            for (let i = parts.length - 1; i >= 0; i--) {
+                const p = parts[i];
+                const pair = p.startsWith("+") ? { isPositive: true, token: p.after("+") } :
+                    p.startsWith("-") ? { isPositive: false, token: p.after("-") } :
+                        { isPositive: true, token: p };
+                        
+                if (pair.token == "*")
+                    return pair.isPositive;
+
+                if (pair.token.startsWith("!"))
+                {
+                    if ("overriden".startsWith(pair.token.after("!")) && !typeAllowedEquals(rule.allowed, rule.allowedBase))
+                        return pair.isPositive;
+
+                    if ("conditions".startsWith(pair.token.after("!")) && rule.allowed.conditions.length)
+                        return pair.isPositive;
+                }
+
+                if (str.toLowerCase().contains(pair.token.toLowerCase()))
+                    return pair.isPositive; 
+            }
+
+            return false;
+        };
 
         let ctx = this.props.ctx;
 
@@ -59,11 +141,14 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                     <EntityLine ctx={ctx.subCtx(f => f.role) }  />
                     <ValueLine ctx={ctx.subCtx(f => f.strategy) }  />
                 </div>
+                
                 <table className="table table-condensed sf-auth-rules">
                     <thead>
                         <tr>
                             <th>
-                                <b>{ TypeEntity.niceName() }</b>
+                                <div className="form-sm" style={{ marginBottom: "-2px"}}>
+                                    <input type="text" className="form-control" id="filter" placeholder="Auth-!overriden+!conditions" value={this.state.filter} onChange={this.handleSetFilter} />
+                                </div>
                             </th>
 
                             <th style={{ textAlign: "center" }}>
@@ -93,7 +178,9 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                         </tr>
                     </thead>
                     <tbody>
-                        {ctx.mlistItemCtxs(a => a.rules).groupBy(a => a.value.resource.namespace).orderBy(a => a.key).flatMap(gr => [
+                        {ctx.mlistItemCtxs(a => a.rules)
+                            .filter((n, i) => isMatch(n.value))
+                            .groupBy(a => a.value.resource.namespace).orderBy(a => a.key).flatMap(gr => [
                             <tr key={gr.key} className="sf-auth-namespace">
                                 <td colSpan={10}><b>{gr.key}</b></td>
                             </tr>
@@ -116,14 +203,14 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                     allowed : "None"
                 }));
 
-                this.forceUpdate();
+                this.updateFrame();
             })
             .done();
     }
 
     handleRemoveConditionClick = (taac: TypeAllowedAndConditions, con: TypeConditionRuleEmbedded) => {
         taac.conditions!.remove(con);
-        this.forceUpdate();
+        this.updateFrame();
     }
 
     renderType(ctx: TypeContext<TypeAllowedRule>) {
@@ -156,7 +243,11 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                     {this.colorRadio(fallback, "None", "red") }
                 </td>
                 <td style={{ textAlign: "center" }}>
-                    <GrayCheckbox checked={!typeAllowedEquals(ctx.value.allowed, ctx.value.allowedBase) }/>
+                    <GrayCheckbox checked={!typeAllowedEquals(ctx.value.allowed, ctx.value.allowedBase)} onUnchecked={() => {
+                        ctx.value.allowed = JSON.parse(JSON.stringify(ctx.value.allowedBase));
+                        ctx.value.modified = true;
+                        this.updateFrame();
+                    }} />
                 </td>
                 {properties && <td style={{ textAlign: "center" }}>
                     {this.link("fa fa-pencil-square-o", ctx.value.properties,
@@ -212,7 +303,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
         return <ColorRadio
             checked={isActive(b.getValue(), part)}
             color={color}
-            onClicked={e => { b.setValue(select(b.getValue(), part, e)); this.forceUpdate(); } }/>;
+            onClicked={e => { b.setValue(select(b.getValue(), part, e)); this.updateFrame(); } }/>;
     }
 
     link<T extends ModelEntity>(icon: string, allowed: AuthThumbnail | null, action: () => Promise<T>, setNewValue: (model: T) => void) {
@@ -225,8 +316,8 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
 
             if (this.props.ctx.value.modified) {
                 MessageModal.show({
-                    title: "",
-                    message: "",
+                    title: NormalControlMessage.SaveChangesFirst.niceToString(),
+                    message: AuthAdminMessage.PleaseSaveChangesFirst.niceToString(),
                     buttons: "ok",
                     style: "warning",
                     icon: "warning"
@@ -238,7 +329,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                     .then(m => {
                        if (m) {
                           setNewValue(m);
-                          this.forceUpdate();
+                          this.updateFrame();
                        }
                      })
                     .done();

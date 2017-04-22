@@ -29,12 +29,12 @@ export class ColorRadio extends React.Component<{ checked: boolean, onClicked: (
     }
 }
 
-export class GrayCheckbox extends React.Component<{ checked: boolean }, void>{
+export class GrayCheckbox extends React.Component<{ checked: boolean, onUnchecked: () => void }, void>{
 
     render() {
         return (
-            <i className={classes("sf-auth-checkbox", "fa", this.props.checked ? "fa-check-square-o" : "fa-square-o") }
-                style={{ color: "#aaa" }}>
+            <i className={classes("sf-auth-checkbox", "fa", this.props.checked ? "fa-check-square-o" : "fa-square-o")}
+                onClick={this.props.checked ? this.props.onUnchecked : undefined}>
             </i>
         );
     }
