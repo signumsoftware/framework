@@ -149,6 +149,9 @@ export function initHtmlEditor(idTargetTextArea: string, culture: string, mobile
         //var config = {};
         var config = CKEDITOR.config;
         config.toolbar = toolbarMobile;
+        config.extraPlugins = 'simpleuploads,autogrow';
+        config.autoGrow_onStartup = true;
+        config.autoGrow_bottomSpace = 50;
         //CKEDITOR.instances.editor1.destroy();//destroy the existing editor
         CKEDITOR.replace(idTargetTextArea, config);
     }
