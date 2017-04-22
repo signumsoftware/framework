@@ -4,6 +4,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
+using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
 using Signum.Utilities;
 using System;
@@ -64,6 +65,7 @@ namespace Signum.Engine.Dynamic
                 sb.Schema.Initializing += () => { initialized = true; };
 
                 Validator.GlobalValidation += DynamicValidation;
+                sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicValidationEntity>().Where(dv => dv.EntityType == type));
             }
         }
         static bool initialized = false;
