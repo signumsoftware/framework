@@ -61,9 +61,15 @@ a.sf-auth-chooser
 }
 
 .sf-auth-checkbox {
-    font-size:18px;
-    vertical-align:middle;
+    font-size: 18px;
+    vertical-align: middle;
+    color: #aaa
 }
+
+    .sf-auth-checkbox.fa-check-square-o {
+        cursor: pointer;
+        color: #555
+    }
 
 span.group.inactive
 {
