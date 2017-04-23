@@ -29,7 +29,7 @@ import { NormalControlMessage } from "../../../../Framework/Signum.React/Scripts
 
 require("./AuthAdmin.css");
 
-export default class TypesRulesPackControl extends React.Component<{ ctx: TypeContext<TypeRulePack>, frame: EntityFrame<TypeRulePack> }, { filter: string }> implements IRenderButtons {
+export default class TypesRulesPackControl extends React.Component<{ ctx: TypeContext<TypeRulePack> }, { filter: string }> implements IRenderButtons {
 
     state = { filter: "" };
 
@@ -69,7 +69,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
     }
 
     updateFrame() {
-        this.props.frame.frameComponent.forceUpdate();
+        this.props.ctx.frame!.frameComponent.forceUpdate();
     }
 
     renderButtons(bc: ButtonsContext) {
