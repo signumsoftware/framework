@@ -76,7 +76,8 @@ namespace Signum.Engine.Dynamic
                     }
 
                    
-                }; 
+                };
+                sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicExpressionEntity>().Where(de => de.FromType == ((TypeEntity)type).ClassName));
             }
         }
 

@@ -85,7 +85,11 @@ export default class PropertyRulesPackControl extends React.Component<{ ctx: Typ
                                     {this.renderRadio(c.value, "None", "red") }
                                 </td>
                                 <td style={{ textAlign: "center" }}>
-                                    <GrayCheckbox checked={c.value.allowed != c.value.allowedBase}/>
+                                    <GrayCheckbox checked={c.value.allowed != c.value.allowedBase} onUnchecked={() => {
+                                        c.value.allowed = c.value.allowedBase;
+                                        ctx.value.modified = true; 
+                                        this.forceUpdate();
+                                    }} />
                                 </td>
                             </tr>
                         )

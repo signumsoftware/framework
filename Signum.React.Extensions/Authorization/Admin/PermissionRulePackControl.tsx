@@ -78,7 +78,11 @@ export default class PermissionRulesPackControl extends React.Component<{ ctx: T
                                     {this.renderRadio(c.value, false, "red") }
                                 </td>
                                 <td style={{ textAlign: "center" }}>
-                                    <GrayCheckbox checked={c.value.allowed != c.value.allowedBase}/>
+                                     <GrayCheckbox checked={c.value.allowed != c.value.allowedBase} onUnchecked={() => {
+                                        c.value.allowed = c.value.allowedBase;     
+                                        ctx.value.modified = true; 
+                                        this.forceUpdate();
+                                    }} />
                                 </td>
                             </tr>
                         ) }

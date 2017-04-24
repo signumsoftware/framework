@@ -248,6 +248,7 @@
     <None Include="Chart\ChartScripts\charts.psd" />
     <EmbeddedResource Include="Excel\plainExcelTemplate.xlsx" />
     <None Include="packages.config" />
+    <None Include="Templating\TemplatingSyntax.md" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Help\Sample.xml" />

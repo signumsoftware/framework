@@ -3,7 +3,7 @@ import { Route } from 'react-router'
 import * as QueryString from 'query-string';
 import { ifError, Dic } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
+import { EntitySettings, ViewPromise, ViewModule } from '../../../Framework/Signum.React/Scripts/Navigator'
 import {
     EntityPack, Lite, toLite, MListElement, JavascriptMessage, EntityControlMessage,
     newMListElement, liteKey, getMixin, Entity, ExecuteSymbol, isEntityPack, isEntity
@@ -413,12 +413,12 @@ export class ActivityViewSettings<T extends ICaseMainEntity> {
 
     activityViewName: string;
 
-    getViewPromise: (entity: T) => ViewPromise<T>;
+    getViewPromise?: (entity: T) => ViewPromise<T>;
 
-    constructor(type: Type<T>, activityViewName: string, getViewPromise: (entity: T) => ViewPromise<any>) {
+    constructor(type: Type<T>, activityViewName: string, getViewPromise?: (entity: T) => Promise<ViewModule<T>>) {
         this.type = type;
         this.activityViewName = activityViewName;
-        this.getViewPromise = getViewPromise;
+        this.getViewPromise = getViewPromise && (entity => new ViewPromise(getViewPromise(entity)).withProps({ inWorkflow: true }));
     }
 }
 
@@ -443,7 +443,7 @@ export function getSettings(typeName: string, activityViewName: string): Activit
 export function getViewPromise<T extends ICaseMainEntity>(entity: T, activityViewName: string | undefined | null): ViewPromise<T> {
 
     var settings = activityViewName && getSettings(entity.Type, activityViewName);
-    if (settings)
+    if (settings && settings.getViewPromise)
         return settings.getViewPromise(entity);
 
     const promise = activityViewName == undefined ?
