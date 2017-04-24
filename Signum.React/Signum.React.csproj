@@ -277,7 +277,6 @@
     <TypeScriptCompile Include="Scripts\Lines\ValueLine.tsx" />
     <TypeScriptCompile Include="Scripts\Globals.ts" />
     <TypeScriptCompile Include="Typings\d3\d3.d.ts" />
-    <TypeScriptCompile Include="Typings\es6-promise\es6-promise.d.ts" />
     <TypeScriptCompile Include="Scripts\Exceptions\Exception.tsx" />
     <TypeScriptCompile Include="Scripts\Lines.tsx" />
     <TypeScriptCompile Include="Scripts\Reflection.ts" />

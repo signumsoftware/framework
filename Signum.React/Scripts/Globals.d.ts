@@ -1,6 +1,4 @@
-﻿/// <reference path="../typings/es6-promise/es6-promise.d.ts" />
-
-declare function require<T>(path: string): T;
+﻿declare function require<T>(path: string): T;
 
  //Necessary till typescript has direct support https://github.com/Microsoft/TypeScript/issues/12364
 declare function _import<T>(path: string): Promise<T>;

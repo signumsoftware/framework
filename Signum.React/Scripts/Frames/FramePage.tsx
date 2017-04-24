@@ -68,7 +68,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
             var pack = window.opener.dataForChildWindow;
             window.opener.dataForChildWindow = undefined;
             this.setState({ pack: pack });
-            return Promise.resolve<void>();
+            return Promise.resolve();
         }
 
         const ti = this.getTypeInfo();
