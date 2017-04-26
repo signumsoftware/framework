@@ -308,8 +308,8 @@ ValueLine.renderers["TextBox" as ValueLineType] = (vl) => {
                     className={addClass(vl.state.valueHtmlAttributes, "form-control")}
                     value={s.ctx.value || ""}
                     onBlur={handleBlur}
-                    onChange={handleTextOnChange} //https://github.com/facebook/react/issues/7211
-                    onInput={handleTextOnChange}
+                    onChange={isIE11() ? undefined : handleTextOnChange} //https://github.com/facebook/react/issues/7211
+                    onInput={isIE11() ? handleTextOnChange : undefined}
                     placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : undefined}
                     ref={elment => vl.inputElement = elment} />)
             }
@@ -322,6 +322,10 @@ function asString(reactChild: React.ReactChild | undefined): string | undefined 
         return reactChild as string;
 
     return undefined;
+}
+
+function isIE11(): boolean {
+    return (!!(window as any).MSInputMethodContext && !!(document as any).documentMode);
 }
 
 ValueLine.renderers["TextArea" as ValueLineType] = (vl) => {
@@ -355,8 +359,8 @@ ValueLine.renderers["TextArea" as ValueLineType] = (vl) => {
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
             <textarea {...vl.state.valueHtmlAttributes} className={addClass(vl.state.valueHtmlAttributes, "form-control")} value={s.ctx.value || ""}
-                onChange={handleTextOnChange} //https://github.com/facebook/react/issues/7211
-                onInput={handleTextOnChange}
+                onChange={isIE11() ? undefined : handleTextOnChange} //https://github.com/facebook/react/issues/7211 && https://github.com/omcljs/om/issues/704
+                onInput={isIE11() ? handleTextOnChange : undefined}
                 onBlur={handleBlur}
                 placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : undefined}
                 ref={elment => vl.inputElement = elment} />
@@ -434,8 +438,8 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?
 
         return <input {...this.props.htmlAttributes} type="text" className={addClass(this.props.htmlAttributes, "form-control numeric")} value={value}
             onBlur={this.handleOnBlur}
-            onChange={this.handleOnChange} //https://github.com/facebook/react/issues/7211
-            onInput={this.handleOnChange}
+            onChange={isIE11() ? undefined : this.handleOnChange} //https://github.com/facebook/react/issues/7211
+            onInput={isIE11() ? this.handleOnChange : undefined}
             onKeyDown={this.handleKeyDown} />
 
     }
@@ -559,8 +563,8 @@ export class DurationTextBox extends React.Component<DurationTextBoxProps, { tex
 
         return <input {...this.props.htmlAttributes} type="text" className={addClass(this.props.htmlAttributes, "form-control numeric")} value={value}
             onBlur={this.handleOnBlur}
-            onChange={this.handleOnChange} //https://github.com/facebook/react/issues/7211
-            onInput={this.handleOnChange}
+            onChange={isIE11() ? undefined : this.handleOnChange} //https://github.com/facebook/react/issues/7211
+            onInput={isIE11() this.handleOnChange : undefined}
             onKeyDown={this.handleKeyDown} />
 
     }
