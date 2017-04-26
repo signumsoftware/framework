@@ -564,7 +564,7 @@ export class DurationTextBox extends React.Component<DurationTextBoxProps, { tex
         return <input {...this.props.htmlAttributes} type="text" className={addClass(this.props.htmlAttributes, "form-control numeric")} value={value}
             onBlur={this.handleOnBlur}
             onChange={isIE11() ? undefined : this.handleOnChange} //https://github.com/facebook/react/issues/7211
-            onInput={isIE11() this.handleOnChange : undefined}
+            onInput={isIE11() ? this.handleOnChange : undefined}
             onKeyDown={this.handleKeyDown} />
 
     }
