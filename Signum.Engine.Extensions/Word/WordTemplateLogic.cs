@@ -405,6 +405,7 @@ namespace Signum.Engine.Word
                 var document = 
                     ext == ".docx" ? (OpenXmlPackage)WordprocessingDocument.Open(memory, true) :
                     ext == ".pptx" ? (OpenXmlPackage)PresentationDocument.Open(memory, true) :
+                    ext == ".xlsx" ? (OpenXmlPackage)SpreadsheetDocument.Open(memory, true) :
                     throw new InvalidOperationException("Extension '{0}' not supported".FormatWith(ext));
 
                 using (document)
