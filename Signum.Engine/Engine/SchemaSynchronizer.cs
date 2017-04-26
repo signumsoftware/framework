@@ -376,6 +376,10 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
             {
                 using (Administrator.OverrideDatabaseInSysViews(db))
                 {
+                    var databaseName = db == null ? Connector.Current.DatabaseName() : db.Name;
+
+                    var sysDb = Database.View<SysDatabases>().Single(a => a.name == databaseName);
+
                     var tables =
                         (from s in Database.View<SysSchemas>()
                          from t in s.Tables().Where(t => !t.ExtendedProperties().Any(a => a.name == "microsoft_database_tools_support")) //IntelliSense bug
@@ -398,6 +402,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                                             SqlDbType = sysType == null ? SqlDbType.Udt : ToSqlDbType(sysType.name),
                                             UserTypeName = sysType == null ? userType.name : null,
                                             Nullable = c.is_nullable,
+                                            Collation = c.collation_name == sysDb.collation_name ? null : c.collation_name,
                                             Length = c.max_length,
                                             Precission = c.precision,
                                             Scale = c.scale,
@@ -760,6 +765,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
         public SqlDbType SqlDbType;
         public string UserTypeName;
         public bool Nullable;
+        public string Collation;
         public int Length;
         public int Precission;
         public int Scale;
@@ -774,6 +780,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
         {
             var result =
                    SqlDbType == other.SqlDbType
+                && Collation == other.Collation
                 && StringComparer.InvariantCultureIgnoreCase.Equals(UserTypeName, other.UserDefinedTypeName)
                 && Nullable == other.Nullable
                 && (other.Size == null || other.Size.Value == Precission || other.Size.Value == Length / BytesPerChar(other.SqlDbType) || other.Size.Value == int.MaxValue && Length == -1)
