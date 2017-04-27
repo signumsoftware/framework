@@ -820,7 +820,9 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> | unde
         return undefined;
     }
 
-    if (getTypeInfo(type.name) && getTypeInfo(type.name).kind == "Entity") {
+    const ti = getTypeInfo(type.name); 
+
+    if (ti && ti.kind == "Entity") {
 
         if (isLite(value))
             return API.fetchAndForget(value);
@@ -831,7 +833,7 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> | unde
         return undefined;
     }
 
-    if (type.name == "string" || type.name == "Guid" || type.name == "Date") {
+    if (type.name == "string" || type.name == "Guid" || type.name == "Date" || ti && ti.kind == "Enum") {
         if (typeof value === "string")
             return Promise.resolve(value);
 
