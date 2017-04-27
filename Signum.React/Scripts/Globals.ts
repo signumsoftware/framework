@@ -373,11 +373,11 @@ Array.prototype.extract = function (this: any[], predicate: (element: any) => bo
 };
 
 
-Array.prototype.findIndex = function (this: any[], predicate: (element: any) => boolean) {
+Array.prototype.findIndex = function (this: any[], predicate: (element: any, index: number, array: Array<any>) => boolean) {
     const result = this.filter(predicate);
 
     for (var i = 0; i < this.length; i++)
-        if (predicate(this[i]))
+        if (predicate(this[i], i, this))
             return i;
 
     return -1;
