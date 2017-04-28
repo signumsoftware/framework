@@ -235,7 +235,7 @@ namespace Signum.Engine.Scheduler
                 lock (priorityQueue)
                 {
                     DateTime now = TimeZoneManager.Now;
-                    var lastExecutions = Database.Query<ScheduledTaskLogEntity>().GroupBy(a => a.ScheduledTask).Select(gr => KVP.Create(
+                    var lastExecutions = Database.Query<ScheduledTaskLogEntity>().Where(a=>a.ScheduledTask != null).GroupBy(a => a.ScheduledTask).Select(gr => KVP.Create(
                         gr.Key,
                         gr.Max(a => a.StartTime)
                     )).ToDictionary();
