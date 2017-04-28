@@ -410,7 +410,11 @@ namespace Signum.Engine.Cache
                 var ee = schema.EntityEvents<T>();
 
                 ee.CacheController = this;
-                ee.Saving += ident => DisableAndInvalidate(withUpdates: true); //Even if new, loading the cache afterwars will Timeout
+                ee.Saving += ident =>
+                {
+                    if (ident.IsGraphModified)
+                        DisableAndInvalidate(withUpdates: true); //Even if new, loading the cache afterwars will Timeout
+                };
                 ee.PreUnsafeDelete += query => DisableAndInvalidate(withUpdates: false);
                 ee.PreUnsafeUpdate += (update, entityQuery) => DisableAndInvalidate(withUpdates: true);
                 ee.PreUnsafeInsert += (query, constructor, entityQuery) => { DisableAndInvalidate(withUpdates: constructor.Body.Type.IsInstantiationOf(typeof(MListElement<,>))); return constructor; };
