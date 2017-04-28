@@ -129,21 +129,15 @@ namespace Signum.Engine
 
         public static string CreateColumn(IColumn c)
         {
-            return CreateColumn(c.Name, c.SqlDbType, c.UserDefinedTypeName, c.Size, c.Scale, c.Nullable, c.Collation, c.Identity, c.Default);
-        }
-
-        public static string CreateColumn(string name, SqlDbType type, string udtTypeName, int? size, int? scale, bool nullable, string collation, bool identity, string @default)
-        {
-            Connector.Current.FixType(ref type, ref size, ref scale);
-
-            return "{0} {1}{2} {3}{4}{5}".FormatWith(
-                name.SqlEscape(),
-                type == SqlDbType.Udt ? udtTypeName : type.ToString().ToUpper(),
-                GetSizeScale(size, scale),
-                identity ? "IDENTITY " : "",
-                collation != null ? ("COLLATE " + collation + " ") : "",
-                nullable ? "NULL" : "NOT NULL",
-                @default != null ? " DEFAULT " +  Quote(type, @default) : "");
+            string fullType = (c.SqlDbType == SqlDbType.Udt ? c.UserDefinedTypeName : c.SqlDbType.ToString().ToUpper()) + GetSizeScale(c.Size, c.Scale);
+            
+            return $" ".CombineIfNotEmpty(
+                c.Name.SqlEscape(),
+                fullType,
+                c.Identity ? "IDENTITY " : null,
+                c.Collation != null ? ("COLLATE " + c.Collation) : null,
+                c.Nullable ? "NULL" : "NOT NULL",
+                c.Default != null ? "DEFAULT " +  Quote(c.SqlDbType, c.Default) : null);
         }
 
         static string Quote(SqlDbType type, string @default)
