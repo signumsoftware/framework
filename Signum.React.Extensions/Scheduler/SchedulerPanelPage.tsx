@@ -102,7 +102,6 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
                         <tr>
                             <th>ScheduledTask</th>
                             <th>Rule</th>
-                            <th>PreviousDate</th>
                             <th>NextDate</th>
                         </tr>
                     </thead>

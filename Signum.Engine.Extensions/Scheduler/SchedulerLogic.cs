@@ -208,6 +208,16 @@ namespace Signum.Engine.Scheduler
             ReloadPlan();
         }
 
+        public static void StartScheduledTaskAfter(int initialDelayMilliseconds)
+        {
+            using (ExecutionContext.SuppressFlow())
+                Task.Run(() =>
+                {
+                    Thread.Sleep(initialDelayMilliseconds);
+                    StartScheduledTasks();
+                });
+        }
+
         public static void StopScheduledTasks()
         {
             if (!running)
