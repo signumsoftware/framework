@@ -372,11 +372,11 @@ namespace Signum.Engine.Cache
 
             //Completer
             {
-                List<Expression> instructions = new List<Expression>();
-
-                instructions.Add(Expression.Assign(ctr.origin, Expression.Convert(CachedTableConstructor.originObject, ctr.tupleType)));
-                instructions.Add(Expression.Assign(result, ctr.MaterializeField(table.Field)));
-
+                List<Expression> instructions = new List<Expression>
+                {
+                    Expression.Assign(ctr.origin, Expression.Convert(CachedTableConstructor.originObject, ctr.tupleType)),
+                    Expression.Assign(result, ctr.MaterializeField(table.Field))
+                };
                 var ci = typeof(MList<T>.RowIdElement).GetConstructor(new []{typeof(T), typeof(PrimaryKey), typeof(int?)});
 
                 var order = table.Order == null ? Expression.Constant(null, typeof(int?)) : 
