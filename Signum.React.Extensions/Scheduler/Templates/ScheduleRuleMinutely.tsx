@@ -11,8 +11,9 @@ export default class ScheduleRuleMinutely extends React.Component<{ ctx: TypeCon
         const ctx4 = this.props.ctx.subCtx({ labelColumns: {sm: 2}});
 
         return (
-            <div>    
-                <ValueLine ctx={ctx4.subCtx(f => f.eachMinutes)}  />
+            <div>
+                <ValueLine ctx={ctx4.subCtx(f => f.startingOn)} />
+                <ValueLine ctx={ctx4.subCtx(f => f.eachMinutes)} />
             </div>
         );
     }

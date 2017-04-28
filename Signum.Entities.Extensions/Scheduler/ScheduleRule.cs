@@ -11,6 +11,8 @@ namespace Signum.Entities.Scheduler
 {
     public interface IScheduleRuleEntity : IEntity
     {
+        DateTime StartingOn { get; }
+
         DateTime Next(DateTime now);
         IScheduleRuleEntity Clone();
     }
@@ -19,9 +21,11 @@ namespace Signum.Entities.Scheduler
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class ScheduleRuleMinutelyEntity : Entity, IScheduleRuleEntity
     {
+        public DateTime StartingOn { get; set; } = TimeZoneManager.Now.Date;
+
         public DateTime Next(DateTime now)
         {
-            DateTime candidate = now.TrimToMinutes();
+            DateTime candidate = DateTimeExtensions.Max(now, StartingOn).TrimToMinutes();
 
             if (this.IsAligned)
                 candidate = candidate.AddMinutes(-(candidate.Minute % EachMinutes));
@@ -35,6 +39,7 @@ namespace Signum.Entities.Scheduler
         public int EachMinutes { get; set; }
 
         public bool IsAligned => EachMinutes < 60 && (60 % EachMinutes == 0);
+        
 
         public override string ToString()
         {

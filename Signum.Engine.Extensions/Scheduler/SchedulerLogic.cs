@@ -235,11 +235,27 @@ namespace Signum.Engine.Scheduler
                 lock (priorityQueue)
                 {
                     DateTime now = TimeZoneManager.Now;
+                    var lastExecutions = Database.Query<ScheduledTaskLogEntity>().GroupBy(a => a.ScheduledTask).Select(gr => KVP.Create(
+                        gr.Key,
+                        gr.Max(a => a.StartTime)
+                    )).ToDictionary();
+
                     priorityQueue.Clear();
-                    priorityQueue.PushAll(ScheduledTasksLazy.Value.Select(st => new ScheduledTaskPair
-                    {
-                        ScheduledTask = st,
-                        NextDate = st.Rule.Next(now),
+                    priorityQueue.PushAll(ScheduledTasksLazy.Value.Select(st => {
+
+                        var previous = lastExecutions.TryGetS(st);
+
+                        var next = previous == null ?
+                            st.Rule.Next(st.Rule.StartingOn) :
+                            st.Rule.Next(previous.Value.Add(SchedulerMargin));
+
+                        bool isMiss = next < now;
+
+                        return new ScheduledTaskPair
+                        {
+                            ScheduledTask = st,
+                            NextDate = isMiss ? now : next,
+                        };
                     }));
 
                     SetTimer();
@@ -411,7 +427,7 @@ namespace Signum.Engine.Scheduler
                 {
                     ScheduledTask = p.ScheduledTask.ToLite(),
                     Rule = p.ScheduledTask.Rule.ToString(),
-                    NextExecution = p.NextDate,
+                    NextDate = p.NextDate,
                 }).ToList()
             };
         }
@@ -429,6 +445,6 @@ namespace Signum.Engine.Scheduler
     {
         public Lite<ScheduledTaskEntity> ScheduledTask;
         public string Rule;
-        public DateTime NextExecution;
+        public DateTime NextDate;
     }
 }

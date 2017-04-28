@@ -567,7 +567,7 @@
     <TypeScriptCompile Include="Scheduler\Templates\ScheduleRuleMinutely.tsx" />
     <TypeScriptCompile Include="Scheduler\Templates\ScheduleRuleMonths.tsx" />
     <TypeScriptCompile Include="Scheduler\Templates\ScheduleRuleWeekDays.tsx" />
-    <TypeScriptCompile Include="Scheduler\Templates\SchedulerTask.tsx" />
+    <TypeScriptCompile Include="Scheduler\Templates\ScheduledTask.tsx" />
     <TypeScriptCompile Include="SMS\Signum.Entities.SMS.ts">
       <DependentUpon>Signum.Entities.SMS.t4s</DependentUpon>
     </TypeScriptCompile>

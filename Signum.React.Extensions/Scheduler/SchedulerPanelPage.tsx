@@ -67,6 +67,7 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
                     { this.renderTable() }
                     <br />
                     <br />
+
                     <h2>{ScheduledTaskEntity.niceName() }</h2>
                     <SearchControl findOptions={{
                         queryName: ScheduledTaskEntity,
@@ -75,8 +76,8 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
                         pagination: { elementsPerPage: 10, mode: "Firsts" }
                     }} />
 
-
                     <br />
+
                     <h2>{ScheduledTaskLogEntity.niceName() }</h2>
                     <SearchControl findOptions={{
                         queryName: ScheduledTaskLogEntity,
@@ -85,6 +86,7 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
                         showFilters: false,
                         pagination: { elementsPerPage: 10, mode: "Firsts" }
                     }} />
+
                 </div>
             </div>
         );
@@ -98,12 +100,10 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
                 <table className="sf-search-results sf-stats-table">
                     <thead>
                         <tr>
-                            <th>ScheduledTask
-                            </th>
-                            <th>Rule
-                            </th>
-                            <th>NextExecution
-                            </th>
+                            <th>ScheduledTask</th>
+                            <th>Rule</th>
+                            <th>PreviousDate</th>
+                            <th>NextDate</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -111,7 +111,7 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
                             <tr key={i}>
                                 <td><EntityLink lite={item.ScheduledTask} inSearch={true} onNavigated={() => this.loadState().done()} /></td>
                                 <td>{item.Rule} </td>
-                                <td>{item.NextExecution} ({item.NextExecution == undefined ? "-None-" : moment(item.NextExecution).fromNow()}) </td>
+                                <td>{item.NextDate} ({moment(item.NextDate).fromNow()})</td>
                             </tr>)
                         }
                     </tbody>
