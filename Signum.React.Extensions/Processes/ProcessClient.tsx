@@ -19,7 +19,6 @@ import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport
 require("./Processes.css");
 
 export function start(options: { routes: JSX.Element[], packages: boolean, packageOperations: boolean }) {
-  
 
     Navigator.addSettings(new EntitySettings(ProcessEntity, e => _import('./Templates/Process'), { isCreable : "Never" }));
 
@@ -68,18 +67,17 @@ function monkeyPatchCreateContextualMenuItem(){
         if(coc.context.lites.length <= 1)
             return base(coc, defaultClick, key);
 
-        const settings = processOperationSettings[coc.operationInfo.key];
-
-        if(settings != undefined){
-            if(settings.isVisible && !settings.isVisible(coc))
+        const processSettings = processOperationSettings[coc.operationInfo.key];
+        if(processSettings != undefined){
+            if(processSettings.isVisible && !processSettings.isVisible(coc))
                 return base(coc, defaultClick, key);
 
-            if(settings.hideOnCanExecute && coc.canExecute != undefined)
+            if(processSettings.hideOnCanExecute && coc.canExecute != undefined)
                 return base(coc, defaultClick, key);
         }
 
 
-         const text = coc.settings && coc.settings.text ? coc.settings.text() :
+        const text = coc.settings && coc.settings.text ? coc.settings.text() :
         coc.entityOperationSettings && coc.entityOperationSettings.text ? coc.entityOperationSettings.text() :
             coc.operationInfo.niceName;
 
@@ -87,9 +85,15 @@ function monkeyPatchCreateContextualMenuItem(){
 
         const disabled = !!coc.canExecute;
 
-        const onClick = coc.settings && coc.settings.onClick ?
-            (me: React.MouseEvent<any>) => coc.settings!.onClick!(coc) :
-            (me: React.MouseEvent<any>) => defaultClick(coc);
+        const onClick = (me: React.MouseEvent<any>) => {
+            coc.event = me;
+            coc.settings && coc.settings.onClick ? coc.settings!.onClick!(coc) : defaultClick(coc)
+        }
+
+        const processOnClick = (me: React.MouseEvent<any>) => {
+            coc.event = me;
+            processSettings && processSettings.onClick ? processSettings.onClick!(coc) : defaultConstructProcessFromMany(coc)
+        }
 
         const menuItem = <MenuItem
             className={disabled ? "disabled" : undefined}
@@ -98,7 +102,7 @@ function monkeyPatchCreateContextualMenuItem(){
             key={key}>
             {bsStyle && <span className={"icon empty-icon btn-" + bsStyle}></span>}
             {text}
-            <span className="glyphicon glyphicon-cog process-contextual-icon" aria-hidden={true} onClick={me =>defaultConstructFromMany(coc, me)}></span>
+            <span className="glyphicon glyphicon-cog process-contextual-icon" aria-hidden={true} onClick={processOnClick}></span>
             </MenuItem>;
 
         if (!coc.canExecute)
@@ -107,32 +111,34 @@ function monkeyPatchCreateContextualMenuItem(){
         const tooltip = <Tooltip id={"tooltip_" + coc.operationInfo.key.replace(".", "_") }>{coc.canExecute}</Tooltip>;
 
         return <OverlayTrigger placement="right" overlay={tooltip} >{menuItem}</OverlayTrigger>;
-
-
     };
 }
 
-function defaultConstructFromMany(coc: Operations.ContextualOperationContext<Entity>, event: React.MouseEvent<any>) {
+function defaultConstructProcessFromMany(coc: Operations.ContextualOperationContext<Entity>, ...args: any[]) {
+    var event = coc.event!;
 
-    event.preventDefault();
+    event.persist();
+    event!.preventDefault();
     event.stopPropagation();
 
-    if (!ContextualOperations.confirmInNecessary(coc))
-        return;
-
-    API.processFromMany<Entity>(coc.context.lites, coc.operationInfo.key).then(pack => {
-
-        if (!pack || !pack.entity)
+    ContextualOperations.confirmInNecessary(coc).then(conf => {
+        if (!conf)
             return;
 
-        const es = Navigator.getSettings(pack.entity.Type);
-        if (es && es.avoidPopup || event.ctrlKey || event.button == 1) {
-            Navigator.history.push('~/create/', pack);
-            return;
-        }
-        else {
-            Navigator.navigate(pack);
-        }
+        API.processFromMany<Entity>(coc.context.lites, coc.operationInfo.key).then(pack => {
+
+            if (!pack || !pack.entity)
+                return;
+
+            const es = Navigator.getSettings(pack.entity.Type);
+            if (es && es.avoidPopup || event.ctrlKey || event.button == 1) {
+                Navigator.history.push('~/create/', pack);
+                return;
+            }
+            else {
+                Navigator.navigate(pack);
+            }
+        }).done();
     }).done();
 }
 
