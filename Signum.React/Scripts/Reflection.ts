@@ -1,4 +1,5 @@
 ﻿import * as moment from 'moment';
+import * as numbro from 'numbro';
 import { Dic } from './Globals';
 import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities';
 import {ajaxPost, ajaxGet} from './Services';
@@ -112,7 +113,6 @@ export function toMomentDurationFormat(format: string | undefined): string | und
     return format.replace("\:", ":");
 }
 
-
 export function toNumbroFormat(format: string | undefined) {
 
     if (format == undefined)
@@ -137,6 +137,37 @@ export function toNumbroFormat(format: string | undefined) {
 
     return format;
 }
+
+export function valToString(val: any) {
+    if (val == null)
+        return "";
+
+    return val.toString();
+}
+
+export function numberToString(val: any, format?: string) {
+    if (val == null)
+        return "";
+
+    return numbro(val).format(toNumbroFormat(format));
+}
+
+export function dateToString(val: any, format?: string) {
+    if (val == null)
+        return "";
+
+    var m = moment(val, moment.ISO_8601);
+    return m.format(toMomentFormat(format));
+}
+
+export function durationToString(val: any, format?: string) {
+    if (val == null)
+        return "";
+
+    var dur = moment.duration(val);
+    return dur.format(toMomentDurationFormat(format));
+}
+
 
 export interface TypeReference {
     name: string;
@@ -837,6 +868,9 @@ export function registerSymbol(type: string, key: string): any /*ISymbol*/ {
 
     return symbol as any;
 }
+
+
+
 
 export class PropertyRoute {
     
