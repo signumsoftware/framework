@@ -161,6 +161,8 @@ namespace Signum.Engine
         public abstract bool AllowsConvertToTime { get; }
 
         public abstract bool SupportsSqlDependency { get; }
+
+        public abstract bool SupportsFormat { get; }
     }
 
     public abstract class ParameterBuilder
