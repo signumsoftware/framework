@@ -14,7 +14,7 @@ export default class WorkflowEventTaskConditionComponent extends React.Component
         var ctx = this.props.ctx;
 
         return (
-            <EntityDetail ctx={ctx} onChange={() => this.forceUpdate()} getComponent={(ctx: TypeContext<WorkflowEventTaskConditionEval>) =>
+            <EntityDetail ctx={ctx} onChange={() => this.forceUpdate()} remove={false} getComponent={(ctx: TypeContext<WorkflowEventTaskConditionEval>) =>
                 <div className="code-container">
                     <pre style={{ border: "0px", margin: "0px" }}>{"public bool CustomCondition() \n{"}</pre>
                     <CSharpCodeMirror script={ctx.value.script || ""} onChange={this.handleCodeChange} />
