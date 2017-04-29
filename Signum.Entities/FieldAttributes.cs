@@ -288,6 +288,8 @@ sb.Schema.Settings.FieldAttributes(({0} a) => a.{1}).Replace(new ImplementedByAt
 
         public string Default { get; set; }
 
+        public string Collation { get; set; }
+
         public const string NewId = "NEWID()";
         public const string NewSequentialId = "NEWSEQUENTIALID()";
     }
