@@ -48,7 +48,6 @@ namespace Signum.Engine.Authorization
                 ToStates = { UserState.Disabled },
                 Execute = (u, _) =>
                 {
-                    Thread.Sleep(500);
                     u.AnulationDate = TimeZoneManager.Now;
                     u.State = UserState.Disabled;
                 },
@@ -62,7 +61,6 @@ namespace Signum.Engine.Authorization
                 ToStates = { UserState.Saved },
                 Execute = (u, _) =>
                 {
-                    Thread.Sleep(500);
                     u.AnulationDate = null;
                     u.State = UserState.Saved;
                 },
