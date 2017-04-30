@@ -28,6 +28,7 @@ export interface ExpressionOrValueProps {
     allowsExpression?: boolean;
     avoidDelete?: boolean;
     hideLabel?: boolean;
+    exampleExpression?: string;
 }
 
 export class ExpressionOrValueComponent extends React.Component<ExpressionOrValueProps, void> {
@@ -77,7 +78,9 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
                 p.binding.deleteValue();
         }
         else
-            p.binding.setValue({ __code__: "" } as Expression<any>);
+            p.binding.setValue({
+                __code__: this.props.exampleExpression || JSON.stringify(value == undefined ? this.props.defaultValue : value)
+            } as Expression<any>);
 
         (p.refreshView || p.dn.context.refreshView)();
     }
@@ -219,7 +222,7 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         const typeName = dn.parent!.fixRoute() !.typeReference().name.split(",").map(tn => tn.endsWith("Entity") ? tn : tn + "Entity").join(" | ");
         return (
             <div className="code-container">
-                <pre style={{ border: "0px", margin: "0px" }}>{"(ctx: TypeContext<" + typeName + ">, auth) =>"}</pre>
+                <pre style={{ border: "0px", margin: "0px" }}>{"(ctx: TypeContext<" + typeName + ">, modules) =>"}</pre>
                 <JavascriptCodeMirror code={expression.__code__} onChange={newCode => { expression.__code__ = newCode; this.props.dn.context.refreshView() } } />
             </div>
         );

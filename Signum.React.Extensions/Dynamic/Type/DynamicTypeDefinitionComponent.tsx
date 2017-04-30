@@ -339,6 +339,9 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
 
 export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefinition, dynamicType: DynamicTypeEntity }, void>{
 
+    static suggestWorkflow = true;
+    static suggestTree = true;
+
     render() {
         const def = this.props.definition;
         const dt = this.props.dynamicType;
@@ -353,8 +356,11 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                         renderContent={e =>
                             <div>
                                 <div className="btn-group" style={{ marginBottom: "3px" }}>
-                                    {dt.baseType == "Entity" &&
+                                    {dt.baseType == "Entity" && CustomCodeTab.suggestWorkflow &&
                                         <input type="button" className="btn btn-success btn-xs sf-button" value="Workflow" onClick={this.handleWorkflowCustomInheritanceClick} />}
+
+                                    {dt.baseType == "Entity" && CustomCodeTab.suggestTree &&
+                                        <input type="button" className="btn btn-warning btn-xs sf-button" value="Tree" onClick={this.handleTreeCustomInheritanceClick} />}
                                 </div>
                                 <div className="code-container">
                                     <pre style={{ border: "0px", margin: "0px" }}>{`public class ${entityName}:`}</pre>
@@ -393,7 +399,8 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
                             <div>
                                 {dt.baseType == "Entity" &&
                                     <div className="btn-group" style={{ marginBottom: "3px" }}>
-                                        <input type="button" className="btn btn-success btn-xs sf-button" value="Workflow" onClick={this.handleWithWorkflowClick} />
+                                        {CustomCodeTab.suggestWorkflow && < input type="button" className="btn btn-success btn-xs sf-button" value="Workflow" onClick={this.handleWithWorkflowClick} />}
+                                        {CustomCodeTab.suggestTree && < input type="button" className="btn btn-info btn-xs sf-button" value="Tree" onClick={this.handleWithTreeClick} />}
                                         <input type="button" className="btn btn-warning btn-xs sf-button" value="Register Operations" onClick={this.handleRegisterOperationsClick} />
                                         <input type="button" className="btn btn-danger btn-xs sf-button" value="Register Expressions" onClick={this.handleRegisterExpressionsClick} />
                                     </div>}
@@ -481,33 +488,30 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
     }
 
     handleWorkflowCustomInheritanceClick = () => {
-        let entityName = this.getDynamicTypeFullName();
-        let text = "ICaseMainEntity";
-        this.popupEventsTemplate(entityName, "Workflow Inheritance", text);
+        this.popupCodeSnippet("ICaseMainEntity");
+    }
+
+    handleTreeCustomInheritanceClick = () => {
+        this.popupCodeSnippet("TreeEntity");
     }
 
     handlePreSavingClick = () => {
-        let entityName = this.getDynamicTypeFullName();
-        let text = `protected internal override void PreSaving(ref bool graphModified)
+        this.popupCodeSnippet(`protected internal override void PreSaving(ref bool graphModified)
 {
     //Your code here
     base.PreSaving(ref graphModified);
-}`;
-        this.popupEventsTemplate(entityName, "PreSaving", text);
+}`);
     }
 
     handlePostRetrievedClick = () => {
-        let entityName = this.getDynamicTypeFullName();
-        let text = `protected internal override void PostRetrieving()
+        this.popupCodeSnippet(`protected internal override void PostRetrieving()
 {
     base.PostRetriving();
-}`;
-        this.popupEventsTemplate(entityName, "PostRetrieved", text);
+}`);
     }
 
     handlePropertyValidatorClick = () => {
-        let entityName = this.getDynamicTypeFullName();
-        let text = `protected override string PropertyValidation(PropertyInfo pi)
+        this.popupCodeSnippet(`protected override string PropertyValidation(PropertyInfo pi)
 {
     if (pi.Name == nameof(YourProperty))
     {
@@ -516,8 +520,7 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
     }
  
     return base.PropertyValidation(pi);
-};`;
-        this.popupEventsTemplate(entityName, "PropertyValidator", text);
+};`);
     }
 
     handleWithWorkflowClick = () => {
@@ -525,26 +528,22 @@ export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefi
         var os = this.props.definition.operationSave;
         var oc = this.props.definition.operationCreate;
 
-        let text = `fi.WithWorkflow(
+        this.popupCodeSnippet(`fi.WithWorkflow(
 constructor: () => ${oc ? `{ ${oc.construct} }` : `new ${entityName}Entity()`}, 
 save: e => ${os ? `e.Execute(${entityName}Operation.Save)` : "e.Save()"}
-);`;
+);`);
+    }
 
-        ValueLineModal.show({
-            type: { name: "string" },
-            initialValue: text,
-            valueLineType: "TextArea",
-            title: "WithWorkflow",
-            message: "Copy to clipboard: Ctrl+C, ESC",
-            initiallyFocused: true,
-            valueHtmlAttributes: { style: { height: 200 } }
-        }).done();
+    handleWithTreeClick = () => {
+        this.popupCodeSnippet(`fi.WithTree(dqm);`);
     }
 
     handleRegisterOperationsClick = () => {
 
         let entityName = this.props.dynamicType.typeName!;
-        const text = `// Sample for Delete symbol operations
+
+        this.popupCodeSnippet(
+            `// Sample for Delete symbol operations
 new Graph<${entityName}Entity>.Delete(${entityName}Operation.Delete)
 {
     FromStates = { },
@@ -559,112 +558,70 @@ new Graph<${entityName}Entity>.Execute(${entityName}Operation.Save)
     ToStates = { },
     CanExecute = e => return null or a message string,
     Execute = (e, args) => { e.Save(); },
-}.Register();`
-
-        ValueLineModal.show({
-            type: { name: "string" },
-            initialValue: text,
-            valueLineType: "TextArea",
-            title: "Register Operations",
-            message: "Copy to clipboard: Ctrl+C, ESC",
-            initiallyFocused: true,
-            valueHtmlAttributes: { style: { height: 350 } }
-        }).done();
+}.Register();`);
     }
 
     handleRegisterExpressionsClick = () => {
 
         let entityName = this.props.dynamicType.typeName!;
-        const text = `dqm.RegisterExpression((${entityName}Entity e) => e.[Expression Name]());`
-        ValueLineModal.show({
-            type: { name: "string" },
-            initialValue: text,
-            valueLineType: "TextArea",
-            title: "Register Expressions",
-            message: "Copy to clipboard: Ctrl+C, ESC",
-            initiallyFocused: true,
-        }).done();
+        this.popupCodeSnippet(`dqm.RegisterExpression((${entityName}Entity e) => e.[Expression Name]());`);
     }
 
     handleQueryExpressionClick = () => {
         let entityName = this.props.dynamicType.typeName!;
-        const text = `static Expression<Func<[Your Entity], IQueryable<${entityName}Entity>>> QueryExpression =
+        this.popupCodeSnippet(
+            `static Expression<Func<[Your Entity], IQueryable<${entityName}Entity>>> QueryExpression =
     e => Database.Query<${entityName}Entity>().Where(a => [Your conditions here]);
 [ExpressionField]
 public static IQueryable<${entityName}Entity> Queries(this [Your Entity] e)
 {
     return QueryExpression.Evaluate(e);
-}`;
-
-        ValueLineModal.show({
-            type: { name: "string" },
-            initialValue: text,
-            valueLineType: "TextArea",
-            title: "Query Expressions",
-            message: "Copy to clipboard: Ctrl+C, ESC",
-            initiallyFocused: true,
-            valueHtmlAttributes: { style: { height: 150 } }
-        }).done();
+}`);
     }
 
     handleScalarExpressionClick = () => {
         let entityName = this.props.dynamicType.typeName!;
-        const text = `static Expression<Func<${entityName}Entity, bool>> IsDisabledExpression =
+        this.popupCodeSnippet(`static Expression<Func<${entityName}Entity, bool>> IsDisabledExpression =
     e => [Your conditions here] ;
 [ExpressionField]
 public static bool IsDisabled(this ${entityName}Entity entity)
 {
     return IsDisabledExpression.Evaluate(entity);
-}`;
-
-        ValueLineModal.show({
-            type: { name: "string" },
-            initialValue: text,
-            valueLineType: "TextArea",
-            title: "Scalar Expressions",
-            message: "Copy to clipboard: Ctrl+C, ESC",
-            initiallyFocused: true,
-            valueHtmlAttributes: { style: { height: 150 } }
-        }).done();
+}`);
     }
 
     handleEnumClick = () => {
-        let entityName = this.props.dynamicType.typeName!;
-        const text = `public enum EnumName 
+
+        this.popupCodeSnippet(`public enum EnumName 
 { 
     Item1, 
     Item2, 
     ....  
-};`
-
-        this.popupEventsTemplate(entityName, "Enum", text);
+};`);
     }
 
     handleOperationClick = () => {
         let entityName = this.props.dynamicType.typeName!;
-        const text = `[AutoInit]
+
+        this.popupCodeSnippet(`[AutoInit]
 public static class ${entityName}Operation2
 {
     public static readonly ConstructSymbol<${entityName}Entity>.From<Your Entity> CreateFrom;
     public static readonly ExecuteSymbol<${entityName}Entity> DoSomething;
     public static readonly DeleteSymbol<${entityName}Entity> DeleteSomething;
-}`
-
-        this.popupEventsTemplate(entityName, "Enum", text);
+}`);
     }
 
     handleOverrideClick = () => {
-        let entityName = this.props.dynamicType.typeName!;
-        const text = `sb.Schema.Settings.FieldAttributes((StaticType ua) => ua.Property).Replace(new ImplementedByAttribute(typeof(YourDynamicTypeEntity)));`;
-        this.popupEventsTemplate(entityName, "Override", text);
+        this.popupCodeSnippet(`sb.Schema.Settings.FieldAttributes((StaticType ua) => ua.Property).Replace(new ImplementedByAttribute(typeof(YourDynamicTypeEntity)));`);
     }
 
-    popupEventsTemplate(entityName: string, eventName: string, text: string) {
+    popupCodeSnippet(snippet: string) {
         ValueLineModal.show({
             type: { name: "string" },
-            initialValue: text,
+            initialValue: snippet,
             valueLineType: "TextArea",
-            title: `${entityName} -> ${eventName}`,
+            title: `Code Snippet`,
             message: "Copy to clipboard: Ctrl+C, ESC",
             initiallyFocused: true,
             valueHtmlAttributes: { style: { height: 150 } },

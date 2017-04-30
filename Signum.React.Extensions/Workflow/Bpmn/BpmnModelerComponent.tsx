@@ -244,14 +244,14 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                         dt == "Decision" ? "bpmn:UserTask" : dt == "Script" ? "bpmn:ScriptTask" : "bpmn:Task";
                 } else if (BpmnUtils.isStartEvent(obj.element.type)) {
                     var et = (me as WorkflowEventModel).type;
-                    obj.element.type = (et == "Start" || et == "TimerStart" || et == "ConditionalStart") ? "bpmn:StartEvent" : "bpmn:EndEvent";
+                    obj.element.type = (et == "Start" || et == "TimerStart") ? "bpmn:StartEvent" : "bpmn:EndEvent";
 
 
                     var bo = obj.element.businessObject;
                     var shouldEvent =
-                        et == "TimerStart" ? "bpmn:TimerEventDefinition" :
-                        et == "ConditionalStart" ? "bpmn:ConditionalEventDefinition" :
-                                null;
+                        (et == "Start" || et == "Finish") ? null :
+                            (me as WorkflowEventModel).task!.triggeredOn == "Always" ? "bpmn:TimerEventDefinition" :
+                                "bpmn:ConditionalEventDefinition";
 
                     if (shouldEvent) {
                         if (!bo.eventDefinitions)

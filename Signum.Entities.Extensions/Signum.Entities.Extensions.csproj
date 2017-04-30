@@ -74,6 +74,10 @@
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.SqlServer.Types, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.SqlServer.Types.Unofficial.12.0.2000.8\lib\net40\Microsoft.SqlServer.Types.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -198,6 +202,8 @@
     <Compile Include="Notes\Note.cs" />
     <Compile Include="Omnibox\SpecialOmniboxResultGenerator.cs" />
     <Compile Include="Processes\IProcessServer.cs" />
+    <Compile Include="Tree\TreeEntity.cs" />
+    <Compile Include="Tree\TreeOmniboxResultGenertor.cs" />
     <Compile Include="UserAssets\IUserAssetsServer.cs" />
     <Compile Include="UserAssets\QueryToken.cs" />
     <Compile Include="ViewLog\ViewLogEntity.cs" />

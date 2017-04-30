@@ -17,7 +17,6 @@ import * as NodeUtils from './NodeUtils'
 import * as DynamicViewClient from '../DynamicViewClient'
 import { DynamicViewInspector, CollapsableTypeHelp } from './Designer'
 import { DynamicViewTree } from './DynamicViewTree'
-import { AuthInfo } from './AuthInfo'
 import ShowCodeModal from './ShowCodeModal'
 import { DynamicViewEntity, DynamicViewOperation, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 

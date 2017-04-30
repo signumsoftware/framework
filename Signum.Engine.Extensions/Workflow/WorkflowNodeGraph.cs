@@ -108,6 +108,24 @@ namespace Signum.Engine.Workflow
                     if (fanOut > 0)
                         errors.Add(WorkflowValidationMessage._0HasOutputs.NiceToString(e));
                 }
+
+                if (e.Type.IsTimerStart())
+                {
+                    var schedule = e.ScheduledTask();
+
+                    if (schedule == null)
+                        errors.Add(WorkflowValidationMessage._0IsTimerStartAndSchedulerIsMandotary.NiceToString(e));
+
+                    var wet = e.WorkflowEventTask();
+
+                    if (wet == null)
+                        errors.Add(WorkflowValidationMessage._0IsTimerStartAndTaskIsMandotary.NiceToString(e));
+                    else if (wet.TriggeredOn != TriggeredOn.Always)
+                    {
+                        if (wet.Condition?.Script == null || !wet.Condition.Script.Trim().HasText())
+                            errors.Add(WorkflowValidationMessage._0IsConditionalStartAndTaskConditionIsMandotary.NiceToString(e));
+                    }
+                }
             });
 
             Gateways.Values.ToList().ForEach(g =>

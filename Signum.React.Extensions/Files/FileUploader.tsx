@@ -6,7 +6,7 @@ import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructo
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { FindOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../../../Framework/Signum.React/Scripts/TypeContext'
-import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, basicConstruct, getTypeName } from '../../../Framework/Signum.React/Scripts/Reflection'
+import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, New, getTypeName } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { IFile, IFilePath, FileMessage, FileTypeSymbol, FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from './Signum.Entities.Files'
@@ -89,16 +89,16 @@ export default class FileUploader extends React.Component<FileUploaderProps, Fil
         const fileReader = new FileReader();
         fileReader.onerror = e => { setTimeout(() => { throw (e as any).error; }, 0); };
         fileReader.onload = e => {
-            const newEntity = basicConstruct(this.props.typeName) as ModifiableEntity & IFile;
-            newEntity.fileName = file.name;
-            newEntity.binaryFile = ((e.target as any).result as string).after("base64,");
+            const fileEntity = New(this.props.typeName) as ModifiableEntity & IFile;
+            fileEntity.fileName = file.name;
+            fileEntity.binaryFile = ((e.target as any).result as string).after("base64,");
 
             if (this.props.fileType)
-                (newEntity as any as IFilePath).fileType = this.props.fileType;
+                (fileEntity as any as IFilePath).fileType = this.props.fileType;
 
             this.setState({ isLoading: false });
 
-            this.props.onFileLoaded(newEntity); 
+            this.props.onFileLoaded(fileEntity); 
         };
         fileReader.readAsDataURL(file);
     }

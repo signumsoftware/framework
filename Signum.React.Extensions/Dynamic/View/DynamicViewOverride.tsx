@@ -12,7 +12,6 @@ import * as DynamicClient from '../DynamicClient'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { ViewReplacer } from '../../../../Framework/Signum.React/Scripts/Frames/ReactVisitor';
 import TypeHelpComponent from '../Help/TypeHelpComponent'
-import { AuthInfo } from './AuthInfo'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
 import * as Nodes from '../../../../Extensions/Signum.React.Extensions/Dynamic/View/Nodes';
@@ -26,7 +25,7 @@ interface DynamicViewOverrideComponentState {
     exampleEntity?: Entity;
     componentClass?: React.ComponentClass<{ ctx: TypeContext<Entity> }> | null;
     syntaxError?: string;
-    viewOverride?: (e: ViewReplacer<Entity>, authInfo: AuthInfo) => void;
+    viewOverride?: (vr: ViewReplacer<Entity>) => void;
     scriptChanged?: boolean;
     viewNames?: string[];
     typeHelp?: DynamicClient.TypeHelp;
@@ -233,7 +232,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
         });
 
         const dvo = this.props.ctx.value;
-        let func: (rep: ViewReplacer<Entity>, auth: AuthInfo) => void;
+        let func: (rep: ViewReplacer<Entity>) => void;
         try {
             func = DynamicViewClient.asOverrideFunction(dvo);
             this.setState({
@@ -255,7 +254,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
                 {this.allViewNames().length > 0 && this.renderViewNameButtons()}
                 {this.allExpressions().length > 0 && <br />}
                 {this.allExpressions().length > 0 && this.renderExpressionsButtons()}
-                <pre style={{ border: "0px", margin: "0px" }}>{`(vr: ViewReplacer<${ctx.value.entityType!.className}>, auth: AuthInfo) =>`}</pre>
+                <pre style={{ border: "0px", margin: "0px" }}>{`(vr: ViewReplacer<${ctx.value.entityType!.className}>, modules) =>`}</pre>
                 <JavascriptCodeMirror code={ctx.value.script || ""} onChange={this.handleCodeChange} />
                 {this.state.syntaxError && <div className="alert alert-danger">{this.state.syntaxError}</div>}
             </div>
@@ -315,7 +314,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
 interface RenderWithReplacementsProps {
     entity: Entity;
     componentClass: React.ComponentClass<{ ctx: TypeContext<Entity> }>;
-    viewOverride?: (e: ViewReplacer<Entity>, authInfo: AuthInfo) => void;
+    viewOverride?: (vr: ViewReplacer<Entity>) => void;
 }
 
 export class RenderWithReplacements extends React.Component<RenderWithReplacementsProps, void> {

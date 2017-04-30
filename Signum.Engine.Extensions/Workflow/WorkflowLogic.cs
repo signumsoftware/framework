@@ -284,7 +284,7 @@ namespace Signum.Engine.Workflow
                     Delete = (e, _) =>
                     {
 
-                        if (e.Type.IsTimerOrConditionalStart())
+                        if (e.Type.IsTimerStart())
                         {
                             var scheduled = e.ScheduledTask();
                             if (scheduled != null)

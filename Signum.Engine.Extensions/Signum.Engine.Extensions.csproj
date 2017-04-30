@@ -66,6 +66,10 @@
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.4\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.SqlServer.Types, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.SqlServer.Types.Unofficial.12.0.2000.8\lib\net40\Microsoft.SqlServer.Types.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -195,6 +199,7 @@
     <Compile Include="Translation\TranslationLogic.cs" />
     <Compile Include="Translation\TranslationReplacementLogic.cs" />
     <Compile Include="Translation\TranslationSynchronizer.cs" />
+    <Compile Include="Tree\TreeLogic.cs" />
     <Compile Include="UserAssets\QueryTokenSynchronizer.cs" />
     <Compile Include="ViewLog\ViewLogLogic.cs" />
     <Compile Include="UserQueries\UserQueryLogic.cs" />
