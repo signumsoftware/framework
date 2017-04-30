@@ -173,6 +173,8 @@
     <Compile Include="Mailing\MailingServer.cs" />
     <Compile Include="Toolbar\ToolbarController.cs" />
     <Compile Include="Toolbar\WordServer.cs" />
+    <Compile Include="Tree\TreeController.cs" />
+    <Compile Include="Tree\TreeServer.cs" />
     <Compile Include="Workflow\WorkflowServer.cs" />
     <Compile Include="Workflow\WorkflowController.cs" />
     <TypeScriptCompile Include="Alerts\AlertsClient.tsx" />
@@ -272,6 +274,11 @@
     <TypeScriptCompile Include="Toolbar\Templates\ToolbarRenderer.tsx" />
     <TypeScriptCompile Include="Toolbar\Templates\ToolbarElement.tsx" />
     <TypeScriptCompile Include="Toolbar\Templates\ToolbarMenu.tsx" />
+    <TypeScriptCompile Include="Tree\TreeClient.tsx" />
+    <TypeScriptCompile Include="Tree\TreeModal.tsx" />
+    <TypeScriptCompile Include="Tree\TreeOmniboxProvider.tsx" />
+    <TypeScriptCompile Include="Tree\TreePage.tsx" />
+    <TypeScriptCompile Include="Tree\TreeViewer.tsx" />
     <TypeScriptCompile Include="UserQueries\UserQueryToolbarConfig.tsx" />
     <TypeScriptCompile Include="Word\Templates\WordTemplate.tsx" />
     <TypeScriptCompile Include="Word\WordClient.tsx" />
@@ -330,6 +337,7 @@
     <Content Include="Map\Operation\operationMap.css" />
     <Content Include="Map\Schema\schemaMap.css" />
     <Content Include="packages.config" />
+    <Content Include="Tree\TreeViewer.css" />
     <Content Include="Workflow\Case\Tag.css" />
     <Content Include="Workflow\Case\Inbox.css" />
     <Content Include="Workflow\Workflow\InitialWorkflow.xml">
@@ -643,6 +651,9 @@
   <ItemGroup>
     <Content Include="Printing\Signum.Entities.Printing.t4s" />
     <Content Include="Toolbar\Signum.Entities.Toolbar.t4s" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Tree\Signum.Entities.Tree.t4s" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>

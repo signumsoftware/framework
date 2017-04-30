@@ -51,6 +51,7 @@ namespace Signum.Entities.Dynamic
             "Signum.Engine.UserQueries",
             "Signum.Engine.ViewLog",
             "Signum.Engine.Word",
+            "Signum.Engine.Tree",
             "Signum.Entities.Authorization",
             "Signum.Entities.Chart",
             "Signum.Entities.Dashboard",
@@ -67,6 +68,7 @@ namespace Signum.Entities.Dynamic
             "Signum.Entities.ViewLog",
             "Signum.Entities.Word",
             "Signum.Entities.Workflow",
+            "Signum.Entities.Tree",
         };
 
         public static HashSet<string> Assemblies = new HashSet<string>

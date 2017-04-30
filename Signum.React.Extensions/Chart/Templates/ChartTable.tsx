@@ -41,7 +41,7 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
 
         const chartRequest = this.props.chartRequest;
         
-        const qs = Finder.getQuerySettings(chartRequest.queryKey);
+        const qs = Finder.getSettings(chartRequest.queryKey);
 
         const columns = chartRequest.columns.map(c => c.element).filter(cc => cc.token != undefined)
             .map(cc => ({ token: cc.token!.token, columnName: cc.displayName } as ColumnOptionParsed))
