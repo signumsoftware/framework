@@ -39,7 +39,7 @@ export module TreeViewerMessage {
     export const AddChild = new MessageKey("TreeViewerMessage", "AddChild");
     export const AddSibling = new MessageKey("TreeViewerMessage", "AddSibling");
     export const Remove = new MessageKey("TreeViewerMessage", "Remove");
-    export const View = new MessageKey("TreeViewerMessage", "View");
+    export const None = new MessageKey("TreeViewerMessage", "None");
 }
 
 

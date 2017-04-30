@@ -95,6 +95,6 @@ namespace Signum.Entities.Tree
         AddChild,
         AddSibling,
         Remove,
-        View
+        None,
     }
 }

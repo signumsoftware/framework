@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { MenuItem } from 'react-bootstrap'
+import { MenuItem, DropdownButton } from 'react-bootstrap'
 import { API, TreeNode, TreeNodeState, fixState } from './TreeClient'
 import { Dic, classes, DomUtils } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -8,12 +8,13 @@ import ContextMenu from '../../../Framework/Signum.React/Scripts/SearchControl/C
 import { ContextMenuPosition } from '../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
-import { SearchMessage, JavascriptMessage, toLite, ExecuteSymbol, ConstructSymbol_From, ConstructSymbol_Simple, DeleteSymbol, OperationMessage } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { SearchMessage, JavascriptMessage, EntityControlMessage, toLite, ExecuteSymbol, ConstructSymbol_From, ConstructSymbol_Simple, DeleteSymbol, OperationMessage } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TreeViewerMessage, TreeEntity, TreeOperation } from './Signum.Entities.Tree'
 import * as TreeClient from './TreeClient'
 import { FilterOptionParsed, QueryDescription, FilterRequest, SubTokensOptions } from "../../../Framework/Signum.React/Scripts/FindOptions";
 import FilterBuilder from "../../../Framework/Signum.React/Scripts/SearchControl/FilterBuilder";
 import { ISimpleFilterBuilder } from "../../../Framework/Signum.React/Scripts/Search";
+import { is } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
 
 require("./TreeViewer.css");
 
@@ -64,7 +65,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
                 this.setState({ queryDescription: qd, simpleFilterBuilder: sfb, showFilters: false });
             })
             .done();
-            
+
         API.getRoots(this.props.typeName)
             .then(t => this.setState({ treeNodes: t }))
             .done();
@@ -99,7 +100,9 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     }
 
     handleNavigate = () => {
-        Navigator.navigate(this.state.selectedNode!.lite).done();
+        Navigator.navigate(this.state.selectedNode!.lite)
+            .then(() => this.search())
+            .done();
     }
 
     treeContainer: HTMLElement;
@@ -152,18 +155,28 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
         return (
             <ContextMenu position={cm.position} onHide={this.handleContextOnHide}>
-                <MenuItem onClick={this.handleNavigate} bsClass="danger"><i className="fa fa-arrow-down" aria-hidden="true"></i>&nbsp; {TreeViewerMessage.View.niceToString()}</MenuItem>
-                <MenuItem onClick={this.handleAddChildren}><i className="fa fa-arrow-right" aria-hidden="true"></i>&nbsp; {TreeViewerMessage.AddChild.niceToString()}</MenuItem>
-                <MenuItem onClick={this.handleAddSibling}><i className="fa fa-arrow-down" aria-hidden="true"></i>&nbsp; {TreeViewerMessage.AddSibling.niceToString()}</MenuItem>
-                <MenuItem onClick={this.handleRemove} bsClass="danger"><i className="fa fa-trash" aria-hidden="true"></i>&nbsp; {TreeViewerMessage.Remove.niceToString()}</MenuItem>
+                {...this.renderMenuItems()}
             </ContextMenu>
         );
+    }
+
+    renderMenuItems(): React.ReactElement<any>[] {
+        return [
+            <MenuItem onClick={this.handleNavigate} bsClass="danger"><i className="fa fa-arrow-right" aria-hidden="true"></i>&nbsp; {EntityControlMessage.View.niceToString()}</MenuItem>,
+            <MenuItem onClick={this.handleAddChildren}><i className="fa fa-caret-square-o-right" aria-hidden="true"></i>&nbsp; {TreeViewerMessage.AddChild.niceToString()}</MenuItem>,
+            <MenuItem onClick={this.handleAddSibling}><i className="fa fa-caret-square-o-down" aria-hidden="true"></i>&nbsp; {TreeViewerMessage.AddSibling.niceToString()}</MenuItem>,
+            <MenuItem onClick={this.handleRemove} bsClass="danger"><i className="fa fa-trash" aria-hidden="true"></i>&nbsp; {TreeViewerMessage.Remove.niceToString()}</MenuItem>,
+        ];
     }
 
     handleSearchSubmit = (e: React.FormEvent<any>) => {
         e.preventDefault();
         e.stopPropagation();
 
+        this.search();
+    }
+
+    search() {
         this.getFilterOptionsWithSFB().then(fos => {
             const filters = fos
                 .filter(fo => fo.token != undefined && fo.operation != undefined)
@@ -171,7 +184,11 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
             return API.findNodes(this.props.typeName, filters);
         })
-            .then(nodes => this.setState({ treeNodes: nodes }))
+            .then(nodes => {
+                const selectedLite = this.state.selectedNode && this.state.selectedNode.lite;
+                var newSeleted = selectedLite && nodes.filter(a => is(a.lite, selectedLite)).singleOrNull();
+                this.setState({ treeNodes: nodes, selectedNode: newSeleted || undefined });
+            })
             .done();
     }
 
@@ -281,20 +298,18 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
     renderToolbar() {
         const s = this.state;
-
+        const selected = s.selectedNode;
         return (
             <div className="btn-toolbar">
                 <a className={"sf-query-button sf-filters-header btn btn-default" + (s.showFilters ? " active" : "")}
                     onClick={this.handleToggleFilters}
                     title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="glyphicon glyphicon glyphicon-filter"></span></a>
                 <button className="btn btn-primary" onClick={this.handleSearchSubmit}><i className="glyphicon glyphicon-search"></i> &nbsp; {JavascriptMessage.search.niceToString()}</button>
-                <div className="btn-group">
-                    <button className="btn btn-default" onClick={this.handleAddRoot} disabled={s.treeNodes == null}><i className="fa fa-star" aria-hidden="true"></i>&nbsp; {TreeViewerMessage.AddRoot.niceToString()}</button>
-                    <button className="btn btn-default" onClick={this.handleAddChildren} disabled={s.selectedNode == null}><i className="fa fa-arrow-right" aria-hidden="true"></i>&nbsp; {TreeViewerMessage.AddChild.niceToString()}</button>
-                    <button className="btn btn-default" onClick={this.handleAddSibling} disabled={s.selectedNode == null}><i className="fa fa-arrow-down" aria-hidden="true"></i>&nbsp; {TreeViewerMessage.AddSibling.niceToString()}</button>
-                </div>
-                <button className="btn btn-info" onClick={this.handleNavigate} disabled={s.selectedNode == null}><i className="fa fa-arrow-down" aria-hidden="true"></i>&nbsp; {TreeViewerMessage.View.niceToString()}</button>
-                <button className="btn btn-danger" onClick={this.handleRemove} disabled={s.selectedNode == null}><i className="fa fa-trash" aria-hidden="true"></i>&nbsp; {TreeViewerMessage.Remove.niceToString()}</button>
+                <button className="btn btn-default" onClick={this.handleAddRoot} disabled={s.treeNodes == null}><i className="fa fa-star" aria-hidden="true"></i>&nbsp; {TreeViewerMessage.AddRoot.niceToString()}</button>
+                <DropdownButton id="selectedButton" className="sf-query-button sf-tm-selected" title={`${JavascriptMessage.Selected.niceToString()} (${selected && selected.lite.toStr || TreeViewerMessage.AddRoot.niceToString()})`}
+                    disabled={selected == undefined}>
+                    {...this.renderMenuItems()}
+                </DropdownButton>
             </div>
         );
     }
