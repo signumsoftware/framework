@@ -9,7 +9,6 @@ import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
 import * as DynamicViewClient from '../DynamicViewClient'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import TypeHelpComponent from '../Help/TypeHelpComponent'
-import { AuthInfo } from './AuthInfo'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
 
@@ -164,7 +163,7 @@ export default class DynamicViewSelectorComponent extends React.Component<Dynami
         });
 
         const dvs = this.props.ctx.value;
-        let func: (e: Entity, auth: AuthInfo) => any;
+        let func: (e: Entity) => any;
         try {
             func = DynamicViewClient.asSelectorFunction(dvs);
         } catch (e) {
@@ -180,7 +179,7 @@ export default class DynamicViewSelectorComponent extends React.Component<Dynami
                 this.setState({
                     testResult : {
                         type: "RESULT",
-                        result: func(this.state.exampleEntity!, new AuthInfo())
+                        result: func(this.state.exampleEntity!)
                     }
                 });
             } catch (e) {
@@ -203,7 +202,7 @@ export default class DynamicViewSelectorComponent extends React.Component<Dynami
         return (
             <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px", color: "Green" }}>//Return {this.allViewNames().map(vn => '"' + vn + '"').joinComma(" or ")}</pre>
-                <pre style={{ border: "0px", margin: "0px" }}>{"(e: " + ctx.value.entityType!.className + ", auth: AuthInfo) =>"}</pre>
+                <pre style={{ border: "0px", margin: "0px" }}>{"(e: " + ctx.value.entityType!.className + ", modules) =>"}</pre>
                 <JavascriptCodeMirror code={ctx.value.script || ""} onChange={this.handleCodeChange} />
                 {this.state.syntaxError && <div className="alert alert-danger">{this.state.syntaxError}</div>}
             </div>

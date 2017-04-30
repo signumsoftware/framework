@@ -4,6 +4,7 @@ import { Route } from 'react-router'
 import * as ReactBootstrap from 'react-bootstrap'
 import * as ReactRouterBootstrap from 'react-router-bootstrap'
 import * as QueryString from 'query-string'
+import { globalModules} from './View/GlobalModules'
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
 import * as Search from '../../../Framework/Signum.React/Scripts/Search'
 import { ValueSearchControlLine } from '../../../Framework/Signum.React/Scripts/Search'
@@ -27,7 +28,6 @@ import * as DynamicClient from './DynamicClient'
 
 import * as DynamicViewComponent from './View/DynamicViewComponent'
 import { DynamicViewComponentProps, DynamicViewPart } from './View/DynamicViewComponent'
-import { AuthInfo } from './View/AuthInfo'
 import * as Nodes from './View/Nodes' //Typings-only
 import * as NodeUtils from './View/NodeUtils' //Typings-only
 
@@ -75,7 +75,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
             if (!sel)
                 return this.fallback(entity);
 
-            var viewName = sel(entity as Entity, new AuthInfo());
+            var viewName = sel(entity as Entity);
 
             if (viewName == "STATIC")
                 return this.static(entity);
@@ -167,7 +167,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
 
 }
 
-export function patchComponent(component: React.ComponentClass < { ctx: TypeContext<Entity> }>, viewOverride: (e: ViewReplacer<Entity>, auth: AuthInfo) => void) {
+export function patchComponent(component: React.ComponentClass < { ctx: TypeContext<Entity> }>, viewOverride: (e: ViewReplacer<Entity>) => void) {
 
     if (!component.prototype.render)
         throw new Error("render function not defined in " + component);
@@ -185,7 +185,7 @@ export function patchComponent(component: React.ComponentClass < { ctx: TypeCont
 
         const replacer = new ViewReplacer<Entity>(view, ctx);
         try {
-            viewOverride(replacer, new AuthInfo());
+            viewOverride(replacer);
             return replacer.result;
         } catch (error) {
             return <div className="alert alert-danger">ERROR: {error && error.message}</div>;
@@ -223,8 +223,8 @@ export function getViewNames(typeName: string): Promise<string[]> {
     );
 }
 
-const selectorCache: { [typeName: string]: ((e: Entity, auth: AuthInfo) => string) | undefined } = {};
-export function getSelector(typeName: string): Promise<((e: Entity, auth: AuthInfo) => string) | undefined> {
+const selectorCache: { [typeName: string]: ((e: Entity) => string) | undefined } = {};
+export function getSelector(typeName: string): Promise<((e: Entity) => string) | undefined> {
 
     return getOrCreate(selectorCache, typeName, () =>
         API.getDynamicViewSelector(typeName)
@@ -232,23 +232,23 @@ export function getSelector(typeName: string): Promise<((e: Entity, auth: AuthIn
     );
 }
 
-export function asSelectorFunction(dvs: DynamicViewSelectorEntity): (e: Entity, auth: AuthInfo) => string {
-    let code = dvs.script!;
+export function asSelectorFunction(dvs: DynamicViewSelectorEntity): (e: Entity) => string {
 
-    if (!code.contains(";") && !code.contains("return"))
-        code = "return " + code + ";";
-
-    code = "(function(e, auth){ " + code + "})";
+    const code = "e => " + dvs.script!;
 
     try {
-        return eval(code);
+        return evalWithScope(code, globalModules);
     } catch (e) {
         throw new Error("Syntax in DynamicViewSelector for '" + dvs.entityType!.toStr + "':\r\n" + code + "\r\n" + (e as Error).message);
     }
 }
 
-const overrideCache: { [typeName: string]: ((e: ViewReplacer<Entity>, auth: AuthInfo) => string) | undefined } = {};
-export function getViewOverride(typeName: string): Promise<((rep: ViewReplacer<Entity>, auth: AuthInfo) => void) | undefined> {
+function evalWithScope(code: string, modules: any) {
+    return eval(code);
+}
+
+const overrideCache: { [typeName: string]: ((vr: ViewReplacer<Entity>) => string) | undefined } = {};
+export function getViewOverride(typeName: string): Promise<((vr: ViewReplacer<Entity>) => void) | undefined> {
 
     return getOrCreate(overrideCache, typeName, () =>
         API.getDynamicViewOverride(typeName)
@@ -257,7 +257,7 @@ export function getViewOverride(typeName: string): Promise<((rep: ViewReplacer<E
 }
 
 
-export function asOverrideFunction(dvr: DynamicViewOverrideEntity): (e: ViewReplacer<Entity>, auth: AuthInfo) => string {
+export function asOverrideFunction(dvr: DynamicViewOverrideEntity): (vr: ViewReplacer<Entity>) => string {
     let code = dvr.script!;
 
     // Lines
@@ -311,10 +311,10 @@ export function asOverrideFunction(dvr: DynamicViewOverrideEntity): (e: ViewRepl
     // Custom
     var DynamicViewPart = DynamicViewComponent.DynamicViewPart;
 
-    code = "(function(vr, auth){ " + code + "})";
+    code = "(function(vr){ " + code + "})";
 
     try {
-        return eval(code);
+        return evalWithScope(code, globalModules);
     } catch (e) {
         throw new Error("Syntax in DynamicViewOverride for '" + dvr.entityType!.toStr + "':\r\n" + code + "\r\n" + (e as Error).message);
     }
