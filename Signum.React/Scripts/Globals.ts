@@ -572,13 +572,13 @@ String.prototype.tryAfterLast = function (this: string, separator: string) {
     return this.substring(index + separator.length);
 };
 
-String.prototype.etc = function (this: string, maxLength: number) {
+String.prototype.etc = function (this: string, maxLength: number, etcString : string = "(…)") {
     let str = this;
 
     str = str.tryBefore("\n") || str;
 
     if (str.length > maxLength)
-        str = str.substr(0, maxLength - 1) + "…";
+        str = str.substr(0, maxLength - etcString.length) + etcString;
 
     return str;
 };

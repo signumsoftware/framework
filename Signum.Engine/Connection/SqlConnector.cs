@@ -459,6 +459,10 @@ namespace Signum.Engine
         {
             get { return Version != SqlServerVersion.AzureSQL && Version >= SqlServerVersion.SqlServer2008; }
         }
+        public override bool SupportsFormat
+        {
+            get { return  Version >= SqlServerVersion.SqlServer2012; }
+        }
     }
 
     public class SqlParameterBuilder : ParameterBuilder

@@ -41,7 +41,7 @@ export function addSettings(...settings: QuerySettings[]) {
     settings.forEach(s=> Dic.addOrThrow(querySettings, getQueryKey(s.queryName), s));
 }
 
-export function getQuerySettings(queryName: PseudoType | QueryKey): QuerySettings {
+export function getSettings(queryName: PseudoType | QueryKey): QuerySettings {
     return querySettings[getQueryKey(queryName)];
 }
 
@@ -64,6 +64,10 @@ export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptio
     const fo = (obj as FindOptions).queryName ? obj as FindOptions :
         { queryName: obj as Type<any> } as FindOptions;
 
+    var qs = getSettings(fo.queryName);
+    if (qs && qs.onFind && !(modalOptions && modalOptions.useDefaultBehaviour))
+        return qs.onFind(fo, modalOptions);
+
     return _import<{ default: typeof SearchModal }>("./SearchControl/SearchModal")
         .then(a => a.default.open(fo, modalOptions));
 }
@@ -74,6 +78,10 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
 
     const fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
         { queryName: findOptions as Type<any> } as FindOptions;
+
+    var qs = getSettings(fo.queryName);
+    if (qs && qs.onFindMany && !(modalOptions && modalOptions.useDefaultBehaviour))
+        return qs.onFindMany(fo, modalOptions);
 
     return _import<{ default: typeof SearchModal }>("./SearchControl/SearchModal")
         .then(a => a.default.openMany(fo, modalOptions));
@@ -87,6 +95,10 @@ export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent
 }
 
 export function explore(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<void> {
+
+    var qs = getSettings(findOptions.queryName);
+    if (qs && qs.onExplore && !(modalOptions && modalOptions.useDefaultBehaviour))
+        return qs.onExplore(findOptions, modalOptions);
 
     return _import<{ default: typeof SearchModal }>("./SearchControl/SearchModal")
         .then(a => a.default.explore(findOptions, modalOptions));
@@ -292,7 +304,7 @@ export function toFindOptions(fo: FindOptionsParsed, queryDescription: QueryDesc
 
     const pair = smartColumns(fo.columnOptions, Dic.getValues(queryDescription.columns));
 
-    const qs = getQuerySettings(fo.queryKey);
+    const qs = getSettings(fo.queryKey);
 
     const defPagination = qs && qs.pagination || defaultPagination;
 
@@ -808,6 +820,9 @@ export interface QuerySettings {
     entityFormatter?: EntityFormatter;
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
     simpleFilterBuilder?: (qd: QueryDescription, initialFilterOptions: FilterOptionParsed[]) => React.ReactElement<any> | undefined;
+    onFind?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<Lite<Entity> | undefined>;
+    onFindMany?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<Lite<Entity>[] | undefined>;
+    onExplore?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<void>;
 }
 
 export interface FormatRule {
@@ -818,9 +833,13 @@ export interface FormatRule {
 
 export class CellFormatter {
     constructor(
-        public formatter: (cell: any) => React.ReactChild | undefined,
+        public formatter: (cell: any, ctx: CellFormatterContext) => React.ReactChild | undefined,
         public cellClass? : string) {
     }
+}
+
+export interface CellFormatterContext {
+    refresh?: () => void;
 }
 
 
@@ -863,7 +882,7 @@ export const formatRules: FormatRule[] = [
     {
         name: "Lite",
         isApplicable: col => col.token!.filterType == "Lite",
-        formatter: col => new CellFormatter((cell: Lite<Entity>) => !cell ? undefined : <EntityLink lite={cell}/>)
+        formatter: col => new CellFormatter((cell: Lite<Entity>, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} />)
     },
 
     {

@@ -225,14 +225,19 @@ Consider the following options:
         }
         #endregion
 
-        public static void Register(this IOperation operation)
+        public static void Register(this IOperation operation, bool replace = false)
         {
             if (!operation.OverridenType.IsIEntity())
                 throw new InvalidOperationException("Type '{0}' has to implement at least {1}".FormatWith(operation.OverridenType.Name));
 
             operation.AssertIsValid();
 
-            operations.GetOrAddDefinition(operation.OverridenType).AddOrThrow(operation.OperationSymbol, operation, "Operation {0} has already been registered");
+            var dic = operations.GetOrAddDefinition(operation.OverridenType);
+
+            if (replace)
+                dic[operation.OperationSymbol] = operation;
+            else
+                dic.AddOrThrow(operation.OperationSymbol, operation, "Operation {0} has already been registered");
 
             operations.ClearCache();
 
@@ -247,18 +252,6 @@ Consider the following options:
         private static bool IsExecuteNoLite(IOperation operation)
         {
             return operation is IExecuteOperation && ((IEntityOperation)operation).Lite == false;
-        }
-
-        public static void RegisterReplace(this IOperation operation)
-        {
-            if (!operation.OverridenType.IsIEntity())
-                throw new InvalidOperationException("Type {0} has to implement at least {1}".FormatWith(operation.OverridenType));
-
-            operation.AssertIsValid();
-
-            operations.GetOrAddDefinition(operation.OverridenType)[operation.OperationSymbol] = operation;
-
-            operationsFromKey.Reset(); //unnecesarry?
         }
 
         public static List<OperationInfo> ServiceGetOperationInfos(Type entityType)
