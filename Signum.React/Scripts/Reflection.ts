@@ -46,6 +46,7 @@ export interface MemberInfo {
     maxLength?: number;
     isMultiline?: boolean;
     preserveOrder?: boolean;
+    notVisible?: boolean;
     id?: any; //symbols
 }
 
