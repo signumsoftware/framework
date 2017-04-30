@@ -30,6 +30,7 @@ import * as DynamicViewComponent from './View/DynamicViewComponent'
 import { DynamicViewComponentProps, DynamicViewPart } from './View/DynamicViewComponent'
 import * as Nodes from './View/Nodes' //Typings-only
 import * as NodeUtils from './View/NodeUtils' //Typings-only
+import MessageModal from "../../../Framework/Signum.React/Scripts/Modals/MessageModal";
 
 
 export function start(options: { routes: JSX.Element[] }) {
@@ -75,18 +76,22 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
             if (!sel)
                 return this.fallback(entity);
 
-            var viewName = sel(entity as Entity);
+            try {
+                var viewName = sel(entity as Entity);
 
-            if (viewName == "STATIC")
-                return this.static(entity);
+                if (viewName == "STATIC")
+                    return this.static(entity);
 
-            if (viewName == "NEW")
-                return ViewPromise.flat(createDefaultDynamicView(entity.Type).then(dv => this.dynamicViewComponent(dv)));
+                if (viewName == "NEW")
+                    return ViewPromise.flat(createDefaultDynamicView(entity.Type).then(dv => this.dynamicViewComponent(dv)));
 
-            if (viewName == "CHOOSE")
-                return ViewPromise.flat(this.chooseDynamicView(entity.Type, true).then(dv => this.dynamicViewComponent(dv)));
+                if (viewName == "CHOOSE")
+                    return ViewPromise.flat(this.chooseDynamicView(entity.Type, true).then(dv => this.dynamicViewComponent(dv)));
 
-            return ViewPromise.flat(API.getDynamicView(entity.Type, viewName).then(dv => this.dynamicViewComponent(dv)));
+                return ViewPromise.flat(API.getDynamicView(entity.Type, viewName).then(dv => this.dynamicViewComponent(dv)));
+            } catch (error) {
+                return MessageModal.showError("There was an error executing the DynamicViewSelector. Fallback to default").then(() => this.fallback(entity));
+            }
         }));
     }
 
@@ -311,10 +316,12 @@ export function asOverrideFunction(dvr: DynamicViewOverrideEntity): (vr: ViewRep
     // Custom
     var DynamicViewPart = DynamicViewComponent.DynamicViewPart;
 
+    var modules = globalModules;
+
     code = "(function(vr){ " + code + "})";
 
     try {
-        return evalWithScope(code, globalModules);
+        return eval(code);
     } catch (e) {
         throw new Error("Syntax in DynamicViewOverride for '" + dvr.entityType!.toStr + "':\r\n" + code + "\r\n" + (e as Error).message);
     }
