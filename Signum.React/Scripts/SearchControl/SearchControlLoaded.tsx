@@ -81,7 +81,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     componentWillMount() {
 
         const fo = this.props.findOptions;
-        const qs = Finder.getQuerySettings(fo.queryKey);
+        const qs = Finder.getSettings(fo.queryKey);
         const qd = this.props.queryDescription;
 
         const sfb = qs && qs.simpleFilterBuilder && qs.simpleFilterBuilder(qd, fo.filterOptions);
