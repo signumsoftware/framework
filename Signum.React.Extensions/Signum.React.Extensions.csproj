@@ -172,7 +172,7 @@
     <Compile Include="Mailing\MailingController.cs" />
     <Compile Include="Mailing\MailingServer.cs" />
     <Compile Include="Toolbar\ToolbarController.cs" />
-    <Compile Include="Toolbar\WordServer.cs" />
+    <Compile Include="Toolbar\ToolbarServer.cs" />
     <Compile Include="Tree\TreeController.cs" />
     <Compile Include="Tree\TreeServer.cs" />
     <Compile Include="Workflow\WorkflowServer.cs" />
