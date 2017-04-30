@@ -663,7 +663,7 @@ export interface LambdaMember {
 
 export type LambdaMemberType = "Member" | "Mixin" | "Indexer";
 
-export function basicConstruct(type: PseudoType): ModifiableEntity {
+export function New(type: PseudoType, props?: any): ModifiableEntity {
 
     const ti = getTypeInfo(type);
 
@@ -689,6 +689,9 @@ export function basicConstruct(type: PseudoType): ModifiableEntity {
         Dic.getValues(ti.members).filter(a => a.type.isCollection).forEach(m => (result as any)[m.name.firstLower()] = []); //TODO: Collections in Embeddeds...
     }
 
+    if (props)
+        Dic.assign(result, props);
+
     return result;
 }
 
@@ -699,13 +702,7 @@ export interface IType {
 export class Type<T extends ModifiableEntity> implements IType {
 
     New(props?: Partial<T>): T {
-
-        const result =  basicConstruct(this.typeName) as T;
-
-        if (props)
-            Dic.assign(result, props);
-
-        return result;
+        return New(this.typeName, props) as T;
     }
 
     constructor(
