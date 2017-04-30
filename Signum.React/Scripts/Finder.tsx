@@ -833,9 +833,13 @@ export interface FormatRule {
 
 export class CellFormatter {
     constructor(
-        public formatter: (cell: any) => React.ReactChild | undefined,
+        public formatter: (cell: any, ctx: CellFormatterContext) => React.ReactChild | undefined,
         public cellClass? : string) {
     }
+}
+
+export interface CellFormatterContext {
+    refresh?: () => void;
 }
 
 
@@ -878,7 +882,7 @@ export const formatRules: FormatRule[] = [
     {
         name: "Lite",
         isApplicable: col => col.token!.filterType == "Lite",
-        formatter: col => new CellFormatter((cell: Lite<Entity>) => !cell ? undefined : <EntityLink lite={cell}/>)
+        formatter: col => new CellFormatter((cell: Lite<Entity>, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} />)
     },
 
     {

@@ -828,6 +828,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             resultIndex: co.token == undefined ? -1 : resultTable.columns.indexOf(co.token.fullKey)
         }));
 
+        const ctx: Finder.CellFormatterContext = {
+            refresh: () => this.doSearch().done()
+        };
 
         const rowAttributes = this.props.rowAttributes || qs && qs.rowAttributes;
 
@@ -855,7 +858,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
                     {columns.map((c, j) =>
                         <td key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
-                            {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex])}
+                            {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex], ctx)}
                         </td>)}
                 </tr>
             );
