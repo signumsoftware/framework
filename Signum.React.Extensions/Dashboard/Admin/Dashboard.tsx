@@ -3,7 +3,7 @@ import * as React from 'react'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity} from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, PropertyRoute, getTypeInfos, basicConstruct } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { getQueryNiceName, PropertyRoute, getTypeInfos, New } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
@@ -70,7 +70,7 @@ export default class Dashboard extends React.Component<{ ctx: TypeContext<Dashbo
                     return undefined;
 
                 return PanelPartEmbedded.New({
-                    content : basicConstruct(ti.name) as any as IPartEntity,
+                    content : New(ti.name) as any as IPartEntity,
                     style : "Default"
                 });
             });
