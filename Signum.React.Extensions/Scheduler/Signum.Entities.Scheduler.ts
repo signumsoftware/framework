@@ -36,6 +36,7 @@ export interface HolidayEmbedded extends Entities.EmbeddedEntity {
 }
 
 export interface IScheduleRuleEntity extends Entities.Entity {
+    startingOn?: string;
 }
 
 export interface ITaskEntity extends Entities.Entity {
@@ -111,6 +112,7 @@ export module SchedulerPermission {
 export const ScheduleRuleMinutelyEntity = new Type<ScheduleRuleMinutelyEntity>("ScheduleRuleMinutely");
 export interface ScheduleRuleMinutelyEntity extends Entities.Entity, IScheduleRuleEntity {
     Type: "ScheduleRuleMinutely";
+    startingOn?: string;
     eachMinutes?: number;
     isAligned?: boolean;
 }

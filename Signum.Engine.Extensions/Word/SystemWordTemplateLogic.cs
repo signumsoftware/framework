@@ -166,12 +166,7 @@ namespace Signum.Engine.Word
 
         public static WordTemplateEntity GetDefaultTemplate(SystemWordTemplateEntity systemWordTemplate)
         {
-            var isAllowed = Schema.Current.GetInMemoryFilter<WordTemplateEntity>(userInterface: false);
-
             var templates = SystemWordTemplateToWordTemplates.Value.TryGetC(systemWordTemplate.ToLite()).EmptyIfNull().Select(a => WordTemplateLogic.WordTemplatesLazy.Value.GetOrThrow(a));
-
-            templates = templates.Where(isAllowed);
-
             if (templates.IsNullOrEmpty())
             {
                 using (ExecutionMode.Global())
@@ -186,7 +181,19 @@ namespace Signum.Engine.Word
                 }
             }
 
-            return templates.Where(t => t.IsActiveNow()).SingleEx(() => "Active WordTemplates for SystemWordTemplate {0}".FormatWith(systemWordTemplate));
+            var isAllowed = Schema.Current.GetInMemoryFilter<WordTemplateEntity>(userInterface: false);
+            var candidates = templates.Where(isAllowed).Where(t => t.IsActiveNow());
+            return GetTemplate(candidates, systemWordTemplate, CultureInfo.CurrentCulture) ??
+                GetTemplate(candidates, systemWordTemplate, CultureInfo.CurrentCulture.Parent) ??
+                candidates.Only() ??
+                throw new InvalidProgramException($"No active template found for {systemWordReports} in {CultureInfo.CurrentCulture} or {CultureInfo.CurrentCulture.Parent}");
+        }
+
+        private static WordTemplateEntity GetTemplate(IEnumerable<WordTemplateEntity> candidates, SystemWordTemplateEntity systemWordTemplate, CultureInfo culture)
+        {
+            return candidates
+                .Where(a => a.Culture.Name == culture.Name)
+                .SingleOrDefaultEx(() => $"Active WordTemplates for SystemWordTemplate {systemWordTemplate} in {culture.Name}");
         }
 
         static SqlPreCommand Schema_Generating()

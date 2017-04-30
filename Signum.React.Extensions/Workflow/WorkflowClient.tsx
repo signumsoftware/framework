@@ -365,13 +365,13 @@ export function executeAndClose(eoc: Operations.EntityOperationContext<CaseActiv
 
 export function navigateCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, readOnly?: boolean): Promise<void> {
 
-    return _import("./Case/CaseFrameModal")
-        .then((NP: { default: typeof CaseFrameModal }) => NP.default.openNavigate(entityOrPack, readOnly));
+    return _import<{ default: typeof CaseFrameModal }>("./Case/CaseFrameModal")
+        .then(NP => NP.default.openNavigate(entityOrPack, readOnly));
 }
 
 export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, readOnly?: boolean): Promise<CaseActivityEntity> {
-    return _import("./Case/CaseFrameModal")
-        .then((NP: { default: typeof CaseFrameModal }) => NP.default.openView(entityOrPack, readOnly));
+    return _import<{ default: typeof CaseFrameModal }>("./Case/CaseFrameModal")
+        .then(NP => NP.default.openView(entityOrPack, readOnly));
     
 }
 
@@ -382,7 +382,7 @@ export function createNewCase(workflowId: number | string, mainEntityStrategy: W
                 return Finder.find({ queryName: wf.mainEntityType!.cleanName })
                     .then(lite => {
                         if (!lite)
-                            return undefined;
+                            return Promise.resolve(undefined);
 
                         return Navigator.API.fetchAndForget(lite!)
                             .then(entity => Operations.API.constructFromEntity(wf, CaseActivityOperation.CreateCaseActivityFromWorkflow, entity))

@@ -41,17 +41,12 @@ namespace Signum.Engine.Mailing
 
         public static void StartRunningEmailSenderAsync(int initialDelayMilliseconds)
         {
-            if (initialDelayMilliseconds == 0)
-                ExecuteProcess();
-            else
-            {
-                using (ExecutionContext.SuppressFlow())
-                    Task.Run(() =>
-                    {
-                        Thread.Sleep(initialDelayMilliseconds);
-                        ExecuteProcess();
-                    });
-            }
+            using (ExecutionContext.SuppressFlow())
+                Task.Run(() =>
+                {
+                    Thread.Sleep(initialDelayMilliseconds);
+                    ExecuteProcess();
+                });
         }
 
         private static void ExecuteProcess()

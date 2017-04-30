@@ -341,6 +341,8 @@ namespace Signum.React.Selenium
             element.GetDriver().Wait(() => element.GetAttribute("value") == text);
         }
 
+        public static string Value(this IWebElement e) => e.GetAttribute("value");
+
         public static void ButtonClick(this IWebElement button)
         {
             if (!button.Enabled)
