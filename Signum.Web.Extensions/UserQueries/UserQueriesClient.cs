@@ -233,6 +233,9 @@ namespace Signum.Web.UserQueries
             }));
 
             findOptions.Pagination = userQuery.GetPagination();
+            findOptions.ShowFilterButton = userQuery.ShowFilterButton;
+            findOptions.SearchOnLoad = userQuery.SearchOnLoad;
+
         }
 
         public static FindOptions ToFindOptions(this UserQueryEntity userQuery)

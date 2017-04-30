@@ -60,6 +60,11 @@ namespace Signum.Entities.UserQueries
         [NotNullable, PreserveOrder]
         public MList<QueryColumnEntity> Columns { get; set; } = new MList<QueryColumnEntity>();
 
+
+        public bool SearchOnLoad { get; set; }
+        public bool ShowFilterButton { get; set; }
+        
+
         PaginationMode? paginationMode;
         public PaginationMode? PaginationMode
         {
