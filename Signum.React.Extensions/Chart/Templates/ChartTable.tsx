@@ -51,6 +51,11 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
                 resultIndex: resultTable.columns.indexOf(co.token!.fullKey)
             }));
 
+
+        const ctx: Finder.CellFormatterContext = {
+            refresh: undefined
+        }
+
         return (
             <table className="sf-search-results table table-hover table-condensed">
                 <thead>
@@ -71,7 +76,7 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
                                 {!chartRequest.groupResults && <td>{((qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row)).last("EntityFormatRules").formatter)(row, resultTable.columns, undefined)}</td>}
                                 {columns.map((c, j) =>
                                     <td key={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
-                                        {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex]) }
+                                        {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex], ctx) }
                                     </td>)
                                 }
                             </tr>
