@@ -418,10 +418,6 @@ namespace Signum.Engine
 
         public override bool AllowsSetSnapshotIsolation => this.Version >= SqlServerVersion.SqlServer2008;
 
-        public override void FixType(ref SqlDbType type, ref int? size, ref int? scale)
-        {
-        }
-
         public override bool AllowsIndexWithWhere(string Where)
         {
             return Version > SqlServerVersion.SqlServer2005 && !ComplexWhereKeywords.Any(Where.Contains);

@@ -12,6 +12,10 @@
     "baseUrl": ".",
     "paths": {
       "moment": [ "./node_modules/moment" ]
-    }
+    },
+    "lib": [
+      "es2017",
+      "dom"
+    ]
   }
 }

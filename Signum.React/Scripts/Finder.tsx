@@ -287,7 +287,7 @@ export function setFilters(e: Entity, filterOptionsParsed: FilterOptionParsed[])
 
         const mi = getMemberForToken(ti, fo.token!.fullKey);
 
-        if (mi && (e as any)[mi.name] == null) {
+        if (mi && (e as any)[mi.name.firstLower()] == null) {
             const promise = Navigator.tryConvert(fo.value, mi.type);
 
             if (promise == null)

@@ -1,6 +1,4 @@
-﻿/// <reference path="../typings/es6-promise/es6-promise.d.ts" />
-
-declare function require<T>(path: string): T;
+﻿declare function require<T>(path: string): T;
 
  //Necessary till typescript has direct support https://github.com/Microsoft/TypeScript/issues/12364
 declare function _import<T>(path: string): Promise<T>;
@@ -48,7 +46,7 @@ interface Array<T> {
     clone(this: Array<T>, ): T[];
     joinComma(this: Array<T>, lastSeparator: string): string;
     extract(this: Array<T>, filter: (element: T) => boolean): T[];
-    findIndex(this: Array<T>, filter: (element: T) => boolean): number;
+    findIndex(this: Array<T>, filter: (element: T, index: number, obj: Array<T>) => boolean): number;
     findLastIndex(this: Array<T>, filter: (element: T) => boolean): number;
 }
 

@@ -487,8 +487,8 @@ export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<
 }
 
 export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions) {
-   return  _import("./Frames/FrameModal")
-        .then((NP: { default: typeof FrameModal }) => NP.default.openView(entityOrPack, viewOptions || {}));
+    return _import<{ default: typeof FrameModal }>("./Frames/FrameModal")
+        .then(NP => NP.default.openView(entityOrPack, viewOptions || {}));
 }
 
 export interface NavigateOptions {
@@ -511,8 +511,8 @@ export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityP
 }
 
 export function navigateDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
-    return _import("./Frames/FrameModal")
-        .then((NP: { default: typeof FrameModal }) => NP.default.openNavigate(entityOrPack, navigateOptions || {}));
+    return _import<{ default: typeof FrameModal }>("./Frames/FrameModal")
+        .then(NP => NP.default.openNavigate(entityOrPack, navigateOptions || {}));
 }
 
 export function createInNewTab(pack: EntityPack<ModifiableEntity>) {
@@ -563,7 +563,7 @@ export module API {
         const realLites = lites.filter(a => a.toStr == undefined && a.entity == undefined);
 
         if (!realLites.length)
-            return Promise.resolve<void>();
+            return Promise.resolve();
 
         return ajaxPost<string[]>({ url: "~/api/entityToStrings" }, realLites).then(strs => {
             realLites.forEach((l, i) => l.toStr = strs[i]);
@@ -820,7 +820,9 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> | unde
         return undefined;
     }
 
-    if (getTypeInfo(type.name) && getTypeInfo(type.name).kind == "Entity") {
+    const ti = getTypeInfo(type.name); 
+
+    if (ti && ti.kind == "Entity") {
 
         if (isLite(value))
             return API.fetchAndForget(value);
@@ -831,7 +833,7 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> | unde
         return undefined;
     }
 
-    if (type.name == "string" || type.name == "Guid" || type.name == "Date") {
+    if (type.name == "string" || type.name == "Guid" || type.name == "Date" || ti && ti.kind == "Enum") {
         if (typeof value === "string")
             return Promise.resolve(value);
 

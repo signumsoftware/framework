@@ -334,6 +334,7 @@ namespace Signum.Engine.Maps
         string Default { get; set; }
         int? Size { get; }
         int? Scale { get; }
+        string Collation { get; }
         Table ReferenceTable { get; }
         bool AvoidForeignKey { get; }
     }
@@ -365,6 +366,7 @@ namespace Signum.Engine.Maps
         bool IColumn.IdentityBehaviour { get { return table.IdentityBehaviour; } }
         int? IColumn.Size { get { return null; } }
         int? IColumn.Scale { get { return null; } }
+        public string Collation { get; set; }
         Table IColumn.ReferenceTable { get { return null; } }
         public Type Type { get; set; }
         public bool AvoidForeignKey { get { return false; } }
@@ -420,6 +422,7 @@ namespace Signum.Engine.Maps
         bool IColumn.Identity { get { return false; } }
         bool IColumn.IdentityBehaviour { get { return false; } }
         public int? Size { get; set; }
+        public string Collation { get; set; }
         public int? Scale { get; set; }
         Table IColumn.ReferenceTable { get { return null; } }
         public bool AvoidForeignKey { get { return false; } }
@@ -489,10 +492,12 @@ namespace Signum.Engine.Maps
             bool IColumn.IdentityBehaviour { get { return false; } }
             int? IColumn.Size { get { return null; } }
             int? IColumn.Scale { get { return null; } }
+            string IColumn.Collation { get { return null; } }
             public Table ReferenceTable { get { return null; } }
             Type IColumn.Type { get { return typeof(bool); } }
             public bool AvoidForeignKey { get { return false; } }
             public string Default { get; set; }
+
         }
 
         public EmbeddedHasValueColumn HasValue { get; set; }
@@ -690,6 +695,7 @@ namespace Signum.Engine.Maps
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get; set; }
         public SqlDbType SqlDbType { get { return ReferenceTable.PrimaryKey.SqlDbType; } }
+        public string Collation { get { return ReferenceTable.PrimaryKey.Collation; } }
         public string UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
         public Type Type { get { return this.Nullable ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
         
@@ -924,6 +930,7 @@ namespace Signum.Engine.Maps
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get; set; }
         public SqlDbType SqlDbType { get { return ReferenceTable.PrimaryKey.SqlDbType; } }
+        public string Collation { get { return ReferenceTable.PrimaryKey.Collation; } }
         public string UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
         public Type Type { get { return this.Nullable ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
         public bool AvoidForeignKey { get; set; }
@@ -940,6 +947,7 @@ namespace Signum.Engine.Maps
         bool IColumn.IdentityBehaviour { get { return false; } }
         public int? Size { get; set; }
         int? IColumn.Scale { get { return null; } }
+        public string Collation { get; set; }
         public Table ReferenceTable { get { return null; } }
         public SqlDbType SqlDbType { get { return SqlDbType.NVarChar; } }
         public Type Type { get { return typeof(string); } }
@@ -1015,6 +1023,7 @@ namespace Signum.Engine.Maps
             public string Name { get; set; }
             bool IColumn.Nullable { get { return false; } }
             public SqlDbType SqlDbType { get; set; }
+            public string Collation { get; set; }
             public string UserDefinedTypeName { get; set; }
             bool IColumn.PrimaryKey { get { return true; } }
             public bool Identity { get; set; }
