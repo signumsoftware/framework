@@ -2,7 +2,7 @@
 import * as React from "react"
 import { EntityData, EntityKind } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { Point, Rectangle, calculatePoint, wrap } from '../Utils'
+import { Point, Rectangle, calculatePoint, wrap, forceBoundingBox } from '../Utils'
 
 export interface TableInfo extends ITableInfo {
     typeName: string;
@@ -13,7 +13,7 @@ export interface TableInfo extends ITableInfo {
 export interface MListTableInfo extends ITableInfo {
 }
 
-export interface ITableInfo extends d3.layout.force.Node, Rectangle {
+export interface ITableInfo extends d3.SimulationNodeDatum, Rectangle {
     tableName: string;
     niceName: string;
     rows: number | null;
@@ -39,7 +39,7 @@ export type EntityBaseType =
     "MList" |
     "Part";
 
-export interface IRelationInfo extends d3.layout.force.Link<ITableInfo> {
+export interface IRelationInfo extends d3.SimulationLinkDatum<ITableInfo> {
     isMList?: boolean;
     repetitions: number;
     sourcePoint: Point;
@@ -82,20 +82,20 @@ export interface ClientColorProvider {
 }
 
 export class SchemaMapD3 {
-    
+
     nodes: ITableInfo[];
     links: IRelationInfo[];
-    force: d3.layout.Force<IRelationInfo, ITableInfo>;
+    simulation: d3.Simulation<ITableInfo, IRelationInfo>;
     fanIn: { [key: string]: IRelationInfo[] };
 
     selectedTable: ITableInfo | undefined;
 
-    link: d3.Selection<IRelationInfo>;
+    link: d3.Selection<SVGPathElement, IRelationInfo, any, any>;
 
-    nodeGroup: d3.Selection<ITableInfo>;
-    node: d3.Selection<ITableInfo>;
-    label: d3.Selection<ITableInfo>;
-    titles: d3.Selection<ITableInfo>;
+    nodeGroup: d3.Selection<SVGGElement, ITableInfo, any, any>;
+    node: d3.Selection<SVGRectElement, ITableInfo, any, any>;
+    label: d3.Selection<SVGTextElement, ITableInfo, any, any>;
+    titles: d3.Selection<SVGTitleElement, ITableInfo, any, any>;
 
     constructor(
         public svgElement: SVGElement,
@@ -106,39 +106,53 @@ export class SchemaMapD3 {
         public width: number,
         public height: number) {
 
-        this.force = d3.layout.force<IRelationInfo, ITableInfo>()
-            .gravity(0)
-            .charge(0)
-            .size([width, height]);
+        this.simulation = d3.forceSimulation<ITableInfo, IRelationInfo>()
+            .force("bounding", forceBoundingBox(width, height))
+            .force("repulsion", d3.forceManyBody().strength(-120))
+            .force("collide", d3.forceCollide(30));
 
         this.fanIn = map.relations.groupToObject(a => a.toTable);
 
-        this.restart();
+        this.regenerate();
 
         const svg = d3.select(svgElement)
             .attr("width", width)
             .attr("height", height);
 
-        this.link = svg.append("svg:g").attr("class", "links").selectAll(".link")
+        this.link = svg.append<SVGGElement>("svg:g").attr("class", "links").selectAll(".link")
             .data(map.allLinks)
-            .enter().append("path")
+            .enter().append<SVGPathElement>("path")
             .attr("class", "link")
-            .style("stroke-dasharray", d => (<RelationInfo>d).lite ? "2, 2" : undefined)
+            .style("stroke-dasharray", d => (d as RelationInfo).lite ? "2, 2" : null)
             .style("stroke", "black")
             .attr("marker-end", d => "url(#" + (d.isMList ? "mlist_arrow" : (<RelationInfo>d).lite ? "lite_arrow" : "normal_arrow") + ")");
 
         this.selectedLinks();
 
-        const nodesG = svg.append("svg:g").attr("class", "nodes");
+        const nodesG = svg.append<SVGGElement>("svg:g").attr("class", "nodes");
 
-        const drag = this.force.drag()
-            .on("dragstart", d => d.fixed = true);
+
+        const drag = d3.drag<SVGGElement, ITableInfo>()
+            .on("start", d => {
+                if (!d3.event.active)
+                    this.simulation.alphaTarget(0.3).restart();
+
+                d.fx = d.x;
+                d.fy = d.y;
+            })
+            .on("drag", d => {
+                d.fx = d3.event.x;
+                d.fy = d3.event.y;
+            })
+            .on("end", d => {
+                this.simulation.alphaTarget(0);
+            });
 
         this.nodeGroup = nodesG.selectAll(".nodeGroup")
             .data(map.allNodes)
             .enter()
-            .append("svg:g").attr("class", "nodeGroup")
-            .style("cursor", d => (d as TableInfo).typeName && Finder.isFindable((d as TableInfo).typeName) ? "pointer" : undefined)
+            .append<SVGGElement>("svg:g").attr("class", "nodeGroup")
+            .style("cursor", d => (d as TableInfo).typeName && Finder.isFindable((d as TableInfo).typeName) ? "pointer" : null)
             .on("click", d => {
 
                 this.selectedTable = this.selectedTable == d ? undefined : d;
@@ -156,10 +170,13 @@ export class SchemaMapD3 {
                 }
             })
             .on("dblclick", d => {
-                d.fixed = false;
-            }).call(drag);
+                d.fx = null;
+                d.fy = null;
+                this.simulation.alpha(0.3).restart();
+            })
+            .call(drag);
 
-        this.node = this.nodeGroup.append("rect")
+        this.node = this.nodeGroup.append<SVGRectElement>("rect")
             .attr("class", d => "node " + d.entityBaseType)
             .attr("rx", n =>
                 n.entityBaseType == "Entity" ? 7 :
@@ -171,9 +188,9 @@ export class SchemaMapD3 {
 
         const margin = 3;
 
-        this.label = this.nodeGroup.append("text")
+        this.label = this.nodeGroup.append<SVGTextElement>("text")
             .attr("class", d => "node " + d.entityBaseType)
-            .style("cursor", d => (d as TableInfo).typeName ? "pointer" : undefined)
+            .style("cursor", d => (d as TableInfo).typeName ? "pointer" : null)
             .text(d => d.niceName)
             .each(function (d) {
                 const text = this as SVGTextElement;
@@ -187,20 +204,20 @@ export class SchemaMapD3 {
             .attr("height", d => d.height);
 
         this.selectedNode();
-        
+
         this.showHideNodes();
 
         this.label.attr("transform", d => "translate(" + d.width / 2 + ", 0)");
 
-        this.titles = this.label.append('svg:title');
+        this.titles = this.label.append<SVGTitleElement>('svg:title');
 
         this.drawColor();
 
-        this.force.on("tick", this.onTick);
+        this.simulation.on("tick", this.onTick);
     }
 
-    
-    restart() {
+
+    regenerate() {
 
         const parts = this.filter.match(/[+-]?((\w+)|\*)/g);
 
@@ -226,25 +243,30 @@ export class SchemaMapD3 {
             isMatch(n.namespace.toLowerCase() + "|" + n.tableName.toLowerCase() + "|" + n.niceName.toLowerCase()));
 
         this.links = this.map.allLinks.filter(l =>
-            this.nodes.indexOf(<ITableInfo>l.source) != -1 &&
-            this.nodes.indexOf(<ITableInfo>l.target) != -1);
+            this.nodes.contains(<ITableInfo>l.source) &&
+            this.nodes.contains(<ITableInfo>l.target));
 
         const numNodes = this.nodes.length;
 
-        const distance =
-            numNodes < 10 ? 80 :
-                numNodes < 20 ? 60 :
-                    numNodes < 30 ? 50 :
-                        numNodes < 50 ? 40 :
+        let distance =
+            numNodes < 10 ? 110 :
+                numNodes < 20 ? 80 :
+                    numNodes < 30 ? 65 :
+                        numNodes < 50 ? 50 :
                             numNodes < 100 ? 35 :
                                 numNodes < 200 ? 30 : 25;
 
-        this.force
-            .linkDistance((d: IRelationInfo) => d.isMList ? distance * 0.7 : distance * 1.5)
-            .linkStrength((d: IRelationInfo) => 0.7 * (d.isMList ? 1 : this.getOpacity((<RelationInfo>d).toTable)))
+        this.simulation
+            .force("link", d3.forceLink<ITableInfo, IRelationInfo>(this.links)
+                .distance(d =>
+                    d.isMList ? distance * 0.7 :
+                    (d as RelationInfo).lite ? distance * 1.6: 
+                    distance * 1.2)
+                .strength(d => 0.7 * (d.isMList ? 1 : this.getOpacity((<RelationInfo>d).toTable)))
+            )
             .nodes(this.nodes)
-            .links(this.links)
-            .start();
+            .alpha(1)
+            .restart();
     }
 
     selectedLinks() {
@@ -255,7 +277,7 @@ export class SchemaMapD3 {
     }
 
     selectedNode() {
-        this.label.style("font-weight", d => d == this.selectedTable ? "bold" : undefined);
+        this.label.style("font-weight", d => d == this.selectedTable ? "bold" : null);
     }
 
     showHideNodes() {
@@ -278,12 +300,12 @@ export class SchemaMapD3 {
     setFilter(newFilter: string) {
         this.filter = newFilter;
 
-        this.restart();
+        this.regenerate();
         this.selectedLinks();
         this.showHideNodes();
     }
 
-    
+
     setColor(newColor: string) {
 
         this.color = newColor;
@@ -295,30 +317,18 @@ export class SchemaMapD3 {
 
         this.node.style("fill", cp.getFill)
             .style("stroke", cp.getStroke || cp.getFill)
-            .style("mask", cp.getMask);
+            .style("mask", a => cp.getMask && cp.getMask(a) || null);
 
         this.titles.text(t => cp.getTooltip(t) + " (" + t.entityBaseType + ")");
     }
 
-    stop(){
-        this.force.stop();
+    stop() {
+        this.simulation.stop();
     }
 
 
     onTick = () => {
-        this.nodes.forEach(d => {
-            d.nx = 0;
-            d.ny = 0;
-        });
-
-        this.namespaceClustering();
-        this.gravity();
-
-        this.nodes.forEach(d => {
-            d.x = (d.x || 0) + d.nx;
-            d.y = (d.y || 0) + d.ny;
-        });
-
+       
         const visibleLink = this.link.filter(f => this.links.indexOf(f) != -1);
 
         visibleLink.each(rel => {
@@ -342,13 +352,15 @@ export class SchemaMapD3 {
         if (l.source == l.target) {
 
             const dx = (l.repetitions % 2) * 2 - 1;
-            const dy = ((l.repetitions + 1 ) % 2) * 2 - 1;
+            const dy = ((l.repetitions + 1) % 2) * 2 - 1;
 
-            const c = calculatePoint(l.source, {
-                x: l.source.x! + dx * (l.source.width / 2),
-                y: l.source.y! + dy * (l.source.height / 2),
+            const source = l.source as ITableInfo;
+
+            const c = calculatePoint(source as ITableInfo, {
+                x: source.x! + dx * (source.width / 2),
+                y: source.y! + dy * (source.height / 2),
             });
-            
+
             return `M${c.x} ${c.y} C ${c.x! + 50 * dx} ${c.y} ${c.x} ${c.y! + 50 * dy} ${c.x} ${c.y}`;
         } else {
             let p = this.getPointRepetitions(s, t, l.repetitions);
@@ -383,93 +395,6 @@ export class SchemaMapD3 {
 
         return p;
     }
-
-
-
-    gravity() {
-        this.nodes.forEach(n => {
-            n.nx += this.gravityDim(n.x!, 0, this.width);
-            n.ny += this.gravityDim(n.y!, 0, this.height);
-        });         
-    }
-
-    gravityDim(v: number, min: number, max: number): number {
-
-        const minF = min + 100;
-        const maxF = max - 100;
-
-        const dist =
-            maxF < v ? maxF - v :
-                v < minF ? minF - v : 0;
-
-        return dist * this.force.alpha() * 0.4;
-    }
-
-    namespaceClustering() {
-        const quadtree = d3.geom.quadtree<ITableInfo>()
-            .x(p => p.x!)
-            .y(p => p.y!)(this.nodes);
-
-        const numNodes = this.nodes.length;
-
-        const constant =
-            numNodes < 10 ? 100 :
-                numNodes < 20 ? 50 :
-                    numNodes < 50 ? 30 :
-                        numNodes < 100 ? 20 :
-                            numNodes < 200 ? 15 : 10;
-
-
-        function distance(v: number, min: number, max: number) {
-            if (v < min)
-                return min - v;
-
-            if (max < v)
-                return v - max;
-
-            return 0;
-        }
-
-        this.nodes.forEach(d => {
-            quadtree.visit((quad, x1, y1, x2, y2) => {
-                if (quad.point && quad.point != d) {
-
-                    let x = d.x! - quad.point.x!;
-                    let y = d.y! - quad.point.y!;
-
-                    if (x == 0 && y == 0) {
-                        x = (Math.random() - 0.5) * 10;
-                        y = (Math.random() - 0.5) * 10;
-                    }
-
-                    const l = Math.sqrt(x * x + y * y);
-
-                    const lx = x / l;
-                    const ly = y / l;
-
-                    const ratio = l / 20;
-
-                    let f = constant * this.force.alpha() / Math.max(ratio * ratio, 0.1);
-    
-                    if (d.namespace != quad.point.namespace)
-                        f *= 4;
-
-                    f = Math.min(f, 1);
-
-                    d.nx += lx * f;
-                    d.ny += ly * f;
-                }
-
-                const dx = distance(d.x!, x1, x2);
-                const dy = distance(d.y!, y1, y2);
-
-                const dist = Math.sqrt(dx * dx + dy * dy);
-
-                return dist > 400;
-            });
-        });
-    }
-
 }
 
 
