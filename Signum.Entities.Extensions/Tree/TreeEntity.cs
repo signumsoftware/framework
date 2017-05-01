@@ -40,12 +40,12 @@ namespace Signum.Entities.Tree
         [Ignore]
         public bool IsSibling { get; set; }
 
-        [SqlDbType(Size = 100)]
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
+        [SqlDbType(Size = 255)]
+        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 255)]
         public string Name { get; set; }
 
         [NotNullable, SqlDbType(Size = 1000)]
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 1000)] //Set by BL
+        [StringLengthValidator(AllowNulls = true, Min = 1, Max = 1000)] //Set by BL
         public string FullName { get; private set; }
 
         public void SetFullName(string newFullName)
@@ -60,7 +60,6 @@ namespace Signum.Entities.Tree
             return ToStringExpression.Evaluate(this);
         }
     }
-
 
     [AutoInit]
     public static class TreeOperation
