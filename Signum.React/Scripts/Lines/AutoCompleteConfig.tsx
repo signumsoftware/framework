@@ -15,10 +15,10 @@ export interface AutocompleteConfig<T> {
     getItems: (subStr: string) => Promise<T[]>;
     getItemsDelay?: number;
     minLength?: number;
-    renderItem: (item: T, subStr?: string) => React.ReactNode;
-    renderList?: (typeahead: Typeahead) => React.ReactNode;
-    getEntityFromItem: (item: T) => Lite<Entity> | ModifiableEntity;
-    getItemFromEntity: (entity: Lite<Entity> | ModifiableEntity) => Promise<T>;
+    renderItem(item: T, subStr?: string) : React.ReactNode;
+    renderList?(typeahead: Typeahead): React.ReactNode;
+    getEntityFromItem(item: T) : Lite<Entity> | ModifiableEntity;
+    getItemFromEntity(entity: Lite<Entity> | ModifiableEntity) : Promise<T>;
 }
 
 export class LiteAutocompleteConfig implements AutocompleteConfig<Lite<Entity>>{
@@ -88,7 +88,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<Lite<En
             .then(filters => this.parsedFilters = filters);
     }
 
-    getItems = (subStr: string): Promise<Lite<Entity>[]> => {
+    getItems(subStr: string): Promise<Lite<Entity>[]> {
         return this.getParsedFilters()
             .then(filters => Finder.API.findLiteLikeWithFilters({
                 queryKey: getQueryKey(this.findOptions.queryName),

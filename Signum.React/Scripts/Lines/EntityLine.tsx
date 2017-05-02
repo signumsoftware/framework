@@ -138,17 +138,17 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
         var ac = this.state.autoComplete;
 
-        if (!ac || ctx.readOnly)
+        if (ac == null || ctx.readOnly)
             return <FormControlStatic ctx={ctx}>{ctx.value && ctx.value.toStr}</FormControlStatic>;
 
         return (
             <Typeahead ref={ta => this.typeahead = ta}
                 inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
-                getItems={ac.getItems}
+                getItems={query => ac!.getItems(query)}
                 getItemsDelay={ac.getItemsDelay}
                 minLength={ac.minLength}
-                renderItem={ac.renderItem}
-                renderList={ac.renderList}
+                renderItem={(item, query) => ac!.renderItem(item, query)}
+                renderList={ac!.renderList && (ta => ac!.renderList!(ta))}
                 liAttrs={lite => ({ 'data-entity-key': liteKey(lite) }) }
                 onSelect={this.handleOnSelect}/>
         );
