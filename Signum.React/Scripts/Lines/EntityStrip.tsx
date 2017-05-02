@@ -129,7 +129,14 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                 getItems={ac.getItems}
                 getItemsDelay={ac.getItemsDelay}
                 renderItem={ac.renderItem}
-                liAttrs={lite => ({ 'data-entity-key': liteKey(lite) }) }
+                liAttrs={item => {
+                    const entity = ac!.getEntityFromItem(item);
+                    const key = isLite(entity) ? liteKey(entity) :
+                        (entity as Entity).id ? liteKey(toLite(entity as Entity)) :
+                            undefined;
+
+                    return ({ 'data-entity-key': key });
+                }}
                 onSelect={this.handleOnSelect}/>
         );
     }
