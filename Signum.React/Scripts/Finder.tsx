@@ -518,12 +518,12 @@ export class TokenCompleter {
     }
 
 
-    get(fullKey: string): QueryToken{
+    get(fullKey: string): QueryToken {
         if (this.isSimple(fullKey)) {
             const cd = this.queryDescription.columns[fullKey];
 
             if (cd == undefined)
-                throw new Error(`Column '${fullKey}' not found in '${this.queryDescription.queryKey}'`);
+                throw new Error(`Column '${fullKey}' is not a column of query '${this.queryDescription.queryKey}'. Maybe use 'Entity.${fullKey}' instead?`);
 
             return toQueryToken(cd);
         }
