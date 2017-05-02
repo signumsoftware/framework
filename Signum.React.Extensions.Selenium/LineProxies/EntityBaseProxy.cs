@@ -165,7 +165,7 @@ namespace Signum.React.Selenium
             autoCompleteElement.FindElement(By.CssSelector("input")).SafeSendKeys(lite.Id.ToString());
             //Selenium.FireEvent(autoCompleteLocator, "keyup");
 
-            var listLocator = By.CssSelector("ul.typeahead.dropdown-menu");
+            var listLocator = By.CssSelector(".typeahead.dropdown-menu");
 
             autoCompleteElement.WaitElementVisible(listLocator);
             IWebElement itemElement = autoCompleteElement.FindElement(By.CssSelector("[data-entity-key='{0}']".FormatWith(lite.Key())));
