@@ -280,8 +280,8 @@ namespace Signum.Web.Files
                
                 QuerySettings.FormatRules.Add(new FormatterRule("WebImage",
                        col => col.Type == typeof(WebImage),
-                       col => new CellFormatter((help, obj) => 
-                       ((WebImage)obj)?.FullWebPath.HasText()==false ? null :
+                       col => new CellFormatter((help, obj) =>
+                      (obj==null||((WebImage)obj)?.FullWebPath.HasText()==false) ? null :
                            new HtmlTag("img")
                            .Attr("src", RouteHelper.New().Content(((WebImage)obj).FullWebPath))
                            .Attr("alt", typeof(WebImage).NiceName())
