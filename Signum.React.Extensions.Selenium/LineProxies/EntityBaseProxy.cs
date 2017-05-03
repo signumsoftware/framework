@@ -167,9 +167,9 @@ namespace Signum.React.Selenium
 
             var listLocator = By.CssSelector(".typeahead.dropdown-menu");
 
-            autoCompleteElement.WaitElementVisible(listLocator);
-            IWebElement itemElement = autoCompleteElement.FindElement(By.CssSelector("[data-entity-key='{0}']".FormatWith(lite.Key())));
-
+            var list = autoCompleteElement.WaitElementVisible(listLocator);
+            IWebElement itemElement = list.FindElement(By.CssSelector("[data-entity-key='{0}']".FormatWith(lite.Key())));
+            
             itemElement.Click();
         }
     }
