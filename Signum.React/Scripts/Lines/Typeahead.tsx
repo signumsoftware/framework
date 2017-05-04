@@ -212,8 +212,13 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
     handleMenuClick = (e: React.MouseEvent<any>) => {
         e.preventDefault();
-        if (this.select(e))
-            this.input.focus();
+        e.persist();
+        this.setState({
+            selectedIndex: parseInt((e.currentTarget as HTMLInputElement).getAttribute("data-index")!)
+        }, () => {
+            if (this.select(e))
+                this.input.focus()
+        });
     }
 
     mouseover = true;
