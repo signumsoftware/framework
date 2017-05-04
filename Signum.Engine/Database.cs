@@ -1012,6 +1012,23 @@ namespace Signum.Engine
         }
 
         #endregion
+
+        public static List<T> ToListWait<T>(this IQueryable<T> query, string message)
+        {
+            message = message == "auto" ? typeof(T).TypeName() : message;
+
+            return SafeConsole.WaitQuery(message, () => query.ToList());
+        }
+
+        public static List<T> ToListWait<T>(this IQueryable<T> query, int timeoutSeconds, string message = null)
+        {
+            using (Connector.CommandTimeoutScope(timeoutSeconds))
+            {
+                if (message == null)
+                    return query.ToList();
+                return query.ToListWait(message);
+            }
+        }
     }
 
     public class MListElement<E, V> where E : Entity
