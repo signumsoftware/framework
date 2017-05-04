@@ -103,23 +103,23 @@ namespace Signum.Engine.Mailing.Pop3
                         e.Package,
                         e.Exception,
                     });
-                
-                 dqm.RegisterQuery(typeof(Pop3ReceptionEntity), () => DynamicQueryCore.Auto(
-                 from s in Database.Query<Pop3ReceptionEntity>()
-                 select new
-                 {
-                     Entity = s,
-                     s.Id,
-                     s.Pop3Configuration,
-                     s.StartDate,
-                     s.EndDate,
-                     s.NewEmails,
-                     EmailMessages = s.EmailMessages().Count(),
-                     Exceptions = s.Exceptions().Count(),
-                     s.Exception,
-                 })
-                 .ColumnDisplayName(a => a.EmailMessages, () => typeof(EmailMessageEntity).NicePluralName())
-                 .ColumnDisplayName(a => a.Exceptions, () => typeof(ExceptionEntity).NicePluralName()));
+
+                dqm.RegisterQuery(typeof(Pop3ReceptionEntity), () => DynamicQueryCore.Auto(
+                from s in Database.Query<Pop3ReceptionEntity>()
+                select new
+                {
+                    Entity = s,
+                    s.Id,
+                    s.Pop3Configuration,
+                    s.StartDate,
+                    s.EndDate,
+                    s.NewEmails,
+                    EmailMessages = s.EmailMessages().Count(),
+                    Exceptions = s.Exceptions().Count(),
+                    s.Exception,
+                })
+                .ColumnDisplayName(a => a.EmailMessages, () => typeof(EmailMessageEntity).NicePluralName())
+                .ColumnDisplayName(a => a.Exceptions, () => typeof(ExceptionEntity).NicePluralName()));
 
                 dqm.RegisterExpression((Pop3ConfigurationEntity c) => c.Receptions(), () => typeof(Pop3ReceptionEntity).NicePluralName());
                 dqm.RegisterExpression((Pop3ReceptionEntity r) => r.EmailMessages(), () => typeof(EmailMessageEntity).NicePluralName());
@@ -203,7 +203,7 @@ namespace Signum.Engine.Mailing.Pop3
                                     {
                                         var email = client.GetMessage(mi, reception.ToLite());
 
-                                        email.Subject = email.Subject.Replace('\n', ' ').Replace('\r', ' ');
+                                        email.Subject = email.Subject == null ? "No Subject" : email.Subject.Replace('\n', ' ').Replace('\r', ' ');
 
                                         if (email.Recipients.IsEmpty())
                                         {
