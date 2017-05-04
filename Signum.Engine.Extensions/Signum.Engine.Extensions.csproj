@@ -59,9 +59,8 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DocumentFormat.OpenXml, Version=2.5.5631.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\..\packages\DocumentFormat.OpenXml.2.5\lib\DocumentFormat.OpenXml.dll</HintPath>
+    <Reference Include="DocumentFormat.OpenXml, Version=0.0.1.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\DocumentFormat.OpenXml.2.7.1\lib\net45\DocumentFormat.OpenXml.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.4\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
@@ -136,6 +135,7 @@
     <Compile Include="Disconnected\ExportManager.cs" />
     <Compile Include="Dynamic\DynamicLogic.cs" />
     <Compile Include="Dynamic\DynamicMixinConnectionLogic.cs" />
+    <Compile Include="Files\FilePathEmbeddedLogic.cs" />
     <Compile Include="Toolbar\ToolbarLogic.cs" />
     <Compile Include="Dynamic\DynamicSqlMigrationLogic.cs" />
     <Compile Include="Dynamic\DynamicExpressionLogic.cs" />
@@ -144,7 +144,6 @@
     <Compile Include="Dynamic\DynamicViewLogic.cs" />
     <Compile Include="Dynamic\DynamicValidationLogic.cs" />
     <Compile Include="Excel\ExcelAttachmentLogic.cs" />
-    <Compile Include="Files\EmbeddedFilePathLogic.cs" />
     <Compile Include="Files\FileLogic.cs" />
     <Compile Include="Files\FilePathLogic.cs" />
     <Compile Include="Files\FileTypeLogic.cs" />
