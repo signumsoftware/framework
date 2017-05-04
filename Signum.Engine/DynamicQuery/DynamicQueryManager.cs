@@ -133,9 +133,9 @@ namespace Signum.Engine.DynamicQuery
             return Execute(ExecuteType.QueryDescription, queryName, null, dqb => dqb.GetDescription());
         }
 
-        public IQueryable<Lite<Entity>> GetEntities(object queryName, List<Filter> filters)
+        public IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request)
         {
-            return Execute(ExecuteType.GetEntities, queryName, null, dqb => dqb.Core.Value.GetEntities(filters));
+            return Execute(ExecuteType.GetEntities, request.QueryName, null, dqb => dqb.Core.Value.GetEntities(request));
         }
 
         public event Func<object, bool> AllowQuery;

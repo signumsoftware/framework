@@ -210,11 +210,11 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     }
 
 
-    handleMenuClick = (e: React.MouseEvent<any>) => {
+    handleMenuClick = (e: React.MouseEvent<any>, index: number) => {
         e.preventDefault();
         e.persist();
         this.setState({
-            selectedIndex: parseInt((e.currentTarget as HTMLInputElement).getAttribute("data-index")!)
+            selectedIndex: index
         }, () => {
             if (this.select(e))
                 this.input.focus()
@@ -222,14 +222,14 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     }
 
     mouseover = true;
-    handleElementMouseEnter = (event: React.MouseEvent<any>) => {
+    handleElementMouseEnter = (event: React.MouseEvent<any>, index: number) => {
         this.mouseover = true;
         this.setState({
-            selectedIndex: parseInt((event.currentTarget as HTMLInputElement).getAttribute("data-index") !)
+            selectedIndex: index
         });
     }
 
-    handleElementMouseLeave = (event: React.MouseEvent<any>) => {
+    handleElementMouseLeave = (event: React.MouseEvent<any>, index: number) => {
         this.mouseover = false;
         this.setState({ selectedIndex: undefined });
         if (!this.focused && this.state.shown)
@@ -285,11 +285,11 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         return (<ul className="typeahead dropdown-menu" ref={this.handlePopupLoaded}>
             {
                 !this.state.items!.length ? <li className="no-results"><a><small>{this.props.noResultsMessage}</small></a></li> :
-                    this.state.items!.map((item, i) => <li key={i} className={i == this.state.selectedIndex ? "active" : undefined} data-index={i}
-                        onMouseEnter={this.handleElementMouseEnter}
-                        onMouseLeave={this.handleElementMouseLeave}
+                    this.state.items!.map((item, i) => <li key={i} className={i == this.state.selectedIndex ? "active" : undefined}
+                        onMouseEnter={e => this.handleElementMouseEnter(e, i)}
+                        onMouseLeave={e => this.handleElementMouseLeave(e, i)}
                         {...this.props.liAttrs && this.props.liAttrs(item) }>
-                        <a href="#" onClick={this.handleMenuClick}>{this.props.renderItem!(item, this.state.query!)}</a>
+                        <a href="#" onClick={e => this.handleMenuClick(e, i)}>{this.props.renderItem!(item, this.state.query!)}</a>
                     </li>)
             }
         </ul>);
