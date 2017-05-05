@@ -1,4 +1,5 @@
 ﻿import * as moment from 'moment';
+import * as numbro from 'numbro';
 import { Dic } from './Globals';
 import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities';
 import {ajaxPost, ajaxGet} from './Services';
@@ -45,6 +46,7 @@ export interface MemberInfo {
     maxLength?: number;
     isMultiline?: boolean;
     preserveOrder?: boolean;
+    notVisible?: boolean;
     id?: any; //symbols
 }
 
@@ -112,7 +114,6 @@ export function toMomentDurationFormat(format: string | undefined): string | und
     return format.replace("\:", ":");
 }
 
-
 export function toNumbroFormat(format: string | undefined) {
 
     if (format == undefined)
@@ -137,6 +138,37 @@ export function toNumbroFormat(format: string | undefined) {
 
     return format;
 }
+
+export function valToString(val: any) {
+    if (val == null)
+        return "";
+
+    return val.toString();
+}
+
+export function numberToString(val: any, format?: string) {
+    if (val == null)
+        return "";
+
+    return numbro(val).format(toNumbroFormat(format));
+}
+
+export function dateToString(val: any, format?: string) {
+    if (val == null)
+        return "";
+
+    var m = moment(val, moment.ISO_8601);
+    return m.format(toMomentFormat(format));
+}
+
+export function durationToString(val: any, format?: string) {
+    if (val == null)
+        return "";
+
+    var dur = moment.duration(val);
+    return dur.format(toMomentDurationFormat(format));
+}
+
 
 export interface TypeReference {
     name: string;
@@ -631,7 +663,7 @@ export interface LambdaMember {
 
 export type LambdaMemberType = "Member" | "Mixin" | "Indexer";
 
-export function basicConstruct(type: PseudoType): ModifiableEntity {
+export function New(type: PseudoType, props?: any): ModifiableEntity {
 
     const ti = getTypeInfo(type);
 
@@ -657,6 +689,9 @@ export function basicConstruct(type: PseudoType): ModifiableEntity {
         Dic.getValues(ti.members).filter(a => a.type.isCollection).forEach(m => (result as any)[m.name.firstLower()] = []); //TODO: Collections in Embeddeds...
     }
 
+    if (props)
+        Dic.assign(result, props);
+
     return result;
 }
 
@@ -667,13 +702,7 @@ export interface IType {
 export class Type<T extends ModifiableEntity> implements IType {
 
     New(props?: Partial<T>): T {
-
-        const result =  basicConstruct(this.typeName) as T;
-
-        if (props)
-            Dic.assign(result, props);
-
-        return result;
+        return New(this.typeName, props) as T;
     }
 
     constructor(
@@ -837,6 +866,9 @@ export function registerSymbol(type: string, key: string): any /*ISymbol*/ {
 
     return symbol as any;
 }
+
+
+
 
 export class PropertyRoute {
     

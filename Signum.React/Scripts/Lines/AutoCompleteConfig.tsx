@@ -73,8 +73,8 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<Lite<En
 
     constructor(
         public findOptions: FindOptions,
-        public count: number,
-        public withCustomToString: boolean) {
+        public count: number = 5,
+        public withCustomToString: boolean = false) {
     }
 
     parsedFilters?: FilterOptionParsed[];

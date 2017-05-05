@@ -76,21 +76,23 @@ export function registerToString<T extends ModifiableEntity>(type: Type<T>, toSt
 }
 
 
-import { getTypeInfo } from './Reflection' 
+import * as Reflection from './Reflection' 
 
 function getOrCreateToStringFunction(type: string)  {
     let f = toStringDictionary[type];
     if (f || f === null)
         return f; 
 
-    const ti = getTypeInfo(type);
+    const ti = Reflection.getTypeInfo(type);
 
     const getToString2 = getToString;
-    const valToString2 = valToString;
 
     try {
         const getToString = getToString2;
-        const valToString = valToString2;
+        const valToString = Reflection.valToString;
+        const numberToString = Reflection.numberToString;
+        const dateToString = Reflection.dateToString;
+        const durationToString = Reflection.durationToString;
 
         f = ti && ti.toStringFunction ? eval("(" + ti.toStringFunction + ")") : null;
     } catch (e) {
@@ -100,13 +102,6 @@ function getOrCreateToStringFunction(type: string)  {
     toStringDictionary[type] = f;
 
     return f;
-}
-
-export function valToString(val: any) {
-    if (val == null)
-        return "";
-
-    return val.toString();
 }
 
 export function getToString(entityOrLite: ModifiableEntity | Lite<Entity> | undefined): string {

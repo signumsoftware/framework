@@ -4,7 +4,7 @@ import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
 import { Dic } from './Globals';
 import { Lite, Entity, ModifiableEntity, EmbeddedEntity, SelectorMessage, EntityPack, MixinEntity } from './Signum.Entities';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationType, getTypeName, basicConstruct, OperationInfo } from './Reflection';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationType, getTypeName, New, OperationInfo } from './Reflection';
 import SelectorModal from './SelectorModal';
 import * as Operations from './Operations';
 import * as Navigator from './Navigator';
@@ -14,7 +14,7 @@ export const customConstructors: { [typeName: string]: (typeName: string) => Mod
 export function construct<T extends ModifiableEntity>(type: Type<T>): Promise<EntityPack<T> | undefined>;
 export function construct(type: string): Promise<EntityPack<ModifiableEntity> | undefined>;
 export function construct(type: string | Type<any>): Promise<EntityPack<ModifiableEntity> | undefined> {
-    
+
     const typeName = (type as Type<any>).typeName || type as string;
 
     const c = customConstructors[typeName];
@@ -35,7 +35,7 @@ export function construct(type: string | Type<any>): Promise<EntityPack<Modifiab
 
         if (constructOperations.length) {
 
-            const ctrs = constructOperations.filter(oi => Operations.isOperationAllowed(oi)); 
+            const ctrs = constructOperations.filter(oi => Operations.isOperationAllowed(oi));
 
             if (!ctrs.length)
                 throw new Error("No constructor is allowed!");
@@ -48,10 +48,15 @@ export function construct(type: string | Type<any>): Promise<EntityPack<Modifiab
 
                     const settings = Operations.getSettings(oi.key) as Operations.ConstructorOperationSettings<Entity>;
 
-                    if (settings && settings.onConstruct)
-                        return settings.onConstruct({ operationInfo: oi, settings: settings, typeInfo: ti });
+                    var ctx = new Operations.ConstructorOperationContext();
+                    ctx.operationInfo = oi;
+                    ctx.settings = settings;
+                    ctx.typeInfo = ti;
 
-                    return Operations.API.construct(ti.name, oi.key) as Promise<EntityPack<Entity> | undefined>
+                    if (settings && settings.onConstruct)
+                        return settings.onConstruct(ctx);
+
+                    return ctx.defaultConstruct();
                 }).then((p: EntityPack<Entity> | undefined) => {
                     if (p == undefined)
                         return undefined;
@@ -62,7 +67,7 @@ export function construct(type: string | Type<any>): Promise<EntityPack<Modifiab
         }
     }
 
-    const result = basicConstruct(typeName);
+    const result = New(typeName);
 
     assertCorrect(result);
 

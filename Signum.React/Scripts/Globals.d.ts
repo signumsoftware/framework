@@ -75,7 +75,7 @@ interface String {
     beforeLast(this: string, separator: string): string;
     tryAfterLast(this: string, separator: string): string | undefined;
     tryBeforeLast(this: string, separator: string): string | undefined;
-    etc(this: string, maxLength: number): string;
+    etc(this: string, maxLength: number, etcString?: string): string;
 
     firstUpper(this: string): string;
     firstLower(this: string, ): string;
