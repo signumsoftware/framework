@@ -16,6 +16,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.React.ApiControllers;
 using Signum.Entities.Tree;
 using Signum.Engine.Tree;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.React.Tree
 {
@@ -77,7 +78,7 @@ namespace Signum.React.Tree
             var qd = DynamicQueryManager.Current.QueryDescription(typeof(T));
             var filters = filtersTs.Select(f => f.ToFilter(qd, false)).ToList();
 
-            var dictionary = DynamicQueryManager.Current.GetEntities(typeof(T), filters)
+            var dictionary = DynamicQueryManager.Current.GetEntities(new QueryEntitiesRequest { QueryName = typeof(T), Filters = filters })
                             .Select(a => (T)a.Entity)
                             .SelectMany(t => t.Ascendants())
                             .Distinct()
@@ -95,6 +96,7 @@ namespace Signum.React.Tree
         }
     }
 
+#pragma warning disable IDE1006 // Naming Styles
     class TreeInfo
     {
         public int childrenCount { get; set; }
@@ -119,4 +121,5 @@ namespace Signum.React.Tree
         public List<TreeNode> loadedChildren { set; get; }
         public short level { get; set; }
     }
+#pragma warning restore IDE1006 // Naming Styles
 }
