@@ -1017,7 +1017,14 @@ namespace Signum.Engine
         {
             message = message == "auto" ? typeof(T).TypeName() : message;
 
-            return SafeConsole.WaitQuery(message, () => query.ToList());
+            var result = SafeConsole.WaitQuery(message, () => query.ToList());
+            lock (SafeConsole.SyncKey)
+            {
+                SafeConsole.WriteColor(ConsoleColor.White, " {0} ", result.Count);
+                SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "rows returned");
+            }
+
+            return result;
         }
 
         public static List<T> ToListWait<T>(this IQueryable<T> query, int timeoutSeconds, string message = null)
