@@ -52,13 +52,18 @@ export default class TreePage extends React.Component<TreePageProps, TreePageSta
         return (
             <div id="divSearchPage">
                 <h2>
-                    <span className="sf-entity-title">{ ti.nicePluralName }</span>
+                    <span className="sf-entity-title">{ti.nicePluralName}</span>
+                    &nbsp;
+                    <a className="sf-popup-fullscreen" href="#" onClick={(e) => this.treeView!.handleFullScreenClick(e)}>
+                        <span className="glyphicon glyphicon-new-window"></span>
+                    </a>
                 </h2>
                 <TreeViewer ref={tv => { this.treeView = tv; }}
+                    initialShowFilters={true}
                     typeName={ti.name}
                     filterOptions={this.state.filterOptions}
                     key={ti.name}
-                    onSearch={()=>this} />
+                    onSearch={() => this.changeUrl()} />
             </div>
         );
     }

@@ -25,6 +25,7 @@ interface TreeViewerProps {
     onSelectedNode?: (selectedNode: TreeNode | undefined) => void;
     onSearch?: () => void;
     filterOptions: FilterOption[];
+    initialShowFilters?: boolean;
 }
 
 interface TreeViewerState {
@@ -47,9 +48,8 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     constructor(props: TreeViewerProps) {
         super(props);
         this.state = {
-            queryDescription: undefined,
             filterOptions: [],
-            selectedNode: undefined,
+            showFilters: props.initialShowFilters
         };
     }
 
@@ -74,7 +74,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
                 return;
         }
 
-        this.state = { filterOptions: [] };
+        this.state = { filterOptions: [], showFilters: newProps.initialShowFilters };
         this.forceUpdate();
 
         this.initilize(newProps.typeName, newProps.filterOptions);
@@ -86,7 +86,9 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
             .then(qd => {
                 const qs = Finder.getSettings(typeName);
                 const sfb = qs && qs.simpleFilterBuilder && qs.simpleFilterBuilder(qd, this.state.filterOptions);
-                this.setState({ queryDescription: qd, simpleFilterBuilder: sfb, showFilters: false });
+                this.setState({ queryDescription: qd, simpleFilterBuilder: sfb });
+                if (sfb)
+                    this.setState({ showFilters: false });
                 
                 Finder.parseFilterOptions(filterOptions, qd).then(fop => {
                     this.setState({ filterOptions: fop }, () => {
@@ -237,11 +239,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         if (!this.state.selectedNode)
             return null;
 
-        return (
-            <ContextMenu position={cm.position} onHide={this.handleContextOnHide}>
-                {...this.renderMenuItems()}
-            </ContextMenu>
-        );
+        return React.cloneElement(<ContextMenu position={cm.position} onHide={this.handleContextOnHide} />, undefined, ...this.renderMenuItems());
     }
 
     renderMenuItems(): React.ReactElement<any>[] {
@@ -272,6 +270,9 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
                 const selectedLite = this.state.selectedNode && this.state.selectedNode.lite;
                 var newSeleted = selectedLite && nodes.filter(a => is(a.lite, selectedLite)).singleOrNull();
                 this.setState({ treeNodes: nodes, selectedNode: newSeleted || undefined });
+
+                if (this.props.onSearch)
+                    this.props.onSearch();
             })
             .done();
     }
@@ -398,10 +399,10 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
                     title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="glyphicon glyphicon glyphicon-filter"></span></a>
                 <button className="btn btn-primary" onClick={this.handleSearchSubmit}><i className="glyphicon glyphicon-search"></i> &nbsp; {JavascriptMessage.search.niceToString()}</button>
                 <button className="btn btn-default" onClick={this.handleAddRoot} disabled={s.treeNodes == null}><i className="fa fa-star" aria-hidden="true"></i>&nbsp; {TreeViewerMessage.AddRoot.niceToString()}</button>
-                <DropdownButton id="selectedButton" className="sf-query-button sf-tm-selected" title={`${JavascriptMessage.Selected.niceToString()} (${selected && selected.lite.toStr || TreeViewerMessage.AddRoot.niceToString()})`}
-                    disabled={selected == undefined}>
-                    {...this.renderMenuItems()}
-                </DropdownButton>
+                {React.cloneElement(<DropdownButton id="selectedButton"
+                    className="sf-query-button sf-tm-selected"
+                    title={`${JavascriptMessage.Selected.niceToString()} (${selected && selected.lite.toStr || TreeViewerMessage.AddRoot.niceToString()})`}
+                    disabled={selected == undefined} />, undefined, ...this.renderMenuItems())}
             </div>
         );
     }
