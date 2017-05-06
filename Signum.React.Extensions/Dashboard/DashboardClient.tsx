@@ -67,12 +67,12 @@ export function start(options: { routes: JSX.Element[] }) {
         component: () => _import<ComponentModule>('./View/UserChartPart').then(a => a.default),
         handleTitleClick: (p, e, ev) => {
             ev.preventDefault();
-            navigateOrWindowsOpen(ev, Navigator.navigateRoute(p.userChart!));
+            Navigator.pushOrOpen(Navigator.navigateRoute(p.userChart!), ev);
         },
         handleFullScreenClick: (p, e, ev) => {
             ev.preventDefault();
             UserChartClient.Converter.toChartRequest(p.userChart!, e)
-                .then(cr => navigateOrWindowsOpen(ev, ChartClient.Encoder.chartRequestPath(cr, { userChart: liteKey(toLite(p.userChart!)) })))
+                .then(cr => Navigator.pushOrOpen(ChartClient.Encoder.chartRequestPath(cr, { userChart: liteKey(toLite(p.userChart!)) }), ev))
                 .done();
         }
     });
@@ -82,12 +82,12 @@ export function start(options: { routes: JSX.Element[] }) {
         component: () => _import('./View/UserQueryPart').then((a: any) => a.default),
         handleTitleClick: (p, e, ev) => {
             ev.preventDefault();
-            navigateOrWindowsOpen(ev, Navigator.navigateRoute(p.userQuery!));
+            Navigator.pushOrOpen(Navigator.navigateRoute(p.userQuery!), ev);
         },
         handleFullScreenClick: (p, e, ev) => {
             ev.preventDefault();
             UserQueryClient.Converter.toFindOptions(p.userQuery!, e)
-                .then(cr => navigateOrWindowsOpen(ev, Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(p.userQuery!)) })))
+                .then(cr => Navigator.pushOrOpen(Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(p.userQuery!)) }), ev))
                 .done()
         }
     });
@@ -104,7 +104,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
         return API.forEntityType(ctx.lite.EntityType).then(das =>
             das.map(d => new QuickLinks.QuickLinkAction(liteKey(d), d.toStr || "", e => {
-                navigateOrWindowsOpen(e, dashboardUrl(d, ctx.lite))
+                Navigator.pushOrOpen(dashboardUrl(d, ctx.lite), e)
             }, { icon: "glyphicon glyphicon-th-large", iconColor: "darkslateblue" })));
     });
 
@@ -112,7 +112,7 @@ export function start(options: { routes: JSX.Element[] }) {
         e => Navigator.API.fetchAndRemember(ctx.lite)
             .then(db => {
                 if (db.entityType == undefined)
-                    navigateOrWindowsOpen(e, dashboardUrl(ctx.lite));
+                    Navigator.pushOrOpen(dashboardUrl(ctx.lite), e);
                 else
                     Navigator.API.fetchAndRemember(db.entityType)
                         .then(t => Finder.find({ queryName: t.cleanName }))
@@ -120,21 +120,13 @@ export function start(options: { routes: JSX.Element[] }) {
                             if (!entity)
                                 return;
 
-                            navigateOrWindowsOpen(e, dashboardUrl(ctx.lite, entity));
+                            Navigator.pushOrOpen(dashboardUrl(ctx.lite, entity), e);
                         }).done();
             }).done()));
 }
 
 export function dashboardUrl(lite: Lite<DashboardEntity>, entity?: Lite<Entity>) {
     return "~/dashboard/" + lite.id + (!entity ? "" : "?entity=" + liteKey(entity)); 
-}
-
-function navigateOrWindowsOpen(e: React.MouseEvent<any>, url: string){
-    if (e.ctrlKey || e.button == 1) {
-        window.open(url);
-    } else {
-        Navigator.history.push(url);
-    }
 }
 
 export function registerRenderer<T extends IPartEntity>(type: Type<T>, renderer : PartRenderer<T>){

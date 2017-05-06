@@ -102,7 +102,7 @@ export function queryIsFindable(queryKey: string) {
     return getQueryInfo(queryKey).queryAllowed;
 }
 
-function isOperationAuthorized(operation: OperationInfo | OperationSymbol | string): boolean {
+export function isOperationAuthorized(operation: OperationInfo | OperationSymbol | string): boolean {
     var key = (operation as OperationInfo | OperationSymbol).key || operation as string;
     const member = getTypeInfo(key.before(".")).members[key.after(".")];
     if (member == null)

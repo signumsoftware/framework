@@ -52,12 +52,9 @@ export abstract class ToolbarConfig<T extends Entity> {
     handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {
 
         var openWindow = e.ctrlKey || e.button == 1;
-
+        e.persist();
         this.navigateTo(res).then(url => {
-            if (openWindow)
-                window.open(url);
-            else
-                Navigator.history.push(url);
+            Navigator.pushOrOpen(url, e);
         }).done();
     }
 }
