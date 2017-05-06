@@ -7,6 +7,7 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 
 
 export interface TreeEntity extends Entities.Entity {
+    parentRoute?: string | null;
     level?: number | null;
     parentOrSibling?: Entities.Lite<TreeEntity> | null;
     isSibling?: boolean;

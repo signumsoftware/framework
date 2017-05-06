@@ -38,7 +38,7 @@ namespace Signum.Engine.Tree
             where T: TreeEntity
         {
             public static Expression<Func<T, IQueryable<T>>> Expression =
-                cp => Database.Query<T>().Where(cc => (bool)cc.Route.IsDescendantOf(cp.Route) && (int)cc.Route.GetLevel() == ((int)cp.Route.GetLevel() + 1));
+                cp => Database.Query<T>().Where(cc => (bool)(cc.Route.GetAncestor(1) == cp.Route));
             public ChildrensMethodExpander() : base(Expression) { }
         }
         [MethodExpander(typeof(ChildrensMethodExpander<>))]
@@ -174,6 +174,7 @@ namespace Signum.Engine.Tree
         {
             RegisterExpressions<T>(dqm);
             RegisterOperations<T>();
+            include.WithUniqueIndex(n => new { n.ParentRoute, n.Name });
             return include;
         }
 

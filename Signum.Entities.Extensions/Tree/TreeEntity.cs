@@ -4,6 +4,7 @@ using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -14,9 +15,21 @@ namespace Signum.Entities.Tree
     [Serializable]
     public abstract class TreeEntity : Entity
     {
-        [UniqueIndex, InTypeScript(false)]
-        public SqlHierarchyId Route { get; set; }
+        [UniqueIndex]
+        SqlHierarchyId route;
+        [InTypeScript(false)]
+        public SqlHierarchyId Route
+        {
+            get { return this.Get(route); }
+            set
+            {
+                if (this.Set(ref route, value))
+                    this.ParentRoute = value.GetAncestor(1).ToString();
+            }
+        }
 
+        [NotNullable, SqlDbType(Size = 255, SqlDbType = SqlDbType.VarChar)]
+        public string ParentRoute { get; set; }
 
         static Expression<Func<TreeEntity, int?>> LevelExpression = @this => (int?)@this.Route.GetLevel();
 
@@ -44,8 +57,8 @@ namespace Signum.Entities.Tree
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 255)]
         public string Name { get; set; }
 
-        [NotNullable, SqlDbType(Size = 1000)]
-        [StringLengthValidator(AllowNulls = true, Min = 1, Max = 1000)] //Set by BL
+        [NotNullable, SqlDbType(Size = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = true, Min = 1, Max = int.MaxValue)] //Set by BL
         public string FullName { get; private set; }
 
         public void SetFullName(string newFullName)
