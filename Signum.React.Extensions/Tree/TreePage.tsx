@@ -1,20 +1,50 @@
 ﻿import * as React from 'react'
 import { getTypeInfo } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
+import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { TreeViewer } from './TreeViewer'
 import { RouteComponentProps } from "react-router";
+import { FilterOption } from "../../../Framework/Signum.React/Scripts/FindOptions";
+import * as QueryString from 'query-string'
 
 
 interface TreePageProps extends RouteComponentProps<{ typeName: string }> {
 
 }
 
-export default class TreePage extends React.Component<TreePageProps, { }> {
+interface TreePageState {
+    filterOptions: FilterOption[];
+}
 
-    constructor(props: any) {
+export default class TreePage extends React.Component<TreePageProps, TreePageState> {
+
+    constructor(props: TreePageProps) {
         super(props);
-        this.state = {};
+        this.state = this.calculateState(props);
     }
-    
+
+    componentWillReceiveProps(nextProps: TreePageProps) {
+        this.setState(this.calculateState(nextProps));
+    }
+
+    calculateState(props: TreePageProps): TreePageState {
+        var query = QueryString.parse(props.location.search);
+        return {
+            filterOptions: Finder.Decoder.decodeFilters(query)
+        };
+    }
+
+    changeUrl() {
+
+        var newPath = this.treeView!.getCurrentUrl();
+        
+        var currentLocation = Navigator.history.location;
+
+        if (currentLocation.pathname + currentLocation.search != newPath)
+            Navigator.history.replace(newPath);
+    }
+
+    treeView?: TreeViewer;
     render() {
 
         var ti = getTypeInfo(this.props.match.params.typeName);
@@ -24,7 +54,11 @@ export default class TreePage extends React.Component<TreePageProps, { }> {
                 <h2>
                     <span className="sf-entity-title">{ ti.nicePluralName }</span>
                 </h2>
-                <TreeViewer typeName={ti.name} key={ti.name} />
+                <TreeViewer ref={tv => { this.treeView = tv; }}
+                    typeName={ti.name}
+                    filterOptions={this.state.filterOptions}
+                    key={ti.name}
+                    onSearch={()=>this} />
             </div>
         );
     }

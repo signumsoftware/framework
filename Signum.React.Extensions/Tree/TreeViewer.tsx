@@ -8,13 +8,14 @@ import ContextMenu from '../../../Framework/Signum.React/Scripts/SearchControl/C
 import { ContextMenuPosition } from '../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
-import { SearchMessage, JavascriptMessage, EntityControlMessage, toLite, ExecuteSymbol, ConstructSymbol_From, ConstructSymbol_Simple, DeleteSymbol, OperationMessage } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { SearchMessage, JavascriptMessage, EntityControlMessage, toLite, liteKey, ExecuteSymbol, ConstructSymbol_From, ConstructSymbol_Simple, DeleteSymbol, OperationMessage } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TreeViewerMessage, TreeEntity, TreeOperation } from './Signum.Entities.Tree'
 import * as TreeClient from './TreeClient'
-import { FilterOptionParsed, QueryDescription, FilterRequest, SubTokensOptions } from "../../../Framework/Signum.React/Scripts/FindOptions";
+import { FilterOptionParsed, QueryDescription, FilterRequest, SubTokensOptions, FilterOption } from "../../../Framework/Signum.React/Scripts/FindOptions";
 import FilterBuilder from "../../../Framework/Signum.React/Scripts/SearchControl/FilterBuilder";
 import { ISimpleFilterBuilder } from "../../../Framework/Signum.React/Scripts/Search";
 import { is } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
+import MessageModal from "../../../Framework/Signum.React/Scripts/Modals/MessageModal";
 
 require("./TreeViewer.css");
 
@@ -22,6 +23,8 @@ interface TreeViewerProps {
     typeName: string;
     onDoubleClick?: (selectedNode: TreeNode, e: React.MouseEvent<any>) => void;
     onSelectedNode?: (selectedNode: TreeNode | undefined) => void;
+    onSearch?: () => void;
+    filterOptions: FilterOption[];
 }
 
 interface TreeViewerState {
@@ -58,34 +61,82 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     }
 
     componentWillMount() {
-        Finder.getQueryDescription(this.props.typeName)
+        this.initilize(this.props.typeName, this.props.filterOptions);
+    }
+
+    componentWillReceiveProps(newProps: TreeViewerProps) {
+        var path = TreeClient.treePath(newProps.typeName, newProps.filterOptions);
+        if (path == TreeClient.treePath(this.props.typeName, this.props.filterOptions))
+            return;
+
+        if (this.state.filterOptions && this.state.queryDescription) {
+            if (path == TreeClient.treePath(this.props.typeName, this.getFilterOptionsFromState()))
+                return;
+        }
+
+        this.state = { filterOptions: [] };
+        this.forceUpdate();
+
+        this.initilize(newProps.typeName, newProps.filterOptions);
+    }
+
+    initilize(typeName: string, filterOptions: FilterOption[]) {
+    
+        Finder.getQueryDescription(typeName)
             .then(qd => {
-                const qs = Finder.getSettings(this.props.typeName);
+                const qs = Finder.getSettings(typeName);
                 const sfb = qs && qs.simpleFilterBuilder && qs.simpleFilterBuilder(qd, this.state.filterOptions);
                 this.setState({ queryDescription: qd, simpleFilterBuilder: sfb, showFilters: false });
+                
+                Finder.parseFilterOptions(filterOptions, qd).then(fop => {
+                    this.setState({ filterOptions: fop }, () => {
+
+                        this.search();
+                    });
+                });
             })
             .done();
+    }
 
-        API.getRoots(this.props.typeName)
-            .then(t => this.setState({ treeNodes: t }))
-            .done();
+    handleFullScreenClick = (ev: React.MouseEvent<any>) => {
+
+        ev.preventDefault();
+        
+        const path = this.getCurrentUrl();
+
+        if (ev.ctrlKey || ev.button == 1)
+            window.open(path);
+        else
+            Navigator.history.push(path);
+    };
+
+    getCurrentUrl() {
+        return TreeClient.treePath(this.props.typeName, this.getFilterOptionsFromState());
+    }
+
+    getFilterOptionsFromState() {
+        return this.state.filterOptions.filter(a => !!a.token).map(f => ({ columnName: f.token!.fullKey, operation: f.operation, value: f.value, frozen: f.frozen }) as FilterOption);
     }
 
     handleNodeIconClick = (n: TreeNode) => {
         if (n.nodeState == "Collapsed" || n.nodeState == "Filtered") {
-            API.getChildren(this.props.typeName, n.lite.id!.toString())
-                .then(t => {
-                    var oldNodes = n.loadedChildren.toObject(a => a.lite.id!.toString());
-                    n.loadedChildren = t.map(n => oldNodes[n.lite.id!.toString()] || n);
-                    n.nodeState = "Expanded";
-                    this.forceUpdate();
-                })
-                .done();
+            this.reloadNode(n);
         }
         else if (n.nodeState == "Expanded") {
             n.nodeState = "Collapsed";
             this.forceUpdate();
         }
+    }
+
+    reloadNode(n: TreeNode) {
+        API.getChildren(this.props.typeName, n.lite.id!.toString())
+            .then(t => {
+                var oldNodes = n.loadedChildren.toObject(a => a.lite.id!.toString());
+                n.loadedChildren = t.map(n => oldNodes[n.lite.id!.toString()] || n);
+                n.nodeState = "Expanded";
+                this.forceUpdate();
+            })
+            .done();
     }
 
     handleNodeTextClick = (n: TreeNode) => {
@@ -100,9 +151,42 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     }
 
     handleNavigate = () => {
-        Navigator.navigate(this.state.selectedNode!.lite)
-            .then(() => this.search())
+        const node = this.state.selectedNode!;
+        Navigator.navigate(node.lite)
+            .then(() => this.refreshSelectedAndSiblings())
             .done();
+    }
+
+    refreshSelectedAndSiblings() {
+        const node = this.state.selectedNode!;
+
+        var parent = this.findParent(node);
+
+        var promise = parent == null ? API.getRoots(this.props.typeName) : API.getChildren(parent.lite);
+
+        promise.then(newSiblings => {
+
+            const newSiblingsDic = newSiblings.toObject(a => liteKey(a.lite));
+
+            if (parent) {
+                parent.childrenCount = newSiblings.length;
+                if (parent.childrenCount == 0)
+                    parent.nodeState = "Leaf";
+            }
+
+            const currentSiblings = parent == null ? this.state.treeNodes! : parent.loadedChildren;
+            currentSiblings.extract(c => !newSiblingsDic[liteKey(c.lite)]);
+            currentSiblings.forEach(c => {
+                const n = newSiblingsDic[liteKey(c.lite)];
+                c.lite = n.lite;
+                c.childrenCount = n.childrenCount;
+            });
+
+            if (!newSiblingsDic[liteKey(node.lite)])
+                this.setState({ selectedNode: undefined });
+            else
+                this.forceUpdate();
+        }).done();
     }
 
     treeContainer: HTMLElement;
@@ -263,16 +347,24 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     handleRemove = () => {
 
         var node = this.state.selectedNode!;
-        if (!confirm(OperationMessage.PleaseConfirmYouDLikeToDelete0FromTheSystem.niceToString(node.lite.toStr)))
-            return;
+        return MessageModal.show({
+            title: OperationMessage.Confirm.niceToString(),
+            message: OperationMessage.PleaseConfirmYouDLikeToDelete0FromTheSystem.niceToString(node.lite.toStr),
+            buttons: "yes_no",
+            icon: "question"
+        }).then(result => {
 
-        Operations.API.deleteLite(node.lite, TreeOperation.Delete)
-            .then(() => {
-                var parent = this.findParent(node);
-                (parent ? parent.loadedChildren : this.state.treeNodes!).remove(node);
-                this.selectNode(parent || undefined);
-            })
-            .done();
+            if (result != "yes")
+                return;
+
+            Operations.API.deleteLite(node.lite, TreeOperation.Delete)
+                .then(() => {
+                    var parent = this.findParent(node);
+                    (parent ? parent.loadedChildren : this.state.treeNodes!).remove(node);
+                    this.selectNode(parent || undefined);
+                })
+                .done();
+        }).done();
     }
 
     simpleFilterBuilderInstance?: ISimpleFilterBuilder;
