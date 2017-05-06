@@ -18,11 +18,27 @@ using Signum.Entities.Basics;
 using System.Data.Common;
 using Signum.Engine.Operations.Internal;
 using static Signum.Engine.Maps.SchemaBuilder;
+using Signum.Entities.Authorization;
 
 namespace Signum.Engine.Operations
 {
     public static class OperationLogic
     {
+
+
+        static Expression<Func<Entity, OperationLogEntity>> OperationLogMyLastExpression =
+        e => Database.Query<OperationLogEntity>()
+        .Where(a => a.User.RefersTo(UserEntity.Current) && a.Target.RefersTo(e))
+        .OrderBy(a => a.Start).FirstOrDefault();
+
+        [ExpressionField]
+        public static OperationLogEntity OperationLogMyLast(this Entity e)
+        {
+            return OperationLogMyLastExpression.Evaluate(e);
+        }
+
+
+
         static Expression<Func<Entity, IQueryable<OperationLogEntity>>> OperationLogsEntityExpression =
             e => Database.Query<OperationLogEntity>().Where(a => a.Target.RefersTo(e));
         [ExpressionField]
@@ -111,6 +127,7 @@ namespace Signum.Engine.Operations
 
                 dqm.RegisterExpression((OperationSymbol o) => o.Logs(), () => OperationMessage.Logs.NiceToString());
                 dqm.RegisterExpression((Entity o) => o.OperationLogs(), () => typeof(OperationLogEntity).NicePluralName());
+                dqm.RegisterExpression((Entity o) => o.OperationLogMyLast(), () => OperationLogMessage.OperationLogMyLast.NiceToString());
 
                 sb.Schema.EntityEventsGlobal.Saving += EntityEventsGlobal_Saving;
 
