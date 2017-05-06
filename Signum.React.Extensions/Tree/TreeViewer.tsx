@@ -70,7 +70,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
             return;
 
         if (this.state.filterOptions && this.state.queryDescription) {
-            if (path == TreeClient.treePath(this.props.typeName, this.getFilterOptionsFromState()))
+            if (path == TreeClient.treePath(this.props.typeName, Finder.toFilterOptions(this.state.filterOptions)))
                 return;
         }
 
@@ -84,14 +84,13 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     
         Finder.getQueryDescription(typeName)
             .then(qd => {
-                const qs = Finder.getSettings(typeName);
-                const sfb = qs && qs.simpleFilterBuilder && qs.simpleFilterBuilder(qd, this.state.filterOptions);
-                this.setState({ queryDescription: qd, simpleFilterBuilder: sfb });
-                if (sfb)
-                    this.setState({ showFilters: false });
-                
                 Finder.parseFilterOptions(filterOptions, qd).then(fop => {
                     this.setState({ filterOptions: fop }, () => {
+                        const qs = Finder.getSettings(typeName);
+                        const sfb = qs && qs.simpleFilterBuilder && qs.simpleFilterBuilder(qd, this.state.filterOptions);
+                        this.setState({ queryDescription: qd, simpleFilterBuilder: sfb });
+                        if (sfb)
+                            this.setState({ showFilters: false });
 
                         this.search();
                     });
@@ -113,12 +112,10 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     };
 
     getCurrentUrl() {
-        return TreeClient.treePath(this.props.typeName, this.getFilterOptionsFromState());
+        return TreeClient.treePath(this.props.typeName, Finder.toFilterOptions(this.state.filterOptions));
     }
 
-    getFilterOptionsFromState() {
-        return this.state.filterOptions.filter(a => !!a.token).map(f => ({ columnName: f.token!.fullKey, operation: f.operation, value: f.value, frozen: f.frozen }) as FilterOption);
-    }
+    
 
     handleNodeIconClick = (n: TreeNode) => {
         if (n.nodeState == "Collapsed" || n.nodeState == "Filtered") {
@@ -397,14 +394,25 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
                 <a className={"sf-query-button sf-filters-header btn btn-default" + (s.showFilters ? " active" : "")}
                     onClick={this.handleToggleFilters}
                     title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="glyphicon glyphicon glyphicon-filter"></span></a>
-                <button className="btn btn-primary" onClick={this.handleSearchSubmit}><i className="glyphicon glyphicon-search"></i> &nbsp; {JavascriptMessage.search.niceToString()}</button>
+                <button className="btn btn-primary" onClick={this.handleSearchSubmit}>{JavascriptMessage.search.niceToString()}</button>
                 <button className="btn btn-default" onClick={this.handleAddRoot} disabled={s.treeNodes == null}><i className="fa fa-star" aria-hidden="true"></i>&nbsp; {TreeViewerMessage.AddRoot.niceToString()}</button>
                 {React.cloneElement(<DropdownButton id="selectedButton"
                     className="sf-query-button sf-tm-selected"
                     title={`${JavascriptMessage.Selected.niceToString()} (${selected && selected.lite.toStr || TreeViewerMessage.AddRoot.niceToString()})`}
                     disabled={selected == undefined} />, undefined, ...this.renderMenuItems())}
+                <button className="btn btn-default" onClick={this.handleExplore} ><i className="glyphicon glyphicon-search"></i> &nbsp; {SearchMessage.Explore.niceToString()}</button>
             </div>
         );
+    }
+
+    handleExplore = (e: React.MouseEvent<any>) => {
+        var path = Finder.findOptionsPath({
+            queryName: this.props.typeName,
+            filterOptions: Finder.toFilterOptions(this.state.filterOptions),
+            showFilters: this.state.filterOptions.length > 0
+        });
+
+        Navigator.pushOrOpen(path, e);
     }
 
     handleToggleFilters = () => {

@@ -16,10 +16,12 @@ import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStr
 import { SearchMessage, JavascriptMessage, ExecuteSymbol, ConstructSymbol_From, ConstructSymbol_Simple, DeleteSymbol } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TreeEntity, TreeOperation } from './Signum.Entities.Tree'
 import TreeModal from './TreeModal'
-import { FilterRequest, FilterOption } from "../../../Framework/Signum.React/Scripts/FindOptions";
+import { FilterRequest, FilterOption, FilterOptionParsed } from "../../../Framework/Signum.React/Scripts/FindOptions";
 import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
-import { getAllTypes } from "../../../Framework/Signum.React/Scripts/Reflection";
+import { getAllTypes, getTypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection";
 import { TypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection";
+import * as AuthClient from '../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
+import TreeButton from './TreeButton'
 
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<ImportRoute path="~/tree/:typeName" onImportModule={() => _import("./TreePage")} />);
@@ -29,13 +31,22 @@ export function start(options: { routes: JSX.Element[] }) {
         new EntityOperationSettings(TreeOperation.CreateNextSibling, { isVisible: _ => false }),
         new EntityOperationSettings(TreeOperation.Move, { isVisible: _ => false })
     );    
+
+    Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
+        var ti = getTypeInfo(ctx.findOptions.queryKey);
+
+        if (!ctx.searchControl.props.showBarExtension || ti == null || !isTree(ti))
+            return undefined;
+
+        return <TreeButton searchControl={ctx.searchControl} />;
+    });
 }
 
-export function treePath(typeName:string, filterOptions: FilterOption[]): string {
+export function treePath(typeName:string, filterOptions?: FilterOption[]): string {
 
     const query: any = {};
-
-    Finder.Encoder.encodeFilters(query, filterOptions);
+    if (filterOptions)
+        Finder.Encoder.encodeFilters(query, filterOptions);
 
     return Navigator.history.createHref({ pathname: "~/tree/" + typeName, search: QueryString.stringify(query) });
 }

@@ -76,6 +76,7 @@ namespace Signum.Entities.Tree
 
     public enum TreeMessage
     {
+        Tree,
         Descendants,
         Parent,
         Ascendants,
