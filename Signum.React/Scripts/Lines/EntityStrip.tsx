@@ -7,7 +7,7 @@ import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, mlistItemContext, EntityFrame } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, LambdaMemberType } from '../Reflection'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../Lines/LineBase'
-import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, isLite } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
 import { EntityListBase, EntityListBaseProps } from './EntityListBase'
 import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './AutocompleteConfig'
@@ -129,7 +129,14 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                 getItems={ac.getItems}
                 getItemsDelay={ac.getItemsDelay}
                 renderItem={ac.renderItem}
-                liAttrs={lite => ({ 'data-entity-key': liteKey(lite) }) }
+                liAttrs={item => {
+                    const entity = ac!.getEntityFromItem(item);
+                    const key = isLite(entity) ? liteKey(entity) :
+                        (entity as Entity).id ? liteKey(toLite(entity as Entity)) :
+                            undefined;
+
+                    return ({ 'data-entity-key': key });
+                }}
                 onSelect={this.handleOnSelect}/>
         );
     }
