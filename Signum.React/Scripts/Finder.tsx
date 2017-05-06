@@ -88,6 +88,7 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
 }
 
 export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent<any>) {
+    e.preventDefault();
     if (e.ctrlKey || e.button == 1)
         window.open(findOptionsPath(findOptions));
     else

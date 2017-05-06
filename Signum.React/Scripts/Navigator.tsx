@@ -534,6 +534,14 @@ export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.Mouse
     }
 }
 
+export function pushOrOpen(path: string, e: React.MouseEvent<any> | React.KeyboardEvent<any>) {
+    e.preventDefault();
+    if (e.ctrlKey || (e as React.MouseEvent<any>).button == 1)
+        window.open(toAbsoluteUrl(path));
+    else
+        history.push(path);
+}
+
 
 export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>): Promise<EntityPack<ModifiableEntity>> {
     if ((entityOrEntityPack as EntityPack<ModifiableEntity>).canExecute)
