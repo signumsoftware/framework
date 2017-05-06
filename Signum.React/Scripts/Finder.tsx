@@ -336,6 +336,12 @@ export function toFindOptions(fo: FindOptionsParsed, queryDescription: QueryDesc
     return findOptions;
 }
 
+export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]) {
+    return filterOptionsParsed
+        .filter(f => !!f.token)
+        .map(f => ({ columnName: f.token!.fullKey, operation: f.operation, value: f.value, frozen: f.frozen }) as FilterOption);
+}
+
 export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription): Promise<FindOptionsParsed> {
 
     const fo: FindOptions = { ...findOptions };
