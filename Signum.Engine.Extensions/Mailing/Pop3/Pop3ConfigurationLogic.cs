@@ -65,11 +65,17 @@ namespace Signum.Engine.Mailing.Pop3
 
         public static Func<Pop3ConfigurationEntity, IPop3Client> GetPop3Client;
 
+
+        public static Action<string> ReceptionComunication;
+
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<Pop3ConfigurationEntity, IPop3Client> getPop3Client)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 GetPop3Client = getPop3Client;
+
+
+                //ReceptionComunication = receptionComunication;
 
                 MixinDeclarations.AssertDeclared(typeof(EmailMessageEntity), typeof(EmailReceptionMixin));
 
@@ -301,6 +307,12 @@ namespace Signum.Engine.Mailing.Pop3
                     }
                     catch { }
                 }
+
+
+                if (ReceptionComunication != null)
+                    ReceptionComunication(reception.NewEmails.ToString());
+
+
 
                 return reception;
             }
