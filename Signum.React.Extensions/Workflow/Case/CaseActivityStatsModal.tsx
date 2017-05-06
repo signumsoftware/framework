@@ -142,7 +142,7 @@ export class CaseActivityStatsComponent extends React.Component<CaseActivityStat
         e.preventDefault();
         Finder.fetchEntitiesWithFilters(CaseEntity, [
             { columnName: "Entity.DecompositionSurrogateActivity", value: this.props.stats.CaseActivity }
-        ], 2)
+        ], [], 2)
             .then(cases => Navigator.navigate(cases.single()))
             .done();
     }
