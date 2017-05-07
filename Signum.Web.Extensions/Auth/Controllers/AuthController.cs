@@ -18,6 +18,7 @@ using Signum.Engine.Mailing;
 using System.Collections.Generic;
 using Signum.Engine.Operations;
 using Signum.Web.Operations;
+using System.Security.Principal;
 
 namespace Signum.Web.Auth
 {
@@ -30,6 +31,7 @@ namespace Signum.Web.Auth
 
         public static event Action UserLogged;
         public static event Action<Controller, UserEntity> UserPreLogin;
+        public static event Action<Controller, UserEntity> UserPostLogin;
         public static Func<Controller, string> UserLoggedRedirect = c =>
         {
             string referrer = c.ControllerContext.HttpContext.Request["referrer"];
@@ -365,6 +367,7 @@ namespace Signum.Web.Auth
             }
 
 
+            OnUserPostLogin(this, user);
 
             TempData["Message"] = AuthLogic.OnLoginMessage();
 
@@ -378,6 +381,14 @@ namespace Signum.Web.Auth
             if (UserPreLogin != null)
             {
                 UserPreLogin(controller, user);
+            }
+        }
+
+        internal static void OnUserPostLogin(Controller controller, UserEntity user)
+        {
+            if (UserPostLogin != null)
+            {
+                UserPostLogin(controller, user);
             }
         }
 
@@ -430,5 +441,33 @@ namespace Signum.Web.Auth
 
             httpContext.Session.Abandon();
         }
+    }
+
+
+
+    interface ICustomPrincipal : IPrincipal
+    {
+         string Id { get; set; }
+         string Name { get; set; }
+    }
+    public class CustomPrincipal : ICustomPrincipal
+    {
+        public IIdentity Identity { get; private set; }
+        public bool IsInRole(string role) { return false; }
+
+        public CustomPrincipal(string id)
+        {
+            this.Identity = new GenericIdentity(id);
+        }
+
+        public string Id { get; set; }
+        public string Name { get; set; }
+      
+    }
+    public class CustomPrincipalSerializeModel
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        
     }
 }
