@@ -25,11 +25,15 @@ using System.Net.Mime;
 using System.Threading;
 using Signum.Engine.Extensions.Mailing.Pop3;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Engine;
 
 namespace Signum.Engine.Mailing.Pop3
 {
     public static class Pop3ConfigurationLogic
     {
+
+
+
         static Expression<Func<Pop3ConfigurationEntity, IQueryable<Pop3ReceptionEntity>>> ReceptionsExpression =
             c => Database.Query<Pop3ReceptionEntity>().Where(r => r.Pop3Configuration.RefersTo(c));
         [ExpressionField]
@@ -66,7 +70,7 @@ namespace Signum.Engine.Mailing.Pop3
         public static Func<Pop3ConfigurationEntity, IPop3Client> GetPop3Client;
 
 
-        public static Action<string> ReceptionComunication;
+        public static Action<Pop3ReceptionEntity> ReceptionComunication;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<Pop3ConfigurationEntity, IPop3Client> getPop3Client)
         {
@@ -310,8 +314,7 @@ namespace Signum.Engine.Mailing.Pop3
 
 
                 if (ReceptionComunication != null)
-                    ReceptionComunication(reception.NewEmails.ToString());
-
+                    ReceptionComunication(reception);
 
 
                 return reception;
