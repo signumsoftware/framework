@@ -140,6 +140,7 @@
     <Compile Include="ApiControllers\EntityController.cs" />
     <Compile Include="ApiControllers\QueryController.cs" />
     <Compile Include="ApiControllers\ReflectionController.cs" />
+    <Compile Include="Facades\LambdaToJavascriptConverter.cs" />
     <Compile Include="Filters\SignumAuthenticationAndProfilerAttribute.cs" />
     <Compile Include="Filters\ProfilerFilterAttribute.cs" />
     <Compile Include="Facades\SignumServer.cs" />

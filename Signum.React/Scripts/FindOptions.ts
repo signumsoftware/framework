@@ -17,6 +17,7 @@ export interface CountOptionsParsed {
 
 export interface ModalFindOptions {
     title?: string;
+    useDefaultBehaviour?: boolean;
 }
 
 export interface FindOptions {

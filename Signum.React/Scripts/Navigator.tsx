@@ -425,7 +425,7 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
     var config: AutocompleteConfig<any> | null = null;
 
     if (findOptions)
-        config = new FindOptionsAutocompleteConfig(findOptions, 5, false);
+        config = new FindOptionsAutocompleteConfig(findOptions);
 
     const types = getTypeInfos(type);
     var delay: number | undefined;
