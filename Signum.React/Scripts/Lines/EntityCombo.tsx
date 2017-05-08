@@ -180,7 +180,8 @@ class EntityComboSelect extends React.Component<EntityComboSelectProps, { data?:
         const fo = props.findOptions;
         if (fo) {
             Finder.expandParentColumn(fo);
-            Finder.fetchEntitiesWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], 100)
+            var limit = fo && fo.pagination && fo.pagination.elementsPerPage || 999;
+            Finder.fetchEntitiesWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], limit)
                 .then(data => this.setState({ data: fo.orderOptions && fo.orderOptions.length ? data : data.orderBy(a => a.toStr) } as any))
                 .done();
         }
