@@ -126,9 +126,9 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         return (
             <Typeahead
                 inputAttrs={{ className: "sf-entity-autocomplete" }}
-                getItems={ac.getItems}
+                getItems={q => ac!.getItems(q)}
                 getItemsDelay={ac.getItemsDelay}
-                renderItem={ac.renderItem}
+                renderItem={(e, str) => ac!.renderItem(e, str)}
                 liAttrs={item => {
                     const entity = ac!.getEntityFromItem(item);
                     const key = isLite(entity) ? liteKey(entity) :
