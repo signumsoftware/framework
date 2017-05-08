@@ -31,7 +31,6 @@ namespace Signum.Web.Auth
 
         public static event Action UserLogged;
         public static event Action<Controller, UserEntity> UserPreLogin;
-        public static event Action<Controller, UserEntity> UserPostLogin;
         public static Func<Controller, string> UserLoggedRedirect = c =>
         {
             string referrer = c.ControllerContext.HttpContext.Request["referrer"];
@@ -367,8 +366,6 @@ namespace Signum.Web.Auth
             }
 
 
-            OnUserPostLogin(this, user);
-
             TempData["Message"] = AuthLogic.OnLoginMessage();
 
 
@@ -384,13 +381,7 @@ namespace Signum.Web.Auth
             }
         }
 
-        internal static void OnUserPostLogin(Controller controller, UserEntity user)
-        {
-            if (UserPostLogin != null)
-            {
-                UserPostLogin(controller, user);
-            }
-        }
+  
 
         public ViewResult LoginError(string key, string error)
         {
