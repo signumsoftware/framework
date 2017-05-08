@@ -29,11 +29,11 @@ namespace Signum.Web.Auth
         {
             return RouteHelper.New().Action((AuthController c) => c.Login(returnUrl));
         };
- 
+
         public static string ViewPrefix = "~/auth/Views/{0}.cshtml";
 
         public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Auth/Scripts/Auth");
-        
+
         public static string LoginView = ViewPrefix.FormatWith("Login");
         public static string LoginUserControlView = ViewPrefix.FormatWith("LoginUserControl");
         public static string ChangePasswordView = ViewPrefix.FormatWith("ChangePassword");
@@ -44,12 +44,12 @@ namespace Signum.Web.Auth
         public static string ResetPasswordSuccessView = ViewPrefix.FormatWith("ResetPasswordSuccess");
         public static string ResetPasswordSetNewView = ViewPrefix.FormatWith("ResetPasswordSetNew");
 
-    
+
         public static string RememberPasswordSuccessView = ViewPrefix.FormatWith("RememberPasswordSuccess");
 
         public static bool ResetPasswordStarted;
 
-        public static bool SingleSignOnMessage; 
+        public static bool SingleSignOnMessage;
 
         public static void Start(bool types, bool property, bool queries, bool resetPassword, bool passwordExpiration, bool singleSignOnMessage)
         {
@@ -118,7 +118,7 @@ namespace Signum.Web.Auth
                 var defaultException = SignumExceptionHandlerAttribute.OnControllerException;
                 SignumExceptionHandlerAttribute.OnControllerException = ctx =>
                 {
-                    if (ctx.Exception is UnauthorizedAccessException && (UserEntity.Current == null || UserEntity.Current == AuthLogic.AnonymousUser))
+                    if (ctx.Exception is UnauthorizedAccessException && (UserEntity.Current == null || UserEntity.Current.Is(AuthLogic.AnonymousUser)))
                     {
                         string returnUrl = ctx.HttpContext.Request.SuggestedReturnUrl().PathAndQuery;
                         string loginUrl = PublicLoginUrl(returnUrl);
@@ -133,16 +133,16 @@ namespace Signum.Web.Auth
 
                 OperationClient.AddSettings(new List<OperationSettings>
                 {
-                    new EntityOperationSettings<UserEntity>(UserOperation.SetPassword) 
-                    { 
-                        Click = ctx => Module["setPassword"](ctx.Options(), 
+                    new EntityOperationSettings<UserEntity>(UserOperation.SetPassword)
+                    {
+                        Click = ctx => Module["setPassword"](ctx.Options(),
                             ctx.Url.Action((AuthController c)=>c.SetPasswordModel()),
                             ctx.Url.Action((AuthController c)=>c.SetPasswordOnOk()))
                     },
 
-                    new EntityOperationSettings<UserEntity>(UserOperation.SaveNew) 
-                    { 
-                         Click = ctx => Module["saveNew"](ctx.Options(), 
+                    new EntityOperationSettings<UserEntity>(UserOperation.SaveNew)
+                    {
+                         Click = ctx => Module["saveNew"](ctx.Options(),
                             ctx.Url.Action((AuthController c)=>c.SaveNewUser()))
                     }
                 });
@@ -179,7 +179,7 @@ namespace Signum.Web.Auth
 
         static bool manager_IsCreable(Type type)
         {
-            if(!typeof(Entity).IsAssignableFrom(type))
+            if (!typeof(Entity).IsAssignableFrom(type))
                 return true;
 
             return TypeAuthLogic.GetAllowed(type).MaxUI() == TypeAllowedBasic.Create;
@@ -196,14 +196,14 @@ namespace Signum.Web.Auth
         {
             Exception exception = SignumExceptionHandlerAttribute.CleanException(ctx.Exception);
 
-            HandleErrorInfo model = new HandleErrorInfo(exception, 
-                (string)ctx.RouteData.Values["controller"], 
+            HandleErrorInfo model = new HandleErrorInfo(exception,
+                (string)ctx.RouteData.Values["controller"],
                 (string)ctx.RouteData.Values["action"]);
 
             if (SignumExceptionHandlerAttribute.LogException != null)
                 SignumExceptionHandlerAttribute.LogException(model);
 
-            ctx.Result = ctx.Controller.RedirectHttpOrAjax(absoluteLoginUrl); 
+            ctx.Result = ctx.Controller.RedirectHttpOrAjax(absoluteLoginUrl);
 
             ctx.ExceptionHandled = true;
             ctx.HttpContext.Response.Clear();
@@ -245,7 +245,7 @@ namespace Signum.Web.Auth
             if (ident.IsGraphModified && ident.Is(UserEntity.Current))
                 Transaction.PostRealCommit += ud =>
                 {
-                     AuthController.UpdateSessionUser();
+                    AuthController.UpdateSessionUser();
                 };
         }
 
@@ -264,7 +264,7 @@ namespace Signum.Web.Auth
                     return true;
                 }
 
-                return false; 
+                return false;
             }
         }
     }
