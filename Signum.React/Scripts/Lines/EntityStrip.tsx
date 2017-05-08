@@ -48,8 +48,8 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                                 (<EntityStripElement key={i}
                                     ctx={mlec}
                                     autoComplete={s.autoComplete}
-                                    onRenderItem={s.onRenderItem}
-                                    onItemHtmlAttributes={s.onItemHtmlAttributes}
+                                    onRenderItem={item => s.onRenderItem!(item)}
+                                    onItemHtmlAttributes={item =>  s.onItemHtmlAttributes!(item)}
                                     onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
                                     onView={this.canView(mlec.value) ? e => this.handleViewElement(e, i) : undefined}
                                     />))
