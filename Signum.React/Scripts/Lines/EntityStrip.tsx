@@ -48,8 +48,8 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                                 (<EntityStripElement key={i}
                                     ctx={mlec}
                                     autoComplete={s.autoComplete}
-                                    onRenderItem={item => s.onRenderItem!(item)}
-                                    onItemHtmlAttributes={item =>  s.onItemHtmlAttributes!(item)}
+                                    onRenderItem={s.onRenderItem}
+                                    onItemHtmlAttributes={s.onItemHtmlAttributes}
                                     onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
                                     onView={this.canView(mlec.value) ? e => this.handleViewElement(e, i) : undefined}
                                     />))
@@ -126,9 +126,9 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         return (
             <Typeahead
                 inputAttrs={{ className: "sf-entity-autocomplete" }}
-                getItems={ac.getItems}
+                getItems={q => ac!.getItems(q)}
                 getItemsDelay={ac.getItemsDelay}
-                renderItem={ac.renderItem}
+                renderItem={(e, str) => ac!.renderItem(e, str)}
                 liAttrs={item => {
                     const entity = ac!.getEntityFromItem(item);
                     const key = isLite(entity) ? liteKey(entity) :
