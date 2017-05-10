@@ -363,8 +363,8 @@ namespace Signum.Utilities
             }
 
             if (repetitions.Count > 0)
-                throw new ArgumentException("There are some repeated {0}: {1}".FormatWith(errorContext, repetitions
-                    .ToString(kvp => "{0} ({1})".FormatWith(kvp.Key, kvp.Value.Take(ErrorExampleLimit).ToString(", ")), "\r\n")));
+                throw new ArgumentException("There are some repeated {0}...\r\n{1}".FormatWith(errorContext, repetitions
+                    .ToString(kvp => $@"Key ""{0}"" has {kvp.Value.Count} repetitions:\r\n{1}".FormatWith(kvp.Key, kvp.Value.Take(ErrorExampleLimit).ToString("\r\n").Indent(4)), "\r\n")));
         }
 
         public static void SetRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<KeyValuePair<K, V>> collection)
