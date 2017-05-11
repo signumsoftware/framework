@@ -184,8 +184,8 @@ export function parseFindOptionsPath(queryName: PseudoType | QueryKey, query: an
             currentPage: query.currentPage,
         } as Pagination,
     } as FindOptions;
-
-    return result;
+    
+    return Dic.simplify(result);
 }
 
 export function mergeColumns(columnDescriptions: ColumnDescription[], mode: ColumnOptionsMode, columnOptions: ColumnOption[]): ColumnOption[] {
@@ -330,7 +330,12 @@ export function toFindOptions(fo: FindOptionsParsed, queryDescription: QueryDesc
         orderOptions: fo.orderOptions.filter(a => !!a.token).map(o => ({ columnName: o.token.fullKey, orderType: o.orderType }) as OrderOption),
         columnOptions: pair.columns,
         columnOptionsMode: pair.mode,
-        pagination: fo.pagination && !equalsPagination(fo.pagination, defPagination) ? fo.pagination : undefined
+        pagination: fo.pagination && !equalsPagination(fo.pagination, defPagination) ? fo.pagination : undefined,
+        allowChangeColumns: fo.allowChangeColumns == false ? false : undefined,
+        showFilters: fo.showFilters == false ? false : undefined,
+        showFilterButton: fo.showFilterButton == false ? false : undefined,
+        showFooter: fo.showFooter == false ? false: undefined, 
+        showHeader: fo.showHeader == false ? false : undefined,
     } as FindOptions;
 
     return findOptions;
