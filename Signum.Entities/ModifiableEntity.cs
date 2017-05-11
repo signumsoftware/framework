@@ -432,8 +432,8 @@ namespace Signum.Entities
 
         public override string ToString()
         {
-            return Type.NiceName() + (Id == null ? "" : (" (" + Id + ")")) + "\r\n" 
-                + Errors.ToString(kvp => "    {0}: {1}".FormatWith(kvp.Key, kvp.Value), "\r\n");
+            return $"{Errors.Count} errors in {" ".CombineIfNotEmpty(Type.Name, Id)}\r\n"
+                  + Errors.ToString(kvp => "    {0}: {1}".FormatWith(kvp.Key, kvp.Value), "\r\n");
         }
     }
 }
