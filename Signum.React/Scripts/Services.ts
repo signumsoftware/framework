@@ -280,7 +280,7 @@ window.addEventListener("storage", se => {
 });
 
 
-export function makeAbortable<A,Q>(makeCall: (abortController: FetchAbortController, query: Q) => Promise<A>): (query: Q) => Promise<A | undefined> {
+export function makeAbortable<A,Q>(makeCall: (abortController: FetchAbortController, query: Q) => Promise<A>): (query: Q) => Promise<A> {
 
     let requestIndex = 0;
     let responseIndex = 0;
@@ -304,16 +304,16 @@ export function makeAbortable<A,Q>(makeCall: (abortController: FetchAbortControl
         return makeCall(abortController, query).then(result => {
 
             if (myIndex <= responseIndex) //request is too old
-                return undefined;
+                return new Promise<A>(resolve => { /*never*/ });
 
             abortController = undefined;
             responseIndex = myIndex;
             return result;
         }, (error: TypeError) => {
             if (error.message == "Aborted request")
-                return new Promise(resolve => { /*never*/ });
+                return new Promise<A>(resolve => { /*never*/ });
 
             throw error
-        });
+        }) as Promise<A>;
     }
 }

@@ -1,6 +1,4 @@
-﻿/// <reference path="../globals.d.ts" />
-
-import * as React from 'react'
+﻿import * as React from 'react'
 import { DropdownButton, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { Dic, DomUtils, classes } from '../Globals'
 import * as Finder from '../Finder'
@@ -355,7 +353,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
 
-    chooseType(): Promise<string> {
+    chooseType(): Promise<string | undefined> {
 
         const tis = getTypeInfos(this.props.queryDescription.columns["Entity"].type)
             .filter(ti => Navigator.isCreable(ti, false, true));

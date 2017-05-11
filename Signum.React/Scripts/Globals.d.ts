@@ -1,6 +1,7 @@
 ﻿declare function require<T>(path: string): T;
 
  //Necessary till typescript has direct support https://github.com/Microsoft/TypeScript/issues/12364
+declare function _import(path: string): Promise<any>;
 declare function _import<T>(path: string): Promise<T>;
 
 declare interface Promise<T> {
