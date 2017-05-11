@@ -229,7 +229,7 @@ export function setAuthToken(authToken: string | undefined): void{
 export function autoLogin(): Promise<UserEntity> {
 
     if (Navigator.currentUser)
-        return Promise.resolve(Navigator.currentUser);
+        return Promise.resolve(Navigator.currentUser as UserEntity);
 
     if (getAuthToken())
         return Api.fetchCurrentUser().then(u => {
