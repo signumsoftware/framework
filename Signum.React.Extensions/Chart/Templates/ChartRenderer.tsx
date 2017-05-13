@@ -83,7 +83,7 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
 
         node.addEventListener("click", this.handleOnClick);
 
-        let func: (chart: d3.Selection<any>, data: ChartClient.ChartTable) => void;
+        let func: (chart: d3.Selection<any, any, any, any>, data: ChartClient.ChartTable) => void;
         let __baseLineNumber__: number = 0;
         try {
             const width = rect.width;
@@ -184,7 +184,7 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
         }
     }
 
-    showError(e: any, __baseLineNumber__: number, chart: d3.Selection<any>) {
+    showError(e: any, __baseLineNumber__: number, chart: d3.Selection<any, any, any, any>) {
         let message = e.toString();
 
         const regex = /(DrawChart.*@.*:(.*))|(DrawChart .*:(.*):.*\)\))|(DrawChart .*:(.*):.*\))/;
