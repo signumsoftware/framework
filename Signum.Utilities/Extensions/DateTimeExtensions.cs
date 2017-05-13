@@ -263,6 +263,18 @@ namespace Signum.Utilities
             return DateTimePrecision.Days;
         }
 
+        static char[] allStandardFormats = new char[] {
+        'd', 'D', 'f', 'F', 'g', 'G', 'm', 'M', 'o', 'O', 'r', 'R', 's', 't', 'T', 'u', 'U', 'y', 'Y'
+        };
+
+        public static string ToCustomFormatString(string f, CultureInfo culture)
+        {
+            if (f != null && f.Length == 1 && allStandardFormats.IndexOf(f[0]) != -1)
+                return culture.DateTimeFormat.GetAllDateTimePatterns(f[0]).FirstEx();
+
+            return f;
+        }
+
         public static string SmartShortDatePattern(this DateTime date)
         {
             DateTime currentdate = DateTime.Today;

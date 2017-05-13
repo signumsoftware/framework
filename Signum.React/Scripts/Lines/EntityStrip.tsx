@@ -7,7 +7,7 @@ import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, mlistItemContext, EntityFrame } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, LambdaMemberType } from '../Reflection'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../Lines/LineBase'
-import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, isLite } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
 import { EntityListBase, EntityListBaseProps } from './EntityListBase'
 import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './AutocompleteConfig'
@@ -40,7 +40,11 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         const s = this.state;
         const readOnly = this.state.ctx.readOnly;
         return (
-            <FormGroup ctx={s.ctx!} labelText={s.labelText} labelHtmlAttributes={s.labelHtmlAttributes} helpBlock={s.helpBlock} {...{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes } }>
+            <FormGroup ctx={s.ctx!}
+                labelText={s.labelText}
+                labelHtmlAttributes={s.labelHtmlAttributes}
+                helpBlock={s.helpBlock}
+                htmlAttributes={{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes }}>
                 <div className="SF-entity-strip SF-control-container">
                     <ul className={classes("sf-strip", this.props.vertical ? "sf-strip-vertical" : "sf-strip-horizontal") }>
                         {
@@ -126,10 +130,17 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         return (
             <Typeahead
                 inputAttrs={{ className: "sf-entity-autocomplete" }}
-                getItems={ac.getItems}
+                getItems={q => ac!.getItems(q)}
                 getItemsDelay={ac.getItemsDelay}
-                renderItem={ac.renderItem}
-                liAttrs={lite => ({ 'data-entity-key': liteKey(lite) }) }
+                renderItem={(e, str) => ac!.renderItem(e, str)}
+                liAttrs={item => {
+                    const entity = ac!.getEntityFromItem(item);
+                    const key = isLite(entity) ? liteKey(entity) :
+                        (entity as Entity).id ? liteKey(toLite(entity as Entity)) :
+                            undefined;
+
+                    return ({ 'data-entity-key': key });
+                }}
                 onSelect={this.handleOnSelect}/>
         );
     }

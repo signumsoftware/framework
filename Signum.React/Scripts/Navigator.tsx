@@ -425,7 +425,7 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
     var config: AutocompleteConfig<any> | null = null;
 
     if (findOptions)
-        config = new FindOptionsAutocompleteConfig(findOptions, 5, false);
+        config = new FindOptionsAutocompleteConfig(findOptions);
 
     const types = getTypeInfos(type);
     var delay: number | undefined;
@@ -537,7 +537,7 @@ export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.Mouse
 
 export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>): Promise<EntityPack<ModifiableEntity>> {
     if ((entityOrEntityPack as EntityPack<ModifiableEntity>).canExecute)
-        return Promise.resolve(entityOrEntityPack);
+        return Promise.resolve(entityOrEntityPack as EntityPack<ModifiableEntity>);
 
     const entity = (entityOrEntityPack as ModifiableEntity).Type ?
         entityOrEntityPack as ModifiableEntity :
@@ -571,7 +571,7 @@ export module API {
     }
 
     export function fetchAll<T extends Entity>(type: Type<T>): Promise<Array<T>> {
-        return ajaxGet<Array<Entity>>({ url: "~/api/fetchAll/" + type.typeName });
+        return ajaxGet<Array<T>>({ url: "~/api/fetchAll/" + type.typeName });
     }
 
 
@@ -590,7 +590,7 @@ export module API {
         if (lite.id == null)
             throw new Error("Lite has no Id");
 
-        return fetchEntity(lite.EntityType, lite.id);
+        return fetchEntity(lite.EntityType, lite.id) as Promise<T>;
     }
 
     export function fetchEntity<T extends Entity>(type: Type<T>, id: any): Promise<T>;
@@ -618,7 +618,7 @@ export module API {
 
     export function fetchCanExecute<T extends Entity>(entity: T): Promise<EntityPack<T>> {
 
-        return ajaxPost<EntityPack<Entity>>({ url: "~/api/entityPackEntity" }, entity);
+        return ajaxPost<EntityPack<T>>({ url: "~/api/entityPackEntity" }, entity);
     }
 
     export function validateEntity(entity: ModifiableEntity): Promise<void> {
@@ -820,7 +820,9 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> | unde
         return undefined;
     }
 
-    if (getTypeInfo(type.name) && getTypeInfo(type.name).kind == "Entity") {
+    const ti = getTypeInfo(type.name); 
+
+    if (ti && ti.kind == "Entity") {
 
         if (isLite(value))
             return API.fetchAndForget(value);
@@ -831,7 +833,7 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> | unde
         return undefined;
     }
 
-    if (type.name == "string" || type.name == "Guid" || type.name == "Date") {
+    if (type.name == "string" || type.name == "Guid" || type.name == "Date" || ti && ti.kind == "Enum") {
         if (typeof value === "string")
             return Promise.resolve(value);
 

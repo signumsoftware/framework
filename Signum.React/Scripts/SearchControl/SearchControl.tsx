@@ -140,7 +140,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             largeToolbarButtons={this.props.largeToolbarButtons} 
             findOptions={fo}
             queryDescription={this.state.queryDescription!}
-            querySettings={Finder.getQuerySettings(fo.queryKey)}
+            querySettings={Finder.getSettings(fo.queryKey)}
             />
     }
 }

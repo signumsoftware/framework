@@ -100,19 +100,22 @@ namespace Signum.Engine.DynamicQuery
 
             return values.ToResultTable(cols, values.Length, new Pagination.All());
         }
-        
-        public override IQueryable<Lite<Entity>> GetEntities(List<Filter> filters)
+
+        public override IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request)
         {
             var ex = new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName);
 
             DQueryable<T> query = Query
              .ToDQueryable(GetQueryDescription())
-             .Where(filters)
+             .OrderBy(request.Orders)
+             .Where(request.Filters)
              .Select(new List<Column> { ex });
 
             var exp = Expression.Lambda<Func<object, Lite<Entity>>>(Expression.Convert(ex.Token.BuildExpression(query.Context), typeof(Lite<Entity>)), query.Context.Parameter);
 
-            return query.Query.Select(exp);
+            var result = query.Query.Select(exp);
+
+            return result.TryTake(request.Count);
         }
 
         public override Expression Expression

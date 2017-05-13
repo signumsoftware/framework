@@ -97,10 +97,14 @@ export interface ConstructorOperationOptions<T extends Entity> {
     onConstruct?: (ctx: ConstructorOperationContext<T>) => Promise<EntityPack<T> | undefined> | undefined;
 }
 
-export interface ConstructorOperationContext<T extends Entity> {
+export class ConstructorOperationContext<T extends Entity> {
     operationInfo: OperationInfo;
     settings: ConstructorOperationSettings<T>;
     typeInfo: TypeInfo;
+
+    defaultConstruct(...args: any[]): Promise<EntityPack<T> | undefined> {
+        return API.construct<T>(this.typeInfo.name, this.operationInfo.key, ...args);
+    }
 }
 
 

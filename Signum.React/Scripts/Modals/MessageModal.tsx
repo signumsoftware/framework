@@ -184,6 +184,11 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
             />
         );
     }
+
+    static showError(message: string, title?: string): Promise<undefined> {
+        return this.show({ buttons: "ok", icon: "error", style: "error", title: title || JavascriptMessage.error.niceToString(), message: message })
+            .then(() => undefined);
+    }
 }
 
 function dialogHeaderClass(style: MessageModalStyle | undefined) {

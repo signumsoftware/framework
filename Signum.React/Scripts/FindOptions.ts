@@ -17,6 +17,7 @@ export interface CountOptionsParsed {
 
 export interface ModalFindOptions {
     title?: string;
+    useDefaultBehaviour?: boolean;
 }
 
 export interface FindOptions {
@@ -192,6 +193,7 @@ export interface ColumnRequest {
 export interface QueryEntitiesRequest {
     queryKey: string;
     filters: FilterRequest[];
+    orders: OrderRequest[];
     count: number;
 }
 

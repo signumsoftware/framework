@@ -7,7 +7,7 @@ import { FindOptions, QueryDescription, FilterOptionParsed, FilterRequest } from
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, getQueryKey } from '../Reflection'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, isLite, isEntity } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, isLite, isEntity, isModifiableEntity } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
 import { EntityBase, EntityBaseProps } from './EntityBase'
 import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './AutocompleteConfig'
@@ -80,16 +80,16 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
     handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
 
-        var lite = this.state.autoComplete!.getEntityFromItem(item);
+        var entity = this.state.autoComplete!.getEntityFromItem(item);
 
-        this.convert(lite)
+        this.convert(entity)
             .then(entity => {
                 this.setState({ currentItem: { entity: entity, item: item } }); //Optimization
                 this.setValue(entity);
             })
             .done();
 
-        return lite.toStr || "";
+        return entity.toStr || "";
     }
 
     setValue(val: any) {
@@ -138,18 +138,25 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
         var ac = this.state.autoComplete;
 
-        if (!ac || ctx.readOnly)
+        if (ac == null || ctx.readOnly)
             return <FormControlStatic ctx={ctx}>{ctx.value && ctx.value.toStr}</FormControlStatic>;
 
         return (
             <Typeahead ref={ta => this.typeahead = ta}
                 inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
-                getItems={ac.getItems}
+                getItems={query => ac!.getItems(query)}
                 getItemsDelay={ac.getItemsDelay}
                 minLength={ac.minLength}
-                renderItem={ac.renderItem}
-                renderList={ac.renderList}
-                liAttrs={lite => ({ 'data-entity-key': liteKey(lite) }) }
+                renderItem={(item, query) => ac!.renderItem(item, query)}
+                renderList={ac!.renderList && (ta => ac!.renderList!(ta))}
+                liAttrs={item => {
+                    const entity = ac!.getEntityFromItem(item);
+                    const key = isLite(entity) ? liteKey(entity) :
+                        (entity as Entity).id ? liteKey(toLite(entity as Entity)) :
+                            undefined;
+
+                    return ({ 'data-entity-key': key });
+                }}
                 onSelect={this.handleOnSelect}/>
         );
     }

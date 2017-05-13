@@ -37,7 +37,7 @@ namespace Signum.Engine.SchemaInfoTables
         public int database_id;
         public string name;
         public byte[] owner_sid;
-
+        public string collation_name;
         public bool is_broker_enabled;
 
         public bool snapshot_isolation_state;
@@ -188,6 +188,7 @@ namespace Signum.Engine.SchemaInfoTables
         public int object_id;
         public int column_id;
         public int default_object_id;
+        public string collation_name;
         public bool is_nullable;
         public int user_type_id;
         public int system_type_id;

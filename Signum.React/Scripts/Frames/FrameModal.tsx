@@ -300,7 +300,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         }
     }
 
-    static openView(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, options: Navigator.ViewOptions): Promise<Entity> {
+    static openView(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, options: Navigator.ViewOptions): Promise<Entity | undefined> {
 
         return openModal<Entity>(<FrameModal
             entityOrPack={entityOrPack}

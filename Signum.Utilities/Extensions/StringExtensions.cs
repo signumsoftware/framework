@@ -564,10 +564,10 @@ namespace Signum.Utilities
 
         public static string Etc(this string str, int max) //Expressions and optionals don't work
         {
-            return str.Etc(max, "(...)");
+            return str.Etc(max, "(…)");
         }
 
-        public static string VerticalEtc(this string str, int maxLines, string etcString = "(...)")
+        public static string VerticalEtc(this string str, int maxLines, string etcString = "(…)")
         {
             if (str.HasText() && (str.Contains("\r\n")))
         {

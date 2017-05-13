@@ -373,11 +373,11 @@ Array.prototype.extract = function (this: any[], predicate: (element: any) => bo
 };
 
 
-Array.prototype.findIndex = function (this: any[], predicate: (element: any) => boolean) {
+Array.prototype.findIndex = function (this: any[], predicate: (element: any, index: number, array: Array<any>) => boolean) {
     const result = this.filter(predicate);
 
     for (var i = 0; i < this.length; i++)
-        if (predicate(this[i]))
+        if (predicate(this[i], i, this))
             return i;
 
     return -1;
@@ -572,13 +572,13 @@ String.prototype.tryAfterLast = function (this: string, separator: string) {
     return this.substring(index + separator.length);
 };
 
-String.prototype.etc = function (this: string, maxLength: number) {
+String.prototype.etc = function (this: string, maxLength: number, etcString : string = "(…)") {
     let str = this;
 
     str = str.tryBefore("\n") || str;
 
     if (str.length > maxLength)
-        str = str.substr(0, maxLength - 1) + "…";
+        str = str.substr(0, maxLength - etcString.length) + etcString;
 
     return str;
 };

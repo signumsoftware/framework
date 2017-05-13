@@ -42,16 +42,14 @@ namespace Signum.React.Filters
                             
                     using (Authenticate == null ? null : Authenticate(actionContext))
                     {
-                        using (GetCurrentCultures(actionContext))
+                        using (GetCurrentCultures?.Invoke(actionContext))
                         {
-
                             if (actionContext.Response != null)
                                 return actionContext.Response;
 
                             return await continuation();
                         }
                     }
-
                 }
             }
         }

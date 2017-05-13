@@ -108,7 +108,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     }
 
 
-    defaultView(value: ModifiableEntity | Lite<Entity>, propertyRoute: PropertyRoute): Promise<ModifiableEntity> {
+    defaultView(value: ModifiableEntity | Lite<Entity>, propertyRoute: PropertyRoute): Promise<ModifiableEntity | undefined> {
         return Navigator.view(value, {
             propertyRoute: propertyRoute,
             viewPromise: this.props.getComponent ? Navigator.ViewPromise.resolve(this.props.getComponent) :
@@ -161,7 +161,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         );
     }
 
-    chooseType(predicate: (ti: TypeInfo) => boolean): Promise<string> {
+    chooseType(predicate: (ti: TypeInfo) => boolean): Promise<string | undefined> {
         const t = this.state.type!;
 
         if (t.isEmbedded)
