@@ -150,7 +150,8 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     }
 
     handleKeyDown = (e: React.KeyboardEvent<any>) => {
-        if (!this.state.shown) return;
+        if (!this.state.shown)
+            return;
 
         switch (e.keyCode) {
             case 9: // tab
