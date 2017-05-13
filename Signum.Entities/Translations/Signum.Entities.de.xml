@@ -31,8 +31,8 @@
     <Member Name="NoOne2" Description="Kein (2)" />
     <Member Name="NoOne3" Description="Kein (3)" />
   </Type>
-  <Type Name="ColorEntity" Description="Farbe">
-    <Member Name="Argb" Description="Argb" />
+  <Type Name="ColorEmbedded" Description="Farbe">
+    <Member Name="Argb" Description="ARGB" />
   </Type>
   <Type Name="ColumnOptionsMode" Description="Spaltenoptionenmodus">
     <Member Name="Add" Description="Hinzufügen" />
@@ -54,11 +54,11 @@
   <Type Name="CorruptMixin">
     <Member Name="Corrupt" Description="Korrupt" />
   </Type>
-  <Type Name="DeleteLogParametersEntity" Description="Lösch log Parameter">
-    <Member Name="ChunkSize" Description="Chunk Größe" />
-    <Member Name="DateLimit" Description="Enddatum" />
-    <Member Name="DeleteLogsWithMoreThan" Description="Lösche logs mit mehr als" />
-    <Member Name="MaxChunks" Description="Max chunks" />
+  <Type Name="DeleteLogParametersEmbedded" Description="Lösche log Parameter">
+    <Member Name="ChunkSize" Description="Chunk-Größe" />
+    <Member Name="DateLimit" Description="Frist" />
+    <Member Name="DeleteLogsWithMoreThan" Description="Löschen Sie Protokolle mit mehr als" />
+    <Member Name="MaxChunks" Description="Max Chunks" />
   </Type>
   <Type Name="EmbeddedEntity" Description="Eingebettete Entität" />
   <Type Name="EngineMessage">

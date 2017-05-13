@@ -170,7 +170,7 @@ namespace Signum.React.Facades
                               EntityKind = type.IsIEntity() ? EntityKindCache.GetEntityKind(type) : (EntityKind?)null,
                               EntityData = type.IsIEntity() ? EntityKindCache.GetEntityData(type) : (EntityData?)null,
                               IsLowPopulation = type.IsIEntity() ? EntityKindCache.IsLowPopulation(type) : false,
-                              ToStringFunction = ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)),
+                              ToStringFunction = LambdaToJavascriptConverter.ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)),
                               QueryDefined = dqm.QueryDefined(type),
                               Members = PropertyRoute.GenerateRoutes(type).Where(pr => InTypeScript(pr))
                                 .ToDictionary(p => p.PropertyString(), p => OnAddPropertyRouteExtension(new MemberInfoTS
@@ -199,90 +199,7 @@ namespace Signum.React.Facades
             return (pr.Parent == null || InTypeScript(pr.Parent)) && (pr.PropertyInfo == null || pr.PropertyInfo.GetCustomAttribute<InTypeScriptAttribute>()?.GetInTypeScript() != false);
         }
 
-        private static string ToJavascript(LambdaExpression lambdaExpression)
-        {
-            if (lambdaExpression == null)
-                return null;
 
-            var body = ToJavascript(lambdaExpression.Parameters.Single(), lambdaExpression.Body);
-
-            if (body == null)
-                return null;
-
-            return "function(e){ return " + body + "; }"; 
-        }
-
-        static Dictionary<string, string> replacements = new Dictionary<string, string>
-        {
-            { "\t", "\\t"},
-            { "\n", "\\n"},
-            { "\r", ""},
-        };
-
-        private static string ToJavascript(ParameterExpression param, Expression expr)
-        {
-            if (param == expr)
-                return "e";
-
-            if(expr.NodeType == ExpressionType.Constant && expr.Type == typeof(string))
-            {
-                var str = (string)((ConstantExpression)expr).Value;
-
-                if (!str.HasText())
-                    return "\"\"";
-
-                return "\"" + str.Replace(replacements) + "\"";
-            }
-
-            if (expr.NodeType == ExpressionType.MemberAccess)
-            {
-                var a = ToJavascript(param, ((MemberExpression)expr).Expression);
-
-                if (a == null)
-                    return null;
-
-                return a + "." + ((MemberExpression)expr).Member.Name.FirstLower();
-            }
-
-            if (expr.NodeType == ExpressionType.Add)
-            {
-                var a = ToJavascriptToString(param, ((BinaryExpression)expr).Left);
-                var b = ToJavascriptToString(param, ((BinaryExpression)expr).Right);
-
-                if (a != null && b != null)
-                    return "(" + a + " + " + b + ")";
-
-                return null;
-            }
-
-            if (expr.NodeType == ExpressionType.Call && ((MethodCallExpression)expr).Method.Name == "ToString")
-            {
-                return ToJavascriptToString(param, ((MethodCallExpression)expr).Object);
-            }
-
-            if(expr.NodeType == ExpressionType.Convert)
-            {
-                return ToJavascriptToString(param, ((UnaryExpression)expr).Operand);
-            }
-
-            return null;
-        }
-
-        private static string ToJavascriptToString(ParameterExpression param, Expression expr)
-        {
-            var r = ToJavascript(param, expr);
-
-            if (r == null)
-                return null;
-            
-            if (expr.NodeType != ExpressionType.MemberAccess)
-                return r;
-
-            if (expr.Type.IsModifiableEntity() || expr.Type.IsLite())
-                return "getToString(" + r + ")";
-
-            return "valToString(" + r + ")";
-        }
 
         static string GetTypeNiceName(Type type)
         {

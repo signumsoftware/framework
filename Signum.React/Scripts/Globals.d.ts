@@ -1,6 +1,7 @@
 ﻿declare function require<T>(path: string): T;
 
  //Necessary till typescript has direct support https://github.com/Microsoft/TypeScript/issues/12364
+declare function _import(path: string): Promise<any>;
 declare function _import<T>(path: string): Promise<T>;
 
 declare interface Promise<T> {
@@ -75,7 +76,7 @@ interface String {
     beforeLast(this: string, separator: string): string;
     tryAfterLast(this: string, separator: string): string | undefined;
     tryBeforeLast(this: string, separator: string): string | undefined;
-    etc(this: string, maxLength: number): string;
+    etc(this: string, maxLength: number, etcString?: string): string;
 
     firstUpper(this: string): string;
     firstLower(this: string, ): string;

@@ -90,7 +90,7 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
             dialogClassName={dialogClassName} />);
     }
 
-    static chooseType(options: TypeInfo[]): Promise<TypeInfo> {
+    static chooseType(options: TypeInfo[]): Promise<TypeInfo | undefined> {
         return SelectorModal.chooseElement(options,
             {
                 display: a => a.niceName || "",

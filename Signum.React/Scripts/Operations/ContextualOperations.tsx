@@ -76,7 +76,7 @@ function defaultConstructFromMany(coc: ContextualOperationContext<Entity>,...arg
 
 }
 
-export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock> | undefined {
+export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
     if (ctx.lites.length == 0)
         return undefined;
 

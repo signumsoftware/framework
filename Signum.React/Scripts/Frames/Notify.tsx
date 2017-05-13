@@ -24,11 +24,11 @@ interface NotifyState {
 }
 
 
-export default class Notify extends React.Component<void, NotifyState>{
+export default class Notify extends React.Component<{}, NotifyState>{
 
     static singletone: Notify;
 
-    constructor(props: void) {
+    constructor(props: {}) {
         super(props);
         this.state = { text: undefined, type: undefined };
 

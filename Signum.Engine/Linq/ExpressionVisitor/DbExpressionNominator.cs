@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -224,21 +225,43 @@ namespace Signum.Engine.Linq
             return cex;
         }
 
-        protected Expression TrySqlToString(Type type, Expression expression)
+        protected Expression TrySqlToString(MethodCallExpression m)
         {
+            var expression = m.Object;
+
             if (expression != null && expression.Type.UnNullify() == typeof(PrimaryKey))
                 expression = SmartEqualizer.UnwrapPrimaryKey(expression);
+
+            if (m.Arguments.Any() && (expression.Type.UnNullify() == typeof(DateTime) || ReflectionTools.IsNumber(expression.Type.UnNullify())) && Connector.Current.SupportsFormat)
+                return GetFormatToString(m);
 
             var newExp = Visit(expression);
             if (Has(newExp) && IsFullNominateOrAggresive)
             {
-                if (type.UnNullify().IsEnum)
-                    throw new InvalidOperationException($"Impossible to get the ToString of {type.Name} because is not in the Schema");
+                if (newExp.Type.UnNullify().IsEnum)
+                    throw new InvalidOperationException($"Impossible to get the ToString of {newExp.Type.Name} because is not in the Schema");
 
-                var cast = new SqlCastExpression(type, newExp);
+                var cast = new SqlCastExpression(typeof(string), newExp);
                 return Add(cast);
             }
             return null;
+        }
+
+        protected Expression GetFormatToString(MethodCallExpression m, string defaultFormat = null)
+        {
+            var culture = m.TryGetArgument("culture")?.Let(e => (CultureInfo)((ConstantExpression)Visit(e)).Value) ?? CultureInfo.CurrentCulture;
+
+            string format = m.TryGetArgument("format")?.Let(e => (string)((ConstantExpression)Visit(e)).Value) ?? defaultFormat;
+            
+            var obj = Visit(m.Object);
+
+            if (!culture.IsReadOnly && obj.Type.UnNullify() == typeof(DateTime))
+                format = DateTimeExtensions.ToCustomFormatString(format, culture);
+
+            return Add(new SqlFunctionExpression(typeof(string), null, "Format", new[] {
+                obj,
+                new SqlConstantExpression(format),
+                new SqlConstantExpression(culture.Name) }));
         }
 
         protected Expression TrySqlFunction(Expression obj, SqlFunction sqlFunction, Type type, params Expression[] expression)
@@ -1062,7 +1085,7 @@ namespace Signum.Engine.Linq
         private Expression HardCodedMethods(MethodCallExpression m)
         {
             if (m.Method.Name == "ToString")
-                return TrySqlToString(typeof(string), m.Object);
+                return TrySqlToString(m);
 
             switch (m.Method.DeclaringType.TypeName() + "." + m.Method.Name)
             {
@@ -1131,6 +1154,10 @@ namespace Signum.Engine.Linq
                 case "DateTime.AddMonths": return TrySqlFunction(null, SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.month), m.GetArgument("months"), m.Object);
                 case "DateTime.AddSeconds": return TrySqlFunction(null, SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.second), m.GetArgument("value"), m.Object);
                 case "DateTime.AddYears": return TrySqlFunction(null, SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.year), m.GetArgument("value"), m.Object);
+                case "DateTime.ToShortDateString": return GetFormatToString(m, "d");
+                case "DateTime.ToShortTimeString": return GetFormatToString(m, "t");
+                case "DateTime.ToLongDateString": return GetFormatToString(m, "D");
+                case "DateTime.ToLongTimeString": return GetFormatToString(m, "T");
 
                 //dateadd(month, datediff(month, 0, SomeDate),0);
                 case "DateTimeExtensions.MonthStart": return TrySqlMonthStart(m.GetArgument("dateTime"));
