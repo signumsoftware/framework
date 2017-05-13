@@ -100,7 +100,7 @@ interface DynamicCompileStepState {
     applicationRestarting?: moment.Moment;
 }
 
-export class CompileStep extends React.Component<void, DynamicCompileStepState>{
+export class CompileStep extends React.Component<{}, DynamicCompileStepState>{
 
     constructor(props: any) {
         super(props);

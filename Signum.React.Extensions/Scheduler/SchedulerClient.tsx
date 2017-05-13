@@ -18,7 +18,7 @@ import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<ImportRoute path="~/scheduler/view" onImportModule={() => _import("./SchedulerPanelPage")} />);
 
-    Navigator.addSettings(new EntitySettings(ScheduledTaskEntity, e => _import('./Templates/SchedulerTask')));
+    Navigator.addSettings(new EntitySettings(ScheduledTaskEntity, e => _import('./Templates/ScheduledTask')));
     Navigator.addSettings(new EntitySettings(ScheduleRuleMinutelyEntity, e => _import('./Templates/ScheduleRuleMinutely')));
     Navigator.addSettings(new EntitySettings(ScheduleRuleWeekDaysEntity, e => _import('./Templates/ScheduleRuleWeekDays')));
     Navigator.addSettings(new EntitySettings(ScheduleRuleMonthsEntity, e => _import('./Templates/ScheduleRuleMonths')));
@@ -60,5 +60,5 @@ export interface SchedulerItemState
 {
     ScheduledTask: Lite<ScheduledTaskEntity>;
     Rule: string;
-    NextExecution: string;
+    NextDate: string;
 }

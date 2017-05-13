@@ -482,7 +482,6 @@ export const WorkflowEventType = new EnumType<WorkflowEventType>("WorkflowEventT
 export type WorkflowEventType =
     "Start" |
     "TimerStart" |
-    "ConditionalStart" |
     "Finish";
 
 export const WorkflowGatewayDirection = new EnumType<WorkflowGatewayDirection>("WorkflowGatewayDirection");
@@ -712,6 +711,9 @@ export module WorkflowValidationMessage {
     export const _0CanNotBeConnectedToAParallelJoinBecauseHasNoPreviousParallelSplit = new MessageKey("WorkflowValidationMessage", "_0CanNotBeConnectedToAParallelJoinBecauseHasNoPreviousParallelSplit");
     export const Activity0WithDecisionTypeShouldGoToAnExclusiveOrInclusiveGateways = new MessageKey("WorkflowValidationMessage", "Activity0WithDecisionTypeShouldGoToAnExclusiveOrInclusiveGateways");
     export const Activity0ShouldBeDecision = new MessageKey("WorkflowValidationMessage", "Activity0ShouldBeDecision");
+    export const _0IsTimerStartAndSchedulerIsMandotary = new MessageKey("WorkflowValidationMessage", "_0IsTimerStartAndSchedulerIsMandotary");
+    export const _0IsTimerStartAndTaskIsMandotary = new MessageKey("WorkflowValidationMessage", "_0IsTimerStartAndTaskIsMandotary");
+    export const _0IsConditionalStartAndTaskConditionIsMandotary = new MessageKey("WorkflowValidationMessage", "_0IsConditionalStartAndTaskConditionIsMandotary");
 }
 
 export const WorkflowXmlEmbedded = new Type<WorkflowXmlEmbedded>("WorkflowXmlEmbedded");

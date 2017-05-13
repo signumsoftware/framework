@@ -292,7 +292,7 @@ namespace Signum.Engine.Workflow
                 }).SaveList();
             }
             
-            foreach (var item in nodes.Where(a => a.Key is WorkflowEventEntity e && (e.Type == WorkflowEventType.ConditionalStart || e.Type == WorkflowEventType.TimerStart)))
+            foreach (var item in nodes.Where(a => a.Key is WorkflowEventEntity e && e.Type.IsTimerStart()))
             {
                 WorkflowEventTaskLogic.CloneScheduledTasks((WorkflowEventEntity)item.Key, (WorkflowEventEntity)item.Value);
             }

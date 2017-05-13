@@ -212,7 +212,6 @@ namespace Signum.Engine.Workflow
             {
                 { WorkflowEventType.Start, "startEvent" },
                 { WorkflowEventType.TimerStart, "startEvent" },
-                { WorkflowEventType.ConditionalStart, "startEvent" },
                 { WorkflowEventType.Finish, "endEvent" },
             };
 
@@ -237,8 +236,8 @@ namespace Signum.Engine.Workflow
                 return new XElement(bpmn + WorkflowEventTypes.GetOrThrow(e.Entity.Type),
                     new XAttribute("id", e.bpmnElementId),
                     e.Entity.Name.HasText() ? new XAttribute("name", e.Entity.Name) : null,
-                    e.Entity.Type.IsTimerOrConditionalStart() ? 
-                        new XElement(bpmn + (e.Entity.Type == WorkflowEventType.TimerStart ? "timerEventDefinition" : "conditionalEventDefinition")) : null, 
+                    e.Entity.Type.IsTimerStart() ? 
+                        new XElement(bpmn + (((WorkflowEventModel)e.Entity.GetModel()).Task.TriggeredOn == TriggeredOn.Always ? "timerEventDefinition" : "conditionalEventDefinition")) : null, 
                     GetConnections(e.Entity.ToLite()));
             }
 

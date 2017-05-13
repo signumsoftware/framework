@@ -410,7 +410,7 @@ export interface LineBaseNode extends BaseNode {
     field: string;
     styleOptions?: StyleOptionsExpression;
     readOnly?: ExpressionOrValue<boolean>;
-    redrawOnChange?: boolean;
+    onChange?: Expression<() => void>;
     labelHtmlAttributes?: HtmlAttributesExpression;
     formGroupHtmlAttributes?: HtmlAttributesExpression;
 }
@@ -443,7 +443,7 @@ NodeUtils.register<ValueLineNode>({
         inlineCheckbox: node.inlineCheckbox,
         valueLineType: node.textArea && bindExpr(ta => ta ? "TextArea" : undefined, node.textArea),
         autoTrim: node.autoTrim,
-        onChange: cc.evaluateOnChange(node.redrawOnChange)
+        onChange: node.onChange
     }),
     render: (dn, ctx) => (<ValueLine
         ctx={ctx.subCtx(NodeUtils.asFieldFunction(dn.node.field), toStyleOptions(ctx, dn.node.styleOptions))}
@@ -457,7 +457,7 @@ NodeUtils.register<ValueLineNode>({
         inlineCheckbox={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.inlineCheckbox, NodeUtils.isBooleanOrNull)}
         valueLineType={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.textArea, NodeUtils.isBooleanOrNull) ? "TextArea" : undefined}
         autoTrim={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.autoTrim, NodeUtils.isBooleanOrNull)}
-        onChange={NodeUtils.evaluateOnChange(ctx, dn)}
+        onChange={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.onChange, NodeUtils.isFunctionOrNull)}
         />),
     renderDesigner: (dn) => {
         const m = dn.route && dn.route.member;
@@ -473,8 +473,8 @@ NodeUtils.register<ValueLineNode>({
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.inlineCheckbox)} type="boolean" defaultValue={false} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.textArea)} type="boolean" defaultValue={false} />
-            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.autoTrim)} type="boolean" defaultValue={true}  />
-            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.redrawOnChange)} type="boolean" defaultValue={false} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.autoTrim)} type="boolean" defaultValue={true} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={false} exampleExpression={"() => this.forceUpdate()"} />
         </div>)
     },
 });
@@ -482,9 +482,13 @@ NodeUtils.register<ValueLineNode>({
 
 export interface EntityBaseNode extends LineBaseNode, ContainerNode {
     create?: ExpressionOrValue<boolean>;
+    onCreate?: Expression<() => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined>
     find?: ExpressionOrValue<boolean>;
-    remove?: ExpressionOrValue<boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean)>;
-    view?: ExpressionOrValue<boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean)>;
+    onFind?: Expression<() => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined>
+    remove?: ExpressionOrValue<boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean)>
+    onRemove?: Expression<(remove: ModifiableEntity | Lite<Entity>) => Promise<boolean>>
+    view?: ExpressionOrValue<boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean)>
+    onView?: Expression<(entity: ModifiableEntity | Lite<Entity>, pr: PropertyRoute) => Promise<ModifiableEntity | undefined> | undefined>
     viewOnCreate?: ExpressionOrValue<boolean>;
     findOptions?: FindOptionsExpr;
 }
@@ -503,7 +507,7 @@ NodeUtils.register<EntityLineNode>({
     validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
     renderTreeNode: NodeUtils.treeNodeKindField,
     renderCode: (node, cc) => cc.elementCode("EntityLine", cc.getEntityBasePropsEx(node, { showAutoComplete: true })),
-    render: (dn, ctx) => (<EntityLine {...NodeUtils.getEntityBaseProps(dn, ctx, { showAutoComplete : true }) } />),
+    render: (dn, ctx) => (<EntityLine {...NodeUtils.getEntityBaseProps(dn, ctx, { showAutoComplete: true }) } />),
     renderDesigner: dn => NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: true, showAutoComplete: true }),
 });
 
@@ -574,7 +578,7 @@ NodeUtils.register<FileLineNode>({
         dragAndDropMessage: node.dragAndDropMessage,
         fileType: bindExpr(key => registerSymbol("FileType", key), node.fileType),
         accept: node.accept,
-        onChange: cc.evaluateOnChange(node.redrawOnChange)
+        onChange: node.onChange
     }),
     render: (dn, parentCtx) => (<FileLine
         ctx={parentCtx.subCtx(NodeUtils.asFieldFunction(dn.node.field), toStyleOptions(parentCtx, dn.node.styleOptions))}
@@ -589,7 +593,7 @@ NodeUtils.register<FileLineNode>({
         dragAndDropMessage={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.dragAndDropMessage, NodeUtils.isStringOrNull)}
         fileType={toFileTypeSymbol(NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.fileType, NodeUtils.isStringOrNull))}
         accept={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.accept, NodeUtils.isStringOrNull)}
-        onChange={NodeUtils.evaluateOnChange(parentCtx, dn)}
+        onChange={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.onChange, NodeUtils.isFunctionOrNull)}
     />),
     renderDesigner: dn => {
         const m = dn.route && dn.route.member;
@@ -607,7 +611,7 @@ NodeUtils.register<FileLineNode>({
                 <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.dragAndDropMessage)} type="string" defaultValue={null} />
                 <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.fileType)} type="string" defaultValue={null} options={getFileTypes()} />
                 <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.accept)} type="string" defaultValue={null} />
-                <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.redrawOnChange)} type="boolean" defaultValue={null} />
+                <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={null} />
             </div>
         );
     }
@@ -646,7 +650,7 @@ NodeUtils.register<EnumCheckboxListNode>({
         readOnly: node.readOnly,
         columnCount: node.columnCount,
         columnWidth: node.columnWidth,
-        onChange: cc.evaluateOnChange(node.redrawOnChange),
+        onChange: node.onChange,
     }),
     render: (dn, ctx) => (<EnumCheckboxList
         ctx={ctx.subCtx(NodeUtils.asFieldFunction(dn.node.field), toStyleOptions(ctx, dn.node.styleOptions))}
@@ -654,7 +658,7 @@ NodeUtils.register<EnumCheckboxListNode>({
         readOnly={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
         columnCount={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.columnCount, NodeUtils.isNumberOrNull)}
         columnWidth={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.columnWidth, NodeUtils.isNumberOrNull)}
-        onChange={NodeUtils.evaluateOnChange(ctx, dn)}
+        onChange={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.onChange, NodeUtils.isFunctionOrNull)}
         />),
     renderDesigner: (dn) => {
         const m = dn.route && dn.route.member;
@@ -664,7 +668,7 @@ NodeUtils.register<EnumCheckboxListNode>({
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.columnCount)} type="number" defaultValue={null} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.columnWidth)} type="number" defaultValue={200} />
-            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.redrawOnChange)} type="boolean" defaultValue={null} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={null} />
         </div>)
     },
 });
@@ -964,17 +968,17 @@ export namespace NodeConstructor {
     }
 
     export const specificComponents: {
-        [typeName: string]: (ctx: MemberInfo) => BaseNode | undefined;
+        [typeName: string]: (mi: MemberInfo, field: string) => BaseNode | undefined;
     } = {};
 
     export var appropiateComponent = (mi: MemberInfo, field: string): BaseNode | undefined => {
-        if (mi.name == "Id")
+        if (mi.name == "Id" || mi.notVisible == true)
             return undefined;
 
         const tr = mi.type;
         const sc = specificComponents[tr.name];
         if (sc) {
-            const result = sc(mi);
+            const result = sc(mi, field);
             if (result)
                 return result;
         }

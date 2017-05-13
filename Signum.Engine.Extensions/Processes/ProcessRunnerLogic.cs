@@ -68,9 +68,6 @@ namespace Signum.Engine.Processes
         {
             initialDelayMiliseconds = delayMilliseconds;
 
-            if (initialDelayMiliseconds == 0)
-                StartRunningProcesses();
-
             Task.Factory.StartNew(() =>
             {
                 Thread.Sleep(initialDelayMiliseconds);

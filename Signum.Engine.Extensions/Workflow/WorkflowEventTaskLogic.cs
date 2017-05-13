@@ -45,6 +45,16 @@ namespace Signum.Engine.Workflow
             return ScheduledTaskExpression.Evaluate(e);
         }
 
+        static Expression<Func<WorkflowEventEntity, WorkflowEventTaskEntity>> WorkflowEventTaskExpression =
+        e => Database.Query<WorkflowEventTaskEntity>()
+                        .SingleOrDefault(et => et.Event.RefersTo(e));
+        [ExpressionField]
+        public static WorkflowEventTaskEntity WorkflowEventTask(this WorkflowEventEntity e)
+        {
+            return WorkflowEventTaskExpression.Evaluate(e);
+        }
+
+
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -53,7 +63,6 @@ namespace Signum.Engine.Workflow
                 sb.Schema.Settings.FieldAttributes((WorkflowEventTaskModel a) => a.Rule).Replace(new ImplementedByAttribute(ib.ImplementedTypes));
 
                 sb.Include<WorkflowEventTaskEntity>()
-                    .WithSave(WorkflowEventTaskOperation.Save)
                     .WithDelete(WorkflowEventTaskOperation.Delete)
                     .WithQuery(dqm, e => new
                     {
@@ -63,6 +72,19 @@ namespace Signum.Engine.Workflow
                         e.TriggeredOn,
                         e.Event,
                     });
+
+                new Graph<WorkflowEventTaskEntity>.Execute(WorkflowEventTaskOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (e, _) => {
+
+                        if (e.TriggeredOn == TriggeredOn.Always)
+                            e.Condition = null;
+
+                        e.Save();
+                    },
+                }.Register();
 
                 sb.Schema.EntityEvents<WorkflowEventTaskEntity>().PreUnsafeDelete += tasks => tasks.SelectMany(a => a.ConditionResults()).UnsafeDelete();
 
@@ -82,18 +104,19 @@ namespace Signum.Engine.Workflow
 
                 WorkflowEventTaskModel.GetModel = (@event) =>
                 {
-                    if (!@event.Type.IsTimerOrConditionalStart())
+                    if (!@event.Type.IsTimerStart())
                         return null;
 
                     var schedule = @event.ScheduledTask();
                     var task = (schedule?.Task as WorkflowEventTaskEntity);
+                    var triggeredOn = task?.TriggeredOn ?? TriggeredOn.Always;
 
                     return new WorkflowEventTaskModel
                     {
                         Suspended = schedule?.Suspended ?? true,
                         Rule = schedule?.Rule,
-                        TriggeredOn = task?.TriggeredOn ?? TriggeredOn.Always,
-                        Condition = task?.Condition != null ? new WorkflowEventTaskConditionEval() { Script = task.Condition.Script } : null,
+                        TriggeredOn = triggeredOn,
+                        Condition = triggeredOn == TriggeredOn.Always ? null : new WorkflowEventTaskConditionEval() { Script = task.Condition.Script },
                         Action = new WorkflowEventTaskActionEval() { Script = task?.Action.Script ?? "" }
                     };
                 };
@@ -102,7 +125,7 @@ namespace Signum.Engine.Workflow
                 {
                     var schedule = @event.IsNew ? null : @event.ScheduledTask();
 
-                    if (!@event.Type.IsTimerOrConditionalStart())
+                    if (!@event.Type.IsTimerStart())
                     {
                         if (schedule != null)
                             DeleteWorkflowEventScheduledTask(schedule);
@@ -120,14 +143,15 @@ namespace Signum.Engine.Workflow
                         }
                         task.TriggeredOn = model.TriggeredOn;
 
-                        if (model.Condition != null)
+
+                        if (model.TriggeredOn == TriggeredOn.Always)
+                            task.Condition = null;
+                        else
                         {
                             if (task.Condition == null)
                                 task.Condition = new WorkflowEventTaskConditionEval();
                             task.Condition.Script = model.Condition.Script;
-                        }
-                        else
-                            task.Condition = null;
+                        };
 
                         task.Action.Script = model.Action.Script;
                         if (GraphExplorer.IsGraphModified(schedule))
@@ -143,7 +167,7 @@ namespace Signum.Engine.Workflow
                             Workflow = @event.Lane.Pool.Workflow.ToLite(),
                             Event = @event.ToLite(),
                             TriggeredOn = model.TriggeredOn,
-                            Condition = model.Condition != null ? new WorkflowEventTaskConditionEval() { Script = model.Condition.Script } : null,
+                            Condition = model.TriggeredOn == TriggeredOn.Always ? null : new WorkflowEventTaskConditionEval() { Script = model.Condition.Script },
                             Action = new WorkflowEventTaskActionEval() { Script = model.Action.Script },
                         }.Execute(WorkflowEventTaskOperation.Save);
 
@@ -158,8 +182,6 @@ namespace Signum.Engine.Workflow
                 };
             }
         }
-
-
 
         internal static void CloneScheduledTasks(WorkflowEventEntity oldEvent, WorkflowEventEntity newEvent)
         {
