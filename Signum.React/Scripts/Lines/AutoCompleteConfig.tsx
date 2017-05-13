@@ -75,6 +75,8 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<Lite<En
         public findOptions: FindOptions,
         public count: number,
         public withCustomToString: boolean) {
+
+        Finder.expandParentColumn(this.findOptions);
     }
 
     parsedFilters?: FilterOptionParsed[];
