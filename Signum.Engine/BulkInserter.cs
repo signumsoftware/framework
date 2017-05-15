@@ -113,7 +113,7 @@ namespace Signum.Engine
             where T : Entity
         {
             if (message != null)
-                return SafeConsole.WaitRows(message == "auto" ? $"BulkInsering {entities.Count()} {typeof(T).TypeName()}" : message,
+                return SafeConsole.WaitRows(message == "auto" ? $"BulkInserting {entities.Count()} {typeof(T).TypeName()}" : message,
                     () => BulkInsertTable(entities, copyOptions, validateFirst, disableIdentity, timeout, message: null));
 
             if (disableIdentity)
