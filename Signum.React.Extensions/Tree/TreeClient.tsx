@@ -57,9 +57,9 @@ export function getAllTreeTypes() {
     return getAllTypes().filter(t => isTree(t));
 }
 
-export function openTree<T extends TreeEntity>(type: Type<T>, options?: { title?: string }): Promise<Lite<T>>;
-export function openTree(typeName: string, options?: { title?: string }): Promise<Lite<TreeEntity>>;
-export function openTree(type: Type<TreeEntity> | string, options?: TreeModalOptions): Promise<Lite<TreeEntity>> {
+export function openTree<T extends TreeEntity>(type: Type<T>, options?: { title?: string }): Promise<Lite<T> | undefined>;
+export function openTree(typeName: string, options?: { title?: string }): Promise<Lite<TreeEntity> | undefined>;
+export function openTree(type: Type<TreeEntity> | string, options?: TreeModalOptions): Promise<Lite<TreeEntity> | undefined> {
     const typeName = type instanceof Type ? type.typeName : type;
 
     return _import("./TreeModal")

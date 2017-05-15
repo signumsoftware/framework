@@ -314,7 +314,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         }
     }
 
-    static openView(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, readOnly?: boolean): Promise<CaseActivityEntity> {
+    static openView(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, readOnly?: boolean): Promise<CaseActivityEntity | undefined> {
 
         return openModal<CaseActivityEntity>(<CaseFrameModal
             entityOrPack={entityOrPack}
@@ -330,6 +330,6 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
             entityOrPack={entityOrPack}
             readOnly={readOnly || false}
             isNavigate={true}
-        />);
+        />) as Promise<void>;
     }
 }
