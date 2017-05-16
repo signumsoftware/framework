@@ -298,7 +298,7 @@ namespace Signum.Engine.Word
         {
             try
             {
-                if (template.Template == null)
+                if (template.Template == null || !replacements.Interactive)
                     return null;
 
                 var queryName = QueryLogic.ToQueryName(template.Query.Key);
