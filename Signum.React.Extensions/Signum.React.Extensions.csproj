@@ -342,7 +342,7 @@
     <Content Include="Workflow\Workflow\InitialWorkflow.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Workflow\Case\Case.css" />
+    <Content Include="Workflow\Case\CaseAct.css" />
     <Content Include="Workflow\Bpmn\Bpmn.css" />
   </ItemGroup>
   <ItemGroup>
