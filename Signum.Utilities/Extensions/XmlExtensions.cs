@@ -21,7 +21,7 @@ namespace Signum.Utilities
             {
                 var serializer = new XmlSerializer(typeof(T));
                 var stringWriter = new StringWriter();
-                using (var writer = XmlWriter.Create(stringWriter))
+                using (var writer = XmlWriter.Create(stringWriter, new XmlWriterSettings { Indent = true }))
                 {
                     serializer.Serialize(writer, obj);
                     return stringWriter.ToString();
