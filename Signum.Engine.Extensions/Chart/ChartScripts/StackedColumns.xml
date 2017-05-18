@@ -22,81 +22,9 @@
   <Script><![CDATA[function DrawChart(chart, data){
     
   var pStack = data.parameters["Stack"];
-  
-   var dim0, series, title;
-  
-   if(data.columns.c1.token == null)
-   {   
-      dim0 = data.rows.map(function(r){return r.c0;});     
-      series = ['c2', 'c3','c4','c5','c6']
-        .filter(function(cn){return data.columns[cn].token != undefined; })
-        .map(function(cn){
-           var col = data.columns[cn];
-            return {
-              key : cn,
-              color : null,
-              niceName : col.title,
-              points : data.rows.map(function(r){
-                var v = r[cn];
-                return {
-                  rowClick : r,
-                  value: v,
-                  niceToString : v == null ? null: (r.c0.niceToString() + ', ' + col.title + ': ' + v.niceToString()),
-                  dim0 : r.c0,
-                };
-              }) 
-            };        
-        });
-    
-     title = ['c2', 'c3','c4','c5','c6']
-        .filter(function(cn){return data.columns[cn].token != undefined; })
-        .map(function(cn){return data.columns[cn].title; })
-        .join(" | ")
-   }
-   else
-   {
-      var errors = ['c3','c4','c5','c6']
-        .filter(function(cn){return data.columns[cn].token != undefined; })
-        .map(function(cn){return "'" + data.columns[cn].displayName + "'"; });
-     
-     if(errors.length > 0)
-      throw errors.join() + " not compatible with '" + data.columns.c1.displayName + "'";  
-    
-     dim0 = d3.nest()
-      .key(function(r){return "k" + r.c0.toString(); })
-      .rollup(function(r){return r[0].c0 })
-      .entries(data.rows)
-      .map(function(g){return g.values;});
-
-  
-     series = d3.nest()
-      .key(function(r){return r.c1; })
-      .rollup(function(list){ 
-        var obj = d3.nest()
-            .key(function(r){return r.c0.toString(); })
-            .rollup(function(r){return r[0] })
-            .map(list);
-        
-        var c1 = list[0].c1;
-        return {
-          key : c1.key,
-          color: c1.color,
-          niceName : c1.niceToString(),
-          points : dim0.map(function(d0){ 
-            var row = obj[d0];
-            return {
-              rowClick: row, 
-              value: row == null ? null: row.c2,
-              niceToString : row == null ? null: (row.c0.niceToString() + ', ' + row.c1.niceToString() + ': ' + row.c2.niceToString()),
-              dim0: d0
-          	}; })
-        };
-      })
-      .entries(data.rows)
-      .map(function(g){return g.values;});
-     
-     title = data.columns.c2.title + " / " + data.columns.c1.title
-   }
+  var pivot = data.columns.c1.token == null ?  
+       ChartUtils.toPivotTable(data, "c0", ["c2", "c3", "c4", "c5", "c6"]): 
+       ChartUtils.groupedPivotTable(data, "c0", "c1", "c2");
   
   var xRule = rule({
     _1 : 5,
@@ -125,7 +53,7 @@
   //yRule.debugY(chart);
   
 
-  var x = d3.scale.ordinal()
+  var x = d3.scaleBand()
       .domain(dim0.map(function (d) { return d; }))
       .rangeBands([0, xRule.size('content')]);
   

@@ -304,12 +304,15 @@ export function getStackOffset(curveName: string): ((series: d3.Series<any, any>
     return undefined;
 }
 
-export function getStackOrder(curveName: string): ((series: d3.Series<any, any>, order: number[]) => void) | undefined {
-    switch (curveName) {
-        case "zero": return d3.stackOffsetNone;
-        case "expand": return d3.stackOffsetExpand;
-        case "silhouette": return d3.stackOffsetSilhouette;
-        case "wiggle": return d3.stackOffsetWiggle;
+
+
+export function getStackOrder(schemeName: string): ((series: d3.Series<any, any>) => number[]) | undefined {
+    switch (schemeName) {
+        case "none": return d3.stackOrderNone;
+        case "ascending": return d3.stackOrderAscending;
+        case "descending": return d3.stackOrderDescending;
+        case "insideOut": return d3.stackOrderInsideOut;
+        case "reverse": return d3.stackOrderReverse;
     }
 
     return undefined;
@@ -319,7 +322,7 @@ export function getStackOrder(curveName: string): ((series: d3.Series<any, any>,
 export function getCurveByName(curveName: string): d3.CurveFactoryLineOnly | undefined {
     switch (curveName) {
         case "basis": return d3.curveBasis;
-        case "bundle": return d3.curveBundle;
+        case "bundle": return d3.curveBundle.beta(0.5);
         case "cardinal": return d3.curveCardinal;
         case "catmull-rom": return d3.curveCatmullRom;
         case "linear": return d3.curveLinear;
@@ -386,6 +389,7 @@ export function getColorScheme(schemeName: string): string[] | undefined{
     return undefined;
 }
 
+
 declare module "d3-selection" {
     interface Selection<GElement extends d3.BaseType, Datum, PElement extends d3.BaseType, PDatum> {
         enterData<NElement extends d3.BaseType, NDatum>(data: NDatum[], tag: string, cssClass: string): Selection<NElement, Datum, GElement, Datum>;
@@ -431,9 +435,7 @@ export function stratifyTokens(
             var fold = r[keyColumn] && r[keyColumn].key && folders[r[keyColumn].key!.toString()];
             if (fold)
                 return fold; //My folder
-
-
-
+            
             const parentValue = r[keyColumnParent];
 
             const parentFolder = parentValue && parentValue.key && folders[parentValue.key.toString()];
@@ -473,12 +475,90 @@ interface Root {
 }
 
 
-export function stackTokens(data: ChartTable,
-    keyColumn: string, /*Employee*/
-    keyColumnParent: string) {
+export function toPivotTable(data: ChartTable,
+    col0: string, /*Employee*/
+    otherCols: string[]) : PivotTable {
+
+    var usedCols = otherCols
+        .filter(function (cn) { return data.columns[cn].token != undefined; });
+   
+    var rows = data.rows
+        .map(function (r) {
+            return {
+                rowValue: r[col0],
+                values: usedCols.toObject(cn => cn, cn => ({
+                    rowClick: r,
+                    value: r[cn],
+                }) as PivotValue)
+            } as PivotRow;
+        });
+
+    var title = otherCols
+        .filter(function (cn) { return data.columns[cn].token != undefined; })
+        .map(function (cn) { return data.columns[cn].title; })
+        .join(" | ");
+
+    return {
+        title,
+        columns: d3.values(usedCols.toObject(c => c, c => ({
+            color: null,
+            key: c,
+            niceName: data.columns[c].title,
+        } as PivotColumn))),
+        rows,
+    };
+}
+
+export function groupedPivotTable(data: ChartTable,
+    col0: string, /*Employee*/
+    colSplit: string,
+    colValue: string): PivotTable {
+    
+    var columns = d3.values(data.rows.toObjectDistinct(cr => cr[colSplit].key as string, cr => ({
+        niceName: cr[colSplit].niceToString(),
+        color: cr[colSplit].color,
+        key: cr[colSplit].key,
+    }) as PivotColumn));
+
+    var rows = data.rows.groupBy(r => "k" + r[col0].key)
+        .map(gr => {
+            
+            return {
+                rowValue: gr.elements[0][col0],
+                values: gr.elements.toObject(
+                    r => r[colSplit].key as string,
+                    r => ({ value: r[colValue], rowClick: r }) as PivotValue),
+            } as PivotRow;
+        });
+    
+    var title = data.columns.c2.title + " / " + data.columns.c1.title;
+
+    return {
+        title,
+        columns,
+        rows,
+    } as PivotTable;
+}
+
+interface PivotTable {
+    title: string;
+    columns: PivotColumn[]; 
+    rows: PivotRow[];
+}
+
+interface PivotColumn {
+    key: string;
+    color?: string | null;
+    niceName?: string | null;
+}
+
+interface PivotRow {
+    rowValue: ChartValue;
+    values: { [key: string /*| number*/]: PivotValue }; 
+}
 
 
-    d3.stack()
-
-
+interface PivotValue {
+    rowClick: ChartRow;
+    value: ChartValue;
 }
