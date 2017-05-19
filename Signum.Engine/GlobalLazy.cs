@@ -50,7 +50,7 @@ namespace Signum.Engine
         static HashSet<IResetLazy> registeredLazyList = new HashSet<IResetLazy>();
         public static List<ResetLazyStats> Statistics()
         {
-            return registeredLazyList.Select(a => a.Stats()).ToList();
+            return registeredLazyList.Select(a => a.Stats()).OrderByDescending(x=>x.SumLoadTime).ToList();
         }
 
 

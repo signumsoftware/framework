@@ -608,9 +608,9 @@ export module API {
     export function fetchEntityPack<T extends Entity>(type: Type<T>, id: number | string): Promise<EntityPack<T>>;
     export function fetchEntityPack(type: PseudoType, id: number | string): Promise<EntityPack<Entity>>;
     export function fetchEntityPack(typeOrLite: PseudoType | Lite<any>, id?: any): Promise<EntityPack<Entity>> {
-
+        
         const typeName = (typeOrLite as Lite<any>).EntityType || getTypeName(typeOrLite as PseudoType);
-        let idVal = (typeOrLite as Lite<any>).id || id;
+        let idVal = (typeOrLite as Lite<any>).id != null ? (typeOrLite as Lite<any>).id : id;
 
         return ajaxGet<EntityPack<Entity>>({ url: "~/api/entityPack/" + typeName + "/" + idVal });
     }
