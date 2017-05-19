@@ -2,21 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
-using Signum.Entities.Basics;
-using Signum.Entities.RestLog;
-using IntTec.Entities;
-using Signum.Entities.Authorization;
-using Signum.Entities;
-using Signum.Engine;
+using Signum.Entities.Rest;
 using Signum.Engine.Operations;
 using Signum.Utilities;
 
-namespace Signum.Engine.RestLog
+namespace Signum.Engine.Rest
 {
     public class RestApiKeyLogic
     {

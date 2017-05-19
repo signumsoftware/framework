@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IntTec.Entities
+namespace Signum.Entities.Rest
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class RestApiKeyEntity : Entity
