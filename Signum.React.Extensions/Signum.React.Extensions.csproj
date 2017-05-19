@@ -169,6 +169,7 @@
     <Compile Include="Printing\PrintServer.cs" />
     <Compile Include="Mailing\MailingController.cs" />
     <Compile Include="Mailing\MailingServer.cs" />
+    <Compile Include="Rest\RestApiKeyController.cs" />
     <Compile Include="Rest\RestLogFilter.cs" />
     <Compile Include="Toolbar\ToolbarController.cs" />
     <Compile Include="Toolbar\ToolbarServer.cs" />
@@ -264,8 +265,9 @@
     <TypeScriptCompile Include="Printing\Templates\PrintPackage.tsx" />
     <TypeScriptCompile Include="Printing\Templates\PrintLine.tsx" />
     <TypeScriptCompile Include="HtmlEditor\react-rte.d.ts" />
-    <TypeScriptCompile Include="Rest\RestLogClient.tsx" />
-    <TypeScriptCompile Include="Rest\Signum.Entities.RestLog.ts" />
+    <TypeScriptCompile Include="Rest\RestClient.tsx" />
+    <TypeScriptCompile Include="Rest\Signum.Entities.Rest.ts" />
+    <TypeScriptCompile Include="Rest\Templates\RestApiKey.tsx" />
     <TypeScriptCompile Include="Rest\Templates\RestLog.tsx" />
     <TypeScriptCompile Include="Toolbar\QueryToolbarConfig.ts" />
     <TypeScriptCompile Include="Toolbar\Signum.Entities.Toolbar.ts">
@@ -653,7 +655,7 @@
     <Content Include="Tree\Signum.Entities.Tree.t4s" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Rest\Signum.Entities.RestLog.t4s" />
+    <Content Include="Rest\Signum.Entities.Rest.t4s" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>

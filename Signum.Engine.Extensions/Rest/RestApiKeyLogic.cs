@@ -7,11 +7,14 @@ using Signum.Engine.Maps;
 using Signum.Entities.Rest;
 using Signum.Engine.Operations;
 using Signum.Utilities;
+using System.Security.Cryptography;
 
 namespace Signum.Engine.Rest
 {
     public class RestApiKeyLogic
     {
+        public static Func<string> GenerateRestApiKey = () => DefaultGenerateRestApiKey();
+
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -31,6 +34,16 @@ namespace Signum.Engine.Rest
                     Lite = false,
                     Execute = (e, _) => { },
                 }.Register();
+            }
+        }
+
+        private static string DefaultGenerateRestApiKey()
+        {
+            using (RandomNumberGenerator rng = new RNGCryptoServiceProvider())
+            {
+                byte[] tokenData = new byte[32];
+                rng.GetBytes(tokenData);
+                return Convert.ToBase64String(tokenData);
             }
         }
     }

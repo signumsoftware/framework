@@ -16,8 +16,8 @@ namespace Signum.Entities.Rest
         [NotNullValidator]
         public Lite<UserEntity> User { get; set; }
 
-        [SqlDbType(Size = 40)]
-        [StringLengthValidator(AllowNulls = false, Min = 40, Max = 40)]
+        [SqlDbType(Size = 100)]
+        [StringLengthValidator(AllowNulls = false, Min = 20, Max = 100)]
         [UniqueIndex(AllowMultipleNulls = true)]
         public string ApiKey { get; set; }
     }
