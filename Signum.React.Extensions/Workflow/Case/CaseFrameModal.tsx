@@ -20,7 +20,7 @@ import InlineCaseTags from './InlineCaseTags'
 import { OperationMessage } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
 
 require("../../../../Framework/Signum.React/Scripts/Frames/Frames.css");
-require("./Case.css");
+require("./CaseAct.css");
 
 interface CaseFrameModalProps extends React.Props<CaseFrameModal>, IModalProps {
     title?: string;
