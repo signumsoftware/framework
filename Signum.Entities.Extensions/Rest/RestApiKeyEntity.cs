@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace IntTec.Entities
 {
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class RestApiKeyEntity : Entity
     {
         [NotNullable]
