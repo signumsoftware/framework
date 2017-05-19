@@ -150,7 +150,7 @@
     <Compile Include="Isolation\IsolationEntity.cs" />
     <Compile Include="Printing\PrintLine.cs" />
     <Compile Include="Printing\PrintPackages.cs" />
-    <Compile Include="RestLog\RestLog.cs" />
+    <Compile Include="Rest\RestLog.cs" />
     <Compile Include="Mailing\EmailMasterTemplate.cs" />
     <Compile Include="Mailing\SendEmailTask.cs" />
     <Compile Include="Mailing\Pop3Configuration.cs" />
@@ -206,6 +206,7 @@
     <Compile Include="Tree\TreeOmniboxResultGenertor.cs" />
     <Compile Include="UserAssets\IUserAssetsServer.cs" />
     <Compile Include="UserAssets\QueryToken.cs" />
+    <Compile Include="Rest\RestApiKeyEntity.cs" />
     <Compile Include="ViewLog\ViewLogEntity.cs" />
     <Compile Include="UserAssets\UserAssets.cs" />
     <Compile Include="UserQueries\UserQueryOmniboxResultGenerator.cs" />

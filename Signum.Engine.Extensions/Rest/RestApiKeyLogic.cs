@@ -9,38 +9,27 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Entities.Basics;
 using Signum.Entities.RestLog;
+using IntTec.Entities;
+using Signum.Entities.Authorization;
+using Signum.Entities;
 
 namespace Signum.Engine.RestLog
 {
-    public class RestLogLogic
+    public class RestApiKeyLogic
     {
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<RestLogEntity>()
-                    .WithIndex(a=>a.StartDate)
-                    .WithIndex(a=>a.EndDate)
-                    .WithIndex(a=>a.Controller)
-                    .WithIndex(a=>a.Action)
+                sb.Include<RestApiKeyEntity>()
                     .WithQuery(dqm, e => new
                     {
                         Entity = e,
                         e.Id,
-                        e.StartDate,
-                        e.Duration,
-                        e.Url,
                         e.User,
-                        e.Exception,
+                        e.ApiKey
                     });
-
             }
-            ExceptionLogic.DeleteLogs += DeleteRestLogs;
-        }
-
-        private static void DeleteRestLogs(DeleteLogParametersEmbedded parameters)
-        {
-            Database.Query<RestLogEntity>().Where(a => a.StartDate < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize,parameters.MaxChunks);
         }
     }
 }
