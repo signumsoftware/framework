@@ -12,6 +12,9 @@ using Signum.Entities.RestLog;
 using IntTec.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities;
+using Signum.Engine;
+using Signum.Engine.Operations;
+using Signum.Utilities;
 
 namespace Signum.Engine.RestLog
 {
@@ -29,6 +32,13 @@ namespace Signum.Engine.RestLog
                         e.User,
                         e.ApiKey
                     });
+
+                new Graph<RestApiKeyEntity>.Execute(RestApiKeyOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (e, _) => { },
+                }.Register();
             }
         }
     }

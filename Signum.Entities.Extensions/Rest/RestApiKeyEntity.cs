@@ -21,4 +21,10 @@ namespace IntTec.Entities
         [UniqueIndex(AllowMultipleNulls = true)]
         public string ApiKey { get; set; }
     }
+
+    [AutoInit]
+    public static class RestApiKeyOperation
+    {
+        public static ExecuteSymbol<RestApiKeyEntity> Save;
+    }
 }
