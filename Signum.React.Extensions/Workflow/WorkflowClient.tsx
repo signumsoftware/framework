@@ -366,7 +366,7 @@ export function executeAndClose(eoc: Operations.EntityOperationContext<CaseActiv
 export function navigateCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, readOnly?: boolean): Promise<void> {
 
     return _import<{ default: typeof CaseFrameModal }>("./Case/CaseFrameModal")
-        .then(NP => NP.default.openNavigate(entityOrPack, readOnly));
+        .then(NP => NP.default.openNavigate(entityOrPack, readOnly)) as Promise<void>;
 }
 
 export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, readOnly?: boolean): Promise<CaseActivityEntity | undefined> {
