@@ -123,7 +123,7 @@ export function toLite<T extends Entity>(entity: T | null | undefined, fat?: boo
     if(fat)
        return toLiteFat(entity);
 
-    if(!entity.id)
+    if(entity.id == undefined)
         throw new Error(`The ${entity.Type} has no Id`);
 
     return {
@@ -144,7 +144,7 @@ export function toLiteFat<T extends Entity>(entity: T) : Lite<T> {
 }
 
 export function liteKey(lite: Lite<Entity>) {
-    return lite.EntityType + ";" + (lite.id || "");
+    return lite.EntityType + ";" + (lite.id == undefined ? "" : lite.id);
 }
 
 export function parseLite(lite: string) : Lite<Entity> {

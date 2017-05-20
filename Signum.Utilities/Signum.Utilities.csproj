@@ -87,6 +87,7 @@
     <Compile Include="Extensions\ArrayExtensions.cs" />
     <Compile Include="Extensions\ColorExtensions.cs" />
     <Compile Include="ConsoleSwitch.cs" />
+    <Compile Include="Extensions\XmlExtensions.cs" />
     <Compile Include="NaturalLanguage\English.cs" />
     <Compile Include="NaturalLanguage\German.cs" />
     <Compile Include="NaturalLanguage\Spanish.cs" />
