@@ -43,12 +43,8 @@ namespace Signum.Engine.Linq
 
             if (!type.IsEntity())
                 throw new ArgumentException("type");
-            
-            if (externalId == null) 
-                throw new ArgumentNullException("externalId");
-            
             this.Table = Schema.Current.Table(type);
-            this.ExternalId = externalId;
+            this.ExternalId = externalId ?? throw new ArgumentNullException("externalId");
 
             this.TableAlias = tableAlias;
             this.Bindings = bindings.ToReadOnly();
@@ -238,12 +234,8 @@ namespace Signum.Engine.Linq
 
             if (id.Type != typeof(string))
                 throw new ArgumentException("string");
-
-            if (typeId == null)
-                throw new ArgumentNullException("typeId");
-
             this.Id = id;
-            this.TypeId = typeId;
+            this.TypeId = typeId ?? throw new ArgumentNullException("typeId");
         }
 
         public override string ToString()
@@ -296,20 +288,14 @@ namespace Signum.Engine.Linq
         public LiteValueExpression(Type type, Expression typeId, Expression id, Expression toStr) :
             base(DbExpressionType.LiteValue, type)
         {
-            if (typeId == null)
-                throw new ArgumentNullException("typeId");
-
-            if (id == null)
-                throw new ArgumentNullException("id");
-
-            this.TypeId = typeId;
-            this.Id = id;
+            this.TypeId = typeId ?? throw new ArgumentNullException("typeId");
+            this.Id = id ?? throw new ArgumentNullException("id");
             this.ToStr = toStr;
         }
 
         public override string ToString()
         {
-            return "new Lite<{0}>({1},{2},{3})".FormatWith(Type.CleanType().TypeName(), TypeId.ToString(), Id.ToString(), ToStr.ToString());
+            return $"new Lite<{Type.CleanType().TypeName()}>({TypeId},{Id},{ToStr})";
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -326,14 +312,8 @@ namespace Signum.Engine.Linq
         public TypeEntityExpression(PrimaryKeyExpression externalId, Type typeValue)
             : base(DbExpressionType.TypeEntity, typeof(Type))
         {
-            if (externalId == null)
-                throw new ArgumentException("externalId");
-
-            if (typeValue == null)
-                throw new ArgumentException("typeValue"); 
-
-            this.TypeValue = typeValue;
-            this.ExternalId = externalId;
+            this.TypeValue = typeValue ?? throw new ArgumentException("typeValue");
+            this.ExternalId = externalId ?? throw new ArgumentException("externalId");
         }
 
         public override string ToString()
@@ -378,10 +358,7 @@ namespace Signum.Engine.Linq
         public TypeImplementedByAllExpression(PrimaryKeyExpression typeColumn)
             : base(DbExpressionType.TypeImplementedByAll, typeof(Type))
         {
-            if (typeColumn == null)
-                throw new ArgumentException("typeId");
-
-            this.TypeColumn = typeColumn;
+            this.TypeColumn = typeColumn ?? throw new ArgumentException("typeId");
         }
 
         public override string ToString()
@@ -516,11 +493,8 @@ namespace Signum.Engine.Linq
             if(id.Type != typeof(string))
                 throw new ArgumentException("id should be a string");
 
-            if(typeId == null)
-                throw new ArgumentNullException("typeId");
-
             this.Id = id;
-            this.TypeId = typeId;
+            this.TypeId = typeId ?? throw new ArgumentNullException("typeId");
         }
 
         public override string ToString()
