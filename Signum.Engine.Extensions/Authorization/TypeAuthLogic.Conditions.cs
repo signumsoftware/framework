@@ -183,7 +183,7 @@ namespace Signum.Engine.Authorization
         public static void AssertAllowed(this Lite<IEntity> lite, TypeAllowedBasic allowed, bool inUserInterface)
         {
             if (lite.IdOrNull == null)
-                AssertAllowed(lite.UntypedEntityOrNull, allowed, inUserInterface);
+                AssertAllowed(lite.EntityOrNull, allowed, inUserInterface);
 
             if (!lite.IsAllowedFor(allowed, inUserInterface))
                 throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().FormatWith(allowed.NiceToString().ToLower(), lite.EntityType.NiceName(), lite.Id));
