@@ -238,13 +238,19 @@ namespace Signum.Entities
         public static T SetReadonly<T, V>(this T ident, Expression<Func<T, V>> readonlyProperty, V value)
              where T : ModifiableEntity
         {
+            return SetReadonly(ident, readonlyProperty, value, true);
+        }
+
+        public static T SetReadonly<T, V>(this T ident, Expression<Func<T, V>> readonlyProperty, V value, bool setSelfModified)
+             where T : ModifiableEntity
+        {
             var pi = ReflectionTools.BasePropertyInfo(readonlyProperty);
 
             Action<T, V> setter = ReadonlySetterCache<T>.Setter<V>(pi);
 
             setter(ident, value);
-
-            ident.SetSelfModified();
+            if (setSelfModified)
+                ident.SetSelfModified();
 
             return ident;
         }
