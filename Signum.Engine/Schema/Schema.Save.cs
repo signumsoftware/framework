@@ -1240,10 +1240,10 @@ namespace Signum.Engine.Maps
             if (lite == null)
                 return null;
 
-            if (lite.UntypedEntityOrNull == null)
+            if (lite.EntityOrNull == null)
                 return lite.Id;
 
-            if (forbidden.Contains(lite.UntypedEntityOrNull))
+            if (forbidden.Contains((Entity)lite.EntityOrNull))
                 return null;
 
             lite.RefreshId();
@@ -1256,10 +1256,10 @@ namespace Signum.Engine.Maps
             if (lite == null)
                 return null;
 
-            if (lite.UntypedEntityOrNull == null)
+            if (lite.EntityOrNull == null)
                 return lite.Id;
 
-            if (forbidden.Contains(lite.UntypedEntityOrNull))
+            if (forbidden.Contains((Entity)lite.EntityOrNull))
                 return null;
 
             lite.RefreshId();
@@ -1291,8 +1291,8 @@ namespace Signum.Engine.Maps
                 return null;
 
             Lite<IEntity> l = (Lite<IEntity>)value;
-            return l.UntypedEntityOrNull == null ? l.EntityType :
-                 forbidden.Contains(l.UntypedEntityOrNull) ? null :
+            return l.EntityOrNull == null ? l.EntityType :
+                 forbidden.Contains((Entity)l.EntityOrNull) ? null :
                  l.EntityType;
         }
 
