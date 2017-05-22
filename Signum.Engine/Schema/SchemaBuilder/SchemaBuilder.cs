@@ -71,7 +71,7 @@ namespace Signum.Engine.Maps
         {
             var table = Schema.Table<T>();
 
-            IColumn[] columns = Split(table, fields);
+            IColumn[] columns = IndexKeyColumns.Split(table, fields);
 
             var index = AddUniqueIndex(table, columns);
 
@@ -85,7 +85,7 @@ namespace Signum.Engine.Maps
         {
             var table = Schema.Table<T>();
 
-            IColumn[] columns = Split(table, fields);
+            IColumn[] columns = IndexKeyColumns.Split(table, fields);
 
             var index = new Index(table, columns);
             
@@ -108,7 +108,7 @@ namespace Signum.Engine.Maps
         {
             TableMList table = ((FieldMList)Schema.FindField(Schema.Table(typeof(T)), Reflector.GetMemberList(toMList))).TableMList;
 
-            IColumn[] columns = Split(table, fields);
+            IColumn[] columns = IndexKeyColumns.Split(table, fields);
 
             var index = AddUniqueIndex(table, columns);
 
@@ -118,59 +118,6 @@ namespace Signum.Engine.Maps
             return index;
         }
 
-        IColumn[] Split<T>(IFieldFinder finder, Expression<Func<T, object>> columns)
-        {
-            if (columns == null)
-                throw new ArgumentNullException("columns");
-
-            if (columns.Body.NodeType == ExpressionType.New)
-            {
-                return (from a in ((NewExpression)columns.Body).Arguments
-                        from c in GetColumns<T>(finder, Expression.Lambda<Func<T, object>>(Expression.Convert(a, typeof(object)), columns.Parameters))
-                        select c).ToArray();
-            }
-
-            return GetColumns<T>(finder, columns);
-        }
-
-        static IColumn[] GetColumns<T>(IFieldFinder finder, Expression<Func<T, object>> field)
-        {
-            Type type = RemoveCasting(ref field);
-
-            Field f = Schema.FindField(finder, Reflector.GetMemberList(field));
-
-            if (type != null)
-            {
-                var ib = f as FieldImplementedBy;
-                if (ib == null)
-                    throw new InvalidOperationException("Casting only supported for {0}".FormatWith(typeof(FieldImplementedBy).Name));
-
-                return (from ic in ib.ImplementationColumns
-                        where type.IsAssignableFrom(ic.Key)
-                        select (IColumn)ic.Value).ToArray();
-            }
-
-            return Index.GetColumnsFromFields(f);
-        }
-
-        static Type RemoveCasting<T>(ref Expression<Func<T, object>> field)
-        {
-            var body = field.Body;
-
-            if (body.NodeType == ExpressionType.Convert && body.Type == typeof(object))
-                body = ((UnaryExpression)body).Operand;
-
-            Type type = null;
-            if ((body.NodeType == ExpressionType.Convert || body.NodeType == ExpressionType.TypeAs) &&
-                body.Type != typeof(object))
-            {
-                type = body.Type;
-                body = ((UnaryExpression)body).Operand;
-            }
-
-            field = Expression.Lambda<Func<T, object>>(Expression.Convert(body, typeof(object)), field.Parameters);
-            return type;
-        }
 
         public UniqueIndex AddUniqueIndex(ITable table, Field[] fields)
         {
