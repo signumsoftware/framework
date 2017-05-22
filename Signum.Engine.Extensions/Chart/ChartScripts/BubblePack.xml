@@ -70,19 +70,13 @@
   bubble(root);
   
   var nodes = root.descendants().filter(function(d){return d.data.isRoot == null;});
-  
-  debugger;
-  
+    
   var node = chart.selectAll("g.node")
       .data(nodes)
     .enter().append("g")
       .attr("class", "node")
       .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
 	  .attr('data-click', function(p) { return getClickKeys(p, data.columns); });
-  
-//   node.append("title")
-//       .text(function(d) { return d.data.folder ? d.data.folder.niceToString():   			
-//   				 d.data.c0 ? (d.data.c0.niceToString() + ": " + d.data.c1.niceToString()) : undefined; });
   
   node.append("circle")
       .attr('shape-rendering', 'initial')
@@ -119,11 +113,14 @@
   
   node.append('svg:title')
   	  .text(function(d) { 
-    		return (d.data.folder ? d.data.folder.niceToString() : 
-    			(d.data.c0.niceToString() + (data.columns.c2.token == null ? '' : (' (' + (d.data.c2 ? d.data.c2.niceToString() : null) + ')'))))  
-              + ': ' 
-  		      + format(d.value) + (data.columns.c3.token == null ? '' : (' (' + d.c3 + ')'));
-        })
-  
+    		var key = (d.data.folder ? d.data.folder.niceToString() : 
+    			(d.data.c0.niceToString() + (data.columns.c2.token == null ? '' : (' (' + (d.data.c2 ? d.data.c2.niceToString() : null) + ')'))));
+     
+    
+    		var value = (d.data.folder ? format(size.invert(d.value)) : 
+                         (d.data.c1 + (data.columns.c3.token == null ? '' : (' (' + d.data.c3 + ')'))));
+    
+    		return key + ': '  + value;
+        });
 }]]></Script>
 </ChartScript>
