@@ -666,6 +666,9 @@ namespace Signum.Entities
 
         protected internal override void PostRetrieving()
         {
+            if (this.innerList.Any(a => a.RowId == null))
+                return; //The MList was changed in the entity PostRetriever, like UserChart Columns
+
             if (this.innerList.Select(a => a.RowId.Value).Duplicates().Any())
                 throw new InvalidOperationException("Duplicated RowId found, possible problem in LINQ provider"); 
 
