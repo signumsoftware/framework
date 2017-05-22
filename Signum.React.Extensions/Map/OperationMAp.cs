@@ -21,7 +21,7 @@ namespace Signum.React.Map
         {
             var operations = OperationLogic.TypeOperationsAndConstructors(type);
 
-            var stateTypes = operations.Select(a => a.StateType ?? typeof(DefaultState)).Distinct().ToList();
+            var stateTypes = operations.Select(a => a.StateType).Distinct().NotNull().PreAnd(typeof(DefaultState)).ToList();
 
             Dictionary<Type, LambdaExpression> expressions = stateTypes
                 .ToDictionary(t => t, t => type == typeof(DefaultState) ? null : giGetGraphGetter.GetInvoker(type, t)());

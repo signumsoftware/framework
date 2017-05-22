@@ -6,7 +6,7 @@ import { MapMessage } from '../../Signum.Entities.Map'
 
 export default function getDefaultProviders(info: SchemaMapInfo): ClientColorProvider[] {
 
-    const namespaceColor = d3.scale.category20();
+    const namespaceColor = d3.scaleOrdinal(d3.schemeCategory20);
     const namespace: ClientColorProvider = {
         name: "namespace",
         getFill: t => namespaceColor(t.namespace),
