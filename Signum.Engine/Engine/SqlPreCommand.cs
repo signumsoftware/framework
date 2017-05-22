@@ -12,6 +12,7 @@ using System.Threading;
 using System.Diagnostics;
 using System.Data.Common;
 using Microsoft.SqlServer.Types;
+using System.Globalization;
 
 namespace Signum.Engine
 {
@@ -162,29 +163,29 @@ namespace Signum.Engine
             if (value == null || value == DBNull.Value)
                 return "NULL";
 
-            if (value is string)
-                return "\'" + ((string)value).Replace("'", "''") + "'";
+            if (value is string s)
+                return "\'" + s.Replace("'", "''") + "'";
 
-            if (value is Guid)
-                return "\'" + ((Guid)value).ToString() + "'";
+            if (value is Guid g)
+                return "\'" + g.ToString() + "'";
 
-            if (value is DateTime)
-                return "convert(datetime, '{0:yyyy-MM-ddThh:mm:ss.fff}', 126)".FormatWith(value);
+            if (value is DateTime dt)
+                return "convert(datetime, '{0}', 126)".FormatWith(dt.ToString("yyyy-MM-ddThh:mm:ss.fff", CultureInfo.InvariantCulture));
 
-            if (value is TimeSpan)
-                return "convert(time, '{0:g}')".FormatWith(value);
+            if (value is TimeSpan ts)
+                return "convert(time, '{0:g}')".FormatWith(ts.ToString("g", CultureInfo.InvariantCulture));
 
-            if (value is bool)
-                return (((bool)value) ? 1 : 0).ToString();
+            if (value is bool b)
+                return (b ? 1 : 0).ToString();
 
-            if (value is SqlHierarchyId)
-                return "CAST('{0}' AS hierarchyid)".FormatWith(value);
+            if (value is SqlHierarchyId sh)
+                return "CAST('{0}' AS hierarchyid)".FormatWith(sh);
 
             if (value.GetType().IsEnum)
                 return Convert.ToInt32(value).ToString();
 
-            if (value is byte[])
-                return "0x" + BitConverter.ToString((byte[])value).Replace("-", "");
+            if (value is byte[] bytes)
+                return "0x" + BitConverter.ToString(bytes).Replace("-", "");
 
             return value.ToString();
         }
