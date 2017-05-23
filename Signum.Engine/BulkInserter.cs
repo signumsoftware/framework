@@ -18,6 +18,7 @@ namespace Signum.Engine
     {
         public static int BulkInsert<T>(this IEnumerable<T> entities,
             SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
+            bool preSaving = false,
             bool validateFirst = false,
             bool disableIdentity = false,
             int? timeout = null,
@@ -35,7 +36,7 @@ namespace Signum.Engine
 
             var list = entities.ToList();
 
-            var rowNum = BulkInsertTable(list, copyOptions, validateFirst, disableIdentity, timeout, message);
+            var rowNum = BulkInsertTable(list, copyOptions, preSaving, validateFirst, disableIdentity, timeout, message);
 
             BulkInsertMLists<T>(list, copyOptions, timeout, message);
 
@@ -48,6 +49,7 @@ namespace Signum.Engine
             Expression<Func<T, K>> keySelector,
             Expression<Func<T, bool>> isNewPredicate = null,
             SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
+            bool preSaving = false,
             bool validateFirst = false,
             int? timeout = null,
             string message = null)
@@ -60,7 +62,7 @@ namespace Signum.Engine
             if (isNewPredicate == null)
                 isNewPredicate = GetFilterAutomatic<T>(t);
 
-            var rowNum = BulkInsertTable<T>(list, copyOptions, validateFirst, false, timeout, message);
+            var rowNum = BulkInsertTable<T>(list, copyOptions, preSaving, validateFirst, false, timeout, message);
 
             var dictionary = Database.Query<T>().Where(isNewPredicate).Select(a => KVP.Create(keySelector.Evaluate(a), a.Id)).ToDictionaryEx();
 
@@ -106,6 +108,7 @@ namespace Signum.Engine
 
         public static int BulkInsertTable<T>(IEnumerable<T> entities,
             SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
+            bool preSaving = false,
             bool validateFirst = false,
             bool disableIdentity = false,
             int? timeout = null,
@@ -113,8 +116,8 @@ namespace Signum.Engine
             where T : Entity
         {
             if (message != null)
-                return SafeConsole.WaitRows(message == "auto" ? $"BulkInserting {entities.Count()} {typeof(T).TypeName()}" : message,
-                    () => BulkInsertTable(entities, copyOptions, validateFirst, disableIdentity, timeout, message: null));
+                return SafeConsole.WaitRows(message == "auto" ? $"BulkInsering {entities.Count()} {typeof(T).TypeName()}" : message,
+                    () => BulkInsertTable(entities, copyOptions, preSaving, validateFirst, disableIdentity, timeout, message: null));
 
             if (disableIdentity)
                 copyOptions |= SqlBulkCopyOptions.KeepIdentity;
@@ -123,6 +126,21 @@ namespace Signum.Engine
                 throw new InvalidOperationException("BulkInsertDisableIdentity not compatible with UseInternalTransaction");
 
             var list = entities.ToList();
+
+            if (preSaving)
+            {
+                Schema schema = Schema.Current;
+                GraphExplorer.PreSaving(() => GraphExplorer.FromRoots(list), (Modifiable m, ref bool graphModified) =>
+                {
+                    if (m is ModifiableEntity me)
+                        me.SetTemporalErrors(null);
+
+                    m.PreSaving(ref graphModified);
+
+                    if (m is Entity ident)
+                        schema.OnPreSaving(ident, ref graphModified);
+                });
+            }
 
             if (validateFirst)
             {
