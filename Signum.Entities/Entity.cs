@@ -38,7 +38,7 @@ namespace Signum.Entities
                     throw new InvalidOperationException("{0} is new and has no Id".FormatWith(this.GetType().Name));
                 return id.Value;
             }
-            internal set { id = value; }
+            internal set { id = value; } //Use SetId method to change the Id
         }
 
         [HiddenProperty]
