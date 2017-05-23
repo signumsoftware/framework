@@ -410,7 +410,9 @@ export function stratifyTokens(
 
     const root: Root = { isRoot: true };
 
-    const dic = data.rows.filter(r => r[keyColumn]).toObjectDistinct(r => r[keyColumn]!.key as string);
+    const NullConst = "- Null -";
+
+    const dic = data.rows.filter(r => r[keyColumn].key != null).toObjectDistinct(r => r[keyColumn]!.key as string);
 
     const getParent = (d: ChartRow | Folder | Root) =>  {
         if ((d as Root).isRoot)
@@ -426,33 +428,43 @@ export function stratifyTokens(
             if (!parentValue || !parentValue.key)
                 return root;  //Either null
 
-            return folders[parentValue.key.toString()]; // Parent folder
+            return folders[parentValue.key as string]; // Parent folder
         }
             
         if ((d as ChartRow)[keyColumn]) {
             const r = d as ChartRow;
-            
-            var fold = r[keyColumn] && r[keyColumn].key && folders[r[keyColumn].key!.toString()];
+
+            var fold = r[keyColumn] && r[keyColumn].key != null  && folders[r[keyColumn].key as string];
             if (fold)
                 return fold; //My folder
             
             const parentValue = r[keyColumnParent];
 
-            const parentFolder = parentValue && parentValue.key && folders[parentValue.key.toString()];
+            const parentFolder = parentValue && parentValue.key && folders[parentValue.key as string];
 
             if (!parentFolder)
                 return root; //No key an no parent
 
-            return folders[parentFolder.folder!.key!.toString()]; //only parent
+            return folders[parentFolder.folder!.key as string]; //only parent
         }
 
         throw new Error("Unexpected " + JSON.stringify(d))
     };
 
     var getKey = (r: ChartRow | Folder | Root) => {
-        return (r as Root).isRoot ? "#Root" :
-            (r as Folder).folder ? ("F#" + (r as Folder).folder.key) :
-                (r as ChartRow) ? (r as ChartRow)[keyColumn].key!.toString() : undefined;
+
+        if ((r as Root).isRoot)
+            return "#Root";
+
+        if ((r as Folder).folder)
+            return "F#" + (r as Folder).folder.key;
+
+        const cr = (r as ChartRow);
+
+        if (cr[keyColumn].key != null)
+            return cr[keyColumn].key as string;
+
+        return NullConst;
     }
 
     var rootNode = d3.stratify<ChartRow | Folder | Root>()
