@@ -281,7 +281,7 @@ namespace Signum.Windows
                     if (entity == null)
                     {
                         Lite<Entity> lite = (Lite<Entity>)entityOrLite;
-                        entity = lite.UntypedEntityOrNull ?? Server.RetrieveAndForget(lite);
+                        entity = lite.EntityOrNull ?? Server.RetrieveAndForget(lite);
                     }
 
                     EntitySettings es = AssertViewableEntitySettings(entity);
