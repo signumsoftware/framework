@@ -116,7 +116,13 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
     handleOnChange = (value: any) => {
         this.props.onTokenSelected(value || this.props.parentToken);
     }
-    
+
+    handleKeyUp = (e: React.KeyboardEvent<any>) => {
+        if (e.key == "Enter") {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }
 
     render() {
         
@@ -124,7 +130,7 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
             return null;
         
         return (
-            <div className="sf-query-token-part">
+            <div className="sf-query-token-part" onKeyUp={this.handleKeyUp} onKeyDown={this.handleKeyUp}>
                 <DropdownList
                     disabled={this.props.readOnly}
                     filter="contains"
