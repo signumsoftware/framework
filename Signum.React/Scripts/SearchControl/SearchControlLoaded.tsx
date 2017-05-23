@@ -501,9 +501,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     handleInsertColumn = () => {
 
+        const token = withoutAllAny(this.state.lastToken);
+
         const newColumn: ColumnOptionParsed = {
-            token: this.state.lastToken,
-            displayName: this.state.lastToken && this.state.lastToken.niceName,
+            token: token,
+            displayName: token && token.niceName,
         };
 
         const cm = this.state.contextualMenu!;
@@ -901,4 +903,19 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         return <OverlayTrigger placement="bottom" overlay={tooltip}>{tr}</OverlayTrigger>;
     }
 
+}
+
+function withoutAllAny(qt: QueryToken | undefined): QueryToken | undefined {
+    if (qt == undefined)
+        return undefined;
+
+    if (qt.queryTokenType == "AnyOrAll")
+        return withoutAllAny(qt.parent);
+
+    var par = withoutAllAny(qt.parent);
+
+    if (par == qt.parent)
+        return qt; 
+
+    return par; 
 }
