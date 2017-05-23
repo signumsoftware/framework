@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
 import { Tabs, Tab } from 'react-bootstrap'
-import { RestLogEntity } from '../Signum.Entities.RestLog'
+import { RestLogEntity } from '../Signum.Entities.Rest'
 import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityRepeater } from "../../../../Framework/Signum.React/Scripts/Lines";
 import { } from "../../../../Framework/Signum.React/Scripts/ConfigureReactWidgets";
 

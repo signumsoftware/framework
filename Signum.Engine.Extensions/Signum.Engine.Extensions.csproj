@@ -135,6 +135,7 @@
     <Compile Include="Disconnected\ExportManager.cs" />
     <Compile Include="Dynamic\DynamicLogic.cs" />
     <Compile Include="Dynamic\DynamicMixinConnectionLogic.cs" />
+    <Compile Include="Rest\RestApiKeyLogic.cs" />
     <Compile Include="Toolbar\ToolbarLogic.cs" />
     <Compile Include="Dynamic\DynamicSqlMigrationLogic.cs" />
     <Compile Include="Dynamic\DynamicExpressionLogic.cs" />
@@ -158,7 +159,7 @@
     <Compile Include="Help\HelpUtilities.cs" />
     <Compile Include="Isolation\IsolationLogic.cs" />
     <Compile Include="Printing\PrintLogic.cs" />
-    <Compile Include="RestLog\RestLogLogic.cs" />
+    <Compile Include="Rest\RestLogLogic.cs" />
     <Compile Include="Mailing\AsyncEmailSenderLogic.cs" />
     <Compile Include="Map\MapLogic.cs" />
     <Compile Include="Mailing\SendEmailTaskLogic.cs" />
