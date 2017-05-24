@@ -171,6 +171,7 @@
     <Compile Include="Mailing\MailingServer.cs" />
     <Compile Include="Rest\RestApiKeyController.cs" />
     <Compile Include="Rest\RestLogFilter.cs" />
+    <Compile Include="Rest\RestServer.cs" />
     <Compile Include="Toolbar\ToolbarController.cs" />
     <Compile Include="Toolbar\ToolbarServer.cs" />
     <Compile Include="Tree\TreeController.cs" />
