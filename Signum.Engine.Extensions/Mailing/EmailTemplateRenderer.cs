@@ -177,7 +177,7 @@ namespace Signum.Engine.Mailing
             {
                 if (smtpConfig != null && smtpConfig.DefaultFrom != null)
                 {
-                    yield return smtpConfig.DefaultFrom;
+                    yield return smtpConfig.DefaultFrom.Clone();
                 }
                 else
                 {
