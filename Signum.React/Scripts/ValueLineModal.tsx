@@ -45,7 +45,14 @@ export default class ValueLineModal extends React.Component<ValueLineModalProps,
         const ctx = new TypeContext(undefined, undefined, undefined as any, Binding.create(this.state, s => s.value));
 
         const { title, message, initialValue, ...valueLineProps } = this.props.options;
-        var vlp: ValueLineProps = { ctx, ...valueLineProps, };
+        var vlp: ValueLineProps = {
+            ctx: ctx,
+            formatText: valueLineProps.formatText,
+            unitText: valueLineProps.unitText,
+            labelText: valueLineProps.labelText,
+            type: valueLineProps.type,
+            valueLineType: valueLineProps.valueLineType,
+        };
 
         return <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited}>
 
@@ -79,14 +86,14 @@ export default class ValueLineModal extends React.Component<ValueLineModalProps,
 }
 
 export interface ValueLineModalOptions {
-    type: TypeReference
+    type: TypeReference;
     valueLineType?: ValueLineType;
-    initialValue?: any
+    initialValue?: any;
     title?: React.ReactChild;
     message?: React.ReactChild;
     labelText?: React.ReactChild;
-    format?: string;
-    unit?: string;
+    formatText?: string;
+    unitText?: string;
     initiallyFocused?: boolean;
     valueHtmlAttributes?: React.HTMLAttributes<any>;
 }
