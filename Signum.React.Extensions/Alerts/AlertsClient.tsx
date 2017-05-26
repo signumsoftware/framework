@@ -61,7 +61,7 @@ function chooseDate(): Promise<moment.Moment | undefined>{
             return ValueLineModal.show({
                 title: AlertMessage.CustomDelay.niceToString(),
                 type: mi.type,
-                unit: mi.unit,
+                unitText: mi.unit,
                 labelText: mi.niceName,
                 initiallyFocused: true,
                 initialValue: result.format()
