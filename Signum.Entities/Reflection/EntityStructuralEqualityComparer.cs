@@ -19,15 +19,16 @@ namespace Signum.Entities.Reflection
     public class EntityStructuralEqualityComparer<T> : EqualityComparer<T> 
         where T : ModifiableEntity
     {
-        Dictionary<string, PropertyComparer> Properties; 
-        Dictionary<Type, IEqualityComparer> Mixins; 
+        public Dictionary<string, PropertyComparer> Properties;
+        public Dictionary<Type, IEqualityComparer> Mixins; 
         
         public EntityStructuralEqualityComparer(IEqualityComparerResolver resolver)
         {
             Properties = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Typed | MemberOptions.Getter)
+                .Where(p => !((PropertyInfo)p.MemberInfo).HasAttribute<HiddenPropertyAttribute>())
                .ToDictionary(a => a.Name, a => new PropertyComparer((PropertyInfo)a.MemberInfo, a.Getter)
                {
-                   Comparer = resolver.GetEqualityComparer(((PropertyInfo)a.MemberInfo).DeclaringType, ((PropertyInfo)a.MemberInfo))
+                   Comparer = resolver.GetEqualityComparer(((PropertyInfo)a.MemberInfo).PropertyType, ((PropertyInfo)a.MemberInfo))
                });
 
             Mixins = !typeof(Entity).IsAssignableFrom(typeof(T)) ? null :
