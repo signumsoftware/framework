@@ -28,7 +28,7 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <TypeScriptToolsVersion>2.2</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>2.3</TypeScriptToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -86,8 +86,8 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.ValueTuple, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.ValueTuple.4.3.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+    <Reference Include="System.ValueTuple, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.ValueTuple.4.3.1\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
@@ -167,9 +167,10 @@
     <Compile Include="Isolation\IsolationServer.cs" />
     <Compile Include="Printing\PrintController.cs" />
     <Compile Include="Printing\PrintServer.cs" />
-    <Compile Include="RestLog\RestLogFilter.cs" />
     <Compile Include="Mailing\MailingController.cs" />
     <Compile Include="Mailing\MailingServer.cs" />
+    <Compile Include="Rest\RestApiKeyController.cs" />
+    <Compile Include="Rest\RestLogFilter.cs" />
     <Compile Include="Toolbar\ToolbarController.cs" />
     <Compile Include="Toolbar\ToolbarServer.cs" />
     <Compile Include="Tree\TreeController.cs" />
@@ -265,6 +266,10 @@
     <TypeScriptCompile Include="Printing\Templates\PrintPackage.tsx" />
     <TypeScriptCompile Include="Printing\Templates\PrintLine.tsx" />
     <TypeScriptCompile Include="HtmlEditor\react-rte.d.ts" />
+    <TypeScriptCompile Include="Rest\RestClient.tsx" />
+    <TypeScriptCompile Include="Rest\Signum.Entities.Rest.ts" />
+    <TypeScriptCompile Include="Rest\Templates\RestApiKey.tsx" />
+    <TypeScriptCompile Include="Rest\Templates\RestLog.tsx" />
     <TypeScriptCompile Include="Toolbar\QueryToolbarConfig.ts" />
     <TypeScriptCompile Include="Toolbar\Signum.Entities.Toolbar.ts">
       <DependentUpon>Signum.Entities.Toolbar.t4s</DependentUpon>
@@ -344,7 +349,7 @@
     <Content Include="Workflow\Workflow\InitialWorkflow.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Workflow\Case\Case.css" />
+    <Content Include="Workflow\Case\CaseAct.css" />
     <Content Include="Workflow\Bpmn\Bpmn.css" />
   </ItemGroup>
   <ItemGroup>
@@ -515,8 +520,6 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="Profiler\Heavy\HeavyListPage.tsx" />
     <TypeScriptCompile Include="Profiler\Times\TimesPage.tsx" />
-    <TypeScriptCompile Include="RestLog\Templates\RestLog.tsx" />
-    <TypeScriptCompile Include="RestLog\RestLogClient.tsx" />
     <TypeScriptCompile Include="Templating\Signum.Entities.Templating.ts">
       <DependentUpon>Signum.Entities.Templating.t4s</DependentUpon>
     </TypeScriptCompile>
@@ -641,9 +644,6 @@
     <Content Include="Profiler\Signum.Entities.Profiler.t4s" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="RestLog\Signum.Entities.RestLog.t4s" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Dynamic\Signum.Entities.Dynamic.t4s" />
   </ItemGroup>
   <ItemGroup>
@@ -655,6 +655,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Tree\Signum.Entities.Tree.t4s" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Rest\Signum.Entities.Rest.t4s" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>

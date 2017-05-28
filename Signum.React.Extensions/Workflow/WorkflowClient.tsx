@@ -365,10 +365,10 @@ export function executeAndClose(eoc: Operations.EntityOperationContext<CaseActiv
 export function navigateCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, readOnly?: boolean): Promise<void> {
 
     return _import<{ default: typeof CaseFrameModal }>("./Case/CaseFrameModal")
-        .then(NP => NP.default.openNavigate(entityOrPack, readOnly));
+        .then(NP => NP.default.openNavigate(entityOrPack, readOnly)) as Promise<void>;
 }
 
-export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, readOnly?: boolean): Promise<CaseActivityEntity> {
+export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, readOnly?: boolean): Promise<CaseActivityEntity | undefined> {
     return _import<{ default: typeof CaseFrameModal }>("./Case/CaseFrameModal")
         .then(NP => NP.default.openView(entityOrPack, readOnly));
     
@@ -398,7 +398,7 @@ export function createNewCase(workflowId: number | string, mainEntityStrategy: W
 
 export function toEntityPackWorkflow(entityOrEntityPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack): Promise<CaseEntityPack> {
     if ((entityOrEntityPack as CaseEntityPack).canExecuteActivity)
-        return Promise.resolve(entityOrEntityPack);
+        return Promise.resolve(entityOrEntityPack as CaseEntityPack);
 
     const lite = isEntity(entityOrEntityPack) ? toLite(entityOrEntityPack) : entityOrEntityPack as Lite<CaseActivityEntity>;
 

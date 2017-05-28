@@ -42,9 +42,9 @@
   //yRule.debugY(chart);
   
   
-  var x = d3.scale.ordinal()
+  var x = d3.scaleBand()
       .domain(data.rows.map(function (e) { return e.c0; }))
-      .rangeBands([0, xRule.size('content')]);
+      .range([0, xRule.size('content')]);
   
   var y = scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0, yRule.size('content'), data.parameters["Scale"]);
   
@@ -84,7 +84,7 @@
     .text(data.columns.c1.title);
   
   
-  var color = d3.scale.category20().domain( data.rows.map(function (v) { return v.c0; }));
+  var color = d3.scaleOrdinal(d3.schemeCategory20).domain( data.rows.map(function (v) { return v.c0; }));
   
   
   //PAINT CHART
@@ -92,21 +92,21 @@
     .enterData(data.rows, 'rect', 'shape')
     .attr('y', function (v) { return -y(v.c1); })
     .attr('height', function (v) { return y(v.c1); })
-    .attr('width', x.rangeBand)
+    .attr('width', x.bandwidth)
     .attr('x', function (v) { return x(v.c0); })
     .attr('fill', function (v) { return v.c0.color || color(v.c0); })
-    .attr('stroke', x.rangeBand() > 4 ? '#fff' : null)
+    .attr('stroke', x.bandwidth() > 4 ? '#fff' : null)
     .attr('data-click', function (v) { return getClickKeys(v, data.columns); })
     .append('svg:title')
     .text(function (d) { return d.c0.niceToString() + ': ' + d.c1.niceToString(); });
   
-  if (x.rangeBand() > 15)
+  if (x.bandwidth() > 15)
   { 
      if(data.parameters["Labels"] == "Margin")
      {
         chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content'), yRule.start('labels')))
           .enterData(data.rows, 'text', 'x-label')
-          .attr('transform', function (v){ return translate( x(v.c0) + x.rangeBand()/2, 0 ) +  rotate(-90);})
+          .attr('transform', function (v){ return translate( x(v.c0) + x.bandwidth()/2, 0 ) +  rotate(-90);})
           .attr('dominant-baseline', 'middle')
           .attr('font-weight', 'bold')
           .attr('fill', function (v) { return (v.c0.color || color(v.c0)); })
@@ -121,7 +121,7 @@
         var labelMargin = 10;    
         chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content'), yRule.end('content')))
           .enterData(data.rows, 'text', 'x-label')
-          .attr('transform', function (v){ return translate( x(v.c0) + x.rangeBand()/2, -y(v.c1) ) +   rotate(-90);})
+          .attr('transform', function (v){ return translate( x(v.c0) + x.bandwidth()/2, -y(v.c1) ) +   rotate(-90);})
           .attr('dominant-baseline', 'middle')
           .attr('font-weight', 'bold')
           .attr('fill', function (v) { return y(v.c1) >= size / 2 ? '#fff' : (v.c0.color || color(v.c0)); })
@@ -137,7 +137,7 @@
        chart.append('svg:g').attr('class', 'numbers-label').attr('transform', translate(xRule.start('content'), yRule.end('content')))
        .enterData(data.rows, 'text', 'number-label')
        .filter(function(v){return y(v.c1) > 10; })
-       .attr('transform', function (v){ return translate( x(v.c0) + x.rangeBand()/2, -y(v.c1) / 2 ) +  rotate(-90);})
+       .attr('transform', function (v){ return translate( x(v.c0) + x.bandwidth()/2, -y(v.c1) / 2 ) +  rotate(-90);})
        .attr('fill', data.parameters["NumberColor"])
        .attr('dominant-baseline', 'central')
        .attr('opacity', data.parameters["NumberOpacity"])

@@ -438,7 +438,7 @@ export class DesignerModal extends React.Component<DesignerModalProps, { show: b
         </Modal>;
     }
 
-    static show(title: React.ReactNode, mainComponent: () => React.ReactElement<any>): Promise<boolean> {
+    static show(title: React.ReactNode, mainComponent: () => React.ReactElement<any>): Promise<boolean | undefined> {
         return openModal<boolean>(<DesignerModal title={title} mainComponent={mainComponent} />);
     }
 }

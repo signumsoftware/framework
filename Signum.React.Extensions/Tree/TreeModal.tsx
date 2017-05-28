@@ -95,12 +95,12 @@ export default class TreeModal extends React.Component<TreeModalProps, { show: b
         );
     }
 
-    static open(typeName: string, filterOptions: FilterOption[],  options?: TreeClient.TreeModalOptions): Promise<Lite<TreeEntity>> {
+    static open(typeName: string, filterOptions: FilterOption[],  options?: TreeClient.TreeModalOptions): Promise<Lite<TreeEntity> | undefined> {
         return openModal<TreeNode>(<TreeModal
             filterOptions={filterOptions}
             typeName={typeName}
             title={options && options.title} />)
-            .then(tn => tn ? tn.lite : null);
+            .then(tn => tn && tn.lite);
     }
 }
 

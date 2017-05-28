@@ -394,8 +394,8 @@ namespace Signum.Engine.Dynamic
 
             StringBuilder sb = new StringBuilder();
 
-            string inititalizer = (property.IsMList != null) ? $" = new {type}()": null;
-            string fieldName = property.Name.FirstLower();
+            string inititalizer = (property.IsMList != null) ? $" = new {type}()" : null;
+            string fieldName = GetFieldName(property);
 
             WriteAttributeTag(sb, GetFieldAttributes(property));
             sb.AppendLine($"{type} {fieldName}{inititalizer};");
@@ -407,6 +407,16 @@ namespace Signum.Engine.Dynamic
             sb.AppendLine("}");
 
             return sb.ToString();
+        }
+
+        private static string GetFieldName(DynamicProperty property)
+        {
+            var fn = property.Name.FirstLower();
+
+            if (CSharpRenderer.Keywords.Contains(fn))
+                return "@" + fn;
+
+            return fn;
         }
 
         private IEnumerable<string> GetPropertyAttributes(DynamicProperty property)
