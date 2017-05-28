@@ -286,7 +286,14 @@ export namespace Options {
 
 export function isPermissionAuthorized(permission: PermissionSymbol | string) {
     var key = (permission as PermissionSymbol).key || permission as string;
-    const member = getTypeInfo(key.before(".")).members[key.after(".")];
+    const type = getTypeInfo(key.before("."));
+    if (!type)
+        throw new Error(`Type '${key.before(".")}' not found. Consider adding PermissionAuthLogic.RegisterPermissions(${key}) and Synchronize`);
+
+    const member = type.members[key.after(".")];
+    if (!member)
+        throw new Error(`Member '${key.after(".")}' not found. Consider adding PermissionAuthLogic.RegisterPermissions(${key}) and Synchronize`);
+
     return member.permissionAllowed;
 }
 
