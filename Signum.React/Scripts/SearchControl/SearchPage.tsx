@@ -31,7 +31,14 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchC
         this.setState(this.calculateState(nextProps));
     }
 
+    componentWillUnmount() {
+        document.title = Navigator.getTitle();
+    }
+
     calculateState(props: SearchPageProps): SearchControlState {
+
+        document.title = Navigator.getTitle(getQueryNiceName(props.match.params.queryName));
+
         return {
             findOptions: {
                 showFilters: true,

@@ -21,7 +21,6 @@ import * as AppRelativeRoutes from "./AppRelativeRoutes";
 
 Dic.skipClasses.push(React.Component);
 
-
 export let currentUser: IUserEntity | undefined;
 export function setCurrentUser(user: IUserEntity | undefined) {
     currentUser = user;
@@ -30,6 +29,11 @@ export function setCurrentUser(user: IUserEntity | undefined) {
 export let history: H.History;
 export function setCurrentHistory(h: H.History) {
     history = h;
+}
+
+export let getTitle: (pageTitle?: string) => string;
+export function setTitle(title: (pageTitle?: string) => string) {
+    getTitle = title;
 }
 
 export function createAppRelativeHistory(): H.History {
