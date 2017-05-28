@@ -127,7 +127,7 @@ namespace Signum.Entities
                 {
                     var l = o as Lite<Entity>;
                     Sb.Append("({0}, \"{1}\")".FormatWith((l.IdOrNull.HasValue ? l.Id.ToString() : "null"), l.ToString()));
-                    if (((Lite<Entity>)o).UntypedEntityOrNull == null)
+                    if (((Lite<Entity>)o).EntityOrNull == null)
                         return;
                 }
 

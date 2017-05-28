@@ -232,7 +232,7 @@ namespace Signum.Engine.Linq
             if (expression != null && expression.Type.UnNullify() == typeof(PrimaryKey))
                 expression = SmartEqualizer.UnwrapPrimaryKey(expression);
 
-            if ((expression.Type.UnNullify() == typeof(DateTime) || ReflectionTools.IsNumber(expression.Type.UnNullify())) && Connector.Current.SupportsFormat)
+            if (IsFullNominateOrAggresive && m.Arguments.Any() && (expression.Type.UnNullify() == typeof(DateTime) || ReflectionTools.IsNumber(expression.Type.UnNullify())) && Connector.Current.SupportsFormat)
                 return GetFormatToString(m);
 
             var newExp = Visit(expression);

@@ -252,7 +252,7 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class QueryEntitiesRequest: BaseQueryRequest
     {
-        List<Order> orders;
+        List<Order> orders = new List<Order>();
         public List<Order> Orders
         {
             get { return orders; }

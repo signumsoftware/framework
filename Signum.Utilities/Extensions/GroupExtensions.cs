@@ -195,8 +195,10 @@ namespace Signum.Utilities
             {
                 if (current == null)
                 {
-                    current = new Grouping<K, T>(getGroupKey(item));
-                    current.Add(item);
+                    current = new Grouping<K, T>(getGroupKey(item))
+                    {
+                        item
+                    };
                 }
                 else if (current.Key.Equals(getGroupKey(item)))
                 {
@@ -205,8 +207,10 @@ namespace Signum.Utilities
                 else
                 {
                     yield return current;
-                    current = new Grouping<K, T>(getGroupKey(item));
-                    current.Add(item);
+                    current = new Grouping<K, T>(getGroupKey(item))
+                    {
+                        item
+                    };
                 }
             }
 

@@ -40,7 +40,11 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         const s = this.state;
         const readOnly = this.state.ctx.readOnly;
         return (
-            <FormGroup ctx={s.ctx!} labelText={s.labelText} labelHtmlAttributes={s.labelHtmlAttributes} helpBlock={s.helpBlock} {...{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes } }>
+            <FormGroup ctx={s.ctx!}
+                labelText={s.labelText}
+                labelHtmlAttributes={s.labelHtmlAttributes}
+                helpBlock={s.helpBlock}
+                htmlAttributes={{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes }}>
                 <div className="SF-entity-strip SF-control-container">
                     <ul className={classes("sf-strip", this.props.vertical ? "sf-strip-vertical" : "sf-strip-horizontal") }>
                         {
@@ -126,9 +130,9 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         return (
             <Typeahead
                 inputAttrs={{ className: "sf-entity-autocomplete" }}
-                getItems={ac.getItems}
+                getItems={q => ac!.getItems(q)}
                 getItemsDelay={ac.getItemsDelay}
-                renderItem={ac.renderItem}
+                renderItem={(e, str) => ac!.renderItem(e, str)}
                 liAttrs={item => {
                     const entity = ac!.getEntityFromItem(item);
                     const key = isLite(entity) ? liteKey(entity) :

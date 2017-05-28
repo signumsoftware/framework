@@ -28,7 +28,7 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <TypeScriptToolsVersion>2.2</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>2.3</TypeScriptToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -82,8 +82,8 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.ValueTuple, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.ValueTuple.4.3.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+    <Reference Include="System.ValueTuple, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.ValueTuple.4.3.1\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
@@ -212,6 +212,7 @@
     <TypeScriptCompile Include="Scripts\Frames\ReactVisitor.tsx" />
     <TypeScriptCompile Include="Scripts\Frames\Widgets.tsx" />
     <TypeScriptCompile Include="Scripts\AsyncImport.tsx" />
+    <TypeScriptCompile Include="Scripts\Globals.d.ts" />
     <TypeScriptCompile Include="Scripts\Lines\DynamicComponent.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\AutocompleteConfig.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityTable.tsx" />
@@ -275,7 +276,6 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="Scripts\Lines\ValueLine.tsx" />
     <TypeScriptCompile Include="Scripts\Globals.ts" />
-    <TypeScriptCompile Include="Typings\d3\d3.d.ts" />
     <TypeScriptCompile Include="Scripts\Exceptions\Exception.tsx" />
     <TypeScriptCompile Include="Scripts\Lines.tsx" />
     <TypeScriptCompile Include="Scripts\Reflection.ts" />

@@ -184,15 +184,15 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
                         subTokenOptions={this.props.subTokenOptions}
                         readOnly={!!f.frozen}/></td>
                 <td className="sf-filter-operation">
-                    {f.token && f.operation &&
+                    {f.token && f.token.filterType && f.operation &&
                         <select className="form-control" value={f.operation as any} disabled={f.frozen} onChange={this.handleChangeOperation}>
-                            { filterOperations[f.token.filterType!]
+                        {f.token.filterType && filterOperations[f.token.filterType!]
                                 .map((ft, i) => <option key={i} value={ft as any}>{ FilterOperation.niceName(ft) }</option>) }
                         </select> }
                 </td>
 
                 <td className="sf-filter-value">
-                    {f.token && f.operation && this.renderValue() }
+                    {f.token && f.token.filterType && f.operation && this.renderValue() }
                 </td>
             </tr>
         );

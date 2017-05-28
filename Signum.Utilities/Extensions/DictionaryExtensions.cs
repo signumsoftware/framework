@@ -321,12 +321,12 @@ namespace Signum.Utilities
         public static void AddRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys, IEnumerable<V> values)
         {
             foreach (var item in keys.ZipStrict(values))
-                dictionary.Add(item.Item1, item.Item2);
+                dictionary.Add(item.first, item.second);
         }
 
         public static void AddRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys, IEnumerable<V> values, string errorContext)
         {
-            dictionary.AddRange(keys.ZipStrict(values), t => t.Item1, t => t.Item2);
+            dictionary.AddRange(keys.ZipStrict(values), t => t.first, t => t.second, errorContext);
         }
 
         public static void AddRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<KeyValuePair<K, V>> collection)
@@ -346,6 +346,8 @@ namespace Signum.Utilities
                 dictionary.Add(keySelector(item), valueSelector(item));
         }
 
+
+        public static int ErrorExampleLimit = 10;
         public static void AddRange<K, V, T>(this IDictionary<K, V> dictionary, IEnumerable<T> collection, Func<T, K> keySelector, Func<T, V> valueSelector, string errorContext)
         {
             Dictionary<K, List<V>> repetitions = new Dictionary<K, List<V>>();
@@ -361,8 +363,8 @@ namespace Signum.Utilities
             }
 
             if (repetitions.Count > 0)
-                throw new ArgumentException("There are some repeated {0}: {1}".FormatWith(errorContext, repetitions
-                    .ToString(kvp => "{0} ({1})".FormatWith(kvp.Key, kvp.Value.ToString(", ")), "\r\n")));
+                throw new ArgumentException("There are some repeated {0}...\r\n{1}".FormatWith(errorContext, repetitions
+                    .ToString(kvp => $@"Key ""{0}"" has {kvp.Value.Count} repetitions:\r\n{1}".FormatWith(kvp.Key, kvp.Value.Take(ErrorExampleLimit).ToString("\r\n").Indent(4)), "\r\n")));
         }
 
         public static void SetRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<KeyValuePair<K, V>> collection)
@@ -374,7 +376,7 @@ namespace Signum.Utilities
         public static void SetRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys, IEnumerable<V> values)
         {
             foreach (var item in keys.ZipStrict(values))
-                dictionary[item.Item1] = item.Item2;
+                dictionary[item.first] = item.second;
         }
 
         public static void SetRange<K, V, A>(this IDictionary<K, V> dictionary, IEnumerable<A> collection, Func<A, K> getKey, Func<A, V> getValue)
@@ -393,8 +395,8 @@ namespace Signum.Utilities
         public static void DefaultRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys, IEnumerable<V> values)
         {
             foreach (var item in keys.ZipStrict(values))
-                if (!dictionary.ContainsKey(item.Item1))
-                    dictionary[item.Item1] = item.Item2;
+                if (!dictionary.ContainsKey(item.first))
+                    dictionary[item.first] = item.second;
         }
 
         public static void DefaultRange<K, V, A>(this IDictionary<K, V> dictionary, IEnumerable<A> collection, Func<A, K> getKey, Func<A, V> getValue)

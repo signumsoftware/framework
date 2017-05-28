@@ -549,7 +549,7 @@ export function pushOrOpen(path: string, e: React.MouseEvent<any> | React.Keyboa
 
 export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>): Promise<EntityPack<ModifiableEntity>> {
     if ((entityOrEntityPack as EntityPack<ModifiableEntity>).canExecute)
-        return Promise.resolve(entityOrEntityPack);
+        return Promise.resolve(entityOrEntityPack as EntityPack<ModifiableEntity>);
 
     const entity = (entityOrEntityPack as ModifiableEntity).Type ?
         entityOrEntityPack as ModifiableEntity :
@@ -583,7 +583,7 @@ export module API {
     }
 
     export function fetchAll<T extends Entity>(type: Type<T>): Promise<Array<T>> {
-        return ajaxGet<Array<Entity>>({ url: "~/api/fetchAll/" + type.typeName });
+        return ajaxGet<Array<T>>({ url: "~/api/fetchAll/" + type.typeName });
     }
 
 
@@ -602,7 +602,7 @@ export module API {
         if (lite.id == null)
             throw new Error("Lite has no Id");
 
-        return fetchEntity(lite.EntityType, lite.id);
+        return fetchEntity(lite.EntityType, lite.id) as Promise<T>;
     }
 
     export function fetchEntity<T extends Entity>(type: Type<T>, id: any): Promise<T>;
@@ -620,9 +620,9 @@ export module API {
     export function fetchEntityPack<T extends Entity>(type: Type<T>, id: number | string): Promise<EntityPack<T>>;
     export function fetchEntityPack(type: PseudoType, id: number | string): Promise<EntityPack<Entity>>;
     export function fetchEntityPack(typeOrLite: PseudoType | Lite<any>, id?: any): Promise<EntityPack<Entity>> {
-
+        
         const typeName = (typeOrLite as Lite<any>).EntityType || getTypeName(typeOrLite as PseudoType);
-        let idVal = (typeOrLite as Lite<any>).id || id;
+        let idVal = (typeOrLite as Lite<any>).id != null ? (typeOrLite as Lite<any>).id : id;
 
         return ajaxGet<EntityPack<Entity>>({ url: "~/api/entityPack/" + typeName + "/" + idVal });
     }
@@ -630,7 +630,7 @@ export module API {
 
     export function fetchCanExecute<T extends Entity>(entity: T): Promise<EntityPack<T>> {
 
-        return ajaxPost<EntityPack<Entity>>({ url: "~/api/entityPackEntity" }, entity);
+        return ajaxPost<EntityPack<T>>({ url: "~/api/entityPackEntity" }, entity);
     }
 
     export function validateEntity(entity: ModifiableEntity): Promise<void> {

@@ -708,7 +708,7 @@ namespace Signum.Windows
 
             if (newValue is Lite<IEntity> lite)
             {
-                if (lite.UntypedEntityOrNull != null && lite.UntypedEntityOrNull.IsNew)
+                if (lite.EntityOrNull != null && lite.EntityOrNull.IsNew)
                     return "{0};New".FormatWith(Server.ServerTypes[lite.EntityType].CleanName);
 
                 return lite.Key();

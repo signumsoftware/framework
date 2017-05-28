@@ -55,7 +55,7 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
 
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText}
-                {...{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes }}
+                htmlAttributes={{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes }}
                 labelHtmlAttributes={s.labelHtmlAttributes}>
                 <div className="SF-entity-line">
                     <div className="input-group">
