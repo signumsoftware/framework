@@ -25,16 +25,16 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     getIcon(element: ToolbarResponse<UserQueryEntity>) {
 
         if (element.iconName == "count")
-            return <CountUserQueryIcon ref={ci => this.countIcon = ci} userQuery={element.lite!} color={element.iconColor || "red"} autoRefreshPeriod={element.autoRefreshPeriod} />;
+            return <CountUserQueryIcon ref={ci => this.countIcon = ci} userQuery={element.content!} color={element.iconColor || "red"} autoRefreshPeriod={element.autoRefreshPeriod} />;
 
-        return this.coloredIcon(element.iconName || "glyphicon glyphicon-list-alt", element.iconColor || "dodgerblue");
+        return ToolbarConfig.coloredIcon(element.iconName || "glyphicon glyphicon-list-alt", element.iconColor || "dodgerblue");
     }
 
     handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {
         if (!res.openInPopup)
             super.handleNavigateClick(e, res);
         else {
-            Navigator.API.fetchAndForget(res.lite!)
+            Navigator.API.fetchAndForget(res.content!)
                 .then(uq => UserQueryClient.Converter.toFindOptions(uq, undefined))
                 .then(fo => Finder.explore(fo))
                 .then(() => this.countIcon && this.countIcon.refreshValue())
@@ -43,9 +43,9 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     }
 
     navigateTo(res: ToolbarResponse<UserQueryEntity>): Promise<string> {
-        return Navigator.API.fetchAndForget(res.lite!)
+        return Navigator.API.fetchAndForget(res.content!)
             .then(uq => UserQueryClient.Converter.toFindOptions(uq, undefined))
-            .then(fo => Finder.findOptionsPath(fo, { userQuery: liteKey(res.lite!) }));
+            .then(fo => Finder.findOptionsPath(fo, { userQuery: liteKey(res.content!) }));
     }
 }
 
