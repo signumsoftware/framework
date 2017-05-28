@@ -12,6 +12,7 @@ import { ToolbarElementEmbedded, ToolbarElementType, ToolbarMenuEntity } from '.
 import * as ToolbarClient from '../ToolbarClient'
 import { Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap'
 import { LinkContainer, IndexLinkContainer } from 'react-router-bootstrap'
+import { ToolbarConfig } from "../ToolbarClient";
 
 
 export interface ToolbarRendererState {
@@ -73,7 +74,7 @@ export default class ToolbarRenderer extends React.Component<void, ToolbarRender
             case "Menu":
 
 
-                var title = res.label || res.lite!.toStr;
+                var title = res.label || res.content!.toStr;
 
                 var icon = this.icon(res);
 
@@ -93,16 +94,30 @@ export default class ToolbarRenderer extends React.Component<void, ToolbarRender
                 );
 
             case "Link":
-                var config = ToolbarClient.configs[res.lite!.EntityType];
 
-                if (!config)
-                    return <MenuItem style={{ color: "red" }}>{res.lite!.EntityType + "ToolbarConfig not registered"}</MenuItem>;
+                if (res.content == null) {
+                    if (!res.url)
+                        return <MenuItem style={{ color: "red" }}>{"No Content or Url found"}</MenuItem>;
 
-                return (
-                    <NavItem onClick={e => config.handleNavigateClick(e, res)}>
-                        {config.getIcon(res)}{config.getLabel(res)}
-                    </NavItem>
-                );
+                    return (
+                        <NavItem onClick={e => Navigator.pushOrOpen(res.url!, e)}>
+                            {ToolbarConfig.coloredIcon(res.iconName, res.iconColor)}{res.label}
+                        </NavItem>
+                    );
+
+                } else {
+
+                    var config = ToolbarClient.configs[res.content!.EntityType];
+
+                    if (!config)
+                        return <MenuItem style={{ color: "red" }}>{res.content!.EntityType + "ToolbarConfig not registered"}</MenuItem>;
+
+                    return (
+                        <NavItem onClick={e => config.handleNavigateClick(e, res)}>
+                            {config.getIcon(res)}{config.getLabel(res)}
+                        </NavItem>
+                    );
+                }
             default: throw new Error("Unexpected " + res.type);
         }
     }
@@ -132,7 +147,7 @@ export default class ToolbarRenderer extends React.Component<void, ToolbarRender
             case "Menu":
                 return [
                     <MenuItem onClick={e => this.handleClick(e, res, topRes)} style={style}>
-                        {this.icon(res)}<strong>{res.label || res.lite!.toStr}</strong>
+                        {this.icon(res)}<strong>{res.label || res.content!.toStr}</strong>
                     </MenuItem>
                 ].concat(res.elements && res.elements.length && this.state.expanded.contains(res) ? res.elements.flatMap(r => this.renderMenuItem(r, indent + 1, topRes)) : []);
             case "Header":
@@ -146,16 +161,29 @@ export default class ToolbarRenderer extends React.Component<void, ToolbarRender
                 ];
 
             case "Link":
-                var config = ToolbarClient.configs[res.lite!.EntityType]
 
-                if (!config)
-                    return [<MenuItem style={{ color: "red", ...style }}> { res.lite!.EntityType + "ToolbarConfig not registered" }</MenuItem>];
+                if (res.content == null) {
+                    if (!res.url)
+                        return [<MenuItem style={{ color: "red" }}>{"No Content or Url found"}</MenuItem>];
 
-                return [
-                    <MenuItem onClick={e => config.handleNavigateClick(e, res)} style={style}>
-                        {config.getIcon(res)}{config.getLabel(res)}
-                    </MenuItem>
-                ];
+                    return [
+                        <NavItem onClick={e => Navigator.pushOrOpen(res.url!, e)}>
+                            {ToolbarConfig.coloredIcon(res.iconName, res.iconColor)}{res.label}
+                        </NavItem>
+                    ];
+
+                } else {
+                    var config = ToolbarClient.configs[res.content!.EntityType]
+
+                    if (!config)
+                        return [<MenuItem style={{ color: "red", ...style }}> {res.content!.EntityType + "ToolbarConfig not registered"}</MenuItem>];
+
+                    return [
+                        <MenuItem onClick={e => config.handleNavigateClick(e, res)} style={style}>
+                            {config.getIcon(res)}{config.getLabel(res)}
+                        </MenuItem>
+                    ];
+                }
             default: throw new Error("Unexpected " + res.type);
         }
     }

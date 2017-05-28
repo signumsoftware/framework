@@ -32,18 +32,18 @@ export function start(...configs: ToolbarConfig<any>[]) {
 export abstract class ToolbarConfig<T extends Entity> {
     type: Type<T>;
     getIcon(element: ToolbarResponse<T>) {
-        return this.coloredIcon(element.iconName, element.iconColor);
+        return ToolbarConfig.coloredIcon(element.iconName, element.iconColor);
     }
 
-    coloredIcon(className: string | null | undefined, color: string | null | undefined): React.ReactChild | null {
+    static coloredIcon(className: string | null | undefined, color: string | null | undefined): React.ReactChild | null {
         if (!className || className.toLowerCase() == "none")
             return null;
 
-        return <span className={"icon " + className} style={{ color: color, }} />;
+        return <span className={"icon " + className} style={{ color: color }} />;
     }
 
     getLabel(element: ToolbarResponse<T>) {
-        return element.label || element.lite!.toStr;
+        return element.label || element.content!.toStr;
     }
     
     abstract navigateTo(element: ToolbarResponse<T>): Promise<string>;
@@ -77,7 +77,8 @@ export interface ToolbarResponse<T extends Entity> {
     iconName?: string;
     iconColor?: string;
     label?: string;
-    lite?: Lite<T>;
+    content?: Lite<T>;
+    url?: string;
     elements?: Array<ToolbarResponse<any>>;
     openInPopup?: boolean;
     autoRefreshPeriod?: number;

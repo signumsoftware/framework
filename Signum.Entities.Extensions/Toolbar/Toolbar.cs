@@ -15,6 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Reflection;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Entities.Toolbar
 {
@@ -91,6 +92,10 @@ namespace Signum.Entities.Toolbar
         [ImplementedBy(typeof(ToolbarMenuEntity), typeof(UserQueryEntity), typeof(UserChartEntity), typeof(QueryEntity), typeof(DashboardEntity))]
         public Lite<Entity> Content { get; set; }
 
+        [SqlDbType(Size = 200)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 200), URLValidator(absolute: true, aspNetSiteRelative: true)]
+        public string Url { get; set; }
+
         public bool OpenInPopup { get; set; }
 
 
@@ -106,9 +111,8 @@ namespace Signum.Entities.Toolbar
                 new XAttribute("IconColor", IconColor),
                 OpenInPopup ? new XAttribute("OpenInPopup", OpenInPopup) : null,
                 AutoRefreshPeriod == null ? null : new XAttribute("AutoRefreshPeriod", AutoRefreshPeriod),
-                new XElement("Content", this.Content is Lite<QueryEntity> ?
-                ctx.QueryToName((Lite<QueryEntity>)this.Content) :
-                (object)ctx.Include((Lite<IUserAssetEntity>)this.Content)));
+                this.Content == null ? null : new XElement("Content", this.Content is Lite<QueryEntity> ? ctx.QueryToName((Lite<QueryEntity>)this.Content) : (object)ctx.Include((Lite<IUserAssetEntity>)this.Content)),
+                string.IsNullOrEmpty(this.Url) ? null : new XElement("Url", this.Url));
         }
 
 
@@ -122,32 +126,53 @@ namespace Signum.Entities.Toolbar
             OpenInPopup = x.Attribute("OpenInPopup")?.Value.ToBool() ?? false;
             AutoRefreshPeriod = x.Attribute("AutoRefreshPeriod")?.Value.ToInt() ?? null;
 
-            var content = x.Attribute("Content").Value;
+            var content = x.Attribute("Content")?.Value;
 
-            Content = Guid.TryParse(content, out Guid guid) ?
-    (Lite<Entity>)ctx.GetEntity(guid).ToLite() :
-    (Lite<Entity>)ctx.GetQuery(content).ToLite();
+            Content = string.IsNullOrEmpty(content) ? null :
+                Guid.TryParse(content, out Guid guid) ? (Lite<Entity>)ctx.GetEntity(guid).ToLite() :
+                (Lite<Entity>)ctx.GetQuery(content).ToLite();
+
+            Url = x.Attribute("Url")?.Value;
         }
 
         static StateValidator<ToolbarElementEmbedded, ToolbarElementType> stateValidator = new StateValidator<ToolbarElementEmbedded, ToolbarElementType>
-                (n => n.Type,           n => n.Content, n => n.IconName, n => n.Label)
+                (n => n.Type,                   n => n.Content, n=> n.Url, n => n.IconName, n => n.Label)
             {
-                { ToolbarElementType.Divider, false,      false,        false  },
-                { ToolbarElementType.Header, false,      null,        true  },
-                { ToolbarElementType.Link, true,      null,        null },
-                { ToolbarElementType.Menu, true,      null,        null },
+                { ToolbarElementType.Divider,   false,          false,     false,          false  },
+                { ToolbarElementType.Header,    false,          false,     null,           true  },
+                { ToolbarElementType.Link,      null,           null,      null,           null },
+                { ToolbarElementType.Menu,      true,           false,     null,           null },
             };
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(this.Content) && this.Content != null)
             {
-                if (this.Content.EntityType == typeof(ToolbarMenuEntity) && (this.Type == ToolbarElementType.Link))
-                    return ValidationMessage._0ShouldNotBeOfType1.NiceToString(pi.NiceName(), typeof(ToolbarMenuEntity));
+                if (this.Type == ToolbarElementType.Link) {
+                    if (this.Content.EntityType == typeof(ToolbarMenuEntity))
+                        return ValidationMessage._0ShouldNotBeOfType1.NiceToString(pi.NiceName(), typeof(ToolbarMenuEntity));
+
+                    if (this.Content == null && string.IsNullOrEmpty(this.Url))
+                        return ValidationMessage._0IsMandatoryWhen1IsNotSet.NiceToString(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => Url).NiceName());
+                }
 
 
-                if (this.Content.EntityType != typeof(ToolbarMenuEntity) && (this.Type == ToolbarElementType.Menu))
-                    return ValidationMessage._0ShouldBeOfType1.NiceToString(pi.NiceName(), typeof(ToolbarMenuEntity));
+                if (Type == ToolbarElementType.Menu) {
+                    if (this.Content.EntityType != typeof(ToolbarMenuEntity))
+                        return ValidationMessage._0ShouldBeOfType1.NiceToString(pi.NiceName(), typeof(ToolbarMenuEntity));
+                }
+            }
+
+            if(pi.Name == nameof(this.Url))
+            {
+                if(this.Url.HasText() && this.Content != null)
+                    return ValidationMessage._0ShouldBeNullWhen1IsSet.NiceToString(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => Content).NiceName());          
+            }
+
+            if (pi.Name == nameof(this.Label))
+            {
+                if (string.IsNullOrEmpty(this.Label) && this.Url.HasText())
+                    return ValidationMessage._0IsMandatoryWhen1IsSet.NiceToString(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => Url).NiceName());
             }
 
             return stateValidator.Validate(this, pi) ?? base.PropertyValidation(pi);
