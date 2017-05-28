@@ -32,8 +32,7 @@ import ActivityWithRemarks from './Case/ActivityWithRemarks'
 import CaseFrameModal from './Case/CaseFrameModal'
 export { CaseFrameModal };
 
-import CaseFramePage from './Case/CaseFrameModal'
-export { CaseFramePage };
+
 
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
