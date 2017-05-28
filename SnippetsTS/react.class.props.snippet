@@ -22,20 +22,16 @@
         <ToolTip>Component Class Name</ToolTip>
         <Default>MyComponent</Default>
       </Literal>
-      <Literal>
-        <ID>EntityType</ID>
-        <ToolTip>Type of the Entity</ToolTip>
-        <Default>Entity</Default>
-      </Literal>
     </Declarations>
     <Code Language="TypeScript">
       <![CDATA[
       interface $ComponentName$Props {
-          ctx: TypeContext<$EntityType$>
+          ctx: TypeContext<$ComponentName$Entity>
       }
       
-      export class $ComponentName$ extends React.Component<$ComponentName$Props, void> {
+      export default class $ComponentName$ extends React.Component<$ComponentName$Props, void> {
           render() {
+              const ctx = this.props.ctx;
               return (
                   <div>
                       <ValueLine ctx={ctx.subCtx(a => a.name)} />
