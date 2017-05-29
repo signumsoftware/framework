@@ -31,7 +31,14 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchC
         this.setState(this.calculateState(nextProps));
     }
 
+    componentWillUnmount() {
+        document.title = Navigator.getTitle();
+    }
+
     calculateState(props: SearchPageProps): SearchControlState {
+
+        document.title = Navigator.getTitle(getQueryNiceName(props.match.params.queryName));
+
         return {
             findOptions: {
                 showFilters: true,
@@ -60,7 +67,8 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchC
         return (
             <div id="divSearchPage">
                 <h2>
-                    <span className="sf-entity-title">{getQueryNiceName(fo.queryName) }</span>&nbsp;
+                    <span className="sf-entity-title">{getQueryNiceName(fo.queryName)}</span>
+                    &nbsp;
                     <a className="sf-popup-fullscreen" href="#" onClick={(e) => this.searchControl.handleFullScreenClick(e) }>
                         <span className="glyphicon glyphicon-new-window"></span>
                     </a>

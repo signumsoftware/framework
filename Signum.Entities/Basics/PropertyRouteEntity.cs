@@ -30,6 +30,12 @@ namespace Signum.Entities.Basics
         [NotNullValidator]
         public TypeEntity RootType { get; set; }
 
+        public static Func<PropertyRouteEntity, PropertyRoute> ToPropertyRouteFunc;
+        public PropertyRoute ToPropertyRoute()
+        {
+            return ToPropertyRouteFunc(this);
+        }
+
         static readonly Expression<Func<PropertyRouteEntity, string>> ToStringExpression = e => e.Path;
         [ExpressionField]
         public override string ToString()

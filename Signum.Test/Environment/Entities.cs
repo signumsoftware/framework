@@ -380,6 +380,8 @@ namespace Signum.Test.Environment
 
     public class EmbeddedConfigEmbedded : EmbeddedEntity
     {
+        public Lite<LabelEntity> DefaultLabel { get; set; }
+
         [NotNullable]
         [NotNullValidator, NoRepeatValidator]
         public MList<Lite<GrammyAwardEntity>> Awards { get; set; } = new MList<Lite<GrammyAwardEntity>>();
