@@ -7,7 +7,7 @@ import {
     ResultTable, ResultRow, FindOptionsParsed, FindOptions, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnOptionsMode, ColumnDescription,
     toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest
 } from '../FindOptions'
-import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, is, isEntity, isLite, toLite } from '../Signum.Entities'
+import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, is, isEntity, isLite, toLite, ModifiableEntity } from '../Signum.Entities'
 import { getTypeInfos, getTypeInfo, TypeReference, IsByAll, getQueryKey, TypeInfo, EntityData, QueryKey, PseudoType, isTypeModel } from '../Reflection'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
@@ -42,6 +42,7 @@ export interface SearchControlLoadedProps {
     largeToolbarButtons?: boolean;
     avoidAutoRefresh?: boolean;
     extraButtons?: (searchControl: SearchControlLoaded) => React.ReactNode
+    createGetViewPromise?: (entity: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
 }
 
 export interface SearchControlLoadedState {
@@ -383,7 +384,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                         return;
 
                     Finder.setFilters(e.entity as Entity, this.props.findOptions.filterOptions)
-                        .then(() => Navigator.navigate(e!))
+                        .then(() => Navigator.navigate(e!, { viewPromise: this.props.createGetViewPromise && this.props.createGetViewPromise(e!.entity) }))
                         .then(() => this.props.avoidAutoRefresh ? undefined : this.doSearch())
                         .done();
                 }).done();

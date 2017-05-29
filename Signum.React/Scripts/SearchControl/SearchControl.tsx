@@ -9,7 +9,7 @@ import {
     ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOptionParsed, FilterOption, QueryDescription, ColumnOption, ColumnOptionsMode, ColumnDescription,
     toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, QueryRequest, FilterOperation
 } from '../FindOptions'
-import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, is, isEntity, isLite, toLite } from '../Signum.Entities'
+import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, is, isEntity, isLite, toLite, ModifiableEntity } from '../Signum.Entities'
 import { getTypeInfos, getTypeInfo, TypeReference, IsByAll, getQueryKey, TypeInfo, EntityData, QueryKey, PseudoType } from '../Reflection'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
@@ -45,6 +45,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     largeToolbarButtons?: boolean; 
     throwIfNotFindable?: boolean;
     extraButtons?: (searchControl: SearchControlLoaded) => React.ReactNode
+    onCreateViewPromise?: (entity: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
 }
 
 export interface SearchControlState {
@@ -137,10 +138,11 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             hideFullScreenButton={this.props.hideFullScreenButton}
             showBarExtension={this.props.showBarExtension}
             extraButtons={this.props.extraButtons}
-            largeToolbarButtons={this.props.largeToolbarButtons} 
+            largeToolbarButtons={this.props.largeToolbarButtons}
             findOptions={fo}
             queryDescription={this.state.queryDescription!}
             querySettings={Finder.getSettings(fo.queryKey)}
+            createGetViewPromise={this.props.onCreateViewPromise}
             />
     }
 }
