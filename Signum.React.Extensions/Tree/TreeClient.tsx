@@ -16,10 +16,12 @@ import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStr
 import { SearchMessage, JavascriptMessage, ExecuteSymbol, ConstructSymbol_From, ConstructSymbol_Simple, DeleteSymbol } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TreeEntity, TreeOperation } from './Signum.Entities.Tree'
 import TreeModal from './TreeModal'
-import { FilterRequest } from "../../../Framework/Signum.React/Scripts/FindOptions";
+import { FilterRequest, FilterOption, FilterOptionParsed } from "../../../Framework/Signum.React/Scripts/FindOptions";
 import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
-import { getAllTypes } from "../../../Framework/Signum.React/Scripts/Reflection";
+import { getAllTypes, getTypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection";
 import { TypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection";
+import * as AuthClient from '../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
+import TreeButton from './TreeButton'
 
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<ImportRoute path="~/tree/:typeName" onImportModule={() => _import("./TreePage")} />);
@@ -29,6 +31,24 @@ export function start(options: { routes: JSX.Element[] }) {
         new EntityOperationSettings(TreeOperation.CreateNextSibling, { isVisible: _ => false }),
         new EntityOperationSettings(TreeOperation.Move, { isVisible: _ => false })
     );    
+
+    Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
+        var ti = getTypeInfo(ctx.findOptions.queryKey);
+
+        if (!ctx.searchControl.props.showBarExtension || ti == null || !isTree(ti))
+            return undefined;
+
+        return <TreeButton searchControl={ctx.searchControl} />;
+    });
+}
+
+export function treePath(typeName:string, filterOptions?: FilterOption[]): string {
+
+    const query: any = {};
+    if (filterOptions)
+        Finder.Encoder.encodeFilters(query, filterOptions);
+
+    return Navigator.history.createHref({ pathname: "~/tree/" + typeName, search: QueryString.stringify(query) });
 }
 
 export function hideSiblings(ti: TypeInfo) {
@@ -44,7 +64,7 @@ export function overrideOnFind(ti: TypeInfo) {
     if (!s) {
         Finder.addSettings({
             queryName: ti.name,
-            onFind: (fo, mo) => openTree(ti.name, { title: mo && mo.title })
+            onFind: (fo, mo) => openTree(ti.name, fo.filterOptions, { title: mo && mo.title })
         });
     }
 }
@@ -57,13 +77,13 @@ export function getAllTreeTypes() {
     return getAllTypes().filter(t => isTree(t));
 }
 
-export function openTree<T extends TreeEntity>(type: Type<T>, options?: { title?: string }): Promise<Lite<T> | undefined>;
-export function openTree(typeName: string, options?: { title?: string }): Promise<Lite<TreeEntity> | undefined>;
-export function openTree(type: Type<TreeEntity> | string, options?: TreeModalOptions): Promise<Lite<TreeEntity> | undefined> {
+export function openTree<T extends TreeEntity>(type: Type<T>, filterOptions?: FilterOption[], options?: { title?: string }): Promise<Lite<T> | undefined>;
+export function openTree(typeName: string, filterOptions?: FilterOption[],options?: TreeModalOptions): Promise<Lite<TreeEntity> | undefined>;
+export function openTree(type: Type<TreeEntity> | string, filterOptions?: FilterOption[],options?: TreeModalOptions): Promise<Lite<TreeEntity> | undefined> {
     const typeName = type instanceof Type ? type.typeName : type;
 
     return _import("./TreeModal")
-        .then((TM: { default: typeof TreeModal }) => TM.default.open(typeName, options));
+        .then((TM: { default: typeof TreeModal }) => TM.default.open(typeName, filterOptions || [], options));
 }
 
 export interface TreeModalOptions {
