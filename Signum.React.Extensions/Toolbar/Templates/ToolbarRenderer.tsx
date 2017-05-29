@@ -22,9 +22,9 @@ export interface ToolbarRendererState {
     isRtl: boolean;
 }
 
-export default class ToolbarRenderer extends React.Component<void, ToolbarRendererState>
+export default class ToolbarRenderer extends React.Component<{}, ToolbarRendererState>
 {
-    constructor(props: any) {
+    constructor(props: {}) {
         super(props);
         this.state = {
             expanded: [],
