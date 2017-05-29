@@ -651,6 +651,7 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
     isReadOnly?: boolean;
     avoidPopup?: boolean;
     autocomplete?: AutocompleteConfig<T>;
+    getViewPromise?: (entity: T) => ViewPromise<T>;
     onNavigateRoute?: (typeName: string, id: string | number) => string;
     onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
     onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
@@ -685,10 +686,10 @@ export class EntitySettings<T extends ModifiableEntity> {
         this.viewOverrides.push(override);
     }
 
-    constructor(type: Type<T>, getViewPromise?: (entity: T) => Promise<ViewModule<any>>, options?: EntitySettingsOptions<T>) {
+    constructor(type: Type<T>, getViewModule?: (entity: T) => Promise<ViewModule<any>>, options?: EntitySettingsOptions<T>) {
 
         this.type = type;
-        this.getViewPromise = getViewPromise && (entity => new ViewPromise(getViewPromise(entity)));
+        this.getViewPromise = getViewModule && (entity => new ViewPromise(getViewModule(entity)));
 
         Dic.assign(this, options);
     }
