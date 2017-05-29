@@ -410,6 +410,10 @@ interface TypeViewDictionary {
     [activityViewName: string]: ActivityViewSettings<ICaseMainEntity>
 }
 
+interface ActivityViewSettingsOptions<T extends ICaseMainEntity> {
+    getViewPromise?: (entity: T) => ViewPromise<T>;
+}
+
 export class ActivityViewSettings<T extends ICaseMainEntity> {
     type: Type<T>
 
@@ -417,10 +421,11 @@ export class ActivityViewSettings<T extends ICaseMainEntity> {
 
     getViewPromise?: (entity: T) => ViewPromise<T>;
 
-    constructor(type: Type<T>, activityViewName: string, getViewPromise?: (entity: T) => Promise<ViewModule<T>>) {
+    constructor(type: Type<T>, activityViewName: string, getViewModule?: (entity: T) => Promise<ViewModule<T>>, options?: ActivityViewSettingsOptions<T>) {
         this.type = type;
         this.activityViewName = activityViewName;
-        this.getViewPromise = getViewPromise && (entity => new ViewPromise(getViewPromise(entity)).withProps({ inWorkflow: true }));
+        this.getViewPromise = getViewModule && (entity => new ViewPromise(getViewModule(entity)).withProps({ inWorkflow: true }));
+        Dic.assign(this, options)
     }
 }
 
