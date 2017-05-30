@@ -394,7 +394,7 @@ namespace Signum.Test
                     Order = 100,
                 }).ToList();
 
-                BulkInserter.BulkInsertMListTable((AlbumEntity a) => a.Songs, list);
+                list.BulkInsertMListTable( a => a.Songs);
 
                 Database.MListQuery((AlbumEntity a) => a.Songs).Where(a => a.RowId > max).UnsafeDeleteMList();
 
