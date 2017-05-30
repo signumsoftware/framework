@@ -220,7 +220,7 @@ namespace Signum.Engine
                                      })
                                      select mle).ToList();
 
-                return BulkInsertMListTable(mListProperty, mlistElements, copyOptions, timeout, message);
+                return BulkInsertMListTable(mlistElements, mListProperty, copyOptions, timeout, message);
             }
             catch (InvalidOperationException e) when (e.Message.Contains("has no Id"))
             {
@@ -231,8 +231,8 @@ namespace Signum.Engine
         }
 
         public static int BulkInsertMListTable<E, V>(
+            this IEnumerable<MListElement<E, V>> mlistElements,
             Expression<Func<E, MList<V>>> mListProperty,
-            IEnumerable<MListElement<E, V>> mlistElements,
             SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
             int? timeout = null,
             string message = null)
@@ -241,7 +241,7 @@ namespace Signum.Engine
 
             if (message != null)
                 return SafeConsole.WaitRows(message == "auto" ? $"BulkInsering MList<{ typeof(V).TypeName()}> in { typeof(E).TypeName()}" : message,
-                    () => BulkInsertMListTable(mListProperty, mlistElements, copyOptions, timeout, message: null));
+                    () => BulkInsertMListTable(mlistElements, mListProperty, copyOptions, timeout, message: null));
 
             if (copyOptions.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
                 throw new InvalidOperationException("BulkInsertDisableIdentity not compatible with UseInternalTransaction");
