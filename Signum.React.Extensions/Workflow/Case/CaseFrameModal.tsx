@@ -296,22 +296,14 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
             return null;
 
         return (
-            <a href={ "~/workflow/activity/" + entity.id } className="sf-popup-fullscreen" onClick={this.handlePopupFullScreen}>
+            <a href="" className="sf-popup-fullscreen" onClick={this.handlePopupFullScreen}>
                 <span className="glyphicon glyphicon-new-window"></span>
             </a>
         );
     }
 
     handlePopupFullScreen = (e: React.MouseEvent<any>) => {
-
-        if (e.ctrlKey || e.buttons) {
-
-        } else {
-
-            Navigator.history.push("~/workflow/activity/" + this.state.pack!.activity.id);
-
-            e.preventDefault();
-        }
+        Navigator.pushOrOpen("~/workflow/activity/" + this.state.pack!.activity.id, e);
     }
 
     static openView(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, readOnly?: boolean): Promise<CaseActivityEntity | undefined> {

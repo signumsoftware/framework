@@ -409,8 +409,7 @@ namespace Signum.Entities.Chart
 		Chart_ChartSettings,
 		[Description("Dimension")]
 		Chart_Dimension,
-		[Description("Draw")]
-		Chart_Draw,
+		DrawChart,
 		[Description("Group")]
 		Chart_Group,
 		[Description("Query {0} is not allowed")]

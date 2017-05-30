@@ -43,7 +43,7 @@ export function start(options: { routes: JSX.Element[], plainExcel: boolean, exc
                 <button
                     className="sf-query-button sf-chart-script-edit btn btn-default"
                     onClick={() => { API.generateChartExcel(ChartClient.API.cleanedChartRequest(ctx.chartRequest)); } }>
-                    {ExcelMessage.ExcelReport.niceToString()}
+                    <i className="fa fa-file-excel-o"></i> &nbsp; {ExcelMessage.ExcelReport.niceToString()}
                 </button>
             );
         });

@@ -100,13 +100,14 @@
       .text(function(d) { return  d.data.c0.niceToString() + ': ' + d.data.c1.niceToString();});
 
   var showNumber = data.parameters["NumberOpacity"] > 0;
-  var limit = 25;
   
-  node.filter(function(d) {return !!d.data.c1;}).append("text")
+  var nodeFilter = node.filter(function(d) {return !!d.data.c1 && d.width > 10 && d.height > 25;});
+  
+  nodeFilter.append("text")
       .attr("text-anchor", "middle")
       .attr('dominant-baseline', 'middle')
       .attr("dx",function(d) { return d.width/2; })
-  	  .attr("dy",function(d) { return d.height/2 + ((showNumber && d.height > limit) ? -8: 0); })
+  	  .attr("dy",function(d) { return d.height/2 + (showNumber ? -6: 0); })
       .attr('data-click', function(p) { return getClickKeys(p.data, data.columns); })
       .text(function(d) { return d.data.c0.niceToString(); })
       .each(function (d) { ellipsis(this, d.width, 4, ""); })
@@ -115,7 +116,7 @@
   
   if(showNumber)
   {
-    node.filter(function(d) {return !!d.data.c1 && d.height > limit;}).append("text")
+    nodeFilter.append("text")
         .attr('fill', data.parameters["NumberColor"])
     	.attr('opacity', ".5")
         .attr('dominant-baseline', 'central')
@@ -123,7 +124,7 @@
         .attr('text-anchor', 'middle')
         .attr('font-weight', 'bold')
         .attr("dx",function(d) { return d.width / 2; })
-        .attr("dy",function(d) { return d.height / 2 + 8; })
+        .attr("dy",function(d) { return d.height / 2 + 6; })
         .attr('data-click', function(p) { return getClickKeys(p.data, data.columns); })
         .text(function(d) { return d.data.c1; })
         .each(function(d) { return ellipsis(this, d.r * 2, 1, ""); });

@@ -4,13 +4,13 @@ import { MemberInfo, getTypeInfo, PropertyRoute, Binding, TypeInfo } from '../..
 import { DynamicValidationEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 import { ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, ValueLineType, FormGroup } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { Entity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { TypeEntity, PropertyRouteEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { API, DynamicValidationTestResponse } from '../DynamicValidationClient'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 import TypeHelpComponent from '../Help/TypeHelpComponent'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
+import PropertyRouteCombo from "../../Basics/Templates/PropertyRouteCombo";
 
 interface DynamicValidationProps {
     ctx: TypeContext<DynamicValidationEntity>;
@@ -185,37 +185,5 @@ export default class DynamicValidation extends React.Component<DynamicValidation
                 }
             </div>
         );
-    }
-}
-
-interface PropertyRouteComboProps {
-    ctx: TypeContext<PropertyRouteEntity | undefined | null>;
-    type: TypeEntity;
-    onChange?: () => void;
-}
-
-class PropertyRouteCombo extends React.Component<PropertyRouteComboProps, void> {
-
-    handleChange = (e: React.FormEvent<any>) => {
-        var currentValue = (e.currentTarget as HTMLSelectElement).value;
-        this.props.ctx.value = currentValue ? PropertyRouteEntity.New({ path : currentValue, rootType : this.props.type }) : null;
-        this.forceUpdate();
-        if (this.props.onChange)
-            this.props.onChange();
-    }
-
-    render() {
-        var ctx = this.props.ctx;
-
-        var members = Dic.getValues(getTypeInfo(this.props.type.cleanName).members).filter(a => a.name != "Id");
-
-        return (
-            <select className="form-control" value={ctx.value && ctx.value.path || ""} onChange={this.handleChange} >
-                <option value=""> - </option>
-                {members.map(m =>
-                    <option key={m.name} value={m.name}>{m.name}</option>
-                )}
-            </select>
-        );;
     }
 }

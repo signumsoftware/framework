@@ -495,7 +495,7 @@ namespace Signum.Engine.Dynamic
         private string ParseTableName(string value)
         {
 
-            var objName = ObjectName.Parse(Def.TableName);
+            var objName = ObjectName.Parse(value);
 
             return new List<string>
                 {

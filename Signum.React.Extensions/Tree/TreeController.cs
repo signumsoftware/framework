@@ -78,7 +78,7 @@ namespace Signum.React.Tree
             var qd = DynamicQueryManager.Current.QueryDescription(typeof(T));
             var filters = filtersTs.Select(f => f.ToFilter(qd, false)).ToList();
 
-            var dictionary = DynamicQueryManager.Current.GetEntities(new QueryEntitiesRequest { QueryName = typeof(T), Filters = filters })
+            var dictionary = DynamicQueryManager.Current.GetEntities(new QueryEntitiesRequest { QueryName = typeof(T), Filters = filters, Orders = new List<Order>() })
                             .Select(a => (T)a.Entity)
                             .SelectMany(t => t.Ascendants())
                             .Distinct()
