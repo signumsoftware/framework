@@ -45,6 +45,10 @@ namespace Signum.Engine.DiffLog
             bool strategy = Types.ContainsKey(type) ? Types.TryGetValue(type)(entity, operation) : false;
 
             if (strategy == false)
+                 strategy = Types.ContainsKey(typeof(Entity)) ? Types.TryGetValue(typeof(Entity))(entity, operation) : false;
+
+
+            if (strategy == false)
                 return null;
 
             using (CultureInfoUtils.ChangeBothCultures(Schema.Current.ForceCultureInfo))
