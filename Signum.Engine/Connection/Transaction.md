@@ -80,7 +80,7 @@ private static void FixTheWorld()
 
 We can also glue together all the inner transactions creating a new, wider one: 
 
-````C#
+```C#
 private static void FixTheWorld()
 {
     using (Transaction tr = new Transaction())
@@ -110,8 +110,8 @@ using(Transaction tr1 = new Transaction())
 {
    using(Transaction tr2 = new Transaction()) //This transaction is silent
    {
-	
-	   tr2.Commit(); //But has to be commited
+    
+       tr2.Commit(); //But has to be commited
    }
 
    tr1.Commit();
@@ -131,8 +131,8 @@ using(Transaction tr1 = new Transaction())
    using(Transaction tr2 = Transaction.ForceNew()) //Independent transaction
    {
        Database.Exists(proj); //returns false because tr1 is not commited
-	
-	   tr2.Commit();
+    
+       tr2.Commit();
    }
 
    tr1.Commit();
@@ -154,8 +154,8 @@ using(Transaction tr1 = Transaction.Test())
    using(Transaction tr2 = Transaction.ForceNew()) //silent transaction
    {
        Database.Exists(proj); //returns true because tr2 is not silent
-	
-	   tr2.Commit();
+    
+       tr2.Commit();
    }
 
    tr1.Commit();
@@ -178,8 +178,8 @@ using(Transaction tr1 = new Transaction())
           proj.Delete(); 
 
           throw Exception();
-	   
-	      tr2.Commit();
+       
+          tr2.Commit();
       }
    }
    catch(Exception e)

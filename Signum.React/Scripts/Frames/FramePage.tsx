@@ -52,8 +52,13 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
         });
     }
 
+    componentWillUnmount() {
+        document.title = Navigator.getTitle();
+    }
+
     load(props: FramePageProps) {
         this.loadEntity(props)
+            .then(() => document.title = Navigator.getTitle(this.state.pack!.entity.toStr))
             .then(() => this.loadComponent())
             .done();
     }

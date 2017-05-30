@@ -196,7 +196,8 @@ namespace Signum.Entities.Reflection
             return properties.Values.ToArray();
         }
 
-        public static MemberInfo[] GetMemberList<T, S>(Expression<Func<T, S>> lambdaToField)
+        public static MemberInfo[] GetMemberList<T, S>(Expression<Func<T, S>> lambdaToField) => GetMemberListUntyped(lambdaToField);
+        public static MemberInfo[] GetMemberListUntyped(LambdaExpression lambdaToField)
         {
             Expression e = lambdaToField.Body;
 

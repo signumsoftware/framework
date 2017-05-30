@@ -136,6 +136,12 @@ export function toNumbroFormat(format: string | undefined) {
     if (f.startsWith("P"))
         return "0." + "0".repeat(parseInt(f.after("P") || "2")) + "%";
 
+    if (f.contains("#"))
+        format = format
+            .replaceAll(".#", "[.]0")
+            .replaceAll(",#", "[,]0")
+            .replaceAll("#", "0");
+
     return format;
 }
 
