@@ -994,9 +994,6 @@
     <EmbeddedResource Include="Chart\Html\ChartContainer.htm" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Chart\Html\colorbrewer.js" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\execute.png" />
   </ItemGroup>
   <ItemGroup>
@@ -1027,21 +1024,19 @@
     <Resource Include="Images\chartScript.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="..\Signum.Web.Extensions\Chart\Scripts\ChartUtils.js">
-      <Link>Chart\Html\ChartUtils.js</Link>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Chart\Html\d3.v3.min.js" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Chart\Html\jquery-1.11.0.js" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\back.png" />
     <Resource Include="Images\fast-back.png" />
     <Resource Include="Images\fast-fore.png" />
     <Resource Include="Images\fore.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Chart\Html\d3.min.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Chart\Html\d3-scale-chromatic.v1.min.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Chart\Html\ChartUtils.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
