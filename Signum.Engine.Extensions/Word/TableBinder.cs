@@ -141,7 +141,7 @@ namespace Signum.Engine.Word
                    var text = gc.Descendants<Drawing.Text>().SingleOrDefaultEx();
 
                    if (text != null)
-                       text.Text = dc.ColumnName;
+                       text.Text = dc.Caption ?? dc.ColumnName;
                });           
             
             SynchronizeNodes(
