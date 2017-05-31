@@ -374,7 +374,17 @@ namespace Signum.Engine.SchemaInfoTables
     {
         [ViewPrimaryKey]
         public int object_id;
+        public int schema_id;
         public string name;
+
+
+        static Expression<Func<SysProcedures, SysSchemas>> SchemaExpression =
+            i => Database.View<SysSchemas>().Single(a => a.schema_id == i.schema_id);
+        [ExpressionField]
+        public SysSchemas Schema()
+        {
+            return SchemaExpression.Evaluate(this);
+        }
     }
 
     [TableName("service_queues", SchemaName = "sys")]
