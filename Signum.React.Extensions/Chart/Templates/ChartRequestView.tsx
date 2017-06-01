@@ -2,7 +2,7 @@
 import { DropdownButton, MenuItem, Tabs, Tab} from 'react-bootstrap'
 import { Dic, classes, ifError } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { ValidationError } from '../../../../Framework/Signum.React/Scripts/Services'
+import { ValidationError, AbortableRequest } from '../../../../Framework/Signum.React/Scripts/Services'
 import { Lite, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { TypeContext, FormGroupSize, FormGroupStyle, StyleOptions, StyleContext, mlistItemContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -89,12 +89,18 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
     handleOnRedraw = () => {
         this.forceUpdate();
     }
+    
+    componentWillUnmount() {
+        this.abortableQuery.abort();
+    }
+
+    abortableQuery = new AbortableRequest<ChartRequest, ChartClient.API.ExecuteChartResult>((abortController, request) => ChartClient.API.executeChart(request, abortController))
 
     handleOnDrawClick = () => {
 
         this.setState({ chartResult: undefined });
 
-        ChartClient.API.executeChart(this.props.chartRequest!)
+        this.abortableQuery.getData(this.props.chartRequest!)
             .then(rt => this.setState({ chartResult: rt }),
             ifError(ValidationError, e => {
                 GraphExplorer.setModelState(this.props.chartRequest!, e.modelState, "request");
