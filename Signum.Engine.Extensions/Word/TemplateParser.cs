@@ -2,7 +2,7 @@
 using DocumentFormat.OpenXml.Packaging;
 using W = DocumentFormat.OpenXml.Wordprocessing;
 using D = DocumentFormat.OpenXml.Drawing;
-using M = DocumentFormat.OpenXml.Math;
+using S = DocumentFormat.OpenXml.Spreadsheet;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Templating;
 using Signum.Entities;
@@ -40,11 +40,14 @@ namespace Signum.Engine.Word
             {
                 foreach (var item in part.RootElement.Descendants())
                 {
-                    if (item is W.Paragraph)
-                        ReplaceRuns((W.Paragraph)item, new WordprocessingNodeProvider());
+                    if (item is W.Paragraph wp)
+                        ReplaceRuns(wp, new WordprocessingNodeProvider());
 
-                    if (item is D.Paragraph)
-                        ReplaceRuns((D.Paragraph)item, new DrawingNodeProvider());
+                    if (item is D.Paragraph dp)
+                        ReplaceRuns(dp, new DrawingNodeProvider());
+
+                    if (item is S.SharedStringItem s)
+                        ReplaceRuns(s, new SpreadsheetNodeProvider());
                 }
 
 
@@ -54,6 +57,8 @@ namespace Signum.Engine.Word
 
         private void ReplaceRuns(OpenXmlCompositeElement par, INodeProvider nodeProvider)
         {
+            FixNakedText(par, nodeProvider);
+
             string text = par.ChildElements.Where(a => nodeProvider.IsRun(a)).ToString(r => nodeProvider.GetText(r), "");
 
             var matches = TemplateUtils.KeywordsRegex.Matches(text).Cast<Match>().ToList();
@@ -124,6 +129,24 @@ namespace Signum.Engine.Word
                     par.Append(pop.Element);
                 }
             }
+        }
+
+        private void FixNakedText(OpenXmlCompositeElement par, INodeProvider nodeProvider) //Simple Spreadsheets cells
+        {
+            if (par.ChildElements.Count != 1)
+                return;
+
+            var only = par.ChildElements.Only();
+
+            if (!nodeProvider.IsText(only))
+                return;
+
+            var text = nodeProvider.GetText(only);
+            if (!TemplateUtils.KeywordsRegex.IsMatch(text))
+                return;
+
+            par.RemoveChild(only);
+            par.AppendChild(nodeProvider.WrapInRun(only));
         }
 
         private static List<ElementInfo> GetElementInfos(IEnumerable<OpenXmlElement> childrens, INodeProvider nodeProvider)

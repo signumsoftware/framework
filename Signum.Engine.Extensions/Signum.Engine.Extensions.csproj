@@ -136,6 +136,7 @@
     <Compile Include="Dynamic\DynamicLogic.cs" />
     <Compile Include="Dynamic\DynamicMixinConnectionLogic.cs" />
     <Compile Include="Rest\RestApiKeyLogic.cs" />
+    <Compile Include="Files\FilePathEmbeddedLogic.cs" />
     <Compile Include="Toolbar\ToolbarLogic.cs" />
     <Compile Include="Dynamic\DynamicSqlMigrationLogic.cs" />
     <Compile Include="Dynamic\DynamicExpressionLogic.cs" />
@@ -144,7 +145,6 @@
     <Compile Include="Dynamic\DynamicViewLogic.cs" />
     <Compile Include="Dynamic\DynamicValidationLogic.cs" />
     <Compile Include="Excel\ExcelAttachmentLogic.cs" />
-    <Compile Include="Files\EmbeddedFilePathLogic.cs" />
     <Compile Include="Files\FileLogic.cs" />
     <Compile Include="Files\FilePathLogic.cs" />
     <Compile Include="Files\FileTypeLogic.cs" />

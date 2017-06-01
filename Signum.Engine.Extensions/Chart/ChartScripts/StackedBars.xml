@@ -172,18 +172,23 @@
     }
     else if(data.parameters["Labels"] == "Inside")
     {    
+      function maxValue(rowIndex){
+          return stackedSeries[stackedSeries.length - 1][rowIndex][1];
+      }
+      
       var size = xRule.size('content');
       var labelMargin = 5;
       chart.append('svg:g').attr('class', 'y-axis-tick-label').attr('transform', translate(xRule.start('content'), yRule.start('content') + y.bandwidth() / 2))
         .enterData(pivot.rows,'text', 'y-axis-tick-label sf-chart-strong')
         .attr('y', function (v) { return y(v.rowValue); })
-        .attr('x', labelMargin)
+        .attr('x', function(v, i) { return x(maxValue(i)) >= size/2 ? 0 : x(maxValue(i)); })
+        .attr('dx', function (r,i) { return labelMargin; })
         .attr('text-anchor', function (v) { var posx = x(v.max); return posx >= size/2 ? 'end' : 'start'; })
-        .attr('fill',  '#fff' )
+        .attr('fill', function (r,i) { return x(maxValue(i)) >= size/2 ? '#fff' : '#000'; })
         .attr('dominant-baseline', 'central')
         .attr('font-weight', 'bold')
         .text(function (v) { return v.rowValue.niceToString(); })
-        .each(function (v) { ellipsis(this, parseInt(data.parameters["LabelsMargin"]), labelMargin); });
+        .each(function (r, i) { var posx = x(maxValue(i)); ellipsis(this, posx >= size/2 ? posx : size - posx, labelMargin); });
     }
   }
   

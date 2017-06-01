@@ -9,34 +9,29 @@ import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../
 import { SearchMessage, JavascriptMessage, parseLite, is } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { default as SearchControlLoaded } from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded'
-import { ChartMessage, ChartRequest } from './Signum.Entities.Chart'
-import * as ChartClient from './ChartClient'
+import { TreeMessage } from './Signum.Entities.Tree'
+import * as TreeClient from './TreeClient'
 
-export interface ChartButtonProps {
+export interface TreeButtonProps {
     searchControl: SearchControlLoaded;
 }
 
-export default class ChartButton extends React.Component<ChartButtonProps, void> {
+export default class TreeButton extends React.Component<TreeButtonProps, void> {
 
     handleClick = (e: React.MouseEvent<any>) => {
 
         const fo = this.props.searchControl.props.findOptions;
 
-        const path = ChartClient.Encoder.chartRequestPath(ChartRequest.New({
-            queryKey : fo.queryKey,
-            orderOptions : [],
-            filterOptions : fo.filterOptions
-        }));
+        const path = TreeClient.treePath(fo.queryKey, Finder.toFilterOptions(fo.filterOptions));
 
         Navigator.pushOrOpen(path, e);
     }
     
     render() {
         return (
-            <Button onClick={this.handleClick}><i className="glyphicon glyphicon-stats"></i> &nbsp; { ChartMessage.Chart.niceToString() }</Button>
+            <Button onClick={this.handleClick}><i className="fa fa-sitemap"></i> &nbsp; {TreeMessage.Tree.niceToString()}</Button>
         );
     }
- 
 }
 
 

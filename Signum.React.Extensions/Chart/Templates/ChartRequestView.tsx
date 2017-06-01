@@ -152,9 +152,11 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                             />
                     </div >
                     <div className="sf-query-button-bar btn-toolbar">
-                        <button type="submit" className="sf-query-button sf-chart-draw btn btn-primary" onClick={this.handleOnDrawClick}>{ ChartMessage.Chart_Draw.niceToString() }</button>
-                        <button className="sf-query-button sf-chart-script-edit btn btn-default" onClick={this.handleEditScript}>{ ChartMessage.EditScript.niceToString() }</button>
+                        <button type="submit" className="sf-query-button sf-chart-draw btn btn-primary" onClick={this.handleOnDrawClick}>{ChartMessage.DrawChart.niceToString()}</button>
+                        <button className="sf-query-button sf-chart-script-edit btn btn-default" onClick={this.handleEditScript}><i className="fa fa-pencil" aria-hidden="true"/> &nbsp; {ChartMessage.EditScript.niceToString()}</button>
                         { ChartClient.ButtonBarChart.getButtonBarElements({ chartRequest: cr, chartRequestView: this }).map((a, i) => React.cloneElement(a, { key: i })) }
+                        <button className="btn btn-default" onClick={this.handleExplore} ><i className="glyphicon glyphicon-search"></i> &nbsp; {SearchMessage.Explore.niceToString()}</button>
+
                     </div>
                     <br />
                     <div className="sf-search-results-container" >
@@ -176,6 +178,18 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
         );
     }
 
+
+    handleExplore = (e: React.MouseEvent<any>) => {
+        const cr = this.props.chartRequest!;
+
+        var path = Finder.findOptionsPath({
+            queryName: cr.queryKey,
+            filterOptions: Finder.toFilterOptions(cr.filterOptions),
+            showFilters: cr.filterOptions.length > 0
+        });
+
+        Navigator.pushOrOpen(path, e);
+    }
 }
 
 

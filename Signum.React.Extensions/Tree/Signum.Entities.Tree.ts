@@ -7,6 +7,7 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 
 
 export interface TreeEntity extends Entities.Entity {
+    parentRoute?: string | null;
     level?: number | null;
     parentOrSibling?: Entities.Lite<TreeEntity> | null;
     isSibling?: boolean;
@@ -15,6 +16,7 @@ export interface TreeEntity extends Entities.Entity {
 }
 
 export module TreeMessage {
+    export const Tree = new MessageKey("TreeMessage", "Tree");
     export const Descendants = new MessageKey("TreeMessage", "Descendants");
     export const Parent = new MessageKey("TreeMessage", "Parent");
     export const Ascendants = new MessageKey("TreeMessage", "Ascendants");

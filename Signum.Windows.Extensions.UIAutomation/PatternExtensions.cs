@@ -16,19 +16,17 @@ namespace Signum.Windows.UIAutomation
         {
             AutomationPattern key = GetAutomationPatternKey(typeof(P));
 
-            var result = (P)ae.GetCurrentPattern(key);
-
-            if (result == null)
-                throw new InvalidOperationException("AutomationElement {0} does not implement pattern {1}".FormatWith(ae, typeof(P).Name));
-
-            return result;
+            return (P)ae.GetCurrentPattern(key);
         }
 
         public static P TryPattern<P>(this AutomationElement ae) where P : BasePattern
         {
             AutomationPattern key = GetAutomationPatternKey(typeof(P));
-            
-            return (P)ae.GetCurrentPattern(key);
+
+            if (ae.GetSupportedPatterns().Contains(key))
+                return (P)ae.GetCurrentPattern(key);
+
+            return null;
         }
 
         private static AutomationPattern GetAutomationPatternKey(Type patternType)
