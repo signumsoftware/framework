@@ -21,7 +21,6 @@ import * as AppRelativeRoutes from "./AppRelativeRoutes";
 
 Dic.skipClasses.push(React.Component);
 
-
 export let currentUser: IUserEntity | undefined;
 export function setCurrentUser(user: IUserEntity | undefined) {
     currentUser = user;
@@ -30,6 +29,11 @@ export function setCurrentUser(user: IUserEntity | undefined) {
 export let history: H.History;
 export function setCurrentHistory(h: H.History) {
     history = h;
+}
+
+export let getTitle: (pageTitle?: string) => string;
+export function setTitle(title: (pageTitle?: string) => string) {
+    getTitle = title;
 }
 
 export function createAppRelativeHistory(): H.History {
@@ -534,6 +538,14 @@ export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.Mouse
     }
 }
 
+export function pushOrOpen(path: string, e: React.MouseEvent<any> | React.KeyboardEvent<any>) {
+    e.preventDefault();
+    if (e.ctrlKey || (e as React.MouseEvent<any>).button == 1)
+        window.open(toAbsoluteUrl(path));
+    else
+        history.push(path);
+}
+
 
 export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>): Promise<EntityPack<ModifiableEntity>> {
     if ((entityOrEntityPack as EntityPack<ModifiableEntity>).canExecute)
@@ -639,6 +651,7 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
     isReadOnly?: boolean;
     avoidPopup?: boolean;
     autocomplete?: AutocompleteConfig<T>;
+    getViewPromise?: (entity: T) => ViewPromise<T>;
     onNavigateRoute?: (typeName: string, id: string | number) => string;
     onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
     onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
@@ -673,10 +686,10 @@ export class EntitySettings<T extends ModifiableEntity> {
         this.viewOverrides.push(override);
     }
 
-    constructor(type: Type<T>, getViewPromise?: (entity: T) => Promise<ViewModule<any>>, options?: EntitySettingsOptions<T>) {
+    constructor(type: Type<T>, getViewModule?: (entity: T) => Promise<ViewModule<any>>, options?: EntitySettingsOptions<T>) {
 
         this.type = type;
-        this.getViewPromise = getViewPromise && (entity => new ViewPromise(getViewPromise(entity)));
+        this.getViewPromise = getViewModule && (entity => new ViewPromise(getViewModule(entity)));
 
         Dic.assign(this, options);
     }

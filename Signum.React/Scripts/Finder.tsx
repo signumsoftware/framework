@@ -88,6 +88,7 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
 }
 
 export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent<any>) {
+    e.preventDefault();
     if (e.ctrlKey || e.button == 1)
         window.open(findOptionsPath(findOptions));
     else
@@ -334,7 +335,7 @@ export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription): Find
         allowChangeColumns: fo.allowChangeColumns == false ? false : undefined,
         showFilters: fo.showFilters == false ? false : undefined,
         showFilterButton: fo.showFilterButton == false ? false : undefined,
-        showFooter: fo.showFooter == false ? false : undefined,
+        showFooter: fo.showFooter == false ? false: undefined, 
         showHeader: fo.showHeader == false ? false : undefined,
     } as FindOptions;
 
@@ -362,6 +363,13 @@ export function getDefaultOrder(qd: QueryDescription, qs: QuerySettings): OrderO
         columnName: defaultOrder,
         orderType: qs && qs.defaultOrderType || (tis.some(a => a.entityData == "Transactional") ? "Descending" as OrderType : "Ascending" as OrderType)
     } as OrderOption;
+
+}
+
+export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]) {
+    return filterOptionsParsed
+        .filter(f => !!f.token)
+        .map(f => ({ columnName: f.token!.fullKey, operation: f.operation, value: f.value, frozen: f.frozen }) as FilterOption);
 }
 
 export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription): Promise<FindOptionsParsed> {

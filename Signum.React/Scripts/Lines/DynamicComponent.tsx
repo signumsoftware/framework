@@ -62,6 +62,9 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
             tis = []; 
 
         if (tr.isCollection) {
+            if (tr.name == "[ALL]")
+                return <EntityStrip ctx={ctx} />;
+
             if (tr.isEmbedded || tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
                 return <EntityTable ctx={ctx}/>;
             else if (tis.every(t => t.isLowPopulation == true))

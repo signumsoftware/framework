@@ -12,7 +12,7 @@ export interface TypeaheadProps {
     minLength?: number;
     renderList?: (typeAhead: Typeahead) => React.ReactNode;
     renderItem?: (item: any, query: string) => React.ReactNode;
-    onSelect?: (item: any, e: React.SyntheticEvent<any>) => string | null;
+    onSelect?: (item: any, e: React.KeyboardEvent<any> | React.MouseEvent<any>) => string | null;
     scrollHeight?: number;
     spanAttrs?: React.HTMLAttributes<HTMLSpanElement>;
     inputAttrs?: React.HTMLAttributes<HTMLInputElement>;
@@ -104,7 +104,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         })).done();
     }
 
-    select(e: React.SyntheticEvent<any>): boolean {        
+    select(e: React.KeyboardEvent<any> | React.MouseEvent<any>): boolean {        
         if (this.state.items!.length == 0)
             return false;
 

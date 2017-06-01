@@ -416,6 +416,7 @@ export module SearchMessage {
     export const ViewSelected = new MessageKey("SearchMessage", "ViewSelected");
     export const Operations = new MessageKey("SearchMessage", "Operations");
     export const NoResultsFound = new MessageKey("SearchMessage", "NoResultsFound");
+    export const Explore = new MessageKey("SearchMessage", "Explore");
 }
 
 export module SelectorMessage {

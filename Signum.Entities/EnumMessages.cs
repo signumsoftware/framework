@@ -172,6 +172,7 @@ Lose changes?")]
         ViewSelected,
         Operations,
         NoResultsFound,
+        Explore,
     }
 
     public enum SelectorMessage
