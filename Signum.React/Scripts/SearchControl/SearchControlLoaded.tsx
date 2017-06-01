@@ -10,6 +10,7 @@ import {
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, is, isEntity, isLite, toLite } from '../Signum.Entities'
 import { getTypeInfos, getTypeInfo, TypeReference, IsByAll, getQueryKey, TypeInfo, EntityData, QueryKey, PseudoType, isTypeModel } from '../Reflection'
 import * as Navigator from '../Navigator'
+import { AbortableRequest } from '../Services'
 import * as Constructor from '../Constructor'
 import PaginationSelector from './PaginationSelector'
 import FilterBuilder from './FilterBuilder'
@@ -96,6 +97,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             this.doSearch().done();
     }
 
+    componentWillUnmount() {
+        this.abortableSearch.abort();
+    }
 
 
     entityColumn(): ColumnDescription {
@@ -136,13 +140,16 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         this.doSearch().done();
     };
 
+
+    abortableSearch = new AbortableRequest((abortController, request: QueryRequest) => Finder.API.executeQuery(request, abortController)); 
+
     doSearch(): Promise<void> {
         return this.getFindOptionsWithSFB().then(fop => {
             if (this.props.onSearch)
                 this.props.onSearch(fop);
 
             this.setState({ loading: false, editingColumn: undefined });
-            return Finder.API.executeQuery(this.getQueryRequest()).then(rt => {
+            return this.abortableSearch.getData(this.getQueryRequest()).then(rt => {
                 this.setState({
                     resultTable: rt,
                     selectedRows: [],

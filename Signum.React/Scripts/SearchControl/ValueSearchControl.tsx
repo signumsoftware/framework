@@ -13,6 +13,7 @@ import { getTypeInfos, IsByAll, getQueryKey, TypeInfo, EntityData, getQueryNiceN
 import * as Navigator from '../Navigator'
 import { StyleContext } from '../Typecontext'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
+import { AbortableRequest } from "../Services";
 
 
 
@@ -91,6 +92,13 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
                 .done();
     }
 
+    componentWillUnmount() {
+        this.abortableQuery.abort();
+    }
+
+    abortableQuery = new AbortableRequest<{ request: QueryCountRequest; avoidNotify: boolean | undefined }, number>(
+        (abortController, a) => Finder.API.queryCount(a.request, a.avoidNotify, abortController));
+
     refreshValue(props?: ValueSearchControlProps) {
         if (!props)
             props = this.props;
@@ -102,7 +110,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
 
         Finder.getQueryDescription(fo.queryName)
             .then(qd => Finder.parseFindOptions(fo, qd))
-            .then(fo => Finder.API.queryCount(this.getQueryRequest(fo), props!.avoidNotifyPendingRequest))
+            .then(fo => this.abortableQuery.getData({ request: this.getQueryRequest(fo), avoidNotify: props!.avoidNotifyPendingRequest }))
             .then(value => {
                 this.setState({ value });
                 this.props.onValueChange && this.props.onValueChange(value);

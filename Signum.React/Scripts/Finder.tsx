@@ -120,7 +120,7 @@ export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
         navigate: fo.navigate,
         searchOnLoad: fo.searchOnLoad,
         showFilterButton: fo.showFilterButton,
-        showFilters: fo.showFilters,
+        showFilters: fo.showFilters == true ? undefined : fo.showFilters,
         showFooter: fo.showFooter,
         showHeader: fo.showHeader,
         allowChangeColumns: fo.allowChangeColumns,
@@ -312,9 +312,9 @@ export function setFilters(e: Entity, filterOptionsParsed: FilterOptionParsed[])
     }).filter(p => !!p)).then(() => e);
 }
 
-export function toFindOptions(fo: FindOptionsParsed, queryDescription: QueryDescription) {
+export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription): FindOptions {
 
-    const pair = smartColumns(fo.columnOptions, Dic.getValues(queryDescription.columns));
+    const pair = smartColumns(fo.columnOptions, Dic.getValues(qd.columns));
 
     const qs = getSettings(fo.queryKey);
 
@@ -334,11 +334,34 @@ export function toFindOptions(fo: FindOptionsParsed, queryDescription: QueryDesc
         allowChangeColumns: fo.allowChangeColumns == false ? false : undefined,
         showFilters: fo.showFilters == false ? false : undefined,
         showFilterButton: fo.showFilterButton == false ? false : undefined,
-        showFooter: fo.showFooter == false ? false: undefined, 
+        showFooter: fo.showFooter == false ? false : undefined,
         showHeader: fo.showHeader == false ? false : undefined,
     } as FindOptions;
 
+    if (findOptions.orderOptions && findOptions.orderOptions.length == 1) {
+        var onlyOrder = findOptions.orderOptions[0]
+        var defaultOrder = getDefaultOrder(qd, qs);
+
+        if (defaultOrder && onlyOrder.columnName == defaultOrder.columnName && onlyOrder.orderType == defaultOrder.orderType)
+            findOptions.orderOptions.remove(onlyOrder);
+    }
+
     return findOptions;
+}
+
+export const defaultOrderColumn: string = "Id";
+
+export function getDefaultOrder(qd: QueryDescription, qs: QuerySettings): OrderOption | undefined {
+    const defaultOrder = qs && qs.defaultOrderColumn || defaultOrderColumn;
+    const tis = getTypeInfos(qd.columns["Entity"].type);
+
+    if (!qd.columns[defaultOrder])
+        return undefined;
+
+    return {
+        columnName: defaultOrder,
+        orderType: qs && qs.defaultOrderType || (tis.some(a => a.entityData == "Transactional") ? "Descending" as OrderType : "Ascending" as OrderType)
+    } as OrderOption;
 }
 
 export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription): Promise<FindOptionsParsed> {
@@ -350,18 +373,14 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
     fo.columnOptions = mergeColumns(Dic.getValues(qd.columns), fo.columnOptionsMode || "Add", fo.columnOptions || []);
 
     var qs = querySettings[qd.queryKey];
-
     const tis = getTypeInfos(qd.columns["Entity"].type);
 
-    if (!fo.orderOptions || fo.orderOptions.length == 0) {
-        const defaultOrder = qs && qs.defaultOrderColumn || defaultOrderColumn;
 
-        if (qd.columns[defaultOrder]) {
-            fo.orderOptions = [{
-                columnName: defaultOrder,
-                orderType: qs && qs.defaultOrderType || (tis.some(a => a.entityData == "Transactional") ? "Descending" as OrderType : "Ascending" as OrderType)
-            }];
-        }
+    if (!fo.orderOptions || fo.orderOptions.length == 0) {
+        var defaultOrder = getDefaultOrder(qd, qs);
+
+        if (defaultOrder)
+            fo.orderOptions = [defaultOrder];
     }
 
     const completer = new TokenCompleter(qd);
@@ -659,12 +678,12 @@ export module API {
         return ajaxGet<QueryEntity>({ url: "~/api/query/queryEntity/" + queryKey });
     }
 
-    export function executeQuery(request: QueryRequest): Promise<ResultTable> {
-        return ajaxPost<ResultTable>({ url: "~/api/query/executeQuery" }, request);
+    export function executeQuery(request: QueryRequest, abortController?: FetchAbortController): Promise<ResultTable> {
+        return ajaxPost<ResultTable>({ url: "~/api/query/executeQuery", abortController }, request);
     }
 
-    export function queryCount(request: QueryCountRequest, avoidNotifyPendingRequest: boolean | undefined = undefined): Promise<number> {
-        return ajaxPost<number>({ url: "~/api/query/queryCount", avoidNotifyPendingRequests: avoidNotifyPendingRequest }, request);
+    export function queryCount(request: QueryCountRequest, avoidNotifyPendingRequest: boolean | undefined = undefined, abortController?: FetchAbortController): Promise<number> {
+        return ajaxPost<number>({ url: "~/api/query/queryCount", avoidNotifyPendingRequests: avoidNotifyPendingRequest, abortController }, request);
     }
 
     export function fetchEntitiesWithFilters(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
@@ -832,7 +851,6 @@ export const defaultPagination: Pagination = {
 };
 
 
-export const defaultOrderColumn: string = "Id";
 
 export interface QuerySettings {
     queryName: PseudoType | QueryKey;
