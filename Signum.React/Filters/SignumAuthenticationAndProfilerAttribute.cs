@@ -19,9 +19,9 @@ namespace Signum.React.Filters
     {
         public const string SavedRequestKey = "SAVED_REQUEST";
 
-        public static Func<HttpActionContext, IDisposable> Authenticate;
-
         public static Func<HttpActionContext, IDisposable> GetCurrentCultures;
+
+        public static readonly IList<Func<HttpActionContext, IDisposable>> Authenticators = new List<Func<HttpActionContext, IDisposable>>();
 
         public async Task<HttpResponseMessage> ExecuteAuthorizationFilterAsync(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
         {
@@ -59,6 +59,19 @@ namespace Signum.React.Filters
             {
                 Statics.CleanThreadContextAndAssert();
             }
+        }
+
+        private static IDisposable Authenticate(HttpActionContext actionContext)
+        {
+            foreach (var item in Authenticators)
+            {
+                var disposable = item(actionContext);
+                if (disposable != null)
+                    return disposable;
+
+            }
+
+            return null;
         }
     }
 }

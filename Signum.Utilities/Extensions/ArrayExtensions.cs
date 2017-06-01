@@ -7,6 +7,15 @@ namespace Signum.Utilities
 {
     public static class ArrayExtensions
     {
+        public static T[] Slice<T>(this T[] data, int startIndex, int length)
+        {
+            T[] result = new T[length];
+            for (int i = 0; i < length; i++)
+                result[i] = data[i + startIndex];
+
+            return result;
+        }
+
         public static T[,] Initialize<T>(this T[,] array, Func<int, int, T> valueXY)
         {
             for (int j = 0; j < array.GetLength(1); j++)
@@ -25,6 +34,7 @@ namespace Signum.Utilities
 
             return array;
         }
+
         public static IEnumerable<T> Row<T>(this T[,] data, int row)
         {
             for (int i = 0; i < data.GetLength(0); i++)

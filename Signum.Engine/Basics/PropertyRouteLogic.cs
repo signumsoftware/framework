@@ -37,6 +37,8 @@ namespace Signum.Engine.Basics
 
                 Properties = sb.GlobalLazy(() => Database.Query<PropertyRouteEntity>().AgGroupToDictionary(a => a.RootType, gr => gr.ToDictionary(a => a.Path)),
                     new InvalidateWith(typeof(PropertyRouteEntity)), Schema.Current.InvalidateMetadata);
+
+                PropertyRouteEntity.ToPropertyRouteFunc = ToPropertyRouteImplementation;
             }
         }
 
@@ -91,7 +93,7 @@ namespace Signum.Engine.Basics
                 }).ToList();
         }
 
-        public static PropertyRoute ToPropertyRoute(this PropertyRouteEntity route)
+        static PropertyRoute ToPropertyRouteImplementation(PropertyRouteEntity route)
         {
             return PropertyRoute.Parse(TypeLogic.DnToType[route.RootType], route.Path);
         }

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 
 namespace Signum.Utilities
@@ -510,6 +511,22 @@ namespace Signum.Utilities
                 dic[key] = 1;
             else
                 dic[key] = count + 1;
+        }
+
+        public static NameValueCollection ToNameValueCollection<K, V>(this IDictionary<K, V> dic)
+        {
+            var collection = new NameValueCollection();
+
+            foreach (var kvp in dic)
+            {
+                string value = null;
+                if (kvp.Value != null)
+                    value = kvp.Value.ToString();
+
+                collection.Add(kvp.Key.ToString(), value);
+            }
+
+            return collection;
         }
     }
 

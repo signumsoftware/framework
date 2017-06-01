@@ -379,9 +379,19 @@ namespace Signum.Utilities
             return (long)new TimeSpan(dateTime.Ticks - new DateTime(1970, 1, 1).Ticks).TotalMilliseconds;
         }
 
+        public static DateTime YearStart(this DateTime dateTime)
+        {
+            return new DateTime(dateTime.Year, 1, 1, 0, 0, 0, dateTime.Kind);
+        }
+
         public static DateTime MonthStart(this DateTime dateTime)
         {
             return new DateTime(dateTime.Year, dateTime.Month, 1, 0, 0, 0, dateTime.Kind);
+        }
+
+        public static DateTime WeekStart(this DateTime dateTime)
+        {
+            return new DateTime(dateTime.Year, dateTime.Month, (-1 * (int)dateTime.DayOfWeek), 0, 0, 0, dateTime.Kind);
         }
 
         public static string ToMonthName(this DateTime dateTime)
