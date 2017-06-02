@@ -243,6 +243,26 @@ namespace Signum.Windows.UIAutomation
 
         public static AutomationElement WaitElement(this AutomationElement automationElement, TreeScope scope, Expression<Func<AutomationElement, bool>> condition, int? timeOut = null)
         {
+            var result = TryWaitElement(automationElement, scope, condition, timeOut);
+
+            if(result == null)
+                throw new TimeoutException("Element not found after {0} ms: {1}".FormatWith((timeOut ?? DefaultTimeout), ExpressionEvaluator.PartialEval(condition).ToString()));
+
+            return result;
+        }
+
+        public static AutomationElement TryWaitDescendant(this AutomationElement automationElement, Expression<Func<AutomationElement, bool>> condition, int? timeOut = null)
+        {
+            return TryWaitElement(automationElement, TreeScope.Descendants, condition, timeOut);
+        }
+
+        public static AutomationElement TryWaitChild(this AutomationElement automationElement, Expression<Func<AutomationElement, bool>> condition, int? timeOut = null)
+        {
+            return TryWaitElement(automationElement, TreeScope.Children, condition, timeOut);
+        }
+
+        public static AutomationElement TryWaitElement(this AutomationElement automationElement, TreeScope scope, Expression<Func<AutomationElement, bool>> condition, int? timeOut = null)
+        {
             long start = PerfCounter.Ticks;
 
             var cond = ConditionBuilder.ToCondition(condition);
@@ -260,7 +280,7 @@ namespace Signum.Windows.UIAutomation
                     return result;
 
                 if (((PerfCounter.Ticks - start) / PerfCounter.FrequencyMilliseconds) > (timeOut ?? DefaultTimeout))
-                    throw new TimeoutException("Element not found after {0} ms: {1}".FormatWith((timeOut ?? DefaultTimeout), ExpressionEvaluator.PartialEval(condition).ToString()));
+                    return null;
             }
         }
 
@@ -277,6 +297,26 @@ namespace Signum.Windows.UIAutomation
         }
 
         public static AutomationElement WaitElementById(this AutomationElement automationElement, TreeScope scope, string automationId, int? timeOut = null)
+        {
+            var result = TryWaitElementById(automationElement, scope, automationId, timeOut);
+
+            if (result == null)
+                throw new InvalidOperationException("Element not foud after {0} ms: AutomationID = {1}".FormatWith((timeOut ?? DefaultTimeout), automationId));
+
+            return result;
+        }
+
+        public static AutomationElement TryWaitDescendantById(this AutomationElement automationElement, string automationId, int? timeOut = null)
+        {
+            return TryWaitElementById(automationElement, TreeScope.Descendants, automationId, timeOut);
+        }
+
+        public static AutomationElement TryWaitChildById(this AutomationElement automationElement, string automationId, int? timeOut = null)
+        {
+            return TryWaitElementById(automationElement, TreeScope.Children, automationId, timeOut);
+        }
+
+        public static AutomationElement TryWaitElementById(this AutomationElement automationElement, TreeScope scope, string automationId, int? timeOut = null)
         {
             long start = PerfCounter.Ticks;
 
@@ -295,11 +335,9 @@ namespace Signum.Windows.UIAutomation
                     return result;
 
                 if (((PerfCounter.Ticks - start) / PerfCounter.FrequencyMilliseconds) > (timeOut ?? DefaultTimeout))
-                    throw new InvalidOperationException("Element not foud after {0} ms: AutomationID = {1}".FormatWith((timeOut ?? DefaultTimeout), automationId));
+                    return null;
             }
         }
-
-
 
 
         public static AutomationElement WaitDescendantByCondition(this AutomationElement automationElement, Condition condition, int? timeOut = null)
@@ -313,6 +351,26 @@ namespace Signum.Windows.UIAutomation
         }
 
         public static AutomationElement WaitElementByCondition(this AutomationElement automationElement, TreeScope scope, Condition condition, int? timeOut = null)
+        {
+            var result = TryWaitElementByCondition(automationElement, scope, condition, timeOut);
+
+            if (result == null)
+                throw new InvalidOperationException("Element not foud after {0} ms: {1}".FormatWith((timeOut ?? DefaultTimeout), condition.NiceToString()));
+
+            return result;
+        }
+
+        public static AutomationElement TryWaitDescendantByCondition(this AutomationElement automationElement, Condition condition, int? timeOut = null)
+        {
+            return TryWaitElementByCondition(automationElement, TreeScope.Descendants, condition, timeOut);
+        }
+
+        public static AutomationElement TryWaitChildByCondition(this AutomationElement automationElement, Condition condition, int? timeOut = null)
+        {
+            return TryWaitElementByCondition(automationElement, TreeScope.Children, condition, timeOut);
+        }
+
+        public static AutomationElement TryWaitElementByCondition(this AutomationElement automationElement, TreeScope scope, Condition condition, int? timeOut = null)
         {
             long start = PerfCounter.Ticks;
 
@@ -329,7 +387,7 @@ namespace Signum.Windows.UIAutomation
                     return result;
 
                 if (((PerfCounter.Ticks - start) / PerfCounter.FrequencyMilliseconds) > (timeOut ?? DefaultTimeout))
-                    throw new InvalidOperationException("Element not foud after {0} ms: {1}".FormatWith((timeOut ?? DefaultTimeout), condition.NiceToString()));
+                    return null;
             }
         }
     }

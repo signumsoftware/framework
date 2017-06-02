@@ -8,9 +8,9 @@ using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Entities.Basics;
-using Signum.Entities.RestLog;
+using Signum.Entities.Rest;
 
-namespace Signum.Engine.RestLog
+namespace Signum.Engine.Rest
 {
     public class RestLogLogic
     {
@@ -42,5 +42,7 @@ namespace Signum.Engine.RestLog
         {
             Database.Query<RestLogEntity>().Where(a => a.StartDate < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize,parameters.MaxChunks);
         }
+
+
     }
 }

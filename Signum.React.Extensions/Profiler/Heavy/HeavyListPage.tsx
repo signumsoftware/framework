@@ -145,11 +145,11 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
         let minStart = data.map(a => a.BeforeStart).min();
         let maxEnd = data.map(a => a.End).max();
 
-        let x = d3.scale.linear()
+        let x = d3.scaleLinear()
             .domain([minStart, maxEnd])
             .range([labelWidth + 3, width - rightMargin]);
 
-        let y = d3.scale.linear()
+        let y = d3.scaleLinear()
             .domain([0, data.length])
             .range([0, height - 1]);
 

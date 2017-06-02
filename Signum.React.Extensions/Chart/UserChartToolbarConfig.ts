@@ -22,12 +22,12 @@ export default class DashboardToolbarConfig extends ToolbarConfig<UserChartEntit
     }
 
     getIcon(element: ToolbarResponse<UserChartEntity>) {
-        return this.coloredIcon(element.iconName || "glyphicon glyphicon-stats", element.iconColor || "darkviolet");
+        return ToolbarConfig.coloredIcon(element.iconName || "glyphicon glyphicon-stats", element.iconColor || "darkviolet");
     }
     
     navigateTo(element: ToolbarResponse<UserChartEntity>): Promise<string> {
-        return Navigator.API.fetchAndForget(element.lite!)
+        return Navigator.API.fetchAndForget(element.content!)
             .then(a => UserChartClient.Converter.toChartRequest(a, undefined))
-            .then(cr => ChartClient.Encoder.chartRequestPath(cr, { userChart: liteKey(element.lite!) }));
+            .then(cr => ChartClient.Encoder.chartRequestPath(cr, { userChart: liteKey(element.content!) }));
     }
 }

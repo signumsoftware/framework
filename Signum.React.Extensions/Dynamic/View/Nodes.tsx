@@ -987,7 +987,9 @@ export namespace NodeConstructor {
         const ti = tis.firstOrNull();
 
         if (tr.isCollection) {
-            if (tr.isEmbedded || ti!.entityKind == "Part" || ti!.entityKind == "SharedPart")
+            if (tr.name == "[ALL]")
+                return { kind: "EntityStrip", field, children: [] } as EntityStripNode;
+            else if (tr.isEmbedded || ti!.entityKind == "Part" || ti!.entityKind == "SharedPart")
                 return { kind: "EntityTable", field, children: [] } as EntityTableNode;
             else if (ti!.isLowPopulation)
                 return { kind: "EntityCheckboxList", field, children: [] } as EntityCheckboxListNode;

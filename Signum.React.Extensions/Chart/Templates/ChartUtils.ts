@@ -1,9 +1,10 @@
-﻿/// <reference path="../../../../framework/signum.react/typings/d3/d3.d.ts" />
-import * as d3 from "d3"
-import { ChartValue, ChartTable, ChartColumn,  } from "../ChartClient"
+﻿import * as d3 from "d3"
+import d3sc = require("d3-scale-chromatic");
+import { ChartValue, ChartTable, ChartColumn, ChartRow } from "../ChartClient"
 
 
-(Array.prototype as any as d3.Selection<any>).enterData = function (this: d3.Selection<any>, data: any, tag: string, cssClass: string) {
+
+((d3.select(document) as any).__proto__ as d3.Selection<any, any, any, any>).enterData = function (this: d3.Selection<any, any, any, any>, data: any, tag: string, cssClass: string) {
     return this.selectAll(tag + "." + cssClass).data(data)
         .enter().append("svg:" + tag)
         .attr("class", cssClass);
@@ -118,18 +119,18 @@ export function matrix(a: number, b: number, c: number, d: number, e: number, f:
 export function scaleFor(column: { type: string }, values: any[], minRange: number, maxRange: number, scaleName: string): { (x: any): any; } {
 
     if (scaleName == "Elements")
-        return d3.scale.ordinal()
+        return d3.scaleBand()
             .domain(values)
-            .rangeBands([minRange, maxRange]);
+            .range([minRange, maxRange]);
 
     if (scaleName == "ZeroMax")
-        return d3.scale.linear()
+        return d3.scaleLinear()
             .domain([0, d3.max(values)])
             .range([minRange, maxRange]);
 
     if (scaleName == "MinMax") {
         if (column.type == "Date" || column.type == "DateTime") {
-            const scale = d3.time.scale()
+            const scale = d3.scaleTime()
                 .domain([new Date(<any>d3.min(values)), new Date(<any>d3.max(values))])
                 .range([minRange, maxRange]);
 
@@ -139,20 +140,20 @@ export function scaleFor(column: { type: string }, values: any[], minRange: numb
             return f;
         }
         else {
-            return d3.scale.linear()
+            return d3.scaleLinear()
                 .domain([d3.min(values), d3.max(values)])
                 .range([minRange, maxRange]);
         }
     }
 
     if (scaleName == "Log")
-        return d3.scale.log()
+        return d3.scaleLog()
             .domain([d3.min(values),
                 d3.max(values)])
             .range([minRange, maxRange]);
 
     if (scaleName == "Sqrt")
-        return d3.scale.pow().exponent(.5)
+        return d3.scalePow().exponent(.5)
             .domain([d3.min(values),
                 d3.max(values)])
             .range([minRange, maxRange]);
@@ -243,7 +244,7 @@ export class Rule {
         return this.starts[name] + this.sizes[name] / 2;
     }
 
-    debugX(chart: d3.Selection<any>) {
+    debugX(chart: d3.Selection<any, any, any, any>) {
 
         const keys = d3.keys(this.sizes);
 
@@ -268,7 +269,7 @@ export class Rule {
             .text(d => d);
     }
 
-    debugY(chart: d3.Selection<any>) {
+    debugY(chart: d3.Selection<any, any, any, any>) {
 
         const keys = d3.keys(this.sizes);
 
@@ -292,50 +293,284 @@ export class Rule {
 }
 
 
-export function toTree<T>(elements: T[], getKey: (elem: T) => string, getParent: (elem: T) => T): Node<T>[] {
+export function getStackOffset(curveName: string): ((series: d3.Series<any, any>, order: number[]) => void) | undefined {
+    switch (curveName) {
+        case "zero": return d3.stackOffsetNone;
+        case "expand": return d3.stackOffsetExpand;
+        case "silhouette": return d3.stackOffsetSilhouette;
+        case "wiggle": return d3.stackOffsetWiggle;
+    }
 
-    const root: Node<T> = { item: undefined as any, children: [] };
+    return undefined;
+}
 
-    const dic: { [key: string]: Node<T> } = {};
 
-    function getOrCreateNode(elem: T) {
 
-        const key = getKey(elem);
+export function getStackOrder(schemeName: string): ((series: d3.Series<any, any>) => number[]) | undefined {
+    switch (schemeName) {
+        case "none": return d3.stackOrderNone;
+        case "ascending": return d3.stackOrderAscending;
+        case "descending": return d3.stackOrderDescending;
+        case "insideOut": return d3.stackOrderInsideOut;
+        case "reverse": return d3.stackOrderReverse;
+    }
 
-        if (dic[key])
-            return dic[key];
+    return undefined;
+}
 
-        const node: Node<T> = { item: elem, children: [] };
 
-        const parent = getParent(elem);
+export function getCurveByName(curveName: string): d3.CurveFactoryLineOnly | undefined {
+    switch (curveName) {
+        case "basis": return d3.curveBasis;
+        case "bundle": return d3.curveBundle.beta(0.5);
+        case "cardinal": return d3.curveCardinal;
+        case "catmull-rom": return d3.curveCatmullRom;
+        case "linear": return d3.curveLinear;
+        case "monotone": return d3.curveMonotoneX;
+        case "natural": return d3.curveNatural;
+        case "step": return d3.curveStep;
+        case "step-after": return d3.curveStepAfter;
+        case "step-before": return d3.curveStepBefore;
+    }
 
-        if (parent) {
-            const parentNode = getOrCreateNode(parent);
+    return undefined;
+}
 
-            parentNode.children.push(node);
-        } else {
-            root.children.push(node);
+export function getColorInterpolation(interpolationName: string): ((value: number) => string) | undefined {
+    switch (interpolationName) {
+        case "YlGn": return d3sc.interpolateYlGn;
+        case "YlGnBu": return d3sc.interpolateYlGnBu;
+        case "GnBu": return d3sc.interpolateGnBu;
+        case "BuGn": return d3sc.interpolateBuGn;
+        case "PuBuGn": return d3sc.interpolatePuBuGn;
+        case "PuBu": return d3sc.interpolatePuBu;
+        case "BuPu": return d3sc.interpolateBuPu;
+        case "RdPu": return d3sc.interpolateRdPu;
+        case "PuRd": return d3sc.interpolatePuRd;
+        case "OrRd": return d3sc.interpolateOrRd;
+        case "YlOrRd": return d3sc.interpolateYlOrRd;
+        case "YlOrBr": return d3sc.interpolateYlOrBr;
+        case "Purples": return d3sc.interpolatePurples;
+        case "Blues": return d3sc.interpolateBlues;
+        case "Greens": return d3sc.interpolateGreens;
+        case "Oranges": return d3sc.interpolateOranges;
+        case "Reds": return d3sc.interpolateReds;
+        case "Greys": return d3sc.interpolateGreys;
+        case "PuOr": return d3sc.interpolatePuOr;
+        case "BrBG": return d3sc.interpolateBrBG;
+        case "PRGn": return d3sc.interpolatePRGn;
+        case "PiYG": return d3sc.interpolatePiYG;
+        case "RdBu": return d3sc.interpolateRdBu;
+        case "RdGy": return d3sc.interpolateRdGy;
+        case "RdYlBu": return d3sc.interpolateRdYlBu;
+        case "Spectral": return d3sc.interpolateSpectral;
+        case "RdYlGn": return d3sc.interpolateRdYlGn;
+    }
+
+    return undefined;
+}
+
+export function getColorScheme(schemeName: string): string[] | undefined{
+    switch (schemeName) {
+        case "category10": return d3.schemeCategory10;
+        case "category20": return d3.schemeCategory20;
+        case "category20b": return d3.schemeCategory20b;
+        case "category20c": return d3.schemeCategory20c;
+        case "accent": return d3sc.schemeAccent;
+        case "dark2": return d3sc.schemeDark2;
+        case "paired": return d3sc.schemePaired;
+        case "pastel1": return d3sc.schemePastel1;
+        case "pastel2": return d3sc.schemePastel2;
+        case "set1": return d3sc.schemeSet1;
+        case "set2": return d3sc.schemeSet2;
+        case "set3": return d3sc.schemeSet3;        
+    }
+
+    return undefined;
+}
+
+
+declare module "d3-selection" {
+    interface Selection<GElement extends d3.BaseType, Datum, PElement extends d3.BaseType, PDatum> {
+        enterData<NElement extends d3.BaseType, NDatum>(data: NDatum[], tag: string, cssClass: string): Selection<NElement, Datum, GElement, Datum>;
+        enterData<NElement extends d3.BaseType, NDatum>(data: (data: Datum) => NDatum[], tag: string, cssClass: string): Selection<NElement, Datum, GElement, Datum>;
+    }
+}
+
+export function stratifyTokens(
+    data: ChartTable,
+    keyColumn: string, /*Employee*/
+    keyColumnParent: string, /*Employee.ReportsTo*/):
+    d3.HierarchyNode<ChartRow | Folder | Root> {
+
+    const folders = data.rows
+        .filter(r => r[keyColumnParent] && r[keyColumnParent].key)
+        .map(r => ({ folder: r[keyColumnParent] }) as Folder)
+        .toObjectDistinct(r => r.folder.key!.toString()); 
+
+    const root: Root = { isRoot: true };
+
+    const NullConst = "- Null -";
+
+    const dic = data.rows.filter(r => r[keyColumn].key != null).toObjectDistinct(r => r[keyColumn]!.key as string);
+
+    const getParent = (d: ChartRow | Folder | Root) =>  {
+        if ((d as Root).isRoot)
+            return null;
+
+        if ((d as Folder).folder) {
+            const r = dic[(d as Folder).folder.key!]; 
+
+            if (!r)
+                return root;
+
+            const parentValue = r[keyColumnParent];
+            if (!parentValue || !parentValue.key)
+                return root;  //Either null
+
+            return folders[parentValue.key as string]; // Parent folder
+        }
+            
+        if ((d as ChartRow)[keyColumn]) {
+            const r = d as ChartRow;
+
+            var fold = r[keyColumn] && r[keyColumn].key != null  && folders[r[keyColumn].key as string];
+            if (fold)
+                return fold; //My folder
+            
+            const parentValue = r[keyColumnParent];
+
+            const parentFolder = parentValue && parentValue.key && folders[parentValue.key as string];
+
+            if (!parentFolder)
+                return root; //No key an no parent
+
+            return folders[parentFolder.folder!.key as string]; //only parent
         }
 
-        dic[key] = node;
+        throw new Error("Unexpected " + JSON.stringify(d))
+    };
 
-        return node;
+    var getKey = (r: ChartRow | Folder | Root) => {
+
+        if ((r as Root).isRoot)
+            return "#Root";
+
+        if ((r as Folder).folder)
+            return "F#" + (r as Folder).folder.key;
+
+        const cr = (r as ChartRow);
+
+        if (cr[keyColumn].key != null)
+            return cr[keyColumn].key as string;
+
+        return NullConst;
     }
 
-    elements.forEach(getOrCreateNode);
+    var rootNode = d3.stratify<ChartRow | Folder | Root>()
+        .id(getKey)
+        .parentId(r => {
+            var parent = getParent(r);
+            return parent ? getKey(parent) : null
+        })([root, ...Object.values(folders), ...data.rows]);
 
-    return root.children;
+    return rootNode
+
+}
+
+interface Folder {
+    folder: ChartValue;
+}
+
+interface Root {
+    isRoot: true;
 }
 
 
-export interface Node<T> {
-    item: T;
-    children: Node<T>[];
+export function toPivotTable(data: ChartTable,
+    col0: string, /*Employee*/
+    otherCols: string[]) : PivotTable {
+
+    var usedCols = otherCols
+        .filter(function (cn) { return data.columns[cn].token != undefined; });
+   
+    var rows = data.rows
+        .map(function (r) {
+            return {
+                rowValue: r[col0],
+                values: usedCols.toObject(cn => cn, cn => ({
+                    rowClick: r,
+                    value: r[cn],
+                }) as PivotValue)
+            } as PivotRow;
+        });
+
+    var title = otherCols
+        .filter(function (cn) { return data.columns[cn].token != undefined; })
+        .map(function (cn) { return data.columns[cn].title; })
+        .join(" | ");
+
+    return {
+        title,
+        columns: d3.values(usedCols.toObject(c => c, c => ({
+            color: null,
+            key: c,
+            niceName: data.columns[c].title,
+        } as PivotColumn))),
+        rows,
+    };
 }
 
-declare module "d3" {
-    interface Selection<Datum> {
-        enterData<S>(data: S[], tag: string, cssClass: string): d3.Selection<S>
-        enterData<S>(data: (data: Datum) => S[], tag: string, cssClass: string): d3.Selection<S>
-    }
+export function groupedPivotTable(data: ChartTable,
+    col0: string, /*Employee*/
+    colSplit: string,
+    colValue: string): PivotTable {
+    
+    var columns = d3.values(data.rows.toObjectDistinct(cr => cr[colSplit].key as string, cr => ({
+        niceName: cr[colSplit].niceToString(),
+        color: cr[colSplit].color,
+        key: cr[colSplit].key,
+    }) as PivotColumn));
+
+    var rows = data.rows.groupBy(r => "k" + r[col0].key)
+        .map(gr => {
+            
+            return {
+                rowValue: gr.elements[0][col0],
+                values: gr.elements.toObject(
+                    r => r[colSplit].key as string,
+                    r => ({ value: r[colValue], rowClick: r }) as PivotValue),
+            } as PivotRow;
+        });
+    
+    var title = data.columns.c2.title + " / " + data.columns.c1.title;
+
+    return {
+        title,
+        columns,
+        rows,
+    } as PivotTable;
+}
+
+interface PivotTable {
+    title: string;
+    columns: PivotColumn[]; 
+    rows: PivotRow[];
+}
+
+interface PivotColumn {
+    key: string;
+    color?: string | null;
+    niceName?: string | null;
+}
+
+interface PivotRow {
+    rowValue: ChartValue;
+    values: { [key: string /*| number*/]: PivotValue }; 
+}
+
+
+interface PivotValue {
+    rowClick: ChartRow;
+    value: ChartValue;
 }

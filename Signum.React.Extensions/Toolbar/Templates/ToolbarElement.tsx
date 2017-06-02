@@ -53,9 +53,10 @@ export default class ToolbarElement extends React.Component<{ ctx: TypeContext<T
                         </div>
                         <div className="col-sm-5">
                             <ValueLine ctx={ctx2.subCtx(t => t.label)} valueHtmlAttributes={{ placeholder: content && content.toStr || undefined }} />
+                            {ctx2.value.type == "Link" && ctx2.value.content == null && <ValueLine ctx={ctx2.subCtx(t => t.url)} />}
                             {content && (content.EntityType == "UserQuery" || content.EntityType == "Query") &&
                                 <div>
-                                    <ValueLine ctx={ctx6.subCtx(t => t.openInPopup)}  />
+                                    <ValueLine ctx={ctx6.subCtx(t => t.openInPopup)} />
                                     <ValueLine ctx={ctx6.subCtx(t => t.autoRefreshPeriod)} />
                                 </div>
                             }

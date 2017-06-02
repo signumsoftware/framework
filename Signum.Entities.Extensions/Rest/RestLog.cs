@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Signum.Entities.Basics;
 using static System.Int32;
 
-namespace Signum.Entities.RestLog
+namespace Signum.Entities.Rest
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), InTypeScript(Undefined = false)]
     public class RestLogEntity : Entity

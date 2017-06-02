@@ -136,7 +136,14 @@ namespace Signum.Entities.Chart
 
         protected override void PostRetrieving()
         {
-            chartScript.SynchronizeColumns(this);
+            try
+            {
+                chartScript.SynchronizeColumns(this);
+            }
+            catch (InvalidOperationException e) when (e.Message.Contains("sealed"))
+            {
+                throw new InvalidOperationException($"Error Synchronizing columns for '{this}'. Maybe the ChartScript has changed. Consider opening UserChart and saving it again.");
+            }
         }
 
         public void InvalidateResults(bool needNewQuery)

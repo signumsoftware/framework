@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <ChartScript GroupBy="Always">
   <Columns>
     <Column DisplayName="Horizontal Axis" ColumnType="Groupable" IsGroupKey="true" />
@@ -11,7 +11,7 @@
   </Columns>
   <Parameters>
     <Parameter Name="Stack" Type="Enum" ValueDefinition="zero | expand | wiggle | silhouette" />
-    <Parameter Name="Order" Type="Enum" ValueDefinition="default | inside-out | reverse" />
+    <Parameter Name="Order" Type="Enum" ValueDefinition="none | ascending | descending | insideOut | reverse" />
     <Parameter Name="UnitMargin" Type="Number" ValueDefinition="20" />
     <Parameter Name="Labels" Type="Enum" ValueDefinition="Margin  | Inside | None" />
     <Parameter Name="LabelsMargin" Type="Number" ValueDefinition="100" />
@@ -22,81 +22,9 @@
   <Script><![CDATA[function DrawChart(chart, data){
     
   var pStack = data.parameters["Stack"];
-  
-   var dim0, series, title;
-  
-   if(data.columns.c1.token == null)
-   {   
-      dim0 = data.rows.map(function(r){return r.c0;});     
-      series = ['c2', 'c3','c4','c5','c6']
-        .filter(function(cn){return data.columns[cn].token != undefined; })
-        .map(function(cn){
-           var col = data.columns[cn];
-            return {
-              key : cn,
-              color : null,
-              niceName : col.title,
-              points : data.rows.map(function(r){
-                var v = r[cn];
-                return {
-                  rowClick : r,
-                  value: v,
-                  niceToString : v == null ? null: (r.c0.niceToString() + ', ' + col.title + ': ' + v.niceToString()),
-                  dim0 : r.c0,
-                };
-              }) 
-            };        
-        });
-    
-     title = ['c2', 'c3','c4','c5','c6']
-        .filter(function(cn){return data.columns[cn].token != undefined; })
-        .map(function(cn){return data.columns[cn].title; })
-        .join(" | ")
-   }
-   else
-   {
-      var errors = ['c3','c4','c5','c6']
-        .filter(function(cn){return data.columns[cn].token != undefined; })
-        .map(function(cn){return "'" + data.columns[cn].displayName + "'"; });
-     
-     if(errors.length > 0)
-      throw errors.join() + " not compatible with '" + data.columns.c1.displayName + "'";  
-    
-     dim0 = d3.nest()
-      .key(function(r){return "k" + r.c0.toString(); })
-      .rollup(function(r){return r[0].c0 })
-      .entries(data.rows)
-      .map(function(g){return g.values;});
-
-  
-     series = d3.nest()
-      .key(function(r){return r.c1; })
-      .rollup(function(list){ 
-        var obj = d3.nest()
-            .key(function(r){return r.c0.toString(); })
-            .rollup(function(r){return r[0] })
-            .map(list);
-        
-        var c1 = list[0].c1;
-        return {
-          key : c1.key,
-          color: c1.color,
-          niceName : c1.niceToString(),
-          points : dim0.map(function(d0){ 
-            var row = obj[d0];
-            return {
-              rowClick: row, 
-              value: row == null ? null: row.c2,
-              niceToString : row == null ? null: (row.c0.niceToString() + ', ' + row.c1.niceToString() + ': ' + row.c2.niceToString()),
-              dim0: d0
-          	}; })
-        };
-      })
-      .entries(data.rows)
-      .map(function(g){return g.values;});
-     
-     title = data.columns.c2.title + " / " + data.columns.c1.title
-   }
+  var pivot = data.columns.c1.token == null ?  
+       ChartUtils.toPivotTable(data, "c0", ["c2", "c3", "c4", "c5", "c6"]): 
+       ChartUtils.groupedPivotTable(data, "c0", "c1", "c2");
   
   var xRule = rule({
     _1 : 5,
@@ -125,35 +53,30 @@
   //yRule.debugY(chart);
   
 
-  var x = d3.scale.ordinal()
-      .domain(dim0.map(function (d) { return d; }))
-      .rangeBands([0, xRule.size('content')]);
+  var x = d3.scaleBand()
+      .domain(pivot.rows.map(function (d) { return d.rowValue.key; }))
+      .range([0, xRule.size('content')]);
   
-  var stack = d3.layout.stack()
-    .offset(pStack)
-    .order(data.parameters['Order'])
-    .values(function(d) { return d.points; })
-    .y(function(p){return p.value == undefined ? 0: p.value;})
-    .x(function(p){return x(p.dim0);});
+  var pStack = data.parameters["Stack"];
   
-  stack(series);
+  var stack = d3.stack()
+    .offset(ChartUtils.getStackOffset(pStack))
+    .order(ChartUtils.getStackOrder(data.parameters["Order"]))
+    .keys(pivot.columns.map(function(d) { return d.key; }))
+    .value(function(r, k){ 
+      var v = r.values[k]; 
+      return v && v.value && v.value.key || 0; 
+    });
   
-  var flattened = series.flatMap(function(dim1){return dim1.points});
+  var stackedSeries = stack(pivot.rows);
   
-  var maxDim0 = d3.nest()      
-      .key(function(r){return r.dim0; })
-      .rollup(function(list){ return { dim0: list[0].dim0, max: d3.max(list, function(a){return a.y0 + a.y;})};})
-      .entries(flattened)
-      .map(function(g){return g.values;});
+  var max = d3.max(stackedSeries, function(s){ return d3.max(s, function(v){return v[1];}); });
+  var min = d3.min(stackedSeries, function(s){ return d3.min(s, function(v){return v[0];}); });
   
-  var max = d3.max(flattened, function(v){return v.y0 + v.y;});   
-  
-  var y = d3.scale.linear()
-      .domain([0, max])
+  var y = d3.scaleLinear()
+      .domain([min, max])
       .range([0, yRule.size('content')]);
   
-  
-
   chart.append('svg:g').attr('class', 'x-title').attr('transform', translate(xRule.middle('content'), yRule.middle('title')))
     .append('svg:text').attr('class', 'x-title')
     .attr('text-anchor', 'middle')
@@ -191,101 +114,105 @@
     .append('svg:text').attr('class', 'y-label')
     .attr('text-anchor', 'middle')
     .attr('dominant-baseline', 'middle')
-    .text(title);
+    .text(pivot.title);
   
-  var color = d3.scale.category20().domain(series.map(function (s) { return s.key; }));
+  var color =  d3.scaleOrdinal(d3.schemeCategory20).domain(pivot.columns.map(function (s) { return s.key; }));
   
   //PAINT CHART
-  chart.enterData(series, 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.end('content')))
+  chart.enterData(stackedSeries, 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.end('content')))
     .each(function(s){
       
-      d3.select(this).enterData(s.points, 'rect', 'shape')
-        .filter(function(r){return r.value != undefined; })
-        .attr('stroke', x.rangeBand() > 4 ? '#fff' : null)
-        .attr('fill', function (r) { return s.color || color(s.key); })
-        .attr('x', function (r) { return x(r.dim0); })
-        .attr('width', x.rangeBand())
-        .attr('height', function (r) { return y(r.y); })
-        .attr('y', function (r) { return -y(r.y)-y(r.y0) })
-        .attr('data-click', function (r) { return getClickKeys(r.rowClick, data.columns); })
+      d3.select(this).enterData(s, 'rect', 'shape')
+         .filter(function(v) {return v.data.values[s.key] != undefined;})
+        .attr('stroke', x.bandwidth() > 4 ? '#fff' : null)
+        .attr('fill', function (v) { return s.color || color(s.key); })
+        .attr('x', function (v) { return x(v.data.rowValue); })
+        .attr('width', x.bandwidth())
+        .attr('height', function(v) { return y(v[1])- y(v[0]); } )
+        .attr('y', function (v) { return -y(v[1]) })
+        .attr('data-click', function (v) { return getClickKeys(v.data.values[s.key].rowClick, data.columns); })
         .append('svg:title')
-        .text(function (r, i) { return r.niceToString; });
+        .text(function(v) { return v.data.values[s.key].value; });
       
       if(data.parameters["NumberOpacity"] > 0)
       {
-          d3.select(this).enterData(s.points, 'text', 'number-label')
-            .filter(function(r){return y(r.y) > 10; })
-            .attr('x', function (r) { return x(r.dim0) + x.rangeBand() / 2; })
-            .attr('y', function (r) { return -(y(r.y) / 2) -y(r.y0) })
+          d3.select(this).enterData(s, 'text', 'number-label')
+            .filter(function(v){return (y(v[1])- y(v[0])) > 10; })
+            .attr('x', function (v) { return x(v.data.rowValue) + x.bandwidth() / 2; })
+            .attr('y', function (v) { return -y(v[0])*0.5 -y(v[1])*0.5;})
             .attr('fill', data.parameters["NumberColor"])
             .attr('dominant-baseline', 'central')
             .attr('opacity', data.parameters["NumberOpacity"])
             .attr('text-anchor', 'middle')
             .attr('font-weight', 'bold')
-            .text(function (v) { return v.value; })
-            .attr('data-click', function (r) { return getClickKeys(r.rowClick, data.columns); })
+            .text(function (v) { return v.data.values[s.key].value; })
+            .attr('data-click', function (v) { return getClickKeys(v.data.values[s.key].rowClick, data.columns); })
             .append('svg:title')
-            .text(function (r, i) { return r.niceToString; });
+            .text(function(v) { return v.data.values[s.key].value; });
       }
       
     });
   
   
-  if (x.rangeBand() > 15) {
+  if (x.bandwidth() > 15) {
     
     if(data.parameters["Labels"] == "Margin")
     {
       chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content'), yRule.start('labels')))
-          .enterData(maxDim0, 'text', 'x-label')
-          .attr('transform', function (v){ return translate( x(v.dim0) + x.rangeBand()/2, 0 ) +  rotate(-90);})
+          .enterData(pivot.rows, 'text', 'x-label')
+          .attr('transform', function (v){ return translate( x(v.rowValue) + x.bandwidth()/2, 0 ) +  rotate(-90);})
           .attr('dominant-baseline', 'middle')
           .attr('fill', 'black')
       	  .attr('shape-rendering', 'geometricPrecision')
           .attr('text-anchor', "end")
-          .text(function (v) { return v.dim0.niceToString(); })
+          .text(function (v) { return v.rowValue.niceToString(); })
           .each(function (v) { ellipsis(this,  yRule.size('labels'), labelMargin); });
     }
     else if(data.parameters["Labels"] == "Inside")
     {
+       function maxValue(rowIndex){
+          return stackedSeries[stackedSeries.length - 1][rowIndex][1];
+       }
+      
       var labelMargin = 10;
       var size = yRule.size('content');
-
+      console.log(stackedSeries);
+      console.log(pivot.rows);
+      
       chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content'), yRule.end('content')))
-        .enterData(maxDim0, 'text', 'x-label')
-        .attr('transform', function (r){ return translate( x(r.dim0) + x.rangeBand()/2, -(y(r.max)) ) +  rotate(-90);})
+        .enterData(pivot.rows, 'text', 'x-label')
+        .attr('transform', function (r, i){ return translate( x(r.rowValue) + x.bandwidth()/2, y(maxValue(i)) >= size/2 ? 0: -y(maxValue(i))) +  rotate(-90);})
         .attr('dominant-baseline', 'middle')
         .attr('font-weight', 'bold')
-        .attr('fill', function (r) { return y(r.max) >= size/2 ? '#fff' : '#000'; })
-        .attr('dx', function (r) { return y(r.max) >= size/2 ? -labelMargin : labelMargin; })
+        .attr('fill', function (r,i) { return y(maxValue(i)) >= size/2 ? '#fff' : '#000'; })
+        .attr('dx', function (r,i) { return labelMargin; })
         .attr('text-anchor',  function (r) { return y(r.max) >= size/2 ? 'end': 'start';})
-        .text(function (r) { return r.dim0.niceToString(); })
+        .text(function (r) { return r.rowValue.niceToString(); })
         .each(function (r) { var posy = y(r.max); ellipsis(this, posy >= size/2 ? posy : size - posy, labelMargin); });
-    }
-    
-         
+    }    
   }
   
-  var legendScale = d3.scale.ordinal()
-    .domain(series.map(function (s, i) { return i; }))
-    .rangeBands([0, xRule.size('content')]);
+  var legendScale = d3.scaleBand()
+    .domain(pivot.columns.map(function (s, i) { return i; }))
+    .range([0, xRule.size('content')]);
   
-  if (legendScale.rangeBand() > 50) {
+  if (legendScale.bandwidth() > 50) {
     
     var legendMargin = yRule.size('legend') + 4;
     
     chart.append('svg:g').attr('class', 'color-legend').attr('transform', translate(xRule.start('content'), yRule.start('legend')))
-      .enterData(series, 'rect', 'color-rect')
+      .enterData(pivot.columns, 'rect', 'color-rect')
       .attr('x', function (e, i) { return legendScale(i); })
       .attr('width', yRule.size('legend'))
       .attr('height', yRule.size('legend'))
       .attr('fill', function (s) { return s.color || color(s.key);});
     
     chart.append('svg:g').attr('class', 'color-legend').attr('transform',  translate(xRule.start('content') + legendMargin, yRule.middle('legend') + 1))
-      .enterData(series, 'text', 'color-text')
+      .enterData(pivot.columns, 'text', 'color-text')
       .attr('x', function (e, i) { return legendScale(i); })
       .attr('dominant-baseline', 'middle')
       .text(function (s) { return s.niceName; })
-      .each(function (s) { ellipsis(this, legendScale.rangeBand() - legendMargin); });
+      .each(function (s) { ellipsis(this, legendScale.bandwidth() - legendMargin); });
   }
   
   chart.append('svg:g').attr('class', 'x-axis').attr('transform', translate(xRule.start('content'), yRule.end('content')))

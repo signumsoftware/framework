@@ -275,6 +275,12 @@ namespace Signum.Engine.Mailing
                     Execute = (t, _) => t.Active = false
                 }.Register();
 
+                new Delete(EmailTemplateOperation.Delete)
+                {
+                    CanDelete = t => !t.Active ? EmailTemplateMessage.TheTemplateIsAlreadyInactive.NiceToString() : null,
+                    Delete = (t, _) => t.Delete()
+                }.Register();
+
                 registered = true;
             }
         }

@@ -28,16 +28,12 @@ export default class ChartButton extends React.Component<ChartButtonProps, void>
             filterOptions : fo.filterOptions
         }));
 
-        if (e.ctrlKey || e.button == 1)
-            window.open(path);
-        else
-            Navigator.history.push(path);
-
+        Navigator.pushOrOpen(path, e);
     }
     
     render() {
         return (
-            <Button onClick={this.handleClick}>{ ChartMessage.Chart.niceToString() }</Button>
+            <Button onClick={this.handleClick}><i className="glyphicon glyphicon-stats"></i> &nbsp; { ChartMessage.Chart.niceToString() }</Button>
         );
     }
  

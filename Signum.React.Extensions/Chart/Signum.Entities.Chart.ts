@@ -65,7 +65,7 @@ export module ChartMessage {
     export const ChartToken = new MessageKey("ChartMessage", "ChartToken");
     export const Chart_ChartSettings = new MessageKey("ChartMessage", "Chart_ChartSettings");
     export const Chart_Dimension = new MessageKey("ChartMessage", "Chart_Dimension");
-    export const Chart_Draw = new MessageKey("ChartMessage", "Chart_Draw");
+    export const DrawChart = new MessageKey("ChartMessage", "DrawChart");
     export const Chart_Group = new MessageKey("ChartMessage", "Chart_Group");
     export const Chart_Query0IsNotAllowed = new MessageKey("ChartMessage", "Chart_Query0IsNotAllowed");
     export const Chart_ToggleInfo = new MessageKey("ChartMessage", "Chart_ToggleInfo");

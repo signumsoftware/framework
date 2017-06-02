@@ -187,10 +187,10 @@ namespace Signum.Windows.UIAutomation
                 return null;
 
             if (exp is AutomationPropertyExpression prop)
-                return new PropertyCondition(((AutomationPropertyExpression)exp).AutomationProperty, ce.Value);
+                return new PropertyCondition(prop.AutomationProperty, ce.Value);
 
             if (exp is AutomationPatternExpression pattern && ce.Value == null)
-                return new PropertyCondition(GetCachedProperty(pattern.AutomationPattern, "Is{0}AvailableProperty".FormatWith(pattern.AutomationPattern.Name)), false);
+                return new PropertyCondition(GetCachedProperty(typeof(AutomationElement), "Is{0}Available".FormatWith(pattern.AutomationPattern.Name)), false);
 
             return null;
         }
@@ -205,8 +205,8 @@ namespace Signum.Windows.UIAutomation
             if (expression is AutomationCurrentExpression)
                 return new AutomationPropertyExpression(GetCachedProperty(typeof(AutomationElement), node.Member.Name), node.Type);
 
-            if (expression is AutomationPatternExpression)
-                return new AutomationPropertyExpression(GetCachedProperty(((AutomationPatternExpression)expression).AutomationPattern, node.Member.Name), node.Type);
+            if (expression is AutomationPatternExpression pattern)
+                return new AutomationPropertyExpression(GetCachedProperty(pattern.AutomationPattern, node.Member.Name), node.Type);
 
             return Expression.MakeMemberAccess(expression, node.Member);
         }

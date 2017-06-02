@@ -11,7 +11,6 @@ import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOpti
 import { MapMessage } from '../Signum.Entities.Map'
 import * as MapClient from '../MapClient'
 import { OperationMapInfo, OperationMapD3, ForceNode, ForceLink, Transition} from './OperationMap'
-const colorbrewer = require("colorbrewer");
 
 require("./operationMap.css");
 
@@ -132,10 +131,10 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
 
         const s = this.state;
 
-        const tables = s.operationMapInfo!.allNodes.filter(a => a.fixed)
+        const tables = s.operationMapInfo!.allNodes.filter(a => a.fx != null && a.fy != null)
             .toObject(a => a.key, a =>
-                (a.x! / s.width!).toPrecision(4) + "," +
-                (a.y! / s.height!).toPrecision(4));        
+                (a.fx! / s.width!).toPrecision(4) + "," +
+                (a.fy! / s.height!).toPrecision(4));        
 
         var query = { ...tables, color: s.color };
 
@@ -202,9 +201,11 @@ export class OperationMapRenderer extends React.Component<OperationMapRendererPr
         map.allNodes.forEach(a => {
             const c = parsedQuery.nodes[a.key];
             if (c) {
-                a.x = c.x * this.props.width;
-                a.y = c.y * this.props.height;
-                a.fixed = true;
+                a.fx = c.x * this.props.width;
+                a.fy = c.y * this.props.height;
+            } else {
+                a.x = Math.random() * this.props.width;
+                a.y = Math.random() * this.props.height;
             }
         });
         
@@ -228,7 +229,10 @@ export class OperationMapRenderer extends React.Component<OperationMapRendererPr
 
         map.states.forEach(m => {
             m.fanOut = (fanOut[m.key] ? fanOut[m.key].reduce((acum, e) => acum + e.weight, 0) : 0);
-            m.fanIn = (fanIn[m.key]?fanIn[m.key].reduce((acum, e) => acum + e.weight, 0): 0);
+            m.fanIn = (fanIn[m.key] ? fanIn[m.key].reduce((acum, e) => acum + e.weight, 0) : 0);
+
+            m.fanInOutFactor = (m.fanIn - m.fanOut) / (m.fanIn + m.fanOut); 
+
         });
     }
 
@@ -259,8 +263,5 @@ export class OperationMapRenderer extends React.Component<OperationMapRendererPr
         );
     }
 }
-
-
-
 
 

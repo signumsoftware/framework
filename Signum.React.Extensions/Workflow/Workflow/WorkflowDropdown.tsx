@@ -16,7 +16,7 @@ import * as WorkflowClient from '../WorkflowClient'
 import { Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap'
 import { LinkContainer, IndexLinkContainer } from 'react-router-bootstrap'
 
-export default class WorkflowDropdown extends React.Component<void, { starts: Array<WorkflowEntity> }>
+export default class WorkflowDropdown extends React.Component<{}, { starts: Array<WorkflowEntity> }>
 {
     constructor(props: any) {
         super(props);

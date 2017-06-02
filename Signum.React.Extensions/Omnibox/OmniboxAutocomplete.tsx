@@ -15,25 +15,20 @@ export interface OmniboxAutocompleteProps {
 
 export default class OmniboxAutocomplete extends React.Component<OmniboxAutocompleteProps, void>
 {
-    handleOnSelect = (result: OmniboxClient.OmniboxResult, e: React.SyntheticEvent<any>) => {
+    handleOnSelect = (result: OmniboxClient.OmniboxResult, e: React.KeyboardEvent<any> | React.MouseEvent<any>) => {
 
         const ke = e as React.KeyboardEvent<any>;
-
         if (ke.keyCode && ke.keyCode == 9) {
             return OmniboxClient.toString(result);
         }
+        e.persist();
 
-        const ctrlKey = ke.ctrlKey;
         const promise = OmniboxClient.navigateTo(result);
         if (promise) {
             promise
                 .then(url => {
-                    if (url) {
-                        if (ctrlKey)
-                            window.open(Navigator.toAbsoluteUrl(url));
-                        else
-                            Navigator.history.push(url);
-                    }
+                    if (url)
+                        Navigator.pushOrOpen(url, e);
                 }).done();
         }
         this.typeahead.blur();

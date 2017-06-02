@@ -445,8 +445,13 @@ export interface ChartValue {
 export interface ChartTable {
     columns: { [name: string]: ChartColumn },
     parameters: { [name: string]: string | null | undefined },
-    rows: { [name: string]: ChartValue }[]
+    rows: ChartRow[]
 }
+
+export interface ChartRow {
+    [name: string]: ChartValue
+}
+
 
 export interface ChartColumn {
     title?: string;

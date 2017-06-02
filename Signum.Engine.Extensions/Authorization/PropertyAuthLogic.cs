@@ -33,7 +33,7 @@ namespace Signum.Engine.Authorization
                 PropertyRouteLogic.Start(sb);
 
                 cache = new AuthCache<RulePropertyEntity, PropertyAllowedRule, PropertyRouteEntity, PropertyRoute, PropertyAllowed>(sb,
-                    PropertyRouteLogic.ToPropertyRoute,
+                    PropertyRouteEntity.ToPropertyRouteFunc,
                     PropertyRouteLogic.ToPropertyRouteEntity,
                     merger: new PropertyMerger(),
                     invalidateWithTypes: true,
@@ -121,7 +121,7 @@ namespace Signum.Engine.Authorization
 
             var coercer = PropertyCoercer.Instance.GetCoerceValue(role);
             result.Rules.ForEach(r => r.CoercedValues = EnumExtensions.GetValues<PropertyAllowed>()
-                .Where(a => !coercer(PropertyRouteLogic.ToPropertyRoute(r.Resource), a).Equals(a))
+                .Where(a => !coercer(PropertyRouteEntity.ToPropertyRouteFunc(r.Resource), a).Equals(a))
                 .ToArray());
 
             return result;

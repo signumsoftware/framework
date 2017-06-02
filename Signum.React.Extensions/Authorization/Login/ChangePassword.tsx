@@ -21,12 +21,12 @@ export default class ChangePassword extends React.Component<{}, { modelState?: M
 
         e.preventDefault();
 
-        const request: AuthClient.Api.ChangePasswordRequest = {
+        const request: AuthClient.API.ChangePasswordRequest = {
             oldPassword: this.oldPassword.value,
             newPassword: this.newPassword.value,
         };
 
-        AuthClient.Api.changePassword(request)
+        AuthClient.API.changePassword(request)
             .then(user => {
                 AuthClient.setCurrentUser(user);
                 Navigator.resetUI();

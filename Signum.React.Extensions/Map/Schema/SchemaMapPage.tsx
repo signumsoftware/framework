@@ -12,7 +12,6 @@ import { MapMessage } from '../Signum.Entities.Map'
 import * as MapClient from '../MapClient'
 import { SchemaMapInfo, EntityBaseType, ITableInfo, MListRelationInfo, IRelationInfo, ClientColorProvider, SchemaMapD3 } from './SchemaMap'
 import { RouteComponentProps } from "react-router";
-const colorbrewer = require("colorbrewer");
 
 require("./schemaMap.css");
 
@@ -166,10 +165,10 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
         const s = this.state;
 
-        const tables = s.schemaMapInfo!.allNodes.filter(a => a.fixed)
+        const tables = s.schemaMapInfo!.allNodes.filter(a => a.fx != null && a.fy != null)
             .toObject(a => a.tableName, a =>
-                (a.x! / s.width!).toPrecision(4) + "," +
-                (a.y! / s.height!).toPrecision(4));
+                (a.fx! / s.width!).toPrecision(4) + "," +
+                (a.fy! / s.height!).toPrecision(4));
 
         const query = {
             ...tables, filter: s.filter, color: s.color
@@ -249,9 +248,12 @@ export class SchemaMapRenderer extends React.Component<SchemaMapRendererProps, {
         map.allNodes.forEach(a => {
             const c = parsedQuery.tables[a.tableName];
             if (c) {
-                a.x = c.x * this.props.width;
-                a.y = c.y * this.props.height;
-                a.fixed = true;
+                a.fx = c.x * this.props.width;
+                a.fy = c.y * this.props.height;
+            }
+            else {
+                a.x = Math.random() * this.props.width;
+                a.y = Math.random() * this.props.height;
             }
         });
 
@@ -272,10 +274,14 @@ export class SchemaMapRenderer extends React.Component<SchemaMapRendererProps, {
         
         const repsDic : {[tableName: string]: number} = {};
 
-        map.allLinks.forEach(l=>{
-            const relName = l.source.tableName > l.target.tableName ? 
-                l.source.tableName + "-" + l.target.tableName : 
-                l.target.tableName + "-" + l.source.tableName ;
+        map.allLinks.forEach(l => {
+
+            const sourceName = (l.source as ITableInfo).tableName;
+            const targetName = (l.target as ITableInfo).tableName;
+
+            const relName = sourceName > targetName? 
+                sourceName + "-" + targetName : 
+                targetName + "-" + sourceName;
 
             if(repsDic[relName] == undefined)
                 repsDic[relName] = 0;

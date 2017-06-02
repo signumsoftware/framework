@@ -11,15 +11,15 @@ export interface Rectangle extends Point {
     height: number;
 }
 
-export function colorScale(max: number): d3.scale.Linear<string, string> {
-    return d3.scale.linear<string>()
+export function colorScale(max: number): d3.ScaleLinear<string, string> {
+    return d3.scaleLinear<string>()
         .domain([0, max / 4, max])
         .range(["green", "gold", "red"]);
 
 }
 
-export function colorScaleSqr(max: number): d3.scale.Pow<string, string>{
-    return d3.scale.sqrt<string>()
+export function colorScaleSqr(max: number): d3.ScalePower<string, string>{
+    return d3.scaleSqrt<string>()
         .domain([0, max / 4, max])
         .range(["green", "gold", "red"]);
 
@@ -63,12 +63,12 @@ function getRatio(vOut: Point, vIn: Point) {
 
 
 export function wrap(textElement: SVGTextElement, width: number) {
-    const text = d3.select(textElement);
+    const text = d3.select<SVGTextElement, void>(textElement);
     const words: string[] = text.text().split(/\s+/).reverse();
     let word: string;
 
     let line: string[] = [];
-    let tspan = text.text(undefined).append("tspan")
+    let tspan = text.text(null).append("tspan")
         .attr("x", 0)
         .attr("dy", "1.2em");
 
@@ -84,4 +84,34 @@ export function wrap(textElement: SVGTextElement, width: number) {
                 .attr("dy", "1.2em").text(word);
         }
     }
+}
+
+export function forceBoundingBox<T extends d3.SimulationNodeDatum>(width : number = 0, height: number = 0) {
+    var nodes : T[];
+    
+    function gravityDim(v: number, min: number, max: number, alpha: number): number {
+
+        const minF = min + 100;
+        const maxF = max - 100;
+
+        const dist =
+            maxF < v ? maxF - v :
+                v < minF ? minF - v :
+                    ((max - min)/2 - v) / 50;
+
+        return dist * alpha * 0.4;
+    }
+
+    function force(alpha: number) {
+        nodes.forEach(n => {
+            n.vx = n.vx! + gravityDim(n.x!, 0, width, alpha);
+            n.vy = n.vx! + gravityDim(n.y!, 0, height, alpha);
+        });
+    }
+
+    (force as any).initialize = function (_ : T[]) {
+        nodes = _;
+    };
+
+    return force;
 }

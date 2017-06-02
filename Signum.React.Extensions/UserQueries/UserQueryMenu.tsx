@@ -87,10 +87,10 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
     }
 
     render() {
-        const label = UserQueryMessage.UserQueries_UserQueries.niceToString();
+        const label = <span><i className="glyphicon glyphicon-list-alt"></i> &nbsp; {UserQueryMessage.UserQueries_UserQueries.niceToString()}</span>;
         const userQueries = this.state.userQueries;
         return (
-            <DropdownButton title={label} label={label} id="userQueriesDropDown" className="sf-userquery-dropdown"
+            <DropdownButton title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown"
                 onToggle={this.handleSelectedToggle}>
                 {
                     userQueries && userQueries.map((uq, i) =>

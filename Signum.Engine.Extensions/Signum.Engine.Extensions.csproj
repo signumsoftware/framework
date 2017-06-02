@@ -59,9 +59,8 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DocumentFormat.OpenXml, Version=2.5.5631.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\..\packages\DocumentFormat.OpenXml.2.5\lib\DocumentFormat.OpenXml.dll</HintPath>
+    <Reference Include="DocumentFormat.OpenXml, Version=0.0.1.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\DocumentFormat.OpenXml.2.7.1\lib\net45\DocumentFormat.OpenXml.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.4\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
@@ -83,8 +82,8 @@
     <Reference Include="System.ServiceModel">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.ValueTuple, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.ValueTuple.4.3.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+    <Reference Include="System.ValueTuple, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.ValueTuple.4.3.1\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
     </Reference>
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq">
@@ -136,6 +135,8 @@
     <Compile Include="Disconnected\ExportManager.cs" />
     <Compile Include="Dynamic\DynamicLogic.cs" />
     <Compile Include="Dynamic\DynamicMixinConnectionLogic.cs" />
+    <Compile Include="Rest\RestApiKeyLogic.cs" />
+    <Compile Include="Files\FilePathEmbeddedLogic.cs" />
     <Compile Include="Toolbar\ToolbarLogic.cs" />
     <Compile Include="Dynamic\DynamicSqlMigrationLogic.cs" />
     <Compile Include="Dynamic\DynamicExpressionLogic.cs" />
@@ -144,7 +145,6 @@
     <Compile Include="Dynamic\DynamicViewLogic.cs" />
     <Compile Include="Dynamic\DynamicValidationLogic.cs" />
     <Compile Include="Excel\ExcelAttachmentLogic.cs" />
-    <Compile Include="Files\EmbeddedFilePathLogic.cs" />
     <Compile Include="Files\FileLogic.cs" />
     <Compile Include="Files\FilePathLogic.cs" />
     <Compile Include="Files\FileTypeLogic.cs" />
@@ -159,7 +159,7 @@
     <Compile Include="Help\HelpUtilities.cs" />
     <Compile Include="Isolation\IsolationLogic.cs" />
     <Compile Include="Printing\PrintLogic.cs" />
-    <Compile Include="RestLog\RestLogLogic.cs" />
+    <Compile Include="Rest\RestLogLogic.cs" />
     <Compile Include="Mailing\AsyncEmailSenderLogic.cs" />
     <Compile Include="Map\MapLogic.cs" />
     <Compile Include="Mailing\SendEmailTaskLogic.cs" />

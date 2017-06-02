@@ -8,13 +8,14 @@ import ContextMenu from '../../../Framework/Signum.React/Scripts/SearchControl/C
 import { ContextMenuPosition } from '../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
-import { SearchMessage, JavascriptMessage, EntityControlMessage, toLite, ExecuteSymbol, ConstructSymbol_From, ConstructSymbol_Simple, DeleteSymbol, OperationMessage } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { SearchMessage, JavascriptMessage, EntityControlMessage, toLite, liteKey, ExecuteSymbol, ConstructSymbol_From, ConstructSymbol_Simple, DeleteSymbol, OperationMessage } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TreeViewerMessage, TreeEntity, TreeOperation } from './Signum.Entities.Tree'
 import * as TreeClient from './TreeClient'
-import { FilterOptionParsed, QueryDescription, FilterRequest, SubTokensOptions } from "../../../Framework/Signum.React/Scripts/FindOptions";
+import { FilterOptionParsed, QueryDescription, FilterRequest, SubTokensOptions, FilterOption } from "../../../Framework/Signum.React/Scripts/FindOptions";
 import FilterBuilder from "../../../Framework/Signum.React/Scripts/SearchControl/FilterBuilder";
 import { ISimpleFilterBuilder } from "../../../Framework/Signum.React/Scripts/Search";
 import { is } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
+import MessageModal from "../../../Framework/Signum.React/Scripts/Modals/MessageModal";
 
 require("./TreeViewer.css");
 
@@ -22,6 +23,9 @@ interface TreeViewerProps {
     typeName: string;
     onDoubleClick?: (selectedNode: TreeNode, e: React.MouseEvent<any>) => void;
     onSelectedNode?: (selectedNode: TreeNode | undefined) => void;
+    onSearch?: () => void;
+    filterOptions: FilterOption[];
+    initialShowFilters?: boolean;
 }
 
 interface TreeViewerState {
@@ -44,9 +48,8 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     constructor(props: TreeViewerProps) {
         super(props);
         this.state = {
-            queryDescription: undefined,
             filterOptions: [],
-            selectedNode: undefined,
+            showFilters: props.initialShowFilters
         };
     }
 
@@ -58,34 +61,81 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     }
 
     componentWillMount() {
-        Finder.getQueryDescription(this.props.typeName)
-            .then(qd => {
-                const qs = Finder.getSettings(this.props.typeName);
-                const sfb = qs && qs.simpleFilterBuilder && qs.simpleFilterBuilder(qd, this.state.filterOptions);
-                this.setState({ queryDescription: qd, simpleFilterBuilder: sfb, showFilters: false });
-            })
-            .done();
+        this.initilize(this.props.typeName, this.props.filterOptions);
+    }
 
-        API.getRoots(this.props.typeName)
-            .then(t => this.setState({ treeNodes: t }))
+    componentWillReceiveProps(newProps: TreeViewerProps) {
+        var path = TreeClient.treePath(newProps.typeName, newProps.filterOptions);
+        if (path == TreeClient.treePath(this.props.typeName, this.props.filterOptions))
+            return;
+
+        if (this.state.filterOptions && this.state.queryDescription) {
+            if (path == TreeClient.treePath(this.props.typeName, Finder.toFilterOptions(this.state.filterOptions)))
+                return;
+        }
+
+        this.state = { filterOptions: [], showFilters: newProps.initialShowFilters };
+        this.forceUpdate();
+
+        this.initilize(newProps.typeName, newProps.filterOptions);
+    }
+
+    initilize(typeName: string, filterOptions: FilterOption[]) {
+    
+        Finder.getQueryDescription(typeName)
+            .then(qd => {
+                Finder.parseFilterOptions(filterOptions, qd).then(fop => {
+                    this.setState({ filterOptions: fop }, () => {
+                        const qs = Finder.getSettings(typeName);
+                        const sfb = qs && qs.simpleFilterBuilder && qs.simpleFilterBuilder(qd, this.state.filterOptions);
+                        this.setState({ queryDescription: qd, simpleFilterBuilder: sfb });
+                        if (sfb)
+                            this.setState({ showFilters: false });
+
+                        this.search();
+                    });
+                });
+            })
             .done();
     }
 
+    handleFullScreenClick = (ev: React.MouseEvent<any>) => {
+
+        ev.preventDefault();
+        
+        const path = this.getCurrentUrl();
+
+        if (ev.ctrlKey || ev.button == 1)
+            window.open(path);
+        else
+            Navigator.history.push(path);
+    };
+
+    getCurrentUrl() {
+        return TreeClient.treePath(this.props.typeName, Finder.toFilterOptions(this.state.filterOptions));
+    }
+
+    
+
     handleNodeIconClick = (n: TreeNode) => {
         if (n.nodeState == "Collapsed" || n.nodeState == "Filtered") {
-            API.getChildren(this.props.typeName, n.lite.id!.toString())
-                .then(t => {
-                    var oldNodes = n.loadedChildren.toObject(a => a.lite.id!.toString());
-                    n.loadedChildren = t.map(n => oldNodes[n.lite.id!.toString()] || n);
-                    n.nodeState = "Expanded";
-                    this.forceUpdate();
-                })
-                .done();
+            this.reloadNode(n);
         }
         else if (n.nodeState == "Expanded") {
             n.nodeState = "Collapsed";
             this.forceUpdate();
         }
+    }
+
+    reloadNode(n: TreeNode) {
+        API.getChildren(this.props.typeName, n.lite.id!.toString())
+            .then(t => {
+                var oldNodes = n.loadedChildren.toObject(a => a.lite.id!.toString());
+                n.loadedChildren = t.map(n => oldNodes[n.lite.id!.toString()] || n);
+                n.nodeState = "Expanded";
+                this.forceUpdate();
+            })
+            .done();
     }
 
     handleNodeTextClick = (n: TreeNode) => {
@@ -100,9 +150,42 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     }
 
     handleNavigate = () => {
-        Navigator.navigate(this.state.selectedNode!.lite)
-            .then(() => this.search())
+        const node = this.state.selectedNode!;
+        Navigator.navigate(node.lite)
+            .then(() => this.refreshSelectedAndSiblings())
             .done();
+    }
+
+    refreshSelectedAndSiblings() {
+        const node = this.state.selectedNode!;
+
+        var parent = this.findParent(node);
+
+        var promise = parent == null ? API.getRoots(this.props.typeName) : API.getChildren(parent.lite);
+
+        promise.then(newSiblings => {
+
+            const newSiblingsDic = newSiblings.toObject(a => liteKey(a.lite));
+
+            if (parent) {
+                parent.childrenCount = newSiblings.length;
+                if (parent.childrenCount == 0)
+                    parent.nodeState = "Leaf";
+            }
+
+            const currentSiblings = parent == null ? this.state.treeNodes! : parent.loadedChildren;
+            currentSiblings.extract(c => !newSiblingsDic[liteKey(c.lite)]);
+            currentSiblings.forEach(c => {
+                const n = newSiblingsDic[liteKey(c.lite)];
+                c.lite = n.lite;
+                c.childrenCount = n.childrenCount;
+            });
+
+            if (!newSiblingsDic[liteKey(node.lite)])
+                this.setState({ selectedNode: undefined });
+            else
+                this.forceUpdate();
+        }).done();
     }
 
     treeContainer: HTMLElement;
@@ -153,11 +236,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         if (!this.state.selectedNode)
             return null;
 
-        return (
-            <ContextMenu position={cm.position} onHide={this.handleContextOnHide}>
-                {...this.renderMenuItems()}
-            </ContextMenu>
-        );
+        return React.cloneElement(<ContextMenu position={cm.position} onHide={this.handleContextOnHide} />, undefined, ...this.renderMenuItems());
     }
 
     renderMenuItems(): React.ReactElement<any>[] {
@@ -188,6 +267,9 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
                 const selectedLite = this.state.selectedNode && this.state.selectedNode.lite;
                 var newSeleted = selectedLite && nodes.filter(a => is(a.lite, selectedLite)).singleOrNull();
                 this.setState({ treeNodes: nodes, selectedNode: newSeleted || undefined });
+
+                if (this.props.onSearch)
+                    this.props.onSearch();
             })
             .done();
     }
@@ -263,16 +345,24 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     handleRemove = () => {
 
         var node = this.state.selectedNode!;
-        if (!confirm(OperationMessage.PleaseConfirmYouDLikeToDelete0FromTheSystem.niceToString(node.lite.toStr)))
-            return;
+        return MessageModal.show({
+            title: OperationMessage.Confirm.niceToString(),
+            message: OperationMessage.PleaseConfirmYouDLikeToDelete0FromTheSystem.niceToString(node.lite.toStr),
+            buttons: "yes_no",
+            icon: "question"
+        }).then(result => {
 
-        Operations.API.deleteLite(node.lite, TreeOperation.Delete)
-            .then(() => {
-                var parent = this.findParent(node);
-                (parent ? parent.loadedChildren : this.state.treeNodes!).remove(node);
-                this.selectNode(parent || undefined);
-            })
-            .done();
+            if (result != "yes")
+                return;
+
+            Operations.API.deleteLite(node.lite, TreeOperation.Delete)
+                .then(() => {
+                    var parent = this.findParent(node);
+                    (parent ? parent.loadedChildren : this.state.treeNodes!).remove(node);
+                    this.selectNode(parent || undefined);
+                })
+                .done();
+        }).done();
     }
 
     simpleFilterBuilderInstance?: ISimpleFilterBuilder;
@@ -304,14 +394,25 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
                 <a className={"sf-query-button sf-filters-header btn btn-default" + (s.showFilters ? " active" : "")}
                     onClick={this.handleToggleFilters}
                     title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="glyphicon glyphicon glyphicon-filter"></span></a>
-                <button className="btn btn-primary" onClick={this.handleSearchSubmit}><i className="glyphicon glyphicon-search"></i> &nbsp; {JavascriptMessage.search.niceToString()}</button>
+                <button className="btn btn-primary" onClick={this.handleSearchSubmit}>{JavascriptMessage.search.niceToString()}</button>
                 <button className="btn btn-default" onClick={this.handleAddRoot} disabled={s.treeNodes == null}><i className="fa fa-star" aria-hidden="true"></i>&nbsp; {TreeViewerMessage.AddRoot.niceToString()}</button>
-                <DropdownButton id="selectedButton" className="sf-query-button sf-tm-selected" title={`${JavascriptMessage.Selected.niceToString()} (${selected && selected.lite.toStr || TreeViewerMessage.AddRoot.niceToString()})`}
-                    disabled={selected == undefined}>
-                    {...this.renderMenuItems()}
-                </DropdownButton>
+                {React.cloneElement(<DropdownButton id="selectedButton"
+                    className="sf-query-button sf-tm-selected"
+                    title={`${JavascriptMessage.Selected.niceToString()} (${selected && selected.lite.toStr || TreeViewerMessage.AddRoot.niceToString()})`}
+                    disabled={selected == undefined} />, undefined, ...this.renderMenuItems())}
+                <button className="btn btn-default" onClick={this.handleExplore} ><i className="glyphicon glyphicon-search"></i> &nbsp; {SearchMessage.Explore.niceToString()}</button>
             </div>
         );
+    }
+
+    handleExplore = (e: React.MouseEvent<any>) => {
+        var path = Finder.findOptionsPath({
+            queryName: this.props.typeName,
+            filterOptions: Finder.toFilterOptions(this.state.filterOptions),
+            showFilters: this.state.filterOptions.length > 0
+        });
+
+        Navigator.pushOrOpen(path, e);
     }
 
     handleToggleFilters = () => {
