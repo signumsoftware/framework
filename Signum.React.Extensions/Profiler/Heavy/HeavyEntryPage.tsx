@@ -68,8 +68,7 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
     render() {
 
         const index = this.props.match.params.selectedIndex;
-
-        document.title = "Heavy Profiler > Entry " + index;
+        Navigator.setTitle("Heavy Profiler > Entry " + index);
         if (this.state.entries == undefined)
             return <h3>Heavy Profiler > Entry {index} (loading...) </h3>;
 

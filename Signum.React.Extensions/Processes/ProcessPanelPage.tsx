@@ -1,6 +1,7 @@
 ﻿import * as React from 'react'
 import { RouteComponentProps } from 'react-router-dom'
 import * as numbro from 'numbro'
+import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import EntityLink from '../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
 import {ValueSearchControl, SearchControl } from '../../../Framework/Signum.React/Scripts/Search'
@@ -20,6 +21,12 @@ export default class ProcessPanelPage extends React.Component<ProcessPanelProps,
 
     componentWillMount() {
         this.loadState().done();
+
+        Navigator.setTitle("ProcessLogic state");
+    }
+
+    componentWillUnmount() {
+        Navigator.setTitle();
     }
 
     loadState() {
@@ -39,7 +46,6 @@ export default class ProcessPanelPage extends React.Component<ProcessPanelProps,
 
 
     render() {
-        document.title = "ProcessLogic state";
 
         if (this.state == undefined)
             return <h2>ProcesLogic state (loading...) </h2>;
