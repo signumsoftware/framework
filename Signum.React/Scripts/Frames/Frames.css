@@ -54,6 +54,10 @@ ul.dropdown-menu li a span.icon {
 }
 
 
+.sf-pointer {
+    cursor:pointer;
+}
+
 a.expand-window {
     cursor: pointer;
     color: lightgray;
