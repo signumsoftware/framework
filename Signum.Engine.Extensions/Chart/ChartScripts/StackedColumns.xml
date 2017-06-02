@@ -145,7 +145,7 @@
             .attr('opacity', data.parameters["NumberOpacity"])
             .attr('text-anchor', 'middle')
             .attr('font-weight', 'bold')
-            .text(function (v) { return v.data.values[s.key].value; })
+            .text(function (v) { return v.data.values[s.key].value.niceToString(); })
             .attr('data-click', function (v) { return getClickKeys(v.data.values[s.key].rowClick, data.columns); })
             .append('svg:title')
             .text(function(v) { return v.data.values[s.key].value; });
