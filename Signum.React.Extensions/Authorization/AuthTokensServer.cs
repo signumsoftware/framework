@@ -67,7 +67,7 @@ namespace Signum.React.Authorization
             {
                 ctx.Response = ctx.Request.CreateResponse<HttpError>(HttpStatusCode.UpgradeRequired,
                     new HttpError(new NewTokenRequiredException("Please upgrade the token to continue using the service"), includeErrorDetail: true)); //Avoid annoying exception
-                return null;
+                return new Disposable(() => { });
             }
 
             return UserHolder.UserSession(token.User);

@@ -107,10 +107,10 @@ export class PanelPart extends React.Component<PanelPartProps, PanelPartState>{
         return (
             <div className={classes("panel", "panel-" + (p.style == undefined ? "default" : p.style.firstLower()))}>
                 <div className="panel-heading">
-                    {renderer.handleTitleClick == undefined ? title : <a href="#" onClick={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>}
+                    {renderer.handleTitleClick == undefined ? title : <a className="sf-pointer" onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>}
                     &nbsp;
                     {renderer.handleFullScreenClick &&
-                        <a className="sf-ftbl-header-fullscreen" href="#" onClick={e => renderer.handleFullScreenClick!(content, lite, e)}>
+                        <a className="sf-ftbl-header-fullscreen sf-pointer" onMouseUp={e => renderer.handleFullScreenClick!(content, lite, e)}>
                             <span className="glyphicon glyphicon-new-window"></span>
                         </a>}
                 </div>
