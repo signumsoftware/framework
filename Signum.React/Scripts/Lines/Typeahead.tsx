@@ -290,7 +290,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
                         onMouseEnter={e => this.handleElementMouseEnter(e, i)}
                         onMouseLeave={e => this.handleElementMouseLeave(e, i)}
                         {...this.props.liAttrs && this.props.liAttrs(item) }>
-                        <a href="#" onClick={e => this.handleMenuClick(e, i)}>{this.props.renderItem!(item, this.state.query!)}</a>
+                        <a className="sf-pointer" onMouseUp={e => this.handleMenuClick(e, i)}>{this.props.renderItem!(item, this.state.query!)}</a>
                     </li>)
             }
         </ul>);

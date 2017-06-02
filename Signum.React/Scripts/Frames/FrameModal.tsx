@@ -282,14 +282,15 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
             return undefined;
 
         return (
-            <a href="" className="sf-popup-fullscreen" onClick={this.handlePopupFullScreen}>
+            <a className="sf-popup-fullscreen sf-pointer" onMouseUp={this.handlePopupFullScreen}>
                 <span className="glyphicon glyphicon-new-window"></span>
             </a>
         );
     }
 
-    handlePopupFullScreen = (e: React.MouseEvent<any>) => {
 
+    handlePopupFullScreen = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
         Navigator.pushOrOpen(Navigator.navigateRoute(this.state.pack!.entity as Entity), e);
     }
 
