@@ -31,9 +31,9 @@ export function setCurrentHistory(h: H.History) {
     history = h;
 }
 
-export let getTitle: (pageTitle?: string) => string;
-export function setTitle(title: (pageTitle?: string) => string) {
-    getTitle = title;
+export let setTitle: (pageTitle?: string) => void;
+export function setTitleFunction(titleFunction: (pageTitle?: string) => void) {
+    setTitle = titleFunction;
 }
 
 export function createAppRelativeHistory(): H.History {
