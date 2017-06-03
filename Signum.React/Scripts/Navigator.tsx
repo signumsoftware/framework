@@ -471,6 +471,7 @@ export interface ViewOptions {
     requiresSaveOperation?: boolean;
     avoidPromptLooseChange?: boolean;
     viewPromise?: ViewPromise<ModifiableEntity>;
+    getViewPromise?: (entity: ModifiableEntity) => ViewPromise<ModifiableEntity>;
     extraComponentProps?: {};
 }
 
@@ -499,6 +500,7 @@ export interface NavigateOptions {
     readOnly?: boolean;
     avoidPromptLooseChange?: boolean;
     viewPromise?: ViewPromise<ModifiableEntity>;
+    getViewPromise?: (entity: ModifiableEntity) => ViewPromise<ModifiableEntity>;
     extraComponentProps?: {};
 }
 

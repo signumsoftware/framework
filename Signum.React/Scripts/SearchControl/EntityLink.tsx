@@ -2,7 +2,7 @@
 import { Router, Route, Redirect } from "react-router"
 
 import { Dic } from '../Globals';
-import { Lite, Entity, liteKey } from '../Signum.Entities';
+import { Lite, Entity, liteKey, ModifiableEntity } from '../Signum.Entities';
 import * as Navigator from '../Navigator';
 import { Link  } from 'react-router-dom';
 
@@ -10,6 +10,7 @@ export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement>
     lite: Lite<Entity>;
     inSearch?: boolean;
     onNavigated?: (lite: Lite<Entity>) => void;
+    getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
 }
 
 
@@ -47,7 +48,7 @@ export default class EntityLink extends React.Component<EntityLinkProps, void>{
 
         event.preventDefault();
 
-        Navigator.navigate(lite).then(() => {
+        Navigator.navigate(lite, { getViewPromise: this.props.getViewPromise }).then(() => {
             this.props.onNavigated && this.props.onNavigated(lite);
         }).done();
     }

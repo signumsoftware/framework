@@ -7,7 +7,7 @@ import {
     ResultTable, ResultRow, FindOptionsParsed, FindOptions, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnOptionsMode, ColumnDescription,
     toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest
 } from '../FindOptions'
-import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, is, isEntity, isLite, toLite } from '../Signum.Entities'
+import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, is, isEntity, isLite, toLite, ModifiableEntity } from '../Signum.Entities'
 import { getTypeInfos, getTypeInfo, TypeReference, IsByAll, getQueryKey, TypeInfo, EntityData, QueryKey, PseudoType, isTypeModel } from '../Reflection'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
@@ -42,6 +42,8 @@ export interface SearchControlLoadedProps {
     largeToolbarButtons?: boolean;
     avoidAutoRefresh?: boolean;
     extraButtons?: (searchControl: SearchControlLoaded) => React.ReactNode
+    onCreate?: () => Promise<void>;
+    getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
 }
 
 export interface SearchControlLoadedState {
@@ -367,28 +369,34 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         if (!this.props.findOptions.create)
             return;
 
-        const isWindowsOpen = ev.button == 1 || ev.ctrlKey;
+        const onCreate = this.props.onCreate;
 
-        this.chooseType().then(tn => {
-            if (tn == undefined)
-                return;
+        if (onCreate)
+            onCreate().done();
+        else {
+            const isWindowsOpen = ev.button == 1 || ev.ctrlKey;
 
-            var s = Navigator.getSettings(tn);
+            this.chooseType().then(tn => {
+                if (tn == undefined)
+                    return;
 
-            if (isWindowsOpen || (s != null && s.avoidPopup)) {
-                window.open(Navigator.createRoute(tn));
-            } else {
-                Constructor.construct(tn).then(e => {
-                    if (e == undefined)
-                        return;
+                var s = Navigator.getSettings(tn);
 
-                    Finder.setFilters(e.entity as Entity, this.props.findOptions.filterOptions)
-                        .then(() => Navigator.navigate(e!))
-                        .then(() => this.props.avoidAutoRefresh ? undefined : this.doSearch())
-                        .done();
-                }).done();
-            }
-        }).done();
+                if (isWindowsOpen || (s != null && s.avoidPopup)) {
+                    window.open(Navigator.createRoute(tn));
+                } else {
+                    Constructor.construct(tn).then(e => {
+                        if (e == undefined)
+                            return;
+
+                        Finder.setFilters(e.entity as Entity, this.props.findOptions.filterOptions)
+                            .then(() => Navigator.navigate(e!, { viewPromise: this.props.getViewPromise && this.props.getViewPromise(e!.entity) }))
+                            .then(() => this.props.avoidAutoRefresh ? undefined : this.doSearch())
+                            .done();
+                    }).done();
+                }
+            }).done();
+        }
     }
 
     handleFullScreenClick = (ev: React.MouseEvent<any>) => {

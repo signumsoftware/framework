@@ -967,6 +967,11 @@ export const entityFormatRules: EntityFormatRule[] = [
         name: "View",
         isApplicable: row => true,
         formatter: (row, columns, sc) => !row.entity || !Navigator.isNavigable(row.entity.EntityType, undefined, true) ? undefined :
-            <EntityLink lite={row.entity} inSearch={true} onNavigated={sc && sc.handleOnNavigated}>{EntityControlMessage.View.niceToString()}</EntityLink>
+            <EntityLink lite={row.entity}
+                inSearch={true}
+                onNavigated={sc && sc.handleOnNavigated}
+                getViewPromise={sc && sc.props.getViewPromise}>
+                {EntityControlMessage.View.niceToString()}
+            </EntityLink>
     },
 ];
