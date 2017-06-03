@@ -53,7 +53,6 @@ export interface SearchControlLoadedState {
     selectedRows?: ResultRow[];
     markedRows?: MarkedRowsDictionary;
 
-    loading?: boolean;
     searchCount?: number;
     dragColumnIndex?: number,
     dropBorderIndex?: number,
@@ -150,14 +149,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             if (this.props.onSearch)
                 this.props.onSearch(fop);
 
-            this.setState({ loading: false, editingColumn: undefined });
+            this.setState({ editingColumn: undefined });
             return this.abortableSearch.getData(this.getQueryRequest()).then(rt => {
                 this.setState({
                     resultTable: rt,
                     selectedRows: [],
                     currentMenuItems: undefined,
                     markedRows: undefined,
-                    loading: false,
                     searchCount: (this.state.searchCount || 0) + 1
                 });
                 if (this.props.onResult)
@@ -346,7 +344,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     className={"sf-query-button sf-filters-header btn btn-default" + (fo.showFilters ? " active" : "")}
                     onClick={this.handleToggleFilters}
                     title={fo.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="glyphicon glyphicon glyphicon-filter"></span></a >}
-                <button className={"sf-query-button sf-search btn btn-primary" + (this.state.loading ? " disabled" : "")} onClick={this.handleSearchClick}>{SearchMessage.Search.niceToString()} </button>
+                <button className={classes("sf-query-button sf-search btn", fo.pagination.mode == "All" ? "btn-danger" : "btn-primary")} onClick={this.handleSearchClick}>{SearchMessage.Search.niceToString()} </button>
                 {fo.create && <a className="sf-query-button btn btn-default sf-search-button sf-create" title={this.createTitle()} onClick={this.handleCreate}>
                     <span className="glyphicon glyphicon-plus sf-create"></span>
                 </a>}
