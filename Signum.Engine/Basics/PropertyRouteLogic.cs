@@ -77,7 +77,7 @@ namespace Signum.Engine.Basics
         public static List<PropertyRouteEntity> RetrieveOrGenerateProperties(TypeEntity typeEntity)
         {
             var retrieve = Database.Query<PropertyRouteEntity>().Where(f => f.RootType == typeEntity).ToDictionary(a => a.Path);
-            var generate = GenerateProperties(TypeLogic.DnToType[typeEntity], typeEntity).ToDictionary(a => a.Path);
+            var generate = GenerateProperties(TypeLogic.EntityToType[typeEntity], typeEntity).ToDictionary(a => a.Path);
 
             return generate.Select(kvp => retrieve.TryGetC(kvp.Key)?.Do(pi => pi.Route = kvp.Value.Route) ?? kvp.Value).ToList();
         }
@@ -95,7 +95,7 @@ namespace Signum.Engine.Basics
 
         static PropertyRoute ToPropertyRouteImplementation(PropertyRouteEntity route)
         {
-            return PropertyRoute.Parse(TypeLogic.DnToType[route.RootType], route.Path);
+            return PropertyRoute.Parse(TypeLogic.EntityToType[route.RootType], route.Path);
         }
 
         public static PropertyRouteEntity ToPropertyRouteEntity(this PropertyRoute route)
