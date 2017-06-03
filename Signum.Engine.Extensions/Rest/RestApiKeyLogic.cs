@@ -8,11 +8,17 @@ using Signum.Entities.Rest;
 using Signum.Engine.Operations;
 using Signum.Utilities;
 using System.Security.Cryptography;
+using Signum.Entities;
+using Signum.Entities.Authorization;
 
 namespace Signum.Engine.Rest
 {
     public class RestApiKeyLogic
     {
+        public readonly static string ApiKeyQueryParameter = "apiKey";
+        public readonly static string ApiKeyHeaderParameter = "X-ApiKey";
+
+        public static ResetLazy<Dictionary<string, Lite<UserEntity>>> RestApiKeyCache;
         public static Func<string> GenerateRestApiKey = () => DefaultGenerateRestApiKey();
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -34,6 +40,11 @@ namespace Signum.Engine.Rest
                     Lite = false,
                     Execute = (e, _) => { },
                 }.Register();
+
+                RestApiKeyCache = sb.GlobalLazy(() =>
+                {
+                    return Database.Query<RestApiKeyEntity>().ToDictionary(rak => rak.ApiKey, rak => rak.User);
+                }, new InvalidateWith(typeof(RestApiKeyEntity)));
             }
         }
 

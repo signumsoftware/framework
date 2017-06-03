@@ -15,7 +15,7 @@ import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/Mess
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfo, Binding, GraphExplorer } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { Api, properties, queries, operations } from '../AuthClient'
+import { API, properties, queries, operations } from '../AuthClient'
 import {
     TypeRulePack, AuthAdminMessage, PermissionSymbol, AuthMessage, TypeAllowed, TypeAllowedRule,
     TypeAllowedAndConditions, TypeAllowedBasic, TypeConditionRuleEmbedded, AuthThumbnail, PropertyRulePack, OperationRulePack, QueryRulePack, RoleEntity
@@ -36,8 +36,8 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
     handleSaveClick = (bc: ButtonsContext) => {
         let pack = this.props.ctx.value;
 
-        Api.saveTypeRulePack(pack)
-            .then(() => Api.fetchTypeRulePack(pack.role.id!))
+        API.saveTypeRulePack(pack)
+            .then(() => API.fetchTypeRulePack(pack.role.id!))
             .then(newPack => {
                 notifySuccess();
                 bc.frame.onReload({ entity: newPack, canExecute: {} });
@@ -48,7 +48,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
     handleResetChangesClick = (bc: ButtonsContext) => {
         let pack = this.props.ctx.value;
 
-        Api.fetchTypeRulePack(pack.role.id!)
+        API.fetchTypeRulePack(pack.role.id!)
             .then(newPack => {
                 bc.frame.onReload({ entity: newPack, canExecute: {} });
             })
@@ -62,7 +62,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
             if (!r)
                 return;
 
-            Api.fetchTypeRulePack(r.id!)
+            API.fetchTypeRulePack(r.id!)
                 .then(newPack => bc.frame.onReload({ entity: newPack, canExecute: {} }))
                 .done();
         });
@@ -251,20 +251,20 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                 </td>
                 {properties && <td style={{ textAlign: "center" }}>
                     {this.link("fa fa-pencil-square-o", ctx.value.properties,
-                        () => Api.fetchPropertyRulePack(ctx.value.resource.cleanName, roleId),
+                        () => API.fetchPropertyRulePack(ctx.value.resource.cleanName, roleId),
                         m => ctx.value.properties = m.rules.every(a => a.element.allowed == "None") ? "None" :
                             m.rules.every(a => a.element.allowed == "Modify") ? "All" : "Mix"
                     )}
                 </td>}
                 {operations && <td style={{ textAlign: "center" }}>
                     {this.link("fa fa-bolt", ctx.value.operations,
-                        () => Api.fetchOperationRulePack(ctx.value.resource.cleanName, roleId),
+                        () => API.fetchOperationRulePack(ctx.value.resource.cleanName, roleId),
                         m => ctx.value.operations = m.rules.every(a => a.element.allowed == "None") ? "None" :
                             m.rules.every(a => a.element.allowed == "Allow") ? "All" : "Mix")}
                 </td>}
                 {queries && <td style={{ textAlign: "center" }}>
                     {this.link("fa fa-search", ctx.value.queries,
-                        () => Api.fetchQueryRulePack(ctx.value.resource.cleanName, roleId),
+                        () => API.fetchQueryRulePack(ctx.value.resource.cleanName, roleId),
                         m => ctx.value.queries = m.rules.every(a => a.element.allowed == false) ? "None" :
                             m.rules.every(a => a.element.allowed == true) ? "All" : "Mix")}
                 </td>}

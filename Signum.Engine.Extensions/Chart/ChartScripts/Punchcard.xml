@@ -85,13 +85,13 @@
   }, height);
   //yRule.debugY(chart);
   
-  var x = d3.scale.ordinal()
+  var x = d3.scaleBand()
       .domain(dim0)
-      .rangeBands([0, xRule.size('content')]);
+      .range([0, xRule.size('content')]);
   
-  var y = d3.scale.ordinal()
+  var y = d3.scaleBand()
       .domain(dim1)
-      .rangeBands([0, yRule.size('content')]);
+      .range([0, yRule.size('content')]);
   
  
   var color = null;
@@ -120,30 +120,30 @@
   	innerSize = scaleFor(data.columns.c5, data.rows.map(function(r){return r.c5;}), 0, 100, data.parameters["OpacityScale"]);
   }
   
-  chart.append('svg:g').attr('class', 'x-line').attr('transform',  translate(xRule.start('content') + x.rangeBand() / (shape == "ProgressBar" ? 1 : 2), yRule.start('content')))
+  chart.append('svg:g').attr('class', 'x-line').attr('transform',  translate(xRule.start('content') + x.bandwidth() / (shape == "ProgressBar" ? 1 : 2), yRule.start('content')))
     .enterData(dim0, 'line', 'y-line')
      .attr('y2',  yRule.size('content'))
       .attr('x1', function (d) { return x(d); })
       .attr('x2', function (d) { return x(d); })
     .style('stroke', data.parameters["VerticalLineColor"]);
   
-  chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(xRule.start('content') + x.rangeBand() / (shape == "ProgressBar" ? 1 : 2), yRule.start('ticks')))
+  chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(xRule.start('content') + x.bandwidth() / (shape == "ProgressBar" ? 1 : 2), yRule.start('ticks')))
     .enterData(dim0, 'line', 'x-tick')
       .attr('y2',  yRule.size('ticks'))
       .attr('x1', function (d) { return x(d); })
       .attr('x2', function (d) { return x(d); })
       .style('stroke', 'Black');
   
-  if ((x.rangeBand() * 2) > 60)     
+  if ((x.bandwidth() * 2) > 60)     
   {
-    chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content')+ (x.rangeBand() / 2), yRule.middle('labels0')))
+    chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content')+ (x.bandwidth() / 2), yRule.middle('labels0')))
       .enterData(dim0, 'text', 'x-label')
         .attr('x', function (d) { return x(d); })
         .attr('y', function (d, i) { return yRule.middle('labels' + (i % 2)) - yRule.middle('labels0'); })
         .attr('dominant-baseline', 'middle')
         .attr('text-anchor', 'middle')
         .text(function (d) { return d.niceToString(); })
-        .each(function (v) { ellipsis(this, x.rangeBand() * 1.7); });
+        .each(function (v) { ellipsis(this, x.bandwidth() * 1.7); });
   }
   
   chart.append('svg:g').attr('class', 'x-title').attr('transform', translate(xRule.middle('content'), yRule.middle('title')))
@@ -154,23 +154,23 @@
   
 
   
-  chart.append('svg:g').attr('class', 'y-line').attr('transform', translate(xRule.start('content'), yRule.end('content') - y.rangeBand() / (shape == "ProgressBar" ? 1 : 2)))
+  chart.append('svg:g').attr('class', 'y-line').attr('transform', translate(xRule.start('content'), yRule.end('content') - y.bandwidth() / (shape == "ProgressBar" ? 1 : 2)))
     .enterData(dim1, 'line', 'y-line')
     .attr('x2', xRule.size('content'))
     .attr('y1', function (t) { return -y(t); })
     .attr('y2', function (t) { return -y(t); })
     .style('stroke', data.parameters["HorizontalLineColor"]);
   
-  chart.append('svg:g').attr('class', 'y-tick').attr('transform', translate(xRule.start('ticks'), yRule.end('content') - y.rangeBand() / 2))
+  chart.append('svg:g').attr('class', 'y-tick').attr('transform', translate(xRule.start('ticks'), yRule.end('content') - y.bandwidth() / 2))
     .enterData(dim1, 'line', 'y-tick')
     .attr('x2', xRule.size('ticks'))
     .attr('y1', function (t) { return -y(t); })
     .attr('y2', function (t) { return -y(t); })
     .style('stroke', 'Black');
   
-   if (y.rangeBand() > 16)     
+   if (y.bandwidth() > 16)     
    {
-      chart.append('svg:g').attr('class', 'y-label').attr('transform',  translate(xRule.end('labels'), yRule.end('content') - y.rangeBand() / 2))
+      chart.append('svg:g').attr('class', 'y-label').attr('transform',  translate(xRule.end('labels'), yRule.end('content') - y.bandwidth() / 2))
         .enterData(dim1, 'text', 'y-label')
         .attr('y', function (t) { return -y(t); })
         .attr('dominant-baseline', 'middle')
@@ -192,7 +192,7 @@
   function configureShape(column, rowValue, domain, extra)
   {
   
-    var shapes = groups.append(shape == "Circle" ? 'circle': 'rect', 'punch').attr('transform', translate(xRule.start('content') + x.rangeBand() / 2, yRule.end('content') - y.rangeBand() / 2))
+    var shapes = groups.append(shape == "Circle" ? 'circle': 'rect', 'punch').attr('transform', translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content') - y.bandwidth() / 2))
         .filter(function(r) {return r != undefined;})      
         .attr('fill-opacity', function(r) {return data.parameters["FillOpacity"]* (opacity != null ? opacity(r.c4) : 1);})
         .attr("shape-rendering","initial");
@@ -200,7 +200,7 @@
 
     if(shape == "Circle")
     {
-       var circleSize = Math.min(x.rangeBand(), y.rangeBand()) * 0.45; 
+       var circleSize = Math.min(x.bandwidth(), y.bandwidth()) * 0.45; 
        var area = column.token == null? function(){return circleSize * circleSize;} : scaleFor(column, domain, 0, circleSize * circleSize, data.parameters["SizeScale"]);
        extra.numberOpacity = function(r) { return area(r) / 500; };
 
@@ -210,8 +210,8 @@
 
     } else if(shape == "Rectangle") {
 
-       var area = column.token == null? function(){return x.rangeBand() * y.rangeBand();} : scaleFor(column, domain, 0, x.rangeBand() * y.rangeBand(), data.parameters["SizeScale"]); 
-       var ratio = x.rangeBand() / y.rangeBand();
+       var area = column.token == null? function(){return x.bandwidth() * y.bandwidth();} : scaleFor(column, domain, 0, x.bandwidth() * y.bandwidth(), data.parameters["SizeScale"]); 
+       var ratio = x.bandwidth() / y.bandwidth();
        var recWidth = function(r) { return  Math.sqrt(area(rowValue(r)) * ratio); };
        var recHeight = function(r) { return Math.sqrt(area(rowValue(r)) / ratio); };
        extra.numberOpacity = function(r) { return area(r) / 500; };
@@ -223,13 +223,13 @@
 
     } else if(shape == "ProgressBar") {
 
-       var recWidth = column.token == null? function(){return x.rangeBand();} : scaleFor(column, domain, 0, x.rangeBand(), data.parameters["SizeScale"]); 
+       var recWidth = column.token == null? function(){return x.bandwidth();} : scaleFor(column, domain, 0, x.bandwidth(), data.parameters["SizeScale"]); 
        extra.numberOpacity = function(r) { return 1; };
 
-      shapes.attr('x', function(r, i) { return x(r.c0) - x.rangeBand() / 2; })
-        .attr('y', function(r) { return -y(r.c1) - y.rangeBand() / 2; })
+      shapes.attr('x', function(r, i) { return x(r.c0) - x.bandwidth() / 2; })
+        .attr('y', function(r) { return -y(r.c1) - y.bandwidth() / 2; })
         .attr('width', function(r) { return recWidth(rowValue(r));})
-        .attr('height', y.rangeBand());    
+        .attr('height', y.bandwidth());    
     }
     
     return shapes;
@@ -262,7 +262,7 @@
   
   if(data.parameters["NumberOpacity"] > 0)
   { 
-      groups.append('text').attr('class', 'punch').attr('transform', translate(xRule.start('content') + x.rangeBand() / 2, yRule.end('content') - y.rangeBand() / 2))
+      groups.append('text').attr('class', 'punch').attr('transform', translate(xRule.start('content') + x.bandwidth() / 2, yRule.end('content') - y.bandwidth() / 2))
       .attr('x', function(r, i) { return x(r.c0); })
       .attr('y', function(r) { return -y(r.c1) })
       .attr('fill', data.parameters["NumberColor"])

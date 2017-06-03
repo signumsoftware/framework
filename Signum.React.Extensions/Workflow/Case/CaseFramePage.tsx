@@ -55,12 +55,12 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     }
 
     componentWillUnmount() {
-        document.title = Navigator.getTitle();
+        Navigator.setTitle();
     }
 
     load(props: CaseFramePageProps) {
         this.loadEntity(props)
-            .then(() => document.title = Navigator.getTitle(this.state.pack!.activity.case.toStr))
+            .then(() => Navigator.setTitle(this.state.pack!.activity.case.toStr))
             .then(() => this.loadComponent())
             .done();
     }

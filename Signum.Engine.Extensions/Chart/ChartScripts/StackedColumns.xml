@@ -145,7 +145,7 @@
             .attr('opacity', data.parameters["NumberOpacity"])
             .attr('text-anchor', 'middle')
             .attr('font-weight', 'bold')
-            .text(function (v) { return v.data.values[s.key].value; })
+            .text(function (v) { return v.data.values[s.key].value.niceToString(); })
             .attr('data-click', function (v) { return getClickKeys(v.data.values[s.key].rowClick, data.columns); })
             .append('svg:title')
             .text(function(v) { return v.data.values[s.key].value; });
@@ -170,22 +170,26 @@
     }
     else if(data.parameters["Labels"] == "Inside")
     {
+       function maxValue(rowIndex){
+          return stackedSeries[stackedSeries.length - 1][rowIndex][1];
+       }
+      
       var labelMargin = 10;
       var size = yRule.size('content');
-
+      console.log(stackedSeries);
+      console.log(pivot.rows);
+      
       chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content'), yRule.end('content')))
-        .enterData(maxDim0, 'text', 'x-label')
-        .attr('transform', function (r){ return translate( x(r.dim0) + x.rangeBand()/2, -(y(r.max)) ) +  rotate(-90);})
+        .enterData(pivot.rows, 'text', 'x-label')
+        .attr('transform', function (r, i){ return translate( x(r.rowValue) + x.bandwidth()/2, y(maxValue(i)) >= size/2 ? 0: -y(maxValue(i))) +  rotate(-90);})
         .attr('dominant-baseline', 'middle')
         .attr('font-weight', 'bold')
-        .attr('fill', function (r) { return y(r.max) >= size/2 ? '#fff' : '#000'; })
-        .attr('dx', function (r) { return y(r.max) >= size/2 ? -labelMargin : labelMargin; })
+        .attr('fill', function (r,i) { return y(maxValue(i)) >= size/2 ? '#fff' : '#000'; })
+        .attr('dx', function (r,i) { return labelMargin; })
         .attr('text-anchor',  function (r) { return y(r.max) >= size/2 ? 'end': 'start';})
-        .text(function (r) { return r.dim0.niceToString(); })
+        .text(function (r) { return r.rowValue.niceToString(); })
         .each(function (r) { var posy = y(r.max); ellipsis(this, posy >= size/2 ? posy : size - posy, labelMargin); });
-    }
-    
-         
+    }    
   }
   
   var legendScale = d3.scaleBand()

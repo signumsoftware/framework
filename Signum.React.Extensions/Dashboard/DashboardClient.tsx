@@ -71,6 +71,7 @@ export function start(options: { routes: JSX.Element[] }) {
         },
         handleFullScreenClick: (p, e, ev) => {
             ev.preventDefault();
+            ev.persist();
             UserChartClient.Converter.toChartRequest(p.userChart!, e)
                 .then(cr => Navigator.pushOrOpen(ChartClient.Encoder.chartRequestPath(cr, { userChart: liteKey(toLite(p.userChart!)) }), ev))
                 .done();
@@ -86,6 +87,7 @@ export function start(options: { routes: JSX.Element[] }) {
         },
         handleFullScreenClick: (p, e, ev) => {
             ev.preventDefault();
+            ev.persist();
             UserQueryClient.Converter.toFindOptions(p.userQuery!, e)
                 .then(cr => Navigator.pushOrOpen(Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(p.userQuery!)) }), ev))
                 .done()

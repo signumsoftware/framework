@@ -229,6 +229,7 @@ namespace Signum.Entities.Mailing
         public static ExecuteSymbol<EmailTemplateEntity> Save;
         public static ExecuteSymbol<EmailTemplateEntity> Enable;
         public static ExecuteSymbol<EmailTemplateEntity> Disable;
+        public static DeleteSymbol<EmailTemplateEntity> Delete;
     }
 
     public enum EmailTemplateMessage

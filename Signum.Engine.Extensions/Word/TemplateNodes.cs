@@ -1,6 +1,7 @@
 ﻿using DocumentFormat.OpenXml;
 using W = DocumentFormat.OpenXml.Wordprocessing;
 using D = DocumentFormat.OpenXml.Drawing;
+using S = DocumentFormat.OpenXml.Spreadsheet;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Templating;
 using Signum.Entities.DynamicQuery;
@@ -27,6 +28,7 @@ namespace Signum.Engine.Word
         OpenXmlCompositeElement GetRunProperties(OpenXmlCompositeElement run);
         bool IsParagraph(OpenXmlElement element);
         bool IsRunProperties(OpenXmlElement a);
+        OpenXmlCompositeElement WrapInRun(OpenXmlElement text);
     }
 
     public class WordprocessingNodeProvider : INodeProvider
@@ -75,6 +77,11 @@ namespace Signum.Engine.Word
         {
             return element is W.RunProperties;
         }
+
+        public OpenXmlCompositeElement WrapInRun(OpenXmlElement text)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class DrawingNodeProvider : INodeProvider
@@ -122,6 +129,66 @@ namespace Signum.Engine.Word
         public bool IsRunProperties(OpenXmlElement element)
         {
             return element is D.RunProperties;
+        }
+
+        public OpenXmlCompositeElement WrapInRun(OpenXmlElement text)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class SpreadsheetNodeProvider : INodeProvider
+    {
+        public OpenXmlCompositeElement CastRun(OpenXmlElement element)
+        {
+            return (S.Run)element;
+        }
+
+        public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement runProps, string text, SpaceProcessingModeValues spaceMode)
+        {
+            return new S.Run(runProps, new S.Text(text));
+        }
+
+        public OpenXmlLeafTextElement NewText(string text)
+        {
+            return new S.Text(text);
+        }
+
+        public string GetText(OpenXmlElement run)
+        {
+            return run is S.Run r ? r.ChildElements.OfType<S.Text>().SingleOrDefault()?.Text :
+                run is S.Text s ? s.Text :
+                "";
+        }
+
+        public bool IsRun(OpenXmlElement a)
+        {
+            return a is S.Run;
+        }
+
+        public bool IsText(OpenXmlElement a)
+        {
+            return a is S.Text;
+        }
+
+        public OpenXmlCompositeElement GetRunProperties(OpenXmlCompositeElement run)
+        {
+            return ((S.Run)run).RunProperties;
+        }
+
+        public bool IsParagraph(OpenXmlElement element)
+        {
+            return false;
+        }
+
+        public bool IsRunProperties(OpenXmlElement element)
+        {
+            return element is S.RunProperties;
+        }
+
+        public OpenXmlCompositeElement WrapInRun(OpenXmlElement text)
+        {
+            return new S.Run(text);
         }
     }
 

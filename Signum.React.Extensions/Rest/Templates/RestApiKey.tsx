@@ -25,8 +25,7 @@ export default class RestApiKeyComponent extends React.Component<{ ctx: TypeCont
     }
 
     generateApiKey = () => {
-        API.RestApiKey
-            .generate()
+        API.generateRestApiKey()
             .then(key => this.apiKey.setValue(key))
             .done();
     }

@@ -407,13 +407,11 @@ export module API {
         return clone;
     }
 
-    export function executeChart(request: ChartRequest): Promise<ExecuteChartResult> {
+    export function executeChart(request: ChartRequest, abortController?: FetchAbortController): Promise<ExecuteChartResult> {
 
         const clone = cleanedChartRequest(request);
 
-        return ajaxPost<ExecuteChartResult>({
-            url: "~/api/chart/execute"
-        }, clone);
+        return ajaxPost<ExecuteChartResult>({ url: "~/api/chart/execute", abortController }, clone);
 
     }
     export interface ExecuteChartResult {
