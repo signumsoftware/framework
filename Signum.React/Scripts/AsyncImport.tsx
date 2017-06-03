@@ -28,6 +28,12 @@ export class ImportComponent extends React.Component<ImportComponentProps, Impor
         this.importModule(this.props);
     }
 
+    _isMounted = true;
+
+    componentWillUnmount() {
+        this._isMounted = false;
+    }
+
     componentWillReceiveProps(newprops: ImportComponentProps) {
         if (newprops.onImportModule != this.props.onImportModule &&
             newprops.onImportModule.toString() != this.props.onImportModule.toString()) {
@@ -38,7 +44,7 @@ export class ImportComponent extends React.Component<ImportComponentProps, Impor
     
     importModule(props: ImportComponentProps) {
         this.props.onImportModule()
-            .then(mod => this.setState({ module: mod }))
+            .then(mod => this._isMounted && this.setState({ module: mod }))
             .done();
     }
 
