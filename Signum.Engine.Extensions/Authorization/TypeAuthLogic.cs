@@ -188,7 +188,7 @@ namespace Signum.Engine.Authorization
             if (ta == null || ta.IsEmpty)
                 return null;
             
-            var pair = ta.FirstOrDefault(a => a.Item1 == type);
+            var pair = ta.FirstOrDefault(a => a.type == type);
 
             if (pair.type == null)
                 return null;
