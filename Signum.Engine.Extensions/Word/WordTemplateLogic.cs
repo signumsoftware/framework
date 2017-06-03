@@ -28,6 +28,7 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.UserQueries;
 using System.Data;
 using Signum.Entities.Chart;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine.Word
 {
@@ -44,7 +45,7 @@ namespace Signum.Engine.Word
 
         public static ResetLazy<Dictionary<Lite<WordTemplateEntity>, WordTemplateEntity>> WordTemplatesLazy;
 
-        public static ResetLazy<Dictionary<TypeEntity, List<Lite<WordTemplateEntity>>>> TemplatesByType;
+        public static ResetLazy<Dictionary<TypeEntity, List<WordTemplateEntity>>> TemplatesByType;
 
         public static Dictionary<WordTransformerSymbol, Action<WordContext, OpenXmlPackage>> Transformers = new Dictionary<WordTransformerSymbol, Action<WordContext, OpenXmlPackage>>();
         public static Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>> Converters = new Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>>();
@@ -118,14 +119,15 @@ namespace Signum.Engine.Word
 
                 TemplatesByType = sb.GlobalLazy(() =>
                 {
-                    var list = Database.Query<WordTemplateEntity>().Select(r => KVP.Create(r.Query, r.ToLite())).ToList();
+                    var list = WordTemplatesLazy.Value.Values.Select(wt => KVP.Create(wt.Query, wt)).ToList();
 
                     return (from kvp in list
                             let imp = dqm.GetEntityImplementations(kvp.Key.ToQueryName())
                             where !imp.IsByAll
                             from t in imp.Types
                             group kvp.Value by t into g
-                            select KVP.Create(g.Key.ToTypeEntity(), g.ToList())).ToDictionary();
+                            select KVP.Create(g.Key.ToTypeEntity(), g.ToList())
+                            ).ToDictionary();
 
                 }, new InvalidateWith(typeof(WordTemplateEntity)));
 
@@ -136,6 +138,21 @@ namespace Signum.Engine.Word
 
                 Validator.PropertyValidator((WordTemplateEntity e) => e.Template).StaticPropertyValidation += ValidateTemplate;
             }
+        }
+
+        public static bool CanContextual(WordTemplateEntity wt, bool multiple)
+        {
+            if (wt.SystemWordTemplate == null)
+                return true;
+
+            if (SystemWordTemplateLogic.HasDefaultTemplateConstructor(wt.SystemWordTemplate))
+                return false;
+
+            var entityType = SystemWordTemplateLogic.GetEntityType(wt.SystemWordTemplate.ToType());
+
+            return entityType.IsEntity() ? true :
+                entityType == typeof(MultiEntityModel) ? multiple: 
+                false;
         }
 
         public static void RegisterTransformer(WordTransformerSymbol transformerSymbol, Action<WordContext, OpenXmlPackage> transformer)

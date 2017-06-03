@@ -26,6 +26,8 @@ using Signum.Engine.Word;
 using System.Web;
 using Signum.React.Files;
 using System.IO;
+using Signum.Entities.Basics;
+using Signum.Engine.Maps;
 
 namespace Signum.React.Word
 {
@@ -35,7 +37,7 @@ namespace Signum.React.Word
         public HttpResponseMessage View(CreateWordReportRequest request)
         {
             var template = request.template.Retrieve();
-            var entity = request.entity;
+            var entity = request.entity ?? request.lite.Retrieve();
 
             byte[] bytes;
             if (template.SystemWordTemplate != null)
@@ -45,7 +47,7 @@ namespace Signum.React.Word
             }
             else
             {
-                bytes = request.template.CreateReport((Entity)request.entity);
+                bytes = request.template.CreateReport((Entity)entity);
             }
             
             return FilesController.GetHttpReponseMessage(new MemoryStream(bytes), template.FileName);            
@@ -54,6 +56,7 @@ namespace Signum.React.Word
         public class CreateWordReportRequest
         {
             public Lite<WordTemplateEntity> template { get; set; }
+            public Lite<Entity> lite { get; set; }
             public ModifiableEntity entity { get; set; }
         }
 
@@ -64,6 +67,18 @@ namespace Signum.React.Word
 
             return ReflectionServer.GetTypeName(type);
 
+        }
+
+        [Route("api/word/wordTemplates"), HttpGet]
+        public List<Lite<WordTemplateEntity>> GetWordTemplates(string typeName, bool isMultiple)
+        {
+            TypeEntity type = TypeLogic.TypeToEntity.GetOrThrow(TypeLogic.GetType(typeName));
+
+            var isAllowed = Schema.Current.GetInMemoryFilter<WordTemplateEntity>(userInterface: true);
+            return WordTemplateLogic.TemplatesByType.Value.TryGetC(type).EmptyIfNull()
+                .Where(a => isAllowed(a) && WordTemplateLogic.CanContextual(a, isMultiple))
+                .Select(a => a.ToLite())
+                .ToList();
         }
     }
 }
