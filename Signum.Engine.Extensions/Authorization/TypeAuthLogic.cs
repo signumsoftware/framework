@@ -112,8 +112,8 @@ namespace Signum.Engine.Authorization
         public static TypeRulePack GetTypeRules(Lite<RoleEntity> roleLite)
         {
             var result = new TypeRulePack { Role = roleLite };
-
-            cache.GetRules(result, TypeLogic.TypeToEntity.Where(t => !t.Key.IsEnumEntity()).Select(a => a.Value));
+            Schema s = Schema.Current;
+            cache.GetRules(result, TypeLogic.TypeToEntity.Where(t => !t.Key.IsEnumEntity() && s.IsAllowed(t.Key, false) == null).Select(a => a.Value));
 
             foreach (TypeAllowedRule r in result.Rules)
             {
