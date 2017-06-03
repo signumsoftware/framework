@@ -24,7 +24,7 @@ p.form-control {
         height: initial !important;
     }
 
-     p.form-control.readonly {
+    p.form-control.readonly {
         overflow: hidden;
     }
 
@@ -78,7 +78,7 @@ label > input[type=checkbox] {
 
     .sf-line-button:not(.btn) {
         vertical-align: middle;
-         margin: 0 2px;
+        margin: 0 2px;
     }
 
 /* EntityLine buttons  */
@@ -128,20 +128,20 @@ fieldset {
 
 /*EntityRepeater*/
 
-fieldset.sf-repeater-element{
+fieldset.sf-repeater-element {
     margin: 0;
     padding-top: 6px;
     padding-bottom: 3px;
 }
 
-fieldset.sf-repeater-element legend {
-    position: relative;
-    padding: 0px 4px;
-}
-
-    fieldset.sf-repeater-element legend .sf-line-button {
-        margin-right: 5px;
+    fieldset.sf-repeater-element legend {
+        position: relative;
+        padding: 0px 4px;
     }
+
+        fieldset.sf-repeater-element legend .sf-line-button {
+            margin-right: 5px;
+        }
 
 
 /*EntityStrip*/
@@ -179,7 +179,7 @@ ul.sf-strip-vertical > li {
     vertical-align: middle;
 }
 
-.sf-strip-element .sf-line-button {   
+.sf-strip-element .sf-line-button {
     margin-left: 2px;
 }
 
@@ -235,12 +235,9 @@ ul.nav-tabs {
         margin-bottom: 0px;
     }
 
-.rw-btn-time rw-btn {
-    border-left:#ccc 1px solid
-}
-
-.rw-btn {
-    border: 0px;
+/*https://github.com/jquense/react-widgets/blob/v4/packages/react-widgets/src/less/dropdown-list.less Disable temporal hack*/
+.rw-dropdown-list-input {
+    max-width: initial !important;
 }
 
 /*form xs*/
@@ -251,10 +248,10 @@ ul.nav-tabs {
 }
 
 
-.form-xs .form-control:not(textarea) {
-    height: 20px;
-    min-height: inherit;
-}
+    .form-xs .form-control:not(textarea) {
+        height: 20px;
+        min-height: inherit;
+    }
 
 .form-xs .input-group-btn .btn {
     height: 20px;
@@ -269,7 +266,7 @@ ul.nav-tabs {
     height: 20px;
 }
 
-.form-xs select[multiple], 
+.form-xs select[multiple],
 .form-xs select[size] {
     height: auto;
 }
@@ -291,35 +288,35 @@ ul.nav-tabs {
     height: 18px;
 }
 
-.form-xs .rw-select.rw-btn, 
-.form-xs .rw-select>.rw-btn  {
+/*
+.form-xs .rw-select.rw-btn,
+.form-xs .rw-select > .rw-btn {
     line-height: 18px;
     width: 1.5em;
-    border-top:0px;
+    border-top: 0px;
 }
 
-.form-xs .rw-dropdownlist>.rw-input {
+.form-xs .rw-dropdown-list > .rw-widget-input {
+    height: 18px;
+}
+
+.form-xs .rw-combobox,
+.form-xs .rw-numberpicker,
+.form-xs .rw-dropdown-list {
+    padding-right: 1.5em;
     line-height: 18px;
 }
+    */
 
-.form-xs .rw-combobox, 
-.form-xs .rw-numberpicker, 
-.form-xs .rw-dropdownlist{
-    padding-right:1.5em;
-    line-height: 18px;
+
+
+.form-xs .rw-widget-picker {
+    height: 20px;
+    line-height: 10px;
 }
 
-.form-xs .rw-datetimepicker {
-    padding-right:1.9em;
-    line-height: 18px;
-}
-
-.form-xs .rw-datetimepicker.rw-has-both>.rw-select {
-    width: 3.2em;
-}
-
-.form-xs .rw-datetimepicker.rw-has-both {
-    padding-right: 3.2em;
+.form-xs .rw-select {
+    vertical-align: top;
 }
 
 .form-xs .sf-strip {
@@ -360,10 +357,10 @@ ul.nav-tabs {
     padding: 3px 6px;
 }
 
-.form-sm .form-control:not(textarea) {
-    height: 26px;
-    min-height: inherit;
-}
+    .form-sm .form-control:not(textarea) {
+        height: 26px;
+        min-height: inherit;
+    }
 
 .form-sm .input-group-btn .btn {
     height: 26px;
@@ -377,7 +374,7 @@ ul.nav-tabs {
     height: 26px;
 }
 
-.form-sm select[multiple], 
+.form-sm select[multiple],
 .form-sm select[size] {
     height: auto;
 }
@@ -398,37 +395,28 @@ ul.nav-tabs {
     padding: 3px 6px;
     height: 24px;
 }
-
-.form-sm .rw-select.rw-btn, 
-.form-sm .rw-select>.rw-btn  {
+/*
+.form-sm .rw-select.rw-btn,
+.form-sm .rw-select > .rw-btn {
     line-height: 24px;
     width: 1.5em;
-    border-top:0px;
+    border-top: 0px;
 }
 
-.form-sm .rw-dropdownlist>.rw-input {
+.form-sm .rw-dropdown-list > .rw-widget-input {
     line-height: 24px;
 }
 
 
-.form-sm .rw-combobox, 
-.form-sm .rw-numberpicker, 
-.form-sm .rw-dropdownlist{
-    padding-right:1.5em;
-    line-height: 24px;
+.form-sm .rw-combobox,
+.form-sm .rw-numberpicker,
+.form-sm .rw-dropdown-list {
+    padding-right: 1.5em;
+    line-height: 24px;bn   
 }
-
-.form-sm .rw-datetimepicker{
-    padding-right:1.9em;
-    line-height: 24px;
-}
-
-.form-sm .rw-datetimepicker.rw-has-both>.rw-select {
-    width: 3.2em;
-}
-
-.form-sm .rw-datetimepicker.rw-has-both {
-    padding-right: 3.2em;
+*/
+.form-sm .rw-widget-picker {
+    height: 24px;
 }
 
 .form-sm .sf-strip {
@@ -468,7 +456,7 @@ ul.nav-tabs {
 }
 
 .form-inline .sf-query-token-builder {
-   vertical-align:middle;
+    vertical-align: middle;
 }
 
 /*form-vertical*/
