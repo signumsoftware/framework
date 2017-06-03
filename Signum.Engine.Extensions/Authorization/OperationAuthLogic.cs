@@ -74,7 +74,7 @@ namespace Signum.Engine.Authorization
 
         public static OperationRulePack GetOperationRules(Lite<RoleEntity> role, TypeEntity typeEntity)
         {
-            var resources = OperationLogic.GetAllOperationInfos(TypeLogic.DnToType[typeEntity]).Select(a => a.OperationSymbol);
+            var resources = OperationLogic.GetAllOperationInfos(TypeLogic.EntityToType[typeEntity]).Select(a => a.OperationSymbol);
             var result = new OperationRulePack { Role = role, Type = typeEntity, };
 
             cache.GetRules(result, resources);
@@ -87,7 +87,7 @@ namespace Signum.Engine.Authorization
 
         public static void SetOperationRules(OperationRulePack rules)
         {
-            var keys = OperationLogic.GetAllOperationInfos(TypeLogic.DnToType[rules.Type])
+            var keys = OperationLogic.GetAllOperationInfos(TypeLogic.EntityToType[rules.Type])
                 .Select(a => a.OperationSymbol).ToHashSet();
 
             cache.SetRules(rules, r => keys.Contains(r));

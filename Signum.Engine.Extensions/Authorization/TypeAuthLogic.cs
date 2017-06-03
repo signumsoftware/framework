@@ -117,7 +117,7 @@ namespace Signum.Engine.Authorization
 
             foreach (TypeAllowedRule r in result.Rules)
             {
-                Type type = TypeLogic.DnToType[r.Resource];
+                Type type = TypeLogic.EntityToType[r.Resource];
 
                 if (OperationAuthLogic.IsStarted)
                     r.Operations = OperationAuthLogic.GetAllowedThumbnail(roleLite, type);
