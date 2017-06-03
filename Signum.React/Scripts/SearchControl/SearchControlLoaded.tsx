@@ -374,29 +374,29 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         if (onCreate)
             onCreate().done();
         else {
-            const isWindowsOpen = ev.button == 1 || ev.ctrlKey;
+        const isWindowsOpen = ev.button == 1 || ev.ctrlKey;
 
-            this.chooseType().then(tn => {
-                if (tn == undefined)
-                    return;
+        this.chooseType().then(tn => {
+            if (tn == undefined)
+                return;
 
-                var s = Navigator.getSettings(tn);
+            var s = Navigator.getSettings(tn);
 
-                if (isWindowsOpen || (s != null && s.avoidPopup)) {
-                    window.open(Navigator.createRoute(tn));
-                } else {
-                    Constructor.construct(tn).then(e => {
-                        if (e == undefined)
-                            return;
+            if (isWindowsOpen || (s != null && s.avoidPopup)) {
+                window.open(Navigator.createRoute(tn));
+            } else {
+                Constructor.construct(tn).then(e => {
+                    if (e == undefined)
+                        return;
 
-                        Finder.setFilters(e.entity as Entity, this.props.findOptions.filterOptions)
-                            .then(() => Navigator.navigate(e!, { viewPromise: this.props.getViewPromise && this.props.getViewPromise(e!.entity) }))
-                            .then(() => this.props.avoidAutoRefresh ? undefined : this.doSearch())
-                            .done();
-                    }).done();
-                }
-            }).done();
-        }
+                    Finder.setFilters(e.entity as Entity, this.props.findOptions.filterOptions)
+                        .then(() => Navigator.navigate(e!, { getViewPromise: this.props.getViewPromise }))
+                        .then(() => this.props.avoidAutoRefresh ? undefined : this.doSearch())
+                        .done();
+                }).done();
+            }
+        }).done();
+    }
     }
 
     handleFullScreenClick = (ev: React.MouseEvent<any>) => {
