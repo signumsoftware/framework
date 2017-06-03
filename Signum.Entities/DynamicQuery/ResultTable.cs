@@ -264,7 +264,7 @@ namespace Signum.Entities.DynamicQuery
 
         public DataTable ToDataTable(DataTableValueConverter converter = null)
         {
-            if (converter != null)
+            if (converter == null)
                 converter = new InvariantDataTableValueConverter();
 
             DataTable dt = new DataTable("Table");

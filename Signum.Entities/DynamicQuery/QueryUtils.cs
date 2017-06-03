@@ -323,11 +323,7 @@ namespace Signum.Entities.DynamicQuery
             foreach (var part in parts.Skip(1))
             {
                 var newResult = SubToken(result, qd, options, part);
-
-                if (newResult == null)
-                    throw new FormatException("Token with key '{0}' not found on {1} of query {2}".FormatWith(part, result.FullKey(), QueryUtils.GetKey(qd.QueryName)));
-
-                result = newResult;
+                result = newResult ?? throw new FormatException("Token with key '{0}' not found on {1} of query {2}".FormatWith(part, result.FullKey(), QueryUtils.GetKey(qd.QueryName)));
             }
 
             return result;

@@ -33,9 +33,9 @@ namespace Signum.Engine.Basics
             get { return Schema.Current.typeCachesLazy.Value.TypeToEntity; }
         }
 
-        public static Dictionary<TypeEntity, Type> DnToType
+        public static Dictionary<TypeEntity, Type> EntityToType
         {
-            get { return Schema.Current.typeCachesLazy.Value.DnToType; }
+            get { return Schema.Current.typeCachesLazy.Value.EntityToType; }
         }
 
         public static void AssertStarted(SchemaBuilder sb)
@@ -81,7 +81,7 @@ namespace Signum.Engine.Basics
                 
                 TypeEntity.SetTypeDNCallbacks(
                     t => TypeToEntity.GetOrThrow(t),
-                    t => DnToType.GetOrThrow(t));
+                    t => EntityToType.GetOrThrow(t));
             }
         }
 
@@ -202,7 +202,7 @@ namespace Signum.Engine.Basics
     internal class TypeCaches
     {
         public readonly Dictionary<Type, TypeEntity> TypeToEntity;
-        public readonly Dictionary<TypeEntity, Type> DnToType;
+        public readonly Dictionary<TypeEntity, Type> EntityToType;
         public readonly Dictionary<PrimaryKey, Type> IdToType;
         public readonly Dictionary<Type, PrimaryKey> TypeToId;
 
@@ -217,7 +217,7 @@ namespace Signum.Engine.Basics
                      "caching {0}".FormatWith(current.Table(typeof(TypeEntity)).Name)
                     ).ToDictionary(a => a.type, a => a.typeEntity);
 
-            DnToType = TypeToEntity.Inverse();
+            EntityToType = TypeToEntity.Inverse();
 
             TypeToId = TypeToEntity.SelectDictionary(k => k, v => v.Id);
             IdToType = TypeToId.Inverse();
