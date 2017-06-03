@@ -190,7 +190,7 @@ namespace Signum.Engine.Word
 
         public static string DumpFileFolder = null;
 
-        public static byte[] CreateReport(this Lite<WordTemplateEntity> liteTemplate, Entity entity, ISystemWordTemplate systemWordTemplate = null, bool avoidConversion = false)
+        public static byte[] CreateReport(this Lite<WordTemplateEntity> liteTemplate, Entity entity = null, ISystemWordTemplate systemWordTemplate = null, bool avoidConversion = false)
         {
             return liteTemplate.GetFromCache().CreateReport(entity, systemWordTemplate, avoidConversion);
         }
@@ -202,9 +202,9 @@ namespace Signum.Engine.Word
             return template;
         }
 
-        public static byte[] CreateReport(this WordTemplateEntity template, Entity entity, ISystemWordTemplate systemWordTemplate = null, bool avoidConversion = false)
+        public static byte[] CreateReport(this WordTemplateEntity template, Entity entity = null, ISystemWordTemplate systemWordTemplate = null, bool avoidConversion = false)
         {
-            if (systemWordTemplate != null && template.SystemWordTemplate.FullClassName != systemWordTemplate.GetType().FullName)
+            if (systemWordTemplate != null && template.SystemWordTemplate.ToType() != systemWordTemplate.GetType())
                 throw new ArgumentException("systemWordTemplate should be a {0} instead of {1}".FormatWith(template.SystemWordTemplate.FullClassName, systemWordTemplate.GetType().FullName));
 
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
@@ -430,6 +430,8 @@ namespace Signum.Engine.Word
         private static SqlPreCommand Regenerate(WordTemplateEntity template, Replacements replacements)
         {
             var newTemplate = SystemWordTemplateLogic.CreateDefaultTemplate(template.SystemWordTemplate);
+            if (newTemplate == null)
+                return null;
 
             var file = template.Template.Retrieve();
 
@@ -464,7 +466,9 @@ namespace Signum.Engine.Word
             {
                 try
                 {
-                    SystemWordTemplateLogic.CreateDefaultTemplate(se).Save();
+                    var defaultTemplate = SystemWordTemplateLogic.CreateDefaultTemplate(se);
+                    if (defaultTemplate != null)
+                        defaultTemplate.Save();
                 }
                 catch (Exception ex)
                 {

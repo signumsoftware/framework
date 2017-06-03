@@ -35,20 +35,35 @@ namespace Signum.React.Word
         public HttpResponseMessage View(CreateWordReportRequest request)
         {
             var template = request.template.Retrieve();
-            var entity = request.entity.Retrieve();
+            var entity = request.entity;
 
-            ISystemWordTemplate systemWordReport = template.SystemWordTemplate == null ? null :
-                (ISystemWordTemplate)SystemWordTemplateLogic.GetEntityConstructor(template.SystemWordTemplate.ToType()).Invoke(new[] { entity });
-
-            var bytes = request.template.CreateReport(entity, systemWordReport);
-
+            byte[] bytes;
+            if (template.SystemWordTemplate != null)
+            {
+                var systemWordTemplate = (ISystemWordTemplate)SystemWordTemplateLogic.GetEntityConstructor(template.SystemWordTemplate.ToType()).Invoke(new[] { entity });
+                bytes = request.template.CreateReport(entity: null, systemWordTemplate: systemWordTemplate);
+            }
+            else
+            {
+                bytes = request.template.CreateReport((Entity)request.entity);
+            }
+            
             return FilesController.GetHttpReponseMessage(new MemoryStream(bytes), template.FileName);            
         }
 
         public class CreateWordReportRequest
         {
             public Lite<WordTemplateEntity> template { get; set; }
-            public Lite<Entity> entity { get; set; }
+            public ModifiableEntity entity { get; set; }
+        }
+
+        [Route("api/word/constructorType"), HttpPost]
+        public string GetConstructorType(SystemWordTemplateEntity systemWordTemplate)
+        {
+            var type = SystemWordTemplateLogic.GetEntityType(systemWordTemplate.ToType());
+
+            return ReflectionServer.GetTypeName(type);
+
         }
     }
 }

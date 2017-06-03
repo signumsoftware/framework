@@ -53,7 +53,8 @@ namespace Signum.Engine.Word
             var columns = tokens.NotNull().Distinct().Select(qt => new Signum.Entities.DynamicQuery.Column(qt, null)).ToList();
 
             var filters = systemWordTemplate != null ? systemWordTemplate.GetFilters(this.queryDescription) :
-                new List<Filter> { new Filter(QueryUtils.Parse("Entity", this.queryDescription, 0), FilterOperation.EqualTo, this.entity.ToLite()) };
+                entity != null ? new List<Filter> { new Filter(QueryUtils.Parse("Entity", this.queryDescription, 0), FilterOperation.EqualTo, this.entity.ToLite()) } :
+                throw new InvalidOperationException($"Impossible to create a Word report if '{nameof(entity)}' and '{nameof(systemWordTemplate)}' are both null");
 
             this.table = DynamicQueryManager.Current.ExecuteQuery(new QueryRequest
             {
@@ -63,6 +64,8 @@ namespace Signum.Engine.Word
                 Filters = filters,
                 Orders = new List<Order>(),
             });
+
+            var dt = this.table.ToDataTable();
 
             this.dicTokenColumn = table.Columns.ToDictionary(rc => rc.Column.Token);
         }

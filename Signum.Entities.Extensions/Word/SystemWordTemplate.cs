@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities;
 
 namespace Signum.Entities.Word
 {
@@ -22,4 +23,13 @@ namespace Signum.Entities.Word
             return ToStringExpression.Evaluate(this);
         }
     }
+
+    [Serializable]
+    public class MultiEntityModel : ModelEntity
+    {
+        [NotNullable, ImplementedByAll]
+        [NotNullValidator, NoRepeatValidator]
+        public MList<Lite<Entity>> Entities { get; set; } = new MList<Lite<Entity>>();
+    }
+
 }

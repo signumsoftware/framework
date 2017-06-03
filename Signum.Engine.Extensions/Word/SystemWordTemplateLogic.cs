@@ -40,13 +40,13 @@ namespace Signum.Engine.Word
 
     public interface ISystemWordTemplate
     {
-        Entity UntypedEntity { get; }
+        ModifiableEntity UntypedEntity { get; }
 
         List<Filter> GetFilters(QueryDescription qd);
     }
 
     public abstract class SystemWordTemplate<T> : ISystemWordTemplate
-       where T : Entity
+       where T : ModifiableEntity
     {
         public SystemWordTemplate(T entity)
         {
@@ -55,16 +55,36 @@ namespace Signum.Engine.Word
 
         public T Entity { get; set; }
 
-        Entity ISystemWordTemplate.UntypedEntity
+        ModifiableEntity ISystemWordTemplate.UntypedEntity
         {
             get { return Entity; }
         }
 
         public virtual List<Filter> GetFilters(QueryDescription qd)
         {
+            var imp = qd.Columns.SingleEx(a => a.IsEntity).Implementations.Value;
+
+            if (imp.IsByAll && typeof(Entity).IsAssignableFrom(typeof(T)) || imp.Types.Contains(typeof(T)))
+                return new List<Filter>
+                {
+                    new Filter(QueryUtils.Parse("Entity", qd, 0), FilterOperation.EqualTo, ((Entity)(ModifiableEntity)Entity).ToLite())
+                };
+
+            throw new InvalidOperationException($"Since {typeof(T).Name} is not in ${imp}, it's necessary to override ${nameof(GetFilters)} in ${this.GetType().Name}");
+        }
+    }
+
+    public class MultiEntityWordTemplate : SystemWordTemplate<MultiEntityModel>
+    {
+        public MultiEntityWordTemplate(MultiEntityModel entity) : base(entity)
+        {
+        }
+
+        public override List<Filter> GetFilters(QueryDescription qd)
+        {
             return new List<Filter>
             {
-                new Filter(QueryUtils.Parse("Entity", qd, 0), FilterOperation.EqualTo, Entity.ToLite())
+                new Filter(QueryUtils.Parse("Entity", qd, 0), FilterOperation.IsIn, this.Entity.Entities.ToList())
             };
         }
     }
@@ -95,9 +115,12 @@ namespace Signum.Engine.Word
                         se.Id,
                         se.FullClassName,
                     });
-                
+
+                RegisterSystemWordReport<MultiEntityWordTemplate>(null);
+
                 new Graph<WordTemplateEntity>.ConstructFrom<SystemWordTemplateEntity>(WordTemplateOperation.CreateWordTemplateFromSystemWordTemplate)
                 {
+                    CanConstruct = se => HasDefaultTemplateConstructor(se) ? null : WordTemplateMessage.NoDefaultTemplateDefined.NiceToString(),
                     Construct = (se, _) => CreateDefaultTemplate(se).Save()
                 }.Register();
 
@@ -128,9 +151,19 @@ namespace Signum.Engine.Word
             }
         }
 
+        internal static bool HasDefaultTemplateConstructor(SystemWordTemplateEntity systemWordReport)
+        {
+            SystemWordTemplateInfo info = systemWordReports.GetOrThrow(systemWordReport.ToType());
+
+            return info.DefaultTemplateConstructor != null;
+        }
+
         internal static WordTemplateEntity CreateDefaultTemplate(SystemWordTemplateEntity systemWordReport)
         {
-            SystemWordTemplateInfo info = systemWordReports.GetOrThrow(SystemWordTemplateToType.Value.GetOrThrow(systemWordReport));
+            SystemWordTemplateInfo info = systemWordReports.GetOrThrow(systemWordReport.ToType());
+
+            if (info.DefaultTemplateConstructor == null)
+                return null;
 
             WordTemplateEntity template = info.DefaultTemplateConstructor();
 
@@ -156,7 +189,7 @@ namespace Signum.Engine.Word
 
             template = GetDefaultTemplate(system);
 
-            return WordTemplateLogic.CreateReport(template.ToLite(), systemWordTemplate.UntypedEntity, systemWordTemplate, avoidConversion); 
+            return WordTemplateLogic.CreateReport(template.ToLite(), systemWordTemplate: systemWordTemplate, avoidConversion: avoidConversion); 
         }
 
         public static SystemWordTemplateEntity GetSystemWordTemplate(Type type)
@@ -167,7 +200,7 @@ namespace Signum.Engine.Word
         public static WordTemplateEntity GetDefaultTemplate(SystemWordTemplateEntity systemWordTemplate)
         {
             var templates = SystemWordTemplateToWordTemplates.Value.TryGetC(systemWordTemplate.ToLite()).EmptyIfNull().Select(a => WordTemplateLogic.WordTemplatesLazy.Value.GetOrThrow(a));
-            if (templates.IsNullOrEmpty())
+            if (templates.IsNullOrEmpty() && HasDefaultTemplateConstructor(systemWordTemplate))
             {
                 using (ExecutionMode.Global())
                 using (OperationLogic.AllowSave<WordTemplateEntity>())
@@ -249,28 +282,25 @@ namespace Signum.Engine.Word
             RegisterSystemWordReport(typeof(T), defaultTemplateConstructor, queryName);
         }
 
-        public static void RegisterSystemWordReport(Type model, Func<WordTemplateEntity> defaultTemplateConstructor, object queryName = null)
+        public static void RegisterSystemWordReport(Type systemWordTemplate, Func<WordTemplateEntity> defaultTemplateConstructor = null, object queryName = null)
         {
-            if (defaultTemplateConstructor == null)
-                throw new ArgumentNullException("defaultTemplateConstructor");
-
-            systemWordReports[model] = new SystemWordTemplateInfo
+            systemWordReports[systemWordTemplate] = new SystemWordTemplateInfo
             {
                 DefaultTemplateConstructor = defaultTemplateConstructor,
-                QueryName = queryName ?? GetEntityType(model),
+                QueryName = queryName ?? GetEntityType(systemWordTemplate),
             };
         }
 
-        static Type GetEntityType(Type model)
+        public static Type GetEntityType(Type systemWordTemplate)
         {
-            var baseType = model.Follow(a => a.BaseType).FirstOrDefault(b => b.IsInstantiationOf(typeof(SystemWordTemplate<>)));
+            var baseType = systemWordTemplate.Follow(a => a.BaseType).FirstOrDefault(b => b.IsInstantiationOf(typeof(SystemWordTemplate<>)));
 
             if (baseType != null)
             {
                 return baseType.GetGenericArguments()[0];
             }
 
-            throw new InvalidOperationException("Unknown queryName from {0}, set the argument queryName in RegisterSystemEmail".FormatWith(model.TypeName()));
+            throw new InvalidOperationException("Unknown queryName from {0}, set the argument queryName in RegisterSystemEmail".FormatWith(systemWordTemplate.TypeName()));
         }
 
         public static Type ToType(this SystemWordTemplateEntity systemWordTemplate)
