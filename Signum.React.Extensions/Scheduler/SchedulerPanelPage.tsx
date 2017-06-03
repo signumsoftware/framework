@@ -2,6 +2,7 @@
 import { RouteComponentProps } from 'react-router'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
+import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { ValueSearchControl, SearchControl } from '../../../Framework/Signum.React/Scripts/Search'
 import EntityLink from '../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
@@ -19,6 +20,12 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
 
     componentWillMount() {
         this.loadState().done();
+
+        Navigator.setTitle("SchedulerLogic state");
+    }
+
+    componentWillUnmount() {
+        Navigator.setTitle();
     }
 
     loadState() {
@@ -36,10 +43,7 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
         API.start().then(() => this.loadState()).done();
     }
 
-
     render() {
-        document.title = "SchedulerLogic state";
-
         if (this.state == undefined)
             return <h2>SchedulerLogic state (loading...) </h2>;
 

@@ -22,7 +22,7 @@ namespace Signum.Entities.Word
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class WordTemplateEntity : Entity
     {
-        [NotNullable, SqlDbType(Size = 200)]
+        [NotNullable, SqlDbType(Size = 200), UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
         public string Name { get; set; }
 

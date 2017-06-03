@@ -71,6 +71,16 @@ namespace Signum.React.Authorization
             }
         }
 
+        [Route("api/auth/loginFromApiKey"), HttpGet]
+        public LoginResponse LoginFromApiKey(string apiKey)
+        {
+            string message = AuthLogic.OnLoginMessage();
+
+            var token = AuthTokenServer.CreateToken(UserEntity.Current);
+
+            return new LoginResponse { message = message, userEntity = UserEntity.Current, token = token };
+        }
+
         [Route("api/auth/loginFromCookie"), HttpPost, AllowAnonymous]
         public LoginResponse LoginFromCookie()
         {

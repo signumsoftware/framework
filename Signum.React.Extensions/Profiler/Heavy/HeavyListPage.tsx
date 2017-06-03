@@ -30,6 +30,12 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
         this.loadIsEnabled().done()
 
         this.loadEntries().done();
+    
+        Navigator.setTitle("Heavy Profiler");
+    }
+
+    componentWillUnmount() {
+        Navigator.setTitle();
     }
 
     loadEntries() {
@@ -86,8 +92,6 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
     }
 
     render() {
-        document.title = "Heavy Profiler";
-
         if (this.state.entries == undefined)
             return <h3>Heavy Profiler (loading...) </h3>;
 
