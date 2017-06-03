@@ -273,11 +273,14 @@ export function parseId(ti: TypeInfo, id: string): string | number {
 }
 
 export const IsByAll = "[ALL]";
-export function getTypeInfos(typeReference: TypeReference): TypeInfo[] {
-    if (typeReference.name == IsByAll || typeReference.name == "")
+export function getTypeInfos(typeReference: TypeReference | string): TypeInfo[] {
+
+    const name = (typeReference as TypeReference).name || typeReference as string;
+
+    if (name == IsByAll || name == "")
         return [];
 
-    return typeReference.name.split(", ").map(getTypeInfo);
+    return name.split(", ").map(getTypeInfo);
 
 }
 
