@@ -31,13 +31,14 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchC
         this.setState(this.calculateState(nextProps));
     }
 
+    
     componentWillUnmount() {
-        document.title = Navigator.getTitle();
+        Navigator.setTitle();
     }
 
     calculateState(props: SearchPageProps): SearchControlState {
 
-        document.title = Navigator.getTitle(getQueryNiceName(props.match.params.queryName));
+        Navigator.setTitle(getQueryNiceName(props.match.params.queryName));
 
         return {
             findOptions: {
@@ -49,13 +50,13 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchC
 
     changeUrl() {
 
-        var scl = this.searchControl.searchControlLoaded; 
+        const scl = this.searchControl.searchControlLoaded; 
 
-        var findOptions = Finder.toFindOptions(scl.props.findOptions, scl.props.queryDescription);
+        const findOptions = Finder.toFindOptions(scl.props.findOptions, scl.props.queryDescription);
 
         const newPath = Finder.findOptionsPath(findOptions);
 
-        var currentLocation = Navigator.history.location;
+        const currentLocation = Navigator.history.location;
 
         if (currentLocation.pathname + currentLocation.search != newPath)
             Navigator.history.replace(newPath);

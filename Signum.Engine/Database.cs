@@ -1199,15 +1199,8 @@ namespace Signum.Engine
 
         public SetterExpressions(LambdaExpression propertyExpression, LambdaExpression valueExpression)
         {
-            if (propertyExpression == null)
-                throw new ArgumentNullException("propertyExpression");
-
-            if (valueExpression == null)
-                throw new ArgumentNullException("valueExpression");
-
-
-            this.PropertyExpression = propertyExpression;
-            this.ValueExpression = valueExpression;
+            this.PropertyExpression = propertyExpression ?? throw new ArgumentNullException("propertyExpression");
+            this.ValueExpression = valueExpression ?? throw new ArgumentNullException("valueExpression");
         }
     }
 

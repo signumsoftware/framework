@@ -280,34 +280,44 @@ window.addEventListener("storage", se => {
 });
 
 
-export function makeAbortable<A,Q>(makeCall: (abortController: FetchAbortController, query: Q) => Promise<A>): (query: Q) => Promise<A> {
+/// This class encapsulates a sequence of ajax request, making them abortable, and auto-aborting previous request when a new one is made 
+export class AbortableRequest<Q, A> {
 
-    let requestIndex = 0;
-    let responseIndex = 0;
-    let abortController: FetchAbortController | undefined = undefined;
+    private requestIndex = 0;
+    private abortController?: FetchAbortController;
 
-    return (query) => {
-
-        if (abortController) {
-            if (abortController.abort) {
-                abortController.abort!();
-            }
-            abortController = undefined;
+    constructor(public makeCall: (abortController: FetchAbortController, query: Q) => Promise<A>)
+    {
+    }
+    
+    abort(): boolean {
+        if (!this.abortController || !this.abortController.abort) {
+            this.abortController = undefined;
+            return false;
+        } else {
+            this.abortController.abort!();
+            this.abortController = undefined;
+            return true;
         }
+    }
+    
 
-        requestIndex++;
+    getData(query: Q): Promise<A> {
 
-        var myIndex = requestIndex;
+        this.abort();
 
-        abortController = {};
+        this.requestIndex++;
 
-        return makeCall(abortController, query).then(result => {
+        var myIndex = this.requestIndex;
 
-            if (myIndex <= responseIndex) //request is too old
+        this.abortController = {};
+
+        return this.makeCall(this.abortController, query).then(result => {
+
+            if (myIndex != this.requestIndex) //request is too old
                 return new Promise<A>(resolve => { /*never*/ });
 
-            abortController = undefined;
-            responseIndex = myIndex;
+            this.abortController = undefined;
             return result;
         }, (error: TypeError) => {
             if (error.message == "Aborted request")

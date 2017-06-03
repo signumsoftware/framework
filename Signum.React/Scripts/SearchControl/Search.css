@@ -245,3 +245,17 @@ span.sf-search-entity-error {
 ul.sf-context-menu li a:not([disabled]) {
     cursor: pointer;
 }
+
+
+.sf-query-token-part .rw-btn rw-btn-select {
+    width: 1.4em;
+}
+
+
+.sf-query-token-part .rw-input rw-dropdown-list-input {
+    cursor: pointer;
+}
+
+.sf-query-token-part .rw-list-empty, .rw-list-option, .rw-list-optgroup {
+    padding: .143em .25em;
+}    
