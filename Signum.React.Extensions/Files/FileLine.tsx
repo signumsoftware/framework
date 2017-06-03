@@ -57,7 +57,7 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineProps> {
 
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} labelHtmlAttributes={s.labelHtmlAttributes} htmlAttributes={{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes }}>
-                {hasValue ? this.renderFile() :
+                {hasValue ? this.renderFile() : s.ctx.readOnly ? undefined :
                     <FileUploader
                         accept={this.props.accept}
                         dragAndDrop={this.props.dragAndDrop}

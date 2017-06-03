@@ -334,7 +334,7 @@ export const TypeAllowedAndConditions = new Type<TypeAllowedAndConditions>("Type
 export interface TypeAllowedAndConditions extends Entities.ModelEntity {
     Type: "TypeAllowedAndConditions";
     fallback: TypeAllowed | null;
-    conditions: Array<TypeConditionRuleEmbedded>;
+    conditions: Entities.MList<TypeConditionRuleEmbedded>;
 }
 
 export const TypeAllowedBasic = new EnumType<TypeAllowedBasic>("TypeAllowedBasic");

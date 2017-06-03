@@ -92,7 +92,7 @@ namespace Signum.Engine.Authorization
 
         public static void SetQueryRules(QueryRulePack rules)
         {
-            string[] queryKeys = DynamicQueryManager.Current.GetTypeQueries(TypeLogic.DnToType[rules.Type]).Keys.Select(qn => QueryUtils.GetKey(qn)).ToArray();
+            string[] queryKeys = DynamicQueryManager.Current.GetTypeQueries(TypeLogic.EntityToType[rules.Type]).Keys.Select(qn => QueryUtils.GetKey(qn)).ToArray();
 
             cache.SetRules(rules, r => queryKeys.Contains(r.Key));
         }

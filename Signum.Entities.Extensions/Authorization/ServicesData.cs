@@ -189,7 +189,7 @@ namespace Signum.Entities.Authorization
         {
         }
 
-        public TypeAllowedAndConditions(TypeAllowed? fallback, ReadOnlyCollection<TypeConditionRuleEmbedded> conditions)
+        public TypeAllowedAndConditions(TypeAllowed? fallback, MList<TypeConditionRuleEmbedded> conditions)
         {
             this.fallback = fallback;
             this.conditions = conditions;
@@ -198,7 +198,7 @@ namespace Signum.Entities.Authorization
         public TypeAllowedAndConditions(TypeAllowed? fallback, params TypeConditionRuleEmbedded[] conditions)
         {
             this.fallback = fallback;
-            this.conditions = conditions.ToReadOnly();
+            this.conditions = conditions.ToMList();
         }
 
         TypeAllowed? fallback;
@@ -215,9 +215,9 @@ namespace Signum.Entities.Authorization
             get { return this.fallback ?? TypeAllowed.None; }
         }
 
-        ReadOnlyCollection<TypeConditionRuleEmbedded> conditions;
+        MList<TypeConditionRuleEmbedded> conditions;
         [InTypeScript(Undefined =false)]
-        public ReadOnlyCollection<TypeConditionRuleEmbedded> Conditions
+        public MList<TypeConditionRuleEmbedded> Conditions
         {
             get { return conditions; }
             private set { conditions = value; }
@@ -306,7 +306,7 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    [Serializable, DescriptionOptions(DescriptionOptions.None), InTypeScript(Undefined = false)]
+    [Serializable, InTypeScript(Undefined = false)]
     public class TypeConditionRuleEmbedded : EmbeddedEntity, IEquatable<TypeConditionRuleEmbedded>
     {
         private TypeConditionRuleEmbedded() { }

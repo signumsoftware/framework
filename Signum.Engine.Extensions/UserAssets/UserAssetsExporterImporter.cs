@@ -44,7 +44,7 @@ namespace Signum.Engine.UserAssets
 
             public string TypeToName(Lite<TypeEntity> type)
             {
-                return TypeLogic.GetCleanName(TypeLogic.DnToType.GetOrThrow(type.Retrieve()));
+                return TypeLogic.GetCleanName(TypeLogic.EntityToType.GetOrThrow(type.Retrieve()));
             }
 
 

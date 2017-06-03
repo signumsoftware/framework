@@ -489,6 +489,10 @@ namespace Signum.Engine.Dynamic
                     atts.Add($"BackReferenceColumnName({Literal(mlist.BackReferenceName)})");
             }
 
+            if (property.CustomAttributes.HasText())
+                atts.Add(property.CustomAttributes);
+
+
             return atts;
         }
 

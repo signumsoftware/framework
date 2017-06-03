@@ -217,7 +217,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                 <Tabs unmountOnExit={true} defaultActiveKey="properties" id="DynamicTypeTabs" onSelect={this.handleTabSelect}>
                     <Tab eventKey="properties" title="Properties">
                         <PropertyRepeaterComponent dc={this.props.dc} properties={def.properties} onRemove={this.handlePropertyRemoved} showDatabaseMapping={this.props.showDatabaseMapping} />
-
+                        <br/>
                         {dt.baseType == "Entity" &&
                             <MultiColumnUniqueIndexFieldsetComponent
                                 binding={Binding.create(def, d => d.multiColumnUniqueIndex)}
@@ -823,10 +823,10 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
                             </Panel>)
                     }
                 </PanelGroup>
-                <a title={EntityControlMessage.Create.niceToString()}
+                <a title="Create Property"
                     className="sf-line-button sf-create"
                     onClick={this.handleCreateClick}>
-                    <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
+                    <span className="glyphicon glyphicon-plus sf-create sf-create-label" />Create Property
                 </a>
             </div>
         );
@@ -937,6 +937,7 @@ export class PropertyComponent extends React.Component<PropertyComponentProps, v
                         </div>}
                     </div>
                 </div >
+                <ValueComponent dc={this.props.dc} labelColumns={2} binding={Binding.create(p, d => d.customAttributes)} type="string" defaultValue={null} onBlur={this.handleAutoFix} />
                 <ValidatorRepeaterComponent dc={this.props.dc} property={this.props.property} />
             </div>
         );
@@ -1087,10 +1088,10 @@ export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterC
                         }
                         <tr>
                             <td colSpan={2}>
-                                <a title={EntityControlMessage.Create.niceToString()}
+                                <a title="Create Query Column"
                                     className="sf-line-button sf-create"
                                     onClick={this.handleCreateClick}>
-                                    <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
+                                    <span className="glyphicon glyphicon-plus sf-create sf-create-label" />Create Query Column
                                 </a>
                             </td>
                         </tr>
@@ -1182,10 +1183,10 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
                             </Panel>)
                     }
                 </div>
-                <a title={EntityControlMessage.Create.niceToString()}
+                <a title="Create Validator"
                     className="sf-line-button sf-create"
                     onClick={this.handleCreateClick}>
-                    <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
+                    <span className="glyphicon glyphicon-plus sf-create sf-create-label" />Create Validator
                 </a>
             </div>
         );

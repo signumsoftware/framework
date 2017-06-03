@@ -14,7 +14,7 @@ import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/Mess
 
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfo, Binding, GraphExplorer } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage, OperationSymbol, ModelEntity, newMListElement, NormalControlMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { API, properties, queries, operations } from '../AuthClient'
 import {
     TypeRulePack, AuthAdminMessage, PermissionSymbol, AuthMessage, TypeAllowed, TypeAllowedRule,
@@ -22,9 +22,7 @@ import {
 } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import { TypeConditionSymbol } from '../../Basics/Signum.Entities.Basics'
-import { OperationSymbol, ModelEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { QueryEntity, PropertyRouteEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
-import { NormalControlMessage } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
 
 
 require("./AuthAdmin.css");
@@ -198,10 +196,10 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                 if (!tc)
                     return;
 
-                taac.conditions.push(TypeConditionRuleEmbedded.New({
+                taac.conditions.push(newMListElement(TypeConditionRuleEmbedded.New({
                     typeCondition : tc!,
                     allowed : "None"
-                }));
+                })));
 
                 this.updateFrame();
             })
@@ -209,7 +207,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
     }
 
     handleRemoveConditionClick = (taac: TypeAllowedAndConditions, con: TypeConditionRuleEmbedded) => {
-        taac.conditions!.remove(con);
+        taac.conditions!.remove(taac.conditions.filter(mle => mle.element == con).single());
         this.updateFrame();
     }
 
@@ -217,7 +215,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
 
         let roleId = this.props.ctx.value.role.id!;
 
-        let used = ctx.value.allowed.conditions.map(tcs => tcs.typeCondition.id!);
+        let used = ctx.value.allowed.conditions.map(mle => mle.element.typeCondition.id!);
 
         let remaining = ctx.value.availableConditions.filter(tcs => !used.contains(tcs.id!));
 
@@ -269,7 +267,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                             m.rules.every(a => a.element.allowed == true) ? "All" : "Mix")}
                 </td>}
             </tr>
-        ].concat(ctx.value.allowed!.conditions!.map(c => {
+        ].concat(ctx.value.allowed!.conditions!.map(mle => mle.element).map(c => {
             let b = Binding.create(c, ca => ca.allowed);
             return (
                 <tr key={ctx.value.resource.namespace + "." + ctx.value.resource.className + "_" + c.typeCondition.id} className= "sf-auth-condition" >
@@ -351,9 +349,9 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
 function typeAllowedEquals(allowed: TypeAllowedAndConditions, allowedBase: TypeAllowedAndConditions) {
     return allowed.fallback == allowedBase.fallback
         && allowed.conditions!.length == allowedBase.conditions!.length
-        && allowed.conditions!
+        && allowed.conditions!.map(mle => mle.element)
             .every((c, i) => {
-                let b = allowedBase.conditions![i];
+                let b = allowedBase.conditions![i].element;
                 return c.allowed == b.allowed && c.typeCondition!.id == b.typeCondition!.id;
             });
 }
