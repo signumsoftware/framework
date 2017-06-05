@@ -106,9 +106,9 @@ namespace Signum.Engine.Extensions.Mailing.Pop3
             };
         }
 
-        private EmailAddressEntity ToEmailAddress(RfcMailAddress rfcMailAddress)
+        private EmailAddressEmbedded ToEmailAddress(RfcMailAddress rfcMailAddress)
         {
-            return new EmailAddressEntity
+            return new EmailAddressEmbedded
             {
                 DisplayName = rfcMailAddress.DisplayName,
                 EmailAddress = rfcMailAddress.Address ?? "unknown@unknown.com",
