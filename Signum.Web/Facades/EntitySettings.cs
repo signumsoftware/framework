@@ -199,7 +199,10 @@ namespace Signum.Web
         }
     }
 
-    public class EmbeddedEntitySettings<T> : EntitySettings, IImplementationsFinder where T : EmbeddedEntity
+    public class EmbeddedEntitySettings<T> : ModifiableEntitySettings<T> where T : EmbeddedEntity { }
+    public class ModelEntitySettings<T> : ModifiableEntitySettings<T> where T : ModelEntity { }
+    
+    public abstract class ModifiableEntitySettings<T> : EntitySettings, IImplementationsFinder where T : ModifiableEntity
     {
         public override string WebTypeName { get; set; }
         
@@ -227,7 +230,7 @@ namespace Signum.Web
             return PartialViewName((T)entity);
         }
         
-        public EmbeddedEntitySettings()
+        public ModifiableEntitySettings()
         {
             MappingDefault = new EntityMapping<T>(true).GetValue;
             WebTypeName = typeof(T).Name;

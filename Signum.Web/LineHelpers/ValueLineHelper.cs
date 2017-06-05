@@ -207,7 +207,7 @@ namespace Signum.Web
             {
                 valueLine.ValueHtmlProps.AddCssClass("form-control");
 
-                ColorEntity color = (ColorEntity)valueLine.UntypedValue;
+                ColorEmbedded color = (ColorEmbedded)valueLine.UntypedValue;
 
                 sb.AddLine(helper.TextBox(valueLine.Prefix, color == null ? "" : color.RGBHex(), valueLine.ValueHtmlProps));
 
@@ -322,7 +322,7 @@ namespace Signum.Web
 
             if (type.IsEnum)
                 return ValueLineType.Enum;
-            else if (type == typeof(ColorEntity))
+            else if (type == typeof(ColorEmbedded))
                 return ValueLineType.Color;
             else if (type == typeof(TimeSpan))
                 return ValueLineType.TimeSpan;
