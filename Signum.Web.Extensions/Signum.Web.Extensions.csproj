@@ -30,7 +30,7 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <TypeScriptToolsVersion>2.0</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>2.3</TypeScriptToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -1878,6 +1878,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>LocalizableTypeUsedNotLocalized.generated.cs</LastGenOutput>
     </Content>
+    <Content Include="tsconfig.json" />
     <None Include="UserQueries\Views\QueryColumn.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>QueryColumn.generated.cs</LastGenOutput>
