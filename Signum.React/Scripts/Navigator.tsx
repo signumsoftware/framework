@@ -653,6 +653,7 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
     isReadOnly?: boolean;
     avoidPopup?: boolean;
     autocomplete?: AutocompleteConfig<T>;
+    autocompleteDelay?: number;
     getViewPromise?: (entity: T) => ViewPromise<T>;
     onNavigateRoute?: (typeName: string, id: string | number) => string;
     onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
