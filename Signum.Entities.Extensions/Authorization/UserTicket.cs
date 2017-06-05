@@ -27,13 +27,23 @@ namespace Signum.Entities.Authorization
 
         [NotNullable, SqlDbType(Size = 100)]
         public string Device { get; set; }
+        public string DeviceKey { get; set; }
+
+        public static Func<UserTicketEntity, string> StringTicketFunc = ute => StringTicketDefauld(ute);
+
+        public static string StringTicketDefauld(UserTicketEntity ute)
+        {
+            return "{0}|{1}".FormatWith(ute.User.Id, ute.Ticket);
+        }
 
         public string StringTicket()
         {
-            return "{0}|{1}".FormatWith(User.Id, Ticket);
+            return StringTicketFunc(this);
         }
 
-        public static (PrimaryKey userId, string ticket) ParseTicket(string ticket)
+
+        public static Func<string, string,Tuple<PrimaryKey, string>> ParseTicket = (ticket, device) => ParseTicketDefauld(ticket, device);
+        public static Tuple<PrimaryKey, string> ParseTicketDefauld(string ticket, string device)
         {
             Match m = Regex.Match(ticket, @"^(?<id>.*)\|(?<ticket>.*)$");
             if (!m.Success) throw new FormatException("The content of the ticket has an invalid format");
