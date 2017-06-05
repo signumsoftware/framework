@@ -25,7 +25,7 @@ export interface ChartRequest {
     orders: OrderRequest[];
 }
 
-export interface ChartScriptParameterEntity {
+export interface ChartScriptParameterEmbedded {
     enumValues: { name: string, typeFilter : ChartColumnType }[];
 }
 
@@ -34,13 +34,13 @@ export const ChartColorEntity = new Type<ChartColorEntity>("ChartColor");
 export interface ChartColorEntity extends Entities.Entity {
     Type: "ChartColor";
     related?: Entities.Lite<Entities.Entity> | null;
-    color?: Basics.ColorEntity | null;
+    color?: Basics.ColorEmbedded | null;
 }
 
-export const ChartColumnEntity = new Type<ChartColumnEntity>("ChartColumnEntity");
-export interface ChartColumnEntity extends Entities.EmbeddedEntity {
-    Type: "ChartColumnEntity";
-    token?: UserAssets.QueryTokenEntity | null;
+export const ChartColumnEmbedded = new Type<ChartColumnEmbedded>("ChartColumnEmbedded");
+export interface ChartColumnEmbedded extends Entities.EmbeddedEntity {
+    Type: "ChartColumnEmbedded";
+    token?: UserAssets.QueryTokenEmbedded | null;
     displayName?: string | null;
 }
 
@@ -65,7 +65,7 @@ export module ChartMessage {
     export const ChartToken = new MessageKey("ChartMessage", "ChartToken");
     export const Chart_ChartSettings = new MessageKey("ChartMessage", "Chart_ChartSettings");
     export const Chart_Dimension = new MessageKey("ChartMessage", "Chart_Dimension");
-    export const Chart_Draw = new MessageKey("ChartMessage", "Chart_Draw");
+    export const DrawChart = new MessageKey("ChartMessage", "DrawChart");
     export const Chart_Group = new MessageKey("ChartMessage", "Chart_Group");
     export const Chart_Query0IsNotAllowed = new MessageKey("ChartMessage", "Chart_Query0IsNotAllowed");
     export const Chart_ToggleInfo = new MessageKey("ChartMessage", "Chart_ToggleInfo");
@@ -100,9 +100,9 @@ export interface ChartPaletteModel extends Entities.ModelEntity {
     colors: Entities.MList<ChartColorEntity>;
 }
 
-export const ChartParameterEntity = new Type<ChartParameterEntity>("ChartParameterEntity");
-export interface ChartParameterEntity extends Entities.EmbeddedEntity {
-    Type: "ChartParameterEntity";
+export const ChartParameterEmbedded = new Type<ChartParameterEmbedded>("ChartParameterEmbedded");
+export interface ChartParameterEmbedded extends Entities.EmbeddedEntity {
+    Type: "ChartParameterEmbedded";
     name?: string | null;
     value?: string | null;
 }
@@ -122,14 +122,14 @@ export interface ChartRequest extends Entities.ModelEntity {
     Type: "ChartRequest";
     chartScript: ChartScriptEntity;
     groupResults: boolean;
-    columns: Entities.MList<ChartColumnEntity>;
-    parameters: Entities.MList<ChartParameterEntity>;
+    columns: Entities.MList<ChartColumnEmbedded>;
+    parameters: Entities.MList<ChartParameterEmbedded>;
     invalidator: boolean;
 }
 
-export const ChartScriptColumnEntity = new Type<ChartScriptColumnEntity>("ChartScriptColumnEntity");
-export interface ChartScriptColumnEntity extends Entities.EmbeddedEntity {
-    Type: "ChartScriptColumnEntity";
+export const ChartScriptColumnEmbedded = new Type<ChartScriptColumnEmbedded>("ChartScriptColumnEmbedded");
+export interface ChartScriptColumnEmbedded extends Entities.EmbeddedEntity {
+    Type: "ChartScriptColumnEmbedded";
     displayName?: string | null;
     isOptional?: boolean;
     columnType?: ChartColumnType;
@@ -143,8 +143,8 @@ export interface ChartScriptEntity extends Entities.Entity {
     icon?: Entities.Lite<Files.FileEntity> | null;
     script?: string | null;
     groupBy?: GroupByChart;
-    columns: Entities.MList<ChartScriptColumnEntity>;
-    parameters: Entities.MList<ChartScriptParameterEntity>;
+    columns: Entities.MList<ChartScriptColumnEmbedded>;
+    parameters: Entities.MList<ChartScriptParameterEmbedded>;
     columnsStructure?: string | null;
 }
 
@@ -154,9 +154,9 @@ export module ChartScriptOperation {
     export const Delete : Entities.DeleteSymbol<ChartScriptEntity> = registerSymbol("Operation", "ChartScriptOperation.Delete");
 }
 
-export const ChartScriptParameterEntity = new Type<ChartScriptParameterEntity>("ChartScriptParameterEntity");
-export interface ChartScriptParameterEntity extends Entities.EmbeddedEntity {
-    Type: "ChartScriptParameterEntity";
+export const ChartScriptParameterEmbedded = new Type<ChartScriptParameterEmbedded>("ChartScriptParameterEmbedded");
+export interface ChartScriptParameterEmbedded extends Entities.EmbeddedEntity {
+    Type: "ChartScriptParameterEmbedded";
     name?: string | null;
     type?: ChartParameterType;
     columnIndex?: number | null;
@@ -177,11 +177,11 @@ export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetE
     owner: Entities.Lite<Entities.Entity> | null;
     displayName: string;
     chartScript: ChartScriptEntity;
-    parameters: Entities.MList<ChartParameterEntity>;
+    parameters: Entities.MList<ChartParameterEmbedded>;
     groupResults: boolean;
-    columns: Entities.MList<ChartColumnEntity>;
-    filters: Entities.MList<UserQueries.QueryFilterEntity>;
-    orders: Entities.MList<UserQueries.QueryOrderEntity>;
+    columns: Entities.MList<ChartColumnEmbedded>;
+    filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
+    orders: Entities.MList<UserQueries.QueryOrderEmbedded>;
     guid: string;
     invalidator: boolean;
 }

@@ -46,7 +46,7 @@ namespace Signum.Engine.Mailing
         {
             ExecuteQuery();
 
-            foreach (EmailAddressEntity from in GetFrom())
+            foreach (EmailAddressEmbedded from in GetFrom())
             {
                 foreach (List<EmailOwnerRecipientData> recipients in GetRecipients())
                 {
@@ -73,7 +73,7 @@ namespace Signum.Engine.Mailing
                         })).ToMList()
                     };
                     
-                    EmailTemplateMessageEntity message = template.GetCultureMessage(ci) ?? template.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo());
+                    EmailTemplateMessageEmbedded message = template.GetCultureMessage(ci) ?? template.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo());
 
                     if (message == null)
                         throw new InvalidOperationException("Message {0} does not have a message for CultureInfo {1} (or Default)".FormatWith(template, ci));
@@ -101,7 +101,7 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        EmailTemplateParser.BlockNode TextNode(EmailTemplateMessageEntity message)
+        EmailTemplateParser.BlockNode TextNode(EmailTemplateMessageEmbedded message)
         {
             if (message.TextParsedNode == null)
             {
@@ -123,7 +123,7 @@ namespace Signum.Engine.Mailing
             return (EmailTemplateParser.BlockNode)message.TextParsedNode;
         }
 
-        EmailTemplateParser.BlockNode SubjectNode(EmailTemplateMessageEntity message)
+        EmailTemplateParser.BlockNode SubjectNode(EmailTemplateMessageEmbedded message)
         {
             if (message.SubjectParsedNode == null)
                 message.SubjectParsedNode = EmailTemplateParser.Parse(message.Subject, qd, template.SystemEmail.ToType());
@@ -131,7 +131,7 @@ namespace Signum.Engine.Mailing
             return (EmailTemplateParser.BlockNode)message.SubjectParsedNode;
         }
 
-        IEnumerable<EmailAddressEntity> GetFrom()
+        IEnumerable<EmailAddressEmbedded> GetFrom()
         {
             if (template.From != null)
             {
@@ -141,7 +141,7 @@ namespace Signum.Engine.Mailing
 
                     if (!template.SendDifferentMessages)
                     {
-                        yield return new EmailAddressEntity(currentRows.Select(r => (EmailOwnerData)r[owner]).Distinct().SingleEx());
+                        yield return new EmailAddressEmbedded(currentRows.Select(r => (EmailOwnerData)r[owner]).Distinct().SingleEx());
                     }
                     else
                     {
@@ -156,7 +156,7 @@ namespace Signum.Engine.Mailing
                                 var old = currentRows;
                                 currentRows = gr;
 
-                                yield return new EmailAddressEntity(gr.Key);
+                                yield return new EmailAddressEmbedded(gr.Key);
 
                                 currentRows = old;
                             }
@@ -165,7 +165,7 @@ namespace Signum.Engine.Mailing
                 }
                 else
                 {
-                    yield return new EmailAddressEntity(new EmailOwnerData
+                    yield return new EmailAddressEmbedded(new EmailOwnerData
                     {
                         CultureInfo = null,
                         Email = template.From.EmailAddress,
@@ -177,13 +177,13 @@ namespace Signum.Engine.Mailing
             {
                 if (smtpConfig != null && smtpConfig.DefaultFrom != null)
                 {
-                    yield return smtpConfig.DefaultFrom;
+                    yield return smtpConfig.DefaultFrom.Clone();
                 }
                 else
                 {
                     SmtpSection smtpSection = ConfigurationManager.GetSection("system.net/mailSettings/smtp") as SmtpSection;
 
-                    yield return new EmailAddressEntity
+                    yield return new EmailAddressEmbedded
                     {
                         EmailAddress = smtpSection.From
                     };

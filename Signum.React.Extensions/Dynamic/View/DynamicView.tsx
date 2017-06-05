@@ -10,7 +10,7 @@ import { ValueLine, EntityLine, TypeContext } from '../../../../Framework/Signum
 import { ModifiableEntity, Entity, Lite, JavascriptMessage, NormalWindowMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { getTypeInfo, Binding, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal'
-import ModalMessage from '../../../../Framework/Signum.React/Scripts/Modals/ModalMessage'
+import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
 import { DynamicViewTree } from './DynamicViewTree'
 import { DynamicViewInspector, CollapsableTypeHelp } from './Designer'
 import { NodeConstructor, BaseNode } from './Nodes'
@@ -112,12 +112,12 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
 
     handleTypeRemove = () => {
         if (this.props.ctx.value.modified || this.props.ctx.value.viewContent != JSON.stringify(this.state.rootNode!))
-            return ModalMessage.show({
+            return MessageModal.show({
                 title: NormalWindowMessage.ThereAreChanges.niceToString(),
                 message: JavascriptMessage.loseCurrentChanges.niceToString(),
                 buttons: "yes_no",
                 icon: "warning",
-                defaultStyle: "warning"
+                style: "warning"
             }).then(result => { return result == "yes"; });
 
         return Promise.resolve(true);

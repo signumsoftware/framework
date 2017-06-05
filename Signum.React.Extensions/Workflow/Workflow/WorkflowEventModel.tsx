@@ -2,9 +2,11 @@
 import { ValueLine, EntityLine, TypeContext, FormGroup, EntityStrip, EntityDetail } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ScheduledTaskEntity } from '../../../../Extensions/Signum.React.Extensions/Scheduler/Signum.Entities.Scheduler'
 import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { WorkflowEventModel, WorkflowEventTaskModel, WorkflowEventTaskActionEval, WorkflowEventTaskConditionEval, WorkflowMessage, WorkflowEventType } from '../Signum.Entities.Workflow'
+import { WorkflowEventModel, WorkflowEventTaskModel, WorkflowEventTaskActionEval, WorkflowEventTaskConditionEval, WorkflowMessage, WorkflowEventType, TriggeredOn } from '../Signum.Entities.Workflow'
 import WorkflowEventTaskConditionComponent from './WorkflowEventTaskConditionComponent'
 import WorkflowEventTaskActionComponent from './WorkflowEventTaskActionComponent'
+import MessageModal from "../../../../Framework/Signum.React/Scripts/Modals/MessageModal";
+import { NormalWindowMessage } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
 
 
 interface WorkflowEventModelComponentProps {
@@ -13,21 +15,31 @@ interface WorkflowEventModelComponentProps {
 
 export default class WorkflowEventModelComponent extends React.Component<WorkflowEventModelComponentProps, void> {
 
-    isTimerOrConditionalStart() {
-        return (this.props.ctx.value.type == "TimerStart" || this.props.ctx.value.type == "ConditionalStart");
+    isTimerStart() {
+        return (this.props.ctx.value.type == "TimerStart");
+    }
+
+    isConditional() {
+        return this.props.ctx.value.task!.triggeredOn != TriggeredOn.value("Always");
     }
 
     loadTask() {
         var ctx = this.props.ctx;
 
-        if (!this.isTimerOrConditionalStart())
-            ctx.value.task = null
+        if (!this.isTimerStart())
+        {
+            ctx.value.task = null;
+            ctx.value.modified = true;
+        }
         else {
             if (!ctx.value.task)
+            {
                 ctx.value.task = WorkflowEventTaskModel.New({
                     triggeredOn: "Always",
                     action: WorkflowEventTaskActionEval.New(),
                 });
+                ctx.value.modified = true;
+            }
         }
 
         this.forceUpdate();
@@ -48,9 +60,9 @@ export default class WorkflowEventModelComponent extends React.Component<Workflo
             <div>
                 <ValueLine ctx={ctx.subCtx(we => we.name)} />
                 <ValueLine ctx={ctx.subCtx(we => we.type)}
-                    comboBoxItems={[WorkflowEventType.value("Start"), WorkflowEventType.value("TimerStart"), WorkflowEventType.value("ConditionalStart")]}
+                    comboBoxItems={[WorkflowEventType.value("Start"), WorkflowEventType.value("TimerStart")]}
                     onChange={this.handleTypeChange} />
-                {this.isTimerOrConditionalStart() && this.renderTaskModel(ctx)}
+                {this.isTimerStart() && this.renderTaskModel(ctx)}
             </div>
         );
     }
@@ -63,11 +75,27 @@ export default class WorkflowEventModelComponent extends React.Component<Workflo
             <div>
                 <ValueLine ctx={ctx.subCtx(we => we.task!.suspended)} />
                 <EntityDetail ctx={ctx.subCtx(we => we.task!.rule)} />
-                <ValueLine ctx={ctx.subCtx(we => we.task!.triggeredOn)} />
-                <WorkflowEventTaskConditionComponent ctx={ctx.subCtx(we => we.task!.condition)} />
+
+                <ValueLine ctx={ctx.subCtx(we => we.task!.triggeredOn)} onChange={this.handleTriggeredOnChange} />
+
+                {this.isConditional() &&
+                    <WorkflowEventTaskConditionComponent ctx={ctx.subCtx(we => we.task!.condition)} />}
                 <WorkflowEventTaskActionComponent ctx={ctx.subCtx(we => we.task!.action!)} mainEntityType={ctx.value.mainEntityType} />
             </div>
         );
+    }
+
+    handleTriggeredOnChange = () => {
+
+        const ctx = this.props.ctx;
+        const task = ctx.value.task!;
+
+        if (this.isConditional() && !task.condition) {
+            task.condition = WorkflowEventTaskConditionEval.New();
+            task.modified = true;
+        }
+        
+        this.forceUpdate();
     }
 }
 

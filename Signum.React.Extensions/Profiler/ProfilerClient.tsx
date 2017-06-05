@@ -10,48 +10,35 @@ import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import { PseudoType, QueryKey, GraphExplorer, OperationType  } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
 import { ProfilerPermission } from './Signum.Entities.Profiler'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
+import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<Route path="profiler">
-        <Route path="times" getComponent={(loc, cb) => require(["./Times/TimesPage"], (Comp) => cb(undefined, Comp.default))}/>
-        <Route path="heavy" getComponent={(loc, cb) => require(["./Heavy/HeavyListPage"], (Comp) => cb(undefined, Comp.default)) }/>
-        <Route path="heavy/entry/:selectedIndex" getComponent={(loc, cb) => require(["./Heavy/HeavyEntryPage"], (Comp) => cb(undefined, Comp.default)) }/>
-    </Route>);
+    options.routes.push(
+        <ImportRoute path="~/profiler/times" onImportModule={() => _import("./Times/TimesPage")} />,
+        <ImportRoute path="~/profiler/heavy" exact onImportModule={() => _import("./Heavy/HeavyListPage")} />,
+        <ImportRoute path="~/profiler/heavy/entry/:selectedIndex" onImportModule={() => _import("./Heavy/HeavyEntryPage")} />
+    );
 
-    //Navigator.addSettings(new EntitySettings(ProcessEntity, e => new ViewPromise(resolve => require(['./Templates/Process'], resolve))));
-
-    //if (options.packages || options.packageOperations) {
-    //    Navigator.addSettings(new EntitySettings(PackageLineEntity, e => new ViewPromise(resolve => require(['./Templates/PackageLine'], resolve))));
-    //}
-
-    //if (options.packages) {
-    //    Navigator.addSettings(new EntitySettings(PackageEntity, e => new ViewPromise(resolve => require(['./Templates/Package'], resolve))));
-    //}
-
-    //if (options.packageOperations) {
-    //    Navigator.addSettings(new EntitySettings(PackageOperationEntity, e => new ViewPromise(resolve => require(['./Templates/PackageOperation'], resolve))));
-    //}
 
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(ProfilerPermission.ViewHeavyProfiler),
         key: "ProfilerHeavy",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/profiler/heavy"))
+        onClick: () => Promise.resolve("~/profiler/heavy")
     });
     
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(ProfilerPermission.ViewTimeTracker),
         key: "ProfilerTimes",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/profiler/times"))
+        onClick: () => Promise.resolve("~/profiler/times")
     });
 
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(ProfilerPermission.OverrideSessionTimeout),
         key: "OverrideSessionTimeout",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/profiler/overrideSessionTimeout"))
+        onClick: () => Promise.resolve("~/profiler/overrideSessionTimeout")
     });
 
 }

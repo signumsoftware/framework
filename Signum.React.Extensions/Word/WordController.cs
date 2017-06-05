@@ -26,6 +26,8 @@ using Signum.Engine.Word;
 using System.Web;
 using Signum.React.Files;
 using System.IO;
+using Signum.Entities.Basics;
+using Signum.Engine.Maps;
 
 namespace Signum.React.Word
 {
@@ -35,20 +37,48 @@ namespace Signum.React.Word
         public HttpResponseMessage View(CreateWordReportRequest request)
         {
             var template = request.template.Retrieve();
-            var entity = request.entity.Retrieve();
+            var entity = request.entity ?? request.lite.Retrieve();
 
-            ISystemWordTemplate systemWordReport = template.SystemWordTemplate == null ? null :
-                (ISystemWordTemplate)SystemWordTemplateLogic.GetEntityConstructor(template.SystemWordTemplate.ToType()).Invoke(new[] { entity });
-
-            var bytes = request.template.CreateReport(entity, systemWordReport);
-
+            byte[] bytes;
+            if (template.SystemWordTemplate != null)
+            {
+                var systemWordTemplate = (ISystemWordTemplate)SystemWordTemplateLogic.GetEntityConstructor(template.SystemWordTemplate.ToType()).Invoke(new[] { entity });
+                bytes = request.template.CreateReport(entity: null, systemWordTemplate: systemWordTemplate);
+            }
+            else
+            {
+                bytes = request.template.CreateReport((Entity)entity);
+            }
+            
             return FilesController.GetHttpReponseMessage(new MemoryStream(bytes), template.FileName);            
         }
 
         public class CreateWordReportRequest
         {
             public Lite<WordTemplateEntity> template { get; set; }
-            public Lite<Entity> entity { get; set; }
+            public Lite<Entity> lite { get; set; }
+            public ModifiableEntity entity { get; set; }
+        }
+
+        [Route("api/word/constructorType"), HttpPost]
+        public string GetConstructorType(SystemWordTemplateEntity systemWordTemplate)
+        {
+            var type = SystemWordTemplateLogic.GetEntityType(systemWordTemplate.ToType());
+
+            return ReflectionServer.GetTypeName(type);
+
+        }
+
+        [Route("api/word/wordTemplates"), HttpGet]
+        public List<Lite<WordTemplateEntity>> GetWordTemplates(string typeName, bool isMultiple)
+        {
+            TypeEntity type = TypeLogic.TypeToEntity.GetOrThrow(TypeLogic.GetType(typeName));
+
+            var isAllowed = Schema.Current.GetInMemoryFilter<WordTemplateEntity>(userInterface: true);
+            return WordTemplateLogic.TemplatesByType.Value.TryGetC(type).EmptyIfNull()
+                .Where(a => isAllowed(a) && WordTemplateLogic.CanContextual(a, isMultiple))
+                .Select(a => a.ToLite())
+                .ToList();
         }
     }
 }

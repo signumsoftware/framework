@@ -322,7 +322,7 @@ namespace Signum.Engine.Mailing
 
                 if (et.From != null && et.From.Token != null)
                 {
-                    QueryTokenEntity token = et.From.Token;
+                    QueryTokenEmbedded token = et.From.Token;
                     switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " From", allowRemoveToken: false, allowReCreate: et.SystemEmail != null))
                     {
                         case FixTokenResult.Nothing: break;
@@ -339,7 +339,7 @@ namespace Signum.Engine.Mailing
                     Console.WriteLine(" Recipients:");
                     foreach (var item in et.Recipients.Where(a => a.Token != null).ToList())
                     {
-                        QueryTokenEntity token = item.Token;
+                        QueryTokenEmbedded token = item.Token;
                         switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Recipient", allowRemoveToken: false, allowReCreate: et.SystemEmail != null))
                         {
                             case FixTokenResult.Nothing: break;

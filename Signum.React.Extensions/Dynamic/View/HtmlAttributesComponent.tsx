@@ -103,15 +103,21 @@ export class HtmlAttributesLine extends React.Component<HtmlAttributesLineProps,
     }
     getDescription(hae: HtmlAttributesExpression) {
 
-        var { style, cleanHae} = hae;
+        var { style, ...cleanHae } = hae;
 
-        var keys = Dic.map(cleanHae, (key, value) => key + ":" + value);
+
+        var keys = Dic.map(cleanHae, (key, value) => key + ":" + this.getValue(value));
 
         if (style)
-            keys.push("style: {\n" + Dic.map(style, (key, value) => "   " +
-                key + ":" + (isExpression(value) ? "{" + value.__code__ + "}" : value)).join("\n") + "\n}");
+            keys.push("style: {\n" +
+                Dic.map(style, (key, value) => "   " + key + ":" + this.getValue(value)).join("\n") +
+                "\n}");
 
         return keys.join("\n");
+    }
+
+    getValue(value : any) {
+        return (isExpression(value) ? "{" + value.__code__ + "}" : value)
     }
 }
 

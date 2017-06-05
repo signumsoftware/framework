@@ -50,15 +50,15 @@ namespace Signum.Entities.UserQueries
 
 
         [NotNullable, PreserveOrder]
-        public MList<QueryFilterEntity> Filters { get; set; } = new MList<QueryFilterEntity>();
+        public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
         [NotNullable, PreserveOrder]
-        public MList<QueryOrderEntity> Orders { get; set; } = new MList<QueryOrderEntity>();
+        public MList<QueryOrderEmbedded> Orders { get; set; } = new MList<QueryOrderEmbedded>();
 
         public ColumnOptionsMode ColumnsMode { get; set; }
 
         [NotNullable, PreserveOrder]
-        public MList<QueryColumnEntity> Columns { get; set; } = new MList<QueryColumnEntity>();
+        public MList<QueryColumnEmbedded> Columns { get; set; } = new MList<QueryColumnEmbedded>();
 
         PaginationMode? paginationMode;
         public PaginationMode? PaginationMode
@@ -182,11 +182,11 @@ namespace Signum.Entities.UserQueries
 
 
     [Serializable]
-    public class QueryOrderEntity : EmbeddedEntity
+    public class QueryOrderEmbedded : EmbeddedEntity
     {
         [NotNullable]
         [NotNullValidator]
-        public QueryTokenEntity Token { get; set; }
+        public QueryTokenEmbedded Token { get; set; }
 
         public OrderType OrderType { get; set; }
 
@@ -199,7 +199,7 @@ namespace Signum.Entities.UserQueries
 
         internal void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Token = new QueryTokenEntity(element.Attribute("Token").Value);
+            Token = new QueryTokenEmbedded(element.Attribute("Token").Value);
             OrderType = element.Attribute("OrderType").Value.ToEnum<OrderType>();
         }
 
@@ -225,11 +225,11 @@ namespace Signum.Entities.UserQueries
     }
 
     [Serializable]
-    public class QueryColumnEntity : EmbeddedEntity
+    public class QueryColumnEmbedded : EmbeddedEntity
     {
         [NotNullable]
         [NotNullValidator]
-        public QueryTokenEntity Token { get; set; }
+        public QueryTokenEmbedded Token { get; set; }
 
         string displayName;
         public string DisplayName
@@ -247,7 +247,7 @@ namespace Signum.Entities.UserQueries
 
         internal void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Token = new QueryTokenEntity(element.Attribute("Token").Value);
+            Token = new QueryTokenEmbedded(element.Attribute("Token").Value);
             DisplayName = element.Attribute("DisplayName")?.Value;
         }
 
@@ -273,14 +273,14 @@ namespace Signum.Entities.UserQueries
     }
 
     [Serializable]
-    public class QueryFilterEntity : EmbeddedEntity
+    public class QueryFilterEmbedded : EmbeddedEntity
     {
-        public QueryFilterEntity() { }
+        public QueryFilterEmbedded() { }
 
         [NotNullable]
-        QueryTokenEntity token;
+        QueryTokenEmbedded token;
         [NotNullValidator]
-        public QueryTokenEntity Token
+        public QueryTokenEmbedded Token
         {
             get { return token; }
             set
@@ -343,7 +343,7 @@ namespace Signum.Entities.UserQueries
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Token = new QueryTokenEntity(element.Attribute("Token").Value);
+            Token = new QueryTokenEmbedded(element.Attribute("Token").Value);
             Operation = element.Attribute("Operation").Value.ToEnum<FilterOperation>();
             ValueString = element.Attribute("Value").Value;
         }
@@ -377,17 +377,17 @@ namespace Signum.Entities.UserQueries
                 Query = query,
                 WithoutFilters = withoutFilters,
                 Owner = DefaultOwner(),
-                Filters = withoutFilters ? new MList<QueryFilterEntity>() : request.Filters.Select(f => new QueryFilterEntity
+                Filters = withoutFilters ? new MList<QueryFilterEmbedded>() : request.Filters.Select(f => new QueryFilterEmbedded
                 {
-                    Token = new QueryTokenEntity(f.Token),
+                    Token = new QueryTokenEmbedded(f.Token),
                     Operation = f.Operation,
                     ValueString = FilterValueConverter.ToString(f.Value, f.Token.Type)
                 }).ToMList(),
                 ColumnsMode = tuple.mode,
                 Columns = tuple.columns,
-                Orders = request.Orders.Select(oo => new QueryOrderEntity
+                Orders = request.Orders.Select(oo => new QueryOrderEmbedded
                 {
-                    Token = new QueryTokenEntity(oo.Token),
+                    Token = new QueryTokenEmbedded(oo.Token),
                     OrderType = oo.OrderType
                 }).ToMList(),
                 PaginationMode = isDefaultPaginate ? (PaginationMode?)null : mode,
@@ -395,7 +395,7 @@ namespace Signum.Entities.UserQueries
             };
         }
 
-        public static (ColumnOptionsMode mode, MList<QueryColumnEntity> columns) SmartColumns(List<Column> current, QueryDescription qd)
+        public static (ColumnOptionsMode mode, MList<QueryColumnEmbedded> columns) SmartColumns(List<Column> current, QueryDescription qd)
         {
             var ideal = (from cd in qd.Columns
                          where !cd.IsEntity
@@ -420,22 +420,22 @@ namespace Signum.Entities.UserQueries
                 }
 
                 if (toRemove.Count + current.Count == ideal.Count)
-                    return (mode: ColumnOptionsMode.Remove, columns: toRemove.Select(c => new QueryColumnEntity { Token = new QueryTokenEntity(c.Token) }).ToMList());
+                    return (mode: ColumnOptionsMode.Remove, columns: toRemove.Select(c => new QueryColumnEmbedded { Token = new QueryTokenEmbedded(c.Token) }).ToMList());
             }
             else
             {
                 if (current.Zip(ideal).All(t => t.first.Similar(t.second)))
-                    return (mode: ColumnOptionsMode.Add, columns: current.Skip(ideal.Count).Select(c => new QueryColumnEntity
+                    return (mode: ColumnOptionsMode.Add, columns: current.Skip(ideal.Count).Select(c => new QueryColumnEmbedded
                     {
-                        Token = new QueryTokenEntity(c.Token),
+                        Token = new QueryTokenEmbedded(c.Token),
                         DisplayName = c.DisplayName
                     }).ToMList());
 
             }
 
-            return (mode: ColumnOptionsMode.Replace, columns: current.Select(c => new QueryColumnEntity
+            return (mode: ColumnOptionsMode.Replace, columns: current.Select(c => new QueryColumnEmbedded
             {
-                Token = new QueryTokenEntity(c.Token),
+                Token = new QueryTokenEmbedded(c.Token),
                 DisplayName = c.DisplayName
             }).ToMList());
         }

@@ -1,16 +1,16 @@
 ﻿import * as React from 'react'
 import { Tabs, Tab } from 'react-bootstrap'
+import { globalModules } from './GlobalModules'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityDetail, EntityStrip } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ModifiableEntity, isLite, isEntity, External } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { ViewReplacer } from '../../../../Framework/Signum.React/Scripts/Frames/ReactVisitor'
-import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import {
     getQueryNiceName, TypeInfo, MemberInfo, getTypeInfo, EntityData, EntityKind, getTypeInfos, Binding, EnumType,
     KindOfType, PropertyRoute, PropertyRouteType, LambdaMemberType, isTypeEntity, isTypeModel, isTypeModifiableEntity
 } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, StyleOptions, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { EntityBase, EntityBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines/EntityBase'
 import { EntityListBase, EntityListBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines/EntityListBase'
@@ -18,7 +18,6 @@ import { DynamicViewValidationMessage } from '../Signum.Entities.Dynamic'
 import { ExpressionOrValueComponent, FieldComponent } from './Designer'
 import { FindOptionsLine } from './FindOptionsComponent'
 import { FindOptionsExpr, toFindOptions } from './FindOptionsExpression'
-import { AuthInfo } from './AuthInfo'
 import { BaseNode, LineBaseNode, EntityBaseNode, EntityListBaseNode, EntityLineNode, ContainerNode, EntityTableColumnNode, CustomContextNode, TypeIsNode } from './Nodes'
 import { toHtmlAttributes, HtmlAttributesExpression, withClassName } from './HtmlAttributesExpression'
 import { toStyleOptions, StyleOptionsExpression, subCtx } from './StyleOptionsExpression'
@@ -102,15 +101,6 @@ export class CodeContext {
         return result;
     }
 
-
-    evaluateOnChange(redrawOnChange?: boolean): ExpressionOrValue<any> {
-
-        if (!redrawOnChange)
-            return null;
-
-        return { __code__: "()=>this.forceUpdate()" };
-    }
-
     elementCode(type: string, props: any, ...children: (string | undefined)[]) {
 
         var propsStr = props && Dic.map(props, (k, v) => v == undefined ? null :
@@ -167,16 +157,20 @@ ${childrenString}
         var result : any/*: EntityBaseProps*/ = {
             ctx: this.subCtxCode(node.field, node.styleOptions),
             labelText: node.labelText,
-            labelHtmlProps: node.labelHtmlAttributes,
-            formGroupHtmlProps: node.formGroupHtmlAttributes,
+            labelHtmlAttributes: node.labelHtmlAttributes,
+            formGroupHtmlAttributes: node.formGroupHtmlAttributes,
             visible: node.visible,
             readOnly: node.readOnly,
             create: node.create,
+            onCreate: node.onCreate,
             remove: node.remove,
+            onRemove: node.onRemove,
             find: node.find,
+            onFind: node.onFind,
             view: node.view,
+            onView: node.onView,
             viewOnCreate: node.viewOnCreate,
-            onChange: this.evaluateOnChange(node.redrawOnChange),
+            onChange: node.onChange,
             findOptions: node.findOptions,
             getComponent: options.avoidGetComponent == true ? undefined : this.getGetComponentEx(node, true),
         };
@@ -392,19 +386,20 @@ export function renderDesigner(dn: DesignerNode<BaseNode>) {
     );
 }
 
-export function asFunction(expression: Expression<any>, getFieldName: () => string): (e: TypeContext<ModifiableEntity>, auth: AuthInfo) => any {
-    let code = expression.__code__;
-
-    if (!code.contains(";") && !code.contains("return"))
-        code = "return " + expression.__code__ + ";";
-
-    code = "(function(ctx, auth){ " + code + "})";
+export function asFunction(thisObject: React.Component<any, any>, expression: Expression<any>, getFieldName: () => string): (e: TypeContext<ModifiableEntity>) => any {
+ 
+    const code = "ctx => " + expression.__code__;
 
     try {
-        return eval(code);
+        return evalWithScope.call(thisObject, code, globalModules);
     } catch (e) {
         throw new Error("Syntax in '" + getFieldName() + "':\r\n" + code + "\r\n" + (e as Error).message);
     }
+}
+
+export function evalWithScope(code: string, modules: any) {
+   
+    return eval(code);
 }
 
 export function asFieldFunction(field: string): (e: ModifiableEntity) => any {
@@ -434,10 +429,10 @@ export function evaluateUntyped(parentCtx: TypeContext<ModifiableEntity>, expres
     if (!expressionOrValue.__code__)
         return undefined;
 
-    var f = asFunction(expressionOrValue, getFieldName);
+    var f = asFunction(parentCtx.frame!.entityComponent, expressionOrValue, getFieldName);
 
     try {
-        return f(parentCtx, new AuthInfo());
+        return f(parentCtx);
     } catch (e) {
         throw new Error("Eval '" + getFieldName() + "':\r\n" + (e as Error).message);
     }
@@ -456,14 +451,6 @@ export function evaluateAndValidate<F, T>(parentCtx: TypeContext<ModifiableEntit
 
     return result;
 }
-
-export function evaluateOnChange<T>(ctx: TypeContext<ModifiableEntity>, dn: DesignerNode<LineBaseNode>): (() => void) | undefined {
-
-    return evaluateAndValidate(ctx, dn.node, n => n.redrawOnChange, isBooleanOrNull) == true ?
-        () => ctx.frame!.entityComponent.forceUpdate() :
-        undefined;
-}
-
 
 export function validate(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity> | undefined) {
     const options = registeredNodes[dn.node.kind];
@@ -508,6 +495,10 @@ export function isEnumOrNull(val: any, enumType: EnumType<any>) {
     return val == null || typeof val == "string" && enumType.values().contains(val) ? null : `The returned value (${JSON.stringify(val)}) should be a valid ${enumType.type} (like ${enumType.values().joinComma(" or ")}) or null`;
 }
 
+export function isObject(val: any) {
+    return val != null && typeof val == "object" ? null : `The returned value (${JSON.stringify(val)}) should be an object`;
+}
+
 export function isInList(val: any, values: string[]) {
     return val != null && typeof val == "string" && values.contains(val) ? null : `The returned value (${JSON.stringify(val)}) should be a value like ${values.joinComma(" or ")}`;
 }
@@ -526,6 +517,10 @@ export function isBooleanOrNull(val: any) {
 
 export function isBooleanOrFunctionOrNull(val: any) {
     return val == null || typeof val == "boolean" || typeof val == "function" ? null : `The returned value (${JSON.stringify(val)}) should be a boolean or function or null`;
+}
+
+export function isFunctionOrNull(val: any) {
+    return val == null || typeof val == "function" ? null : `The returned value (${JSON.stringify(val)}) should be a function or null`;
 }
 
 export function isFindOptionsOrNull(val: any) {
@@ -672,18 +667,22 @@ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: 
     var result: EntityBaseProps = {
         ctx: parentCtx.subCtx(asFieldFunction(dn.node.field), toStyleOptions(parentCtx, dn.node.styleOptions)),
         labelText: evaluateAndValidate(parentCtx, dn.node, n => n.labelText, isStringOrNull),
-        labelHtmlProps: toHtmlAttributes(parentCtx, dn.node.labelHtmlAttributes),
-        formGroupHtmlProps: toHtmlAttributes(parentCtx, dn.node.formGroupHtmlAttributes),
+        labelHtmlAttributes: toHtmlAttributes(parentCtx, dn.node.labelHtmlAttributes),
+        formGroupHtmlAttributes: toHtmlAttributes(parentCtx, dn.node.formGroupHtmlAttributes),
         visible: evaluateAndValidate(parentCtx, dn.node, n => n.visible, isBooleanOrNull),
         readOnly: evaluateAndValidate(parentCtx, dn.node, n => n.readOnly, isBooleanOrNull),
         create: evaluateAndValidate(parentCtx, dn.node, n => n.create, isBooleanOrNull),
+        onCreate: evaluateAndValidate(parentCtx, dn.node, n => n.onCreate, isFunctionOrNull),
         remove: evaluateAndValidate(parentCtx, dn.node, n => n.remove, isBooleanOrFunctionOrNull),
+        onRemove: evaluateAndValidate(parentCtx, dn.node, n => n.onRemove, isFunctionOrNull),
         find: evaluateAndValidate(parentCtx, dn.node, n => n.find, isBooleanOrNull),
+        onFind: evaluateAndValidate(parentCtx, dn.node, n => n.onFind, isFunctionOrNull),
         view: evaluateAndValidate(parentCtx, dn.node, n => n.view, isBooleanOrFunctionOrNull),
+        onView: evaluateAndValidate(parentCtx, dn.node, n => n.onView, isFunctionOrNull),
         viewOnCreate: evaluateAndValidate(parentCtx, dn.node, n => n.viewOnCreate, isBooleanOrNull),
-        onChange: evaluateOnChange(parentCtx, dn),
+        onChange: evaluateAndValidate(parentCtx, dn.node, n => n.onChange, isFunctionOrNull),
         findOptions: dn.node.findOptions && toFindOptions(parentCtx, dn.node.findOptions),
-        getComponent: options.avoidGetComponent  == true ? undefined : getGetComponent(dn),
+        getComponent: options.avoidGetComponent == true ? undefined : getGetComponent(dn),
     };
 
     if (options.showAutoComplete)
@@ -708,6 +707,9 @@ export function getGetComponent(dn: DesignerNode<ContainerNode>) {
 export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { isCreable: boolean; isFindable: boolean; isViewable: boolean; showAutoComplete: boolean, showMove?: boolean }) {
   
     const m = dn.route && dn.route.member;
+
+    const typeName = m ? m.type.name : "YourEntity";
+
     return (
         <div>
             <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
@@ -717,14 +719,18 @@ export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { is
             <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.create)} type="boolean" defaultValue={null} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onCreate)} type={null} defaultValue={null} exampleExpression={"() => Promise.resolve(modules.Reflection.New('" + typeName + "', { name: ''}))"} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.remove)} type="boolean" defaultValue={null} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onRemove)} type={null} defaultValue={null} exampleExpression={"() => Promise.resolve(true)"}/>
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.find)} type="boolean" defaultValue={null} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onFind)} type={null} defaultValue={null} exampleExpression={"e => modules.Finder.find('" + typeName + "')"} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.view)} type="boolean" defaultValue={null} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onView)} type={null} defaultValue={null} exampleExpression={"e => modules.Navigator.view(e)"}/>
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.viewOnCreate)} type="boolean" defaultValue={null} />
             {options.showMove && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, (n: EntityListBaseNode) => n.move)} type="boolean" defaultValue={null} />}
             {options.showAutoComplete && <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, (n: EntityLineNode) => n.autoComplete)} type="boolean" defaultValue={null} />}
             <FindOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.findOptions)} avoidSuggestion={true} />
-            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.redrawOnChange)} type="boolean" defaultValue={null} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={null} />
         </div>
     );
 }

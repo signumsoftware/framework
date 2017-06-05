@@ -36,7 +36,6 @@ export default class SpecialOmniboxProvider extends OmniboxProvider<SpecialOmnib
     }
 
     toString(result: SpecialOmniboxResult) {
-
         return "!" + result.Key;
     }
 }

@@ -10,21 +10,20 @@ import { CultureInfoEntity } from '../Basics/Signum.Entities.Basics'
 import { TranslationPermission } from './Signum.Entities.Translation'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
+import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 export function start(options: { routes: JSX.Element[] }) {
 
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(TranslationPermission.TranslateCode),
         key: "TranslateCode",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/translation/status"))
+        onClick: () => Promise.resolve("~/translation/status")
     });
 
     options.routes.push(
-        <Route path="translation" >
-            <Route path="status" getComponent= {(loc, cb) => require(["./Code/TranslationCodeStatus"], (Comp) => cb(undefined, Comp.default)) }/>
-            <Route path="view/:assembly(/:culture)" getComponent= {(loc, cb) => require(["./Code/TranslationCodeView"], (Comp) => cb(undefined, Comp.default)) }/>
-            <Route path="sync/:assembly/:culture" getComponent= {(loc, cb) => require(["./Code/TranslationCodeSync"], (Comp) => cb(undefined, Comp.default)) }/>
-        </Route>
+        <ImportRoute path="~/translation/status" onImportModule={() => _import("./Code/TranslationCodeStatus")} />,
+        <ImportRoute path="~/translation/view/:assembly/:culture?" onImportModule={() => _import("./Code/TranslationCodeView")} />,
+        <ImportRoute path="~/translation/sync/:assembly/:culture" onImportModule={() => _import("./Code/TranslationCodeSync")} />
     );
 }
 

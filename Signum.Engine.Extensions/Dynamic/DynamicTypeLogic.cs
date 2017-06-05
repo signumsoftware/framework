@@ -7,6 +7,7 @@ using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Authorization;
+using Signum.Entities.Basics;
 using Signum.Entities.Dynamic;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
@@ -23,6 +24,8 @@ namespace Signum.Engine.Dynamic
 {
     public static class DynamicTypeLogic
     {
+        public static ResetLazy<HashSet<Type>> AvailableEmbeddedEntities;
+ 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -35,6 +38,16 @@ namespace Signum.Engine.Dynamic
                         e.TypeName,
                         e.BaseType,
                     });
+
+                AvailableEmbeddedEntities = sb.GlobalLazy(() =>
+                {
+                    var namespaces = DynamicCode.GetNamespaces().ToHashSet();
+                    return DynamicCode.GetAssemblies()
+                    .SelectMany(a => Assembly.LoadFile(a).GetTypes())
+                    .Where(t => typeof(EmbeddedEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace))
+                    .ToHashSet();
+
+                }, new InvalidateWith(typeof(TypeEntity)));
 
                 DynamicTypeGraph.Register();
                 DynamicLogic.GetCodeFiles += GetCodeFiles;
@@ -236,11 +249,11 @@ namespace Signum.Engine.Dynamic
             {
                 sb.AppendLine("[" + gr.ToString(", ") + "]");
             }
-            sb.AppendLine($"public class {this.TypeName}{this.BaseType} : {GetEntityBaseClass(this.BaseType)}");
+            sb.AppendLine($"public class {this.GetTypeNameWithSuffix()} : {GetEntityBaseClass(this.BaseType)}");
             sb.AppendLine("{");
 
-            if (this.BaseType == DynamicBaseType.Mixin)
-                sb.AppendLine($"{this.TypeName}{this.BaseType}(Entity mainEntity, MixinEntity next): base(mainEntity, next) {{ }}".Indent(4));
+            if (this.BaseType == DynamicBaseType.MixinEntity)
+                sb.AppendLine($"{this.GetTypeNameWithSuffix()}(Entity mainEntity, MixinEntity next): base(mainEntity, next) {{ }}".Indent(4));
 
             foreach (var prop in Def.Properties)
             {
@@ -307,12 +320,7 @@ namespace Signum.Engine.Dynamic
             if (this.Def.CustomInheritance != null)
                 return this.Def.CustomInheritance.Code;
 
-            switch (baseType)
-            {
-                case DynamicBaseType.Entity: return "Entity";
-                case DynamicBaseType.Mixin: return "MixinEntity";
-                default: throw new NotImplementedException();
-            }
+            return baseType.ToString();
         }
 
         protected virtual string GetToString()
@@ -321,13 +329,19 @@ namespace Signum.Engine.Dynamic
                 return null;
             
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"static Expression<Func<{this.TypeName}{this.BaseType}, string>> ToStringExpression = e => {Def.ToStringExpression};");
+            sb.AppendLine($"static Expression<Func<{this.GetTypeNameWithSuffix()}, string>> ToStringExpression = e => {Def.ToStringExpression};");
             sb.AppendLine("[ExpressionField(\"ToStringExpression\")]");
             sb.AppendLine("public override string ToString()");
             sb.AppendLine("{");
             sb.AppendLine("    return ToStringExpression.Evaluate(this);");
             sb.AppendLine("}");
             return sb.ToString();
+        }
+
+        public virtual string GetTypeNameWithSuffix()
+        {
+            return this.TypeName + (this.BaseType == DynamicBaseType.MixinEntity ? "Mixin" :
+                this.BaseType == DynamicBaseType.EmbeddedEntity ? "Embedded":  "Entity");
         }
 
         private List<string> GetEntityAttributes()
@@ -380,8 +394,8 @@ namespace Signum.Engine.Dynamic
 
             StringBuilder sb = new StringBuilder();
 
-            string inititalizer = (property.IsMList != null) ? $" = new {type}()": null;
-            string fieldName = property.Name.FirstLower();
+            string inititalizer = (property.IsMList != null) ? $" = new {type}()" : null;
+            string fieldName = GetFieldName(property);
 
             WriteAttributeTag(sb, GetFieldAttributes(property));
             sb.AppendLine($"{type} {fieldName}{inititalizer};");
@@ -393,6 +407,16 @@ namespace Signum.Engine.Dynamic
             sb.AppendLine("}");
 
             return sb.ToString();
+        }
+
+        private static string GetFieldName(DynamicProperty property)
+        {
+            var fn = property.Name.FirstLower();
+
+            if (CSharpRenderer.Keywords.Contains(fn))
+                return "@" + fn;
+
+            return fn;
         }
 
         private IEnumerable<string> GetPropertyAttributes(DynamicProperty property)
@@ -465,13 +489,17 @@ namespace Signum.Engine.Dynamic
                     atts.Add($"BackReferenceColumnName({Literal(mlist.BackReferenceName)})");
             }
 
+            if (property.CustomAttributes.HasText())
+                atts.Add(property.CustomAttributes);
+
+
             return atts;
         }
 
         private string ParseTableName(string value)
         {
 
-            var objName = ObjectName.Parse(Def.TableName);
+            var objName = ObjectName.Parse(value);
 
             return new List<string>
                 {

@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
-import { UserQueryEntity, UserQueryMessage, QueryFilterEntity, QueryOrderEntity, QueryColumnEntity } from '../../UserQueries/Signum.Entities.UserQueries'
+import { UserQueryEntity, UserQueryMessage, QueryFilterEmbedded, QueryOrderEmbedded, QueryColumnEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
 import ChartBuilder from '../Templates/ChartBuilder'
-import { ChartScriptEntity, ChartScriptColumnEntity, ChartScriptParameterEntity } from '../Signum.Entities.Chart'
+import { ChartScriptEntity, ChartScriptColumnEmbedded, ChartScriptParameterEmbedded } from '../Signum.Entities.Chart'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
@@ -62,7 +62,7 @@ export default class ChartScript extends React.Component<{ ctx: TypeContext<Char
         );
     }
 
-    renderColumn = (ctx: TypeContext<ChartScriptColumnEntity>) => {
+    renderColumn = (ctx: TypeContext<ChartScriptColumnEmbedded>) => {
         return (
             <div>
                 <ValueLine ctx={ctx.subCtx(c => c.displayName) } valueColumns={{ sm: 8 }} />
@@ -81,7 +81,7 @@ export default class ChartScript extends React.Component<{ ctx: TypeContext<Char
         );
     }
 
-    renderParameter = (ctx: TypeContext<ChartScriptParameterEntity>) => {
+    renderParameter = (ctx: TypeContext<ChartScriptParameterEmbedded>) => {
         const cc = ctx.subCtx({ formGroupStyle: "Basic" });
         return (
             <div>

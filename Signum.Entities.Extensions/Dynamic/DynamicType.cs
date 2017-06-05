@@ -238,7 +238,8 @@ namespace Signum.Entities.Dynamic
     public enum DynamicBaseType
     {
         Entity,
-        Mixin
+        MixinEntity,
+        EmbeddedEntity,
     }
 
     public class DynamicProperty
@@ -277,7 +278,10 @@ namespace Signum.Entities.Dynamic
         public int? Scale;
         
         [JsonProperty(PropertyName = "validators", NullValueHandling = NullValueHandling.Ignore)]
-        public List<DynamicValidator> Validators; 
+        public List<DynamicValidator> Validators;
+
+        [JsonProperty(PropertyName = "customAttributes", NullValueHandling = NullValueHandling.Ignore)]
+        public string CustomAttributes;
     }
 
 
@@ -350,6 +354,9 @@ namespace Signum.Entities.Dynamic
 
         string Value(object obj)
         {
+            if (obj is decimal)
+                obj = (double)(decimal)obj;
+
             return CSharpRenderer.Value(obj, obj.GetType(), null);
         }
 

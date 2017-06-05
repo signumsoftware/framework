@@ -39,8 +39,8 @@ namespace Signum.Engine.Mailing
 {
     public static class EmailLogic
     {
-        static Func<EmailConfigurationEntity> getConfiguration;
-        public static EmailConfigurationEntity Configuration
+        static Func<EmailConfigurationEmbedded> getConfiguration;
+        public static EmailConfigurationEmbedded Configuration
         {
             get { return getConfiguration(); }
         }
@@ -54,20 +54,16 @@ namespace Signum.Engine.Mailing
 
         public static Func<EmailMessageEntity, SmtpClient> GetSmtpClient;
         
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailConfigurationEntity> getConfiguration, Func<EmailTemplateEntity, SmtpConfigurationEntity> getSmtpConfiguration,  Func<EmailMessageEntity, SmtpClient> getSmtpClient = null, IFileTypeAlgorithm attachment = null)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailConfigurationEmbedded> getConfiguration, Func<EmailTemplateEntity, SmtpConfigurationEntity> getSmtpConfiguration,  Func<EmailMessageEntity, SmtpClient> getSmtpClient = null, IFileTypeAlgorithm attachment = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {   
                 if (getSmtpClient == null && getSmtpConfiguration != null)
                     getSmtpClient = message => getSmtpConfiguration(message.Template?.Let(EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow)).GenerateSmtpClient();
-
-                if (getSmtpClient == null)
-                    throw new ArgumentNullException("getSmtpClient");
-
-                EmbeddedFilePathLogic.AssertStarted(sb);
+                FilePathEmbeddedLogic.AssertStarted(sb);
                 CultureInfoLogic.AssertStarted(sb);
                 EmailLogic.getConfiguration = getConfiguration;
-                EmailLogic.GetSmtpClient = getSmtpClient;
+                EmailLogic.GetSmtpClient = getSmtpClient ?? throw new ArgumentNullException("getSmtpClient");
                 EmailTemplateLogic.Start(sb, dqm, getSmtpConfiguration);
                 if (attachment != null)
                     FileTypeLogic.Register(EmailFileType.Attachment, attachment);
@@ -158,9 +154,9 @@ namespace Signum.Engine.Mailing
             };
         }
 
-        public static MList<EmailTemplateMessageEntity> CreateMessages(Func<EmailTemplateMessageEntity> func)
+        public static MList<EmailTemplateMessageEmbedded> CreateMessages(Func<EmailTemplateMessageEmbedded> func)
         {
-            var list = new MList<EmailTemplateMessageEntity>();
+            var list = new MList<EmailTemplateMessageEmbedded>();
             foreach (var ci in CultureInfoLogic.ApplicationCultures)
             {
                 using (CultureInfoUtils.ChangeBothCultures(ci))
@@ -171,7 +167,7 @@ namespace Signum.Engine.Mailing
             return list;
         }
 
-        public static MailAddress ToMailAddress(this EmailAddressEntity address)
+        public static MailAddress ToMailAddress(this EmailAddressEmbedded address)
         {
             if (address.DisplayName != null)
                 return new MailAddress(address.EmailAddress, address.DisplayName);

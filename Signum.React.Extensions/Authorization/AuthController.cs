@@ -15,20 +15,6 @@ namespace Signum.React.Authorization
 {
     public class AuthController : ApiController
     {
-        public class LoginRequest
-        {
-            public string userName { get; set; }
-            public string password { get; set; }
-            public bool? rememberMe { get; set; }
-        }
-
-        public class LoginResponse
-        {
-            public string message { get; set; }
-            public string token { get; set; }
-            public UserEntity userEntity { get; set; }
-        }
-
         [Route("api/auth/login"), HttpPost, AllowAnonymous]
         public LoginResponse Login([FromBody]LoginRequest data)
         {
@@ -85,6 +71,16 @@ namespace Signum.React.Authorization
             }
         }
 
+        [Route("api/auth/loginFromApiKey"), HttpGet]
+        public LoginResponse LoginFromApiKey(string apiKey)
+        {
+            string message = AuthLogic.OnLoginMessage();
+
+            var token = AuthTokenServer.CreateToken(UserEntity.Current);
+
+            return new LoginResponse { message = message, userEntity = UserEntity.Current, token = token };
+        }
+
         [Route("api/auth/loginFromCookie"), HttpPost, AllowAnonymous]
         public LoginResponse LoginFromCookie()
         {
@@ -123,11 +119,7 @@ namespace Signum.React.Authorization
             return new LoginResponse { message = null, userEntity = user, token = newToken };
         }
 
-        public class ChangePasswordRequest
-        {
-            public string oldPassword { get; set; }
-            public string newPassword { get; set; }
-        }
+       
 
         [Route("api/auth/ChangePassword"), HttpPost]
         public UserEntity ChangePassword(ChangePasswordRequest request)
@@ -155,5 +147,27 @@ namespace Signum.React.Authorization
             ModelState.AddModelError(field, error);
             return new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, this.ModelState));
         }
+
+#pragma warning disable IDE1006 // Naming Styles
+        public class LoginRequest
+        {
+            public string userName { get; set; }
+            public string password { get; set; }
+            public bool? rememberMe { get; set; }
+        }
+
+        public class LoginResponse
+        {
+            public string message { get; set; }
+            public string token { get; set; }
+            public UserEntity userEntity { get; set; }
+        }
+
+        public class ChangePasswordRequest
+        {
+            public string oldPassword { get; set; }
+            public string newPassword { get; set; }
+        }
+#pragma warning restore IDE1006 // Naming Styles
     }
 }

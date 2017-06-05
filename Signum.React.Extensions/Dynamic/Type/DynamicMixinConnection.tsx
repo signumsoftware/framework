@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
 import { Button } from 'react-bootstrap'
 import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
@@ -26,7 +25,7 @@ export default class DynamicMixinConnectionComponent extends React.Component<Dyn
                     findOptions={{
                         queryName: DynamicTypeEntity,
                         filterOptions: [
-                            { columnName: "Entity.BaseType", operation: "EqualTo", value: "Mixin" },
+                            { columnName: "Entity.BaseType", operation: "EqualTo", value: "MixinEntity" },
                         ]
                     }} />
                 <EntityLine ctx={ctx.subCtx(dt => dt.entityType)} />

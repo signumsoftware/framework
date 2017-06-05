@@ -24,7 +24,7 @@ namespace Signum.Entities.Excel
 
         [NotNullable]
         [NotNullValidator]
-        public EmbeddedFileEntity File { get; set; }
+        public FileEmbedded File { get; set; }
 
         static readonly Expression<Func<ExcelReportEntity, string>> ToStringExpression = e => e.DisplayName;
         [ExpressionField]

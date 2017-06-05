@@ -161,9 +161,9 @@ namespace Signum.Entities.Authorization
 
         Overriden,
         NoRoles,
-
-
-        PleaseSaveChangesFirst
+        Filter,
+        PleaseSaveChangesFirst,
+        ResetChanges,
+        SwitchTo,
     }
-
 }

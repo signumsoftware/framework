@@ -1,7 +1,6 @@
 ﻿import * as React from 'react'
 import { Button } from 'react-bootstrap'
-import { Link } from 'react-router'
-import * as numeral from 'numeral'
+import * as numbro from 'numbro'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { notifySuccess }from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
@@ -12,7 +11,6 @@ import { EntityLine, ValueLine } from '../../../../Framework/Signum.React/Script
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { Api } from '../AuthClient'
 import { PermissionRulePack, AuthAdminMessage, PermissionSymbol, AuthMessage } from '../Signum.Entities.Authorization'
 
 
@@ -30,12 +28,12 @@ export class ColorRadio extends React.Component<{ checked: boolean, onClicked: (
     }
 }
 
-export class GrayCheckbox extends React.Component<{ checked: boolean }, void>{
+export class GrayCheckbox extends React.Component<{ checked: boolean, onUnchecked: () => void }, void>{
 
     render() {
         return (
-            <i className={classes("sf-auth-checkbox", "fa", this.props.checked ? "fa-check-square-o" : "fa-square-o") }
-                style={{ color: "#aaa" }}>
+            <i className={classes("sf-auth-checkbox", "fa", this.props.checked ? "fa-check-square-o" : "fa-square-o")}
+                onClick={this.props.checked ? this.props.onUnchecked : undefined}>
             </i>
         );
     }

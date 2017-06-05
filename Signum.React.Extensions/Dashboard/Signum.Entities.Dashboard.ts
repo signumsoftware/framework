@@ -26,7 +26,7 @@ export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetE
     dashboardPriority?: number | null;
     autoRefreshPeriod?: number | null;
     displayName?: string | null;
-    parts: Entities.MList<PanelPartEntity>;
+    parts: Entities.MList<PanelPartEmbedded>;
     guid?: string;
     forNavbar?: boolean;
     key?: string | null;
@@ -56,9 +56,9 @@ export interface IPartEntity extends Entities.Entity {
     requiresTitle?: boolean;
 }
 
-export const LinkElementEntity = new Type<LinkElementEntity>("LinkElementEntity");
-export interface LinkElementEntity extends Entities.EmbeddedEntity {
-    Type: "LinkElementEntity";
+export const LinkElementEmbedded = new Type<LinkElementEmbedded>("LinkElementEmbedded");
+export interface LinkElementEmbedded extends Entities.EmbeddedEntity {
+    Type: "LinkElementEmbedded";
     label?: string | null;
     link?: string | null;
 }
@@ -66,13 +66,13 @@ export interface LinkElementEntity extends Entities.EmbeddedEntity {
 export const LinkListPartEntity = new Type<LinkListPartEntity>("LinkListPart");
 export interface LinkListPartEntity extends Entities.Entity, IPartEntity {
     Type: "LinkListPart";
-    links: Entities.MList<LinkElementEntity>;
+    links: Entities.MList<LinkElementEmbedded>;
     requiresTitle?: boolean;
 }
 
-export const PanelPartEntity = new Type<PanelPartEntity>("PanelPartEntity");
-export interface PanelPartEntity extends Entities.EmbeddedEntity {
-    Type: "PanelPartEntity";
+export const PanelPartEmbedded = new Type<PanelPartEmbedded>("PanelPartEmbedded");
+export interface PanelPartEmbedded extends Entities.EmbeddedEntity {
+    Type: "PanelPartEmbedded";
     title?: string | null;
     row?: number;
     startColumn?: number;
@@ -106,9 +106,9 @@ export interface UserQueryPartEntity extends Entities.Entity, IPartEntity {
     requiresTitle?: boolean;
 }
 
-export const ValueUserQueryElementEntity = new Type<ValueUserQueryElementEntity>("ValueUserQueryElementEntity");
-export interface ValueUserQueryElementEntity extends Entities.EmbeddedEntity {
-    Type: "ValueUserQueryElementEntity";
+export const ValueUserQueryElementEmbedded = new Type<ValueUserQueryElementEmbedded>("ValueUserQueryElementEmbedded");
+export interface ValueUserQueryElementEmbedded extends Entities.EmbeddedEntity {
+    Type: "ValueUserQueryElementEmbedded";
     label?: string | null;
     userQuery?: UserQueries.UserQueryEntity | null;
     href?: string | null;
@@ -117,7 +117,7 @@ export interface ValueUserQueryElementEntity extends Entities.EmbeddedEntity {
 export const ValueUserQueryListPartEntity = new Type<ValueUserQueryListPartEntity>("ValueUserQueryListPart");
 export interface ValueUserQueryListPartEntity extends Entities.Entity, IPartEntity {
     Type: "ValueUserQueryListPart";
-    userQueries: Entities.MList<ValueUserQueryElementEntity>;
+    userQueries: Entities.MList<ValueUserQueryElementEmbedded>;
     requiresTitle?: boolean;
 }
 

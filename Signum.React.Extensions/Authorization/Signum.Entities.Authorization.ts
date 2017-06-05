@@ -34,7 +34,10 @@ export module AuthAdminMessage {
     export const Deny = new MessageKey("AuthAdminMessage", "Deny");
     export const Overriden = new MessageKey("AuthAdminMessage", "Overriden");
     export const NoRoles = new MessageKey("AuthAdminMessage", "NoRoles");
+    export const Filter = new MessageKey("AuthAdminMessage", "Filter");
     export const PleaseSaveChangesFirst = new MessageKey("AuthAdminMessage", "PleaseSaveChangesFirst");
+    export const ResetChanges = new MessageKey("AuthAdminMessage", "ResetChanges");
+    export const SwitchTo = new MessageKey("AuthAdminMessage", "SwitchTo");
 }
 
 export module AuthEmailMessage {
@@ -131,9 +134,9 @@ export type AuthThumbnail =
     "Mix" |
     "None";
 
-export const AuthTokenConfigurationEntity = new Type<AuthTokenConfigurationEntity>("AuthTokenConfigurationEntity");
-export interface AuthTokenConfigurationEntity extends Entities.EmbeddedEntity {
-    Type: "AuthTokenConfigurationEntity";
+export const AuthTokenConfigurationEmbedded = new Type<AuthTokenConfigurationEmbedded>("AuthTokenConfigurationEmbedded");
+export interface AuthTokenConfigurationEmbedded extends Entities.EmbeddedEntity {
+    Type: "AuthTokenConfigurationEmbedded";
     refreshTokenEvery?: number;
     refreshAnyTokenPreviousTo?: string | null;
 }
@@ -286,9 +289,9 @@ export interface RuleQueryEntity extends RuleEntity<Basics.QueryEntity, boolean>
     Type: "RuleQuery";
 }
 
-export const RuleTypeConditionEntity = new Type<RuleTypeConditionEntity>("RuleTypeConditionEntity");
-export interface RuleTypeConditionEntity extends Entities.EmbeddedEntity {
-    Type: "RuleTypeConditionEntity";
+export const RuleTypeConditionEmbedded = new Type<RuleTypeConditionEmbedded>("RuleTypeConditionEmbedded");
+export interface RuleTypeConditionEmbedded extends Entities.EmbeddedEntity {
+    Type: "RuleTypeConditionEmbedded";
     condition?: Signum.TypeConditionSymbol | null;
     allowed?: TypeAllowed;
 }
@@ -296,7 +299,7 @@ export interface RuleTypeConditionEntity extends Entities.EmbeddedEntity {
 export const RuleTypeEntity = new Type<RuleTypeEntity>("RuleType");
 export interface RuleTypeEntity extends RuleEntity<Basics.TypeEntity, TypeAllowed> {
     Type: "RuleType";
-    conditions: Entities.MList<RuleTypeConditionEntity>;
+    conditions: Entities.MList<RuleTypeConditionEmbedded>;
 }
 
 export const SessionLogEntity = new Type<SessionLogEntity>("SessionLog");
@@ -331,7 +334,7 @@ export const TypeAllowedAndConditions = new Type<TypeAllowedAndConditions>("Type
 export interface TypeAllowedAndConditions extends Entities.ModelEntity {
     Type: "TypeAllowedAndConditions";
     fallback: TypeAllowed | null;
-    conditions: Array<TypeConditionRule>;
+    conditions: Entities.MList<TypeConditionRuleEmbedded>;
 }
 
 export const TypeAllowedBasic = new EnumType<TypeAllowedBasic>("TypeAllowedBasic");
@@ -350,9 +353,9 @@ export interface TypeAllowedRule extends AllowedRule<Basics.TypeEntity, TypeAllo
     availableConditions: Array<Signum.TypeConditionSymbol>;
 }
 
-export const TypeConditionRule = new Type<TypeConditionRule>("TypeConditionRule");
-export interface TypeConditionRule extends Entities.EmbeddedEntity {
-    Type: "TypeConditionRule";
+export const TypeConditionRuleEmbedded = new Type<TypeConditionRuleEmbedded>("TypeConditionRuleEmbedded");
+export interface TypeConditionRuleEmbedded extends Entities.EmbeddedEntity {
+    Type: "TypeConditionRuleEmbedded";
     typeCondition: Signum.TypeConditionSymbol;
     allowed: TypeAllowed;
 }

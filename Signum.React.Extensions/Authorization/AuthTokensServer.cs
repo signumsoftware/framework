@@ -20,35 +20,40 @@ using System.Web.Http.Controllers;
 
 namespace Signum.React.Authorization
 {
-    public class AuthTokenServer
+    public static class AuthTokenServer
     {
-        static Func<AuthTokenConfigurationEntity> Configuration;
+        static Func<AuthTokenConfigurationEmbedded> Configuration;
 
-        public static void Start(Func<AuthTokenConfigurationEntity> tokenConfig, string hashableEncryptionKey)
+        public static void Start(Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
         {
             Configuration = tokenConfig;
             CryptoKey = new MD5CryptoServiceProvider().Using(p => p.ComputeHash(UTF8Encoding.UTF8.GetBytes(hashableEncryptionKey)));
 
-            SignumAuthenticationAndProfilerAttribute.Authenticate += Authenticate;
+            SignumAuthenticationAndProfilerAttribute.Authenticators.Add(TokenAuthenticator);
+            SignumAuthenticationAndProfilerAttribute.Authenticators.Add(AnonymousAuthenticator);
+            SignumAuthenticationAndProfilerAttribute.Authenticators.Add(InvalidAuthenticator);
         }
 
-        public static bool AllowsAnonymous(HttpActionContext actionContext)
+        public static IDisposable InvalidAuthenticator(HttpActionContext actionContext)
+        {
+            throw new AuthenticationException("No authentication information found!");
+        }
+
+        public static IDisposable AnonymousAuthenticator(HttpActionContext actionContext)
         {
             var r = actionContext.ActionDescriptor as ReflectedHttpActionDescriptor;
-            return r.GetCustomAttributes<AllowAnonymousAttribute>().Any() || r.ControllerDescriptor.ControllerType.HasAttribute<AllowAnonymousAttribute>();
+            if (r.GetCustomAttributes<AllowAnonymousAttribute>().Any() || r.ControllerDescriptor.ControllerType.HasAttribute<AllowAnonymousAttribute>())
+                return new Disposable(() => { });
+            
+            return null;
         }
 
-        static IDisposable Authenticate(HttpActionContext ctx)
+        static IDisposable TokenAuthenticator(HttpActionContext ctx)
         {
-            var anonymous = AllowsAnonymous(ctx);
-
             var tokenString = ctx.Request.Headers.Authorization?.Parameter;
             if (tokenString == null)
             {
-                if (anonymous)
-                    return null;
-                else
-                    throw new AuthenticationException("No authorization token header found");
+                return null;
             }
 
             var token = DeserializeToken(tokenString);
@@ -62,7 +67,7 @@ namespace Signum.React.Authorization
             {
                 ctx.Response = ctx.Request.CreateResponse<HttpError>(HttpStatusCode.UpgradeRequired,
                     new HttpError(new NewTokenRequiredException("Please upgrade the token to continue using the service"), includeErrorDetail: true)); //Avoid annoying exception
-                return null;
+                return new Disposable(() => { });
             }
 
             return UserHolder.UserSession(token.User);

@@ -42,7 +42,7 @@ namespace Signum.Entities.Dynamic
         public static readonly ExecuteSymbol<DynamicTypeConditionEntity> Save;
     }
 
-    public class DynamicTypeConditionEval : EvalEntity<IDynamicTypeConditionEvaluator>
+    public class DynamicTypeConditionEval : EvalEmbedded<IDynamicTypeConditionEvaluator>
     {
         protected override CompilationResult Compile()
         {
@@ -51,7 +51,7 @@ namespace Signum.Entities.Dynamic
             var entityTypeName = ((DynamicTypeConditionEntity)this.GetParentEntity()).EntityType.ToType().FullName;
 
             return Compile(DynamicCode.GetAssemblies(),
-                DynamicCode.GetNamespaces() +
+                DynamicCode.GetUsingNamespaces() +
 @"
 namespace Signum.Entities.Dynamic
 {

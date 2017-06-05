@@ -179,7 +179,7 @@ namespace Signum.Engine.Scheduler
             }
         }
 
-        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEntity parameters)
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters)
         {
             Database.Query<ScheduledTaskLogEntity>().Where(a => a.StartTime < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
         }
@@ -206,6 +206,16 @@ namespace Signum.Engine.Scheduler
             running = true;
 
             ReloadPlan();
+        }
+
+        public static void StartScheduledTaskAfter(int initialDelayMilliseconds)
+        {
+            using (ExecutionContext.SuppressFlow())
+                Task.Run(() =>
+                {
+                    Thread.Sleep(initialDelayMilliseconds);
+                    StartScheduledTasks();
+                });
         }
 
         public static void StopScheduledTasks()
@@ -235,11 +245,27 @@ namespace Signum.Engine.Scheduler
                 lock (priorityQueue)
                 {
                     DateTime now = TimeZoneManager.Now;
+                    var lastExecutions = Database.Query<ScheduledTaskLogEntity>().Where(a=>a.ScheduledTask != null).GroupBy(a => a.ScheduledTask).Select(gr => KVP.Create(
+                        gr.Key,
+                        gr.Max(a => a.StartTime)
+                    )).ToDictionary();
+
                     priorityQueue.Clear();
-                    priorityQueue.PushAll(ScheduledTasksLazy.Value.Select(st => new ScheduledTaskPair
-                    {
-                        ScheduledTask = st,
-                        NextDate = st.Rule.Next(now),
+                    priorityQueue.PushAll(ScheduledTasksLazy.Value.Select(st => {
+
+                        var previous = lastExecutions.TryGetS(st);
+
+                        var next = previous == null ?
+                            st.Rule.Next(st.Rule.StartingOn) :
+                            st.Rule.Next(previous.Value.Add(SchedulerMargin));
+
+                        bool isMiss = next < now;
+
+                        return new ScheduledTaskPair
+                        {
+                            ScheduledTask = st,
+                            NextDate = isMiss ? now : next,
+                        };
                     }));
 
                     SetTimer();
@@ -411,7 +437,7 @@ namespace Signum.Engine.Scheduler
                 {
                     ScheduledTask = p.ScheduledTask.ToLite(),
                     Rule = p.ScheduledTask.Rule.ToString(),
-                    NextExecution = p.NextDate,
+                    NextDate = p.NextDate,
                 }).ToList()
             };
         }
@@ -429,6 +455,6 @@ namespace Signum.Engine.Scheduler
     {
         public Lite<ScheduledTaskEntity> ScheduledTask;
         public string Rule;
-        public DateTime NextExecution;
+        public DateTime NextDate;
     }
 }

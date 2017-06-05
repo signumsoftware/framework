@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
-import { UserQueryEntity, UserQueryMessage, QueryFilterEntity, QueryOrderEntity, QueryColumnEntity } from '../../UserQueries/Signum.Entities.UserQueries'
+import { UserQueryEntity, UserQueryMessage, QueryFilterEmbedded, QueryOrderEmbedded, QueryColumnEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
 import ChartBuilder from '../Templates/ChartBuilder'
-import { ChartScriptEntity, ChartScriptColumnEntity, ChartScriptParameterEntity } from '../Signum.Entities.Chart'
+import { ChartScriptEntity, ChartScriptColumnEmbedded, ChartScriptParameterEmbedded } from '../Signum.Entities.Chart'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
@@ -26,7 +26,7 @@ export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<
         this.props.ctx.value.script = newValue;
         this.props.ctx.value.modified = true;
 
-        if (opener != undefined && opener != undefined) {
+        if (opener != undefined) {
             clearTimeout(this.changedHandler);
             this.changedHandler = setTimeout(this.updatePreview, 150);
         }

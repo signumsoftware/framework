@@ -7,7 +7,6 @@ import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { EntityData, EntityKind } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 import { Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
 import { StyleContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
@@ -16,21 +15,21 @@ import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStr
 import { DynamicTypeEntity, DynamicTypeOperation, DynamicPanelPermission, DynamicSqlMigrationEntity } from './Signum.Entities.Dynamic'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
+import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<Route path="dynamic">
-        <Route path="panel" getComponent={(loc, cb) => require(["./DynamicPanelPage"], (Comp) => cb(undefined, Comp.default))} />
-    </Route>);
+    options.routes.push(<ImportRoute path="~/dynamic/panel" onImportModule={() => _import("./DynamicPanelPage")} />);
 
 
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel),
         key: "DynamicPanel",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/dynamic/panel"))
+        onClick: () => Promise.resolve("~/dynamic/panel")
     });
 }
 
 export namespace Options {
+    //export let onGetDynamicLineForPanel: ({ line: (ctx: StyleContext) => React.ReactNode, needsCompiling: boolean })[] = [];
     export let onGetDynamicLineForPanel: ((ctx: StyleContext) => React.ReactNode)[] = [];
     export let onGetDynamicLineForType: ((ctx: StyleContext, type: string) => React.ReactNode)[] = [];
     export let getDynaicMigrationsStep: (() => React.ReactElement<any>) | undefined = undefined;
@@ -78,6 +77,7 @@ export interface AutocompleteTypeRequest {
     limit: number;
     includeBasicTypes: boolean;
     includeEntities?: boolean;
+    includeEmbeddedEntities?: boolean;
     includeMList?: boolean;
     includeQueriable?: boolean;
 }

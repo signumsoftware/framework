@@ -35,7 +35,7 @@ namespace Signum.Entities.Workflow
 
         [NotNullable]
         [NotNullValidator]
-        public WorkflowXmlEntity Xml { get; set; }
+        public WorkflowXmlEmbedded Xml { get; set; }
 
         static Expression<Func<WorkflowEventEntity, string>> ToStringExpression = @this => @this.Name ?? @this.BpmnElementId;
         [ExpressionField]
@@ -69,21 +69,18 @@ namespace Signum.Entities.Workflow
     {
         Start,
         TimerStart,
-        ConditionalStart,
         Finish
     }
 
 
     public static class WorkflowEventTypeExtension
     {
-        public static bool IsStart(this WorkflowEventType type) => 
-            type == WorkflowEventType.Start || 
-            type == WorkflowEventType.TimerStart || 
-            type == WorkflowEventType.ConditionalStart;
+        public static bool IsStart(this WorkflowEventType type) =>
+            type == WorkflowEventType.Start ||
+            type == WorkflowEventType.TimerStart;
 
-        public static bool IsTimerOrConditionalStart(this WorkflowEventType type) =>
-            type == WorkflowEventType.TimerStart ||
-            type == WorkflowEventType.ConditionalStart;
+        public static bool IsTimerStart(this WorkflowEventType type) =>
+            type == WorkflowEventType.TimerStart;
 
         public static bool IsFinish(this WorkflowEventType type) =>
             type == WorkflowEventType.Finish;

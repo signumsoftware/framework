@@ -38,7 +38,7 @@ export interface ExcelReportEntity extends Entities.Entity {
     Type: "ExcelReport";
     query?: Basics.QueryEntity | null;
     displayName?: string | null;
-    file?: Files.EmbeddedFileEntity | null;
+    file?: Files.FileEmbedded | null;
 }
 
 export module ExcelReportOperation {

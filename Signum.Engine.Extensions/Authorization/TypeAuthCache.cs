@@ -54,7 +54,7 @@ namespace Signum.Entities.Authorization
                 return null;
             }
 
-            Type type = TypeLogic.DnToType[rt.Resource];
+            Type type = TypeLogic.EntityToType[rt.Resource];
             var conditions = rt.Conditions.Where(a => 
             a.Condition.FieldInfo != null && /*Not 100% Sync*/
             !TypeConditionLogic.IsDefined(type, a.Condition));
@@ -157,7 +157,7 @@ namespace Signum.Entities.Authorization
 
                 Dictionary<Lite<RoleEntity>, Dictionary<Type, TypeAllowedAndConditions>> realRules =
                    rules.AgGroupToDictionary(ru => ru.Role, gr => gr
-                          .ToDictionary(ru => TypeLogic.DnToType[ru.Resource], ru => ru.ToTypeAllowedAndConditions()));
+                          .ToDictionary(ru => TypeLogic.EntityToType[ru.Resource], ru => ru.ToTypeAllowedAndConditions()));
 
                 Dictionary<Lite<RoleEntity>, RoleAllowedCache> newRules = new Dictionary<Lite<RoleEntity>, RoleAllowedCache>();
                 foreach (var role in roles)
@@ -178,7 +178,7 @@ namespace Signum.Entities.Authorization
             rules.MergeStrategy = AuthLogic.GetMergeStrategy(rules.Role);
             rules.SubRoles = AuthLogic.RelatedTo(rules.Role).ToMList();
             rules.Rules = (from r in resources
-                           let type = TypeLogic.DnToType[r]
+                           let type = TypeLogic.EntityToType[r]
                            select new TypeAllowedRule()
                            {
                                Resource = r,
@@ -202,7 +202,7 @@ namespace Signum.Entities.Authorization
                     {
                         pr.Allowed = ar.Allowed.Fallback.Value;
 
-                        var shouldConditions = ar.Allowed.Conditions.Select(a => new RuleTypeConditionEntity
+                        var shouldConditions = ar.Allowed.Conditions.Select(a => new RuleTypeConditionEmbedded
                         {
                             Allowed = a.Allowed,
                             Condition = a.TypeCondition,
@@ -417,12 +417,12 @@ namespace Signum.Entities.Authorization
                 }, Spacing.Double);
         }
 
-        private static MList<RuleTypeConditionEntity> Conditions(XElement xr, Replacements replacements)
+        private static MList<RuleTypeConditionEmbedded> Conditions(XElement xr, Replacements replacements)
         {
             return (from xc in xr.Elements("Condition")
                     let cn = SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, xc.Attribute("Name").Value))
                     where cn != null
-                    select new RuleTypeConditionEntity
+                    select new RuleTypeConditionEmbedded
                     {
                         Condition = cn,
                         Allowed = xc.Attribute("Allowed").Value.ToEnum<TypeAllowed>()

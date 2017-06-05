@@ -1,6 +1,5 @@
 ﻿
 import * as React from 'react'
-import { Link } from 'react-router'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, 
     EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity} from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
@@ -49,26 +48,19 @@ export default class UserChartPart extends React.Component<UserChartPartProps, U
         this.loadChartRequest(newProps);
     }
 
-    loadChartRequest(props: UserChartPartProps) {
-       
-        this.setState({chartRequest: undefined, result: undefined, error: undefined });
-
-        UserChartClient.Converter.toChartRequest(props.part.userChart!, props.entity)
-            .then(cr => {
-                this.setState({chartRequest: cr, result: undefined });
-                this.makeQuery();
-            })
-            .done();
+    loadChartRequest(props: UserChartPartProps) {       
+        this.setState({ chartRequest: undefined, result: undefined, error: undefined }, () =>
+            UserChartClient.Converter.toChartRequest(props.part.userChart!, props.entity)
+                .then(cr => this.setState({ chartRequest: cr, result: undefined }, () => this.makeQuery()))
+                .done());
     }
 
-    makeQuery(){
-
-        this.setState({ result: undefined, error: undefined });
-
-        ChartClient.API.executeChart(this.state.chartRequest!)
-            .then(rt => this.setState({ result: rt }))
-            .catch(e => { this.setState({ error: e }); })
-            .done();
+    makeQuery() {
+        this.setState({ result: undefined, error: undefined }, () =>
+            ChartClient.API.executeChart(this.state.chartRequest!)
+                .then(rt => this.setState({ result: rt }))
+                .catch(e => { this.setState({ error: e }); })
+                .done());
     }
 
     render(){

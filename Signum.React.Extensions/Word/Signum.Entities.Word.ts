@@ -10,6 +10,12 @@ import * as Files from '../Files/Signum.Entities.Files'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
+export const MultiEntityModel = new Type<MultiEntityModel>("MultiEntityModel");
+export interface MultiEntityModel extends Entities.ModelEntity {
+    Type: "MultiEntityModel";
+    entities: Entities.MList<Entities.Lite<Entities.Entity>>;
+}
+
 export const SystemWordTemplateEntity = new Type<SystemWordTemplateEntity>("SystemWordTemplate");
 export interface SystemWordTemplateEntity extends Entities.Entity {
     Type: "SystemWordTemplate";
@@ -45,6 +51,7 @@ export module WordTemplateMessage {
     export const _01RequiresExtraParameters = new MessageKey("WordTemplateMessage", "_01RequiresExtraParameters");
     export const SelectTheSourceOfDataForYourTableOrChart = new MessageKey("WordTemplateMessage", "SelectTheSourceOfDataForYourTableOrChart");
     export const WriteThisKeyAsTileInTheAlternativeTextOfYourTableOrChart = new MessageKey("WordTemplateMessage", "WriteThisKeyAsTileInTheAlternativeTextOfYourTableOrChart");
+    export const NoDefaultTemplateDefined = new MessageKey("WordTemplateMessage", "NoDefaultTemplateDefined");
 }
 
 export module WordTemplateOperation {

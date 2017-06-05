@@ -16,7 +16,7 @@ import { DynamicValidationEntity, DynamicValidationOperation, DynamicValidationE
 
 export function start(options: { routes: JSX.Element[] }) {
 
-    Navigator.addSettings(new EntitySettings(DynamicValidationEntity, w => new ViewPromise(resolve => require(['./Validation/DynamicValidation'], resolve))));
+    Navigator.addSettings(new EntitySettings(DynamicValidationEntity, w => _import('./Validation/DynamicValidation')));
     Constructor.registerConstructor(DynamicValidationEntity, () => DynamicValidationEntity.New({ eval: DynamicValidationEval.New() }));
 
     DynamicClient.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicValidationEntity }} />);

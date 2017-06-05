@@ -29,9 +29,10 @@ namespace Signum.Engine.Mailing
 {
     public static class EmailTemplateLogic
     {
-        public static bool AvoidSynchronize = false;
+        public static bool AvoidSynchronizeTokens = false;
+        public static bool AvoidSynchronizeDefaultTemplates = true;
 
-        public static EmailTemplateMessageEntity GetCultureMessage(this EmailTemplateEntity template, CultureInfo ci)
+        public static EmailTemplateMessageEmbedded GetCultureMessage(this EmailTemplateEntity template, CultureInfo ci)
         {
             return template.Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo() == ci);
         }
@@ -57,8 +58,8 @@ namespace Signum.Engine.Mailing
             public List<QueryToken> QueryTokens;
         }
 
-        public static Polymorphic<Func<IAttachmentGeneratorEntity, GenerateAttachmentContext, List<EmailAttachmentEntity>>> GenerateAttachment = 
-            new Polymorphic<Func<IAttachmentGeneratorEntity, GenerateAttachmentContext, List<EmailAttachmentEntity>>>();
+        public static Polymorphic<Func<IAttachmentGeneratorEntity, GenerateAttachmentContext, List<EmailAttachmentEmbedded>>> GenerateAttachment = 
+            new Polymorphic<Func<IAttachmentGeneratorEntity, GenerateAttachmentContext, List<EmailAttachmentEmbedded>>>();
 
         public class GenerateAttachmentContext
         {
@@ -102,10 +103,10 @@ namespace Signum.Engine.Mailing
                 sb.Schema.EntityEvents<EmailTemplateEntity>().PreSaving += new PreSavingEventHandler<EmailTemplateEntity>(EmailTemplate_PreSaving);
                 sb.Schema.EntityEvents<EmailTemplateEntity>().Retrieved += EmailTemplateLogic_Retrieved;
 
-                Validator.OverridePropertyValidator((EmailTemplateMessageEntity m) => m.Text).StaticPropertyValidation +=
+                Validator.OverridePropertyValidator((EmailTemplateMessageEmbedded m) => m.Text).StaticPropertyValidation +=
                     EmailTemplateMessageText_StaticPropertyValidation;
 
-                Validator.OverridePropertyValidator((EmailTemplateMessageEntity m) => m.Subject).StaticPropertyValidation +=
+                Validator.OverridePropertyValidator((EmailTemplateMessageEmbedded m) => m.Subject).StaticPropertyValidation +=
                     EmailTemplateMessageSubject_StaticPropertyValidation;
 
                 EmailTemplateGraph.Register();
@@ -164,7 +165,7 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        static string EmailTemplateMessageText_StaticPropertyValidation(EmailTemplateMessageEntity message, PropertyInfo pi)
+        static string EmailTemplateMessageText_StaticPropertyValidation(EmailTemplateMessageEmbedded message, PropertyInfo pi)
         {
             if (message.TextParsedNode as EmailTemplateParser.BlockNode == null)
             {
@@ -182,7 +183,7 @@ namespace Signum.Engine.Mailing
             return null;
         }
 
-        static string EmailTemplateMessageSubject_StaticPropertyValidation(EmailTemplateMessageEntity message, PropertyInfo pi)
+        static string EmailTemplateMessageSubject_StaticPropertyValidation(EmailTemplateMessageEmbedded message, PropertyInfo pi)
         {
             if (message.SubjectParsedNode as EmailTemplateParser.BlockNode == null)
             {
@@ -274,13 +275,19 @@ namespace Signum.Engine.Mailing
                     Execute = (t, _) => t.Active = false
                 }.Register();
 
+                new Delete(EmailTemplateOperation.Delete)
+                {
+                    CanDelete = t => !t.Active ? EmailTemplateMessage.TheTemplateIsAlreadyInactive.NiceToString() : null,
+                    Delete = (t, _) => t.Delete()
+                }.Register();
+
                 registered = true;
             }
         }
 
         static SqlPreCommand Schema_Synchronize_Tokens(Replacements replacements)
         {
-            if (AvoidSynchronize)
+            if (AvoidSynchronizeTokens)
                 return null;
 
             StringDistance sd = new StringDistance();
@@ -296,7 +303,7 @@ namespace Signum.Engine.Mailing
 
         static SqlPreCommand Schema_Syncronize_DefaultTemplates(Replacements replacements)
         {
-            if (AvoidSynchronize)
+            if (AvoidSynchronizeDefaultTemplates)
                 return null;
 
             var table = Schema.Current.Table(typeof(EmailTemplateEntity));

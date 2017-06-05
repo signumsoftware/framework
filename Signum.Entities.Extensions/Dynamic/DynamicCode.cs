@@ -51,6 +51,7 @@ namespace Signum.Entities.Dynamic
             "Signum.Engine.UserQueries",
             "Signum.Engine.ViewLog",
             "Signum.Engine.Word",
+            "Signum.Engine.Tree",
             "Signum.Entities.Authorization",
             "Signum.Entities.Chart",
             "Signum.Entities.Dashboard",
@@ -67,6 +68,7 @@ namespace Signum.Entities.Dynamic
             "Signum.Entities.ViewLog",
             "Signum.Entities.Word",
             "Signum.Entities.Workflow",
+            "Signum.Entities.Tree",
         };
 
         public static HashSet<string> Assemblies = new HashSet<string>
@@ -92,10 +94,15 @@ namespace Signum.Entities.Dynamic
                         .EmptyIfNull();
         }
 
-        public static string GetNamespaces()
+        public static string GetUsingNamespaces()
         {
-            return DynamicCode.CreateUsings(DynamicCode.Namespaces
-                .And(DynamicCode.CodeGenEntitiesNamespace).NotNull());
+            return DynamicCode.CreateUsings(GetNamespaces());
+        }
+
+        public static IEnumerable<string> GetNamespaces()
+        {
+            return DynamicCode.Namespaces
+                            .And(DynamicCode.CodeGenEntitiesNamespace).NotNull();
         }
 
         public static string CreateUsings(IEnumerable<string> namespaces)

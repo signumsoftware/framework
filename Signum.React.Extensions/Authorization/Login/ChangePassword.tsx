@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
 import { Calendar } from 'react-widgets'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
@@ -22,12 +21,12 @@ export default class ChangePassword extends React.Component<{}, { modelState?: M
 
         e.preventDefault();
 
-        const request: AuthClient.Api.ChangePasswordRequest = {
+        const request: AuthClient.API.ChangePasswordRequest = {
             oldPassword: this.oldPassword.value,
             newPassword: this.newPassword.value,
         };
 
-        AuthClient.Api.changePassword(request)
+        AuthClient.API.changePassword(request)
             .then(user => {
                 AuthClient.setCurrentUser(user);
                 Navigator.resetUI();

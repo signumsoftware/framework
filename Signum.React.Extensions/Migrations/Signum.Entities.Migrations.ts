@@ -4,6 +4,7 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 
 
 export const CSharpMigrationEntity = new Type<CSharpMigrationEntity>("CSharpMigration");
@@ -11,6 +12,17 @@ export interface CSharpMigrationEntity extends Entities.Entity {
     Type: "CSharpMigration";
     uniqueName?: string | null;
     executionDate?: string;
+}
+
+export const ExecutedLoadProcessEntity = new Type<ExecutedLoadProcessEntity>("ExecutedLoadProcess");
+export interface ExecutedLoadProcessEntity extends Entities.Entity {
+    Type: "ExecutedLoadProcess";
+    methodName?: string | null;
+    className?: string | null;
+    description?: string | null;
+    start?: string;
+    end?: string | null;
+    exception?: Entities.Lite<Basics.ExceptionEntity> | null;
 }
 
 export const SqlMigrationEntity = new Type<SqlMigrationEntity>("SqlMigration");

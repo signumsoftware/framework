@@ -49,7 +49,7 @@ namespace Signum.Entities.Mailing
         public int? DeleteMessagesAfter { get; set; } = 14;
 
         [NotNullable]
-        public MList<ClientCertificationFileEntity> ClientCertificationFiles { get; set; } = new MList<ClientCertificationFileEntity>();
+        public MList<ClientCertificationFileEmbedded> ClientCertificationFiles { get; set; } = new MList<ClientCertificationFileEmbedded>();
 
         public override string ToString()
         {

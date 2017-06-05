@@ -89,7 +89,7 @@ namespace Signum.Entities.Chart
 			{
 				if (chart.Columns.Count <= i)
 				{
-					chart.Columns.Add(new ChartColumnEntity());
+					chart.Columns.Add(new ChartColumnEmbedded());
 					result = true;
 				}
 
@@ -138,7 +138,7 @@ namespace Signum.Entities.Chart
 						}
 						else
 						{
-							cp = new ChartParameterEntity
+							cp = new ChartParameterEmbedded
 							{
 								Name = sp.Name,
 								parentChart = chart,
@@ -178,16 +178,16 @@ namespace Signum.Entities.Chart
 				GroupResults = request.GroupResults,
 				ChartScript = request.ChartScript,
 
-				Filters = request.Filters.Select(f => new QueryFilterEntity
+				Filters = request.Filters.Select(f => new QueryFilterEmbedded
 				{
-					Token = new QueryTokenEntity(f.Token),
+					Token = new QueryTokenEmbedded(f.Token),
 					Operation = f.Operation,
 					ValueString = FilterValueConverter.ToString(f.Value, f.Token.Type),
 				}).ToMList(),
 
-				Orders = request.Orders.Select(o => new QueryOrderEntity
+				Orders = request.Orders.Select(o => new QueryOrderEmbedded
 				{
-					Token = new QueryTokenEntity(o.Token),
+					Token = new QueryTokenEmbedded(o.Token),
 					OrderType = o.OrderType
 				}).ToMList()
 			};
@@ -279,58 +279,75 @@ namespace Signum.Entities.Chart
 			};
 		}
 
-		private static Func<ResultRow, object> Converter(this ChartColumnEntity ct, int columnIndex)
+		private static Func<ResultRow, object> Converter(this ChartColumnEmbedded ct, int columnIndex)
 		{
 			if (ct == null || ct.Token == null)
 				return null;
 
 			var type = ct.Token.Token.Type.UnNullify();
 
-			if (type.IsLite())
-			{
-				return r =>
-				{
-					Lite<Entity> l = (Lite<Entity>)r[columnIndex];
-					return new
-					{
-						key = l?.Key(),
-						toStr = l?.ToString(),
-						color = l == null ? "#555" : GetChartColor(l.EntityType, l.Id).TryToHtml(),
-					};
-				};
-			}
-			else if (type.IsEnum)
-			{
-				var enumEntity = EnumEntity.Generate(type);
+            if (type.IsLite())
+            {
+                return r =>
+                {
+                    Lite<Entity> l = (Lite<Entity>)r[columnIndex];
+                    return new
+                    {
+                        key = l?.Key(),
+                        toStr = l?.ToString(),
+                        color = l == null ? "#555" : GetChartColor(l.EntityType, l.Id).TryToHtml(),
+                    };
+                };
+            }
+            else if (type.IsEnum)
+            {
+                var enumEntity = EnumEntity.Generate(type);
 
-				return r =>
-				{
-					Enum e = (Enum)r[columnIndex];
-					return new
-					{
-						key = e?.ToString(),
-						toStr = e?.NiceToString(),
-						color = e == null ? "#555" : GetChartColor(enumEntity, Convert.ToInt32(e)).TryToHtml(),
-					};
-				};
-			}
-			else if (typeof(DateTime) == type)
-			{
-				return r =>
-				{
-					DateTime? e = (DateTime?)r[columnIndex];
-					if (e != null)
-						e = e.Value.ToUserInterface();
-					return new
-					{
-						key = e,
-						keyForFilter = e?.ToString("s"),
-						toStr = ct.Token.Token.Format.HasText() ? e?.ToString(ct.Token.Token.Format) : r[columnIndex]?.ToString()
-					};
-				};
-			}
-			else
-				return r =>
+                return r =>
+                {
+                    Enum e = (Enum)r[columnIndex];
+                    return new
+                    {
+                        key = e?.ToString(),
+                        toStr = e?.NiceToString(),
+                        color = e == null ? "#555" : GetChartColor(enumEntity, Convert.ToInt32(e)).TryToHtml(),
+                    };
+                };
+            }
+            else if (typeof(DateTime) == type)
+            {
+                var format = ct.Token.Token.Format;
+
+                return r =>
+                {
+                    DateTime? e = (DateTime?)r[columnIndex];
+                    if (e != null)
+                        e = e.Value.ToUserInterface();
+
+                    return new
+                    {
+                        key = e,
+                        keyForFilter = e?.ToString("s"),
+                        toStr = format.HasText() ? e?.ToString(format) : e?.ToString()
+                    };
+                };
+            }
+            else if (ct.Token.Token.Format.HasText())
+            {
+                var format = ct.Token.Token.Format;
+
+                return r =>
+                {
+                    IFormattable e = (IFormattable)r[columnIndex];
+                    return new
+                    {
+                        key = e,
+                        toStr = format.HasText() ? e?.ToString(format, null) : e?.ToString()
+                    };
+                };
+            }
+            else
+                return r =>
 				{
 					object value = r[columnIndex];
 					return new
@@ -384,7 +401,7 @@ namespace Signum.Entities.Chart
 			return result;
 		}
 
-		internal static void FixParameters(ChartRequest chartRequest, ChartColumnEntity chartColumn)
+		internal static void FixParameters(ChartRequest chartRequest, ChartColumnEmbedded chartColumn)
 		{
 			int index = chartRequest.Columns.IndexOf(chartColumn);
 
@@ -409,8 +426,7 @@ namespace Signum.Entities.Chart
 		Chart_ChartSettings,
 		[Description("Dimension")]
 		Chart_Dimension,
-		[Description("Draw")]
-		Chart_Draw,
+		DrawChart,
 		[Description("Group")]
 		Chart_Group,
 		[Description("Query {0} is not allowed")]

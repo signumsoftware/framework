@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Signum.Entities.Chart
 {
     [Serializable]
-    public class ChartScriptColumnEntity : EmbeddedEntity
+    public class ChartScriptColumnEmbedded : EmbeddedEntity
     {
         [NotNullable, SqlDbType(Size = 80)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 80)]
@@ -21,9 +21,9 @@ namespace Signum.Entities.Chart
 
         public bool IsGroupKey { get; set; }
 
-        internal ChartScriptColumnEntity Clone()
+        internal ChartScriptColumnEmbedded Clone()
         {
-            return new ChartScriptColumnEntity
+            return new ChartScriptColumnEmbedded
             {
                 DisplayName = DisplayName,
                 IsGroupKey = IsGroupKey,

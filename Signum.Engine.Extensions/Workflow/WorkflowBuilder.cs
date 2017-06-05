@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Signum.Utilities.DataStructures;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Workflow
 {
@@ -30,7 +31,7 @@ namespace Signum.Engine.Workflow
 
         public object HasMultipleInputsAndOutputsAtTheSameTime { get; private set; }
 
-        public WorkflowBuilder(WorkflowEntity wf, bool useCache = true)
+        public WorkflowBuilder(WorkflowEntity wf)
         {
             using (HeavyProfiler.Log("WorkflowBuilder"))
             using (new EntityCache())
@@ -48,13 +49,6 @@ namespace Signum.Engine.Workflow
                     events = new List<WorkflowEventEntity>();
                     activities = new List<WorkflowActivityEntity>();
                     gateways = new List<WorkflowGatewayEntity>();
-                }
-                else if (useCache)
-                {
-                    connections = wf.WorkflowConnectionsFromCache().Select(a => a.ToLite()).RetrieveFromListOfLite().ToList();
-                    events = wf.WorkflowEventsFromCache().Select(a => a.ToLite()).RetrieveFromListOfLite().ToList();
-                    activities = wf.WorkflowActivitiesFromCache().Select(a => a.ToLite()).RetrieveFromListOfLite().ToList();
-                    gateways = wf.WorkflowGatewaysFromCache().Select(a => a.ToLite()).RetrieveFromListOfLite().ToList();
                 }
                 else
                 {
@@ -95,7 +89,9 @@ namespace Signum.Engine.Workflow
             dic.AddRange(lanes.Select(lb => lb.lane.ToModelKVP()));
 
             dic.AddRange(lanes.SelectMany(lb => lb.GetActivities()).Select(a => a.ToModelKVP()));
-            dic.AddRange(lanes.SelectMany(lb => lb.GetEvents()).Select(a => a.ToModelKVP()));
+
+            // Only Start events because end event has no model and extra properties for now
+            dic.AddRange(lanes.SelectMany(lb => lb.GetEvents().Where(e => e.Entity.Type.IsStart())).Select(a => a.ToModelKVP()));
 
             dic.AddRange(this.messageFlows.Select(mf => mf.ToModelKVP()));
             dic.AddRange(this.pools.Values.SelectMany(pb => pb.GetSequenceFlows()).Select(sf => sf.ToModelKVP()));
@@ -103,7 +99,7 @@ namespace Signum.Engine.Workflow
             return new WorkflowModel
             {
                 DiagramXml = xml.ToString(),
-                Entities = dic.Select(kvp => new BpmnEntityPair { BpmnElementId = kvp.Key, Model = kvp.Value }).ToMList()
+                Entities = dic.Select(kvp => new BpmnEntityPairEmbedded { BpmnElementId = kvp.Key, Model = kvp.Value }).ToMList()
             };
         }
 
@@ -172,7 +168,7 @@ namespace Signum.Engine.Workflow
             Synchronizer.Synchronize(participants, oldPools,
                 (id, pa) =>
                 {
-                    var wp = new WorkflowPoolEntity { Xml = new WorkflowXmlEntity(), Workflow = this.workflow }.ApplyXml(pa, locator);
+                    var wp = new WorkflowPoolEntity { Xml = new WorkflowXmlEmbedded(), Workflow = this.workflow }.ApplyXml(pa, locator);
                     var pb = new PoolBuilder(wp, Enumerable.Empty<LaneBuilder>(), Enumerable.Empty<XmlEntity<WorkflowConnectionEntity>>());
                     this.pools.Add(wp.ToLite(), pb);
                     pb.ApplyChanges(processElements.GetOrThrow(pa.Attribute("processRef").Value), locator);
@@ -194,7 +190,7 @@ namespace Signum.Engine.Workflow
             Synchronizer.Synchronize(messageFlows, oldMessageFlows,
                 (id, mf) =>
                 {
-                    var wc = new WorkflowConnectionEntity { Xml = new WorkflowXmlEntity() }.ApplyXml(mf, locator);
+                    var wc = new WorkflowConnectionEntity { Xml = new WorkflowXmlEmbedded() }.ApplyXml(mf, locator);
                     this.messageFlows.Add(new XmlEntity<WorkflowConnectionEntity>(wc));
                 },
                 (id, omf) =>
@@ -223,7 +219,7 @@ namespace Signum.Engine.Workflow
             return this.pools.GetOrThrow(node.Lane.Pool.ToLite()).GetLaneBuilder(node.Lane.ToLite()).GetBpmnElementId(node);
         }
 
-        public PreviewResult PreviewChanges(XDocument document)
+        public PreviewResult PreviewChanges(XDocument document, WorkflowModel model)
         {
             var oldTasks = this.pools.Values.SelectMany(p => p.GetAllActivities())
                 .ToDictionary(a => a.bpmnElementId);
@@ -231,19 +227,26 @@ namespace Signum.Engine.Workflow
             var newElements = document.Descendants().Where(a => LaneBuilder.WorkflowActivityTypes.Values.Contains(a.Name.LocalName))
                 .ToDictionary(a => a.Attribute("id").Value);
 
+            var entities = model.Entities.ToDictionaryEx(a => a.BpmnElementId);
+
             return new PreviewResult
             {
                 Model = new WorkflowReplacementModel
                 {
-                    Replacements = oldTasks.Where(kvp => !newElements.ContainsKey(kvp.Key) && kvp.Value.Entity.CaseActivities().Any(c => c.DoneDate == null))
-                    .Select(a => new WorkflowReplacementItemEntity { OldTask = a.Value.Entity.ToLite() })
+                    Replacements = oldTasks.Where(kvp => !newElements.ContainsKey(kvp.Key) && kvp.Value.Entity.CaseActivities().Any())
+                    .Select(a => new WorkflowReplacementItemEmbedded
+                    {
+                        OldTask = a.Value.Entity.ToLite(),
+                        SubWorkflow = a.Value.Entity.SubWorkflow?.Workflow.ToLite()
+                    })
                     .ToMList(),
 
                 },
-                NewTasks = newElements.Select(a => new PreviewTask
+                NewTasks = newElements.Select(kvp => new PreviewTask
                 {
-                    BpmnId = a.Key,
-                    Name = a.Value.Attribute("name")?.Value,
+                    BpmnId = kvp.Key,
+                    Name = kvp.Value.Attribute("name")?.Value,
+                    SubWorkflow = ((WorkflowActivityModel)entities.GetOrThrow(kvp.Key).Model).SubWorkflow?.Workflow.ToLite()
                 }).ToList(),
             };
         }
@@ -278,6 +281,7 @@ namespace Signum.Engine.Workflow
                 allConnections.Values.Select(c => new WorkflowConnectionEntity
                 {
                     Name = c.Entity.Name,
+                    BpmnElementId = c.bpmnElementId,
                     Action = c.Entity.Action,
                     Condition = c.Entity.Condition,
                     DecisonResult = c.Entity.DecisonResult,
@@ -287,12 +291,32 @@ namespace Signum.Engine.Workflow
                     To = nodes.GetOrThrow(c.Entity.To),
                 }).SaveList();
             }
+            
+            foreach (var item in nodes.Where(a => a.Key is WorkflowEventEntity e && e.Type.IsTimerStart()))
+            {
+                WorkflowEventTaskLogic.CloneScheduledTasks((WorkflowEventEntity)item.Key, (WorkflowEventEntity)item.Value);
+            }
 
-            WorkflowBuilder wb = new WorkflowBuilder(newWorkflow, useCache: false);
-            newWorkflow.FullDiagramXml = new WorkflowXmlEntity { DiagramXml = wb.GetXDocument().ToString() };
+
+            WorkflowBuilder wb = new WorkflowBuilder(newWorkflow);
+            newWorkflow.FullDiagramXml = new WorkflowXmlEmbedded { DiagramXml = wb.GetXDocument().ToString() };
             newWorkflow.Save();
 
             return newWorkflow;
+        }
+
+        public void Delete() {
+            this.pools.SingleEx().Value.DeleteAll(null);
+            this.workflow.Cases().UnsafeDelete();
+            this.workflow.Delete();
+        }
+
+        private void DeleteCases(Expression<Func<CaseEntity, bool>> filter)
+        {
+            this.pools.SingleEx().Value.DeleteCaseActivities(filter);
+            Database.Query<CaseEntity>()
+                .Where(c => c.Workflow.Is(this.workflow) && filter.Evaluate(c))
+                .UnsafeDelete();
         }
 
         private IEnumerable<XmlEntity<WorkflowConnectionEntity>> GetAllConnections()
@@ -312,210 +336,15 @@ namespace Signum.Engine.Workflow
             };
             
             wg.FillGraphs();
-
-            List<string> errors = new List<string>();
-            
-            if (wg.Events.Count(a => a.Value.Type.IsStart()) == 0)
-                errors.Add(WorkflowValidationMessage.SomeStartEventIsRequired.NiceToString());
-            if (wg.Events.Count(a => a.Value.Type == WorkflowEventType.Start) > 1)
-                errors.Add(WorkflowValidationMessage.MultipleStartEventsAreNotAllowed.NiceToString());
-
-            var finishEventCount = wg.Events.Count(a => a.Value.Type.IsFinish());
-            if (finishEventCount == 0)
-                errors.Add(WorkflowValidationMessage.FinishEventIsRequired.NiceToString());
-
-            wg.Events.Values.ToList().ForEach(e =>
+            var errors = wg.Validate((g, newDirection) =>
             {
-                var fanIn = wg.PreviousGraph.RelatedTo(e).Count;
-                var fanOut = wg.NextGraph.RelatedTo(e).Count;
-
-                if (e.Type.IsStart())
-                {
-                    if (fanIn > 0)
-                        errors.Add(WorkflowValidationMessage._0HasInputs.NiceToString(e));
-                    if (fanOut == 0)
-                        errors.Add(WorkflowValidationMessage._0HasNoOutputs.NiceToString(e));
-                    if (fanOut > 1)
-                        errors.Add(WorkflowValidationMessage._0HasMultipleOutputs.NiceToString(e));
-
-                    if (fanOut == 1)
-                    {
-                        var nextConn = wg.NextGraph.RelatedTo(e).Single().Value;
-
-                        if (e.Type == WorkflowEventType.Start && !(nextConn.To is WorkflowActivityEntity))
-                            errors.Add(WorkflowValidationMessage.StartEventNextNodeShouldBeAnActivity.NiceToString());
-                    }
-                }
-
-                if (e.Type.IsFinish())
-                {
-                    if (fanIn == 0)
-                        errors.Add(WorkflowValidationMessage._0HasNoInputs.NiceToString(e));
-                    if (fanOut > 0)
-                        errors.Add(WorkflowValidationMessage._0HasOutputs.NiceToString(e));
-                }
-            });
-
-            wg.Gateways.Values.ToList().ForEach(g =>
-            {
-                var fanIn = wg.PreviousGraph.RelatedTo(g).Count();
-                var fanOut = wg.NextGraph.RelatedTo(g).Count;
-                if (fanIn == 0)
-                    errors.Add(WorkflowValidationMessage._0HasNoInputs.NiceToString(g));
-                if (fanOut == 0)
-                    errors.Add(WorkflowValidationMessage._0HasNoOutputs.NiceToString(g));
-                
-                if (fanIn == 1 && fanOut == 1)
-                    errors.Add(WorkflowValidationMessage._0HasJustOneInputAndOneOutput.NiceToString(g));
-
-                g.Direction = fanOut == 1 ? WorkflowGatewayDirection.Join : WorkflowGatewayDirection.Split;
+                g.Direction = newDirection;
                 g.Execute(WorkflowGatewayOperation.Save);
-
-
-                if (g.Direction == WorkflowGatewayDirection.Split)
-                {
-                    if (g.Type == WorkflowGatewayType.Exclusive && g.NextConnections().OrderByDescending(a => a.Order).Skip(1).Any(c => c.Condition == null))
-                        errors.Add(WorkflowValidationMessage.Gateway0ShouldHasConditionOnEachOutputExceptTheLast .NiceToString(g));
-
-                    if (g.Type == WorkflowGatewayType.Inclusive && g.NextConnections().Any(c => c.Condition == null))
-                        errors.Add(WorkflowValidationMessage.Gateway0ShouldHasConditionOnEachOutput.NiceToString(g));
-                }
             });
-
-            var starts = wg.Events.Values.Where(a => a.Type.IsStart()).ToList();
-            Dictionary<IWorkflowNodeEntity, int> TrackId = starts.ToDictionary(a => (IWorkflowNodeEntity)a, a => 0);
-            Dictionary<int, int> ParentIds = new Dictionary<int, int>();
-
-            starts.ForEach(st =>
-            wg.NextGraph.BreadthExploreConnections(st,
-                (prev, conn, next) =>
-                {
-                    var prevTrackId = TrackId.GetOrThrow(prev);
-                    int newTrackId;
-
-                    if (IsParallelGatway(prev, WorkflowGatewayDirection.Split))
-                    {
-                        if (IsParallelGatway(next, WorkflowGatewayDirection.Join))
-                            newTrackId = prevTrackId;
-                        else
-                        {
-                            newTrackId = ParentIds.Count + 1;
-                            ParentIds.Add(newTrackId, prevTrackId);
-                        }
-                    }
-                    else
-                    {
-                        if (IsParallelGatway(next, WorkflowGatewayDirection.Join))
-                        {
-                            var parentId = ParentIds.TryGetS(prevTrackId);
-                            if (parentId == null)
-                            {
-                                errors.Add(WorkflowValidationMessage._0CanNotBeConnectodToAParallelJoinBecauseHasNoPreviousParallelSplit.NiceToString(prev));
-                                return false;
-                            }
-
-                            newTrackId = parentId.Value;
-                        }
-                        else
-                            newTrackId = prevTrackId;
-                    }
-
-                    if (TrackId.ContainsKey(next))
-                    {
-                        if (TrackId[next] != newTrackId)
-                            errors.Add(WorkflowValidationMessage._0Track1CanNotBeConnectedTo2Track3InsteadOfTrack4.NiceToString(prev, prevTrackId, next, TrackId[next], newTrackId));
-
-                        return false;
-                    }
-                    else
-                    {
-                        TrackId[next] = newTrackId;
-                        return true;
-                    }
-                })
-            );
-
-            Action<WorkflowActivityEntity, IWorkflowTransitionTo> ValidateTransition = (WorkflowActivityEntity wa, IWorkflowTransitionTo item) =>
-            {
-                var activity0CanNotXTo1Because2 = (item is WorkflowJumpEntity || item is WorkflowScriptPartEntity) ?
-                    WorkflowValidationMessage.Activity0CanNotJumpTo1Because2 :
-                    WorkflowValidationMessage.Activity0CanNotTimeoutTo1Because2;
-
-                var to =
-                    item.To is Lite<WorkflowActivityEntity> ? (IWorkflowNodeEntity)wg.Activities.TryGetC((Lite<WorkflowActivityEntity>)item.To) :
-                    item.To is Lite<WorkflowGatewayEntity> ? (IWorkflowNodeEntity)wg.Gateways.TryGetC((Lite<WorkflowGatewayEntity>)item.To) :
-                    item.To is Lite<WorkflowEventEntity> ? (IWorkflowNodeEntity)wg.Events.TryGetC((Lite<WorkflowEventEntity>)item.To) : null;
-
-                if (to == null)
-                    errors.Add(activity0CanNotXTo1Because2.NiceToString(wa, item.To, WorkflowValidationMessage.IsNotInWorkflow.NiceToString()));
-
-                if (to is WorkflowEventEntity && ((WorkflowEventEntity)to).Type.IsStart())
-                    errors.Add(activity0CanNotXTo1Because2.NiceToString(wa, item.To, WorkflowValidationMessage.IsStart.NiceToString()));
-
-                if (to is WorkflowActivityEntity && to == wa)
-                    errors.Add(activity0CanNotXTo1Because2.NiceToString(wa, item.To, WorkflowValidationMessage.IsSelfJumping.NiceToString()));
-
-                if (TrackId.GetOrThrow(to) != TrackId.GetOrThrow(wa))
-                    errors.Add(activity0CanNotXTo1Because2.NiceToString(wa, item.To, WorkflowValidationMessage.IsInDifferentParallelTrack.NiceToString()));
-            };
-
-
-            foreach (var wa in wg.Activities.Values)
-            {
-                var fanIn = wg.PreviousGraph.RelatedTo(wa).Count;
-                var fanOut = wg.NextGraph.RelatedTo(wa).Count;
-
-                if (fanIn == 0)
-                    errors.Add(WorkflowValidationMessage._0HasNoInputs.NiceToString(wa));
-                if (fanOut == 0)
-                    errors.Add(WorkflowValidationMessage._0HasNoOutputs.NiceToString(wa));
-                if (fanOut > 1)
-                    errors.Add(WorkflowValidationMessage._0HasMultipleOutputs.NiceToString(wa));
-
-                if (wa.Reject != null)
-                {
-                    var prevs = wg.PreviousGraph. IndirectlyRelatedTo(wa, kvp => !(kvp.Key is WorkflowActivityEntity));
-                    if (prevs.Any(a => a is WorkflowEventEntity && ((WorkflowEventEntity)a).Type.IsStart()))
-                        errors.Add(WorkflowValidationMessage.Activity0CanNotRejectToStart.NiceToString(wa));
-
-                    if (prevs.Any(a => IsParallelGatway(a)))
-                        errors.Add(WorkflowValidationMessage.Activity0CanNotRejectToParallelGateway.NiceToString(wa));
-                }
-
-                if (wa.Timeout != null)
-                    ValidateTransition(wa, wa.Timeout);
-
-                if (wa.Script != null)
-                    ValidateTransition(wa, wa.Script);
-
-                foreach (var item in wa.Jumps)
-                {
-                    ValidateTransition(wa, item);
-                }
-            }
 
             var error =  errors.ToString("\r\n").DefaultText(null);
             if (error != null)
                 throw new ApplicationException(error);
-        }
-
-        private bool IsParallelGatway(IWorkflowNodeEntity a, WorkflowGatewayDirection? direction = null)
-        {
-            var gateway = a as WorkflowGatewayEntity;
-
-            return gateway != null  && gateway.Type != WorkflowGatewayType.Exclusive && (direction == null || direction.Value == gateway.Direction);
-        }
-
-        private bool IsStartEvent(IWorkflowNodeEntity a)
-        {
-            var start = a as WorkflowEventEntity;
-
-            return start != null && start.Type.IsStart();
-        }
-
-        private bool IsTimerOrConditionalStartEvent(IWorkflowNodeEntity a)
-        {
-            return IsStartEvent(a) &&  ((WorkflowEventEntity)a).Type.IsTimerOrConditionalStart();
         }
     }
 
@@ -528,7 +357,8 @@ namespace Signum.Engine.Workflow
     public class PreviewTask
     {
         public string BpmnId;
-        public string Name; 
+        public string Name;
+        public Lite<WorkflowEntity> SubWorkflow;
     }
 
     public class Locator
@@ -576,7 +406,12 @@ namespace Signum.Engine.Workflow
         internal T GetModelEntity<T>(string bpmnElementId)
             where T : ModelEntity, new()
         {
-            return (T)this.entitiesFromModel.GetOrCreate(bpmnElementId, new T());
+            return (T)this.entitiesFromModel.TryGetC(bpmnElementId);
+        }
+
+        internal bool HasReplacement(Lite<WorkflowActivityEntity> lite)
+        {
+            return Replacements.GetOrThrow(lite).HasText();
         }
     }
 
@@ -614,15 +449,24 @@ namespace Signum.Engine.Workflow
         public static WorkflowEventEntity ApplyXml(this WorkflowEventEntity we, XElement @event, Locator locator)
         {
             var bpmnElementId = @event.Attribute("id").Value;
+            we.BpmnElementId = bpmnElementId;
             var model = locator.GetModelEntity<WorkflowEventModel>(bpmnElementId);
             if (model != null)
                 we.SetModel(model);
-            we.BpmnElementId = bpmnElementId;
-            we.Name = @event.Attribute("name")?.Value;
+            else
+            {
+                we.Name = @event.Attribute("name")?.Value;
+                we.Type = WorkflowBuilder.LaneBuilder.WorkflowEventTypes.First(kvp => kvp.Value == @event.Name.LocalName).Key;
+            }
+
             we.Xml.DiagramXml = locator.GetDiagram(bpmnElementId).ToString();
+
             if (GraphExplorer.HasChanges(we))
                 we.Execute(WorkflowEventOperation.Save);
-            WorkflowEventTaskModel.ApplyModel(we, model.Task);
+
+            if (model != null)
+                WorkflowEventTaskModel.ApplyModel(we, model.Task);
+
             return we;
         }
 

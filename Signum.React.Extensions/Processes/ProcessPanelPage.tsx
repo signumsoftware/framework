@@ -1,6 +1,7 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
-import * as numeral from 'numeral'
+import { RouteComponentProps } from 'react-router-dom'
+import * as numbro from 'numbro'
+import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import EntityLink from '../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
 import {ValueSearchControl, SearchControl } from '../../../Framework/Signum.React/Scripts/Search'
@@ -12,7 +13,7 @@ import { ProcessEntity } from './Signum.Entities.Processes'
 
 
 
-interface ProcessPanelProps extends ReactRouter.RouteComponentProps<{}, {}> {
+interface ProcessPanelProps extends RouteComponentProps<{}> {
 
 }
 
@@ -20,6 +21,12 @@ export default class ProcessPanelPage extends React.Component<ProcessPanelProps,
 
     componentWillMount() {
         this.loadState().done();
+
+        Navigator.setTitle("ProcessLogic state");
+    }
+
+    componentWillUnmount() {
+        Navigator.setTitle();
     }
 
     loadState() {
@@ -39,7 +46,6 @@ export default class ProcessPanelPage extends React.Component<ProcessPanelProps,
 
 
     render() {
-        document.title = "ProcessLogic state";
 
         if (this.state == undefined)
             return <h2>ProcesLogic state (loading...) </h2>;
@@ -97,7 +103,7 @@ export default class ProcessPanelPage extends React.Component<ProcessPanelProps,
                                 <tr key={i}>
                                     <td> <EntityLink lite={item.Process} inSearch={true} /> </td>
                                     <td> { item.State } </td>
-                                    <td> { numeral(item.Progress).format("0 %") } </td>
+                                    <td> { numbro(item.Progress).format("0 %") } </td>
                                     <td> { item.MachineName } </td>
                                     <td> { item.ApplicationName } </td>
                                     <td> { item.IsCancellationRequested } </td>

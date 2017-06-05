@@ -17,6 +17,7 @@ using Signum.Entities.Migrations;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Engine.SchemaInfoTables;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Migrations
 {
@@ -42,10 +43,22 @@ namespace Signum.Engine.Migrations
                         e.UniqueName,
                         e.ExecutionDate,
                     });
+
+                sb.Include<ExecutedLoadProcessEntity>()
+                    .WithQuery(dqm, e => new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.Start,
+                        e.Duration,
+                        e.ClassName,
+                        e.MethodName,
+                        e.Description,
+                    });
             }
         }
 
-        internal static void EnsureMigrationTable<T>() where T : Entity
+        public static void EnsureMigrationTable<T>() where T : Entity
         {
             using (Transaction tr = new Transaction())
             {
@@ -67,6 +80,50 @@ namespace Signum.Engine.Migrations
                 SafeConsole.WriteLineColor(ConsoleColor.White, "Table " + table.Name + " auto-generated...");
          
                 tr.Commit();
+            }
+        }
+
+        public static Exception ExecuteLoadProcess(Action action, string description)
+        {
+            string showDescription = description ?? action.Method.Name.SpacePascal(true);
+            Console.WriteLine("------- Executing {0} ".FormatWith(showDescription).PadRight(Console.WindowWidth - 2, '-'));
+
+            var log = !Schema.Current.Tables.ContainsKey(typeof(ExecutedLoadProcessEntity)) ? null : new ExecutedLoadProcessEntity
+            {
+                Start = TimeZoneManager.Now,
+                ClassName = action.Method.DeclaringType.FullName,
+                MethodName = action.Method.Name,
+                Description = description,
+            };
+
+            try
+            {
+                action();
+                if (log != null)
+                {
+                    log.End = TimeZoneManager.Now;
+                    log.Save();
+                }
+                Console.WriteLine("------- Executed {0} (took {1})".FormatWith(showDescription, (log.End.Value - log.Start).NiceToString()).PadRight(Console.WindowWidth - 2, '-'));
+
+                return null;
+            }
+            catch (Exception e)
+            {                
+                Console.WriteLine();
+
+                SafeConsole.WriteColor(ConsoleColor.Red, e.GetType() + ": ");
+                SafeConsole.WriteLineColor(ConsoleColor.DarkRed, e.Message);
+                SafeConsole.WriteSameLineColor(ConsoleColor.DarkRed, e.StackTrace);
+                if (log != null)
+                {
+                    var exLog = e.LogException();
+                    log.Exception = exLog.ToLite();
+                    log.End = TimeZoneManager.Now;
+                    log.Save();
+                }
+
+                return e;
             }
         }
     }

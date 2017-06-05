@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import {RouteComponentProps, Router, RouteContext } from 'react-router'
+import { RouteComponentProps } from 'react-router'
 import { DropdownButton, MenuItem, } from 'react-bootstrap'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
@@ -23,7 +23,6 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
     }
 
     componentWillMount() {
-        const props = this.props as any as RouteComponentProps<any, any>;
         const userQuery = window.location.search.tryAfter("userQuery=");
         if (userQuery) {
             const uq = parseLite(decodeURIComponent(userQuery.tryBefore("&") || userQuery)) as Lite<UserQueryEntity>;
@@ -88,10 +87,10 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
     }
 
     render() {
-        const label = UserQueryMessage.UserQueries_UserQueries.niceToString();
+        const label = <span><i className="glyphicon glyphicon-list-alt"></i> &nbsp; {UserQueryMessage.UserQueries_UserQueries.niceToString()}</span>;
         const userQueries = this.state.userQueries;
         return (
-            <DropdownButton title={label} label={label} id="userQueriesDropDown" className="sf-userquery-dropdown"
+            <DropdownButton title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown"
                 onToggle={this.handleSelectedToggle}>
                 {
                     userQueries && userQueries.map((uq, i) =>

@@ -21,14 +21,14 @@ namespace Signum.Entities.Chart
 
         bool GroupResults { get; set; }
 
-        MList<ChartColumnEntity> Columns { get; }
-        MList<ChartParameterEntity> Parameters { get; }
+        MList<ChartColumnEmbedded> Columns { get; }
+        MList<ChartParameterEmbedded> Parameters { get; }
 
         void InvalidateResults(bool needNewQuery);
 
         bool Invalidator { get; }
 
-        void FixParameters(ChartColumnEntity chartColumnEntity);
+        void FixParameters(ChartColumnEmbedded chartColumnEntity);
     }
 
     [Serializable, InTypeScript(Undefined = false)]
@@ -91,11 +91,11 @@ namespace Signum.Entities.Chart
         }
 
         [NotifyCollectionChanged, NotifyChildProperty, NotNullable]
-        public MList<ChartColumnEntity> Columns { get; set; } = new MList<ChartColumnEntity>();
+        public MList<ChartColumnEmbedded> Columns { get; set; } = new MList<ChartColumnEmbedded>();
 
         [NotNullable]
         [NotNullValidator, NoRepeatValidator]
-        public MList<ChartParameterEntity> Parameters { get; set; } = new MList<ChartParameterEntity>();
+        public MList<ChartParameterEmbedded> Parameters { get; set; } = new MList<ChartParameterEmbedded>();
 
         void NotifyAllColumns()
         {
@@ -170,7 +170,7 @@ namespace Signum.Entities.Chart
         }
 
 
-        public void FixParameters(ChartColumnEntity chartColumn)
+        public void FixParameters(ChartColumnEmbedded chartColumn)
         {
             ChartUtils.FixParameters(this, chartColumn);
         }

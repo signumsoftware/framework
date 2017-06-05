@@ -1,19 +1,20 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
 import { Tabs, Tab } from 'react-bootstrap'
-import * as numeral from 'numeral'
+import * as numbro from 'numbro'
 import * as moment from 'moment'
+import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
 import {ValueSearchControl, SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { API, TimeTrackerEntry} from '../ProfilerClient'
+import { API, TimeTrackerEntry } from '../ProfilerClient'
+import { RouteComponentProps } from "react-router";
 
 require("./Times.css");
 
-interface TimesPageProps extends ReactRouter.RouteComponentProps<{}, {}> {
+interface TimesPageProps extends RouteComponentProps<{}> {
 
 }
 
@@ -26,6 +27,12 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
 
     componentWillMount() {
         this.loadState().done();
+  
+        Navigator.setTitle("Times state");
+    }
+
+    componentWillUnmount() {
+        Navigator.setTitle();
     }
 
     loadState() {
@@ -39,7 +46,6 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
 
 
     render() {
-        document.title = "Times state";
 
         if (this.state.times == undefined)
             return <h3>Times (loading...)</h3>;

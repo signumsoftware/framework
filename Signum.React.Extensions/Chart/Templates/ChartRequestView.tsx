@@ -2,7 +2,7 @@
 import { DropdownButton, MenuItem, Tabs, Tab} from 'react-bootstrap'
 import { Dic, classes, ifError } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { ValidationError } from '../../../../Framework/Signum.React/Scripts/Services'
+import { ValidationError, AbortableRequest } from '../../../../Framework/Signum.React/Scripts/Services'
 import { Lite, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { TypeContext, FormGroupSize, FormGroupStyle, StyleOptions, StyleContext, mlistItemContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -12,8 +12,8 @@ import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator
 import FilterBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/FilterBuilder'
 import ValidationErrors from '../../../../Framework/Signum.React/Scripts/Frames/ValidationErrors'
 import { ValueLine, FormGroup, ValueLineProps, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity, ChartRequest, GroupByChart, ChartMessage,
-    ChartColorEntity, ChartScriptEntity, ChartParameterEntity, ChartParameterType, UserChartEntity } from '../Signum.Entities.Chart'
+import { ChartColumnEmbedded, ChartScriptColumnEmbedded, ChartScriptParameterEmbedded, ChartRequest, GroupByChart, ChartMessage,
+    ChartColorEntity, ChartScriptEntity, ChartParameterEmbedded, ChartParameterType, UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import { ChartColumn, ChartColumnInfo }from './ChartColumn'
@@ -89,12 +89,18 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
     handleOnRedraw = () => {
         this.forceUpdate();
     }
+    
+    componentWillUnmount() {
+        this.abortableQuery.abort();
+    }
+
+    abortableQuery = new AbortableRequest<ChartRequest, ChartClient.API.ExecuteChartResult>((abortController, request) => ChartClient.API.executeChart(request, abortController))
 
     handleOnDrawClick = () => {
 
         this.setState({ chartResult: undefined });
 
-        ChartClient.API.executeChart(this.props.chartRequest!)
+        this.abortableQuery.getData(this.props.chartRequest!)
             .then(rt => this.setState({ chartResult: rt }),
             ifError(ValidationError, e => {
                 GraphExplorer.setModelState(this.props.chartRequest!, e.modelState, "request");
@@ -105,7 +111,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
     handleOnFullScreen = (e: React.MouseEvent<any>) => {
         e.preventDefault();
-        Navigator.currentHistory.push(ChartClient.Encoder.chartRequestPath(this.props.chartRequest!));
+        Navigator.history.push(ChartClient.Encoder.chartRequestPath(this.props.chartRequest!));
     }
 
     handleEditScript = (e: React.MouseEvent<any>) => {
@@ -146,9 +152,10 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                             />
                     </div >
                     <div className="sf-query-button-bar btn-toolbar">
-                        <button type="submit" className="sf-query-button sf-chart-draw btn btn-primary" onClick={this.handleOnDrawClick}>{ ChartMessage.Chart_Draw.niceToString() }</button>
-                        <button className="sf-query-button sf-chart-script-edit btn btn-default" onClick={this.handleEditScript}>{ ChartMessage.EditScript.niceToString() }</button>
-                        { ChartClient.ButtonBarChart.getButtonBarElements({ chartRequest: cr, chartRequestView: this }).map((a, i) => React.cloneElement(a, { key: i })) }
+                        <button type="submit" className="sf-query-button sf-chart-draw btn btn-primary" onClick={this.handleOnDrawClick}>{ChartMessage.DrawChart.niceToString()}</button>
+                        <button className="sf-query-button sf-chart-script-edit btn btn-default" onClick={this.handleEditScript}><i className="fa fa-pencil" aria-hidden="true"/> &nbsp; {ChartMessage.EditScript.niceToString()}</button>
+                        {ChartClient.ButtonBarChart.getButtonBarElements({ chartRequest: cr, chartRequestView: this }).map((a, i) => React.cloneElement(a, { key: i }))}
+                        <button className="btn btn-default" onMouseUp={this.handleExplore} ><i className="glyphicon glyphicon-search"></i> &nbsp; {SearchMessage.Explore.niceToString()}</button>
                     </div>
                     <br />
                     <div className="sf-search-results-container" >
@@ -170,6 +177,18 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
         );
     }
 
+
+    handleExplore = (e: React.MouseEvent<any>) => {
+        const cr = this.props.chartRequest!;
+
+        var path = Finder.findOptionsPath({
+            queryName: cr.queryKey,
+            filterOptions: Finder.toFilterOptions(cr.filterOptions),
+            showFilters: cr.filterOptions.length > 0
+        });
+
+        Navigator.pushOrOpen(path, e);
+    }
 }
 
 

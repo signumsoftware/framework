@@ -43,7 +43,7 @@ namespace Signum.Entities.Workflow
 
 
     [Serializable]
-    public class WorkflowScriptEval : EvalEntity<IWorkflowScriptExecutor>
+    public class WorkflowScriptEval : EvalEmbedded<IWorkflowScriptExecutor>
     {
         [SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = true, MultiLine = true)]
@@ -57,7 +57,7 @@ namespace Signum.Entities.Workflow
             var WorkflowEntityTypeName = parent.MainEntityType.ToType().FullName;
 
             return Compile(DynamicCode.GetAssemblies(),
-                DynamicCode.GetNamespaces() +
+                DynamicCode.GetUsingNamespaces() +
                     @"
                     namespace Signum.Entities.Workflow
                     {

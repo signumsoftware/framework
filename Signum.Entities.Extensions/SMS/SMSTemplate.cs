@@ -29,7 +29,7 @@ namespace Signum.Entities.SMS
         public TypeEntity AssociatedType { get; set; }
 
         [NotifyCollectionChanged]
-        public MList<SMSTemplateMessageEntity> Messages { get; set; } = new MList<SMSTemplateMessageEntity>();
+        public MList<SMSTemplateMessageEmbedded> Messages { get; set; } = new MList<SMSTemplateMessageEmbedded>();
 
         [StringLengthValidator(AllowNulls = false)]
         public string From { get; set; }
@@ -86,11 +86,11 @@ namespace Signum.Entities.SMS
             if (sender == Messages)
             {
                 if (args.OldItems != null)
-                    foreach (var item in args.OldItems.Cast<SMSTemplateMessageEntity>())
+                    foreach (var item in args.OldItems.Cast<SMSTemplateMessageEmbedded>())
                         item.Template = null;
 
                 if (args.NewItems != null)
-                    foreach (var item in args.NewItems.Cast<SMSTemplateMessageEntity>())
+                    foreach (var item in args.NewItems.Cast<SMSTemplateMessageEmbedded>())
                         item.Template = this;
             }
         }
@@ -120,11 +120,11 @@ namespace Signum.Entities.SMS
     }
 
     [Serializable]
-    public class SMSTemplateMessageEntity : EmbeddedEntity
+    public class SMSTemplateMessageEmbedded : EmbeddedEntity
     {
-        public SMSTemplateMessageEntity() { }
+        public SMSTemplateMessageEmbedded() { }
 
-        public SMSTemplateMessageEntity(CultureInfoEntity culture)
+        public SMSTemplateMessageEmbedded(CultureInfoEntity culture)
         {
             this.CultureInfo = culture;
         }

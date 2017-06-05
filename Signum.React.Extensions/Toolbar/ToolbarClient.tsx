@@ -11,19 +11,18 @@ import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
-import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEntity, ToolbarElementType } from './Signum.Entities.Toolbar'
+import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType } from './Signum.Entities.Toolbar'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
 
 export function start(...configs: ToolbarConfig<any>[]) {
-    Navigator.addSettings(new EntitySettings(ToolbarEntity, t => new ViewPromise(resolve => require(['./Templates/Toolbar'], resolve))));
-    Navigator.addSettings(new EntitySettings(ToolbarMenuEntity, t => new ViewPromise(resolve => require(['./Templates/ToolbarMenu'], resolve))));
-    Navigator.addSettings(new EntitySettings(ToolbarElementEntity, t => new ViewPromise(resolve => require(['./Templates/ToolbarElement'], resolve))));   
+    Navigator.addSettings(new EntitySettings(ToolbarEntity, t => _import('./Templates/Toolbar')));
+    Navigator.addSettings(new EntitySettings(ToolbarMenuEntity, t => _import('./Templates/ToolbarMenu')));
+    Navigator.addSettings(new EntitySettings(ToolbarElementEmbedded, t => _import('./Templates/ToolbarElement')));   
 
 
     Finder.addSettings({ queryName: ToolbarEntity, defaultOrderColumn: "Priority", defaultOrderType: "Descending" });
 
-    Constructor.registerConstructor(ToolbarElementEntity, tn => ToolbarElementEntity.New({ type : "Link" }));
+    Constructor.registerConstructor(ToolbarElementEmbedded, tn => ToolbarElementEmbedded.New({ type: "Link" }));
 
     configs.forEach(c => registerConfig(c));
 }
@@ -33,18 +32,18 @@ export function start(...configs: ToolbarConfig<any>[]) {
 export abstract class ToolbarConfig<T extends Entity> {
     type: Type<T>;
     getIcon(element: ToolbarResponse<T>) {
-        return this.coloredIcon(element.iconName, element.iconColor);
+        return ToolbarConfig.coloredIcon(element.iconName, element.iconColor);
     }
 
-    coloredIcon(className: string | null | undefined, color: string | null | undefined): React.ReactChild | null {
+    static coloredIcon(className: string | null | undefined, color: string | null | undefined): React.ReactChild | null {
         if (!className || className.toLowerCase() == "none")
             return null;
 
-        return <span className={"icon " + className} style={{ color: color, }} />;
+        return <span className={"icon " + className} style={{ color: color }} />;
     }
 
     getLabel(element: ToolbarResponse<T>) {
-        return element.label || element.lite!.toStr;
+        return element.label || element.content!.toStr;
     }
     
     abstract navigateTo(element: ToolbarResponse<T>): Promise<string>;
@@ -53,12 +52,9 @@ export abstract class ToolbarConfig<T extends Entity> {
     handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {
 
         var openWindow = e.ctrlKey || e.button == 1;
-
+        e.persist();
         this.navigateTo(res).then(url => {
-            if (openWindow)
-                window.open(url);
-            else
-                Navigator.currentHistory.push(url);
+            Navigator.pushOrOpen(url, e);
         }).done();
     }
 }
@@ -81,7 +77,8 @@ export interface ToolbarResponse<T extends Entity> {
     iconName?: string;
     iconColor?: string;
     label?: string;
-    lite?: Lite<T>;
+    content?: Lite<T>;
+    url?: string;
     elements?: Array<ToolbarResponse<any>>;
     openInPopup?: boolean;
     autoRefreshPeriod?: number;

@@ -4,9 +4,10 @@ import { Button } from "react-bootstrap"
 import { Binding, LambdaMemberType } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { newMListElement } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { InboxFilterModel, InboxFilterModelMessage, CaseNotificationState } from '../Signum.Entities.Workflow'
-import { TypeContext, ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EnumCheckboxList, FormGroup, FormGroupStyle, FormGroupSize } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { SearchControl, ValueSearchControl, FilterOperation, OrderType, PaginationMode, ISimpleFilterBuilder, FilterOption, FindOptionsParsed } from '../../../../Framework/Signum.React/Scripts/Search'
+import { InboxFilterModel, InboxMessage, CaseNotificationState } from '../Signum.Entities.Workflow'
+import { TypeContext, ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EnumCheckboxList, FormGroup, FormGroupStyle, FormGroupSize, StyleContext } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { SearchControl, ValueSearchControl, FilterOperation, OrderType, PaginationMode, ISimpleFilterBuilder, extractFilterValue, FilterOption, FindOptionsParsed } from '../../../../Framework/Signum.React/Scripts/Search'
+import { FilterOptionParsed } from "../../../../Framework/Signum.React/Scripts/FindOptions";
 
 export default class InboxFilter extends React.Component<{ ctx: TypeContext<InboxFilterModel> }, void> implements ISimpleFilterBuilder {
 
@@ -29,26 +30,19 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
 
     render() {
         var ctx = this.props.ctx;
-
         return (
             <div className="form-vertical" style={{ marginBottom: 15 }}>
                 <div className="row">
-                    <div className="col-sm-4">
-                        <ValueLine ctx={ctx.subCtx(o => o.range) } />
+                    <div className="col-sm-2">
+                        <EnumCheckboxList ctx={ctx.subCtx(o => o.states)} />
                     </div>
                     <div className="col-sm-4">
-                        <ValueLine ctx={ctx.subCtx(o => o.fromDate) } />
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col-sm-4">
-                        <EnumCheckboxList ctx={ctx.subCtx(o => o.states) } />
-                    </div>
-                    <div className="col-sm-4">
-                        <ValueLine ctx={ctx.subCtx(o => o.toDate) } />
+                        <ValueLine ctx={ctx.subCtx(o => o.range)} />
+                        <ValueLine ctx={ctx.subCtx(o => o.fromDate)} />
+                        <ValueLine ctx={ctx.subCtx(o => o.toDate)} />
+                        <Button bsStyle="warning" className="btn btn-sm" style={{ marginTop: 5, marginLeft: 15 }} onClick={this.handleOnClearFiltersClick} > {InboxMessage.Clear.niceToString()} </Button>
                     </div>
                 </div>
-                <Button bsStyle="warning" style={{ marginTop: 15, marginLeft: 15 }} onClick={ this.handleOnClearFiltersClick } > { InboxFilterModelMessage.Clear.niceToString() } </Button>
             </div>);
     }
 
@@ -106,23 +100,14 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
         return result;
     }
 
-    static extract(fo: FindOptionsParsed): InboxFilterModel | null {
-        var filters = fo.filterOptions.clone();
-
-        var extract = (columnName: string, operation: FilterOperation) => {
-            var f = filters.filter(f => f.token!.fullKey == columnName && f.operation == operation).firstOrNull();
-            if (!f)
-                return null;
-
-            filters.remove(f);
-            return f.value;
-        }
+    static extract(fos: FilterOptionParsed[]): InboxFilterModel | null {
+        var filters = fos.clone();
 
         var result = InboxFilterModel.New({
-            range: extract("Range", "EqualTo"),
-            states: (extract("State", "IsIn") as CaseNotificationState[] || []).map(b => newMListElement(b)),
-            fromDate: extract("StartDate", "GreaterThanOrEqual"),
-            toDate: extract("StartDate", "LessThanOrEqual"),
+            range: extractFilterValue(filters, "Range", "EqualTo"),
+            states: (extractFilterValue(filters, "State", "IsIn") as CaseNotificationState[] || []).map(b => newMListElement(b)),
+            fromDate: extractFilterValue(filters, "StartDate", "GreaterThanOrEqual"),
+            toDate: extractFilterValue(filters, "StartDate", "LessThanOrEqual"),
         });
 
         if (filters.length)

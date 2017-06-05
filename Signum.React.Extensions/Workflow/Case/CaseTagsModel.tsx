@@ -16,7 +16,7 @@ export default class CaseTagsModelComponent extends React.Component<{ ctx: TypeC
         var ctx = this.props.ctx;
         return (
             <EntityStrip ctx={ctx.subCtx(a => a.caseTags)}
-                onItemHtmlProps={(tag: CaseTagTypeEntity) => ({ style: { textDecoration: "none" } })}
+                onItemHtmlAttributes={(tag: CaseTagTypeEntity) => ({ style: { textDecoration: "none" } })}
                 onRenderItem={(tag: CaseTagTypeEntity) => <Tag tag={tag} />}
             />
         );

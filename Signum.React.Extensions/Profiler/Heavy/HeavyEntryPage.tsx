@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
+import { Link } from 'react-router-dom'
 import * as d3 from 'd3'
-import * as numeral from 'numeral'
+import * as numbro from 'numbro'
 import * as moment from 'moment'
 import { } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
@@ -11,11 +11,12 @@ import {ValueSearchControl, SearchControl } from '../../../../Framework/Signum.R
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { API, HeavyProfilerEntry, StackTraceTS} from '../ProfilerClient'
+import { API, HeavyProfilerEntry, StackTraceTS } from '../ProfilerClient'
+import { RouteComponentProps } from "react-router";
 
 require("./Profiler.css");
 
-interface HeavyEntryProps extends ReactRouter.RouteComponentProps<{}, {selectedIndex : string }> {
+interface HeavyEntryProps extends RouteComponentProps<{selectedIndex : string }> {
 
 }
 
@@ -34,7 +35,7 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
     }
 
     componentWillReceiveProps(newProps: HeavyEntryProps){
-        if(this.state.entries == undefined || !this.state.entries.some(a=>a.FullIndex == newProps.routeParams.selectedIndex))
+        if(this.state.entries == undefined || !this.state.entries.some(a=>a.FullIndex == newProps.match.params.selectedIndex))
             this.loadEntries(newProps);
 
         this.loadStackTrace(newProps);
@@ -42,7 +43,7 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
 
     loadEntries(props: HeavyEntryProps) {
 
-        let selectedIndex = props.routeParams.selectedIndex;
+        let selectedIndex = props.match.params.selectedIndex;
 
         return API.Heavy.details(selectedIndex.tryBefore(".") || selectedIndex)
             .then(entries => this.setState({entries}))
@@ -51,14 +52,14 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
 
 
     loadStackTrace(props: HeavyEntryProps){
-        return API.Heavy.stackTrace(props.routeParams.selectedIndex)
+        return API.Heavy.stackTrace(props.match.params.selectedIndex)
             .then(stackTrace => this.setState({stackTrace}))
             .done();
     }
     
     handleDownload = () => {
 
-        let selectedIndex = this.props.routeParams.selectedIndex;
+        let selectedIndex = this.props.match.params.selectedIndex;
 
         API.Heavy.download(selectedIndex.tryBefore(".") || selectedIndex);
     }
@@ -66,13 +67,12 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
 
     render() {
 
-        const index = this.props.routeParams.selectedIndex;
-
-        document.title = "Heavy Profiler > Entry " + index;
+        const index = this.props.match.params.selectedIndex;
+        Navigator.setTitle("Heavy Profiler > Entry " + index);
         if (this.state.entries == undefined)
             return <h3>Heavy Profiler > Entry {index} (loading...) </h3>;
 
-        let current = this.state.entries.filter(a => a.FullIndex == this.props.routeParams.selectedIndex).single();
+        let current = this.state.entries.filter(a => a.FullIndex == this.props.match.params.selectedIndex).single();
         return (
             <div>
                 <h2><Link to="~/profiler/heavy">Heavy Profiler</Link> > Entry {index}</h2>
@@ -220,19 +220,99 @@ export class HeavyProfilerDetailsD3 extends React.Component<{entries: HeavyProfi
         return (<div className="sf-profiler-chart" ref={div => this.chartContainer = div} onWheel={this.handleWeel}></div>);
     }
 
-    chart: d3.Selection<any>;
-    groups: d3.Selection<HeavyProfilerEntry>;
-    rects: d3.Selection<HeavyProfilerEntry>;
-    rectsBefore: d3.Selection<HeavyProfilerEntry>;
-    labelTop: d3.Selection<HeavyProfilerEntry>;
-    labelBottom: d3.Selection<HeavyProfilerEntry>;
+    chart: d3.Selection<SVGElement, any, any, any>;
+    groups: d3.Selection<SVGGElement, HeavyProfilerEntry, any, any>;
+    rects: d3.Selection<SVGGElement, HeavyProfilerEntry, any, any>;
+    rectsBefore: d3.Selection<SVGGElement, HeavyProfilerEntry, any, any>;
+    labelTop: d3.Selection<SVGGElement, HeavyProfilerEntry, any, any>;
+    labelBottom: d3.Selection<SVGGElement, HeavyProfilerEntry, any, any>;
+
+    
+
+    mountChart (){
+
+        if (this.chartContainer == undefined)
+            throw new Error("chartContainer not mounted!");
+
+        let data = this.props.entries;
+
+        if (data == undefined)
+            throw new Error("no entries");
+
+        let fontSize = 12;
+        let fontPadding = 3;
+        let minDepth = d3.min(data, e=> e.Depth)!;
+        let maxDepth = d3.max(data, e=> e.Depth)!;
+   
+        let height = ((fontSize * 2) + (3 * fontPadding)) * (maxDepth + 1);
+        this.chartContainer.style.height = height + "px";
+
+
+
+        let y = d3.scaleLinear()
+            .domain([0, maxDepth + 1])
+            .range([0, height]);
+
+        let entryHeight = y(1);
+
+        d3.select(this.chartContainer).select("svg").remove();
+
+        this.chart = d3.select(this.chartContainer)
+            .append<SVGElement>('svg:svg').attr('height', height);
+
+        this.groups = this.chart.selectAll("g.entry").data(data).enter()
+            .append<SVGGElement>('svg:g').attr('class', 'entry');
+
+        this.rects = this.groups.append<SVGRectElement>('svg:rect').attr('class', 'shape')
+            .attr('y', v => y(v.Depth))            
+            .attr('height', entryHeight - 1)
+            .attr('fill', v => v.Color);
+
+        this.rectsBefore = this.groups.append<SVGRectElement>('svg:rect').attr('class', 'shape-before')          
+            .attr('y', v => y(v.Depth) + 1)            
+            .attr('height', entryHeight - 2)
+            .attr('fill', '#fff');
+
+        this.labelTop = this.groups.append<SVGTextElement>('svg:text').attr('class', 'label label-top')
+            .attr('dy', v => y(v.Depth))
+            .attr('y', fontPadding + fontSize)
+            .text(v => v.Elapsed);
+
+        this.labelBottom = this.groups.append<SVGTextElement>('svg:text').attr('class', 'label label-bottom')
+            .attr('dy', v => y(v.Depth))
+            .attr('y', (2 * fontPadding) + (2 * fontSize))
+            .text(v => v.Role + (v.AdditionalData ? (" - " + v.AdditionalData.etc(30)) : ""));
+
+        this.groups.append('svg:title').text(v => v.Role +  v.Elapsed);
+
+        this.groups.on("click", e=> {
+
+            if(e == this.props.selected)
+            {
+                this.resetZoom(e);
+            }
+            else
+            {
+                let url = "~/profiler/heavy/entry/" + e.FullIndex;
+
+                if (d3.event.ctrlKey) {
+                    window.open(Navigator.toAbsoluteUrl(url));
+                }
+                else {
+                    Navigator.history.push(url);
+                }
+            }
+        });
+
+        this.updateChart();
+    }
 
     updateChart() {
 
-        let {min, max} = this.state;
+        let { min, max } = this.state;
         let width = this.chartContainer.getBoundingClientRect().width;
         let sel = this.props.selected;
-        let x = d3.scale.linear()
+        let x = d3.scaleLinear()
             .domain([min, max])
             .range([0, width]);
 
@@ -256,84 +336,5 @@ export class HeavyProfilerDetailsD3 extends React.Component<{entries: HeavyProfi
         this.labelBottom
             .attr('dx', v => x(Math.max(min, v.Start)) + 3)
             .attr('fill', v => v == sel ? '#000' : '#fff');
-    }
-
-    mountChart (){
-
-        if (this.chartContainer == undefined)
-            throw new Error("chartContainer not mounted!");
-
-        let data = this.props.entries;
-
-        if (data == undefined)
-            throw new Error("no entries");
-
-        let fontSize = 12;
-        let fontPadding = 3;
-        let minDepth = d3.min(data, e=> e.Depth);
-        let maxDepth = d3.max(data, e=> e.Depth);
-   
-        let height = ((fontSize * 2) + (3 * fontPadding)) * (maxDepth + 1);
-        this.chartContainer.style.height = height + "px";
-
-
-
-        let y = d3.scale.linear()
-            .domain([0, maxDepth + 1])
-            .range([0, height]);
-
-        let entryHeight = y(1);
-
-
-        d3.select(this.chartContainer).select("svg").remove();
-
-        this.chart = d3.select(this.chartContainer)
-            .append('svg:svg').attr('height', height);
-
-        this.groups = this.chart.selectAll("g.entry").data(data).enter()
-            .append('svg:g').attr('class', 'entry');
-
-        this.rects = this.groups.append('svg:rect').attr('class', 'shape')
-            .attr('y', v => y(v.Depth))            
-            .attr('height', entryHeight - 1)
-            .attr('fill', v => v.Color);
-
-        this.rectsBefore = this.groups.append('svg:rect').attr('class', 'shape-before')          
-            .attr('y', v => y(v.Depth) + 1)            
-            .attr('height', entryHeight - 2)
-            .attr('fill', '#fff');
-
-        this.labelTop = this.groups.append('svg:text').attr('class', 'label label-top')
-            .attr('dy', v => y(v.Depth))
-            .attr('y', fontPadding + fontSize)
-            .text(v => v.Elapsed);
-
-        this.labelBottom = this.groups.append('svg:text').attr('class', 'label label-bottom')
-            .attr('dy', v => y(v.Depth))
-            .attr('y', (2 * fontPadding) + (2 * fontSize))
-            .text(v => v.Role + (v.AdditionalData ? (" - " + v.AdditionalData.etc(30)) : ""));
-
-        this.groups.append('svg:title').text(v => v.Role +  v.Elapsed);
-
-        this.groups.on("click", e=> {
-
-            if(e == this.props.selected)
-            {
-                this.resetZoom(e);
-            }
-            else
-            {
-                let url = Navigator.currentHistory.createHref("~/profiler/heavy/entry/" + e.FullIndex);
-
-                if (d3.event.ctrlKey) {
-                    window.open(url);
-                }
-                else {
-                    Navigator.currentHistory.push(url);
-                }
-            }
-        });
-
-        this.updateChart();
     }
 }

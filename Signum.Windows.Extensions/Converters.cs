@@ -57,8 +57,8 @@ namespace Signum.Windows.Extensions
             (object d) => d == null ? null : Brushes.Pink);
 
         public static readonly IValueConverter TokenToEntity = ConverterFactory.New(
-            (QueryTokenEntity qt) => qt?.TryToken,
-            (QueryToken t) => new QueryTokenEntity(t));
+            (QueryTokenEmbedded qt) => qt?.TryToken,
+            (QueryToken t) => new QueryTokenEmbedded(t));
 
 
         public static readonly IValueConverter ThicknessToBool = ConverterFactory.New(

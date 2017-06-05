@@ -14,6 +14,7 @@ import { FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption, 
 import * as AuthClient  from '../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
 import { IUserAssetEntity, UserAssetMessage, UserAssetPreviewModel, UserAssetPermission }  from './Signum.Entities.UserAssets'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
+import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 
 let started = false;
@@ -21,14 +22,12 @@ export function start(options: { routes: JSX.Element[] }) {
     if (started)
         return;
 
-    options.routes.push(<Route path="userAssets">
-        <Route path="import" getComponent={(loc, cb) => require(["./ImportAssetsPage"], (Comp) => cb(undefined, Comp.default)) }/>
-    </Route>);
+    options.routes.push(<ImportRoute path="~/userAssets/import" onImportModule={() => _import("./ImportAssetsPage")} />);
 
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML),
         key: "ImportUserAssets",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/userAssets/import"))
+        onClick: () => Promise.resolve("~/userAssets/import")
     });
 
 

@@ -1,7 +1,8 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
-import * as numeral from 'numeral'
+import { RouteComponentProps } from 'react-router'
+import * as numbro from 'numbro'
 import * as moment from 'moment'
+import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { ValueSearchControl, SearchControl } from '../../../Framework/Signum.React/Scripts/Search'
 import EntityLink from '../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
@@ -11,7 +12,7 @@ import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString,
 import { API, SchedulerState } from './SchedulerClient'
 import { ScheduledTaskLogEntity, ScheduledTaskEntity} from './Signum.Entities.Scheduler'
 
-interface SchedulerPanelProps extends ReactRouter.RouteComponentProps<{}, {}> {
+interface SchedulerPanelProps extends RouteComponentProps<{}> {
 
 }
 
@@ -19,6 +20,12 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
 
     componentWillMount() {
         this.loadState().done();
+
+        Navigator.setTitle("SchedulerLogic state");
+    }
+
+    componentWillUnmount() {
+        Navigator.setTitle();
     }
 
     loadState() {
@@ -36,10 +43,7 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
         API.start().then(() => this.loadState()).done();
     }
 
-
     render() {
-        document.title = "SchedulerLogic state";
-
         if (this.state == undefined)
             return <h2>SchedulerLogic state (loading...) </h2>;
 
@@ -67,16 +71,17 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
                     { this.renderTable() }
                     <br />
                     <br />
+
                     <h2>{ScheduledTaskEntity.niceName() }</h2>
                     <SearchControl findOptions={{
                         queryName: ScheduledTaskEntity,
                         searchOnLoad: true,
                         showFilters: false,
                         pagination: { elementsPerPage: 10, mode: "Firsts" }
-                    }}/>
-
+                    }} />
 
                     <br />
+
                     <h2>{ScheduledTaskLogEntity.niceName() }</h2>
                     <SearchControl findOptions={{
                         queryName: ScheduledTaskLogEntity,
@@ -84,7 +89,8 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
                         searchOnLoad: true,
                         showFilters: false,
                         pagination: { elementsPerPage: 10, mode: "Firsts" }
-                    }}/>
+                    }} />
+
                 </div>
             </div>
         );
@@ -98,20 +104,17 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
                 <table className="sf-search-results sf-stats-table">
                     <thead>
                         <tr>
-                            <th>ScheduledTask
-                            </th>
-                            <th>Rule
-                            </th>
-                            <th>NextExecution
-                            </th>
+                            <th>ScheduledTask</th>
+                            <th>Rule</th>
+                            <th>NextDate</th>
                         </tr>
                     </thead>
                     <tbody>
                         {s.Queue.map((item, i) =>
                             <tr key={i}>
-                                <td><EntityLink lite={item.ScheduledTask} inSearch={true} /></td>
+                                <td><EntityLink lite={item.ScheduledTask} inSearch={true} onNavigated={() => this.loadState().done()} /></td>
                                 <td>{item.Rule} </td>
-                                <td>{item.NextExecution} ({item.NextExecution == undefined ? "-None-" : moment(item.NextExecution).fromNow()}) </td>
+                                <td>{item.NextDate} ({moment(item.NextDate).fromNow()})</td>
                             </tr>)
                         }
                     </tbody>

@@ -25,7 +25,7 @@ namespace Signum.Entities.Workflow
 
         [NotNullable]
         [NotNullValidator]
-        public WorkflowXmlEntity Xml { get; set; }
+        public WorkflowXmlEmbedded Xml { get; set; }
 
         [NotNullable]
         [NotNullValidator]
@@ -67,7 +67,7 @@ namespace Signum.Entities.Workflow
     }
 
     [Serializable]
-    public class WorkflowLaneActorsEval : EvalEntity<IWorkflowLaneActorsEvaluator>
+    public class WorkflowLaneActorsEval : EvalEmbedded<IWorkflowLaneActorsEvaluator>
     {
         protected override CompilationResult Compile()
         {
@@ -78,7 +78,7 @@ namespace Signum.Entities.Workflow
             var WorkflowEntityTypeName = parent.Pool.Workflow.MainEntityType.ToType().FullName;
 
             return Compile(DynamicCode.GetAssemblies(),
-                DynamicCode.GetNamespaces() +
+                DynamicCode.GetUsingNamespaces() +
                     @"
                     namespace Signum.Entities.Workflow
                     {
@@ -95,6 +95,11 @@ namespace Signum.Entities.Workflow
                             }
                         }                  
                     }");
+        }
+
+        public WorkflowLaneActorsEval Clone()
+        {
+            return new WorkflowLaneActorsEval() { Script = this.Script };
         }
     }
 

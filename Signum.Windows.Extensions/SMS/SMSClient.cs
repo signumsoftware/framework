@@ -27,7 +27,7 @@ namespace Signum.Windows.SMS
                 {
                     new EntitySettings<SMSMessageEntity> { View = e => new SMSMessage(), Icon = ExtensionsImageLoader.GetImageSortName("sms.png") },
                     new EntitySettings<SMSTemplateEntity> { View = e => new SMSTemplate(), Icon = ExtensionsImageLoader.GetImageSortName("smstemplate.png") },
-                    new EmbeddedEntitySettings<SMSTemplateMessageEntity>() { View = e => new Signum.Windows.SMS.SMSTemplateMessage() },
+                    new EmbeddedEntitySettings<SMSTemplateMessageEmbedded>() { View = e => new Signum.Windows.SMS.SMSTemplateMessage() },
                     new EntitySettings<SMSSendPackageEntity> { View = e => new SMSSendPackage(), Icon = ExtensionsImageLoader.GetImageSortName("package.png") },
                     new EntitySettings<SMSUpdatePackageEntity> { View = e => new SMSUpdatePackage(), Icon = ExtensionsImageLoader.GetImageSortName("package.png") },
                     new ModelEntitySettings<MultipleSMSModel> { View = e => new MultipleSMS(), Icon = ExtensionsImageLoader.GetImageSortName("package.png") },

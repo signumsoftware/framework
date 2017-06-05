@@ -68,7 +68,7 @@ namespace Signum.Entities.Chart
 
         [NotNullable]
         [NotNullValidator, NoRepeatValidator]
-        public MList<ChartParameterEntity> Parameters { get; set; } = new MList<ChartParameterEntity>();
+        public MList<ChartParameterEmbedded> Parameters { get; set; } = new MList<ChartParameterEmbedded>();
 
         bool groupResults = true;
         public bool GroupResults
@@ -84,7 +84,7 @@ namespace Signum.Entities.Chart
         }
 
         [NotifyCollectionChanged, NotifyChildProperty, NotNullable, PreserveOrder]
-        public MList<ChartColumnEntity> Columns { get; set; } = new MList<ChartColumnEntity>();
+        public MList<ChartColumnEmbedded> Columns { get; set; } = new MList<ChartColumnEmbedded>();
 
         void NotifyAllColumns()
         {
@@ -95,10 +95,10 @@ namespace Signum.Entities.Chart
         }
 
         [NotNullable, PreserveOrder]
-        public MList<QueryFilterEntity> Filters { get; set; } = new MList<QueryFilterEntity>();
+        public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
         [NotNullable, PreserveOrder]
-        public MList<QueryOrderEntity> Orders { get; set; } = new MList<QueryOrderEntity>();
+        public MList<QueryOrderEmbedded> Orders { get; set; } = new MList<QueryOrderEmbedded>();
 
         [UniqueIndex]
         public Guid Guid { get; set; } = Guid.NewGuid();
@@ -136,7 +136,14 @@ namespace Signum.Entities.Chart
 
         protected override void PostRetrieving()
         {
-            chartScript.SynchronizeColumns(this);
+            try
+            {
+                chartScript.SynchronizeColumns(this);
+            }
+            catch (InvalidOperationException e) when (e.Message.Contains("sealed"))
+            {
+                throw new InvalidOperationException($"Error Synchronizing columns for '{this}'. Maybe the ChartScript has changed. Consider opening UserChart and saving it again.");
+            }
         }
 
         public void InvalidateResults(bool needNewQuery)
@@ -177,7 +184,7 @@ namespace Signum.Entities.Chart
             ParseData(ctx.GetQueryDescription(Query));
         }
 
-        public void FixParameters(ChartColumnEntity chartColumnEntity)
+        public void FixParameters(ChartColumnEmbedded chartColumnEntity)
         {
 
         }

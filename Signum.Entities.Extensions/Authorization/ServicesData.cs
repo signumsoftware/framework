@@ -189,16 +189,16 @@ namespace Signum.Entities.Authorization
         {
         }
 
-        public TypeAllowedAndConditions(TypeAllowed? fallback, ReadOnlyCollection<TypeConditionRule> conditions)
+        public TypeAllowedAndConditions(TypeAllowed? fallback, MList<TypeConditionRuleEmbedded> conditions)
         {
             this.fallback = fallback;
             this.conditions = conditions;
         }
 
-        public TypeAllowedAndConditions(TypeAllowed? fallback, params TypeConditionRule[] conditions)
+        public TypeAllowedAndConditions(TypeAllowed? fallback, params TypeConditionRuleEmbedded[] conditions)
         {
             this.fallback = fallback;
-            this.conditions = conditions.ToReadOnly();
+            this.conditions = conditions.ToMList();
         }
 
         TypeAllowed? fallback;
@@ -215,9 +215,9 @@ namespace Signum.Entities.Authorization
             get { return this.fallback ?? TypeAllowed.None; }
         }
 
-        ReadOnlyCollection<TypeConditionRule> conditions;
+        MList<TypeConditionRuleEmbedded> conditions;
         [InTypeScript(Undefined =false)]
-        public ReadOnlyCollection<TypeConditionRule> Conditions
+        public MList<TypeConditionRuleEmbedded> Conditions
         {
             get { return conditions; }
             private set { conditions = value; }
@@ -306,12 +306,12 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    [Serializable, DescriptionOptions(DescriptionOptions.None), InTypeScript(Undefined = false)]
-    public class TypeConditionRule : EmbeddedEntity, IEquatable<TypeConditionRule>
+    [Serializable, InTypeScript(Undefined = false)]
+    public class TypeConditionRuleEmbedded : EmbeddedEntity, IEquatable<TypeConditionRuleEmbedded>
     {
-        private TypeConditionRule() { }
+        private TypeConditionRuleEmbedded() { }
 
-        public TypeConditionRule(TypeConditionSymbol typeCondition, TypeAllowed allowed)
+        public TypeConditionRuleEmbedded(TypeConditionSymbol typeCondition, TypeAllowed allowed)
         {
             this.TypeCondition = typeCondition;
             this.Allowed = allowed;
@@ -322,7 +322,7 @@ namespace Signum.Entities.Authorization
         
         public TypeAllowed Allowed { get; set; }
 
-        public bool Equals(TypeConditionRule other)
+        public bool Equals(TypeConditionRuleEmbedded other)
         {
             return TypeCondition.Equals(other.TypeCondition) &&
                 Allowed.Equals(other.Allowed);

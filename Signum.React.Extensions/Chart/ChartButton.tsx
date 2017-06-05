@@ -18,7 +18,7 @@ export interface ChartButtonProps {
 
 export default class ChartButton extends React.Component<ChartButtonProps, void> {
 
-    handleClick = (e: React.MouseEvent<any>) => {
+    handleOnMouseUp = (e: React.MouseEvent<any>) => {
 
         const fo = this.props.searchControl.props.findOptions;
 
@@ -28,16 +28,12 @@ export default class ChartButton extends React.Component<ChartButtonProps, void>
             filterOptions : fo.filterOptions
         }));
 
-        if (e.ctrlKey || e.button == 1)
-            window.open(path);
-        else
-            Navigator.currentHistory.push(path);
-
+        Navigator.pushOrOpen(path, e);
     }
     
     render() {
         return (
-            <Button onClick={this.handleClick}>{ ChartMessage.Chart.niceToString() }</Button>
+            <Button onMouseUp={this.handleOnMouseUp}><i className="glyphicon glyphicon-stats"></i> &nbsp; {ChartMessage.Chart.niceToString()}</Button>
         );
     }
  

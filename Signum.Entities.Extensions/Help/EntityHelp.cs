@@ -28,7 +28,7 @@ namespace Signum.Entities.Help
 
         [NotNullable]
         [NotNullValidator, NoRepeatValidator]
-        public MList<PropertyRouteHelpEntity> Properties { get; set; } = new MList<PropertyRouteHelpEntity>();
+        public MList<PropertyRouteHelpEmbedded> Properties { get; set; } = new MList<PropertyRouteHelpEmbedded>();
 
         [Ignore]
         public MList<OperationHelpEntity> Operations { get; set; } = new MList<OperationHelpEntity>();
@@ -64,7 +64,7 @@ namespace Signum.Entities.Help
     }
 
     [Serializable]
-    public class PropertyRouteHelpEntity : EmbeddedEntity
+    public class PropertyRouteHelpEmbedded : EmbeddedEntity
     {
         [NotNullable]
         [NotNullValidator]

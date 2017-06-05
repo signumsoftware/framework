@@ -11,16 +11,21 @@ namespace Signum.Entities.Scheduler
 {
     public interface IScheduleRuleEntity : IEntity
     {
+        DateTime StartingOn { get; }
+
         DateTime Next(DateTime now);
+        IScheduleRuleEntity Clone();
     }
 
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class ScheduleRuleMinutelyEntity : Entity, IScheduleRuleEntity
     {
+        public DateTime StartingOn { get; set; } = TimeZoneManager.Now.Date;
+
         public DateTime Next(DateTime now)
         {
-            DateTime candidate = now.TrimToMinutes();
+            DateTime candidate = DateTimeExtensions.Max(now, StartingOn).TrimToMinutes();
 
             if (this.IsAligned)
                 candidate = candidate.AddMinutes(-(candidate.Minute % EachMinutes));
@@ -34,12 +39,20 @@ namespace Signum.Entities.Scheduler
         public int EachMinutes { get; set; }
 
         public bool IsAligned => EachMinutes < 60 && (60 % EachMinutes == 0);
+        
 
         public override string ToString()
         {
             return SchedulerMessage.Each0Minutes.NiceToString().FormatWith(EachMinutes.ToString());
         }
 
+        public IScheduleRuleEntity Clone()
+        {
+            return new ScheduleRuleMinutelyEntity
+            {
+                EachMinutes = EachMinutes,
+            };
+        }
     }
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
@@ -67,7 +80,7 @@ namespace Signum.Entities.Scheduler
 
         public DateTime Next(DateTime now)
         {
-            DateTime result = DateTimeExtensions.Max(now.Date, StartingOn.Date).Add(StartingOn.TimeOfDay);
+            DateTime result = DateTimeExtensions.Max(now, StartingOn).Date.Add(StartingOn.TimeOfDay);
 
             if (result < now)
                 result = result.AddDays(1);
@@ -118,6 +131,24 @@ namespace Signum.Entities.Scheduler
                 SchedulerMessage.ScheduleRuleWeekDaysDN_At.NiceToString(),
                 StartingOn.ToUserInterface().ToShortTimeString());
         }
+
+        public IScheduleRuleEntity Clone()
+        {
+            return new ScheduleRuleWeekDaysEntity
+            {
+                Calendar = Calendar,
+                Holiday = Holiday,
+
+                Monday = Monday,
+                Tuesday = Tuesday,
+                Wednesday = Wednesday,
+                Thursday = Thursday,
+                Friday = Friday,
+                Saturday = Saturday,
+                Sunday = Sunday,
+                StartingOn = StartingOn
+            };
+        }
     }
 
 
@@ -141,7 +172,7 @@ namespace Signum.Entities.Scheduler
         
         public DateTime Next(DateTime now)
         {
-            DateTime result = DateTimeExtensions.Max(now.Date, StartingOn.Date).MonthStart().AddDays(StartingOn.Day).Add(StartingOn.TimeOfDay);
+            DateTime result = DateTimeExtensions.Max(now, StartingOn).MonthStart().AddDays(StartingOn.Day - 1).Add(StartingOn.TimeOfDay);
 
             if (result < now)
                 result = result.AddMonths(1);
@@ -185,6 +216,26 @@ namespace Signum.Entities.Scheduler
             var monthNames = 0.To(12).Where(i => IsAllowed(i + 1)).CommaAnd(i => CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames[i]);
 
             return SchedulerMessage.Day0At1In2.NiceToString(StartingOn.Day, StartingOn.ToUserInterface().ToShortTimeString(), monthNames);
+        }
+
+        public IScheduleRuleEntity Clone()
+        {
+            return new ScheduleRuleMonthsEntity
+            {
+                January = January,
+                February = February,
+                March = March,
+                April = April,
+                May = May,
+                June = June,
+                July = July,
+                August = August,
+                September = September,
+                October = October,
+                November = November,
+                December = December,
+                StartingOn = StartingOn,
+            };
         }
     }
 

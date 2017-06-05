@@ -112,12 +112,12 @@ namespace Signum.Engine.Authorization
         public static TypeRulePack GetTypeRules(Lite<RoleEntity> roleLite)
         {
             var result = new TypeRulePack { Role = roleLite };
-
-            cache.GetRules(result, TypeLogic.TypeToEntity.Where(t => !t.Key.IsEnumEntity()).Select(a => a.Value));
+            Schema s = Schema.Current;
+            cache.GetRules(result, TypeLogic.TypeToEntity.Where(t => !t.Key.IsEnumEntity() && s.IsAllowed(t.Key, false) == null).Select(a => a.Value));
 
             foreach (TypeAllowedRule r in result.Rules)
             {
-                Type type = TypeLogic.DnToType[r.Resource];
+                Type type = TypeLogic.EntityToType[r.Resource];
 
                 if (OperationAuthLogic.IsStarted)
                     r.Operations = OperationAuthLogic.GetAllowedThumbnail(roleLite, type);
@@ -188,7 +188,7 @@ namespace Signum.Engine.Authorization
             if (ta == null || ta.IsEmpty)
                 return null;
             
-            var pair = ta.FirstOrDefault(a => a.Item1 == type);
+            var pair = ta.FirstOrDefault(a => a.type == type);
 
             if (pair.type == null)
                 return null;
@@ -276,7 +276,7 @@ namespace Signum.Engine.Authorization
                 return new TypeAllowedAndConditions(null);
 
             return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback.Value)),
-                conditions.Select((c, i) => new TypeConditionRule(c, maxMerge(baseRules.Where(br => !br.Conditions.IsNullOrEmpty()).Select(br => br.Conditions[i].Allowed)))).ToArray());
+                conditions.Select((c, i) => new TypeConditionRuleEmbedded(c, maxMerge(baseRules.Where(br => !br.Conditions.IsNullOrEmpty()).Select(br => br.Conditions[i].Allowed)))).ToArray());
         }
 
 

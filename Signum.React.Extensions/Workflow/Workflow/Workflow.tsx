@@ -1,12 +1,12 @@
 ﻿import * as React from 'react'
-import { WorkflowEntity, WorkflowModel, WorkflowEntitiesDictionary, BpmnEntityPair, WorkflowOperation, WorkflowMessage } from '../Signum.Entities.Workflow'
+import { WorkflowEntity, WorkflowModel, WorkflowEntitiesDictionary, BpmnEntityPairEmbedded, WorkflowOperation, WorkflowMessage } from '../Signum.Entities.Workflow'
 import { TypeContext, ValueLine, EntityLine, LiteAutocompleteConfig } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { is, JavascriptMessage, toLite, ModifiableEntity, Lite, Entity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { createEntityOperationContext } from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 import * as Entities from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
 import { API, executeWorkflowSave } from '../WorkflowClient'
 import BpmnModelerComponent from '../Bpmn/BpmnModelerComponent'
+import MessageModal from "../../../../Framework/Signum.React/Scripts/Modals/MessageModal";
 
 interface WorkflowProps {
     ctx: TypeContext<WorkflowEntity>;
@@ -53,14 +53,12 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
 
     loadXml(w: WorkflowEntity) {
         if (w.isNew) {
-            require(["raw-loader!./InitialWorkflow.xml"], (xml) => {
-                var model = WorkflowModel.New({
+            _import<string>("raw-loader!./InitialWorkflow.xml")
+                .then(xml => this.updateState(WorkflowModel.New({
                     diagramXml: xml,
                     entities: [],
-                });
-
-                this.updateState(model);
-            });
+                })))
+                .done();
         }
         else
             API.getWorkflowModel(toLite(w))
@@ -78,6 +76,7 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
                     find={false}
                     onRemove={this.handleMainEntityTypeChange} />
 
+                <ValueLine ctx={ctx.subCtx(d => d.mainEntityStrategy)} />
                 <fieldset>
                     {this.state.initialXmlDiagram ?
                         <div className="code-container">
@@ -95,8 +94,13 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
 
     handleMainEntityTypeChange = (entity: ModifiableEntity | Lite<Entity>): Promise<boolean> => {
         if (this.bpmnModelerComponent!.existsMainEntityTypeRelatedNodes()) {
-            alert(WorkflowMessage.ChangeWorkflowMainEntityTypeIsNotAllowedBecausueWeHaveNodesThatUseIt.niceToString());
-            return Promise.resolve(false);
+            return MessageModal.show({
+                title: JavascriptMessage.error.niceToString(),
+                message: WorkflowMessage.ChangeWorkflowMainEntityTypeIsNotAllowedBecausueWeHaveNodesThatUseIt.niceToString(),
+                buttons: "ok",
+                icon: "warning",
+                style: "warning",
+            }).then(a=>false)
         }
         else
             return Promise.resolve(true);

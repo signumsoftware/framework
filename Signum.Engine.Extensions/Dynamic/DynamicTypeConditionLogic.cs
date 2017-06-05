@@ -65,6 +65,7 @@ namespace Signum.Engine.Dynamic
 
                 DynamicLogic.GetCodeFiles += GetCodeFiles;
                 DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
+                sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicTypeConditionEntity>().Where(dtc => dtc.EntityType == type));
             }
         }
 

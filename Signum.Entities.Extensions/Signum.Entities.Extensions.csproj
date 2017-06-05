@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\Microsoft.Net.Compilers.2.0.1\build\Microsoft.Net.Compilers.props" Condition="Exists('..\..\packages\Microsoft.Net.Compilers.2.0.1\build\Microsoft.Net.Compilers.props')" />
-  <Import Project="..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
+  <Import Project="..\..\packages\Microsoft.Net.Compilers.2.2.0\build\Microsoft.Net.Compilers.props" Condition="Exists('..\..\packages\Microsoft.Net.Compilers.2.2.0\build\Microsoft.Net.Compilers.props')" />
+  <Import Project="..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.4\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.4\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -68,12 +68,14 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.4\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\packages\Newtonsoft.Json.10.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SqlServer.Types, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.SqlServer.Types.Unofficial.12.0.2000.8\lib\net40\Microsoft.SqlServer.Types.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -85,8 +87,8 @@
     <Reference Include="System.ServiceModel">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.ValueTuple, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.ValueTuple.4.3.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+    <Reference Include="System.ValueTuple, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.ValueTuple.4.3.1\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
     </Reference>
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq">
@@ -121,6 +123,7 @@
     <Compile Include="Dynamic\DynamicCode.cs" />
     <Compile Include="Dynamic\Dynamic.cs" />
     <Compile Include="Dynamic\DynamicMixinConnection.cs" />
+    <Compile Include="Migrations\ExecutedLoadProcess.cs" />
     <Compile Include="Toolbar\Toolbar.cs" />
     <Compile Include="Dynamic\DynamicSqlMigration.cs" />
     <Compile Include="Dynamic\DynamicType.cs" />
@@ -133,7 +136,7 @@
     <Compile Include="Excel\ExcelAttachmentEntity.cs" />
     <Compile Include="Excel\ExcelReportEntity.cs" />
     <Compile Include="Excel\IExcelReportServer.cs" />
-    <Compile Include="Files\EmbeddedFile.cs" />
+    <Compile Include="Files\FileEmbedded.cs" />
     <Compile Include="Files\FileUtils.cs" />
     <Compile Include="Help\AppendixHelp.cs" />
     <Compile Include="Help\IHelpServer.cs" />
@@ -147,7 +150,7 @@
     <Compile Include="Isolation\IsolationEntity.cs" />
     <Compile Include="Printing\PrintLine.cs" />
     <Compile Include="Printing\PrintPackages.cs" />
-    <Compile Include="RestLog\RestLog.cs" />
+    <Compile Include="Rest\RestLog.cs" />
     <Compile Include="Mailing\EmailMasterTemplate.cs" />
     <Compile Include="Mailing\SendEmailTask.cs" />
     <Compile Include="Mailing\Pop3Configuration.cs" />
@@ -182,9 +185,9 @@
     <Compile Include="Disconnected\DisconnectedMachineEntity.cs" />
     <Compile Include="Disconnected\DisconnectedExportEntity.cs" />
     <Compile Include="Disconnected\FileMessage.cs" />
-    <Compile Include="Files\EmbeddedFilePath.cs" />
-    <Compile Include="Files\File.cs" />
-    <Compile Include="Files\FilePath.cs" />
+    <Compile Include="Files\FilePathEmbedded.cs" />
+    <Compile Include="Files\FileEntity.cs" />
+    <Compile Include="Files\FilePathEntity.cs" />
     <Compile Include="Files\IFileServer.cs" />
     <Compile Include="Mailing\EmailConfiguration.cs" />
     <Compile Include="Templating\TemplateTokenMessage.cs" />
@@ -199,8 +202,11 @@
     <Compile Include="Notes\Note.cs" />
     <Compile Include="Omnibox\SpecialOmniboxResultGenerator.cs" />
     <Compile Include="Processes\IProcessServer.cs" />
+    <Compile Include="Tree\TreeEntity.cs" />
+    <Compile Include="Tree\TreeOmniboxResultGenertor.cs" />
     <Compile Include="UserAssets\IUserAssetsServer.cs" />
     <Compile Include="UserAssets\QueryToken.cs" />
+    <Compile Include="Rest\RestApiKeyEntity.cs" />
     <Compile Include="ViewLog\ViewLogEntity.cs" />
     <Compile Include="UserAssets\UserAssets.cs" />
     <Compile Include="UserQueries\UserQueryOmniboxResultGenerator.cs" />
@@ -319,7 +325,7 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
-    <Error Condition="!Exists('..\..\packages\Microsoft.Net.Compilers.2.0.1\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Net.Compilers.2.0.1\build\Microsoft.Net.Compilers.props'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.4\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.4\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.Net.Compilers.2.2.0\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Net.Compilers.2.2.0\build\Microsoft.Net.Compilers.props'))" />
   </Target>
 </Project>

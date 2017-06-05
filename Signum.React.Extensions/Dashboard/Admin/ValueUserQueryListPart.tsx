@@ -9,7 +9,7 @@ import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import FileLine, { FileTypeSymbol } from '../../Files/FileLine'
-import { ValueUserQueryListPartEntity, ValueUserQueryElementEntity } from '../Signum.Entities.Dashboard'
+import { ValueUserQueryListPartEntity, ValueUserQueryElementEmbedded } from '../Signum.Entities.Dashboard'
 
 
 export default class ValueUserQueryListPart extends React.Component<{ ctx: TypeContext<ValueUserQueryListPartEntity> }, void> {
@@ -24,12 +24,12 @@ export default class ValueUserQueryListPart extends React.Component<{ ctx: TypeC
         );
     }
 
-    renderUserQuery = (tc: TypeContext<ValueUserQueryElementEntity>) => {
+    renderUserQuery = (tc: TypeContext<ValueUserQueryElementEmbedded>) => {
         return (
             <div className="form-inline repeater-inline">
                 <ValueLine ctx={tc.subCtx(cuq => cuq.label) }  />
                 &nbsp;
-                <EntityLine ctx={tc.subCtx(cuq => cuq.userQuery) }  formGroupHtmlProps={{ style: { maxWidth: "300px" } }} />
+                <EntityLine ctx={tc.subCtx(cuq => cuq.userQuery) }  formGroupHtmlAttributes={{ style: { maxWidth: "300px" } }} />
                 &nbsp;
                 <ValueLine ctx={tc.subCtx(cuq => cuq.href) }  />
             </div>

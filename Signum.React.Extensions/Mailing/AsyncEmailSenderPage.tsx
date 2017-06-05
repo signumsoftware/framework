@@ -1,6 +1,7 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
-import { Link } from 'react-router'
+import { RouteComponentProps } from 'react-router'
+import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import EntityLink from '../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
 import {ValueSearchControl, SearchControl, OrderType } from '../../../Framework/Signum.React/Scripts/Search'
@@ -12,7 +13,7 @@ import { EmailMessageEntity } from './Signum.Entities.Mailing'
 
 
 
-interface AsyncEmailSenderPageProps extends ReactRouter.RouteComponentProps<{}, {}> {
+interface AsyncEmailSenderPageProps extends RouteComponentProps<{}> {
 
 }
 
@@ -20,6 +21,11 @@ export default class AsyncEmailSenderPage extends React.Component<AsyncEmailSend
 
     componentWillMount() {
         this.loadState().done();
+        Navigator.setTitle("AsyncEmailSender state");
+    }
+
+    componentWillUnmount() {
+        Navigator.setTitle();
     }
 
     loadState() {
@@ -38,8 +44,7 @@ export default class AsyncEmailSenderPage extends React.Component<AsyncEmailSend
     }
 
 
-    render() {
-        document.title = "AsyncEmailSender state";
+    render() {      
 
         if (this.state == undefined)
             return <h2>AsyncEmailSender state (loading...) </h2>;

@@ -23,13 +23,13 @@ namespace Signum.Windows.Mailing
                 Navigator.AddSettings(new List<EntitySettings> 
                 { 
                     new EntitySettings<EmailMessageEntity> { View = e => new EmailMessage() },
-                    new EmbeddedEntitySettings<EmailAttachmentEntity> { View = e => new EmailAttachment() },
-                    new EmbeddedEntitySettings<EmailAddressEntity> { View = e => new EmailAddress() },
+                    new EmbeddedEntitySettings<EmailAttachmentEmbedded> { View = e => new EmailAttachment() },
+                    new EmbeddedEntitySettings<EmailAddressEmbedded> { View = e => new EmailAddress() },
                     new EmbeddedEntitySettings<EmailRecipientEntity> { View = e => new EmailRecipient() }
                 });
 
                 if (smtp || pop3)
-                    Navigator.AddSetting(new EmbeddedEntitySettings<ClientCertificationFileEntity> { View = e => new ClientCertificationFile() });
+                    Navigator.AddSetting(new EmbeddedEntitySettings<ClientCertificationFileEmbedded> { View = e => new ClientCertificationFile() });
 
                 if (smtp)
                 {

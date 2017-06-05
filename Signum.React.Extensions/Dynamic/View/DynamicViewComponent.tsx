@@ -7,7 +7,7 @@ import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfo } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import ModalMessage from '../../../../Framework/Signum.React/Scripts/Modals/ModalMessage'
+import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
 import * as EntityOperations from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
@@ -17,7 +17,6 @@ import * as NodeUtils from './NodeUtils'
 import * as DynamicViewClient from '../DynamicViewClient'
 import { DynamicViewInspector, CollapsableTypeHelp } from './Designer'
 import { DynamicViewTree } from './DynamicViewTree'
-import { AuthInfo } from './AuthInfo'
 import ShowCodeModal from './ShowCodeModal'
 import { DynamicViewEntity, DynamicViewOperation, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 
@@ -106,11 +105,11 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
         const node = JSON.stringify(this.state.rootNode);
 
         if (this.state.dynamicView.isNew || node != this.state.dynamicView.viewContent) {
-            return ModalMessage.show({
+            return MessageModal.show({
                 title: NormalWindowMessage.ThereAreChanges.niceToString(),
                 message: JavascriptMessage.loseCurrentChanges.niceToString(),
                 buttons: "yes_no",
-                defaultStyle: "warning",
+                style: "warning",
                 icon: "warning"
             }).then(result => { return result == "yes"; });
         }

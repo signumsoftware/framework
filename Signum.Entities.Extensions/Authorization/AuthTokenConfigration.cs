@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Signum.Entities.Authorization
 {
     [Serializable]
-    public class AuthTokenConfigurationEntity : EmbeddedEntity
+    public class AuthTokenConfigurationEmbedded : EmbeddedEntity
     {
         [Unit("mins")]
         public int RefreshTokenEvery { get; set; } = 30;

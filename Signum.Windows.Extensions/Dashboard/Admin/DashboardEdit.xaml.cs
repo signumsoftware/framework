@@ -43,7 +43,7 @@ namespace Signum.Windows.Dashboard.Admin
             if (type == null)
                 return null;
 
-            return new PanelPartEntity
+            return new PanelPartEmbedded
             {
                 Row = Panel.Parts.IsEmpty() ? 0 : Panel.Parts.Max(a => Math.Max(a.Row, 0)) + 1,
                 Columns = 12,

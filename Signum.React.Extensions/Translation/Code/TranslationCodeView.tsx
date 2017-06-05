@@ -1,6 +1,5 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
-import * as numeral from 'numeral'
+import * as numbro from 'numbro'
 import * as moment from 'moment'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
@@ -14,10 +13,11 @@ import * as CultureClient from '../CultureClient'
 import { API, AssemblyResult, LocalizedType, LocalizableType, LocalizedMember } from '../TranslationClient'
 import { CultureInfoEntity } from '../../Basics/Signum.Entities.Basics'
 import { TranslationMessage } from '../Signum.Entities.Translation'
+import { RouteComponentProps } from "react-router";
 
 require("../Translation.css");
 
-interface TranslationCodeViewProps extends ReactRouter.RouteComponentProps<{}, { culture: string; assembly: string }> {
+interface TranslationCodeViewProps extends RouteComponentProps<{ culture: string; assembly: string }> {
 
 }
 
@@ -34,7 +34,7 @@ export default class TranslationCodeView extends React.Component<TranslationCode
 
     render() {
 
-        const {assembly, culture } = this.props.routeParams!;
+        const {assembly, culture } = this.props.match.params;
 
         const message = TranslationMessage.View0In1.niceToString(assembly,
             culture == undefined ? TranslationMessage.AllLanguages.niceToString() :
@@ -53,7 +53,7 @@ export default class TranslationCodeView extends React.Component<TranslationCode
     }
 
     handleSearch = (filter: string) => {
-        const {assembly, culture} = this.props.routeParams!;
+        const {assembly, culture} = this.props.match.params;
 
         return API.retrieve(assembly, culture || "", filter)
             .then(result => this.setState({ result: result }))
@@ -73,7 +73,7 @@ export default class TranslationCodeView extends React.Component<TranslationCode
 
         return (
             <div>
-                { Dic.getValues(this.state.result.types).map(type => <TranslationTypeTable key={type.type} type={type} result={result} currentCulture={this.props.routeParams.culture} />) }
+                { Dic.getValues(this.state.result.types).map(type => <TranslationTypeTable key={type.type} type={type} result={result} currentCulture={this.props.match.params.culture} />) }
                 <input type="submit" value={ TranslationMessage.Save.niceToString() } className="btn btn-primary" onClick={this.handleSave}/>
             </div>
         );
@@ -81,7 +81,7 @@ export default class TranslationCodeView extends React.Component<TranslationCode
 
     handleSave = (e: React.FormEvent<any>) => {
         e.preventDefault();
-        const params = this.props.routeParams!;
+        const params = this.props.match.params;
         API.save(params.assembly, params.culture || "", this.state.result!).then(() => notifySuccess()).done();
     }
 }

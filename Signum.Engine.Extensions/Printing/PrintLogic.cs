@@ -108,10 +108,10 @@ namespace Signum.Engine.Printing
 
         public static PrintLineEntity CreateLine(Entity referred, FileTypeSymbol fileType, string fileName, byte[] content)
         {
-            return CreateLine(referred, new EmbeddedFilePathEntity(fileType, fileName, content));
+            return CreateLine(referred, new FilePathEmbedded(fileType, fileName, content));
         }
 
-        public static PrintLineEntity CreateLine(Entity referred, EmbeddedFilePathEntity file)
+        public static PrintLineEntity CreateLine(Entity referred, FilePathEmbedded file)
         {
             return new PrintLineEntity
             {
@@ -177,8 +177,8 @@ namespace Signum.Engine.Printing
 
         public static FileContent SavePrintLine(this FileContent file, Entity entity, FileTypeSymbol fileTypeForPrinting)
         {
-            PrintingLogic.CancelPrinting(entity, fileTypeForPrinting);
-            PrintingLogic.CreateLine(entity, fileTypeForPrinting, Path.GetFileName(file.FileName), file.Bytes);
+            CancelPrinting(entity, fileTypeForPrinting);
+            CreateLine(entity, fileTypeForPrinting, Path.GetFileName(file.FileName), file.Bytes);
 
             return file;
         }

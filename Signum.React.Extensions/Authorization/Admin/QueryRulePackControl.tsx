@@ -1,7 +1,6 @@
 ﻿import * as React from 'react'
 import { Button } from 'react-bootstrap'
-import { Link } from 'react-router'
-import * as numeral from 'numeral'
+import * as numbro from 'numbro'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { notifySuccess }from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
@@ -12,7 +11,7 @@ import { EntityLine, ValueLine } from '../../../../Framework/Signum.React/Script
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { Api } from '../AuthClient'
+import { API } from '../AuthClient'
 import { QueryRulePack, QueryAllowedRule, AuthAdminMessage, PermissionSymbol, AuthMessage } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 
@@ -23,8 +22,8 @@ export default class QueryRulesPackControl extends React.Component<{ ctx: TypeCo
     handleSaveClick = (bc: ButtonsContext) => {
         let pack = this.props.ctx.value;
 
-        Api.saveQueryRulePack(pack)
-            .then(() => Api.fetchQueryRulePack(pack.type.cleanName!, pack.role.id!))
+        API.saveQueryRulePack(pack)
+            .then(() => API.fetchQueryRulePack(pack.type.cleanName!, pack.role.id!))
             .then(newPack => {
                 notifySuccess();
                 bc.frame.onReload({ entity: newPack, canExecute: {} });
@@ -80,7 +79,11 @@ export default class QueryRulesPackControl extends React.Component<{ ctx: TypeCo
                                     {this.renderRadio(c.value, false, "red") }
                                 </td>
                                 <td style={{ textAlign: "center" }}>
-                                    <GrayCheckbox checked={c.value.allowed != c.value.allowedBase}/>
+                                    <GrayCheckbox checked={c.value.allowed != c.value.allowedBase} onUnchecked={() => {
+                                        c.value.allowed = c.value.allowedBase;
+                                        ctx.value.modified = true; 
+                                        this.forceUpdate();
+                                    }} />
                                 </td>
                             </tr>
                         )

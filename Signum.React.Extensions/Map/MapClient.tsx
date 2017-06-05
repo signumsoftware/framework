@@ -1,6 +1,6 @@
 ﻿   
 import * as React from 'react'
-import { Route, IndexRoute } from 'react-router'
+import { Route, } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -20,7 +20,8 @@ import * as AuthClient  from '../../../Extensions/Signum.React.Extensions/Author
 import { SchemaMapInfo, ClientColorProvider } from './Schema/SchemaMap'
 import { OperationMapInfo } from './Operation/OperationMap'
 
-import {  } from './Signum.Entities.Map'
+import { } from './Signum.Entities.Map'
+import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 
 export const getProviders: Array<(info: SchemaMapInfo) => Promise<ClientColorProvider[]>> = []; 
@@ -31,38 +32,20 @@ export function getAllProviders(info: SchemaMapInfo): Promise<ClientColorProvide
 
 export function start(options: { routes: JSX.Element[], auth: boolean; cache: boolean; disconnected: boolean; isolation: boolean }) {
 
-    options.routes.push(<Route path="map">
-        <IndexRoute getComponent={ (loc, cb) => require(["./Schema/SchemaMapPage"], (Comp) => cb(undefined, Comp.default)) } />
-        <Route path=":type" getComponent={ (loc, cb) => require(["./Operation/OperationMapPage"], (Comp) => cb(undefined, Comp.default)) } />
-    </Route>);
-    
-    getProviders.push((smi) => new Promise<ClientColorProvider[]>(resolve => {
-        require(["./Schema/ColorProviders/Default"], c => resolve(c.default(smi)));
-    }));
+    options.routes.push(
+        <ImportRoute path="~/map" exact onImportModule={() => _import("./Schema/SchemaMapPage")} />,
+        <ImportRoute path="~/map/:type" onImportModule={() => _import("./Operation/OperationMapPage")} />
+    );
 
-    if(options.auth){
-        getProviders.push((smi) => new Promise<ClientColorProvider[]>(resolve => {
-            require(["./Schema/ColorProviders/Auth"], c => resolve(c.default(smi)));
-        }));
-    }
-
-    if(options.cache){
-        getProviders.push((smi) => new Promise<ClientColorProvider[]>(resolve => {
-            require(["./Schema/ColorProviders/Cache"], c => resolve(c.default(smi)));
-        }));
-    }
-
-    if(options.disconnected){
-        getProviders.push((smi) => new Promise<ClientColorProvider[]>(resolve => {
-            require(["./Schema/ColorProviders/Disconnected"], c => resolve(c.default(smi)));
-        }));
-    }
-
-    if(options.isolation){
-        getProviders.push((smi) => new Promise<ClientColorProvider[]>(resolve => {
-            require(["./Schema/ColorProviders/Isolation"], c => resolve(c.default(smi)));
-        }));
-    }
+    getProviders.push(smi => _import("./Schema/ColorProviders/Default").then((c: any) => c.default(smi)));
+    if (options.auth)
+        getProviders.push(smi => _import("./Schema/ColorProviders/Auth").then((c: any) => c.default(smi)));
+    if (options.cache)
+        getProviders.push(smi => _import("./Schema/ColorProviders/Cache").then((c: any) => c.default(smi)));
+    if (options.disconnected)
+        getProviders.push(smi => _import("./Schema/ColorProviders/Disconnected").then((c: any) => c.default(smi)));
+    if (options.isolation)
+        getProviders.push(smi => _import("./Schema/ColorProviders/Isolation").then((c: any) => c.default(smi)));
 }
 
 export namespace API {

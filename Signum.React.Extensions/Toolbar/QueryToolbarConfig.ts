@@ -9,7 +9,7 @@ import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { QueryEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From, registerToString, JavascriptMessage, toLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEntity, ToolbarElementType } from './Signum.Entities.Toolbar'
+import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType } from './Signum.Entities.Toolbar'
 import { ToolbarConfig, ToolbarResponse } from './ToolbarClient'
 
 export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
@@ -20,18 +20,18 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
     }
 
     getLabel(res: ToolbarResponse<QueryEntity>) {
-        return res.label || getQueryNiceName(res.lite!.toStr!);
+        return res.label || getQueryNiceName(res.content!.toStr!);
     }
 
     handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {
         if (!res.openInPopup)
             super.handleNavigateClick(e, res);
         else {
-            Finder.explore({ queryName: res.lite!.toStr! }).done()
+            Finder.explore({ queryName: res.content!.toStr! }).done()
         }
     }
 
     navigateTo(res: ToolbarResponse<QueryEntity>): Promise<string> {
-        return Promise.resolve(Finder.findOptionsPath({ queryName: res.lite!.toStr! }));
+        return Promise.resolve(Finder.findOptionsPath({ queryName: res.content!.toStr! }));
     }
 }

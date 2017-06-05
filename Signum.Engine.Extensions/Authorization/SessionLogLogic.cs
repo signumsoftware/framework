@@ -38,7 +38,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEntity parameters)
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters)
         {
             Database.Query<SessionLogEntity>().Where(a => a.SessionStart < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
         }

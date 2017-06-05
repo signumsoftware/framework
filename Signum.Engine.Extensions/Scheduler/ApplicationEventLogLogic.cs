@@ -39,7 +39,7 @@ namespace Signum.Engine.Scheduler
             }
         }
 
-        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEntity parameters)
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters)
         {
             Database.Query<ApplicationEventLogEntity>().Where(a => a.Date < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
         }

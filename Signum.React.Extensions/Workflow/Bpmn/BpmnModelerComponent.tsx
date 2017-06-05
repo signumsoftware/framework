@@ -1,6 +1,7 @@
 ﻿/// <reference path="../bpmn-js.d.ts" />
 import * as React from 'react'
-import { WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity, IWorkflowNodeEntity } from '../Signum.Entities.Workflow'
+import { Button } from "react-bootstrap";
+import { WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity, IWorkflowNodeEntity, WorkflowMessage } from '../Signum.Entities.Workflow'
 import Modeler = require("bpmn-js/lib/Modeler");
 import { ModelEntity, ValidationMessage, parseLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
@@ -24,7 +25,7 @@ class CustomModeler extends Modeler {
 }
 
 CustomModeler.prototype._modules =
-    CustomModeler.prototype._modules.concat([customRenderer/*, customPopupMenu*/]);
+    CustomModeler.prototype._modules.concat([customRenderer, customPopupMenu]);
 
 export default class BpmnModelerComponent extends React.Component<BpmnModelerComponentProps, void> {
 
@@ -74,8 +75,10 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     }
 
     private handleOnModelError = (err : string) => {
-        if (err) 
+        if (err)
             throw new Error('Error rendering the model ' + err);
+        else
+            this.modeler.get<connectionIcons.ConnectionIcons>('connectionIcons').show();
     }
 
     configureModules() {
@@ -197,7 +200,9 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
     }
 
     handleElementDoubleClick = (obj: BPMN.DoubleClickEvent) => {
-        console.log(obj);
+        if (BpmnUtils.isEndEvent(obj.element.type))
+            return;
+
         var model = this.props.entities[obj.element.id] as (ModelEntity | undefined);
         if (!model) {
             model = this.newModel(obj.element);
@@ -230,6 +235,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
 
             if (me) {
                 this.props.entities[obj.element.id] = me;
+
                 obj.element.businessObject.name = (me as any).name;
 
                 if (BpmnUtils.isTaskAnyKind(obj.element.type)) {
@@ -238,14 +244,14 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                         dt == "Decision" ? "bpmn:UserTask" : dt == "Script" ? "bpmn:ScriptTask" : "bpmn:Task";
                 } else if (BpmnUtils.isStartEvent(obj.element.type)) {
                     var et = (me as WorkflowEventModel).type;
-                    obj.element.type = (et == "Start" || et == "TimerStart" || et == "ConditionalStart") ? "bpmn:StartEvent" : "bpmn:EndEvent";
+                    obj.element.type = (et == "Start" || et == "TimerStart") ? "bpmn:StartEvent" : "bpmn:EndEvent";
 
 
                     var bo = obj.element.businessObject;
                     var shouldEvent =
-                        et == "TimerStart" ? "bpmn:TimerEventDefinition" :
-                        et == "ConditionalStart" ? "bpmn:ConditionalEventDefinition" :
-                                null;
+                        (et == "Start" || et == "Finish") ? null :
+                            (me as WorkflowEventModel).task!.triggeredOn == "Always" ? "bpmn:TimerEventDefinition" :
+                                "bpmn:ConditionalEventDefinition";
 
                     if (shouldEvent) {
                         if (!bo.eventDefinitions)
@@ -259,12 +265,9 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                     }
                 }
 
-                this.fireElementChanged(obj.element);
-
-                if (obj.element.label) {
-                    var labelObj = this.elementRegistry.get(obj.element.label.id);
-                    this.fireElementChanged(labelObj);
-                };           
+                this.modeler.get<any>("modeling").updateProperties(obj.element, {
+                    name: (me as any).name,
+                });
             };
         }).done();
     }
@@ -335,7 +338,17 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         }
     }
 
+    handleZoomClick = (e: React.MouseEvent<Button>) => {
+        var zoomScroll = this.modeler.get<any>("zoomScroll");
+        zoomScroll.reset();
+    }
+
     render() {
-        return (<div ref={this.setDiv} />);
+        return (
+            <div>
+                <Button style={{ marginLeft: "20px" }} onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>
+                <div ref={this.setDiv} />
+            </div>
+        );
     }
 }

@@ -28,13 +28,13 @@ namespace Signum.Entities.Mailing
 
         public SmtpDeliveryMethod DeliveryMethod { get; set; }
 
-        public SmtpNetworkDeliveryEntity Network { get; set; }
+        public SmtpNetworkDeliveryEmbedded Network { get; set; }
 
         [SqlDbType(Size = 300)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 300), FileNameValidator]
         public string PickupDirectoryLocation { get; set; }
 
-        public EmailAddressEntity DefaultFrom { get; set; }
+        public EmailAddressEmbedded DefaultFrom { get; set; }
 
         [NotNullable]
         [NoRepeatValidator]
@@ -69,7 +69,7 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable]
-    public class SmtpNetworkDeliveryEntity : EmbeddedEntity
+    public class SmtpNetworkDeliveryEmbedded : EmbeddedEntity
     {
         [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
@@ -90,11 +90,11 @@ namespace Signum.Entities.Mailing
         public bool EnableSSL { get; set; }
 
         [NotNullable]
-        public MList<ClientCertificationFileEntity> ClientCertificationFiles { get; set; } = new MList<ClientCertificationFileEntity>();
+        public MList<ClientCertificationFileEmbedded> ClientCertificationFiles { get; set; } = new MList<ClientCertificationFileEmbedded>();
     }
 
     [Serializable]
-    public class ClientCertificationFileEntity : EmbeddedEntity
+    public class ClientCertificationFileEmbedded : EmbeddedEntity
     {
         [NotNullable, SqlDbType(Size = 300)]
         [StringLengthValidator(AllowNulls = false, Min = 2, Max = 300),]
@@ -102,7 +102,7 @@ namespace Signum.Entities.Mailing
 
         public CertFileType CertFileType { get; set; }
 
-        static Expression<Func<ClientCertificationFileEntity, string>> ToStringExpression = e => e.FullFilePath;
+        static Expression<Func<ClientCertificationFileEmbedded, string>> ToStringExpression = e => e.FullFilePath;
         [ExpressionField]
         public override string ToString()
         {

@@ -36,12 +36,13 @@ namespace Signum.Entities.Workflow
     [AutoInit]
     public static class WorkflowConditionOperation
     {
+        public static readonly ConstructSymbol<WorkflowConditionEntity>.From<WorkflowConditionEntity> Clone;
         public static readonly ExecuteSymbol<WorkflowConditionEntity> Save;
         public static readonly DeleteSymbol<WorkflowConditionEntity> Delete;
     }
 
     [Serializable]
-    public class WorkflowConditionEval : EvalEntity<IWorkflowConditionEvaluator>
+    public class WorkflowConditionEval : EvalEmbedded<IWorkflowConditionEvaluator>
     {
         protected override CompilationResult Compile()
         {
@@ -52,7 +53,7 @@ namespace Signum.Entities.Workflow
             var WorkflowEntityTypeName = parent.MainEntityType.ToType().FullName;
 
             return Compile(DynamicCode.GetAssemblies(),
-                DynamicCode.GetNamespaces() +
+                DynamicCode.GetUsingNamespaces() +
                     @"
                     namespace Signum.Entities.Workflow
                     {

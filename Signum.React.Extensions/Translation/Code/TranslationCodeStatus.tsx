@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
-import * as numeral from 'numeral'
+import { Link, RouteComponentProps } from 'react-router-dom'
+import * as numbro from 'numbro'
 import * as moment from 'moment'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
@@ -14,7 +14,7 @@ import { TranslationMessage } from '../Signum.Entities.Translation'
 
 require("../Translation.css");
 
-interface TranslationCodeStatusProps extends ReactRouter.RouteComponentProps<{}, {}> {
+interface TranslationCodeStatusProps extends RouteComponentProps<{}> {
 
 }
 

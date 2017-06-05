@@ -4,7 +4,7 @@ import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, Ent
 import { SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { SmtpConfigurationEntity, SmtpNetworkDeliveryEntity, ClientCertificationFileEntity} from '../Signum.Entities.Mailing'
+import { SmtpConfigurationEntity, SmtpNetworkDeliveryEmbedded, ClientCertificationFileEmbedded} from '../Signum.Entities.Mailing'
 
 export default class SmtpConfiguration extends React.Component<{ ctx: TypeContext<SmtpConfigurationEntity> }, void> {
 
@@ -25,21 +25,21 @@ export default class SmtpConfiguration extends React.Component<{ ctx: TypeContex
         );
     }
 
-    renderNetwork = (sc: TypeContext<SmtpNetworkDeliveryEntity>) => {
+    renderNetwork = (sc: TypeContext<SmtpNetworkDeliveryEmbedded>) => {
         return (
             <div>
                 <ValueLine ctx={sc.subCtx(s => s.port)}  />
                 <ValueLine ctx={sc.subCtx(s => s.host)}  />
                 <ValueLine ctx={sc.subCtx(s => s.useDefaultCredentials)}  />
                 <ValueLine ctx={sc.subCtx(s => s.username)}  />
-                <ValueLine ctx={sc.subCtx(s => s.password)}  valueHtmlProps={{type: "password"}} />
+                <ValueLine ctx={sc.subCtx(s => s.password)}  valueHtmlAttributes={{type: "password"}} />
                 <ValueLine ctx={sc.subCtx(s => s.enableSSL)}  />
                 <EntityRepeater ctx={sc.subCtx(s => s.clientCertificationFiles)} getComponent={this.renderClientCertification} />
             </div>
         );  
     };
 
-    renderClientCertification = (sc: TypeContext<ClientCertificationFileEntity>) => {
+    renderClientCertification = (sc: TypeContext<ClientCertificationFileEmbedded>) => {
         return (
             <div>
                 <ValueLine ctx={sc.subCtx(s => s.certFileType)}  />

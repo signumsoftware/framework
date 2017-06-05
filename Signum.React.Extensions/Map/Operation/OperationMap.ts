@@ -2,7 +2,7 @@
 import * as React from "react"
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { OperationLogEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
-import { Point, Rectangle, calculatePoint, wrap, colorScale } from '../Utils'
+import { Point, Rectangle, calculatePoint, wrap, colorScale, forceBoundingBox } from '../Utils'
 
 export interface OperationMapInfo {
     states: MapState[];
@@ -30,15 +30,16 @@ export interface MapState extends ForceNode {
     token: string;
     fanOut: number;
     fanIn: number;
+    fanInOutFactor: number;
 }
 
-export interface ForceNode extends d3.layout.force.Node, Rectangle {
+export interface ForceNode extends d3.SimulationNodeDatum, Rectangle {
     key: string;
     nx?: number;
     ny?: number;
 }
 
-export interface ForceLink extends d3.layout.force.Link<ForceNode> {
+export interface ForceLink extends d3.SimulationLinkDatum<ForceNode> {
     isFrom: boolean;
 }
 
@@ -55,17 +56,17 @@ export class OperationMapD3 {
 
     static opacities = [1, .5, .3, .2, .1];
 
-    force: d3.layout.Force<ForceLink, ForceNode>;
+    simulation: d3.Simulation<ForceNode, ForceLink>;
     selectedNode: ForceNode | undefined;
-    link: d3.Selection<Transition>;
+    link: d3.Selection<SVGPathElement, Transition, any, any>;
 
-    statesGroup: d3.Selection<MapState>;
-    nodeStates: d3.Selection<MapState>;
-    labelStates: d3.Selection<MapState>;
+    statesGroup: d3.Selection<SVGGElement, MapState, any, any>;
+    nodeStates: d3.Selection<SVGRectElement, MapState, any, any>;
+    labelStates: d3.Selection<SVGTextElement, MapState, any, any>;
 
-    operationsGroup: d3.Selection<MapOperation>;
-    nodeOperations: d3.Selection<MapOperation>;
-    labelOperations: d3.Selection<MapOperation>;
+    operationsGroup: d3.Selection<SVGGElement, MapOperation, any, any>;
+    nodeOperations: d3.Selection<SVGRectElement, MapOperation, any, any>;
+    labelOperations: d3.Selection<SVGTextElement, MapOperation, any, any>;
 
     constructor(
         public svgElement: SVGElement,
@@ -74,33 +75,29 @@ export class OperationMapD3 {
         public color: string,
         public width: number,
         public height: number) {
-
-
-        this.force = d3.layout.force<ForceLink, ForceNode>()
-            .gravity(0)
-            .linkDistance(80)
-            .charge(-600)
-            //.charge(10)
-            //.linkStrength((d: Line) => 0.7 * opacities[Math.min(similarLinks(d), opacities.length - 1)])
-            //.linkStrength(20)
-            .size([width, height]);
+        
+        this.simulation = d3.forceSimulation<ForceNode, ForceLink>()
+            .nodes(map.allNodes)
+            .force("bounding", forceBoundingBox(width, height))
+            .force("fx", d3.forceX(width / 2))
+            .force("fy", d3.forceY(height / 2))
+            .force("repulsion", d3.forceManyBody().strength(-200))
+            .force("collide", d3.forceCollide(30))
+            .force("links", d3.forceLink(map.allLinks))
+            .force("fainInOut", forceFanInOut())
+            ;
 
         const colorStates = colorScale(map.states.map(a => a.count).max());
         const colorOperations = colorScale(map.operations.map(a => a.count).max());
-
-        this.force
-            .nodes(map.allNodes)
-            .links(map.allLinks)
-            .start();
-
+        
         const svg = d3.select(svgElement)
             .attr("width", width)
             .attr("height", height);
 
 
-        this.link = svg.append("svg:g").attr("class", "links").selectAll(".link")
+        this.link = svg.append<SVGGElement>("svg:g").attr("class", "links").selectAll(".link")
             .data(map.allTransition)
-            .enter().append("path")
+            .enter().append<SVGPathElement>("path")
             .attr("class", "link")
             .style("stroke", "black")
             .attr("marker-end", "url(#normal_arrow)");
@@ -111,20 +108,34 @@ export class OperationMapD3 {
         this.initStates(svg);
         this.initOperations(svg);
 
-        this.force.on("tick", () => this.onTick());
+        this.simulation.on("tick", () => this.onTick());
     }
 
-    initStates(svg: d3.Selection<any>) {
+    initStates(svg: d3.Selection<SVGElement, any, any, any>) {
 
-        const drag = this.force.drag()
-            .on("dragstart", d => d.fixed = true);
+        const drag = d3.drag<SVGGElement, MapState>()
+            .on("start", d => {
+                if (!d3.event.active)
+                    this.simulation.alphaTarget(0.3).restart();
 
-        this.statesGroup = svg.append("svg:g").attr("class", "states")
+                d.fx = d.x;
+                d.fy = d.y;
+            })
+            .on("drag", d => {
+                d.fx = d3.event.x;
+                d.fy = d3.event.y;
+            })
+            .on("end", d => {
+                this.simulation.alphaTarget(0);
+            });
+        
+
+        this.statesGroup = svg.append<SVGGElement>("svg:g").attr("class", "states")
             .selectAll(".stateGroup")
             .data(this.map.states)
             .enter()
-            .append("svg:g").attr("class", "stateGroup")
-            .style("cursor", d => d.token ? "pointer" : undefined)
+            .append<SVGGElement>("svg:g").attr("class", "stateGroup")
+            .style("cursor", d => d.token ? "pointer" : null)
             .on("click", d => {
 
                 this.selectedNode = this.selectedNode == d ? undefined : d;
@@ -141,11 +152,13 @@ export class OperationMapD3 {
                     d3.event.preventDefault();
                 }
             }).on("dblclick", d => {
-                d.fixed = false;
+                d.fx = null;
+                d.fy = null;
+                this.simulation.alpha(0.3).restart();
             }).call(drag);
 
 
-        this.nodeStates = this.statesGroup.append("rect")
+        this.nodeStates = this.statesGroup.append<SVGRectElement>("rect")
             .attr("class", d => "state " + (
                 d.isSpecial ? "special" :
                 d.ignored ? "ignore" : undefined))
@@ -156,12 +169,12 @@ export class OperationMapD3 {
 
         const margin = 3;
 
-        this.labelStates = this.statesGroup.append("text")
+        this.labelStates = this.statesGroup.append<SVGTextElement>("text")
             .attr("class", "state")
-            .style("cursor", d => d.token ? "pointer" : undefined)
+            .style("cursor", d => d.token ? "pointer" : null)
             .text(d => d.niceName)
             .each(function(d) {
-                const svg = this as SVGTextElement;
+                const svg = this;
                 wrap(svg, 60);
                 const b = svg.getBBox();
                 d.width = b.width + margin * 2;
@@ -177,16 +190,29 @@ export class OperationMapD3 {
             .text(t => t.niceName + " (" + t.count + ")");
     }
 
-    initOperations(svg: d3.Selection<any>) {
+    initOperations(svg: d3.Selection<SVGElement, any, any, any>) {
 
-        const drag = this.force.drag()
-            .on("dragstart", d => d.fixed = true);
+        const drag = d3.drag<SVGGElement, MapOperation>()
+            .on("start", d => {
+                if (!d3.event.active)
+                    this.simulation.alphaTarget(0.3).restart();
 
-        this.operationsGroup = svg.append("svg:g").attr("class", "operations")
+                d.fx = d.x;
+                d.fy = d.y;
+            })
+            .on("drag", d => {
+                d.fx = d3.event.x;
+                d.fy = d3.event.y;
+            })
+            .on("end", d => {
+                this.simulation.alphaTarget(0);
+            });
+
+        this.operationsGroup = svg.append<SVGGElement>("svg:g").attr("class", "operations")
             .selectAll(".operation")
             .data(this.map.operations)
             .enter()
-            .append("svg:g").attr("class", "operation")
+            .append<SVGGElement>("svg:g").attr("class", "operation")
             .style("cursor", "pointer")
             .on("click", d => {
 
@@ -204,15 +230,17 @@ export class OperationMapD3 {
                     d3.event.preventDefault();
                 }
             }).on("dblclick", d => {
-                d.fixed = false;
+                d.fx = null;
+                d.fy = null;
+                this.simulation.alpha(0.3).restart();
             }).call(drag);
 
-        this.nodeOperations = this.operationsGroup.append("rect")
+        this.nodeOperations = this.operationsGroup.append<SVGRectElement>("rect")
             .attr("class", "operation")
 
         const margin = 1;
 
-        this.labelOperations = this.operationsGroup.append("text")
+        this.labelOperations = this.operationsGroup.append<SVGTextElement>("text")
             .attr("class", "operation")
             .style("cursor", "pointer")
             .text(d => d.niceName)
@@ -242,8 +270,8 @@ export class OperationMapD3 {
     }
 
     selectNodes() {
-        this.labelStates.style("font-weight", d => d == this.selectedNode ? "bold" : undefined);
-        this.labelOperations.style("font-weight", d => d == this.selectedNode ? "bold" : undefined);
+        this.labelStates.style("font-weight", d => d == this.selectedNode ? "bold" : null);
+        this.labelOperations.style("font-weight", d => d == this.selectedNode ? "bold" : null);
     }
 
 
@@ -261,7 +289,7 @@ export class OperationMapD3 {
             const colorStates = colorScale(this.map.states.map(a => a.count).max());
             c = d => colorStates(d.count);
         } else {
-            const scale = d3.scale.category10();
+            const scale = d3.scaleOrdinal(d3.schemeCategory10);
             c = d => d.color || (d.isSpecial ? "lightgray" : scale(d.key));
         }
 
@@ -288,19 +316,8 @@ export class OperationMapD3 {
 
     onTick() {
 
-        this.map.allNodes.forEach(d => {
-            d.nx = d.x;
-            d.ny = d.y;
-        });
 
-        this.gravity();
-
-        this.map.allNodes.forEach(d => {
-            d.x = d.nx;
-            d.y = d.ny;
-        });
-
-        this.fanInOut();
+        //this.fanInOut();
 
         this.link.each(rel => {
             rel.sourcePoint = calculatePoint(<Rectangle><any>rel.fromState, rel.operation);
@@ -322,45 +339,32 @@ export class OperationMapD3 {
 
             return `M${t.sourcePoint.x} ${t.sourcePoint.y} C ${t.operation.x! - dy} ${t.operation.y! + dx} ${t.operation.x! + dy} ${t.operation.y! - dx} ${t.targetPoint.x} ${t.targetPoint.y}`;
         }
-
-
+        
         return `M${t.sourcePoint.x} ${t.sourcePoint.y} Q ${t.operation.x} ${t.operation.y} ${t.targetPoint.x} ${t.targetPoint.y}`;
     }
 
-    fanInOut() {
-
-        const fanInConstant = 0.05;
-        this.map.states.forEach(d => {
-            if (d.fanOut > 0)
-                d.y = d.y! + d.y! * d.fanOut * fanInConstant * this.force.alpha();
-
-            if (d.fanIn > 0)
-                d.y = d.y! + (this.height - d.y!) * d.fanIn * fanInConstant * this.force.alpha();
-        });
-    }
-
-
-    gravity() {
-        this.map.allNodes.forEach(n => {
-            n.nx = n.nx! + this.gravityDim(n.x!, 0, this.width);
-            n.ny = n.ny! + this.gravityDim(n.y!, 0, this.height);
-        });
-    }
-
-    gravityDim(v: number, min: number, max: number): number {
-
-        const minF = min + 100;
-        const maxF = max - 100;
-
-        const dist =
-            maxF < v ? maxF - v :
-                v < minF ? minF - v : 0;
-
-        return dist * this.force.alpha() * 0.4;
-    }
-
+ 
     stop() {
-        this.force.stop();
+        this.simulation.stop();
+    }
+}
+
+
+export function forceFanInOut<T extends d3.SimulationNodeDatum>() {
+    var nodes: MapState[];
+    const fanInConstant = 30;
+    function force(alpha: number) {
+        nodes.forEach(d => {
+            if (d.fanInOutFactor != null) {
+                d.vx = d.vx! + d.fanInOutFactor * fanInConstant * alpha;
+            }   
+        });
     }
 
+    (force as any).initialize = function (_: MapState[]) {
+        nodes = _;
+    };
+
+    return force;
 }
+

@@ -3,7 +3,7 @@ import * as React from 'react'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity} from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, PropertyRoute, getTypeInfos, basicConstruct } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { getQueryNiceName, PropertyRoute, getTypeInfos, New } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
@@ -11,7 +11,7 @@ import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorMo
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import FileLine, {FileTypeSymbol} from '../../Files/FileLine'
-import { DashboardEntity, PanelPartEntity, IPartEntity } from '../Signum.Entities.Dashboard'
+import { DashboardEntity, PanelPartEmbedded, IPartEntity } from '../Signum.Entities.Dashboard'
 import { EntityGridRepeater, EntityGridItem } from './EntityGridRepeater'
 
 
@@ -69,14 +69,14 @@ export default class Dashboard extends React.Component<{ ctx: TypeContext<Dashbo
                 if (ti == undefined)
                     return undefined;
 
-                return PanelPartEntity.New({
-                    content : basicConstruct(ti.name) as any as IPartEntity,
+                return PanelPartEmbedded.New({
+                    content : New(ti.name) as any as IPartEntity,
                     style : "Default"
                 });
             });
     }
 
-    renderPart = (tc: TypeContext<PanelPartEntity>) => {
+    renderPart = (tc: TypeContext<PanelPartEmbedded>) => {
 
         const title = (
             <div>

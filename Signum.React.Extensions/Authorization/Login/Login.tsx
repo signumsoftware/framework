@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
+import { Link } from 'react-router-dom'
 import { Calendar } from 'react-widgets'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
@@ -20,13 +20,13 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
 
         e.preventDefault();
 
-        const request: AuthClient.Api.LoginRequest = {
+        const request: AuthClient.API.LoginRequest = {
             userName: this.userName.value,
             password: this.password.value,
             rememberMe: this.rememberMe ? this.rememberMe.checked : undefined,
         };
 
-        AuthClient.Api.login(request)
+        AuthClient.API.login(request)
             .then(response => {
                 AuthClient.setAuthToken(response.token);
                 AuthClient.setCurrentUser(response.userEntity);

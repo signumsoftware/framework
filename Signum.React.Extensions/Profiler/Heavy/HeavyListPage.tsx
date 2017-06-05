@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
+import { RouteComponentProps } from 'react-router'
 import * as d3 from 'd3'
-import * as numeral from 'numeral'
+import * as numbro from 'numbro'
 import * as moment from 'moment'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
@@ -14,7 +14,7 @@ import { API, HeavyProfilerEntry} from '../ProfilerClient'
 
 require("./Profiler.css");
 
-interface HeavyListProps extends ReactRouter.RouteComponentProps<{}, {}> {
+interface HeavyListProps extends RouteComponentProps<{}> {
 
 }
 
@@ -30,6 +30,12 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
         this.loadIsEnabled().done()
 
         this.loadEntries().done();
+    
+        Navigator.setTitle("Heavy Profiler");
+    }
+
+    componentWillUnmount() {
+        Navigator.setTitle();
     }
 
     loadEntries() {
@@ -86,8 +92,6 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
     }
 
     render() {
-        document.title = "Heavy Profiler";
-
         if (this.state.entries == undefined)
             return <h3>Heavy Profiler (loading...) </h3>;
 
@@ -145,11 +149,11 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
         let minStart = data.map(a => a.BeforeStart).min();
         let maxEnd = data.map(a => a.End).max();
 
-        let x = d3.scale.linear()
+        let x = d3.scaleLinear()
             .domain([minStart, maxEnd])
             .range([labelWidth + 3, width - rightMargin]);
 
-        let y = d3.scale.linear()
+        let y = d3.scaleLinear()
             .domain([0, data.length])
             .range([0, height - 1]);
 
@@ -205,13 +209,12 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
         //labelsRight.append('svg:title').text(function (v) { return v.Elapsed + " - " + v.AdditionalData; });
 
         groups.on("click", e => {
-            let url = Navigator.currentHistory.createHref("~/profiler/heavy/entry/" + e.FullIndex);
+            let url = "~/profiler/heavy/entry/" + e.FullIndex;
 
             if (d3.event.ctrlKey) {
-                window.open(url);
+                window.open(Navigator.toAbsoluteUrl(url));
             } else {
-                Navigator.currentHistory.push(url);
-                window.location.href = url;
+                Navigator.history.push(url);
             }
         });
     }

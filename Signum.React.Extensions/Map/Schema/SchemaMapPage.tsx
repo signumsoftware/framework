@@ -1,6 +1,7 @@
 ﻿import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import * as d3 from 'd3'
+import * as QueryString from 'query-string'
 import { DomUtils, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
@@ -10,11 +11,11 @@ import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOpti
 import { MapMessage } from '../Signum.Entities.Map'
 import * as MapClient from '../MapClient'
 import { SchemaMapInfo, EntityBaseType, ITableInfo, MListRelationInfo, IRelationInfo, ClientColorProvider, SchemaMapD3 } from './SchemaMap'
-const colorbrewer = require("colorbrewer");
+import { RouteComponentProps } from "react-router";
 
 require("./schemaMap.css");
 
-interface SchemaMapPageProps extends ReactRouter.RouteComponentProps<{}, {}> {
+interface SchemaMapPageProps extends RouteComponentProps<{}> {
 
 }
 
@@ -90,7 +91,7 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
     
         const result: ParsedQueryString = { tables: {} };
 
-        const query = this.props.location.query as { [name: string]: string };
+        const query = QueryString.parse(this.props.location.search) as { [name: string]: string };
         if (!query)
             return result;
 
@@ -164,16 +165,16 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
         const s = this.state;
 
-        const tables = s.schemaMapInfo!.allNodes.filter(a => a.fixed)
+        const tables = s.schemaMapInfo!.allNodes.filter(a => a.fx != null && a.fy != null)
             .toObject(a => a.tableName, a =>
-                (a.x! / s.width!).toPrecision(4) + "," +
-                (a.y! / s.height!).toPrecision(4));
+                (a.fx! / s.width!).toPrecision(4) + "," +
+                (a.fy! / s.height!).toPrecision(4));
 
         const query = {
             ...tables, filter: s.filter, color: s.color
         };
 
-        const url = Navigator.currentHistory.createHref({ pathname: "~/map", query: query });
+        const url = Navigator.history.createHref({ pathname: "~/map", search: QueryString.stringify(query) });
 
         window.open(url);
     }
@@ -247,9 +248,12 @@ export class SchemaMapRenderer extends React.Component<SchemaMapRendererProps, {
         map.allNodes.forEach(a => {
             const c = parsedQuery.tables[a.tableName];
             if (c) {
-                a.x = c.x * this.props.width;
-                a.y = c.y * this.props.height;
-                a.fixed = true;
+                a.fx = c.x * this.props.width;
+                a.fy = c.y * this.props.height;
+            }
+            else {
+                a.x = Math.random() * this.props.width;
+                a.y = Math.random() * this.props.height;
             }
         });
 
@@ -270,10 +274,14 @@ export class SchemaMapRenderer extends React.Component<SchemaMapRendererProps, {
         
         const repsDic : {[tableName: string]: number} = {};
 
-        map.allLinks.forEach(l=>{
-            const relName = l.source.tableName > l.target.tableName ? 
-                l.source.tableName + "-" + l.target.tableName : 
-                l.target.tableName + "-" + l.source.tableName ;
+        map.allLinks.forEach(l => {
+
+            const sourceName = (l.source as ITableInfo).tableName;
+            const targetName = (l.target as ITableInfo).tableName;
+
+            const relName = sourceName > targetName? 
+                sourceName + "-" + targetName : 
+                targetName + "-" + sourceName;
 
             if(repsDic[relName] == undefined)
                 repsDic[relName] = 0;

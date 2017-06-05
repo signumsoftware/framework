@@ -15,7 +15,7 @@ import { MenuItem } from 'react-bootstrap'
 import * as NodeUtils from './NodeUtils'
 import NodeSelectorModal from './NodeSelectorModal'
 import { DesignerContext, DesignerNode } from './NodeUtils'
-import { BaseNode, ContainerNode, LineBaseNode, NodeConstructor } from './Nodes'
+import { BaseNode, ContainerNode, LineBaseNode, NodeConstructor, EntityTableNode, EntityTableColumnNode } from './Nodes'
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 
 require("./DynamicViewTree.css");
@@ -155,8 +155,11 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
 
     handleGenerateChildren = () => {
 
-        var selected = this.props.rootNode.context.getSelectedNode() ! as DesignerNode<ContainerNode>;
-        selected.node.children.push(...NodeConstructor.createSubChildren(selected.fixRoute()!));
+        var selected = this.props.rootNode.context.getSelectedNode()! as DesignerNode<ContainerNode>;
+        if (selected.node.kind == "EntityTable")
+            selected.node.children.push(...NodeConstructor.createEntityTableSubChildren(selected.fixRoute()!));
+        else
+            selected.node.children.push(...NodeConstructor.createSubChildren(selected.fixRoute()!));
         selected.context.refreshView();
     }
 

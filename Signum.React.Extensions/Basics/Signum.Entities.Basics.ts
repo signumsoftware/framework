@@ -18,17 +18,17 @@ export module CultureInfoOperation {
     export const Save : Entities.ExecuteSymbol<CultureInfoEntity> = registerSymbol("Operation", "CultureInfoOperation.Save");
 }
 
-export const DateSpanEntity = new Type<DateSpanEntity>("DateSpanEntity");
-export interface DateSpanEntity extends Entities.EmbeddedEntity {
-    Type: "DateSpanEntity";
+export const DateSpanEmbedded = new Type<DateSpanEmbedded>("DateSpanEmbedded");
+export interface DateSpanEmbedded extends Entities.EmbeddedEntity {
+    Type: "DateSpanEmbedded";
     years?: number;
     months?: number;
     days?: number;
 }
 
-export const TimeSpanEntity = new Type<TimeSpanEntity>("TimeSpanEntity");
-export interface TimeSpanEntity extends Entities.EmbeddedEntity {
-    Type: "TimeSpanEntity";
+export const TimeSpanEmbedded = new Type<TimeSpanEmbedded>("TimeSpanEmbedded");
+export interface TimeSpanEmbedded extends Entities.EmbeddedEntity {
+    Type: "TimeSpanEmbedded";
     days?: number;
     hours?: number;
     minutes?: number;

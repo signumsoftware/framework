@@ -2,7 +2,7 @@
 import { ValueLine, EntityLine, TypeContext, FormGroup, EntityStrip, EntityDetail, EntityCombo} from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { ScheduledTaskEntity } from '../../../../Extensions/Signum.React.Extensions/Scheduler/Signum.Entities.Scheduler'
-import { WorkflowEventTaskEntity, WorkflowEventEntity, WorkflowEventTaskActionEval, WorkflowEventType } from '../Signum.Entities.Workflow'
+import { WorkflowEventTaskEntity, WorkflowEventEntity, WorkflowEventTaskActionEval, WorkflowEventType, TriggeredOn, WorkflowEventTaskConditionEval, WorkflowEventTaskModel } from '../Signum.Entities.Workflow'
 import WorkflowEventTaskConditionComponent from './WorkflowEventTaskConditionComponent'
 import WorkflowEventTaskActionComponent from './WorkflowEventTaskActionComponent'
 
@@ -30,6 +30,10 @@ export default class WorkflowEventTaskComponent extends React.Component<Workflow
                 }).done();
     }
 
+    isConditional() {
+        return this.props.ctx.value.triggeredOn != TriggeredOn.value("Always");
+    }
+
     componentWillMount() {
         this.loadWorkflow();
     }
@@ -48,16 +52,15 @@ export default class WorkflowEventTaskComponent extends React.Component<Workflow
                             parentValue: ctx.value.workflow,
                             filterOptions: [
                                 {
-                                    columnName: "Type", operation: "IsIn", value: [
-                                        WorkflowEventType.value("TimerStart"),
-                                        WorkflowEventType.value("ConditionalStart")
-                                    ]
+                                    columnName: "Type", operation: "EqualTo", value: WorkflowEventType.value("TimerStart")
                                 }
                             ]
                         }} />
 
-                        <ValueLine ctx={ctx.subCtx(wet => wet.triggeredOn)} />
-                        <WorkflowEventTaskConditionComponent ctx={ctx.subCtx(wet => wet.condition)} />
+                        <ValueLine ctx={ctx.subCtx(wet => wet.triggeredOn)} onChange={this.handleTriggeredOnChange} />
+
+                        { this.isConditional() &&
+                            <WorkflowEventTaskConditionComponent ctx={ctx.subCtx(wet => wet.condition)} />}
                         <WorkflowEventTaskActionComponent ctx={ctx.subCtx(wet => wet.action!)} mainEntityType={ctx.value.workflow!.entity!.mainEntityType!} />
                     </div>}
             </div>
@@ -66,6 +69,19 @@ export default class WorkflowEventTaskComponent extends React.Component<Workflow
 
     handleWorkflowChange = () => {
         this.loadWorkflow();
+    }
+
+    handleTriggeredOnChange = () => {
+
+        const ctx = this.props.ctx;
+        const task = ctx.value;
+
+        if (this.isConditional() && !task.condition) {
+            task.condition = WorkflowEventTaskConditionEval.New();
+            task.modified = true;
+        }
+
+        this.forceUpdate();
     }
 }
 

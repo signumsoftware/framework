@@ -11,7 +11,6 @@ import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
 import { ExcelReportEntity, ExcelMessage } from './Signum.Entities.Excel'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
@@ -24,7 +23,7 @@ import ExcelMenu from './ExcelMenu'
 export function start(options: { routes: JSX.Element[], plainExcel: boolean, excelReport: boolean }) {
     
     if (options.excelReport) {
-        Navigator.addSettings(new EntitySettings(ExcelReportEntity, e => new ViewPromise(resolve => require(['./Templates/ExcelReport'], resolve))));
+        Navigator.addSettings(new EntitySettings(ExcelReportEntity, e => _import('./Templates/ExcelReport')));
     }
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
@@ -44,7 +43,7 @@ export function start(options: { routes: JSX.Element[], plainExcel: boolean, exc
                 <button
                     className="sf-query-button sf-chart-script-edit btn btn-default"
                     onClick={() => { API.generateChartExcel(ChartClient.API.cleanedChartRequest(ctx.chartRequest)); } }>
-                    {ExcelMessage.ExcelReport.niceToString()}
+                    <i className="fa fa-file-excel-o"></i> &nbsp; {ExcelMessage.ExcelReport.niceToString()}
                 </button>
             );
         });

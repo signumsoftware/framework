@@ -3,6 +3,8 @@ import * as React from 'react'
 import { Route } from 'react-router'
 import * as ReactBootstrap from 'react-bootstrap'
 import * as ReactRouterBootstrap from 'react-router-bootstrap'
+import * as QueryString from 'query-string'
+import { globalModules} from './View/GlobalModules'
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
 import * as Search from '../../../Framework/Signum.React/Scripts/Search'
 import { ValueSearchControlLine } from '../../../Framework/Signum.React/Scripts/Search'
@@ -10,7 +12,6 @@ import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scr
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 import { TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
 import { isTypeEntity, getTypeInfo, PropertyRoute } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { Entity, ModifiableEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -27,16 +28,16 @@ import * as DynamicClient from './DynamicClient'
 
 import * as DynamicViewComponent from './View/DynamicViewComponent'
 import { DynamicViewComponentProps, DynamicViewPart } from './View/DynamicViewComponent'
-import { AuthInfo } from './View/AuthInfo'
 import * as Nodes from './View/Nodes' //Typings-only
 import * as NodeUtils from './View/NodeUtils' //Typings-only
+import MessageModal from "../../../Framework/Signum.React/Scripts/Modals/MessageModal";
 
 
 export function start(options: { routes: JSX.Element[] }) {
     
-    Navigator.addSettings(new EntitySettings(DynamicViewEntity, w => new ViewPromise(resolve => require(['./View/DynamicView'], resolve))));
-    Navigator.addSettings(new EntitySettings(DynamicViewSelectorEntity, w => new ViewPromise(resolve => require(['./View/DynamicViewSelector'], resolve))));
-    Navigator.addSettings(new EntitySettings(DynamicViewOverrideEntity, w => new ViewPromise(resolve => require(['./View/DynamicViewOverride'], resolve))));
+    Navigator.addSettings(new EntitySettings(DynamicViewEntity, w => _import('./View/DynamicView')));
+    Navigator.addSettings(new EntitySettings(DynamicViewSelectorEntity, w => _import('./View/DynamicViewSelector')));
+    Navigator.addSettings(new EntitySettings(DynamicViewOverrideEntity, w => _import('./View/DynamicViewOverride')));
 
     DynamicClient.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicViewEntity, parentColumn: "EntityType.CleanName", parentValue: type }} />);
     DynamicClient.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicViewSelectorEntity, parentColumn: "EntityType.CleanName", parentValue: type }} />);
@@ -44,7 +45,7 @@ export function start(options: { routes: JSX.Element[] }) {
     Operations.addSettings(new EntityOperationSettings(DynamicViewOperation.Save, {
         onClick: ctx => {
             (ctx.frame.entityComponent as DynamicViewEntityComponent).beforeSave();
-            EntityOperations.defaultExecuteEntity(ctx);
+            ctx.defaultClick();
         }
     }));
 
@@ -75,23 +76,27 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
             if (!sel)
                 return this.fallback(entity);
 
-            var viewName = sel(entity as Entity, new AuthInfo());
+            try {
+                var viewName = sel(entity as Entity);
 
-            if (viewName == "STATIC")
-                return this.static(entity);
+                if (viewName == "STATIC")
+                    return this.static(entity);
 
-            if (viewName == "NEW")
-                return ViewPromise.flat(createDefaultDynamicView(entity.Type).then(dv => this.dynamicViewComponent(dv)));
+                if (viewName == "NEW")
+                    return ViewPromise.flat(createDefaultDynamicView(entity.Type).then(dv => this.dynamicViewComponent(dv)));
 
-            if (viewName == "CHOOSE")
-                return ViewPromise.flat(this.chooseDynamicView(entity.Type, true).then(dv => this.dynamicViewComponent(dv)));
+                if (viewName == "CHOOSE")
+                    return ViewPromise.flat(this.chooseDynamicView(entity.Type, true).then(dv => this.dynamicViewComponent(dv)));
 
-            return ViewPromise.flat(API.getDynamicView(entity.Type, viewName).then(dv => this.dynamicViewComponent(dv)));
+                return ViewPromise.flat(API.getDynamicView(entity.Type, viewName).then(dv => this.dynamicViewComponent(dv)));
+            } catch (error) {
+                return MessageModal.showError("There was an error executing the DynamicViewSelector. Fallback to default").then(() => this.fallback(entity));
+            }
         }));
     }
 
     dynamicViewComponent(dynamicView: DynamicViewEntity): ViewPromise<ModifiableEntity> {
-        return new ViewPromise(resolve => require(['./View/DynamicViewComponent'], resolve))
+        return new ViewPromise(_import('./View/DynamicViewComponent'))
             .withProps({ initialDynamicView: dynamicView });
     }
 
@@ -101,7 +106,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
         if (!settings || !settings.getViewPromise) {
 
             if (!isTypeEntity(entity.Type))
-               return new ViewPromise(resolve => require(['../../../Framework/Signum.React/Scripts/Lines/DynamicComponent'], resolve));
+                return new ViewPromise(_import('../../../Framework/Signum.React/Scripts/Lines/DynamicComponent'));
 
             return ViewPromise.flat(this.chooseDynamicView(entity.Type, true).then(dv => this.dynamicViewComponent(dv)));
         }
@@ -167,7 +172,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
 
 }
 
-export function patchComponent(component: React.ComponentClass < { ctx: TypeContext<Entity> }>, viewOverride: (e: ViewReplacer<Entity>, auth: AuthInfo) => void) {
+export function patchComponent(component: React.ComponentClass < { ctx: TypeContext<Entity> }>, viewOverride: (e: ViewReplacer<Entity>) => void) {
 
     if (!component.prototype.render)
         throw new Error("render function not defined in " + component);
@@ -185,7 +190,7 @@ export function patchComponent(component: React.ComponentClass < { ctx: TypeCont
 
         const replacer = new ViewReplacer<Entity>(view, ctx);
         try {
-            viewOverride(replacer, new AuthInfo());
+            viewOverride(replacer);
             return replacer.result;
         } catch (error) {
             return <div className="alert alert-danger">ERROR: {error && error.message}</div>;
@@ -223,8 +228,8 @@ export function getViewNames(typeName: string): Promise<string[]> {
     );
 }
 
-const selectorCache: { [typeName: string]: ((e: Entity, auth: AuthInfo) => string) | undefined } = {};
-export function getSelector(typeName: string): Promise<((e: Entity, auth: AuthInfo) => string) | undefined> {
+const selectorCache: { [typeName: string]: ((e: Entity) => string) | undefined } = {};
+export function getSelector(typeName: string): Promise<((e: Entity) => string) | undefined> {
 
     return getOrCreate(selectorCache, typeName, () =>
         API.getDynamicViewSelector(typeName)
@@ -232,23 +237,23 @@ export function getSelector(typeName: string): Promise<((e: Entity, auth: AuthIn
     );
 }
 
-export function asSelectorFunction(dvs: DynamicViewSelectorEntity): (e: Entity, auth: AuthInfo) => string {
-    let code = dvs.script!;
+export function asSelectorFunction(dvs: DynamicViewSelectorEntity): (e: Entity) => string {
 
-    if (!code.contains(";") && !code.contains("return"))
-        code = "return " + code + ";";
-
-    code = "(function(e, auth){ " + code + "})";
+    const code = "e => " + dvs.script!;
 
     try {
-        return eval(code);
+        return evalWithScope(code, globalModules);
     } catch (e) {
         throw new Error("Syntax in DynamicViewSelector for '" + dvs.entityType!.toStr + "':\r\n" + code + "\r\n" + (e as Error).message);
     }
 }
 
-const overrideCache: { [typeName: string]: ((e: ViewReplacer<Entity>, auth: AuthInfo) => string) | undefined } = {};
-export function getViewOverride(typeName: string): Promise<((rep: ViewReplacer<Entity>, auth: AuthInfo) => void) | undefined> {
+function evalWithScope(code: string, modules: any) {
+    return eval(code);
+}
+
+const overrideCache: { [typeName: string]: ((vr: ViewReplacer<Entity>) => string) | undefined } = {};
+export function getViewOverride(typeName: string): Promise<((vr: ViewReplacer<Entity>) => void) | undefined> {
 
     return getOrCreate(overrideCache, typeName, () =>
         API.getDynamicViewOverride(typeName)
@@ -257,7 +262,7 @@ export function getViewOverride(typeName: string): Promise<((rep: ViewReplacer<E
 }
 
 
-export function asOverrideFunction(dvr: DynamicViewOverrideEntity): (e: ViewReplacer<Entity>, auth: AuthInfo) => string {
+export function asOverrideFunction(dvr: DynamicViewOverrideEntity): (vr: ViewReplacer<Entity>) => string {
     let code = dvr.script!;
 
     // Lines
@@ -307,12 +312,13 @@ export function asOverrideFunction(dvr: DynamicViewOverrideEntity): (e: ViewRepl
 
     // ReactRouterBootstrap
     var LinkContainer = ReactRouterBootstrap.LinkContainer;
-    var IndexLinkContainer = ReactRouterBootstrap.IndexLinkContainer;
-
+    
     // Custom
     var DynamicViewPart = DynamicViewComponent.DynamicViewPart;
 
-    code = "(function(vr, auth){ " + code + "})";
+    var modules = globalModules;
+
+    code = "(function(vr){ " + code + "})";
 
     try {
         return eval(code);
@@ -331,14 +337,14 @@ export function createDefaultDynamicView(typeName: string): Promise<DynamicViewE
 }
 
 export function loadNodes(): Promise<typeof Nodes> {
-    return new Promise<typeof Nodes>(resolve => require(["./View/Nodes"], resolve));
+    return _import<typeof Nodes>("./View/Nodes");
 }
 
 export function getDynamicViewPromise(typeName: string, viewName: string): ViewPromise<ModifiableEntity> {
 
     return ViewPromise.flat(
         API.getDynamicView(typeName, viewName)
-            .then(vn => new ViewPromise(resolve => require(['./View/DynamicViewComponent'], resolve)).withProps({ initialDynamicView: vn }))
+            .then(vn => new ViewPromise(_import('./View/DynamicViewComponent')).withProps({ initialDynamicView: vn }))
     );
 }
 
@@ -347,12 +353,7 @@ export namespace API {
     
     export function getDynamicView(typeName: string, viewName: string): Promise<DynamicViewEntity> {
         
-            var url = Navigator.currentHistory.createHref({
-                pathname: `~/api/dynamic/view/${typeName}`,
-                query: { viewName }
-            });
-
-            return ajaxGet<DynamicViewEntity>({ url });
+            return ajaxGet<DynamicViewEntity>({ url: `~/api/dynamic/view/${typeName}?` + QueryString.stringify({ viewName}) });
     }
 
     export function getDynamicViewSelector(typeName: string): Promise<DynamicViewSelectorEntity | undefined> {

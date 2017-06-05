@@ -21,9 +21,11 @@ namespace Signum.Engine.Workflow
                 CaseActivity = ca.ToLite(),
                 PreviousActivity = ca.Previous,
                 WorkflowActivity = ca.WorkflowActivity.ToLite(),
+                WorkflowActivityType = ca.WorkflowActivity.Type,
+                SubWorkflow = ca.WorkflowActivity.SubWorkflow.Workflow.ToLite(),
                 BpmnElementId = ca.WorkflowActivity.BpmnElementId,
                 Notifications = ca.Notifications().Count(),
-                StartOn = ca.StartDate,
+                StartDate = ca.StartDate,
                 DoneDate = ca.DoneDate,
                 DoneType = ca.DoneType,
                 DoneBy = ca.DoneBy,
@@ -32,7 +34,7 @@ namespace Signum.Engine.Workflow
                 EstimatedDuration = ca.WorkflowActivity.EstimatedDuration,
             }).ToDictionary(a => a.CaseActivity);
 
-            var gr = WorkflowLogic.WorkflowGraphLazy.Value.TryGetC(@case.Workflow.ToLite());
+            var gr = WorkflowLogic.GetWorkflowNodeGraph(@case.Workflow.ToLite());
 
             var connections = caseActivities.Values
                 .Where(cs => cs.PreviousActivity != null && caseActivities.ContainsKey(cs.PreviousActivity))
@@ -41,131 +43,95 @@ namespace Signum.Engine.Workflow
                     var prev = caseActivities.GetOrThrow(cs.PreviousActivity);
                     var from = gr.Activities.GetOrThrow(prev.WorkflowActivity);
                     var to = gr.Activities.GetOrThrow(cs.WorkflowActivity);
-                    var conns = GetAllConnections(gr, from, to);
-
-                    return conns.Select(c => new CaseConnectionStats
+                    if (IsNormal(prev.DoneType.Value))
                     {
-                        BpmnElementId = c.BpmnElementId,
-                        Connection = c.ToLite(),
-                        FromBpmnElementId = c.From.BpmnElementId,
-                        ToBpmnElementId = c.To.BpmnElementId,
-                        DoneBy = prev.DoneBy,
-                        DoneDate = prev.DoneDate.Value,
-                    });
+                        var conns = GetAllConnections(gr, from, to);
+                        if (conns.Any())
+                            return conns.Select(c => new CaseConnectionStats
+                            {
+                                BpmnElementId = c.BpmnElementId,
+                                Connection = c.ToLite(),
+                                FromBpmnElementId = c.From.BpmnElementId,
+                                ToBpmnElementId = c.To.BpmnElementId,
+                                DoneBy = prev.DoneBy,
+                                DoneDate = prev.DoneDate.Value,
+                                DoneType = prev.DoneType.Value
+                            });
+                    }
+
+                    return new[]
+                    {
+                        new CaseConnectionStats
+                        {
+                            FromBpmnElementId = from.BpmnElementId,
+                            ToBpmnElementId = to.BpmnElementId,
+                            DoneBy = prev.DoneBy,
+                            DoneDate = prev.DoneDate.Value,
+                            DoneType = prev.DoneType.Value
+                        }
+                    };
                 }).ToList();
 
-            WorkflowEventEntity start = GetStartEvent(@case, caseActivities, gr, out Lite<IUserEntity> startUser);
+      
 
-            if (start != null)
+           
+            var firsts = caseActivities.Values.Where(a => (a.PreviousActivity == null || !caseActivities.ContainsKey(a.PreviousActivity)));
+            foreach (var f in firsts)
             {
-                var firsts = caseActivities.Values.Where(a => (a.PreviousActivity == null || !caseActivities.ContainsKey(a.PreviousActivity)));
-                foreach (var f in firsts)
+                WorkflowEventEntity start = GetStartEvent(@case, f.CaseActivity, gr);
+                connections.AddRange(GetAllConnections(gr, start, gr.Activities.GetOrThrow(f.WorkflowActivity)).Select(c => new CaseConnectionStats
                 {
-                    connections.AddRange(GetAllConnections(gr, start, gr.Activities.GetOrThrow(f.WorkflowActivity)).Select(c => new CaseConnectionStats
-                    {
-                        BpmnElementId = c.BpmnElementId,
-                        Connection = c.ToLite(),
-                        FromBpmnElementId = c.From.BpmnElementId,
-                        ToBpmnElementId = c.To.BpmnElementId,
-                        DoneBy = startUser,
-                        DoneDate = f.StartOn,
-                    }));
-                }
+                    BpmnElementId = c.BpmnElementId,
+                    Connection = c.ToLite(),
+                    FromBpmnElementId = c.From.BpmnElementId,
+                    ToBpmnElementId = c.To.BpmnElementId,
+                    DoneBy = f.DoneBy,
+                    DoneDate = f.StartDate,
+                }));
             }
 
-
-            WorkflowEventEntity finish = GetFinishEvent(@case, caseActivities, gr);
-
-            if (finish != null)
+            if(@case.FinishDate != null)
             {
-                var prevs = GetPreviousActivities(@case, caseActivities, gr, finish);
-                foreach (var p in prevs)
+                var lasts = caseActivities.Values.Where(last => !caseActivities.Values.Any(a => a.PreviousActivity.Is(last.CaseActivity))).ToList();
+
+                var ends = gr.Events.Values.Where(a => a.Type == WorkflowEventType.Finish);
+                foreach (var last in lasts)
                 {
-                    connections.AddRange(GetAllConnections(gr, gr.Activities.GetOrThrow(p.WorkflowActivity), finish).Select(c => new CaseConnectionStats
+                    foreach (var end in ends)
                     {
-                        BpmnElementId = c.BpmnElementId,
-                        Connection = c.ToLite(),
-                        FromBpmnElementId = c.From.BpmnElementId,
-                        ToBpmnElementId = c.To.BpmnElementId,
-                        DoneBy = p.DoneBy,
-                        DoneDate = p.DoneDate.Value,
-                    }));
+                        connections.AddRange(GetAllConnections(gr, gr.Activities.GetOrThrow(last.WorkflowActivity), end).Select(c => new CaseConnectionStats
+                        {
+                            BpmnElementId = c.BpmnElementId,
+                            Connection = c.ToLite(),
+                            FromBpmnElementId = c.From.BpmnElementId,
+                            ToBpmnElementId = c.To.BpmnElementId,
+                            DoneBy = last.DoneBy,
+                            DoneDate = last.DoneDate.Value,
+                        }));
+                    }
                 }
             }
 
             return new CaseFlow
             {
                 Activities = caseActivities.Values.GroupToDictionary(a => a.BpmnElementId),
-                Connections = connections.GroupToDictionary(a => a.BpmnElementId),
+                Connections = connections.Where(a => a.BpmnElementId != null).GroupToDictionary(a => a.BpmnElementId),
+                Jumps = connections.Where(a => a.BpmnElementId == null).ToList(),
                 AllNodes = connections.Select(a => a.FromBpmnElementId).Union(connections.Select(a => a.ToBpmnElementId)).ToList()
             };
         }
-
-        private static List<CaseActivityStats> GetPreviousActivities(CaseEntity @case, Dictionary<Lite<CaseActivityEntity>, CaseActivityStats> caseActivities, WorkflowNodeGraph wg, WorkflowEventEntity finish)
+        
+        private static bool IsNormal(DoneType type)
         {
-            var byWorkflowActivity = caseActivities.Values.GroupToDictionary(a => a.WorkflowActivity);
-
-
-            List<CaseActivityStats> result = new List<Workflow.CaseActivityStats>();
-            var stack = new Stack<IWorkflowNodeEntity>(new [] { finish });
-            wg.PreviousGraph.DepthExploreConnections(stack, (prev, conn, next) =>
-            {
-                if(next is WorkflowActivityEntity)
-                {
-                    var act = byWorkflowActivity.TryGetC(((WorkflowActivityEntity)next).ToLite())?.Where(a=>a.DoneDate.HasValue).WithMax(a => a.DoneDate.Value);
-                    if (act != null)
-                        result.Add(act);
-                    return false;
-                }
-
-                if (next is WorkflowEventEntity)
-                    return true;
-
-                if (next is WorkflowGatewayEntity)
-                    return false;
-
-                throw new InvalidOperationException("Unexpected");
-            });
-
-            return result;
+            return
+                type == DoneType.Approve ||
+                type == DoneType.Decline ||
+                type == DoneType.Next || 
+                type == DoneType.ScriptSuccess;
         }
 
-        private static WorkflowEventEntity GetFinishEvent(CaseEntity @case, Dictionary<Lite<CaseActivityEntity>, CaseActivityStats> caseActivities, WorkflowNodeGraph gr)
+        private static WorkflowEventEntity GetStartEvent(CaseEntity @case, Lite<CaseActivityEntity> firstActivity, WorkflowNodeGraph gr)
         {
-            if (!@case.FinishDate.HasValue)
-                return null;
-
-            var last = caseActivities.Values.Where(a => a.DoneDate != null).WithMax(a => a.DoneDate.Value);
-
-            WorkflowEventEntity result = null;
-
-            var lastAct = gr.Activities.GetOrThrow(last.WorkflowActivity);
-
-            Stack<IWorkflowNodeEntity> stack = new Stack<IWorkflowNodeEntity>(new[] { lastAct });
-            gr.NextGraph.DepthExploreConnections(stack, (prev, con, next) =>
-            {
-                if (next is WorkflowActivityEntity)
-                    return false;
-
-                if (next is WorkflowEventEntity we)
-                {
-                    if (we.Type.IsFinish())
-                        result = we;
-                    return false;
-                }
-
-                if (next is WorkflowGatewayEntity)
-                    return true;
-
-                throw new InvalidOperationException("Unexpected");
-            });
-
-            return result;
-        }
-
-        private static WorkflowEventEntity GetStartEvent(CaseEntity @case, Dictionary<Lite<CaseActivityEntity>, CaseActivityStats> caseActivities, WorkflowNodeGraph gr, out Lite<IUserEntity> user)
-        {
-            user = null;
             var wet = Database.Query<OperationLogEntity>()
             .Where(l => l.Operation == CaseActivityOperation.CreateCaseFromWorkflowEventTask.Symbol && l.Target.RefersTo(@case))
             .Select(l => new { l.Origin, l.User })
@@ -174,30 +140,25 @@ namespace Signum.Engine.Workflow
             if (wet != null)
             {
                 var lite = (wet.Origin as Lite<WorkflowEventTaskEntity>).InDB(a => a.Event);
-                user = wet.User;
                 return lite == null ? null : gr.Events.GetOrThrow(lite);
             }
-            else
-            {
-                var firstActivity = caseActivities.Values.WithMin(a => a.StartOn)?.CaseActivity;
+            
+            bool register = Database.Query<OperationLogEntity>()
+               .Where(l => l.Operation == CaseActivityOperation.Register.Symbol && l.Target.Is(firstActivity) && l.Exception == null)
+               .Any();
 
-                user = Database.Query<OperationLogEntity>()
-                   .Where(l => l.Operation == CaseActivityOperation.Register.Symbol && l.Target.Is(firstActivity) && l.Exception == null)
-                   .Select(a => a.User)
-                   .SingleEx();
-
-                if (user != null)
-                    return gr.Events.Values.SingleEx(a => a.Type == WorkflowEventType.Start);
-                else
-                    return null;
-            }
+            if (register)
+                return gr.Events.Values.SingleEx(a => a.Type == WorkflowEventType.Start);
+            
+            return gr.Events.Values.Where(a => a.Type.IsStart()).Only();
         }
 
         private static HashSet<WorkflowConnectionEntity> GetAllConnections(WorkflowNodeGraph gr, IWorkflowNodeEntity from, IWorkflowNodeEntity to)
         {
             HashSet<WorkflowConnectionEntity> result = new HashSet<WorkflowConnectionEntity>(); 
 
-            Stack<WorkflowConnectionEntity> partialPath = new Stack<WorkflowConnectionEntity>(); //Stack of connections, not NODES
+            Stack<WorkflowConnectionEntity> partialPath = new Stack<WorkflowConnectionEntity>(); 
+            HashSet<IWorkflowNodeEntity> visited = new HashSet<IWorkflowNodeEntity>();
             Action<IWorkflowNodeEntity> flood = null;
             flood = node =>
             {
@@ -206,14 +167,28 @@ namespace Signum.Engine.Workflow
 
                 if (node is WorkflowActivityEntity && !node.Is(from))
                     return;
+
                 
-                foreach (var kvp in gr.NextGraph.RelatedTo(node))
+                foreach (var kvp in gr.NextGraph.RelatedTo(node).ToList())
                 {
-                    if (!partialPath.Contains(kvp.Value))
+                    if (!visited.Contains(kvp.Key))
                     {
+                        visited.Add(kvp.Key);
                         partialPath.Push(kvp.Value);
                         flood(kvp.Key);
                         partialPath.Pop();
+                        visited.Remove(kvp.Key);
+                    }
+                }
+
+                if (node is WorkflowGatewayEntity g && g.Type == WorkflowGatewayType.Inclusive && g.Direction == WorkflowGatewayDirection.Split)
+                {
+                    var next = gr.ParallelWorkflowPairs.GetOrThrow(g);
+                    if (!visited.Contains(next))
+                    {
+                        visited.Add(next);
+                        flood(next);
+                        visited.Remove(next);
                     }
                 }
             };
@@ -229,8 +204,10 @@ namespace Signum.Engine.Workflow
         public Lite<CaseActivityEntity> CaseActivity;
         public Lite<CaseActivityEntity> PreviousActivity;
         public Lite<WorkflowActivityEntity> WorkflowActivity;
+        public WorkflowActivityType WorkflowActivityType;
+        public Lite<WorkflowEntity> SubWorkflow;
         public int Notifications;
-        public DateTime StartOn;
+        public DateTime StartDate;
         public DateTime? DoneDate;
         public DoneType? DoneType;
         public Lite<IUserEntity> DoneBy;
@@ -246,6 +223,7 @@ namespace Signum.Engine.Workflow
         public Lite<WorkflowConnectionEntity> Connection;
         public DateTime DoneDate;
         public Lite<IUserEntity> DoneBy;
+        public DoneType DoneType;
 
         public string BpmnElementId { get; internal set; }
         public string FromBpmnElementId { get; internal set; }
@@ -256,6 +234,7 @@ namespace Signum.Engine.Workflow
     {
         public Dictionary<string, List<CaseActivityStats>> Activities;
         public Dictionary<string, List<CaseConnectionStats>> Connections;
+        public List<CaseConnectionStats> Jumps;
         public List<string> AllNodes;
     }
 }

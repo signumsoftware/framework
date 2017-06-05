@@ -7,7 +7,7 @@ import { ajaxPost, ajaxGet, ValidationError } from '../../../Framework/Signum.Re
 import { SearchControl, ValueSearchControlLine } from '../../../Framework/Signum.React/Scripts/Search'
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import ModalMessage from '../../../Framework/Signum.React/Scripts/Modals/ModalMessage'
+import MessageModal from '../../../Framework/Signum.React/Scripts/Modals/MessageModal'
 import { EntityData, EntityKind, symbolNiceName } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
@@ -26,9 +26,9 @@ import * as AuthClient from '../Authorization/AuthClient'
 
 export function start(options: { routes: JSX.Element[] }) {
 
-    Navigator.addSettings(new EntitySettings(DynamicTypeEntity, w => new ViewPromise(resolve => require(['./Type/DynamicType'], resolve))));
-    Navigator.addSettings(new EntitySettings(DynamicMixinConnectionEntity, w => new ViewPromise(resolve => require(['./Type/DynamicMixinConnection'], resolve))));
-    Navigator.addSettings(new EntitySettings(DynamicSqlMigrationEntity, w => new ViewPromise(resolve => require(['./Type/DynamicSqlMigration'], resolve))));
+    Navigator.addSettings(new EntitySettings(DynamicTypeEntity, w => _import('./Type/DynamicType')));
+    Navigator.addSettings(new EntitySettings(DynamicMixinConnectionEntity, w => _import('./Type/DynamicMixinConnection')));
+    Navigator.addSettings(new EntitySettings(DynamicSqlMigrationEntity, w => _import('./Type/DynamicSqlMigration')));
 
     Operations.addSettings(new EntityOperationSettings(DynamicTypeOperation.Save, {
         onClick: eoc => {
@@ -38,14 +38,15 @@ export function start(options: { routes: JSX.Element[] }) {
                 .then(pack => { eoc.frame.onReload(pack); EntityOperations.notifySuccess(); })
                 .then(() => {
                     if (AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel)) {
-                        ModalMessage.show({
+                        MessageModal.show({
                             title: NormalControlMessage.Save.niceToString(),
                             message: DynamicTypeMessage.DynamicType0SucessfullySavedGoToDynamicPanelNow.niceToString(eoc.entity.typeName),
                             buttons: "yes_no",
-                            defaultStyle: "success",
+                            style: "success",
                             icon: "success"
                         }).then(result => {
-                            window.open(Navigator.currentHistory.createHref("~/dynamic/panel"));
+                            if (result == "yes")
+                                window.open(Navigator.toAbsoluteUrl("~/dynamic/panel"));
                         }).done();
                     }
                 })
@@ -80,8 +81,6 @@ export namespace API {
         return ajaxGet<Array<string>>({ url: `~/api/dynamic/type/expressionNames/${typeName}` });
     }
 }
-
-export type DynamicBaseType = "Entity" | "Mixin";
 
 export interface DynamicTypeDefinition {
     primaryKey?: DynamicTypePrimaryKeyDefinition;
@@ -118,6 +117,7 @@ export interface DynamicProperty {
     scale?: number;
     _propertyType_?: string;
     validators?: Validators.DynamicValidator[];
+    customAttributes?: string;
 }
 
 export interface DynamicTypePrimaryKeyDefinition {

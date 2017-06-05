@@ -254,7 +254,7 @@ namespace Signum.Engine.Cache
                     //to avoid massive logs with SqlQueryNotificationStoredProcedure
                     //http://rusanu.com/2007/11/10/when-it-rains-it-pours/
                     var staleServices = (from s in Database.View<SysServiceQueues>()
-                                         where s.activation_procedure != null && !Database.View<SysProcedures>().Any(p => "[dbo].[" + p.name + "]" == s.activation_procedure)
+                                         where s.activation_procedure != null && !Database.View<SysProcedures>().Any(p => "[" + p.Schema().name + "].[" + p.name + "]" == s.activation_procedure)
                                          select new ObjectName(new SchemaName(null, s.Schema().name), s.name)).ToList();
 
                     foreach (var s in staleServices)
@@ -262,6 +262,16 @@ namespace Signum.Engine.Cache
                         TryDropService(s.Name);
                         TryDropQueue(s);
                     }
+
+                    var oldProcedures = (from p in Database.View<SysProcedures>()
+                                         where p.name.Contains("SqlQueryNotificationStoredProcedure-") && !Database.View<SysServiceQueues>().Any(s => "[" + p.Schema().name + "].[" + p.name + "]" == s.activation_procedure)
+                                         select new ObjectName(new SchemaName(null, p.Schema().name), p.name)).ToList();
+
+                    foreach (var item in oldProcedures)
+                    {
+                        Executor.ExecuteNonQuery(new SqlPreCommandSimple($"DROP PROCEDURE {item.ToString()}"));
+                    }
+
                 }
 
                 foreach (var database in Schema.Current.DatabaseNames())
@@ -410,7 +420,11 @@ namespace Signum.Engine.Cache
                 var ee = schema.EntityEvents<T>();
 
                 ee.CacheController = this;
-                ee.Saving += ident => DisableAndInvalidate(withUpdates: true); //Even if new, loading the cache afterwars will Timeout
+                ee.Saving += ident =>
+                {
+                    if (ident.IsGraphModified)
+                        DisableAndInvalidate(withUpdates: true); //Even if new, loading the cache afterwars will Timeout
+                };
                 ee.PreUnsafeDelete += query => DisableAndInvalidate(withUpdates: false);
                 ee.PreUnsafeUpdate += (update, entityQuery) => DisableAndInvalidate(withUpdates: true);
                 ee.PreUnsafeInsert += (query, constructor, entityQuery) => { DisableAndInvalidate(withUpdates: constructor.Body.Type.IsInstantiationOf(typeof(MListElement<,>))); return constructor; };

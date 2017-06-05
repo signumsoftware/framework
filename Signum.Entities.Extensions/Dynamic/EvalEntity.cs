@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace Signum.Entities.Dynamic
 {
     [Serializable]
-    public abstract class EvalEntity<T> : EmbeddedEntity
+    public abstract class EvalEmbedded<T> : EmbeddedEntity
                     where T : class
     {
         public class CompilationResult
@@ -93,8 +93,12 @@ namespace Signum.Entities.Dynamic
 
                         if (compiled.Errors.HasErrors)
                         {
+                            var lines = code.Split('\n');
                             var errors = compiled.Errors.Cast<CompilerError>();
-                            return new CompilationResult { CompilationErrors = errors.Count() + " Errors:\r\n" + errors.ToString(e => "Line {0}: {1}".FormatWith(e.Line, e.ErrorText), "\r\n") };
+                            return new CompilationResult
+                            {
+                                CompilationErrors = errors.Count() + " Errors:\r\n" + errors.ToString(e => "Line {0}: {1}".FormatWith(e.Line, e.ErrorText) + "\r\n" + lines[e.Line - 1], "\r\n\r\n")
+                            };
                         }
 
                         Assembly assembly = compiled.CompiledAssembly;

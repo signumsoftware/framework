@@ -1,14 +1,17 @@
 ﻿import * as React from 'react'
+import { Tabs, Tab } from "react-bootstrap";
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { getMixin, toLite, JavascriptMessage, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { ColorTypeaheadLine } from '../../Basics/Templates/ColorTypeahead'
-import { CaseEntity, WorkflowEntity, WorkflowEntitiesDictionary, CaseActivityEntity } from '../Signum.Entities.Workflow'
+import { CaseEntity, WorkflowEntity, WorkflowEntitiesDictionary, CaseActivityEntity, WorkflowActivityMessage, WorkflowActivityEntity } from '../Signum.Entities.Workflow'
 import {
     ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip,
     EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, EntityTable
 } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { API, CaseFlow } from '../WorkflowClient'
 import BpmnViewerComponent from '../Bpmn/BpmnViewerComponent'
+import InlineCaseTags from "../Case/InlineCaseTags";
+import { SearchControl } from "../../../../Framework/Signum.React/Scripts/Search";
 
 interface CaseComponentProps {
     ctx: TypeContext<CaseEntity>;
@@ -59,6 +62,8 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
         var ctx = this.props.ctx.subCtx({ readOnly: true, labelColumns: 4 });
         return (
             <div>
+                <div className="inline-tags"> <InlineCaseTags case={toLite(this.props.ctx.value)} /></div>
+                <br />
                 <div className="row">
                     <div className="col-sm-6">
                         <EntityLine ctx={ctx.subCtx(a => a.workflow)} />
@@ -72,17 +77,31 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
                     </div>
                 </div>
 
-                <fieldset>
-                    {this.state.initialXmlDiagram && this.state.entities && this.state.caseFlow ?
-                        <div className="code-container">
-                            <BpmnViewerComponent ref={m => this.bpmnViewerComponent = m}
-                                diagramXML={this.state.initialXmlDiagram}
-                                entities={this.state.entities}
-                                caseFlow={this.state.caseFlow}
-                                caseActivity={this.props.caseActivity}
-                            /></div> :
-                        <h3>{JavascriptMessage.loading.niceToString()}</h3>}
-                </fieldset>
+                <Tabs id="caseTabs">
+                    <Tab eventKey="CaseFlow" title={WorkflowActivityMessage.CaseFlow.niceToString()}>
+                        {this.state.initialXmlDiagram && this.state.entities && this.state.caseFlow ?
+                            <div className="code-container">
+                                <BpmnViewerComponent ref={m => this.bpmnViewerComponent = m}
+                                    diagramXML={this.state.initialXmlDiagram}
+                                    entities={this.state.entities}
+                                    caseFlow={this.state.caseFlow}
+                                    case={ctx.value}
+                                    caseActivity={this.props.caseActivity}
+                                /></div> :
+                            <h3>{JavascriptMessage.loading.niceToString()}</h3>}
+                    </Tab>
+                    <Tab eventKey="CaseActivities" title={WorkflowActivityEntity.nicePluralName()}>
+                        <SearchControl findOptions={{
+                            queryName: CaseActivityEntity,
+                            parentColumn: "Case",
+                            parentValue: ctx.value,
+                            orderOptions: [{
+                                columnName: "StartDate",
+                                orderType: "Ascending",
+                            }]
+                        }} />
+                    </Tab>
+                </Tabs>
             </div>
         );
     }

@@ -16,6 +16,10 @@
         "../../Framework/Signum.React/node_modules/*",
         "*"
       ]
-    }
+    },
+    "lib": [
+      "es2017",
+      "dom"
+    ]
   }
 }

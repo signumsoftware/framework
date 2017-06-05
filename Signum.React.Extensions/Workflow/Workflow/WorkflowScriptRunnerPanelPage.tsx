@@ -1,7 +1,8 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
-import { Link } from 'react-router'
+import { RouteComponentProps } from 'react-router'
 import { Tabs, Tab } from 'react-bootstrap'
+import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
 import {ValueSearchControl, SearchControl, OrderType } from '../../../../Framework/Signum.React/Scripts/Search'
@@ -19,7 +20,7 @@ import { CaseActivityEntity, WorkflowActivityType, DoneType, WorkflowScriptRunne
 import * as AuthClient from '../../Authorization/AuthClient'
 
 
-interface WorkflowScriptRunnerPanelPageProps extends ReactRouter.RouteComponentProps<{}, {}> {
+interface WorkflowScriptRunnerPanelPageProps extends RouteComponentProps<{}> {
 
 }
 
@@ -27,6 +28,12 @@ export default class WorkflowScriptRunnerPanelPage extends React.Component<Workf
 
     componentWillMount() {
         this.loadState().done();
+        AuthClient.asserPermissionAuthorized(WorkflowScriptRunnerPanelPermission.ViewWorkflowScriptRunnerPanel);
+        Navigator.setTitle("WorkflowScriptRunner State");
+    }
+
+    componentWillUnmount() {
+        Navigator.setTitle();
     }
 
     loadState() {
@@ -46,11 +53,8 @@ export default class WorkflowScriptRunnerPanelPage extends React.Component<Workf
 
 
     render() {
-        AuthClient.asserPermissionAuthorized(WorkflowScriptRunnerPanelPermission.ViewWorkflowScriptRunnerPanel);
 
-        const title = "WorkflowScriptRunner State";
-
-        document.title = title;
+        var title = "WorkflowScriptRunner State";
 
         if (this.state == undefined)
             return <h2>{title} (loading...) </h2>;

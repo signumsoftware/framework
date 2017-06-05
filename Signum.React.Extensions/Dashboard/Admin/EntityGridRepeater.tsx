@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
 import { Tab, Tabs } from 'react-bootstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
