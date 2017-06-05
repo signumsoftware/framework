@@ -219,7 +219,7 @@ export class EntityBase {
         if (this.creating != null)
             return this.creating(prefix, event);
 
-        return this.typeChooser(ti => ti.creable).then(type=> {
+        return this.typeChooser(ti => ti.creable).then<Entities.EntityValue> (type=> {
             if (!type)
                 return null;
 
@@ -564,7 +564,7 @@ export class EntityDetail extends EntityBase {
         if (this.options.template)
             return Promise.resolve(this.getEmbeddedTemplate(prefix));
 
-        return this.typeChooser(t=>t.creable).then(type=> {
+        return this.typeChooser(t => t.creable).then<Entities.EntityValue>(type=> {
             if (!type)
                 return null;
 
@@ -1087,7 +1087,7 @@ export class EntityListDetail extends EntityList {
 
             var promise = selContainer.children().length ? Promise.resolve<void>(null) :
                 Navigator.requestPartialView(new Entities.EntityHtml(selPrefix, Entities.RuntimeInfo.getFromPrefix(selPrefix), null), this.defaultViewOptions(null))
-                    .then<void>(e=> selContainer.html(e.html));
+                    .then<void>(e => { selContainer.html(e.html); });
 
             promise.then(() =>
             {
@@ -1113,7 +1113,7 @@ export class EntityListDetail extends EntityList {
         if (this.options.template)
             return Promise.resolve(this.getEmbeddedTemplate(prefix));
 
-        return this.typeChooser(t => t.creable).then(type=> {
+        return this.typeChooser(t => t.creable).then<Entities.EntityValue>(type=> {
             if (type == null)
                 return null;
 
@@ -1190,7 +1190,7 @@ export class EntityRepeater extends EntityListBase {
         if (this.options.template)
             return Promise.resolve(this.getEmbeddedTemplate(prefix));
 
-        return this.typeChooser(t => t.creable).then(type=> {
+        return this.typeChooser(t => t.creable).then<Entities.EntityValue>(type=> {
             if (type == null)
                 return null;
 

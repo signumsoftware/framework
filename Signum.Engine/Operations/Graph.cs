@@ -92,8 +92,7 @@ namespace Signum.Engine.Operations
                                 });
 
                             if (log != null)
-                                using (ExecutionMode.Global())
-                                    log.Save();
+                                log.SaveLog();
 
                             return tr.Commit(result);
                         }
@@ -113,8 +112,7 @@ namespace Signum.Engine.Operations
                             {
                                 log.Exception = exLog.ToLite();
 
-                                using (ExecutionMode.Global())
-                                    log.Save();
+                                log.SaveLog();
 
                                 tr2.Commit();
                             }
@@ -124,6 +122,8 @@ namespace Signum.Engine.Operations
                     }
                 }
             }
+
+       
 
             protected virtual void AssertEntity(T entity)
             {
@@ -259,8 +259,7 @@ namespace Signum.Engine.Operations
                                 });
 
                             if (log != null)
-                                using (ExecutionMode.Global())
-                                    log.Save();
+                                log.SaveLog();
 
                             return tr.Commit(result);
                         }
@@ -280,8 +279,7 @@ namespace Signum.Engine.Operations
                             {
                                 log.Exception = exLog.ToLite();
 
-                                using (ExecutionMode.Global())
-                                    log.Save();
+                                log.SaveLog();
 
                                 tr2.Commit();
                             }
@@ -397,8 +395,7 @@ namespace Signum.Engine.Operations
                                 });
 
                             if (log != null)
-                                using (ExecutionMode.Global())
-                                    log.Save();
+                                log.SaveLog();
 
                             return tr.Commit(result);
                         }
@@ -418,8 +415,7 @@ namespace Signum.Engine.Operations
                             {
                                 log.Exception = exLog.ToLite();
 
-                                using (ExecutionMode.Global())
-                                    log.Save();
+                                log.SaveLog();
 
                                 tr2.Commit();
                             }
@@ -542,8 +538,7 @@ namespace Signum.Engine.Operations
                                     log.End = TimeZoneManager.Now;
                                 });
 
-                            using (ExecutionMode.Global())
-                                log.Save();
+                            log.SaveLog();
 
                             tr.Commit();
                         }
@@ -568,8 +563,7 @@ namespace Signum.Engine.Operations
                                 Exception = exLog.ToLite(),
                             };
 
-                            using (ExecutionMode.Global())
-                                newLog.Save();
+                            newLog.SaveLog();
 
                             tr2.Commit();
                         }
@@ -681,8 +675,7 @@ namespace Signum.Engine.Operations
                                     log.SetTarget(entity);
                                     log.End = TimeZoneManager.Now;
 
-                                    using (ExecutionMode.Global())
-                                        log.Save();
+                                    log.SaveLog();
 
                                     tr.Commit();
                                 }
@@ -701,8 +694,7 @@ namespace Signum.Engine.Operations
                                     log.Target = entity.ToLite();
                                     log.Exception = exLog.ToLite();
 
-                                    using (ExecutionMode.Global())
-                                        log.Save();
+                                    log.SaveLog();
 
                                     tr2.Commit();
                                 }

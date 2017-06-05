@@ -56,4 +56,9 @@ namespace Signum.Entities.Basics
         [Ignore]
         IEntity TemporalTarget;
     }
+
+    public enum OperationLogMessage
+    {
+        OperationLogMyLast
+    }
 }
