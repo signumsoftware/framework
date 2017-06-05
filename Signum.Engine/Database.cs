@@ -73,7 +73,7 @@ namespace Signum.Engine
 
         #region Retrieve
 
-        public static event PreRetriveEventHandler PreRetrive;
+
 
         public static T Retrieve<T>(this Lite<T> lite) where T : class, IEntity
         {
@@ -107,6 +107,10 @@ namespace Signum.Engine
                         return cached;
                 }
 
+                var alternateEntity = Schema.Current.OnAlternativeRetriving(typeof(T), id);
+                if (alternateEntity != null)
+                    return (T)alternateEntity;
+
                 var cc = GetCacheController<T>();
                 if (cc != null)
                 {
@@ -126,32 +130,8 @@ namespace Signum.Engine
                         return result;
                     }
                 }
-
-               
-
-                if(PreRetrive!=null)
-                {
-                    var arg = new PreRetriveEventArgs();
-                    PreRetrive.Invoke(id, typeof(T), arg);
-
-                    if (arg.Cancel)
-                        throw new EntityNotFoundException(typeof(T), id);
-
-                    if (arg.Entity != null)
-                    {
-                        if (!arg.AvoidAccesVerify)
-                        {
-                            var verifyAcces = Database.Query<T>().Where(a => a.Id == id).Any();
-                            if (!verifyAcces)
-                                throw new EntityNotFoundException(typeof(T), id);
-                        }
-                        return (T)arg.Entity;
-                    }
-
-                }
-                    
-
-               T retrieved = Database.Query<T>().SingleOrDefaultEx(a => a.Id == id);
+                
+                T retrieved = Database.Query<T>().SingleOrDefaultEx(a => a.Id == id);
 
                 if (retrieved == null)
                     throw new EntityNotFoundException(typeof(T), id);
@@ -1065,16 +1045,6 @@ namespace Signum.Engine
         }
     }
 
-    public class PreRetriveEventArgs
-    {
-        public bool AvoidAccesVerify { get; set; }
-        public bool Cancel { get; set; }
-        public Entity Entity { get; set; }
-       
-    }
-
-    public delegate void PreRetriveEventHandler(PrimaryKey id,Type type, PreRetriveEventArgs args) ;
- 
 
 
     public class MListElement<E, V> where E : Entity
