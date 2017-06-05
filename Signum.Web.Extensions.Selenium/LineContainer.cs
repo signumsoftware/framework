@@ -239,7 +239,7 @@ namespace Signum.Web.Selenium
             return routeType.IsAssignableFrom(type);
         }
 
-        public static QueryTokenBuilderProxy QueryTokenBuilder<T>(this ILineContainer<T> lineContainer, Expression<Func<T, QueryTokenEntity>> property)
+        public static QueryTokenBuilderProxy QueryTokenBuilder<T>(this ILineContainer<T> lineContainer, Expression<Func<T, QueryTokenEmbedded>> property)
             where T : ModifiableEntity
         {
             string newPrefix;
