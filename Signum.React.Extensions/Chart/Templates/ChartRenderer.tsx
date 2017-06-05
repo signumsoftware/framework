@@ -12,8 +12,6 @@ import {
    ChartColorEntity, ChartScriptEntity, ChartParameterEmbedded, ChartParameterType } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 
-const colorbrewer = require("colorbrewer");
-
 require("../Chart.css");
 
 declare global {
