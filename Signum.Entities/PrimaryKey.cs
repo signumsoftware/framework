@@ -45,10 +45,7 @@ namespace Signum.Entities
 
         public PrimaryKey(IComparable obj)
         {
-            if (obj == null)
-                throw new ArgumentNullException("obj");
-
-            this.Object = obj;
+            this.Object = obj ?? throw new ArgumentNullException("obj");
         }
 
         public override string ToString()

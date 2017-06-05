@@ -1,22 +1,23 @@
 ﻿import * as React from "react"
-import { Router, Route, Redirect, IndexRoute } from "react-router"
+import { Router, Route, Redirect } from "react-router"
 
 import { Dic } from '../Globals';
-import { Lite, Entity, liteKey } from '../Signum.Entities';
+import { Lite, Entity, liteKey, ModifiableEntity } from '../Signum.Entities';
 import * as Navigator from '../Navigator';
-import { Link  } from 'react-router';
+import { Link  } from 'react-router-dom';
 
-export interface EntityLinkProps extends React.HTMLAttributes<Link>, React.Props<EntityLink> {
+export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement>, React.Props<EntityLink> {
     lite: Lite<Entity>;
     inSearch?: boolean;
     onNavigated?: (lite: Lite<Entity>) => void;
+    getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
 }
 
 
 export default class EntityLink extends React.Component<EntityLinkProps, void>{
 
     render() {
-        const { lite, inSearch, children, onNavigated, ...htmlAtts} = this.props;
+        const { lite, inSearch, children, onNavigated, getViewPromise, ...htmlAtts } = this.props;
 
         if (!Navigator.isNavigable(lite.EntityType, undefined, this.props.inSearch || false))
             return <span data-entity={liteKey(lite) }>{this.props.children || lite.toStr}</span>;
@@ -28,7 +29,7 @@ export default class EntityLink extends React.Component<EntityLinkProps, void>{
                 title={lite.toStr}
                 onClick={this.handleClick}
                 data-entity={liteKey(lite)}
-                {...(htmlAtts as React.HTMLAttributes<Link>) }>
+                {...(htmlAtts as React.HTMLAttributes<HTMLAnchorElement>) }>
                 {children || lite.toStr}                
             </Link>
         );
@@ -47,7 +48,7 @@ export default class EntityLink extends React.Component<EntityLinkProps, void>{
 
         event.preventDefault();
 
-        Navigator.navigate(lite).then(() => {
+        Navigator.navigate(lite, { getViewPromise: this.props.getViewPromise }).then(() => {
             this.props.onNavigated && this.props.onNavigated(lite);
         }).done();
     }

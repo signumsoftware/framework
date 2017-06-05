@@ -133,9 +133,9 @@ namespace Signum.Engine.DynamicQuery
             return Execute(ExecuteType.QueryDescription, queryName, null, dqb => dqb.GetDescription());
         }
 
-        public IQueryable<Lite<Entity>> GetEntities(object queryName, List<Filter> filters)
+        public IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request)
         {
-            return Execute(ExecuteType.GetEntities, queryName, null, dqb => dqb.Core.Value.GetEntities(filters));
+            return Execute(ExecuteType.GetEntities, request.QueryName, null, dqb => dqb.Core.Value.GetEntities(request));
         }
 
         public event Func<object, bool> AllowQuery;
@@ -188,6 +188,16 @@ namespace Signum.Engine.DynamicQuery
         {
             QueryToken.EntityExtensions = parent => DynamicQueryManager.Current.GetExtensions(parent);
             ExtensionToken.BuildExtension = (parentType, key, parentExpression) => DynamicQueryManager.Current.BuildExtension(parentType, key, parentExpression);
+            QueryToken.ImplementedByAllSubTokens = GetImplementedByAllSubTokens;
+        }
+
+        static List<QueryToken> GetImplementedByAllSubTokens(QueryToken queryToken, Type type, SubTokensOptions options)
+        {
+            var cleanType = type.CleanType();
+            return Schema.Current.Tables.Keys
+                .Where(t => cleanType.IsAssignableFrom(t))
+                .Select(t => (QueryToken)new AsTypeToken(queryToken, t))
+                .ToList();
         }
 
         private Expression BuildExtension(Type parentType, string key, Expression parentExpression)

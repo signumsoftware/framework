@@ -42,7 +42,7 @@ namespace Signum.Engine.Operations
 
         public class Construct : Graph<T>.Construct, IGraphToStateOperation
         {
-            public List<S> ToStates { get; private set; }
+            public List<S> ToStates { get; private set; } = new List<S>();
             IEnumerable<Enum> IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
             Type IOperation.StateType { get { return typeof(S); } }
 
@@ -50,6 +50,17 @@ namespace Signum.Engine.Operations
                 : base(symbol)
             {
                 ToStates = new List<S>();
+            }
+
+            protected Construct(OperationSymbol symbol)
+                : base(symbol)
+            {
+            }
+
+            public static new Construct Untyped<B>(ConstructSymbol<B>.Simple symbol)
+                 where B : class, IEntity
+            {
+                return new Construct(symbol.Symbol);
             }
 
             protected override void AssertEntity(T entity)
@@ -68,7 +79,7 @@ namespace Signum.Engine.Operations
                 base.AssertIsValid();
 
                 if (ToStates.IsEmpty())
-                    throw new InvalidOperationException("Operation {0} does not have ToStates initialized".FormatWith(Symbol.Symbol));
+                    throw new InvalidOperationException("Operation {0} does not have ToStates initialized".FormatWith(operationSymbol));
 
             }
         }
@@ -86,14 +97,24 @@ namespace Signum.Engine.Operations
         public class ConstructFrom<F> : Graph<T>.ConstructFrom<F>, IGraphToStateOperation
             where F : class, IEntity
         {
-            public List<S> ToStates { get; private set; }
+            public List<S> ToStates { get; private set; } = new List<S>();
             IEnumerable<Enum> IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
             Type IOperation.StateType { get { return typeof(S); } }
 
             public ConstructFrom(ConstructSymbol<T>.From<F> symbol)
                 : base(symbol)
             {
-                ToStates = new List<S>();
+            }
+
+            protected ConstructFrom(OperationSymbol operationSymbol, Type baseType)
+                : base(operationSymbol, baseType)
+            {
+            }
+
+            public static new ConstructFrom<F> Untyped<B>(ConstructSymbol<B>.From<F> symbol)
+                 where B : class, IEntity
+            {
+                return new ConstructFrom<F>(symbol.Symbol, symbol.BaseType);
             }
 
             protected override void AssertEntity(T result)
@@ -114,14 +135,14 @@ namespace Signum.Engine.Operations
                 base.AssertIsValid();
 
                 if (ToStates.IsEmpty())
-                    throw new InvalidOperationException("Operation {0} does not have ToStates initialized".FormatWith(Symbol.Symbol));
+                    throw new InvalidOperationException("Operation {0} does not have ToStates initialized".FormatWith(operationSymbol));
             }
         }
 
         public class ConstructFromMany<F> : Graph<T>.ConstructFromMany<F>, IGraphToStateOperation
             where F : class, IEntity
         {
-            public List<S> ToStates { get; private set; }
+            public List<S> ToStates { get; private set; } = new List<S>();
             IEnumerable<Enum> IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
             Type IOperation.StateType { get { return typeof(S); } }
 
@@ -131,6 +152,19 @@ namespace Signum.Engine.Operations
                 ToStates = new List<S>();
             }
 
+
+            protected ConstructFromMany(OperationSymbol operationSymbol, Type baseType)
+                : base(operationSymbol, baseType)
+            {
+            }
+
+            public static new ConstructFromMany<F> Untyped<B>(ConstructSymbol<B>.FromMany<F> symbol)
+                 where B : class, IEntity
+            {
+                return new ConstructFromMany<F>(symbol.Symbol, symbol.BaseType);
+            }
+
+
             protected override void AssertEntity(T result)
             {
                 if (result != null)
@@ -148,7 +182,7 @@ namespace Signum.Engine.Operations
                 base.AssertIsValid();
 
                 if (ToStates.IsEmpty())
-                    throw new InvalidOperationException("Operation {0} does not have ToStates initialized".FormatWith(Symbol.Symbol));
+                    throw new InvalidOperationException("Operation {0} does not have ToStates initialized".FormatWith(operationSymbol));
             }
         }
 

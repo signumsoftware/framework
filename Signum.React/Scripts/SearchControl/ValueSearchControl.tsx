@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as numeral from 'numeral'
+import * as numbro from 'numbro'
 import * as moment from 'moment'
 import { DropdownButton, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { Dic, DomUtils, classes } from '../Globals'
@@ -9,10 +9,11 @@ import {
     toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, QueryCountRequest, QueryRequest
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, is, Entity, getToString, EmbeddedEntity } from '../Signum.Entities'
-import { getTypeInfos, IsByAll, getQueryKey, TypeInfo, EntityData, getQueryNiceName, toNumeralFormat, toMomentFormat, getEnumInfo } from '../Reflection'
+import { getTypeInfos, IsByAll, getQueryKey, TypeInfo, EntityData, getQueryNiceName, toNumbroFormat, toMomentFormat, getEnumInfo } from '../Reflection'
 import * as Navigator from '../Navigator'
 import { StyleContext } from '../Typecontext'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
+import { AbortableRequest } from "../Services";
 
 
 
@@ -91,6 +92,13 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
                 .done();
     }
 
+    componentWillUnmount() {
+        this.abortableQuery.abort();
+    }
+
+    abortableQuery = new AbortableRequest<{ request: QueryCountRequest; avoidNotify: boolean | undefined }, number>(
+        (abortController, a) => Finder.API.queryCount(a.request, a.avoidNotify, abortController));
+
     refreshValue(props?: ValueSearchControlProps) {
         if (!props)
             props = this.props;
@@ -102,7 +110,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
 
         Finder.getQueryDescription(fo.queryName)
             .then(qd => Finder.parseFindOptions(fo, qd))
-            .then(fo => Finder.API.queryCount(this.getQueryRequest(fo), props!.avoidNotifyPendingRequest))
+            .then(fo => this.abortableQuery.getData({ request: this.getQueryRequest(fo), avoidNotify: props!.avoidNotifyPendingRequest }))
             .then(value => {
                 this.setState({ value });
                 this.props.onValueChange && this.props.onValueChange(value);
@@ -165,8 +173,8 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
         switch (token.filterType) {
             case "Integer":
             case "Decimal":
-                const numeralFormat = toNumeralFormat(this.props.format || token.format);
-                return numeral(value).format(numeralFormat);
+                const numbroFormat = toNumbroFormat(this.props.format || token.format);
+                return numbro(value).format(numbroFormat);
             case "DateTime":
                 const momentFormat = toMomentFormat(this.props.format || token.format);
                 return moment(value).format(momentFormat);
@@ -186,7 +194,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
     handleClick = (e: React.MouseEvent<any>) => {
         e.preventDefault();
 
-        if (e.ctrlKey || e.button == 2)
+        if (e.ctrlKey || e.button == 1)
             window.open(Finder.findOptionsPath(this.props.findOptions));
         else
             Finder.explore(this.props.findOptions).then(() => {

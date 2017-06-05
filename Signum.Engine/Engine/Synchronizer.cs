@@ -14,22 +14,21 @@ namespace Signum.Engine
           Action<K, N> createNew,
           Action<K, O> removeOld,
           Action<K, N, O> merge)
-            where O : class
-            where N : class
         {
             HashSet<K> keys = new HashSet<K>();
             keys.UnionWith(oldDictionary.Keys);
             keys.UnionWith(newDictionary.Keys);
+
             foreach (var key in keys)
             {
-                var oldVal = oldDictionary.TryGetC(key);
-                var newVal = newDictionary.TryGetC(key);
+                var oldExists = oldDictionary.TryGetValue(key, out var oldVal);
+                var newExists = newDictionary.TryGetValue(key, out var newVal);
 
-                if (oldVal == null)
+                if (!oldExists)
                 {
                     createNew?.Invoke(key, newVal);
                 }
-                else if (newVal == null)
+                else if (!newExists)
                 {
                     removeOld?.Invoke(key, oldVal);
                 }

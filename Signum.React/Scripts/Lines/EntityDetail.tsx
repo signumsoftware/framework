@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
 import { Dic, classes } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
@@ -40,7 +39,7 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
 
         return (
             <fieldset className={classes("sf-entity-line-details", s.ctx.errorClass) }
-                {...{ ...this.baseHtmlProps(), ...EntityBase.entityHtmlProps(s.ctx.value), ...s.formGroupHtmlProps}}>
+                {...{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes}}>
                 <legend>
                     <div>
                         <span>{s.labelText}</span>

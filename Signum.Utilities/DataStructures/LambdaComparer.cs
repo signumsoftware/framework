@@ -98,5 +98,37 @@ namespace Signum.Utilities.DataStructures
                 return this.Compare((T)x, (T)y);
             }
         }
+
+        public static IEqualityComparer<T> AndAlso<T>(this IEqualityComparer<T> comparer1, IEqualityComparer<T> comparer2)
+        {
+            return new CombineEqualityComparer<T>(comparer1, comparer2);
+        }
+
+        public class CombineEqualityComparer<T> : IEqualityComparer<T>, IEqualityComparer
+        {
+            private IEqualityComparer<T> comparer1;
+            private IEqualityComparer<T> comparer2;
+
+            public CombineEqualityComparer(IEqualityComparer<T> comparer1, IEqualityComparer<T> comparer2)
+            {
+                this.comparer1 = comparer1;
+                this.comparer2 = comparer2;
+            }
+           
+            public bool Equals(T x, T y)
+            {
+                return comparer1.Equals(x, y) && comparer2.Equals(x,y);
+            }
+
+            public new bool Equals(object x, object y) => this.Equals((T)x, (T)y);
+
+            public int GetHashCode(T obj)
+            {
+                return comparer1.GetHashCode(obj) ^ comparer2.GetHashCode(obj);
+            }
+
+            public int GetHashCode(object obj) => this.GetHashCode((T)obj);
+            
+        }
     }
 }

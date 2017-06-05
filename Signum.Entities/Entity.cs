@@ -38,7 +38,7 @@ namespace Signum.Entities
                     throw new InvalidOperationException("{0} is new and has no Id".FormatWith(this.GetType().Name));
                 return id.Value;
             }
-            internal set { id = value; }
+            internal set { id = value; } //Use SetId method to change the Id
         }
 
         [HiddenProperty]
@@ -102,7 +102,7 @@ namespace Signum.Entities
             return false;
         }
 
-        public virtual Dictionary<Guid, Dictionary<string, string>> EntityIntegrityCheck()
+        public virtual Dictionary<Guid, IntegrityCheck> EntityIntegrityCheck()
         {
             using (Mixins.OfType<CorruptMixin>().Any(c => c.Corrupt) ? Corruption.AllowScope() : null)
             {
@@ -110,7 +110,7 @@ namespace Signum.Entities
             }
         }
 
-        internal virtual Dictionary<Guid, Dictionary<string, string>> EntityIntegrityCheckBase()
+        internal virtual Dictionary<Guid, IntegrityCheck> EntityIntegrityCheckBase()
         {
             using (HeavyProfiler.LogNoStackTrace("EntityIntegrityCheckBase", () => GetType().Name))
                 return GraphExplorer.EntityIntegrityCheck(GraphExplorer.FromRootEntity(this));
@@ -238,13 +238,19 @@ namespace Signum.Entities
         public static T SetReadonly<T, V>(this T ident, Expression<Func<T, V>> readonlyProperty, V value)
              where T : ModifiableEntity
         {
+            return SetReadonly(ident, readonlyProperty, value, true);
+        }
+
+        public static T SetReadonly<T, V>(this T ident, Expression<Func<T, V>> readonlyProperty, V value, bool setSelfModified)
+             where T : ModifiableEntity
+        {
             var pi = ReflectionTools.BasePropertyInfo(readonlyProperty);
 
             Action<T, V> setter = ReadonlySetterCache<T>.Setter<V>(pi);
 
             setter(ident, value);
-
-            ident.SetSelfModified();
+            if (setSelfModified)
+                ident.SetSelfModified();
 
             return ident;
         }

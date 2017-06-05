@@ -282,9 +282,9 @@ namespace Signum.Test.Environment
         public IAuthorEntity Author { get; set; }
 
         [NotNullable, PreserveOrder]
-        public MList<SongEntity> Songs { get; set; } = new MList<SongEntity>();
+        public MList<SongEmbedded> Songs { get; set; } = new MList<SongEmbedded>();
 
-        public SongEntity BonusTrack { get; set; }
+        public SongEmbedded BonusTrack { get; set; }
 
         public LabelEntity Label { get; set; }
 
@@ -325,7 +325,7 @@ namespace Signum.Test.Environment
     }
 
     [Serializable]
-    public class SongEntity : EmbeddedEntity
+    public class SongEmbedded : EmbeddedEntity
     {
         [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
@@ -346,7 +346,7 @@ namespace Signum.Test.Environment
 
         public int Index { get; set; }
 
-        static Expression<Func<SongEntity, string>> ToStringExpression = a => a.Name;
+        static Expression<Func<SongEmbedded, string>> ToStringExpression = a => a.Name;
         [ExpressionField]
         public override string ToString()
         {
@@ -369,7 +369,7 @@ namespace Signum.Test.Environment
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class ConfigEntity : Entity
     {
-        public EmbeddedConfigEntity EmbeddedConfig { get; set; }
+        public EmbeddedConfigEmbedded EmbeddedConfig { get; set; }
     }
 
     [AutoInit]
@@ -378,8 +378,10 @@ namespace Signum.Test.Environment
         public static ExecuteSymbol<ConfigEntity> Save;
     }
 
-    public class EmbeddedConfigEntity : EmbeddedEntity
+    public class EmbeddedConfigEmbedded : EmbeddedEntity
     {
+        public Lite<LabelEntity> DefaultLabel { get; set; }
+
         [NotNullable]
         [NotNullValidator, NoRepeatValidator]
         public MList<Lite<GrammyAwardEntity>> Awards { get; set; } = new MList<Lite<GrammyAwardEntity>>();

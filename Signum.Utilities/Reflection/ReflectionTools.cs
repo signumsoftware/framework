@@ -721,6 +721,17 @@ namespace Signum.Utilities.Reflection
                     if (conv != null && conv.CanConvertTo(type))
                         return conv.ConvertTo(value, type);
 
+                    if(type != typeof(string) && value is IEnumerable && typeof(IEnumerable).IsAssignableFrom(type))
+                    {
+                        var colType = type.IsInstantiationOf(typeof(IEnumerable<>)) ? typeof(List<>).MakeGenericType(type.GetGenericArguments()) : type;
+                        IList col = (IList)Activator.CreateInstance(colType);
+                        foreach (var item in value as IEnumerable)
+                        {
+                            col.Add(item);
+                        }
+                        return col;
+                    }
+
                     return Convert.ChangeType(value, utype);
                 }
                   

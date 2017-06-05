@@ -17,7 +17,7 @@ namespace Signum.Utilities.NaturalLanguage
             {"ex", "exes"}, //index -> indexes
             {"f", "ves"}, //wolf -> wolves 
             {"fe", "ves"}, //wolf -> wolves 
-            {"ieu", "ieus milieu"}, //milieu-> mileus
+            {"ieu", "ieus"}, //milieu-> mileus
             {"is", "is"}, //basis -> basis 
             {"ix", "ixes"}, //matrix -> matrixes
             {"nx", "nxes"}, //phalanx -> phalanxes 
@@ -25,6 +25,10 @@ namespace Signum.Utilities.NaturalLanguage
             {"sh", "shes"}, //wish -> wishes 
             {"us",  "us"},// genus -> us 
             {"x",  "xes"},// box -> boxes 
+            {"ey", "eys" }, // key -> keys
+            {"ay", "ays" }, // play -> plays
+            {"oy", "oys" }, // boy -> boys
+            {"uy", "uys" }, // guy -> guys
             {"y", "ies"}, //ferry -> ferries 
         };
 

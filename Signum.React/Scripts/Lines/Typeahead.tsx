@@ -12,7 +12,7 @@ export interface TypeaheadProps {
     minLength?: number;
     renderList?: (typeAhead: Typeahead) => React.ReactNode;
     renderItem?: (item: any, query: string) => React.ReactNode;
-    onSelect?: (item: any, e: React.SyntheticEvent<any>) => string | null;
+    onSelect?: (item: any, e: React.KeyboardEvent<any> | React.MouseEvent<any>) => string | null;
     scrollHeight?: number;
     spanAttrs?: React.HTMLAttributes<HTMLSpanElement>;
     inputAttrs?: React.HTMLAttributes<HTMLInputElement>;
@@ -104,7 +104,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         })).done();
     }
 
-    select(e: React.SyntheticEvent<any>): boolean {        
+    select(e: React.KeyboardEvent<any> | React.MouseEvent<any>): boolean {        
         if (this.state.items!.length == 0)
             return false;
 
@@ -150,7 +150,8 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     }
 
     handleKeyDown = (e: React.KeyboardEvent<any>) => {
-        if (!this.state.shown) return;
+        if (!this.state.shown)
+            return;
 
         switch (e.keyCode) {
             case 9: // tab
@@ -210,21 +211,26 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     }
 
 
-    handleMenuClick = (e: React.MouseEvent<any>) => {
+    handleMenuClick = (e: React.MouseEvent<any>, index: number) => {
         e.preventDefault();
-        if (this.select(e))
-            this.input.focus();
-    }
-
-    mouseover = true;
-    handleElementMouseEnter = (event: React.MouseEvent<any>) => {
-        this.mouseover = true;
+        e.persist();
         this.setState({
-            selectedIndex: parseInt((event.currentTarget as HTMLInputElement).getAttribute("data-index") !)
+            selectedIndex: index
+        }, () => {
+            if (this.select(e))
+                this.input.focus()
         });
     }
 
-    handleElementMouseLeave = (event: React.MouseEvent<any>) => {
+    mouseover = true;
+    handleElementMouseEnter = (event: React.MouseEvent<any>, index: number) => {
+        this.mouseover = true;
+        this.setState({
+            selectedIndex: index
+        });
+    }
+
+    handleElementMouseLeave = (event: React.MouseEvent<any>, index: number) => {
         this.mouseover = false;
         this.setState({ selectedIndex: undefined });
         if (!this.focused && this.state.shown)
@@ -280,11 +286,11 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         return (<ul className="typeahead dropdown-menu" ref={this.handlePopupLoaded}>
             {
                 !this.state.items!.length ? <li className="no-results"><a><small>{this.props.noResultsMessage}</small></a></li> :
-                    this.state.items!.map((item, i) => <li key={i} className={i == this.state.selectedIndex ? "active" : undefined} data-index={i}
-                        onMouseEnter={this.handleElementMouseEnter}
-                        onMouseLeave={this.handleElementMouseLeave}
+                    this.state.items!.map((item, i) => <li key={i} className={i == this.state.selectedIndex ? "active" : undefined}
+                        onMouseEnter={e => this.handleElementMouseEnter(e, i)}
+                        onMouseLeave={e => this.handleElementMouseLeave(e, i)}
                         {...this.props.liAttrs && this.props.liAttrs(item) }>
-                        <a href="#" onClick={this.handleMenuClick}>{this.props.renderItem!(item, this.state.query!)}</a>
+                        <a className="sf-pointer" onMouseUp={e => this.handleMenuClick(e, i)}>{this.props.renderItem!(item, this.state.query!)}</a>
                     </li>)
             }
         </ul>);

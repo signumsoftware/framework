@@ -15,6 +15,11 @@ export interface CountOptionsParsed {
     filterOptions: FilterOptionParsed; 
 }
 
+export interface ModalFindOptions {
+    title?: string;
+    useDefaultBehaviour?: boolean;
+}
+
 export interface FindOptions {
     queryName: PseudoType | QueryKey;
     parentColumn?: string;
@@ -24,7 +29,7 @@ export interface FindOptions {
     orderOptions?: OrderOption[];
     columnOptionsMode?: ColumnOptionsMode;
     columnOptions?: ColumnOption[];
-    pagination?: Pagination
+    pagination?: Pagination,
 
     searchOnLoad?: boolean;
     showHeader?: boolean;
@@ -188,6 +193,7 @@ export interface ColumnRequest {
 export interface QueryEntitiesRequest {
     queryKey: string;
     filters: FilterRequest[];
+    orders: OrderRequest[];
     count: number;
 }
 

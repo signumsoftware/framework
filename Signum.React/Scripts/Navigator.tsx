@@ -1,6 +1,6 @@
 ﻿import * as React from "react"
-import * as HistoryModule from "history"
-import { Router, Route, Redirect, IndexRoute } from "react-router"
+import * as H from "history"
+import { Router, Route, Redirect, RouterChildContext, RouteProps, Switch, match, matchPath } from "react-router"
 import { Dic, } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
@@ -11,23 +11,40 @@ import { TypeContext } from './TypeContext';
 import * as Finder from './Finder';
 import { needsCanExecute } from './Operations/EntityOperations';
 import * as Operations from './Operations';
-import ModalFrame from './Frames/ModalFrame';
+import FrameModal from './Frames/FrameModal';
 import { ViewReplacer } from './Frames/ReactVisitor'
 import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './Lines/AutocompleteConfig'
 import { FindOptions } from './FindOptions'
+import { ImportRoute } from "./AsyncImport";
+import * as AppRelativeRoutes from "./AppRelativeRoutes";
 
 
 Dic.skipClasses.push(React.Component);
-
 
 export let currentUser: IUserEntity | undefined;
 export function setCurrentUser(user: IUserEntity | undefined) {
     currentUser = user;
 }
 
-export let currentHistory: HistoryModule.History;
-export function setCurrentHistory(history: HistoryModule.History) {
-    currentHistory = history;
+export let history: H.History;
+export function setCurrentHistory(h: H.History) {
+    history = h;
+}
+
+export let setTitle: (pageTitle?: string) => void;
+export function setTitleFunction(titleFunction: (pageTitle?: string) => void) {
+    setTitle = titleFunction;
+}
+
+export function createAppRelativeHistory(): H.History {
+    var h = H.createBrowserHistory({});
+    AppRelativeRoutes.useAppRelativeBasename(h);
+    AppRelativeRoutes.useAppRelativeComputeMatch(Route);
+    AppRelativeRoutes.useAppRelativeComputeMatch(ImportRoute as any);
+    AppRelativeRoutes.useAppRelativeSwitch(Switch);
+    setCurrentHistory(h);
+    return h;
+
 }
 
 export let resetUI: () => void = () => { };
@@ -41,8 +58,8 @@ export namespace Expander {
 }
 
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<Route path="view/:type/:id" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(undefined, Comp.default))} ></Route>);
-    options.routes.push(<Route path="create/:type" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(undefined, Comp.default))} ></Route>);
+    options.routes.push(<ImportRoute path="~/view/:type/:id" onImportModule={() => _import("./Frames/FramePage")} />);
+    options.routes.push(<ImportRoute path="~/create/:type" onImportModule={() => _import("./Frames/FramePage")} />);
 }
 
 export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined) {
@@ -96,12 +113,12 @@ export function navigateRoute(typeOrEntity: Entity | Lite<Entity> | PseudoType, 
 }
 
 export function navigateRouteDefault(typeName: string, id: number | string) {
-    return currentHistory.createHref("~/view/" + typeName.firstLower() + "/" + id);
+    return toAbsoluteUrl("~/view/" + typeName.firstLower() + "/" + id);
 
 }
 
 export function createRoute(type: PseudoType) {
-    return currentHistory.createHref("~/create/" + getTypeName(type));
+    return toAbsoluteUrl("~/create/" + getTypeName(type));
 }
 
 export const entitySettings: { [type: string]: EntitySettings<ModifiableEntity> } = {};
@@ -155,7 +172,7 @@ export class DynamicComponentViewDispatcher implements ViewDispatcher {
         const settings = getSettings(entity.Type) as EntitySettings<ModifiableEntity>;
 
         if (!settings || !settings.getViewPromise)
-            return new ViewPromise<ModifiableEntity>(resolve => require(['./Lines/DynamicComponent'], resolve));
+            return new ViewPromise<ModifiableEntity>(_import('./Lines/DynamicComponent'));
 
         return settings.getViewPromise(entity).applyViewOverrides(settings);
     }
@@ -412,7 +429,7 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
     var config: AutocompleteConfig<any> | null = null;
 
     if (findOptions)
-        config = new FindOptionsAutocompleteConfig(findOptions, 5, false);
+        config = new FindOptionsAutocompleteConfig(findOptions);
 
     const types = getTypeInfos(type);
     var delay: number | undefined;
@@ -454,6 +471,7 @@ export interface ViewOptions {
     requiresSaveOperation?: boolean;
     avoidPromptLooseChange?: boolean;
     viewPromise?: ViewPromise<ModifiableEntity>;
+    getViewPromise?: (entity: ModifiableEntity) => ViewPromise<ModifiableEntity>;
     extraComponentProps?: {};
 }
 
@@ -474,17 +492,15 @@ export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<
 }
 
 export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions) {
-    return new Promise<ModifiableEntity>((resolve, reject) => {
-        require(["./Frames/ModalFrame"], function (NP: { default: typeof ModalFrame }) {
-            NP.default.openView(entityOrPack, viewOptions || {}).then(resolve, reject);
-        });
-    });
+    return _import<{ default: typeof FrameModal }>("./Frames/FrameModal")
+        .then(NP => NP.default.openView(entityOrPack, viewOptions || {}));
 }
 
 export interface NavigateOptions {
     readOnly?: boolean;
     avoidPromptLooseChange?: boolean;
     viewPromise?: ViewPromise<ModifiableEntity>;
+    getViewPromise?: (entity: ModifiableEntity) => ViewPromise<ModifiableEntity>;
     extraComponentProps?: {};
 }
 
@@ -501,11 +517,8 @@ export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityP
 }
 
 export function navigateDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        require(["./Frames/ModalFrame"], function (NP: { default: typeof ModalFrame }) {
-            NP.default.openNavigate(entityOrPack, navigateOptions || {}).then(resolve, reject);
-        });
-    })
+    return _import<{ default: typeof FrameModal }>("./Frames/FrameModal")
+        .then(NP => NP.default.openNavigate(entityOrPack, navigateOptions || {}));
 }
 
 export function createInNewTab(pack: EntityPack<ModifiableEntity>) {
@@ -527,10 +540,18 @@ export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.Mouse
     }
 }
 
+export function pushOrOpen(path: string, e: React.MouseEvent<any> | React.KeyboardEvent<any>) {
+    e.preventDefault();
+    if (e.ctrlKey || (e as React.MouseEvent<any>).button == 1)
+        window.open(toAbsoluteUrl(path));
+    else
+        history.push(path);
+}
+
 
 export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>): Promise<EntityPack<ModifiableEntity>> {
     if ((entityOrEntityPack as EntityPack<ModifiableEntity>).canExecute)
-        return Promise.resolve(entityOrEntityPack);
+        return Promise.resolve(entityOrEntityPack as EntityPack<ModifiableEntity>);
 
     const entity = (entityOrEntityPack as ModifiableEntity).Type ?
         entityOrEntityPack as ModifiableEntity :
@@ -556,7 +577,7 @@ export module API {
         const realLites = lites.filter(a => a.toStr == undefined && a.entity == undefined);
 
         if (!realLites.length)
-            return Promise.resolve<void>();
+            return Promise.resolve();
 
         return ajaxPost<string[]>({ url: "~/api/entityToStrings" }, realLites).then(strs => {
             realLites.forEach((l, i) => l.toStr = strs[i]);
@@ -564,7 +585,7 @@ export module API {
     }
 
     export function fetchAll<T extends Entity>(type: Type<T>): Promise<Array<T>> {
-        return ajaxGet<Array<Entity>>({ url: "~/api/fetchAll/" + type.typeName });
+        return ajaxGet<Array<T>>({ url: "~/api/fetchAll/" + type.typeName });
     }
 
 
@@ -583,7 +604,7 @@ export module API {
         if (lite.id == null)
             throw new Error("Lite has no Id");
 
-        return fetchEntity(lite.EntityType, lite.id);
+        return fetchEntity(lite.EntityType, lite.id) as Promise<T>;
     }
 
     export function fetchEntity<T extends Entity>(type: Type<T>, id: any): Promise<T>;
@@ -601,9 +622,9 @@ export module API {
     export function fetchEntityPack<T extends Entity>(type: Type<T>, id: number | string): Promise<EntityPack<T>>;
     export function fetchEntityPack(type: PseudoType, id: number | string): Promise<EntityPack<Entity>>;
     export function fetchEntityPack(typeOrLite: PseudoType | Lite<any>, id?: any): Promise<EntityPack<Entity>> {
-
+        
         const typeName = (typeOrLite as Lite<any>).EntityType || getTypeName(typeOrLite as PseudoType);
-        let idVal = (typeOrLite as Lite<any>).id || id;
+        let idVal = (typeOrLite as Lite<any>).id != null ? (typeOrLite as Lite<any>).id : id;
 
         return ajaxGet<EntityPack<Entity>>({ url: "~/api/entityPack/" + typeName + "/" + idVal });
     }
@@ -611,7 +632,7 @@ export module API {
 
     export function fetchCanExecute<T extends Entity>(entity: T): Promise<EntityPack<T>> {
 
-        return ajaxPost<EntityPack<Entity>>({ url: "~/api/entityPackEntity" }, entity);
+        return ajaxPost<EntityPack<T>>({ url: "~/api/entityPackEntity" }, entity);
     }
 
     export function validateEntity(entity: ModifiableEntity): Promise<void> {
@@ -632,7 +653,7 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
     isReadOnly?: boolean;
     avoidPopup?: boolean;
     autocomplete?: AutocompleteConfig<T>;
-    autocompleteDelay?: number;
+    getViewPromise?: (entity: T) => ViewPromise<T>;
     onNavigateRoute?: (typeName: string, id: string | number) => string;
     onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
     onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
@@ -667,10 +688,10 @@ export class EntitySettings<T extends ModifiableEntity> {
         this.viewOverrides.push(override);
     }
 
-    constructor(type: Type<T>, getViewPromise?: (entity: T) => ViewPromise<any>, options?: EntitySettingsOptions<T>) {
+    constructor(type: Type<T>, getViewModule?: (entity: T) => Promise<ViewModule<any>>, options?: EntitySettingsOptions<T>) {
 
         this.type = type;
-        this.getViewPromise = getViewPromise;
+        this.getViewPromise = getViewModule && (entity => new ViewPromise(getViewModule(entity)));
 
         Dic.assign(this, options);
     }
@@ -681,9 +702,9 @@ export type ViewModule<T extends ModifiableEntity> = { default: React.ComponentC
 export class ViewPromise<T extends ModifiableEntity> {
     promise: Promise<(ctx: TypeContext<T>) => React.ReactElement<any>>;
 
-    constructor(callback?: (loadModule: (module: ViewModule<T>) => void) => void) {
-        if (callback)
-            this.promise = new Promise<ViewModule<T>>(callback)
+    constructor(promise?: Promise<ViewModule<T>>) {
+        if (promise)
+            this.promise = promise
                 .then(mod => {
                     return (ctx: TypeContext<T>) => React.createElement(mod.default, { ctx });
                 });
@@ -787,34 +808,15 @@ String.prototype.formatHtml = function (this: string) {
     return React.createElement("span", undefined, ...result);
 };
 
-export function fixUrl(url: string): string {
-    if (url && url.startsWith("~/"))
-        return window.__baseUrl + url.after("~/");
+export function toAbsoluteUrl(appRelativeUrl: string): string {
+    if (appRelativeUrl && appRelativeUrl.startsWith("~/"))
+        return window.__baseUrl + appRelativeUrl.after("~/");
 
-    if (url.startsWith(window.__baseUrl) || url.startsWith("http"))
-        return url;
+    if (appRelativeUrl.startsWith(window.__baseUrl) || appRelativeUrl.startsWith("http"))
+        return appRelativeUrl;
 
-    console.warn(url);
-    return url;
-}
-
-function fixBaseName<T>(baseFunction: (location?: HistoryModule.LocationDescriptorObject | string) => T): (location?: HistoryModule.LocationDescriptorObject | string) => T {
-    return (location) => {
-        if (typeof location === "string") {
-            return baseFunction(fixUrl(location));
-        } else {
-            location!.pathname = fixUrl(location!.pathname!);
-            return baseFunction(location);
-        }
-    };
-}
-
-export function useAppRelativeBasename(history: HistoryModule.History) {
-    history.push = fixBaseName(history.push);
-    history.replace = fixBaseName(history.replace);
-    history.createHref = fixBaseName(history.createHref);
-    history.createPath = fixBaseName(history.createPath);
-    history.createLocation = fixBaseName(history.createLocation);
+    console.warn(appRelativeUrl);
+    return appRelativeUrl;
 }
 
 export function tryConvert(value: any, type: TypeReference): Promise<any> | undefined {
@@ -833,7 +835,9 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> | unde
         return undefined;
     }
 
-    if (getTypeInfo(type.name) && getTypeInfo(type.name).kind == "Entity") {
+    const ti = getTypeInfo(type.name); 
+
+    if (ti && ti.kind == "Entity") {
 
         if (isLite(value))
             return API.fetchAndForget(value);
@@ -844,7 +848,7 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> | unde
         return undefined;
     }
 
-    if (type.name == "string" || type.name == "Guid" || type.name == "Date") {
+    if (type.name == "string" || type.name == "Guid" || type.name == "Date" || ti && ti.kind == "Enum") {
         if (typeof value === "string")
             return Promise.resolve(value);
 

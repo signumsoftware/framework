@@ -266,7 +266,7 @@ export class QuickLinkLink extends QuickLink {
     toMenuItem(key: any) {
 
         return (
-            <MenuItem data-name={this.name} className="sf-quick-link" key={key} onClick={this.handleClick}>
+            <MenuItem data-name={this.name} className="sf-quick-link" key={key} onMouseUp={this.handleClick}>
                 {this.renderIcon()}
                 {this.text}
             </MenuItem>
@@ -274,10 +274,7 @@ export class QuickLinkLink extends QuickLink {
     }
 
     handleClick = (e: React.MouseEvent<any>) => {
-        if (e.ctrlKey || e.button == 1)
-            window.open(Navigator.currentHistory.createHref(this.url));
-        else
-            Navigator.currentHistory.push(this.url);
+        Navigator.pushOrOpen(this.url, e);
     }
 }
 

@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
 import { classes, Dic } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
@@ -74,7 +73,7 @@ export class EnumCheckboxList extends LineBase<EnumCheckboxListProps, EnumCheckb
     renderInternal() {
        
         return (
-            <fieldset className={classes("SF-checkbox-list", this.state.ctx.errorClass)} {...this.baseHtmlProps() } {...this.state.formGroupHtmlProps}>
+            <fieldset className={classes("SF-checkbox-list", this.state.ctx.errorClass)} {...this.baseHtmlAttributes() } {...this.state.formGroupHtmlAttributes}>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>

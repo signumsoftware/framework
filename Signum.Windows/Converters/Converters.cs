@@ -123,8 +123,8 @@ namespace Signum.Windows
             (QueryToken token) => token == null ? null : QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(token.Type)));
 
         public static readonly IValueConverter Color = ConverterFactory.New(
-            (ColorEntity c) => c == null ? null : (Color?)System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B),
-            (Color? c) => c == null ? null : ColorEntity.FromARGB(c.Value.A, c.Value.R, c.Value.G, c.Value.B));
+            (ColorEmbedded c) => c == null ? null : (Color?)System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B),
+            (Color? c) => c == null ? null : ColorEmbedded.FromARGB(c.Value.A, c.Value.R, c.Value.G, c.Value.B));
 
         public static readonly IMultiValueConverter And = ConverterFactory.New(
             (bool a, bool b) => a && b);

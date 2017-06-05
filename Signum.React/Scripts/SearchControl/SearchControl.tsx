@@ -7,14 +7,13 @@ import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter } from '../Finder'
 import {
     ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOptionParsed, FilterOption, QueryDescription, ColumnOption, ColumnOptionsMode, ColumnDescription,
-    toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, QueryRequest
+    toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, QueryRequest, FilterOperation
 } from '../FindOptions'
-import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, is, isEntity, isLite, toLite } from '../Signum.Entities'
+import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, is, isEntity, isLite, toLite, ModifiableEntity } from '../Signum.Entities'
 import { getTypeInfos, getTypeInfo, TypeReference, IsByAll, getQueryKey, TypeInfo, EntityData, QueryKey, PseudoType } from '../Reflection'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import PaginationSelector from './PaginationSelector'
-import FilterBuilder from './FilterBuilder'
 import ColumnEditor from './ColumnEditor'
 import MultipliedMessage from './MultipliedMessage'
 import { renderContextualItems, ContextualItemsContext, MarkedRowsDictionary, MarkedRow } from './ContextualItems'
@@ -40,20 +39,20 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     onSelectionChanged?: (entity: Lite<Entity>[]) => void;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
     onResult?: (table: ResultTable) => void;
+    onSearch?: (fo: FindOptionsParsed) => void;
     hideFullScreenButton?: boolean;
     showBarExtension?: boolean;
     largeToolbarButtons?: boolean; 
     throwIfNotFindable?: boolean;
     extraButtons?: (searchControl: SearchControlLoaded) => React.ReactNode
+    onCreate?: () => Promise<void>;
+    getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
 }
 
 export interface SearchControlState {
     findOptions?: FindOptionsParsed;
     queryDescription?: QueryDescription;
 }
-
-
-
 export default class SearchControl extends React.Component<SearchControlProps, SearchControlState> {
 
     static defaultProps = {
@@ -65,16 +64,21 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         super(props);
         this.state = {};
     }
-
-
-
+    
     componentWillMount() {
         this.initialLoad(this.props.findOptions);
     }
 
     componentWillReceiveProps(newProps: SearchControlProps) {
-        if (Finder.findOptionsPath(this.props.findOptions) == Finder.findOptionsPath(newProps.findOptions))
+        var path = Finder.findOptionsPath(newProps.findOptions);
+        if (path == Finder.findOptionsPath(this.props.findOptions))
             return;
+
+        if (this.state.findOptions && this.state.queryDescription) {
+            var fo = Finder.toFindOptions(this.state.findOptions, this.state.queryDescription);
+            if (path == Finder.findOptionsPath(fo))
+                return;
+        }
 
         this.state = {};
         this.forceUpdate();
@@ -126,15 +130,18 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             entityFormatter={this.props.entityFormatter}
             showContextMenu={this.props.showContextMenu}
             onSelectionChanged={this.props.onSelectionChanged}
-            onFiltersChanged= {this.props.onFiltersChanged}
+            onFiltersChanged={this.props.onFiltersChanged}
+            onSearch={this.props.onSearch}
             onResult={this.props.onResult}
             hideFullScreenButton={this.props.hideFullScreenButton}
             showBarExtension={this.props.showBarExtension}
             extraButtons={this.props.extraButtons}
-            largeToolbarButtons={this.props.largeToolbarButtons} 
+            largeToolbarButtons={this.props.largeToolbarButtons}
             findOptions={fo}
             queryDescription={this.state.queryDescription!}
-            querySettings={Finder.getQuerySettings(fo.queryKey)}
+            querySettings={Finder.getSettings(fo.queryKey)}
+            onCreate={this.props.onCreate}
+            getViewPromise={this.props.getViewPromise}
             />
     }
 }

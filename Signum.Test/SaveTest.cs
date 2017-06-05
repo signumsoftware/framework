@@ -110,7 +110,7 @@ namespace Signum.Test
                     Name = "System Greatest hits",
                     Author = new ArtistEntity { Name = ".Net Framework" },
                     Year = 2001,
-                    Songs = types.Select(t => new SongEntity() { Name = t.Name }).ToMList(),
+                    Songs = types.Select(t => new SongEmbedded() { Name = t.Name }).ToMList(),
                     State = AlbumState.Saved
                 }.Save();
 
@@ -147,11 +147,11 @@ namespace Signum.Test
                     Name = "Test album",
                     Author = artist,
                     Year = 2000,
-                    Songs = { new SongEntity { Name = "Song 1" } },
+                    Songs = { new SongEmbedded { Name = "Song 1" } },
                     State = AlbumState.Saved,
                 };
 
-                var innerList = ((IMListPrivate<SongEntity>)album.Songs).InnerList;
+                var innerList = ((IMListPrivate<SongEmbedded>)album.Songs).InnerList;
 
                 Assert.IsNull(innerList[0].RowId);
                 //Insert and row-id is set
@@ -160,7 +160,7 @@ namespace Signum.Test
                 Assert.IsTrue(innerList[0].RowId > maxRowId); 
 
 
-                album.Songs.Add(new SongEntity { Name = "Song 2" });
+                album.Songs.Add(new SongEmbedded { Name = "Song 2" });
 
                 Assert.IsNull(innerList[1].RowId);
 
@@ -178,7 +178,7 @@ namespace Signum.Test
                     var album2 = album.ToLite().Retrieve();
 
                     Assert.IsTrue(album.Songs.Count == album2.Songs.Count);
-                    Assert.IsTrue(innerList[0].RowId == ((IMListPrivate<SongEntity>)album2.Songs).InnerList[0].RowId);
+                    Assert.IsTrue(innerList[0].RowId == ((IMListPrivate<SongEmbedded>)album2.Songs).InnerList[0].RowId);
                     Assert.IsTrue(!album.MListElements(a => a.Songs).Any(mle => mle.RowId == song.RowId));
                 }
 
@@ -190,7 +190,7 @@ namespace Signum.Test
                     var album2 = album.ToLite().Retrieve();
                     
                     Assert.IsTrue(album.Songs.Count == album2.Songs.Count);
-                    Assert.IsTrue(innerList[0].RowId == ((IMListPrivate<SongEntity>)album2.Songs).InnerList[0].RowId);
+                    Assert.IsTrue(innerList[0].RowId == ((IMListPrivate<SongEmbedded>)album2.Songs).InnerList[0].RowId);
                     Assert.IsTrue(album.Songs[0].Name == album2.Songs[0].Name);
                     Assert.IsTrue(!album.MListElements(a => a.Songs).Any(mle => mle.RowId == song.RowId));
                 }
@@ -213,7 +213,7 @@ namespace Signum.Test
                     Name = "Test album",
                     Author = artist,
                     Year = 2000,
-                    Songs = { new SongEntity { Name = "Song 0" }, new SongEntity { Name = "Song 1" }, new SongEntity { Name = "Song 2" }, },
+                    Songs = { new SongEmbedded { Name = "Song 0" }, new SongEmbedded { Name = "Song 1" }, new SongEmbedded { Name = "Song 2" }, },
                     State = AlbumState.Saved,
                 };
 
@@ -277,7 +277,7 @@ namespace Signum.Test
                     Name = "System Greatest hits {0}".FormatWith(i),
                     Author = i < authors.Count ? authors[i] : new ArtistEntity { Name = ".Net Framework" },
                     Year = 2001,
-                    Songs =  { new SongEntity { Name = "Compilation {0}".FormatWith(i) }},
+                    Songs =  { new SongEmbedded { Name = "Compilation {0}".FormatWith(i) }},
                     State = AlbumState.Saved
                 }).ToList();
 
@@ -328,7 +328,7 @@ namespace Signum.Test
             using (Transaction tr = new Transaction())
             {
                 var max = Database.Query<AlbumEntity>().Select(a => a.Id).ToList().Max();
-                var count = Database.MListQuery<AlbumEntity, SongEntity>(a => a.Songs).Count();
+                var count = Database.MListQuery<AlbumEntity, SongEmbedded>(a => a.Songs).Count();
 
                 var list = Database.Query<AlbumEntity>().ToList().Select(a => new AlbumEntity
                 {
@@ -336,7 +336,7 @@ namespace Signum.Test
                     Author = a.Author,
                     Label = a.Label,
                     State = a.State,
-                    Songs = a.Songs.Select(s => new SongEntity
+                    Songs = a.Songs.Select(s => new SongEmbedded
                     {
                         Name = s.Name,
                         Seconds = s.Seconds,
@@ -345,11 +345,11 @@ namespace Signum.Test
 
                 list.BulkInsertQueryIds(keySelector: a => a.Name, isNewPredicate: a => a.Id > max);
 
-                Assert.AreNotEqual(count, Database.MListQuery<AlbumEntity, SongEntity>(a => a.Songs).Count());
+                Assert.AreNotEqual(count, Database.MListQuery<AlbumEntity, SongEmbedded>(a => a.Songs).Count());
 
                 Database.Query<AlbumEntity>().Where(a => a.Id > max).UnsafeDelete();
 
-                Assert.AreEqual(count, Database.MListQuery<AlbumEntity, SongEntity>(a => a.Songs).Count());
+                Assert.AreEqual(count, Database.MListQuery<AlbumEntity, SongEmbedded>(a => a.Songs).Count());
 
                 tr.Commit();
             }
@@ -387,14 +387,14 @@ namespace Signum.Test
             {
                 var max = Database.MListQuery((AlbumEntity a) => a.Songs).Max(a => a.RowId);
 
-                var list = Database.Query<AlbumEntity>().Select(a => new MListElement<AlbumEntity, SongEntity>
+                var list = Database.Query<AlbumEntity>().Select(a => new MListElement<AlbumEntity, SongEmbedded>
                 {
                     Parent = a,
-                    Element = new SongEntity { Duration = TimeSpan.FromMinutes(1), Name = "Bonus - " + a.Name },
+                    Element = new SongEmbedded { Duration = TimeSpan.FromMinutes(1), Name = "Bonus - " + a.Name },
                     Order = 100,
                 }).ToList();
 
-                BulkInserter.BulkInsertMListTable((AlbumEntity a) => a.Songs, list);
+                list.BulkInsertMListTable( a => a.Songs);
 
                 Database.MListQuery((AlbumEntity a) => a.Songs).Where(a => a.RowId > max).UnsafeDeleteMList();
 

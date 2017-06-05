@@ -76,7 +76,7 @@ namespace Signum.Engine.DynamicQuery
         object ExecuteQueryValue(QueryValueRequest request);
         Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request);
         ResultTable ExecuteQueryGroup(QueryGroupRequest request);
-        IQueryable<Lite<Entity>> GetEntities(List<Filter> filters);
+        IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request);
     }
 
 
@@ -108,7 +108,7 @@ namespace Signum.Engine.DynamicQuery
         public abstract object ExecuteQueryValue(QueryValueRequest request);
         public abstract Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request);
         public abstract ResultTable ExecuteQueryGroup(QueryGroupRequest request);
-        public abstract IQueryable<Lite<Entity>> GetEntities(List<Filter> filters);
+        public abstract IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request);
 
         protected virtual ColumnDescriptionFactory[] InitializeColumns()
         {

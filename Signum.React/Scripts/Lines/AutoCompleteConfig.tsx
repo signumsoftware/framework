@@ -1,10 +1,9 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
 import { Dic } from '../Globals'
-import { FindOptions, QueryDescription, FilterOptionParsed, FilterRequest } from '../FindOptions'
+import { FindOptions, QueryDescription, FilterOptionParsed, FilterRequest, OrderOptionParsed, OrderRequest } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, getQueryKey } from '../Reflection'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
@@ -15,10 +14,11 @@ import { EntityBase, EntityBaseProps} from './EntityBase'
 export interface AutocompleteConfig<T> {
     getItems: (subStr: string) => Promise<T[]>;
     getItemsDelay?: number;
-    renderItem: (item: T, subStr?: string) => React.ReactNode;
-    renderList?: (typeahead: Typeahead) => React.ReactNode;
-    getEntityFromItem: (item: T) => Lite<Entity> | ModifiableEntity;
-    getItemFromEntity: (entity: Lite<Entity> | ModifiableEntity) => Promise<T>;
+    minLength?: number;
+    renderItem(item: T, subStr?: string) : React.ReactNode;
+    renderList?(typeahead: Typeahead): React.ReactNode;
+    getEntityFromItem(item: T) : Lite<Entity> | ModifiableEntity;
+    getItemFromEntity(entity: Lite<Entity> | ModifiableEntity) : Promise<T>;
 }
 
 export class LiteAutocompleteConfig implements AutocompleteConfig<Lite<Entity>>{
@@ -73,12 +73,13 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<Lite<En
 
     constructor(
         public findOptions: FindOptions,
-        public count: number,
-        public withCustomToString: boolean) {
+        public count: number = 5,
+        public withCustomToString: boolean = false) {
+
+        Finder.expandParentColumn(this.findOptions);
     }
 
     parsedFilters?: FilterOptionParsed[];
-
     getParsedFilters(): Promise<FilterOptionParsed[]> {
         if (this.parsedFilters)
             return Promise.resolve(this.parsedFilters);
@@ -88,14 +89,29 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<Lite<En
             .then(filters => this.parsedFilters = filters);
     }
 
-    getItems = (subStr: string): Promise<Lite<Entity>[]> => {
+    parsedOrders?: OrderOptionParsed[];
+    getParsedOrders(): Promise<OrderOptionParsed[]> {
+        if (this.parsedOrders)
+            return Promise.resolve(this.parsedOrders);
+
+        return Finder.getQueryDescription(this.findOptions.queryName)
+            .then(qd => Finder.parseOrderOptions(this.findOptions.orderOptions || [], qd))
+            .then(orders => this.parsedOrders = orders);
+    }
+
+    getItems(subStr: string): Promise<Lite<Entity>[]> {
         return this.getParsedFilters()
-            .then(filters => Finder.API.findLiteLikeWithFilters({
-                queryKey: getQueryKey(this.findOptions.queryName),
-                filters: filters.map(f => ({ token: f.token!.fullKey, operation: f.operation, value: f.value }) as FilterRequest),
-                count: this.count,
-                subString: subStr
-            }));
+            .then(filters =>
+                this.getParsedOrders().then(orders =>
+                    Finder.API.findLiteLikeWithFilters({
+                        queryKey: getQueryKey(this.findOptions.queryName),
+                        filters: filters.map(f => ({ token: f.token!.fullKey, operation: f.operation, value: f.value }) as FilterRequest),
+                        orders: orders.map(f => ({ token: f.token!.fullKey, orderType: f.orderType }) as OrderRequest),
+                        count: this.count,
+                        subString: subStr
+                    })
+                )
+            );
     }
 
     renderItem(item: Lite<Entity>, subStr: string) {
@@ -118,7 +134,8 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<Lite<En
 
         return Finder.API.findLiteLikeWithFilters({
             queryKey: getQueryKey(this.findOptions.queryName),
-            filters:  [{ token: "Entity.Id", operation: "EqualTo", value: lite.id }],
+            filters: [{ token: "Entity.Id", operation: "EqualTo", value: lite.id }],
+            orders: [],
             count: 1,
             subString: ""
         }).then(lites => {

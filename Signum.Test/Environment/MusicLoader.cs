@@ -55,7 +55,7 @@ namespace Signum.Test.Environment
                 Name = "Siamese Dream",
                 Year = 1993,
                 Author = smashingPumpkins,
-                Songs = { new SongEntity { Name = "Disarm" } },
+                Songs = { new SongEmbedded { Name = "Disarm" } },
                 Label = virgin
             }.Execute(AlbumOperation.Save);
 
@@ -66,11 +66,11 @@ namespace Signum.Test.Environment
                 Author = smashingPumpkins,
                 Songs = 
                 { 
-                    new SongEntity { Name = "Zero", Duration = TimeSpan.FromSeconds(123) }, 
-                    new SongEntity { Name = "1976" }, 
-                    new SongEntity { Name = "Tonight, Tonight", Duration = TimeSpan.FromSeconds(376) } 
+                    new SongEmbedded { Name = "Zero", Duration = TimeSpan.FromSeconds(123) }, 
+                    new SongEmbedded { Name = "1976" }, 
+                    new SongEmbedded { Name = "Tonight, Tonight", Duration = TimeSpan.FromSeconds(376) } 
                 },
-                BonusTrack = new SongEntity { Name = "Jellybelly" },
+                BonusTrack = new SongEmbedded { Name = "Jellybelly" },
                 Label = virgin
             }.Execute(AlbumOperation.Save);
             
@@ -85,8 +85,8 @@ namespace Signum.Test.Environment
                 Name = "Zeitgeist",
                 Year = 2007,
                 Author = smashingPumpkins,
-                Songs = { new SongEntity { Name = "Tarantula" } },
-                BonusTrack = new SongEntity { Name = "1976" },
+                Songs = { new SongEmbedded { Name = "Tarantula" } },
+                BonusTrack = new SongEmbedded { Name = "1976" },
                 Label = wea,
             }.Execute(AlbumOperation.Save);
 
@@ -95,7 +95,7 @@ namespace Signum.Test.Environment
                 Name = "American Gothic",
                 Year = 2008,
                 Author = smashingPumpkins,
-                Songs = { new SongEntity { Name = "The Rose March", Duration = TimeSpan.FromSeconds(276) } },
+                Songs = { new SongEmbedded { Name = "The Rose March", Duration = TimeSpan.FromSeconds(276) } },
                 Label = wea,
             }.Execute(AlbumOperation.Save);
 
@@ -126,8 +126,8 @@ namespace Signum.Test.Environment
                 Name = "Ben",
                 Year = 1972,
                 Author = michael,
-                Songs = { new SongEntity { Name = "Ben" } },
-                BonusTrack = new SongEntity { Name = "Michael" },
+                Songs = { new SongEmbedded { Name = "Ben" } },
+                BonusTrack = new SongEmbedded { Name = "Michael" },
                 Label = universal,
             }.Execute(AlbumOperation.Save);
 
@@ -140,8 +140,8 @@ namespace Signum.Test.Environment
                 Year = 1982,
                 Author = michael,
                 Songs = "Wanna Be Startin' Somethin', Thriller, Beat It"
-                .Split(',').Select(s => new SongEntity { Name = s.Trim() }).ToMList(),
-                BonusTrack = new SongEntity { Name = "Billie Jean" },
+                .Split(',').Select(s => new SongEmbedded { Name = s.Trim() }).ToMList(),
+                BonusTrack = new SongEmbedded { Name = "Billie Jean" },
                 Label = sony
             }.Execute(AlbumOperation.Save);
 
@@ -154,7 +154,7 @@ namespace Signum.Test.Environment
                 Year = 1989,
                 Author = michael,
                 Songs = "Bad, Man in the Mirror, Dirty Diana, Smooth Criminal"
-                .Split(',').Select(s => new SongEntity { Name = s.Trim() }).ToMList(),
+                .Split(',').Select(s => new SongEmbedded { Name = s.Trim() }).ToMList(),
                 Label = mjj
             }.Execute(AlbumOperation.Save);
 
@@ -164,7 +164,7 @@ namespace Signum.Test.Environment
                 Year = 1991,
                 Author = michael,
                 Songs = "Black or White, Who Is It, Give it to Me"
-                .Split(',').Select(s => new SongEntity { Name = s.Trim() }).ToMList(),
+                .Split(',').Select(s => new SongEmbedded { Name = s.Trim() }).ToMList(),
                 Label = mjj
             }.Execute(AlbumOperation.Save);
 
@@ -174,8 +174,8 @@ namespace Signum.Test.Environment
                 Year = 1995,
                 Author = michael,
                 Songs = "Billie Jean, Stranger In Moscow"
-                .Split(',').Select(s => new SongEntity { Name = s.Trim() }).ToMList(),
-                BonusTrack = new SongEntity { Name = "Heal The World" },
+                .Split(',').Select(s => new SongEmbedded { Name = s.Trim() }).ToMList(),
+                BonusTrack = new SongEmbedded { Name = "Heal The World" },
                 Label = mjj
             }.Execute(AlbumOperation.Save);
 
@@ -185,7 +185,7 @@ namespace Signum.Test.Environment
                 Year = 1995,
                 Author = michael,
                 Songs = "Blood on the Dance Floor, Morphine"
-                .Split(',').Select(s => new SongEntity { Name = s.Trim() }).ToMList(),
+                .Split(',').Select(s => new SongEmbedded { Name = s.Trim() }).ToMList(),
                 Label = mjj
             }.Execute(AlbumOperation.Save); ;
 
@@ -209,8 +209,8 @@ namespace Signum.Test.Environment
                 Year = 1999,
                 Author = sigurRos,
                 Songs = "Scefn-g-englar"
-                .Split(',').Select(s => new SongEntity { Name = s.Trim() }).ToMList(),
-                BonusTrack = new SongEntity { Name = "Intro" },
+                .Split(',').Select(s => new SongEmbedded { Name = s.Trim() }).ToMList(),
+                BonusTrack = new SongEmbedded { Name = "Intro" },
                 Label = fatCat,
             }.Execute(AlbumOperation.Save);
 
@@ -222,8 +222,8 @@ namespace Signum.Test.Environment
                 Year = 2005,
                 Author = sigurRos,
                 Songs = "Hoppípolla, Glósóli, Saeglópur"
-                .Split(',').Select(s => new SongEntity { Name = s.Trim() }).ToMList(),
-                BonusTrack = new SongEntity { Name = "Svo hljótt" },
+                .Split(',').Select(s => new SongEmbedded { Name = s.Trim() }).ToMList(),
+                BonusTrack = new SongEmbedded { Name = "Svo hljótt" },
                 Label = emi
             }.Execute(AlbumOperation.Save);
 
@@ -240,7 +240,7 @@ namespace Signum.Test.Environment
 
             new ConfigEntity
             {
-                EmbeddedConfig = new EmbeddedConfigEntity
+                EmbeddedConfig = new EmbeddedConfigEmbedded
                 {
                     Awards = { ga.ToLite() }
                 }

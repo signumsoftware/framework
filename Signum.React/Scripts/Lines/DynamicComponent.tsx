@@ -10,9 +10,9 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
 
     render() {
 
-        const subContexts = this.subContext(this.props.ctx).filter(m => m.propertyRoute.member!.name != "Id");
+        const subContexts = this.subContext(this.props.ctx);
 
-        const components = subContexts.map(ctx => DynamicComponent.appropiateComponent(ctx)).filter(a => !!a).map(a => a!);
+        const components = subContexts.map(ctx => DynamicComponent.getAppropiateComponent(ctx)).filter(a => !!a).map(a => a!);
 
         const result = React.createElement("div", undefined, ...components);
 
@@ -41,9 +41,14 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
         [typeName: string]: (ctx: TypeContext<any>) => React.ReactElement<any> | undefined;
     } = {};
 
-    static appropiateComponent = (ctx: TypeContext<any>): React.ReactElement<any> | undefined => {
+    static getAppropiateComponent(ctx: TypeContext<any>): React.ReactElement<any> | undefined {
+        const mi = ctx.propertyRoute.member!;
+
+        if (mi.name == "Id" || mi.notVisible == true)
+            return undefined;
+
         const tr = ctx.propertyRoute.typeReference();        
-    
+
         const sc = DynamicComponent.specificComponents[tr.name];
         if (sc) {
             const result = sc(ctx);
@@ -57,6 +62,9 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
             tis = []; 
 
         if (tr.isCollection) {
+            if (tr.name == "[ALL]")
+                return <EntityStrip ctx={ctx} />;
+
             if (tr.isEmbedded || tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
                 return <EntityTable ctx={ctx}/>;
             else if (tis.every(t => t.isLowPopulation == true))

@@ -35,9 +35,13 @@ namespace Signum.React.ApiControllers
         {
             var qn = QueryLogic.ToQueryName(request.queryKey);
             var qd = DynamicQueryManager.Current.QueryDescription(qn);
-            var filters = request.filters.Select(a => a.ToFilter(qd, false)).ToList();
 
-            var entitiesQuery = DynamicQueryManager.Current.GetEntities(qn, filters);
+            var entitiesQuery = DynamicQueryManager.Current.GetEntities(new QueryEntitiesRequest
+            {
+                QueryName = qn,
+                Filters = request.filters.EmptyIfNull().Select(a => a.ToFilter(qd, false)).ToList(),
+                Orders = request.orders.EmptyIfNull().Select(a=>a.ToOrder(qd, false)).ToList()
+            });
             var entityType = qd.Columns.Single(a => a.IsEntity).Implementations.Value.Types.SingleEx();
 
             return entitiesQuery.AutocompleteUntyped(request.subString, request.count, entityType);
@@ -126,10 +130,14 @@ namespace Signum.React.ApiControllers
         {
             var qn = QueryLogic.ToQueryName(request.queryKey);
             var qd = DynamicQueryManager.Current.QueryDescription(qn);
-
-            var filters = request.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false)).ToList();
-
-            return DynamicQueryManager.Current.GetEntities(qn, filters).Take(request.count).ToList();
+            
+            return DynamicQueryManager.Current.GetEntities(new QueryEntitiesRequest
+            {
+                QueryName = qn,
+                Count = request.count,
+                Filters = request.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false)).ToList(),
+                Orders = request.orders.EmptyIfNull().Select(f => f.ToOrder(qd, canAggregate: false)).ToList(),
+            }).ToList();
         }
 
         [Route("api/query/queryCount"), HttpPost, ProfilerActionSplitter]
@@ -167,6 +175,7 @@ namespace Signum.React.ApiControllers
     {
         public string queryKey;
         public List<FilterTS> filters;
+        public List<OrderTS> orders;
         public string subString;
         public int count;
     }
@@ -203,6 +212,7 @@ namespace Signum.React.ApiControllers
     {
         public string queryKey;
         public List<FilterTS> filters;
+        public List<OrderTS> orders;
         public int count;
 
         public override string ToString() => queryKey;

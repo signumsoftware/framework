@@ -1,5 +1,5 @@
 ﻿import * as React from "react"
-import { Router, Route, Redirect, IndexRoute } from "react-router"
+import { Router, Route, Redirect } from "react-router"
 import { Button, OverlayTrigger, Tooltip, MenuItem } from "react-bootstrap"
 import {
     Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, toLite, JavascriptMessage,
@@ -8,7 +8,7 @@ import {
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationInfo, OperationType, LambdaMemberType } from '../Reflection';
 import { classes } from '../Globals';
 import * as Navigator from '../Navigator';
-import ModalMessage from '../Modals/ModalMessage'
+import MessageModal from '../Modals/MessageModal'
 import Notify from '../Frames/Notify';
 import { ContextualItemsContext, MenuItemBlock } from '../SearchControl/ContextualItems';
 import { EntityFrame } from '../TypeContext';
@@ -63,20 +63,20 @@ export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<
 
 
 
-function defaultConstructFromMany(coc: ContextualOperationContext<Entity>, event: React.MouseEvent<any>, ...args: any[]) {
+function defaultConstructFromMany(coc: ContextualOperationContext<Entity>,...args: any[]) {
 
     confirmInNecessary(coc).then(conf => {
         if (!conf)
             return;
 
         API.constructFromMany<Entity, Entity>(coc.context.lites, coc.operationInfo.key, ...args).then(pack => {
-            Navigator.createNavigateOrTab(pack, event);
+            Navigator.createNavigateOrTab(pack, coc.event!);
         }).done();
     }).done();
 
 }
 
-export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock> | undefined {
+export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
     if (ctx.lites.length == 0)
         return undefined;
 
@@ -93,12 +93,11 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
             const eos = getSettings(oi.key) as EntityOperationSettings<Entity> | undefined;
             const cos = eos == undefined ? undefined :
                 ctx.lites.length == 1 ? eos.contextual : eos.contextualFromMany
-            const coc = {
-                context: ctx,
-                operationInfo: oi,
-                settings: cos,
-                entityOperationSettings: eos,
-            } as ContextualOperationContext<Entity>;
+            const coc = new ContextualOperationContext<Entity>();
+            coc.context = ctx;
+            coc.operationInfo = oi;
+            coc.settings = cos;
+            coc.entityOperationSettings = eos;
 
             const visibleByDefault = oi.lite && (ctx.lites.length == 1 || oi.operationType != OperationType.ConstructorFrom)
 
@@ -169,7 +168,7 @@ export function confirmInNecessary(coc: ContextualOperationContext<Entity>): Pro
     if (confirmMessage == undefined)
         return Promise.resolve(true);
 
-    return ModalMessage.show({
+    return MessageModal.show({
         title: OperationMessage.Confirm.niceToString(),
         message: confirmMessage,
         buttons: "yes_no",
@@ -200,7 +199,7 @@ export namespace MenuItemConstructor { //To allow monkey patching
         const array = new RegExp(OperationMessage.CreateFromRegex.niceToString()).exec(niceName);
         return array ? (niceName.tryBefore(array[1]) || "") + array[1].firstUpper() : niceName;
     }
-    export function createContextualMenuItem(coc: ContextualOperationContext<Entity>, defaultClick: (coc: ContextualOperationContext<Entity>, event: React.MouseEvent<any>) => void, key: any) {
+    export function createContextualMenuItem(coc: ContextualOperationContext<Entity>, defaultClick: (coc: ContextualOperationContext<Entity>) => void, key: any) {
 
         const text = coc.settings && coc.settings.text ? coc.settings.text() :
             coc.entityOperationSettings && coc.entityOperationSettings.text ? coc.entityOperationSettings.text() :
@@ -211,9 +210,10 @@ export namespace MenuItemConstructor { //To allow monkey patching
 
         const disabled = !!coc.canExecute;
 
-        const onClick = coc.settings && coc.settings.onClick ?
-            (me: React.MouseEvent<any>) => coc.settings.onClick!(coc, me) :
-            (me: React.MouseEvent<any>) => defaultClick(coc, me)
+        const onClick = (me: React.MouseEvent<any>) => {
+            coc.event = me;
+            coc.settings && coc.settings.onClick ? coc.settings!.onClick!(coc) : defaultClick(coc)
+        }
 
         const menuItem = <MenuItem
             className={disabled ? "disabled" : undefined}
@@ -235,10 +235,9 @@ export namespace MenuItemConstructor { //To allow monkey patching
 }
 
 
+export function defaultContextualClick(coc: ContextualOperationContext<Entity>,...args: any[]) {
 
-export function defaultContextualClick(coc: ContextualOperationContext<Entity>, event: React.MouseEvent<any>, ...args: any[]) {
-
-    event.persist();
+    coc.event!.persist();
 
     confirmInNecessary(coc).then(conf => {
         if (!conf)
@@ -250,7 +249,7 @@ export function defaultContextualClick(coc: ContextualOperationContext<Entity>, 
                     API.constructFromLite(coc.context.lites[0], coc.operationInfo.key, ...args)
                         .then(pack => {
                             coc.context.markRows({});
-                            Navigator.createNavigateOrTab(pack, event);
+                            Navigator.createNavigateOrTab(pack, coc.event!);
                         })
                         .done();
                 } else {

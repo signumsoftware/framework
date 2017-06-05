@@ -1,10 +1,8 @@
-﻿/// <reference path="../typings/es6-promise/es6-promise.d.ts" />
+﻿declare function require<T>(path: string): T;
 
-declare const require: {
-    <T>(path: string): T;
-    (paths: string[], callback: (...modules: any[]) => void): void;
-    ensure: (paths: string[], callback: (require: <T>(path: string) => T) => void) => void;
-};
+ //Necessary till typescript has direct support https://github.com/Microsoft/TypeScript/issues/12364
+declare function _import(path: string): Promise<any>;
+declare function _import<T>(path: string): Promise<T>;
 
 declare interface Promise<T> {
     done(this: Promise<T>): void;
@@ -49,6 +47,8 @@ interface Array<T> {
     clone(this: Array<T>, ): T[];
     joinComma(this: Array<T>, lastSeparator: string): string;
     extract(this: Array<T>, filter: (element: T) => boolean): T[];
+    findIndex(this: Array<T>, filter: (element: T, index: number, obj: Array<T>) => boolean): number;
+    findLastIndex(this: Array<T>, filter: (element: T) => boolean): number;
 }
 
 interface ArrayConstructor {
@@ -76,7 +76,7 @@ interface String {
     beforeLast(this: string, separator: string): string;
     tryAfterLast(this: string, separator: string): string | undefined;
     tryBeforeLast(this: string, separator: string): string | undefined;
-    etc(this: string, maxLength: number): string;
+    etc(this: string, maxLength: number, etcString?: string): string;
 
     firstUpper(this: string): string;
     firstLower(this: string, ): string;

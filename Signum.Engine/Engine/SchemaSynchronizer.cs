@@ -38,6 +38,12 @@ namespace Signum.Engine
 
             Dictionary<ITable, Dictionary<string, Index>> modelIndices = model.Values
                 .ToDictionary(t => t, t => t.GeneratAllIndexes().ToDictionaryEx(a => a.IndexName, "Indexes for {0}".FormatWith(t.Name)));
+            
+            //To --> From
+            Dictionary<ObjectName, ObjectName> copyDataFrom = new Dictionary<ObjectName, ObjectName>();
+
+            //A -> A_temp
+            Dictionary<ObjectName, ObjectName> preRenames = new Dictionary<ObjectName, ObjectName>();
 
             model.JoinDictionaryForeach(database, (tn, tab, diff) =>
             {
@@ -48,7 +54,55 @@ namespace Signum.Engine
                 diff.Columns = replacements.ApplyReplacementsToOld(diff.Columns, key);
 
                 diff.Indices = ApplyIndexAutoReplacements(diff, tab, modelIndices[tab]);
+
+                var diffPk = diff.Columns.TryGetC(tab.PrimaryKey.Name);
+                if(diffPk != null && tab.PrimaryKey.Identity != diffPk.Identity)
+                {
+                    if(tab.Name.Equals(diff.Name))
+                    {
+                        var tempName = new ObjectName(diff.Name.Schema, diff.Name.Name + "_old");
+                        preRenames.Add(diff.Name, tempName);
+                        copyDataFrom.Add(tab.Name, tempName);
+
+                        if (replacements.Interactive)
+                        {
+                            SafeConsole.WriteLineColor(ConsoleColor.Yellow, $@"Column {diffPk.Name} in {diff.Name} is now Identity={tab.PrimaryKey.Identity}.");
+                            Console.WriteLine($@"Changing a Primary Key is not supported by SQL Server so the script will...:
+  1. Rename {diff.Name} table to {tempName}
+  2. Create a new table {diff.Name} 
+  3. Copy data from {tempName} to {tab.Name}.
+  4. Drop {tempName}
+");
+                        }
+                    }
+                    else
+                    {
+                        copyDataFrom.Add(tab.Name, diff.Name);
+                        if (replacements.Interactive)
+                        {
+                            SafeConsole.WriteLineColor(ConsoleColor.Yellow, $@"Column {diffPk.Name} in {diff.Name} is now Identity={tab.PrimaryKey.Identity}.");
+                            Console.WriteLine($@"Changing a Primary Key is not supported by SQL Server so the script will...:
+  1. Create a new table {tab.Name} 
+  2. Copy data from {diff.Name} to {tab.Name}.
+  3. Drop {diff.Name}
+");
+                        }
+                    }
+                }
             });
+
+            var columnsByFKTarget = database.Values.SelectMany(a => a.Columns.Values).Where(a => a.ForeignKey != null).GroupToDictionary(a => a.ForeignKey.TargetTable);
+
+            foreach (var pr in preRenames)
+            {
+                var diff = database[pr.Key.ToString()];
+                diff.Name = pr.Value;
+                foreach (var col in columnsByFKTarget.TryGetC(pr.Key).EmptyIfNull())
+                    col.ForeignKey.TargetTable = pr.Value;
+
+                database.Add(pr.Value.ToString(), diff);
+                database.Remove(pr.Key.ToString());
+            }
 
             Func<ObjectName, ObjectName> ChangeName = (ObjectName objectName) =>
             {
@@ -73,6 +127,11 @@ namespace Signum.Engine
 
             using (replacements.WithReplacedDatabaseName())
             {
+                SqlPreCommand preRenameTables = preRenames.Select(a => SqlBuilder.RenameTable(a.Key, a.Value.Name)).Combine(Spacing.Double);
+
+                if (preRenameTables != null)
+                    preRenameTables.GoAfter = true;
+
                 SqlPreCommand createSchemas = Synchronizer.SynchronizeScriptReplacing(replacements, "Schemas",
                     modelSchemas.ToDictionary(a => a.ToString()),
                     databaseSchemas.ToDictionary(a => a.ToString()),
@@ -133,11 +192,16 @@ namespace Signum.Engine
                         dif.MultiForeignKeys.Select(fk => SqlBuilder.AlterTableDropConstraint(dif.Name, fk.Name)).Combine(Spacing.Simple)),
                         Spacing.Double);
 
-                SqlPreCommand tables =
+            SqlPreCommand preRenamePks = preRenames.Select(a => SqlBuilder.DropPrimaryKeyConstraint(a.Value)).Combine(Spacing.Double);
+
+            SqlPreCommand tables =
                     Synchronizer.SynchronizeScript(
                     model,
                     database,
-                    (tn, tab) => SqlBuilder.CreateTableSql(tab),
+                    (tn, tab) => SqlPreCommand.Combine(Spacing.Double, 
+                        SqlBuilder.CreateTableSql(tab),
+                        copyDataFrom.ContainsKey(tab.Name) ? CopyData(tab, database.GetOrThrow(copyDataFrom.GetOrThrow(tab.Name).ToString()), replacements).Do(a=>a.GoBefore = true) : null
+                    ),
                     (tn, dif) => SqlBuilder.DropTable(dif.Name),
                     (tn, tab, dif) =>
                         SqlPreCommand.Combine(Spacing.Simple,
@@ -145,10 +209,10 @@ namespace Signum.Engine
                         Synchronizer.SynchronizeScript(
                             tab.Columns,
                             dif.Columns,
-                            (cn, tabCol) => SqlPreCommandSimple.Combine(Spacing.Simple,
+                            (cn, tabCol) => SqlPreCommand.Combine(Spacing.Simple,
                                 tabCol.PrimaryKey && dif.PrimaryKeyName != null ? SqlBuilder.DropPrimaryKeyConstraint(tab.Name) : null,
                                 AlterTableAddColumnDefault(tab, tabCol, replacements)),
-                            (cn, difCol) => SqlPreCommandSimple.Combine(Spacing.Simple,
+                            (cn, difCol) => SqlPreCommand.Combine(Spacing.Simple,
                                  difCol.Default != null ? SqlBuilder.DropDefaultConstraint(tab.Name, difCol.Name) : null,
                                 SqlBuilder.AlterTableDropColumn(tab, cn)),
                             (cn, tabCol, difCol) => SqlPreCommand.Combine(Spacing.Simple,
@@ -160,7 +224,7 @@ namespace Signum.Engine
                                 difCol.DefaultEquals(tabCol) ? null : SqlPreCommand.Combine(Spacing.Simple,
                                     difCol.Default != null ? SqlBuilder.DropDefaultConstraint(tab.Name, tabCol.Name) : null,
                                     tabCol.Default != null ? SqlBuilder.AddDefaultConstraint(tab.Name, tabCol.Name, tabCol.Default, tabCol.SqlDbType) : null),
-                                UpdateByFkChange(tn, difCol, tabCol, ChangeName)),
+                                UpdateByFkChange(tn, difCol, tabCol, ChangeName, copyDataFrom)),
                             Spacing.Simple)),
                      Spacing.Double);
 
@@ -241,7 +305,7 @@ namespace Signum.Engine
                   (_, newSN, oldSN) => newSN.Equals(oldSN) ? null : SqlBuilder.DropSchema(oldSN),
                   Spacing.Double);
 
-                return SqlPreCommand.Combine(Spacing.Triple, createSchemas, dropStatistics, dropIndices, dropForeignKeys, tables, syncEnums, addForeingKeys, addIndices, dropSchemas);
+                return SqlPreCommand.Combine(Spacing.Triple, preRenameTables, createSchemas, dropStatistics, dropIndices, dropForeignKeys, preRenamePks, tables, syncEnums, addForeingKeys, addIndices, dropSchemas);
             }
         }
 
@@ -267,23 +331,14 @@ namespace Signum.Engine
             if (!temporalDefault)
                 return SqlBuilder.AlterTableAddColumn(table, column);
 
-            string defaultValue = rep.Interactive ? SafeConsole.AskString("Default value for '{0}.{1}'? (or press enter) ".FormatWith(table.Name.Name, column.Name), stringValidator: str => null) : "";
-            if (defaultValue == "null")
-                return SqlBuilder.AlterTableAddColumn(table, column);
-
             try
             {
+                var defaultValue = GetDefaultValue(table, column, rep);
+                if (defaultValue == "force")
+                    return SqlBuilder.AlterTableAddColumn(table, column);
+                
                 column.Default = defaultValue;
-
-                if (column.Default.HasText() && SqlBuilder.IsString(column.SqlDbType) && !column.Default.Contains("'"))
-                    column.Default = "'" + column.Default + "'";
-
-                if (string.IsNullOrEmpty(column.Default))
-                    column.Default = SqlBuilder.IsNumber(column.SqlDbType) ? "0" :
-                        SqlBuilder.IsString(column.SqlDbType) ? "''" :
-                        SqlBuilder.IsDate(column.SqlDbType) ? "GetDate()" :
-                        "?";
-
+                
                 return SqlPreCommand.Combine(Spacing.Simple,
                     SqlBuilder.AlterTableAddColumn(table, column),
                     SqlBuilder.DropDefaultConstraint(table.Name, column.Name));
@@ -292,6 +347,45 @@ namespace Signum.Engine
             {
                 column.Default = null;
             }
+        }
+
+        internal static SqlPreCommand CopyData(ITable newTable, DiffTable oldTable, Replacements rep)
+        {
+            var selectColumns = newTable.Columns
+                .Select(col =>  oldTable.Columns.TryGetC(col.Key)?.Name ?? GetDefaultValue(newTable, col.Value, rep))
+                .ToString(", ");
+
+            var insertSelect = new SqlPreCommandSimple(
+$@"INSERT INTO {newTable.Name} ({newTable.Columns.Values.ToString(a => a.Name, ", ")})
+SELECT {selectColumns}
+FROM {oldTable.Name}");
+
+            if (!newTable.PrimaryKey.Identity)
+                return insertSelect;
+
+            return SqlPreCommand.Combine(Spacing.Simple,
+                SqlBuilder.SetIdentityInsert(newTable.Name, true),
+                insertSelect,
+                SqlBuilder.SetIdentityInsert(newTable.Name, false)
+            );
+        }
+
+        public static string GetDefaultValue(ITable table, IColumn column, Replacements rep)
+        {
+            string defaultValue = rep.Interactive ? SafeConsole.AskString("Default value for '{0}.{1}'? (or press enter) ".FormatWith(table.Name.Name, column.Name), stringValidator: str => null) : "";
+            if (defaultValue == "force")
+                return defaultValue;
+
+            if (defaultValue.HasText() && SqlBuilder.IsString(column.SqlDbType) && !defaultValue.Contains("'"))
+                defaultValue = "'" + defaultValue + "'";
+
+            if (string.IsNullOrEmpty(defaultValue))
+                defaultValue = SqlBuilder.IsNumber(column.SqlDbType) ? "0" :
+                    SqlBuilder.IsString(column.SqlDbType) ? "''" :
+                    SqlBuilder.IsDate(column.SqlDbType) ? "GetDate()" :
+                    "?";
+
+            return defaultValue;
         }
 
         private static Dictionary<string, DiffIndex> ApplyIndexAutoReplacements(DiffTable diff, ITable tab, Dictionary<string, Index> dictionary)
@@ -346,7 +440,7 @@ namespace Signum.Engine
             return diff.Indices.SelectDictionary(on => replacements.TryGetC(on) ?? on, dif => dif);
         }
 
-        private static SqlPreCommandSimple UpdateByFkChange(string tn, DiffColumn difCol, IColumn tabCol, Func<ObjectName, ObjectName> changeName)
+        private static SqlPreCommandSimple UpdateByFkChange(string tn, DiffColumn difCol, IColumn tabCol, Func<ObjectName, ObjectName> changeName, Dictionary<ObjectName, ObjectName> copyDataFrom)
         {
             if (difCol.ForeignKey == null || tabCol.ReferenceTable == null || tabCol.AvoidForeignKey)
                 return null;
@@ -354,6 +448,10 @@ namespace Signum.Engine
             ObjectName oldFk = changeName(difCol.ForeignKey.TargetTable);
 
             if (oldFk.Equals(tabCol.ReferenceTable.Name))
+                return null;
+
+            var newComesFrom = copyDataFrom.TryGetC(tabCol.ReferenceTable.Name);
+            if (newComesFrom != null && oldFk.Equals(newComesFrom))
                 return null;
 
             AliasGenerator ag = new AliasGenerator();
@@ -376,6 +474,10 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
             {
                 using (Administrator.OverrideDatabaseInSysViews(db))
                 {
+                    var databaseName = db == null ? Connector.Current.DatabaseName() : db.Name;
+
+                    var sysDb = Database.View<SysDatabases>().Single(a => a.name == databaseName);
+
                     var tables =
                         (from s in Database.View<SysSchemas>()
                          from t in s.Tables().Where(t => !t.ExtendedProperties().Any(a => a.name == "microsoft_database_tools_support")) //IntelliSense bug
@@ -398,6 +500,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                                             SqlDbType = sysType == null ? SqlDbType.Udt : ToSqlDbType(sysType.name),
                                             UserTypeName = sysType == null ? userType.name : null,
                                             Nullable = c.is_nullable,
+                                            Collation = c.collation_name == sysDb.collation_name ? null : c.collation_name,
                                             Length = c.max_length,
                                             Precission = c.precision,
                                             Scale = c.scale,
@@ -760,6 +863,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
         public SqlDbType SqlDbType;
         public string UserTypeName;
         public bool Nullable;
+        public string Collation;
         public int Length;
         public int Precission;
         public int Scale;
@@ -774,6 +878,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
         {
             var result =
                    SqlDbType == other.SqlDbType
+                && Collation == other.Collation
                 && StringComparer.InvariantCultureIgnoreCase.Equals(UserTypeName, other.UserDefinedTypeName)
                 && Nullable == other.Nullable
                 && (other.Size == null || other.Size.Value == Precission || other.Size.Value == Length / BytesPerChar(other.SqlDbType) || other.Size.Value == int.MaxValue && Length == -1)

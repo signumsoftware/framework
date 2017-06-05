@@ -372,6 +372,27 @@ Array.prototype.extract = function (this: any[], predicate: (element: any) => bo
     return result;
 };
 
+
+Array.prototype.findIndex = function (this: any[], predicate: (element: any, index: number, array: Array<any>) => boolean) {
+    const result = this.filter(predicate);
+
+    for (var i = 0; i < this.length; i++)
+        if (predicate(this[i], i, this))
+            return i;
+
+    return -1;
+};
+
+Array.prototype.findLastIndex = function (this: any[], predicate: (element: any) => boolean) {
+    const result = this.filter(predicate);
+
+    for (var i = this.length - 1; i >= 0; i--)
+        if (predicate(this[i]))
+            return i;
+
+    return -1;
+};
+
 Array.range = function (min: number, maxNotIncluded: number) {
     const length = maxNotIncluded - min;
 
@@ -400,15 +421,15 @@ Array.toArray = function (arrayish: { length: number;[index: number]: any }) {
     return result;
 }
 
-String.prototype.contains = function (str) {
+String.prototype.contains = function (this: string, str: string) {
     return this.indexOf(str) !== -1;
 }
 
-String.prototype.startsWith = function (str) {
+String.prototype.startsWith = function (this: string, str: string) {
     return this.indexOf(str) === 0;
 }
 
-String.prototype.endsWith = function (str) {
+String.prototype.endsWith = function (this: string, str: string) {
     const index = this.lastIndexOf(str);
     return index !== -1 && index === (this.length - str.length); //keep it
 }
@@ -551,13 +572,13 @@ String.prototype.tryAfterLast = function (this: string, separator: string) {
     return this.substring(index + separator.length);
 };
 
-String.prototype.etc = function (this: string, maxLength: number) {
+String.prototype.etc = function (this: string, maxLength: number, etcString : string = "(…)") {
     let str = this;
 
     str = str.tryBefore("\n") || str;
 
     if (str.length > maxLength)
-        str = str.substr(0, maxLength - 1) + "…";
+        str = str.substr(0, maxLength - etcString.length) + etcString;
 
     return str;
 };

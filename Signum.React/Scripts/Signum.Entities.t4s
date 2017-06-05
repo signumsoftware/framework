@@ -34,6 +34,10 @@ export function newMListElement<T>(element: T): MListElement<T> {
     return { rowId: null, element };
 }
 
+export function toMList<T>(array: T[]): MList<T> {
+    return array.map(newMListElement);
+}
+
 export interface Lite<T extends Entity> {
     entity?: T;
     EntityType: string;
@@ -65,21 +69,23 @@ export function registerToString<T extends ModifiableEntity>(type: Type<T>, toSt
 }
 
 
-import { getTypeInfo } from './Reflection' 
+import * as Reflection from './Reflection' 
 
 function getOrCreateToStringFunction(type: string)  {
     let f = toStringDictionary[type];
     if (f || f === null)
         return f; 
 
-    const ti = getTypeInfo(type);
+    const ti = Reflection.getTypeInfo(type);
 
     const getToString2 = getToString;
-    const valToString2 = valToString;
 
     try {
         const getToString = getToString2;
-        const valToString = valToString2;
+        const valToString = Reflection.valToString;
+        const numberToString = Reflection.numberToString;
+        const dateToString = Reflection.dateToString;
+        const durationToString = Reflection.durationToString;
 
         f = ti && ti.toStringFunction ? eval("(" + ti.toStringFunction + ")") : null;
     } catch (e) {
@@ -89,13 +95,6 @@ function getOrCreateToStringFunction(type: string)  {
     toStringDictionary[type] = f;
 
     return f;
-}
-
-export function valToString(val: any) {
-    if (val == null)
-        return "";
-
-    return val.toString();
 }
 
 export function getToString(entityOrLite: ModifiableEntity | Lite<Entity> | undefined): string {
@@ -124,7 +123,7 @@ export function toLite<T extends Entity>(entity: T | null | undefined, fat?: boo
     if(fat)
        return toLiteFat(entity);
 
-    if(!entity.id)
+    if(entity.id == undefined)
         throw new Error(`The ${entity.Type} has no Id`);
 
     return {
@@ -145,7 +144,7 @@ export function toLiteFat<T extends Entity>(entity: T) : Lite<T> {
 }
 
 export function liteKey(lite: Lite<Entity>) {
-    return lite.EntityType + ";" + (lite.id || "");
+    return lite.EntityType + ";" + (lite.id == undefined ? "" : lite.id);
 }
 
 export function parseLite(lite: string) : Lite<Entity> {

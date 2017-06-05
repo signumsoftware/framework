@@ -9,7 +9,7 @@ using System.Collections;
 
 namespace Signum.Utilities
 {
-    public class Statics
+    public static class Statics
     {
         static Dictionary<string, IThreadVariable> threadVariables = new Dictionary<string, IThreadVariable>();
 
@@ -111,9 +111,6 @@ namespace Signum.Utilities
         {
             get
             {
-                if (Value == null)
-                    return true;
-
                 if (Value.Equals(default(T)))
                     return true;
 

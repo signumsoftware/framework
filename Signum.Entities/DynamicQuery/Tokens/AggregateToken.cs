@@ -62,8 +62,12 @@ namespace Signum.Entities.DynamicQuery
         {
             get
             {
-                if (AggregateFunction == AggregateFunction.Count || AggregateFunction == AggregateFunction.Average)
+                if (AggregateFunction == AggregateFunction.Count)
                     return null;
+
+                if (AggregateFunction == AggregateFunction.Average && Parent.Format == "D")
+                    return "N2";
+
                 return Parent.Format;
             }
         }

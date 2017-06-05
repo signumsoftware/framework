@@ -12,6 +12,7 @@ using Signum.Entities.Reflection;
 using Microsoft.SqlServer.Types;
 using Microsoft.SqlServer.Server;
 using System.Collections.ObjectModel;
+using System.Collections.Concurrent;
 
 namespace Signum.Engine.Maps
 {
@@ -30,8 +31,8 @@ namespace Signum.Engine.Maps
         public int MaxNumberOfParameters = 2000;
         public int MaxNumberOfStatementsInSaveQueries = 16;
 
-        public Dictionary<PropertyRoute, AttributeCollection> FieldAttributesCache = new Dictionary<PropertyRoute, AttributeCollection>();
-        public Dictionary<Type, AttributeCollection> TypeAttributesCache = new Dictionary<Type, AttributeCollection>();
+        public ConcurrentDictionary<PropertyRoute, AttributeCollection> FieldAttributesCache = new ConcurrentDictionary<PropertyRoute, AttributeCollection>();
+        public ConcurrentDictionary<Type, AttributeCollection> TypeAttributesCache = new ConcurrentDictionary<Type, AttributeCollection>();
 
         public Dictionary<Type, string> UdtSqlName = new Dictionary<Type, string>()
         {
@@ -86,7 +87,7 @@ namespace Signum.Engine.Maps
 
         public AttributeCollection FieldAttributes(PropertyRoute propertyRoute)
         {
-            return FieldAttributesCache.GetOrCreate(propertyRoute, () =>
+            return FieldAttributesCache.GetOrAdd(propertyRoute, pr =>
             {
                 switch (propertyRoute.PropertyRouteType)
                 {
@@ -125,7 +126,7 @@ namespace Signum.Engine.Maps
             if (entityType.IsAbstract)
                 throw new InvalidOperationException("{0} is abstract".FormatWith(entityType.Name));
 
-            return TypeAttributesCache.GetOrCreate(entityType, () =>
+            return TypeAttributesCache.GetOrAdd(entityType, t =>
             {
                 var list = entityType.GetCustomAttributes(true).Cast<Attribute>().ToList();
 
@@ -232,6 +233,14 @@ namespace Signum.Engine.Maps
                 return att.Scale;
 
             return defaultScale.TryGetS(sqlDbType);
+        }
+
+        internal string GetCollate(SqlDbTypeAttribute att)
+        {
+            if (att != null && att.Collation != null)
+                return att.Collation;
+
+            return null;
         }
 
         internal SqlDbType DefaultSqlType(Type type)

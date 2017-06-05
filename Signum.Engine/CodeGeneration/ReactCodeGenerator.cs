@@ -457,7 +457,7 @@ namespace Signum.Engine.CodeGeneration
         {
             type = type.UnNullify();
 
-            if (type.IsEnum || type == typeof(TimeSpan) || type == typeof(ColorEntity))
+            if (type.IsEnum || type == typeof(TimeSpan) || type == typeof(ColorEmbedded))
                 return true;
 
             TypeCode tc = Type.GetTypeCode(type);

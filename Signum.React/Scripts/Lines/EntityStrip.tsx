@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
 import { classes, Dic } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
@@ -8,7 +7,7 @@ import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, mlistItemContext, EntityFrame } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, LambdaMemberType } from '../Reflection'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../Lines/LineBase'
-import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, isLite } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
 import { EntityListBase, EntityListBaseProps } from './EntityListBase'
 import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './AutocompleteConfig'
@@ -19,7 +18,7 @@ export interface EntityStripProps extends EntityListBaseProps {
     vertical?: boolean;
     autoComplete?: AutocompleteConfig<any> | null;
     onRenderItem?: (item: Lite<Entity> | ModifiableEntity) => React.ReactNode; 
-    onItemHtmlProps?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+    onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
 }
 
 export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripProps> {
@@ -41,7 +40,11 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         const s = this.state;
         const readOnly = this.state.ctx.readOnly;
         return (
-            <FormGroup ctx={s.ctx!} labelText={s.labelText} labelProps={s.labelHtmlProps} helpBlock={s.helpBlock} {...{ ...this.baseHtmlProps(), ...this.state.formGroupHtmlProps } }>
+            <FormGroup ctx={s.ctx!}
+                labelText={s.labelText}
+                labelHtmlAttributes={s.labelHtmlAttributes}
+                helpBlock={s.helpBlock}
+                htmlAttributes={{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes }}>
                 <div className="SF-entity-strip SF-control-container">
                     <ul className={classes("sf-strip", this.props.vertical ? "sf-strip-vertical" : "sf-strip-horizontal") }>
                         {
@@ -50,7 +53,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                                     ctx={mlec}
                                     autoComplete={s.autoComplete}
                                     onRenderItem={s.onRenderItem}
-                                    onItemHtmlProps={s.onItemHtmlProps}
+                                    onItemHtmlAttributes={s.onItemHtmlAttributes}
                                     onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
                                     onView={this.canView(mlec.value) ? e => this.handleViewElement(e, i) : undefined}
                                     />))
@@ -127,10 +130,17 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         return (
             <Typeahead
                 inputAttrs={{ className: "sf-entity-autocomplete" }}
-                getItems={ac.getItems}
+                getItems={q => ac!.getItems(q)}
                 getItemsDelay={ac.getItemsDelay}
-                renderItem={ac.renderItem}
-                liAttrs={lite => ({ 'data-entity-key': liteKey(lite) }) }
+                renderItem={(e, str) => ac!.renderItem(e, str)}
+                liAttrs={item => {
+                    const entity = ac!.getEntityFromItem(item);
+                    const key = isLite(entity) ? liteKey(entity) :
+                        (entity as Entity).id ? liteKey(toLite(entity as Entity)) :
+                            undefined;
+
+                    return ({ 'data-entity-key': key });
+                }}
                 onSelect={this.handleOnSelect}/>
         );
     }
@@ -143,7 +153,7 @@ export interface EntityStripElementProps {
     ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
     autoComplete?: AutocompleteConfig<any> | null;
     onRenderItem?: (item: Lite<Entity> | ModifiableEntity) => React.ReactNode;
-    onItemHtmlProps?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+    onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
 }
 
 export interface EntityStripElementState {
@@ -188,17 +198,17 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
                 this.state.currentItem && this.state.currentItem.item ? this.props.autoComplete!.renderItem(this.state.currentItem.item) :
                     getToString(this.props.ctx.value);
 
-        const htmlProps = this.props.onItemHtmlProps && this.props.onItemHtmlProps(this.props.ctx.value);
+        const htmlAttributes = this.props.onItemHtmlAttributes && this.props.onItemHtmlAttributes(this.props.ctx.value);
 
         return (
-            <li className="sf-strip-element input-group" {...EntityListBase.entityHtmlProps(this.props.ctx.value) }>
+            <li className="sf-strip-element input-group" {...EntityListBase.entityHtmlAttributes(this.props.ctx.value) }>
                 {
                     this.props.onView ?
-                        <a className="sf-entitStrip-link" href="" onClick={this.props.onView} {...htmlProps}>
+                        <a className="sf-entitStrip-link" href="" onClick={this.props.onView} {...htmlAttributes}>
                             {toStr}
                         </a>
                         :
-                        <span className="sf-entitStrip-link" {...htmlProps}>
+                        <span className="sf-entitStrip-link" {...htmlAttributes}>
                             {toStr}
                         </span>
                 }

@@ -113,7 +113,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         {
             using (Transaction tr = new Transaction())
             {
-                SongEntity song = new SongEntity
+                SongEmbedded song = new SongEmbedded
                 {
                     Name = "Mana Mana",
                     Duration = TimeSpan.FromSeconds(184),
@@ -152,7 +152,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         {
             using (Transaction tr = new Transaction())
             {
-                SongEntity song = new SongEntity
+                SongEmbedded song = new SongEmbedded
                 {
                     Name = "Mana Mana",
                     Duration = TimeSpan.FromSeconds(184),

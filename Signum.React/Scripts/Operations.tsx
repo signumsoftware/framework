@@ -1,5 +1,5 @@
 ﻿import * as React from "react"
-import { Router, Route, Redirect, IndexRoute } from "react-router"
+import { Router, Route, Redirect } from "react-router"
 import { Button, OverlayTrigger, Tooltip, MenuItem, DropdownButton } from "react-bootstrap"
 import { Dic } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
@@ -16,9 +16,9 @@ import * as Navigator from './Navigator';
 import * as QuickLinks from './QuickLinks';
 import * as ContexualItems from './SearchControl/ContextualItems';
 import ButtonBar from './Frames/ButtonBar';
-import { getEntityOperationButtons } from './Operations/EntityOperations';
-import { getConstructFromManyContextualItems, getEntityOperationsContextualItems } from './Operations/ContextualOperations';
-import { ContextualItemsContext } from './SearchControl/ContextualItems';
+import { getEntityOperationButtons, defaultOnClick } from './Operations/EntityOperations';
+import { getConstructFromManyContextualItems, getEntityOperationsContextualItems, defaultContextualClick } from './Operations/ContextualOperations';
+import { ContextualItemsContext} from './SearchControl/ContextualItems';
 
 export function start() {
     ButtonBar.onButtonBarRender.push(getEntityOperationButtons);
@@ -97,10 +97,14 @@ export interface ConstructorOperationOptions<T extends Entity> {
     onConstruct?: (ctx: ConstructorOperationContext<T>) => Promise<EntityPack<T> | undefined> | undefined;
 }
 
-export interface ConstructorOperationContext<T extends Entity> {
+export class ConstructorOperationContext<T extends Entity> {
     operationInfo: OperationInfo;
     settings: ConstructorOperationSettings<T>;
     typeInfo: TypeInfo;
+
+    defaultConstruct(...args: any[]): Promise<EntityPack<T> | undefined> {
+        return API.construct<T>(this.typeInfo.name, this.operationInfo.key, ...args);
+    }
 }
 
 
@@ -113,7 +117,7 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
     isVisible?: (ctx: ContextualOperationContext<T>) => boolean;
     hideOnCanExecute?: boolean;
     confirmMessage?: (ctx: ContextualOperationContext<T>) => string;
-    onClick?: (ctx: ContextualOperationContext<T>, event: React.MouseEvent<any>) => void;
+    onClick?: (ctx: ContextualOperationContext<T>) => void;
     style?: BsStyle;
     icon?: string;
     iconColor?: string;
@@ -131,31 +135,50 @@ export interface ContextualOperationOptions<T extends Entity> {
     isVisible?: (ctx: ContextualOperationContext<T>) => boolean;
     hideOnCanExecute?: boolean;
     confirmMessage?: (ctx: ContextualOperationContext<T>) => string;
-    onClick?: (ctx: ContextualOperationContext<T>, event: React.MouseEvent<any>) => void;
+    onClick?: (ctx: ContextualOperationContext<T>) => void;
     style?: BsStyle;
     icon?: string;
     iconColor?: string;
     order?: number;
 }
 
-export interface ContextualOperationContext<T extends Entity> {
+export class ContextualOperationContext<T extends Entity> {
     context: ContextualItemsContext<T>
     operationInfo: OperationInfo;
-    settings: ContextualOperationSettings<T>;
-    entityOperationSettings: EntityOperationSettings<T>;
-    canExecute: string | undefined;
+    settings?: ContextualOperationSettings<T>; 
+    entityOperationSettings?: EntityOperationSettings<T>;
+    canExecute?: string;
+    event?: React.MouseEvent<any>;
+    defaultContextualClick(...args: any[]) {
+        defaultContextualClick(this, ...args);
+    }
 }
 
+export class EntityOperationContext<T extends Entity> {
 
-
-export interface EntityOperationContext<T extends Entity> {
+    static fromTypeContext<T extends Entity>(ctx: TypeContext<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<T, any>): EntityOperationContext<T>
+    {
+        if (!ctx.frame)
+            throw new Error("a frame is necessary");
+        var result = new EntityOperationContext<T>();
+        result.frame = ctx.frame;
+        result.entity = ctx.value;
+        result.settings = getSettings(operation) as EntityOperationSettings<T>;
+        result.operationInfo = getTypeInfo(ctx.value.Type).operations![operation.key!];
+        result.canExecute = undefined;
+        return result;
+    }
     frame: EntityFrame<T>;
     tag?: string;
     entity: T;
     operationInfo: OperationInfo;
     settings: EntityOperationSettings<T>;
-    canExecute: string | undefined;
+    canExecute?: string;
     closeRequested?: boolean;
+    event?: React.MouseEvent<any>;
+    defaultClick(...args: any[]) {
+        defaultOnClick(this, ...args);
+    }
 }
 
 export class EntityOperationSettings<T extends Entity> extends OperationSettings {
@@ -165,7 +188,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
 
     isVisible?: (ctx: EntityOperationContext<T>) => boolean;
     confirmMessage?: (ctx: EntityOperationContext<T>) => string;
-    onClick?: (ctx: EntityOperationContext<T>, event: React.MouseEvent<any>) => void;
+    onClick?: (ctx: EntityOperationContext<T>) => void;
     hideOnCanExecute?: boolean;
     group?: EntityOperationGroup | null;
     order?: number;
@@ -191,7 +214,7 @@ export interface EntityOperationOptions<T extends Entity> {
     text?: () => string;
     isVisible?: (ctx: EntityOperationContext<T>) => boolean;
     confirmMessage?: (ctx: EntityOperationContext<T>) => string;
-    onClick?: (ctx: EntityOperationContext<T>, event: React.MouseEvent<any>, closeRequested: boolean) => void;
+    onClick?: (ctx: EntityOperationContext<T>) => void;
     hideOnCanExecute?: boolean;
     group?: EntityOperationGroup | null;
     order?: number;

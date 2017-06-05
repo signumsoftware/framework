@@ -67,13 +67,24 @@ namespace Signum.MSBuildTask
 
             var field = ((FieldReference)ld.Operand);
 
-            if(field.DeclaringType != m.DeclaringType)
+            if(!Same(field.DeclaringType, m.DeclaringType))
             {
                 LogError(m, string.Format("field {0} is declared in a different class", field.Name));
                 return null;
             }
 
             return field.Name;
+        }
+
+        private bool Same(TypeReference fieldDT, TypeReference memberDT)
+        {
+            if (fieldDT == memberDT)
+                return true;
+
+            if (fieldDT is GenericInstanceType gt)
+                return gt.ElementType == memberDT;
+
+            return true;
         }
 
         private void LogError(MethodDefinition m, string error)

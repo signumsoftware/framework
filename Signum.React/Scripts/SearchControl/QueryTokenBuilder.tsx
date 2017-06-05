@@ -9,6 +9,7 @@ import { FilterOperation, FilterOption, QueryDescription, QueryToken, SubTokensO
 import { SearchMessage, JavascriptMessage } from '../Signum.Entities'
 import * as Reflection from '../Reflection'
 import { default as SearchControl, SearchControlProps} from './SearchControl'
+import * as PropTypes from "prop-types";
 
 
 require("./QueryTokenBuilder.css");
@@ -34,7 +35,7 @@ export default class QueryTokenBuilder extends React.Component<QueryTokenBuilder
 
         return (
             <div className={classes("sf-query-token-builder", this.props.className)} onKeyDown={this.handleKeyDown}>
-                {tokenList.map((a, i) => <QueryTokenPart key={a ? a.fullKey : i > 0 ? tokenList[i - 1]!.fullKey + "_new" : "_first_" }
+                {tokenList.map((a, i) => <QueryTokenPart key={i == 0 ? "__first__" : tokenList[i - 1]!.fullKey }
                     queryKey={this.props.queryKey}
                     readOnly={this.props.readOnly}
                     onTokenSelected={qt => {
@@ -110,12 +111,18 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
         return { parentToken: this.props.parentToken };
     }
 
-    static childContextTypes: React.ValidationMap<QueryTokenOptionalItem> = { "parentToken": React.PropTypes.object };
+    static childContextTypes = { "parentToken": PropTypes.object };
 
     handleOnChange = (value: any) => {
         this.props.onTokenSelected(value || this.props.parentToken);
     }
-    
+
+    handleKeyUp = (e: React.KeyboardEvent<any>) => {
+        if (e.key == "Enter") {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }
 
     render() {
         
@@ -123,7 +130,7 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
             return null;
         
         return (
-            <div className="sf-query-token-part">
+            <div className="sf-query-token-part" onKeyUp={this.handleKeyUp} onKeyDown={this.handleKeyUp}>
                 <DropdownList
                     disabled={this.props.readOnly}
                     filter="contains"
@@ -142,7 +149,7 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
     }
 }
 
-export class QueryTokenItem extends React.Component<{ item: QueryToken | null }, {}> {
+export class QueryTokenItem extends React.Component<{ item: QueryToken | null }, void> {
     render() {
 
         const item = this.props.item;
@@ -161,9 +168,9 @@ export class QueryTokenItem extends React.Component<{ item: QueryToken | null },
 }
   
 
-export class QueryTokenOptionalItem extends React.Component<{ item: QueryToken | null }, {}> {
+export class QueryTokenOptionalItem extends React.Component<{ item: QueryToken | null }, void> {
 
-    static contextTypes: React.ValidationMap<QueryTokenOptionalItem> = { "parentToken": React.PropTypes.object };
+    static contextTypes = { "parentToken": PropTypes.object };
 
 
     render() {

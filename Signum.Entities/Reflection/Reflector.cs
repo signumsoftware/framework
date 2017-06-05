@@ -92,6 +92,9 @@ namespace Signum.Entities.Reflection
             if (t.Name.EndsWith("Entity"))
                 return t.Name.RemoveSuffix("Entity");
 
+            if (t.Name.EndsWith("Embedded"))
+                return t.Name.RemoveSuffix("Embedded");
+
             if (t.Name.EndsWith("Model"))
                 return t.Name.RemoveSuffix("Model");
 
@@ -157,6 +160,11 @@ namespace Signum.Entities.Reflection
             return typeof(EmbeddedEntity).IsAssignableFrom(t);
         }
 
+        public static bool IsModelEntity(this Type t)
+        {
+            return typeof(ModelEntity).IsAssignableFrom(t);
+        }
+
         public static FieldInfo[] InstanceFieldsInOrder(Type type)
         {
             var result = type.For(t => t != typeof(object), t => t.BaseType)
@@ -188,7 +196,8 @@ namespace Signum.Entities.Reflection
             return properties.Values.ToArray();
         }
 
-        public static MemberInfo[] GetMemberList<T, S>(Expression<Func<T, S>> lambdaToField)
+        public static MemberInfo[] GetMemberList<T, S>(Expression<Func<T, S>> lambdaToField) => GetMemberListUntyped(lambdaToField);
+        public static MemberInfo[] GetMemberListUntyped(LambdaExpression lambdaToField)
         {
             Expression e = lambdaToField.Body;
 

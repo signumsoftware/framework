@@ -490,4 +490,11 @@ public static Dictionary<V, K> Inverse<K, V>(this IDictionary<K, V> dic)
 public static Dictionary<V, K> Inverse<K, V>(this IDictionary<K, V> dic, IEqualityComparer<V> comparer)
 public static Dictionary<V, K> Inverse<K, V>(this IDictionary<K, V> dic, string errorContext)
 public static Dictionary<V, K> Inverse<K, V>(this IDictionary<K, V> dic, IEqualityComparer<V> comparer, string errorContext)
+
+### ToNameValueCollection
+
+Converts the dictionary to a new NameValueCollection.
+
+```C#
+public static NameValueCollection ToNameValueCollection<K, V>(this IDictionary<K, V> dic)
 ```

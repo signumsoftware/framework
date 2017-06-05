@@ -135,7 +135,7 @@ namespace Signum.Entities.Basics
 
 
     [Serializable]
-    public class DeleteLogParametersEntity : EmbeddedEntity
+    public class DeleteLogParametersEmbedded : EmbeddedEntity
     {
         [Unit("Days"), NumberIsValidator(ComparisonType.GreaterThan, 0)]
         public int DeleteLogsWithMoreThan { get; set; } = 30 * 6;

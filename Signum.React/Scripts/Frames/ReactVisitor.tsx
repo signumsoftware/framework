@@ -127,7 +127,7 @@ export class ViewReplacer<T> {
         return this;
     }
 
-    insertAfter(propertyRoute: (entity: T) => any, ...newElements: React.ReactElement<any>[]): this {
+    insertAfter(propertyRoute: (entity: T) => any, ...newElements: (React.ReactElement<any> | undefined)[]): this {
 
         var pr = this.ctx.propertyRoute.add(propertyRoute);
 

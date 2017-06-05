@@ -150,8 +150,6 @@ namespace Signum.Engine
 
         public abstract bool AllowsSetSnapshotIsolation { get; }
 
-        public abstract void FixType(ref SqlDbType type, ref int? size, ref int? scale);
-
         public abstract bool AllowsIndexWithWhere(string where);
 
         public abstract SqlPreCommand ShringDatabase(string schemaName);
@@ -161,6 +159,8 @@ namespace Signum.Engine
         public abstract bool AllowsConvertToTime { get; }
 
         public abstract bool SupportsSqlDependency { get; }
+
+        public abstract bool SupportsFormat { get; }
     }
 
     public abstract class ParameterBuilder

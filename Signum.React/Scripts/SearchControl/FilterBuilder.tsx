@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import * as numeral from 'numeral'
+import * as numbro from 'numbro'
 import * as moment from 'moment'
 import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
 import * as Finder from '../Finder'
@@ -9,7 +9,7 @@ import { openModal, IModalProps } from '../Modals';
 import { FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, FilterType, isList, FilterOperation } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
 import { ValueLine, EntityLine, EntityCombo } from '../Lines'
-import { Binding, IsByAll, getTypeInfos, toNumeralFormat, toMomentFormat } from '../Reflection'
+import { Binding, IsByAll, getTypeInfos, toNumbroFormat, toMomentFormat } from '../Reflection'
 import { TypeContext, FormGroupStyle } from '../TypeContext'
 import QueryTokenBuilder from './QueryTokenBuilder'
 
@@ -19,7 +19,7 @@ interface FilterBuilderProps extends React.Props<FilterBuilder> {
     filterOptions: FilterOptionParsed[];
     subTokensOptions: SubTokensOptions;
     queryDescription: QueryDescription;
-    onTokenChanged: (token: QueryToken) => void;
+    onTokenChanged?: (token: QueryToken) => void;
     lastToken?: QueryToken;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
 }
@@ -103,7 +103,7 @@ export interface FilterComponentProps extends React.Props<FilterComponent> {
     onDeleteFilter: (fo: FilterOptionParsed) => void;
     queryDescription: QueryDescription;
     subTokenOptions: SubTokensOptions;
-    onTokenChanged: (token: QueryToken) => void;
+    onTokenChanged?: (token: QueryToken) => void;
     onFilterChanged: (filter: FilterOptionParsed) => void;
 }
 
@@ -133,7 +133,8 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
         }
         f.token = newToken;
 
-        this.props.onTokenChanged(newToken);
+        if (this.props.onTokenChanged)
+            this.props.onTokenChanged(newToken);
 
         this.props.onFilterChanged(this.props.filter);
 
@@ -183,15 +184,15 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
                         subTokenOptions={this.props.subTokenOptions}
                         readOnly={!!f.frozen}/></td>
                 <td className="sf-filter-operation">
-                    {f.token && f.operation &&
+                    {f.token && f.token.filterType && f.operation &&
                         <select className="form-control" value={f.operation as any} disabled={f.frozen} onChange={this.handleChangeOperation}>
-                            { filterOperations[f.token.filterType!]
+                        {f.token.filterType && filterOperations[f.token.filterType!]
                                 .map((ft, i) => <option key={i} value={ft as any}>{ FilterOperation.niceName(ft) }</option>) }
                         </select> }
                 </td>
 
                 <td className="sf-filter-value">
-                    {f.token && f.operation && this.renderValue() }
+                    {f.token && f.token.filterType && f.operation && this.renderValue() }
                 </td>
             </tr>
         );

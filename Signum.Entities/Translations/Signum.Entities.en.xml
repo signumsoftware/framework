@@ -4,7 +4,7 @@
   <Type Name="BooleanEnum" />
   <Type Name="CalendarMessage" />
   <Type Name="CollectionElementType" />
-  <Type Name="ColorEntity" />
+  <Type Name="ColorEmbedded" />
   <Type Name="ColumnOptionsMode" />
   <Type Name="ComparisonType">
     <Member Name="DistinctTo" Description="distinct to" />
@@ -14,7 +14,7 @@
   </Type>
   <Type Name="ConnectionMessage" />
   <Type Name="CorruptMixin" />
-  <Type Name="DeleteLogParametersEntity" />
+  <Type Name="DeleteLogParametersEmbedded" />
   <Type Name="EmbeddedEntity" />
   <Type Name="EngineMessage" />
   <Type Name="Entity" />

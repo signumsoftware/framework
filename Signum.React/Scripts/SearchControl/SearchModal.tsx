@@ -3,7 +3,7 @@ import * as React from 'react'
 import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
 import * as Finder from '../Finder'
 import { openModal, IModalProps } from '../Modals';
-import { ResultTable, FindOptions, FindMode, FilterOption, QueryDescription, ResultRow } from '../FindOptions'
+import { ResultTable, FindOptions, FindMode, FilterOption, QueryDescription, ResultRow, ModalFindOptions } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
 import { getQueryNiceName } from '../Reflection'
 import SearchControl, { SearchControlProps} from './SearchControl'
@@ -72,7 +72,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
                         </div>}
                     <h4>
                         <span className="sf-entity-title"> {this.props.title}</span>&nbsp;
-                        <a className ="sf-popup-fullscreen" href="#" onClick={(e) => this.searchControl.handleFullScreenClick(e)}>
+                        <a className ="sf-popup-fullscreen" href="" onClick={(e) => this.searchControl.handleFullScreenClick(e)}>
                             <span className="glyphicon glyphicon-new-window"></span>
                         </a>
                     </h4>
@@ -91,30 +91,30 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
         );
     }
 
-    static open(findOptions: FindOptions, title?: string): Promise<Lite<Entity> | undefined> {
+    static open(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<Entity> | undefined> {
 
         return openModal<Lite<Entity>[]>(<SearchModal
             findOptions={findOptions}
             findMode={"Find"}
             isMany={false}
-            title={title || getQueryNiceName(findOptions.queryName)} />)
+            title={modalOptions && modalOptions.title || getQueryNiceName(findOptions.queryName)} />)
             .then(a => a ? a[0] : undefined);
     }
 
-    static openMany(findOptions: FindOptions, title?: string): Promise<Lite<Entity>[] | undefined> {
+    static openMany(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<Entity>[] | undefined> {
 
         return openModal<Lite<Entity>[]>(<SearchModal findOptions={findOptions}
             findMode={"Find"}
             isMany={true}
-            title={title || getQueryNiceName(findOptions.queryName) } />);
+            title={modalOptions && modalOptions.title || getQueryNiceName(findOptions.queryName) } />);
     }
 
-    static explore(findOptions: FindOptions, title?: string): Promise<void> {
+    static explore(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<void> {
 
         return openModal<void>(<SearchModal findOptions={findOptions}
             findMode={"Explore"}
             isMany={true}
-            title={title || getQueryNiceName(findOptions.queryName) } />);
+            title={modalOptions && modalOptions.title || getQueryNiceName(findOptions.queryName) } />);
     }
 }
 

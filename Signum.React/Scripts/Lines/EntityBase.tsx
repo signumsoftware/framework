@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
 import { Dic, classes } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
@@ -7,10 +6,11 @@ import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, EntityFrame } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, TypeReference } from '../Reflection'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLiteFat, is, liteKey, isLite, isEntity, entityInfo } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLiteFat, is, liteKey, isLite, isEntity, entityInfo, SelectorMessage } from '../Signum.Entities'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
 import Typeahead from '../Lines/Typeahead'
 import SelectorModal from '../SelectorModal'
+import { TypeEntity } from "../Signum.Entities.Basics";
 
 
 export interface EntityBaseProps extends LineBaseProps {
@@ -60,7 +60,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
     static defaultIsFindable(type: TypeReference) {
         return type.isEmbedded ? false :
-            type.name == IsByAll ? false :
+            type.name == IsByAll ? true :
                 getTypeInfos(type).some(ti => Navigator.isFindable(ti));
     }
     
@@ -108,7 +108,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     }
 
 
-    defaultView(value: ModifiableEntity | Lite<Entity>, propertyRoute: PropertyRoute): Promise<ModifiableEntity> {
+    defaultView(value: ModifiableEntity | Lite<Entity>, propertyRoute: PropertyRoute): Promise<ModifiableEntity | undefined> {
         return Navigator.view(value, {
             propertyRoute: propertyRoute,
             viewPromise: this.props.getComponent ? Navigator.ViewPromise.resolve(this.props.getComponent) :
@@ -161,11 +161,14 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         );
     }
 
-    chooseType(predicate: (ti: TypeInfo) => boolean): Promise<string> {
+    chooseType(predicate: (ti: TypeInfo) => boolean): Promise<string | undefined> {
         const t = this.state.type!;
 
         if (t.isEmbedded)
             return Promise.resolve(t.name);
+
+        if (t.name == IsByAll)
+            return Finder.find(TypeEntity, { title: SelectorMessage.PleaseSelectAType.niceToString() }).then(t => t && t.toStr /*CleanName*/);
 
         const tis = getTypeInfos(t).filter(ti => predicate(ti));
 
@@ -235,7 +238,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         );
     }
 
-    static entityHtmlProps(entity: ModifiableEntity | Lite<Entity> | undefined | null): React.HTMLAttributes<any> {
+    static entityHtmlAttributes(entity: ModifiableEntity | Lite<Entity> | undefined | null): React.HTMLAttributes<any> {
 
         return {
             'data-entity': entityInfo(entity)

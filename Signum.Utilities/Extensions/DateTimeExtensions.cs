@@ -263,6 +263,18 @@ namespace Signum.Utilities
             return DateTimePrecision.Days;
         }
 
+        static char[] allStandardFormats = new char[] {
+        'd', 'D', 'f', 'F', 'g', 'G', 'm', 'M', 'o', 'O', 'r', 'R', 's', 't', 'T', 'u', 'U', 'y', 'Y'
+        };
+
+        public static string ToCustomFormatString(string f, CultureInfo culture)
+        {
+            if (f != null && f.Length == 1 && allStandardFormats.IndexOf(f[0]) != -1)
+                return culture.DateTimeFormat.GetAllDateTimePatterns(f[0]).FirstEx();
+
+            return f;
+        }
+
         public static string SmartShortDatePattern(this DateTime date)
         {
             DateTime currentdate = DateTime.Today;
@@ -367,9 +379,19 @@ namespace Signum.Utilities
             return (long)new TimeSpan(dateTime.Ticks - new DateTime(1970, 1, 1).Ticks).TotalMilliseconds;
         }
 
+        public static DateTime YearStart(this DateTime dateTime)
+        {
+            return new DateTime(dateTime.Year, 1, 1, 0, 0, 0, dateTime.Kind);
+        }
+
         public static DateTime MonthStart(this DateTime dateTime)
         {
             return new DateTime(dateTime.Year, dateTime.Month, 1, 0, 0, 0, dateTime.Kind);
+        }
+
+        public static DateTime WeekStart(this DateTime dateTime)
+        {
+            return new DateTime(dateTime.Year, dateTime.Month, (-1 * (int)dateTime.DayOfWeek), 0, 0, 0, dateTime.Kind);
         }
 
         public static string ToMonthName(this DateTime dateTime)

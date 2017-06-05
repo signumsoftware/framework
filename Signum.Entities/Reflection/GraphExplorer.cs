@@ -95,23 +95,26 @@ namespace Signum.Entities.Reflection
 
             return result;
         }
-
-        public static Dictionary<Guid, Dictionary<string, string>> EntityIntegrityCheck(DirectedGraph<Modifiable> graph)
+        
+        public static Dictionary<Guid, IntegrityCheck> EntityIntegrityCheck(DirectedGraph<Modifiable> graph)
         {
-            return graph.OfType<ModifiableEntity>().ToDictionaryOrNull(a=>a.temporalId, a=>a.IntegrityCheck());
+            return graph.OfType<ModifiableEntity>()
+                .ToDictionaryOrNull(a => a.temporalId, a => a.IntegrityCheck());
         }
 
-        public static Dictionary<Guid, Dictionary<string, string>> FullIntegrityCheck(DirectedGraph<Modifiable> graph)
+        public static Dictionary<Guid, IntegrityCheck> FullIntegrityCheck(DirectedGraph<Modifiable> graph)
         {
             AssertCloneAttack(graph);
 
             DirectedGraph<Modifiable> identGraph = DirectedGraph<Modifiable>.Generate(graph.Where(a => a is Entity), graph.RelatedTo);
 
-            var identErrors = identGraph.OfType<Entity>().Select(ident => ident.EntityIntegrityCheck()).Where(errors => errors != null).SelectMany(errors => errors);
+            var identErrors = identGraph.OfType<Entity>().Select(ident => ident.EntityIntegrityCheck()).Where(errors => errors != null).SelectMany(errors => errors.Values);
 
-            var modErros = graph.Except(identGraph).OfType<ModifiableEntity>().Select(a => KVP.Create(a.temporalId, a.IntegrityCheck())); 
+            var modErros = graph.Except(identGraph).OfType<ModifiableEntity>()
+                            .Select(a => a.IntegrityCheck())
+                            .NotNull();
 
-            return identErrors.Concat(modErros).ToDictionaryOrNull(a=>a.Key, a=>a.Value); 
+            return identErrors.Concat(modErros).ToDictionaryOrNull(a => a.TemporalId, a => a); 
         }
 
         static void AssertCloneAttack(DirectedGraph<Modifiable> graph)
@@ -325,34 +328,34 @@ namespace Signum.Entities.Reflection
             SetValidationErrors(directedGraph, e.Errors);
         }
 
-        public static void SetValidationErrors(DirectedGraph<Modifiable> directedGraph, Dictionary<Guid, Dictionary<string, string>> dictionary)
+        public static void SetValidationErrors(DirectedGraph<Modifiable> directedGraph, Dictionary<Guid, IntegrityCheck> dictionary)
         {
             var copy = dictionary.ToDictionary();
             foreach (var mod in directedGraph.OfType<ModifiableEntity>())
             {
                 if (copy.ContainsKey(mod.temporalId))
                 {
-                    var dic = copy.Extract(mod.temporalId);
-                    mod.SetTemporalErrors(dic);
+                    var ic = copy.Extract(mod.temporalId);
+                    mod.SetTemporalErrors(ic.Errors);
                 }
             }
 
             if (copy.Any())
-                throw new InvalidOperationException(copy.Values.SelectMany(a => a.Values).ToString("\n"));       
+                throw new InvalidOperationException(copy.Values.ToString("\r\n"));       
         }
     }
 
     [Serializable]
     public class IntegrityCheckException : Exception
     {
-        public Dictionary<Guid, Dictionary<string, string>> Errors
+        public Dictionary<Guid, IntegrityCheck> Errors
         {
-            get { return (Dictionary<Guid, Dictionary<string, string>>)this.Data["integrityErrors"]; }
+            get { return (Dictionary<Guid, IntegrityCheck>)this.Data["integrityErrors"]; }
             set { this.Data["integrityErrors"] = value; }
         }
 
-        public IntegrityCheckException(Dictionary<Guid, Dictionary<string, string>> errors)
-            : base(errors.Values.SelectMany(a => a.Values).ToString("\r\n"))
+        public IntegrityCheckException(Dictionary<Guid, IntegrityCheck> errors)
+            : base(errors.Values.ToString("\r\n\r\n"))
         {
             this.Errors = errors;
         }

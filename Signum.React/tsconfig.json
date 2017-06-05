@@ -1,7 +1,7 @@
 ﻿{
   "compilerOptions": {
     "target": "es5",
-    "sourceMap": true,
+    "sourceMap": false,
     "module": "commonjs",
     "jsx": "react",
     "noEmit": true,
@@ -10,8 +10,10 @@
     "noImplicitReturns": true,
     "strictNullChecks": true,
     "baseUrl": ".",
-    "paths": {
-      "moment": [ "./node_modules/moment" ]
-    }
-  }
+    "lib": [
+      "es2017",
+      "dom"
+    ]
+  },
+  "exclude": [ "node_modules" ]
 }

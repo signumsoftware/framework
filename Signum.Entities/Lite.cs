@@ -19,7 +19,9 @@ using Signum.Entities.Internal;
 
 namespace Signum.Entities
 {
+#pragma warning disable IDE1006
     public interface Lite<out T> : IComparable, IComparable<Lite<Entity>>
+#pragma warning restore IDE1006
         where T : class, IEntity
     {
         T Entity { get; }
@@ -29,8 +31,7 @@ namespace Signum.Entities
         bool IsNew { get;  }
         PrimaryKey? IdOrNull { get; }
         Type EntityType { get; }
-        Entity UntypedEntityOrNull { get; }
-
+        
         void ClearEntity();      
         void SetEntity(Entity ei);
         void SetToString(string toStr);
@@ -153,28 +154,28 @@ namespace Signum.Entities
                 if (id == null)
                     throw new InvalidOperationException("Removing entity not allowed in new Lite");
 
-                this.toStr = this.UntypedEntityOrNull?.ToString();
+                this.toStr = this.entityOrNull?.ToString();
                 this.entityOrNull = null;
             }
 
             public void RefreshId()
             {
-                id = UntypedEntityOrNull.Id;
+                id = entityOrNull.Id;
             }
 
 
             protected internal override void PreSaving(ref bool graphModified)
             {
-                if (UntypedEntityOrNull != null)
+                if (entityOrNull != null)
                 {
-                    UntypedEntityOrNull.PreSaving(ref graphModified);
+                    entityOrNull.PreSaving(ref graphModified);
                 }
             }
 
             public override string ToString()
             {
-                if (this.UntypedEntityOrNull != null)
-                    return this.UntypedEntityOrNull.ToString();
+                if (this.entityOrNull != null)
+                    return this.entityOrNull.ToString();
 
                 return this.toStr;
             }

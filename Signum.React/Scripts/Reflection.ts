@@ -1,4 +1,5 @@
 ﻿import * as moment from 'moment';
+import * as numbro from 'numbro';
 import { Dic } from './Globals';
 import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities';
 import {ajaxPost, ajaxGet} from './Services';
@@ -45,6 +46,7 @@ export interface MemberInfo {
     maxLength?: number;
     isMultiline?: boolean;
     preserveOrder?: boolean;
+    notVisible?: boolean;
     id?: any; //symbols
 }
 
@@ -112,8 +114,7 @@ export function toMomentDurationFormat(format: string | undefined): string | und
     return format.replace("\:", ":");
 }
 
-
-export function toNumeralFormat(format: string | undefined) {
+export function toNumbroFormat(format: string | undefined) {
 
     if (format == undefined)
         return undefined;
@@ -135,8 +136,45 @@ export function toNumeralFormat(format: string | undefined) {
     if (f.startsWith("P"))
         return "0." + "0".repeat(parseInt(f.after("P") || "2")) + "%";
 
+    if (f.contains("#"))
+        format = format
+            .replaceAll(".#", "[.]0")
+            .replaceAll(",#", "[,]0")
+            .replaceAll("#", "0");
+
     return format;
 }
+
+export function valToString(val: any) {
+    if (val == null)
+        return "";
+
+    return val.toString();
+}
+
+export function numberToString(val: any, format?: string) {
+    if (val == null)
+        return "";
+
+    return numbro(val).format(toNumbroFormat(format));
+}
+
+export function dateToString(val: any, format?: string) {
+    if (val == null)
+        return "";
+
+    var m = moment(val, moment.ISO_8601);
+    return m.format(toMomentFormat(format));
+}
+
+export function durationToString(val: any, format?: string) {
+    if (val == null)
+        return "";
+
+    var dur = moment.duration(val);
+    return dur.format(toMomentDurationFormat(format));
+}
+
 
 export interface TypeReference {
     name: string;
@@ -235,11 +273,14 @@ export function parseId(ti: TypeInfo, id: string): string | number {
 }
 
 export const IsByAll = "[ALL]";
-export function getTypeInfos(typeReference: TypeReference): TypeInfo[] {
-    if (typeReference.name == IsByAll || typeReference.name == "")
+export function getTypeInfos(typeReference: TypeReference | string): TypeInfo[] {
+
+    const name = (typeReference as TypeReference).name || typeReference as string;
+
+    if (name == IsByAll || name == "")
         return [];
 
-    return typeReference.name.split(", ").map(getTypeInfo);
+    return name.split(", ").map(getTypeInfo);
 
 }
 
@@ -631,7 +672,7 @@ export interface LambdaMember {
 
 export type LambdaMemberType = "Member" | "Mixin" | "Indexer";
 
-export function basicConstruct(type: PseudoType): ModifiableEntity {
+export function New(type: PseudoType, props?: any): ModifiableEntity {
 
     const ti = getTypeInfo(type);
 
@@ -657,6 +698,9 @@ export function basicConstruct(type: PseudoType): ModifiableEntity {
         Dic.getValues(ti.members).filter(a => a.type.isCollection).forEach(m => (result as any)[m.name.firstLower()] = []); //TODO: Collections in Embeddeds...
     }
 
+    if (props)
+        Dic.assign(result, props);
+
     return result;
 }
 
@@ -667,13 +711,7 @@ export interface IType {
 export class Type<T extends ModifiableEntity> implements IType {
 
     New(props?: Partial<T>): T {
-
-        const result =  basicConstruct(this.typeName) as T;
-
-        if (props)
-            Dic.assign(result, props);
-
-        return result;
+        return New(this.typeName, props) as T;
     }
 
     constructor(
@@ -688,7 +726,7 @@ export class Type<T extends ModifiableEntity> implements IType {
         const result = this.tryTypeInfo();
 
         if (!result)
-            throw new Error(`Type ${this.typeName} has no TypeInfo. Maybe is an embedded?`);
+            throw new Error(`Type ${this.typeName} has no TypeInfo. If is an embedded? Then start from some main entity type containing it to get metadata for the embedded properties (i.e. MyEntity.propertyRoute(m => m.myEmbedded.someProperty)`);
 
         return result;
     }
@@ -722,6 +760,10 @@ export class Type<T extends ModifiableEntity> implements IType {
             throw new Error(`no nicePluralName found for ${ti.name}`);
 
         return ti.nicePluralName;
+    }
+
+    niceCount(count: number): string {
+        return count + " " + (count == 1 ? this.niceName() : this.nicePluralName());
     }
 
     nicePropertyName(lambdaToProperty: (v: T) => any): string  {
@@ -833,6 +875,9 @@ export function registerSymbol(type: string, key: string): any /*ISymbol*/ {
 
     return symbol as any;
 }
+
+
+
 
 export class PropertyRoute {
     

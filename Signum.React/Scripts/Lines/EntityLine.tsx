@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Link } from 'react-router'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
@@ -8,7 +7,7 @@ import { FindOptions, QueryDescription, FilterOptionParsed, FilterRequest } from
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, getQueryKey } from '../Reflection'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, isLite, isEntity } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, isLite, isEntity, isModifiableEntity } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
 import { EntityBase, EntityBaseProps } from './EntityBase'
 import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './AutocompleteConfig'
@@ -18,7 +17,7 @@ export interface EntityLineProps extends EntityBaseProps {
     ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
     autoComplete?: AutocompleteConfig<any> | null;
     renderItem?: React.ReactNode; 
-    itemHtmlProps?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+    itemHtmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
 }
 
 export interface EntityLineState extends EntityLineProps {
@@ -81,16 +80,16 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
     handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
 
-        var lite = this.state.autoComplete!.getEntityFromItem(item);
+        var entity = this.state.autoComplete!.getEntityFromItem(item);
 
-        this.convert(lite)
+        this.convert(entity)
             .then(entity => {
                 this.setState({ currentItem: { entity: entity, item: item } }); //Optimization
                 this.setValue(entity);
             })
             .done();
 
-        return lite.toStr || "";
+        return entity.toStr || "";
     }
 
     setValue(val: any) {
@@ -117,8 +116,8 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock}
-                htmlProps={{ ...this.baseHtmlProps(), ...EntityBase.entityHtmlProps(s.ctx.value!), ...s.formGroupHtmlProps }}
-                labelProps={s.labelHtmlProps}>
+                htmlAttributes={{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value!), ...s.formGroupHtmlAttributes }}
+                labelHtmlAttributes={s.labelHtmlAttributes}>
                 <div className="SF-entity-line">
                     {
                         !EntityBase.hasChildrens(buttons) ?
@@ -139,17 +138,25 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
         var ac = this.state.autoComplete;
 
-        if (!ac || ctx.readOnly)
+        if (ac == null || ctx.readOnly)
             return <FormControlStatic ctx={ctx}>{ctx.value && ctx.value.toStr}</FormControlStatic>;
 
         return (
             <Typeahead ref={ta => this.typeahead = ta}
                 inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
-                getItems={ac.getItems}
+                getItems={query => ac!.getItems(query)}
                 getItemsDelay={ac.getItemsDelay}
-                renderItem={ac.renderItem}
-                renderList={ac.renderList}
-                liAttrs={lite => ({ 'data-entity-key': liteKey(lite) }) }
+                minLength={ac.minLength}
+                renderItem={(item, query) => ac!.renderItem(item, query)}
+                renderList={ac!.renderList && (ta => ac!.renderList!(ta))}
+                liAttrs={item => {
+                    const entity = ac!.getEntityFromItem(item);
+                    const key = isLite(entity) ? liteKey(entity) :
+                        (entity as Entity).id ? liteKey(toLite(entity as Entity)) :
+                            undefined;
+
+                    return ({ 'data-entity-key': key });
+                }}
                 onSelect={this.handleOnSelect}/>
         );
     }
@@ -172,13 +179,13 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
             return (
                 <a href="#" onClick={this.handleViewClick}
                     className="form-control btn-default sf-entity-line-entity"
-                    title={JavascriptMessage.navigate.niceToString()} {...s.itemHtmlProps}>
+                    title={JavascriptMessage.navigate.niceToString()} {...s.itemHtmlAttributes}>
                     {str}
                 </a>
             );
         } else {
             return (
-                <span className="form-control btn-default sf-entity-line-entity" {...s.itemHtmlProps}>
+                <span className="form-control btn-default sf-entity-line-entity" {...s.itemHtmlAttributes}>
                     {str }
                 </span>
             );

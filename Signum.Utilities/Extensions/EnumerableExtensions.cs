@@ -372,7 +372,6 @@ namespace Signum.Utilities
 
     public static class EnumerableExtensions
     {
-        [MethodExpander(typeof(IsEmptyExpander))]
         public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T> collection)
         {
             if (collection == null)
@@ -619,10 +618,10 @@ namespace Signum.Utilities
             return table;
         }
 
-        public static DataTable Transpose(this DataTable table)
+        public static DataTable Transpose(this DataTable table, string captionName = "")
         {
             DataTable result = new DataTable();
-            result.Columns.Add(new DataColumn("", typeof(string)));
+            result.Columns.Add(new DataColumn("Column", typeof(string)) { Caption = captionName});
 
             var list = table.Columns.Cast<DataColumn>().Skip(1).Select(a => a.DataType).Distinct().ToList();
 

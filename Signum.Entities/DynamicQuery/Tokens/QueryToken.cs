@@ -158,6 +158,8 @@ namespace Signum.Entities.DynamicQuery
             return subTokensOverrideCache.GetOrAdd((this, options), (tup) => tup.Item1.SubTokensOverride(tup.Item2).ToDictionaryEx(a => a.Key, "subtokens for " + this.Key));
         }
 
+        public static Func<QueryToken, Type, SubTokensOptions, List<QueryToken>> ImplementedByAllSubTokens = (quetyToken, type, options) => throw new NotImplementedException("QueryToken.ImplementedByAllSubTokens not set");
+
         protected List<QueryToken> SubTokensBase(Type type, SubTokensOptions options, Implementations? implementations)
         {
             var ut = type.UnNullify();
@@ -168,7 +170,7 @@ namespace Signum.Entities.DynamicQuery
                 return StepTokens(this, 4).AndHasValue(this);
 
             if (ut == typeof(int) || ut == typeof(long) || ut == typeof(short))
-                return StepTokens(this, 0).AndHasValue(this); ;
+                return StepTokens(this, 0).AndHasValue(this);
 
             if (ut == typeof(string))
                 return StringTokens().AndHasValue(this);
@@ -177,7 +179,7 @@ namespace Signum.Entities.DynamicQuery
             if (cleanType.IsIEntity())
             {
                 if (implementations.Value.IsByAll)
-                    return new List<QueryToken>(); // new[] { EntityPropertyToken.IdProperty(this) };
+                    return ImplementedByAllSubTokens(this, type, options); // new[] { EntityPropertyToken.IdProperty(this) };
 
                 var onlyType = implementations.Value.Types.Only();
 
@@ -188,7 +190,7 @@ namespace Signum.Entities.DynamicQuery
                 return implementations.Value.Types.Select(t => (QueryToken)new AsTypeToken(this, t)).ToList().AndHasValue(this);
             }
 
-            if (type.IsEmbeddedEntity())
+            if (type.IsEmbeddedEntity() || type.IsModelEntity())
             {
                 return EntityProperties(type).OrderBy(a => a.ToString()).ToList().AndHasValue(this);
             }

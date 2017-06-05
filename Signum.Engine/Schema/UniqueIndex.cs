@@ -103,7 +103,71 @@ namespace Signum.Engine.Maps
         public bool AvoidAttachToUniqueIndexes { get; set; }
     }
 
-    class IndexWhereExpressionVisitor : ExpressionVisitor
+    public class IndexKeyColumns
+    {
+
+        public static IColumn[] Split(IFieldFinder finder, LambdaExpression columns)
+        {
+            if (columns == null)
+                throw new ArgumentNullException("columns");
+
+            if (columns.Body.NodeType == ExpressionType.New)
+            {
+                return (from a in ((NewExpression)columns.Body).Arguments
+                        from c in GetColumns(finder, Expression.Lambda(Expression.Convert(a, typeof(object)), columns.Parameters))
+                        select c).ToArray();
+            }
+
+            return GetColumns(finder, columns);
+        }
+
+        static string[] ignoreMembers = new string[] { "ToLite", "ToLiteFat" };
+
+        static IColumn[] GetColumns(IFieldFinder finder, LambdaExpression field)
+        {
+            Type type = RemoveCasting(ref field);
+
+            var members = Reflector.GetMemberListUntyped(field);
+            if (members.Any(a => ignoreMembers.Contains(a.Name)))
+                members = members.Where(a => !ignoreMembers.Contains(a.Name)).ToArray();
+            
+            Field f = Schema.FindField(finder, members);
+
+            if (type != null)
+            {
+                var ib = f as FieldImplementedBy;
+                if (ib == null)
+                    throw new InvalidOperationException("Casting only supported for {0}".FormatWith(typeof(FieldImplementedBy).Name));
+
+                return (from ic in ib.ImplementationColumns
+                        where type.IsAssignableFrom(ic.Key)
+                        select (IColumn)ic.Value).ToArray();
+            }
+
+            return Index.GetColumnsFromFields(f);
+        }
+
+        static Type RemoveCasting(ref LambdaExpression field)
+        {
+            var body = field.Body;
+
+            if (body.NodeType == ExpressionType.Convert && body.Type == typeof(object))
+                body = ((UnaryExpression)body).Operand;
+
+            Type type = null;
+            if ((body.NodeType == ExpressionType.Convert || body.NodeType == ExpressionType.TypeAs) &&
+                body.Type != typeof(object))
+            {
+                type = body.Type;
+                body = ((UnaryExpression)body).Operand;
+            }
+
+            field = Expression.Lambda(Expression.Convert(body, typeof(object)), field.Parameters);
+            return type;
+        }
+    }
+
+    public class IndexWhereExpressionVisitor : ExpressionVisitor
     {
         StringBuilder sb = new StringBuilder();
 

@@ -22,23 +22,32 @@
         <ToolTip>Component Class Name</ToolTip>
         <Default>MyComponent</Default>
       </Literal>
+    </Declarations>
+    <Declarations>
       <Literal>
-        <ID>EntityType</ID>
-        <ToolTip>Type of the Entity</ToolTip>
-        <Default>Entity</Default>
+        <ID>StateName</ID>
+        <ToolTip>state property name</ToolTip>
+        <Default>data</Default>
+      </Literal>
+    </Declarations>
+    <Declarations>
+      <Literal>
+        <ID>StateType</ID>
+        <ToolTip>state property Type</ToolTip>
+        <Default>string[]</Default>
       </Literal>
     </Declarations>
     <Code Language="TypeScript">
       <![CDATA[
       interface $ComponentName$Props {
-          ctx: TypeContext<$EntityType$>
+          ctx: TypeContext<$ComponentName$Entity>
       }
       
       interface $ComponentName$State {
-          
+          $StateName$?: $StateType$
       }
       
-      export class $ComponentName$ extends React.Component<$ComponentName$Props, $ComponentName$State> {
+      export default class $ComponentName$ extends React.Component<$ComponentName$Props, $ComponentName$State> {
       
           constructor(props: $ComponentName$Props) {
               super(props);
@@ -55,18 +64,24 @@
           }
           
           loadData(props: $ComponentName$Props) {
-              someQuery()
-              .then(() => this.setData({})
+              API.someQuery()
+              .then($StateName$ => this.setState({ $StateName$ }))
               .done();
           }
           
           render() {
+              const ctx = this.props.ctx;
               return (
                   <div>
                       <ValueLine ctx={ctx.subCtx(a => a.name)} />
+                      {this.state.$StateName$ && this.renderData(this.state.$StateName$)}
                       $end$
                   </div>
               );
+          }
+          
+          renderData($StateName$ : $StateType$){
+              return <div></div>;
           }
       }
      ]]>
