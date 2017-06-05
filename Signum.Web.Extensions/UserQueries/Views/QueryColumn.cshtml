@@ -2,7 +2,7 @@
 @using Signum.Entities.UserQueries
 @using Signum.Web.UserAssets
 @using Signum.Entities.DynamicQuery
-@using (var e = Html.TypeContext<QueryColumnEntity>())
+@using (var e = Html.TypeContext<QueryColumnEmbedded>())
 {
     e.FormGroupStyle = FormGroupStyle.None;
     @Html.ValueLine(e, f => f.DisplayName, vl => vl.ValueHtmlProps["size"] = 20)

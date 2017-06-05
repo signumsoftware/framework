@@ -290,7 +290,7 @@ WriteLiteral("\r\n                        </td>\r\n                        <td>"
 
             
             #line 57 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
-                       Write(item.NextExecution);
+                       Write(item.NextDate);
 
             
             #line default
@@ -299,7 +299,7 @@ WriteLiteral(" (");
 
             
             #line 57 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
-                                            Write(item.NextExecution.ToAgoString());
+                                       Write(item.NextDate.ToAgoString());
 
             
             #line default

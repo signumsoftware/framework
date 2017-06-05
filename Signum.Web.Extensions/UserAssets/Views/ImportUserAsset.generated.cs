@@ -168,7 +168,7 @@ WriteLiteral("    <table>\r\n        <thead>\r\n            <tr>\r\n            
 
             
             #line 33 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
-               Write(Html.PropertyNiceName((UserAssetPreviewLine l) => l.Action));
+               Write(Html.PropertyNiceName((UserAssetPreviewLineEmbedded l) => l.Action));
 
             
             #line default
@@ -177,7 +177,7 @@ WriteLiteral("</td>\r\n                <td>");
 
             
             #line 34 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
-               Write(Html.PropertyNiceName((UserAssetPreviewLine l) => l.OverrideEntity));
+               Write(Html.PropertyNiceName((UserAssetPreviewLineEmbedded l) => l.OverrideEntity));
 
             
             #line default
@@ -186,7 +186,7 @@ WriteLiteral("</td>\r\n                <td>");
 
             
             #line 35 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
-               Write(Html.PropertyNiceName((UserAssetPreviewLine l) => l.Type));
+               Write(Html.PropertyNiceName((UserAssetPreviewLineEmbedded l) => l.Type));
 
             
             #line default
@@ -195,7 +195,7 @@ WriteLiteral("</td>\r\n                <td>");
 
             
             #line 36 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
-               Write(Html.PropertyNiceName((UserAssetPreviewLine l) => l.Text));
+               Write(Html.PropertyNiceName((UserAssetPreviewLineEmbedded l) => l.Text));
 
             
             #line default

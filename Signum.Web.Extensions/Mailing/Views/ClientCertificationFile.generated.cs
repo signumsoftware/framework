@@ -49,7 +49,7 @@ WriteLiteral("\r\n");
 
             
             #line 3 "..\..\Mailing\Views\ClientCertificationFile.cshtml"
- using (var sc = Html.TypeContext<ClientCertificationFileEntity>())
+ using (var sc = Html.TypeContext<ClientCertificationFileEmbedded>())
 {
     
             

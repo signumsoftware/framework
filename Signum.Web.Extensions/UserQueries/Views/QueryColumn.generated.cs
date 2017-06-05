@@ -65,7 +65,7 @@ namespace ASP
         {
             
             #line 5 "..\..\UserQueries\Views\QueryColumn.cshtml"
- using (var e = Html.TypeContext<QueryColumnEntity>())
+ using (var e = Html.TypeContext<QueryColumnEmbedded>())
 {
     e.FormGroupStyle = FormGroupStyle.None;
     

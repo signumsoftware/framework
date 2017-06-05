@@ -87,7 +87,7 @@ namespace ASP
         {
             
             #line 9 "..\..\Mailing\Views\EmailMasterTemplateMessage.cshtml"
- using (var ec = Html.TypeContext<EmailMasterTemplateMessageEntity>())
+ using (var ec = Html.TypeContext<EmailMasterTemplateMessageEmbedded>())
 {
 
             
@@ -103,14 +103,14 @@ WriteLiteral(" type=\"hidden\"");
 
 WriteLiteral(" class=\"sf-tab-title\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 400), Tuple.Create("\"", 443)
+WriteAttribute("value", Tuple.Create(" value=\"", 402), Tuple.Create("\"", 445)
             
             #line 12 "..\..\Mailing\Views\EmailMasterTemplateMessage.cshtml"
-, Tuple.Create(Tuple.Create("", 408), Tuple.Create<System.Object, System.Int32>(ec.Value.CultureInfo?.ToString()
+, Tuple.Create(Tuple.Create("", 410), Tuple.Create<System.Object, System.Int32>(ec.Value.CultureInfo?.ToString()
             
             #line default
             #line hidden
-, 408), false)
+, 410), false)
 );
 
 WriteLiteral(" />\r\n        \r\n");
@@ -137,14 +137,14 @@ WriteLiteral(" type=\"button\"");
 
 WriteLiteral(" class=\"sf-button sf-master-template-insert-content\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 771), Tuple.Create("\"", 842)
+WriteAttribute("value", Tuple.Create(" value=\"", 773), Tuple.Create("\"", 844)
             
             #line 20 "..\..\Mailing\Views\EmailMasterTemplateMessage.cshtml"
-              , Tuple.Create(Tuple.Create("", 779), Tuple.Create<System.Object, System.Int32>(EmailTemplateViewMessage.InsertMessageContent.NiceToString()
+              , Tuple.Create(Tuple.Create("", 781), Tuple.Create<System.Object, System.Int32>(EmailTemplateViewMessage.InsertMessageContent.NiceToString()
             
             #line default
             #line hidden
-, 779), false)
+, 781), false)
 );
 
 WriteLiteral(" />\r\n        </div>\r\n\r\n");

@@ -218,30 +218,12 @@ WriteLiteral("\r\n        <br />\r\n        QueuedItems: ");
             
             #line default
             #line hidden
-WriteLiteral("\r\n        <br />\r\n        MachineName: ");
-
-            
-            #line 36 "..\..\Mailing\Views\AsyncEmailSenderDashboard.cshtml"
-                Write(Model.MachineName);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n        <br />\r\n        ApplicationName: ");
-
-            
-            #line 38 "..\..\Mailing\Views\AsyncEmailSenderDashboard.cshtml"
-                    Write(Model.ApplicationName);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n    </div>\r\n    <br />\r\n");
+WriteLiteral("\r\n      \r\n    </div>\r\n    <br />\r\n");
 
 WriteLiteral("    ");
 
             
-            #line 41 "..\..\Mailing\Views\AsyncEmailSenderDashboard.cshtml"
+            #line 38 "..\..\Mailing\Views\AsyncEmailSenderDashboard.cshtml"
 Write(Html.AntiForgeryToken());
 
             
@@ -252,7 +234,7 @@ WriteLiteral("\r\n");
 WriteLiteral("    ");
 
             
-            #line 42 "..\..\Mailing\Views\AsyncEmailSenderDashboard.cshtml"
+            #line 39 "..\..\Mailing\Views\AsyncEmailSenderDashboard.cshtml"
 Write(Html.SearchControl(new FindOptions(typeof(EmailMessageEntity))
 {
     OrderOptions = { new OrderOption("Entity.CreationDate", OrderType.Descending) },
@@ -269,7 +251,7 @@ WriteLiteral("\r\n    <script>\r\n        $(function () {\r\n");
 WriteLiteral("            ");
 
             
-            #line 51 "..\..\Mailing\Views\AsyncEmailSenderDashboard.cshtml"
+            #line 48 "..\..\Mailing\Views\AsyncEmailSenderDashboard.cshtml"
         Write(MailingClient.AsyncEmailSenderModule["initDashboard"](Url.Action<AsyncEmailSenderController>(p => p.View())));
 
             

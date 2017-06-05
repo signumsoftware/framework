@@ -103,15 +103,15 @@ namespace Signum.Web.Files
 
                 if (embeddedFile)
                 {
-                    RegisterFileConstructor<EmbeddedFileEntity>(data =>
+                    RegisterFileConstructor<FileEmbedded>(data =>
                     {
-                        return new EmbeddedFileEntity { FileName = data.FileName, BinaryFile = data.Content };
+                        return new FileEmbedded { FileName = data.FileName, BinaryFile = data.Content };
                     });
 
-                    var es = new EmbeddedEntitySettings<EmbeddedFileEntity>();
+                    var es = new EmbeddedEntitySettings<FileEmbedded>();
                     Navigator.AddSetting(es);
 
-                    var baseMapping = (Mapping<EmbeddedFileEntity>) es.MappingDefault.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
+                    var baseMapping = (Mapping<FileEmbedded>) es.MappingDefault.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
 
                     es.MappingDefault = ctx =>
                     {
@@ -124,7 +124,7 @@ namespace Signum.Web.Files
 
                             if (hpf != null && hpf.ContentLength != 0)
                             {
-                                return new EmbeddedFileEntity()
+                                return new FileEmbedded()
                                 {
                                     FileName = Path.GetFileName(hpf.FileName),
                                     BinaryFile = hpf.InputStream.ReadAllBytes()
@@ -132,7 +132,7 @@ namespace Signum.Web.Files
                             }
                             else if (ctx.Inputs.ContainsKey(EntityBaseKeys.EntityState))
                             {
-                                return (EmbeddedFileEntity)Navigator.Manager.DeserializeEntity(ctx.Inputs[EntityBaseKeys.EntityState]);
+                                return (FileEmbedded)Navigator.Manager.DeserializeEntity(ctx.Inputs[EntityBaseKeys.EntityState]);
                             }
                             else
                                 return baseMapping(ctx);
@@ -214,12 +214,12 @@ namespace Signum.Web.Files
 
                 if (embeddedFilePath)
                 {
-                    RegisterFileConstructor<EmbeddedFilePathEntity>(data =>
+                    RegisterFileConstructor<FilePathEmbedded>(data =>
                     {
                         if (!data.FileType.HasText())
                             throw new InvalidOperationException("Couldn't create FilePath with unknown FileType for file '{0}'".FormatWith(data.FileName));
 
-                        return new EmbeddedFilePathEntity(SymbolLogic<FileTypeSymbol>.ToSymbol(data.FileType))
+                        return new FilePathEmbedded(SymbolLogic<FileTypeSymbol>.ToSymbol(data.FileType))
                         {
                             FileName = data.FileName,
                             BinaryFile = data.Content,
@@ -227,19 +227,19 @@ namespace Signum.Web.Files
                         }.SaveFile();
                     });
 
-                    RegisterDownloadUrlConstructor<EmbeddedFilePathEntity>(fp =>
+                    RegisterDownloadUrlConstructor<FilePathEmbedded>(fp =>
                     {
                         return RouteHelper.New().Action((FileController fc) => fc.DownloadEmbedded(fp.FileType.ToLite(), fp.Suffix, fp.FileName));
                     });
 
                     Navigator.AddSettings(new List<EntitySettings>
                     {
-                        new EmbeddedEntitySettings<EmbeddedFilePathEntity>{ PartialViewName = e => ViewPrefix.FormatWith("EmbeddedFilePath")},
+                        new EmbeddedEntitySettings<FilePathEmbedded>{ PartialViewName = e => ViewPrefix.FormatWith("EmbeddedFilePath")},
                     });
 
-                    var es = Navigator.EmbeddedEntitySettings<EmbeddedFilePathEntity>();
+                    var es = Navigator.EmbeddedEntitySettings<FilePathEmbedded>();
 
-                    var baseMapping = (Mapping<EmbeddedFilePathEntity>)es.MappingDefault.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
+                    var baseMapping = (Mapping<FilePathEmbedded>)es.MappingDefault.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
 
                     es.MappingDefault = ctx =>
                     {
@@ -252,7 +252,7 @@ namespace Signum.Web.Files
                             if (hpf != null)
                             {
                                 string fileType = ctx.Inputs[FileLineKeys.FileType];
-                                return new EmbeddedFilePathEntity(SymbolLogic<FileTypeSymbol>.ToSymbol(fileType))
+                                return new FilePathEmbedded(SymbolLogic<FileTypeSymbol>.ToSymbol(fileType))
                                 {
                                     FileName = Path.GetFileName(hpf.FileName),
                                     BinaryFile = hpf.InputStream.ReadAllBytes(),
@@ -260,7 +260,7 @@ namespace Signum.Web.Files
                             }
                             else if (ctx.Inputs.ContainsKey(EntityBaseKeys.EntityState))
                             {
-                                return (EmbeddedFilePathEntity)Navigator.Manager.DeserializeEntity(ctx.Inputs[EntityBaseKeys.EntityState]);
+                                return (FilePathEmbedded)Navigator.Manager.DeserializeEntity(ctx.Inputs[EntityBaseKeys.EntityState]);
                             }
 
                             else

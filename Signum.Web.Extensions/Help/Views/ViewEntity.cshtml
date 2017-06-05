@@ -17,7 +17,7 @@
     ViewBag.Title = eh.Type.NiceName();
 }
 
-@helper WriteProperty(Node<Tuple<PropertyHelp, TypeElementContext<PropertyRouteHelpEntity>>> node, string entityName)
+@helper WriteProperty(Node<Tuple<PropertyHelp, TypeElementContext<PropertyRouteHelpEmbedded>>> node, string entityName)
 {
     PropertyHelp ph = node.Value.Item1;
     using (var ctx = node.Value.Item2)

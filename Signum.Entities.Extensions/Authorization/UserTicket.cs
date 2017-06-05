@@ -42,12 +42,12 @@ namespace Signum.Entities.Authorization
         }
 
 
-        public static Func<string, string,Tuple<PrimaryKey, string>> ParseTicket = (ticket, device) => ParseTicketDefauld(ticket, device);
-        public static Tuple<PrimaryKey, string> ParseTicketDefauld(string ticket, string device)
+        public static Func<string, string,(PrimaryKey, string)> ParseTicket = (ticket, device) => ParseTicketDefauld(ticket, device);
+        public static (PrimaryKey, string) ParseTicketDefauld(string ticket, string device)
         {
             Match m = Regex.Match(ticket, @"^(?<id>.*)\|(?<ticket>.*)$");
             if (!m.Success) throw new FormatException("The content of the ticket has an invalid format");
-            return (userId : PrimaryKey.Parse(m.Groups["id"].Value, typeof(UserEntity)), ticket: m.Groups["ticket"].Value);
+            return ( PrimaryKey.Parse(m.Groups["id"].Value, typeof(UserEntity)), m.Groups["ticket"].Value);
         }
     }
 }

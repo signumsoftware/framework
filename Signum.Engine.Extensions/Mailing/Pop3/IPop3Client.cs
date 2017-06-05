@@ -66,7 +66,7 @@ namespace Signum.Engine.Extensions.Mailing.Pop3
                 State = EmailMessageState.Received,
                 Subject = message.Headers.Subject,
                 Attachments = message.FindAllAttachments().Select(a =>
-                    new EmailAttachmentEntity
+                    new EmailAttachmentEmbedded
                     {
                         ContentId = a.ContentId,
                         File = new FilePathEntity(EmailFileType.Attachment, a.ContentDisposition?.FileName ?? a.FileName, a.Body).Save(),

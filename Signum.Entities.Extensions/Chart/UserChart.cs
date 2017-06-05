@@ -184,7 +184,7 @@ namespace Signum.Entities.Chart
             ParseData(ctx.GetQueryDescription(Query));
         }
 
-        public void FixParameters(ChartColumnEmbedded chartColumnEntity)
+        public void FixParameters(ChartColumnEmbedded ChartColumnEmbedded)
         {
 
         }

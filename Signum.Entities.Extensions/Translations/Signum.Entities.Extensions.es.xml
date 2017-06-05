@@ -206,7 +206,7 @@
     <Member Name="Color" Description="Color" />
     <Member Name="Related" Description="Relacionado" />
   </Type>
-  <Type Name="ChartColumnEntity" Description="Columna de gráfico">
+  <Type Name="ChartColumnEmbedded" Description="Columna de gráfico">
     <Member Name="DisplayName" Description="Nombre para Mostrar" />
     <Member Name="Token" Description="Token" />
   </Type>
@@ -261,7 +261,7 @@
     <Member Name="Colors" Description="Colores" />
     <Member Name="Type" Description="Tipo" />
   </Type>
-  <Type Name="ChartParameterEntity" Description="Parámetro de gráfico">
+  <Type Name="ChartParameterEmbedded" Description="Parámetro de gráfico">
     <Member Name="Name" Description="Nombre" />
     <Member Name="ScriptParameter" Description="Parámetro de secuencia de comandos" />
     <Member Name="Value" Description="Valor" />
@@ -285,7 +285,7 @@
     <Member Name="Parameters" Description="Parámetros" />
     <Member Name="QueryName" Description="Nombre consulta" />
   </Type>
-  <Type Name="ChartScriptColumnEntity" Description="Columna de Script de Gráfico">
+  <Type Name="ChartScriptColumnEmbedded" Description="Columna de Script de Gráfico">
     <Member Name="ColumnType" Description="Tipo de columna" />
     <Member Name="DisplayName" Description="Nombre para Mostrar" />
     <Member Name="IsGroupKey" Description="Es clave de grupo" />
@@ -305,13 +305,13 @@
     <Member Name="Delete" Description="Eliminar" />
     <Member Name="Save" Description="Guardar" />
   </Type>
-  <Type Name="ChartScriptParameterEntity" Description="Parámetro de script de gráfico">
+  <Type Name="ChartScriptParameterEmbedded" Description="Parámetro de script de gráfico">
     <Member Name="ColumnIndex" Description="Índice de columnas" />
     <Member Name="Name" Description="Nombre" />
     <Member Name="Type" Description="Tipo" />
     <Member Name="ValueDefinition" Description="Definición de valor" />
   </Type>
-  <Type Name="ClientCertificationFileEntity" Description="Archivo de certificado de cliente">
+  <Type Name="ClientCertificationFileEmbedded" Description="Archivo de certificado de cliente">
     <Member Name="CertFileType" Description="Tipo de archivo de certificado" />
     <Member Name="FullFilePath" Description="Ruta completa del archivo" />
   </Type>
@@ -449,7 +449,7 @@
     <Member Name="Error" Description="Error" />
     <Member Name="InProgress" Description="En progreso" />
   </Type>
-  <Type Name="DisconnectedImportTableEntity" Description="Tabla de importación desconectada">
+  <Type Name="DisconnectedImportTableEmbedded" Description="Tabla de importación desconectada">
     <Member Name="CopyTable" Description="Copiar tabla" />
     <Member Name="DisableForeignKeys" Description="Desactivar las claves externas" />
     <Member Name="InsertedOrUpdated" Description="Insertar o actualizar" />
@@ -526,13 +526,13 @@
     <Member Name="Type0DoesNotContainsField1" Description="Tipo '{0}' no contiene el campo '{1}'" />
     <Member Name="Value" Description="Valor" />
   </Type>
-  <Type Name="EmailAddressEntity" Description="Dirección email">
+  <Type Name="EmailAddressEmbedded" Description="Dirección email">
     <Member Name="DisplayName" Description="Nombre" />
     <Member Name="EmailAddress" Description="Dirección email" />
     <Member Name="EmailOwner" Description="Propietario email" />
     <Member Name="InvalidEmail" Description="Correo electrónico no válida" />
   </Type>
-  <Type Name="EmailAttachmentEntity" Description="Archivo adjunto de email">
+  <Type Name="EmailAttachmentEmbedded" Description="Archivo adjunto de email">
     <Member Name="ContentId" Description="Content id" />
     <Member Name="File" Description="Archivo" />
     <Member Name="Type" Description="Tipo" />
@@ -541,7 +541,7 @@
     <Member Name="Attachment" Description="Archivo adjunto" />
     <Member Name="LinkedResource" Description="Recursos vinculados" />
   </Type>
-  <Type Name="EmailConfigurationEntity" Description="Configuración de email">
+  <Type Name="EmailConfigurationEmbedded" Description="Configuración de email">
     <Member Name="AsyncSenderPeriod" Description="Período de envío Asíncrono" />
     <Member Name="AvoidSendingEmailsOlderThan" Description="Evite enviar mensajes previos a" />
     <Member Name="ChunkSizeSendingEmails" Description="Tamaño de envío de mensajes de correo electrónico" />
@@ -559,7 +559,7 @@
     <Member Name="Messages" Description="Mensajes" />
     <Member Name="Name" Description="Nombre" />
   </Type>
-  <Type Name="EmailMasterTemplateMessageEntity" Description="Mensaje email plantilla maestra">
+  <Type Name="EmailMasterTemplateMessageEmbedded" Description="Mensaje email plantilla maestra">
     <Member Name="CultureInfo" Description="Información cultura" />
     <Member Name="MasterTemplate" Description="Plantilla maestra" />
     <Member Name="Text" Description="Texto" />
@@ -654,7 +654,7 @@
     <Member Name="Cc" Description="CC" />
     <Member Name="To" Description="Para" />
   </Type>
-  <Type Name="EmailTemplateContactEntity" Description="Plantilla email">
+  <Type Name="EmailTemplateContactEmbedded" Description="Plantilla email">
     <Member Name="DisplayName" Description="Nombre" />
     <Member Name="EmailAddress" Description="Dirección email" />
     <Member Name="Token" Description="Token" />
@@ -692,7 +692,7 @@
     <Member Name="TokenMustBeA0" Description="Token debe ser un {0}" />
     <Member Name="TokenOrEmailAddressMustBeSet" Description="Debe establecerse Token o correo electrónico" />
   </Type>
-  <Type Name="EmailTemplateMessageEntity" Description="Mensaje plantilla email">
+  <Type Name="EmailTemplateMessageEmbedded" Description="Mensaje plantilla email">
     <Member Name="CultureInfo" Description="Cultura" />
     <Member Name="Subject" Description="Asunto" />
     <Member Name="Template" Description="Plantilla" />
@@ -713,11 +713,11 @@
     <Member Name="InsertMessageContent" Description="Insertar contenido del mensaje" />
     <Member Name="Language" Description="Idioma" />
   </Type>
-  <Type Name="EmbeddedFileEntity" Description="Archivo incrustado">
+  <Type Name="FileEmbedded" Description="Archivo incrustado">
     <Member Name="BinaryFile" Description="Archivo binario" />
     <Member Name="FileName" Description="Nombre de archivo" />
   </Type>
-  <Type Name="EmbeddedFilePathEntity" Description="Ruta del archivo incrustado">
+  <Type Name="FilePathEmbedded" Description="Ruta del archivo incrustado">
     <Member Name="BinaryFile" Description="Archivo binario" />
     <Member Name="CalculatedDirectory" Description="Directorio calculado" />
     <Member Name="FileLength" Description="Longitud del archivo" />
@@ -912,7 +912,7 @@
     <Member Name="Delete" Description="Eliminar" />
     <Member Name="Save" Description="Guardar" />
   </Type>
-  <Type Name="HolidayEntity" Description="Festivo">
+  <Type Name="HolidayEmbedded" Description="Festivo">
     <Member Name="Date" Description="Fecha" />
     <Member Name="Name" Description="Nombre" />
   </Type>
@@ -949,7 +949,7 @@
   <Type Name="LastAuthRulesImportEntity" Description="Últimas importación de AuthRules">
     <Member Name="Date" Description="Fecha" />
   </Type>
-  <Type Name="LinkElementEntity" Description="Elemento enlace">
+  <Type Name="LinkElementEmbedded" Description="Elemento enlace">
     <Member Name="Label" Description="Etiqueta" />
     <Member Name="Link" Description="Enlace" />
   </Type>
@@ -1075,7 +1075,7 @@
     <Member Name="Unknown" Description="Desconocido" />
     <Member Name="Yes" Description="sí" />
   </Type>
-  <Type Name="OmniboxPanelPartEntity" Description="Panel de Omnibox parte">
+  <Type Name="OmniboxPanelPartEmbedded" Description="Panel de Omnibox parte">
     <Member Name="RequiresTitle" Description="Requiere título" />
   </Type>
   <Type Name="OperationAllowed">
@@ -1111,7 +1111,7 @@
   <Type Name="PackageOperationProcess">
     <Member Name="PackageOperation" Description="Paquete operación" />
   </Type>
-  <Type Name="PanelPartEntity" Description="Parte del panel">
+  <Type Name="PanelPartEmbedded" Description="Parte del panel">
     <Member Name="Columns" Description="Columnas" />
     <Member Name="Content" Description="Contenido" />
     <Member Name="Row" Description="Fila" />
@@ -1233,7 +1233,7 @@
     <Member Name="Read" Description="Lectura" />
   </Type>
   <Type Name="PropertyAllowedRule" Description="Propiedad que permitir regla" />
-  <Type Name="PropertyRouteHelpEntity" Description="Ayuda ruta propiedad">
+  <Type Name="PropertyRouteHelpEmbedded" Description="Ayuda ruta propiedad">
     <Member Name="Description" Description="Descripción" />
     <Member Name="Property" Description="Propiedad" />
   </Type>
@@ -1241,15 +1241,15 @@
     <Member Name="Type" Description="Tipo" />
   </Type>
   <Type Name="QueryAllowedRule" Description="Consulta que permitir regla" />
-  <Type Name="QueryColumnEntity" Description="Columna de consulta">
+  <Type Name="QueryColumnEmbedded" Description="Columna de consulta">
     <Member Name="DisplayName" Description="Nombre" />
     <Member Name="Token" Description="Token" />
   </Type>
-  <Type Name="QueryColumnHelpEntity" Description="Consulta columna ayuda">
+  <Type Name="QueryColumnHelpEmbedded" Description="Consulta columna ayuda">
     <Member Name="ColumnName" Description="Nombre de columna" />
     <Member Name="Description" Description="Descripción" />
   </Type>
-  <Type Name="QueryFilterEntity" Description="Filtro de consulta">
+  <Type Name="QueryFilterEmbedded" Description="Filtro de consulta">
     <Member Name="Operation" Description="Operación" />
     <Member Name="Token" Description="Token" />
     <Member Name="ValueString" Description="Valor cadena" />
@@ -1264,7 +1264,7 @@
   <Type Name="QueryHelpOperation">
     <Member Name="Save" Description="Guardar" />
   </Type>
-  <Type Name="QueryOrderEntity" Description="Orden de consulta">
+  <Type Name="QueryOrderEmbedded" Description="Orden de consulta">
     <Member Name="OrderType" Description="Tipo de orden" />
     <Member Name="Token" Description="Token" />
   </Type>
@@ -1275,7 +1275,7 @@
     <Member Name="Key" Description="Clave" />
     <Member Name="Value" Description="Valor" />
   </Type>
-  <Type Name="QueryTokenEntity" Description="Token de consulta">
+  <Type Name="QueryTokenEmbedded" Description="Token de consulta">
     <Member Name="TokenString" Description="Cadena del token" />
   </Type>
   <Type Name="ResetPasswordRequestEntity" Description="Solicitud nueva contraseña">
@@ -1448,7 +1448,7 @@
     <Member Name="TheTemplateMustBeActiveToConstructSMSMessages" Description="La plantilla debe estar activo para la construcción de mensajes SMS" />
     <Member Name="TheTextForTheSMSMessageExceedsTheLengthLimit" Description="El texto del mensaje de SMS supera el límite de longitud" />
   </Type>
-  <Type Name="SMSConfigurationEntity" Description="Configuración de SMS">
+  <Type Name="SMSConfigurationEmbedded" Description="Configuración de SMS">
     <Member Name="DefaultCulture" Description="Cultura predeterminada" />
   </Type>
   <Type Name="SMSMessageEntity" Description="Mensaje SMS">
@@ -1511,7 +1511,7 @@
     <Member Name="ThereMustBeAMessageFor0" Description="Debe haber un mensaje para {0}" />
     <Member Name="TheresMoreThanOneMessageForTheSameLanguage" Description="Hay más de un mensaje para el mismo idioma" />
   </Type>
-  <Type Name="SMSTemplateMessageEntity" Description="Mensaje de plantilla SMS">
+  <Type Name="SMSTemplateMessageEmbedded" Description="Mensaje de plantilla SMS">
     <Member Name="CultureInfo" Description="Información cultura" />
     <Member Name="Message" Description="Mensaje" />
     <Member Name="Template" Description="Plantilla" />
@@ -1533,7 +1533,7 @@
   <Type Name="SmtpConfigurationOperation">
     <Member Name="Save" Description="Guardar" />
   </Type>
-  <Type Name="SmtpNetworkDeliveryEntity" Description="Smtp network delivery">
+  <Type Name="SmtpNetworkDeliveryEmbedded" Description="Smtp network delivery">
     <Member Name="ClientCertificationFiles" Description="Client certification files" />
     <Member Name="EnableSSL" Description="Habilitar SSL" />
     <Member Name="Host" Description="Host" />
@@ -1622,7 +1622,7 @@
     <Member Name="Delete" Description="Eliminar" />
     <Member Name="Save" Description="Guardar" />
   </Type>
-  <Type Name="TranslatorUserCultureEntity" Description="Cultura usuario traductor">
+  <Type Name="TranslatorUserCultureEmbedded" Description="Cultura usuario traductor">
     <Member Name="Action" Description="Acción" />
     <Member Name="Culture" Description="Cultura" />
   </Type>
@@ -1688,7 +1688,7 @@
   <Type Name="UserAssetPermission">
     <Member Name="UserAssetsToXML" Description="Activos del usuario a XML" />
   </Type>
-  <Type Name="UserAssetPreviewLine" Description="Línea de previsualización de activos de usuario">
+  <Type Name="UserAssetPreviewLineEmbedded" Description="Línea de previsualización de activos de usuario">
     <Member Name="Action" Description="Acción" />
     <Member Name="Guid" Description="Guid" />
     <Member Name="OverrideEntity" Description="Reemplazar la entidad" />

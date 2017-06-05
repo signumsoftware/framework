@@ -105,7 +105,7 @@ namespace Signum.Web.AuthAdmin
                 Navigator.AddSetting(new EntitySettings<R>());
 
             string viewPrefix = "~/authAdmin/Views/{0}.cshtml";
-            Navigator.AddSetting(new EmbeddedEntitySettings<T>
+            Navigator.AddSetting(new ModelEntitySettings<T>
             {
                 PartialViewName = e => viewPrefix.FormatWith(partialViewName),
                 MappingDefault = new EntityMapping<T>(false)
@@ -119,10 +119,10 @@ namespace Signum.Web.AuthAdmin
 
         static void RegisterTypes()
         {
-            Navigator.AddSetting(new EmbeddedEntitySettings<TypeConditionRule>());
+            Navigator.AddSetting(new EmbeddedEntitySettings<TypeConditionRuleEmbedded>());
 
             string viewPrefix = "~/authAdmin/Views/{0}.cshtml";
-            Navigator.AddSetting(new EmbeddedEntitySettings<TypeRulePack>
+            Navigator.AddSetting(new ModelEntitySettings<TypeRulePack>
             {
                 PartialViewName = e => viewPrefix.FormatWith("types"),
                 MappingDefault = new EntityMapping<TypeRulePack>(false)
@@ -132,10 +132,10 @@ namespace Signum.Web.AuthAdmin
                             .SetProperty(p => p.Allowed, ctx => new TypeAllowedAndConditions(
                                 ParseTypeAllowed(ctx.Inputs.SubDictionary("Fallback")),
                                 ctx.Inputs.SubDictionary("Conditions").IndexSubDictionaries().Select(d =>
-                                    new TypeConditionRule(
+                                    new TypeConditionRuleEmbedded(
                                         SymbolLogic<TypeConditionSymbol>.ToSymbol(d["ConditionName"]),
                                         ParseTypeAllowed(d.SubDictionary("Allowed")))
-                                   ).ToReadOnly()))
+                                   ).ToMList()))
                         ))
             });
 

@@ -47,7 +47,7 @@ namespace Signum.Web.Translation
                     Navigator.AddSettings(new List<EntitySettings>
                     {
                         new EntitySettings<TranslatorUserEntity>{ PartialViewName = t=>ViewPrefix.FormatWith("TranslatorUser")},
-                        new EmbeddedEntitySettings<TranslatorUserCultureEntity>{ PartialViewName = t=>ViewPrefix.FormatWith("TranslatorUserCulture")},
+                        new EmbeddedEntitySettings<TranslatorUserCultureEmbedded>{ PartialViewName = t=>ViewPrefix.FormatWith("TranslatorUserCulture")},
                     });
                 }
 
@@ -179,7 +179,7 @@ namespace Signum.Web.Translation
                     var color =
                         gr.Key == StringDistance.DiffAction.Added ? "#72F272" :
                         gr.Key == StringDistance.DiffAction.Removed ? "#FF8B8B" :
-                        new InvalidOperationException().Throw<string>();
+                        throw new InvalidOperationException();
 
                     sb.Add(new HtmlTag("span").Attr("style", "background:" + color).SetInnerText(text));
                 }

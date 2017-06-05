@@ -38,7 +38,24 @@ namespace ASP
     using System.Web.Security;
     using System.Web.UI;
     using System.Web.WebPages;
+    
+    #line 7 "..\..\Translation\Views\View.cshtml"
+    using Signum.Engine.Translation;
+    
+    #line default
+    #line hidden
+    
+    #line 9 "..\..\Translation\Views\View.cshtml"
     using Signum.Entities;
+    
+    #line default
+    #line hidden
+    
+    #line 8 "..\..\Translation\Views\View.cshtml"
+    using Signum.Entities.Authorization;
+    
+    #line default
+    #line hidden
     
     #line 6 "..\..\Translation\Views\View.cshtml"
     using Signum.Entities.Translation;
@@ -69,7 +86,7 @@ namespace ASP
         public override void Execute()
         {
             
-            #line 7 "..\..\Translation\Views\View.cshtml"
+            #line 10 "..\..\Translation\Views\View.cshtml"
   
     CultureInfo culture = ViewBag.Culture;
     CultureInfo defaultCulture = ViewBag.DefaultCulture;
@@ -87,7 +104,7 @@ namespace ASP
 WriteLiteral("\r\n");
 
             
-            #line 18 "..\..\Translation\Views\View.cshtml"
+            #line 21 "..\..\Translation\Views\View.cshtml"
 Write(Html.ScriptCss("~/Translation/Content/Translation.css"));
 
             
@@ -96,7 +113,7 @@ Write(Html.ScriptCss("~/Translation/Content/Translation.css"));
 WriteLiteral("\r\n\r\n<h2>");
 
             
-            #line 20 "..\..\Translation\Views\View.cshtml"
+            #line 23 "..\..\Translation\Views\View.cshtml"
 Write(ViewBag.Title);
 
             
@@ -105,13 +122,13 @@ Write(ViewBag.Title);
 WriteLiteral("</h2>\r\n\r\n<div>\r\n");
 
             
-            #line 23 "..\..\Translation\Views\View.cshtml"
+            #line 26 "..\..\Translation\Views\View.cshtml"
     
             
             #line default
             #line hidden
             
-            #line 23 "..\..\Translation\Views\View.cshtml"
+            #line 26 "..\..\Translation\Views\View.cshtml"
      using (Html.BeginForm("View", "Translation", FormMethod.Get))
     {
         
@@ -119,42 +136,42 @@ WriteLiteral("</h2>\r\n\r\n<div>\r\n");
             #line default
             #line hidden
             
-            #line 25 "..\..\Translation\Views\View.cshtml"
+            #line 28 "..\..\Translation\Views\View.cshtml"
    Write(Html.Hidden("assembly"));
 
             
             #line default
             #line hidden
             
-            #line 25 "..\..\Translation\Views\View.cshtml"
+            #line 28 "..\..\Translation\Views\View.cshtml"
                                 
         
             
             #line default
             #line hidden
             
-            #line 26 "..\..\Translation\Views\View.cshtml"
+            #line 29 "..\..\Translation\Views\View.cshtml"
    Write(Html.Hidden("culture"));
 
             
             #line default
             #line hidden
             
-            #line 26 "..\..\Translation\Views\View.cshtml"
+            #line 29 "..\..\Translation\Views\View.cshtml"
                                
         
             
             #line default
             #line hidden
             
-            #line 27 "..\..\Translation\Views\View.cshtml"
+            #line 30 "..\..\Translation\Views\View.cshtml"
    Write(Html.TextBox("filter", (string)ViewBag.Filter));
 
             
             #line default
             #line hidden
             
-            #line 27 "..\..\Translation\Views\View.cshtml"
+            #line 30 "..\..\Translation\Views\View.cshtml"
                                                        ;
 
 
@@ -175,20 +192,20 @@ WriteLiteral("        <input");
 
 WriteLiteral(" type=\"submit\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 1134), Tuple.Create("\"", 1183)
+WriteAttribute("value", Tuple.Create(" value=\"", 1230), Tuple.Create("\"", 1279)
             
-            #line 30 "..\..\Translation\Views\View.cshtml"
-, Tuple.Create(Tuple.Create("", 1142), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Search.NiceToString()
+            #line 33 "..\..\Translation\Views\View.cshtml"
+, Tuple.Create(Tuple.Create("", 1238), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Search.NiceToString()
             
             #line default
             #line hidden
-, 1142), false)
+, 1238), false)
 );
 
 WriteLiteral(" />\r\n");
 
             
-            #line 31 "..\..\Translation\Views\View.cshtml"
+            #line 34 "..\..\Translation\Views\View.cshtml"
     }
 
             
@@ -197,7 +214,7 @@ WriteLiteral(" />\r\n");
 WriteLiteral("</div>\r\n\r\n");
 
             
-            #line 34 "..\..\Translation\Views\View.cshtml"
+            #line 37 "..\..\Translation\Views\View.cshtml"
  if (Model == null)
 {
 
@@ -207,7 +224,7 @@ WriteLiteral("</div>\r\n\r\n");
 WriteLiteral("    <em>");
 
             
-            #line 36 "..\..\Translation\Views\View.cshtml"
+            #line 39 "..\..\Translation\Views\View.cshtml"
    Write(TranslationMessage.PressSearchForResults.NiceToString());
 
             
@@ -216,7 +233,7 @@ WriteLiteral("    <em>");
 WriteLiteral("</em>\r\n");
 
             
-            #line 37 "..\..\Translation\Views\View.cshtml"
+            #line 40 "..\..\Translation\Views\View.cshtml"
 }
 else
 {
@@ -235,7 +252,7 @@ else
 WriteLiteral("        <strong>");
 
             
-            #line 48 "..\..\Translation\Views\View.cshtml"
+            #line 51 "..\..\Translation\Views\View.cshtml"
            Write(TranslationMessage.NoResultsFound.NiceToString());
 
             
@@ -244,7 +261,7 @@ WriteLiteral("        <strong>");
 WriteLiteral("</strong>\r\n");
 
             
-            #line 49 "..\..\Translation\Views\View.cshtml"
+            #line 52 "..\..\Translation\Views\View.cshtml"
     }
     else
     {
@@ -264,26 +281,26 @@ WriteLiteral(" style=\"width: 100%; margin: 0px\"");
 
 WriteLiteral(" class=\"st\"");
 
-WriteAttribute("pluralandgender", Tuple.Create(" pluralandgender=\"", 1976), Tuple.Create("\"", 2057)
+WriteAttribute("pluralandgender", Tuple.Create(" pluralandgender=\"", 2072), Tuple.Create("\"", 2153)
             
-            #line 56 "..\..\Translation\Views\View.cshtml"
-             , Tuple.Create(Tuple.Create("", 1994), Tuple.Create<System.Object, System.Int32>(Url.Action((TranslationController tc) => tc.PluralAndGender())
+            #line 59 "..\..\Translation\Views\View.cshtml"
+             , Tuple.Create(Tuple.Create("", 2090), Tuple.Create<System.Object, System.Int32>(Url.Action((TranslationController tc) => tc.PluralAndGender())
             
             #line default
             #line hidden
-, 1994), false)
+, 2090), false)
 );
 
 WriteLiteral(">\r\n");
 
             
-            #line 57 "..\..\Translation\Views\View.cshtml"
+            #line 60 "..\..\Translation\Views\View.cshtml"
                 
             
             #line default
             #line hidden
             
-            #line 57 "..\..\Translation\Views\View.cshtml"
+            #line 60 "..\..\Translation\Views\View.cshtml"
                  foreach (var defaultLocType in types)
                 {
                     bool hasDescription = defaultLocType.Options.IsSet(DescriptionOptions.Description);
@@ -294,6 +311,7 @@ WriteLiteral(">\r\n");
 
                     bool hasMembers = defaultLocType.Options.IsSet(DescriptionOptions.Members);
 
+        
 
             
             #line default
@@ -306,7 +324,7 @@ WriteLiteral(" class=\"leftCell\"");
 WriteLiteral(">");
 
             
-            #line 69 "..\..\Translation\Views\View.cshtml"
+            #line 73 "..\..\Translation\Views\View.cshtml"
                                             Write(TranslationMessage.Type.NiceToString());
 
             
@@ -321,7 +339,7 @@ WriteLiteral(" class=\"titleCell\"");
 WriteLiteral(">");
 
             
-            #line 70 "..\..\Translation\Views\View.cshtml"
+            #line 74 "..\..\Translation\Views\View.cshtml"
                                                          Write(defaultLocType.Type.Name);
 
             
@@ -330,7 +348,7 @@ WriteLiteral(">");
 WriteLiteral(" (");
 
             
-            #line 70 "..\..\Translation\Views\View.cshtml"
+            #line 74 "..\..\Translation\Views\View.cshtml"
                                                                                      Write("/".Combine(hasDescription ? "Singular" : null, hasPlural ? "Plural" : null, hasGenderOption ? "Gender" : null, hasMembers ? "Members" : null));
 
             
@@ -339,7 +357,7 @@ WriteLiteral(" (");
 WriteLiteral(")</th>\r\n                        </tr>\r\n                    </thead>\r\n");
 
             
-            #line 73 "..\..\Translation\Views\View.cshtml"
+            #line 77 "..\..\Translation\Views\View.cshtml"
 
                     if (defaultLocType.Options.IsSet(DescriptionOptions.Description))
                     {
@@ -360,7 +378,7 @@ WriteLiteral(" class=\"leftCell\"");
 WriteLiteral(">");
 
             
-            #line 83 "..\..\Translation\Views\View.cshtml"
+            #line 87 "..\..\Translation\Views\View.cshtml"
                                                 Write(locType.Assembly.Culture.Name);
 
             
@@ -373,13 +391,13 @@ WriteLiteral(" class=\"smallCell monospaceCell\"");
 WriteLiteral(">\r\n");
 
             
-            #line 85 "..\..\Translation\Views\View.cshtml"
+            #line 89 "..\..\Translation\Views\View.cshtml"
                                     
             
             #line default
             #line hidden
             
-            #line 85 "..\..\Translation\Views\View.cshtml"
+            #line 89 "..\..\Translation\Views\View.cshtml"
                                      if (hasGender)
                                     {
                                         if (editCulture(locType.Assembly.Culture))
@@ -398,14 +416,14 @@ WriteLiteral(">\r\n");
             #line default
             #line hidden
             
-            #line 98 "..\..\Translation\Views\View.cshtml"
+            #line 102 "..\..\Translation\Views\View.cshtml"
                                        Write(Html.SafeDropDownList(locKey(locType) + ".Gender", list));
 
             
             #line default
             #line hidden
             
-            #line 98 "..\..\Translation\Views\View.cshtml"
+            #line 102 "..\..\Translation\Views\View.cshtml"
                                                                                                      ;
                                         }
                                         else
@@ -415,14 +433,14 @@ WriteLiteral(">\r\n");
             #line default
             #line hidden
             
-            #line 102 "..\..\Translation\Views\View.cshtml"
+            #line 106 "..\..\Translation\Views\View.cshtml"
                                         Write(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: false, culture: locType.Assembly.Culture) : "-");
 
             
             #line default
             #line hidden
             
-            #line 102 "..\..\Translation\Views\View.cshtml"
+            #line 106 "..\..\Translation\Views\View.cshtml"
                                                                                                                                                                                     
                                         }
                                     }
@@ -437,13 +455,13 @@ WriteLiteral(" class=\"monospaceCell\"");
 WriteLiteral(">\r\n");
 
             
-            #line 107 "..\..\Translation\Views\View.cshtml"
+            #line 111 "..\..\Translation\Views\View.cshtml"
                                     
             
             #line default
             #line hidden
             
-            #line 107 "..\..\Translation\Views\View.cshtml"
+            #line 111 "..\..\Translation\Views\View.cshtml"
                                      if (editCulture(locType.Assembly.Culture))
                                     {
                                         
@@ -451,14 +469,14 @@ WriteLiteral(">\r\n");
             #line default
             #line hidden
             
-            #line 109 "..\..\Translation\Views\View.cshtml"
+            #line 113 "..\..\Translation\Views\View.cshtml"
                                    Write(Html.TextArea(locKey(locType) + ".Description", locType.Description, new { style = "width:90%;" }));
 
             
             #line default
             #line hidden
             
-            #line 109 "..\..\Translation\Views\View.cshtml"
+            #line 113 "..\..\Translation\Views\View.cshtml"
                                                                                                                                            
                                     }
                                     else
@@ -468,14 +486,14 @@ WriteLiteral(">\r\n");
             #line default
             #line hidden
             
-            #line 113 "..\..\Translation\Views\View.cshtml"
+            #line 117 "..\..\Translation\Views\View.cshtml"
                                    Write(locType.Description);
 
             
             #line default
             #line hidden
             
-            #line 113 "..\..\Translation\Views\View.cshtml"
+            #line 117 "..\..\Translation\Views\View.cshtml"
                                                             
                                     }
 
@@ -489,13 +507,13 @@ WriteLiteral(" class=\"smallCell\"");
 WriteLiteral(">\r\n");
 
             
-            #line 117 "..\..\Translation\Views\View.cshtml"
+            #line 121 "..\..\Translation\Views\View.cshtml"
                                     
             
             #line default
             #line hidden
             
-            #line 117 "..\..\Translation\Views\View.cshtml"
+            #line 121 "..\..\Translation\Views\View.cshtml"
                                      if (hasPlural && hasGender)
                                     {
                                         
@@ -503,14 +521,14 @@ WriteLiteral(">\r\n");
             #line default
             #line hidden
             
-            #line 119 "..\..\Translation\Views\View.cshtml"
+            #line 123 "..\..\Translation\Views\View.cshtml"
                                     Write(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: true, culture: locType.Assembly.Culture) : "-");
 
             
             #line default
             #line hidden
             
-            #line 119 "..\..\Translation\Views\View.cshtml"
+            #line 123 "..\..\Translation\Views\View.cshtml"
                                                                                                                                                                                
                                     }
 
@@ -524,13 +542,13 @@ WriteLiteral(" class=\"monospaceCell\"");
 WriteLiteral(">\r\n");
 
             
-            #line 123 "..\..\Translation\Views\View.cshtml"
+            #line 127 "..\..\Translation\Views\View.cshtml"
                                     
             
             #line default
             #line hidden
             
-            #line 123 "..\..\Translation\Views\View.cshtml"
+            #line 127 "..\..\Translation\Views\View.cshtml"
                                      if (hasPlural)
                                     {
                                         if (editCulture(locType.Assembly.Culture))
@@ -540,14 +558,14 @@ WriteLiteral(">\r\n");
             #line default
             #line hidden
             
-            #line 127 "..\..\Translation\Views\View.cshtml"
+            #line 131 "..\..\Translation\Views\View.cshtml"
                                        Write(Html.TextArea(locKey(locType) + ".PluralDescription", locType.PluralDescription, new { style = "width:90%;" }));
 
             
             #line default
             #line hidden
             
-            #line 127 "..\..\Translation\Views\View.cshtml"
+            #line 131 "..\..\Translation\Views\View.cshtml"
                                                                                                                                                            
                                         }
                                         else
@@ -557,14 +575,14 @@ WriteLiteral(">\r\n");
             #line default
             #line hidden
             
-            #line 131 "..\..\Translation\Views\View.cshtml"
+            #line 135 "..\..\Translation\Views\View.cshtml"
                                        Write(locType.PluralDescription);
 
             
             #line default
             #line hidden
             
-            #line 131 "..\..\Translation\Views\View.cshtml"
+            #line 135 "..\..\Translation\Views\View.cshtml"
                                                                       
                                         }
                                     }
@@ -575,7 +593,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                                </th>\r\n                            </tr>\r\n");
 
             
-            #line 136 "..\..\Translation\Views\View.cshtml"
+            #line 140 "..\..\Translation\Views\View.cshtml"
                         }
                     }
 
@@ -598,7 +616,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                                    ");
 
             
-            #line 147 "..\..\Translation\Views\View.cshtml"
+            #line 151 "..\..\Translation\Views\View.cshtml"
                                Write(TranslationMessage.Member.NiceToString());
 
             
@@ -613,7 +631,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                                    ");
 
             
-            #line 150 "..\..\Translation\Views\View.cshtml"
+            #line 154 "..\..\Translation\Views\View.cshtml"
                                 Write(key);
 
             
@@ -622,7 +640,7 @@ WriteLiteral("                                    ");
 WriteLiteral("\r\n                                </th>\r\n                            </tr>\r\n");
 
             
-            #line 153 "..\..\Translation\Views\View.cshtml"
+            #line 157 "..\..\Translation\Views\View.cshtml"
 
                             foreach (var locType in Model.Values.Select(la => la.Types[defaultLocType.Type]).Where(lt => editCulture(lt.Assembly.Culture) || lt.Members.ContainsKey(key)))
                             {
@@ -637,7 +655,7 @@ WriteLiteral(" class=\"leftCell\"");
 WriteLiteral(">");
 
             
-            #line 157 "..\..\Translation\Views\View.cshtml"
+            #line 161 "..\..\Translation\Views\View.cshtml"
                                                     Write(locType.Assembly.Culture.Name);
 
             
@@ -652,13 +670,13 @@ WriteLiteral(" class=\"monospaceCell\"");
 WriteLiteral(">\r\n\r\n");
 
             
-            #line 160 "..\..\Translation\Views\View.cshtml"
+            #line 164 "..\..\Translation\Views\View.cshtml"
                                         
             
             #line default
             #line hidden
             
-            #line 160 "..\..\Translation\Views\View.cshtml"
+            #line 164 "..\..\Translation\Views\View.cshtml"
                                          if (editCulture(locType.Assembly.Culture))
                                         {
                                             
@@ -666,14 +684,14 @@ WriteLiteral(">\r\n\r\n");
             #line default
             #line hidden
             
-            #line 162 "..\..\Translation\Views\View.cshtml"
+            #line 166 "..\..\Translation\Views\View.cshtml"
                                        Write(Html.TextArea(locKey(locType) + ".Member." + key, locType.Members.TryGetC(key), new { style = "width:90%;" }));
 
             
             #line default
             #line hidden
             
-            #line 162 "..\..\Translation\Views\View.cshtml"
+            #line 166 "..\..\Translation\Views\View.cshtml"
                                                                                                                                                           
                                         }
                                         else
@@ -683,14 +701,14 @@ WriteLiteral(">\r\n\r\n");
             #line default
             #line hidden
             
-            #line 166 "..\..\Translation\Views\View.cshtml"
+            #line 170 "..\..\Translation\Views\View.cshtml"
                                        Write(locType.Members.TryGetC(key));
 
             
             #line default
             #line hidden
             
-            #line 166 "..\..\Translation\Views\View.cshtml"
+            #line 170 "..\..\Translation\Views\View.cshtml"
                                                                          
                                         }
 
@@ -701,7 +719,7 @@ WriteLiteral("                                    </td>\r\n                     
 "\n");
 
             
-            #line 170 "..\..\Translation\Views\View.cshtml"
+            #line 174 "..\..\Translation\Views\View.cshtml"
                             }
                         }
                     }
@@ -716,20 +734,20 @@ WriteLiteral("            <input");
 
 WriteLiteral(" type=\"submit\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 9153), Tuple.Create("\"", 9200)
+WriteAttribute("value", Tuple.Create(" value=\"", 9259), Tuple.Create("\"", 9306)
             
-            #line 175 "..\..\Translation\Views\View.cshtml"
-, Tuple.Create(Tuple.Create("", 9161), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
+            #line 179 "..\..\Translation\Views\View.cshtml"
+, Tuple.Create(Tuple.Create("", 9267), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
             
             #line default
             #line hidden
-, 9161), false)
+, 9267), false)
 );
 
 WriteLiteral(" />\r\n");
 
             
-            #line 176 "..\..\Translation\Views\View.cshtml"
+            #line 180 "..\..\Translation\Views\View.cshtml"
         }
     }
 }
@@ -742,7 +760,7 @@ WriteLiteral("\r\n<script>\r\n    $(function () {\r\n");
 WriteLiteral("        ");
 
             
-            #line 182 "..\..\Translation\Views\View.cshtml"
+            #line 186 "..\..\Translation\Views\View.cshtml"
     Write(Signum.Web.Translation.TranslationClient.Module["fixTextAreas"]());
 
             

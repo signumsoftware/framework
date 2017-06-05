@@ -42,8 +42,8 @@ namespace Signum.Web.Excel
 
                 if (excelReport)
                 {
-                    if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(EmbeddedFileEntity)))
-                        throw new InvalidOperationException("Call EmbeddedFileEntity first");
+                    if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(FileEmbedded)))
+                        throw new InvalidOperationException("Call FileEmbedded first");
 
                     if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryEntity)))
                         Navigator.Manager.EntitySettings.Add(typeof(QueryEntity), new EntitySettings<QueryEntity>());
@@ -57,18 +57,7 @@ namespace Signum.Web.Excel
 
                 if (excelAttachment)
                 {
-                    var es = new EntitySettings<ExcelAttachmentEntity>
-                    {
-                        PartialViewName = _ => ViewPrefix.FormatWith("ExcelAttachment")
-                    };
-
-                    es.MappingMain = es.MappingLine = new EntityMapping<ExcelAttachmentEntity>(true)
-                        .SetProperty(etm => etm.Template, ctx =>
-                        {
-                            return (EmailTemplateEntity)ctx.Parent.Parent?.Parent.Parent.UntypedValue;
-                        });
-
-                    Navigator.AddSetting(es);
+                    Navigator.AddSetting(new EntitySettings<ExcelAttachmentEntity> { PartialViewName = _ => ViewPrefix.FormatWith("ExcelAttachment") });
                 }
             }
         }

@@ -23,7 +23,7 @@ namespace Signum.Engine.Authorization
 
         public static bool IsStarted { get; private set; }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<UserTicketEntity, string> StringTicket = null, Func<string, string, Tuple<PrimaryKey, string>> ParseTicket=null)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<UserTicketEntity, string> StringTicket = null, Func<string, string, (PrimaryKey, string)> ParseTicket=null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -97,10 +97,10 @@ namespace Signum.Engine.Authorization
             {
                 var pair = UserTicketEntity.ParseTicket(ticket, deviceKey);
 
-                UserEntity user = Database.Retrieve<UserEntity>(pair.userId);
+                UserEntity user = Database.Retrieve<UserEntity>(pair.Item1);
                 CleanExpiredTickets(user);
 
-                UserTicketEntity userTicket = user.UserTickets().SingleOrDefaultEx(t => t.Ticket == pair.ticket);
+                UserTicketEntity userTicket = user.UserTickets().SingleOrDefaultEx(t => t.Ticket == pair.Item2);
                 if (userTicket == null)
                 {
                     throw new UnauthorizedAccessException("User attempted to log-in with an invalid ticket");

@@ -74,7 +74,7 @@ namespace Signum.Web.Auth
                     Navigator.AddSetting(new EntitySettings<PasswordExpiresIntervalEntity> { PartialViewName = _ => ViewPrefix.FormatWith("PasswordValidInterval") });
                 }
 
-                Navigator.AddSetting(new EmbeddedEntitySettings<SetPasswordModel>
+                Navigator.AddSetting(new ModelEntitySettings<SetPasswordModel>
                 {
                     PartialViewName = _ => ViewPrefix.FormatWith("SetPassword"),
                     MappingDefault = new EntityMapping<SetPasswordModel>(false)

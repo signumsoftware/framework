@@ -82,7 +82,7 @@ namespace ASP
         {
             
             #line 8 "..\..\Chart\Views\UserChartFilter.cshtml"
- using (var e = Html.TypeContext<QueryFilterEntity>())
+ using (var e = Html.TypeContext<QueryFilterEmbedded>())
 {
     var parent = ((TypeContext<UserChartEntity>)e.Parent.Parent).Value;
     e.FormGroupStyle = FormGroupStyle.None;
