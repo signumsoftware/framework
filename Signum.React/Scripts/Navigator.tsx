@@ -447,11 +447,11 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
     }
 
     if(!config) {
-        config = new LiteAutocompleteConfig((subStr: string) => Finder.API.findLiteLike({
+        config = new LiteAutocompleteConfig((ac, subStr: string) => Finder.API.findLiteLike({
             types: type.name,
             subString: subStr,
             count: 5
-        }), false);
+        }, ac), false);
     }
 
     if (!config.getItemsDelay) {

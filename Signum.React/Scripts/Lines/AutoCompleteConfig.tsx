@@ -3,6 +3,7 @@ import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
 import { Dic } from '../Globals'
+import { AbortableRequest } from '../Services'
 import { FindOptions, QueryDescription, FilterOptionParsed, FilterRequest, OrderOptionParsed, OrderRequest } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, getQueryKey } from '../Reflection'
@@ -24,8 +25,14 @@ export interface AutocompleteConfig<T> {
 export class LiteAutocompleteConfig implements AutocompleteConfig<Lite<Entity>>{
 
     constructor(
-        public getItems: (subStr: string) => Promise<Lite<Entity>[]>,
+        public getItemsFunction: (abortController: FetchAbortController, subStr: string) => Promise<Lite<Entity>[]>,
         public withCustomToString: boolean) {
+    }
+
+    abortableRequest = new AbortableRequest((abortController, subStr: string) => this.getItemsFunction(abortController, subStr));
+    
+    getItems(subStr: string) {
+        return this.abortableRequest.getData(subStr);
     }
 
     renderItem(item: Lite<Entity>, subStr: string) {
@@ -46,7 +53,7 @@ export class LiteAutocompleteConfig implements AutocompleteConfig<Lite<Entity>>{
         if (lite.id == undefined)
             return Promise.resolve(lite);
 
-        return this.getItems(lite.id!.toString()).then(lites => {
+        return this.abortableRequest.getData(lite.id!.toString()).then(lites => {
 
             const result = lites.filter(a => a.id == lite.id).firstOrNull();
 
@@ -99,11 +106,13 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<Lite<En
             .then(orders => this.parsedOrders = orders);
     }
 
+    abortableRequest = new AbortableRequest((abortController, request: Finder.API.AutocompleteQueryRequest) => Finder.API.findLiteLikeWithFilters(request, abortController));
+
     getItems(subStr: string): Promise<Lite<Entity>[]> {
         return this.getParsedFilters()
             .then(filters =>
                 this.getParsedOrders().then(orders =>
-                    Finder.API.findLiteLikeWithFilters({
+                    this.abortableRequest.getData({
                         queryKey: getQueryKey(this.findOptions.queryName),
                         filters: filters.map(f => ({ token: f.token!.fullKey, operation: f.operation, value: f.value }) as FilterRequest),
                         orders: orders.map(f => ({ token: f.token!.fullKey, orderType: f.orderType }) as OrderRequest),

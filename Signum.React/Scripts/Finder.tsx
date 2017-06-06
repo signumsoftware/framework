@@ -710,15 +710,20 @@ export module API {
         });
     }
 
-    export function findLiteLike(request: { types: string, subString: string, count: number }): Promise<Lite<Entity>[]> {
+    export function findLiteLike(request: AutocompleteRequest, abortController?: FetchAbortController): Promise<Lite<Entity>[]> {
         return ajaxGet<Lite<Entity>[]>({
             url: "~/api/query/findLiteLike?" + QueryString.stringify(request)
         });
     }
 
+    export interface AutocompleteRequest {
+        types: string;
+        subString: string;
+        count: number;
+    }
 
-    export function findLiteLikeWithFilters(request: { queryKey: string, filters: FilterRequest[], orders: OrderRequest[], subString: string, count: number }): Promise<Lite<Entity>[]> {
-        return ajaxPost<Lite<Entity>[]>({ url: "~/api/query/findLiteLikeWithFilters" }, request);
+    export function findLiteLikeWithFilters(request: AutocompleteQueryRequest, abortController?: FetchAbortController): Promise<Lite<Entity>[]> {
+        return ajaxPost<Lite<Entity>[]>({ url: "~/api/query/findLiteLikeWithFilters", abortController }, request);
     }
 
     export function parseTokens(queryKey: string, tokens: { token: string, options: SubTokensOptions }[]): Promise<QueryToken[]> {
@@ -738,7 +743,17 @@ export module API {
             return list;
         });
     }
+
+    export interface AutocompleteQueryRequest {
+        queryKey: string;
+        filters: FilterRequest[];
+        orders: OrderRequest[];
+        subString: string;
+        count: number;
+    }
 }
+
+
 
 
 
