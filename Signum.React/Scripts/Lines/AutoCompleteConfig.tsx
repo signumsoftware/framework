@@ -19,7 +19,8 @@ export interface AutocompleteConfig<T> {
     renderItem(item: T, subStr?: string) : React.ReactNode;
     renderList?(typeahead: Typeahead): React.ReactNode;
     getEntityFromItem(item: T) : Lite<Entity> | ModifiableEntity;
-    getItemFromEntity(entity: Lite<Entity> | ModifiableEntity) : Promise<T>;
+    getItemFromEntity(entity: Lite<Entity> | ModifiableEntity): Promise<T>;
+    abort(): void;
 }
 
 export class LiteAutocompleteConfig implements AutocompleteConfig<Lite<Entity>>{
@@ -30,6 +31,10 @@ export class LiteAutocompleteConfig implements AutocompleteConfig<Lite<Entity>>{
     }
 
     abortableRequest = new AbortableRequest((abortController, subStr: string) => this.getItemsFunction(abortController, subStr));
+
+    abort() {
+        this.abortableRequest.abort();
+    }
     
     getItems(subStr: string) {
         return this.abortableRequest.getData(subStr);
@@ -84,6 +89,10 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<Lite<En
         public withCustomToString: boolean = false) {
 
         Finder.expandParentColumn(this.findOptions);
+    }
+
+    abort() {
+        this.abortableRequest.abort();
     }
 
     parsedFilters?: FilterOptionParsed[];

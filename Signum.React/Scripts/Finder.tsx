@@ -711,9 +711,7 @@ export module API {
     }
 
     export function findLiteLike(request: AutocompleteRequest, abortController?: FetchAbortController): Promise<Lite<Entity>[]> {
-        return ajaxGet<Lite<Entity>[]>({
-            url: "~/api/query/findLiteLike?" + QueryString.stringify(request)
-        });
+        return ajaxGet<Lite<Entity>[]>({ url: "~/api/query/findLiteLike?" + QueryString.stringify(request), abortController });
     }
 
     export interface AutocompleteRequest {

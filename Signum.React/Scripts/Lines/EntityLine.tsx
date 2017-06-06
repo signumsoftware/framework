@@ -39,6 +39,10 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         }
     }
 
+    componentWillUnmount() {
+        this.state.autoComplete && this.state.autoComplete.abort();
+    }
+    
     componentWillMount() {
         this.refreshItem(this.props);
     }

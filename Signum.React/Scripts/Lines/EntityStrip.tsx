@@ -27,6 +27,9 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         super.calculateDefaultState(state);   
     }
 
+    componentWillUnmount() {
+        this.state.autoComplete && this.state.autoComplete.abort();
+    }
 
     overrideProps(state: EntityStripProps, overridenProps: EntityStripProps) {
         super.overrideProps(state, overridenProps);
