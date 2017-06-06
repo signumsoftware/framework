@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { Route } from 'react-router'
 import { Dic } from '../../../Framework/Signum.React/Scripts/Globals';
-import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
+import { ajaxPost, ajaxGet, AbortableRequest } from '../../../Framework/Signum.React/Scripts/Services';
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import Typeahead from '../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import * as OmniboxClient from './OmniboxClient'
@@ -36,6 +36,8 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
         return null;
     }
 
+    abortRule = new AbortableRequest((ac, query: string) => OmniboxClient.API.getResults(query, ac));
+
     typeahead: Typeahead;
 
     render() {
@@ -43,7 +45,7 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
         let inputAttr = { tabIndex: -1, placeholder: OmniboxMessage.Search.niceToString(), ...this.props.inputAttrs };
         
         const result = (
-            <Typeahead ref={ta => this.typeahead = ta} getItems={OmniboxClient.API.getResults} 
+            <Typeahead ref={ta => this.typeahead = ta} getItems={str => this.abortRule.getData(str)} 
                 renderItem={OmniboxClient.renderItem}
                 onSelect={this.handleOnSelect}
                 spanAttrs={this.props.spanAttrs}
