@@ -35,7 +35,7 @@
     <Member Name="NoOne2" Description="Nessuno (2)" />
     <Member Name="NoOne3" Description="Nessuno (3)" />
   </Type>
-  <Type Name="ColorEntity" Description="Colore">
+  <Type Name="ColorEmbedded" Description="Colore">
     <Member Name="Argb" Description="ARGB" />
   </Type>
   <Type Name="ColumnOptionsMode" Description="Opzioni di colonna">
@@ -58,7 +58,7 @@
   <Type Name="CorruptMixin">
     <Member Name="Corrupt" Description="Corrompere" />
   </Type>
-  <Type Name="DeleteLogParametersEntity" Description="Parametri di eliminazione del registro">
+  <Type Name="DeleteLogParametersEmbedded" Description="Parametri di eliminazione del registro">
     <Member Name="ChunkSize" Description="Dimensione del blocco" />
     <Member Name="DateLimit" Description="Data limite" />
     <Member Name="DeleteLogsWithMoreThan" Description="Eliminare i registri con più di" />
