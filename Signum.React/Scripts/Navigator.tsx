@@ -816,7 +816,6 @@ export function toAbsoluteUrl(appRelativeUrl: string): string {
     if (appRelativeUrl.startsWith(window.__baseUrl) || appRelativeUrl.startsWith("http"))
         return appRelativeUrl;
 
-    console.warn(appRelativeUrl);
     return appRelativeUrl;
 }
 
