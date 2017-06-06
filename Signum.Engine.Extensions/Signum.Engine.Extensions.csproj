@@ -136,7 +136,6 @@
     <Compile Include="Dynamic\DynamicMixinConnectionLogic.cs" />
     <Compile Include="Rest\RestApiKeyLogic.cs" />
     <Compile Include="Files\FilePathEmbeddedLogic.cs" />
-    <Compile Include="SqlServerTypes\Loader.cs" />
     <Compile Include="Toolbar\ToolbarLogic.cs" />
     <Compile Include="Dynamic\DynamicSqlMigrationLogic.cs" />
     <Compile Include="Dynamic\DynamicExpressionLogic.cs" />
@@ -277,19 +276,6 @@
     <Content Include="Chart\ChartScripts\StackedLines.xml" />
     <Content Include="Chart\ChartScripts\TreeMap.xml" />
     <Content Include="Chart\ChartScripts\WorldMap.xml" />
-    <Content Include="SqlServerTypes\readme.htm" />
-    <Content Include="SqlServerTypes\x64\msvcr120.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SqlServerTypes\x64\SqlServerSpatial140.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SqlServerTypes\x86\msvcr120.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SqlServerTypes\x86\SqlServerSpatial140.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
