@@ -316,7 +316,7 @@
     <Member Name="CertFile" Description="Zertiikationsdatei" />
     <Member Name="SignedFile" Description="Signierte Datei" />
   </Type>
-  <Type Name="ChartColorEntity" Description="Diagrammfarbe" PluralDescription="Diagrammfarben">
+  <Type Name="ChartColorEmbedded" Description="Diagrammfarbe" PluralDescription="Diagrammfarben">
     <Member Name="Color" Description="Farbe" />
     <Member Name="Related" Description="In Beziehung mit" />
   </Type>

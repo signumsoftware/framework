@@ -26,7 +26,7 @@ namespace Signum.Engine.Chart
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<ChartColorEntity>()
+                sb.Include<ChartColorEmbedded>()
                     .WithQuery(dqm, cc => new
                     {
                         Entity = cc,
@@ -35,10 +35,10 @@ namespace Signum.Engine.Chart
                     }); 
 
                 Colors = sb.GlobalLazy(() =>
-                    Database.Query<ChartColorEntity>()
+                    Database.Query<ChartColorEmbedded>()
                         .Select(cc => new { cc.Related.EntityType, cc.Related.Id, cc.Color.Argb })
                         .AgGroupToDictionary(a => a.EntityType, gr => gr.ToDictionary(a => a.Id, a => Color.FromArgb(a.Argb))),
-                    new InvalidateWith(typeof(ChartColorEntity)));
+                    new InvalidateWith(typeof(ChartColorEmbedded)));
             }
         }
 
@@ -53,9 +53,9 @@ namespace Signum.Engine.Chart
         {
             AssertFewEntities(type);
 
-            var dic = Database.RetrieveAllLite(type).Select(l => new ChartColorEntity { Related = (Lite<Entity>)l }).ToDictionary(a => a.Related);
+            var dic = Database.RetrieveAllLite(type).Select(l => new ChartColorEmbedded { Related = (Lite<Entity>)l }).ToDictionary(a => a.Related);
 
-            dic.SetRange(Database.Query<ChartColorEntity>().Where(c => c.Related.EntityType == type).ToDictionary(a => a.Related));
+            dic.SetRange(Database.Query<ChartColorEmbedded>().Where(c => c.Related.EntityType == type).ToDictionary(a => a.Related));
 
             var list = dic.Values.ToList();
 
@@ -105,7 +105,7 @@ namespace Signum.Engine.Chart
         static int DeleteColors<T>() where T : Entity
         {
             return (from t in Database.Query<T>() // To filter by type conditions
-                    join cc in Database.Query<ChartColorEntity>() on t.ToLite() equals cc.Related
+                    join cc in Database.Query<ChartColorEmbedded>() on t.ToLite() equals cc.Related
                     select cc).UnsafeDelete();
         }
 
@@ -118,7 +118,7 @@ namespace Signum.Engine.Chart
             return new ChartPaletteModel
             {
                 Type = type.ToTypeEntity(),
-                Colors = Database.RetrieveAllLite(type).Select(l => new ChartColorEntity
+                Colors = Database.RetrieveAllLite(type).Select(l => new ChartColorEmbedded
                 {
                     Related = (Lite<Entity>)l,
                     Color = dic.TryGetS(l.Id)?.Let(c => new ColorEmbedded { Argb = c.ToArgb() })
@@ -143,7 +143,7 @@ namespace Signum.Engine.Chart
 
         public static void DeletePalette(Type type)
         {
-            Database.Query<ChartColorEntity>().Where(c => c.Related.EntityType == type).UnsafeDelete();
+            Database.Query<ChartColorEmbedded>().Where(c => c.Related.EntityType == type).UnsafeDelete();
         }
     }
 }

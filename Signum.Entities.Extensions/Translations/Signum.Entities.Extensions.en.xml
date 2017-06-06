@@ -40,7 +40,7 @@
   <Type Name="CaseTagTypeEntity" />
   <Type Name="CaseTagTypeOperation" />
   <Type Name="CertFileType" />
-  <Type Name="ChartColorEntity" />
+  <Type Name="ChartColorEmbedded" />
   <Type Name="ChartColumnEmbedded" />
   <Type Name="ChartColumnType" />
   <Type Name="ChartMessage">

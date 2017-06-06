@@ -55,7 +55,7 @@
   <Type Name="BasicPermission" />
   <Type Name="CachePermission" />
   <Type Name="CertFileType" />
-  <Type Name="ChartColorEntity" />
+  <Type Name="ChartColorEmbedded" />
   <Type Name="ChartColumnEmbedded" />
   <Type Name="ChartColumnType" />
   <Type Name="ChartMessage" />

@@ -202,7 +202,7 @@
     <Member Name="CertFile" Description="Archivo de certificado" />
     <Member Name="SignedFile" Description="Archivo firmado" />
   </Type>
-  <Type Name="ChartColorEntity" Description="Color de gráfico">
+  <Type Name="ChartColorEmbedded" Description="Color de gráfico">
     <Member Name="Color" Description="Color" />
     <Member Name="Related" Description="Relacionado" />
   </Type>

@@ -177,7 +177,7 @@
     <Member Name="CertFile" Description="File certificato" />
     <Member Name="SignedFile" Description="File firmato" />
   </Type>
-  <Type Name="ChartColorEntity" Description="Colore del grafico" PluralDescription="Colori del grafico">
+  <Type Name="ChartColorEmbedded" Description="Colore del grafico" PluralDescription="Colori del grafico">
     <Member Name="Color" Description="Colore" />
     <Member Name="Related" Description="Correlati" />
   </Type>
