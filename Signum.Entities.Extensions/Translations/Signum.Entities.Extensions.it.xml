@@ -291,7 +291,7 @@
     <Member Name="RequiresTitle" Description="Titolo richiesto" />
     <Member Name="UserQueries" Description="Query utente" />
   </Type>
-  <Type Name="CountUserQueryElementEntity" Description="Elemento di conteggio di query utente">
+  <Type Name="CountUserQueryElementEmbedded" Description="Elemento di conteggio di query utente">
     <Member Name="Href" Description="Href" />
     <Member Name="Label" Description="Etichetta" />
     <Member Name="UserQuery" Description="Query utente" />
@@ -342,7 +342,7 @@
   <Type Name="DashboardPermission">
     <Member Name="ViewDashboard" Description="Vista pannello di controllo" />
   </Type>
-  <Type Name="DateSpanEntity" Description="Intervallo di date">
+  <Type Name="DateSpanEmbedded" Description="Intervallo di date">
     <Member Name="Days" Description="Giorni" />
     <Member Name="Months" Description="Mesi" />
     <Member Name="Years" Description="Anni" />

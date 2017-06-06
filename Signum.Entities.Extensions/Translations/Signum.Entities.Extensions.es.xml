@@ -319,7 +319,7 @@
     <Member Name="RequiresTitle" Description="Requiere título" />
     <Member Name="UserQueries" Description="Consultas de usuario" />
   </Type>
-  <Type Name="CountUserQueryElementEntity" Description="Elemento recuento consulta de usuario">
+  <Type Name="CountUserQueryElementEmbedded" Description="Elemento recuento consulta de usuario">
     <Member Name="Href" Description="Href" />
     <Member Name="Label" Description="Etiqueta" />
     <Member Name="UserQuery" Description="Consulta de usuario" />
@@ -372,7 +372,7 @@
   <Type Name="DashboardPermission">
     <Member Name="ViewDashboard" Description="Vista panel de control" />
   </Type>
-  <Type Name="DateSpanEntity" Description="Intervalo de fecha">
+  <Type Name="DateSpanEmbedded" Description="Intervalo de fecha">
     <Member Name="Days" Description="Días" />
     <Member Name="Months" Description="Meses" />
     <Member Name="Years" Description="Años" />

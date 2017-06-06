@@ -74,7 +74,7 @@
   <Type Name="CountSearchControlPartEntity">
     <Member Name="UserQueries" Description="Requêtes utilisateur" />
   </Type>
-  <Type Name="CountUserQueryElementEntity" />
+  <Type Name="CountUserQueryElementEmbedded" />
   <Type Name="CSharpMigrationEntity" />
   <Type Name="CultureInfoEntity" />
   <Type Name="CultureInfoOperation" />
@@ -89,7 +89,7 @@
   </Type>
   <Type Name="DashboardOperation" />
   <Type Name="DashboardPermission" />
-  <Type Name="DateSpanEntity" Description="Date Span">
+  <Type Name="DateSpanEmbedded" Description="Date Span">
     <Member Name="Days" Description="Jours" />
     <Member Name="Months" Description="Mois" />
     <Member Name="Years" Description="Années" />

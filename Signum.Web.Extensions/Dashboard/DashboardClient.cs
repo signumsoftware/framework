@@ -78,7 +78,7 @@ namespace Signum.Web.Dashboard
                     new EntitySettings<UserQueryPartEntity>(),
 
                     //new EntitySettings<CountSearchControlPartEntity>(),
-                    //new EmbeddedEntitySettings<CountUserQueryElementEntity> { PartialViewName = e => AdminViewPrefix.FormatWith("CountUserQueryElement") },
+                    //new EmbeddedEntitySettings<CountUserQueryElementEmbedded> { PartialViewName = e => AdminViewPrefix.FormatWith("CountUserQueryElement") },
                     
                     new EntitySettings<LinkListPartEntity>(),
                     //new EntitySettings<LinkPartEntity>(),

@@ -481,7 +481,7 @@
     <Member Name="LastMonth" Description="Letzten Monat" />
     <Member Name="LastWeek" Description="Letzte Woche" />
   </Type>
-  <Type Name="DateSpanEntity" Description="Zeitraum">
+  <Type Name="DateSpanEmbedded" Description="Zeitraum">
     <Member Name="Days" Description="Tage" />
     <Member Name="Months" Description="Monate" />
     <Member Name="Years" Description="Jahre" />
@@ -1853,7 +1853,7 @@
     <Member Name="YouCanOnlyAddForeachBlocksWithCollectionFields" Description="Sie können nur Foreach-Blöcke mit Collection-Feldern hinzufügen" />
     <Member Name="YouHaveToAddTheElementTokenToUseForeachOnCollectionFields" Description="Sie müssen das Element Token zur Verwendung von Foreach in einem Collection-Feld hinzufügen" />
   </Type>
-  <Type Name="TimeSpanEntity" />
+  <Type Name="TimeSpanEmbedded" />
   <Type Name="ToolbarElementEntity" Description="Symbolleisten-element">
     <Member Name="Content" Description="Inhalt" />
     <Member Name="IconColor" Description="Symbolfarbe" />

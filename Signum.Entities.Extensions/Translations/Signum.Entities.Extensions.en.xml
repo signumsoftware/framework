@@ -65,7 +65,7 @@
   <Type Name="DashboardOperation" />
   <Type Name="DashboardPermission" />
   <Type Name="DateFilterRange" />
-  <Type Name="DateSpanEntity" />
+  <Type Name="DateSpanEmbedded" />
   <Type Name="DecisionResult" />
   <Type Name="DefaultState" />
   <Type Name="DelayOption" />
@@ -304,7 +304,7 @@
   <Type Name="TaskMessage" />
   <Type Name="TaskOperation" />
   <Type Name="TemplateTokenMessage" />
-  <Type Name="TimeSpanEntity" />
+  <Type Name="TimeSpanEmbedded" />
   <Type Name="ToolbarElementEntity" />
   <Type Name="ToolbarElementType" />
   <Type Name="ToolbarEntity" />
