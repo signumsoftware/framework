@@ -54,7 +54,7 @@
   <Type Name="CorruptMixin">
     <Member Name="Corrupt" Description="Corrupto" />
   </Type>
-  <Type Name="DeleteLogParametersEntity" Description="Parámetros eliminación de registros">
+  <Type Name="DeleteLogParametersEmbedded" Description="Parámetros eliminación de registros">
     <Member Name="ChunkSize" Description="Tamaño" />
     <Member Name="DateLimit" Description="Fecha límite" />
     <Member Name="DeleteLogsWithMoreThan" Description="Eliminar registros con más de" />
