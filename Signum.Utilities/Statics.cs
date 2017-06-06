@@ -111,6 +111,9 @@ namespace Signum.Utilities
         {
             get
             {
+                if (Value == null)
+                    return true;
+
                 if (Value.Equals(default(T)))
                     return true;
 
