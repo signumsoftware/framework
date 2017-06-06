@@ -35,6 +35,9 @@ namespace Signum.React.Authorization
                     System.Web.HttpContext.Current.Response.Cookies.Add(new HttpCookie(CookieName, ticketText)
                     {
                         Expires = DateTime.UtcNow.Add(UserTicketLogic.ExpirationInterval),
+                        HttpOnly = true,
+                        Domain = System.Web.HttpContext.Current.Request.Url.Host
+
                     });
 
                     AuthServer.AddUserSession(user);
@@ -45,7 +48,9 @@ namespace Signum.React.Authorization
                     //Remove cookie
                     HttpCookie cookie = new HttpCookie(CookieName)
                     {
-                        Expires = DateTime.UtcNow.AddDays(-10) // or any other time in the past
+                        Expires = DateTime.UtcNow.AddDays(-10), // or any other time in the past
+                        HttpOnly = true,
+                        Domain = System.Web.HttpContext.Current.Request.Url.Host
                     };
                     System.Web.HttpContext.Current.Response.Cookies.Set(cookie);
 
