@@ -17,6 +17,8 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
 {
     handleOnSelect = (result: OmniboxClient.OmniboxResult, e: React.KeyboardEvent<any> | React.MouseEvent<any>) => {
 
+        this.abortRequest.abort();
+
         const ke = e as React.KeyboardEvent<any>;
         if (ke.keyCode && ke.keyCode == 9) {
             return OmniboxClient.toString(result);
@@ -36,7 +38,7 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
         return null;
     }
 
-    abortRule = new AbortableRequest((ac, query: string) => OmniboxClient.API.getResults(query, ac));
+    abortRequest = new AbortableRequest((ac, query: string) => OmniboxClient.API.getResults(query, ac));
 
     typeahead: Typeahead;
 
@@ -45,7 +47,7 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
         let inputAttr = { tabIndex: -1, placeholder: OmniboxMessage.Search.niceToString(), ...this.props.inputAttrs };
         
         const result = (
-            <Typeahead ref={ta => this.typeahead = ta} getItems={str => this.abortRule.getData(str)} 
+            <Typeahead ref={ta => this.typeahead = ta} getItems={str => this.abortRequest.getData(str)} 
                 renderItem={OmniboxClient.renderItem}
                 onSelect={this.handleOnSelect}
                 spanAttrs={this.props.spanAttrs}
