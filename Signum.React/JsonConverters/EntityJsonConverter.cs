@@ -193,12 +193,8 @@ namespace Signum.React.Json
             if (pr == null)
             {
                 var embedded = (EmbeddedEntity)value;
-                var hpr = DefaultPropertyRoutes.TryGetC(embedded.GetType());
-
-                if (hpr == null)
+                pr = DefaultPropertyRoutes.TryGetC(embedded.GetType()) ?? 
                     throw new InvalidOperationException($"Impossible to determine PropertyRoute for {value.GetType().Name}. Consider adding a new value to {nameof(EntityJsonConverter)}.{nameof(EntityJsonConverter.DefaultPropertyRoutes)}.");
-
-                pr = hpr;
             }
             else if (pr.Type.ElementType() == value.GetType())
                 pr = pr.Add("Item"); //We habe a custom MListConverter but not for other simple collections

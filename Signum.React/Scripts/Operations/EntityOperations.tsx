@@ -15,7 +15,7 @@ import { ajaxPost, ValidationError } from '../Services';
 import { TypeContext } from '../TypeContext';
 import {
     operationInfos, getSettings, EntityOperationSettings, EntityOperationContext, EntityOperationGroup,
-    CreateGroup, API, isEntityOperation, autoStyleFunction
+    CreateGroup, API, isEntityOperation, autoStyleFunction, isSave
 } from '../Operations'
 
 
@@ -111,7 +111,7 @@ function getWithClose(eoc: EntityOperationContext<Entity>) {
     if (withClose != undefined)
         return withClose;
 
-    return eoc.operationInfo.key.after(".") == "Save";
+    return isSave(eoc.operationInfo);
 }
 
 function createDefaultButton(eoc: EntityOperationContext<Entity>, group: EntityOperationGroup | undefined, asMenuItem: boolean, key: any) {

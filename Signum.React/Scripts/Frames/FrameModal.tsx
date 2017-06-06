@@ -28,6 +28,7 @@ interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
     avoidPromptLooseChange?: boolean;
     extraComponentProps?: {}
     viewPromise?: Navigator.ViewPromise<ModifiableEntity>;
+    getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
     isNavigate?: boolean;
     readOnly?: boolean;
 }
@@ -109,7 +110,9 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
     loadComponent() {
 
-        var viewPromise = this.props.viewPromise || Navigator.getViewPromise(this.state.pack!.entity);
+        var viewPromise = this.props.viewPromise ||
+            this.props.getViewPromise && this.props.getViewPromise(this.state.pack!.entity) ||
+            Navigator.getViewPromise(this.state.pack!.entity);
 
         if (this.props.extraComponentProps)
             viewPromise = viewPromise.withProps(this.props.extraComponentProps);
@@ -282,14 +285,15 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
             return undefined;
 
         return (
-            <a href="" className="sf-popup-fullscreen" onClick={this.handlePopupFullScreen}>
+            <a className="sf-popup-fullscreen sf-pointer" onMouseUp={this.handlePopupFullScreen}>
                 <span className="glyphicon glyphicon-new-window"></span>
             </a>
         );
     }
 
-    handlePopupFullScreen = (e: React.MouseEvent<any>) => {
 
+    handlePopupFullScreen = (e: React.MouseEvent<any>) => {
+        e.preventDefault();
         Navigator.pushOrOpen(Navigator.navigateRoute(this.state.pack!.entity as Entity), e);
     }
 
@@ -300,6 +304,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
             readOnly={options.readOnly}
             propertyRoute={options.propertyRoute}
             viewPromise={options.viewPromise}
+            getViewPromise={options.getViewPromise}
             isOperationVisible={options.isOperationVisible}
             requiresSaveOperation={options.requiresSaveOperation}
             avoidPromptLooseChange={options.avoidPromptLooseChange}
@@ -323,6 +328,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
             readOnly={options.readOnly}
             propertyRoute={undefined}
             viewPromise={options.viewPromise}
+            getViewPromise={options.getViewPromise}
             requiresSaveOperation={undefined}
             avoidPromptLooseChange={options.avoidPromptLooseChange}
             extraComponentProps={options.extraComponentProps}

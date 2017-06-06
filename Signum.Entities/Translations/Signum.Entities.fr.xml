@@ -5,7 +5,7 @@
   <Type Name="CalendarMessage" />
   <Type Name="Case" />
   <Type Name="CollectionElementType" />
-  <Type Name="ColorEntity" Description="Couleur" />
+  <Type Name="ColorEmbedded" Description="Couleur" />
   <Type Name="ColumnOptionsMode" />
   <Type Name="ComparisonType">
     <Member Name="DistinctTo" Description="différent de" />
@@ -17,7 +17,7 @@
   </Type>
   <Type Name="ConnectionMessage" />
   <Type Name="CorruptMixin" />
-  <Type Name="DeleteLogParametersEntity" />
+  <Type Name="DeleteLogParametersEmbedded" />
   <Type Name="EmbeddedEntity" />
   <Type Name="EngineMessage">
     <Member Name="ConcurrencyErrorOnDatabaseTable0Id1" Description="Erreur de simultanéité sur la databe, la table = {0}, ID = {1}" />

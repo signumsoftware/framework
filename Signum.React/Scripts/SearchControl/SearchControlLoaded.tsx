@@ -7,9 +7,10 @@ import {
     ResultTable, ResultRow, FindOptionsParsed, FindOptions, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnOptionsMode, ColumnDescription,
     toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest
 } from '../FindOptions'
-import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, is, isEntity, isLite, toLite } from '../Signum.Entities'
+import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, is, isEntity, isLite, toLite, ModifiableEntity } from '../Signum.Entities'
 import { getTypeInfos, getTypeInfo, TypeReference, IsByAll, getQueryKey, TypeInfo, EntityData, QueryKey, PseudoType, isTypeModel } from '../Reflection'
 import * as Navigator from '../Navigator'
+import { AbortableRequest } from '../Services'
 import * as Constructor from '../Constructor'
 import PaginationSelector from './PaginationSelector'
 import FilterBuilder from './FilterBuilder'
@@ -42,6 +43,8 @@ export interface SearchControlLoadedProps {
     largeToolbarButtons?: boolean;
     avoidAutoRefresh?: boolean;
     extraButtons?: (searchControl: SearchControlLoaded) => React.ReactNode
+    onCreate?: () => Promise<void>;
+    getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
 }
 
 export interface SearchControlLoadedState {
@@ -50,7 +53,6 @@ export interface SearchControlLoadedState {
     selectedRows?: ResultRow[];
     markedRows?: MarkedRowsDictionary;
 
-    loading?: boolean;
     searchCount?: number;
     dragColumnIndex?: number,
     dropBorderIndex?: number,
@@ -96,6 +98,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             this.doSearch().done();
     }
 
+    componentWillUnmount() {
+        this.abortableSearch.abort();
+    }
 
 
     entityColumn(): ColumnDescription {
@@ -136,19 +141,21 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         this.doSearch().done();
     };
 
+
+    abortableSearch = new AbortableRequest((abortController, request: QueryRequest) => Finder.API.executeQuery(request, abortController)); 
+
     doSearch(): Promise<void> {
         return this.getFindOptionsWithSFB().then(fop => {
             if (this.props.onSearch)
                 this.props.onSearch(fop);
 
-            this.setState({ loading: false, editingColumn: undefined });
-            return Finder.API.executeQuery(this.getQueryRequest()).then(rt => {
+            this.setState({ editingColumn: undefined });
+            return this.abortableSearch.getData(this.getQueryRequest()).then(rt => {
                 this.setState({
                     resultTable: rt,
                     selectedRows: [],
                     currentMenuItems: undefined,
                     markedRows: undefined,
-                    loading: false,
                     searchCount: (this.state.searchCount || 0) + 1
                 });
                 if (this.props.onResult)
@@ -337,7 +344,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     className={"sf-query-button sf-filters-header btn btn-default" + (fo.showFilters ? " active" : "")}
                     onClick={this.handleToggleFilters}
                     title={fo.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="glyphicon glyphicon glyphicon-filter"></span></a >}
-                <button className={"sf-query-button sf-search btn btn-primary" + (this.state.loading ? " disabled" : "")} onClick={this.handleSearchClick}>{SearchMessage.Search.niceToString()} </button>
+                <button className={classes("sf-query-button sf-search btn", fo.pagination.mode == "All" ? "btn-danger" : "btn-primary")} onClick={this.handleSearchClick}>{SearchMessage.Search.niceToString()} </button>
                 {fo.create && <a className="sf-query-button btn btn-default sf-search-button sf-create" title={this.createTitle()} onClick={this.handleCreate}>
                     <span className="glyphicon glyphicon-plus sf-create"></span>
                 </a>}
@@ -367,6 +374,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         if (!this.props.findOptions.create)
             return;
 
+        const onCreate = this.props.onCreate;
+
+        if (onCreate)
+            onCreate().done();
+        else {
         const isWindowsOpen = ev.button == 1 || ev.ctrlKey;
 
         this.chooseType().then(tn => {
@@ -383,12 +395,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                         return;
 
                     Finder.setFilters(e.entity as Entity, this.props.findOptions.filterOptions)
-                        .then(() => Navigator.navigate(e!))
+                        .then(() => Navigator.navigate(e!, { getViewPromise: this.props.getViewPromise }))
                         .then(() => this.props.avoidAutoRefresh ? undefined : this.doSearch())
                         .done();
                 }).done();
             }
         }).done();
+    }
     }
 
     handleFullScreenClick = (ev: React.MouseEvent<any>) => {

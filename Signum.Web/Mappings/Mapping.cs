@@ -21,6 +21,7 @@ using Signum.Web;
 using Microsoft.SqlServer.Types;
 using Signum.Entities.Basics;
 using System.Drawing;
+using static Signum.Entities.UserAssets.SmartDateTimeFilterValueConverter;
 
 namespace Signum.Web
 {
@@ -57,7 +58,7 @@ namespace Signum.Web
             MappingRepository<decimal>.Mapping = GetValue(ctx => ctx.PropertyRoute != null && ReflectionTools.IsPercentage(Reflector.FormatString(ctx.PropertyRoute), CultureInfo.CurrentCulture) ? (decimal)ReflectionTools.ParsePercentage(ctx.Input, typeof(decimal), CultureInfo.CurrentCulture) : decimal.Parse(ctx.Input));
             MappingRepository<DateTime>.Mapping = GetValue(ctx => DateTime.Parse(ctx.HasInput ? ctx.Input : ctx.Inputs["Date"] + " " + ctx.Inputs["Time"]).FromUserInterface());
             MappingRepository<Guid>.Mapping = GetValue(ctx => Guid.Parse(ctx.Input));
-            MappingRepository<TimeSpan>.Mapping = GetValue(ctx => 
+            MappingRepository<TimeSpan>.Mapping = GetValue(ctx =>
             {
                 var dateFormatAttr = ctx.PropertyRoute.PropertyInfo.GetCustomAttribute<TimeSpanDateFormatAttribute>();
                 if (dateFormatAttr != null)
@@ -66,7 +67,7 @@ namespace Signum.Web
                     return TimeSpan.Parse(ctx.Input);
             });
             MappingRepository<SqlHierarchyId>.Mapping = GetValue(ctx => SqlHierarchyId.Parse(ctx.Input));
-            MappingRepository<ColorEntity>.Mapping = GetValue(ctx => ctx.Input.HasText() ? ColorEntity.FromRGBHex(ctx.Input) : null);
+            MappingRepository<ColorEmbedded>.Mapping = GetValue(ctx => ctx.Input.HasText() ? ColorEmbedded.FromRGBHex(ctx.Input) : null);
 
             MappingRepository<bool?>.Mapping = GetValueNullable(ctx => ParseHtmlBool(ctx.Input));
             MappingRepository<byte?>.Mapping = GetValueNullable(ctx => byte.Parse(ctx.Input));
@@ -83,7 +84,30 @@ namespace Signum.Web
             MappingRepository<DateTime?>.Mapping = GetValue(ctx =>
             {
                 var input = ctx.HasInput ? ctx.Input : " ".CombineIfNotEmpty(ctx.Inputs["Date"], ctx.Inputs["Time"]);
-                return input.HasText() ? DateTime.Parse(input).FromUserInterface() : (DateTime?)null;
+
+
+
+                if (input.HasText())
+                {
+                    DateTime dt;
+                    if (DateTime.TryParse(input, out dt))
+                        return dt.FromUserInterface();
+                    else
+                    {
+                        SmartDateTimeSpan sts;
+                        string error = SmartDateTimeSpan.TryParse(input, out sts);
+                        if (!error.HasText())
+                        {
+                            dt = sts.ToDateTime();
+                            return dt.FromUserInterface();
+
+                        }
+                    }
+                }
+
+                return (DateTime?)null;
+
+                //return input.HasText() ? DateTime.Parse(input).FromUserInterface() : (DateTime?)null;
             });
             MappingRepository<Guid?>.Mapping = GetValueNullable(ctx => Guid.Parse(ctx.Input));
             MappingRepository<TimeSpan?>.Mapping = GetValue(ctx => 

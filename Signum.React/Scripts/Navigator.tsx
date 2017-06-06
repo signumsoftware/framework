@@ -31,9 +31,9 @@ export function setCurrentHistory(h: H.History) {
     history = h;
 }
 
-export let getTitle: (pageTitle?: string) => string;
-export function setTitle(title: (pageTitle?: string) => string) {
-    getTitle = title;
+export let setTitle: (pageTitle?: string) => void;
+export function setTitleFunction(titleFunction: (pageTitle?: string) => void) {
+    setTitle = titleFunction;
 }
 
 export function createAppRelativeHistory(): H.History {
@@ -447,11 +447,11 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
     }
 
     if(!config) {
-        config = new LiteAutocompleteConfig((subStr: string) => Finder.API.findLiteLike({
+        config = new LiteAutocompleteConfig((ac, subStr: string) => Finder.API.findLiteLike({
             types: type.name,
             subString: subStr,
             count: 5
-        }), false);
+        }, ac), false);
     }
 
     if (!config.getItemsDelay) {
@@ -471,6 +471,7 @@ export interface ViewOptions {
     requiresSaveOperation?: boolean;
     avoidPromptLooseChange?: boolean;
     viewPromise?: ViewPromise<ModifiableEntity>;
+    getViewPromise?: (entity: ModifiableEntity) => ViewPromise<ModifiableEntity>;
     extraComponentProps?: {};
 }
 
@@ -499,6 +500,7 @@ export interface NavigateOptions {
     readOnly?: boolean;
     avoidPromptLooseChange?: boolean;
     viewPromise?: ViewPromise<ModifiableEntity>;
+    getViewPromise?: (entity: ModifiableEntity) => ViewPromise<ModifiableEntity>;
     extraComponentProps?: {};
 }
 
@@ -651,6 +653,7 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
     isReadOnly?: boolean;
     avoidPopup?: boolean;
     autocomplete?: AutocompleteConfig<T>;
+    autocompleteDelay?: number;
     getViewPromise?: (entity: T) => ViewPromise<T>;
     onNavigateRoute?: (typeName: string, id: string | number) => string;
     onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
@@ -813,7 +816,6 @@ export function toAbsoluteUrl(appRelativeUrl: string): string {
     if (appRelativeUrl.startsWith(window.__baseUrl) || appRelativeUrl.startsWith("http"))
         return appRelativeUrl;
 
-    console.warn(appRelativeUrl);
     return appRelativeUrl;
 }
 

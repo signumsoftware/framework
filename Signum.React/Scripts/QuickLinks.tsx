@@ -266,7 +266,7 @@ export class QuickLinkLink extends QuickLink {
     toMenuItem(key: any) {
 
         return (
-            <MenuItem data-name={this.name} className="sf-quick-link" key={key} onClick={this.handleClick}>
+            <MenuItem data-name={this.name} className="sf-quick-link" key={key} onMouseUp={this.handleClick}>
                 {this.renderIcon()}
                 {this.text}
             </MenuItem>

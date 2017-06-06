@@ -72,6 +72,9 @@ namespace Signum.Engine
         #endregion
 
         #region Retrieve
+
+
+
         public static T Retrieve<T>(this Lite<T> lite) where T : class, IEntity
         {
             if (lite == null)
@@ -104,6 +107,10 @@ namespace Signum.Engine
                         return cached;
                 }
 
+                var alternateEntity = Schema.Current.OnAlternativeRetriving(typeof(T), id);
+                if (alternateEntity != null)
+                    return (T)alternateEntity;
+
                 var cc = GetCacheController<T>();
                 if (cc != null)
                 {
@@ -123,8 +130,8 @@ namespace Signum.Engine
                         return result;
                     }
                 }
-
-                var retrieved = Database.Query<T>().SingleOrDefaultEx(a => a.Id == id);
+                
+                T retrieved = Database.Query<T>().SingleOrDefaultEx(a => a.Id == id);
 
                 if (retrieved == null)
                     throw new EntityNotFoundException(typeof(T), id);
@@ -1037,6 +1044,8 @@ namespace Signum.Engine
             }
         }
     }
+
+
 
     public class MListElement<E, V> where E : Entity
     {

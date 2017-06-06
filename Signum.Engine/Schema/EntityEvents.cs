@@ -15,6 +15,7 @@ namespace Signum.Engine.Maps
         public event SavingEventHandler<T> Saving;
         public event SavedEventHandler<T> Saved;
 
+        public event AlternativeRetriveEventHandler<T> AlternativeRetrive;
         public event RetrievedEventHandler<T> Retrieved;
 
         public CacheControllerBase<T> CacheController { get; set; }
@@ -99,6 +100,31 @@ namespace Signum.Engine.Maps
             Retrieved?.Invoke((T)entity);
         }
 
+        public Entity OnAlternativeRetriving(PrimaryKey id)
+        {
+            if (AlternativeRetrive == null)
+                return null;
+
+            var args = new AlternativeRetrieveArgs<T>();
+
+            AlternativeRetrive(id, args);
+
+
+            if (args.Entity == null)
+                throw new EntityNotFoundException(typeof(T), id);
+
+            if (!args.AvoidAccesVerify)
+            {
+                var verifyAcces = Database.Query<T>().Where(a => a.Id == id).Any();
+                if (!verifyAcces)
+                    throw new EntityNotFoundException(typeof(T), id);
+            }
+
+            return (Entity)args.Entity;
+
+
+        }
+
         ICacheController IEntityEvents.CacheController
         {
             get { return CacheController; }
@@ -110,12 +136,20 @@ namespace Signum.Engine.Maps
     public delegate void SavingEventHandler<T>(T ident) where T : Entity;
     public delegate void SavedEventHandler<T>(T ident, SavedEventArgs args) where T : Entity;
     public delegate FilterQueryResult<T> FilterQueryEventHandler<T>() where T : Entity;
+    public delegate void AlternativeRetriveEventHandler<T>(PrimaryKey id, AlternativeRetrieveArgs<T> args) where T : Entity;
 
     public delegate void PreUnsafeDeleteHandler<T>(IQueryable<T> entityQuery);
     public delegate void PreUnsafeMListDeleteHandler<T>(IQueryable mlistQuery, IQueryable<T> entityQuery);
     public delegate void PreUnsafeUpdateHandler<T>(IUpdateable update, IQueryable<T> entityQuery);
     public delegate LambdaExpression PreUnsafeInsertHandler<T>(IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery);
     public delegate void BulkInsetHandler<T>(bool inMListTable);
+
+
+    public class AlternativeRetrieveArgs<T> where T : Entity
+    {
+        public bool AvoidAccesVerify { get; set; }
+        public T Entity { get; set; }
+    }
 
     public class SavedEventArgs
     {
@@ -126,7 +160,7 @@ namespace Signum.Engine.Maps
 
     public interface IFilterQueryResult
     {
-        LambdaExpression InDatabaseExpression{get;}
+        LambdaExpression InDatabaseExpression { get; }
     }
 
     public class FilterQueryResult<T> : IFilterQueryResult where T : Entity
@@ -145,6 +179,7 @@ namespace Signum.Engine.Maps
 
     internal interface IEntityEvents
     {
+        Entity OnAlternativeRetriving(PrimaryKey id);
         void OnPreSaving(Entity entity, ref bool graphModified);
         void OnSaving(Entity entity);
         void OnSaved(Entity entity, SavedEventArgs args);
