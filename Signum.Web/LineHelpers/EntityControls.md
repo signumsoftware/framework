@@ -77,7 +77,7 @@ public class ValueLine : LineBase
 | single double, decimal | Number |
 | DateTime      | DateTime      |
 | TimeSpan      | TimeSpan      |
-| ColorEntity       | Color         |
+| ColorEmbedded       | Color         |
 | any Enum      | Enum          |
 | string, char  | String      |
 | any object    | String      |

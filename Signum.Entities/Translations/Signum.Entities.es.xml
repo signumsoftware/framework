@@ -31,7 +31,7 @@
     <Member Name="NoOne2" Description="Ninguno (2)" />
     <Member Name="NoOne3" Description="Ninguno (3)" />
   </Type>
-  <Type Name="ColorEntity" Description="Color">
+  <Type Name="ColorEmbedded" Description="Color">
     <Member Name="Argb" Description="Argb" />
   </Type>
   <Type Name="ColumnOptionsMode" Description="Modo de las columnas">
