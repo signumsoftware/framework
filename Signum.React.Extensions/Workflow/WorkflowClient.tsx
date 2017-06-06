@@ -485,14 +485,15 @@ export namespace API {
         return ajaxPost<PreviewResult>({ url: `~/api/workflow/previewChanges/${workflow.id} ` }, model);
     }
 
-    export function findMainEntityType(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {
+    export function findMainEntityType(request: { subString: string, count: number }, abortController?: FetchAbortController): Promise<Lite<TypeEntity>[]> {
         return ajaxGet<Lite<TypeEntity>[]>({
-            url: "~/api/workflow/findMainEntityType?" + QueryString.stringify(request)
+            url: "~/api/workflow/?findMainEntityType" + QueryString.stringify(request),
+            abortController
         });
     }
 
-    export function findNode(request: WorkflowFindNodeRequest): Promise<Lite<IWorkflowNodeEntity>[]> {
-        return ajaxPost<Lite<IWorkflowNodeEntity>[]>({ url: "~/api/workflow/findNode" }, request);
+    export function findNode(request: WorkflowFindNodeRequest, abortController?: FetchAbortController): Promise<Lite<IWorkflowNodeEntity>[]> {
+        return ajaxPost<Lite<IWorkflowNodeEntity>[]>({ url: "~/api/workflow/findNode", abortController }, request);
     }
 
     export function conditionTest(request: WorkflowConditionTestRequest): Promise<WorkflowConditionTestResponse> {

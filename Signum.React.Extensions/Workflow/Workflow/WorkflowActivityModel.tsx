@@ -171,7 +171,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                                     </FormGroup>
                                     <EntityLine
                                         ctx={tctx.subCtx(t => t.to)}
-                                        autoComplete={new LiteAutocompleteConfig(str => API.findNode(({ workflowId: ctx.value.workflow!.id, subString: str, count: 5, excludes: this.getCurrentJumpsTo() })), false)}
+                                        autoComplete={new LiteAutocompleteConfig((ac,str) => API.findNode({ workflowId: ctx.value.workflow!.id, subString: str, count: 5, excludes: this.getCurrentJumpsTo() }, ac), false)}
                                         find={false}
                                         helpBlock={WorkflowMessage.ToUseNewNodesOnJumpsYouSouldSaveWorkflow.niceToString()} />
                                     <EntityLine ctx={tctx.subCtx(t => t.action)} findOptions={{
@@ -193,7 +193,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                                         template: (jctx, row, state) => {
                                             return <EntityLine
                                                 ctx={jctx.subCtx(wj => wj.to)}
-                                                autoComplete={new LiteAutocompleteConfig(str => API.findNode(({ workflowId: ctx.value.workflow!.id, subString: str, count: 5, excludes: this.getCurrentJumpsTo() })), false)}
+                                                autoComplete={new LiteAutocompleteConfig((ac, str) => API.findNode({ workflowId: ctx.value.workflow!.id, subString: str, count: 5, excludes: this.getCurrentJumpsTo() }, ac), false)}
                                                 find={false} />
                                         },
                                         headerHtmlAttributes: { width: "40%" }
@@ -273,7 +273,7 @@ class ScriptComponent extends React.Component<{ ctx: TypeContext<WorkflowScriptP
                 <EntityLine ctx={ctx.subCtx(s => s.retryStrategy)} />
                 <EntityLine
                     ctx={ctx.subCtx(s => s.onFailureJump)}
-                    autoComplete={new LiteAutocompleteConfig(str => API.findNode(({ workflowId: this.props.workflow.id, subString: str, count: 5 })), false)}
+                    autoComplete={new LiteAutocompleteConfig((ac, str) => API.findNode({ workflowId: this.props.workflow.id, subString: str, count: 5 }, ac), false)}
                     find={false}
                     helpBlock={WorkflowMessage.ToUseNewNodesOnJumpsYouSouldSaveWorkflow.niceToString()} />
              
