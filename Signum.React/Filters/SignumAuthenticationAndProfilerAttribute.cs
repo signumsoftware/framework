@@ -42,7 +42,7 @@ namespace Signum.React.Filters
 
                         actionContext.Request.Properties[SavedRequestKey] = await actionContext.Request.Content.ReadAsStringAsync();
 
-                        using (Authenticate == null ? null : Authenticate(actionContext))
+                        using (Authenticate(actionContext))
                         {
                             using (GetCurrentCultures?.Invoke(actionContext))
                             {
