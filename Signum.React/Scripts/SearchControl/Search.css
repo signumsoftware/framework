@@ -147,6 +147,7 @@ td.centered-cell{
 }
 
 .sf-header-sort.l0 {
+    opacity: 1;
 }
 
 .sf-header-sort.asc {
@@ -252,7 +253,7 @@ ul.sf-context-menu li a:not([disabled]) {
 }
 
 
-.sf-query-token-part .rw-input rw-dropdown-list-input {
+.sf-query-token-part .rw-input .rw-dropdown-list-input {
     cursor: pointer;
 }
 
