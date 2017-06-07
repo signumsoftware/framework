@@ -55,12 +55,11 @@ export function start(options: { routes: JSX.Element[] }) {
         }
     }));
 
-    ContexualItems.onContextualItems.push(getWordTemplastes);
+    ContexualItems.onContextualItems.push(getWordTemplates);
 }
 
-export function getWordTemplastes(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
+export function getWordTemplates(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
 
-    debugger;
     if (ctx.lites.length == 0)
         return undefined;
 
