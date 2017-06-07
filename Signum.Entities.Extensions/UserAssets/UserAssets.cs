@@ -97,6 +97,11 @@ namespace Signum.Entities.UserAssets
         public static void Synchronize<T>(this MList<T> entities, List<XElement> xElements, Action<T, XElement> syncAction)
             where T : new()
         {
+
+            if (xElements == null)
+                xElements = new List<XElement>();
+
+
             for (int i = 0; i < xElements.Count; i++)
             {
                 T entity;
