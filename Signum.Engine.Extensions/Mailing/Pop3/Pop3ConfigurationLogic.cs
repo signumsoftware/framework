@@ -31,9 +31,6 @@ namespace Signum.Engine.Mailing.Pop3
 {
     public static class Pop3ConfigurationLogic
     {
-
-
-
         static Expression<Func<Pop3ConfigurationEntity, IQueryable<Pop3ReceptionEntity>>> ReceptionsExpression =
             c => Database.Query<Pop3ReceptionEntity>().Where(r => r.Pop3Configuration.RefersTo(c));
         [ExpressionField]
@@ -77,14 +74,9 @@ namespace Signum.Engine.Mailing.Pop3
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 GetPop3Client = getPop3Client;
-
-
-                //ReceptionComunication = receptionComunication;
-
+                
                 MixinDeclarations.AssertDeclared(typeof(EmailMessageEntity), typeof(EmailReceptionMixin));
-
-                //MimeMapping.CacheExtension.TryAdd("message/rfc822", ".eml");
-
+                
                 sb.Include<Pop3ConfigurationEntity>()
                     .WithSave(Pop3ConfigurationOperation.Save)
                     .WithQuery(dqm, s => new
@@ -310,10 +302,7 @@ namespace Signum.Engine.Mailing.Pop3
                     catch { }
                 }
 
-
-                if (ReceptionComunication != null)
-                    ReceptionComunication(reception);
-
+                ReceptionComunication?.Invoke(reception);
 
                 return reception;
             }

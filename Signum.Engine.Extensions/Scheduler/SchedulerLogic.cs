@@ -360,13 +360,12 @@ namespace Signum.Engine.Scheduler
         {
             IUserEntity entityIUser = user ?? (IUserEntity)scheduledTask.User.Retrieve();
 
-            var isolation =entityIUser.TryIsolation();
+            var isolation = entityIUser.TryIsolation();
             if (isolation == null)
             {
                 var ientity = task as IEntity;
                 isolation = ientity?.TryIsolation();
             }
-
 
             using (IsolationEntity.Override(isolation))
             {

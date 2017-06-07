@@ -31,20 +31,16 @@ namespace Signum.Engine.ViewLog
         {
             return ViewLogsExpression.Evaluate(a);
         }
-
-
-
+        
         static Expression<Func<Entity, ViewLogEntity>> ViewLogMyLastExpression =
-        e => Database.Query<ViewLogEntity>()
-        .Where(a => a.User.RefersTo(UserEntity.Current) && a.Target.RefersTo(e))
-        .OrderBy(a => a.StartDate).FirstOrDefault();
-     
+            e => Database.Query<ViewLogEntity>()
+            .Where(a => a.User.RefersTo(UserEntity.Current) && a.Target.RefersTo(e))
+            .OrderBy(a => a.StartDate).FirstOrDefault();     
         [ExpressionField]
         public static ViewLogEntity ViewLogMyLast(this Entity e)
         {
             return ViewLogMyLastExpression.Evaluate(e);
         }
-
 
         public static Func<Type, bool> LogType = type => true;
         public static Func<BaseQueryRequest, DynamicQueryManager.ExecuteType, bool> LogQuery = (request, type) => true;

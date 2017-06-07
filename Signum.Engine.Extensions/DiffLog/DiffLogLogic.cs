@@ -38,15 +38,12 @@ namespace Signum.Engine.DiffLog
 
         static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity entity, object[] args)
         {
-            if(entity==null)
+            if (entity == null)
                 return null;
 
             var type = entity.GetType();
-            bool strategy = Types.ContainsKey(type) ? Types.TryGetValue(type)(entity, operation) : false;
 
-            if (strategy == false)
-                 strategy = Types.ContainsKey(typeof(Entity)) ? Types.TryGetValue(typeof(Entity))(entity, operation) : false;
-
+            bool? strategy = type == null ? (bool?)null : Types.GetValue(type)(entity, operation);
 
             if (strategy == false)
                 return null;

@@ -9,7 +9,7 @@ using Signum.Utilities;
 namespace Signum.Entities.Chart
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Master), TicksColumn(false)]
-    public class ChartColorEmbedded : Entity
+    public class ChartColorEntity : Entity
     {
         [ImplementedByAll, UniqueIndex]
         [NotNullValidator]
@@ -36,7 +36,7 @@ namespace Signum.Entities.Chart
         public TypeEntity Type { get; set; }
 
         [NotNullable]
-        public MList<ChartColorEmbedded> Colors { get; set; } = new MList<ChartColorEmbedded>();
+        public MList<ChartColorEntity> Colors { get; set; } = new MList<ChartColorEntity>();
 
         public override string ToString()
         {

@@ -44,6 +44,5 @@ namespace Signum.Entities.ViewLog
     public enum ViewLogMessage
     {
         ViewLogMyLast
-
     }
 }

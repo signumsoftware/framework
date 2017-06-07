@@ -163,9 +163,7 @@ namespace Signum.Entities.Dashboard
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
             UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
-
-            var value = element.Attribute("AllowSelection")?.Value;
-            AllowSelection = bool.Parse(value == null ? "false" : value);
+            AllowSelection = element.Attribute("AllowSelection")?.Value.ToBool() ?? false;
         }
     }
 

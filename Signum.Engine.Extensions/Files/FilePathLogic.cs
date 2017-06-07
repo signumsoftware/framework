@@ -23,7 +23,7 @@ namespace Signum.Engine.Files
     public static class FilePathLogic
     {
         static Expression<Func<FilePathEntity, WebImage>> WebImageExpression =
-            fp => fp==null?null: new WebImage { FullWebPath = fp.FullWebPath() };
+            fp => fp == null ? null: new WebImage { FullWebPath = fp.FullWebPath() };
         [ExpressionField]
         public static WebImage WebImage(this FilePathEntity fp)
         {

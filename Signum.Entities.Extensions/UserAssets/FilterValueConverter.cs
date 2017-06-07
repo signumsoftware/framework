@@ -451,7 +451,7 @@ namespace Signum.Entities.UserAssets
     {
         public static string CurrentEntityKey = "[CurrentEntity]";
 
-        static readonly ThreadVariable<Entity> currentEntityVariable = Statics.ThreadVariable<Entity>("currentFilterValueEmbedded");
+        static readonly ThreadVariable<Entity> currentEntityVariable = Statics.ThreadVariable<Entity>("currentFilterValueEntity");
 
         public static IDisposable SetCurrentEntity(Entity currentEntity)
         {

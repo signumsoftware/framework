@@ -28,7 +28,7 @@ namespace Signum.Entities.Chart
 
         bool Invalidator { get; }
 
-        void FixParameters(ChartColumnEmbedded ChartColumnEmbedded);
+        void FixParameters(ChartColumnEmbedded chartColumnEntity);
     }
 
     [Serializable, InTypeScript(Undefined = false)]
