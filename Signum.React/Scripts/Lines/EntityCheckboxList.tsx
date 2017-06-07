@@ -38,18 +38,21 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
     }
 
     componentWillMount() {
-        if (!this.state.data) {
-            Finder.API.fetchAllLites({ types: this.state.type!.name })
-                .then(data => this.setState({ data: data.orderBy(a => a.toStr) } as any))
-                .done();
-        }
+        if (this.state.data == null)
+            this.reloadData(this.props);
     }
 
     componentWillReceiveProps(newProps: EntityCheckboxListProps, newContext: any) {
-        if (!!newProps.data && !this.props.data)
-            console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityCheckboxList: ${this.state.type!.name}`);
+        if (newProps.data) {
+            if (this.props.data == null)
+                console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityCombo: ${this.props.type!.name}`);
 
-        super.componentWillReceiveProps(newProps, newContext);
+            this.setState({ data: newProps.data });
+        } else {
+            if (newProps.findOptions != this.props.findOptions || newProps.type!.name != this.props.type!.name)
+                this.reloadData(newProps);
+            //super.componentWillReceiveProps(newProps, newContext);
+        }
     }
 
     handleOnChange = (event: React.ChangeEvent<HTMLInputElement>, lite: Lite<Entity>) => {
@@ -152,5 +155,20 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
                 <span className="sf-entitStrip-link">{lite.toStr}</span>
             </label>);
 
+    }
+
+    reloadData(props: EntityCheckboxListProps) {
+        const fo = props.findOptions;
+        if (fo) {
+            Finder.expandParentColumn(fo);
+            var limit = fo && fo.pagination && fo.pagination.elementsPerPage || 999;
+            Finder.fetchEntitiesWithFilters(fo.queryName, fo.filterOptions || [], fo.orderOptions || [], limit)
+                .then(data => this.setState({ data: fo.orderOptions && fo.orderOptions.length ? data : data.orderBy(a => a.toStr) } as any))
+                .done();
+        }
+        else
+            Finder.API.fetchAllLites({ types: this.state.type!.name })
+                .then(data => this.setState({ data: data.orderBy(a => a.toStr) } as any))
+                .done();
     }
 }
