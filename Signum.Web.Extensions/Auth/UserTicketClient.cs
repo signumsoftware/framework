@@ -23,11 +23,7 @@ namespace Signum.Web.Auth
             return System.Web.HttpContext.Current.Request.UserHostAddress;
         }
 
-        public static Func<string> GetDeviceKey = GetDeviceKeyDefauld;
-        public static string GetDeviceKeyDefauld()
-        {
-            return "";
-        }
+ 
 
         public static bool LoginFromCookie()
         {
@@ -41,7 +37,7 @@ namespace Signum.Web.Auth
 
                     string ticketText = authCookie.Value;
 
-                    UserEntity user = UserTicketLogic.UpdateTicket( GetDevice(), GetDeviceKey(),ref ticketText);
+                    UserEntity user = UserTicketLogic.UpdateTicket( GetDevice(), ref ticketText);
 
                     AuthController.OnUserPreLogin(null, user);
 
@@ -83,7 +79,7 @@ namespace Signum.Web.Auth
 
         public static void SaveCookie()
         {
-            string ticketText = UserTicketLogic.NewTicket(GetDevice(), GetDeviceKey());
+            string ticketText = UserTicketLogic.NewTicket(GetDevice());
 
             HttpCookie cookie = new HttpCookie(CookieName, ticketText)
             {

@@ -23,17 +23,11 @@ namespace Signum.Engine.Authorization
 
         public static bool IsStarted { get; private set; }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<UserTicketEntity, string> StringTicket = null, Func<string, string, (PrimaryKey, string)> ParseTicket=null)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 IsStarted = true;
-
-                if (StringTicket != null)
-                    UserTicketEntity.StringTicketFunc = StringTicket;
-
-                if (ParseTicket != null)
-                    UserTicketEntity.ParseTicket = ParseTicket;
 
                 AuthLogic.AssertStarted(sb);
                 sb.Include<UserTicketEntity>()
@@ -67,7 +61,7 @@ namespace Signum.Engine.Authorization
             return UserTicketsExpression.Evaluate(u);
         }
 
-        public static string NewTicket(string device,string deviceKey)
+        public static string NewTicket(string device)
         {
             using (AuthLogic.Disable())
             using (Transaction tr = new Transaction())
@@ -78,7 +72,6 @@ namespace Signum.Engine.Authorization
                 {
                     User = UserEntity.Current.ToLite(),
                     Device = device,
-                    DeviceKey = deviceKey,
                     ConnectionDate = TimeZoneManager.Now,
                     Ticket = Guid.NewGuid().ToString(),
                 };
@@ -90,17 +83,17 @@ namespace Signum.Engine.Authorization
 
         }
 
-        public static UserEntity UpdateTicket(string device, string deviceKey, ref string ticket)
+        public static UserEntity UpdateTicket(string device, ref string ticket)
         {
             using (AuthLogic.Disable())
             using (Transaction tr = new Transaction())
             {
-                var pair = UserTicketEntity.ParseTicket(ticket, deviceKey);
+                var pair = UserTicketEntity.ParseTicket(ticket);
 
-                UserEntity user = Database.Retrieve<UserEntity>(pair.Item1);
+                UserEntity user = Database.Retrieve<UserEntity>(pair.userId);
                 CleanExpiredTickets(user);
 
-                UserTicketEntity userTicket = user.UserTickets().SingleOrDefaultEx(t => t.Ticket == pair.Item2);
+                UserTicketEntity userTicket = user.UserTickets().SingleOrDefaultEx(t => t.Ticket == pair.ticket);
                 if (userTicket == null)
                 {
                     throw new UnauthorizedAccessException("User attempted to log-in with an invalid ticket");
@@ -110,7 +103,6 @@ namespace Signum.Engine.Authorization
                 {
                     User = user.ToLite(),
                     Device = device,
-                    DeviceKey= deviceKey,
                     ConnectionDate = TimeZoneManager.Now,
                     Ticket = Guid.NewGuid().ToString(),
                 }.Save();
