@@ -60,6 +60,11 @@ namespace Signum.Web
         {
         }
 
+        public RuntimeInfo(ModelEntity entity) :
+            this(entity.GetType(), null, false, null)
+        {
+        }
+
         public RuntimeInfo(IEntity entity)
             : this(entity.GetType(), entity.IdOrNull, entity.IsNew,
                  entity is Entity ? ((Entity)entity).Ticks : (long?)null)

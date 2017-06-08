@@ -631,6 +631,13 @@ namespace Signum.Web
 
                 return ctx.Value;
             }
+            else if (typeof(T).IsModelEntity())
+            {
+                if (runtimeInfo.IsNew || ctx.Value == null)
+                    return new ConstructorContext(ctx.Controller).Construct<T>();
+
+                return ctx.Value;
+            }
             else
             {
                 Entity identifiable = (Entity)(ModifiableEntity)ctx.Value;
