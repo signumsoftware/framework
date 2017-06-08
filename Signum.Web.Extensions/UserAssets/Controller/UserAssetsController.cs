@@ -51,8 +51,8 @@ namespace Signum.Web.UserAssets
         }
 
         static Mapping<UserAssetPreviewModel> mapping = new EntityMapping<UserAssetPreviewModel>(false)
-            .SetProperty(m=>m.Lines, new MListDictionaryMapping<UserAssetPreviewLine, Guid>(a=>a.Guid)
-                .SetElementMapping(new EntityMapping<UserAssetPreviewLine>(false).CreateProperty(a=>a.OverrideEntity)));
+            .SetProperty(m=>m.Lines, new MListDictionaryMapping<UserAssetPreviewLineEmbedded, Guid>(a=>a.Guid)
+                .SetElementMapping(new EntityMapping<UserAssetPreviewLineEmbedded>(false).CreateProperty(a=>a.OverrideEntity)));
 
         [HttpPost]
         public ActionResult ImportConfirm()

@@ -65,7 +65,7 @@ WriteLiteral("\r\n");
 
             
             #line 6 "..\..\SMS\Views\SMSTemplateMessage.cshtml"
- using (var tc = Html.TypeContext<SMSTemplateMessageEntity>())
+ using (var tc = Html.TypeContext<SMSTemplateMessageEmbedded>())
 {
     tc.LabelColumns = new BsColumn(4);
 
@@ -82,14 +82,14 @@ WriteLiteral(" type=\"hidden\"");
 
 WriteLiteral(" class=\"sf-tab-title\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 296), Tuple.Create("\"", 339)
+WriteAttribute("value", Tuple.Create(" value=\"", 298), Tuple.Create("\"", 341)
             
             #line 10 "..\..\SMS\Views\SMSTemplateMessage.cshtml"
-, Tuple.Create(Tuple.Create("", 304), Tuple.Create<System.Object, System.Int32>(tc.Value.CultureInfo?.ToString()
+, Tuple.Create(Tuple.Create("", 306), Tuple.Create<System.Object, System.Int32>(tc.Value.CultureInfo?.ToString()
             
             #line default
             #line hidden
-, 304), false)
+, 306), false)
 );
 
 WriteLiteral(" />\r\n");
@@ -151,14 +151,14 @@ WriteLiteral(" type=\"button\"");
 
 WriteLiteral(" class=\"btn sf-button sf-sms-remove-chars\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 1201), Tuple.Create("\"", 1270)
+WriteAttribute("value", Tuple.Create(" value=\"", 1203), Tuple.Create("\"", 1272)
             
             #line 30 "..\..\SMS\Views\SMSTemplateMessage.cshtml"
-      , Tuple.Create(Tuple.Create("", 1209), Tuple.Create<System.Object, System.Int32>(SMSCharactersMessage.RemoveNonValidCharacters.NiceToString()
+      , Tuple.Create(Tuple.Create("", 1211), Tuple.Create<System.Object, System.Int32>(SMSCharactersMessage.RemoveNonValidCharacters.NiceToString()
             
             #line default
             #line hidden
-, 1209), false)
+, 1211), false)
 );
 
 WriteLiteral(" />\r\n            </div>\r\n        </div>\r\n    </div>\r\n");

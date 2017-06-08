@@ -40,4 +40,9 @@ namespace Signum.Entities.ViewLog
             get { return DurationExpression.Evaluate(this); }
         }
     }
+
+    public enum ViewLogMessage
+    {
+        ViewLogMyLast
+    }
 }

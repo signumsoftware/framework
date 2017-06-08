@@ -49,7 +49,7 @@ WriteLiteral("\n");
 
             
             #line 3 "..\..\Mailing\Views\SmtpNetworkDelivery.cshtml"
- using (var sc = Html.TypeContext<SmtpNetworkDeliveryEntity>())
+ using (var sc = Html.TypeContext<SmtpNetworkDeliveryEmbedded>())
 {
     
             

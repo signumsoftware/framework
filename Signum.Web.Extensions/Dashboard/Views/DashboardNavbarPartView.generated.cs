@@ -50,7 +50,7 @@ namespace ASP
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Dashboard/Views/DashboardNavbarPartView.cshtml")]
-    public partial class _Dashboard_Views_DashboardNavbarPartView_cshtml : System.Web.Mvc.WebViewPage<PanelPartEntity>
+    public partial class _Dashboard_Views_DashboardNavbarPartView_cshtml : System.Web.Mvc.WebViewPage<PanelPartEmbedded>
     {
         public _Dashboard_Views_DashboardNavbarPartView_cshtml()
         {
@@ -66,7 +66,7 @@ namespace ASP
             
             #line default
             #line hidden
-WriteLiteral("\r\n\r\n");
+WriteLiteral("\n\n");
 
             
             #line 11 "..\..\Dashboard\Views\DashboardNavbarPartView.cshtml"
@@ -75,7 +75,7 @@ Write(Html.Partial(config.FrontEndView, TypeContextUtilities.UntypedNew(Model.Co
             
             #line default
             #line hidden
-WriteLiteral("\r\n");
+WriteLiteral("\n");
 
         }
     }

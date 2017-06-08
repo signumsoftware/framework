@@ -3,7 +3,7 @@
 @using Signum.Web.UserAssets
 @using Signum.Entities.DynamicQuery
 
-@using (var e = Html.TypeContext<QueryOrderEntity>())
+@using (var e = Html.TypeContext<QueryOrderEmbedded>())
 {
     e.FormGroupStyle = FormGroupStyle.None;
     @Html.QueryTokenDNBuilder(e.SubContext(a => a.Token), SearchControlHelper.GetQueryTokenBuilderSettings(

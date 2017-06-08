@@ -178,7 +178,7 @@ namespace Signum.Engine.Mailing
         public static MailAddress ToMailAddress(this EmailRecipientEntity recipient)
         {
             if (!Configuration.SendEmails)
-                throw new InvalidOperationException("EmailConfigurationEntity.SendEmails is set to false");
+                throw new InvalidOperationException("EmailConfigurationEmbedded.SendEmails is set to false");
 
             if (recipient.DisplayName != null)
                 return new MailAddress(Configuration.OverrideEmailAddress.DefaultText(recipient.EmailAddress), recipient.DisplayName);

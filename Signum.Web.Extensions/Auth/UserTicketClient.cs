@@ -17,6 +17,14 @@ namespace Signum.Web.Auth
         public static Func<string> CookieNameFunc = () => "sfUser";
         public static string CookieName { get { return CookieNameFunc(); } }
 
+        public static Func<string> GetDevice = GetDeviceDefauld;
+        public static string GetDeviceDefauld()
+        {
+            return System.Web.HttpContext.Current.Request.UserHostAddress;
+        }
+
+ 
+
         public static bool LoginFromCookie()
         {
             using (AuthLogic.Disable())
@@ -29,9 +37,7 @@ namespace Signum.Web.Auth
 
                     string ticketText = authCookie.Value;
 
-                    UserEntity user = UserTicketLogic.UpdateTicket(
-                           System.Web.HttpContext.Current.Request.UserHostAddress,
-                           ref ticketText);
+                    UserEntity user = UserTicketLogic.UpdateTicket( GetDevice(), ref ticketText);
 
                     AuthController.OnUserPreLogin(null, user);
 
@@ -66,14 +72,14 @@ namespace Signum.Web.Auth
             if (authCookie != null && authCookie.Value.HasText())
             {
                 httpContext.Response.Cookies[CookieName].Expires = DateTime.UtcNow.AddDays(-10);
-				Database.Query<UserTicketEntity>().Where(u => u.Ticket == authCookie.Value).UnsafeDelete();
+                using (AuthLogic.Disable())
+             				Database.Query<UserTicketEntity>().Where(u => u.Ticket == authCookie.Value).UnsafeDelete();
             }
         }
 
         public static void SaveCookie()
         {
-            string ticketText = UserTicketLogic.NewTicket(
-                      System.Web.HttpContext.Current.Request.UserHostAddress);
+            string ticketText = UserTicketLogic.NewTicket(GetDevice());
 
             HttpCookie cookie = new HttpCookie(CookieName, ticketText)
             {

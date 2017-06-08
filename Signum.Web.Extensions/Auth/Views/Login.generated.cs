@@ -99,7 +99,7 @@ WriteLiteral("        ");
 
             
             #line 17 "..\..\Auth\Views\Login.cshtml"
-   Write(AuthMessage.IntroduceYourUserNameAndPassword.NiceToString());
+   Write(AuthMessage.EnterYourUserNameAndPassword.NiceToString());
 
             
             #line default

@@ -156,12 +156,12 @@ WriteLiteral("\r\n");
 
             
             #line 24 "..\..\Chart\Views\ChartColumn.cshtml"
- using (var tc = Html.TypeContext<ChartColumnEntity>())
+ using (var tc = Html.TypeContext<ChartColumnEmbedded>())
 {
 
     if (tc.Value == null)
     {
-        tc.Value = new ChartColumnEntity();
+        tc.Value = new ChartColumnEmbedded();
     }
     
 
@@ -176,7 +176,7 @@ WriteLiteral(" data-token=\"");
 
             
             #line 32 "..\..\Chart\Views\ChartColumn.cshtml"
-                                       Write(((TypeElementContext<ChartColumnEntity>)tc.Parent).Index);
+                                       Write(((TypeElementContext<ChartColumnEmbedded>)tc.Parent).Index);
 
             
             #line default
@@ -359,7 +359,7 @@ WriteLiteral("</div>\r\n                        \r\n");
             #line hidden
             
             #line 85 "..\..\Chart\Views\ChartColumn.cshtml"
-                         if (sc.Value.Token != null && !Navigator.IsReadOnly(typeof(ChartColorEntity)))
+                         if (sc.Value.Token != null && !Navigator.IsReadOnly(typeof(ChartColorEmbedded)))
                         {
                             var type = sc.Value.Token.Token.Type.CleanType();
 

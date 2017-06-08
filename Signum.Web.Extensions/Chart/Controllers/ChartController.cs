@@ -186,7 +186,7 @@ namespace Signum.Web.Chart
             }
         }
 
-        private FilterOption GetSubgroupFilter(ChartColumnEntity chartToken, string key)
+        private FilterOption GetSubgroupFilter(ChartColumnEmbedded chartToken, string key)
         {
             if (chartToken == null || chartToken.Token.Token is AggregateToken)
                 return null;

@@ -87,7 +87,7 @@ namespace ASP
         {
             
             #line 9 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
- using (var ec = Html.TypeContext<EmailTemplateMessageEntity>())
+ using (var ec = Html.TypeContext<EmailTemplateMessageEmbedded>())
 {
     ec.LabelColumns = new BsColumn(1);
 
@@ -104,14 +104,14 @@ WriteLiteral(" type=\"hidden\"");
 
 WriteLiteral(" class=\"sf-tab-title\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 434), Tuple.Create("\"", 477)
+WriteAttribute("value", Tuple.Create(" value=\"", 436), Tuple.Create("\"", 479)
             
             #line 13 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-, Tuple.Create(Tuple.Create("", 442), Tuple.Create<System.Object, System.Int32>(ec.Value.CultureInfo?.ToString()
+, Tuple.Create(Tuple.Create("", 444), Tuple.Create<System.Object, System.Int32>(ec.Value.CultureInfo?.ToString()
             
             #line default
             #line hidden
-, 442), false)
+, 444), false)
 );
 
 WriteLiteral(" />\r\n");
@@ -163,14 +163,14 @@ WriteLiteral("\"");
 WriteLiteral(" class=\"btn btn-default btn-sm sf-button sf-email-inserttoken sf-email-inserttoke" +
 "n-basic\"");
 
-WriteAttribute("value", Tuple.Create("  value=\"", 1075), Tuple.Create("\"", 1133)
+WriteAttribute("value", Tuple.Create("  value=\"", 1077), Tuple.Create("\"", 1135)
             
             #line 20 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-                                                                                                , Tuple.Create(Tuple.Create("", 1084), Tuple.Create<System.Object, System.Int32>(EmailTemplateViewMessage.Insert.NiceToString()
+                                                                                                , Tuple.Create(Tuple.Create("", 1086), Tuple.Create<System.Object, System.Int32>(EmailTemplateViewMessage.Insert.NiceToString()
             
             #line default
             #line hidden
-, 1084), false)
+, 1086), false)
 );
 
 WriteLiteral(" />\r\n            <input");

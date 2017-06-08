@@ -90,7 +90,7 @@ namespace Signum.Web.Help
 
                 if (prop == null)
                 {
-                    entity.Properties.Add(new PropertyRouteHelpEntity
+                    entity.Properties.Add(new PropertyRouteHelpEmbedded
                     {
                         Property = fromProp.Property,
                         Description = dic.GetOrThrow(fromProp.Description)
@@ -130,7 +130,7 @@ namespace Signum.Web.Help
 
                 if (col == null)
                 {
-                    query.Columns.Add(new QueryColumnHelpEntity
+                    query.Columns.Add(new QueryColumnHelpEmbedded
                     {
                         ColumnName = fromProp.ColumnName,
                         Description = dic.GetOrThrow(fromProp.Description)

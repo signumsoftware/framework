@@ -49,7 +49,7 @@ WriteLiteral("\r\n");
 
             
             #line 3 "..\..\Mailing\Views\EmailConfiguration.cshtml"
- using (var sc = Html.TypeContext<EmailConfigurationEntity>())
+ using (var sc = Html.TypeContext<EmailConfigurationEmbedded>())
 {
     
             
