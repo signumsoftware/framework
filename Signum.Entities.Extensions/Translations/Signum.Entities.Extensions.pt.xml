@@ -170,7 +170,7 @@
     <Member Name="CertFile" Description="Arquivo certificado" />
     <Member Name="SignedFile" Description="Arquivo assinado" />
   </Type>
-  <Type Name="ChartColorEmbedded" Description="Cor do gráfico" PluralDescription="Cores do gráfico">
+  <Type Name="ChartColorEntity" Description="Cor do gráfico" PluralDescription="Cores do gráfico">
     <Member Name="Color" Description="Cor" />
     <Member Name="Related" Description="Relacionado" />
   </Type>
