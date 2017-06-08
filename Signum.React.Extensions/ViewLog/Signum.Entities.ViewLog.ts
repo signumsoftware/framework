@@ -18,4 +18,8 @@ export interface ViewLogEntity extends Entities.Entity {
     data?: string | null;
 }
 
+export module ViewLogMessage {
+    export const ViewLogMyLast = new MessageKey("ViewLogMessage", "ViewLogMyLast");
+}
+
 
