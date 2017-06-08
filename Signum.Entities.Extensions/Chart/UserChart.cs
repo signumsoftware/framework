@@ -177,10 +177,10 @@ namespace Signum.Entities.Chart
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value));
             ChartScript = ctx.ChartScript(element.Attribute("ChartScript").Value);
             GroupResults = bool.Parse(element.Attribute("GroupResults").Value);
-            Filters.Synchronize((element.Element("Filters")?.Elements()).EmptyIfNull().ToList(), (f, x) => f.FromXml(x, ctx));
-            Columns.Synchronize((element.Element("Columns")?.Elements()).EmptyIfNull().ToList(), (c, x) => c.FromXml(x, ctx));
-            Orders.Synchronize((element.Element("Orders")?.Elements()).EmptyIfNull().ToList(), (o, x) => o.FromXml(x, ctx));
-            Parameters.Synchronize((element.Element("Parameters")?.Elements()).EmptyIfNull().ToList(), (p, x) => p.FromXml(x, ctx));
+            Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
+            Columns.Synchronize(element.Element("Columns")?.Elements().ToList(), (c, x) => c.FromXml(x, ctx));
+            Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
+            Parameters.Synchronize(element.Element("Parameters")?.Elements().ToList(), (p, x) => p.FromXml(x, ctx));
             ParseData(ctx.GetQueryDescription(Query));
         }
 

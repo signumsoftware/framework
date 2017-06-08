@@ -49,7 +49,7 @@ WriteLiteral("\r\n");
 
             
             #line 3 "..\..\Basic\Views\DateSpan.cshtml"
- using (var s = Html.TypeContext<DateSpanEntity>())
+ using (var s = Html.TypeContext<DateSpanEmbedded>())
 {
 
             

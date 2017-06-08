@@ -1,7 +1,7 @@
 ﻿@using Signum.Entities.Dashboard
 @using Signum.Web.Dashboard
 
-@using (var tc = Html.TypeContext<LinkElementEntity>())
+@using (var tc = Html.TypeContext<LinkElementEmbedded>())
 {
     @Html.ValueLine(tc, l => l.Label)
     @Html.ValueLine(tc, l => l.Link)

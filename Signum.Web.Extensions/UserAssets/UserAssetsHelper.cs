@@ -10,7 +10,7 @@ namespace Signum.Web.UserAssets
 {
     public static class UserAssetsHelper
     {
-        public static MvcHtmlString QueryTokenDNBuilder(this HtmlHelper helper, TypeContext<QueryTokenEntity> ctx, QueryTokenBuilderSettings settings)
+        public static MvcHtmlString QueryTokenDNBuilder(this HtmlHelper helper, TypeContext<QueryTokenEmbedded> ctx, QueryTokenBuilderSettings settings)
         {
             if (ctx.Value?.ParseException != null)
             {
@@ -26,7 +26,7 @@ namespace Signum.Web.UserAssets
             }
         }
 
-        public static string GetTokenString(MappingContext<QueryTokenEntity> ctx)
+        public static string GetTokenString(MappingContext<QueryTokenEmbedded> ctx)
         {
             return ctx.Inputs.Keys
                 .OrderBy(k => int.Parse(k.After("ddlTokens_")))

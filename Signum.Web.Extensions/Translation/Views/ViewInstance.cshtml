@@ -87,7 +87,7 @@ else
                             <tr>
                                 <td class="leftCell"><em>@TranslatedInstanceLogic.DefaultCulture</em></td>
                                 <td class="monospaceCell">
-                                    @if (TranslatedInstanceLogic.RouteType(key.Route).Value == TraducibleRouteType.Html)
+                                    @if (TranslatedInstanceLogic.RouteType(key.Route).Value == TranslateableRouteType.Html)
                                     {
                                         <pre>@master[key]</pre>
                                     }
@@ -124,7 +124,7 @@ else
                                         {
                                             @Html.TextArea(formName, trans?.TranslatedText, new { style = "width:90%;" })
                                         }
-                                        else if (TranslatedInstanceLogic.RouteType(key.Route).Value == TraducibleRouteType.Html)
+                                        else if (TranslatedInstanceLogic.RouteType(key.Route).Value == TranslateableRouteType.Html)
                                         {
                                             <pre>@trans.TranslatedText</pre>
                                         }

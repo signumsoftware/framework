@@ -40,7 +40,7 @@ namespace Signum.Web.Mailing
         public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Mailing/Scripts/Mailing");
         public static JsModule AsyncEmailSenderModule = new JsModule("Extensions/Signum.Web.Extensions/Mailing/Scripts/AsyncEmailSender");
 
-        private static QueryTokenEntity ParseQueryToken(string tokenString, string queryRuntimeInfoInput)
+        private static QueryTokenEmbedded ParseQueryToken(string tokenString, string queryRuntimeInfoInput)
         {
             if (tokenString.IsNullOrEmpty())
                 return null;
@@ -49,7 +49,7 @@ namespace Signum.Web.Mailing
             var queryName = QueryLogic.ToQueryName(((Lite<QueryEntity>)queryRuntimeInfo.ToLite()).InDB(q => q.Key));
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
-            return new QueryTokenEntity(QueryUtils.Parse(tokenString, qd, SubTokensOptions.CanElement));
+            return new QueryTokenEmbedded(QueryUtils.Parse(tokenString, qd, SubTokensOptions.CanElement));
         }
 
         public static void Start(bool smtpConfig, bool newsletter, bool pop3Config, bool emailReport, Type[] quickLinkFrom)
@@ -61,22 +61,22 @@ namespace Signum.Web.Mailing
                 Navigator.RegisterArea(typeof(MailingClient));
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EmbeddedEntitySettings<EmailAttachmentEntity>{ PartialViewName = e => ViewPrefix.FormatWith("EmailAttachment")},
+                    new EmbeddedEntitySettings<EmailAttachmentEmbedded>{ PartialViewName = e => ViewPrefix.FormatWith("EmailAttachment")},
                     new EntitySettings<EmailPackageEntity>{ PartialViewName = e => ViewPrefix.FormatWith("EmailPackage")},
                     
                     new EntitySettings<EmailMessageEntity>{ PartialViewName = e => ViewPrefix.FormatWith("EmailMessage"), AvoidValidateRequest = true },
                     
-                    new EmbeddedEntitySettings<EmailAddressEntity>{ PartialViewName = e => ViewPrefix.FormatWith("EmailAddress")},
+                    new EmbeddedEntitySettings<EmailAddressEmbedded>{ PartialViewName = e => ViewPrefix.FormatWith("EmailAddress")},
                     new EmbeddedEntitySettings<EmailRecipientEntity>{ PartialViewName = e => ViewPrefix.FormatWith("EmailRecipient")},
                     
-                    new EmbeddedEntitySettings<EmailConfigurationEntity> { PartialViewName = e => ViewPrefix.FormatWith("EmailConfiguration")},
+                    new EmbeddedEntitySettings<EmailConfigurationEmbedded> { PartialViewName = e => ViewPrefix.FormatWith("EmailConfiguration")},
                     new EntitySettings<SystemEmailEntity>{ },
                     
                     new EntitySettings<EmailMasterTemplateEntity> { PartialViewName = e => ViewPrefix.FormatWith("EmailMasterTemplate"), AvoidValidateRequest = true  },
-                    new EmbeddedEntitySettings<EmailMasterTemplateMessageEntity>
+                    new EmbeddedEntitySettings<EmailMasterTemplateMessageEmbedded>
                     {
                         PartialViewName = e => ViewPrefix.FormatWith("EmailMasterTemplateMessage"),
-                        MappingDefault = new EntityMapping<EmailMasterTemplateMessageEntity>(true)
+                        MappingDefault = new EntityMapping<EmailMasterTemplateMessageEmbedded>(true)
                             .SetProperty(emtm => emtm.MasterTemplate, ctx => 
                             {
                                 return (EmailMasterTemplateEntity)ctx.Parent.Parent.Parent.Parent.UntypedValue;
@@ -84,20 +84,12 @@ namespace Signum.Web.Mailing
                     },
                     
                     new EntitySettings<EmailTemplateEntity> { PartialViewName = e => ViewPrefix.FormatWith("EmailTemplate"), AvoidValidateRequest = true },
-                    new EmbeddedEntitySettings<EmailTemplateMessageEntity>() 
-                    { 
-                        PartialViewName = e => ViewPrefix.FormatWith("EmailTemplateMessage"),
-                        MappingDefault = new EntityMapping<EmailTemplateMessageEntity>(true)
-                            .SetProperty(etm => etm.Template, ctx =>
-                            {
-                                return (EmailTemplateEntity)ctx.Parent.Parent.Parent.Parent.UntypedValue;
-                            })
-                    },
+                    new EmbeddedEntitySettings<EmailTemplateMessageEmbedded>() { PartialViewName = e => ViewPrefix.FormatWith("EmailTemplateMessage") },
 
-                    new EmbeddedEntitySettings<EmailTemplateContactEntity>() 
+                    new EmbeddedEntitySettings<EmailTemplateContactEmbedded>() 
                     { 
                         PartialViewName = e => ViewPrefix.FormatWith("EmailTemplateContact"),
-                        MappingDefault = new EntityMapping<EmailTemplateContactEntity>(true)
+                        MappingDefault = new EntityMapping<EmailTemplateContactEmbedded>(true)
                             .SetProperty(ec => ec.Token, ctx =>
                             {
                                 string tokenStr = UserAssetsHelper.GetTokenString(ctx);
@@ -134,8 +126,8 @@ namespace Signum.Web.Mailing
                     Navigator.AddSettings(new List<EntitySettings>
                     {
                         new EntitySettings<SmtpConfigurationEntity> { PartialViewName = e => ViewPrefix.FormatWith("SmtpConfiguration") },
-                        new EmbeddedEntitySettings<SmtpNetworkDeliveryEntity> { PartialViewName = e => ViewPrefix.FormatWith("SmtpNetworkDelivery") },
-                        new EmbeddedEntitySettings<ClientCertificationFileEntity> { PartialViewName = e => ViewPrefix.FormatWith("ClientCertificationFile")},
+                        new EmbeddedEntitySettings<SmtpNetworkDeliveryEmbedded> { PartialViewName = e => ViewPrefix.FormatWith("SmtpNetworkDelivery") },
+                        new EmbeddedEntitySettings<ClientCertificationFileEmbedded> { PartialViewName = e => ViewPrefix.FormatWith("ClientCertificationFile")},
                     });
                 }
 

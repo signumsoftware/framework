@@ -71,18 +71,18 @@ namespace Signum.Web.Dashboard
                 Navigator.AddSettings(new List<EntitySettings>
                 {
                     new EntitySettings<DashboardEntity> { PartialViewName = e => AdminViewPrefix.FormatWith("DashboardAdmin") },
-                    new EmbeddedEntitySettings<PanelPartEntity>(),
+                    new EmbeddedEntitySettings<PanelPartEmbedded>(),
                     
                     new EntitySettings<UserChartPartEntity>(),
 
                     new EntitySettings<UserQueryPartEntity>(),
 
                     //new EntitySettings<CountSearchControlPartEntity>(),
-                    //new EmbeddedEntitySettings<CountUserQueryElementEntity> { PartialViewName = e => AdminViewPrefix.FormatWith("CountUserQueryElement") },
+                    //new EmbeddedEntitySettings<CountUserQueryElementEmbedded> { PartialViewName = e => AdminViewPrefix.FormatWith("CountUserQueryElement") },
                     
                     new EntitySettings<LinkListPartEntity>(),
                     //new EntitySettings<LinkPartEntity>(),
-                    new EmbeddedEntitySettings<LinkElementEntity> { PartialViewName = e => AdminViewPrefix.FormatWith("LinkElement") },
+                    new EmbeddedEntitySettings<LinkElementEmbedded> { PartialViewName = e => AdminViewPrefix.FormatWith("LinkElement") },
                 });
 
 
@@ -91,13 +91,13 @@ namespace Signum.Web.Dashboard
 
                 //    Navigator.AddSettings(new List<EntitySettings>
                 //    {
-                //        new EntitySettings<OmniboxPanelPartEntity> {  },
+                //        new EntitySettings<OmniboxPanelPartEmbedded> {  },
                 //        new EntitySettings<UserQueryCountPartEntity> { PartialViewName = e => AdminViewPrefix.FormatWith("UserQueryCountPartAdmin") },
                 //    });
                     
 
                 //    DashboardClient.PanelPartViews.Add(
-                //       typeof(OmniboxPanelPartEntity),
+                //       typeof(OmniboxPanelPartEmbedded),
                 //       new DashboardClient.PartViews(ViewPrefixOmnibox.FormatWith("OmniboxPanelPart"), ViewPrefixOmnibox.FormatWith("OmniboxPanelPart")));
 
                 //    DashboardClient.PanelPartViews.Add(
@@ -155,7 +155,7 @@ namespace Signum.Web.Dashboard
                 {
                     return Dashboard.EmbeddedInEntity.Value == DashboardEmbedededInEntity.Top ? EmbeddedWidgetPostion.Top :
                         Dashboard.EmbeddedInEntity.Value == DashboardEmbedededInEntity.Bottom ? EmbeddedWidgetPostion.Bottom :
-                        new InvalidOperationException("Unexpected {0}".FormatWith(Dashboard.EmbeddedInEntity.Value)).Throw<EmbeddedWidgetPostion>();
+                        throw new InvalidOperationException("Unexpected {0}".FormatWith(Dashboard.EmbeddedInEntity.Value));
                 }
             }
         }

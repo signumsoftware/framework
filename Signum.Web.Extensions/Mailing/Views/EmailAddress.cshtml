@@ -1,6 +1,6 @@
 ﻿@using Signum.Entities.Mailing
 
-@using (var sc = Html.TypeContext<EmailAddressEntity>())
+@using (var sc = Html.TypeContext<EmailAddressEmbedded>())
 {
     sc.PlaceholderLabels = true;
     sc.FormGroupStyle = FormGroupStyle.SrOnly;

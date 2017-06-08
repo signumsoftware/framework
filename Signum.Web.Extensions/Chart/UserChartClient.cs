@@ -44,7 +44,7 @@ namespace Signum.Web.Chart
                    }
                 });
 
-                Func<SubTokensOptions, Mapping<QueryTokenEntity>> qtMapping = ops=>ctx =>
+                Func<SubTokensOptions, Mapping<QueryTokenEmbedded>> qtMapping = ops=>ctx =>
                 {
                     string tokenStr = UserAssetsHelper.GetTokenString(ctx);
 
@@ -54,7 +54,7 @@ namespace Signum.Web.Chart
                     var chart = ((UserChartEntity)ctx.Parent.Parent.Parent.UntypedValue);
 
                     QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                    return new QueryTokenEntity(QueryUtils.Parse(tokenStr, qd, ops | (chart.GroupResults ? SubTokensOptions.CanAggregate : 0)));
+                    return new QueryTokenEmbedded(QueryUtils.Parse(tokenStr, qd, ops | (chart.GroupResults ? SubTokensOptions.CanAggregate : 0)));
                 };
 
                 Navigator.AddSettings(new List<EntitySettings>
@@ -64,21 +64,21 @@ namespace Signum.Web.Chart
 
                 Navigator.EntitySettings<UserChartEntity>().MappingMain = Navigator.EntitySettings<UserChartEntity>().MappingLine = 
                     new EntityMapping<UserChartEntity>(true)
-                        .SetProperty(cb => cb.Columns, new ChartClient.MListCorrelatedOrDefaultMapping<ChartColumnEntity>(ChartClient.MappingChartColumn))
-                        .SetProperty(cr => cr.Filters, new MListMapping<QueryFilterEntity>
+                        .SetProperty(cb => cb.Columns, new ChartClient.MListCorrelatedOrDefaultMapping<ChartColumnEmbedded>(ChartClient.MappingChartColumn))
+                        .SetProperty(cr => cr.Filters, new MListMapping<QueryFilterEmbedded>
                         {
-                            ElementMapping = new EntityMapping<QueryFilterEntity>(false)
+                            ElementMapping = new EntityMapping<QueryFilterEmbedded>(false)
                                 .CreateProperty(a => a.Operation)
                                 .CreateProperty(a => a.ValueString)
                                 .SetProperty(a => a.Token, qtMapping(SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
                         })
-                        .SetProperty(cr => cr.Orders, new MListMapping<QueryOrderEntity>
+                        .SetProperty(cr => cr.Orders, new MListMapping<QueryOrderEmbedded>
                         {
-                            ElementMapping = new EntityMapping<QueryOrderEntity>(false)
+                            ElementMapping = new EntityMapping<QueryOrderEmbedded>(false)
                                 .CreateProperty(a => a.OrderType)
                                 .SetProperty(a => a.Token, qtMapping(SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
                         })
-                        .SetProperty(cb => cb.Parameters, new MListDictionaryMapping<ChartParameterEntity, string>(p => p.Name) { OnlyIfPossible = true }); 
+                        .SetProperty(cb => cb.Parameters, new MListDictionaryMapping<ChartParameterEmbedded, string>(p => p.Name) { OnlyIfPossible = true }); 
 
                 RouteTable.Routes.MapRoute(null, "UC/{webQueryName}/{lite}",
                      new { controller = "Chart", action = "ViewUserChart" });

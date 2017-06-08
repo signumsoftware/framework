@@ -84,7 +84,7 @@ WriteLiteral("\r\n");
 
             
             #line 9 "..\..\Chart\Views\UserChartOrder.cshtml"
- using (var e = Html.TypeContext<QueryOrderEntity>())
+ using (var e = Html.TypeContext<QueryOrderEmbedded>())
 {
     var userChart = ((TypeContext<UserChartEntity>)e.Parent.Parent).Value;
 

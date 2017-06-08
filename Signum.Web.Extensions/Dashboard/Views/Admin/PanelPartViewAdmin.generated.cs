@@ -55,7 +55,7 @@ WriteLiteral("\r\n");
 
             
             #line 4 "..\..\Dashboard\Views\Admin\PanelPartViewAdmin.cshtml"
- using (var tc = Html.TypeContext<PanelPartEntity>())
+ using (var tc = Html.TypeContext<PanelPartEmbedded>())
 {
     var part = tc.Value;
     var offset = part.StartColumn - (int)ViewData[GridRepeaterHelper.LastEnd];

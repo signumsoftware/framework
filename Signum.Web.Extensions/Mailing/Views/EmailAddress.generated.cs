@@ -49,7 +49,7 @@ WriteLiteral("\r\n");
 
             
             #line 3 "..\..\Mailing\Views\EmailAddress.cshtml"
- using (var sc = Html.TypeContext<EmailAddressEntity>())
+ using (var sc = Html.TypeContext<EmailAddressEmbedded>())
 {
     sc.PlaceholderLabels = true;
     sc.FormGroupStyle = FormGroupStyle.SrOnly;

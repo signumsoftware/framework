@@ -54,11 +54,11 @@ namespace Signum.Web.Chart
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EmbeddedEntitySettings<ChartRequest>(),
-                    new EmbeddedEntitySettings<ChartParameterEntity>(),
-                    new EmbeddedEntitySettings<ChartColumnEntity> { PartialViewName = _ => ViewPrefix.FormatWith("ChartColumn") },
-                    new EmbeddedEntitySettings<ChartScriptColumnEntity>{ PartialViewName = _ => ViewPrefix.FormatWith("ChartScriptColumn") },
-                    new EmbeddedEntitySettings<ChartScriptParameterEntity>{ PartialViewName = _ => ViewPrefix.FormatWith("ChartScriptParameter") },
+                    new ModelEntitySettings<ChartRequest>(),
+                    new EmbeddedEntitySettings<ChartParameterEmbedded>(),
+                    new EmbeddedEntitySettings<ChartColumnEmbedded> { PartialViewName = _ => ViewPrefix.FormatWith("ChartColumn") },
+                    new EmbeddedEntitySettings<ChartScriptColumnEmbedded>{ PartialViewName = _ => ViewPrefix.FormatWith("ChartScriptColumn") },
+                    new EmbeddedEntitySettings<ChartScriptParameterEmbedded>{ PartialViewName = _ => ViewPrefix.FormatWith("ChartScriptParameter") },
                     new EntitySettings<ChartScriptEntity> { PartialViewName = _ => ViewPrefix.FormatWith("ChartScript") },
                 });
 
@@ -72,7 +72,7 @@ namespace Signum.Web.Chart
             }
         }
 
-        public static EntityMapping<ChartColumnEntity> MappingChartColumn = new EntityMapping<ChartColumnEntity>(true)
+        public static EntityMapping<ChartColumnEmbedded> MappingChartColumn = new EntityMapping<ChartColumnEmbedded>(true)
             .SetProperty(ct => ct.Token, ctx =>
             {
                 var tokenName = UserAssetsHelper.GetTokenString(ctx);
@@ -83,14 +83,14 @@ namespace Signum.Web.Chart
                 var qd = DynamicQueryManager.Current.QueryDescription(
                     Finder.ResolveQueryName(ctx.Controller.ControllerContext.HttpContext.Request.Params["webQueryName"]));
 
-                var chartToken = (ChartColumnEntity)ctx.Parent.UntypedValue;
+                var chartToken = (ChartColumnEmbedded)ctx.Parent.UntypedValue;
 
                 var token = QueryUtils.Parse(tokenName, qd, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate /* chartToken.ParentChart.GroupResults*/);
 
                 if (token is AggregateToken && !chartToken.ParentChart.GroupResults)
                     token = token.Parent;
 
-                return new QueryTokenEntity(token);
+                return new QueryTokenEmbedded(token);
             })
             .SetProperty(ct => ct.DisplayName, ctx =>
             {
@@ -104,8 +104,8 @@ namespace Signum.Web.Chart
             .RemoveProperty(cr => cr.QueryName)
             .SetProperty(cr => cr.Filters, ctx => ExtractChartFilters(ctx))
             .SetProperty(cr => cr.Orders, ctx => ExtractChartOrders(ctx))
-            .SetProperty(cb => cb.Columns, new MListCorrelatedOrDefaultMapping<ChartColumnEntity>(MappingChartColumn))
-            .SetProperty(cb => cb.Parameters, new MListDictionaryMapping<ChartParameterEntity, string>(p => p.Name) { OnlyIfPossible = true });
+            .SetProperty(cb => cb.Columns, new MListCorrelatedOrDefaultMapping<ChartColumnEmbedded>(MappingChartColumn))
+            .SetProperty(cb => cb.Parameters, new MListDictionaryMapping<ChartParameterEmbedded, string>(p => p.Name) { OnlyIfPossible = true });
 
         public class MListCorrelatedOrDefaultMapping<S> : MListMapping<S>
         {
@@ -224,12 +224,12 @@ namespace Signum.Web.Chart
             };
         }
 
-        public static string ToJS(this QueryOrderEntity order)
+        public static string ToJS(this QueryOrderEmbedded order)
         {
             return (order.OrderType == OrderType.Descending ? "-" : "") + order.Token.Token.FullKey();
         }
 
-        public static void SetupParameter(ValueLine vl, ChartParameterEntity parameter)
+        public static void SetupParameter(ValueLine vl, ChartParameterEmbedded parameter)
         {
             var scriptParameter = parameter.ScriptParameter;
 

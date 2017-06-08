@@ -40,7 +40,7 @@ namespace Signum.Web.Scheduler
                     new EntitySettings<ScheduleRuleMonthsEntity> { PartialViewName = _ => ViewPrefix.FormatWith("ScheduleRuleMonths") },
 
                     new EntitySettings<HolidayCalendarEntity> { PartialViewName = _ => ViewPrefix.FormatWith("HolidayCalendar") },
-                    new EmbeddedEntitySettings<HolidayEntity> { PartialViewName = _ => ViewPrefix.FormatWith("Holiday") },
+                    new EmbeddedEntitySettings<HolidayEmbedded> { PartialViewName = _ => ViewPrefix.FormatWith("Holiday") },
                 });
 
                 if (simpleTask)

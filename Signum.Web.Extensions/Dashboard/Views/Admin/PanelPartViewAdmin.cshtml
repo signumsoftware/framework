@@ -1,7 +1,7 @@
 ﻿@using Signum.Entities.Dashboard
 @using Signum.Web.Dashboard
 
-@using (var tc = Html.TypeContext<PanelPartEntity>())
+@using (var tc = Html.TypeContext<PanelPartEmbedded>())
 {
     var part = tc.Value;
     var offset = part.StartColumn - (int)ViewData[GridRepeaterHelper.LastEnd];

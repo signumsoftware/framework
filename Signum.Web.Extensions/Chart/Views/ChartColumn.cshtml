@@ -21,15 +21,15 @@
     </div>
 }
 
-@using (var tc = Html.TypeContext<ChartColumnEntity>())
+@using (var tc = Html.TypeContext<ChartColumnEmbedded>())
 {
 
     if (tc.Value == null)
     {
-        tc.Value = new ChartColumnEntity();
+        tc.Value = new ChartColumnEmbedded();
     }
     
-    <tr class="sf-chart-token" data-token="@(((TypeElementContext<ChartColumnEntity>)tc.Parent).Index)">
+    <tr class="sf-chart-token" data-token="@(((TypeElementContext<ChartColumnEmbedded>)tc.Parent).Index)">
         <th>@(tc.Value.PropertyLabel + (tc.Value.ScriptColumn.IsOptional ? "?" : ""))
         </th>
         <td style="text-align: center">
@@ -82,7 +82,7 @@
                     <div class="row">
                         <div class="col-sm-4">@Html.ValueLine(sc, ct => ct.DisplayName, vl => vl.ValueHtmlProps["class"] = "sf-chart-redraw-onchange")</div>
                         
-                        @if (sc.Value.Token != null && !Navigator.IsReadOnly(typeof(ChartColorEntity)))
+                        @if (sc.Value.Token != null && !Navigator.IsReadOnly(typeof(ChartColorEmbedded)))
                         {
                             var type = sc.Value.Token.Token.Type.CleanType();
 

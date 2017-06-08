@@ -65,7 +65,7 @@ namespace ASP
         {
             
             #line 5 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
- using (var tc = Html.TypeContext<EmailTemplateContactEntity>())
+ using (var tc = Html.TypeContext<EmailTemplateContactEmbedded>())
 {
     
     using(var sc = tc.SubContext())

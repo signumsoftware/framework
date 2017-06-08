@@ -87,7 +87,7 @@ WriteLiteral(">\r\n");
             #line hidden
             
             #line 9 "..\..\Dashboard\Views\LinkListPart.cshtml"
-         foreach (LinkElementEntity link in Model.Value.Links)
+         foreach (LinkElementEmbedded link in Model.Value.Links)
         {
 
             

@@ -1,7 +1,7 @@
 ﻿@using Signum.Entities.Mailing
 @using Signum.Web.Files
 
-@using (var sc = Html.TypeContext<EmailAttachmentEntity>())
+@using (var sc = Html.TypeContext<EmailAttachmentEmbedded>())
 {
     sc.FormGroupStyle = FormGroupStyle.SrOnly;
     @Html.FileLine(sc, ea => ea.File, fl => { fl.FileType = EmailFileType.Attachment; fl.Remove = false; fl.DragAndDrop = false; })

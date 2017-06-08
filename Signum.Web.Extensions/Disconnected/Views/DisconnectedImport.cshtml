@@ -14,10 +14,10 @@
             <table class="table table-condensed">
                 <thead>
                     <tr>
-                        <td>@Html.PropertyNiceName((DisconnectedImportTableEntity de) => de.Type)</td>
-                        <td>@Html.PropertyNiceName((DisconnectedImportTableEntity de) => de.CopyTable)</td>
-                        <td>@Html.PropertyNiceName((DisconnectedImportTableEntity de) => de.InsertedRows)</td>
-                        <td>@Html.PropertyNiceName((DisconnectedImportTableEntity de) => de.UpdatedRows)</td>
+                        <td>@Html.PropertyNiceName((DisconnectedImportTableEmbedded de) => de.Type)</td>
+                        <td>@Html.PropertyNiceName((DisconnectedImportTableEmbedded de) => de.CopyTable)</td>
+                        <td>@Html.PropertyNiceName((DisconnectedImportTableEmbedded de) => de.InsertedRows)</td>
+                        <td>@Html.PropertyNiceName((DisconnectedImportTableEmbedded de) => de.UpdatedRows)</td>
                     </tr>
                 </thead>
                 @foreach (var dtc in dc.TypeElementContext(a => a.Copies))
