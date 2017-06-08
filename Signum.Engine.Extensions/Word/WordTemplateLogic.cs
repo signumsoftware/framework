@@ -168,6 +168,8 @@ namespace Signum.Engine.Word
             public WordTemplateEntity Template;
             public Entity Entity;
             public ISystemWordTemplate SystemWordTemplate;
+
+            public ModifiableEntity ModifiableEntity => Entity ?? SystemWordTemplate.UntypedEntity;
         }
 
         public static void RegisterConverter(WordConverterSymbol converterSymbol, Func<WordContext, byte[], byte[]> converter)
