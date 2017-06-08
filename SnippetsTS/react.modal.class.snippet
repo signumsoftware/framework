@@ -1,0 +1,65 @@
+﻿<CodeSnippet Format="1.1.0" xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <Header>
+    <Title>Signum Modal Pop-up Class Component</Title>
+    <Author>Signum Software</Author>
+    <Shortcut>signumModal</Shortcut>
+    <Description>Code snippet for adding an Modal Pop-up React class component with implicit props</Description>
+    <SnippetTypes>
+      <SnippetType>Expansion</SnippetType>
+    </SnippetTypes>
+  </Header>
+  <Snippet>
+    <Imports>
+      <Import>
+        <Namespace>
+          import { openModal, IModalProps } from "../../../../Framework/Signum.React/Scripts/Modals";
+        </Namespace>
+      </Import>
+    </Imports>
+    <Declarations>
+      <Literal>
+        <ID>ComponentName</ID>
+        <ToolTip>Component Class Name</ToolTip>
+        <Default>MyComponent</Default>
+      </Literal>
+    </Declarations>
+    <Code Language="TypeScript">
+      <![CDATA[
+      interface $ComponentName$ModalProps extends IModalProps {
+      }
+
+      interface $ComponentName$ModalState {
+          show:boolean;
+      }
+
+      class $ComponentName$Modal extends React.Component<$ComponentName$ModalProps, $ComponentName$ModalState> {
+
+          constructor(props: $ComponentName$ModalProps) {
+              super(props);
+              this.state = { show: true };
+          }
+
+          static show($end$) {
+              return openModal<void>(<$ComponentName$Modal />).done();
+          }
+
+          render() {
+              return(
+                  <Modal onHide={() => { this.state.show = false; this.forceUpdate(); }} show={this.state.show} className="message-modal">
+                      <Modal.Header closeButton={true}>
+                          
+                      </Modal.Header>
+                      <Modal.Body>
+                          
+                      </Modal.Body>
+                      <Modal.Footer>
+
+                      </Modal.Footer>
+                  </Modal>
+              );
+          }
+      }
+     ]]>
+    </Code>
+  </Snippet>
+</CodeSnippet>
