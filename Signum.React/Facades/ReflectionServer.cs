@@ -59,7 +59,7 @@ namespace Signum.React.Facades
             EntityAssemblies = Schema.Current.Tables.Keys.AgGroupToDictionary(t => t.Assembly, gr => gr.Select(a => a.Namespace).ToHashSet());
             EntityAssemblies[typeof(PaginationMode).Assembly].Add(typeof(PaginationMode).Namespace);
         }
-        
+
         const BindingFlags instanceFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
         const BindingFlags staticFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly;
 
@@ -111,7 +111,10 @@ namespace Signum.React.Facades
 
             return oi;
         }
-        
+
+
+
+        public static HashSet<Type> ExcludeTypes = new HashSet<Type>();
 
         internal static Dictionary<string, TypeInfoTS> GetTypeInfoTS()
         {
@@ -120,9 +123,12 @@ namespace Signum.React.Facades
                 var result = new Dictionary<string, TypeInfoTS>();
 
                 var allTypes = GetTypes();
+                allTypes = allTypes.Except(ExcludeTypes);
+
                 result.AddRange(GetEntities(allTypes), "typeInfo");
                 result.AddRange(GetSymbolContainers(allTypes), "typeInfo");
                 result.AddRange(GetEnums(allTypes), "typeInfo");
+
                 return result;
             });
         }
@@ -139,7 +145,7 @@ namespace Signum.React.Facades
                                  let pt = (p.PropertyType.ElementType() ?? p.PropertyType).UnNullify()
                                  where pt.IsEnum && !EntityAssemblies.ContainsKey(pt.Assembly)
                                  select pt).Distinct().ToList();
-                
+
 
                 var importedTypes = kvp.Key.GetCustomAttributes<ImportInTypeScriptAttribute>().Where(a => kvp.Value.Contains(a.ForNamesace)).Select(a => a.Type);
                 return normalTypes.Concat(importedTypes).Concat(usedEnums).ToList();
@@ -159,7 +165,7 @@ namespace Signum.React.Facades
             var settings = Schema.Current.Settings;
 
             var result = (from type in TypeLogic.TypeToEntity.Keys.Concat(models)
-                          where !type.IsEnumEntity()
+                          where !type.IsEnumEntity() && !ReflectionServer.ExcludeTypes.Contains(type)
                           let descOptions = LocalizedAssembly.GetDescriptionOptions(type)
                           select KVP.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
                           {
@@ -203,7 +209,7 @@ namespace Signum.React.Facades
 
         static string GetTypeNiceName(Type type)
         {
-            if(type.IsModifiableEntity() && !type.IsEntity())
+            if (type.IsModifiableEntity() && !type.IsEntity())
                 return type.NiceName();
             return null;
         }
@@ -211,7 +217,7 @@ namespace Signum.React.Facades
         public static bool IsId(PropertyRoute p)
         {
             return p.PropertyRouteType == PropertyRouteType.FieldOrProperty &&
-                p.PropertyInfo.Name == nameof(Entity.Id) && 
+                p.PropertyInfo.Name == nameof(Entity.Id) &&
                 p.Parent.PropertyRouteType == PropertyRouteType.Root;
         }
 
@@ -269,7 +275,7 @@ namespace Signum.React.Facades
 
         private static Symbol GetSymbol(FieldInfo m)
         {
-            object v = m.GetValue(null);          
+            object v = m.GetValue(null);
             if (v is IOperationSymbolContainer)
                 v = ((IOperationSymbolContainer)v).Symbol;
 
@@ -356,7 +362,7 @@ namespace Signum.React.Facades
     {
         [JsonProperty(PropertyName = "operationType")]
         private OperationType OperationType;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore,  NullValueHandling = NullValueHandling.Ignore, PropertyName = "allowsNew")]
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "allowsNew")]
         private bool? AllowsNew;
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "hasCanExecute")]
         private bool? HasCanExecute;
@@ -396,8 +402,8 @@ namespace Signum.React.Facades
         public TypeReferenceTS(Type type, Implementations? implementations)
         {
             this.IsCollection = type != typeof(string) && type != typeof(byte[]) && type.ElementType() != null;
-            
-            var clean = type == typeof(string) ? type :  (type.ElementType() ?? type);
+
+            var clean = type == typeof(string) ? type : (type.ElementType() ?? type);
             this.IsLite = clean.IsLite();
             this.IsNotNullable = clean.IsValueType && !clean.IsNullable();
             this.IsEmbedded = clean.IsEmbeddedEntity();
