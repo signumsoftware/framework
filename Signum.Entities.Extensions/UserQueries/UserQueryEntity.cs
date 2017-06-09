@@ -60,9 +60,9 @@ namespace Signum.Entities.UserQueries
         [NotNullable, PreserveOrder]
         public MList<QueryColumnEmbedded> Columns { get; set; } = new MList<QueryColumnEmbedded>();
         
-        public bool SearchOnLoad { get; set; }
+        public bool SearchOnLoad { get; set; } = true;
 
-        public bool ShowFilterButton { get; set; }
+        public bool ShowFilterButton { get; set; } = true;
         
         PaginationMode? paginationMode;
         public PaginationMode? PaginationMode
