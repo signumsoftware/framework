@@ -76,7 +76,7 @@ namespace Signum.Engine.Operations
                         { 
                             T result = null;
                             using (OperationLogic.AllowSave<T>())
-                                OperationLogic.OnSuroundOperation(this, null, log, args).EndUsing(_ =>
+                                OperationLogic.OnSuroundOperation(this, log, null, args).EndUsing(_ =>
                                 {
                                     result = Construct(args);
 
