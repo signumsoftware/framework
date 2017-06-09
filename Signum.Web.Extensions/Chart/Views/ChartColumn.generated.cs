@@ -359,7 +359,7 @@ WriteLiteral("</div>\r\n                        \r\n");
             #line hidden
             
             #line 85 "..\..\Chart\Views\ChartColumn.cshtml"
-                         if (sc.Value.Token != null && !Navigator.IsReadOnly(typeof(ChartColorEmbedded)))
+                         if (sc.Value.Token != null && !Navigator.IsReadOnly(typeof(ChartColorEntity)))
                         {
                             var type = sc.Value.Token.Token.Type.CleanType();
 

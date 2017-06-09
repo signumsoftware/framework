@@ -42,6 +42,17 @@ export interface IScheduleRuleEntity extends Entities.Entity {
 export interface ITaskEntity extends Entities.Entity {
 }
 
+export module ITaskMessage {
+    export const Execute = new MessageKey("ITaskMessage", "Execute");
+    export const Executions = new MessageKey("ITaskMessage", "Executions");
+    export const LastExecution = new MessageKey("ITaskMessage", "LastExecution");
+}
+
+export module ITaskOperation {
+    export const ExecuteSync : Entities.ConstructSymbol_From<Entities.Entity, ITaskEntity> = registerSymbol("Operation", "ITaskOperation.ExecuteSync");
+    export const ExecuteAsync : Entities.ExecuteSymbol<ITaskEntity> = registerSymbol("Operation", "ITaskOperation.ExecuteAsync");
+}
+
 export const ScheduledTaskEntity = new Type<ScheduledTaskEntity>("ScheduledTask");
 export interface ScheduledTaskEntity extends Entities.Entity {
     Type: "ScheduledTask";
@@ -153,17 +164,6 @@ export interface ScheduleRuleWeekDaysEntity extends Entities.Entity, IScheduleRu
 export const SimpleTaskSymbol = new Type<SimpleTaskSymbol>("SimpleTask");
 export interface SimpleTaskSymbol extends Entities.Symbol, ITaskEntity {
     Type: "SimpleTask";
-}
-
-export module TaskMessage {
-    export const Execute = new MessageKey("TaskMessage", "Execute");
-    export const Executions = new MessageKey("TaskMessage", "Executions");
-    export const LastExecution = new MessageKey("TaskMessage", "LastExecution");
-}
-
-export module TaskOperation {
-    export const ExecuteSync : Entities.ConstructSymbol_From<Entities.Entity, ITaskEntity> = registerSymbol("Operation", "TaskOperation.ExecuteSync");
-    export const ExecuteAsync : Entities.ExecuteSymbol<ITaskEntity> = registerSymbol("Operation", "TaskOperation.ExecuteAsync");
 }
 
 export const TypeEvent = new EnumType<TypeEvent>("TypeEvent");

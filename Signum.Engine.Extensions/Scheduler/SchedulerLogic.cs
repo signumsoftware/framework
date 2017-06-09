@@ -125,9 +125,9 @@ namespace Signum.Engine.Scheduler
                         Holidays = st.Holidays.Count,
                     });
 
-                dqm.RegisterExpression((ITaskEntity ct) => ct.Executions(), () => TaskMessage.Executions.NiceToString());
-                dqm.RegisterExpression((ITaskEntity ct) => ct.LastExecution(), () => TaskMessage.LastExecution.NiceToString());
-                dqm.RegisterExpression((ScheduledTaskEntity ct) => ct.Executions(), () => TaskMessage.Executions.NiceToString());
+                dqm.RegisterExpression((ITaskEntity ct) => ct.Executions(), () => ITaskMessage.Executions.NiceToString());
+                dqm.RegisterExpression((ITaskEntity ct) => ct.LastExecution(), () => ITaskMessage.LastExecution.NiceToString());
+                dqm.RegisterExpression((ScheduledTaskEntity ct) => ct.Executions(), () => ITaskMessage.Executions.NiceToString());
 
                 new Graph<HolidayCalendarEntity>.Execute(HolidayCalendarOperation.Save)
                 {
@@ -158,12 +158,12 @@ namespace Signum.Engine.Scheduler
                 }.Register();
 
 
-                new Graph<IEntity>.ConstructFrom<ITaskEntity>(TaskOperation.ExecuteSync)
+                new Graph<IEntity>.ConstructFrom<ITaskEntity>(ITaskOperation.ExecuteSync)
                 {
                     Construct = (task, _) => ExecuteSync(task, null, UserHolder.Current)?.Retrieve()
                 }.Register();
 
-                new Graph<ITaskEntity>.Execute(TaskOperation.ExecuteAsync)
+                new Graph<ITaskEntity>.Execute(ITaskOperation.ExecuteAsync)
                 {
                     Execute = (task, _) => ExecuteAsync(task, null, UserHolder.Current)
                 }.Register();

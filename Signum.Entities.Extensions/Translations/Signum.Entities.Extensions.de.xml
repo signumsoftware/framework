@@ -316,7 +316,7 @@
     <Member Name="CertFile" Description="Zertiikationsdatei" />
     <Member Name="SignedFile" Description="Signierte Datei" />
   </Type>
-  <Type Name="ChartColorEmbedded" Description="Diagrammfarbe" PluralDescription="Diagrammfarben">
+  <Type Name="ChartColorEntity" Description="Diagrammfarbe" PluralDescription="Diagrammfarben">
     <Member Name="Color" Description="Farbe" />
     <Member Name="Related" Description="In Beziehung mit" />
   </Type>
@@ -1836,7 +1836,7 @@
   <Type Name="SystemWordTemplateEntity" Description="System-Word-Vorlage">
     <Member Name="FullClassName" Description="Vollständiger Klassenname" />
   </Type>
-  <Type Name="TaskMessage">
+  <Type Name="ITaskMessage">
     <Member Name="Execute" Description="Ausführen" />
     <Member Name="Executions" Description="Ausführungen" />
     <Member Name="LastExecution" Description="Letzte Ausführung" />
