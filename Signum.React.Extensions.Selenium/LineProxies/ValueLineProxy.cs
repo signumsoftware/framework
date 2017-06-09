@@ -24,7 +24,7 @@ namespace Signum.React.Selenium
                 return;
             }
 
-            IWebElement dateTimePicker = this.Element.TryFindElement(By.CssSelector("div.rw-datetimepicker input[type=text]"));
+            IWebElement dateTimePicker = this.Element.TryFindElement(By.CssSelector("div.rw-datetime-picker input[type=text]"));
             if(dateTimePicker != null)
             {
                 var js = this.Element.GetDriver() as IJavaScriptExecutor;
