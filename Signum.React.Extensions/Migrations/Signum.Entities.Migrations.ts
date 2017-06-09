@@ -29,6 +29,7 @@ export const SqlMigrationEntity = new Type<SqlMigrationEntity>("SqlMigration");
 export interface SqlMigrationEntity extends Entities.Entity {
     Type: "SqlMigration";
     versionNumber?: string | null;
+    comment?: string | null;
 }
 
 
