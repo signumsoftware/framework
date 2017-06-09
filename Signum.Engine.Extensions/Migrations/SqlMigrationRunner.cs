@@ -86,6 +86,7 @@ namespace Signum.Engine.Migrations
                 
             if (!hasComment)
             {
+                SafeConsole.WriteLineColor(ConsoleColor.White, "Column " + col.Name + " created in " + table.Name + "...");
                 Executor.ExecuteNonQuery($"ALTER TABLE {table.Name} ADD {col.Name} NVARCHAR({col.Size}) NULL");
             }
         }
