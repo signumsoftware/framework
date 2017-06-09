@@ -45,13 +45,13 @@ namespace Signum.Engine.Migrations
 
             var first = migrations.FirstOrDefault();
 
-            var executedMigrations = Database.Query<SqlMigrationEntity>().Select(m => new{m.VersionNumber,m.Comment}).OrderBy(a=>a.VersionNumber).ToList().Where(d => first == null || first.Version.CompareTo(d) <= 0).ToList();
+            var executedMigrations = Database.Query<SqlMigrationEntity>().Select(m => new{m.VersionNumber,m.Comment}).OrderBy(a=>a.VersionNumber).ToList().Where(d => first == null || first.Version.CompareTo(d.VersionNumber) <= 0).ToList();
 
             var dic = migrations.ToDictionaryEx(a => a.Version, "Migrations in folder");
 
             foreach (var migration in executedMigrations)
             {
-                var m = dic.TryGetC(migration.Comment);
+                var m = dic.TryGetC(migration.VersionNumber);
                 if (m != null)
                     m.IsExecuted = true;
                 else

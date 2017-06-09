@@ -16,7 +16,7 @@ namespace Signum.Entities.Migrations
         public string VersionNumber { get; set; }
 
         [SqlDbType(Size = 400)]
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 400)]
+        [StringLengthValidator(AllowNulls = true, Min = 0, Max = 400)]
         public string Comment { get; set; }
 
         static Expression<Func<SqlMigrationEntity, string>> ToStringExpression = e => e.VersionNumber;
