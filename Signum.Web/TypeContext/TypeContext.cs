@@ -300,6 +300,9 @@ namespace Signum.Web
             if (type.IsEmbeddedEntity())
                 return new RuntimeInfo((EmbeddedEntity)this.UntypedValue);
 
+            if (type.IsModelEntity())
+                return new RuntimeInfo((ModelEntity)this.UntypedValue);
+
             if (type.IsEntity())
                 return new RuntimeInfo((Entity)this.UntypedValue);
 
