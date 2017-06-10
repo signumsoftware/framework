@@ -5,7 +5,7 @@ import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, mlistItemContext, EntityFrame } from '../TypeContext'
-import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, LambdaMemberType } from '../Reflection'
+import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, LambdaMemberType, TypeReference } from '../Reflection'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../Lines/LineBase'
 import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString  } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
@@ -29,36 +29,37 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
         state.create = false;
         state.view = false;
         state.find = false;
-        state.columnWidth = 200;
-
-        if (!state.data) {
-            if (this.state && this.state.type!.name == state.type!.name)
-                state.data = this.state.data;
-        }
+        state.columnWidth = 200;     
     }
 
-    componentWillMount() {
-        if (this.state.data == null)
-            this.reloadData(this.props);
+    renderInternal() {
+        const s = this.state;
+        return (
+            <fieldset className={classes("SF-checkbox-list", this.state.ctx.errorClass)} {...{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes } }>
+                <legend>
+                    <div>
+                        <span>{this.state.labelText}</span>
+                        <span className="pull-right">
+                            {this.renderCreateButton(false)}
+                            {this.renderFindButton(false)}
+                        </span>
+                    </div>
+                </legend>
+                <EntityCheckboxListSelect
+                    ctx={s.ctx}
+                    onChange={this.handleOnChange}
+                    type={s.type!}
+                    data={s.data}
+                    findOptions={s.findOptions}
+                    columnCount={s.columnCount}
+                    columnWidth={s.columnWidth} />
+            </fieldset>
+        );
     }
 
-    componentWillReceiveProps(newProps: EntityCheckboxListProps, newContext: any) {
-        if (newProps.data) {
-            if (this.props.data == null)
-                console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityCombo: ${this.props.type!.name}`);
+    handleOnChange = (lite: Lite<Entity>) => {
 
-            this.setState({ data: newProps.data });
-        } else {
-            if (newProps.findOptions != this.props.findOptions || newProps.type!.name != this.props.type!.name)
-                this.reloadData(newProps);
-            //super.componentWillReceiveProps(newProps, newContext);
-        }
-    }
-
-    handleOnChange = (event: React.ChangeEvent<HTMLInputElement>, lite: Lite<Entity>) => {
-        const current = event.currentTarget;
-
-        const list = this.state.ctx.value!;
+        const list = this.props.ctx.value!;
         const toRemove = list.filter(mle => is(mle.element as Lite<Entity> | Entity, lite))
 
         if (toRemove.length) {
@@ -71,33 +72,91 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
             }).done();
         }
     }
+  
+}
+
+interface EntityCheckboxListSelectProps {
+    ctx: TypeContext<MList<Lite<Entity> | ModifiableEntity >>;
+    onChange: (lite: Lite<Entity>) => void;
+    type: TypeReference;
+    findOptions?: FindOptions;
+    data?: Lite<Entity>[];
+    columnCount?: number;
+    columnWidth?: number;
+}
+
+interface EntityCheckboxListSelectState {
+    data?: Lite<Entity>[]
+}
+
+export default class EntityCheckboxListSelect extends React.Component<EntityCheckboxListSelectProps, EntityCheckboxListSelectState> {
+
+    constructor(props: EntityCheckboxListSelectProps) {
+        super(props);
+        this.state = { data : props.data };
+    }
+
+    componentWillMount() {
+        if (this.props.data == null)
+            this.reloadData(this.props);
+    }
+
+    componentWillReceiveProps(newProps: EntityCheckboxListSelectProps, newContext: any) {
+        if (newProps.data) {
+            if (this.props.data == null)
+                console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityCombo: ${this.props.type!.name}`);
+
+            this.setState({ data: newProps.data });
+        } else {
+            if (EntityCheckboxListSelect.getFindOptions(newProps.findOptions) != EntityCheckboxListSelect.getFindOptions(this.props.findOptions) ||
+                newProps.type.name != this.props.type.name)
+                this.reloadData(newProps);
+        }
+    }
+
+    static getFindOptions(fo: FindOptions | undefined) {
+        if (fo == undefined)
+            return undefined;
+
+        return Finder.findOptionsPath(fo);
+    }
+
+    render() {
+        return (
+            <div className="sf-checkbox-elements" style={this.getColumnStyle()}>
+                {this.renderContent()}
+            </div>
+        );
+    }
+
 
     getColumnStyle(): React.CSSProperties | undefined {
-        const s = this.state;
+        const p = this.props;
 
-        if (s.columnCount && s.columnWidth)
+        if (p.columnCount && p.columnWidth)
             return {
-                columns: `${s.columnCount} ${s.columnWidth}px`,
-                MozColumns: `${s.columnCount} ${s.columnWidth}px`,
-                WebkitColumns: `${s.columnCount} ${s.columnWidth}px`,
+                columns: `${p.columnCount} ${p.columnWidth}px`,
+                MozColumns: `${p.columnCount} ${p.columnWidth}px`,
+                WebkitColumns: `${p.columnCount} ${p.columnWidth}px`,
             };
 
-        if (s.columnCount)
+        if (p.columnCount)
             return {
-                columnCount: s.columnCount,
-                MozColumnCount: s.columnCount,
-                WebkitColumnCount: s.columnCount,
+                columnCount: p.columnCount,
+                MozColumnCount: p.columnCount,
+                WebkitColumnCount: p.columnCount,
             };
 
-        if (s.columnWidth)
+        if (p.columnWidth)
             return {
-                columnWidth: s.columnWidth,
-                MozColumnWidth: s.columnWidth,
-                WebkitColumnWidth: s.columnWidth,
+                columnWidth: p.columnWidth,
+                MozColumnWidth: p.columnWidth,
+                WebkitColumnWidth: p.columnWidth,
             };
 
         return undefined;
     }
+
 
     maybeToLite(entityOrLite: Entity | Lite<Entity>) {
         const entity = entityOrLite as Entity;
@@ -108,27 +167,6 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
         return entityOrLite as Lite<Entity>;
     }
 
-    renderInternal() {
-       
-        return (
-            <fieldset className={classes("SF-checkbox-list", this.state.ctx.errorClass)} {...{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes } }>
-                <legend>
-                    <div>
-                        <span>{this.state.labelText}</span>
-                        <span className="pull-right">
-                            {this.renderCreateButton(false) }
-                            {this.renderFindButton(false) }
-                        </span>
-                    </div>
-                </legend>
-                <div className="sf-checkbox-elements" style={this.getColumnStyle() }>
-                    { this.renderContent() }
-                </div>
-            </fieldset>
-        );
-    }
-
-
     renderContent() {
         if (this.state.data == undefined)
             return undefined;
@@ -137,7 +175,7 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
         const data = [...this.state.data];
 
 
-        const list = this.state.ctx.value!;
+        const list = this.props.ctx.value!;
 
         list.forEach(mle => {
             if (!data.some(d => is(d, mle.element as Entity | Lite<Entity>)))
@@ -148,16 +186,16 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
             <label className="sf-checkbox-element" key={i}>
                 <input type="checkbox"
                     checked={list.some(mle => is(mle.element as Entity | Lite<Entity>, lite))}
-                    disabled={this.state.ctx.readOnly}
-                    name={liteKey(lite) }
-                    onChange={e => this.handleOnChange(e, lite) }  />
+                    disabled={this.props.ctx.readOnly}
+                    name={liteKey(lite)}
+                    onChange={e => this.props.onChange(lite)} />
                 &nbsp;
                 <span className="sf-entitStrip-link">{lite.toStr}</span>
             </label>);
 
     }
 
-    reloadData(props: EntityCheckboxListProps) {
+    reloadData(props: EntityCheckboxListSelectProps) {
         const fo = props.findOptions;
         if (fo) {
             Finder.expandParentColumn(fo);
@@ -167,8 +205,14 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
                 .done();
         }
         else
-            Finder.API.fetchAllLites({ types: this.state.type!.name })
+            Finder.API.fetchAllLites({ types: this.props.type!.name })
                 .then(data => this.setState({ data: data.orderBy(a => a.toStr) } as any))
                 .done();
+
     }
+
+   
 }
+
+
+
