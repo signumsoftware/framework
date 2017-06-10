@@ -140,7 +140,7 @@ export function taskAuthorizeProperties(lineBase: LineBase<LineBaseProps, LineBa
     }
 }
 
-export function navigatorIsReadOnly(typeName: string, entityPack?: EntityPack<ModifiableEntity>) {
+export function navigatorIsReadOnly(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>) {
     const ti = getTypeInfo(typeName);
 
     if (ti == undefined)
@@ -152,7 +152,7 @@ export function navigatorIsReadOnly(typeName: string, entityPack?: EntityPack<Mo
     return ti.typeAllowed == "None" || ti.typeAllowed == "Read";
 }
 
-export function navigatorIsViewable(typeName: string, entityPack?: EntityPack<ModifiableEntity>) {
+export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>) {
     const ti = getTypeInfo(typeName);
 
     if (ti == undefined)
@@ -164,7 +164,7 @@ export function navigatorIsViewable(typeName: string, entityPack?: EntityPack<Mo
     return ti.typeAllowed != "None";
 }
 
-export function navigatorIsCreable(typeName: string) {
+export function navigatorIsCreable(typeName: PseudoType) {
     const ti = getTypeInfo(typeName);
   
     return ti == undefined || ti.typeAllowed == "Create";
