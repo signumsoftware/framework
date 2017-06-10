@@ -20,10 +20,11 @@ import * as ContexualItems from '../../../Framework/Signum.React/Scripts/SearchC
 import { ContextualItemsContext, MenuItemBlock } from "../../../Framework/Signum.React/Scripts/SearchControl/ContextualItems";
 import { ModelEntity } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
 import { QueryRequest, FilterRequest } from "../../../Framework/Signum.React/Scripts/FindOptions";
+import WordMenu from "./WordMenu";
 
 
-const constructorForTesting: { [typeName: string]: (wordTemplate: WordTemplateEntity) => Promise<ModelEntity | undefined>; } = {};
-const constructorContextual: { [typeName: string]: (wt: Lite<WordTemplateEntity>, lites?: Array<Lite<Entity>>, req?: QueryRequest) => Promise<ModelEntity | undefined>; } = {};
+export const constructorForTesting: { [typeName: string]: (wordTemplate: WordTemplateEntity) => Promise<ModelEntity | undefined>; } = {};
+export const constructorContextual: { [typeName: string]: (wt: Lite<WordTemplateEntity>, lites?: Array<Lite<Entity>>, req?: QueryRequest) => Promise<ModelEntity | undefined>; } = {};
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -46,19 +47,14 @@ export function start(options: { routes: JSX.Element[] }) {
         }
     };
 
-    constructorForTesting[MultiEntityModel.typeName] = wt => getQueryType(wt.query!.key)
-        .then(ti => ti && Finder.findMany({ queryName: ti.name }))
+    constructorForTesting[MultiEntityModel.typeName] = wt =>
+        Finder.findMany({ queryName: wt.query!.key })
         .then(lites => lites && MultiEntityModel.New({ entities: toMList(lites) }));
 
     constructorContextual[MultiEntityModel.typeName] = (wt, lites, req) => Navigator.view(MultiEntityModel.New({ entities: toMList(lites!) }));
 
     Navigator.addSettings(new EntitySettings(WordTemplateEntity, e => _import('./Templates/WordTemplate')));
     Navigator.addSettings(new EntitySettings(QueryModel, e => _import('./Templates/QueryModel')));
-
-    function getQueryType(queryKey: string) {
-        return Finder.getQueryDescription(queryKey)
-            .then(a => SelectorModal.chooseType(getTypeInfos(a.columns["Entity"].type.name)));
-    }
 
     Operations.addSettings(new EntityOperationSettings(WordTemplateOperation.CreateWordReport, {
         onClick: ctx => {
@@ -69,7 +65,7 @@ export function start(options: { routes: JSX.Element[] }) {
                     var template = toLite(ctx.entity);
 
                     if (!ct || isTypeEntity(ct))
-                        return getQueryType(ctx.entity.query!.key).then(ti => ti && Finder.find({ queryName: ti.name }))
+                        return Finder.find({ queryName: ctx.entity.query!.key })
                             .then<Response | undefined>(lite => lite && API.createAndDownloadReport({ template, lite }));
                     else
                         return (constructorForTesting[ct] && constructorForTesting[ct](ctx.entity) || Constructor.construct(ct))
@@ -85,19 +81,22 @@ export function start(options: { routes: JSX.Element[] }) {
     }));
 
     ContexualItems.onContextualItems.push(getWordTemplates);
+
+    Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
+
+        if (!ctx.searchControl.props.showBarExtension)
+            return undefined;
+
+        return <WordMenu searchControl={ctx.searchControl} />;
+    }); 
 }
 
 export function getWordTemplates(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
 
     if (ctx.lites.length == 0)
         return undefined;
-
-    const types = ctx.lites.groupBy(lite => lite.EntityType);
-
-    if (types.length != 1)
-        return undefined;
-
-    return API.getWordTemplates(types[0].key, ctx.lites.length > 1 ? "Multiple" : "Single")
+    
+    return API.getWordTemplates(ctx.queryDescription.queryKey, ctx.lites.length > 1 ? "Multiple" : "Single")
         .then(wts => {
             if (!wts.length)
                 return undefined;
@@ -124,7 +123,7 @@ export function handleMenuClick(wt: Lite<WordTemplateEntity>, ctx: ContextualIte
 
             const constructor = constructorContextual[ct];
             if (!constructor)
-                throw new Error("No 'constructorFromLites' defined for '" + ct + "'");
+                throw new Error("No 'constructorContextual' defined for '" + ct + "'");
 
             return constructorContextual[ct](wt, ctx.lites, ctx.searchControl.getQueryRequest())
                 .then<Response | undefined>(m => m && API.createAndDownloadReport({ template: wt, entity: m }));
@@ -149,7 +148,7 @@ export namespace API {
         return ajaxPost<string>({ url: "~/api/word/constructorType" }, systemWordTemplate);
     }
 
-    export function getWordTemplates(typeName: string, visibleOn: WordTemplateVisibleOn): Promise<Lite<WordTemplateEntity>[]> {
-        return ajaxGet<Lite<WordTemplateEntity>[]>({ url: `~/api/word/wordTemplates?typeName=${typeName}&visibleOn=${visibleOn}` });
+    export function getWordTemplates(queryKey: string, visibleOn: WordTemplateVisibleOn): Promise<Lite<WordTemplateEntity>[]> {
+        return ajaxGet<Lite<WordTemplateEntity>[]>({ url: `~/api/word/wordTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` });
     }
 }

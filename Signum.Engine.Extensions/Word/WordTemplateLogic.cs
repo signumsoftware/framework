@@ -45,7 +45,7 @@ namespace Signum.Engine.Word
 
         public static ResetLazy<Dictionary<Lite<WordTemplateEntity>, WordTemplateEntity>> WordTemplatesLazy;
 
-        public static ResetLazy<Dictionary<TypeEntity, List<WordTemplateEntity>>> TemplatesByType;
+        public static ResetLazy<Dictionary<object, List<WordTemplateEntity>>> TemplatesByQueryName;
 
         public static Dictionary<WordTransformerSymbol, Action<WordContext, OpenXmlPackage>> Transformers = new Dictionary<WordTransformerSymbol, Action<WordContext, OpenXmlPackage>>();
         public static Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>> Converters = new Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>>();
@@ -117,18 +117,9 @@ namespace Signum.Engine.Word
                     }
                 }.Register();
 
-                TemplatesByType = sb.GlobalLazy(() =>
+                TemplatesByQueryName = sb.GlobalLazy(() =>
                 {
-                    var list = WordTemplatesLazy.Value.Values.Select(wt => KVP.Create(wt.Query, wt)).ToList();
-
-                    return (from kvp in list
-                            let imp = dqm.GetEntityImplementations(kvp.Key.ToQueryName())
-                            where !imp.IsByAll
-                            from t in imp.Types
-                            group kvp.Value by t into g
-                            select KVP.Create(g.Key.ToTypeEntity(), g.ToList())
-                            ).ToDictionary();
-
+                    return WordTemplatesLazy.Value.Values.GroupToDictionary(a => a.Query.ToQueryName());
                 }, new InvalidateWith(typeof(WordTemplateEntity)));
 
                 WordTemplatesLazy = sb.GlobalLazy(() => Database.Query<WordTemplateEntity>()

@@ -68,18 +68,15 @@ namespace Signum.React.Word
             var type = SystemWordTemplateLogic.GetEntityType(systemWordTemplate.ToType());
 
             return ReflectionServer.GetTypeName(type);
-
         }
 
-
-
         [Route("api/word/wordTemplates"), HttpGet]
-        public List<Lite<WordTemplateEntity>> GetWordTemplates(string typeName,[FromUri]WordTemplateVisibleOn visibleOn)
+        public List<Lite<WordTemplateEntity>> GetWordTemplates(string queryKey, WordTemplateVisibleOn visibleOn)
         {
-            TypeEntity type = TypeLogic.TypeToEntity.GetOrThrow(TypeLogic.GetType(typeName));
+            object type = QueryLogic.ToQueryName(queryKey);
 
             var isAllowed = Schema.Current.GetInMemoryFilter<WordTemplateEntity>(userInterface: true);
-            return WordTemplateLogic.TemplatesByType.Value.TryGetC(type).EmptyIfNull()
+            return WordTemplateLogic.TemplatesByQueryName.Value.TryGetC(type).EmptyIfNull()
                 .Where(a => isAllowed(a) && WordTemplateLogic.IsVisible(a, visibleOn))
                 .Select(a => a.ToLite())
                 .ToList();

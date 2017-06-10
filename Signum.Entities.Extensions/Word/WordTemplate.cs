@@ -105,6 +105,7 @@ namespace Signum.Entities.Word
         [Description("Write this key as Title in the 'Alternative text' of your table or chart")]
         WriteThisKeyAsTileInTheAlternativeTextOfYourTableOrChart,
         NoDefaultTemplateDefined,
+        WordReport,
     }
 
     [Serializable]
