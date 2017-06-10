@@ -441,15 +441,16 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     loadMenuItems() {
-        const options: ContextualItemsContext<Entity> = {
-            lites: this.getSelectedEntities(),
-            queryDescription: this.props.queryDescription,
-            markRows: this.markRows
-        };
+            const options: ContextualItemsContext<Entity> = {
+                lites: this.getSelectedEntities(),
+                queryDescription: this.props.queryDescription,
+                markRows: this.markRows,
+                searchControl: this,
+            };
 
-        renderContextualItems(options)
-            .then(menuItems => this.setState({ currentMenuItems: menuItems }))
-            .done();
+            renderContextualItems(options)
+                .then(menuItems => this.setState({ currentMenuItems: menuItems }))
+                .done();
     }
 
     markRows = (dic: MarkedRowsDictionary) => {
