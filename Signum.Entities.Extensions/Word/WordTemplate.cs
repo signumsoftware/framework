@@ -80,6 +80,7 @@ namespace Signum.Entities.Word
         }
     }
 
+    
     [AutoInit]
     public static class WordTemplateOperation
     {
@@ -132,5 +133,13 @@ namespace Signum.Entities.Word
     public static class WordTemplatePermission
     {
         public static PermissionSymbol GenerateReport;
+    }
+
+    [InTypeScript(true)]
+    public enum WordTemplateVisibleOn
+    {
+        Single = 1,
+        Multiple = 2,
+        Query = 4
     }
 }

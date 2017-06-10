@@ -12,39 +12,68 @@ import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName, 
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
-import { WordTemplateEntity, WordTemplateOperation, SystemWordTemplateEntity, MultiEntityModel, WordTemplatePermission } from './Signum.Entities.Word'
+import { WordTemplateEntity, WordTemplateOperation, SystemWordTemplateEntity, MultiEntityModel, WordTemplatePermission, QueryModel, WordTemplateVisibleOn } from './Signum.Entities.Word'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import * as ContexualItems from '../../../Framework/Signum.React/Scripts/SearchControl/ContextualItems'
 import { ContextualItemsContext, MenuItemBlock } from "../../../Framework/Signum.React/Scripts/SearchControl/ContextualItems";
+import { ModelEntity } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
+import { QueryRequest, FilterRequest } from "../../../Framework/Signum.React/Scripts/FindOptions";
+
+
+const constructorForTesting: { [typeName: string]: (wordTemplate: WordTemplateEntity) => Promise<ModelEntity | undefined>; } = {};
+const constructorContextual: { [typeName: string]: (wt: Lite<WordTemplateEntity>, lites?: Array<Lite<Entity>>, req?: QueryRequest) => Promise<ModelEntity | undefined>; } = {};
 
 export function start(options: { routes: JSX.Element[] }) {
+
+    constructorForTesting[QueryModel.typeName] = wt => Navigator.view(QueryModel.New({ queryKey: wt.query!.key }));
+    constructorContextual[QueryModel.typeName] = (wt, lites, req) => {
+        if (req) {
+            return Promise.resolve(QueryModel.New({
+                queryKey: req.queryKey,
+                filters: [...req.filters, ...(!lites ? [] : [{ token: "Entity", operation: "IsIn", value: lites } as FilterRequest])],
+                orders: req.orders,
+                pagination: req.pagination,
+            }));
+        } else {
+            return Navigator.API.fetchAndForget(wt).then(template => QueryModel.New({
+                queryKey: template.query!.key,
+                filters: [{ token: "Entity", operation: "IsIn", value: lites }],
+                orders: [],
+                pagination: { mode: "All" },
+            }));
+        }
+    };
+
+    constructorForTesting[MultiEntityModel.typeName] = wt => getQueryType(wt.query!.key)
+        .then(ti => ti && Finder.findMany({ queryName: ti.name }))
+        .then(lites => lites && MultiEntityModel.New({ entities: toMList(lites) }));
+
+    constructorContextual[MultiEntityModel.typeName] = (wt, lites, req) => Navigator.view(MultiEntityModel.New({ entities: toMList(lites!) }));
+
     Navigator.addSettings(new EntitySettings(WordTemplateEntity, e => _import('./Templates/WordTemplate')));
+    Navigator.addSettings(new EntitySettings(QueryModel, e => _import('./Templates/QueryModel')));
+
+    function getQueryType(queryKey: string) {
+        return Finder.getQueryDescription(queryKey)
+            .then(a => SelectorModal.chooseType(getTypeInfos(a.columns["Entity"].type.name)));
+    }
 
     Operations.addSettings(new EntityOperationSettings(WordTemplateOperation.CreateWordReport, {
         onClick: ctx => {
 
-            function getQueryType() {
-                return Finder.getQueryDescription(ctx.entity.query!.key)
-                    .then(a => SelectorModal.chooseType(getTypeInfos(a.columns["Entity"].type.name)));
-            }
-
-
             var promise: Promise<string | undefined> = ctx.entity.systemWordTemplate ? API.getConstructorType(ctx.entity.systemWordTemplate) : Promise.resolve(undefined);
             promise
                 .then<Response | undefined>(ct => {
-                    if (!ct)
-                        return undefined;
-
                     var template = toLite(ctx.entity);
 
-                    if (isTypeEntity(ct))
-                        return getQueryType().then(ti => ti && Finder.find({ queryName: ti.name })).then<Response | undefined>(lite => lite && API.createAndDownloadReport({ template, lite }));
-                    else if (MultiEntityModel.typeName == ct)
-                        return getQueryType().then(ti => ti && Finder.findMany({ queryName: ti.name })).then<Response | undefined>(lites => lites && API.createAndDownloadReport({ template, entity: MultiEntityModel.New({ entities: toMList(lites) }) }));
+                    if (!ct || isTypeEntity(ct))
+                        return getQueryType(ctx.entity.query!.key).then(ti => ti && Finder.find({ queryName: ti.name }))
+                            .then<Response | undefined>(lite => lite && API.createAndDownloadReport({ template, lite }));
                     else
-                        return Constructor.construct(ct).then(e => e && Navigator.view(e)).then<Response | undefined>(entity => entity && API.createAndDownloadReport({ template, entity }));
+                        return (constructorForTesting[ct] && constructorForTesting[ct](ctx.entity) || Constructor.construct(ct))
+                            .then<Response | undefined>(entity => entity && API.createAndDownloadReport({ template, entity }));
                 })
                 .then(response => {
                     if (!response)
@@ -68,7 +97,7 @@ export function getWordTemplates(ctx: ContextualItemsContext<Entity>): Promise<M
     if (types.length != 1)
         return undefined;
 
-    return API.getWordTemplates(types[0].key, ctx.lites.length > 1)
+    return API.getWordTemplates(types[0].key, ctx.lites.length > 1 ? "Multiple" : "Single")
         .then(wts => {
             if (!wts.length)
                 return undefined;
@@ -76,7 +105,7 @@ export function getWordTemplates(ctx: ContextualItemsContext<Entity>): Promise<M
             return {
                 header: WordTemplateEntity.nicePluralName(),
                 menuItems: wts.map(wt =>
-                    <MenuItem data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx.lites)}>
+                    <MenuItem data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)}>
                         <span className={classes("icon", "fa fa-file-word-o")}></span>
                         {wt.toStr}
                     </MenuItem>
@@ -85,14 +114,22 @@ export function getWordTemplates(ctx: ContextualItemsContext<Entity>): Promise<M
         });
 }
 
-export function handleMenuClick(wt: Lite<WordTemplateEntity>, lites: Lite<Entity>[]) {
+export function handleMenuClick(wt: Lite<WordTemplateEntity>, ctx: ContextualItemsContext<Entity>) {
 
     Navigator.API.fetchAndForget(wt)
         .then(wordTemplate => wordTemplate.systemWordTemplate ? API.getConstructorType(wordTemplate.systemWordTemplate) : Promise.resolve(undefined))
-        .then<Response>(ct => ct == MultiEntityModel.typeName ?
-            API.createAndDownloadReport({ template: wt, entity: MultiEntityModel.New({ entities: toMList(lites) }) }) :
-            API.createAndDownloadReport({ template: wt, lite: lites.single() }))
-        .then(response => saveFile(response))
+        .then(ct => {
+            if (!ct)
+                return API.createAndDownloadReport({ template: wt, lite: ctx.lites.single() });
+
+            const constructor = constructorContextual[ct];
+            if (!constructor)
+                throw new Error("No 'constructorFromLites' defined for '" + ct + "'");
+
+            return constructorContextual[ct](wt, ctx.lites, ctx.searchControl.getQueryRequest())
+                .then<Response | undefined>(m => m && API.createAndDownloadReport({ template: wt, entity: m }));
+        })
+        .then(response => response && saveFile(response))
         .done();
 }
 
@@ -112,7 +149,7 @@ export namespace API {
         return ajaxPost<string>({ url: "~/api/word/constructorType" }, systemWordTemplate);
     }
 
-    export function getWordTemplates(typeName: string, isMultiple: boolean): Promise<Lite<WordTemplateEntity>[]> {
-        return ajaxGet<Lite<WordTemplateEntity>[]>({ url: `~/api/word/wordTemplates?typeName=${typeName}&isMultiple=${isMultiple}` });
+    export function getWordTemplates(typeName: string, visibleOn: WordTemplateVisibleOn): Promise<Lite<WordTemplateEntity>[]> {
+        return ajaxGet<Lite<WordTemplateEntity>[]>({ url: `~/api/word/wordTemplates?typeName=${typeName}&visibleOn=${visibleOn}` });
     }
 }

@@ -140,20 +140,31 @@ namespace Signum.Engine.Word
             }
         }
 
-        public static bool CanContextual(WordTemplateEntity wt, bool multiple)
+
+        public static Dictionary<Type, WordTemplateVisibleOn> VisibleOnDictionary = new Dictionary<Type, WordTemplateVisibleOn>()
+        {
+            { typeof(MultiEntityModel), WordTemplateVisibleOn.Single | WordTemplateVisibleOn.Multiple},
+            { typeof(QueryModel), WordTemplateVisibleOn.Single | WordTemplateVisibleOn.Multiple| WordTemplateVisibleOn.Query},
+        };
+
+        public static bool IsVisible(WordTemplateEntity wt, WordTemplateVisibleOn visibleOn)
         {
             if (wt.SystemWordTemplate == null)
-                return true;
+                return visibleOn == WordTemplateVisibleOn.Single;
 
             if (SystemWordTemplateLogic.HasDefaultTemplateConstructor(wt.SystemWordTemplate))
                 return false;
 
             var entityType = SystemWordTemplateLogic.GetEntityType(wt.SystemWordTemplate.ToType());
 
-            return entityType.IsEntity() ? true :
-                entityType == typeof(MultiEntityModel) ? multiple: 
-                false;
+            if (entityType.IsEntity())
+                return visibleOn == WordTemplateVisibleOn.Single;
+
+            var should = VisibleOnDictionary.TryGetS(entityType);
+
+            return should.HasValue && ((should.Value & visibleOn) != 0);
         }
+        
 
         public static void RegisterTransformer(WordTransformerSymbol transformerSymbol, Action<WordContext, OpenXmlPackage> transformer)
         {
