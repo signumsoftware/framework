@@ -264,6 +264,8 @@ ul.nav-tabs {
 
 .form-xs .sf-query-token-builder {
     height: 20px;
+    display: inline-table;
+    margin-bottom: -3px;
 }
 
 .form-xs select[multiple],

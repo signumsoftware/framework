@@ -241,9 +241,18 @@ export interface EntityOperationGroup {
     order?: number;
 }
 
+
+export function setIsSaveFunction(isSaveFunction: (oi: OperationInfo) => boolean) {
+    isSave = isSaveFunction;
+}
+
+export let isSave = (oi: OperationInfo): boolean => {
+    return oi.key.endsWith(".Save");
+}
+
 export function autoStyleFunction(oi: OperationInfo): BsStyle {
     return oi.operationType == OperationType.Delete ? "danger" :
-        oi.operationType == OperationType.Execute && oi.key.endsWith(".Save") ? "primary" : "default";
+        oi.operationType == OperationType.Execute && isSave(oi) ? "primary" : "default";
 }
 
 

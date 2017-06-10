@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { Dropdown, MenuItem } from 'react-bootstrap'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from './TypeContext'
-import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, getQueryNiceName, getQueryKey, PseudoType, getTypeName, Type} from './Reflection'
+import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, getQueryNiceName, getQueryKey, PseudoType, getTypeName, Type } from './Reflection'
 import { classes, Dic } from './Globals'
 import { FindOptions } from './FindOptions'
 import * as Finder from './Finder'
@@ -25,14 +25,12 @@ export interface QuickLinkContext<T extends Entity> {
 type Seq<T> = (T | undefined)[] | T | undefined;
 
 export const onGlobalQuickLinks: Array<(ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>> = [];
-export function registerGlobalQuickLink(quickLinkGenerator: (ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>)
-{
+export function registerGlobalQuickLink(quickLinkGenerator: (ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>) {
     onGlobalQuickLinks.push(quickLinkGenerator);
 }
 
 export const onQuickLinks: { [typeName: string]: Array<(ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>> } = {};
-export function registerQuickLink<T extends Entity>(type: Type<T>, quickLinkGenerator: (ctx: QuickLinkContext<T>) => Seq<QuickLink> | Promise<Seq<QuickLink>>)
-{
+export function registerQuickLink<T extends Entity>(type: Type<T>, quickLinkGenerator: (ctx: QuickLinkContext<T>) => Seq<QuickLink> | Promise<Seq<QuickLink>>) {
     const typeName = getTypeName(type);
 
     const col = onQuickLinks[typeName] || (onQuickLinks[typeName] = []);
@@ -40,7 +38,7 @@ export function registerQuickLink<T extends Entity>(type: Type<T>, quickLinkGene
     col.push(quickLinkGenerator);
 }
 
-export function getQuickLinks(ctx: QuickLinkContext<Entity>): Promise<QuickLink[]>{
+export function getQuickLinks(ctx: QuickLinkContext<Entity>): Promise<QuickLink[]> {
 
     let promises = onGlobalQuickLinks.map(f => asPromiseArray<QuickLink>(f(ctx)));
 
@@ -76,7 +74,7 @@ function asArray<T>(valueOrArray: Seq<T>): T[] {
 
 export function getQuickLinkWidget(ctx: WidgetContext): React.ReactElement<any> {
 
-    return <QuickLinkWidget ctx={ctx}/>;
+    return <QuickLinkWidget ctx={ctx} />;
 }
 
 export function getQuickLinkContextMenus(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> {
@@ -132,7 +130,7 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
                 lite: toLiteFat(props.ctx.pack.entity as Entity),
                 widgetContext: props.ctx
             }).then(links => this.setState({ links }))
-              .done();
+                .done();
         }
     }
 
@@ -145,14 +143,14 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
 
         const a = (
             <a
-                className={classes("badge", "sf-widgets-active", "sf-quicklinks") }
-                title={QuickLinkMessage.Quicklinks.niceToString() }
+                className={classes("badge", "sf-widgets-active", "sf-quicklinks")}
+                title={QuickLinkMessage.Quicklinks.niceToString()}
                 role="button"
                 href="#"
                 data-toggle="dropdown"
-                onClick={e => e.preventDefault() } >
-                { links && <span className="glyphicon glyphicon-star"></span>}
-                { links ? "\u00A0" + links.length : "…"}
+                onClick={e => e.preventDefault()} >
+                {links && <span className="glyphicon glyphicon-star"></span>}
+                {links ? "\u00A0" + links.length : "…"}
             </a >
         );
 
@@ -160,7 +158,7 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
             <Dropdown id="quickLinksWidget" pullRight>
                 <QuickLinkToggle bsRole="toggle" links={links} />
                 <Dropdown.Menu>
-                    { links && links.orderBy(a => a.order).map((a, i) => a.toMenuItem(i)) }
+                    {links && links.orderBy(a => a.order).map((a, i) => a.toMenuItem(i))}
                 </Dropdown.Menu>
             </Dropdown>
 
@@ -224,7 +222,7 @@ export abstract class QuickLink {
 
         return (
             <span
-                className={classes("icon", this.icon) }
+                className={classes("icon", this.icon)}
                 style={{ color: this.iconColor }}>
             </span>
         );
@@ -246,7 +244,7 @@ export class QuickLinkAction extends QuickLink {
     toMenuItem(key: any) {
 
         return (
-            <MenuItem data-name={this.name} className="sf-quick-link" key={key} onClick={this.action}>
+            <MenuItem data-name={this.name} className="sf-quick-link" key={key} onMouseUp={this.action}>
                 {this.renderIcon()}
                 {this.text}
             </MenuItem>
@@ -293,8 +291,8 @@ export class QuickLinkExplore extends QuickLink {
 
     toMenuItem(key: any) {
         return (
-            <MenuItem data-name={this.name} className="sf-quick-link" key={key} onClick={this.exploreOrPopup}>
-                {this.renderIcon() }
+            <MenuItem data-name={this.name} className="sf-quick-link" key={key} onMouseUp={this.exploreOrPopup}>
+                {this.renderIcon()}
                 {this.text}
             </MenuItem>
         );
@@ -324,8 +322,8 @@ export class QuickLinkNavigate extends QuickLink {
 
     toMenuItem(key: any) {
         return (
-            <MenuItem data-name={this.name} className="sf-quick-link" key={key} onClick={this.navigateOrPopup}>
-                {this.renderIcon() }
+            <MenuItem data-name={this.name} className="sf-quick-link" key={key} onMouseUp={this.navigateOrPopup}>
+                {this.renderIcon()}
                 {this.text}
             </MenuItem>
         );

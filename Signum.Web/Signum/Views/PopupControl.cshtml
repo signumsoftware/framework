@@ -17,7 +17,7 @@
                 }
                 else
                 {
-                    var saveProtected = (bool)ViewData[ViewDataKeys.SaveProtected]; 
+                    var saveProtected = (bool)ViewData[ViewDataKeys.RequiresSaveOperation]; 
                     <div style="float:right">
                         <button id="@Model.Compose("btnOk")" class="btn btn-primary sf-entity-button sf-close-button sf-ok-button@(saveProtected ? " sf-save-protected" : "")">@JavascriptMessage.ok.NiceToString()</button>
                         <button id="@Model.Compose("btnCancel")" class="btn btn-default sf-entity-button sf-close-button sf-cancel-button">@JavascriptMessage.cancel.NiceToString()</button>

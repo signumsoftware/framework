@@ -125,7 +125,7 @@ WriteLiteral(">");
             
             #line default
             #line hidden
-WriteLiteral("</span>\r\n    <br />\r\n    <small");
+WriteLiteral("</span>,\r\n    <br />\r\n    <small");
 
 WriteLiteral(" class=\"sf-type-nice-name\"");
 
@@ -142,7 +142,8 @@ WriteLiteral("</small>\r\n</h3>\r\n");
 
             
             #line 22 "..\..\Signum\Views\NormalControl.cshtml"
-Write(Html.RenderWidgets(wc));
+Write(Html.RenderWidgets(wc
+    ));
 
             
             #line default
@@ -156,7 +157,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("    ");
 
             
-            #line 24 "..\..\Signum\Views\NormalControl.cshtml"
+            #line 25 "..\..\Signum\Views\NormalControl.cshtml"
 Write(ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
     {
         Url = Url,
@@ -173,7 +174,7 @@ Write(ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
 WriteLiteral("\r\n</div>\r\n");
 
             
-            #line 34 "..\..\Signum\Views\NormalControl.cshtml"
+            #line 35 "..\..\Signum\Views\NormalControl.cshtml"
 Write(Html.ValidationSummaryAjax());
 
             
@@ -182,7 +183,7 @@ Write(Html.ValidationSummaryAjax());
 WriteLiteral("\r\n");
 
             
-            #line 35 "..\..\Signum\Views\NormalControl.cshtml"
+            #line 36 "..\..\Signum\Views\NormalControl.cshtml"
 Write(Html.HiddenRuntimeInfo(Model));
 
             
@@ -191,7 +192,7 @@ Write(Html.HiddenRuntimeInfo(Model));
 WriteLiteral("\r\n");
 
             
-            #line 36 "..\..\Signum\Views\NormalControl.cshtml"
+            #line 37 "..\..\Signum\Views\NormalControl.cshtml"
  if (((bool?)ViewData[ViewDataKeys.WriteEntityState]) == true)
 {
     
@@ -199,14 +200,14 @@ WriteLiteral("\r\n");
             #line default
             #line hidden
             
-            #line 38 "..\..\Signum\Views\NormalControl.cshtml"
+            #line 39 "..\..\Signum\Views\NormalControl.cshtml"
 Write(Html.Hidden(ViewDataKeys.EntityState, Navigator.Manager.SerializeEntity(modifiable)));
 
             
             #line default
             #line hidden
             
-            #line 38 "..\..\Signum\Views\NormalControl.cshtml"
+            #line 39 "..\..\Signum\Views\NormalControl.cshtml"
                                                                                          
 }
 
@@ -214,7 +215,7 @@ Write(Html.Hidden(ViewDataKeys.EntityState, Navigator.Manager.SerializeEntity(mo
             #line default
             #line hidden
             
-            #line 40 "..\..\Signum\Views\NormalControl.cshtml"
+            #line 41 "..\..\Signum\Views\NormalControl.cshtml"
  using (Html.RenderEmbeddedWidget(wc))
 {
 
@@ -230,7 +231,7 @@ WriteLiteral(" class=\"sf-main-control\"");
 WriteLiteral(" data-prefix=\"");
 
             
-            #line 42 "..\..\Signum\Views\NormalControl.cshtml"
+            #line 43 "..\..\Signum\Views\NormalControl.cshtml"
                                                              Write(Model.Prefix);
 
             
@@ -241,7 +242,7 @@ WriteLiteral("\"");
 WriteLiteral(" data-test-ticks=\"");
 
             
-            #line 42 "..\..\Signum\Views\NormalControl.cshtml"
+            #line 43 "..\..\Signum\Views\NormalControl.cshtml"
                                                                                              Write(DateTime.Now.Ticks);
 
             
@@ -252,13 +253,13 @@ WriteLiteral("\"");
 WriteLiteral(">\r\n");
 
             
-            #line 43 "..\..\Signum\Views\NormalControl.cshtml"
+            #line 44 "..\..\Signum\Views\NormalControl.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 43 "..\..\Signum\Views\NormalControl.cshtml"
+            #line 44 "..\..\Signum\Views\NormalControl.cshtml"
            Html.RenderPartial(partialViewName, Model);
             
             #line default
@@ -266,7 +267,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("\r\n    </div>\r\n");
 
             
-            #line 45 "..\..\Signum\Views\NormalControl.cshtml"
+            #line 46 "..\..\Signum\Views\NormalControl.cshtml"
 }
 
             

@@ -107,6 +107,7 @@ namespace Signum.Engine.Maps
             return (EntityEvents<T>)entityEvents.GetOrCreate(typeof(T), () => new EntityEvents<T>());
         }
 
+
         internal void OnPreSaving(Entity entity, ref bool graphModified)
         {
             AssertAllowed(entity.GetType(), inUserInterface: false);
@@ -117,6 +118,18 @@ namespace Signum.Engine.Maps
                 ee.OnPreSaving(entity, ref graphModified);
 
             entityEventsGlobal.OnPreSaving(entity, ref graphModified);
+        }
+
+        internal Entity OnAlternativeRetriving(Type entityType, PrimaryKey id)
+        {
+            AssertAllowed(entityType, inUserInterface: false);
+
+            IEntityEvents ee = entityEvents.TryGetC(entityType);
+
+            if (ee == null)
+                return null;
+
+            return ee.OnAlternativeRetriving(id);
         }
 
         internal void OnSaving(Entity entity)

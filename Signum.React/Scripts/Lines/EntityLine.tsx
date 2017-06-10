@@ -10,7 +10,7 @@ import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from 
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, isLite, isEntity, isModifiableEntity } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
 import { EntityBase, EntityBaseProps } from './EntityBase'
-import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './AutocompleteConfig'
+import { AutocompleteConfig } from './AutocompleteConfig'
 
 export interface EntityLineProps extends EntityBaseProps {
 
@@ -39,6 +39,10 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         }
     }
 
+    componentWillUnmount() {
+        this.state.autoComplete && this.state.autoComplete.abort();
+    }
+    
     componentWillMount() {
         this.refreshItem(this.props);
     }

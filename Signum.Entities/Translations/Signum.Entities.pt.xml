@@ -32,7 +32,7 @@
     <Member Name="NoOne2" Description="Nenhum (2)" />
     <Member Name="NoOne3" Description="Nenhum (3)" />
   </Type>
-  <Type Name="ColorEntity" Description="Cor">
+  <Type Name="ColorEmbedded" Description="Cor">
     <Member Name="Argb" Description="Argb" />
   </Type>
   <Type Name="ColumnOptionsMode" Description="Modo das colunas">
@@ -55,7 +55,7 @@
   <Type Name="CorruptMixin">
     <Member Name="Corrupt" Description="Corrompido" />
   </Type>
-  <Type Name="DeleteLogParametersEntity" />
+  <Type Name="DeleteLogParametersEmbedded" />
   <Type Name="EmbeddedEntity" Description="Entidade embebida" />
   <Type Name="EngineMessage">
     <Member Name="ConcurrencyErrorOnDatabaseTable0Id1" Description="Erro de concordância na base de dados, tabela = {0}, ID = {1}" />

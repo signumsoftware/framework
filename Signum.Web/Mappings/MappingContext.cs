@@ -196,32 +196,32 @@ namespace Signum.Web
         }
 
 
-        public void ImportErrors(Dictionary<Guid, Dictionary<string, string>> errorDictionary)
+        public void ImportErrors(Dictionary<Guid, IntegrityCheck> errorDictionary)
         {
             this.DistributeErrors(errorDictionary);
 
             if (errorDictionary.Count > 0)
                 this.Errors.GetOrCreate(ViewDataKeys.GlobalErrors)
-                    .AddRange(errorDictionary.SelectMany(a => a.Value.Values));
+                    .AddRange(errorDictionary.SelectMany(a => a.Value.Errors.Values));
         }
 
-        protected void DistributeErrors(Dictionary<Guid, Dictionary<string, string>> errorDictionary)
+        protected void DistributeErrors(Dictionary<Guid, IntegrityCheck> errorDictionary)
         {
             var mod = this.UntypedValue as ModifiableEntity;
 
-            var dic = mod == null ? null : errorDictionary.TryGetC(mod.temporalId);
+            var integrityCheck = mod == null ? null : errorDictionary.TryGetC(mod.temporalId);
 
             foreach (var child in this.Children())
             {
                 var pv = child.PropertyValidator;
 
-                if (pv != null && dic != null)
+                if (pv != null && integrityCheck != null)
                 {
-                    string error = dic.TryGetC(pv.PropertyInfo.Name);
+                    string error = integrityCheck.Errors.TryGetC(pv.PropertyInfo.Name);
 
                     if (error != null)
                     {
-                        dic.Remove(pv.PropertyInfo.Name);
+                        integrityCheck.Errors.Remove(pv.PropertyInfo.Name);
 
                         child.Error.AddRange(error.SplitNoEmpty("\r\n" ));
                     }
@@ -230,7 +230,7 @@ namespace Signum.Web
                 child.DistributeErrors(errorDictionary);
             }
 
-            if (dic != null && dic.IsEmpty())
+            if (integrityCheck != null && integrityCheck.Errors.IsEmpty())
                 errorDictionary.Remove(mod.temporalId);
         }
 
@@ -299,7 +299,7 @@ namespace Signum.Web
 
             GraphExplorer.PreSaving(() => GraphExplorer.FromRoot(entity));
 
-            Dictionary<Guid, Dictionary<string, string>> errorDictionary = entity.FullIntegrityCheck();
+            Dictionary<Guid, IntegrityCheck> errorDictionary = entity.FullIntegrityCheck();
 
             if (errorDictionary != null)
                 ImportErrors(errorDictionary);

@@ -111,9 +111,11 @@ namespace Signum.Utilities
         {
             get
             {
-                if (Value.Equals(default(T)))
+                if (Value == null)
                     return true;
 
+                if (Value.Equals(default(T)))
+                    return true;
 
                 if (Value is IEnumerable col)
                 {

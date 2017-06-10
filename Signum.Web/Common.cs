@@ -188,7 +188,10 @@ namespace Signum.Web
             if (objType.IsLite() && type.IsAssignableFrom(((Lite<IEntity>)obj).EntityType))
             {
                 Lite<IEntity> lite = (Lite<IEntity>)obj;
-                return lite.UntypedEntityOrNull ?? Database.RetrieveAndForget(lite);
+          
+
+                //return lite.UntypedEntityOrNull ?? Database.RetrieveAndForget(lite);
+                return lite.EntityOrNull ?? Database.RetrieveAndForget(lite);
             }
 
             if (type.IsLite())

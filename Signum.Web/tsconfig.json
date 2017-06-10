@@ -1,0 +1,13 @@
+﻿// tsconfig.json
+{
+  "compilerOptions": {
+    "module": "amd",
+    "sourceMap":true ,
+    "target": "es5",
+    "lib": [
+      "es2015",
+      "es2015.promise",
+      "dom"
+    ]
+  }
+}

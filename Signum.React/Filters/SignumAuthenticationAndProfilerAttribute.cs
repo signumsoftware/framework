@@ -27,30 +27,37 @@ namespace Signum.React.Filters
         {
             string action = ProfilerActionSplitterAttribute.GetActionDescription(actionContext);
 
-            using (TimeTracker.Start(action))
+            try
             {
-                using (HeavyProfiler.Log("Web.API " + actionContext.Request.Method, () => actionContext.Request.RequestUri.ToString()))
+                using (TimeTracker.Start(action))
                 {
-                    //if (ProfilerLogic.SessionTimeout != null)
-                    //{
-                    //    IDisposable sessionTimeout = Connector.CommandTimeoutScope(ProfilerLogic.SessionTimeout.Value);
-                    //    if (sessionTimeout != null)
-                    //        actionContext.Request.RegisterForDispose(sessionTimeout);
-                    //}
-
-                    actionContext.Request.Properties[SavedRequestKey] = await actionContext.Request.Content.ReadAsStringAsync();
-                    
-                    using (Authenticate(actionContext))
+                    using (HeavyProfiler.Log("Web.API " + actionContext.Request.Method, () => actionContext.Request.RequestUri.ToString()))
                     {
-                        using (GetCurrentCultures?.Invoke(actionContext))
-                        {
-                            if (actionContext.Response != null)
-                                return actionContext.Response;
+                        //if (ProfilerLogic.SessionTimeout != null)
+                        //{
+                        //    IDisposable sessionTimeout = Connector.CommandTimeoutScope(ProfilerLogic.SessionTimeout.Value);
+                        //    if (sessionTimeout != null)
+                        //        actionContext.Request.RegisterForDispose(sessionTimeout);
+                        //}
 
-                            return await continuation();
+                        actionContext.Request.Properties[SavedRequestKey] = await actionContext.Request.Content.ReadAsStringAsync();
+
+                        using (Authenticate(actionContext))
+                        {
+                            using (GetCurrentCultures?.Invoke(actionContext))
+                            {
+                                if (actionContext.Response != null)
+                                    return actionContext.Response;
+
+                                return await continuation();
+                            }
                         }
                     }
                 }
+            }
+            finally
+            {
+                Statics.CleanThreadContextAndAssert();
             }
         }
 

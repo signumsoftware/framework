@@ -18,11 +18,17 @@ using Signum.Entities.Basics;
 using System.Data.Common;
 using Signum.Engine.Operations.Internal;
 using static Signum.Engine.Maps.SchemaBuilder;
+using Signum.Entities.Authorization;
 
 namespace Signum.Engine.Operations
 {
     public static class OperationLogic
     {
+
+
+       
+
+
         static Expression<Func<Entity, IQueryable<OperationLogEntity>>> OperationLogsEntityExpression =
             e => Database.Query<OperationLogEntity>().Where(a => a.Target.RefersTo(e));
         [ExpressionField]
@@ -111,6 +117,7 @@ namespace Signum.Engine.Operations
 
                 dqm.RegisterExpression((OperationSymbol o) => o.Logs(), () => OperationMessage.Logs.NiceToString());
                 dqm.RegisterExpression((Entity o) => o.OperationLogs(), () => typeof(OperationLogEntity).NicePluralName());
+             
 
                 sb.Schema.EntityEventsGlobal.Saving += EntityEventsGlobal_Saving;
 
@@ -662,6 +669,18 @@ Consider the following options:
                         OperationMessage.StateShouldBe0InsteadOf1.NiceToString().FormatWith(
                         o.FromStates.CommaOr(v => ((Enum)(object)v).NiceToString()),
                         invalid.CommaOr(v => ((Enum)(object)v).NiceToString())))).ToDictionary();
+        }
+
+        public static Func<OperationLogEntity, bool> LogOperation = (request) => true;
+
+        public static void SaveLog(this OperationLogEntity log)
+        {
+            if (!LogOperation(log))
+                return;
+
+
+            using (ExecutionMode.Global())
+                log.Save();
         }
     }
     
