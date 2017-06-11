@@ -49,9 +49,9 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
                     <div className={EntityBase.hasChildrens(buttons) ? "input-group" : undefined}>
                         <EntityComboSelect ctx={s.ctx}
                             onChange={this.handleOnChange}
-                            type={this.state.type!}
-                            data={this.state.data}
-                            findOptions={this.state.findOptions}
+                            type={s.type!}
+                            data={s.data}
+                            findOptions={s.findOptions}
                         />
                         {EntityBase.hasChildrens(buttons) ? buttons : undefined}
                     </div>

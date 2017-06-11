@@ -707,6 +707,26 @@ Consider the following options:
             }.Register();
             return fi;
         }
+
+        public static FluentInclude<T> WithConstruct<T>(this FluentInclude<T> fi, ConstructSymbol<T>.Simple construct, Func<object[], T> constructFunction)
+               where T : Entity
+        {
+            new Graph<T>.Construct(construct)
+            {
+                Construct = constructFunction
+            }.Register();
+            return fi;
+        }
+
+        public static FluentInclude<T> WithConstruct<T>(this FluentInclude<T> fi, ConstructSymbol<T>.Simple construct)
+               where T : Entity, new()
+        {
+            new Graph<T>.Construct(construct)
+            {
+                Construct = (_) => new T()
+            }.Register();
+            return fi;
+        }
     }
 
     public interface IOperation
