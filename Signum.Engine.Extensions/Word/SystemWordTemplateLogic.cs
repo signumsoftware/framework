@@ -43,6 +43,8 @@ namespace Signum.Engine.Word
         ModifiableEntity UntypedEntity { get; }
 
         List<Filter> GetFilters(QueryDescription qd);
+        Pagination GetPagination();
+        List<Order> GetOrders(QueryDescription queryDescription);
     }
 
     public abstract class SystemWordTemplate<T> : ISystemWordTemplate
@@ -72,6 +74,16 @@ namespace Signum.Engine.Word
 
             throw new InvalidOperationException($"Since {typeof(T).Name} is not in ${imp}, it's necessary to override ${nameof(GetFilters)} in ${this.GetType().Name}");
         }
+
+        public virtual List<Order> GetOrders(QueryDescription queryDescription)
+        {
+            return new List<Order>();
+        }
+
+        public virtual Pagination GetPagination()
+        {
+            return new Pagination.All();
+        }        
     }
 
     public class MultiEntityWordTemplate : SystemWordTemplate<MultiEntityModel>
@@ -86,6 +98,28 @@ namespace Signum.Engine.Word
             {
                 new Filter(QueryUtils.Parse("Entity", qd, 0), FilterOperation.IsIn, this.Entity.Entities.ToList())
             };
+        }
+    }
+
+    public class QueryWordTemplate : SystemWordTemplate<QueryModel>
+    {
+        public QueryWordTemplate(QueryModel entity) : base(entity)
+        {
+        }
+
+        public override List<Filter> GetFilters(QueryDescription qd)
+        {
+            return this.Entity.Filters;
+        }
+
+        public override Pagination GetPagination()
+        {
+            return this.Entity.Pagination;
+        }
+
+        public override List<Order> GetOrders(QueryDescription queryDescription)
+        {
+            return this.Entity.Orders;
         }
     }
 
@@ -117,6 +151,7 @@ namespace Signum.Engine.Word
                     });
 
                 RegisterSystemWordReport<MultiEntityWordTemplate>(null);
+                RegisterSystemWordReport<QueryWordTemplate>(null);
 
                 new Graph<WordTemplateEntity>.ConstructFrom<SystemWordTemplateEntity>(WordTemplateOperation.CreateWordTemplateFromSystemWordTemplate)
                 {
