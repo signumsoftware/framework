@@ -45,7 +45,7 @@ namespace Signum.Engine.Word
 
         public static ResetLazy<Dictionary<Lite<WordTemplateEntity>, WordTemplateEntity>> WordTemplatesLazy;
 
-        public static ResetLazy<Dictionary<TypeEntity, List<WordTemplateEntity>>> TemplatesByType;
+        public static ResetLazy<Dictionary<object, List<WordTemplateEntity>>> TemplatesByQueryName;
 
         public static Dictionary<WordTransformerSymbol, Action<WordContext, OpenXmlPackage>> Transformers = new Dictionary<WordTransformerSymbol, Action<WordContext, OpenXmlPackage>>();
         public static Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>> Converters = new Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>>();
@@ -71,7 +71,9 @@ namespace Signum.Engine.Word
                     {
                         Entity = e,
                         e.Id,
+                        e.Name,
                         e.Query,
+                        e.Culture,
                         e.Template.Entity.FileName
                     });
 
@@ -117,18 +119,9 @@ namespace Signum.Engine.Word
                     }
                 }.Register();
 
-                TemplatesByType = sb.GlobalLazy(() =>
+                TemplatesByQueryName = sb.GlobalLazy(() =>
                 {
-                    var list = WordTemplatesLazy.Value.Values.Select(wt => KVP.Create(wt.Query, wt)).ToList();
-
-                    return (from kvp in list
-                            let imp = dqm.GetEntityImplementations(kvp.Key.ToQueryName())
-                            where !imp.IsByAll
-                            from t in imp.Types
-                            group kvp.Value by t into g
-                            select KVP.Create(g.Key.ToTypeEntity(), g.ToList())
-                            ).ToDictionary();
-
+                    return WordTemplatesLazy.Value.Values.GroupToDictionary(a => a.Query.ToQueryName());
                 }, new InvalidateWith(typeof(WordTemplateEntity)));
 
                 WordTemplatesLazy = sb.GlobalLazy(() => Database.Query<WordTemplateEntity>()
@@ -140,20 +133,31 @@ namespace Signum.Engine.Word
             }
         }
 
-        public static bool CanContextual(WordTemplateEntity wt, bool multiple)
+
+        public static Dictionary<Type, WordTemplateVisibleOn> VisibleOnDictionary = new Dictionary<Type, WordTemplateVisibleOn>()
+        {
+            { typeof(MultiEntityModel), WordTemplateVisibleOn.Single | WordTemplateVisibleOn.Multiple},
+            { typeof(QueryModel), WordTemplateVisibleOn.Single | WordTemplateVisibleOn.Multiple| WordTemplateVisibleOn.Query},
+        };
+
+        public static bool IsVisible(WordTemplateEntity wt, WordTemplateVisibleOn visibleOn)
         {
             if (wt.SystemWordTemplate == null)
-                return true;
+                return visibleOn == WordTemplateVisibleOn.Single;
 
             if (SystemWordTemplateLogic.HasDefaultTemplateConstructor(wt.SystemWordTemplate))
                 return false;
 
             var entityType = SystemWordTemplateLogic.GetEntityType(wt.SystemWordTemplate.ToType());
 
-            return entityType.IsEntity() ? true :
-                entityType == typeof(MultiEntityModel) ? multiple: 
-                false;
+            if (entityType.IsEntity())
+                return visibleOn == WordTemplateVisibleOn.Single;
+
+            var should = VisibleOnDictionary.TryGetS(entityType);
+
+            return should.HasValue && ((should.Value & visibleOn) != 0);
         }
+        
 
         public static void RegisterTransformer(WordTransformerSymbol transformerSymbol, Action<WordContext, OpenXmlPackage> transformer)
         {

@@ -80,6 +80,7 @@ namespace Signum.Entities.Word
         }
     }
 
+    
     [AutoInit]
     public static class WordTemplateOperation
     {
@@ -104,6 +105,7 @@ namespace Signum.Entities.Word
         [Description("Write this key as Title in the 'Alternative text' of your table or chart")]
         WriteThisKeyAsTileInTheAlternativeTextOfYourTableOrChart,
         NoDefaultTemplateDefined,
+        WordReport,
     }
 
     [Serializable]
@@ -132,5 +134,13 @@ namespace Signum.Entities.Word
     public static class WordTemplatePermission
     {
         public static PermissionSymbol GenerateReport;
+    }
+
+    [InTypeScript(true)]
+    public enum WordTemplateVisibleOn
+    {
+        Single = 1,
+        Multiple = 2,
+        Query = 4
     }
 }
