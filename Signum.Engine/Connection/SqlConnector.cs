@@ -15,6 +15,8 @@ using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
 using Microsoft.SqlServer.Types;
 using Microsoft.SqlServer.Server;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Signum.Engine
 {
@@ -235,6 +237,24 @@ namespace Signum.Engine
                 SqlCommand cmd = NewCommand(preCommand, null, commandType);
 
                 return cmd.ExecuteReader();
+            }
+            catch (Exception ex)
+            {
+                var nex = HandleException(ex, preCommand);
+                if (nex == ex)
+                    throw;
+
+                throw nex;
+            }
+        }
+
+        protected internal override async Task<DbDataReader> UnsafeExecuteDataReaderAsync(SqlPreCommandSimple preCommand, CommandType commandType, CancellationToken token)
+        {
+            try
+            {
+                SqlCommand cmd = NewCommand(preCommand, null, commandType);
+
+                return await cmd.ExecuteReaderAsync(token);
             }
             catch (Exception ex)
             {

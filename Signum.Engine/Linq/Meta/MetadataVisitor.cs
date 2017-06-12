@@ -147,7 +147,7 @@ namespace Signum.Engine.Linq
                     case "Min":
                     case "Max":
                     case "Average":
-                        return this.BindAggregate(m.Type, m.Method.Name.ToEnum<AggregateFunction>(),
+                        return this.BindAggregate(m.Type, m.Method.Name.ToEnum<AggregateSqlFunction>(),
                             m.GetArgument("source"), m.TryGetArgument("selector").StripQuotes());
                     case "First":
                     case "FirstOrDefault":
@@ -295,7 +295,7 @@ namespace Signum.Engine.Linq
             return MakeVoidMeta(resultType);
         }
 
-        private Expression BindAggregate(Type resultType, AggregateFunction aggregateFunction, Expression source, LambdaExpression selector)
+        private Expression BindAggregate(Type resultType, AggregateSqlFunction aggregateFunction, Expression source, LambdaExpression selector)
         {
             MetaProjectorExpression mp = AsProjection(Visit(source));
             if (selector == null)
