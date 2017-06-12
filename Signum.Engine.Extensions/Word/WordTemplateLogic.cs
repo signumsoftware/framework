@@ -71,7 +71,9 @@ namespace Signum.Engine.Word
                     {
                         Entity = e,
                         e.Id,
+                        e.Name,
                         e.Query,
+                        e.Culture,
                         e.Template.Entity.FileName
                     });
 
