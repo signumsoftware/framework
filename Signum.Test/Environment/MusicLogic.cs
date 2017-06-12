@@ -121,7 +121,7 @@ namespace Signum.Test.Environment
                         a.Author
                     });
 
-                dqm.RegisterQuery(typeof(IAuthorEntity), () => DynamicQueryCore.Manual((request, descriptions) =>
+                dqm.RegisterQuery(typeof(IAuthorEntity), () => DynamicQueryCore.Manual(async (request, descriptions, token) =>
                     {
                         var one = (from a in Database.Query<ArtistEntity>()
                                    select new
@@ -132,7 +132,9 @@ namespace Signum.Test.Environment
                                        a.Name,
                                        Lonely = a.Lonely(),
                                        LastAward = a.LastAward
-                                   }).ToDQueryable(descriptions).AllQueryOperations(request);
+                                   })
+                                   .ToDQueryable(descriptions)
+                                   .AllQueryOperationsAsync(request, token);
 
                         var two = (from a in Database.Query<BandEntity>()
                                    select new
@@ -143,13 +145,15 @@ namespace Signum.Test.Environment
                                        a.Name,
                                        Lonely = a.Lonely(),
                                        LastAward = a.LastAward
-                                   }).ToDQueryable(descriptions).AllQueryOperations(request);
+                                   })
+                                   .ToDQueryable(descriptions)
+                                   .AllQueryOperationsAsync(request, token);
 
-                        return one.Concat(two).OrderBy(request.Orders).TryPaginate(request.Pagination);
+                        return (await one).Concat(await two).OrderBy(request.Orders).TryPaginate(request.Pagination);
 
                     })
                     .Column(a => a.LastAward, cl => cl.Implementations = Implementations.ByAll)
-                    .ColumnProperyRoutes(a => a.Id, PropertyRoute.Construct((ArtistEntity a)=>a.Id), PropertyRoute.Construct((BandEntity a)=>a.Id)),
+                    .ColumnProperyRoutes(a => a.Id, PropertyRoute.Construct((ArtistEntity a) => a.Id), PropertyRoute.Construct((BandEntity a) => a.Id)),
                     entityImplementations: Implementations.By(typeof(ArtistEntity), typeof(BandEntity)));
 
                 Validator.PropertyValidator((NoteWithDateEntity n) => n.Text)

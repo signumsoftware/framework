@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Reflection;
 using System.Xml.Linq;
 using System.Text.RegularExpressions;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Utilities
 {
@@ -446,6 +447,12 @@ namespace Signum.Utilities
             if (Entries != null)
                 foreach (var e in Entries)
                     e.ReBaseTime(timeDelta);
+        }
+
+        public bool Overlaps(HeavyProfilerEntry e)
+        {
+            return new Interval<long>(this.BeforeStart, this.End)
+                .Overlaps(new Interval<long>(e.BeforeStart, e.End));
         }
     }
 

@@ -16,6 +16,7 @@ using Signum.Engine.Operations;
 using Signum.Engine.Basics;
 using System.ServiceModel.Channels;
 using Signum.Entities.Reflection;
+using System.Threading;
 
 namespace Signum.Services
 {
@@ -194,25 +195,25 @@ namespace Signum.Services
         public virtual ResultTable ExecuteQuery(QueryRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
-                () => DynamicQueryManager.Current.ExecuteQuery(request));
+                () => DynamicQueryManager.Current.ExecuteQueryAsync(request, CancellationToken.None).Result);
         }
 
         public ResultTable ExecuteQueryGroup(QueryGroupRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
-                () => DynamicQueryManager.Current.ExecuteGroupQuery(request));
+                () => DynamicQueryManager.Current.ExecuteGroupQueryAsync(request, CancellationToken.None).Result);
         }
 
         public virtual int ExecuteQueryCount(QueryValueRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
-                () => (int)DynamicQueryManager.Current.ExecuteQueryCount(request));
+                () => (int)DynamicQueryManager.Current.ExecuteQueryCountAsync(request, CancellationToken.None).Result);
         }
 
         public virtual Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
-                () => DynamicQueryManager.Current.ExecuteUniqueEntity(request));
+                () => DynamicQueryManager.Current.ExecuteUniqueEntityAsync(request, CancellationToken.None).Result);
         }
 
         public virtual List<object> GetQueryNames()
@@ -230,7 +231,7 @@ namespace Signum.Services
         public virtual object[] BatchExecute(BaseQueryRequest[] requests)
         {
             return Return(MethodInfo.GetCurrentMethod(), requests.ToString("; "),
-                () => DynamicQueryManager.Current.BatchExecute(requests));
+                () => DynamicQueryManager.Current.BatchExecute(requests, CancellationToken.None).Result);
         }
         #endregion
 

@@ -17,6 +17,9 @@ using Signum.Engine;
 using Signum.React.Filters;
 using System.Collections.ObjectModel;
 using Signum.Engine.Maps;
+using System.Threading;
+using System.Threading.Tasks;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.React.ApiControllers
 {
@@ -120,30 +123,31 @@ namespace Signum.React.ApiControllers
         }
 
         [Route("api/query/executeQuery"), HttpPost, ProfilerActionSplitter]
-        public ResultTable ExecuteQuery(QueryRequestTS request)
+        public async Task<ResultTable> ExecuteQuery(QueryRequestTS request, CancellationToken token)
         {
-            return DynamicQueryManager.Current.ExecuteQuery(request.ToQueryRequest());
+            var result = await DynamicQueryManager.Current.ExecuteQueryAsync(request.ToQueryRequest(), token);
+            return result;
         }
 
         [Route("api/query/entitiesWithFilter"), HttpPost, ProfilerActionSplitter]
-        public List<Lite<Entity>> GetEntitiesWithFilter(QueryEntitiesRequestTS request)
+        public async Task<List<Lite<Entity>>> GetEntitiesWithFilter(QueryEntitiesRequestTS request, CancellationToken token)
         {
             var qn = QueryLogic.ToQueryName(request.queryKey);
             var qd = DynamicQueryManager.Current.QueryDescription(qn);
             
-            return DynamicQueryManager.Current.GetEntities(new QueryEntitiesRequest
+            return await DynamicQueryManager.Current.GetEntities(new QueryEntitiesRequest
             {
                 QueryName = qn,
                 Count = request.count,
                 Filters = request.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false)).ToList(),
                 Orders = request.orders.EmptyIfNull().Select(f => f.ToOrder(qd, canAggregate: false)).ToList(),
-            }).ToList();
+            }).ToListAsync();
         }
 
         [Route("api/query/queryCount"), HttpPost, ProfilerActionSplitter]
-        public object QueryCount(QueryValueRequestTS request)
+        public async Task<object> QueryCount(QueryValueRequestTS request, CancellationToken token)
         {
-            return DynamicQueryManager.Current.ExecuteQueryCount(request.ToQueryCountRequest());
+            return await DynamicQueryManager.Current.ExecuteQueryCountAsync(request.ToQueryCountRequest(), token);
         }
     }
 
