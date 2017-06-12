@@ -29,7 +29,7 @@ export interface SearchControlLoadedProps {
     findOptions: FindOptionsParsed;
     queryDescription: QueryDescription;
     querySettings: Finder.QuerySettings;
-    showContextMenu?: boolean;
+    showContextMenu?: boolean | "Basic";
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
     formatters?: { [columnName: string]: CellFormatter };
     rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
@@ -38,6 +38,7 @@ export interface SearchControlLoadedProps {
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
     onSearch?: (fo: FindOptionsParsed) => void;
     onResult?: (table: ResultTable) => void;
+    hideButtonBar?: boolean;
     hideFullScreenButton?: boolean;
     showBarExtension?: boolean;
     largeToolbarButtons?: boolean;
@@ -302,7 +303,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     subTokensOptions={SubTokensOptions.CanElement}
                     close={this.handleColumnClose} />}
                 <div className="sf-search-results-container table-responsive" >
-                    <table className="sf-search-results table table-hover table-condensed" onContextMenu={this.handleOnContextMenu} >
+                    <table className="sf-search-results table table-hover table-condensed" onContextMenu={this.props.showContextMenu != false ? this.handleOnContextMenu : undefined} >
                         <thead>
                             {this.renderHeaders()}
                         </thead>
@@ -349,7 +350,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     <span className="glyphicon glyphicon-plus sf-create"></span>
                 </a>}
                 {this.props.showContextMenu != false && this.renderSelecterButton()}
-                {Finder.ButtonBarQuery.getButtonBarElements({ findOptions: fo, searchControl: this }).map((a, i) => React.cloneElement(a, { key: i }))}
+                {!this.props.hideButtonBar && Finder.ButtonBarQuery.getButtonBarElements({ findOptions: fo, searchControl: this }).map((a, i) => React.cloneElement(a, { key: i }))}
                 {!this.props.hideFullScreenButton &&
                     <a className="sf-query-button btn btn-default" href="#" onClick={this.handleFullScreenClick} >
                         <span className="glyphicon glyphicon-new-window"></span>
@@ -441,15 +442,20 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     loadMenuItems() {
-        const options: ContextualItemsContext<Entity> = {
-            lites: this.getSelectedEntities(),
-            queryDescription: this.props.queryDescription,
-            markRows: this.markRows
-        };
+        if (this.props.showContextMenu == "Basic")
+            this.setState({ currentMenuItems: [] });
+        else {
+            const options: ContextualItemsContext<Entity> = {
+                lites: this.getSelectedEntities(),
+                queryDescription: this.props.queryDescription,
+                markRows: this.markRows,
+                searchControl: this,
+            };
 
-        renderContextualItems(options)
-            .then(menuItems => this.setState({ currentMenuItems: menuItems }))
-            .done();
+            renderContextualItems(options)
+                .then(menuItems => this.setState({ currentMenuItems: menuItems }))
+                .done();
+        }
     }
 
     markRows = (dic: MarkedRowsDictionary) => {

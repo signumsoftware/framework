@@ -492,7 +492,7 @@ ValueLine.renderers["DateTime" as ValueLineType] = (vl) => {
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
             {ValueLine.withItemGroup(vl,
-                <DateTimePicker value={m && m.toDate()} onChange={handleDatePickerOnChange} format={momentFormat} time={showTime} defaultCurrentDate={currentDate.toDate()} />
+                <DateTimePicker value={m && m.toDate()} onChange={handleDatePickerOnChange} format={momentFormat} time={showTime} currentDate={currentDate.toDate()} />
             )}
         </FormGroup>
     );
