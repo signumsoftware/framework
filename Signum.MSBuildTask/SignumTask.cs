@@ -35,6 +35,7 @@ namespace Signum.MSBuildTask
                     AssemblyResolver = resolver,
                     ReadingMode = ReadingMode.Deferred,
                     ReadSymbols = hasPdb,
+                    InMemory = true,
                     SymbolReaderProvider = hasPdb ? new PdbReaderProvider() : null
                 });
 
@@ -80,7 +81,7 @@ namespace Signum.MSBuildTask
 
         private void MarkAsProcessed(AssemblyDefinition assembly, IAssemblyResolver resolver)
         {
-            TypeDefinition generatedCodeAttribute = resolver.Resolve("System").MainModule.GetType(typeof(GeneratedCodeAttribute).FullName);
+            TypeDefinition generatedCodeAttribute = resolver.Resolve(AssemblyNameReference.Parse("System")).MainModule.GetType(typeof(GeneratedCodeAttribute).FullName);
             MethodDefinition constructor = generatedCodeAttribute.Methods.Single(a => a.IsConstructor && a.Parameters.Count == 2);
 
             TypeReference stringType = assembly.MainModule.TypeSystem.String;
