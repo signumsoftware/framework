@@ -22,6 +22,7 @@ using System.Globalization;
 using System.Reflection;
 using Signum.Engine.Templating;
 using Signum.Entities.Word;
+using System.Threading;
 
 namespace Signum.Engine.Word
 {
@@ -295,7 +296,7 @@ namespace Signum.Engine.Word
             using (CurrentEntityConverter.SetCurrentEntity(context.Entity))
             {
                 var request = UserQueryLogic.ToQueryRequest(userQuery);
-                ResultTable resultTable = DynamicQueryManager.Current.ExecuteQuery(request);
+                ResultTable resultTable = DynamicQueryManager.Current.ExecuteQueryAsync(request, CancellationToken.None).Result;
                 var dataTable = resultTable.ToDataTable();
                 return dataTable;
             }
@@ -322,7 +323,7 @@ namespace Signum.Engine.Word
             using (CurrentEntityConverter.SetCurrentEntity(context.Entity))
             {
                 var chartRequest = UserChartLogic.ToChartRequest(userChart);
-                ResultTable result = ChartLogic.ExecuteChart(chartRequest);
+                ResultTable result = ChartLogic.ExecuteChartAsync(chartRequest, CancellationToken.None).Result;
                 var tokens = chartRequest.Columns.Where(a => a.Token != null).ToList();
 
                 if (chartRequest.GroupResults && tokens.Count(a => a.IsGroupKey.Value) == 2 && tokens.Count(a => !a.IsGroupKey.Value) == 1)

@@ -19,6 +19,7 @@ using System.Net.Mail;
 using Signum.Entities.UserQueries;
 using Signum.Engine.Templating;
 using Signum.Utilities.ExpressionTrees;
+using System.Threading;
 
 namespace Signum.Engine.Mailing
 {
@@ -252,18 +253,18 @@ namespace Signum.Engine.Mailing
 
             columns = columns.Distinct().ToList();
 
-            var resultTable = DynamicQueryManager.Current.ExecuteQuery(new QueryRequest
+            var resultTable = DynamicQueryManager.Current.ExecuteQueryAsync(new QueryRequest
             {
                 QueryName = queryName,
                 Filters = new List<Filter>
-                { 
+                {
                     new Filter(QueryUtils.Parse("Entity.NewsletterDeliveries.Element.Newsletter", qd, SubTokensOptions.CanElement),  FilterOperation.EqualTo, newsletter.ToLite()),
                     new Filter(QueryUtils.Parse("Entity.NewsletterDeliveries.Element.Sent", qd, SubTokensOptions.CanElement), FilterOperation.EqualTo, false),
                 },
                 Orders = new List<Order>(),
                 Columns = columns,
                 Pagination = new Pagination.All(),
-            });
+            }, CancellationToken.None).Result;
 
             var dicTokenColumn = resultTable.Columns.ToDictionary(rc => rc.Column.Token);
 

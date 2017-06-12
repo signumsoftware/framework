@@ -21,6 +21,8 @@ using Signum.Engine;
 using Signum.Entities.Chart;
 using Signum.Engine.Chart;
 using Signum.React.Filters;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Signum.React.Chart
 {
@@ -39,9 +41,9 @@ namespace Signum.React.Chart
         }
 
         [Route("api/chart/execute"), HttpPost, ValidateModelFilter]
-        public ExecuteChartResult Execute(ChartRequest request)
+        public async Task<ExecuteChartResult> Execute(ChartRequest request, CancellationToken token)
         {
-            var resultTable = ChartLogic.ExecuteChart(request);
+            var resultTable = await ChartLogic.ExecuteChartAsync(request, token);
 
             var chartTable = ChartUtils.DataJson(request, resultTable);
 

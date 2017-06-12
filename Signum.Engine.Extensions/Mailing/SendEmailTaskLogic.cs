@@ -19,6 +19,7 @@ using Signum.Entities.UserQueries;
 using Signum.Engine.UserQueries;
 using Signum.Entities.Processes;
 using Signum.Engine.Processes;
+using System.Threading;
 
 namespace Signum.Engine.Mailing
 {
@@ -92,7 +93,7 @@ namespace Signum.Engine.Mailing
                     {
                         var qr = er.TargetsFromUserQuery.Retrieve().ToQueryRequest();
                         qr.Columns.Clear();
-                        var result = DynamicQueryManager.Current.ExecuteQuery(qr);
+                        var result = DynamicQueryManager.Current.ExecuteQueryAsync(qr, CancellationToken.None).Result;
 
                         var entities = result.Rows.Select(a => a.Entity).ToList();
                         if (entities.IsEmpty())
