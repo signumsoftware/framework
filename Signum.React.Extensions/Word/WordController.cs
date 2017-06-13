@@ -53,12 +53,14 @@ namespace Signum.React.Word
             return FilesController.GetHttpReponseMessage(new MemoryStream(bytes), template.FileName);            
         }
 
+#pragma warning disable IDE1006 // Naming Styles
         public class CreateWordReportRequest
         {
             public Lite<WordTemplateEntity> template { get; set; }
             public Lite<Entity> lite { get; set; }
             public ModifiableEntity entity { get; set; }
         }
+#pragma warning restore IDE1006 // Naming Styles
 
         [Route("api/word/constructorType"), HttpPost]
         public string GetConstructorType(SystemWordTemplateEntity systemWordTemplate)
@@ -66,17 +68,16 @@ namespace Signum.React.Word
             var type = SystemWordTemplateLogic.GetEntityType(systemWordTemplate.ToType());
 
             return ReflectionServer.GetTypeName(type);
-
         }
 
         [Route("api/word/wordTemplates"), HttpGet]
-        public List<Lite<WordTemplateEntity>> GetWordTemplates(string typeName, bool isMultiple)
+        public List<Lite<WordTemplateEntity>> GetWordTemplates(string queryKey, WordTemplateVisibleOn visibleOn)
         {
-            TypeEntity type = TypeLogic.TypeToEntity.GetOrThrow(TypeLogic.GetType(typeName));
+            object type = QueryLogic.ToQueryName(queryKey);
 
             var isAllowed = Schema.Current.GetInMemoryFilter<WordTemplateEntity>(userInterface: true);
-            return WordTemplateLogic.TemplatesByType.Value.TryGetC(type).EmptyIfNull()
-                .Where(a => isAllowed(a) && WordTemplateLogic.CanContextual(a, isMultiple))
+            return WordTemplateLogic.TemplatesByQueryName.Value.TryGetC(type).EmptyIfNull()
+                .Where(a => isAllowed(a) && WordTemplateLogic.IsVisible(a, visibleOn))
                 .Select(a => a.ToLite())
                 .ToList();
         }
