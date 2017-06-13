@@ -378,26 +378,36 @@ Array.prototype.extract = function (this: any[], predicate: (element: any) => bo
     return result;
 };
 
+if (!Array.prototype.find) {
+    Array.prototype.find = function (this: any[], predicate: (element: any, index: number, array: Array<any>) => boolean, thisArg?: any) {
+        for (var i = 0; i < this.length; i++) {
+            if (predicate.call(thisArg, this[i], i, this)) {
+                return this[i];
+            }
+        }
+        return undefined;
+    };
+}
 
-Array.prototype.findIndex = function (this: any[], predicate: (element: any, index: number, array: Array<any>) => boolean) {
-    const result = this.filter(predicate);
+if (!Array.prototype.findIndex) {
+    Array.prototype.findIndex = function (this: any[], predicate: (element: any, index: number, array: Array<any>) => boolean, thisArg?: any) {
+        for (var i = 0; i < this.length; i++)
+            if (predicate.call(thisArg, this[i], i, this))
+                return i;
 
-    for (var i = 0; i < this.length; i++)
-        if (predicate(this[i], i, this))
-            return i;
+        return -1;
+    };
+}
 
-    return -1;
-};
+if (!Array.prototype.findLastIndex) {
+    Array.prototype.findLastIndex = function (this: any[], predicate: (element: any, index: number, array: Array<any>) => boolean, thisArg?: any) {
+        for (var i = this.length - 1; i >= 0; i--)
+            if (predicate.call(thisArg, this[i], i, this))
+                return i;
 
-Array.prototype.findLastIndex = function (this: any[], predicate: (element: any) => boolean) {
-    const result = this.filter(predicate);
-
-    for (var i = this.length - 1; i >= 0; i--)
-        if (predicate(this[i]))
-            return i;
-
-    return -1;
-};
+        return -1;
+    };
+}
 
 Array.range = function (min: number, maxNotIncluded: number) {
     const length = maxNotIncluded - min;

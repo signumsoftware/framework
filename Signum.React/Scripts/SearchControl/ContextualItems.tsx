@@ -5,6 +5,7 @@ import { Dic, classes, combineFunction } from '../Globals'
 import { QueryDescription, } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
 import * as RootCloseWrapper from 'react-overlays/lib/RootCloseWrapper'
+import SearchControlLoaded from "./SearchControlLoaded";
 
 
 export interface MenuItemBlock {
@@ -16,6 +17,7 @@ export interface ContextualItemsContext<T extends Entity> {
     lites: Lite<T>[];
     queryDescription: QueryDescription;
     markRows: (dictionary: MarkedRowsDictionary) => void;
+    searchControl: SearchControlLoaded;
 }
 
 export interface MarkedRowsDictionary {
