@@ -5,7 +5,7 @@
 @using Signum.Entities.Chart
 @using Signum.Entities.DynamicQuery
 @using Signum.Web.UserAssets
-@using (var e = Html.TypeContext<QueryFilterEntity>())
+@using (var e = Html.TypeContext<QueryFilterEmbedded>())
 {
     var parent = ((TypeContext<UserChartEntity>)e.Parent.Parent).Value;
     e.FormGroupStyle = FormGroupStyle.None;

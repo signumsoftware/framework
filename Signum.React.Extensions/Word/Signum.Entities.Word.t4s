@@ -1,1 +1,10 @@
-﻿
+﻿import { FilterOptionParsed, OrderOptionParsed, FilterRequest, OrderRequest, Pagination } from '../../../Framework/Signum.React/Scripts/FindOptions' 
+
+//Partial
+export interface QueryModel {
+    queryKey: string;
+
+    filters: FilterRequest[];
+    orders: OrderRequest[];
+    pagination: Pagination;
+}

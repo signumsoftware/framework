@@ -50,7 +50,7 @@ namespace ASP
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Dashboard/Views/PanelPartView.cshtml")]
-    public partial class _Dashboard_Views_PanelPartView_cshtml : System.Web.Mvc.WebViewPage<PanelPartEntity>
+    public partial class _Dashboard_Views_PanelPartView_cshtml : System.Web.Mvc.WebViewPage<PanelPartEmbedded>
     {
         public _Dashboard_Views_PanelPartView_cshtml()
         {
@@ -69,16 +69,16 @@ namespace ASP
             #line hidden
 WriteLiteral("\r\n<div");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 385), Tuple.Create("\"", 438)
-, Tuple.Create(Tuple.Create("", 393), Tuple.Create("panel", 393), true)
-, Tuple.Create(Tuple.Create(" ", 398), Tuple.Create("panel-", 399), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 387), Tuple.Create("\"", 440)
+, Tuple.Create(Tuple.Create("", 395), Tuple.Create("panel", 395), true)
+, Tuple.Create(Tuple.Create(" ", 400), Tuple.Create("panel-", 401), true)
             
             #line 11 "..\..\Dashboard\Views\PanelPartView.cshtml"
-, Tuple.Create(Tuple.Create("", 405), Tuple.Create<System.Object, System.Int32>(Model.Style.ToString().ToLower()
+, Tuple.Create(Tuple.Create("", 407), Tuple.Create<System.Object, System.Int32>(Model.Style.ToString().ToLower()
             
             #line default
             #line hidden
-, 405), false)
+, 407), false)
 );
 
 WriteLiteral(">\r\n    <div");
@@ -120,14 +120,14 @@ WriteLiteral(">\r\n");
             #line hidden
 WriteLiteral("            <a");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 595), Tuple.Create("\"", 607)
+WriteAttribute("href", Tuple.Create(" href=\"", 597), Tuple.Create("\"", 609)
             
             #line 19 "..\..\Dashboard\Views\PanelPartView.cshtml"
-, Tuple.Create(Tuple.Create("", 602), Tuple.Create<System.Object, System.Int32>(link
+, Tuple.Create(Tuple.Create("", 604), Tuple.Create<System.Object, System.Int32>(link
             
             #line default
             #line hidden
-, 602), false)
+, 604), false)
 );
 
 WriteLiteral(">");
@@ -160,14 +160,14 @@ WriteLiteral("        ");
             #line hidden
 WriteLiteral("            <a");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 708), Tuple.Create("\"", 766)
+WriteAttribute("id", Tuple.Create(" id=\"", 710), Tuple.Create("\"", 768)
             
             #line 23 "..\..\Dashboard\Views\PanelPartView.cshtml"
-, Tuple.Create(Tuple.Create("", 713), Tuple.Create<System.Object, System.Int32>(TypeContextUtilities.Compose(prefix, "sfFullScreen")
+, Tuple.Create(Tuple.Create("", 715), Tuple.Create<System.Object, System.Int32>(TypeContextUtilities.Compose(prefix, "sfFullScreen")
             
             #line default
             #line hidden
-, 713), false)
+, 715), false)
 );
 
 WriteLiteral(" class=\"sf-ftbl-header-fullscreen\"");

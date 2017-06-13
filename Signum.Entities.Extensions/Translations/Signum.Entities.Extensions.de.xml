@@ -320,7 +320,7 @@
     <Member Name="Color" Description="Farbe" />
     <Member Name="Related" Description="In Beziehung mit" />
   </Type>
-  <Type Name="ChartColumnEntity" Description="Diagrammspalte">
+  <Type Name="ChartColumnEmbedded" Description="Diagrammspalte">
     <Member Name="DisplayName" Description="Anzeigename" />
     <Member Name="Token" Description="Token" />
   </Type>
@@ -375,7 +375,7 @@
     <Member Name="Colors" Description="Farben" />
     <Member Name="Type" Description="Typ" />
   </Type>
-  <Type Name="ChartParameterEntity" Description="Diagramm-parameter">
+  <Type Name="ChartParameterEmbedded" Description="Diagramm-parameter">
     <Member Name="Name" Description="Name" />
     <Member Name="ScriptParameter" Description="Skriptparameter" />
     <Member Name="Value" Description="Wert" />
@@ -399,7 +399,7 @@
     <Member Name="Parameters" Description="Parameter" />
     <Member Name="QueryName" Description="Abfrage-Name" />
   </Type>
-  <Type Name="ChartScriptColumnEntity" Description="Diagramm-Skript-Spalte">
+  <Type Name="ChartScriptColumnEmbedded" Description="Diagramm-Skript-Spalte">
     <Member Name="ColumnType" Description="Spaltentyp" />
     <Member Name="DisplayName" Description="Anzeigename" />
     <Member Name="IsGroupKey" Description="Ist Gruppenschlüssel" />
@@ -419,13 +419,13 @@
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
-  <Type Name="ChartScriptParameterEntity" Description="Diagrammscriptparameter">
+  <Type Name="ChartScriptParameterEmbedded" Description="Diagrammscriptparameter">
     <Member Name="ColumnIndex" Description="Spaltenindex" />
     <Member Name="Name" Description="Name" />
     <Member Name="Type" Description="Typ" />
     <Member Name="ValueDefinition" Description="Wertedefinition" />
   </Type>
-  <Type Name="ClientCertificationFileEntity" Description="Client-Zertifikat-Datei">
+  <Type Name="ClientCertificationFileEmbedded" Description="Client-Zertifikat-Datei">
     <Member Name="CertFileType" Description="Zertifikationsdateityp" />
     <Member Name="FullFilePath" Description="Vollständiger Pfad" />
   </Type>
@@ -481,7 +481,7 @@
     <Member Name="LastMonth" Description="Letzten Monat" />
     <Member Name="LastWeek" Description="Letzte Woche" />
   </Type>
-  <Type Name="DateSpanEntity" Description="Zeitraum">
+  <Type Name="DateSpanEmbedded" Description="Zeitraum">
     <Member Name="Days" Description="Tage" />
     <Member Name="Months" Description="Monate" />
     <Member Name="Years" Description="Jahre" />
@@ -563,7 +563,7 @@
     <Member Name="Error" Description="Fehler" />
     <Member Name="InProgress" Description="In Bearbeitung" />
   </Type>
-  <Type Name="DisconnectedImportTableEntity" Description="Getrennte Importtabelle">
+  <Type Name="DisconnectedImportTableEmbedded" Description="Getrennte Importtabelle">
     <Member Name="CopyTable" Description="Tabelle kopieren" />
     <Member Name="DisableForeignKeys" Description="Foreign Keys deaktivieren" />
     <Member Name="InsertedOrUpdated" Description="Eingefügt oder aktualisiert" />
@@ -767,13 +767,13 @@
     <Member Name="Type0DoesNotContainsField1" Description="Typ &quot;{0}&quot; enthält kein Feld &quot;{1}&quot;" />
     <Member Name="Value" Description="Wert" />
   </Type>
-  <Type Name="EmailAddressEntity" Description="E-Mail-Adresse">
+  <Type Name="EmailAddressEmbedded" Description="E-Mail-Adresse">
     <Member Name="DisplayName" Description="Namen" />
     <Member Name="EmailAddress" Description="E-Mail-Adresse" />
     <Member Name="EmailOwner" Description="E-Mail-Besitzer" />
     <Member Name="InvalidEmail" Description="Ungültige e-Mail" />
   </Type>
-  <Type Name="EmailAttachmentEntity" Description="E-Mail-Anhang">
+  <Type Name="EmailAttachmentEmbedded" Description="E-Mail-Anhang">
     <Member Name="ContentId" Description="Content-id" />
     <Member Name="File" Description="Datei" />
     <Member Name="Type" Description="Typ" />
@@ -782,7 +782,7 @@
     <Member Name="Attachment" Description="Anhang" />
     <Member Name="LinkedResource" Description="Verknüpfte Ressource" />
   </Type>
-  <Type Name="EmailConfigurationEntity" Description="E-Mail-Konfiguration">
+  <Type Name="EmailConfigurationEmbedded" Description="E-Mail-Konfiguration">
     <Member Name="AsyncSenderPeriod" Description="Async Absender Periode" />
     <Member Name="AvoidSendingEmailsOlderThan" Description="Vermeiden sie das senden von E-Mails die älter sind als" />
     <Member Name="ChunkSizeSendingEmails" Description="Chunk-Größe, die Emails versenden" />
@@ -800,7 +800,7 @@
     <Member Name="Messages" Description="Nachrichten" />
     <Member Name="Name" Description="Name" />
   </Type>
-  <Type Name="EmailMasterTemplateMessageEntity" Description="Nachricht E-Mail-Vorlage">
+  <Type Name="EmailMasterTemplateMessageEmbedded" Description="Nachricht E-Mail-Vorlage">
     <Member Name="CultureInfo" Description="Kulturinfo" />
     <Member Name="MasterTemplate" Description="Mastervorlage" />
     <Member Name="Text" Description="Text" />
@@ -895,7 +895,7 @@
     <Member Name="Cc" Description="CC" />
     <Member Name="To" Description="An" />
   </Type>
-  <Type Name="EmailTemplateContactEntity" Description="Kontakt E-Mail-Vorlage">
+  <Type Name="EmailTemplateContactEmbedded" Description="Kontakt E-Mail-Vorlage">
     <Member Name="DisplayName" Description="Namen" />
     <Member Name="EmailAddress" Description="E-Mail-Adresse" />
     <Member Name="Token" Description="Token" />
@@ -933,7 +933,7 @@
     <Member Name="TokenMustBeA0" Description="Token muss {0} sein" />
     <Member Name="TokenOrEmailAddressMustBeSet" Description="Token oder E-Mail-Adresse müssen angegeben werden" />
   </Type>
-  <Type Name="EmailTemplateMessageEntity" Description="Nachricht E-Mail-Vorlage">
+  <Type Name="EmailTemplateMessageEmbedded" Description="Nachricht E-Mail-Vorlage">
     <Member Name="CultureInfo" Description="Kulturinfo" />
     <Member Name="Subject" Description="Betreff" />
     <Member Name="Text" Description="Text" />
@@ -953,11 +953,11 @@
     <Member Name="InsertMessageContent" Description="Inhalt der Nachricht einfügen" />
     <Member Name="Language" Description="Sprache" />
   </Type>
-  <Type Name="EmbeddedFileEntity" Description="Eingebettete Datei">
+  <Type Name="FileEmbedded" Description="Eingebettete Datei">
     <Member Name="BinaryFile" Description="Binärdatei" />
     <Member Name="FileName" Description="Dateiname" />
   </Type>
-  <Type Name="EmbeddedFilePathEntity" Description="Eingebettete Datei-Pfad">
+  <Type Name="FilePathEmbedded" Description="Eingebettete Datei-Pfad">
     <Member Name="BinaryFile" Description="Binärdatei" />
     <Member Name="CalculatedDirectory" Description="Berechnetes Verzeichnis" />
     <Member Name="FileLength" Description="Dateilänge" />
@@ -1151,7 +1151,7 @@
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
-  <Type Name="HolidayEntity" Description="Feiertag">
+  <Type Name="HolidayEmbedded" Description="Feiertag">
     <Member Name="Date" Description="Datum" />
     <Member Name="Name" Description="Name" />
   </Type>
@@ -1204,7 +1204,7 @@
   <Type Name="LastAuthRulesImportEntity" Description="Letzte Authregeln importieren" Gender="f">
     <Member Name="Date" Description="Datum" />
   </Type>
-  <Type Name="LinkElementEntity" Description="Linkelement">
+  <Type Name="LinkElementEmbedded" Description="Linkelement">
     <Member Name="Label" Description="Etikett" />
     <Member Name="Link" Description="Link" />
   </Type>
@@ -1360,7 +1360,7 @@
   <Type Name="PackageOperationProcess">
     <Member Name="PackageOperation" Description="Paket-Operation" />
   </Type>
-  <Type Name="PanelPartEntity" Description="Dashboardteil">
+  <Type Name="PanelPartEmbedded" Description="Dashboardteil">
     <Member Name="Columns" Description="Spalten" />
     <Member Name="Content" Description="Inhalt" />
     <Member Name="Row" Description="Zeile" />
@@ -1511,7 +1511,7 @@
     <Member Name="Read" Description="Lesen" />
   </Type>
   <Type Name="PropertyAllowedRule" Description="Erlaubte Eigenschaftenregel" />
-  <Type Name="PropertyRouteHelpEntity" Description="Eigenschaftsweghilfe">
+  <Type Name="PropertyRouteHelpEmbedded" Description="Eigenschaftsweghilfe">
     <Member Name="Description" Description="Beschreibung" />
     <Member Name="Property" Description="Eigenschaft" />
   </Type>
@@ -1519,15 +1519,15 @@
     <Member Name="Type" Description="Typ" />
   </Type>
   <Type Name="QueryAllowedRule" Description="Erlaubte Abfrageregel" />
-  <Type Name="QueryColumnEntity" Description="Abfrage-Spalte">
+  <Type Name="QueryColumnEmbedded" Description="Abfrage-Spalte">
     <Member Name="DisplayName" Description="Angezeigter Name" />
     <Member Name="Token" Description="Token" />
   </Type>
-  <Type Name="QueryColumnHelpEntity" Description="Abfrage Spaltenhilfe">
+  <Type Name="QueryColumnHelpEmbedded" Description="Abfrage Spaltenhilfe">
     <Member Name="ColumnName" Description="Spaltenname" />
     <Member Name="Description" Description="Beschreibung" />
   </Type>
-  <Type Name="QueryFilterEntity" Description="Abfragefilter">
+  <Type Name="QueryFilterEmbedded" Description="Abfragefilter">
     <Member Name="Operation" Description="Betrieb" />
     <Member Name="Token" Description="Token" />
     <Member Name="ValueString" Description="Wert String" />
@@ -1542,7 +1542,7 @@
   <Type Name="QueryHelpOperation">
     <Member Name="Save" Description="Speichern" />
   </Type>
-  <Type Name="QueryOrderEntity" Description="Abfragereihenfolge">
+  <Type Name="QueryOrderEmbedded" Description="Abfragereihenfolge">
     <Member Name="OrderType" Description="Reihenfolgentyp" />
     <Member Name="Token" Description="Token" />
   </Type>
@@ -1553,7 +1553,7 @@
     <Member Name="Key" Description="Schlüssel" />
     <Member Name="Value" Description="Wert" />
   </Type>
-  <Type Name="QueryTokenEntity" Description="Abfrage Token">
+  <Type Name="QueryTokenEmbedded" Description="Abfrage Token">
     <Member Name="TokenString" Description="Token string" />
   </Type>
   <Type Name="ResetPasswordRequestEntity" Description="Neues Passwort beantragen">
@@ -1731,7 +1731,7 @@
     <Member Name="TheTemplateMustBeActiveToConstructSMSMessages" Description="Die Vorlage muss zum erstellen von SMS-Nachrichten aktiv sein" />
     <Member Name="TheTextForTheSMSMessageExceedsTheLengthLimit" Description="Der Text für die SMS-Nachricht überschreitet die Länge" />
   </Type>
-  <Type Name="SMSConfigurationEntity" Description="SMS-Konfiguration">
+  <Type Name="SMSConfigurationEmbedded" Description="SMS-Konfiguration">
     <Member Name="DefaultCulture" Description="Standardkultur" />
   </Type>
   <Type Name="SMSMessageEntity" Description="SMS-Nachricht" PluralDescription="SMS-Nachrichten" Gender="f">
@@ -1794,7 +1794,7 @@
     <Member Name="ThereMustBeAMessageFor0" Description="Es muss eine Nachricht für {0} geben" />
     <Member Name="TheresMoreThanOneMessageForTheSameLanguage" Description="Es gibt mehr als eine Nachricht für die gleiche Sprache" />
   </Type>
-  <Type Name="SMSTemplateMessageEntity" Description="SMS-Vorlagennachricht">
+  <Type Name="SMSTemplateMessageEmbedded" Description="SMS-Vorlagennachricht">
     <Member Name="CultureInfo" Description="Kulturinfo" />
     <Member Name="Message" Description="Nachricht" />
     <Member Name="Template" Description="Vorlage" />
@@ -1816,7 +1816,7 @@
   <Type Name="SmtpConfigurationOperation">
     <Member Name="Save" Description="Speichern" />
   </Type>
-  <Type Name="SmtpNetworkDeliveryEntity" Description="SMTP-Netzwerk-Zustellung">
+  <Type Name="SmtpNetworkDeliveryEmbedded" Description="SMTP-Netzwerk-Zustellung">
     <Member Name="ClientCertificationFiles" Description="Klientzertfikatsdateien" />
     <Member Name="EnableSSL" Description="SSL aktivieren" />
     <Member Name="Host" Description="Host" />
@@ -1836,7 +1836,7 @@
   <Type Name="SystemWordTemplateEntity" Description="System-Word-Vorlage">
     <Member Name="FullClassName" Description="Vollständiger Klassenname" />
   </Type>
-  <Type Name="TaskMessage">
+  <Type Name="ITaskMessage">
     <Member Name="Execute" Description="Ausführen" />
     <Member Name="Executions" Description="Ausführungen" />
     <Member Name="LastExecution" Description="Letzte Ausführung" />
@@ -1853,7 +1853,7 @@
     <Member Name="YouCanOnlyAddForeachBlocksWithCollectionFields" Description="Sie können nur Foreach-Blöcke mit Collection-Feldern hinzufügen" />
     <Member Name="YouHaveToAddTheElementTokenToUseForeachOnCollectionFields" Description="Sie müssen das Element Token zur Verwendung von Foreach in einem Collection-Feld hinzufügen" />
   </Type>
-  <Type Name="TimeSpanEntity" />
+  <Type Name="TimeSpanEmbedded" />
   <Type Name="ToolbarElementEntity" Description="Symbolleisten-element">
     <Member Name="Content" Description="Inhalt" />
     <Member Name="IconColor" Description="Symbolfarbe" />
@@ -1941,7 +1941,7 @@
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
-  <Type Name="TranslatorUserCultureEntity" Description="Übersetzer Kultur">
+  <Type Name="TranslatorUserCultureEmbedded" Description="Übersetzer Kultur">
     <Member Name="Action" Description="Aktion" />
     <Member Name="Culture" Description="Kultur" />
   </Type>
@@ -2007,7 +2007,7 @@
   <Type Name="UserAssetPermission">
     <Member Name="UserAssetsToXML" Description="Benutzer-Assets in XML" />
   </Type>
-  <Type Name="UserAssetPreviewLine" Description="Benutzer-Asset-Vorschau-Linie">
+  <Type Name="UserAssetPreviewLineEmbedded" Description="Benutzer-Asset-Vorschau-Linie">
     <Member Name="Action" Description="Aktion" />
     <Member Name="Guid" Description="Guid" />
     <Member Name="OverrideEntity" Description="Entität überschreiben" />

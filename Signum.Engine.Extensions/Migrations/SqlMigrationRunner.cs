@@ -1,5 +1,6 @@
 ﻿using Signum.Engine.Cache;
 using Signum.Engine.Maps;
+using Signum.Engine.SchemaInfoTables;
 using Signum.Entities;
 using Signum.Entities.Migrations;
 using Signum.Utilities;
@@ -42,25 +43,30 @@ namespace Signum.Engine.Migrations
         private static void SetExecuted(List<MigrationInfo> migrations)
         {
             MigrationLogic.EnsureMigrationTable<SqlMigrationEntity>();
+            AddCommentColumnIfNecessary();
 
             var first = migrations.FirstOrDefault();
 
-            var executedMigrations = Database.Query<SqlMigrationEntity>().Select(m => m.VersionNumber).OrderBy().ToList().Where(d => first == null || first.Version.CompareTo(d) <= 0).ToList();
+            var executedMigrations = Database.Query<SqlMigrationEntity>().Select(m => new { m.VersionNumber, m.Comment })
+                .OrderBy(a => a.VersionNumber)
+                .ToList()
+                .Where(d => first == null || first.Version.CompareTo(d.VersionNumber) <= 0)
+                .ToList();
 
             var dic = migrations.ToDictionaryEx(a => a.Version, "Migrations in folder");
 
-            foreach (var ver in executedMigrations)
+            foreach (var migration in executedMigrations)
             {
-                var m = dic.TryGetC(ver);
+                var m = dic.TryGetC(migration.VersionNumber);
                 if (m != null)
                     m.IsExecuted = true;
                 else
                     migrations.Add(new MigrationInfo
                     {
                         FileName = null,
-                        Comment = ">> In Database Only <<",
+                        Comment = ">> In Database Only <<" + migration.Comment,
                         IsExecuted = true,
-                        Version = ver
+                        Version = migration.VersionNumber
                     });
 
             }
@@ -68,7 +74,24 @@ namespace Signum.Engine.Migrations
             migrations.Sort(a => a.Version);
         }
 
-        private static List<MigrationInfo> ReadMigrationsDirectory()
+        private static void AddCommentColumnIfNecessary()
+        {
+            var table = Schema.Current.Table<SqlMigrationEntity>();
+            var col = table.Columns[nameof(SqlMigrationEntity.Comment)];
+
+            var hasComment = Database.View<SysTables>()
+                .Where(a => a.Schema().name == table.Name.Schema.Name && a.name == table.Name.Name)
+                .SelectMany(t => t.Columns())
+                .Any(c => c.name == col.Name);
+                
+            if (!hasComment)
+            {
+                SafeConsole.WriteLineColor(ConsoleColor.White, "Column " + col.Name + " created in " + table.Name + "...");
+                Executor.ExecuteNonQuery($"ALTER TABLE {table.Name} ADD {col.Name} NVARCHAR({col.Size}) NULL");
+            }
+        }
+
+        public static List<MigrationInfo> ReadMigrationsDirectory()
         {
             Console.WriteLine();
             SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "Reading migrations from: " + MigrationsDirectory);
@@ -206,6 +229,7 @@ namespace Signum.Engine.Migrations
                 SqlMigrationEntity m = new SqlMigrationEntity
                 {
                     VersionNumber = mi.Version,
+                    Comment = mi.Comment,
                 }.Save();
 
                 mi.IsExecuted = true;

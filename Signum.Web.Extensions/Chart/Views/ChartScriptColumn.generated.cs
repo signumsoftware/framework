@@ -47,7 +47,7 @@ namespace ASP
         {
             
             #line 2 "..\..\Chart\Views\ChartScriptColumn.cshtml"
- using (var cc = Html.TypeContext<ChartScriptColumnEntity>())
+ using (var cc = Html.TypeContext<ChartScriptColumnEmbedded>())
 {
     
             

@@ -6,7 +6,7 @@
 @using (var llp = Html.TypeContext<LinkListPartEntity>())
 {
     <ul class="sf-cp-link-list">
-        @foreach (LinkElementEntity link in Model.Value.Links)
+        @foreach (LinkElementEmbedded link in Model.Value.Links)
         {
             <li>
                 @Html.Href(Url.Content(link.Link), link.Label.DefaultText(link.Link))

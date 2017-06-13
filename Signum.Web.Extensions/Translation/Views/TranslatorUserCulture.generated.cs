@@ -47,7 +47,7 @@ namespace ASP
         {
             
             #line 2 "..\..\Translation\Views\TranslatorUserCulture.cshtml"
- using (var tcc = Html.TypeContext<TranslatorUserCultureEntity>())
+ using (var tcc = Html.TypeContext<TranslatorUserCultureEmbedded>())
 {
 
             

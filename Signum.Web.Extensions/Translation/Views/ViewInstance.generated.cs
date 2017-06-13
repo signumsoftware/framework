@@ -392,7 +392,7 @@ WriteLiteral(">\r\n");
             #line hidden
             
             #line 90 "..\..\Translation\Views\ViewInstance.cshtml"
-                                     if (TranslatedInstanceLogic.RouteType(key.Route).Value == TraducibleRouteType.Html)
+                                     if (TranslatedInstanceLogic.RouteType(key.Route).Value == TranslateableRouteType.Html)
                                     {
 
             
@@ -542,7 +542,7 @@ WriteLiteral(">\r\n");
             #line 125 "..\..\Translation\Views\ViewInstance.cshtml"
                                                                                                                          
                                         }
-                                        else if (TranslatedInstanceLogic.RouteType(key.Route).Value == TraducibleRouteType.Html)
+                                        else if (TranslatedInstanceLogic.RouteType(key.Route).Value == TranslateableRouteType.Html)
                                         {
 
             
@@ -604,14 +604,14 @@ WriteLiteral("        <input");
 
 WriteLiteral(" type=\"submit\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 6404), Tuple.Create("\"", 6451)
+WriteAttribute("value", Tuple.Create(" value=\"", 6410), Tuple.Create("\"", 6457)
             
             #line 144 "..\..\Translation\Views\ViewInstance.cshtml"
-, Tuple.Create(Tuple.Create("", 6412), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
+, Tuple.Create(Tuple.Create("", 6418), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
             
             #line default
             #line hidden
-, 6412), false)
+, 6418), false)
 );
 
 WriteLiteral(" />\r\n");

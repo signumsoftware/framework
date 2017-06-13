@@ -1,6 +1,6 @@
 ﻿@using Signum.Entities.Mailing
 
-@using (var sc = Html.TypeContext<SmtpNetworkDeliveryEntity>())
+@using (var sc = Html.TypeContext<SmtpNetworkDeliveryEmbedded>())
 {
     @Html.ValueLine(sc, s => s.Port)
     @Html.ValueLine(sc, s => s.Host)

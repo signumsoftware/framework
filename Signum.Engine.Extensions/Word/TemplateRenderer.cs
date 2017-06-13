@@ -61,9 +61,9 @@ namespace Signum.Engine.Word
             {
                 QueryName = this.queryDescription.QueryName,
                 Columns = columns,
-                Pagination = new Pagination.All(),
+                Pagination = systemWordTemplate?.GetPagination() ?? new Pagination.All(),
                 Filters = filters,
-                Orders = new List<Order>(),
+                Orders = systemWordTemplate?.GetOrders(this.queryDescription) ?? new List<Order>(),
             }, CancellationToken.None).Result;
 
             var dt = this.table.ToDataTable();

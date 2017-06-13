@@ -18,6 +18,7 @@ using Signum.Engine.Mailing;
 using System.Collections.Generic;
 using Signum.Engine.Operations;
 using Signum.Web.Operations;
+using System.Security.Principal;
 
 namespace Signum.Web.Auth
 {
@@ -365,7 +366,6 @@ namespace Signum.Web.Auth
             }
 
 
-
             TempData["Message"] = AuthLogic.OnLoginMessage();
 
 
@@ -380,6 +380,8 @@ namespace Signum.Web.Auth
                 UserPreLogin(controller, user);
             }
         }
+
+  
 
         public ViewResult LoginError(string key, string error)
         {
@@ -430,5 +432,33 @@ namespace Signum.Web.Auth
 
             httpContext.Session.Abandon();
         }
+    }
+
+
+
+    interface ICustomPrincipal : IPrincipal
+    {
+         string Id { get; set; }
+         string Name { get; set; }
+    }
+    public class CustomPrincipal : ICustomPrincipal
+    {
+        public IIdentity Identity { get; private set; }
+        public bool IsInRole(string role) { return false; }
+
+        public CustomPrincipal(string id)
+        {
+            this.Identity = new GenericIdentity(id);
+        }
+
+        public string Id { get; set; }
+        public string Name { get; set; }
+      
+    }
+    public class CustomPrincipalSerializeModel
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        
     }
 }

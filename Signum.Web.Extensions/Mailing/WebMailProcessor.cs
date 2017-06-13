@@ -12,7 +12,7 @@ namespace Signum.Web.Mailing
     public class WebMailOptions
     {
         public bool ForEditing;
-        public IEnumerable<EmailAttachmentEntity> Attachments;
+        public IEnumerable<EmailAttachmentEmbedded> Attachments;
         public string UntrustedImage;
         public UrlHelper Url;
         public bool HasUntrusted;
@@ -85,7 +85,7 @@ namespace Signum.Web.Mailing
 
                 string cid = value.After("cid:");
 
-                EmailAttachmentEntity only = options.Attachments.Where(a => a.ContentId == cid).Only();
+                EmailAttachmentEmbedded only = options.Attachments.Where(a => a.ContentId == cid).Only();
                 if (only != null)
                     return "src=\"{0}\"".FormatWith(options.Url.Content(only.File.FullWebPath()));
 

@@ -177,7 +177,7 @@ WriteLiteral(">\r\n                <thead>\r\n                    <tr>\r\n      
 
             
             #line 20 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
-                       Write(Html.PropertyNiceName((DisconnectedExportTableEntity de) => de.Type));
+                       Write(Html.PropertyNiceName((DisconnectedExportTableEmbedded de) => de.Type));
 
             
             #line default
@@ -186,7 +186,7 @@ WriteLiteral("</td>\r\n                        <td>");
 
             
             #line 21 "..\..\Disconnected\Views\DisconnectedExport.cshtml"
-                       Write(Html.PropertyNiceName((DisconnectedExportTableEntity de) => de.CopyTable));
+                       Write(Html.PropertyNiceName((DisconnectedExportTableEmbedded de) => de.CopyTable));
 
             
             #line default

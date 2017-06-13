@@ -21,6 +21,7 @@ using Signum.Entities.Cache;
 using Signum.Engine.Authorization;
 using Signum.Engine.Maps;
 using Signum.Entities.Templating;
+using Signum.Entities.Word;
 
 namespace Signum.React.Word
 {
@@ -31,6 +32,101 @@ namespace Signum.React.Word
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
             ReflectionServer.RegisterLike(typeof(TemplateTokenMessage));
+
+            CustomizeFiltersModel();
+        }
+
+        private static void CustomizeFiltersModel()
+        {
+            var converters = PropertyConverter.GetPropertyConverters(typeof(QueryModel));
+            converters.Remove("queryName");
+
+            converters.Add("queryKey", new PropertyConverter()
+            {
+                AvoidValidate = true,
+                CustomReadJsonProperty = ctx =>
+                {
+                    ((QueryModel)ctx.Entity).QueryName = QueryLogic.ToQueryName((string)ctx.JsonReader.Value);
+                },
+                CustomWriteJsonProperty = ctx =>
+                {
+                    var cr = (QueryModel)ctx.Entity;
+
+                    ctx.JsonWriter.WritePropertyName(ctx.LowerCaseName);
+                    ctx.JsonWriter.WriteValue(QueryLogic.GetQueryEntity(cr.QueryName).Key);
+                }
+            });
+
+            converters.Add("filters", new PropertyConverter()
+            {
+                AvoidValidate = true,
+                CustomReadJsonProperty = ctx =>
+                {
+                    var list = (List<FilterTS>)ctx.JsonSerializer.Deserialize(ctx.JsonReader, typeof(List<FilterTS>));
+
+                    var cr = (QueryModel)ctx.Entity;
+
+                    var qd = DynamicQueryManager.Current.QueryDescription(cr.QueryName);
+
+                    cr.Filters = list.Select(l => l.ToFilter(qd, canAggregate: true)).ToList();
+                },
+                CustomWriteJsonProperty = ctx =>
+                {
+                    var cr = (QueryModel)ctx.Entity;
+
+                    ctx.JsonWriter.WritePropertyName(ctx.LowerCaseName);
+                    ctx.JsonSerializer.Serialize(ctx.JsonWriter, cr.Filters.Select(f => new FilterTS
+                    {
+                        token = f.Token.FullKey(),
+                        operation = f.Operation,
+                        value = f.Value
+                    }).ToList());
+                }
+            });
+
+            converters.Add("orders", new PropertyConverter()
+            {
+                AvoidValidate = true,
+                CustomReadJsonProperty = ctx =>
+                {
+                    var list = (List<OrderTS>)ctx.JsonSerializer.Deserialize(ctx.JsonReader, typeof(List<OrderTS>));
+
+                    var cr = (QueryModel)ctx.Entity;
+
+                    var qd = DynamicQueryManager.Current.QueryDescription(cr.QueryName);
+
+                    cr.Orders = list.Select(l => l.ToOrder(qd, canAggregate: true)).ToList();
+                },
+                CustomWriteJsonProperty = ctx =>
+                {
+                    var cr = (QueryModel)ctx.Entity;
+
+                    ctx.JsonWriter.WritePropertyName(ctx.LowerCaseName);
+                    ctx.JsonSerializer.Serialize(ctx.JsonWriter, cr.Orders.Select(f => new OrderTS
+                    {
+                        token = f.Token.FullKey(),
+                        orderType = f.OrderType
+                    }));
+                }
+            });
+
+            converters.Add("pagination", new PropertyConverter()
+            {
+                AvoidValidate = true,
+                CustomReadJsonProperty = ctx =>
+                {
+                    var pagination = (PaginationTS)ctx.JsonSerializer.Deserialize(ctx.JsonReader, typeof(PaginationTS));
+                    var cr = (QueryModel)ctx.Entity;
+                    cr.Pagination = pagination.ToPagination();
+                },
+                CustomWriteJsonProperty = ctx =>
+                {
+                    var cr = (QueryModel)ctx.Entity;
+
+                    ctx.JsonWriter.WritePropertyName(ctx.LowerCaseName);
+                    ctx.JsonSerializer.Serialize(ctx.JsonWriter, new PaginationTS(cr.Pagination));
+                }
+            });
         }
     }
 }

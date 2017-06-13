@@ -23,7 +23,7 @@ namespace Signum.Web.Basic
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EmbeddedEntitySettings<DateSpanEntity> { PartialViewName = _ => ViewPrefix.FormatWith("DateSpan") },
+                    new EmbeddedEntitySettings<DateSpanEmbedded> { PartialViewName = _ => ViewPrefix.FormatWith("DateSpan") },
                 });
             }
         }
