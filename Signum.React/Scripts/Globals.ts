@@ -303,8 +303,14 @@ Array.prototype.singleOrNull = function (this: any[], errorContext: string) {
 };
 
 Array.prototype.contains = function (this: any[], element: any) {
-    return this.indexOf(element) != -1;
+    return this.indexOf(element) !== -1;
 };
+
+if (!Array.prototype.includes) {
+    Array.prototype.includes = function (this: any[], element: any, fromIndex?: number) {
+        return this.indexOf(element, fromIndex) !== -1;
+    };
+}
 
 Array.prototype.removeAt = function (this: any[], index: number) {
     this.splice(index, 1);
@@ -372,26 +378,36 @@ Array.prototype.extract = function (this: any[], predicate: (element: any) => bo
     return result;
 };
 
+if (!Array.prototype.find) {
+    Array.prototype.find = function (this: any[], predicate: (element: any, index: number, array: Array<any>) => boolean, thisArg?: any) {
+        for (var i = 0; i < this.length; i++) {
+            if (predicate.call(thisArg, this[i], i, this)) {
+                return this[i];
+            }
+        }
+        return undefined;
+    };
+}
 
-Array.prototype.findIndex = function (this: any[], predicate: (element: any, index: number, array: Array<any>) => boolean) {
-    const result = this.filter(predicate);
+if (!Array.prototype.findIndex) {
+    Array.prototype.findIndex = function (this: any[], predicate: (element: any, index: number, array: Array<any>) => boolean, thisArg?: any) {
+        for (var i = 0; i < this.length; i++)
+            if (predicate.call(thisArg, this[i], i, this))
+                return i;
 
-    for (var i = 0; i < this.length; i++)
-        if (predicate(this[i], i, this))
-            return i;
+        return -1;
+    };
+}
 
-    return -1;
-};
+if (!Array.prototype.findLastIndex) {
+    Array.prototype.findLastIndex = function (this: any[], predicate: (element: any, index: number, array: Array<any>) => boolean, thisArg?: any) {
+        for (var i = this.length - 1; i >= 0; i--)
+            if (predicate.call(thisArg, this[i], i, this))
+                return i;
 
-Array.prototype.findLastIndex = function (this: any[], predicate: (element: any) => boolean) {
-    const result = this.filter(predicate);
-
-    for (var i = this.length - 1; i >= 0; i--)
-        if (predicate(this[i]))
-            return i;
-
-    return -1;
-};
+        return -1;
+    };
+}
 
 Array.range = function (min: number, maxNotIncluded: number) {
     const length = maxNotIncluded - min;
@@ -419,6 +435,12 @@ Array.toArray = function (arrayish: { length: number;[index: number]: any }) {
     for (var i = 0; i < arrayish.length; i++)
         result.push(arrayish[i]);
     return result;
+}
+
+if (!String.prototype.includes) {
+    String.prototype.includes = function (this: string, str: string, start?: number) {
+         return this.indexOf(str, start) !== -1;
+    };
 }
 
 String.prototype.contains = function (this: string, str: string) {

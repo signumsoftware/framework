@@ -13,9 +13,11 @@ namespace Signum.Engine
     {
         public static SqlPreCommand CreateSchemasScript()
         {
-            return Schema.Current.GetDatabaseTables()
+            Schema s = Schema.Current;
+
+            return s.GetDatabaseTables()
                 .Select(a => a.Name.Schema)
-                .Where(s => s.Name != "dbo")
+                .Where(sn => sn.Name != "dbo" && !s.IsExternalDatabase(sn.Database))
                 .Distinct()
                 .Select(SqlBuilder.CreateSchema)
                 .Combine(Spacing.Simple);
@@ -23,8 +25,9 @@ namespace Signum.Engine
 
         public static SqlPreCommand CreateTablesScript()
         {
-            List<ITable> tables = Schema.Current.GetDatabaseTables().ToList();
-
+            Schema s = Schema.Current;
+            List<ITable> tables =s.GetDatabaseTables().Where(t => !s.IsExternalDatabase(t.Name.Schema.Database)).ToList();
+            
             SqlPreCommand createTables = tables.Select(SqlBuilder.CreateTableSql).Combine(Spacing.Double).PlainSqlCommand();
 
             SqlPreCommand foreignKeys = tables.Select(SqlBuilder.AlterTableForeignKeys).Combine(Spacing.Double).PlainSqlCommand();

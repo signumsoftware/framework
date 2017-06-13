@@ -27,7 +27,7 @@ namespace Signum.MSBuildTask
             this.Resolver = resolver;
             this.Log = log;
 
-            this.SystemType = resolver.Resolve("mscorlib").MainModule.GetType("System", "Type");
+            this.SystemType = resolver.Resolve(AssemblyNameReference.Parse("mscorlib")).MainModule.GetType("System", "Type");
             this.GetTypeFromHandle = this.SystemType.GetMethods().Single(a => a.Name == "GetTypeFromHandle");
 
             this.SigumEntities = assembly.Name.Name == "Signum.Entities" ? assembly : resolver.SignumEntities;

@@ -117,7 +117,6 @@ namespace Signum.Utilities
                 if (Value.Equals(default(T)))
                     return true;
 
-
                 if (Value is IEnumerable col)
                 {
                     foreach (var item in col)

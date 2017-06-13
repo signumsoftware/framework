@@ -35,11 +35,12 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     formatters?: { [columnName: string]: CellFormatter };
     rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
     entityFormatter?: EntityFormatter;
-    showContextMenu?: boolean;
+    showContextMenu?: boolean | "Basic";
     onSelectionChanged?: (entity: Lite<Entity>[]) => void;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
     onResult?: (table: ResultTable) => void;
     onSearch?: (fo: FindOptionsParsed) => void;
+    hideButtonBar?: boolean;
     hideFullScreenButton?: boolean;
     showBarExtension?: boolean;
     largeToolbarButtons?: boolean; 
@@ -133,6 +134,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             onFiltersChanged={this.props.onFiltersChanged}
             onSearch={this.props.onSearch}
             onResult={this.props.onResult}
+            hideButtonBar={this.props.hideButtonBar}
             hideFullScreenButton={this.props.hideFullScreenButton}
             showBarExtension={this.props.showBarExtension}
             extraButtons={this.props.extraButtons}

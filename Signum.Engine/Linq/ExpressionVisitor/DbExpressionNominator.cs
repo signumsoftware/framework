@@ -1082,6 +1082,10 @@ namespace Signum.Engine.Linq
             return base.VisitMethodCall(m);
         }
 
+        private Expression GetDateTimeToStringSqlFunction(MethodCallExpression m, string defaultFormat = null) {
+            return Connector.Current.SupportsFormat ? GetFormatToString(m, defaultFormat) : TrySqlToString(m);
+        }
+
         private Expression HardCodedMethods(MethodCallExpression m)
         {
             if (m.Method.Name == "ToString")
@@ -1154,10 +1158,10 @@ namespace Signum.Engine.Linq
                 case "DateTime.AddMonths": return TrySqlFunction(null, SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.month), m.GetArgument("months"), m.Object);
                 case "DateTime.AddSeconds": return TrySqlFunction(null, SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.second), m.GetArgument("value"), m.Object);
                 case "DateTime.AddYears": return TrySqlFunction(null, SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.year), m.GetArgument("value"), m.Object);
-                case "DateTime.ToShortDateString": return GetFormatToString(m, "d");
-                case "DateTime.ToShortTimeString": return GetFormatToString(m, "t");
-                case "DateTime.ToLongDateString": return GetFormatToString(m, "D");
-                case "DateTime.ToLongTimeString": return GetFormatToString(m, "T");
+                case "DateTime.ToShortDateString": return GetDateTimeToStringSqlFunction(m, "d");
+                case "DateTime.ToShortTimeString": return GetDateTimeToStringSqlFunction(m, "t");
+                case "DateTime.ToLongDateString": return GetDateTimeToStringSqlFunction(m, "D");
+                case "DateTime.ToLongTimeString": return GetDateTimeToStringSqlFunction(m, "T");
 
                 //dateadd(month, datediff(month, 0, SomeDate),0);
                 case "DateTimeExtensions.MonthStart": return TrySqlMonthStart(m.GetArgument("dateTime"));

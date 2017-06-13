@@ -1,0 +1,105 @@
+﻿<CodeSnippet Format="1.1.0" xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <Header>
+    <Title>Signum Modal Pop-up Class Component</Title>
+    <Author>Signum Software</Author>
+    <Shortcut>reactModal</Shortcut>
+    <Description>Code snippet for adding an Modal Pop-up React class</Description>
+    <SnippetTypes>
+      <SnippetType>Expansion</SnippetType>
+    </SnippetTypes>
+  </Header>
+  <Snippet>
+    <Imports>
+      <Import>
+        <Namespace>
+          import { Modal } from "react-bootstrap";
+          import { openModal, IModalProps } from "../../../../Framework/Signum.React/Scripts/Modals";
+        </Namespace>
+      </Import>
+    </Imports>
+    <Declarations>
+      <Literal>
+        <ID>ComponentName</ID>
+        <ToolTip>Component Class Name</ToolTip>
+        <Default>MyComponent</Default>
+      </Literal>
+      <Literal>
+        <ID>AnswerType</ID>
+        <ToolTip>Type of item returned by popup</ToolTip>
+        <Default>boolean</Default>
+      </Literal>
+    </Declarations>
+    <Code Language="TypeScript">
+      <![CDATA[
+
+
+interface $ComponentName$ModalProps extends IModalProps {
+    question: string;
+}
+
+interface $ComponentName$ModalState {
+    show: boolean;
+}
+
+class $ComponentName$Modal extends React.Component<$ComponentName$ModalProps, $ComponentName$ModalState> {
+
+    constructor(props: $ComponentName$ModalProps) {
+        super(props);
+        this.state = { show: true };
+    }
+
+    answer?: $AnswerType$;
+    handleButtonClicked = (val: $AnswerType$) => {
+        this.answer = val;
+        this.setState({ show: false });
+    }
+
+    handleClosedClicked = () => {
+        this.setState({ show: false });
+    }
+
+    handleOnExited = () => {
+        this.props.onExited!(this.answer);
+    }
+
+    render() {
+        return (
+            <Modal onHide={this.handleClosedClicked}
+                show={this.state.show} className="message-modal">
+                <Modal.Header closeButton={true}>
+                    <h4 className={"modal-title"}>
+                        Important Question
+                    </h4>
+                </Modal.Header>
+                <Modal.Body>
+                    {this.props.question}
+                </Modal.Body>
+                <Modal.Footer>
+                    <div>
+                        <button
+                            className="btn btn-primary sf-close-button sf-ok-button"
+                            onClick={() => this.handleButtonClicked(true)}
+                            name="accept">
+                            Yes
+                        </button>
+                        <button
+                            className="btn btn-default sf-close-button sf-button"
+                            onClick={() => this.handleButtonClicked(false)}
+                            name="cancel">
+                            No
+                        </button>
+                    </div>
+                </Modal.Footer>
+            </Modal>
+        );
+    }
+
+    static show(question: string) : Promise<$AnswerType$ | undefined> {
+        return openModal<$AnswerType$ | undefined>(<$ComponentName$Modal question={question}/>);
+    }
+}
+
+     ]]>
+    </Code>
+  </Snippet>
+</CodeSnippet>
