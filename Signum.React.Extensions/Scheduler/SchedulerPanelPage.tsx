@@ -85,7 +85,7 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
 
                     <h3>Available Tasks</h3>
                     <div className="form-horizontal">
-                        {getTypeInfos(ScheduledTaskEntity.memberInfo(a => a.task).type).map(t => <ValueSearchControlLine key={t.name} ctx={ctx} findOptions={{ queryName: t.name }} />}
+                        {getTypeInfos(ScheduledTaskEntity.memberInfo(a => a.task).type).map(t => <ValueSearchControlLine key={t.name} ctx={ctx} findOptions={{ queryName: t.name }} />)}
                     </div>
                     <h3>{ScheduledTaskEntity.niceName()}</h3>
                     <SearchControl findOptions={{
