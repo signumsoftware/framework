@@ -45,7 +45,7 @@ namespace Signum.Engine.Linq
 
         public void Fill(Dictionary<LookupToken, IEnumerable> lookups, IRetriever retriever)
         {
-            using (HeavyProfiler.Log("SQL", () => Command.Sql))
+            using (HeavyProfiler.Log("SQL", () => Command.PlainSql()))
             using (DbDataReader reader = Executor.UnsafeExecuteDataReader(Command))
             {
                 ProjectionRowEnumerator<KeyValuePair<K, V>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, V>>(reader, ProjectorExpression, lookups, retriever);
@@ -90,7 +90,7 @@ namespace Signum.Engine.Linq
             if (requests == null)
                 return;
 
-            using (HeavyProfiler.Log("SQL", () => Command.Sql))
+            using (HeavyProfiler.Log("SQL", () => Command.PlainSql()))
             using (DbDataReader reader = Executor.UnsafeExecuteDataReader(Command))
             {
                 ProjectionRowEnumerator<KeyValuePair<K, MList<V>.RowIdElement>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, MList<V>.RowIdElement>>(reader, ProjectorExpression, lookups, retriever);
