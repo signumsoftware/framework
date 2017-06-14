@@ -866,7 +866,7 @@ namespace Signum.Engine
             }
         }
 
-        public static int UnsafeDeleteChunks<T>(this IQueryable<T> query, int chunkSize = 10000, int maxChunks = int.MaxValue, int? pauseMilliseconds = null, CancellationToken? token = null)
+        public static int UnsafeDeleteChunks<T>(this IQueryable<T> query, int chunkSize = 10000, int maxChunks = int.MaxValue, int? pauseMilliseconds = null, CancellationToken? cancellationToken = null)
          where T : Entity
         {
             int total = 0;
@@ -877,8 +877,8 @@ namespace Signum.Engine
                 if (num < chunkSize)
                     break;
 
-                if (token.HasValue)
-                    token.Value.ThrowIfCancellationRequested();
+                if (cancellationToken.HasValue)
+                    cancellationToken.Value.ThrowIfCancellationRequested();
 
                 if (pauseMilliseconds.HasValue)
                     Thread.Sleep(pauseMilliseconds.Value);

@@ -173,13 +173,14 @@ namespace Signum.Engine.Basics
             sb.AppendLine($"{text}: {result} rows affected in {ts.NiceToString()}");
         }
 
-        public static void UnsafeDeleteChunksLog<T>(this IQueryable<T> sources, DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
+        public static void UnsafeDeleteChunksLog<T>(this IQueryable<T> sources, DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken cancellationToken)
             where T : Entity
         {
             WriteRows(sb, "Deleting " + typeof(T).Name, () => sources.UnsafeDeleteChunks(
                 parameters.ChunkSize, 
                 parameters.MaxChunks, 
-                pauseMilliseconds: parameters.PauseTime));
+                pauseMilliseconds: parameters.PauseTime,
+                cancellationToken: cancellationToken));
         }
 	}
 }
