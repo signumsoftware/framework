@@ -253,7 +253,7 @@ namespace Signum.Engine.Mailing
 
             columns = columns.Distinct().ToList();
 
-            var resultTable = DynamicQueryManager.Current.ExecuteQueryAsync(new QueryRequest
+            var resultTable = DynamicQueryManager.Current.ExecuteQuery(new QueryRequest
             {
                 QueryName = queryName,
                 Filters = new List<Filter>
@@ -264,7 +264,7 @@ namespace Signum.Engine.Mailing
                 Orders = new List<Order>(),
                 Columns = columns,
                 Pagination = new Pagination.All(),
-            }, CancellationToken.None).Result;
+            });
 
             var dicTokenColumn = resultTable.Columns.ToDictionary(rc => rc.Column.Token);
 

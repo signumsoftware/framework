@@ -296,7 +296,7 @@ namespace Signum.Engine.Word
             using (CurrentEntityConverter.SetCurrentEntity(context.Entity))
             {
                 var request = UserQueryLogic.ToQueryRequest(userQuery);
-                ResultTable resultTable = DynamicQueryManager.Current.ExecuteQueryAsync(request, CancellationToken.None).Result;
+                ResultTable resultTable = DynamicQueryManager.Current.ExecuteQuery(request);
                 var dataTable = resultTable.ToDataTable();
                 return dataTable;
             }

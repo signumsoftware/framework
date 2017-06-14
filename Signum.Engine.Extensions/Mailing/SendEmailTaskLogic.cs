@@ -93,7 +93,7 @@ namespace Signum.Engine.Mailing
                     {
                         var qr = er.TargetsFromUserQuery.Retrieve().ToQueryRequest();
                         qr.Columns.Clear();
-                        var result = DynamicQueryManager.Current.ExecuteQueryAsync(qr, CancellationToken.None).Result;
+                        var result = DynamicQueryManager.Current.ExecuteQuery(qr);
 
                         var entities = result.Rows.Select(a => a.Entity).ToList();
                         if (entities.IsEmpty())

@@ -311,14 +311,14 @@ namespace Signum.Engine.Mailing
                 var filters = systemEmail != null ? systemEmail.GetFilters(qd) :
                     new List<Filter> { new Filter(QueryUtils.Parse("Entity", qd, 0), FilterOperation.EqualTo, entity.ToLite()) };
 
-                this.table = DynamicQueryManager.Current.ExecuteQueryAsync(new QueryRequest
+                this.table = DynamicQueryManager.Current.ExecuteQuery(new QueryRequest
                 {
                     QueryName = queryName,
                     Columns = columns,
                     Pagination = new Pagination.All(),
                     Filters = filters,
                     Orders = new List<Order>(),
-                }, CancellationToken.None).Result;
+                });
 
                 this.dicTokenColumn = table.Columns.ToDictionary(rc => rc.Column.Token);
 
