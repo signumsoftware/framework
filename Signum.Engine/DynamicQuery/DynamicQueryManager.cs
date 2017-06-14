@@ -131,9 +131,19 @@ namespace Signum.Engine.DynamicQuery
             GetEntities
         }
 
+        public ResultTable ExecuteQuery(QueryRequest request)
+        {
+            return Execute(ExecuteType.ExecuteQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQuery(request));
+        }
+
         public Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken token)
         {
-            return ExecuteAsync(ExecuteType.ExecuteQuery, request.QueryName,request, dqb => dqb.Core.Value.ExecuteQueryAsync(request, token));
+            return ExecuteAsync(ExecuteType.ExecuteQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryAsync(request, token));
+        }
+
+        public object ExecuteQueryCount(QueryValueRequest request)
+        {
+            return Execute(ExecuteType.ExecuteQueryCount, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryValue(request));
         }
 
         public Task<object> ExecuteQueryCountAsync(QueryValueRequest request, CancellationToken token)
@@ -141,9 +151,19 @@ namespace Signum.Engine.DynamicQuery
             return ExecuteAsync(ExecuteType.ExecuteQueryCount, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryValueAsync(request, token));
         }
 
+        public ResultTable ExecuteGroupQuery(QueryGroupRequest request)
+        {
+            return Execute(ExecuteType.ExecuteGroupQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryGroup(request));
+        }
+
         public Task<ResultTable> ExecuteGroupQueryAsync(QueryGroupRequest request, CancellationToken token)
         {
             return ExecuteAsync(ExecuteType.ExecuteGroupQuery, request.QueryName,request, dqb => dqb.Core.Value.ExecuteQueryGroupAsync(request, token));
+        }
+
+        public Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request)
+        {
+            return Execute(ExecuteType.ExecuteUniqueEntity, request.QueryName, request, dqb => dqb.Core.Value.ExecuteUniqueEntity(request));
         }
 
         public Task<Lite<Entity>> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken token)

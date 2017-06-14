@@ -30,6 +30,22 @@ namespace Signum.Engine.DynamicQuery
               .Select((e, i) => new ColumnDescriptionFactory(i, e.MemberInfo, metas[e.MemberInfo.Name])).ToArray();
         }
 
+        public override ResultTable ExecuteQuery(QueryRequest request)
+        {
+            request.Columns.Insert(0, new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName));
+
+            DQueryable<T> query = Query
+                .ToDQueryable(GetQueryDescription())
+                .SelectMany(request.Multiplications)
+                .Where(request.Filters)
+                .OrderBy(request.Orders)
+                .Select(request.Columns);
+
+            var result = query.TryPaginate(request.Pagination);
+
+            return result.ToResultTable(request);
+        }
+
         public override async Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken token)
         {
             request.Columns.Insert(0, new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName));
@@ -46,6 +62,21 @@ namespace Signum.Engine.DynamicQuery
             return result.ToResultTable(request);
         }
 
+        public override object ExecuteQueryValue(QueryValueRequest request)
+        {
+            var query = Query.ToDQueryable(GetQueryDescription())
+                .SelectMany(request.Multiplications)
+                .Where(request.Filters);
+
+            if (request.ValueToken == null)
+                return query.Query.Count();
+
+            if (request.ValueToken is AggregateToken)
+                return query.SimpleAggregate((AggregateToken)request.ValueToken);
+
+            return query.SelectOne(request.ValueToken).Unique(UniqueType.Single);
+        }
+
         public override async Task<object> ExecuteQueryValueAsync(QueryValueRequest request, CancellationToken token)
         {
             var query = Query.ToDQueryable(GetQueryDescription())
@@ -59,6 +90,11 @@ namespace Signum.Engine.DynamicQuery
                 return await query.SimpleAggregateAsync((AggregateToken)request.ValueToken, token);
 
             return await query.SelectOne(request.ValueToken).UniqueAsync(UniqueType.Single, token);
+        }
+
+        public override Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request)
+        {
+            throw new NotImplementedException();
         }
 
         public override async Task<Lite<Entity>> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken token)
@@ -77,6 +113,15 @@ namespace Signum.Engine.DynamicQuery
 
             return (Lite<Entity>)result;
         }
+
+
+        
+
+        public override ResultTable ExecuteQueryGroup(QueryGroupRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
 
         public override async Task<ResultTable> ExecuteQueryGroupAsync(QueryGroupRequest request, CancellationToken token)
         {
@@ -103,6 +148,8 @@ namespace Signum.Engine.DynamicQuery
             return values.ToResultTable(cols, values.Length, new Pagination.All());
         }
 
+        
+
         public override IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request)
         {
             var ex = new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName);
@@ -119,6 +166,8 @@ namespace Signum.Engine.DynamicQuery
 
             return result.TryTake(request.Count);
         }
+
+        
 
         public override Expression Expression
         {

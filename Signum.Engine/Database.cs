@@ -14,6 +14,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Signum.Engine
 {
@@ -86,12 +88,32 @@ namespace Signum.Engine
             return lite.EntityOrNull;
         }
 
+        public static async Task<T> RetrieveAsyc<T>(this Lite<T> lite, CancellationToken token) where T : class, IEntity
+        {
+            if (lite == null)
+                throw new ArgumentNullException("lite");
+
+            if (lite.EntityOrNull == null)
+                lite.SetEntity(await RetrieveAsync(lite.EntityType, lite.Id, token));
+
+            return lite.EntityOrNull;
+        }
+
+
         public static T RetrieveAndForget<T>(this Lite<T> lite) where T : class, IEntity
         {
             if (lite == null)
                 throw new ArgumentNullException("lite");
 
             return (T)(object)Retrieve(lite.EntityType, lite.Id);
+        }
+
+        public static async Task<T> RetrieveAndForgetAsync<T>(this Lite<T> lite, CancellationToken token) where T : class, IEntity
+        {
+            if (lite == null)
+                throw new ArgumentNullException("lite");
+
+            return (T)(object)await RetrieveAsync(lite.EntityType, lite.Id, token);
         }
 
         static GenericInvoker<Func<PrimaryKey, Entity>> giRetrieve = new GenericInvoker<Func<PrimaryKey, Entity>>(id => Retrieve<Entity>(id));
@@ -140,6 +162,52 @@ namespace Signum.Engine
             }
         }
 
+        static GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Entity>>> giRetrieveAsync = new GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Entity>>>((id, token) => RetrieveAsync<Entity>(id, token));
+        public static async Task<T> RetrieveAsync<T>(PrimaryKey id, CancellationToken token) where T : Entity
+        {
+            using (HeavyProfiler.Log("DBRetrieve", () => typeof(T).TypeName()))
+            {
+                if (EntityCache.Created)
+                {
+                    T cached = EntityCache.Get<T>(id);
+
+                    if (cached != null)
+                        return cached;
+                }
+
+                var alternateEntity = Schema.Current.OnAlternativeRetriving(typeof(T), id);
+                if (alternateEntity != null)
+                    return (T)alternateEntity;
+
+                var cc = GetCacheController<T>();
+                if (cc != null)
+                {
+                    var filter = GetFilterQuery<T>();
+                    if (filter == null || filter.InMemoryFunction != null)
+                    {
+                        T result;
+                        using (new EntityCache())
+                        using (var r = EntityCache.NewRetriever())
+                        {
+                            result = r.Request<T>(id);
+                        }
+
+                        if (filter != null && !filter.InMemoryFunction(result))
+                            throw new EntityNotFoundException(typeof(T), id);
+
+                        return result;
+                    }
+                }
+
+                T retrieved = await Database.Query<T>().SingleOrDefaultAsync(a => a.Id == id, token);
+
+                if (retrieved == null)
+                    throw new EntityNotFoundException(typeof(T), id);
+
+                return retrieved;
+            }
+        }
+
         static CacheControllerBase<T> GetCacheController<T>() where T : Entity
         {
             CacheControllerBase<T> cc = Schema.Current.CacheController<T>();
@@ -165,13 +233,21 @@ namespace Signum.Engine
             return giRetrieve.GetInvoker(type)(id);
         }
 
+        public static Task<Entity> RetrieveAsync(Type type, PrimaryKey id, CancellationToken token)
+        {
+            return giRetrieveAsync.GetInvoker(type)(id, token);
+        }
+
         public static Lite<Entity> RetrieveLite(Type type, PrimaryKey id)
         {
-            if (type == null)
-                throw new ArgumentNullException("type");
-
             return giRetrieveLite.GetInvoker(type)(id);
         }
+
+        public static Task<Lite<Entity>> RetrieveLiteAsync(Type type, PrimaryKey id, CancellationToken token)
+        {
+            return giRetrieveLiteAsync.GetInvoker(type)(id, token);
+        }
+
 
         static GenericInvoker<Func<PrimaryKey, Lite<Entity>>> giRetrieveLite = new GenericInvoker<Func<PrimaryKey, Lite<Entity>>>(id => RetrieveLite<Entity>(id));
         public static Lite<T> RetrieveLite<T>(PrimaryKey id)
@@ -203,6 +279,37 @@ namespace Signum.Engine
             }
         }
 
+        static GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Lite<Entity>>>> giRetrieveLiteAsync = 
+            new GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Lite<Entity>>>>((id, token) => RetrieveLiteAsync<Entity>(id, token));
+        public static async Task<Lite<T>> RetrieveLiteAsync<T>(PrimaryKey id, CancellationToken token)
+            where T : Entity
+        {
+            using (HeavyProfiler.Log("DBRetrieve", () => "Lite<{0}>".FormatWith(typeof(T).TypeName())))
+            {
+                try
+                {
+                    var cc = GetCacheController<T>();
+                    if (cc != null && GetFilterQuery<T>() == null)
+                    {
+                        return new LiteImp<T>(id, cc.GetToString(id));
+                    }
+
+                    var result = await Database.Query<T>().Select(a => a.ToLite()).SingleOrDefaultAsync(a => a.Id == id, token);
+                    if (result == null)
+                        throw new EntityNotFoundException(typeof(T), id);
+
+                    return result;
+                }
+                catch (Exception e)
+                {
+                    e.Data["type"] = typeof(T).TypeName();
+                    e.Data["id"] = id;
+
+                    throw;
+                }
+            }
+        }
+
         public static Lite<T> FillToString<T>(this Lite<T> lite) where T : class, IEntity
         {
             if (lite == null)
@@ -213,11 +320,18 @@ namespace Signum.Engine
             return lite;
         }
 
-        public static string GetToStr(Type type, PrimaryKey id)
+        public static async Task<Lite<T>> FillToStringAsync<T>(this Lite<T> lite, CancellationToken token) where T : class, IEntity
         {
-            return giGetToStr.GetInvoker(type)(id);
+            if (lite == null)
+                return null;
+
+            lite.SetToString(await GetToStrAsync(lite.EntityType, lite.Id, token));
+
+            return lite;
         }
 
+
+        public static string GetToStr(Type type, PrimaryKey id) => giGetToStr.GetInvoker(type)(id);
         static GenericInvoker<Func<PrimaryKey, string>> giGetToStr = new GenericInvoker<Func<PrimaryKey, string>>(id => GetToStr<Entity>(id));
         public static string GetToStr<T>(PrimaryKey id)
             where T : Entity
@@ -241,6 +355,33 @@ namespace Signum.Engine
             }
         }
 
+
+        public static Task<string> GetToStrAsync(Type type, PrimaryKey id, CancellationToken token) => giGetToStrAsync.GetInvoker(type)(id, token);
+        static GenericInvoker<Func<PrimaryKey, CancellationToken, Task<string>>> giGetToStrAsync = 
+            new GenericInvoker<Func<PrimaryKey, CancellationToken, Task<string>>>((id, token) => GetToStrAsync<Entity>(id, token));
+        public static async Task<string> GetToStrAsync<T>(PrimaryKey id, CancellationToken token)
+            where T : Entity
+        {
+            try
+            {
+                using (HeavyProfiler.Log("DBRetrieve", () => "GetToStr<{0}>".FormatWith(typeof(T).TypeName())))
+                {
+                    var cc = GetCacheController<T>();
+                    if (cc != null && GetFilterQuery<T>() == null)
+                        return cc.GetToString(id);
+
+                    return await Database.Query<T>().Where(a => a.Id == id).Select(a => a.ToString()).FirstAsync(token);
+                }
+            }
+            catch (Exception e)
+            {
+                e.Data["type"] = typeof(T).TypeName();
+                e.Data["id"] = id;
+                throw;
+            }
+        }
+
+
         #endregion
 
         #region Exists
@@ -259,7 +400,23 @@ namespace Signum.Engine
             }
         }
 
-        static GenericInvoker<Func<PrimaryKey, bool>> giExist = new GenericInvoker<Func<PrimaryKey, bool>>(id => Exists<Entity>(id));
+        public static async Task<bool> ExistsAsync<T>(this Lite<T> lite, CancellationToken token)
+            where T : class, IEntity
+        {
+            try
+            {
+                return await lite.InDB().AnyAsync(token);
+            }
+            catch (Exception e)
+            {
+                e.Data["lite"] = lite;
+                throw;
+            }
+        }
+
+        public static bool Exists(Type type, PrimaryKey id) => giExist.GetInvoker(type)(id);
+        static GenericInvoker<Func<PrimaryKey, bool>> giExist = 
+            new GenericInvoker<Func<PrimaryKey, bool>>(id => Exists<Entity>(id));
         public static bool Exists<T>(PrimaryKey id)
             where T : Entity
         {
@@ -275,11 +432,24 @@ namespace Signum.Engine
             }
         }
 
-        public static bool Exists(Type type, PrimaryKey id)
+        public static Task<bool> ExistsAsync(Type type, PrimaryKey id, CancellationToken token) => giExistAsync.GetInvoker(type)(id, token);
+        static GenericInvoker<Func<PrimaryKey, CancellationToken, Task<bool>>> giExistAsync = 
+            new GenericInvoker<Func<PrimaryKey, CancellationToken, Task<bool>>>((id, token) => ExistsAsync<Entity>(id, token));
+        public static async Task<bool> ExistsAsync<T>(PrimaryKey id, CancellationToken token)
+            where T : Entity
         {
-            return giExist.GetInvoker(type)(id);
-
+            try
+            {
+                return await Database.Query<T>().AnyAsync(a => a.Id == id, token);
+            }
+            catch (Exception e)
+            {
+                e.Data["type"] = typeof(T).TypeName();
+                e.Data["id"] = id;
+                throw;
+            }
         }
+
         #endregion
 
         #region Retrieve All Lists Lites
@@ -320,6 +490,45 @@ namespace Signum.Engine
             }
         }
 
+        public static async Task<List<T>> RetrieveAllAsync<T>(CancellationToken token)
+            where T : Entity
+        {
+            try
+            {
+                using (HeavyProfiler.Log("DBRetrieve", () => "All {0}".FormatWith(typeof(T).TypeName())))
+                {
+                    var cc = GetCacheController<T>();
+                    if (cc != null)
+                    {
+                        var filter = GetFilterQuery<T>();
+                        if (filter == null || filter.InMemoryFunction != null)
+                        {
+                            List<T> result;
+                            using (new EntityCache())
+                            using (var r = EntityCache.NewRetriever())
+                            {
+                                result = cc.GetAllIds().Select(id => r.Request<T>(id)).ToList();
+                            }
+
+                            if (filter != null)
+                                result = result.Where(filter.InMemoryFunction).ToList();
+
+                            return result;
+                        }
+                    }
+
+                    return await Database.Query<T>().ToListAsync(token);
+                }
+            }
+            catch (Exception e)
+            {
+                e.Data["type"] = typeof(T).TypeName();
+                throw;
+            }
+        }
+
+        
+
         static readonly GenericInvoker<Func<IList>> giRetrieveAll = new GenericInvoker<Func<IList>>(() => RetrieveAll<TypeEntity>());
         public static List<Entity> RetrieveAll(Type type)
         {
@@ -329,6 +538,19 @@ namespace Signum.Engine
             IList list = giRetrieveAll.GetInvoker(type)();
             return list.Cast<Entity>().ToList();
         }
+
+        static Task<IList> RetrieveAllAsyncIList<T>(CancellationToken token) where T : Entity => RetrieveAllAsync<T>(token).ContinueWith(list => (IList)list);
+        static readonly GenericInvoker<Func<CancellationToken, Task<IList>>> giRetrieveAllAsyncIList = 
+            new GenericInvoker<Func<CancellationToken, Task<IList>>>(token => RetrieveAllAsyncIList<TypeEntity>(token));
+        public static async Task<List<Entity>> RetrieveAllAsync(Type type, CancellationToken token)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            IList list = await giRetrieveAllAsyncIList.GetInvoker(type)(token);
+            return list.Cast<Entity>().ToList();
+        }
+
 
         static readonly GenericInvoker<Func<IList>> giRetrieveAllLite = new GenericInvoker<Func<IList>>(() => Database.RetrieveAllLite<TypeEntity>());
         public static List<Lite<T>> RetrieveAllLite<T>()
@@ -354,6 +576,32 @@ namespace Signum.Engine
             }
         }
 
+        static readonly GenericInvoker<Func<CancellationToken, Task<IList>>> giRetrieveAllLiteAsync = 
+            new GenericInvoker<Func<CancellationToken, Task<IList>>>(token => Database.RetrieveAllLiteAsyncIList<TypeEntity>(token));
+        static Task<IList> RetrieveAllLiteAsyncIList<T>(CancellationToken token) where T : Entity => RetrieveAllLiteAsync<T>(token).ContinueWith(r => (IList)r.Result);
+        public static async Task<List<Lite<T>>> RetrieveAllLiteAsync<T>(CancellationToken token)
+            where T : Entity
+        {
+            try
+            {
+                using (HeavyProfiler.Log("DBRetrieve", () => "All Lite<{0}>".FormatWith(typeof(T).TypeName())))
+                {
+                    var cc = GetCacheController<T>();
+                    if (cc != null && GetFilterQuery<T>() == null)
+                    {
+                        return cc.GetAllIds().Select(id => (Lite<T>)new LiteImp<T>(id, cc.GetToString(id))).ToList();
+                    }
+
+                    return await Database.Query<T>().Select(e => e.ToLite()).ToListAsync(token);
+                }
+            }
+            catch (Exception e)
+            {
+                e.Data["type"] = typeof(T).TypeName();
+                throw;
+            }
+        }
+
         public static List<Lite<Entity>> RetrieveAllLite(Type type)
         {
             if (type == null)
@@ -363,8 +611,18 @@ namespace Signum.Engine
             return list.Cast<Lite<Entity>>().ToList();
         }
 
+        public static async Task<List<Lite<Entity>>> RetrieveAllLiteAsync(Type type, CancellationToken token)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
 
-        static GenericInvoker<Func<List<PrimaryKey>, IList>> giRetrieveList = new GenericInvoker<Func<List<PrimaryKey>, IList>>(ids => RetrieveList<Entity>(ids));
+            IList list = await giRetrieveAllLiteAsync.GetInvoker(type)(token);
+            return list.Cast<Lite<Entity>>().ToList();
+        }
+
+
+        static GenericInvoker<Func<List<PrimaryKey>, IList>> giRetrieveList = 
+            new GenericInvoker<Func<List<PrimaryKey>, IList>>(ids => RetrieveList<Entity>(ids));
         public static List<T> RetrieveList<T>(List<PrimaryKey> ids)
             where T : Entity
         {
@@ -411,7 +669,7 @@ namespace Signum.Engine
             }
         }
 
-        private static List<T> RetrieveFromDatabaseOrCache<T>(List<PrimaryKey> ids) where T : Entity
+        static List<T> RetrieveFromDatabaseOrCache<T>(List<PrimaryKey> ids) where T : Entity
         {
             var cc = GetCacheController<T>();
             if (cc != null)
@@ -437,6 +695,88 @@ namespace Signum.Engine
             return ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters).SelectMany(gr => Database.Query<T>().Where(a => gr.Contains(a.Id))).ToList();
         }
 
+        static GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>> giRetrieveListAsync = 
+            new GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>>((ids, token) => RetrieveListAsyncIList<Entity>(ids, token));
+        static Task<IList> RetrieveListAsyncIList<T>(List<PrimaryKey> ids, CancellationToken token) where T : Entity =>
+            RetrieveListAsync<T>(ids, token).ContinueWith(p => (IList)p.Result);
+        public static async Task<List<T>> RetrieveListAsync<T>(List<PrimaryKey> ids, CancellationToken token)
+            where T : Entity
+        {
+            using (HeavyProfiler.Log("DBRetrieve", () => "List<{0}>".FormatWith(typeof(T).TypeName())))
+            {
+                if (ids == null)
+                    throw new ArgumentNullException("ids");
+                List<PrimaryKey> remainingIds;
+                Dictionary<PrimaryKey, T> result = null;
+                if (EntityCache.Created)
+                {
+                    result = ids.Select(id => EntityCache.Get<T>(id)).NotNull().ToDictionary(a => a.Id);
+                    if (result.Count == 0)
+                        remainingIds = ids;
+                    else
+                        remainingIds = ids.Where(id => !result.ContainsKey(id)).ToList();
+                }
+                else
+                {
+                    remainingIds = ids;
+                }
+
+                if (remainingIds.Count > 0)
+                {
+                    var retrieved = (await RetrieveFromDatabaseOrCache<T>(remainingIds, token)).ToDictionary(a => a.Id);
+
+                    var missing = remainingIds.Except(retrieved.Keys);
+
+                    if (missing.Any())
+                        throw new EntityNotFoundException(typeof(T), missing.ToArray());
+
+                    if (result == null)
+                        result = retrieved;
+                    else
+                        result.AddRange(retrieved);
+                }
+                else
+                {
+                    if (result == null)
+                        result = new Dictionary<PrimaryKey, T>();
+                }
+
+                return ids.Select(id => result[id]).ToList(); //Preserve order
+            }
+        }
+
+        static async Task<List<T>> RetrieveFromDatabaseOrCache<T>(List<PrimaryKey> ids, CancellationToken token) where T : Entity
+        {
+            var cc = GetCacheController<T>();
+            if (cc != null)
+            {
+                var filter = GetFilterQuery<T>();
+                if (filter == null || filter.InMemoryFunction != null)
+                {
+                    List<T> result;
+
+                    using (new EntityCache())
+                    using (var rr = EntityCache.NewRetriever())
+                    {
+                        result = ids.Select(id => rr.Request<T>(id)).ToList();
+                    }
+
+                    if (filter != null)
+                        result = result.Where(filter.InMemoryFunction).ToList();
+
+                    return result;
+                }
+            }
+
+            var tasks = ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters)
+                .Select(gr => Database.Query<T>().Where(a => gr.Contains(a.Id)).ToListAsync(token))
+                .ToList();
+
+            var task = await Task.WhenAll(tasks);
+
+            return task.SelectMany(list => list).ToList();
+        }
+
         public static List<Entity> RetrieveList(Type type, List<PrimaryKey> ids)
         {
             if (type == null)
@@ -446,8 +786,17 @@ namespace Signum.Engine
             return list.Cast<Entity>().ToList();
         }
 
+        public static async Task<List<Entity>> RetrieveListAsync(Type type, List<PrimaryKey> ids, CancellationToken token)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
 
-        static GenericInvoker<Func<List<PrimaryKey>, IList>> giRetrieveListLite = new GenericInvoker<Func<List<PrimaryKey>, IList>>(ids => RetrieveListLite<Entity>(ids));
+            IList list = await giRetrieveListAsync.GetInvoker(type)(ids, token);
+            return list.Cast<Entity>().ToList();
+        }
+        
+        static GenericInvoker<Func<List<PrimaryKey>, IList>> giRetrieveListLite = 
+            new GenericInvoker<Func<List<PrimaryKey>, IList>>(ids => RetrieveListLite<Entity>(ids));
         public static List<Lite<T>> RetrieveListLite<T>(List<PrimaryKey> ids)
             where T : Entity
         {
@@ -473,12 +822,55 @@ namespace Signum.Engine
             }
         }
 
+        static GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>> giRetrieveListLiteAsync =
+            new GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>>((ids, token) => RetrieveListLiteAsyncIList<Entity>(ids, token));
+        static Task<IList> RetrieveListLiteAsyncIList<T>(List<PrimaryKey> ids, CancellationToken token)  where T : Entity => RetrieveListLiteAsync<T>(ids, token).ContinueWith(a => (IList)a);
+        public static async Task<List<Lite<T>>> RetrieveListLiteAsync<T>(List<PrimaryKey> ids, CancellationToken token)
+            where T : Entity
+        {
+            using (HeavyProfiler.Log("DBRetrieve", () => "List<Lite<{0}>>".FormatWith(typeof(T).TypeName())))
+            {
+                if (ids == null)
+                    throw new ArgumentNullException("ids");
+
+                var cc = GetCacheController<T>();
+                if (cc != null && GetFilterQuery<T>() == null)
+                {
+                    return ids.Select(id => (Lite<T>)new LiteImp<T>(id, cc.GetToString(id))).ToList();
+                }
+
+                var tasks = ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters)
+                    .Select(gr => Database.Query<T>().Where(a => gr.Contains(a.Id)).Select(a => a.ToLite()).ToListAsync(token))
+                    .ToList();
+
+                var list = await Task.WhenAll(tasks);
+
+                var retrieved = list.SelectMany(li => li).ToDictionary(a => a.Id);
+
+                var missing = ids.Except(retrieved.Keys);
+
+                if (missing.Any())
+                    throw new EntityNotFoundException(typeof(T), missing.ToArray());
+
+                return ids.Select(id => retrieved[id]).ToList(); //Preserve order
+            }
+        }
+
         public static List<Lite<Entity>> RetrieveListLite(Type type, List<PrimaryKey> ids)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
 
-            IList list = (IList)giRetrieveListLite.GetInvoker(type).Invoke(ids);
+            IList list = giRetrieveListLite.GetInvoker(type).Invoke(ids);
+            return list.Cast<Lite<Entity>>().ToList();
+        }
+
+        public static async Task<List<Lite<Entity>>> RetrieveListLite(Type type, List<PrimaryKey> ids, CancellationToken token)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            IList list = await giRetrieveListLiteAsync.GetInvoker(type).Invoke(ids, token);
             return list.Cast<Lite<Entity>>().ToList();
         }
 
@@ -497,6 +889,30 @@ namespace Signum.Engine
                     RetrieveList(gr.Key, gr.Select(a => a.Id).ToList()).ToDictionary(a => a.Id));
 
                 var result = lites.Select(l => (T)(object)dic[l.EntityType][l.Id]).ToList(); // keep same order
+
+                return tr.Commit(result);
+            }
+        }
+
+        public static async Task<List<T>> RetrieveFromListOfLiteAsync<T>(this IEnumerable<Lite<T>> lites, CancellationToken token)
+           where T : class, IEntity
+        {
+            if (lites == null)
+                throw new ArgumentNullException("lites");
+
+            if (lites.IsEmpty())
+                return new List<T>();
+
+            using (Transaction tr = new Transaction())
+            {
+                var tasks = lites.GroupBy(a => a.EntityType).Select(gr =>
+                    RetrieveListAsync(gr.Key, gr.Select(a => a.Id).ToList(), token)).ToList();
+
+                var list = await Task.WhenAll(tasks);
+
+                var dic = list.SelectMany(li => li).ToDictionary(a => (Lite<T>)a.ToLite());
+
+                var result = lites.Select(lite => (T)(object)dic[lite]).ToList(); // keep same order
 
                 return tr.Commit(result);
             }

@@ -192,28 +192,28 @@ namespace Signum.Services
                 () => DynamicQueryManager.Current.QueryDescription(queryName));
         }
 
-        public virtual ResultTable ExecuteQuery(QueryRequest request)
+        public ResultTable ExecuteQuery(QueryRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
-                () => DynamicQueryManager.Current.ExecuteQueryAsync(request, CancellationToken.None).Result);
+                () => DynamicQueryManager.Current.ExecuteQuery(request));
         }
 
         public ResultTable ExecuteQueryGroup(QueryGroupRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
-                () => DynamicQueryManager.Current.ExecuteGroupQueryAsync(request, CancellationToken.None).Result);
+                () => DynamicQueryManager.Current.ExecuteGroupQuery(request));
         }
 
         public virtual int ExecuteQueryCount(QueryValueRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
-                () => (int)DynamicQueryManager.Current.ExecuteQueryCountAsync(request, CancellationToken.None).Result);
+                () => (int)DynamicQueryManager.Current.ExecuteQueryCount(request));
         }
 
         public virtual Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
-                () => DynamicQueryManager.Current.ExecuteUniqueEntityAsync(request, CancellationToken.None).Result);
+                () => DynamicQueryManager.Current.ExecuteUniqueEntity(request));
         }
 
         public virtual List<object> GetQueryNames()
