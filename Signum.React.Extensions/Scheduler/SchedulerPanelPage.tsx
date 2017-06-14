@@ -80,12 +80,11 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
                     NextExecution: {s.NextExecution} ({s.NextExecution == undefined ? "-None-" : moment(s.NextExecution).fromNow()})
                     <br />
                     {this.renderInMemoryQueue()}
-                    <br />
                     {this.renderRunningTasks()}
 
                     <h3>Available Tasks</h3>
                     <div className="form-horizontal">
-                        {getTypeInfos(ScheduledTaskEntity.memberInfo(a => a.task).type).map(t => <ValueSearchControlLine key={t.name} ctx={ctx} findOptions={{ queryName: t.name }} />)}
+                        {getTypeInfos(ScheduledTaskEntity.memberInfo(a => a.task).type).map(t => <ValueSearchControlLine key={t.name} ctx={ctx} findOptions={{ queryName: t.name }} onExplored={() => this.loadState().done()} />)}
                     </div>
                     <h3>{ScheduledTaskEntity.niceName()}</h3>
                     <SearchControl findOptions={{
