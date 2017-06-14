@@ -17,6 +17,7 @@ using Signum.Utilities;
 using Signum.Entities.Basics;
 using Signum.Engine.Operations;
 using Signum.Utilities.ExpressionTrees;
+using System.Threading;
 
 namespace Signum.Engine.Processes
 {
@@ -111,13 +112,13 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters)
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
             var usedDatas = Database.Query<ProcessEntity>().Select(a => a.Data);
 
-            Database.Query<PackageLineEntity>().Where(line => !usedDatas.Contains(line.Package.Entity)).UnsafeDeleteChunks();
-            Database.Query<PackageOperationEntity>().Where(po => !usedDatas.Contains(po)).UnsafeDeleteChunks();
-            Database.Query<PackageEntity>().Where(po => !usedDatas.Contains(po)).UnsafeDeleteChunks();
+            Database.Query<PackageLineEntity>().Where(line => !usedDatas.Contains(line.Package.Entity)).UnsafeDeleteChunksLog(parameters, sb, token);
+            Database.Query<PackageOperationEntity>().Where(po => !usedDatas.Contains(po)).UnsafeDeleteChunksLog(parameters, sb, token);
+            Database.Query<PackageEntity>().Where(po => !usedDatas.Contains(po)).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         public static PackageEntity CreateLines(this PackageEntity package, IEnumerable<Lite<IEntity>> lites)
@@ -237,10 +238,7 @@ namespace Signum.Engine.Processes
 
         public PackageDeleteAlgorithm(DeleteSymbol<T> deleteSymbol)
         {
-            if (deleteSymbol == null)
-                throw new ArgumentNullException("operatonKey");
-
-            this.DeleteSymbol = deleteSymbol;
+            this.DeleteSymbol = deleteSymbol ?? throw new ArgumentNullException("operatonKey");
         }
 
         public virtual void Execute(ExecutingProcess executingProcess)
@@ -283,10 +281,7 @@ namespace Signum.Engine.Processes
 
         public PackageExecuteAlgorithm(ExecuteSymbol<T> symbol)
         {
-            if (symbol == null)
-                throw new ArgumentNullException("operationKey");
-
-            this.Symbol = symbol;
+            this.Symbol = symbol ?? throw new ArgumentNullException("operationKey");
         }
 
         public virtual void Execute(ExecutingProcess executingProcess)

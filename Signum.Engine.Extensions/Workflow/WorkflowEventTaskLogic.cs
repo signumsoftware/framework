@@ -19,6 +19,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Signum.Engine.Workflow
@@ -100,7 +101,7 @@ namespace Signum.Engine.Workflow
                         e.Result,
                     });
 
-                SchedulerLogic.ExecuteTask.Register((WorkflowEventTaskEntity wet) => ExecuteTask(wet));
+                SchedulerLogic.ExecuteTask.Register((WorkflowEventTaskEntity wet, ScheduledTaskContext ctx) => ExecuteTask(wet));
 
                 WorkflowEventTaskModel.GetModel = (@event) =>
                 {
@@ -219,11 +220,11 @@ namespace Signum.Engine.Workflow
             workflowEventTask.Delete(WorkflowEventTaskOperation.Delete);
         }
 
-        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters)
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
             Database.Query<WorkflowEventTaskConditionResultEntity>()
                .Where(a => a.CreationDate < parameters.DateLimit)
-               .UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
+               .UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         public static Lite<IEntity> ExecuteTask(WorkflowEventTaskEntity task)

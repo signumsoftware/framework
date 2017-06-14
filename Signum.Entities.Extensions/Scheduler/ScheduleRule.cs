@@ -300,7 +300,8 @@ namespace Signum.Entities.Scheduler
         [Description("Day of the week")]
         ScheduleRuleWeeklyDN_DayOfTheWeek,
         [Description("Day {0} at {1} in {2}")]
-        Day0At1In2
+        Day0At1In2,
+        TaskIsNotRunning
     }
 
 }

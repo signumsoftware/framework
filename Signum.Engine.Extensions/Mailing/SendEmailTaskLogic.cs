@@ -80,7 +80,7 @@ namespace Signum.Engine.Mailing
                     Execute = (e, _) => { }
                 }.Register();
 
-                SchedulerLogic.ExecuteTask.Register((SendEmailTaskEntity er) =>
+                SchedulerLogic.ExecuteTask.Register((SendEmailTaskEntity er, ScheduledTaskContext ctx) =>
                 {
                     if (er.UniqueTarget != null)
                     {
