@@ -20,8 +20,9 @@ p.form-control {
     margin: 0px;
 }
 
-    p.form-control.readonly-textarea {
+    p.form-control.readonly.readonly-textarea {
         height: initial !important;
+        white-space: pre-wrap;
     }
 
     p.form-control.readonly {
@@ -253,6 +254,10 @@ ul.nav-tabs {
         min-height: inherit;
     }
 
+    .form-xs .form-control.readonly.readonly-textarea {
+        min-height: 20px;
+    }
+
 .form-xs .input-group-btn .btn {
     height: 20px;
 }
@@ -362,6 +367,10 @@ ul.nav-tabs {
     .form-sm .form-control:not(textarea) {
         height: 26px;
         min-height: inherit;
+    }
+
+    .form-sm .form-control.readonly.readonly-textarea {
+        min-height: 26px;
     }
 
 .form-sm .input-group-btn .btn {
