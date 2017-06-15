@@ -16,11 +16,11 @@ import { PermissionRulePack, AuthAdminMessage, PermissionSymbol, AuthMessage } f
 
 require("./AuthAdmin.css");
 
-export class ColorRadio extends React.Component<{ checked: boolean, onClicked: (e: React.MouseEvent<any>) => void, color: string }, void>{
+export class ColorRadio extends React.Component<{ checked: boolean, onClicked: (e: React.MouseEvent<any>) => void, color: string; title?: string }, void>{
 
     render() {
         return (
-            <a onClick={e => { e.preventDefault(); this.props.onClicked(e); } }
+            <a onClick={e => { e.preventDefault(); this.props.onClicked(e); }} title={this.props.title}
                 className={classes("sf-auth-chooser", "fa", this.props.checked ? "fa-dot-circle-o" : "fa-circle-o")}
                 style={{ color: this.props.checked ? this.props.color : "#aaa" }}>
             </a>
