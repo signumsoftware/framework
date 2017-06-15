@@ -99,9 +99,9 @@
     .attr('y2', function (t) { return -y(t); })
     .style('stroke', 'Black');
   
-  var formatter = pStack == "expand" ? function(t){return (t*100 + "%");} : 
-    		      pStack == "zero" ? function(t){return t;} : 
-                    function(t){return t + "?";};
+  var formatter = pStack == "expand" ? d3.format(".0%") : 
+    		      pStack == "zero" ? d3.format("") : 
+                  function(n) { return d3.format("")(n) + "?"};
   
   chart.append('svg:g').attr('class', 'y-label').attr('transform',  translate(xRule.end('labels'), yRule.end('content')))
     .enterData(yTicks, 'text', 'y-label')

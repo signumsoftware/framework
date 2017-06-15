@@ -248,22 +248,22 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                     }} />
                 </td>
                 {properties && <td style={{ textAlign: "center" }}>
-                    {this.link("fa fa-pencil-square-o", ctx.value.properties,
+                    {this.link("fa fa-pencil-square-o", ctx.value.modified ? "Invalidated" : ctx.value.properties,
                         () => API.fetchPropertyRulePack(ctx.value.resource.cleanName, roleId),
                         m => ctx.value.properties = m.rules.every(a => a.element.allowed == "None") ? "None" :
                             m.rules.every(a => a.element.allowed == "Modify") ? "All" : "Mix"
                     )}
                 </td>}
                 {operations && <td style={{ textAlign: "center" }}>
-                    {this.link("fa fa-bolt", ctx.value.operations,
+                    {this.link("fa fa-bolt", ctx.value.modified ? "Invalidated" :  ctx.value.operations,
                         () => API.fetchOperationRulePack(ctx.value.resource.cleanName, roleId),
                         m => ctx.value.operations = m.rules.every(a => a.element.allowed == "None") ? "None" :
                             m.rules.every(a => a.element.allowed == "Allow") ? "All" : "Mix")}
                 </td>}
                 {queries && <td style={{ textAlign: "center" }}>
-                    {this.link("fa fa-search", ctx.value.queries,
+                    {this.link("fa fa-search", ctx.value.modified ? "Invalidated" : ctx.value.queries,
                         () => API.fetchQueryRulePack(ctx.value.resource.cleanName, roleId),
-                        m => ctx.value.queries = m.rules.every(a => a.element.allowed == false) ? "None" :
+                        m =>  ctx.value.queries = m.rules.every(a => a.element.allowed == false) ? "None" :
                             m.rules.every(a => a.element.allowed == true) ? "All" : "Mix")}
                 </td>}
             </tr>
@@ -297,14 +297,26 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
 
     }
 
-    colorRadio(b: Binding<TypeAllowed | null>, part: TypeAllowedBasic, color: string) {
+    colorRadio(b: Binding<TypeAllowed | null>, basicAllowed: TypeAllowedBasic, color: string) {
+        const allowed = b.getValue();
+
+        const niceName = TypeAllowedBasic.niceName(basicAllowed)!;
+
+        const title = !allowed ? niceName :
+            getDB(allowed) == getUI(allowed) && getUI(allowed) == basicAllowed ? niceName :
+                getDB(allowed) == basicAllowed ? AuthAdminMessage._0InDB.niceToString(niceName) :
+                    getUI(allowed) == basicAllowed ? AuthAdminMessage._0InUI.niceToString(niceName) :
+                        niceName;
+
         return <ColorRadio
-            checked={isActive(b.getValue(), part)}
+            checked={isActive(allowed, basicAllowed)}
+            title={title}
             color={color}
-            onClicked={e => { b.setValue(select(b.getValue(), part, e)); this.updateFrame(); } }/>;
+            onClicked={e => { b.setValue(select(b.getValue(), basicAllowed, e)); this.updateFrame(); }}
+        />;
     }
 
-    link<T extends ModelEntity>(icon: string, allowed: AuthThumbnail | null, action: () => Promise<T>, setNewValue: (model: T) => void) {
+    link<T extends ModelEntity>(icon: string, allowed: AuthThumbnail | null | "Invalidated", action: () => Promise<T>, setNewValue: (model: T) => void) {
         
         if (!allowed)
             return undefined;
@@ -335,11 +347,12 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
         };
 
         return (
-            <a onClick={onClick}
-                className={classes("sf-auth-link", icon) }
+            <a onClick={onClick} title={allowed}
+                className={classes("sf-auth-link", icon)}
                 style={{
-                    color: allowed == "All" ? "green" :
-                        allowed == "Mix" ? "#FFAD00" : "red"
+                    color: allowed == "Invalidated" ? "gray" :
+                        allowed == "All" ? "green" :
+                            allowed == "Mix" ? "#FFAD00" : "red"
                 }}>
             </a>
         );
