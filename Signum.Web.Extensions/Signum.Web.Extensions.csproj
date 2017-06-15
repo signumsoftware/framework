@@ -252,6 +252,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Dashboard\Views\DashboardNavbarPartView.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DashboardNavbarPartView.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Dashboard\Views\DashboardNavbarView.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -1580,6 +1585,10 @@
     <Content Include="Dashboard\Views\DashboardNavbarView.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>DashboardNavbarView.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Dashboard\Views\DashboardNavbarPartView.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>DashboardNavbarPartView.generated.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>
