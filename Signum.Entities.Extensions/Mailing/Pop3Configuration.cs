@@ -15,6 +15,8 @@ namespace Signum.Entities.Mailing
     {
         public bool Active { get; set; }
 
+        public bool FullComparation { get; set; }
+
         public int Port { get; set; } = 110;
 
         [NotNullable, SqlDbType(Size = 100)]

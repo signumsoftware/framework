@@ -74,9 +74,9 @@ namespace Signum.Engine.Mailing.Pop3
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 GetPop3Client = getPop3Client;
-                
+
                 MixinDeclarations.AssertDeclared(typeof(EmailMessageEntity), typeof(EmailReceptionMixin));
-                
+
                 sb.Include<Pop3ConfigurationEntity>()
                     .WithSave(Pop3ConfigurationOperation.Save)
                     .WithQuery(dqm, s => new
@@ -163,9 +163,18 @@ namespace Signum.Engine.Mailing.Pop3
 
         public static Pop3ReceptionEntity ReceiveEmails(this Pop3ConfigurationEntity config)
         {
+            if (config.FullComparation)
+                return ReceiveEmailsFullComparation(config);
+            else
+                return ReceiveEmailsPartialComparation(config);
+        }
+
+        public static Pop3ReceptionEntity ReceiveEmailsPartialComparation(this Pop3ConfigurationEntity config)
+        {
             if (!EmailLogic.Configuration.ReciveEmails)
                 throw new InvalidOperationException("EmailLogic.Configuration.ReciveEmails is set to false");
 
+            using (HeavyProfiler.Log("ReciveEmails"))
             using (Disposable.Combine(SurroundReceiveEmail, func => func(config)))
             {
                 Pop3ReceptionEntity reception = Transaction.ForceNew().Using(tr => tr.Commit(
@@ -176,103 +185,38 @@ namespace Signum.Engine.Mailing.Pop3
                 {
                     using (var client = GetPop3Client(config))
                     {
-                        var messageInfos = client.GetMessageInfos();
+                        var messageInfos = client.GetMessageInfos().OrderBy(m => m.Number);
 
-                        var already = messageInfos.Select(a => a.Uid).GroupsOf(50).SelectMany(l =>
-                            (from em in Database.Query<EmailMessageEntity>()
-                             let ri = em.Mixin<EmailReceptionMixin>().ReceptionInfo
-                             where ri != null && l.Contains(ri.UniqueId)
-                             select KVP.Create(ri.UniqueId, (DateTime?)ri.SentDate))).ToDictionary();
+
+                        var lastsEmails = Database.Query<EmailMessageEntity>()
+                            .Where(e => e.Mixin<EmailReceptionMixin>().ReceptionInfo.Reception.Entity.Pop3Configuration.RefersTo(config))
+                            .Select(d => new { d.CreationDate, d.Mixin<EmailReceptionMixin>().ReceptionInfo.UniqueId })
+                            .OrderByDescending(c => c.CreationDate).Take(10).ToDictionary(e => e.UniqueId);
+
+
+                        List<MessageUid> messagesToSave;
+                        if (lastsEmails.Any())
+                        {
+                            var messageJoinDict = messageInfos.ToDictionary(e => e.Uid).OuterJoinDictionarySC(lastsEmails, (key, v1, v2) => new { key, v1, v2 });
+                            var messageMachings = messageJoinDict.Where(e => e.Value.v1 != null && e.Value.v2 != null).ToList();
+                            messagesToSave = messageInfos.Where(m => m.Number > messageMachings.Select(e => e.Value.v1.Value.Number).Max()).ToList();
+                        }
+                        else
+                            messagesToSave = messageInfos.ToList();
 
                         using (Transaction tr = Transaction.ForceNew())
                         {
-                            reception.NewEmails = messageInfos.Count - already.Count;
+                            reception.NewEmails = messagesToSave.Count;
                             reception.Save();
                             tr.Commit();
                         }
 
-                        foreach (var mi in messageInfos)
+                        foreach (var mi in messagesToSave)
                         {
-                            var sent = already.TryGetS(mi.Uid);
 
-                            if (sent == null)
-                            {
-                                using (OperationLogic.AllowSave<EmailMessageEntity>())
-                                using (Transaction tr = Transaction.ForceNew())
-                                {
-                                    string rawContent = null;
-                                    try
-                                    {
-                                        var email = client.GetMessage(mi, reception.ToLite());
+                            var sent = SaveEmail(config, reception, client, mi);
 
-                                        email.Subject = email.Subject == null ? "No Subject" : email.Subject.Replace('\n', ' ').Replace('\r', ' ');
-
-                                        if (email.Recipients.IsEmpty())
-                                        {
-                                            email.Recipients.Add(new EmailRecipientEntity
-                                            {
-                                                EmailAddress = config.Username,
-                                                Kind = EmailRecipientKind.To,
-                                            });
-                                        }
-
-                                        Lite<EmailMessageEntity> duplicate = Database.Query<EmailMessageEntity>()
-                                            .Where(a => a.BodyHash == email.BodyHash)
-                                            .Select(a => a.ToLite())
-                                            .FirstOrDefault();
-
-                                        if (duplicate != null && AreDuplicates(email, duplicate.Retrieve()))
-                                        {
-                                            var dup = duplicate.Entity;
-
-                                            email.AssignEntities(dup);
-
-                                            AssociateDuplicateEmail?.Invoke(email, dup);
-                                        }
-                                        else
-                                        {
-                                            AssociateNewEmail?.Invoke(email);
-                                        }
-
-                                        email.Save();
-
-                                        sent = email.Mixin<EmailReceptionMixin>().ReceptionInfo.SentDate;
-
-                                        tr.Commit();
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        e.Data["rawContent"] = rawContent;
-
-                                        var ex = e.LogException();
-
-                                        using (Transaction tr2 = Transaction.ForceNew())
-                                        {
-                                            new Pop3ReceptionExceptionEntity
-                                            {
-                                                Exception = ex.ToLite(),
-                                                Reception = reception.ToLite()
-                                            }.Save();
-
-                                            tr2.Commit();
-                                        }
-                                    }
-                                }
-                            }
-
-                            if (config.DeleteMessagesAfter != null && sent != null &&
-                                 sent.Value.Date.AddDays(config.DeleteMessagesAfter.Value) < TimeZoneManager.Now.Date)
-                            {
-                                client.DeleteMessage(mi);
-
-                                (from em in Database.Query<EmailMessageEntity>()
-                                 let ri = em.Mixin<EmailReceptionMixin>().ReceptionInfo
-                                 where ri != null && ri.UniqueId == mi.Uid
-                                 select em)
-                                 .UnsafeUpdate()
-                                 .Set(em => em.Mixin<EmailReceptionMixin>().ReceptionInfo.DeletionDate, em => now)
-                                 .Execute();
-                            }
+                            DeleteSavedEmail(config, now, client, mi, sent);
                         }
 
                         using (Transaction tr = Transaction.ForceNew())
@@ -306,6 +250,168 @@ namespace Signum.Engine.Mailing.Pop3
 
                 return reception;
             }
+        }
+
+        private static void DeleteSavedEmail(Pop3ConfigurationEntity config, DateTime now, IPop3Client client, MessageUid mi, DateTime? sent)
+        {
+            if (config.DeleteMessagesAfter != null && sent != null &&
+                 sent.Value.Date.AddDays(config.DeleteMessagesAfter.Value) < TimeZoneManager.Now.Date)
+            {
+                client.DeleteMessage(mi);
+
+                (from em in Database.Query<EmailMessageEntity>()
+                 let ri = em.Mixin<EmailReceptionMixin>().ReceptionInfo
+                 where ri != null && ri.UniqueId == mi.Uid
+                 select em)
+                 .UnsafeUpdate()
+                 .Set(em => em.Mixin<EmailReceptionMixin>().ReceptionInfo.DeletionDate, em => now)
+                 .Execute();
+            }
+        }
+
+        public static Pop3ReceptionEntity ReceiveEmailsFullComparation(this Pop3ConfigurationEntity config)
+        {
+            if (!EmailLogic.Configuration.ReciveEmails)
+                throw new InvalidOperationException("EmailLogic.Configuration.ReciveEmails is set to false");
+
+            using (HeavyProfiler.Log("ReciveEmails"))
+            using (Disposable.Combine(SurroundReceiveEmail, func => func(config)))
+            {
+                Pop3ReceptionEntity reception = Transaction.ForceNew().Using(tr => tr.Commit(
+                    new Pop3ReceptionEntity { Pop3Configuration = config.ToLite(), StartDate = TimeZoneManager.Now }.Save()));
+
+                var now = TimeZoneManager.Now;
+                try
+                {
+                    using (var client = GetPop3Client(config))
+                    {
+                        var messageInfos = client.GetMessageInfos();
+
+                        var already = messageInfos.Select(a => a.Uid).GroupsOf(50).SelectMany(l =>
+                            (from em in Database.Query<EmailMessageEntity>()
+                             let ri = em.Mixin<EmailReceptionMixin>().ReceptionInfo
+                             where ri != null && l.Contains(ri.UniqueId)
+                             select KVP.Create(ri.UniqueId, (DateTime?)ri.SentDate))).ToDictionary();
+
+                        using (Transaction tr = Transaction.ForceNew())
+                        {
+                            reception.NewEmails = messageInfos.Count - already.Count;
+                            reception.Save();
+                            tr.Commit();
+                        }
+
+                        foreach (var mi in messageInfos)
+                        {
+                            var sent = already.TryGetS(mi.Uid);
+
+                            if (sent == null)
+                                sent = SaveEmail(config, reception, client, mi);
+
+                            DeleteSavedEmail(config, now, client, mi, sent);
+                        }
+
+                        using (Transaction tr = Transaction.ForceNew())
+                        {
+                            reception.EndDate = TimeZoneManager.Now;
+                            reception.Save();
+                            tr.Commit();
+                        }
+
+                        client.Disconnect(); //Delete messages now
+                    }
+                }
+                catch (Exception e)
+                {
+                    var ex = e.LogException();
+
+                    try
+                    {
+                        using (Transaction tr = Transaction.ForceNew())
+                        {
+                            reception.EndDate = TimeZoneManager.Now;
+                            reception.Exception = ex.ToLite();
+                            reception.Save();
+                            tr.Commit();
+                        }
+                    }
+                    catch { }
+                }
+
+                ReceptionComunication?.Invoke(reception);
+
+                return reception;
+            }
+        }
+
+        private static DateTime? SaveEmail(Pop3ConfigurationEntity config, Pop3ReceptionEntity reception, IPop3Client client, MessageUid mi)
+        {
+            DateTime? sent = null;
+
+            {
+                using (OperationLogic.AllowSave<EmailMessageEntity>())
+                using (Transaction tr = Transaction.ForceNew())
+                {
+                    string rawContent = null;
+                    try
+                    {
+                        var email = client.GetMessage(mi, reception.ToLite());
+
+                        email.Subject = email.Subject == null ? "No Subject" : email.Subject.Replace('\n', ' ').Replace('\r', ' ');
+
+                        if (email.Recipients.IsEmpty())
+                        {
+                            email.Recipients.Add(new EmailRecipientEntity
+                            {
+                                EmailAddress = config.Username,
+                                Kind = EmailRecipientKind.To,
+                            });
+                        }
+
+                        Lite<EmailMessageEntity> duplicate = Database.Query<EmailMessageEntity>()
+                            .Where(a => a.BodyHash == email.BodyHash)
+                            .Select(a => a.ToLite())
+                            .FirstOrDefault();
+
+                        if (duplicate != null && AreDuplicates(email, duplicate.Retrieve()))
+                        {
+                            var dup = duplicate.Entity;
+
+                            email.AssignEntities(dup);
+
+                            AssociateDuplicateEmail?.Invoke(email, dup);
+                        }
+                        else
+                        {
+                            AssociateNewEmail?.Invoke(email);
+                        }
+
+                        email.Save();
+
+                        sent = email.Mixin<EmailReceptionMixin>().ReceptionInfo.SentDate;
+
+                        tr.Commit();
+                    }
+                    catch (Exception e)
+                    {
+                        e.Data["rawContent"] = rawContent;
+
+                        var ex = e.LogException();
+
+                        using (Transaction tr2 = Transaction.ForceNew())
+                        {
+                            new Pop3ReceptionExceptionEntity
+                            {
+                                Exception = ex.ToLite(),
+                                Reception = reception.ToLite()
+                            }.Save();
+
+                            tr2.Commit();
+                        }
+                    }
+                }
+            }
+
+            return sent;
         }
 
         private static void AssignEntities(this EmailMessageEntity email, EmailMessageEntity dup)
