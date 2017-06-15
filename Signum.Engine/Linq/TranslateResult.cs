@@ -213,13 +213,13 @@ namespace Signum.Engine.Linq
             using (Transaction tr = new Transaction())
             {
                 object result;
-                using (IRetriever retriever = EntityCache.NewRetriever())
+                using (var retriever = EntityCache.NewRetriever())
                 {
                     if (EagerProjections.Any() || LazyChildProjections.Any())
                         lookups = new Dictionary<LookupToken, IEnumerable>();
 
-                    foreach (var chils in EagerProjections)
-                        chils.Fill(lookups, retriever);
+                    foreach (var child in EagerProjections)
+                        child.Fill(lookups, retriever);
 
                     using (HeavyProfiler.Log("SQL", () => MainCommand.PlainSql()))
                     using (DbDataReader reader = Executor.UnsafeExecuteDataReader(MainCommand))
@@ -245,9 +245,10 @@ namespace Signum.Engine.Linq
                         }
                     }
 
-                    foreach (var chils in LazyChildProjections)
-                        chils.Fill(lookups, retriever);
+                    foreach (var child in LazyChildProjections)
+                        child.Fill(lookups, retriever);
 
+                    retriever.CompleteAll();
                 }
             
                 return tr.Commit(result);
@@ -260,13 +261,13 @@ namespace Signum.Engine.Linq
             using (Transaction tr = new Transaction())
             {
                 object result;
-                using (IRetriever retriever = EntityCache.NewRetriever())
+                using (var retriever = EntityCache.NewRetriever())
                 {
                     if (EagerProjections.Any() || LazyChildProjections.Any())
                         lookups = new Dictionary<LookupToken, IEnumerable>();
 
-                    foreach (var chils in EagerProjections)
-                        chils.Fill(lookups, retriever);
+                    foreach (var child in EagerProjections)
+                        child.Fill(lookups, retriever);
 
                     using (HeavyProfiler.Log("SQL", () => MainCommand.PlainSql()))
                     using (DbDataReader reader = await Executor.UnsafeExecuteDataReaderAsync(MainCommand, token: token))
@@ -292,9 +293,10 @@ namespace Signum.Engine.Linq
                         }
                     }
 
-                    foreach (var chils in LazyChildProjections)
-                        chils.Fill(lookups, retriever);
+                    foreach (var child in LazyChildProjections)
+                        child.Fill(lookups, retriever);
 
+                    retriever.CompleteAll();
                 }
 
                 return tr.Commit(result);

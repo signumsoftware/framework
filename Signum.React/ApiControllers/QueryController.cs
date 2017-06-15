@@ -26,15 +26,15 @@ namespace Signum.React.ApiControllers
     public class QueryController : ApiController
     {
         [Route("api/query/findLiteLike"), HttpGet, ProfilerActionSplitter("types")]
-        public List<Lite<Entity>> FindLiteLike(string types, string subString, int count)
+        public async Task<List<Lite<Entity>>> FindLiteLike(string types, string subString, int count, CancellationToken token)
         {
             Implementations implementations = ParseImplementations(types);
 
-            return AutocompleteUtils.FindLiteLike(implementations, subString, count);
+            return await AutocompleteUtils.FindLiteLikeAsync(implementations, subString, count, token);
         }
 
         [Route("api/query/findLiteLikeWithFilters"), HttpPost, ProfilerActionSplitter("types")]
-        public List<Lite<Entity>> FindLiteLikeWithFilters(AutocompleteQueryRequestTS request)
+        public async Task<List<Lite<Entity>>> FindLiteLikeWithFilters(AutocompleteQueryRequestTS request, CancellationToken token)
         {
             var qn = QueryLogic.ToQueryName(request.queryKey);
             var qd = DynamicQueryManager.Current.QueryDescription(qn);
@@ -47,15 +47,15 @@ namespace Signum.React.ApiControllers
             });
             var entityType = qd.Columns.Single(a => a.IsEntity).Implementations.Value.Types.SingleEx();
 
-            return entitiesQuery.AutocompleteUntyped(request.subString, request.count, entityType);
+            return await entitiesQuery.AutocompleteUntypedAsync(request.subString, request.count, entityType, token);
         }
 
         [Route("api/query/allLites"), HttpGet, ProfilerActionSplitter("types")]
-        public List<Lite<Entity>> FetchAllLites([FromUri]string types)
+        public async Task<List<Lite<Entity>>> FetchAllLites([FromUri]string types, CancellationToken token)
         {
             Implementations implementations = ParseImplementations(types);
 
-            return AutocompleteUtils.FindAllLite(implementations);
+            return await AutocompleteUtils.FindAllLiteAsync(implementations, token);
         }
 
         private static Implementations ParseImplementations(string types)

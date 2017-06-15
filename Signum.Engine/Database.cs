@@ -144,6 +144,8 @@ namespace Signum.Engine
                         using (var r = EntityCache.NewRetriever())
                         {
                             result = r.Request<T>(id);
+
+                            r.CompleteAll();
                         }
 
                         if (filter != null && !filter.InMemoryFunction(result))
@@ -190,6 +192,8 @@ namespace Signum.Engine
                         using (var r = EntityCache.NewRetriever())
                         {
                             result = r.Request<T>(id);
+
+                            await r.CompleteAllAsync(token);
                         }
 
                         if (filter != null && !filter.InMemoryFunction(result))
@@ -471,6 +475,8 @@ namespace Signum.Engine
                             using (var r = EntityCache.NewRetriever())
                             {
                                 result = cc.GetAllIds().Select(id => r.Request<T>(id)).ToList();
+
+                                r.CompleteAll();
                             }
 
                             if (filter != null)
@@ -508,6 +514,8 @@ namespace Signum.Engine
                             using (var r = EntityCache.NewRetriever())
                             {
                                 result = cc.GetAllIds().Select(id => r.Request<T>(id)).ToList();
+
+                                await r.CompleteAllAsync(token);
                             }
 
                             if (filter != null)
@@ -683,6 +691,8 @@ namespace Signum.Engine
                     using (var rr = EntityCache.NewRetriever())
                     {
                         result = ids.Select(id => rr.Request<T>(id)).ToList();
+
+                        rr.CompleteAll();
                     }
 
                     if (filter != null)
@@ -759,6 +769,8 @@ namespace Signum.Engine
                     using (var rr = EntityCache.NewRetriever())
                     {
                         result = ids.Select(id => rr.Request<T>(id)).ToList();
+
+                        await rr.CompleteAllAsync(token);
                     }
 
                     if (filter != null)
