@@ -176,6 +176,8 @@ namespace Signum.Entities.Dashboard
 
         public bool ShowData { get; set; } = false;
 
+        public bool AllowChangeShowData { get; set; } = false;
+
         public override string ToString()
         {
             return UserChart?.ToString();
@@ -192,7 +194,7 @@ namespace Signum.Entities.Dashboard
             {
                 UserChart = this.UserChart,
                 ShowData = this.ShowData,
-
+                AllowChangeShowData = this.AllowChangeShowData,
             };
         }
 
@@ -200,11 +202,14 @@ namespace Signum.Entities.Dashboard
         {
             return new XElement("UserChartPart",
                 new XAttribute("ShowData", ShowData),
+                new XAttribute("AllowChangeShowData", AllowChangeShowData),
                 new XAttribute("UserChart", ctx.Include(UserChart)));
         }
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
+            ShowData = element.Attribute("ShowData")?.Value.ToBool() ?? false;
+            AllowChangeShowData = element.Attribute("AllowChangeShowData")?.Value.ToBool() ?? false;
             UserChart = (UserChartEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserChart").Value));
         }
     }

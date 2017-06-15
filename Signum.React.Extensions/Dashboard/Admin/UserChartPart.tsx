@@ -19,8 +19,9 @@ export default class UserChartPart extends React.Component<{ ctx: TypeContext<Us
         
         return (
             <div >
-                <EntityLine ctx={ctx.subCtx(p => p.userChart) } create={false} />
-                <ValueLine ctx={ctx.subCtx(p => p.showData) } />
+                <EntityLine ctx={ctx.subCtx(p => p.userChart)} create={false} />
+                <ValueLine ctx={ctx.subCtx(p => p.showData)} inlineCheckbox={true} formGroupHtmlAttributes={{ style: { display: "block" } }} />
+                <ValueLine ctx={ctx.subCtx(p => p.allowChangeShowData)} inlineCheckbox={true} formGroupHtmlAttributes={{ style: { display: "block" } }} />
             </div>
         );
     }
