@@ -40,11 +40,11 @@ namespace Signum.Windows.Scheduler
                 {
                     Background = Brushes.Gold,
                     AutomationName = "execute",
-                    Text = () => TaskMessage.Execute.NiceToString() + "...",
+                    Text = () => ITaskMessage.Execute.NiceToString() + "...",
                 };
 
-                OperationClient.AddSetting(new EntityOperationSettings<ITaskEntity>(TaskOperation.ExecuteSync) { Icon = Image("execute.png"), Group = executeGroup });
-                OperationClient.AddSetting(new EntityOperationSettings<ITaskEntity>(TaskOperation.ExecuteAsync) { Icon = Image("execute.png"), Group = executeGroup });
+                OperationClient.AddSetting(new EntityOperationSettings<ITaskEntity>(ITaskOperation.ExecuteSync) { Icon = Image("execute.png"), Group = executeGroup });
+                OperationClient.AddSetting(new EntityOperationSettings<ITaskEntity>(ITaskOperation.ExecuteAsync) { Icon = Image("execute.png"), Group = executeGroup });
             }
         }
 

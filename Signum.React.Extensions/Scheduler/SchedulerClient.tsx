@@ -54,6 +54,7 @@ export interface SchedulerState
     SchedulerMargin: string;
     NextExecution: string;
     Queue: SchedulerItemState[];
+    RunningTask: SchedulerRunningTaskState[];
 }
 
 export interface SchedulerItemState
@@ -61,4 +62,10 @@ export interface SchedulerItemState
     ScheduledTask: Lite<ScheduledTaskEntity>;
     Rule: string;
     NextDate: string;
+}
+
+export interface SchedulerRunningTaskState {
+    SchedulerTaskLog: Lite<ScheduledTaskLogEntity>;
+    StartTime: string;
+    Remarks: string;
 }
