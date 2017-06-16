@@ -114,39 +114,73 @@ namespace Signum.Engine.Basics
 		}
 
 
-		public static event Action<DeleteLogParametersEmbedded> DeleteLogs;
+		public static event Action<DeleteLogParametersEmbedded, StringBuilder, CancellationToken> DeleteLogs;
 
 		public static int DeleteLogsTimeOut = 10 * 60 * 1000; 
 
-		public static void DeleteLogsAndExceptions(DeleteLogParametersEmbedded parameters)
+		public static void DeleteLogsAndExceptions(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
 		{
-			using(Connector.CommandTimeoutScope(DeleteLogsTimeOut))
-			{
-				foreach (var action in DeleteLogs.GetInvocationListTyped())
-				{
-						action(parameters);
-					}
+            using (Connector.CommandTimeoutScope(DeleteLogsTimeOut))
+            using (var tr = Transaction.None())
+            {
+                foreach (var action in DeleteLogs.GetInvocationListTyped())
+                {
+                    token.ThrowIfCancellationRequested();
 
-				int exceptions = Database.Query<ExceptionEntity>().UnsafeUpdate().Set(a => a.Referenced, a => false).Execute();
+                    action(parameters, sb, token);
+                }
 
-				var ex = Schema.Current.Table<ExceptionEntity>();
-				var referenced = (FieldValue)ex.GetField(ReflectionTools.GetPropertyInfo((ExceptionEntity e)=>e.Referenced));
+                WriteRows(sb, "Updating ExceptionEntity.Referenced = false", () => Database.Query<ExceptionEntity>().UnsafeUpdate().Set(a => a.Referenced, a => false).Execute());
 
-				var commands = (from t in Schema.Current.GetDatabaseTables()
-							   from c in t.Columns.Values
-							   where c.ReferenceTable == ex
-								select new SqlPreCommandSimple("UPDATE ex SET {1} = 1 FROM {0} ex JOIN {2} log ON ex.Id = log.{3}"
-								   .FormatWith(ex.Name, referenced.Name, t.Name, c.Name))).ToList();
+                token.ThrowIfCancellationRequested();
 
-				foreach (var c in commands) 
-				{
-					c.ExecuteNonQuery();
+                var ex = Schema.Current.Table<ExceptionEntity>();
+                var referenced = (FieldValue)ex.GetField(ReflectionTools.GetPropertyInfo((ExceptionEntity e) => e.Referenced));
+
+                var commands = (from t in Schema.Current.GetDatabaseTables()
+                                from c in t.Columns.Values
+                                where c.ReferenceTable == ex
+                                select (table: t, command: new SqlPreCommandSimple("UPDATE ex SET {1} = 1 FROM {0} ex JOIN {2} log ON ex.Id = log.{3}"
+                                   .FormatWith(ex.Name, referenced.Name, t.Name, c.Name)))).ToList();
+
+                foreach (var p in commands)
+                {
+                    token.ThrowIfCancellationRequested();
+
+                    WriteRows(sb, "Updating Exceptions.Referenced from " + p.table.Name.Name, () => p.command.ExecuteNonQuery());
 				}
 
-				int deletedExceptions = Database.Query<ExceptionEntity>()
-					.Where(a => !a.Referenced && a.CreationDate < parameters.DateLimit)
-					.UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
-			}
+                token.ThrowIfCancellationRequested();
+
+                Database.Query<ExceptionEntity>()
+                    .Where(a => !a.Referenced && a.CreationDate < parameters.DateLimit)
+                    .UnsafeDeleteChunksLog(parameters, sb, token);
+
+                tr.Commit();
+            }
 		}
+
+        public static void WriteRows(StringBuilder sb, string text, Func<int> makeQuery)
+        {
+            var start = PerfCounter.Ticks;
+
+            var result = makeQuery();
+
+            var end = PerfCounter.Ticks;
+
+            var ts = TimeSpan.FromMilliseconds(PerfCounter.ToMilliseconds(start, end));
+
+            sb.AppendLine($"{text}: {result} rows affected in {ts.NiceToString()}");
+        }
+
+        public static void UnsafeDeleteChunksLog<T>(this IQueryable<T> sources, DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken cancellationToken)
+            where T : Entity
+        {
+            WriteRows(sb, "Deleting " + typeof(T).Name, () => sources.UnsafeDeleteChunks(
+                parameters.ChunkSize, 
+                parameters.MaxChunks, 
+                pauseMilliseconds: parameters.PauseTime,
+                cancellationToken: cancellationToken));
+        }
 	}
 }

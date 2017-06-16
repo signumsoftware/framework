@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading;
 
 namespace Signum.Engine
 {
@@ -865,30 +866,42 @@ namespace Signum.Engine
             }
         }
 
-        public static int UnsafeDeleteChunks<T>(this IQueryable<T> query, int chunkSize = 10000, int maxQueries = int.MaxValue)
+        public static int UnsafeDeleteChunks<T>(this IQueryable<T> query, int chunkSize = 10000, int maxChunks = int.MaxValue, int? pauseMilliseconds = null, CancellationToken? cancellationToken = null)
          where T : Entity
         {
             int total = 0;
-            for (int i = 0; i < maxQueries; i++)
+            for (int i = 0; i < maxChunks; i++)
             {
-                int num = query.Take(chunkSize).UnsafeDelete();
+                int num = query.OrderBy(a => a.Id).Take(chunkSize).UnsafeDelete();
                 total += num;
                 if (num < chunkSize)
                     break;
+
+                if (cancellationToken.HasValue)
+                    cancellationToken.Value.ThrowIfCancellationRequested();
+
+                if (pauseMilliseconds.HasValue)
+                    Thread.Sleep(pauseMilliseconds.Value);
             }
             return total;
         }
 
-        public static int UnsafeDeleteMListChunks<E, V>(this IQueryable<MListElement<E, V>> mlistQuery, int chunkSize = 10000, int maxQueries = int.MaxValue)
+        public static int UnsafeDeleteMListChunks<E, V>(this IQueryable<MListElement<E, V>> mlistQuery, int chunkSize = 10000, int maxChunks = int.MaxValue, int? pauseMilliseconds = null, CancellationToken? token = null)
             where E : Entity
         {
             int total = 0;
-            for (int i = 0; i < maxQueries; i++)
+            for (int i = 0; i < maxChunks; i++)
             {
-                int num = mlistQuery.Take(chunkSize).UnsafeDeleteMList();
+                int num = mlistQuery.OrderBy(a => a.RowId).Take(chunkSize).UnsafeDeleteMList();
                 total += num;
                 if (num < chunkSize)
                     break;
+
+                if (token.HasValue)
+                    token.Value.ThrowIfCancellationRequested();
+
+                if (pauseMilliseconds.HasValue)
+                    Thread.Sleep(pauseMilliseconds.Value);
             }
             return total;
         }

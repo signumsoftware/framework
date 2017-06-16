@@ -25,6 +25,7 @@ export interface ValueSearchControlProps extends React.Props<ValueSearchControl>
     formControlClass?: string;
     avoidAutoRefresh?: boolean;
     onValueChange?: (value: any) => void;
+    onExplored?: () => void;
     onTokenLoaded?: () => void;
     initialValue?: any;
     customClass?: string;
@@ -200,6 +201,9 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
             Finder.explore(this.props.findOptions).then(() => {
                 if (!this.props.avoidAutoRefresh)
                     this.refreshValue(this.props);
+
+                if (this.props.onExplored)
+                    this.props.onExplored();
             }).done();
     }
 }

@@ -147,6 +147,9 @@ namespace Signum.Entities.Basics
 
         public int ChunkSize { get; set; } = 1000;
 
-        public int MaxChunks { get; set; }
+        public int MaxChunks { get; set; } = 20;
+
+        [Unit("ms")]
+        public int? PauseTime { get; set; } = 5000;
     }
 }

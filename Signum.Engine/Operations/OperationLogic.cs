@@ -125,14 +125,14 @@ namespace Signum.Engine.Operations
                 sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(Type_PreDeleteSqlSync);
 
                 sb.Schema.SchemaCompleted += OperationLogic_Initializing;
-
+                
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }
         }
 
-        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters)
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            Database.Query<OperationLogEntity>().Where(o => o.Start < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
+            Database.Query<OperationLogEntity>().Where(o => o.Start < parameters.DateLimit).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         static void OperationLogic_Initializing()
