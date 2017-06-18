@@ -20,11 +20,11 @@ interface HeavyEntryProps extends RouteComponentProps<{selectedIndex : string }>
 
 }
 
-export default class HeavyEntry extends React.Component<HeavyEntryProps, { entries?: HeavyProfilerEntry[], stackTrace?: StackTraceTS[]}> {
+export default class HeavyEntry extends React.Component<HeavyEntryProps, { entries?: HeavyProfilerEntry[], stackTrace?: StackTraceTS[], asyncDepth: boolean }> {
 
     constructor(props: HeavyEntryProps) {
         super(props);
-        this.state = { };
+        this.state = { asyncDepth: true };
     }
 
     componentWillMount() {
@@ -76,8 +76,9 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
         return (
             <div>
                 <h2><Link to="~/profiler/heavy">Heavy Profiler</Link> > Entry {index}</h2>
+                <label><input type="checkbox" checked={this.state.asyncDepth} onChange={a => this.setState({ asyncDepth: a.currentTarget.checked })} />Async Stack</label>
                 <br />
-                {this.state.entries && < HeavyProfilerDetailsD3 entries={this.state.entries} selected={current}/>}
+                {this.state.entries && <HeavyProfilerDetailsD3 entries={this.state.entries} selected={current} asyncDepth={this.state.asyncDepth} />}
                 <br />
                 <table className="table table-nonfluid">
                     <tbody>
@@ -165,8 +166,22 @@ function lerp(min: number, ratio: number, max: number) {
     return min * (1-ratio) + max * ratio;
 }
 
-export class HeavyProfilerDetailsD3 extends React.Component<{entries: HeavyProfilerEntry[], selected : HeavyProfilerEntry }, {min: number, max: number}>{
-    
+
+interface HeavyProfilerDetailsD3Props {
+    entries: HeavyProfilerEntry[];
+    selected: HeavyProfilerEntry;
+    asyncDepth: boolean; 
+}
+
+
+interface HeavyProfilerDetailsD3State {
+    min: number;
+    max: number;
+}
+
+
+
+export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetailsD3Props, HeavyProfilerDetailsD3State>{
     
     componentWillMount(){
         this.resetZoom(this.props.selected);
@@ -179,8 +194,13 @@ export class HeavyProfilerDetailsD3 extends React.Component<{entries: HeavyProfi
         });
     }
     
-    componentDidMount(){
-        this.mountChart();
+    componentDidMount() {
+        this.mountChart(this.props);
+    }
+
+    componentWillReceiveProps(newProps: HeavyProfilerDetailsD3Props) {
+        if (newProps.asyncDepth != this.props.asyncDepth)
+            this.mountChart(newProps);
     }
 
     componentDidUpdate() {
@@ -229,26 +249,27 @@ export class HeavyProfilerDetailsD3 extends React.Component<{entries: HeavyProfi
 
     
 
-    mountChart (){
+    mountChart(props: HeavyProfilerDetailsD3Props) {
 
         if (this.chartContainer == undefined)
             throw new Error("chartContainer not mounted!");
 
-        let data = this.props.entries;
+        let data = props.entries;
 
         if (data == undefined)
             throw new Error("no entries");
-
+        
+        var getDepth = props.asyncDepth ?
+            (e: HeavyProfilerEntry) => e.AsyncDepth :
+            (e: HeavyProfilerEntry) => e.Depth;
+   
         let fontSize = 12;
         let fontPadding = 3;
-        let minDepth = d3.min(data, e=> e.Depth)!;
-        let maxDepth = d3.max(data, e=> e.Depth)!;
+        let maxDepth = d3.max(data, getDepth)!;
    
         let height = ((fontSize * 2) + (3 * fontPadding)) * (maxDepth + 1);
         this.chartContainer.style.height = height + "px";
-
-
-
+        
         let y = d3.scaleLinear()
             .domain([0, maxDepth + 1])
             .range([0, height]);
@@ -264,22 +285,22 @@ export class HeavyProfilerDetailsD3 extends React.Component<{entries: HeavyProfi
             .append<SVGGElement>('svg:g').attr('class', 'entry');
 
         this.rects = this.groups.append<SVGRectElement>('svg:rect').attr('class', 'shape')
-            .attr('y', v => y(v.Depth))            
+            .attr('y', v => y(getDepth(v)))            
             .attr('height', entryHeight - 1)
             .attr('fill', v => v.Color);
 
         this.rectsBefore = this.groups.append<SVGRectElement>('svg:rect').attr('class', 'shape-before')          
-            .attr('y', v => y(v.Depth) + 1)            
+            .attr('y', v => y(getDepth(v)) + 1)            
             .attr('height', entryHeight - 2)
             .attr('fill', '#fff');
 
         this.labelTop = this.groups.append<SVGTextElement>('svg:text').attr('class', 'label label-top')
-            .attr('dy', v => y(v.Depth))
+            .attr('dy', v => y(getDepth(v)))
             .attr('y', fontPadding + fontSize)
             .text(v => v.Elapsed);
 
         this.labelBottom = this.groups.append<SVGTextElement>('svg:text').attr('class', 'label label-bottom')
-            .attr('dy', v => y(v.Depth))
+            .attr('dy', v => y(getDepth(v)))
             .attr('y', (2 * fontPadding) + (2 * fontSize))
             .text(v => v.Role + (v.AdditionalData ? (" - " + v.AdditionalData.etc(30)) : ""));
 

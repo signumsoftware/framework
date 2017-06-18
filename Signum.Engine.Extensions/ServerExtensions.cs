@@ -39,6 +39,7 @@ using Signum.Engine.DiffLog;
 using Signum.Entities.Isolation;
 using Signum.Engine.Isolation;
 using Signum.Engine.Help;
+using System.Threading;
 
 namespace Signum.Services
 {
@@ -248,7 +249,7 @@ namespace Signum.Services
         public ResultTable ExecuteChart(ChartRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-               () => ChartLogic.ExecuteChart(request));
+               () => ChartLogic.ExecuteChartAsync(request, CancellationToken.None).Result);
         }
 
         public List<Lite<UserChartEntity>> GetUserCharts(object queryName)
@@ -293,13 +294,13 @@ namespace Signum.Services
         public byte[] ExecuteExcelReport(Lite<ExcelReportEntity> excelReport, QueryRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => ExcelLogic.ExecuteExcelReport(excelReport, request));
+                () => ExcelLogic.ExecuteExcelReport(excelReport, request, CancellationToken.None).Result);
         }
 
         public byte[] ExecutePlainExcel(QueryRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => ExcelLogic.ExecutePlainExcel(request, QueryUtils.GetNiceName(request.QueryName)));
+                () => ExcelLogic.ExecutePlainExcel(request, QueryUtils.GetNiceName(request.QueryName), CancellationToken.None).Result);
         }
 
         #endregion

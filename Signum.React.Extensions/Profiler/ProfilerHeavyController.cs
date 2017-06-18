@@ -26,6 +26,7 @@ using System.Xml.Linq;
 using System.IO;
 using Signum.React.Files;
 using System.Threading.Tasks;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.React.Profiler
 {
@@ -71,8 +72,10 @@ namespace Signum.React.Profiler
 
             var entry = HeavyProfiler.Find(fullIndex);
 
-            var result = entry.DescendantsAndSelf().Select(e => new HeavyProfofilerEntryTS(e, true)).ToList();
+            var result = new List<HeavyProfofilerEntryTS>();
 
+            HeavyProfofilerEntryTS.Fill(result, entry, 0);
+   
             return result;
         }
 
@@ -167,6 +170,7 @@ namespace Signum.React.Profiler
             public string Role;
             public string Color;
             public int Depth;
+            public int AsyncDepth;
             public string AdditionalData;
             public string FullIndex; 
 
@@ -181,6 +185,26 @@ namespace Signum.React.Profiler
                 Depth = e.Depth;
                 FullIndex = e.FullIndex();
                 AdditionalData = fullAditionalData ? e.AdditionalData : e.AdditionalDataPreview();
+            }
+
+            internal static int Fill(List<HeavyProfofilerEntryTS> result, HeavyProfilerEntry entry, int asyncDepth)
+            {
+                result.Add(new HeavyProfofilerEntryTS(entry, true) { AsyncDepth = asyncDepth });
+
+                if (entry.Entries == null)
+                    return asyncDepth;
+                
+            
+                Dictionary<HeavyProfilerEntry, int> newDepths = new Dictionary<HeavyProfilerEntry, int>();
+                foreach (var e in entry.Entries)
+                {
+                    var maxAsyncDepth = newDepths.Where(kvp => kvp.Key.Overlaps(e)).Max(a => (int?)a.Value);
+
+                    var newAsyncDepth = Fill(result, e, maxAsyncDepth.HasValue ? maxAsyncDepth.Value + 1 : asyncDepth + 1);
+                    newDepths.Add(e, newAsyncDepth);
+                }
+
+                return newDepths.Values.Max();
             }
         }
 

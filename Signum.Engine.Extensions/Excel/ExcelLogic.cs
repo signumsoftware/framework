@@ -20,6 +20,8 @@ using Signum.Entities.Mailing;
 using Signum.Engine.UserQueries;
 using Signum.Entities.UserAssets;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Signum.Engine.Excel
 {
@@ -56,9 +58,9 @@ namespace Signum.Engine.Excel
                     select er.ToLite()).ToList();
         }
 
-        public static byte[] ExecuteExcelReport(Lite<ExcelReportEntity> excelReport, QueryRequest request)
+        public static async Task<byte[]> ExecuteExcelReport(Lite<ExcelReportEntity> excelReport, QueryRequest request, CancellationToken token)
         {
-            ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
+            ResultTable queryResult = await DynamicQueryManager.Current.ExecuteQueryAsync(request, token);
 
             ExcelReportEntity report = excelReport.RetrieveAndForget();
             string extension = Path.GetExtension(report.File.FileName);
@@ -68,9 +70,9 @@ namespace Signum.Engine.Excel
             return ExcelGenerator.WriteDataInExcelFile(queryResult, report.File.BinaryFile);
         }
 
-        public static byte[] ExecutePlainExcel(QueryRequest request, string title)
+        public static async Task<byte[]> ExecutePlainExcel(QueryRequest request, string title, CancellationToken token)
         {
-            ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
+            ResultTable queryResult = await DynamicQueryManager.Current.ExecuteQueryAsync(request, token);
 
             return PlainExcelGenerator.WritePlainExcel(queryResult, title);
         }

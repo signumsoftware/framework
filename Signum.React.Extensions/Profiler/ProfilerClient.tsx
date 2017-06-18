@@ -111,6 +111,7 @@ export interface HeavyProfilerEntry {
     Role: string;
     Color: string;
     Depth : number;
+    AsyncDepth : number;
     AdditionalData: string;
     FullIndex: string;
     StackTrace: string;

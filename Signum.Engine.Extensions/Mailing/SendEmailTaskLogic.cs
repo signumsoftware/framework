@@ -19,6 +19,7 @@ using Signum.Entities.UserQueries;
 using Signum.Engine.UserQueries;
 using Signum.Entities.Processes;
 using Signum.Engine.Processes;
+using System.Threading;
 
 namespace Signum.Engine.Mailing
 {
