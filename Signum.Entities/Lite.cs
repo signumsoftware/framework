@@ -428,7 +428,15 @@ namespace Signum.Entities
                 Expression lite = arguments[0];
                 Expression entity = arguments[1];
 
-                return Expression.Equal(lite, Expression.Call(null, miToLazy.MakeGenericMethod(mi.GetGenericArguments()[0]), entity));
+                var evalEntity = ExpressionEvaluator.PartialEval(entity);
+
+                var type = mi.GetGenericArguments()[0];
+
+                var toLite = evalEntity is ConstantExpression c && c.Value == null ?
+                    (Expression)Expression.Constant(null, typeof(Lite<>).MakeGenericType(type)) :
+                    (Expression)Expression.Call(null, miToLazy.MakeGenericMethod(type), entity);
+
+                return Expression.Equal(lite, toLite);
             }
         }
 

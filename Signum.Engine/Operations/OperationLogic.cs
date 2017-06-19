@@ -17,18 +17,11 @@ using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using System.Data.Common;
 using Signum.Engine.Operations.Internal;
-using static Signum.Engine.Maps.SchemaBuilder;
-using Signum.Entities.Authorization;
 
 namespace Signum.Engine.Operations
 {
     public static class OperationLogic
     {
-
-
-       
-
-
         static Expression<Func<Entity, IQueryable<OperationLogEntity>>> OperationLogsEntityExpression =
             e => Database.Query<OperationLogEntity>().Where(a => a.Target.RefersTo(e));
         [ExpressionField]

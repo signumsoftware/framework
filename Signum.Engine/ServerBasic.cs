@@ -16,6 +16,7 @@ using Signum.Engine.Operations;
 using Signum.Engine.Basics;
 using System.ServiceModel.Channels;
 using Signum.Entities.Reflection;
+using System.Threading;
 
 namespace Signum.Services
 {
@@ -191,7 +192,7 @@ namespace Signum.Services
                 () => DynamicQueryManager.Current.QueryDescription(queryName));
         }
 
-        public virtual ResultTable ExecuteQuery(QueryRequest request)
+        public ResultTable ExecuteQuery(QueryRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
                 () => DynamicQueryManager.Current.ExecuteQuery(request));
@@ -230,7 +231,7 @@ namespace Signum.Services
         public virtual object[] BatchExecute(BaseQueryRequest[] requests)
         {
             return Return(MethodInfo.GetCurrentMethod(), requests.ToString("; "),
-                () => DynamicQueryManager.Current.BatchExecute(requests));
+                () => DynamicQueryManager.Current.BatchExecute(requests, CancellationToken.None).Result);
         }
         #endregion
 

@@ -227,11 +227,11 @@ namespace Signum.Engine.Linq
             if (aggExp == null)
                 return false;
 
-            return aggExp.AggregateFunction == AggregateFunction.Count ||
-                aggExp.AggregateFunction == AggregateFunction.Sum ||
-                aggExp.AggregateFunction == AggregateFunction.Average ||
-                aggExp.AggregateFunction == AggregateFunction.StdDev || 
-                aggExp.AggregateFunction == AggregateFunction.StdDevP;
+            return aggExp.AggregateFunction == AggregateSqlFunction.Count ||
+                aggExp.AggregateFunction == AggregateSqlFunction.Sum ||
+                aggExp.AggregateFunction == AggregateSqlFunction.Average ||
+                aggExp.AggregateFunction == AggregateSqlFunction.StdDev || 
+                aggExp.AggregateFunction == AggregateSqlFunction.StdDevP;
         }
 
         protected internal override Expression VisitJoin(JoinExpression join)
