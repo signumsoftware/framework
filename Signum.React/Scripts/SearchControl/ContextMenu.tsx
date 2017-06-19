@@ -19,12 +19,13 @@ export default class ContextMenu extends React.Component<ContextMenuProps, {}> {
     static getPosition(e: React.MouseEvent<any>, container: HTMLElement): ContextMenuPosition{
 
         const op = DomUtils.offsetParent(container);
-
-        return ({
-            pageX: e.pageX - (op ? op.getBoundingClientRect().left : 0),
-            pageY: e.pageY - (op ? op.getBoundingClientRect().top : 0),
-            width: (op ? op.getBoundingClientRect().width : window.innerWidth)
+        var result = ({
+            pageX: e.pageX - (op ? op.offsetLeft : 0),
+            pageY: e.pageY - (op ? op.offsetTop : 0),
+            width: (op ? op.offsetWidth : window.innerWidth)
         });
+
+        return result;
     }
 
 
