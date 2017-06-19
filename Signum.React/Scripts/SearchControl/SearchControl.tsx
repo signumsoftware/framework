@@ -32,6 +32,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     allowSelection?: boolean
     findOptions: FindOptions;
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
+    onNavigated?: (lite: Lite<Entity>) => void;
     formatters?: { [columnName: string]: CellFormatter };
     rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
     entityFormatter?: EntityFormatter;
@@ -134,6 +135,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         return <SearchControlLoaded ref={(lo: SearchControlLoaded) => this.searchControlLoaded = lo}
             allowSelection={this.props.allowSelection}
             onDoubleClick={this.props.onDoubleClick}
+            onNavigated={this.props.onNavigated}
             formatters={this.props.formatters}
             rowAttributes={this.props.rowAttributes}
             entityFormatter={this.props.entityFormatter}

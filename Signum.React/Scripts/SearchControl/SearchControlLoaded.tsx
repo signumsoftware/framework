@@ -31,6 +31,7 @@ export interface SearchControlLoadedProps {
     querySettings: Finder.QuerySettings;
     showContextMenu?: boolean | "Basic";
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
+    onNavigated?: (lite: Lite<Entity>) => void;
     formatters?: { [columnName: string]: CellFormatter };
     rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
     entityFormatter?: EntityFormatter;
@@ -830,7 +831,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             window.open(Navigator.navigateRoute(row.entity));
         }
         else {
-            Navigator.navigate(row.entity).done();
+            Navigator.navigate(row.entity)
+                .then(() => {
+                    if (this.props.onNavigated)
+                        this.props.onNavigated(row.entity);
+                }).done();
         }
 
     }
@@ -900,6 +905,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     handleOnNavigated = (lite: Lite<Entity>) => {
+
+        if (this.props.onNavigated)
+            this.props.onNavigated(lite);
+
         if (this.props.avoidAutoRefresh)
             return;
 

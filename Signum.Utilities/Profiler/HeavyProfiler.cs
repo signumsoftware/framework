@@ -476,9 +476,9 @@ namespace Signum.Utilities
             }
         }
 
-        public static long ToMilliseconds(long t1, long t2)
+        public static long ToMilliseconds(long start, long end)
         {
-            return (t2 - t1) / FrequencyMilliseconds;
+            return (end - start) / FrequencyMilliseconds;
         }
     }
 

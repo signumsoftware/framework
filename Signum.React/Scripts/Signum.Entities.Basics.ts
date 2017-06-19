@@ -19,6 +19,7 @@ export interface DeleteLogParametersEmbedded extends Entities.EmbeddedEntity {
     dateLimit?: string;
     chunkSize?: number;
     maxChunks?: number;
+    pauseTime?: number | null;
 }
 
 export const ExceptionEntity = new Type<ExceptionEntity>("Exception");
