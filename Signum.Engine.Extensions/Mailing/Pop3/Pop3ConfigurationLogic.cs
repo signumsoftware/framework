@@ -199,7 +199,7 @@ namespace Signum.Engine.Mailing.Pop3
                         {
                             var messageJoinDict = messageInfos.ToDictionary(e => e.Uid).OuterJoinDictionarySC(lastsEmails, (key, v1, v2) => new { key, v1, v2 });
                             var messageMachings = messageJoinDict.Where(e => e.Value.v1 != null && e.Value.v2 != null).ToList();
-                            messagesToSave = messageInfos.Where(m => m.Number > messageMachings.Select(e => e.Value.v1.Value.Number).Max()).ToList();
+                            messagesToSave = !messageMachings.Any()? messageInfos.ToList(): messageInfos.Where(m => m.Number > messageMachings.Select(e => e.Value.v1.Value.Number).Max()).ToList();
                         }
                         else
                             messagesToSave = messageInfos.ToList();
