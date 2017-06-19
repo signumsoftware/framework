@@ -547,7 +547,7 @@ namespace Signum.Engine
             return list.Cast<Entity>().ToList();
         }
 
-        static Task<IList> RetrieveAllAsyncIList<T>(CancellationToken token) where T : Entity => RetrieveAllAsync<T>(token).ContinueWith(list => (IList)list);
+        static Task<IList> RetrieveAllAsyncIList<T>(CancellationToken token) where T : Entity => RetrieveAllAsync<T>(token).ContinueWith(t => (IList)t.Result);
         static readonly GenericInvoker<Func<CancellationToken, Task<IList>>> giRetrieveAllAsyncIList = 
             new GenericInvoker<Func<CancellationToken, Task<IList>>>(token => RetrieveAllAsyncIList<TypeEntity>(token));
         public static async Task<List<Entity>> RetrieveAllAsync(Type type, CancellationToken token)
@@ -836,7 +836,7 @@ namespace Signum.Engine
 
         static GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>> giRetrieveListLiteAsync =
             new GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>>((ids, token) => RetrieveListLiteAsyncIList<Entity>(ids, token));
-        static Task<IList> RetrieveListLiteAsyncIList<T>(List<PrimaryKey> ids, CancellationToken token)  where T : Entity => RetrieveListLiteAsync<T>(ids, token).ContinueWith(a => (IList)a);
+        static Task<IList> RetrieveListLiteAsyncIList<T>(List<PrimaryKey> ids, CancellationToken token)  where T : Entity => RetrieveListLiteAsync<T>(ids, token).ContinueWith(t => (IList)t.Result);
         public static async Task<List<Lite<T>>> RetrieveListLiteAsync<T>(List<PrimaryKey> ids, CancellationToken token)
             where T : Entity
         {

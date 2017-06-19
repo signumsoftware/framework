@@ -152,7 +152,7 @@ namespace Signum.Engine.DynamicQuery
         static Task<Lite<Entity>> LiteByIdAsync<T>(PrimaryKey id, CancellationToken token)
             where T : Entity
         {
-            return Database.Query<T>().Where(a => a.id == id).Select(a => a.ToLite()).SingleOrDefaultAsync(token).ContinueWith(lite => (Lite<Entity>)lite);
+            return Database.Query<T>().Where(a => a.id == id).Select(a => a.ToLite()).SingleOrDefaultAsync(token).ContinueWith(t => (Lite<Entity>)t.Result);
         }
 
         static GenericInvoker<Func<string[], int, List<Lite<Entity>>>> giLiteContaining =
