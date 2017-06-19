@@ -380,17 +380,15 @@ namespace Signum.Engine.DynamicQuery
                         mpe = MetadataVisitor.AsProjection(e);
 
                     me = mpe == null ? null : mpe.Projector as MetaExpression;
-
-                }else 
+                }
+                else 
                 {
                     me = e as MetaExpression;
                 }
      
-                CleanMeta cm = me == null ? null : me.Meta as CleanMeta;
-
                 var result = new ExtensionRouteInfo();
 
-                if (cm != null && cm.PropertyRoutes.Any())
+                if (me?.Meta is CleanMeta cm && cm.PropertyRoutes.Any())
                 {
                     var cleanType = me.Type.CleanType();
 
