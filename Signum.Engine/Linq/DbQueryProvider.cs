@@ -18,6 +18,8 @@ using Signum.Engine;
 using System.Data;
 using Signum.Entities;
 using Signum.Engine.Maps;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace Signum.Engine.Linq
 {
@@ -25,7 +27,7 @@ namespace Signum.Engine.Linq
     /// <summary>
     /// Stateless query provider 
     /// </summary>
-    public class DbQueryProvider : QueryProvider
+    public class DbQueryProvider : QueryProvider, IQueryProviderAsync
     {
         public static readonly DbQueryProvider Single = new DbQueryProvider();
 
@@ -42,6 +44,12 @@ namespace Signum.Engine.Linq
         {
             using (HeavyProfiler.Log("DBQuery", () => expression.Type.TypeName()))
                 return this.Translate(expression, tr => tr.Execute());
+        }
+
+        public async Task<object> ExecuteAsync(Expression expression, CancellationToken token)
+        {
+            using (HeavyProfiler.Log("DBQuery", () => expression.Type.TypeName()))
+                return await this.Translate(expression, tr => tr.ExecuteAsync(token));
         }
 
         public ITranslateResult GetRawTranslateResult(Expression expression)
@@ -167,4 +175,6 @@ namespace Signum.Engine.Linq
             return continuation(cr);
         }
     }
+
+    
 }

@@ -10,6 +10,8 @@ using Signum.Engine.DynamicQuery;
 using System.Data.SqlTypes;
 using Signum.Entities;
 using System.Data.Common;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Signum.Engine.Linq
 {
@@ -20,6 +22,7 @@ namespace Signum.Engine.Linq
         SqlPreCommandSimple MainCommand { get; set; }
 
         object Execute();
+        Task<object> ExecuteAsync(CancellationToken token);
 
         LambdaExpression GetMainProjector(); 
     }
@@ -29,6 +32,7 @@ namespace Signum.Engine.Linq
         LookupToken Token { get; set; }
 
         void Fill(Dictionary<LookupToken, IEnumerable> lookups, IRetriever retriever);
+        Task FillAsync(Dictionary<LookupToken, IEnumerable> lookups, IRetriever retriever, CancellationToken token);
 
         SqlPreCommandSimple Command { get; set; }
 
@@ -48,7 +52,33 @@ namespace Signum.Engine.Linq
             using (HeavyProfiler.Log("SQL", () => Command.PlainSql()))
             using (DbDataReader reader = Executor.UnsafeExecuteDataReader(Command))
             {
-                ProjectionRowEnumerator<KeyValuePair<K, V>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, V>>(reader, ProjectorExpression, lookups, retriever);
+                ProjectionRowEnumerator<KeyValuePair<K, V>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, V>>(reader, ProjectorExpression, lookups, retriever, CancellationToken.None);
+
+                IEnumerable<KeyValuePair<K, V>> enumerabe = new ProjectionRowEnumerable<KeyValuePair<K, V>>(enumerator);
+
+                try
+                {
+                    var lookUp = enumerabe.ToLookup(a => a.Key, a => a.Value);
+
+                    lookups.Add(Token, lookUp);
+                }
+                catch (Exception ex)
+                {
+                    FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
+                    fieldEx.Command = Command;
+                    fieldEx.Row = enumerator.Row;
+                    fieldEx.Projector = ProjectorExpression;
+                    throw fieldEx;
+                }
+            }
+        }
+
+        public async Task FillAsync(Dictionary<LookupToken, IEnumerable> lookups, IRetriever retriever, CancellationToken token)
+        {
+            using (HeavyProfiler.Log("SQL", () => Command.Sql))
+            using (DbDataReader reader = await Executor.UnsafeExecuteDataReaderAsync(Command, token: token))
+            {
+                ProjectionRowEnumerator<KeyValuePair<K, V>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, V>>(reader, ProjectorExpression, lookups, retriever, token);
 
                 IEnumerable<KeyValuePair<K, V>> enumerabe = new ProjectionRowEnumerable<KeyValuePair<K, V>>(enumerator);
 
@@ -93,7 +123,45 @@ namespace Signum.Engine.Linq
             using (HeavyProfiler.Log("SQL", () => Command.PlainSql()))
             using (DbDataReader reader = Executor.UnsafeExecuteDataReader(Command))
             {
-                ProjectionRowEnumerator<KeyValuePair<K, MList<V>.RowIdElement>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, MList<V>.RowIdElement>>(reader, ProjectorExpression, lookups, retriever);
+                ProjectionRowEnumerator<KeyValuePair<K, MList<V>.RowIdElement>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, MList<V>.RowIdElement>>(reader, ProjectorExpression, lookups, retriever, CancellationToken.None);
+
+                IEnumerable<KeyValuePair<K, MList<V>.RowIdElement>> enumerabe = new ProjectionRowEnumerable<KeyValuePair<K, MList<V>.RowIdElement>>(enumerator);
+
+                try
+                {
+                    var lookUp = enumerabe.ToLookup(a => a.Key, a => a.Value);
+                    foreach (var kvp in requests)
+                    {
+                        var results = lookUp[kvp.Key];
+
+                        ((IMListPrivate<V>)kvp.Value).InnerList.AddRange(results);
+                        ((IMListPrivate<V>)kvp.Value).InnerListModified(results.Select(a => a.Element).ToList(), null);
+                        retriever.ModifiablePostRetrieving(kvp.Value);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
+                    fieldEx.Command = Command;
+                    fieldEx.Row = enumerator.Row;
+                    fieldEx.Projector = ProjectorExpression;
+                    throw fieldEx;
+
+                }
+            }
+        }
+
+        public async Task FillAsync(Dictionary<LookupToken, IEnumerable> lookups, IRetriever retriever, CancellationToken token)
+        {
+            Dictionary<K, MList<V>> requests = (Dictionary<K, MList<V>>)lookups.TryGetC(Token);
+
+            if (requests == null)
+                return;
+
+            using (HeavyProfiler.Log("SQL", () => Command.Sql))
+            using (DbDataReader reader = await Executor.UnsafeExecuteDataReaderAsync(Command, token: token))
+            {
+                ProjectionRowEnumerator<KeyValuePair<K, MList<V>.RowIdElement>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, MList<V>.RowIdElement>>(reader, ProjectorExpression, lookups, retriever, token);
 
                 IEnumerable<KeyValuePair<K, MList<V>.RowIdElement>> enumerabe = new ProjectionRowEnumerable<KeyValuePair<K, MList<V>.RowIdElement>>(enumerator);
 
@@ -145,18 +213,18 @@ namespace Signum.Engine.Linq
             using (Transaction tr = new Transaction())
             {
                 object result;
-                using (IRetriever retriever = EntityCache.NewRetriever())
+                using (var retriever = EntityCache.NewRetriever())
                 {
                     if (EagerProjections.Any() || LazyChildProjections.Any())
                         lookups = new Dictionary<LookupToken, IEnumerable>();
 
-                    foreach (var chils in EagerProjections)
-                        chils.Fill(lookups, retriever);
+                    foreach (var child in EagerProjections)
+                        child.Fill(lookups, retriever);
 
                     using (HeavyProfiler.Log("SQL", () => MainCommand.PlainSql()))
                     using (DbDataReader reader = Executor.UnsafeExecuteDataReader(MainCommand))
                     {
-                        ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(reader, ProjectorExpression, lookups, retriever);
+                        ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(reader, ProjectorExpression, lookups, retriever, CancellationToken.None);
 
                         IEnumerable<T> enumerable = new ProjectionRowEnumerable<T>(enumerator);
 
@@ -177,11 +245,60 @@ namespace Signum.Engine.Linq
                         }
                     }
 
-                    foreach (var chils in LazyChildProjections)
-                        chils.Fill(lookups, retriever);
+                    foreach (var child in LazyChildProjections)
+                        child.Fill(lookups, retriever);
 
+                    retriever.CompleteAll();
                 }
             
+                return tr.Commit(result);
+            }
+        }
+
+        public async Task<object> ExecuteAsync(CancellationToken token)
+        {
+            using (new EntityCache())
+            using (Transaction tr = new Transaction())
+            {
+                object result;
+                using (var retriever = EntityCache.NewRetriever())
+                {
+                    if (EagerProjections.Any() || LazyChildProjections.Any())
+                        lookups = new Dictionary<LookupToken, IEnumerable>();
+
+                    foreach (var child in EagerProjections)
+                        child.Fill(lookups, retriever);
+
+                    using (HeavyProfiler.Log("SQL", () => MainCommand.PlainSql()))
+                    using (DbDataReader reader = await Executor.UnsafeExecuteDataReaderAsync(MainCommand, token: token))
+                    {
+                        ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(reader, ProjectorExpression, lookups, retriever, token);
+
+                        IEnumerable<T> enumerable = new ProjectionRowEnumerable<T>(enumerator);
+
+                        try
+                        {
+                            if (Unique == null)
+                                result = enumerable.ToList();
+                            else
+                                result = UniqueMethod(enumerable, Unique.Value);
+                        }
+                        catch (Exception ex)
+                        {
+                            FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
+                            fieldEx.Command = MainCommand;
+                            fieldEx.Row = enumerator.Row;
+                            fieldEx.Projector = ProjectorExpression;
+                            throw fieldEx;
+                        }
+                    }
+
+                    foreach (var child in LazyChildProjections)
+                        child.Fill(lookups, retriever);
+
+                    retriever.CompleteAll();
+                }
+
                 return tr.Commit(result);
             }
         }
