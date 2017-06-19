@@ -39,6 +39,8 @@ namespace Signum.Engine.Linq
 
         public IProjectionRow Parent { get; private set; }
 
+        public CancellationToken Token { get; private set; }
+
         DbDataReader dataReader;
 
         T current;
@@ -47,7 +49,7 @@ namespace Signum.Engine.Linq
 
         Dictionary<LookupToken, IEnumerable> lookups;
 
-        internal ProjectionRowEnumerator(DbDataReader dataReader, Expression<Func<IProjectionRow, T>> projectorExpression, Dictionary<LookupToken, IEnumerable> lookups, IRetriever retriever)
+        internal ProjectionRowEnumerator(DbDataReader dataReader, Expression<Func<IProjectionRow, T>> projectorExpression, Dictionary<LookupToken, IEnumerable> lookups, IRetriever retriever, CancellationToken token)
         {
             this.dataReader = dataReader;
             this.Reader = new FieldReader(dataReader);
@@ -57,6 +59,7 @@ namespace Signum.Engine.Linq
             this.lookups = lookups;
             this.Row = -1;
             this.Retriever = retriever;
+            this.Token = token;
         }
 
         public T Current
@@ -72,6 +75,8 @@ namespace Signum.Engine.Linq
         public int Row;
         public bool MoveNext()
         {
+            Token.ThrowIfCancellationRequested();
+
             if (dataReader.Read())
             {
                 this.Row++;

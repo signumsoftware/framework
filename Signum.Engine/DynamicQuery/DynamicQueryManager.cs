@@ -18,6 +18,7 @@ using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
 using System.Threading;
 using static Signum.Engine.Maps.SchemaBuilder;
+using System.Threading.Tasks;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -96,6 +97,28 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
+        async Task<T> ExecuteAsync<T>(ExecuteType executeType, object queryName, BaseQueryRequest request, Func<DynamicQueryBucket, Task<T>> executor)
+        {
+            using (ExecutionMode.UserInterface())
+            using (HeavyProfiler.Log(executeType.ToString(), () => QueryUtils.GetKey(queryName)))
+            {
+                try
+                {
+                    var qb = GetQuery(queryName);
+
+                    using (Disposable.Combine(QueryExecuted, f => f(executeType, queryName, request)))
+                    {
+                        return await executor(qb);
+                    }
+                }
+                catch (Exception e)
+                {
+                    e.Data["QueryName"] = queryName;
+                    throw;
+                }
+            }
+        }
+
         public event Func<ExecuteType, object, BaseQueryRequest ,  IDisposable> QueryExecuted;
 
         public enum ExecuteType
@@ -110,7 +133,12 @@ namespace Signum.Engine.DynamicQuery
 
         public ResultTable ExecuteQuery(QueryRequest request)
         {
-            return Execute(ExecuteType.ExecuteQuery, request.QueryName,request, dqb => dqb.Core.Value.ExecuteQuery(request));
+            return Execute(ExecuteType.ExecuteQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQuery(request));
+        }
+
+        public Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken token)
+        {
+            return ExecuteAsync(ExecuteType.ExecuteQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryAsync(request, token));
         }
 
         public object ExecuteQueryCount(QueryValueRequest request)
@@ -118,14 +146,29 @@ namespace Signum.Engine.DynamicQuery
             return Execute(ExecuteType.ExecuteQueryCount, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryValue(request));
         }
 
+        public Task<object> ExecuteQueryCountAsync(QueryValueRequest request, CancellationToken token)
+        {
+            return ExecuteAsync(ExecuteType.ExecuteQueryCount, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryValueAsync(request, token));
+        }
+
         public ResultTable ExecuteGroupQuery(QueryGroupRequest request)
         {
-            return Execute(ExecuteType.ExecuteGroupQuery, request.QueryName,request, dqb => dqb.Core.Value.ExecuteQueryGroup(request));
+            return Execute(ExecuteType.ExecuteGroupQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryGroup(request));
+        }
+
+        public Task<ResultTable> ExecuteGroupQueryAsync(QueryGroupRequest request, CancellationToken token)
+        {
+            return ExecuteAsync(ExecuteType.ExecuteGroupQuery, request.QueryName,request, dqb => dqb.Core.Value.ExecuteQueryGroupAsync(request, token));
         }
 
         public Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
-            return Execute(ExecuteType.ExecuteUniqueEntity, request.QueryName,request, dqb => dqb.Core.Value.ExecuteUniqueEntity(request));
+            return Execute(ExecuteType.ExecuteUniqueEntity, request.QueryName, request, dqb => dqb.Core.Value.ExecuteUniqueEntity(request));
+        }
+
+        public Task<Lite<Entity>> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken token)
+        {
+            return ExecuteAsync(ExecuteType.ExecuteUniqueEntity, request.QueryName,request, dqb => dqb.Core.Value.ExecuteUniqueEntityAsync(request, token));
         }
 
         public QueryDescription QueryDescription(object queryName)
@@ -263,24 +306,24 @@ namespace Signum.Engine.DynamicQuery
             return extension;
         }
 
-        public object[] BatchExecute(BaseQueryRequest[] requests)
+        public Task<object[]> BatchExecute(BaseQueryRequest[] requests, CancellationToken token)
         {
-            return requests.Select(r =>
+            return Task.WhenAll<object>(requests.Select<BaseQueryRequest, Task<object>>(r =>
             {
                 if (r is QueryValueRequest)
-                    return ExecuteQueryCount((QueryValueRequest)r);
+                    return ExecuteQueryCountAsync((QueryValueRequest)r, token);
 
                 if (r is QueryRequest)
-                    return ExecuteQuery((QueryRequest)r);
+                    return ExecuteQueryAsync((QueryRequest)r, token).ContinueWith(a => (object)a.Result);
 
                 if (r is UniqueEntityRequest)
-                    return ExecuteUniqueEntity((UniqueEntityRequest)r);
+                    return ExecuteUniqueEntityAsync((UniqueEntityRequest)r, token).ContinueWith(a => (object)a.Result);
 
                 if (r is QueryGroupRequest)
-                    return ExecuteGroupQuery((QueryGroupRequest)r);
+                    return ExecuteGroupQueryAsync((QueryGroupRequest)r, token).ContinueWith(a => (object)a.Result);
 
-                return (object)null;
-            }).ToArray(); 
+                throw new InvalidOperationException("Unexpected QueryRequest type"); ;
+            })); 
         }
     }
 
@@ -380,17 +423,15 @@ namespace Signum.Engine.DynamicQuery
                         mpe = MetadataVisitor.AsProjection(e);
 
                     me = mpe == null ? null : mpe.Projector as MetaExpression;
-
-                }else 
+                }
+                else 
                 {
                     me = e as MetaExpression;
                 }
      
-                CleanMeta cm = me == null ? null : me.Meta as CleanMeta;
-
                 var result = new ExtensionRouteInfo();
 
-                if (cm != null && cm.PropertyRoutes.Any())
+                if (me?.Meta is CleanMeta cm && cm.PropertyRoutes.Any())
                 {
                     var cleanType = me.Type.CleanType();
 

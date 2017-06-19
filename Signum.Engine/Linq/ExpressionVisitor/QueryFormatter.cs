@@ -501,15 +501,15 @@ namespace Signum.Engine.Linq
             return select;
         }
 
-        Dictionary<AggregateFunction, string> dic = new Dictionary<AggregateFunction, string>
+        Dictionary<AggregateSqlFunction, string> dic = new Dictionary<AggregateSqlFunction, string>
         {
-            {AggregateFunction.Average, "AVG"},
-            {AggregateFunction.StdDev, "STDEV"},
-            {AggregateFunction.StdDevP, "STDEVP"},
-            {AggregateFunction.Count, "COUNT"},
-            {AggregateFunction.Max, "MAX"},
-            {AggregateFunction.Min, "MIN"},
-            {AggregateFunction.Sum, "SUM"}
+            {AggregateSqlFunction.Average, "AVG"},
+            {AggregateSqlFunction.StdDev, "STDEV"},
+            {AggregateSqlFunction.StdDevP, "STDEVP"},
+            {AggregateSqlFunction.Count, "COUNT"},
+            {AggregateSqlFunction.Max, "MAX"},
+            {AggregateSqlFunction.Min, "MIN"},
+            {AggregateSqlFunction.Sum, "SUM"}
         };
 
         protected internal override Expression VisitAggregate(AggregateExpression aggregate)

@@ -15,6 +15,8 @@ using System.Collections;
 using Signum.Engine.Maps;
 using Signum.Entities.Basics;
 using System.Globalization;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -37,6 +39,24 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
+        public static async Task<List<Lite<Entity>>> FindLiteLikeAsync(Implementations implementations, string subString, int count, CancellationToken cancellationToken)
+        {
+            if (implementations.IsByAll)
+                throw new InvalidOperationException("ImplementedByAll not supported for FindLiteLike");
+
+            try
+            {
+                using (ExecutionMode.UserInterface())
+                    return await FindLiteLikeAsync(implementations.Types, subString, count, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                e.Data["implementations"] = implementations.ToString();
+                throw;
+            }
+        }
+
+
         static List<Lite<Entity>> FindLiteLike(IEnumerable<Type> types, string subString, int count)
         {
             if (subString == null)
@@ -50,7 +70,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 if (PrimaryKey.TryParse(subString, t, out PrimaryKey id))
                 {
-                    var lite = miLiteById.GetInvoker(t).Invoke(id);
+                    var lite = giLiteById.GetInvoker(t).Invoke(id);
                     if (lite != null)
                     {
                         results.Add(lite);
@@ -68,7 +88,7 @@ namespace Signum.Engine.DynamicQuery
                 {
                     var parts = subString.Trim('\'', '"').SplitNoEmpty(' ');
 
-                    results.AddRange(miLiteContaining.GetInvoker(t)(parts, count - results.Count));
+                    results.AddRange(giLiteContaining.GetInvoker(t)(parts, count - results.Count));
 
                     if (results.Count >= count)
                         return results;
@@ -76,6 +96,132 @@ namespace Signum.Engine.DynamicQuery
             }
 
             return results;
+        }
+
+        private static async Task<List<Lite<Entity>>> FindLiteLikeAsync(IEnumerable<Type> types, string subString, int count, CancellationToken cancellationToken)
+        {
+            if (subString == null)
+                subString = "";
+
+            types = types.Where(t => Schema.Current.IsAllowed(t, inUserInterface: true) == null);
+
+            List<Lite<Entity>> results = new List<Lite<Entity>>();
+
+            foreach (var t in types)
+            {
+                if (PrimaryKey.TryParse(subString, t, out PrimaryKey id))
+                {
+                    var lite = await giLiteByIdAsync.GetInvoker(t).Invoke(id, cancellationToken);
+                    if (lite != null)
+                    {
+                        results.Add(lite);
+
+                        if (results.Count >= count)
+                            return results;
+                    }
+                }
+            }
+
+            foreach (var t in types)
+            {
+                if (!PrimaryKey.TryParse(subString, t, out PrimaryKey id))
+                {
+                    var parts = subString.Trim('\'', '"').SplitNoEmpty(' ');
+
+                    var list = await giLiteContainingAsync.GetInvoker(t)(parts, count - results.Count, cancellationToken);
+                    results.AddRange(list);
+
+                    if (results.Count >= count)
+                        return results;
+                }
+            }
+
+            return results;
+        }
+     
+        static GenericInvoker<Func<PrimaryKey, Lite<Entity>>> giLiteById =
+            new GenericInvoker<Func<PrimaryKey, Lite<Entity>>>(id => LiteById<TypeEntity>(id));
+        static Lite<Entity> LiteById<T>(PrimaryKey id)
+            where T : Entity
+        {
+            return Database.Query<T>().Where(a => a.id == id).Select(a => a.ToLite()).SingleOrDefault();
+        }
+
+        static GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Lite<Entity>>>> giLiteByIdAsync =
+            new GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Lite<Entity>>>>((id, token) => LiteByIdAsync<TypeEntity>(id, token));
+        static Task<Lite<Entity>> LiteByIdAsync<T>(PrimaryKey id, CancellationToken token)
+            where T : Entity
+        {
+            return Database.Query<T>().Where(a => a.id == id).Select(a => a.ToLite()).SingleOrDefaultAsync(token).ContinueWith(t => (Lite<Entity>)t.Result);
+        }
+
+        static GenericInvoker<Func<string[], int, List<Lite<Entity>>>> giLiteContaining =
+            new GenericInvoker<Func<string[], int, List<Lite<Entity>>>>((parts, c) => LiteContaining<TypeEntity>(parts, c));
+        static List<Lite<Entity>> LiteContaining<T>(string[] parts, int count)
+            where T : Entity
+        {
+            return Database.Query<T>()
+                .Where(a => a.ToString().ContainsAll(parts))
+                .OrderBy(a => a.ToString().Length)
+                .Select(a => a.ToLite())
+                .Take(count)
+                .AsEnumerable()
+                .Cast<Lite<Entity>>()
+                .ToList();
+        }
+
+        static GenericInvoker<Func<string[], int, CancellationToken, Task<List<Lite<Entity>>>>> giLiteContainingAsync =
+            new GenericInvoker<Func<string[], int, CancellationToken, Task<List<Lite<Entity>>>>>((parts, c, token) => LiteContaining<TypeEntity>(parts, c, token));
+        static Task<List<Lite<Entity>>> LiteContaining<T>(string[] parts, int count, CancellationToken token)
+            where T : Entity
+        {
+            return Database.Query<T>()
+                .Where(a => a.ToString().ContainsAll(parts))
+                .OrderBy(a => a.ToString().Length)
+                .Select(a => a.ToLite())
+                .Take(count)
+                .ToListAsync(token)
+                .ContinueWith(t => t.Result.Cast<Lite<Entity>>().ToList());
+        }
+
+        public static List<Lite<Entity>> FindAllLite(Implementations implementations)
+        {
+            if (implementations.IsByAll)
+                throw new InvalidOperationException("ImplementedByAll is not supported for RetrieveAllLite");
+
+            try
+            {
+                using (ExecutionMode.UserInterface())
+                    return implementations.Types.SelectMany(type => Database.RetrieveAllLite(type)).ToList();
+            }
+            catch (Exception e)
+            {
+                e.Data["implementations"] = implementations.ToString();
+                throw;
+            }
+        }
+
+        public static async Task<List<Lite<Entity>>> FindAllLiteAsync(Implementations implementations, CancellationToken token)
+        {
+            if (implementations.IsByAll)
+                throw new InvalidOperationException("ImplementedByAll is not supported for RetrieveAllLite");
+
+            try
+            {
+                using (ExecutionMode.UserInterface())
+                {
+                    var tasks = implementations.Types.Select(type => Database.RetrieveAllLiteAsync(type, token)).ToList();
+
+                    var list = await Task.WhenAll(tasks);
+
+                    return list.SelectMany(li => li).ToList();
+                }
+            }
+            catch (Exception e)
+            {
+                e.Data["implementations"] = implementations.ToString();
+                throw;
+            }
         }
 
         public static List<Lite<Entity>> AutocompleteUntyped(this IQueryable<Lite<Entity>> query, string subString, int count, Type type)
@@ -106,11 +252,40 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
+        public static async Task<List<Lite<Entity>>> AutocompleteUntypedAsync(this IQueryable<Lite<Entity>> query, string subString, int count, Type type, CancellationToken token)
+        {
+            using (ExecutionMode.UserInterface())
+            {
+                List<Lite<Entity>> results = new List<Lite<Entity>>();
+
+                if (PrimaryKey.TryParse(subString, type, out PrimaryKey id))
+                {
+                    Lite<Entity> entity = await query.SingleOrDefaultAsync(e => e.Id == id, token);
+
+                    if (entity != null)
+                        results.Add(entity);
+
+                    if (results.Count >= count)
+                        return results;
+                }
+
+                var parts = subString.Trim('\'', '"').SplitNoEmpty(' ');
+
+                var list = await query.Where(a => a.ToString().ContainsAll(parts))
+                    .OrderBy(a => a.ToString().Length)
+                    .Take(count - results.Count)
+                    .ToListAsync(token);
+
+                results.AddRange(list);
+
+                return results;
+            }
+        }
 
         public static List<Lite<T>> Autocomplete<T>(this IQueryable<Lite<T>> query, string subString, int count)
             where T : Entity
         {
-            using(ExecutionMode.UserInterface())
+            using (ExecutionMode.UserInterface())
             {
 
                 List<Lite<T>> results = new List<Lite<T>>();
@@ -136,8 +311,8 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
-        public static List<Lite<T>> Autocomplete<T>(this IEnumerable<Lite<T>> query, string subString, int count)
-            where T : Entity
+        public static async Task<List<Lite<T>>> AutocompleteAsync<T>(this IQueryable<Lite<T>> query, string subString, int count, CancellationToken token)
+                where T : Entity
         {
             using (ExecutionMode.UserInterface())
             {
@@ -145,7 +320,7 @@ namespace Signum.Engine.DynamicQuery
 
                 if (PrimaryKey.TryParse(subString, typeof(T), out PrimaryKey id))
                 {
-                    Lite<T> entity = query.SingleOrDefaultEx(e => e.Id == id);
+                    Lite<T> entity = await query.SingleOrDefaultAsync(e => e.Id == id, token);
 
                     if (entity != null)
                         results.Add(entity);
@@ -154,54 +329,48 @@ namespace Signum.Engine.DynamicQuery
                         return results;
                 }
 
-                var parts = subString.Trim('\'', '"').SplitNoEmpty(' ' );
+                var parts = subString.Trim('\'', '"').SplitNoEmpty(' ');
 
-                results.AddRange(query.Where(a =>  a.ToString().ContainsAll(parts))
+                var list = await query.Where(a => a.ToString().ContainsAll(parts))
                     .OrderBy(a => a.ToString().Length)
-                    .Take(count - results.Count));
+                    .Take(count - results.Count)
+                    .ToListAsync(token);
+
+                results.AddRange(list);
 
                 return results;
             }
         }
 
-        static GenericInvoker<Func<PrimaryKey, Lite<Entity>>> miLiteById =
-            new GenericInvoker<Func<PrimaryKey, Lite<Entity>>>(id => LiteById<TypeEntity>(id));
-        static Lite<Entity> LiteById<T>(PrimaryKey id)
+        public static List<Lite<T>> Autocomplete<T>(this IEnumerable<Lite<T>> collection, string subString, int count)
             where T : Entity
         {
-            return Database.Query<T>().Where(a => a.id == id).Select(a => a.ToLite()).SingleOrDefault();
-        }
-
-        static GenericInvoker<Func<string[], int, List<Lite<Entity>>>> miLiteContaining =
-            new GenericInvoker<Func<string[], int, List<Lite<Entity>>>>((parts, c) => LiteContaining<TypeEntity>(parts, c));
-        static List<Lite<Entity>> LiteContaining<T>(string[] parts, int count)
-            where T : Entity
-        {
-            return Database.Query<T>()
-                .Where(a => a.ToString().ContainsAll(parts))
-                .OrderBy(a => a.ToString().Length)
-                .Select(a => a.ToLite())
-                .Take(count)
-                .AsEnumerable()
-                .Cast<Lite<Entity>>()
-                .ToList();
-        }
-
-        public static List<Lite<Entity>> FindAllLite(Implementations implementations)
-        {
-            if (implementations.IsByAll)
-                throw new InvalidOperationException("ImplementedByAll is not supported for RetrieveAllLite");
-
-            try
+            using (ExecutionMode.UserInterface())
             {
-                using (ExecutionMode.UserInterface())
-                    return implementations.Types.SelectMany(type => Database.RetrieveAllLite(type)).ToList();
-            }
-            catch (Exception e)
-            {
-                e.Data["implementations"] = implementations.ToString();
-                throw;
+                List<Lite<T>> results = new List<Lite<T>>();
+
+                if (PrimaryKey.TryParse(subString, typeof(T), out PrimaryKey id))
+                {
+                    Lite<T> entity = collection.SingleOrDefaultEx(e => e.Id == id);
+
+                    if (entity != null)
+                        results.Add(entity);
+
+                    if (results.Count >= count)
+                        return results;
+                }
+
+                var parts = subString.Trim('\'', '"').SplitNoEmpty(' ');
+
+                var list = collection.Where(a => a.ToString().ContainsAll(parts))
+                    .OrderBy(a => a.ToString().Length)
+                    .Take(count - results.Count);
+
+                results.AddRange(list);
+
+                return results;
             }
         }
+
     }
 }
