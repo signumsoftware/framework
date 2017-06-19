@@ -52,7 +52,7 @@ namespace Signum.Engine.Linq
             using (HeavyProfiler.Log("SQL", () => Command.PlainSql()))
             using (DbDataReader reader = Executor.UnsafeExecuteDataReader(Command))
             {
-                ProjectionRowEnumerator<KeyValuePair<K, V>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, V>>(reader, ProjectorExpression, lookups, retriever);
+                ProjectionRowEnumerator<KeyValuePair<K, V>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, V>>(reader, ProjectorExpression, lookups, retriever, CancellationToken.None);
 
                 IEnumerable<KeyValuePair<K, V>> enumerabe = new ProjectionRowEnumerable<KeyValuePair<K, V>>(enumerator);
 
@@ -78,7 +78,7 @@ namespace Signum.Engine.Linq
             using (HeavyProfiler.Log("SQL", () => Command.Sql))
             using (DbDataReader reader = await Executor.UnsafeExecuteDataReaderAsync(Command, token: token))
             {
-                ProjectionRowEnumerator<KeyValuePair<K, V>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, V>>(reader, ProjectorExpression, lookups, retriever);
+                ProjectionRowEnumerator<KeyValuePair<K, V>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, V>>(reader, ProjectorExpression, lookups, retriever, token);
 
                 IEnumerable<KeyValuePair<K, V>> enumerabe = new ProjectionRowEnumerable<KeyValuePair<K, V>>(enumerator);
 
@@ -123,7 +123,7 @@ namespace Signum.Engine.Linq
             using (HeavyProfiler.Log("SQL", () => Command.PlainSql()))
             using (DbDataReader reader = Executor.UnsafeExecuteDataReader(Command))
             {
-                ProjectionRowEnumerator<KeyValuePair<K, MList<V>.RowIdElement>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, MList<V>.RowIdElement>>(reader, ProjectorExpression, lookups, retriever);
+                ProjectionRowEnumerator<KeyValuePair<K, MList<V>.RowIdElement>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, MList<V>.RowIdElement>>(reader, ProjectorExpression, lookups, retriever, CancellationToken.None);
 
                 IEnumerable<KeyValuePair<K, MList<V>.RowIdElement>> enumerabe = new ProjectionRowEnumerable<KeyValuePair<K, MList<V>.RowIdElement>>(enumerator);
 
@@ -161,7 +161,7 @@ namespace Signum.Engine.Linq
             using (HeavyProfiler.Log("SQL", () => Command.Sql))
             using (DbDataReader reader = await Executor.UnsafeExecuteDataReaderAsync(Command, token: token))
             {
-                ProjectionRowEnumerator<KeyValuePair<K, MList<V>.RowIdElement>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, MList<V>.RowIdElement>>(reader, ProjectorExpression, lookups, retriever);
+                ProjectionRowEnumerator<KeyValuePair<K, MList<V>.RowIdElement>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, MList<V>.RowIdElement>>(reader, ProjectorExpression, lookups, retriever, token);
 
                 IEnumerable<KeyValuePair<K, MList<V>.RowIdElement>> enumerabe = new ProjectionRowEnumerable<KeyValuePair<K, MList<V>.RowIdElement>>(enumerator);
 
@@ -224,7 +224,7 @@ namespace Signum.Engine.Linq
                     using (HeavyProfiler.Log("SQL", () => MainCommand.PlainSql()))
                     using (DbDataReader reader = Executor.UnsafeExecuteDataReader(MainCommand))
                     {
-                        ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(reader, ProjectorExpression, lookups, retriever);
+                        ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(reader, ProjectorExpression, lookups, retriever, CancellationToken.None);
 
                         IEnumerable<T> enumerable = new ProjectionRowEnumerable<T>(enumerator);
 
@@ -272,7 +272,7 @@ namespace Signum.Engine.Linq
                     using (HeavyProfiler.Log("SQL", () => MainCommand.PlainSql()))
                     using (DbDataReader reader = await Executor.UnsafeExecuteDataReaderAsync(MainCommand, token: token))
                     {
-                        ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(reader, ProjectorExpression, lookups, retriever);
+                        ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(reader, ProjectorExpression, lookups, retriever, token);
 
                         IEnumerable<T> enumerable = new ProjectionRowEnumerable<T>(enumerator);
 
