@@ -1,4 +1,5 @@
-﻿.sf-search-footer {
+﻿
+.sf-search-footer {
     min-height: 50px;
 }
 
@@ -52,6 +53,7 @@ th.drag-right {
     border-left: 1px solid #eee;
     border-right: 1px solid #eee;
     cursor: pointer;
+    background-color:#f8f8f8;
 }
 
 .sf-search-results > thead > tr > th.noOrder{
@@ -202,6 +204,7 @@ td.centered-cell{
 
 .sf-search-results {
     margin-bottom: 0px;
+    border-collapse: separate;
 }
 
 .empty-icon {

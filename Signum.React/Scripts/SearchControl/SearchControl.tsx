@@ -49,6 +49,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     extraButtons?: (searchControl: SearchControlLoaded) => React.ReactNode
     onCreate?: () => Promise<void>;
     getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
+    maxResultsHeight?: React.CSSWideKeyword | any;
 }
 
 export interface SearchControlState {
@@ -88,6 +89,13 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         this.initialLoad(newProps.findOptions);
     }
 
+    doSearch(avoidOnSearchEvent?: boolean) {
+        this.searchControlLoaded && this.searchControlLoaded.doSearch(avoidOnSearchEvent);
+    }
+
+    doSearchPage1(avoidOnSearchEvent?: boolean) {
+        this.searchControlLoaded && this.searchControlLoaded.doSearchPage1(avoidOnSearchEvent);
+    }
 
     initialLoad(propsFindOptions: FindOptions) {
 
@@ -146,6 +154,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             querySettings={Finder.getSettings(fo.queryKey)}
             onCreate={this.props.onCreate}
             getViewPromise={this.props.getViewPromise}
+            maxResultsHeight={this.props.maxResultsHeight}
             />
     }
 }

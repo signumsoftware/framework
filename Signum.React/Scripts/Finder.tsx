@@ -865,7 +865,7 @@ export module ButtonBarQuery {
 }
 
 
-export const defaultPagination: Pagination = {
+export let defaultPagination: Pagination = {
     mode: "Paginate",
     elementsPerPage: 20,
     currentPage: 1,
