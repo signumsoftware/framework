@@ -46,6 +46,7 @@ export interface SearchControlLoadedProps {
     extraButtons?: (searchControl: SearchControlLoaded) => React.ReactNode
     onCreate?: () => Promise<void>;
     getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
+    maxResultsHeight?: React.CSSWideKeyword | any;
 }
 
 export interface SearchControlLoadedState {
@@ -302,9 +303,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     queryDescription={qd}
                     subTokensOptions={SubTokensOptions.CanElement}
                     close={this.handleColumnClose} />}
-                <div className="sf-search-results-container table-responsive" >
+                <div ref={d => this.containerDiv = d}
+                    className="sf-search-results-container table-responsive"
+                    style={{ maxHeight: this.props.maxResultsHeight }}>
                     <table className="sf-search-results table table-hover table-condensed" onContextMenu={this.props.showContextMenu != false ? this.handleOnContextMenu : undefined} >
-                        <thead>
+                        <thead ref={th => this.thead = th}>
                             {this.renderHeaders()}
                         </thead>
                         <tbody>
