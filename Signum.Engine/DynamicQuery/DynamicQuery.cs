@@ -240,7 +240,7 @@ namespace Signum.Engine.DynamicQuery
     { 
         #region ToDQueryable
 
-    public static DQueryable<T> ToDQueryable<T>(this IQueryable<T> query, QueryDescription description)
+        public static DQueryable<T> ToDQueryable<T>(this IQueryable<T> query, QueryDescription description)
         {
             ParameterExpression pe = Expression.Parameter(typeof(object));
 
