@@ -82,6 +82,7 @@
   <ItemGroup>
     <Compile Include="AboutTools.cs" />
     <Compile Include="ExpressionExpanderAttributes.cs" />
+    <Compile Include="ExpressionTrees\QueryableAsyncExtensions.cs" />
     <Compile Include="Extensions\ArgsExtensions.cs" />
     <Compile Include="Extensions\ArrayExtensions.cs" />
     <Compile Include="Extensions\ColorExtensions.cs" />

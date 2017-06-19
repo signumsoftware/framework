@@ -273,7 +273,7 @@ namespace Signum.Engine.Linq
         }
     }
 
-    internal enum AggregateFunction
+    internal enum AggregateSqlFunction
     {
         Average,
         StdDev,
@@ -287,11 +287,11 @@ namespace Signum.Engine.Linq
     internal class AggregateExpression : DbExpression
     {
         public readonly Expression Expression;
-        public readonly AggregateFunction AggregateFunction;
-        public AggregateExpression(Type type, Expression expression, AggregateFunction aggregateFunction)
+        public readonly AggregateSqlFunction AggregateFunction;
+        public AggregateExpression(Type type, Expression expression, AggregateSqlFunction aggregateFunction)
             : base(DbExpressionType.Aggregate, type)
         {
-            if (expression == null && aggregateFunction != AggregateFunction.Count)
+            if (expression == null && aggregateFunction != AggregateSqlFunction.Count)
                 throw new ArgumentNullException("expression");
 
             this.Expression = expression;
