@@ -41,9 +41,7 @@ namespace Signum.Analyzer
 
         public static bool IsLite(this TypeInfo e)
         {
-            var namedSymbol = e.Type as INamedTypeSymbol;
-
-            if (namedSymbol != null && namedSymbol.MetadataName == "Lite`1" && namedSymbol.ContainingNamespace.ToString() == "Signum.Entities")
+            if (e.Type is INamedTypeSymbol namedSymbol && namedSymbol.MetadataName == "Lite`1" && namedSymbol.ContainingNamespace.ToString() == "Signum.Entities")
             {
                 return true;
             }
@@ -59,8 +57,7 @@ namespace Signum.Analyzer
 
         public static bool IsEntity(this TypeInfo e)
         {
-            var namedSymbol = e.Type as INamedTypeSymbol;
-            if (namedSymbol != null && GetBaseTypesAndThis(namedSymbol).Any(t=>t.Name == "Entity" && t.ContainingNamespace.ToString() == "Signum.Entities"))
+            if (e.Type is INamedTypeSymbol namedSymbol && GetBaseTypesAndThis(namedSymbol).Any(t => t.Name == "Entity" && t.ContainingNamespace.ToString() == "Signum.Entities"))
             {
                 return true;
             }

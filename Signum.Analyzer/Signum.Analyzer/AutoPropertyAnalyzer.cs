@@ -71,6 +71,9 @@ namespace Signum.Analyzer
             if (field.AttributeLists.Any(al => al.Attributes.Any(a => AvoidAttributes.Contains(LastName(a.Name)))))
                 return false;
 
+            if (property.AccessorList == null)
+                return false;
+
             var getter = property.AccessorList.Accessors.Where(a => a.Kind() == SyntaxKind.GetAccessorDeclaration).Only();
             if (getter == null || !IsValidGetter(getter, field))
                 return false;
