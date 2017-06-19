@@ -268,6 +268,16 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             this.doSearchPage1();
     }
 
+    componentDidMount() {
+        this.containerDiv!.addEventListener("scroll", (e) => {
+            var translate = "translate(0," + this.containerDiv!.scrollTop + "px)";
+            this.thead!.style.transform = translate;
+        });
+    }
+
+
+    containerDiv?: HTMLDivElement;
+    thead?: HTMLTableSectionElement;
 
     render() {
 
