@@ -133,21 +133,21 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     // MAIN
-    doSearchPage1() {
+    doSearchPage1(avoidOnSearchEvent?: boolean) {
         const fo = this.props.findOptions;
 
         if (fo.pagination.mode == "Paginate")
             fo.pagination.currentPage = 1;
 
-        this.doSearch().done();
+        this.doSearch(avoidOnSearchEvent).done();
     };
 
 
-    abortableSearch = new AbortableRequest((abortController, request: QueryRequest) => Finder.API.executeQuery(request, abortController)); 
+    abortableSearch = new AbortableRequest((abortController, request: QueryRequest) => Finder.API.executeQuery(request, abortController));
 
-    doSearch(): Promise<void> {
+    doSearch(avoidOnSearchEvent?: boolean): Promise<void> {
         return this.getFindOptionsWithSFB().then(fop => {
-            if (this.props.onSearch)
+            if (!avoidOnSearchEvent && this.props.onSearch)
                 this.props.onSearch(fop);
 
             this.setState({ editingColumn: undefined });
@@ -211,12 +211,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         event.preventDefault();
         event.stopPropagation();
 
-        const td = DomUtils.closest(event.target as HTMLElement, "td, th") !;
-        const columnIndex = td.getAttribute("data-column-index") ? parseInt(td.getAttribute("data-column-index") !) : null;
+        const td = DomUtils.closest(event.target as HTMLElement, "td, th")!;
+        const columnIndex = td.getAttribute("data-column-index") ? parseInt(td.getAttribute("data-column-index")!) : null;
 
 
         const tr = td.parentNode as HTMLElement;
-        const rowIndex = tr.getAttribute("data-row-index") ? parseInt(tr.getAttribute("data-row-index") !) : null;
+        const rowIndex = tr.getAttribute("data-row-index") ? parseInt(tr.getAttribute("data-row-index")!) : null;
 
         this.setState({
             contextualMenu: {
