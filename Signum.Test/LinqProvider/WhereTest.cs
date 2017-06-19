@@ -193,6 +193,27 @@ namespace Signum.Test.LinqProvider
                           select a.ToLite()).ToList();
         }
 
+
+        [TestMethod]
+        public void WhereRefersTo1()
+        {
+            var lite = (Lite<BandEntity>)null;
+
+            var first = Database.Query<BandEntity>().Where(b => lite.RefersTo(b)).FirstOrDefault();
+
+            Assert.AreEqual(null, first);
+        }
+
+        [TestMethod]
+        public void WhereRefersTo2()
+        {
+            var entity = (BandEntity)null;
+
+            var first = Database.Query<BandEntity>().Where(b => b.ToLite().RefersTo(entity)).FirstOrDefault();
+
+            Assert.AreEqual(null, first);
+        }
+
         [TestMethod]
         public void WhereCase()
         {
