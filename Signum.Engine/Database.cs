@@ -1050,7 +1050,7 @@ namespace Signum.Engine
                     foreach (var group in groups)
                         result += Database.Query<T>().Where(a => group.Contains(a.Id)).UnsafeDelete();
 
-                    if (result != ids.Count())
+                    if (result != ids.Count)
                         throw new InvalidOperationException("not all the elements have been deleted");
                     tr.Commit();
                 }

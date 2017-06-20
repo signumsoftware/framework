@@ -133,7 +133,7 @@ namespace Signum.Engine.DynamicQuery
             return values.ToResultTable(cols, values.Length, new Pagination.All());
         }
 
-        public override IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest filters)
+        public override IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request)
         {
             throw new NotImplementedException();
         }
