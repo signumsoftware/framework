@@ -75,13 +75,13 @@ namespace Signum.Engine.DynamicQuery
         QueryDescription GetQueryDescription();
 
         ResultTable ExecuteQuery(QueryRequest request);
-        Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken token);
+        Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken cancellationToken);
         object ExecuteQueryValue(QueryValueRequest request);
-        Task<object> ExecuteQueryValueAsync(QueryValueRequest request, CancellationToken token);
+        Task<object> ExecuteQueryValueAsync(QueryValueRequest request, CancellationToken cancellationToken);
         Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request);
-        Task<Lite<Entity>> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken token);
+        Task<Lite<Entity>> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken cancellationToken);
         ResultTable ExecuteQueryGroup(QueryGroupRequest request);
-        Task<ResultTable> ExecuteQueryGroupAsync(QueryGroupRequest request, CancellationToken token);
+        Task<ResultTable> ExecuteQueryGroupAsync(QueryGroupRequest request, CancellationToken cancellationToken);
 
         IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request);
     }
@@ -668,7 +668,7 @@ namespace Signum.Engine.DynamicQuery
                 q = q.Take(pag.ElementsPerPage);
 
                 var listTask = q.ToListAsync();
-                var countTask = q.CountAsync();
+                var countTask = query.Query.CountAsync();
 
                 return new DEnumerableCount<T>(await listTask, query.Context, await countTask);
             }
@@ -702,10 +702,10 @@ namespace Signum.Engine.DynamicQuery
 
                 q = q.Take(pag.ElementsPerPage);
 
-                var listTask = q.ToList();
-                var countTask = q.Count();
+                var list = q.ToList();
+                var count = list.Count < pag.ElementsPerPage ? pag.ElementsPerPage : query.Query.Count();
 
-                return new DEnumerableCount<T>(listTask, query.Context, countTask);
+                return new DEnumerableCount<T>(list, query.Context, count);
             }
 
             throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination.GetType().Name));
