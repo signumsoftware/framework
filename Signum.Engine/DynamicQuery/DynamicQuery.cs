@@ -351,6 +351,12 @@ namespace Signum.Engine.DynamicQuery
             return new DEnumerable<T>(query.Query.ToList(), query.Context);
         }
 
+        public static async Task<DEnumerable<T>> ToDEnumerableAsync<T>(this DQueryable<T> query, CancellationToken token)
+        {
+            var list = await query.Query.ToListAsync(token);
+            return new DEnumerable<T>(list, query.Context);
+        }
+
         #region SelectMany
         public static DQueryable<T> SelectMany<T>(this DQueryable<T> query, List<CollectionElementToken> elementTokens)
         {
