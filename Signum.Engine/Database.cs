@@ -1579,7 +1579,7 @@ namespace Signum.Engine
         }
     }
 
-    internal class UpdateableConverter
+    internal static class UpdateableConverter
     {
         public static IQueryable<E> Convert<T, E>(IQueryable<T> query)
         {
