@@ -29,7 +29,7 @@ import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport
 
 export function start(options: { routes: JSX.Element[] }) {
 
-    options.routes.push(<ImportRoute path="~/chart/:queryName" onImportModule={() => _import("./Templates/ChartRequestPage")} />);
+    options.routes.push(<ImportRoute path="~/chart/:queryName" onImportModule={() => import("./Templates/ChartRequestPage")} />);
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
         if (!ctx.searchControl.props.showBarExtension || !AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting))
@@ -38,7 +38,7 @@ export function start(options: { routes: JSX.Element[] }) {
         return <ChartButton searchControl={ctx.searchControl}/>;
     });
 
-    Navigator.addSettings(new EntitySettings(ChartScriptEntity, e => _import('./ChartScript/ChartScript')));
+    Navigator.addSettings(new EntitySettings(ChartScriptEntity, e => import('./ChartScript/ChartScript')));
 
     UserChartClient.start({ routes: options.routes });
 }

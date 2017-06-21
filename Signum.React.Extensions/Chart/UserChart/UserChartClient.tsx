@@ -26,7 +26,7 @@ export function start(options: { routes: JSX.Element[] }) {
     UserAssetsClient.start({ routes: options.routes });
     UserAssetsClient.registerExportAssertLink(UserChartEntity);
 
-    options.routes.push(<ImportRoute path="~/userChart/:userChartId/:entity?" onImportModule={() => _import("./UserChartPage")} />);
+    options.routes.push(<ImportRoute path="~/userChart/:userChartId/:entity?" onImportModule={() => import("./UserChartPage")} />);
 
 
     ChartClient.ButtonBarChart.onButtonBarElements.push(ctx => {
@@ -65,7 +65,7 @@ export function start(options: { routes: JSX.Element[] }) {
         }, { isVisible: AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) }));
 
 
-    Navigator.addSettings(new EntitySettings(UserChartEntity, e => _import('./UserChart'), { isCreable: "Never" }));
+    Navigator.addSettings(new EntitySettings(UserChartEntity, e => import('./UserChart'), { isCreable: "Never" }));
 }
 
 

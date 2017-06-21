@@ -16,13 +16,13 @@ import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport
 
 
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<ImportRoute path="~/scheduler/view" onImportModule={() => _import("./SchedulerPanelPage")} />);
+    options.routes.push(<ImportRoute path="~/scheduler/view" onImportModule={() => import("./SchedulerPanelPage")} />);
 
-    Navigator.addSettings(new EntitySettings(ScheduledTaskEntity, e => _import('./Templates/ScheduledTask')));
-    Navigator.addSettings(new EntitySettings(ScheduleRuleMinutelyEntity, e => _import('./Templates/ScheduleRuleMinutely')));
-    Navigator.addSettings(new EntitySettings(ScheduleRuleWeekDaysEntity, e => _import('./Templates/ScheduleRuleWeekDays')));
-    Navigator.addSettings(new EntitySettings(ScheduleRuleMonthsEntity, e => _import('./Templates/ScheduleRuleMonths')));
-    Navigator.addSettings(new EntitySettings(HolidayCalendarEntity, e => _import('./Templates/HolidayCalendar')));
+    Navigator.addSettings(new EntitySettings(ScheduledTaskEntity, e => import('./Templates/ScheduledTask')));
+    Navigator.addSettings(new EntitySettings(ScheduleRuleMinutelyEntity, e => import('./Templates/ScheduleRuleMinutely')));
+    Navigator.addSettings(new EntitySettings(ScheduleRuleWeekDaysEntity, e => import('./Templates/ScheduleRuleWeekDays')));
+    Navigator.addSettings(new EntitySettings(ScheduleRuleMonthsEntity, e => import('./Templates/ScheduleRuleMonths')));
+    Navigator.addSettings(new EntitySettings(HolidayCalendarEntity, e => import('./Templates/HolidayCalendar')));
     
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(SchedulerPermission.ViewSchedulerPanel),

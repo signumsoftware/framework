@@ -20,21 +20,21 @@ require("./Processes.css");
 
 export function start(options: { routes: JSX.Element[], packages: boolean, packageOperations: boolean }) {
 
-    Navigator.addSettings(new EntitySettings(ProcessEntity, e => _import('./Templates/Process'), { isCreable : "Never" }));
+    Navigator.addSettings(new EntitySettings(ProcessEntity, e => import('./Templates/Process'), { isCreable : "Never" }));
 
     if (options.packages || options.packageOperations) {
-        Navigator.addSettings(new EntitySettings(PackageLineEntity, e => _import('./Templates/PackageLine')));
+        Navigator.addSettings(new EntitySettings(PackageLineEntity, e => import('./Templates/PackageLine')));
     }
 
     if (options.packages) {
-        Navigator.addSettings(new EntitySettings(PackageEntity, e => _import('./Templates/Package'), { isCreable: "Never" }));
+        Navigator.addSettings(new EntitySettings(PackageEntity, e => import('./Templates/Package'), { isCreable: "Never" }));
     }
 
     if (options.packageOperations) {
-        Navigator.addSettings(new EntitySettings(PackageOperationEntity, e => _import('./Templates/PackageOperation'), { isCreable: "Never" }));
+        Navigator.addSettings(new EntitySettings(PackageOperationEntity, e => import('./Templates/PackageOperation'), { isCreable: "Never" }));
     }
 
-    options.routes.push(<ImportRoute path="~/processes/view" onImportModule={() => _import("./ProcessPanelPage")} />);
+    options.routes.push(<ImportRoute path="~/processes/view" onImportModule={() => import("./ProcessPanelPage")} />);
     
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(ProcessPermission.ViewProcessPanel),

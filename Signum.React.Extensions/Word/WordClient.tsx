@@ -53,8 +53,8 @@ export function start(options: { routes: JSX.Element[] }) {
 
     constructorContextual[MultiEntityModel.typeName] = (wt, lites, req) => Navigator.view(MultiEntityModel.New({ entities: toMList(lites!) }));
 
-    Navigator.addSettings(new EntitySettings(WordTemplateEntity, e => _import('./Templates/WordTemplate')));
-    Navigator.addSettings(new EntitySettings(QueryModel, e => _import('./Templates/QueryModel')));
+    Navigator.addSettings(new EntitySettings(WordTemplateEntity, e => import('./Templates/WordTemplate')));
+    Navigator.addSettings(new EntitySettings(QueryModel, e => import('./Templates/QueryModel')));
 
     Operations.addSettings(new EntityOperationSettings(WordTemplateOperation.CreateWordReport, {
         onClick: ctx => {
