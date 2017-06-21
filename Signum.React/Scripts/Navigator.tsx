@@ -58,8 +58,8 @@ export namespace Expander {
 }
 
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<ImportRoute path="~/view/:type/:id" onImportModule={() => _import("./Frames/FramePage")} />);
-    options.routes.push(<ImportRoute path="~/create/:type" onImportModule={() => _import("./Frames/FramePage")} />);
+    options.routes.push(<ImportRoute path="~/view/:type/:id" onImportModule={() => import("./Frames/FramePage")} />);
+    options.routes.push(<ImportRoute path="~/create/:type" onImportModule={() => import("./Frames/FramePage")} />);
 }
 
 export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined) {
@@ -172,7 +172,7 @@ export class DynamicComponentViewDispatcher implements ViewDispatcher {
         const settings = getSettings(entity.Type) as EntitySettings<ModifiableEntity>;
 
         if (!settings || !settings.getViewPromise)
-            return new ViewPromise<ModifiableEntity>(_import('./Lines/DynamicComponent'));
+            return new ViewPromise<ModifiableEntity>(import('./Lines/DynamicComponent'));
 
         return settings.getViewPromise(entity).applyViewOverrides(settings);
     }
@@ -492,7 +492,7 @@ export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<
 }
 
 export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions) {
-    return _import<{ default: typeof FrameModal }>("./Frames/FrameModal")
+    return import("./Frames/FrameModal")
         .then(NP => NP.default.openView(entityOrPack, viewOptions || {}));
 }
 
@@ -517,7 +517,7 @@ export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityP
 }
 
 export function navigateDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
-    return _import<{ default: typeof FrameModal }>("./Frames/FrameModal")
+    return import("./Frames/FrameModal")
         .then(NP => NP.default.openNavigate(entityOrPack, navigateOptions || {}));
 }
 
@@ -707,7 +707,7 @@ export class ViewPromise<T extends ModifiableEntity> {
         if (promise)
             this.promise = promise
                 .then(mod => {
-                    return (ctx: TypeContext<T>) => React.createElement(mod.default, { ctx });
+                    return (ctx: TypeContext<T>): React.ReactElement<any> => React.createElement(mod.default, { ctx });
                 });
     }
 
@@ -722,7 +722,7 @@ export class ViewPromise<T extends ModifiableEntity> {
         var result = new ViewPromise<T>();
 
         result.promise = this.promise.then(func => {
-            return (ctx: TypeContext<T>) => {
+            return (ctx: TypeContext<T>): React.ReactElement<any> => {
                 var result = func(ctx);
                 return React.cloneElement(result, props);
             };

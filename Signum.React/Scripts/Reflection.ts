@@ -1133,7 +1133,7 @@ export class GraphExplorer {
         ge.modelState = modelState == undefined ? {} : { ...modelState };
         ge.isModifiableObject(e, initialPrefix);
         if (Dic.getValues(ge.modelState).length) //Assign remaining
-            e.error = { ...e.error, ...ge.modelState };
+            e.error = { ...e.error, ...ge.modelState } as any;
     }
 
     static collectModelState(e: ModifiableEntity, initialPrefix: string): ModelState {

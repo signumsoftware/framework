@@ -476,7 +476,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         var promise = this.props.avoidAutoRefresh ? Promise.resolve(undefined) :
             this.doSearch();
 
-        promise.then(() => this.setState({ markedRows: { ...this.state.markedRows, ...dic } })).done();
+        promise.then(() => this.setState({ markedRows: { ...this.state.markedRows, ...dic } as MarkedRowsDictionary })).done();
 
     }
 
