@@ -21,6 +21,7 @@ interface SearchControlState {
 export default class SearchPage extends React.Component<SearchPageProps, SearchControlState> {
 
     static marginDown = 130;
+    static minHeight = 600;
 
     constructor(props: SearchPageProps) {
         super(props);
@@ -49,12 +50,12 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchC
         var containerDiv = this.searchControl.searchControlLoaded.containerDiv;
 
         if (containerDiv) {
-
-            debugger;
-
+            
             var marginTop = containerDiv.offsetTop;
 
-            containerDiv.style.maxHeight = (window.innerHeight - (marginTop + SearchPage.marginDown)) + "px";
+            var maxHeight = (window.innerHeight - (marginTop + SearchPage.marginDown));
+
+            containerDiv.style.maxHeight = maxHeight < SearchPage.minHeight ? null : (maxHeight + "px");
         }
     }
 
