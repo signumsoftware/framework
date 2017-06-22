@@ -282,7 +282,7 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
                 .domain([min, max])
                 .range([0, width]);
 
-            var filteredData = data.filter(a => a.End > min && a.BeforeStart < max && (x(a.End) - x(a.BeforeStart)) > 2);
+            var filteredData = data.filter(a => a.End > min && a.BeforeStart < max && (x(a.End) - x(a.BeforeStart)) > 1);
 
             const selection = chart.selectAll<SVGGElement, any>("g.entry").data(filteredData, a => (a as HeavyProfilerEntry).FullIndex);
 
