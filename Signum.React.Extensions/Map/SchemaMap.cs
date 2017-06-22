@@ -36,7 +36,7 @@ namespace Signum.React.Maps
                              total_size_kb = getStats.TryGetC(t.Name)?.total_size_kb,
                              mlistTables = t.TablesMList().Select(ml => new MListTableInfo
                              {
-                                 niceName = ml.Route.PropertyInfo.NiceName(),
+                                 niceName = ml.EntityField.Field.Route.PropertyInfo.NiceName(),
                                  tableName = ml.Name.ToString(),
                                  rows = getStats.TryGetC(ml.Name)?.rows,
                                  total_size_kb = getStats.TryGetC(ml.Name)?.total_size_kb,
