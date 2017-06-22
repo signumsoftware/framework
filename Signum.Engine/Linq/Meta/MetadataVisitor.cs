@@ -396,10 +396,10 @@ namespace Signum.Engine.Linq
                     TableMList rt = (TableMList)st.Table;
 
 
-                    PropertyRoute element = rt.EntityField.Field.Route.Add("Item");
+                    PropertyRoute element = rt.PropertyRoute.Add("Item");
 
                     return new MetaProjectorExpression(c.Type, new MetaMListExpression(type, 
-                        new CleanMeta(Implementations.By(parentType), PropertyRoute.Root(rt.EntityField.Field.Route.RootType)), 
+                        new CleanMeta(Implementations.By(parentType), PropertyRoute.Root(rt.PropertyRoute.RootType)), 
                         new CleanMeta(element.TryGetImplementations(), element)));
                 }
             }

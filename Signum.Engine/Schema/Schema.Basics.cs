@@ -974,7 +974,9 @@ namespace Signum.Engine.Maps
         public Type CollectionType { get; private set; }
         public Func<IList> Constructor { get; private set; }
 
-        public EntityField EntityField { get; internal set; }
+        public PropertyRoute PropertyRoute { get; internal set; }
+        Func<Entity, IMListPrivate> getter;
+        public Func<Entity, IMListPrivate> Getter => getter ?? (getter = PropertyRoute.GetLambdaExpression<Entity, IMListPrivate>(true).Compile());
 
         public TableMList(Type collectionType)
         {

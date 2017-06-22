@@ -1027,7 +1027,7 @@ namespace Signum.Engine.Maps
             TableMListCache<T> result = new TableMListCache<T>()
             {
                 table = this,
-                Getter = ident => (MList<T>)EntityField.Getter(ident),
+                Getter = entity => (MList<T>)Getter(entity),
 
                 sqlDelete = suffix => "DELETE {0} WHERE {1} = {2}".FormatWith(Name, BackReference.Name.SqlEscape(), ParameterBuilder.GetParameterName(BackReference.Name + suffix)),
                 DeleteParameter = (ident, suffix) => pb.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name + suffix), ident.Id, this.BackReference.ReferenceTable.PrimaryKey),

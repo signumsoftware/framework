@@ -316,7 +316,7 @@ namespace Signum.Engine.Maps
                         var ef = new EntityField(type, fi) { Field = field };
 
                         if (field is FieldMList fml)
-                            fml.TableMList.EntityField = ef;
+                            fml.TableMList.PropertyRoute = route;
 
                         result.Add(fi.Name, ef);
                     }
