@@ -35,16 +35,19 @@ namespace Signum.Engine.DynamicQuery
         public Polymorphic<Dictionary<string, ExtensionInfo>> RegisteredExtensions =
             new Polymorphic<Dictionary<string, ExtensionInfo>>(PolymorphicMerger.InheritDictionaryInterfaces, null);
 
-     
+        public void RegisterQuery<T>(object queryName, Func<DynamicQueryCore<T>> lazyQueryCore, Implementations? entityImplementations = null)
+        {
+            queries[queryName] = new DynamicQueryBucket(queryName, lazyQueryCore, entityImplementations ?? DefaultImplementations(typeof(T), queryName));
+        }
 
         public void RegisterQuery<T>(object queryName, Func<IQueryable<T>> lazyQuery, Implementations? entityImplementations = null)
         {
             queries[queryName] = new DynamicQueryBucket(queryName, () => DynamicQueryCore.Auto(lazyQuery()), entityImplementations ?? DefaultImplementations(typeof(T), queryName));
         }
-
-        public void RegisterQuery<T>(object queryName, Func<DynamicQueryCore<T>> lazyQueryCore, Implementations? entityImplementations = null)
+    
+        public void RegisterQuery(object queryName, DynamicQueryBucket bucket)
         {
-            queries[queryName] = new DynamicQueryBucket(queryName, lazyQueryCore, entityImplementations ?? DefaultImplementations(typeof(T), queryName));
+            queries[queryName] = bucket;
         }
 
         static Implementations DefaultImplementations(Type type, object queryName)
@@ -261,25 +264,27 @@ namespace Signum.Engine.DynamicQuery
 
             return dic.Values.Where(a => a.Inherit || a.SourceType == parentType).Select(v => v.CreateToken(parent));
         }
-
-
+        
         public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Func<string> niceName = null)
         {
-            if (lambdaToMethodOrProperty.Body.NodeType == ExpressionType.Call)
+            using (HeavyProfiler.LogNoStackTrace("RegisterExpression"))
             {
-                var mi = ReflectionTools.GetMethodInfo(lambdaToMethodOrProperty);
+                if (lambdaToMethodOrProperty.Body.NodeType == ExpressionType.Call)
+                {
+                    var mi = ReflectionTools.GetMethodInfo(lambdaToMethodOrProperty);
 
-                AssertExtensionMethod(mi);
+                    AssertExtensionMethod(mi);
 
-                return RegisterExpression<E, S>(lambdaToMethodOrProperty, niceName ?? (() => mi.Name.NiceName()), mi.Name);
+                    return RegisterExpression<E, S>(lambdaToMethodOrProperty, niceName ?? (() => mi.Name.NiceName()), mi.Name);
+                }
+                else if (lambdaToMethodOrProperty.Body.NodeType == ExpressionType.MemberAccess)
+                {
+                    var pi = ReflectionTools.GetPropertyInfo(lambdaToMethodOrProperty);
+
+                    return RegisterExpression<E, S>(lambdaToMethodOrProperty, niceName ?? (() => pi.NiceName()), pi.Name);
+                }
+                else throw new InvalidOperationException("argument 'lambdaToMethodOrProperty' should be a simple lambda calling a method or property: {0}".FormatWith(lambdaToMethodOrProperty.ToString()));
             }
-            else if (lambdaToMethodOrProperty.Body.NodeType == ExpressionType.MemberAccess)
-            {
-                var pi = ReflectionTools.GetPropertyInfo(lambdaToMethodOrProperty);
-
-                return RegisterExpression<E, S>(lambdaToMethodOrProperty, niceName ?? (() => pi.NiceName()), pi.Name);
-            }
-            else throw new InvalidOperationException("argument 'lambdaToMethodOrProperty' should be a simple lambda calling a method or property: {0}".FormatWith(lambdaToMethodOrProperty.ToString()));
         }
 
         private static void AssertExtensionMethod(MethodInfo mi)
@@ -327,24 +332,20 @@ namespace Signum.Engine.DynamicQuery
         }
     }
 
+
     public static class DynamicQueryFluentInclude
     {
-        public static FluentInclude<T> WithQuery<T, Q>(this FluentInclude<T> fi, DynamicQueryManager dqm, Expression<Func<T, Q>> simpleQuerySelector)
+        public static FluentInclude<T> WithQuery<T>(this FluentInclude<T> fi, DynamicQueryManager dqm, Func<Expression<Func<T, object>>> lazyQuerySelector)
             where T : Entity
         {
-            dqm.RegisterQuery<Q>(typeof(T), () => Database.Query<T>().Select(simpleQuerySelector));
+            dqm.RegisterQuery(typeof(T), new DynamicQueryBucket(typeof(T), () => DynamicQueryCore.FromSelectorUntyped(lazyQuerySelector()), Implementations.By(typeof(T))));
             return fi;
         }
 
-        public static FluentInclude<T> WithQuery<T, Q>(this FluentInclude<T> fi, DynamicQueryManager dqm, Expression<Func<T, Q>> simpleQuerySelector, Action<AutoDynamicQueryCore<Q>> modifyQuery)
-            where T : Entity
+        public static FluentInclude<T> WithQuery<T, Q>(this FluentInclude<T> fi, DynamicQueryManager dqm, Func<DynamicQueryCore<Q>> lazyGetQuery)
+             where T : Entity
         {
-            dqm.RegisterQuery<Q>(typeof(T), () =>
-            {
-                var autoQuery = DynamicQueryCore.Auto(Database.Query<T>().Select(simpleQuerySelector));
-                modifyQuery(autoQuery);
-                return autoQuery;
-            });
+            dqm.RegisterQuery<Q>(typeof(T), () => lazyGetQuery());
             return fi;
         }
 

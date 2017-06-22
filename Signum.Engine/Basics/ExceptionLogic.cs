@@ -21,16 +21,16 @@ namespace Signum.Engine.Basics
 		{
 			if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
 			{
-				sb.Include<ExceptionEntity>()
-					.WithQuery(dqm, e => new
-					{
-						Entity = e,
-						e.Id,
-						e.CreationDate,
-						e.ExceptionType,
-						e.ExceptionMessage,
-						e.StackTraceHash,
-					});
+                sb.Include<ExceptionEntity>()
+                    .WithQuery(dqm, () => e => new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.CreationDate,
+                        e.ExceptionType,
+                        e.ExceptionMessage,
+                        e.StackTraceHash,
+                    });
 
 				DefaultEnvironment = "Default"; 
 			}

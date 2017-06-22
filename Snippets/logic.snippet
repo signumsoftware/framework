@@ -54,8 +54,8 @@
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<$entityName$Entity>()
-					.WithSave($entityName$Operation.Save)
-					.WithQuery(dqm, $entityParam$ => new
+                    .WithSave($entityName$Operation.Save)
+                    .WithQuery(dqm, () => $entityParam$ => new
                     {
                         Entity = $entityParam$,
                         $entityParam$.Id

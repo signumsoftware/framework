@@ -44,7 +44,7 @@ namespace Signum.Engine
             if (sb.NotDefined(typeof(SymbolLogic<T>).GetMethod("Start")))
             {
                 sb.Include<T>()
-                    .WithQuery(dqm, t => new
+                    .WithQuery(dqm, () => t => new
                     {
                         Entity = t,
                         t.Id,

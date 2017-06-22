@@ -86,7 +86,7 @@ namespace Signum.Engine.Operations
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<OperationLogEntity>()
-                    .WithQuery(dqm, lo => new
+                    .WithQuery(dqm, () => lo => new
                     {
                         Entity = lo,
                         lo.Id,
@@ -101,7 +101,7 @@ namespace Signum.Engine.Operations
                 SymbolLogic<OperationSymbol>.Start(sb, dqm, () => RegisteredOperations);
 
                 sb.Include<OperationSymbol>()
-                    .WithQuery(dqm, os => new
+                    .WithQuery(dqm, () => os => new
                     {
                         Entity = os,
                         os.Id,

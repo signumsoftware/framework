@@ -98,11 +98,30 @@ namespace Signum.Engine.DynamicQuery
         {
             return new ManualDynamicQueryCore<T>(execute);
         }
+        
+        internal static IDynamicQueryCore FromSelectorUntyped<T>(Expression<Func<T, object>> expression) 
+            where T : Entity
+        {
+            var eType = expression.Parameters.SingleEx().Type;
+            var tType = expression.Body.Type;
+            var typedSelector = Expression.Lambda(expression.Body, expression.Parameters);
+
+            return giAutoPrivate.GetInvoker(eType, tType)(typedSelector);
+        }
+
+        static readonly GenericInvoker<Func<LambdaExpression, IDynamicQueryCore>> giAutoPrivate =
+            new GenericInvoker<Func<LambdaExpression, IDynamicQueryCore>>(lambda => FromSelector<TypeEntity, object>((Expression<Func<TypeEntity, object>>)lambda));
+        public static AutoDynamicQueryCore<T> FromSelector<E, T>(Expression<Func<E, T>> selector)
+            where E : Entity
+        {
+            return new AutoDynamicQueryCore<T>(Database.Query<E>().Select(selector));
+        }
 
         public static Dictionary<string, Meta> QueryMetadata(IQueryable query)
-        {  
+        {
             return MetadataVisitor.GatherMetadata(query.Expression);
         }
+
     }
 
     public abstract class DynamicQueryCore<T> : IDynamicQueryCore
@@ -344,7 +363,7 @@ namespace Signum.Engine.DynamicQuery
                     (Expression)Expression.Convert(ctor, typeof(object)), context.Parameter);
         }
         
-	    #endregion
+        #endregion
 
         public static DEnumerable<T> ToDEnumerable<T>(this DQueryable<T> query)
         {

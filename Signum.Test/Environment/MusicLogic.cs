@@ -26,7 +26,7 @@ namespace Signum.Test.Environment
                 }
 
                 sb.Include<AlbumEntity>()
-                    .WithQuery(dqm, a => new
+                    .WithQuery(dqm, () => a => new
                     {
                         Entity = a,
                         a.Id,
@@ -37,7 +37,7 @@ namespace Signum.Test.Environment
                     });
 
                 sb.Include<NoteWithDateEntity>()
-                    .WithQuery(dqm, a => new
+                    .WithQuery(dqm, () => a => new
                     {
                         Entity = a,
                         a.Id,
@@ -52,7 +52,7 @@ namespace Signum.Test.Environment
 
                 MinimumExtensions.IncludeFunction(sb.Schema.Assets);
                 sb.Include<ArtistEntity>()
-                    .WithQuery(dqm, a => new
+                    .WithQuery(dqm, () => a => new
                     {
                         Entity = a,
                         a.Id,
@@ -66,7 +66,7 @@ namespace Signum.Test.Environment
                 dqm.RegisterExpression((IAuthorEntity au) => Database.Query<AlbumEntity>().Where(a => a.Author == au), () => typeof(AlbumEntity).NicePluralName(), "Albums");
 
                 sb.Include<BandEntity>()
-                    .WithQuery(dqm, a => new
+                    .WithQuery(dqm, () => a => new
                     {
                         Entity = a,
                         a.Id,
@@ -75,7 +75,7 @@ namespace Signum.Test.Environment
                     });
 
                 sb.Include<LabelEntity>()
-                    .WithQuery(dqm, a => new
+                    .WithQuery(dqm, () => a => new
                     {
                         Entity = a,
                         a.Id,
@@ -83,7 +83,7 @@ namespace Signum.Test.Environment
                     });
 
                 sb.Include<AmericanMusicAwardEntity>()
-                    .WithQuery(dqm, a => new
+                    .WithQuery(dqm, () => a => new
                     {
                         Entity = a,
                         a.Id,
@@ -93,7 +93,7 @@ namespace Signum.Test.Environment
                     });
 
                 sb.Include<GrammyAwardEntity>()
-                    .WithQuery(dqm, a => new
+                    .WithQuery(dqm, () => a => new
                     {
                         Entity = a,
                         a.Id,
@@ -103,7 +103,7 @@ namespace Signum.Test.Environment
                     });
 
                 sb.Include<PersonalAwardEntity>()
-                    .WithQuery(dqm, a => new
+                    .WithQuery(dqm, () => a => new
                     {
                         Entity = a,
                         a.Id,
@@ -113,7 +113,7 @@ namespace Signum.Test.Environment
                     });
 
                 sb.Include<AwardNominationEntity>()
-                    .WithQuery(dqm, a => new
+                    .WithQuery(dqm, () => a => new
                     {
                         Entity = a,
                         a.Id,
