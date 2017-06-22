@@ -24,7 +24,7 @@ namespace Signum.Engine.Excel
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             sb.Include<ExcelAttachmentEntity>()
-                .WithQuery(dqm, s => new
+                .WithQuery(dqm, () => s => new
                 {
                     Entity = s,
                     s.Id,

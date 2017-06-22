@@ -65,7 +65,7 @@ namespace Signum.Engine.Workflow
 
                 sb.Include<WorkflowEventTaskEntity>()
                     .WithDelete(WorkflowEventTaskOperation.Delete)
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -92,7 +92,7 @@ namespace Signum.Engine.Workflow
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
 
                 sb.Include<WorkflowEventTaskConditionResultEntity>()
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,

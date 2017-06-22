@@ -26,7 +26,7 @@ namespace Signum.Engine.Dynamic
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<DynamicTypeConditionSymbolEntity>()
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -35,7 +35,7 @@ namespace Signum.Engine.Dynamic
 
                 sb.Include<DynamicTypeConditionEntity>()
                     .WithSave(DynamicTypeConditionOperation.Save)
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,

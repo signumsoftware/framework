@@ -71,7 +71,7 @@ namespace Signum.Engine.Mailing
                 Schema.Current.WhenIncluded<ProcessEntity>(() => EmailPackageLogic.Start(sb, dqm));
 
                 sb.Include<EmailMessageEntity>()
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,

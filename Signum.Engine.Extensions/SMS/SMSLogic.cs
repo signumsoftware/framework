@@ -81,7 +81,7 @@ namespace Signum.Engine.SMS
                 SMSLogic.Provider = provider;
 
                 sb.Include<SMSMessageEntity>()
-                    .WithQuery(dqm, m => new
+                    .WithQuery(dqm, () => m => new
                     {
                         Entity = m,
                         m.Id,
@@ -93,7 +93,7 @@ namespace Signum.Engine.SMS
                     });
 
                 sb.Include<SMSTemplateEntity>()
-                    .WithQuery(dqm, t => new
+                    .WithQuery(dqm, () => t => new
                     {
                         Entity = t,
                         t.Id,

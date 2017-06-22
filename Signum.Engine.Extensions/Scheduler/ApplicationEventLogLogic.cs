@@ -27,7 +27,7 @@ namespace Signum.Engine.Scheduler
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<ApplicationEventLogEntity>()
-                    .WithQuery(dqm, s => new
+                    .WithQuery(dqm, () => s => new
                     {
                         Entity = s,
                         s.Id,

@@ -28,7 +28,7 @@ namespace Signum.Engine.Migrations
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<SqlMigrationEntity>()
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -36,7 +36,7 @@ namespace Signum.Engine.Migrations
                     });
 
                 sb.Include<CSharpMigrationEntity>()
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -45,7 +45,7 @@ namespace Signum.Engine.Migrations
                     });
 
                 sb.Include<ExecutedLoadProcessEntity>()
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,

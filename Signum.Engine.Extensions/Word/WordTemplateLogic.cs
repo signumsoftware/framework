@@ -67,7 +67,7 @@ namespace Signum.Engine.Word
                 sb.Include<WordTemplateEntity>()
                     .WithSave(WordTemplateOperation.Save)
                     .WithDelete(WordTemplateOperation.Delete)
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -83,14 +83,14 @@ namespace Signum.Engine.Word
                 SymbolLogic<WordConverterSymbol>.Start(sb, dqm, () => Converters.Keys.ToHashSet());
 
                 sb.Include<WordTransformerSymbol>()
-                .WithQuery(dqm, f => new
+                .WithQuery(dqm, () => f => new
                 {
                     Entity = f,
                     f.Key
                 });
 
                 sb.Include<WordConverterSymbol>()
-                    .WithQuery(dqm, f => new
+                    .WithQuery(dqm, () => f => new
                     {
                         Entity = f,
                         f.Key

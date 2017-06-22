@@ -79,7 +79,7 @@ namespace Signum.Engine.Authorization
                 sb.Include<RoleEntity>()
                     .WithSave(RoleOperation.Save)
                     .WithDelete(RoleOperation.Delete)
-                    .WithQuery(dqm, r => new
+                    .WithQuery(dqm, () => r => new
                     {
                         Entity = r,
                         r.Id,
@@ -126,7 +126,7 @@ namespace Signum.Engine.Authorization
                         Refered = rc,
                     });
                 sb.Include<UserEntity>()
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,

@@ -38,7 +38,7 @@ namespace Signum.Engine.Excel
                     sb.Include<ExcelReportEntity>()
                         .WithSave(ExcelReportOperation.Save)
                         .WithDelete(ExcelReportOperation.Delete)
-                        .WithQuery(dqm, s => new
+                        .WithQuery(dqm, () => s => new
                         {
                             Entity = s,
                             s.Id,

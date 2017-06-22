@@ -126,7 +126,7 @@ namespace Signum.Engine.Workflow
             {
                 sb.Include<CaseEntity>()
                     .WithExpressionFrom(dqm, (WorkflowEntity w) => w.Cases())
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -137,7 +137,7 @@ namespace Signum.Engine.Workflow
 
                 sb.Include<CaseTagTypeEntity>()
                     .WithSave(CaseTagTypeOperation.Save)
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -148,7 +148,7 @@ namespace Signum.Engine.Workflow
 
                 sb.Include<CaseTagEntity>()
                     .WithExpressionFrom(dqm, (CaseEntity ce) => ce.Tags())
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -185,7 +185,7 @@ namespace Signum.Engine.Workflow
                     .WithExpressionFrom(dqm, (WorkflowActivityEntity c) => c.CaseActivities())
                     .WithExpressionFrom(dqm, (CaseEntity c) => c.CaseActivities())
                     .WithExpressionFrom(dqm, (CaseActivityEntity c) => c.NextActivities())
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -220,7 +220,7 @@ namespace Signum.Engine.Workflow
 
                 sb.Include<CaseNotificationEntity>()
                     .WithExpressionFrom(dqm, (CaseActivityEntity c) => c.Notifications())
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,

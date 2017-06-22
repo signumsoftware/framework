@@ -143,7 +143,7 @@ namespace Signum.Engine.Word
                 sb.Schema.Generating += Schema_Generating;
                 sb.Schema.Synchronizing += Schema_Synchronizing;
                 sb.Include<SystemWordTemplateEntity>()
-                    .WithQuery(dqm, se => new
+                    .WithQuery(dqm, () => se => new
                     {
                         Entity = se,
                         se.Id,

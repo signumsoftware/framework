@@ -31,7 +31,7 @@ namespace Signum.Engine.Dynamic
                     .WithUniqueIndex(a => new { a.ViewName, a.EntityType })
                     .WithSave(DynamicViewOperation.Save)
                     .WithDelete(DynamicViewOperation.Delete)
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -62,7 +62,7 @@ namespace Signum.Engine.Dynamic
                 sb.Include<DynamicViewSelectorEntity>()
                     .WithSave(DynamicViewSelectorOperation.Save)
                     .WithDelete(DynamicViewSelectorOperation.Delete)
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -76,7 +76,7 @@ namespace Signum.Engine.Dynamic
                 sb.Include<DynamicViewOverrideEntity>()
                    .WithSave(DynamicViewOverrideOperation.Save)
                    .WithDelete(DynamicViewOverrideOperation.Delete)
-                   .WithQuery(dqm, e => new
+                   .WithQuery(dqm, () => e => new
                    {
                        Entity = e,
                        e.Id,
