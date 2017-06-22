@@ -86,9 +86,7 @@ namespace Signum.Engine.Maps
 
             if (Mixins != null)
                 columns.AddRange(Mixins.Values.SelectMany(m => m.Fields.Values).SelectMany(f => f.Field.Columns()).ToDictionaryEx(c => c.Name, errorSuffix), errorSuffix);
-
-            SetFullMListGetter();
-
+            
             Columns = columns;
 
             inserterDisableIdentity = new ResetLazy<InsertCacheDisableIdentity>(() => InsertCacheDisableIdentity.InitializeInsertDisableIdentity(this));
@@ -201,24 +199,6 @@ namespace Signum.Engine.Maps
         {
             return this.AllFields().SelectMany(f => f.Field.TablesMList()); 
         }
-
-        public void SetFullMListGetter()
-        {
-            var root = PropertyRoute.Root(this.Type);
-
-            foreach (var field in this.Fields.Values)
-            {
-                field.Field.SetFullMListGetter(root.Add(field.FieldInfo), field.Getter);
-            }
-
-            if (this.Mixins != null)
-            {
-                foreach (var kvp in this.Mixins)
-                {
-                    kvp.Value.SetFullMListGetter(root.Add(kvp.Key), kvp.Value.Getter);
-                }
-            }
-        }
         
         public FieldTicks Ticks { get; internal set; }
         public FieldPrimaryKey PrimaryKey { get; internal set; }
@@ -240,14 +220,15 @@ namespace Signum.Engine.Maps
     {
         public Field Field { get; set; }
         public FieldInfo FieldInfo { get; private set; }
-        public Func<object, object> Getter { get; private set; }
-        //public Action<object, object> Setter { get; private set; }
+
+        Type type;
+        Func<object, object> getter;
+        public Func<object, object> Getter => getter ?? (getter = ReflectionTools.CreateGetterUntyped(type, FieldInfo));
 
         public EntityField(Type type, FieldInfo fi)
         {
             FieldInfo = fi;
-            Getter = ReflectionTools.CreateGetterUntyped(type, fi);
-            //Setter = ReflectionTools.CreateSetterUntyped(type, fi);
+            this.type = type;
         }
 
         public override string ToString()
@@ -259,12 +240,15 @@ namespace Signum.Engine.Maps
     public abstract partial class Field
     {
         public Type FieldType { get; private set; }
+        public PropertyRoute Route { get; private set; }
         public UniqueIndex UniqueIndex { get; set; }
 
-        public Field(Type fieldType)
+        public Field(PropertyRoute route, Type fieldType = null)
         {
-            FieldType = fieldType;
+            this.Route = route;
+            this.FieldType = fieldType ?? route.Type;
         }
+
 
         public abstract IEnumerable<IColumn> Columns();
 
@@ -295,7 +279,6 @@ namespace Signum.Engine.Maps
         internal abstract IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables();
 
         internal abstract IEnumerable<TableMList> TablesMList();
-        internal abstract void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter);
     }
 
     public static class FieldExtensions
@@ -373,8 +356,8 @@ namespace Signum.Engine.Maps
         public string Default { get; set; }
 
         Table table;
-        public FieldPrimaryKey(Type fieldType, Table table)
-            : base(fieldType)
+        public FieldPrimaryKey(PropertyRoute route, Table table)
+            : base(route)
         {
             this.table = table;
         }
@@ -406,10 +389,6 @@ namespace Signum.Engine.Maps
         {
             return Enumerable.Empty<TableMList>();
         }
-
-        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
-        {
-        }
     }
 
     public partial class FieldValue : Field, IColumn
@@ -428,8 +407,8 @@ namespace Signum.Engine.Maps
         public bool AvoidForeignKey { get { return false; } }
         public string Default { get; set; }
 
-        public FieldValue(Type fieldType)
-            : base(fieldType)
+        public FieldValue(PropertyRoute route, Type fieldType = null)
+            : base(route, fieldType)
         {
         }
 
@@ -458,11 +437,6 @@ namespace Signum.Engine.Maps
             return Enumerable.Empty<TableMList>();
         }
 
-        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
-        {
-            
-        }
-
         public virtual Type Type
         {
             get { return this.Nullable ? this.FieldType.Nullify() : this.FieldType; }
@@ -473,8 +447,8 @@ namespace Signum.Engine.Maps
     {
         public new Type Type { get; set; }
 
-        public FieldTicks(Type fieldType)
-            : base(fieldType)
+        public FieldTicks(PropertyRoute route)
+            : base(route)
         {
         }
     }
@@ -506,8 +480,8 @@ namespace Signum.Engine.Maps
 
         public Func<EmbeddedEntity> Constructor { get; private set; }
 
-        public FieldEmbedded(Type fieldType)
-            : base(fieldType)
+        public FieldEmbedded(PropertyRoute route)
+            : base(route)
         {
         }
 
@@ -575,24 +549,6 @@ namespace Signum.Engine.Maps
         {
             return EmbeddedFields.Values.SelectMany(e => e.Field.TablesMList()); 
         }
-
-        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
-        {
-            foreach (var item in EmbeddedFields.Values)
-            {
-                item.Field.SetFullMListGetter(route.Add(item.FieldInfo), entity =>
-                {
-                    var embedded = getter(entity);
-
-
-                    if (embedded == null)
-                        return null;
-
-                    return item.Getter(embedded);
-                }); 
-            }
-
-        }
     }
 
     public partial class FieldMixin : Field, IFieldFinder
@@ -601,8 +557,8 @@ namespace Signum.Engine.Maps
 
         public Table MainEntityTable;
 
-        public FieldMixin(Type fieldType, Table mainEntityTable)
-            : base(fieldType)
+        public FieldMixin(PropertyRoute route, Table mainEntityTable)
+            : base(route)
         {
             this.MainEntityTable = mainEntityTable;
         }
@@ -669,14 +625,6 @@ namespace Signum.Engine.Maps
             return Fields.Values.SelectMany(e => e.Field.TablesMList());
         }
 
-        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
-        {
-            foreach (var field in Fields.Values)
-            {
-                field.Field.SetFullMListGetter(route.Add(field.FieldInfo), entity => field.Getter(getter(entity)));
-            }
-        }
-
         internal MixinEntity Getter(Entity ident)
         {
             return ((Entity)ident).GetMixin(FieldType);
@@ -705,7 +653,7 @@ namespace Signum.Engine.Maps
         public bool AvoidExpandOnRetrieving { get; set; }
         public string Default { get; set; }
 
-        public FieldReference(Type fieldType) : base(fieldType) { }
+        public FieldReference(PropertyRoute route, Type fieldType = null) : base(route, fieldType) { }
 
         public override string ToString()
         {
@@ -758,15 +706,11 @@ namespace Signum.Engine.Maps
         {
             return Enumerable.Empty<TableMList>();
         }
-
-        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
-        {
-        }
     }
 
     public partial class FieldEnum : FieldReference
     {
-        public FieldEnum(Type fieldType) : base(fieldType) { }
+        public FieldEnum(PropertyRoute route) : base(route) { }
 
         public override string ToString()
         {
@@ -794,10 +738,6 @@ namespace Signum.Engine.Maps
         {
             return Enumerable.Empty<TableMList>();
         }
-
-        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
-        {
-        }
     }
 
     public partial class FieldImplementedBy : Field, IFieldReference
@@ -808,7 +748,7 @@ namespace Signum.Engine.Maps
 
         public Dictionary<Type, ImplementationColumn> ImplementationColumns { get; set; }
 
-        public FieldImplementedBy(Type fieldType) : base(fieldType) { }
+        public FieldImplementedBy(PropertyRoute route) : base(route) { }
 
         public override string ToString()
         {
@@ -854,10 +794,6 @@ namespace Signum.Engine.Maps
         {
             return Enumerable.Empty<TableMList>();
         }
-
-        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
-        {
-        }
     }
 
     public partial class FieldImplementedByAll : Field, IFieldReference
@@ -869,7 +805,7 @@ namespace Signum.Engine.Maps
         public ImplementationStringColumn Column { get; set; }
         public ImplementationColumn ColumnType { get; set; }
 
-        public FieldImplementedByAll(Type fieldType) : base(fieldType) { }
+        public FieldImplementedByAll(PropertyRoute route) : base(route) { }
 
         public override IEnumerable<IColumn> Columns()
         {
@@ -913,10 +849,6 @@ namespace Signum.Engine.Maps
         {
             return Enumerable.Empty<TableMList>();
         }
-
-        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
-        {
-        }
     }
 
     public partial class ImplementationColumn : IColumn
@@ -959,7 +891,7 @@ namespace Signum.Engine.Maps
     {
         public TableMList TableMList { get; set; }
 
-        public FieldMList(Type fieldType) : base(fieldType) { }
+        public FieldMList(PropertyRoute route) : base(route) { }
 
         public override string ToString()
         {
@@ -1008,12 +940,6 @@ namespace Signum.Engine.Maps
         {
             return new[] { TableMList };
         }
-
-        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
-        {
-            TableMList.Route = route;
-            TableMList.FullGetter = getter;
-        }
     }
 
     public partial class TableMList : ITable, IFieldFinder, ITablePrivate
@@ -1048,8 +974,7 @@ namespace Signum.Engine.Maps
         public Type CollectionType { get; private set; }
         public Func<IList> Constructor { get; private set; }
 
-        public Func<Entity, object> FullGetter { get; internal set; }
-        public PropertyRoute Route { get; internal set; }
+        public EntityField EntityField { get; internal set; }
 
         public TableMList(Type collectionType)
         {

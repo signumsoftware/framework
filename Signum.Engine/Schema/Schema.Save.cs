@@ -1018,7 +1018,6 @@ namespace Signum.Engine.Maps
         static GenericInvoker<Func<TableMList, IMListCache>> giCreateCache =
             new GenericInvoker<Func<TableMList, IMListCache>>((TableMList rt) => rt.CreateCache<int>());
 
-
         internal Lazy<IMListCache> cache;
 
         TableMListCache<T> CreateCache<T>()
@@ -1028,7 +1027,7 @@ namespace Signum.Engine.Maps
             TableMListCache<T> result = new TableMListCache<T>()
             {
                 table = this,
-                Getter = ident => (MList<T>)FullGetter(ident),
+                Getter = ident => (MList<T>)EntityField.Getter(ident),
 
                 sqlDelete = suffix => "DELETE {0} WHERE {1} = {2}".FormatWith(Name, BackReference.Name.SqlEscape(), ParameterBuilder.GetParameterName(BackReference.Name + suffix)),
                 DeleteParameter = (ident, suffix) => pb.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name + suffix), ident.Id, this.BackReference.ReferenceTable.PrimaryKey),

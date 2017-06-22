@@ -396,10 +396,10 @@ namespace Signum.Engine.Linq
                     TableMList rt = (TableMList)st.Table;
 
 
-                    PropertyRoute element = rt.Route.Add("Item");
+                    PropertyRoute element = rt.EntityField.Field.Route.Add("Item");
 
                     return new MetaProjectorExpression(c.Type, new MetaMListExpression(type, 
-                        new CleanMeta(Implementations.By(parentType), PropertyRoute.Root(rt.Route.RootType)), 
+                        new CleanMeta(Implementations.By(parentType), PropertyRoute.Root(rt.EntityField.Field.Route.RootType)), 
                         new CleanMeta(element.TryGetImplementations(), element)));
                 }
             }
@@ -437,7 +437,7 @@ namespace Signum.Engine.Linq
                     if (nex.Members != null)
                     {
                         PropertyInfo pi = (PropertyInfo)member;
-                        return nex.Members.Zip(nex.Arguments).SingleEx(p => ReflectionTools.PropertyEquals((PropertyInfo)p.Item1, pi)).Item2;
+                        return nex.Members.Zip(nex.Arguments).SingleEx(p => ReflectionTools.PropertyEquals((PropertyInfo)p.first, pi)).second;
                     }
                     break;
             }
