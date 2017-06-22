@@ -22,6 +22,7 @@ interface FilterBuilderProps extends React.Props<FilterBuilder> {
     onTokenChanged?: (token: QueryToken) => void;
     lastToken?: QueryToken;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
+    onHeightChanged?: () => void;
 }
 
 export default class FilterBuilder extends React.Component<FilterBuilderProps, {}>  {
@@ -39,20 +40,25 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps, {
         if (this.props.onFiltersChanged)
             this.props.onFiltersChanged(this.props.filterOptions);
 
-        this.forceUpdate();
+        this.forceUpdate(() => this.handleHeightChanged());
     };
 
     handlerDeleteFilter = (filter: FilterOptionParsed) => {
         this.props.filterOptions.remove(filter);
         if (this.props.onFiltersChanged)
             this.props.onFiltersChanged(this.props.filterOptions);
-        this.forceUpdate();
+        this.forceUpdate(() => this.handleHeightChanged());
     };
 
     handleFilterChanged = (filter: FilterOptionParsed) => {
         if (this.props.onFiltersChanged)
             this.props.onFiltersChanged(this.props.filterOptions);
     };
+
+    handleHeightChanged = () => {
+        if (this.props.onHeightChanged)
+            this.props.onHeightChanged();
+    }
 
     render() {
 

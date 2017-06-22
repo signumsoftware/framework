@@ -20,6 +20,8 @@ interface SearchControlState {
 
 export default class SearchPage extends React.Component<SearchPageProps, SearchControlState> {
 
+    static marginDown = 130;
+
     constructor(props: SearchPageProps) {
         super(props);
         this.state = this.calculateState(this.props);
@@ -31,10 +33,31 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchC
         this.setState(this.calculateState(nextProps));
     }
 
+    componentWillMount() {
+        window.addEventListener('resize', this.onResize);
+    }
+
     
     componentWillUnmount() {
-        Navigator.setTitle();
+        window.removeEventListener('resize', this.onResize);
+
+        Navigator.setTitle();     
     }
+
+    onResize = () => {
+
+        var containerDiv = this.searchControl.searchControlLoaded.containerDiv;
+
+        if (containerDiv) {
+
+            debugger;
+
+            var marginTop = containerDiv.offsetTop;
+
+            containerDiv.style.maxHeight = (window.innerHeight - (marginTop + SearchPage.marginDown)) + "px";
+        }
+    }
+
 
     calculateState(props: SearchPageProps): SearchControlState {
 
@@ -75,6 +98,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchC
                     </a>
                 </h2>
                 <SearchControl ref={(e: SearchControl) => this.searchControl = e}
+                    onHeighChanged={this.onResize}
                     throwIfNotFindable={true}
                     showBarExtension={true}
                     hideFullScreenButton={true}

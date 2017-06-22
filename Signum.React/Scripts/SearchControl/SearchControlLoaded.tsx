@@ -37,6 +37,7 @@ export interface SearchControlLoadedProps {
     entityFormatter?: EntityFormatter;
     onSelectionChanged?: (entity: Lite<Entity>[]) => void;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
+    onHeighChanged?: () => void;
     onSearch?: (fo: FindOptionsParsed) => void;
     onResult?: (table: ResultTable) => void;
     hideButtonBar?: boolean;
@@ -152,7 +153,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             if (!avoidOnSearchEvent && this.props.onSearch)
                 this.props.onSearch(fop);
 
-            this.setState({ editingColumn: undefined });
+            this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
             return this.abortableSearch.getData(this.getQueryRequest()).then(rt => {
                 this.setState({
                     resultTable: rt,
@@ -251,7 +252,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     handleColumnClose = () => {
-        this.setState({ editingColumn: undefined });
+        this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
     }
 
     handleFilterTokenChanged = (token: QueryToken) => {
@@ -261,7 +262,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     handleFiltersChanged = () => {
         if (this.props.onFiltersChanged)
-            this.props.onFiltersChanged(this.props.findOptions.filterOptions);
+            this.props.onFiltersChanged(this.props.findOptions.filterOptions); 
+         
+    }
+
+    handleHeightChanged = () => {
+        if (this.props.onHeighChanged)
+            this.props.onHeighChanged();
     }
 
     handleFiltersKeyUp = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -296,12 +303,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     <div onKeyUp={this.handleFiltersKeyUp}>
                         {
                             fo.showFilters ? <FilterBuilder
-                                queryDescription={qd}
-                                filterOptions={fo.filterOptions}
-                                lastToken={this.state.lastToken}
-                                subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement}
-                                onTokenChanged={this.handleFilterTokenChanged}
-                                onFiltersChanged={this.handleFiltersChanged} /> :
+                            queryDescription={qd}
+                            filterOptions={fo.filterOptions}
+                            lastToken={this.state.lastToken}
+                            subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement}
+                            onTokenChanged={this.handleFilterTokenChanged}
+                            onFiltersChanged={this.handleFiltersChanged}
+                            onHeightChanged={this.handleHeightChanged}
+                        /> :
                                 sfb && <div className="simple-filter-builder">{sfb}</div>
                         }
                     </div>
@@ -338,7 +347,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         this.getFindOptionsWithSFB().then(() => {
             this.simpleFilterBuilderInstance = undefined;
             this.props.findOptions.showFilters = !this.props.findOptions.showFilters;
-            this.setState({ simpleFilterBuilder: undefined });
+            this.setState({ simpleFilterBuilder: undefined }, () => this.handleHeightChanged());
         }).done();
     }
 
@@ -529,7 +538,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         this.handleFiltersChanged();
 
-        this.forceUpdate();
+        this.forceUpdate(() => this.handleHeightChanged());
     }
 
     handleInsertColumn = () => {
@@ -542,7 +551,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         };
 
         const cm = this.state.contextualMenu!;
-        this.setState({ editingColumn: newColumn });
+        this.setState({ editingColumn: newColumn }, () => this.handleHeightChanged());
         this.props.findOptions.columnOptions.insertAt(cm.columnIndex! + cm.columnOffset!, newColumn);
 
         this.forceUpdate();
@@ -552,7 +561,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         const cm = this.state.contextualMenu!;
         const fo = this.props.findOptions;
-        this.setState({ editingColumn: fo.columnOptions[cm.columnIndex!] });
+        this.setState({ editingColumn: fo.columnOptions[cm.columnIndex!] }, () => this.handleHeightChanged());
 
         this.forceUpdate();
     }
@@ -564,7 +573,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         const col = fo.columnOptions[cm.columnIndex!];
         fo.columnOptions.removeAt(cm.columnIndex!);
 
-        this.setState({ editingColumn: undefined });
+        this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
     }
 
     renderContextualMenu() {
