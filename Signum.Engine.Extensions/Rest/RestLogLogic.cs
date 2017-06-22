@@ -24,7 +24,7 @@ namespace Signum.Engine.Rest
                     .WithIndex(a => a.EndDate)
                     .WithIndex(a => a.Controller)
                     .WithIndex(a => a.Action)
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,

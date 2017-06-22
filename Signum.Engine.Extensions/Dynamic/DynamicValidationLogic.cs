@@ -45,7 +45,7 @@ namespace Signum.Engine.Dynamic
             {
                 sb.Include<DynamicValidationEntity>()
                     .WithSave(DynamicValidationOperation.Save)
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,

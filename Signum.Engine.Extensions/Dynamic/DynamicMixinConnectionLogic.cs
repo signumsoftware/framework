@@ -32,7 +32,7 @@ namespace Signum.Engine.Dynamic
                     .WithUniqueIndex(e => new { e.EntityType, e.DynamicMixin })
                     .WithSave(DynamicMixinConnectionOperation.Save)
                     .WithDelete(DynamicMixinConnectionOperation.Delete)
-                    .WithQuery(dqm, e => new {
+                    .WithQuery(dqm, () => e => new {
                         Entity = e,
                         e.Id,
                         e.EntityType,

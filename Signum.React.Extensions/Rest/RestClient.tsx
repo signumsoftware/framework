@@ -12,8 +12,8 @@ export function registerAuthenticator() {
 
 
 export function start(options: { routes: JSX.Element[] }) {
-    Navigator.addSettings(new EntitySettings(RestLogEntity, e => _import('./Templates/RestLog')));
-    Navigator.addSettings(new EntitySettings(RestApiKeyEntity, e => _import('./Templates/RestApiKey')));
+    Navigator.addSettings(new EntitySettings(RestLogEntity, e => import('./Templates/RestLog')));
+    Navigator.addSettings(new EntitySettings(RestApiKeyEntity, e => import('./Templates/RestApiKey')));
 }
 
 export function loginFromApiKey(): Promise<AuthClient.AuthenticatedUser | undefined> {

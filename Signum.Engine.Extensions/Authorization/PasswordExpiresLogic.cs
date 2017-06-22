@@ -21,7 +21,7 @@ namespace Signum.Engine.Authorization
             {
                 sb.Include<PasswordExpiresIntervalEntity>()
                     .WithSave(PasswordExpiresIntervalOperation.Save)
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,

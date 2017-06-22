@@ -44,7 +44,7 @@ namespace Signum.Engine.Translation
                 CultureInfoLogic.AssertStarted(sb);
 
                 sb.Include<TranslatorUserEntity>()
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,

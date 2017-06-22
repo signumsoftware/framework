@@ -104,7 +104,7 @@ namespace Signum.Engine.Processes
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<ProcessAlgorithmSymbol>()
-                    .WithQuery(dqm, pa => new
+                    .WithQuery(dqm, () => pa => new
                     {
                         Entity = pa,
                         pa.Id,
@@ -112,7 +112,7 @@ namespace Signum.Engine.Processes
                     });
 
                 sb.Include<ProcessEntity>()
-                    .WithQuery(dqm, p => new
+                    .WithQuery(dqm, () => p => new
                     {
                         Entity = p,
                         p.Id,
@@ -132,7 +132,7 @@ namespace Signum.Engine.Processes
                     });
 
                 sb.Include<ProcessExceptionLineEntity>()
-                    .WithQuery(dqm, p => new
+                    .WithQuery(dqm, () => p => new
                     {
                         Entity = p,
                         p.Line,

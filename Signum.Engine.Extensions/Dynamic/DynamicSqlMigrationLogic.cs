@@ -40,7 +40,7 @@ namespace Signum.Engine.Dynamic
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<DynamicRenameEntity>()
-                      .WithQuery(dqm, e => new
+                      .WithQuery(dqm, () => e => new
                       {
                           Entity = e,
                           e.Id,
@@ -52,7 +52,7 @@ namespace Signum.Engine.Dynamic
                       });
 
                 sb.Include<DynamicSqlMigrationEntity>()
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,

@@ -25,7 +25,7 @@ namespace Signum.Engine.Mailing
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<SmtpConfigurationEntity>()
-                    .WithQuery(dqm, s => new
+                    .WithQuery(dqm, () => s => new
                     {
                         Entity = s,
                         s.Id,

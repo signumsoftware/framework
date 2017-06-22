@@ -42,7 +42,7 @@ namespace Signum.Engine.UserQueries
                 sb.Include<UserQueryEntity>()
                     .WithSave(UserQueryOperation.Save)
                     .WithDelete(UserQueryOperation.Delete)
-                    .WithQuery(dqm, uq => new
+                    .WithQuery(dqm, () => uq => new
                     {
                         Entity = uq,
                         uq.Query,

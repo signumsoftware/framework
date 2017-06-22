@@ -38,7 +38,7 @@ namespace Signum.Engine.Translation
             {
                 sb.Include<TranslatedInstanceEntity>()
                     .WithUniqueIndex(ti => new { ti.Culture, ti.PropertyRoute, ti.Instance, ti.RowId })
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,

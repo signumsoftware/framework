@@ -53,7 +53,7 @@ namespace Signum.Engine.ViewLog
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<ViewLogEntity>()
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,

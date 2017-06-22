@@ -39,7 +39,7 @@ namespace Signum.Engine.Notes
             {
                 sb.Include<NoteEntity>()
                     .WithSave(NoteOperation.Save)
-                    .WithQuery(dqm, n => new
+                    .WithQuery(dqm, () => n => new
                     {
                         Entity = n,
                         n.Id,
@@ -57,7 +57,7 @@ namespace Signum.Engine.Notes
 
                 sb.Include<NoteTypeEntity>()
                     .WithSave(NoteTypeOperation.Save)
-                    .WithQuery(dqm, t => new
+                    .WithQuery(dqm, () => t => new
                     {
                         Entity = t,
                         t.Id,

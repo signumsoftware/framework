@@ -93,7 +93,7 @@ namespace Signum.Engine.Scheduler
 
                 SimpleTaskLogic.Start(sb, dqm);
                 sb.Include<ScheduledTaskEntity>()
-                    .WithQuery(dqm, st => new
+                    .WithQuery(dqm, () => st => new
                     {
                         Entity = st,
                         st.Id,
@@ -105,7 +105,7 @@ namespace Signum.Engine.Scheduler
                     });
 
                 sb.Include<ScheduledTaskLogEntity>()
-                    .WithQuery(dqm, cte => new
+                    .WithQuery(dqm, () => cte => new
                     {
                         Entity = cte,
                         cte.Id,
@@ -127,7 +127,7 @@ namespace Signum.Engine.Scheduler
                 }.Register();
 
                 sb.Include<HolidayCalendarEntity>()
-                    .WithQuery(dqm, st => new
+                    .WithQuery(dqm, () => st => new
                     {
                         Entity = st,
                         st.Id,

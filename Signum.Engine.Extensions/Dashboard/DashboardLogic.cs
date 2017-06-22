@@ -40,7 +40,7 @@ namespace Signum.Engine.Dashboard
                 });
 
                 sb.Include<DashboardEntity>()
-                    .WithQuery(dqm, cp => new
+                    .WithQuery(dqm, () => cp => new
                     {
                         Entity = cp,
                         cp.Id,
@@ -51,7 +51,7 @@ namespace Signum.Engine.Dashboard
                     });
 
                 sb.Include<LinkListPartEntity>()
-                    .WithQuery(dqm, cp => new
+                    .WithQuery(dqm, () => cp => new
                     {
                         Entity = cp,
                         ToStr = cp.ToString(),
@@ -59,7 +59,7 @@ namespace Signum.Engine.Dashboard
                     });
                 
                 sb.Include<ValueUserQueryListPartEntity>()
-                    .WithQuery(dqm, cp => new
+                    .WithQuery(dqm, () => cp => new
                     {
                         Entity = cp,
                         ToStr = cp.ToString(),

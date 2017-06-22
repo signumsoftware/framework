@@ -31,7 +31,7 @@ namespace Signum.Engine.Dynamic
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<DynamicTypeEntity>()
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -674,7 +674,7 @@ namespace Signum.Engine.Dynamic
             {
                 var lines = new[] { "Entity = e" }.Concat(queryFields);
 
-                sb.AppendLine($@"    .WithQuery(dqm, e => new 
+                sb.AppendLine($@"    .WithQuery(dqm, () => e => new 
     {{ 
 { lines.ToString(",\r\n").Indent(8)}
     }})");

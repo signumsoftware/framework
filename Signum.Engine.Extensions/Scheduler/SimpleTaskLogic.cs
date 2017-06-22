@@ -34,7 +34,7 @@ namespace Signum.Engine.Scheduler
                 });
 
                 sb.Include<SimpleTaskSymbol>()
-                    .WithQuery(dqm, ct => new
+                    .WithQuery(dqm, () => ct => new
                     {
                         Entity = ct,
                         ct.Id,

@@ -23,7 +23,7 @@ namespace Signum.Engine.Authorization
                 AuthLogic.AssertStarted(sb);
 
                 sb.Include<SessionLogEntity>()
-                    .WithQuery(dqm, sl => new
+                    .WithQuery(dqm, () => sl => new
                     {
                         Entity = sl,
                         sl.Id,

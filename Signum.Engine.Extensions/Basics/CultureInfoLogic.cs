@@ -42,7 +42,7 @@ namespace Signum.Engine.Basics
             {
                 sb.Include<CultureInfoEntity>()
                     .WithSave(CultureInfoOperation.Save)
-                    .WithQuery(dqm, c => new
+                    .WithQuery(dqm, () => c => new
                     {
                         Entity = c,
                         c.Id,

@@ -46,7 +46,7 @@ namespace Signum.Engine.Isolation
             {
                 sb.Include<IsolationEntity>()
                     .WithSave(IsolationOperation.Save)
-                    .WithQuery(dqm, iso => new
+                    .WithQuery(dqm, () => iso => new
                     {
                         Entity = iso,
                         iso.Id,
