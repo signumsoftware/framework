@@ -44,7 +44,7 @@ namespace Signum.Engine.Migrations
                         e.ExecutionDate,
                     });
 
-                sb.Include<ExecutedLoadProcessEntity>()
+                sb.Include<LoadMethodLogEntity>()
                     .WithQuery(dqm, e => new
                     {
                         Entity = e,
@@ -88,7 +88,7 @@ namespace Signum.Engine.Migrations
             string showDescription = description ?? action.Method.Name.SpacePascal(true);
             Console.WriteLine("------- Executing {0} ".FormatWith(showDescription).PadRight(Console.WindowWidth - 2, '-'));
 
-            var log = !Schema.Current.Tables.ContainsKey(typeof(ExecutedLoadProcessEntity)) ? null : new ExecutedLoadProcessEntity
+            var log = !Schema.Current.Tables.ContainsKey(typeof(LoadMethodLogEntity)) ? null : new LoadMethodLogEntity
             {
                 Start = TimeZoneManager.Now,
                 ClassName = action.Method.DeclaringType.FullName,
