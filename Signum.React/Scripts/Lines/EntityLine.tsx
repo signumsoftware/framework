@@ -159,7 +159,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
                         (entity as Entity).id ? liteKey(toLite(entity as Entity)) :
                             undefined;
 
-                    return ({ 'data-entity-key': key });
+                    return ({ 'data-entity-key': key }) as React.HTMLAttributes<HTMLLIElement>;
                 }}
                 onSelect={this.handleOnSelect}/>
         );

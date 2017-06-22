@@ -33,8 +33,9 @@ import { ImportRoute } from "./AsyncImport";
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
 
+
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<ImportRoute path="~/find/:queryName" onImportModule={() => _import("./SearchControl/SearchPage")} />);
+    options.routes.push(<ImportRoute path="~/find/:queryName" onImportModule={() => import("./SearchControl/SearchPage")} />);
 }
 
 export function addSettings(...settings: QuerySettings[]) {
@@ -68,7 +69,7 @@ export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptio
     if (qs && qs.onFind && !(modalOptions && modalOptions.useDefaultBehaviour))
         return qs.onFind(fo, modalOptions);
 
-    return _import<{ default: typeof SearchModal }>("./SearchControl/SearchModal")
+    return import("./SearchControl/SearchModal")
         .then(a => a.default.open(fo, modalOptions));
 }
 
@@ -83,7 +84,7 @@ export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: Mo
     if (qs && qs.onFindMany && !(modalOptions && modalOptions.useDefaultBehaviour))
         return qs.onFindMany(fo, modalOptions);
 
-    return _import<{ default: typeof SearchModal }>("./SearchControl/SearchModal")
+    return import("./SearchControl/SearchModal")
         .then(a => a.default.openMany(fo, modalOptions));
 }
 
@@ -101,7 +102,7 @@ export function explore(findOptions: FindOptions, modalOptions?: ModalFindOption
     if (qs && qs.onExplore && !(modalOptions && modalOptions.useDefaultBehaviour))
         return qs.onExplore(findOptions, modalOptions);
 
-    return _import<{ default: typeof SearchModal }>("./SearchControl/SearchModal")
+    return import("./SearchControl/SearchModal")
         .then(a => a.default.explore(findOptions, modalOptions));
 }
 

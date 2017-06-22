@@ -142,7 +142,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                         (entity as Entity).id ? liteKey(toLite(entity as Entity)) :
                             undefined;
 
-                    return ({ 'data-entity-key': key });
+                    return ({ 'data-entity-key': key }) as any;
                 }}
                 onSelect={this.handleOnSelect}/>
         );
