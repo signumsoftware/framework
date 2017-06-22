@@ -24,7 +24,7 @@ import * as AuthClient from '../../../Extensions/Signum.React.Extensions/Authori
 import TreeButton from './TreeButton'
 
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<ImportRoute path="~/tree/:typeName" onImportModule={() => _import("./TreePage")} />);
+    options.routes.push(<ImportRoute path="~/tree/:typeName" onImportModule={() => import("./TreePage")} />);
 
     Operations.addSettings(
         new EntityOperationSettings(TreeOperation.CreateChild, { isVisible: _ => false }),
@@ -82,7 +82,7 @@ export function openTree(typeName: string, filterOptions?: FilterOption[],option
 export function openTree(type: Type<TreeEntity> | string, filterOptions?: FilterOption[],options?: TreeModalOptions): Promise<Lite<TreeEntity> | undefined> {
     const typeName = type instanceof Type ? type.typeName : type;
 
-    return _import("./TreeModal")
+    return import("./TreeModal")
         .then((TM: { default: typeof TreeModal }) => TM.default.open(typeName, filterOptions || [], options));
 }
 

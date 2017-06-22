@@ -18,10 +18,10 @@ import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport
 
 export function start(options: { routes: JSX.Element[],}) {
   
-    Navigator.addSettings(new EntitySettings(PrintLineEntity, e => _import('./Templates/PrintLine')));
-    Navigator.addSettings(new EntitySettings(PrintPackageEntity, e => _import('./Templates/PrintPackage')));
+    Navigator.addSettings(new EntitySettings(PrintLineEntity, e => import('./Templates/PrintLine')));
+    Navigator.addSettings(new EntitySettings(PrintPackageEntity, e => import('./Templates/PrintPackage')));
 
-    options.routes.push(<ImportRoute path="~/printing/view" onImportModule={() => _import("./PrintPanelPage")} />);
+    options.routes.push(<ImportRoute path="~/printing/view" onImportModule={() => import("./PrintPanelPage")} />);
 
     
     OmniboxClient.registerSpecialAction({

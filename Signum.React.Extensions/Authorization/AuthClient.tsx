@@ -40,8 +40,8 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
             throw new Error("call AuthClient.registerUserTicketAuthenticator in Main.tsx before AuthClient.autoLogin");
     }
 
-    options.routes.push(<ImportRoute path="~/auth/login" onImportModule={() => _import("./Login/Login")} />);
-    options.routes.push(<ImportRoute path="~/auth/changePassword" onImportModule={() => _import("./Login/ChangePassword")} />);
+    options.routes.push(<ImportRoute path="~/auth/login" onImportModule={() => import("./Login/Login")} />);
+    options.routes.push(<ImportRoute path="~/auth/changePassword" onImportModule={() => import("./Login/ChangePassword")} />);
 }
 
 export let types: boolean;
@@ -58,14 +58,14 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     queries = options.queries;
     permissions = options.permissions;
 
-    Navigator.addSettings(new EntitySettings(UserEntity, e => _import('./Templates/User')));
-    Navigator.addSettings(new EntitySettings(RoleEntity, e => _import('./Templates/Role')));
+    Navigator.addSettings(new EntitySettings(UserEntity, e => import('./Templates/User')));
+    Navigator.addSettings(new EntitySettings(RoleEntity, e => import('./Templates/Role')));
     Operations.addSettings(new EntityOperationSettings(UserOperation.SetPassword, { isVisible: ctx => false }));
 
     if (options.properties) {
         tasks.push(taskAuthorizeProperties);
         GraphExplorer.TypesLazilyCreated.push(PropertyRouteEntity.typeName);
-        Navigator.addSettings(new EntitySettings(PropertyRulePack, e => _import('./Admin/PropertyRulePackControl')));
+        Navigator.addSettings(new EntitySettings(PropertyRulePack, e => import('./Admin/PropertyRulePackControl')));
     }
 
     if (options.types) {
@@ -73,7 +73,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
         Navigator.isReadonlyEvent.push(navigatorIsReadOnly);
         Navigator.isViewableEvent.push(navigatorIsViewable);
 
-        Navigator.addSettings(new EntitySettings(TypeRulePack, e => _import('./Admin/TypeRulePackControl')));
+        Navigator.addSettings(new EntitySettings(TypeRulePack, e => import('./Admin/TypeRulePackControl')));
 
         QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("types", AuthAdminMessage.TypeRules.niceToString(),
             e => API.fetchTypeRulePack(ctx.lite.id!).then(pack => Navigator.navigate(pack)).done(),
@@ -83,18 +83,18 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     if (options.operations) {
         Operations.isOperationAllowedEvent.push(isOperationAuthorized);
 
-        Navigator.addSettings(new EntitySettings(OperationRulePack, e => _import('./Admin/OperationRulePackControl')));
+        Navigator.addSettings(new EntitySettings(OperationRulePack, e => import('./Admin/OperationRulePackControl')));
     }
 
     if (options.queries) {
         Finder.isFindableEvent.push(queryIsFindable);
 
-        Navigator.addSettings(new EntitySettings(QueryRulePack, e => _import('./Admin/QueryRulePackControl')));
+        Navigator.addSettings(new EntitySettings(QueryRulePack, e => import('./Admin/QueryRulePackControl')));
     }
 
     if (options.permissions) {
 
-        Navigator.addSettings(new EntitySettings(PermissionRulePack, e => _import('./Admin/PermissionRulePackControl')));
+        Navigator.addSettings(new EntitySettings(PermissionRulePack, e => import('./Admin/PermissionRulePackControl')));
 
         QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("permissions", AuthAdminMessage.PermissionRules.niceToString(),
             e => API.fetchPermissionRulePack(ctx.lite.id!).then(pack => Navigator.navigate(pack)).done(),

@@ -21,7 +21,7 @@ import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport
 require("./Mailing.css");
 
 export function start(options: { routes: JSX.Element[], smtpConfig: boolean, newsletter: boolean, pop3Config: boolean, sendEmailTask: boolean, quickLinksFrom: PseudoType[] | undefined }) {
-    options.routes.push(<ImportRoute path="~/asyncEmailSender/view" onImportModule={() => _import("./AsyncEmailSenderPage")} />);
+    options.routes.push(<ImportRoute path="~/asyncEmailSender/view" onImportModule={() => import("./AsyncEmailSenderPage")} />);
 
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel),
@@ -32,13 +32,13 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
     registerToString(EmailTemplateMessageEmbedded, a => a.cultureInfo == undefined ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName!);
     registerToString(EmailMasterTemplateMessageEmbedded, a => a.cultureInfo == undefined ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName!);
 
-    Navigator.addSettings(new EntitySettings(EmailMessageEntity, e => _import('./Templates/EmailMessage')));
-    Navigator.addSettings(new EntitySettings(EmailTemplateEntity, e => _import('./Templates/EmailTemplate')));
-    Navigator.addSettings(new EntitySettings(EmailMasterTemplateEntity, e => _import('./Templates/EmailMasterTemplate')));
-    Navigator.addSettings(new EntitySettings(EmailPackageEntity, e => _import('./Templates/EmailPackage')));
-    Navigator.addSettings(new EntitySettings(EmailRecipientEntity, e => _import('./Templates/EmailRecipient')));
-    Navigator.addSettings(new EntitySettings(EmailAddressEmbedded, e => _import('./Templates/EmailAddress')));
-    Navigator.addSettings(new EntitySettings(EmailConfigurationEmbedded, e => _import('./Templates/EmailConfiguration')));
+    Navigator.addSettings(new EntitySettings(EmailMessageEntity, e => import('./Templates/EmailMessage')));
+    Navigator.addSettings(new EntitySettings(EmailTemplateEntity, e => import('./Templates/EmailTemplate')));
+    Navigator.addSettings(new EntitySettings(EmailMasterTemplateEntity, e => import('./Templates/EmailMasterTemplate')));
+    Navigator.addSettings(new EntitySettings(EmailPackageEntity, e => import('./Templates/EmailPackage')));
+    Navigator.addSettings(new EntitySettings(EmailRecipientEntity, e => import('./Templates/EmailRecipient')));
+    Navigator.addSettings(new EntitySettings(EmailAddressEmbedded, e => import('./Templates/EmailAddress')));
+    Navigator.addSettings(new EntitySettings(EmailConfigurationEmbedded, e => import('./Templates/EmailConfiguration')));
 
     Operations.addSettings(new EntityOperationSettings(EmailMessageOperation.CreateMailFromTemplate, {
         onClick: (ctx) => {
@@ -53,21 +53,21 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
     }));
 
     if (options.smtpConfig) {
-        Navigator.addSettings(new EntitySettings(SmtpConfigurationEntity, e => _import('./Templates/SmtpConfiguration')));
+        Navigator.addSettings(new EntitySettings(SmtpConfigurationEntity, e => import('./Templates/SmtpConfiguration')));
     }
 
     if (options.newsletter) {
-        Navigator.addSettings(new EntitySettings(NewsletterEntity, e => _import('./Newsletters/Newsletter')));
-        Navigator.addSettings(new EntitySettings(NewsletterDeliveryEntity, e => _import('./Newsletters/NewsletterDelivery')));
+        Navigator.addSettings(new EntitySettings(NewsletterEntity, e => import('./Newsletters/Newsletter')));
+        Navigator.addSettings(new EntitySettings(NewsletterDeliveryEntity, e => import('./Newsletters/NewsletterDelivery')));
     }
 
     if (options.sendEmailTask) {
-        Navigator.addSettings(new EntitySettings(SendEmailTaskEntity, e => _import('./Templates/SendEmailTask')));
+        Navigator.addSettings(new EntitySettings(SendEmailTaskEntity, e => import('./Templates/SendEmailTask')));
     }
 
     if (options.pop3Config) {
-        Navigator.addSettings(new EntitySettings(Pop3ConfigurationEntity, e => _import('./Pop3/Pop3Configuration')));
-        Navigator.addSettings(new EntitySettings(Pop3ReceptionEntity, e => _import('./Pop3/Pop3Reception')));
+        Navigator.addSettings(new EntitySettings(Pop3ConfigurationEntity, e => import('./Pop3/Pop3Configuration')));
+        Navigator.addSettings(new EntitySettings(Pop3ReceptionEntity, e => import('./Pop3/Pop3Reception')));
     }
 
     if (options.quickLinksFrom) {

@@ -35,9 +35,9 @@ import MessageModal from "../../../Framework/Signum.React/Scripts/Modals/Message
 
 export function start(options: { routes: JSX.Element[] }) {
     
-    Navigator.addSettings(new EntitySettings(DynamicViewEntity, w => _import('./View/DynamicView')));
-    Navigator.addSettings(new EntitySettings(DynamicViewSelectorEntity, w => _import('./View/DynamicViewSelector')));
-    Navigator.addSettings(new EntitySettings(DynamicViewOverrideEntity, w => _import('./View/DynamicViewOverride')));
+    Navigator.addSettings(new EntitySettings(DynamicViewEntity, w => import('./View/DynamicView')));
+    Navigator.addSettings(new EntitySettings(DynamicViewSelectorEntity, w => import('./View/DynamicViewSelector')));
+    Navigator.addSettings(new EntitySettings(DynamicViewOverrideEntity, w => import('./View/DynamicViewOverride')));
 
     DynamicClient.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicViewEntity, parentColumn: "EntityType.CleanName", parentValue: type }} />);
     DynamicClient.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicViewSelectorEntity, parentColumn: "EntityType.CleanName", parentValue: type }} />);
@@ -96,7 +96,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
     }
 
     dynamicViewComponent(dynamicView: DynamicViewEntity): ViewPromise<ModifiableEntity> {
-        return new ViewPromise(_import('./View/DynamicViewComponent'))
+        return new ViewPromise(import('./View/DynamicViewComponent'))
             .withProps({ initialDynamicView: dynamicView });
     }
 
@@ -106,7 +106,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
         if (!settings || !settings.getViewPromise) {
 
             if (!isTypeEntity(entity.Type))
-                return new ViewPromise(_import('../../../Framework/Signum.React/Scripts/Lines/DynamicComponent'));
+                return new ViewPromise(import('../../../Framework/Signum.React/Scripts/Lines/DynamicComponent'));
 
             return ViewPromise.flat(this.chooseDynamicView(entity.Type, true).then(dv => this.dynamicViewComponent(dv)));
         }
@@ -337,14 +337,14 @@ export function createDefaultDynamicView(typeName: string): Promise<DynamicViewE
 }
 
 export function loadNodes(): Promise<typeof Nodes> {
-    return _import<typeof Nodes>("./View/Nodes");
+    return import("./View/Nodes");
 }
 
 export function getDynamicViewPromise(typeName: string, viewName: string): ViewPromise<ModifiableEntity> {
 
     return ViewPromise.flat(
         API.getDynamicView(typeName, viewName)
-            .then(vn => new ViewPromise(_import('./View/DynamicViewComponent')).withProps({ initialDynamicView: vn }))
+            .then(vn => new ViewPromise(import('./View/DynamicViewComponent')).withProps({ initialDynamicView: vn }))
     );
 }
 
