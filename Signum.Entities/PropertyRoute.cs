@@ -105,21 +105,24 @@ namespace Signum.Entities
 
         public PropertyRoute Add(MemberInfo member)
         {
-            if (member is MethodInfo && ((MethodInfo)member).IsInstantiationOf(MixinDeclarations.miMixin))
-                member = ((MethodInfo)member).GetGenericArguments()[0];
-
-            if (this.Type.IsIEntity() && PropertyRouteType != PropertyRouteType.Root)
+            using (HeavyProfiler.LogNoStackTrace("PR.Add", () => member.Name))
             {
-                Implementations imp = GetImplementations();
+                if (member is MethodInfo && ((MethodInfo)member).IsInstantiationOf(MixinDeclarations.miMixin))
+                    member = ((MethodInfo)member).GetGenericArguments()[0];
 
-                Type only;
-                if (imp.IsByAll || (only = imp.Types.Only()) == null)
-                    throw new InvalidOperationException("Attempt to make a PropertyRoute on a {0}. Cast first".FormatWith(imp));
+                if (this.Type.IsIEntity() && PropertyRouteType != PropertyRouteType.Root)
+                {
+                    Implementations imp = GetImplementations();
 
-                return new PropertyRoute(Root(only), member);
+                    Type only;
+                    if (imp.IsByAll || (only = imp.Types.Only()) == null)
+                        throw new InvalidOperationException("Attempt to make a PropertyRoute on a {0}. Cast first".FormatWith(imp));
+
+                    return new PropertyRoute(Root(only), member);
+                }
+
+                return new PropertyRoute(this, member);
             }
-
-            return new PropertyRoute(this, member);
         }
 
         PropertyRoute(PropertyRoute parent, MemberInfo fieldOrProperty)

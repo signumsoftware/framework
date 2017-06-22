@@ -248,62 +248,77 @@ namespace Signum.Utilities.Reflection
 
         public static Func<T, object> CreateGetter<T>(MemberInfo m)
         {
-            if ((m as PropertyInfo)?.Let(a => !a.CanRead) ?? false)
-                return null;
+            using (HeavyProfiler.LogNoStackTrace("CreateGetter"))
+            {
+                if ((m as PropertyInfo)?.Let(a => !a.CanRead) ?? false)
+                    return null;
 
-            ParameterExpression p = Expression.Parameter(typeof(T), "p");
-            Type lambdaType = typeof(Func<,>).MakeGenericType(typeof(T), typeof(object));
-            var exp = Expression.Lambda(lambdaType, Expression.Convert(Expression.MakeMemberAccess(p, m), typeof(object)), p);
-            return (Func<T, object>)exp.Compile();
+                ParameterExpression p = Expression.Parameter(typeof(T), "p");
+                Type lambdaType = typeof(Func<,>).MakeGenericType(typeof(T), typeof(object));
+                var exp = Expression.Lambda(lambdaType, Expression.Convert(Expression.MakeMemberAccess(p, m), typeof(object)), p);
+                return (Func<T, object>)exp.Compile();
+            }
         }
 
         public static Func<object, object> CreateGetterUntyped(Type type, MemberInfo m)
         {
-            if ((m as PropertyInfo)?.Let(a => !a.CanRead) ?? false)
-                return null;
+            using (HeavyProfiler.LogNoStackTrace("CreateGetterUntyped"))
+            {
+                if ((m as PropertyInfo)?.Let(a => !a.CanRead) ?? false)
+                    return null;
 
-            ParameterExpression p = Expression.Parameter(typeof(object), "p");
-            Type lambdaType = typeof(Func<,>).MakeGenericType(typeof(object), typeof(object));
-            var exp = Expression.Lambda(lambdaType, Expression.Convert(Expression.MakeMemberAccess(Expression.Convert(p, type), m), typeof(object)), p);
-            return (Func<object, object>)exp.Compile();
+                ParameterExpression p = Expression.Parameter(typeof(object), "p");
+                Type lambdaType = typeof(Func<,>).MakeGenericType(typeof(object), typeof(object));
+                var exp = Expression.Lambda(lambdaType, Expression.Convert(Expression.MakeMemberAccess(Expression.Convert(p, type), m), typeof(object)), p);
+                return (Func<object, object>)exp.Compile();
+            }
         }
 
         public static Action<T, P> CreateSetter<T, P>(MemberInfo m)
         {
-            if ((m as PropertyInfo)?.Let(a => !a.CanWrite) ?? false)
-                return null;
+            using (HeavyProfiler.LogNoStackTrace("CreateSetter"))
+            {
+                if ((m as PropertyInfo)?.Let(a => !a.CanWrite) ?? false)
+                    return null;
 
-            ParameterExpression t = Expression.Parameter(typeof(T), "t");
-            ParameterExpression p = Expression.Parameter(typeof(P), "p");
-            var exp = Expression.Lambda(typeof(Action<T, P>),
-                Expression.Assign(Expression.MakeMemberAccess(t, m), p), t, p);
-            return (Action<T, P>)exp.Compile();
+                ParameterExpression t = Expression.Parameter(typeof(T), "t");
+                ParameterExpression p = Expression.Parameter(typeof(P), "p");
+                var exp = Expression.Lambda(typeof(Action<T, P>),
+                    Expression.Assign(Expression.MakeMemberAccess(t, m), p), t, p);
+                return (Action<T, P>)exp.Compile();
+            }
         }
 
         public static Action<T, object> CreateSetter<T>(MemberInfo m)
         {
-            if ((m as PropertyInfo)?.Let(a => !a.CanWrite) ?? false)
-                return null;
+            using (HeavyProfiler.LogNoStackTrace("CreateSetter"))
+            {
+                if ((m as PropertyInfo)?.Let(a => !a.CanWrite) ?? false)
+                    return null;
 
-            ParameterExpression t = Expression.Parameter(typeof(T), "t");
-            ParameterExpression p = Expression.Parameter(typeof(object), "p");
-            var exp = Expression.Lambda(typeof(Action<T, object>),
-                Expression.Assign(Expression.MakeMemberAccess(t, m), Expression.Convert(p, m.ReturningType())), t, p);
-            return (Action<T, object>)exp.Compile();
+                ParameterExpression t = Expression.Parameter(typeof(T), "t");
+                ParameterExpression p = Expression.Parameter(typeof(object), "p");
+                var exp = Expression.Lambda(typeof(Action<T, object>),
+                    Expression.Assign(Expression.MakeMemberAccess(t, m), Expression.Convert(p, m.ReturningType())), t, p);
+                return (Action<T, object>)exp.Compile();
+            }
         }
 
         static Module module = ((Expression<Func<int>>)(() => 2)).Compile().Method.Module;
 
         public static Action<object, object> CreateSetterUntyped(Type type, MemberInfo m)
         {
-            if ((m as PropertyInfo)?.Let(a => !a.CanWrite) ?? false)
-                return null;
+            using (HeavyProfiler.LogNoStackTrace("CreateSetterUntyped"))
+            {
+                if ((m as PropertyInfo)?.Let(a => !a.CanWrite) ?? false)
+                    return null;
 
-            ParameterExpression t = Expression.Parameter(typeof(object), "t");
-            ParameterExpression p = Expression.Parameter(typeof(object), "p");
-            var exp = Expression.Lambda(typeof(Action<object, object>),
-                Expression.Assign(Expression.MakeMemberAccess(Expression.Convert(t, type), m), Expression.Convert(p, m.ReturningType())), t, p);
-            return (Action<object, object>)exp.Compile();
+                ParameterExpression t = Expression.Parameter(typeof(object), "t");
+                ParameterExpression p = Expression.Parameter(typeof(object), "p");
+                var exp = Expression.Lambda(typeof(Action<object, object>),
+                    Expression.Assign(Expression.MakeMemberAccess(Expression.Convert(t, type), m), Expression.Convert(p, m.ReturningType())), t, p);
+                return (Action<object, object>)exp.Compile();
+            }
         }
 
         public static bool IsNumber(Type type)
