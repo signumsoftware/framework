@@ -1264,7 +1264,7 @@ namespace Signum.Engine.Linq
                             }
 
                             PropertyInfo pi = (PropertyInfo)m.Member;
-                            return nex.Members.Zip(nex.Arguments).SingleEx(p => ReflectionTools.PropertyEquals((PropertyInfo)p.Item1, pi)).Item2;
+                            return nex.Members.Zip(nex.Arguments).SingleEx(p => ReflectionTools.PropertyEquals((PropertyInfo)p.first, pi)).second;
                         }
                         break;
                     }
