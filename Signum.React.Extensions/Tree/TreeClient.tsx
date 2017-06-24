@@ -70,7 +70,7 @@ export function overrideOnFind(ti: TypeInfo) {
 }
 
 export function isTree(t: TypeInfo) {
-    return t.kind == "Entity" && t.operations && t.operations[TreeOperation.CreateNextSibling.key];
+    return (t.kind == "Entity" && t.operations && t.operations[TreeOperation.CreateNextSibling.key] != null) || false;
 }
 
 export function getAllTreeTypes() {
