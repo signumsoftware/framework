@@ -208,6 +208,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
 
     handleRemoveConditionClick = (taac: TypeAllowedAndConditions, con: TypeConditionRuleEmbedded) => {
         taac.conditions!.remove(taac.conditions.filter(mle => mle.element == con).single());
+        taac.modified = true;
         this.updateFrame();
     }
 
