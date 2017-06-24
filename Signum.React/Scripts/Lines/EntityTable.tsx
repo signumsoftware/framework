@@ -23,7 +23,7 @@ export interface EntityTableProps extends EntityListBaseProps {
 }
 
 export interface EntityTableColumn<T, RS> {
-    property?: (a: T) => any;
+    property?: ((a: T) => any) | string;
     header?: React.ReactNode | null;
     headerHtmlAttributes?: React.HTMLAttributes<any>;
     cellHtmlAttributes?: (ctx: TypeContext<T>, row: EntityTableRow, rowState: RS) => React.HTMLAttributes<any> | null | undefined;

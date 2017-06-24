@@ -32,7 +32,7 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
 
         const members = ctx.propertyRoute.subMembers();
 
-        const result = Dic.map(members, (field, m) => ctx.subCtxField(field));
+        const result = Dic.map(members, (field, m) => ctx.subCtx(field));
 
         return result;
     }

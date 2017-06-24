@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, LambdaMemberType, Type, PseudoType, getTypeName, Binding } from './Reflection'
+import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, LambdaMemberType, Type, PseudoType, getTypeName, Binding, getFieldMembers } from './Reflection'
 import { ModelState, MList, ModifiableEntity, EntityPack, Entity } from './Signum.Entities'
 import { EntityOperationContext } from './Operations'
 
@@ -188,46 +188,23 @@ export class TypeContext<T> extends StyleContext {
   
     subCtx(styleOptions: StyleOptions): TypeContext<T>     
     subCtx<R>(property: (val: T) => R, styleOptions?: StyleOptions): TypeContext<R>
-    subCtx(propertyOrStyleOptions: ((val: T) => any) | StyleOptions, styleOptions?: StyleOptions): TypeContext<any>
+    subCtx(field: string, styleOptions?: StyleOptions): TypeContext<any>
+    subCtx(propertyFieldOrStyleOptions: ((val: T) => any) | StyleOptions | string, styleOptions?: StyleOptions): TypeContext<any>
     {
-        if (typeof propertyOrStyleOptions != "function")
-            return new TypeContext<T>(this, propertyOrStyleOptions, this.propertyRoute, this.binding);
+        if (typeof propertyFieldOrStyleOptions == "object")
+            return new TypeContext<T>(this, propertyFieldOrStyleOptions, this.propertyRoute, this.binding);
         
-        const property = propertyOrStyleOptions as ((val: T) => any);
+        const lambdaMembers = typeof propertyFieldOrStyleOptions == "function" ?
+            getLambdaMembers(propertyFieldOrStyleOptions) :
+            getFieldMembers(propertyFieldOrStyleOptions);
 
-        const lambdaMembers = getLambdaMembers(property);
-
-        const subRoute = lambdaMembers.reduce<PropertyRoute>((pr, m) => pr.addMember(m), this.propertyRoute);
+        const subRoute = lambdaMembers.reduce<PropertyRoute>((pr, m) => pr.addLambdaMember(m), this.propertyRoute);
         
-        const binding = createBinding(this.value, property);
+        const binding = createBinding(this.value, lambdaMembers);
 
         const result = new TypeContext<any>(this, styleOptions, subRoute, binding);
 
         return result;
-    }
-
-    subCtxField(field: string): TypeContext<any>{
-
-        if (field.contains(".")) {
-            var mixinType = field.before(".").trimStart("[").trimEnd("]");
-            var fieldName = field.after(".");
-
-            var mixinValue = (this.value as any as Entity).mixins[mixinType];
-            var binding = new Binding(mixinValue, fieldName.firstLower());
-
-            var pr = this.propertyRoute
-                .addMember({ type: "Mixin", name: mixinType })
-                .addMember({ type: "Member", name: fieldName });
-
-            return new TypeContext<any>(this, undefined, pr, binding);
-
-        } else {
-            var pr = this.propertyRoute
-                .addMember({ type: "Member", name: field });
-
-            var binding = new Binding(this.value, field.firstLower());
-            return new TypeContext<any>(this, undefined, pr, binding);
-        }
     }
 
     cast<R extends T & ModifiableEntity>(type: Type<R>): TypeContext<R> {
@@ -359,7 +336,7 @@ export function mlistItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[
     
     return ctx.value!.map((mle, i) =>
         new TypeContext<T>(ctx, undefined,
-            ctx.propertyRoute.addMember({ name: "", type: "Indexer" }),
+            ctx.propertyRoute.addLambdaMember({ name: "", type: "Indexer" }),
             new ReadonlyBinding(mle.element, i.toString())));
 }
 
