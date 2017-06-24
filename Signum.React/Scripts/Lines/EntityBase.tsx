@@ -31,16 +31,7 @@ export interface EntityBaseProps extends LineBaseProps {
     viewPromise?: (typeName: string) => Navigator.ViewPromise<ModifiableEntity>;
 }
 
-
-export interface EntityBaseState extends LineBaseProps {
-    view?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
-    viewOnCreate?: boolean;
-    create?: boolean;
-    find?: boolean;
-    remove?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
-}
-
-export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBaseState> extends LineBase<T, S>
+export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBaseProps> extends LineBase<T, S>
 {
     static hasChildrens(element: React.ReactElement<any>) {
         return element.props.children && React.Children.toArray(element.props.children).length;
@@ -63,6 +54,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             type.name == IsByAll ? true :
                 getTypeInfos(type).some(ti => Navigator.isFindable(ti));
     }
+
     
     calculateDefaultState(state: S) {
 
@@ -71,6 +63,8 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         state.create = EntityBase.defaultIsCreable(type, !!this.props.getComponent || !!this.props.viewPromise);
         state.view = EntityBase.defaultIsViewable(type, !!this.props.getComponent || !!this.props.viewPromise);
         state.find = EntityBase.defaultIsFindable(type);
+        state.findOptions = Navigator.defaultFindOptions(type);
+
 
         state.viewOnCreate = true;
         state.remove = true;
@@ -184,7 +178,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
                 if (!e)
                     return Promise.resolve(undefined);
 
-                var fo = this.props.findOptions;
+                var fo = this.state.findOptions;
                 if (!fo || !fo.filterOptions)
                     return e.entity as Entity;
 
@@ -248,8 +242,8 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
     defaultFind(): Promise<ModifiableEntity | Lite<Entity> | undefined> {
 
-        if (this.props.findOptions) {
-            return Finder.find(this.props.findOptions);
+        if (this.state.findOptions) {
+            return Finder.find(this.state.findOptions);
         }
 
         return this.chooseType(Finder.isFindable)

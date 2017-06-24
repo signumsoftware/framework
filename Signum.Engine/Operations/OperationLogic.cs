@@ -483,10 +483,15 @@ Consider the following options:
 
         public static IOperation FindOperation(Type type, OperationSymbol operationSymbol)
         {
-            IOperation result = operations.TryGetValue(type)?.TryGetC(operationSymbol);
+            IOperation result = TryFindOperation(type, operationSymbol);
             if (result == null)
                 throw new InvalidOperationException("Operation '{0}' not found for type {1}".FormatWith(operationSymbol, type));
             return result;
+        }
+
+        public static IOperation TryFindOperation(Type type, OperationSymbol operationSymbol)
+        {
+            return operations.TryGetValue(type)?.TryGetC(operationSymbol);
         }
 
         public static Graph<T>.Construct FindConstruct<T>(ConstructSymbol<T>.Simple symbol) 
