@@ -104,6 +104,7 @@ Lose changes?")]
         Detail,
         MoveDown,
         MoveUp,
+        Move,
         Navigate,
         NullValueNotAllowed,
         Remove,

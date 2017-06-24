@@ -660,10 +660,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     //HEADER DRAG AND DROP
 
-    handleHeaderDragStart = (de: React.DragEvent<any>) => {
+    handleHeaderDragStart = (de: React.DragEvent<any>, dragIndex: number) => {
         de.dataTransfer.setData('text', "start"); //cannot be empty string
         de.dataTransfer.effectAllowed = "move";
-        const dragIndex = parseInt((de.currentTarget as HTMLElement).getAttribute("data-column-index") !);
         this.setState({ dragColumnIndex: dragIndex });
     }
 
@@ -689,14 +688,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         return undefined;
     }
 
-    handlerHeaderDragOver = (de: React.DragEvent<any>) => {
+    handlerHeaderDragOver = (de: React.DragEvent<any>, columnIndex: number) => {
         de.preventDefault();
 
         const th = de.currentTarget as HTMLElement;
 
         const size = th.scrollWidth;
-
-        const columnIndex = parseInt(th.getAttribute("data-column-index") !);
 
         const offset = this.getOffset((de.nativeEvent as DragEvent).pageX, th.getBoundingClientRect(), 50);
 
@@ -737,22 +734,21 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 }
                 {this.props.findOptions.navigate && <th className="sf-th-entity" data-column-name="Entity"></th>}
                 {this.props.findOptions.columnOptions.map((co, i) =>
-                    <th draggable={true}
-                        style={i == this.state.dragColumnIndex ? { opacity: 0.5 } : undefined}
+                    <th key={ i }
+                        draggable={true}
                         className={classes(
+                            i == this.state.dragColumnIndex  && "sf-draggin",
                             co == this.state.editingColumn && "sf-current-column",
                             !this.canOrder(co) && "noOrder",
                             co == this.state.editingColumn && co.token && co.token.type.isCollection && "error",
                             this.state.dropBorderIndex != null && i == this.state.dropBorderIndex ? "drag-left " :
                                 this.state.dropBorderIndex != null && i == this.state.dropBorderIndex - 1 ? "drag-right " : undefined)}
                         data-column-name={co.token && co.token.fullKey}
-                        data-column-index={i}
-                        key={i}
                         onClick={this.canOrder(co) ? this.handleHeaderClick : undefined}
-                        onDragStart={this.handleHeaderDragStart}
+                        onDragStart={e => this.handleHeaderDragStart(e, i)}
                         onDragEnd={this.handleHeaderDragEnd}
-                        onDragOver={this.handlerHeaderDragOver}
-                        onDragEnter={this.handlerHeaderDragOver}
+                        onDragOver={e => this.handlerHeaderDragOver(e, i)}
+                        onDragEnter={e => this.handlerHeaderDragOver(e, i)}
                         onDrop={this.handleHeaderDrop}>
                         <span className={"sf-header-sort " + this.orderClassName(co)} />
                         <span> {co.displayName}</span></th>

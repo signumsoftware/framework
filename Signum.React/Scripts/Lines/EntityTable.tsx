@@ -10,7 +10,7 @@ import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from
 import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
 import { EntityBase } from './EntityBase'
-import { EntityListBase, EntityListBaseProps } from './EntityListBase'
+import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBase'
 import DynamicComponent from './DynamicComponent'
 import { RenderEntity } from './RenderEntity'
 
@@ -87,7 +87,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                         {EntityBase.hasChildrens(buttons) ? buttons : undefined}
                     </div>
                 </legend>
-                <table className="table table-condensed form-vertical">
+                <table className="table table-condensed form-vertical sf-table">
                     <thead>
                         <tr>
                             <th></th>
@@ -101,12 +101,11 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                     <tbody>
                         {
                             mlistItemContext(ctx).map((mlec, i) =>
-                                (<EntityTableRow key={i} index={i}
+                                (<EntityTableRow key={i} 
                                     onRowHtmlAttributes={this.props.onRowHtmlAttributes}
                                     fetchRowState={this.props.fetchRowState}
                                     onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
-                                    onMoveDown={this.canMove(mlec.value) && !readOnly ? e => this.moveDown(i) : undefined}
-                                    onMoveUp={this.canMove(mlec.value) && !readOnly ? e => this.moveUp(i) : undefined}
+                                    draggable={this.canMove(mlec.value) && !readOnly && this.getDragConfig(i, "v")}
                                     columns={this.state.columns!}
                                     ctx={mlec} />))
                         }
@@ -133,11 +132,9 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
 
 export interface EntityTableRowProps {
     ctx: TypeContext<ModifiableEntity>;
-    index: number;
     columns: EntityTableColumn<ModifiableEntity, any>[],
     onRemove?: (event: React.MouseEvent<any>) => void;
-    onMoveUp?: (event: React.MouseEvent<any>) => void;
-    onMoveDown?: (event: React.MouseEvent<any>) => void;
+    draggable?: DragConfig;
     fetchRowState?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow) => Promise<any>;
     onRowHtmlAttributes?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow, rowState: any) => React.HTMLAttributes<any> | null | undefined;
 }
@@ -158,8 +155,13 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
     render() {
         var ctx = this.props.ctx;
         var rowAtts = this.props.onRowHtmlAttributes && this.props.onRowHtmlAttributes(ctx, this, this.state.rowState);
+        const drag = this.props.draggable;
         return (
-            <tr style={{ backgroundColor: rowAtts && rowAtts.style && rowAtts.style.backgroundColor }}>
+            <tr style={{ backgroundColor: rowAtts && rowAtts.style && rowAtts.style.backgroundColor }}
+                onDragEnter={drag && drag.onDragOver}
+                onDragOver={drag && drag.onDragOver}
+                onDrop={drag && drag.onDrop}
+                className={drag && drag.dropClass}>
                 <td>
                     <div className="item-group">
                         {this.props.onRemove && <a className={classes("sf-line-button", "sf-remove")}
@@ -167,17 +169,13 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
                             title={EntityControlMessage.Remove.niceToString()}>
                             <span className="glyphicon glyphicon-remove"/>
                         </a>}
-
-                        {this.props.onMoveUp && <a className={classes("sf-line-button", "move-up")}
-                            onClick={this.props.onMoveUp}
-                            title={EntityControlMessage.MoveUp.niceToString()}>
-                            <span className="glyphicon glyphicon-chevron-up"/>
-                        </a>}
-
-                        {this.props.onMoveDown && <a className={classes("sf-line-button", "move-down")}
-                            onClick={this.props.onMoveDown}
-                            title={EntityControlMessage.MoveDown.niceToString()}>
-                            <span className="glyphicon glyphicon-chevron-down"/>
+                        &nbsp;
+                        {drag && <a className={classes("sf-line-button", "sf-move")}
+                            draggable={true}
+                            onDragStart={drag.onDragStart}
+                            onDragEnd={drag.onDragEnd}
+                            title={EntityControlMessage.Move.niceToString()}>
+                            <span className="glyphicon glyphicon-menu-hamburger"/>
                         </a>}
                     </div>
                 </td>
