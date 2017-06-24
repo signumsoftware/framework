@@ -22,7 +22,7 @@ import { ViewReplacer } from '../../../Framework/Signum.React/Scripts/Frames/Rea
 import * as Lines from '../../../Framework/Signum.React/Scripts/Lines'
 import * as FileLineModule from '../Files/FileLine'
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
-import { DynamicViewEntity, DynamicViewSelectorEntity, DynamicViewOverrideEntity, DynamicViewMessage, DynamicViewOperation } from './Signum.Entities.Dynamic'
+import { DynamicViewEntity, DynamicViewSelectorEntity, DynamicViewOverrideEntity, DynamicViewMessage, DynamicViewOperation, DynamicViewSelectorOperation } from './Signum.Entities.Dynamic'
 import DynamicViewEntityComponent from './View/DynamicView' //Just Typing
 import * as DynamicClient from './DynamicClient'
 
@@ -31,6 +31,7 @@ import { DynamicViewComponentProps, DynamicViewPart } from './View/DynamicViewCo
 import * as Nodes from './View/Nodes' //Typings-only
 import * as NodeUtils from './View/NodeUtils' //Typings-only
 import MessageModal from "../../../Framework/Signum.React/Scripts/Modals/MessageModal";
+import { Dic } from "../../../Framework/Signum.React/Scripts/Globals";
 
 
 export function start(options: { routes: JSX.Element[] }) {
@@ -45,8 +46,34 @@ export function start(options: { routes: JSX.Element[] }) {
     Operations.addSettings(new EntityOperationSettings(DynamicViewOperation.Save, {
         onClick: ctx => {
             (ctx.frame.entityComponent as DynamicViewEntityComponent).beforeSave();
+            cleanCaches();
             ctx.defaultClick();
         }
+    }));
+
+    Operations.addSettings(new EntityOperationSettings(DynamicViewOperation.Delete, {
+        onClick: ctx => {
+            cleanCaches();
+            ctx.defaultClick();
+        },
+        contextual: { onClick: ctx => { cleanCaches(); ctx.defaultContextualClick(); } },
+        contextualFromMany: { onClick: ctx => { cleanCaches(); ctx.defaultContextualClick(); } },
+    }));
+
+    Operations.addSettings(new EntityOperationSettings(DynamicViewSelectorOperation.Save, {
+        onClick: ctx => {
+            cleanCaches();
+            ctx.defaultClick();
+        }
+    }));
+
+    Operations.addSettings(new EntityOperationSettings(DynamicViewSelectorOperation.Delete, {
+        onClick: ctx => {
+            cleanCaches();
+            ctx.defaultClick();
+        },
+        contextual: { onClick: ctx => { cleanCaches(); ctx.defaultContextualClick(); } },
+        contextualFromMany: { onClick: ctx => { cleanCaches(); ctx.defaultContextualClick(); } },
     }));
 
     Navigator.setViewDispatcher(new DynamicViewViewDispatcher());
@@ -218,6 +245,12 @@ function getOrCreate<V>(cache: { [key: string]: V }, key: string, onCreate: (key
         return Promise.resolve(cache[key]);
 
     return onCreate(key).then(v => cache[key] = v);
+}
+
+
+export function cleanCaches() {
+    Dic.clear(viewNamesCache);
+    Dic.clear(selectorCache);
 }
 
 const viewNamesCache: { [typeName: string]: string[] } = {};
