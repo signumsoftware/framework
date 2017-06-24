@@ -1106,8 +1106,6 @@ export class PropertyRoute {
         }
     }
 
-    
-
     toString() {
         if (this.propertyRouteType == "Root")
             return `(${this.findRootType().name})`;

@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, LambdaMemberType, Type, PseudoType, getTypeName } from './Reflection'
+import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, LambdaMemberType, Type, PseudoType, getTypeName, Binding } from './Reflection'
 import { ModelState, MList, ModifiableEntity, EntityPack, Entity } from './Signum.Entities'
 import { EntityOperationContext } from './Operations'
 
@@ -204,6 +204,30 @@ export class TypeContext<T> extends StyleContext {
         const result = new TypeContext<any>(this, styleOptions, subRoute, binding);
 
         return result;
+    }
+
+    subCtxField(field: string): TypeContext<any>{
+
+        if (field.contains(".")) {
+            var mixinType = field.before(".").trimStart("[").trimEnd("]");
+            var fieldName = field.after(".");
+
+            var mixinValue = (this.value as any as Entity).mixins[mixinType];
+            var binding = new Binding(mixinValue, fieldName.firstLower());
+
+            var pr = this.propertyRoute
+                .addMember({ type: "Mixin", name: mixinType })
+                .addMember({ type: "Member", name: fieldName });
+
+            return new TypeContext<any>(this, undefined, pr, binding);
+
+        } else {
+            var pr = this.propertyRoute
+                .addMember({ type: "Member", name: field });
+
+            var binding = new Binding(this.value, field.firstLower());
+            return new TypeContext<any>(this, undefined, pr, binding);
+        }
     }
 
     cast<R extends T & ModifiableEntity>(type: Type<R>): TypeContext<R> {
