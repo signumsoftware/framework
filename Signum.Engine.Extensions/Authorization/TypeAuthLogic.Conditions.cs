@@ -639,7 +639,13 @@ namespace Signum.Engine.Authorization
                          select new { rt.Resource, c.Condition, rt.Role }).ToList();
 
             var errors = conds.GroupBy(a => new { a.Resource, a.Condition }, a => a.Role)
-                .Where(c => !TypeConditionLogic.IsDefined(c.Key.Resource.ToType(), c.Key.Condition))
+                .Where(gr =>
+                {
+                    if (gr.Key.Condition.FieldInfo == null)
+                        return rep.TryGetC(typeof(TypeConditionSymbol).Name)?.TryGetC(gr.Key.Condition.Key) == null;
+
+                    return !TypeConditionLogic.IsDefined(gr.Key.Resource.ToType(), gr.Key.Condition);
+                })
                 .ToList();
 
             using (rep.WithReplacedDatabaseName())
