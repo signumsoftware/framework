@@ -194,6 +194,7 @@
     <Compile Include="Schema\UniqueIndex.cs" />
     <Compile Include="ServerBasic.cs" />
     <Compile Include="Basics\TypeLogic.cs" />
+    <Compile Include="VirtualMList.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Administrator.md" />
