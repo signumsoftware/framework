@@ -62,15 +62,16 @@ export function hideSiblings(ti: TypeInfo) {
 export function overrideOnFind(ti: TypeInfo) {
     var s = Finder.getSettings(ti.name);
     if (!s) {
-        Finder.addSettings({
-            queryName: ti.name,
-            onFind: (fo, mo) => openTree(ti.name, fo.filterOptions, { title: mo && mo.title })
-        });
+        s = { queryName: ti.name };
+        Finder.addSettings(s);
     }
+
+    if (!s.onFind)
+      s.onFind = (fo, mo) => openTree(ti.name, fo.filterOptions, { title: mo && mo.title });
 }
 
 export function isTree(t: TypeInfo) {
-    return t.kind == "Entity" && t.operations && t.operations[TreeOperation.CreateNextSibling.key];
+    return (t.kind == "Entity" && t.operations && t.operations[TreeOperation.CreateNextSibling.key] != null) || false;
 }
 
 export function getAllTreeTypes() {
