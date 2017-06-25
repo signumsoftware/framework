@@ -598,8 +598,8 @@ export function createBinding(parentValue: any, lambdaMembers: LambdaMember[]): 
     const lastMember = lambdaMembers[lambdaMembers.length - 1];
     switch (lastMember.type) {
 
-        case "Member": return new Binding(val, lastMember.name);
-        case "Mixin": new ReadonlyBinding(val.mixins[lastMember.name], "");
+        case "Member": return new Binding(val, lastMember.name); 
+        case "Mixin": return new ReadonlyBinding(val.mixins[lastMember.name], "");
         default: throw new Error("Unexpected " + lastMember.type);
     }
 }
