@@ -249,31 +249,35 @@ namespace Signum.Engine
                 }
             }
 
-            foreach (var entity in retrieved.Values)
+            var currentlyRetrieved = retrieved.Values.ToHashSet();
+            var currentlyModifiableRetrieved = modifiablePostRetrieving.ToHashSet(Signum.Utilities.DataStructures.ReferenceEqualityComparer<Modifiable>.Default);
+            foreach (var entity in currentlyRetrieved)
             {
                 entity.PostRetrieving();
                 Schema.Current.OnRetrieved(entity);
                 entityCache.Add(entity);
             }
 
-            foreach (var embedded in modifiablePostRetrieving)
+            foreach (var embedded in currentlyModifiableRetrieved)
                 embedded.PostRetrieving();
 
             ModifiedState ms = ModifiedState;
-            foreach (var entity in retrieved.Values)
+            foreach (var entity in currentlyRetrieved)
             {
                 entity.Modified = ms;
                 entity.IsNew = false;
             }
 
-            foreach (var embedded in modifiablePostRetrieving)
+            foreach (var embedded in currentlyModifiableRetrieved)
                 embedded.Modified = ms;
 
             if (liteRequests != null && liteRequests.Count > 0 ||
-                requests != null && requests.Count > 0) // PostRetrieving could retrieve as well
+                requests != null && requests.Count > 0 ||
+                retrieved.Count > currentlyRetrieved.Count
+                ) // PostRetrieving could retrieve as well
             {
-                retrieved.Clear();
-                modifiablePostRetrieving.Clear();
+                retrieved.RemoveAll(a =>  currentlyRetrieved.Contains(a.Value));
+                modifiablePostRetrieving.RemoveAll(a => currentlyModifiableRetrieved.Contains(a));
                 goto retry;
             }
 
