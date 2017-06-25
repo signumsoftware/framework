@@ -516,7 +516,8 @@ export class Binding<T> implements IBinding<T> {
         const oldVal = this.parentValue[this.member];
         this.parentValue[this.member] = val;
 
-        if (oldVal != val && (this.parentValue as ModifiableEntity).Type) {
+        if ((this.parentValue as ModifiableEntity).Type) {
+            if (oldVal !== val || Array.isArray(oldVal))
             (this.parentValue as ModifiableEntity).modified = true;
         }
     }
