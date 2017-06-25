@@ -516,7 +516,8 @@ export class Binding<T> implements IBinding<T> {
         const oldVal = this.parentValue[this.member];
         this.parentValue[this.member] = val;
 
-        if (oldVal != val && (this.parentValue as ModifiableEntity).Type) {
+        if ((this.parentValue as ModifiableEntity).Type) {
+            if (oldVal !== val || Array.isArray(oldVal))
             (this.parentValue as ModifiableEntity).modified = true;
         }
     }
@@ -597,8 +598,8 @@ export function createBinding(parentValue: any, lambdaMembers: LambdaMember[]): 
     const lastMember = lambdaMembers[lambdaMembers.length - 1];
     switch (lastMember.type) {
 
-        case "Member": return new Binding(val, lastMember.name);
-        case "Mixin": new ReadonlyBinding(val.mixins[lastMember.name], "");
+        case "Member": return new Binding(val, lastMember.name); 
+        case "Mixin": return new ReadonlyBinding(val.mixins[lastMember.name], "");
         default: throw new Error("Unexpected " + lastMember.type);
     }
 }
