@@ -492,10 +492,44 @@ ValueLine.renderers["DateTime" as ValueLineType] = (vl) => {
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
             {ValueLine.withItemGroup(vl,
-                <DateTimePicker value={m && m.toDate()} onChange={handleDatePickerOnChange} format={momentFormat} time={showTime} defaultCurrentDate={currentDate.toDate()} />
+                <DateTimePickerHotFix value={m && m.toDate()} onChange={handleDatePickerOnChange} format={momentFormat} time={showTime} defaultCurrentDate={currentDate.toDate()} />
             )}
         </FormGroup>
     );
+}
+
+
+
+interface DateTimePickerHotFixProps {
+    value?: Date;
+    onChange?: (date?: Date, dateStr?: string) => void;
+    format?: string;
+    time?: boolean;
+    defaultCurrentDate?: Date;
+}
+
+interface DateTimePickerHotFixState {
+    currentDate?: Date;
+}
+//https://github.com/jquense/react-widgets/issues/593
+export default class DateTimePickerHotFix extends React.Component<DateTimePickerHotFixProps, DateTimePickerHotFixState> {
+
+    constructor(props: DateTimePickerHotFixProps) {
+        super(props);
+        this.state = { currentDate: props.defaultCurrentDate };
+    }
+
+    componentWillReceiveProps(newProps: DateTimePickerHotFixProps) {
+        if (newProps.defaultCurrentDate != this.props.defaultCurrentDate)
+            this.setState({ currentDate: this.props.defaultCurrentDate });
+    }
+    
+    render() {
+        const p = this.props;
+        return (
+            <DateTimePicker value={p.value} onChange={p.onChange} format={p.format} time={p.time} currentDate={p.defaultCurrentDate} onCurrentDateChange={d => this.setState({ currentDate: d })} />
+        );
+    }
 }
 
 ValueLine.renderers["TimeSpan" as ValueLineType] = (vl) => {
