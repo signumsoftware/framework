@@ -15,8 +15,13 @@ import { PermissionRulePack, AuthAdminMessage, PermissionSymbol, AuthMessage } f
 
 
 require("./AuthAdmin.css");
+interface ColorRadioProps {
+    checked: boolean;
+    onClicked: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+    color: string;
+}
 
-export class ColorRadio extends React.Component<{ checked: boolean, onClicked: (e: React.MouseEvent<any>) => void, color: string }, void>{
+export class ColorRadio extends React.Component<ColorRadioProps, void>{
 
     render() {
         return (

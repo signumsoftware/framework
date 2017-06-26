@@ -315,6 +315,7 @@ export const Pop3ConfigurationEntity = new Type<Pop3ConfigurationEntity>("Pop3Co
 export interface Pop3ConfigurationEntity extends Entities.Entity, Scheduler.ITaskEntity {
     Type: "Pop3Configuration";
     active?: boolean;
+    fullComparation?: boolean;
     port?: number;
     host?: string | null;
     username?: string | null;
