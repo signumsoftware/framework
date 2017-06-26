@@ -744,6 +744,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                             this.state.dropBorderIndex != null && i == this.state.dropBorderIndex ? "drag-left " :
                                 this.state.dropBorderIndex != null && i == this.state.dropBorderIndex - 1 ? "drag-right " : undefined)}
                         data-column-name={co.token && co.token.fullKey}
+                        data-column-index={i}
                         onClick={this.canOrder(co) ? this.handleHeaderClick : undefined}
                         onDragStart={e => this.handleHeaderDragStart(e, i)}
                         onDragEnd={this.handleHeaderDragEnd}
