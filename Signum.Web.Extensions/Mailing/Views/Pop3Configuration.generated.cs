@@ -71,111 +71,125 @@ Write(Html.ValueLine(sc, s => s.Active));
             #line hidden
             
             #line 6 "..\..\Mailing\Views\Pop3Configuration.cshtml"
-Write(Html.ValueLine(sc, s => s.Port));
+Write(Html.ValueLine(sc, s => s.FullComparation));
 
             
             #line default
             #line hidden
             
             #line 6 "..\..\Mailing\Views\Pop3Configuration.cshtml"
-                                    
+                                               
     
             
             #line default
             #line hidden
             
             #line 7 "..\..\Mailing\Views\Pop3Configuration.cshtml"
+Write(Html.ValueLine(sc, s => s.Port));
+
+            
+            #line default
+            #line hidden
+            
+            #line 7 "..\..\Mailing\Views\Pop3Configuration.cshtml"
+                                    
+    
+            
+            #line default
+            #line hidden
+            
+            #line 8 "..\..\Mailing\Views\Pop3Configuration.cshtml"
 Write(Html.ValueLine(sc, s => s.Host));
 
             
             #line default
             #line hidden
             
-            #line 7 "..\..\Mailing\Views\Pop3Configuration.cshtml"
+            #line 8 "..\..\Mailing\Views\Pop3Configuration.cshtml"
                                     
     
             
             #line default
             #line hidden
             
-            #line 8 "..\..\Mailing\Views\Pop3Configuration.cshtml"
+            #line 9 "..\..\Mailing\Views\Pop3Configuration.cshtml"
 Write(Html.ValueLine(sc, s => s.Username));
 
             
             #line default
             #line hidden
             
-            #line 8 "..\..\Mailing\Views\Pop3Configuration.cshtml"
+            #line 9 "..\..\Mailing\Views\Pop3Configuration.cshtml"
                                         
     
             
             #line default
             #line hidden
             
-            #line 9 "..\..\Mailing\Views\Pop3Configuration.cshtml"
+            #line 10 "..\..\Mailing\Views\Pop3Configuration.cshtml"
 Write(Html.ValueLine(sc, s => s.Password, vl => vl.ValueHtmlProps.Add("type", "password")));
 
             
             #line default
             #line hidden
             
-            #line 9 "..\..\Mailing\Views\Pop3Configuration.cshtml"
+            #line 10 "..\..\Mailing\Views\Pop3Configuration.cshtml"
                                                                                          
     
             
             #line default
             #line hidden
             
-            #line 10 "..\..\Mailing\Views\Pop3Configuration.cshtml"
+            #line 11 "..\..\Mailing\Views\Pop3Configuration.cshtml"
 Write(Html.ValueLine(sc, s => s.EnableSSL));
 
             
             #line default
             #line hidden
             
-            #line 10 "..\..\Mailing\Views\Pop3Configuration.cshtml"
+            #line 11 "..\..\Mailing\Views\Pop3Configuration.cshtml"
                                          
     
             
             #line default
             #line hidden
             
-            #line 11 "..\..\Mailing\Views\Pop3Configuration.cshtml"
+            #line 12 "..\..\Mailing\Views\Pop3Configuration.cshtml"
 Write(Html.ValueLine(sc, s => s.ReadTimeout));
 
             
             #line default
             #line hidden
             
-            #line 11 "..\..\Mailing\Views\Pop3Configuration.cshtml"
+            #line 12 "..\..\Mailing\Views\Pop3Configuration.cshtml"
                                            
     
             
             #line default
             #line hidden
             
-            #line 12 "..\..\Mailing\Views\Pop3Configuration.cshtml"
+            #line 13 "..\..\Mailing\Views\Pop3Configuration.cshtml"
 Write(Html.ValueLine(sc, s => s.DeleteMessagesAfter));
 
             
             #line default
             #line hidden
             
-            #line 12 "..\..\Mailing\Views\Pop3Configuration.cshtml"
+            #line 13 "..\..\Mailing\Views\Pop3Configuration.cshtml"
                                                    
     
             
             #line default
             #line hidden
             
-            #line 13 "..\..\Mailing\Views\Pop3Configuration.cshtml"
+            #line 14 "..\..\Mailing\Views\Pop3Configuration.cshtml"
 Write(Html.EntityRepeater(sc, s => s.ClientCertificationFiles));
 
             
             #line default
             #line hidden
             
-            #line 13 "..\..\Mailing\Views\Pop3Configuration.cshtml"
+            #line 14 "..\..\Mailing\Views\Pop3Configuration.cshtml"
                                                              
 
     if (!sc.Value.IsNew)
@@ -185,7 +199,7 @@ Write(Html.EntityRepeater(sc, s => s.ClientCertificationFiles));
             #line default
             #line hidden
             
-            #line 17 "..\..\Mailing\Views\Pop3Configuration.cshtml"
+            #line 18 "..\..\Mailing\Views\Pop3Configuration.cshtml"
 Write(Html.CountSearchControl(new FindOptions(typeof(Pop3ReceptionEntity))
     {
         FilterOptions = { new FilterOption("Pop3Configuration", sc.Value) }
@@ -195,7 +209,7 @@ Write(Html.CountSearchControl(new FindOptions(typeof(Pop3ReceptionEntity))
             #line default
             #line hidden
             
-            #line 20 "..\..\Mailing\Views\Pop3Configuration.cshtml"
+            #line 21 "..\..\Mailing\Views\Pop3Configuration.cshtml"
                                                                   ;
     }
 }

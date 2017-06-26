@@ -2,7 +2,6 @@
 import { Tab, Tabs } from 'react-bootstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { SubTokensOptions, QueryToken, QueryTokenType, hasAnyOrAll } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString, getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -16,16 +15,11 @@ import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLine
 export default class AlertType extends React.Component<{ ctx: TypeContext<AlertTypeEntity> }, void> {
 
     render() {
-
-        const e = this.props.ctx;
-
-        const ec = e.subCtx({ labelColumns: { sm: 4 } });
-        const sc = ec.subCtx({ formGroupStyle: "Basic" });
-
-
+        const ctx = this.props.ctx;
+        const ctx4 = ctx.subCtx({ labelColumns: 4 });
         return (
             <div>
-                <ValueLine ctx={ec.subCtx(n => n.name)} />
+                <ValueLine ctx={ctx4.subCtx(n => n.name)} />
             </div>
         );
     }
