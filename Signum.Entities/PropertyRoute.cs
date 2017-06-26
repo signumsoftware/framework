@@ -135,10 +135,7 @@ namespace Signum.Entities
             if (fieldOrProperty == null)
                 throw new ArgumentNullException("fieldOrProperty");
 
-            if (parent == null)
-                throw new ArgumentNullException("parent");
-
-            this.Parent = parent;
+            this.Parent = parent ?? throw new ArgumentNullException("parent");
 
             if (parent.Type.IsIEntity() && parent.PropertyRouteType != PropertyRouteType.Root)
                 throw new ArgumentException("Parent can not be a non-root Identifiable");
@@ -181,10 +178,7 @@ namespace Signum.Entities
                         var otherProperty = parent.Type.Follow(a => a.BaseType)
                             .Select(a => a.GetProperty(fieldOrProperty.Name, BindingFlags.Public | BindingFlags.Instance, null, null, new Type[0], null)).NotNull().FirstEx();
 
-                        if (otherProperty == null)
-                            throw new ArgumentException("PropertyInfo {0} not found on {1}".FormatWith(pi.PropertyName(), parent.Type));
-
-                        fieldOrProperty = otherProperty;
+                        fieldOrProperty = otherProperty ?? throw new ArgumentException("PropertyInfo {0} not found on {1}".FormatWith(pi.PropertyName(), parent.Type));
                     }
 
                     PropertyInfo = (PropertyInfo)fieldOrProperty;
