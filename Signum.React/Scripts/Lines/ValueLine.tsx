@@ -527,7 +527,7 @@ export default class DateTimePickerHotFix extends React.Component<DateTimePicker
     render() {
         const p = this.props;
         return (
-            <DateTimePicker value={p.value} onChange={p.onChange} format={p.format} time={p.time} currentDate={p.defaultCurrentDate} onCurrentDateChange={d => this.setState({ currentDate: d })} />
+            <DateTimePicker value={p.value} onChange={p.onChange} format={p.format} time={p.time} currentDate={this.state.currentDate} onCurrentDateChange={d => this.setState({ currentDate: d })} />
         );
     }
 }
