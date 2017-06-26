@@ -191,14 +191,23 @@ namespace Signum.Engine.Maps
 
         void Complete(Table table)
         {
-            Type type = table.Type;
+            using (HeavyProfiler.LogNoStackTrace("Complete", () => table.Type.Name))
+            using (var tr = HeavyProfiler.LogNoStackTrace("GetPrimaryKeyAttribute", () => table.Type.Name))
+            {
+                Type type = table.Type;
 
-            table.IdentityBehaviour = GetPrimaryKeyAttribute(type).IdentityBehaviour;
-            table.Name = GenerateTableName(type, Settings.TypeAttribute<TableNameAttribute>(type));
-            table.CleanTypeName = GenerateCleanTypeName(type);
-            table.Fields = GenerateFields(PropertyRoute.Root(type), table, NameSequence.Void, forceNull: false, inMList: false);
-            table.Mixins = GenerateMixins(PropertyRoute.Root(type), table, NameSequence.Void);
-            table.GenerateColumns();
+                table.IdentityBehaviour = GetPrimaryKeyAttribute(type).IdentityBehaviour;
+                tr.Switch("GenerateTableName");
+                table.Name = GenerateTableName(type, Settings.TypeAttribute<TableNameAttribute>(type));
+                tr.Switch("GenerateCleanTypeName");
+                table.CleanTypeName = GenerateCleanTypeName(type);
+                tr.Switch("GenerateFields");
+                table.Fields = GenerateFields(PropertyRoute.Root(type), table, NameSequence.Void, forceNull: false, inMList: false);
+                tr.Switch("GenerateMixins");
+                table.Mixins = GenerateMixins(PropertyRoute.Root(type), table, NameSequence.Void);
+                tr.Switch("GenerateColumns");
+                table.GenerateColumns();
+            }
         }
 
         private Dictionary<Type, FieldMixin> GenerateMixins(PropertyRoute propertyRoute, Table table, NameSequence nameSequence)
@@ -215,9 +224,14 @@ namespace Signum.Engine.Maps
             return mixins;
         }
 
+        public HeavyProfiler.Tracer Tracer { get; set; }
+
+
         public HashSet<(Type type, string method)> LoadedModules = new HashSet<(Type type, string method)>();
         public bool NotDefined(MethodBase methodBase)
         {
+            this.Tracer.Switch(methodBase.DeclaringType.Name);
+
             var should = methodBase.DeclaringType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
              .Where(m => !m.HasAttribute<MethodExpanderAttribute>())
              .Select(m => m.GetCustomAttribute<ExpressionFieldAttribute>()?.Name ?? m.Name + "Expression").ToList();
@@ -245,63 +259,71 @@ namespace Signum.Engine.Maps
 
         protected Dictionary<string, EntityField> GenerateFields(PropertyRoute root, ITable table, NameSequence preName, bool forceNull, bool inMList)
         {
-            Dictionary<string, EntityField> result = new Dictionary<string, EntityField>();
-            var type = root.Type;
-
-            if (type.IsEntity())
+            using (HeavyProfiler.LogNoStackTrace("SB.GenerateFields", () => root.ToString()))
             {
+                Dictionary<string, EntityField> result = new Dictionary<string, EntityField>();
+                var type = root.Type;
+
+                if (type.IsEntity())
                 {
-                    PropertyRoute route = root.Add(fiId);
+                    {
+                        PropertyRoute route = root.Add(fiId);
 
-                    Field field = GenerateField(table, route, preName, forceNull, inMList);
+                        Field field = GenerateField(table, route, preName, forceNull, inMList);
 
-                    result.Add(fiId.Name, new EntityField(type, fiId) { Field = field });
+                        result.Add(fiId.Name, new EntityField(type, fiId) { Field = field });
+                    }
+
+                    TicksColumnAttribute t = type.GetCustomAttribute<TicksColumnAttribute>();
+                    if (t == null || t.HasTicks)
+                    {
+                        PropertyRoute route = root.Add(fiTicks);
+
+                        Field field = GenerateField(table, route, preName, forceNull, inMList);
+
+                        result.Add(fiTicks.Name, new EntityField(type, fiTicks) { Field = field });
+                    }
+
+                    Expression exp = ExpressionCleaner.GetFieldExpansion(type, EntityExpression.ToStringMethod);
+
+                    if (exp == null)
+                    {
+                        PropertyRoute route = root.Add(fiToStr);
+
+                        Field field = GenerateField(table, route, preName, forceNull, inMList);
+
+                        if (result.ContainsKey(fiToStr.Name))
+                            throw new InvalidOperationException("Duplicated field with name {0} on {1}, shadowing not supported".FormatWith(fiToStr.Name, type.TypeName()));
+
+                        result.Add(fiToStr.Name, new EntityField(type, fiToStr) { Field = field });
+                    }
                 }
 
-                TicksColumnAttribute t = type.GetCustomAttribute<TicksColumnAttribute>();
-                if (t == null || t.HasTicks)
+                foreach (FieldInfo fi in Reflector.InstanceFieldsInOrder(type))
                 {
-                    PropertyRoute route = root.Add(fiTicks);
+                    PropertyRoute route = root.Add(fi);
 
-                    Field field = GenerateField(table, route, preName, forceNull, inMList);
+                    if (Settings.FieldAttribute<IgnoreAttribute>(route) == null)
+                    {
+                        if (Reflector.TryFindPropertyInfo(fi) == null && !fi.IsPublic && !fi.HasAttribute<FieldWithoutPropertyAttribute>())
+                            throw new InvalidOperationException("Field '{0}' of type '{1}' has no property".FormatWith(fi.Name, type.Name));
 
-                    result.Add(fiTicks.Name, new EntityField(type, fiTicks) { Field = field });
+                        Field field = GenerateField(table, route, preName, forceNull, inMList);
+
+                        if (result.ContainsKey(fi.Name))
+                            throw new InvalidOperationException("Duplicated field with name '{0}' on '{1}', shadowing not supported".FormatWith(fi.Name, type.TypeName()));
+
+                        var ef = new EntityField(type, fi) { Field = field };
+
+                        if (field is FieldMList fml)
+                            fml.TableMList.PropertyRoute = route;
+
+                        result.Add(fi.Name, ef);
+                    }
                 }
 
-                Expression exp = ExpressionCleaner.GetFieldExpansion(type, EntityExpression.ToStringMethod);
-
-                if (exp == null)
-                {
-                    PropertyRoute route = root.Add(fiToStr);
-
-                    Field field = GenerateField(table, route, preName, forceNull, inMList);
-
-                    if (result.ContainsKey(fiToStr.Name))
-                        throw new InvalidOperationException("Duplicated field with name {0} on {1}, shadowing not supported".FormatWith(fiToStr.Name, type.TypeName()));
-
-                    result.Add(fiToStr.Name, new EntityField(type, fiToStr) { Field = field });
-                }
+                return result;
             }
-
-            foreach (FieldInfo fi in Reflector.InstanceFieldsInOrder(type))
-            {
-                PropertyRoute route = root.Add(fi);
-
-                if (Settings.FieldAttribute<IgnoreAttribute>(route) == null)
-                {
-                    if (Reflector.TryFindPropertyInfo(fi) == null && !fi.IsPublic && !fi.HasAttribute<FieldWithoutPropertyAttribute>())
-                        throw new InvalidOperationException("Field '{0}' of type '{1}' has no property".FormatWith(fi.Name, type.Name));
-
-                    Field field = GenerateField(table, route, preName, forceNull, inMList);
-
-                    if (result.ContainsKey(fi.Name))
-                        throw new InvalidOperationException("Duplicated field with name '{0}' on '{1}', shadowing not supported".FormatWith(fi.Name, type.TypeName()));
-
-                    result.Add(fi.Name, new EntityField(type, fi) { Field = field });
-                }
-            }
-
-            return result;
         }
 
         static readonly FieldInfo fiToStr = ReflectionTools.GetFieldInfo((Entity o) => o.toStr);
@@ -310,56 +332,54 @@ namespace Signum.Engine.Maps
 
         protected virtual Field GenerateField(ITable table, PropertyRoute route, NameSequence preName, bool forceNull, bool inMList)
         {
-            
-
-            KindOfField kof = GetKindOfField(route).ThrowIfNull(() => "Field {0} of type {1} has no database representation".FormatWith(route, route.Type.Name));
-
-            if(kof == KindOfField.MList && inMList)
-                throw new InvalidOperationException("Field {0} of type {1} can not be nested in another MList".FormatWith(route, route.Type.TypeName(), kof));
-
-            //field name generation 
-            NameSequence name;
-            ColumnNameAttribute vc = Settings.FieldAttribute<ColumnNameAttribute>(route);
-            if (vc != null && vc.Name.HasText())
-                name = NameSequence.Void.Add(vc.Name);
-            else if (route.PropertyRouteType != PropertyRouteType.MListItems)
-                name = preName.Add(GenerateFieldName(route, kof));
-            else if (kof == KindOfField.Enum || kof == KindOfField.Reference)
-                name = preName.Add(GenerateMListFieldName(route, kof));
-            else
-                name = preName;
-
-            switch (kof)
+            using (HeavyProfiler.LogNoStackTrace("GenerateField", () => route.ToString()))
             {
-                case KindOfField.PrimaryKey:
-                    return GenerateFieldPrimaryKey((Table)table, route, name);
-                case KindOfField.Ticks:
-                    return GenerateFieldTicks((Table)table, route, name);
-                case KindOfField.Value:
-                    return GenerateFieldValue(table, route, name, forceNull);
-                case KindOfField.Reference:
-                    {
-                        Implementations at = Settings.GetImplementations(route);
-                        if (at.IsByAll)
-                            return GenerateFieldImplementedByAll(route, table, name, forceNull);
-                        else if (at.Types.Only() == route.Type.CleanType())
-                            return GenerateFieldReference(table, route, name, forceNull);
-                        else
-                            return GenerateFieldImplementedBy(table, route, name, forceNull, at.Types);
-                    }
-                case KindOfField.Enum:
-                    return GenerateFieldEnum(table, route, name, forceNull);
-                case KindOfField.Embedded:
-                    return GenerateFieldEmbedded(table, route, name, forceNull, inMList);
-                case KindOfField.MList:
-                    return GenerateFieldMList((Table)table, route, name);
-                default:
-                    throw new NotSupportedException(EngineMessage.NoWayOfMappingType0Found.NiceToString().FormatWith(route.Type));
+                KindOfField kof = GetKindOfField(route).ThrowIfNull(() => "Field {0} of type {1} has no database representation".FormatWith(route, route.Type.Name));
+
+                if (kof == KindOfField.MList && inMList)
+                    throw new InvalidOperationException("Field {0} of type {1} can not be nested in another MList".FormatWith(route, route.Type.TypeName(), kof));
+
+                //field name generation 
+                NameSequence name;
+                ColumnNameAttribute vc = Settings.FieldAttribute<ColumnNameAttribute>(route);
+                if (vc != null && vc.Name.HasText())
+                    name = NameSequence.Void.Add(vc.Name);
+                else if (route.PropertyRouteType != PropertyRouteType.MListItems)
+                    name = preName.Add(GenerateFieldName(route, kof));
+                else if (kof == KindOfField.Enum || kof == KindOfField.Reference)
+                    name = preName.Add(GenerateMListFieldName(route, kof));
+                else
+                    name = preName;
+
+                switch (kof)
+                {
+                    case KindOfField.PrimaryKey:
+                        return GenerateFieldPrimaryKey((Table)table, route, name);
+                    case KindOfField.Ticks:
+                        return GenerateFieldTicks((Table)table, route, name);
+                    case KindOfField.Value:
+                        return GenerateFieldValue(table, route, name, forceNull);
+                    case KindOfField.Reference:
+                        {
+                            Implementations at = Settings.GetImplementations(route);
+                            if (at.IsByAll)
+                                return GenerateFieldImplementedByAll(route, table, name, forceNull);
+                            else if (at.Types.Only() == route.Type.CleanType())
+                                return GenerateFieldReference(table, route, name, forceNull);
+                            else
+                                return GenerateFieldImplementedBy(table, route, name, forceNull, at.Types);
+                        }
+                    case KindOfField.Enum:
+                        return GenerateFieldEnum(table, route, name, forceNull);
+                    case KindOfField.Embedded:
+                        return GenerateFieldEmbedded(table, route, name, forceNull, inMList);
+                    case KindOfField.MList:
+                        return GenerateFieldMList((Table)table, route, name);
+                    default:
+                        throw new NotSupportedException(EngineMessage.NoWayOfMappingType0Found.NiceToString().FormatWith(route.Type));
+                }
             }
         }
-
-        
-
 
         public enum KindOfField
         {
@@ -406,7 +426,7 @@ namespace Signum.Engine.Maps
 
             SqlDbTypePair pair = Settings.GetSqlDbType(attr, attr.Type);
 
-            return table.PrimaryKey = new FieldPrimaryKey(route.Type, table)
+            return table.PrimaryKey = new FieldPrimaryKey(route, table)
             {
                 Name = attr.Name,
                 Type = attr.Type,
@@ -442,7 +462,7 @@ namespace Signum.Engine.Maps
 
             SqlDbTypePair pair = Settings.GetSqlDbType(ticksAttr, type);
 
-            return table.Ticks = new FieldTicks(route.Type)
+            return table.Ticks = new FieldTicks(route)
             {
                 Type = type,
                 Name = ticksAttr?.Name ?? name.ToString(),
@@ -462,7 +482,7 @@ namespace Signum.Engine.Maps
 
             SqlDbTypePair pair = Settings.GetSqlDbType(att, route.Type);
 
-            return new FieldValue(route.Type)
+            return new FieldValue(route)
             {
                 Name = name.ToString(),
                 SqlDbType = pair.SqlDbType,
@@ -483,7 +503,7 @@ namespace Signum.Engine.Maps
 
             var referenceTable = Include(EnumEntity.Generate(cleanEnum), route);
 
-            return new FieldEnum(route.Type)
+            return new FieldEnum(route)
             {
                 Name = name.ToString(),
                 Nullable = Settings.IsNullable(route, forceNull),
@@ -500,7 +520,7 @@ namespace Signum.Engine.Maps
 
             var nullable = Settings.IsNullable(route, forceNull);
 
-            return new FieldReference(route.Type)
+            return new FieldReference(route)
             {
                 Name = name.ToString(),
                 Nullable = nullable,
@@ -525,7 +545,7 @@ namespace Signum.Engine.Maps
 
             bool avoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null;
 
-            return new FieldImplementedBy(route.Type)
+            return new FieldImplementedBy(route)
             {
                 SplitStrategy = strategy,
                 ImplementationColumns = types.ToDictionary(t => t, t => new ImplementationColumn
@@ -544,7 +564,7 @@ namespace Signum.Engine.Maps
         {
             bool nullable = Settings.IsNullable(route, forceNull);
 
-            return new FieldImplementedByAll(route.Type)
+            return new FieldImplementedByAll(route)
             {
                 Column = new ImplementationStringColumn
                 {
@@ -578,7 +598,7 @@ namespace Signum.Engine.Maps
             {
                 var pair = Settings.GetSqlDbTypePair(typeof(int));
 
-                order = new FieldValue(typeof(int))
+                order = new FieldValue(route: null, fieldType:  typeof(int))
                 {
                     Name = orderAttr.Name ?? "Order",
                     SqlDbType = pair.SqlDbType,
@@ -611,7 +631,7 @@ namespace Signum.Engine.Maps
             {
                 Name = GenerateTableNameCollection(table, name, Settings.FieldAttribute<TableNameAttribute>(route)),
                 PrimaryKey = primaryKey,
-                BackReference = new FieldReference(table.Type)
+                BackReference = new FieldReference(route: null, fieldType: table.Type)
                 {
                     Name = GenerateBackReferenceName(table.Type, Settings.FieldAttribute<BackReferenceColumnNameAttribute>(route)),
                     ReferenceTable = table,
@@ -623,8 +643,8 @@ namespace Signum.Engine.Maps
             relationalTable.Field = GenerateField(relationalTable, route.Add("Item"), NameSequence.Void, forceNull: false, inMList: true);
 
             relationalTable.GenerateColumns();
-
-            return new FieldMList(route.Type)
+            
+            return new FieldMList(route)
             {
                 TableMList = relationalTable,
             };
@@ -634,7 +654,7 @@ namespace Signum.Engine.Maps
         {
             bool nullable = Settings.IsNullable(route, false);
 
-            return new FieldEmbedded(route.Type)
+            return new FieldEmbedded(route)
             {
                 HasValue = nullable ? new FieldEmbedded.EmbeddedHasValueColumn() { Name = name.Add("HasValue").ToString() } : null,
                 EmbeddedFields = GenerateFields(route, table, name, forceNull: nullable || forceNull, inMList: inMList)
@@ -643,7 +663,7 @@ namespace Signum.Engine.Maps
 
         protected virtual FieldMixin GenerateFieldMixin(PropertyRoute route, NameSequence name, Table table)
         {
-            return new FieldMixin(route.Type, table)
+            return new FieldMixin(route, table)
             {
                 Fields = GenerateFields(route, table, name, forceNull: false, inMList: false)
             };
@@ -903,7 +923,7 @@ namespace Signum.Engine.Maps
 
             SqlDbTypePair pair = Settings.GetSqlDbType(att, route.Type);
 
-            var result = new FieldValue(route.Type)
+            var result = new FieldValue(route)
             {
                 PrimaryKey = true,
                 Name = name.ToString(),

@@ -25,7 +25,8 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
     isBadge?: boolean | "MoreThanZero";
     isFormControl?: boolean;
     findButton?: boolean;
-    onViewEntity?: (entity: Lite<Entity>)=> void;
+    onViewEntity?: (entity: Lite<Entity>) => void;
+    onExplored?: () => void;
     viewEntityButton?: boolean;
     avoidAutoRefresh?: boolean;
     extraButtons?: (valueSearchControl: ValueSearchControl) => React.ReactNode | undefined
@@ -116,6 +117,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
                         valueToken={this.props.valueToken}
                         onValueChange={() => this.forceUpdate()}
                         onTokenLoaded={() => this.forceUpdate()}
+                        onExplored={this.props.onExplored}
                         />
                     {unit}
                     {(view || extra || find) && (isFormControl ?

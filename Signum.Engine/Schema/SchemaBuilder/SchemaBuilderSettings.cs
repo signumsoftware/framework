@@ -87,22 +87,25 @@ namespace Signum.Engine.Maps
 
         public AttributeCollection FieldAttributes(PropertyRoute propertyRoute)
         {
-            return FieldAttributesCache.GetOrAdd(propertyRoute, pr =>
+            using (HeavyProfiler.LogNoStackTrace("FieldAttributes"))
             {
-                switch (propertyRoute.PropertyRouteType)
+                return FieldAttributesCache.GetOrAdd(propertyRoute, pr =>
                 {
-                    case PropertyRouteType.FieldOrProperty:
-                        if (propertyRoute.FieldInfo == null)
-                            return null;
-                        return CreateFieldAttributeCollection(propertyRoute);
-                    case PropertyRouteType.MListItems:
-                        if (propertyRoute.Parent.FieldInfo == null)
-                            return null;
-                        return CreateFieldAttributeCollection(propertyRoute.Parent);
-                    default:
-                        throw new InvalidOperationException("Route of type {0} not supported for this method".FormatWith(propertyRoute.PropertyRouteType));
-                }
-            });
+                    switch (propertyRoute.PropertyRouteType)
+                    {
+                        case PropertyRouteType.FieldOrProperty:
+                            if (propertyRoute.FieldInfo == null)
+                                return null;
+                            return CreateFieldAttributeCollection(propertyRoute);
+                        case PropertyRouteType.MListItems:
+                            if (propertyRoute.Parent.FieldInfo == null)
+                                return null;
+                            return CreateFieldAttributeCollection(propertyRoute.Parent);
+                        default:
+                            throw new InvalidOperationException("Route of type {0} not supported for this method".FormatWith(propertyRoute.PropertyRouteType));
+                    }
+                });
+            }
         }
 
         AttributeCollection CreateFieldAttributeCollection(PropertyRoute route)
@@ -154,10 +157,13 @@ namespace Signum.Engine.Maps
 
         public A FieldAttribute<A>(PropertyRoute propertyRoute) where A : Attribute
         {
-            if(propertyRoute.PropertyRouteType == PropertyRouteType.Root || propertyRoute.PropertyRouteType == PropertyRouteType.LiteEntity)
-                throw new InvalidOperationException("Route of type {0} not supported for this method".FormatWith(propertyRoute.PropertyRouteType));
+            using (HeavyProfiler.LogNoStackTrace("FieldAttribute"))
+            {
+                if (propertyRoute.PropertyRouteType == PropertyRouteType.Root || propertyRoute.PropertyRouteType == PropertyRouteType.LiteEntity)
+                    throw new InvalidOperationException("Route of type {0} not supported for this method".FormatWith(propertyRoute.PropertyRouteType));
 
-            return (A)FieldAttributes(propertyRoute).FirstOrDefault(a => a.GetType() == typeof(A));
+                return (A)FieldAttributes(propertyRoute).FirstOrDefault(a => a.GetType() == typeof(A));
+            }
         }
 
         public A TypeAttribute<A>(Type entityType) where A : Attribute
@@ -321,11 +327,16 @@ namespace Signum.Engine.Maps
             base.InsertItem(index, item);
         }
 
+        static Dictionary<Type, AttributeUsageAttribute> AttributeUssageCache = new Dictionary<Type, AttributeUsageAttribute>();
+
         public static bool IsCompatibleWith(Attribute a, AttributeTargets targets)
         {
-            var au = a.GetType().GetCustomAttribute<AttributeUsageAttribute>();
+            using (HeavyProfiler.LogNoStackTrace("IsCompatibleWith"))
+            {
+                var au = AttributeUssageCache.GetOrCreate(a.GetType(), t => t.GetCustomAttribute<AttributeUsageAttribute>());
 
-            return au != null && (au.ValidOn & targets) == targets;
+                return au != null && (au.ValidOn & targets) == targets;
+            }
         }
 
         public new AttributeCollection Add(Attribute attr)

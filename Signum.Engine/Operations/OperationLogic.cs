@@ -17,18 +17,11 @@ using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using System.Data.Common;
 using Signum.Engine.Operations.Internal;
-using static Signum.Engine.Maps.SchemaBuilder;
-using Signum.Entities.Authorization;
 
 namespace Signum.Engine.Operations
 {
     public static class OperationLogic
     {
-
-
-       
-
-
         static Expression<Func<Entity, IQueryable<OperationLogEntity>>> OperationLogsEntityExpression =
             e => Database.Query<OperationLogEntity>().Where(a => a.Target.RefersTo(e));
         [ExpressionField]
@@ -93,7 +86,7 @@ namespace Signum.Engine.Operations
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<OperationLogEntity>()
-                    .WithQuery(dqm, lo => new
+                    .WithQuery(dqm, () => lo => new
                     {
                         Entity = lo,
                         lo.Id,
@@ -108,7 +101,7 @@ namespace Signum.Engine.Operations
                 SymbolLogic<OperationSymbol>.Start(sb, dqm, () => RegisteredOperations);
 
                 sb.Include<OperationSymbol>()
-                    .WithQuery(dqm, os => new
+                    .WithQuery(dqm, () => os => new
                     {
                         Entity = os,
                         os.Id,
@@ -125,14 +118,14 @@ namespace Signum.Engine.Operations
                 sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(Type_PreDeleteSqlSync);
 
                 sb.Schema.SchemaCompleted += OperationLogic_Initializing;
-
+                
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }
         }
 
-        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters)
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            Database.Query<OperationLogEntity>().Where(o => o.Start < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
+            Database.Query<OperationLogEntity>().Where(o => o.Start < parameters.DateLimit).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         static void OperationLogic_Initializing()
@@ -490,10 +483,15 @@ Consider the following options:
 
         public static IOperation FindOperation(Type type, OperationSymbol operationSymbol)
         {
-            IOperation result = operations.TryGetValue(type)?.TryGetC(operationSymbol);
+            IOperation result = TryFindOperation(type, operationSymbol);
             if (result == null)
                 throw new InvalidOperationException("Operation '{0}' not found for type {1}".FormatWith(operationSymbol, type));
             return result;
+        }
+
+        public static IOperation TryFindOperation(Type type, OperationSymbol operationSymbol)
+        {
+            return operations.TryGetValue(type)?.TryGetC(operationSymbol);
         }
 
         public static Graph<T>.Construct FindConstruct<T>(ConstructSymbol<T>.Simple symbol) 

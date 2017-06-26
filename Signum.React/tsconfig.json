@@ -5,13 +5,11 @@
     "module": "commonjs",
     "jsx": "react",
     "noEmit": true,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
-    "noImplicitReturns": true,
-    "strictNullChecks": true,
+    "strict": true,
     "baseUrl": ".",
     "lib": [
       "es2017",
+      "esnext",
       "dom"
     ]
   },

@@ -30,6 +30,7 @@ namespace Signum.Utilities.NaturalLanguage
             {"oy", "oys" }, // boy -> boys
             {"uy", "uys" }, // guy -> guys
             {"y", "ies"}, //ferry -> ferries 
+            {"ss", "sses" } // class -> classes
         };
 
         public string MakePlural(string singularName)

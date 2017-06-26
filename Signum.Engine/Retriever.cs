@@ -8,6 +8,9 @@ using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Basics;
+using System.Threading;
+using System.Threading.Tasks;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine
 {
@@ -19,6 +22,9 @@ namespace Signum.Engine
         Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IEntity;
         T ModifiablePostRetrieving<T>(T entity) where T : Modifiable;
         IRetriever Parent { get; }
+
+        void CompleteAll();
+        Task CompleteAllAsync(CancellationToken token);
 
         ModifiedState ModifiedState { get; }
     }
@@ -156,7 +162,10 @@ namespace Signum.Engine
             return modifiable;
         }
 
-        public void Dispose()
+        public Task CompleteAllAsync(CancellationToken token) => CompleteAllPrivate(token);
+        public void CompleteAll() => CompleteAllPrivate(null).Wait();
+
+        public async Task CompleteAllPrivate(CancellationToken? token)
         {
         retry:
             if (requests != null)
@@ -184,7 +193,10 @@ namespace Signum.Engine
                     }
                     else
                     {
-                        Database.RetrieveList(group.Key, dic.Keys.ToList());
+                        if (token == null)
+                            Database.RetrieveList(group.Key, dic.Keys.ToList());
+                        else
+                            await Database.RetrieveListAsync(group.Key, dic.Keys.ToList(), token.Value);
                     }
 
                     if (dic.Count == 0)
@@ -222,7 +234,7 @@ namespace Signum.Engine
                 {
                     var group = liteRequests.GroupBy(a => a.Key.type).FirstEx();
 
-                    var dic = giGetStrings.GetInvoker(group.Key)(group.Select(a => a.Key.id).ToList());
+                    var dic = await giGetStrings.GetInvoker(group.Key)(group.Select(a => a.Key.id).ToList(), token);
 
                     foreach (var item in group)
                     {
@@ -237,39 +249,44 @@ namespace Signum.Engine
                 }
             }
 
-            foreach (var entity in retrieved.Values)
+            var currentlyRetrieved = retrieved.Values.ToHashSet();
+            var currentlyModifiableRetrieved = modifiablePostRetrieving.ToHashSet(Signum.Utilities.DataStructures.ReferenceEqualityComparer<Modifiable>.Default);
+            foreach (var entity in currentlyRetrieved)
             {
                 entity.PostRetrieving();
                 Schema.Current.OnRetrieved(entity);
                 entityCache.Add(entity);
             }
 
-            foreach (var embedded in modifiablePostRetrieving)
+            foreach (var embedded in currentlyModifiableRetrieved)
                 embedded.PostRetrieving();
 
             ModifiedState ms = ModifiedState;
-            foreach (var entity in retrieved.Values)
+            foreach (var entity in currentlyRetrieved)
             {
                 entity.Modified = ms;
                 entity.IsNew = false;
             }
 
-            foreach (var embedded in modifiablePostRetrieving)
+            foreach (var embedded in currentlyModifiableRetrieved)
                 embedded.Modified = ms;
 
             if (liteRequests != null && liteRequests.Count > 0 ||
-                requests != null && requests.Count > 0) // PostRetrieving could retrieve as well
+                requests != null && requests.Count > 0 ||
+                retrieved.Count > currentlyRetrieved.Count
+                ) // PostRetrieving could retrieve as well
             {
-                retrieved.Clear();
-                modifiablePostRetrieving.Clear();
+                retrieved.RemoveAll(a =>  currentlyRetrieved.Contains(a.Value));
+                modifiablePostRetrieving.RemoveAll(a => currentlyModifiableRetrieved.Contains(a));
                 goto retry;
             }
 
-            entityCache.ReleaseRetriever(this);
+       
         }
 
-        static readonly GenericInvoker<Func<List<PrimaryKey>, Dictionary<PrimaryKey, string>>> giGetStrings = new GenericInvoker<Func<List<PrimaryKey>, Dictionary<PrimaryKey, string>>>(ids => GetStrings<Entity>(ids));
-        static Dictionary<PrimaryKey, string> GetStrings<T>(List<PrimaryKey> ids) where T : Entity
+        static readonly GenericInvoker<Func<List<PrimaryKey>, CancellationToken?, Task<Dictionary<PrimaryKey, string>>>> giGetStrings = 
+            new GenericInvoker<Func<List<PrimaryKey>, CancellationToken?, Task<Dictionary<PrimaryKey, string>>>>((ids, token) => GetStrings<Entity>(ids, token));
+        static async Task<Dictionary<PrimaryKey, string>> GetStrings<T>(List<PrimaryKey> ids, CancellationToken? token) where T : Entity
         {
             ICacheController cc = Schema.Current.CacheController(typeof(T));
 
@@ -278,11 +295,30 @@ namespace Signum.Engine
                 cc.Load();
                 return ids.ToDictionary(a => a, a => cc.TryGetToString(a));
             }
+            else if (token != null)
+            {
+                var tasks = ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters)
+                   .Select(gr => Database.Query<T>().Where(e => gr.Contains(e.Id)).Select(a => KVP.Create(a.Id, a.ToString())).ToListAsync(token.Value))
+                   .ToList();
+
+                var list = await Task.WhenAll(tasks);
+
+                return list.SelectMany(li => li).ToDictionary();
+
+            }
             else
-                return ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters)
-                    .SelectMany(gr =>
-                        Database.Query<T>().Where(e => gr.Contains(e.Id)).Select(a => KVP.Create(a.Id, a.ToString())))
-                    .ToDictionary();
+            {
+                var dic = ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters)
+                    .SelectMany(gr => Database.Query<T>().Where(e => gr.Contains(e.Id)).Select(a => KVP.Create(a.Id, a.ToString())))
+                    .ToDictionaryEx();
+
+                return dic;
+            }  
+        }
+
+        public void Dispose()
+        {
+            entityCache.ReleaseRetriever(this);
         }
 
         public ModifiedState ModifiedState
@@ -326,9 +362,18 @@ namespace Signum.Engine
             return Parent.ModifiablePostRetrieving(entity);
         }
 
+        public void CompleteAll()
+        {
+        }
+
+        public Task CompleteAllAsync(CancellationToken token)
+        {
+            return Task.CompletedTask;
+        }
+
         public void Dispose()
         {
-            EntityCache.ReleaseRetriever(this);
+            entityCache.ReleaseRetriever(this);
         }
 
         public ModifiedState ModifiedState

@@ -31,11 +31,13 @@ export interface SearchControlLoadedProps {
     querySettings: Finder.QuerySettings;
     showContextMenu?: boolean | "Basic";
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
+    onNavigated?: (lite: Lite<Entity>) => void;
     formatters?: { [columnName: string]: CellFormatter };
     rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
     entityFormatter?: EntityFormatter;
     onSelectionChanged?: (entity: Lite<Entity>[]) => void;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
+    onHeighChanged?: () => void;
     onSearch?: (fo: FindOptionsParsed) => void;
     onResult?: (table: ResultTable) => void;
     hideButtonBar?: boolean;
@@ -46,6 +48,7 @@ export interface SearchControlLoadedProps {
     extraButtons?: (searchControl: SearchControlLoaded) => React.ReactNode
     onCreate?: () => Promise<void>;
     getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
+    maxResultsHeight?: React.CSSWideKeyword | any;
 }
 
 export interface SearchControlLoadedState {
@@ -133,24 +136,24 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     // MAIN
-    doSearchPage1() {
+    doSearchPage1(avoidOnSearchEvent?: boolean) {
         const fo = this.props.findOptions;
 
         if (fo.pagination.mode == "Paginate")
             fo.pagination.currentPage = 1;
 
-        this.doSearch().done();
+        this.doSearch(avoidOnSearchEvent).done();
     };
 
 
-    abortableSearch = new AbortableRequest((abortController, request: QueryRequest) => Finder.API.executeQuery(request, abortController)); 
+    abortableSearch = new AbortableRequest((abortController, request: QueryRequest) => Finder.API.executeQuery(request, abortController));
 
-    doSearch(): Promise<void> {
+    doSearch(avoidOnSearchEvent?: boolean): Promise<void> {
         return this.getFindOptionsWithSFB().then(fop => {
-            if (this.props.onSearch)
+            if (!avoidOnSearchEvent && this.props.onSearch)
                 this.props.onSearch(fop);
 
-            this.setState({ editingColumn: undefined });
+            this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
             return this.abortableSearch.getData(this.getQueryRequest()).then(rt => {
                 this.setState({
                     resultTable: rt,
@@ -211,12 +214,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         event.preventDefault();
         event.stopPropagation();
 
-        const td = DomUtils.closest(event.target as HTMLElement, "td, th") !;
-        const columnIndex = td.getAttribute("data-column-index") ? parseInt(td.getAttribute("data-column-index") !) : null;
+        const td = DomUtils.closest(event.target as HTMLElement, "td, th")!;
+        const columnIndex = td.getAttribute("data-column-index") ? parseInt(td.getAttribute("data-column-index")!) : null;
 
 
         const tr = td.parentNode as HTMLElement;
-        const rowIndex = tr.getAttribute("data-row-index") ? parseInt(tr.getAttribute("data-row-index") !) : null;
+        const rowIndex = tr.getAttribute("data-row-index") ? parseInt(tr.getAttribute("data-row-index")!) : null;
 
         this.setState({
             contextualMenu: {
@@ -249,7 +252,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     handleColumnClose = () => {
-        this.setState({ editingColumn: undefined });
+        this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
     }
 
     handleFilterTokenChanged = (token: QueryToken) => {
@@ -259,7 +262,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     handleFiltersChanged = () => {
         if (this.props.onFiltersChanged)
-            this.props.onFiltersChanged(this.props.findOptions.filterOptions);
+            this.props.onFiltersChanged(this.props.findOptions.filterOptions); 
+         
+    }
+
+    handleHeightChanged = () => {
+        if (this.props.onHeighChanged)
+            this.props.onHeighChanged();
     }
 
     handleFiltersKeyUp = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -267,6 +276,16 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             this.doSearchPage1();
     }
 
+    componentDidMount() {
+        this.containerDiv!.addEventListener("scroll", (e) => {
+            var translate = "translate(0," + this.containerDiv!.scrollTop + "px)";
+            this.thead!.style.transform = translate;
+        });
+    }
+
+
+    containerDiv?: HTMLDivElement;
+    thead?: HTMLTableSectionElement;
 
     render() {
 
@@ -284,12 +303,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     <div onKeyUp={this.handleFiltersKeyUp}>
                         {
                             fo.showFilters ? <FilterBuilder
-                                queryDescription={qd}
-                                filterOptions={fo.filterOptions}
-                                lastToken={this.state.lastToken}
-                                subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement}
-                                onTokenChanged={this.handleFilterTokenChanged}
-                                onFiltersChanged={this.handleFiltersChanged} /> :
+                            queryDescription={qd}
+                            filterOptions={fo.filterOptions}
+                            lastToken={this.state.lastToken}
+                            subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement}
+                            onTokenChanged={this.handleFilterTokenChanged}
+                            onFiltersChanged={this.handleFiltersChanged}
+                            onHeightChanged={this.handleHeightChanged}
+                        /> :
                                 sfb && <div className="simple-filter-builder">{sfb}</div>
                         }
                     </div>
@@ -302,9 +323,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     queryDescription={qd}
                     subTokensOptions={SubTokensOptions.CanElement}
                     close={this.handleColumnClose} />}
-                <div className="sf-search-results-container table-responsive" >
+                <div ref={d => this.containerDiv = d}
+                    className="sf-search-results-container table-responsive"
+                    style={{ maxHeight: this.props.maxResultsHeight }}>
                     <table className="sf-search-results table table-hover table-condensed" onContextMenu={this.props.showContextMenu != false ? this.handleOnContextMenu : undefined} >
-                        <thead>
+                        <thead ref={th => this.thead = th}>
                             {this.renderHeaders()}
                         </thead>
                         <tbody>
@@ -324,7 +347,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         this.getFindOptionsWithSFB().then(() => {
             this.simpleFilterBuilderInstance = undefined;
             this.props.findOptions.showFilters = !this.props.findOptions.showFilters;
-            this.setState({ simpleFilterBuilder: undefined });
+            this.setState({ simpleFilterBuilder: undefined }, () => this.handleHeightChanged());
         }).done();
     }
 
@@ -462,7 +485,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         var promise = this.props.avoidAutoRefresh ? Promise.resolve(undefined) :
             this.doSearch();
 
-        promise.then(() => this.setState({ markedRows: { ...this.state.markedRows, ...dic } })).done();
+        promise.then(() => this.setState({ markedRows: { ...this.state.markedRows, ...dic } as MarkedRowsDictionary })).done();
 
     }
 
@@ -515,7 +538,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         this.handleFiltersChanged();
 
-        this.forceUpdate();
+        this.forceUpdate(() => this.handleHeightChanged());
     }
 
     handleInsertColumn = () => {
@@ -528,7 +551,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         };
 
         const cm = this.state.contextualMenu!;
-        this.setState({ editingColumn: newColumn });
+        this.setState({ editingColumn: newColumn }, () => this.handleHeightChanged());
         this.props.findOptions.columnOptions.insertAt(cm.columnIndex! + cm.columnOffset!, newColumn);
 
         this.forceUpdate();
@@ -538,7 +561,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         const cm = this.state.contextualMenu!;
         const fo = this.props.findOptions;
-        this.setState({ editingColumn: fo.columnOptions[cm.columnIndex!] });
+        this.setState({ editingColumn: fo.columnOptions[cm.columnIndex!] }, () => this.handleHeightChanged());
 
         this.forceUpdate();
     }
@@ -550,7 +573,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         const col = fo.columnOptions[cm.columnIndex!];
         fo.columnOptions.removeAt(cm.columnIndex!);
 
-        this.setState({ editingColumn: undefined });
+        this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
     }
 
     renderContextualMenu() {
@@ -637,10 +660,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     //HEADER DRAG AND DROP
 
-    handleHeaderDragStart = (de: React.DragEvent<any>) => {
+    handleHeaderDragStart = (de: React.DragEvent<any>, dragIndex: number) => {
         de.dataTransfer.setData('text', "start"); //cannot be empty string
         de.dataTransfer.effectAllowed = "move";
-        const dragIndex = parseInt((de.currentTarget as HTMLElement).getAttribute("data-column-index") !);
         this.setState({ dragColumnIndex: dragIndex });
     }
 
@@ -666,14 +688,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         return undefined;
     }
 
-    handlerHeaderDragOver = (de: React.DragEvent<any>) => {
+    handlerHeaderDragOver = (de: React.DragEvent<any>, columnIndex: number) => {
         de.preventDefault();
 
         const th = de.currentTarget as HTMLElement;
 
         const size = th.scrollWidth;
-
-        const columnIndex = parseInt(th.getAttribute("data-column-index") !);
 
         const offset = this.getOffset((de.nativeEvent as DragEvent).pageX, th.getBoundingClientRect(), 50);
 
@@ -714,22 +734,21 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 }
                 {this.props.findOptions.navigate && <th className="sf-th-entity" data-column-name="Entity"></th>}
                 {this.props.findOptions.columnOptions.map((co, i) =>
-                    <th draggable={true}
-                        style={i == this.state.dragColumnIndex ? { opacity: 0.5 } : undefined}
+                    <th key={ i }
+                        draggable={true}
                         className={classes(
+                            i == this.state.dragColumnIndex  && "sf-draggin",
                             co == this.state.editingColumn && "sf-current-column",
                             !this.canOrder(co) && "noOrder",
                             co == this.state.editingColumn && co.token && co.token.type.isCollection && "error",
                             this.state.dropBorderIndex != null && i == this.state.dropBorderIndex ? "drag-left " :
                                 this.state.dropBorderIndex != null && i == this.state.dropBorderIndex - 1 ? "drag-right " : undefined)}
                         data-column-name={co.token && co.token.fullKey}
-                        data-column-index={i}
-                        key={i}
                         onClick={this.canOrder(co) ? this.handleHeaderClick : undefined}
-                        onDragStart={this.handleHeaderDragStart}
+                        onDragStart={e => this.handleHeaderDragStart(e, i)}
                         onDragEnd={this.handleHeaderDragEnd}
-                        onDragOver={this.handlerHeaderDragOver}
-                        onDragEnter={this.handlerHeaderDragOver}
+                        onDragOver={e => this.handlerHeaderDragOver(e, i)}
+                        onDragEnter={e => this.handlerHeaderDragOver(e, i)}
                         onDrop={this.handleHeaderDrop}>
                         <span className={"sf-header-sort " + this.orderClassName(co)} />
                         <span> {co.displayName}</span></th>
@@ -817,7 +836,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             window.open(Navigator.navigateRoute(row.entity));
         }
         else {
-            Navigator.navigate(row.entity).done();
+            Navigator.navigate(row.entity)
+                .then(() => {
+                    if (this.props.onNavigated)
+                        this.props.onNavigated(row.entity);
+                }).done();
         }
 
     }
@@ -887,6 +910,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     handleOnNavigated = (lite: Lite<Entity>) => {
+
+        if (this.props.onNavigated)
+            this.props.onNavigated(lite);
+
         if (this.props.avoidAutoRefresh)
             return;
 

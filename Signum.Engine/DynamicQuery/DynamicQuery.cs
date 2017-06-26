@@ -17,6 +17,8 @@ using Signum.Utilities.DataStructures;
 using Signum.Services;
 using Signum.Entities.Basics;
 using DQ = Signum.Engine.DynamicQuery;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -73,9 +75,14 @@ namespace Signum.Engine.DynamicQuery
         QueryDescription GetQueryDescription();
 
         ResultTable ExecuteQuery(QueryRequest request);
+        Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken cancellationToken);
         object ExecuteQueryValue(QueryValueRequest request);
+        Task<object> ExecuteQueryValueAsync(QueryValueRequest request, CancellationToken cancellationToken);
         Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request);
+        Task<Lite<Entity>> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken cancellationToken);
         ResultTable ExecuteQueryGroup(QueryGroupRequest request);
+        Task<ResultTable> ExecuteQueryGroupAsync(QueryGroupRequest request, CancellationToken cancellationToken);
+
         IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request);
     }
 
@@ -87,15 +94,34 @@ namespace Signum.Engine.DynamicQuery
             return new AutoDynamicQueryCore<T>(query);
         }
 
-        public static ManualDynamicQueryCore<T> Manual<T>(Func<QueryRequest, QueryDescription, DEnumerableCount<T>> execute)
+        public static ManualDynamicQueryCore<T> Manual<T>(Func<QueryRequest, QueryDescription, CancellationToken, Task<DEnumerableCount<T>>> execute)
         {
             return new ManualDynamicQueryCore<T>(execute);
+        }
+        
+        internal static IDynamicQueryCore FromSelectorUntyped<T>(Expression<Func<T, object>> expression) 
+            where T : Entity
+        {
+            var eType = expression.Parameters.SingleEx().Type;
+            var tType = expression.Body.Type;
+            var typedSelector = Expression.Lambda(expression.Body, expression.Parameters);
+
+            return giAutoPrivate.GetInvoker(eType, tType)(typedSelector);
+        }
+
+        static readonly GenericInvoker<Func<LambdaExpression, IDynamicQueryCore>> giAutoPrivate =
+            new GenericInvoker<Func<LambdaExpression, IDynamicQueryCore>>(lambda => FromSelector<TypeEntity, object>((Expression<Func<TypeEntity, object>>)lambda));
+        public static AutoDynamicQueryCore<T> FromSelector<E, T>(Expression<Func<E, T>> selector)
+            where E : Entity
+        {
+            return new AutoDynamicQueryCore<T>(Database.Query<E>().Select(selector));
         }
 
         public static Dictionary<string, Meta> QueryMetadata(IQueryable query)
         {
             return MetadataVisitor.GatherMetadata(query.Expression);
         }
+
     }
 
     public abstract class DynamicQueryCore<T> : IDynamicQueryCore
@@ -105,10 +131,19 @@ namespace Signum.Engine.DynamicQuery
         public ColumnDescriptionFactory[] StaticColumns { get; protected set; }
 
         public abstract ResultTable ExecuteQuery(QueryRequest request);
+        public abstract Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken cancellationToken);
+
         public abstract object ExecuteQueryValue(QueryValueRequest request);
+        public abstract Task<object> ExecuteQueryValueAsync(QueryValueRequest request, CancellationToken cancellationToken);
+
         public abstract Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request);
+        public abstract Task<Lite<Entity>> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken cancellationToken);
+
         public abstract ResultTable ExecuteQueryGroup(QueryGroupRequest request);
+        public abstract Task<ResultTable> ExecuteQueryGroupAsync(QueryGroupRequest request, CancellationToken cancellationToken);
+        
         public abstract IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request);
+
 
         protected virtual ColumnDescriptionFactory[] InitializeColumns()
         {
@@ -164,6 +199,8 @@ namespace Signum.Engine.DynamicQuery
 
             return new QueryDescription(QueryName, columns);
         }
+
+      
     }
 
     public interface IDynamicInfo
@@ -222,7 +259,7 @@ namespace Signum.Engine.DynamicQuery
     { 
         #region ToDQueryable
 
-    public static DQueryable<T> ToDQueryable<T>(this IQueryable<T> query, QueryDescription description)
+        public static DQueryable<T> ToDQueryable<T>(this IQueryable<T> query, QueryDescription description)
         {
             ParameterExpression pe = Expression.Parameter(typeof(object));
 
@@ -234,14 +271,14 @@ namespace Signum.Engine.DynamicQuery
         }
 
 
-        public static DEnumerableCount<T> AllQueryOperations<T>(this DQueryable<T> query, QueryRequest request)
+        public static Task<DEnumerableCount<T>> AllQueryOperationsAsync<T>(this DQueryable<T> query, QueryRequest request, CancellationToken token)
         {
             return query
                 .SelectMany(request.Multiplications)
                 .Where(request.Filters)
                 .OrderBy(request.Orders)
                 .Select(request.Columns)
-                .TryPaginate(request.Pagination);
+                .TryPaginateAsync(request.Pagination, token);
         }
 
         #endregion 
@@ -326,11 +363,17 @@ namespace Signum.Engine.DynamicQuery
                     (Expression)Expression.Convert(ctor, typeof(object)), context.Parameter);
         }
         
-	    #endregion
+        #endregion
 
         public static DEnumerable<T> ToDEnumerable<T>(this DQueryable<T> query)
         {
             return new DEnumerable<T>(query.Query.ToList(), query.Context);
+        }
+
+        public static async Task<DEnumerable<T>> ToDEnumerableAsync<T>(this DQueryable<T> query, CancellationToken token)
+        {
+            var list = await query.Query.ToListAsync(token);
+            return new DEnumerable<T>(list, query.Context);
         }
 
         #region SelectMany
@@ -571,12 +614,27 @@ namespace Signum.Engine.DynamicQuery
         {
             switch (uniqueType)
             {
-                case UniqueType.First: return collection.FirstEx();
+                case UniqueType.First: return  collection.First();
                 case UniqueType.FirstOrDefault: return collection.FirstOrDefault();
                 case UniqueType.Single: return collection.SingleEx();
                 case UniqueType.SingleOrDefault: return collection.SingleOrDefaultEx();
                 case UniqueType.SingleOrMany: return collection.SingleOrMany();
                 case UniqueType.Only: return collection.Only();
+                default: throw new InvalidOperationException();
+            }
+        }
+
+
+        public static Task<T> UniqueAsync<T>(this IQueryable<T> collection, UniqueType uniqueType, CancellationToken token)
+        {
+            switch (uniqueType)
+            {
+                case UniqueType.First: return collection.FirstAsync(token);
+                case UniqueType.FirstOrDefault: return collection.FirstOrDefaultAsync(token);
+                case UniqueType.Single: return collection.SingleAsync(token);
+                case UniqueType.SingleOrDefault: return collection.SingleOrDefaultAsync(token);
+                case UniqueType.SingleOrMany: return collection.Take(2).ToListAsync(token).ContinueWith(l => l.Result.SingleOrManyEx());
+                case UniqueType.Only: return collection.Take(2).ToListAsync(token).ContinueWith(l => l.Result.Only());
                 default: throw new InvalidOperationException();
             }
         }
@@ -601,6 +659,41 @@ namespace Signum.Engine.DynamicQuery
 
 
         #region TryPaginate
+        
+        public static async Task<DEnumerableCount<T>> TryPaginateAsync<T>(this DQueryable<T> query, Pagination pagination, CancellationToken token)
+        {
+            if (pagination == null)
+                throw new ArgumentNullException("pagination");
+
+            if (pagination is Pagination.All)
+            {
+                var allList = await query.Query.ToListAsync();
+
+                return new DEnumerableCount<T>(allList, query.Context, allList.Count);
+            }
+            else if (pagination is Pagination.Firsts top)
+            {
+                var topList = await query.Query.Take(top.TopElements).ToListAsync();
+
+                return new DEnumerableCount<T>(topList, query.Context, null);
+            }
+            else if (pagination is Pagination.Paginate pag)
+            {
+                var q = query.Query.OrderAlsoByKeys();
+
+                if (pag.CurrentPage != 1)
+                    q = q.Skip((pag.CurrentPage - 1) * pag.ElementsPerPage);
+
+                q = q.Take(pag.ElementsPerPage);
+
+                var listTask = q.ToListAsync();
+                var countTask = query.Query.CountAsync();
+
+                return new DEnumerableCount<T>(await listTask, query.Context, await countTask);
+            }
+
+            throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination.GetType().Name));
+        }
 
         public static DEnumerableCount<T> TryPaginate<T>(this DQueryable<T> query, Pagination pagination)
         {
@@ -621,8 +714,6 @@ namespace Signum.Engine.DynamicQuery
             }
             else if (pagination is Pagination.Paginate pag)
             {
-                int? totalElements = null;
-
                 var q = query.Query.OrderAlsoByKeys();
 
                 if (pag.CurrentPage != 1)
@@ -631,14 +722,12 @@ namespace Signum.Engine.DynamicQuery
                 q = q.Take(pag.ElementsPerPage);
 
                 var list = q.ToList();
+                var count = list.Count < pag.ElementsPerPage ? pag.ElementsPerPage : query.Query.Count();
 
-                if (list.Count < pag.ElementsPerPage && pag.CurrentPage == 1)
-                    totalElements = list.Count;
-
-                return new DEnumerableCount<T>(list, query.Context, totalElements ?? query.Query.Count());
+                return new DEnumerableCount<T>(list, query.Context, count);
             }
 
-            throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination.GetType().Name)); 
+            throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination.GetType().Name));
         }
 
         public static DEnumerableCount<T> TryPaginate<T>(this DEnumerable<T> collection, Pagination pagination)
@@ -747,8 +836,7 @@ namespace Signum.Engine.DynamicQuery
                 TupleReflection.TupleChainProperty(pk, i))));
 
             ParameterExpression pe = Expression.Parameter(typeof(IEnumerable<object>), "e");
-            resultExpressions.AddRange(aggregateTokens.Select(at => KVP.Create((QueryToken)at,
-                BuildAggregateExpression(pe, at, context))));
+            resultExpressions.AddRange(aggregateTokens.Select(at => KVP.Create((QueryToken)at, BuildAggregateExpressionEnumerable(pe, at, context))));
 
             var resultConstructor = TupleReflection.TupleChainConstructor(resultExpressions.Values);
 
@@ -767,15 +855,35 @@ namespace Signum.Engine.DynamicQuery
             return keySelector;
         }
 
-        static Expression BuildAggregateExpression(Expression collection, AggregateToken at, BuildExpressionContext context)
-        {
-            Type enumerableOrQueryable = collection.Type.IsInstantiationOf(typeof(IQueryable<>)) ? typeof(Queryable) : typeof(Enumerable); 
 
 
+
+        static Expression BuildAggregateExpressionEnumerable(Expression collection, AggregateToken at, BuildExpressionContext context)
+        {  
             Type elementType = collection.Type.ElementType();
                 
-            if (at.AggregateFunction == Signum.Entities.DynamicQuery.AggregateFunction.Count)
-                return Expression.Call(enumerableOrQueryable, "Count", new[] { elementType }, new[] { collection });
+            if (at.AggregateFunction == AggregateFunction.Count)
+                return Expression.Call(typeof(Enumerable), "Count", new[] { elementType }, new[] { collection });
+
+            var body = at.Parent.BuildExpression(context);
+
+            if (body.Type != at.Type)
+                body = body.TryConvert(at.Type);
+
+            var lambda = Expression.Lambda(body, context.Parameter);
+
+            if (at.AggregateFunction == AggregateFunction.Min || at.AggregateFunction == AggregateFunction.Max)
+                return Expression.Call(typeof(Enumerable), at.AggregateFunction.ToString(), new[] { elementType, lambda.Body.Type }, new[] { collection, lambda });
+
+            return Expression.Call(typeof(Enumerable), at.AggregateFunction.ToString(), new[] { elementType }, new[] { collection, lambda });
+        }
+
+        static Expression BuildAggregateExpressionQueryable(Expression collection, AggregateToken at, BuildExpressionContext context)
+        {
+            Type elementType = collection.Type.ElementType();
+
+            if (at.AggregateFunction == AggregateFunction.Count)
+                return Expression.Call(typeof(Queryable), "Count", new[] { elementType }, new[] { collection });
 
             var body = at.Parent.BuildExpression(context);
 
@@ -783,33 +891,76 @@ namespace Signum.Engine.DynamicQuery
 
             if (body.Type != type)
                 body = body.TryConvert(type);
-            
 
             var lambda = Expression.Lambda(body, context.Parameter);
-            var quotedLambda = elementType == typeof(Queryable) ? Expression.Quote(lambda) : (Expression)lambda;
+            var quotedLambda = Expression.Quote(lambda);
 
-            if (at.AggregateFunction == Signum.Entities.DynamicQuery.AggregateFunction.Min || 
-                at.AggregateFunction == Signum.Entities.DynamicQuery.AggregateFunction.Max)
-                return Expression.Call(enumerableOrQueryable, at.AggregateFunction.ToString(), new[] { elementType, lambda.Body.Type }, new[] { collection, quotedLambda });
+            if (at.AggregateFunction == AggregateFunction.Min || at.AggregateFunction == AggregateFunction.Max)
+                return Expression.Call(typeof(Queryable), at.AggregateFunction.ToString(), new[] { elementType, lambda.Body.Type }, new[] { collection, quotedLambda });
 
-            return Expression.Call(enumerableOrQueryable, at.AggregateFunction.ToString(), new[] { elementType }, new[] { collection, quotedLambda });
+            return Expression.Call(typeof(Queryable), at.AggregateFunction.ToString(), new[] { elementType }, new[] { collection, quotedLambda });
         }
+
+        static Expression BuildAggregateExpressionQueryableAsync(Expression collection, AggregateToken at, BuildExpressionContext context, CancellationToken token)
+        {
+            var tokenConstant = Expression.Constant(token);
+
+            Type elementType = collection.Type.ElementType();
+
+            if (at.AggregateFunction == AggregateFunction.Count)
+                return Expression.Call(typeof(QueryableAsyncExtensions), "CountAsync", new[] { elementType }, new[] { collection, tokenConstant });
+
+            var body = at.Parent.BuildExpression(context);
+
+            var type = at.Type;
+
+            if (body.Type != type)
+                body = body.TryConvert(type);
+
+            var lambda = Expression.Lambda(body, context.Parameter);
+            var quotedLambda = Expression.Quote(lambda);
+
+            if (at.AggregateFunction == AggregateFunction.Min || at.AggregateFunction == AggregateFunction.Max)
+                return Expression.Call(typeof(QueryableAsyncExtensions), at.AggregateFunction.ToString() + "Async", new[] { elementType, lambda.Body.Type }, new[] { collection, quotedLambda, tokenConstant });
+
+            return Expression.Call(typeof(QueryableAsyncExtensions), at.AggregateFunction.ToString() + "Async", new[] { elementType }, new[] { collection, quotedLambda, tokenConstant });
+        }
+
+
         #endregion
 
         #region SimpleAggregate
-        
+
         public static object SimpleAggregate<T>(this DEnumerable<T> collection, AggregateToken simpleAggregate)
         {
-            var expr = BuildAggregateExpression(Expression.Constant(collection.Collection), simpleAggregate, collection.Context);
+            var expr = BuildAggregateExpressionEnumerable(Expression.Constant(collection.Collection), simpleAggregate, collection.Context);
 
             return Expression.Lambda<Func<object>>(Expression.Convert(expr, typeof(object))).Compile()();
         }
 
         public static object SimpleAggregate<T>(this DQueryable<T> query, AggregateToken simpleAggregate)
         {
-            var expr = BuildAggregateExpression(query.Query.Expression, simpleAggregate, query.Context);
+            var expr = BuildAggregateExpressionQueryable(query.Query.Expression, simpleAggregate, query.Context);
 
             return Expression.Lambda<Func<object>>(Expression.Convert(expr, typeof(object))).Compile()();
+        }
+
+        public static Task<object> SimpleAggregateAsync<T>(this DQueryable<T> query, AggregateToken simpleAggregate, CancellationToken token)
+        {
+            var expr = BuildAggregateExpressionQueryableAsync(query.Query.Expression, simpleAggregate, query.Context, token);
+
+            var func = (Func<object>)Expression.Lambda(expr).Compile();
+
+            var task = func();
+
+            return giCastObject.GetInvoker(task.GetType().GenericTypeArguments)(task);
+        }
+
+        static GenericInvoker<Func<object, Task<object>>> giCastObject =
+            new GenericInvoker<Func<object, Task<object>>>(task => CastObject<int>((Task<int>)task));
+        static Task<object> CastObject<T>(Task<T> task)
+        {
+            return task.ContinueWith(t => (object)t.Result);
         }
 
         #endregion

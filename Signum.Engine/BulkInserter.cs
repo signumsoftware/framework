@@ -196,7 +196,7 @@ namespace Signum.Engine
         static int BulkInsertMListTablePropertyRoute<E, V>(List<E> entities, PropertyRoute route, SqlBulkCopyOptions copyOptions, int? timeout, string message)
              where E : Entity
         {
-            return BulkInsertMListTable<E, V>(entities, route.GetLambdaExpression<E, MList<V>>(), copyOptions, timeout, message);
+            return BulkInsertMListTable<E, V>(entities, route.GetLambdaExpression<E, MList<V>>(safeNullAccess: false), copyOptions, timeout, message);
         }
 
         public static int BulkInsertMListTable<E, V>(

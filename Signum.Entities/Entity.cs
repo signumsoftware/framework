@@ -25,7 +25,8 @@ namespace Signum.Entities
     public abstract class Entity : ModifiableEntity, IEntity
     {
         [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        internal PrimaryKey? id = null;
+        internal PrimaryKey? id;
+        
         [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
         protected internal string toStr; //for queries and lites on entities with non-expression ToString 
 
@@ -57,7 +58,7 @@ namespace Signum.Entities
         }
 
         [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        internal long ticks = 0;
+        internal long ticks;
         [HiddenProperty]
         public long Ticks
         {

@@ -35,7 +35,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         super.overrideProps(state, overridenProps);
         if (state.autoComplete === undefined) {
             const type = state.type!;
-            state.autoComplete = Navigator.getAutoComplete(type, overridenProps.findOptions);
+            state.autoComplete = Navigator.getAutoComplete(type, state.findOptions);
         }
     }
     renderInternal() {
@@ -142,7 +142,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                         (entity as Entity).id ? liteKey(toLite(entity as Entity)) :
                             undefined;
 
-                    return ({ 'data-entity-key': key });
+                    return ({ 'data-entity-key': key }) as any;
                 }}
                 onSelect={this.handleOnSelect}/>
         );

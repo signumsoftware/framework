@@ -30,7 +30,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         super.overrideProps(state, overridenProps);
         if (state.autoComplete === undefined) {
             const type = state.type!;
-            state.autoComplete = Navigator.getAutoComplete(type, overridenProps.findOptions);
+            state.autoComplete = Navigator.getAutoComplete(type, state.findOptions);
         }
 
         if (!state.currentItem) {
@@ -159,7 +159,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
                         (entity as Entity).id ? liteKey(toLite(entity as Entity)) :
                             undefined;
 
-                    return ({ 'data-entity-key': key });
+                    return ({ 'data-entity-key': key }) as React.HTMLAttributes<HTMLLIElement>;
                 }}
                 onSelect={this.handleOnSelect}/>
         );

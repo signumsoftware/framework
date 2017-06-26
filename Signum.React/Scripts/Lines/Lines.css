@@ -20,8 +20,9 @@ p.form-control {
     margin: 0px;
 }
 
-    p.form-control.readonly-textarea {
+    p.form-control.readonly.readonly-textarea {
         height: initial !important;
+        white-space: pre-wrap;
     }
 
     p.form-control.readonly {
@@ -59,6 +60,10 @@ label > input[type=checkbox] {
 .sf-entity-line-entity {
     background: transparent;
     overflow: hidden;
+}
+
+.sf-table{
+    margin-bottom: 0;
 }
 
 /* Buttons */
@@ -214,9 +219,9 @@ ul.nav-tabs {
     color: #007CE8;
 }
 
-.move-down:hover,
-.move-up:hover {
+.sf-move:hover {
     color: #9900E0;
+    cursor: move; 
 }
 
 /*has-error*/
@@ -253,6 +258,10 @@ ul.nav-tabs {
         min-height: inherit;
     }
 
+    .form-xs .form-control.readonly.readonly-textarea {
+        min-height: 20px;
+    }
+
 .form-xs .input-group-btn .btn {
     height: 20px;
 }
@@ -264,7 +273,6 @@ ul.nav-tabs {
 
 .form-xs .sf-query-token-builder {
     height: 20px;
-    display: inline-table;
     margin-bottom: -3px;
 }
 
@@ -309,8 +317,6 @@ ul.nav-tabs {
     line-height: 18px;
 }
     */
-
-
 
 .form-xs .rw-widget-picker {
     height: 20px;
@@ -362,6 +368,10 @@ ul.nav-tabs {
     .form-sm .form-control:not(textarea) {
         height: 26px;
         min-height: inherit;
+    }
+
+    .form-sm .form-control.readonly.readonly-textarea {
+        min-height: 26px;
     }
 
 .form-sm .input-group-btn .btn {
@@ -523,4 +533,9 @@ ul.dropdown-menu > li > a.disabled {
 
 .sf-create-label {
     margin-right: 5px;
+}
+
+
+.item-group{
+    white-space: nowrap;
 }

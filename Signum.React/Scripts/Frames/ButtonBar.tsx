@@ -18,10 +18,10 @@ export default class ButtonBar extends React.Component<ButtonBarProps, void>{
 
         const ctx: ButtonsContext = this.props;
 
-        const c = ctx.frame.entityComponent as any as IRenderButtons;
+        const rb = ctx.frame.entityComponent as any as IRenderButtons;
 
-        const buttons = (c && c.renderButtons ? c.renderButtons(ctx) : [])
-            .concat(ButtonBar.onButtonBarRender.flatMap(func => func(this.props) || []))
+        const buttons = ButtonBar.onButtonBarRender.flatMap(func => func(this.props) || [])
+            .concat(rb && rb.renderButtons ? rb.renderButtons(ctx) : [])
             .filter(a => a != null)
             .map((a, i) => React.cloneElement(a!, { key: i }));
 

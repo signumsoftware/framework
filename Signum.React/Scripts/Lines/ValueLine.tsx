@@ -172,7 +172,7 @@ ValueLine.renderers["Boolean" as ValueLineType] = (vl) => {
 
     if (s.inlineCheckbox) {
         return (
-            <label className={vl.state.ctx.error} {...vl.baseHtmlAttributes() }>
+            <label className={vl.state.ctx.error} {...vl.baseHtmlAttributes() } { ...s.formGroupHtmlAttributes }>
                 <input type="checkbox" {...vl.state.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly} />
                 {" " + s.labelText}
             </label>
@@ -231,7 +231,7 @@ function internalComboBox(vl: ValueLine) {
     if (s.ctx.readOnly) {
 
         var label = null;
-        if (s.ctx.value) {
+        if (s.ctx.value != undefined) {
 
             var item = optionItems.filter(a => a.value == s.ctx.value).singleOrNull();
 
@@ -336,7 +336,7 @@ ValueLine.renderers["TextArea" as ValueLineType] = (vl) => {
     if (s.ctx.readOnly)
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-                {ValueLine.withItemGroup(vl, <FormControlStatic htmlAttributes={vl.state.valueHtmlAttributes} ctx={s.ctx}>{s.ctx.value}</FormControlStatic>)}
+                {ValueLine.withItemGroup(vl, <FormControlStatic htmlAttributes={vl.state.valueHtmlAttributes} className="readonly-textarea" ctx={s.ctx}>{s.ctx.value}</FormControlStatic>)}
             </FormGroup>
         );
 
@@ -492,10 +492,44 @@ ValueLine.renderers["DateTime" as ValueLineType] = (vl) => {
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} helpBlock={s.helpBlock} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
             {ValueLine.withItemGroup(vl,
-                <DateTimePicker value={m && m.toDate()} onChange={handleDatePickerOnChange} format={momentFormat} time={showTime} currentDate={currentDate.toDate()} />
+                <DateTimePickerHotFix value={m && m.toDate()} onChange={handleDatePickerOnChange} format={momentFormat} time={showTime} defaultCurrentDate={currentDate.toDate()} />
             )}
         </FormGroup>
     );
+}
+
+
+
+interface DateTimePickerHotFixProps {
+    value?: Date;
+    onChange?: (date?: Date, dateStr?: string) => void;
+    format?: string;
+    time?: boolean;
+    defaultCurrentDate?: Date;
+}
+
+interface DateTimePickerHotFixState {
+    currentDate?: Date;
+}
+//https://github.com/jquense/react-widgets/issues/593
+export default class DateTimePickerHotFix extends React.Component<DateTimePickerHotFixProps, DateTimePickerHotFixState> {
+
+    constructor(props: DateTimePickerHotFixProps) {
+        super(props);
+        this.state = { currentDate: props.defaultCurrentDate };
+    }
+
+    componentWillReceiveProps(newProps: DateTimePickerHotFixProps) {
+        if (newProps.defaultCurrentDate != this.props.defaultCurrentDate)
+            this.setState({ currentDate: this.props.defaultCurrentDate });
+    }
+    
+    render() {
+        const p = this.props;
+        return (
+            <DateTimePicker value={p.value} onChange={p.onChange} format={p.format} time={p.time} currentDate={this.state.currentDate} onCurrentDateChange={d => this.setState({ currentDate: d })} />
+        );
+    }
 }
 
 ValueLine.renderers["TimeSpan" as ValueLineType] = (vl) => {

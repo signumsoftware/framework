@@ -194,6 +194,7 @@
     <Compile Include="Schema\UniqueIndex.cs" />
     <Compile Include="ServerBasic.cs" />
     <Compile Include="Basics\TypeLogic.cs" />
+    <Compile Include="VirtualMList.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Administrator.md" />
@@ -240,10 +241,6 @@
     <None Include="Schema\Schema.cd" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Extensions\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj">
-      <Project>{7D851227-5294-4BEB-990E-56B4FBB7A148}</Project>
-      <Name>Signum.Entities.Extensions</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj">
       <Project>{F2B51D08-498D-4C9F-8112-9521A7762B02}</Project>
       <Name>Signum.Entities</Name>

@@ -105,21 +105,24 @@ namespace Signum.Entities
 
         public PropertyRoute Add(MemberInfo member)
         {
-            if (member is MethodInfo && ((MethodInfo)member).IsInstantiationOf(MixinDeclarations.miMixin))
-                member = ((MethodInfo)member).GetGenericArguments()[0];
-
-            if (this.Type.IsIEntity() && PropertyRouteType != PropertyRouteType.Root)
+            using (HeavyProfiler.LogNoStackTrace("PR.Add", () => member.Name))
             {
-                Implementations imp = GetImplementations();
+                if (member is MethodInfo && ((MethodInfo)member).IsInstantiationOf(MixinDeclarations.miMixin))
+                    member = ((MethodInfo)member).GetGenericArguments()[0];
 
-                Type only;
-                if (imp.IsByAll || (only = imp.Types.Only()) == null)
-                    throw new InvalidOperationException("Attempt to make a PropertyRoute on a {0}. Cast first".FormatWith(imp));
+                if (this.Type.IsIEntity() && PropertyRouteType != PropertyRouteType.Root)
+                {
+                    Implementations imp = GetImplementations();
 
-                return new PropertyRoute(Root(only), member);
+                    Type only;
+                    if (imp.IsByAll || (only = imp.Types.Only()) == null)
+                        throw new InvalidOperationException("Attempt to make a PropertyRoute on a {0}. Cast first".FormatWith(imp));
+
+                    return new PropertyRoute(Root(only), member);
+                }
+
+                return new PropertyRoute(this, member);
             }
-
-            return new PropertyRoute(this, member);
         }
 
         PropertyRoute(PropertyRoute parent, MemberInfo fieldOrProperty)
@@ -132,10 +135,7 @@ namespace Signum.Entities
             if (fieldOrProperty == null)
                 throw new ArgumentNullException("fieldOrProperty");
 
-            if (parent == null)
-                throw new ArgumentNullException("parent");
-
-            this.Parent = parent;
+            this.Parent = parent ?? throw new ArgumentNullException("parent");
 
             if (parent.Type.IsIEntity() && parent.PropertyRouteType != PropertyRouteType.Root)
                 throw new ArgumentException("Parent can not be a non-root Identifiable");
@@ -178,10 +178,7 @@ namespace Signum.Entities
                         var otherProperty = parent.Type.Follow(a => a.BaseType)
                             .Select(a => a.GetProperty(fieldOrProperty.Name, BindingFlags.Public | BindingFlags.Instance, null, null, new Type[0], null)).NotNull().FirstEx();
 
-                        if (otherProperty == null)
-                            throw new ArgumentException("PropertyInfo {0} not found on {1}".FormatWith(pi.PropertyName(), parent.Type));
-
-                        fieldOrProperty = otherProperty;
+                        fieldOrProperty = otherProperty ?? throw new ArgumentException("PropertyInfo {0} not found on {1}".FormatWith(pi.PropertyName(), parent.Type));
                     }
 
                     PropertyInfo = (PropertyInfo)fieldOrProperty;
@@ -572,23 +569,32 @@ namespace Signum.Entities
         /// <typeparam name="T">The RootType or the type of MListElement</typeparam>
         /// <typeparam name="R">Result type</typeparam>
         /// <returns></returns>
-        public Expression<Func<T, R>> GetLambdaExpression<T, R>()
+        public Expression<Func<T, R>> GetLambdaExpression<T, R>(bool safeNullAccess, PropertyRoute skipBefore = null)
         {
             ParameterExpression pe = Expression.Parameter(typeof(T));
             Expression exp = null;
-            foreach (var p in this.Follow(a => a.Parent).Reverse().SkipWhile(a => a.Type != typeof(T)))
+
+            var steps = this.Follow(a => a.Parent).Reverse();
+            if (skipBefore != null)
+                steps = steps.SkipWhile(a => a.Equals(skipBefore));
+
+            foreach (var p in steps)
             {
                 switch (p.PropertyRouteType)
                 {
                     case PropertyRouteType.Root:
                     case PropertyRouteType.MListItems:
-                        exp = pe;
+                        exp = pe.TryConvert(p.Type);
                         break;
                     case PropertyRouteType.FieldOrProperty:
-                        if (p.PropertyInfo != null)
-                            exp = Expression.Property(exp, p.PropertyInfo);
+                        var memberExp = Expression.MakeMemberAccess(exp, (MemberInfo)p.PropertyInfo ?? p.FieldInfo);
+                        if (exp.Type.IsEmbeddedEntity() && safeNullAccess)
+                            exp = Expression.Condition(
+                                Expression.Equal(exp, Expression.Constant(null, exp.Type)),
+                                Expression.Constant(null, memberExp.Type.Nullify()),
+                                memberExp.Nullify());
                         else
-                            exp = Expression.Field(exp, p.FieldInfo);
+                            exp = memberExp;
                         break;
                     case PropertyRouteType.Mixin:
                         exp = Expression.Call(exp, MixinDeclarations.miMixin.MakeGenericMethod(p.Type));

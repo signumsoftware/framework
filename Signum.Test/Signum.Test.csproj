@@ -17,7 +17,7 @@
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation />
-    <TypeScriptToolsVersion>2.3</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>2.4</TypeScriptToolsVersion>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -80,6 +80,7 @@
     <Compile Include="Assert2.cs" />
     <Compile Include="Environment\Entities.cs" />
     <Compile Include="LinqProvider\AllAnyContainsTest.cs" />
+    <Compile Include="LinqProvider\AsyncTest.cs" />
     <Compile Include="LinqProvider\UnsafeInsertTest.cs" />
     <Compile Include="LinqProvider\ToStringTest.cs" />
     <Compile Include="LinqProvider\InDBTest.cs" />
