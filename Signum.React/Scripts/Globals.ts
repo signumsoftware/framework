@@ -743,6 +743,14 @@ export module Dic {
         return result;
     }
 
+    export function clear(obj: { [key: string]: any }): void {
+        for (const name in obj) {
+            if (obj.hasOwnProperty == null || obj.hasOwnProperty(name)) {
+                delete obj[name];
+            }
+        }
+    }
+
     export function map<V, R>(obj: { [key: string]: V }, selector: (key: string, value: V, index: number) => R): R[] {
         let index = 0;
         const result: R[] = [];

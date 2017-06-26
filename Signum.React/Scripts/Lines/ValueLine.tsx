@@ -231,7 +231,7 @@ function internalComboBox(vl: ValueLine) {
     if (s.ctx.readOnly) {
 
         var label = null;
-        if (s.ctx.value) {
+        if (s.ctx.value != undefined) {
 
             var item = optionItems.filter(a => a.value == s.ctx.value).singleOrNull();
 

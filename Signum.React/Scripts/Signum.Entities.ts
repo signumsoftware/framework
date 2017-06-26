@@ -256,6 +256,7 @@ export module EntityControlMessage {
     export const Detail = new MessageKey("EntityControlMessage", "Detail");
     export const MoveDown = new MessageKey("EntityControlMessage", "MoveDown");
     export const MoveUp = new MessageKey("EntityControlMessage", "MoveUp");
+    export const Move = new MessageKey("EntityControlMessage", "Move");
     export const Navigate = new MessageKey("EntityControlMessage", "Navigate");
     export const NullValueNotAllowed = new MessageKey("EntityControlMessage", "NullValueNotAllowed");
     export const Remove = new MessageKey("EntityControlMessage", "Remove");

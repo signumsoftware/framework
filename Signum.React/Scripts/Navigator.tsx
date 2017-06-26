@@ -124,7 +124,7 @@ export function createRoute(type: PseudoType) {
 export const entitySettings: { [type: string]: EntitySettings<ModifiableEntity> } = {};
 
 export function addSettings(...settings: EntitySettings<any>[]) {
-    settings.forEach(s => Dic.addOrThrow(entitySettings, s.type.typeName, s));
+    settings.forEach(s => Dic.addOrThrow(entitySettings, s.typeName, s));
 }
 
 
@@ -422,6 +422,23 @@ function typeIsNavigable(typeName: string): EntityWhen {
     }
 }
 
+export function defaultFindOptions(type: TypeReference): FindOptions | undefined {
+    if (type.isEmbedded || type.name == IsByAll)
+        return undefined;
+
+    const types = getTypeInfos(type);
+
+    if (types.length == 1) {
+        var s = getSettings(types[0]);
+
+        if (s && s.findOptions) {
+            return s.findOptions;
+        }
+    }
+
+    return undefined;
+}
+
 export function getAutoComplete(type: TypeReference, findOptions: FindOptions | undefined): AutocompleteConfig<any> | null {
     if (type.isEmbedded || type.name == IsByAll)
         return null;
@@ -661,7 +678,7 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
 }
 
 export class EntitySettings<T extends ModifiableEntity> {
-    type: Type<T>;
+    typeName: string;
 
     avoidPopup: boolean;
 
@@ -678,6 +695,7 @@ export class EntitySettings<T extends ModifiableEntity> {
     isReadOnly: boolean;
     autocomplete?: AutocompleteConfig<T>;
     autocompleteDelay?: number;
+    findOptions?: FindOptions;
     onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
     onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
     onNavigateRoute?: (typeName: string, id: string | number) => string;
@@ -689,9 +707,9 @@ export class EntitySettings<T extends ModifiableEntity> {
         this.viewOverrides.push(override);
     }
 
-    constructor(type: Type<T>, getViewModule?: (entity: T) => Promise<ViewModule<any>>, options?: EntitySettingsOptions<T>) {
+    constructor(type: Type<T> | string, getViewModule?: (entity: T) => Promise<ViewModule<any>>, options?: EntitySettingsOptions<T>) {
 
-        this.type = type;
+        this.typeName = (type as Type<T>).typeName || type as string;
         this.getViewPromise = getViewModule && (entity => new ViewPromise(getViewModule(entity)));
 
         Dic.assign(this, options);

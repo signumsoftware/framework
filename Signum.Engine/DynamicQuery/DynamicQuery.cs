@@ -921,9 +921,9 @@ namespace Signum.Engine.DynamicQuery
             var quotedLambda = Expression.Quote(lambda);
 
             if (at.AggregateFunction == AggregateFunction.Min || at.AggregateFunction == AggregateFunction.Max)
-                return Expression.Call(typeof(Queryable), at.AggregateFunction.ToString() + "Async", new[] { elementType, lambda.Body.Type }, new[] { collection, quotedLambda, tokenConstant });
+                return Expression.Call(typeof(QueryableAsyncExtensions), at.AggregateFunction.ToString() + "Async", new[] { elementType, lambda.Body.Type }, new[] { collection, quotedLambda, tokenConstant });
 
-            return Expression.Call(typeof(Queryable), at.AggregateFunction.ToString() + "Async", new[] { elementType }, new[] { collection, quotedLambda, tokenConstant });
+            return Expression.Call(typeof(QueryableAsyncExtensions), at.AggregateFunction.ToString() + "Async", new[] { elementType }, new[] { collection, quotedLambda, tokenConstant });
         }
 
 
@@ -947,9 +947,20 @@ namespace Signum.Engine.DynamicQuery
 
         public static Task<object> SimpleAggregateAsync<T>(this DQueryable<T> query, AggregateToken simpleAggregate, CancellationToken token)
         {
-            var expr = BuildAggregateExpressionQueryableAsync(query.Query.Expression, simpleAggregate, query.Context, token);            
+            var expr = BuildAggregateExpressionQueryableAsync(query.Query.Expression, simpleAggregate, query.Context, token);
 
-            return Expression.Lambda<Func<Task<object>>>(Expression.Convert(expr, typeof(Task<object>))).Compile()();
+            var func = (Func<object>)Expression.Lambda(expr).Compile();
+
+            var task = func();
+
+            return giCastObject.GetInvoker(task.GetType().GenericTypeArguments)(task);
+        }
+
+        static GenericInvoker<Func<object, Task<object>>> giCastObject =
+            new GenericInvoker<Func<object, Task<object>>>(task => CastObject<int>((Task<int>)task));
+        static Task<object> CastObject<T>(Task<T> task)
+        {
+            return task.ContinueWith(t => (object)t.Result);
         }
 
         #endregion
