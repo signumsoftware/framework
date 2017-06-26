@@ -686,10 +686,10 @@ namespace Signum.Engine.DynamicQuery
 
                 q = q.Take(pag.ElementsPerPage);
 
-                var listTask = q.ToListAsync();
-                var countTask = query.Query.CountAsync();
+                var listTask = await q.ToListAsync();
+                var countTask = await query.Query.CountAsync();
 
-                return new DEnumerableCount<T>(await listTask, query.Context, await countTask);
+                return new DEnumerableCount<T>(listTask, query.Context, countTask);
             }
 
             throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination.GetType().Name));
