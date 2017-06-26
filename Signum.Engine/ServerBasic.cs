@@ -132,7 +132,7 @@ namespace Signum.Services
         public virtual Dictionary<Type, HashSet<Type>> FindAllMixins()
         {
             return Return(MethodInfo.GetCurrentMethod(), null,
-             () => MixinDeclarations.Declarations);
+             () => MixinDeclarations.Declarations.ToDictionary());
         }
 
         public virtual bool Exists(Type type, PrimaryKey id)

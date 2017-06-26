@@ -47,10 +47,9 @@ namespace Signum.Entities
     {
         public static readonly MethodInfo miMixin = ReflectionTools.GetMethodInfo((Entity i) => i.Mixin<CorruptMixin>()).GetGenericMethodDefinition();
 
-        public static Dictionary<Type, HashSet<Type>> Declarations = new Dictionary<Type, HashSet<Type>>();
+        public static ConcurrentDictionary<Type, HashSet<Type>> Declarations = new ConcurrentDictionary<Type, HashSet<Type>>();
 
-        public static Dictionary<Type, Func<Entity, MixinEntity, MixinEntity>> Constructors =
-            new Dictionary<Type, Func<Entity, MixinEntity, MixinEntity>>();
+        public static ConcurrentDictionary<Type, Func<Entity, MixinEntity, MixinEntity>> Constructors = new ConcurrentDictionary<Type, Func<Entity, MixinEntity, MixinEntity>>();
 
         public static Action<Type> AssertNotIncluded = t => { throw new NotImplementedException("Call MixinDeclarations.Register in the server, after the Connector is created."); };
 
@@ -81,7 +80,7 @@ namespace Signum.Entities
 
         public static void Import(Dictionary<Type, HashSet<Type>> declarations)
         {
-            Declarations = declarations;
+            Declarations = new ConcurrentDictionary<Type, HashSet<Type>>(declarations);
 
             foreach (var t in declarations.SelectMany(d => d.Value).Distinct())
                 AddConstructor(t);
@@ -89,13 +88,13 @@ namespace Signum.Entities
 
         static void AddConstructor(Type mixinEntity)
         {
-            Constructors.GetOrCreate(mixinEntity, () =>
+            Constructors.GetOrAdd(mixinEntity, me =>
             {
-                var constructors = mixinEntity.GetConstructors(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+                var constructors = me.GetConstructors(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
 
                 if (constructors.Length != 1)
                     throw new InvalidOperationException("{0} should have just one non-public construtor with parameters (Entity mainEntity, MixinEntity next)"
-                        .FormatWith(mixinEntity.Name));
+                        .FormatWith(me.Name));
 
                 var ci = constructors.Single();
 
@@ -113,10 +112,9 @@ namespace Signum.Entities
 
         public static HashSet<Type> GetMixinDeclarations(Type mainEntity)
         {
-            return Declarations.GetOrCreate(mainEntity,
-                () =>
+            return Declarations.GetOrAdd(mainEntity, me =>
                 {
-                    var hs = mainEntity.GetCustomAttributes(typeof(MixinAttribute), inherit: false)
+                    var hs = me.GetCustomAttributes(typeof(MixinAttribute), inherit: false)
                         .Cast<MixinAttribute>()
                         .Select(t => t.MixinType)
                         .ToHashSet();
