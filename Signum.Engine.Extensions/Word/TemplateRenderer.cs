@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Data;
 using Signum.Entities.Word;
 using DocumentFormat.OpenXml;
+using System.Threading;
 
 namespace Signum.Engine.Word
 {

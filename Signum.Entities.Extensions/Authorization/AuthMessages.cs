@@ -165,5 +165,10 @@ namespace Signum.Entities.Authorization
         PleaseSaveChangesFirst,
         ResetChanges,
         SwitchTo,
+
+        [Description("{0} (in UI)")]
+        _0InUI,
+        [Description("{0} (in DB only)")]
+        _0InDB,
     }
 }

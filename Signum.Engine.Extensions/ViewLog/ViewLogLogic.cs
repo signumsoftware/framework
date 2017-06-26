@@ -17,6 +17,7 @@ using Signum.Utilities.ExpressionTrees;
 using System.Data.Common;
 using Signum.Engine;
 using Signum.Entities.Authorization;
+using System.Threading;
 
 namespace Signum.Engine.ViewLog
 {
@@ -52,7 +53,7 @@ namespace Signum.Engine.ViewLog
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<ViewLogEntity>()
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -132,9 +133,9 @@ namespace Signum.Engine.ViewLog
             });
         }
 
-        static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters)
+        static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            Database.Query<ViewLogEntity>().Where(view => view.StartDate < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
+            Database.Query<ViewLogEntity>().Where(view => view.StartDate < parameters.DateLimit).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         public static IDisposable LogView(Lite<IEntity> entity, string viewAction)

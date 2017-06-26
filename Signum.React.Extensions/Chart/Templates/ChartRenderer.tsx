@@ -77,7 +77,7 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
         }); 
 
         const chart = d3.select(node)
-            .append('svg:svg').attr('width', rect.width).attr('height', rect.height);
+            .append('svg:svg').attr("direction", "ltr").attr('width', rect.width).attr('height', rect.height);
 
         node.addEventListener("click", this.handleOnClick);
 

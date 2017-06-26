@@ -153,13 +153,13 @@ namespace Signum.Entities.Chart
 
                 interval = new NumberInterval();
 
-                if (!ReflectionTools.TryParse<decimal>(m.Groups["def"].Value, CultureInfo.InvariantCulture, out interval.DefaultValue))
+                if (!ReflectionTools.TryParse(m.Groups["def"].Value, CultureInfo.InvariantCulture, out interval.DefaultValue))
                     return "Invalid default value";
 
-                if (!ReflectionTools.TryParse<decimal?>(m.Groups["min"].Value, CultureInfo.InvariantCulture, out interval.MinValue))
+                if (!ReflectionTools.TryParse(m.Groups["min"].Value, CultureInfo.InvariantCulture, out interval.MinValue))
                     return "Invalid min value";
 
-                if (!ReflectionTools.TryParse<decimal?>(m.Groups["max"].Value, CultureInfo.InvariantCulture, out interval.MaxValue))
+                if (!ReflectionTools.TryParse(m.Groups["max"].Value, CultureInfo.InvariantCulture, out interval.MaxValue))
                     return "Invalid max value";
 
                 return null;
@@ -172,7 +172,7 @@ namespace Signum.Entities.Chart
 
             public string Validate(string parameter)
             {
-                if (!decimal.TryParse(parameter, out decimal value))
+                if (!decimal.TryParse(parameter, NumberStyles.Float, CultureInfo.InvariantCulture,  out decimal value))
                     return "{0} is not a valid number".FormatWith(parameter);
 
                 if (MinValue.HasValue && value < MinValue)

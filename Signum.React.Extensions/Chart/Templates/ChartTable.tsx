@@ -1,6 +1,7 @@
 ﻿import * as React from 'react'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOptionParsed, OrderOptionParsed, OrderType } from '../../../../Framework/Signum.React/Scripts/FindOptions'
+import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
+import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOptionParsed, OrderOptionParsed, OrderType, ResultRow, hasAggregate, ColumnOption, FilterOptionParsed } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { ChartColumnEmbedded, ChartScriptColumnEmbedded, ChartScriptParameterEmbedded, ChartRequest, GroupByChart, ChartMessage,
    ChartColorEntity, ChartScriptEntity, ChartParameterEmbedded, ChartParameterType } from '../Signum.Entities.Chart'
 
@@ -72,7 +73,7 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
                 <tbody>
                     {
                         resultTable.rows.map((row, i) =>
-                            <tr key={i}>
+                            <tr key={i} onDoubleClick={e => this.handleOnDoubleClick(e, row)}>
                                 {!chartRequest.groupResults && <td>{((qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row)).last("EntityFormatRules").formatter)(row, resultTable.columns, undefined)}</td>}
                                 {columns.map((c, j) =>
                                     <td key={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
@@ -86,6 +87,59 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
             </table>
 
         );
+    }
+
+    handleOnDoubleClick = (e: React.MouseEvent<HTMLTableRowElement>, row: ResultRow) => {
+
+
+        const cr = this.props.chartRequest;
+
+        if (cr.groupResults == false) {
+            
+            window.open(Navigator.navigateRoute(row.entity));
+
+        } else {
+            
+            const filters = cr.filterOptions.filter(a => !hasAggregate(a.token));
+            const columns: ColumnOption[] = [];
+
+
+
+            cr.columns.map((a, i) => {
+
+                const t = a.element.token;
+
+                if (t && t.token && !hasAggregate(t.token)) {
+                    filters.push({
+                        token: t!.token!,
+                        operation: "EqualTo",
+                        value: row.columns[i],
+                        frozen: false
+                    } as FilterOptionParsed);
+                }
+
+                if (t && t.token && t.token.parent != undefined) //Avoid Count and simple Columns that are already added
+                {
+                    var col = t.token.queryTokenType == "Aggregate" ? t.token.parent : t.token
+
+                    if (col.parent)
+                        columns.push({
+                            columnName: col.fullKey
+                        });
+                }
+            });
+
+            window.open(Finder.findOptionsPath({
+                queryName: cr.queryKey,
+                filterOptions: filters.map(fop => ({
+                    columnName: fop.token!.fullKey,
+                    operation: fop.operation,
+                    value: fop.value,
+                    frozen: fop.frozen,
+                }) as FilterOption),
+                columnOptions: columns,
+            }));
+        }
     }
 
     orderClassName(column: ColumnOptionParsed) {

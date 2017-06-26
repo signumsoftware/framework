@@ -165,13 +165,17 @@ namespace Signum.Engine.Cache
                 CacheLogic.LogWriter.WriteLine("Load ToListWithInvalidations {0} {1}".FormatWith(typeof(T).TypeName()), exceptionContext);
 
             using (new EntityCache())
+            using (var r = EntityCache.NewRetriever()) {
                 subConnector.ExecuteDataReaderDependency(tr.MainCommand, onChange, StartSqlDependencyAndEnableBrocker, fr =>
                     {
                         if (reader == null)
-                            reader = new SimpleReader(fr, EntityCache.NewRetriever());
+                            reader = new SimpleReader(fr, r);
 
                         list.Add(projector(reader));
                     }, CommandType.Text);
+
+                r.CompleteAll();
+            }
 
             return list;
         }

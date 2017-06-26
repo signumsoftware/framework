@@ -19,13 +19,14 @@ interface ColorRadioProps {
     checked: boolean;
     onClicked: (e: React.MouseEvent<HTMLAnchorElement>) => void;
     color: string;
+ 	title?: string;
 }
 
 export class ColorRadio extends React.Component<ColorRadioProps, void>{
 
     render() {
         return (
-            <a onClick={e => { e.preventDefault(); this.props.onClicked(e); } }
+            <a onClick={e => { e.preventDefault(); this.props.onClicked(e); }} title={this.props.title}
                 className={classes("sf-auth-chooser", "fa", this.props.checked ? "fa-dot-circle-o" : "fa-circle-o")}
                 style={{ color: this.props.checked ? this.props.color : "#aaa" }}>
             </a>

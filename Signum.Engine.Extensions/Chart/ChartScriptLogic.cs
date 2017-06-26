@@ -26,7 +26,7 @@ namespace Signum.Engine.Chart
             {
                 sb.Include<ChartScriptEntity>()
                     .WithSave(ChartScriptOperation.Save)
-                    .WithQuery(dqm, uq => new
+                    .WithQuery(dqm, () => uq => new
                     {
                         Entity = uq,
                         uq.Id,

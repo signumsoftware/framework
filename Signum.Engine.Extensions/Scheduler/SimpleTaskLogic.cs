@@ -19,7 +19,7 @@ namespace Signum.Engine.Scheduler
 {
     public static class SimpleTaskLogic
     {
-        static Dictionary<SimpleTaskSymbol, Func<Lite<IEntity>>> tasks = new Dictionary<SimpleTaskSymbol, Func<Lite<IEntity>>>();
+        static Dictionary<SimpleTaskSymbol, Func<ScheduledTaskContext, Lite<IEntity>>> tasks = new Dictionary<SimpleTaskSymbol, Func<ScheduledTaskContext, Lite<IEntity>>>();
 
         internal static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -27,14 +27,14 @@ namespace Signum.Engine.Scheduler
             {
                 SymbolLogic<SimpleTaskSymbol>.Start(sb, dqm, () => tasks.Keys.ToHashSet());
 
-                SchedulerLogic.ExecuteTask.Register((SimpleTaskSymbol st) =>
+                SchedulerLogic.ExecuteTask.Register((SimpleTaskSymbol st, ScheduledTaskContext ctx) =>
                 {
-                    Func<Lite<IEntity>> func = tasks.GetOrThrow(st);
-                    return func();
+                    Func<ScheduledTaskContext, Lite<IEntity>> func = tasks.GetOrThrow(st);
+                    return func(ctx);
                 });
 
                 sb.Include<SimpleTaskSymbol>()
-                    .WithQuery(dqm, ct => new
+                    .WithQuery(dqm, () => ct => new
                     {
                         Entity = ct,
                         ct.Id,
@@ -43,7 +43,7 @@ namespace Signum.Engine.Scheduler
             }
         }
 
-        public static void Register(SimpleTaskSymbol simpleTaskSymbol, Func<Lite<IEntity>> action)
+        public static void Register(SimpleTaskSymbol simpleTaskSymbol, Func<ScheduledTaskContext, Lite<IEntity>> action)
         {
             if (simpleTaskSymbol == null)
                 throw AutoInitAttribute.ArgumentNullException(typeof(SimpleTaskSymbol), nameof(simpleTaskSymbol));

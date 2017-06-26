@@ -36,7 +36,7 @@ namespace Signum.Engine.Chart
                 sb.Include<UserChartEntity>()
                     .WithSave(UserChartOperation.Save)
                     .WithDelete(UserChartOperation.Delete)
-                    .WithQuery(dqm, uq => new
+                    .WithQuery(dqm, () => uq => new
                     {
                         Entity = uq,
                         uq.Query,

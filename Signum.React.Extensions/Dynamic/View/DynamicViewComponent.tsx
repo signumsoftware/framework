@@ -166,7 +166,11 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { vi
         this.props.dynamicView.modified = true;
 
         Operations.API.executeEntity(this.props.dynamicView, DynamicViewOperation.Save)
-            .then(pack => { this.reload(pack.entity); return EntityOperations.notifySuccess(); })
+            .then(pack => {
+                this.reload(pack.entity);
+                DynamicViewClient.cleanCaches();
+                return EntityOperations.notifySuccess();
+            })
             .done();
     }
 

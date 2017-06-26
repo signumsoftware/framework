@@ -19,6 +19,7 @@ using Signum.Entities.UserQueries;
 using Signum.Engine.UserQueries;
 using Signum.Entities.Processes;
 using Signum.Engine.Processes;
+using System.Threading;
 
 namespace Signum.Engine.Mailing
 {
@@ -30,7 +31,7 @@ namespace Signum.Engine.Mailing
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<SendEmailTaskEntity>()
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -80,7 +81,7 @@ namespace Signum.Engine.Mailing
                     Execute = (e, _) => { }
                 }.Register();
 
-                SchedulerLogic.ExecuteTask.Register((SendEmailTaskEntity er) =>
+                SchedulerLogic.ExecuteTask.Register((SendEmailTaskEntity er, ScheduledTaskContext ctx) =>
                 {
                     if (er.UniqueTarget != null)
                     {

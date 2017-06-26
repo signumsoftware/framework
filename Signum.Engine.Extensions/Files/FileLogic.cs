@@ -38,7 +38,7 @@ namespace Signum.Engine.Files
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<FileEntity>()
-                    .WithQuery(dqm, a => new
+                    .WithQuery(dqm, () => a => new
                     {
                         Entity = a,
                         a.Id,

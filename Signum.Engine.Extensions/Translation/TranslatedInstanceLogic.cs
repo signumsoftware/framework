@@ -38,7 +38,7 @@ namespace Signum.Engine.Translation
             {
                 sb.Include<TranslatedInstanceEntity>()
                     .WithUniqueIndex(ti => new { ti.Culture, ti.PropertyRoute, ti.Instance, ti.RowId })
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -154,7 +154,7 @@ namespace Signum.Engine.Translation
             new GenericInvoker<Func<PropertyRoute, Dictionary<LocalizedInstanceKey, string>>>(pr => FromRoute<Entity>(pr));
         static Dictionary<LocalizedInstanceKey, string> FromRoute<T>(PropertyRoute pr) where T : Entity
         {
-            var selector = pr.GetLambdaExpression<T, string>();
+            var selector = pr.GetLambdaExpression<T, string>(safeNullAccess: false);
 
             return (from e in Database.Query<T>()
                     select KVP.Create(new LocalizedInstanceKey(pr, e.ToLite(), null), selector.Evaluate(e))).ToDictionary();
@@ -164,8 +164,9 @@ namespace Signum.Engine.Translation
             new GenericInvoker<Func<PropertyRoute, Dictionary<LocalizedInstanceKey, string>>>(pr => FromRouteMList<Entity, string>(pr));
         static Dictionary<LocalizedInstanceKey, string> FromRouteMList<T, M>(PropertyRoute pr) where T : Entity
         {
-            var mListProperty = pr.GetMListItemsRoute().Parent.GetLambdaExpression<T, MList<M>>();
-            var selector = pr.GetLambdaExpression<M, string>();
+            var mlItemPr = pr.GetMListItemsRoute();
+            var mListProperty = mlItemPr.Parent.GetLambdaExpression<T, MList<M>>(safeNullAccess: false);
+            var selector = pr.GetLambdaExpression<M, string>(safeNullAccess: false, skipBefore: mlItemPr);
 
             return (from mle in Database.MListQuery(mListProperty)
                     select KVP.Create(new LocalizedInstanceKey(pr, mle.Parent.ToLite(), mle.RowId), selector.Evaluate(mle.Element))).ToDictionary();
@@ -206,7 +207,7 @@ namespace Signum.Engine.Translation
             new GenericInvoker<Func<PropertyRoute, CultureInfo, bool>>((pr, ci) => AnyNoTranslated<Entity>(pr, ci));
         static bool AnyNoTranslated<T>(PropertyRoute pr, CultureInfo ci) where T : Entity
         {
-            var exp = pr.GetLambdaExpression<T, string>();
+            var exp = pr.GetLambdaExpression<T, string>(safeNullAccess: false);
 
             return (from e in Database.Query<T>()
                     let str = exp.Evaluate(e)
@@ -223,9 +224,10 @@ namespace Signum.Engine.Translation
            new GenericInvoker<Func<PropertyRoute, CultureInfo, bool>>((pr, ci) => AnyNoTranslatedMList<Entity, string>(pr, ci));
         static bool AnyNoTranslatedMList<T, M>(PropertyRoute pr, CultureInfo ci) where T : Entity
         {
-            var mListProperty = pr.GetMListItemsRoute().Parent.GetLambdaExpression<T, MList<M>>();
+            var mlistItemPr = pr.GetMListItemsRoute();
+            var mListProperty = mlistItemPr.Parent.GetLambdaExpression<T, MList<M>>(safeNullAccess: false);
 
-            var exp = pr.GetLambdaExpression<M, string>();
+            var exp = pr.GetLambdaExpression<M, string>(safeNullAccess: false, skipBefore: mlistItemPr);
 
             return (from mle in Database.MListQuery(mListProperty)
                     let str = exp.Evaluate(mle.Element)

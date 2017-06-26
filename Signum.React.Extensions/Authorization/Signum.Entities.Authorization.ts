@@ -38,6 +38,8 @@ export module AuthAdminMessage {
     export const PleaseSaveChangesFirst = new MessageKey("AuthAdminMessage", "PleaseSaveChangesFirst");
     export const ResetChanges = new MessageKey("AuthAdminMessage", "ResetChanges");
     export const SwitchTo = new MessageKey("AuthAdminMessage", "SwitchTo");
+    export const _0InUI = new MessageKey("AuthAdminMessage", "_0InUI");
+    export const _0InDB = new MessageKey("AuthAdminMessage", "_0InDB");
 }
 
 export module AuthEmailMessage {

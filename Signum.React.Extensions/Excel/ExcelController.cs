@@ -30,17 +30,18 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities.Excel;
 using Signum.Entities.Chart;
 using Signum.Engine.Chart;
+using System.Threading.Tasks;
 
 namespace Signum.React.Excel
 {
     public class ExcelController : ApiController
     {
         [Route("api/excel/plain"), HttpPost]
-        public HttpResponseMessage ToPlainExcel(QueryRequestTS request)
+        public async Task<HttpResponseMessage> ToPlainExcel(QueryRequestTS request, CancellationToken token)
         {
             var queryRequest = request.ToQueryRequest();
 
-            ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(queryRequest);
+            ResultTable queryResult = await DynamicQueryManager.Current.ExecuteQueryAsync(queryRequest, token);
             byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(queryResult, QueryUtils.GetNiceName(queryRequest.QueryName));
 
             var fileName = request.queryKey + TimeZoneManager.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx";
@@ -49,9 +50,9 @@ namespace Signum.React.Excel
         }
 
         [Route("api/excel/plainChart"), HttpPost]
-        public HttpResponseMessage ToPlainExcel(ChartRequest request)
+        public async Task<HttpResponseMessage> ToPlainExcel(ChartRequest request, CancellationToken token)
         {
-            var resultTable = ChartLogic.ExecuteChart(request);
+            var resultTable = await ChartLogic.ExecuteChartAsync(request, token);
 
             byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(resultTable, QueryUtils.GetNiceName(request.QueryName));
 
@@ -68,9 +69,9 @@ namespace Signum.React.Excel
         }
 
         [Route("api/excel/excelReport"), HttpPost]
-        public HttpResponseMessage GenerateExcelReport(ExcelReportRequest request)
+        public async Task<HttpResponseMessage> GenerateExcelReport(ExcelReportRequest request, CancellationToken token)
         {
-            byte[] file = ExcelLogic.ExecuteExcelReport(request.excelReport, request.queryRequest.ToQueryRequest());
+            byte[] file = await ExcelLogic.ExecuteExcelReport(request.excelReport, request.queryRequest.ToQueryRequest(), token);
 
             var fileName = request.excelReport.ToString() + "-" + TimeZoneManager.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx";
 

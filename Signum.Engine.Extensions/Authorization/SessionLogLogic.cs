@@ -10,6 +10,7 @@ using Signum.Engine.DynamicQuery;
 using System.Reflection;
 using Signum.Engine.Basics;
 using Signum.Entities.Basics;
+using System.Threading;
 
 namespace Signum.Engine.Authorization
 {
@@ -22,7 +23,7 @@ namespace Signum.Engine.Authorization
                 AuthLogic.AssertStarted(sb);
 
                 sb.Include<SessionLogEntity>()
-                    .WithQuery(dqm, sl => new
+                    .WithQuery(dqm, () => sl => new
                     {
                         Entity = sl,
                         sl.Id,
@@ -38,9 +39,9 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters)
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            Database.Query<SessionLogEntity>().Where(a => a.SessionStart < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
+            Database.Query<SessionLogEntity>().Where(a => a.SessionStart < parameters.DateLimit).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         static bool RoleTracked(Lite<RoleEntity> role)

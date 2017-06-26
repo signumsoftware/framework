@@ -85,7 +85,7 @@ namespace Signum.Engine.Mailing
                 GetSmtpConfiguration = getSmtpConfiguration;
 
                 sb.Include<EmailTemplateEntity>()
-                    .WithQuery(dqm, t => new
+                    .WithQuery(dqm, () => t => new
                     {
                         Entity = t,
                         t.Id,

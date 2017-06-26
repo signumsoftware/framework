@@ -39,7 +39,7 @@ namespace Signum.Engine.Toolbar
                 sb.Include<ToolbarEntity>()
                     .WithSave(ToolbarOperation.Save)
                     .WithDelete(ToolbarOperation.Delete)
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -52,7 +52,7 @@ namespace Signum.Engine.Toolbar
                 sb.Include<ToolbarMenuEntity>()
                     .WithSave(ToolbarMenuOperation.Save)
                     .WithDelete(ToolbarMenuOperation.Delete)
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,

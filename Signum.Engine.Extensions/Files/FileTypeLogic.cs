@@ -35,7 +35,7 @@ namespace Signum.Engine.Files
             {
                 SymbolLogic<FileTypeSymbol>.Start(sb,dqm, () => FileTypes.Keys.ToHashSet());
                 sb.Include<FileTypeSymbol>()
-                    .WithQuery(dqm, f => new
+                    .WithQuery(dqm, () => f => new
                     {
                         Entity = f,
                         f.Key

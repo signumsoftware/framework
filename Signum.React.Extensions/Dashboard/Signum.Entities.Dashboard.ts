@@ -95,6 +95,7 @@ export interface UserChartPartEntity extends Entities.Entity, IPartEntity {
     Type: "UserChartPart";
     userChart?: Chart.UserChartEntity | null;
     showData?: boolean;
+    allowChangeShowData?: boolean;
     requiresTitle?: boolean;
 }
 

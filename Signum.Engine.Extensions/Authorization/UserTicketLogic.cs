@@ -31,7 +31,7 @@ namespace Signum.Engine.Authorization
 
                 AuthLogic.AssertStarted(sb);
                 sb.Include<UserTicketEntity>()
-                    .WithQuery(dqm, ut => new
+                    .WithQuery(dqm, () => ut => new
                     {
                         Entity = ut,
                         ut.Id,

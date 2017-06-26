@@ -20,7 +20,7 @@ export default class UserQueryPart extends React.Component<{ ctx: TypeContext<Us
         return (
             <div >
                 <EntityLine ctx={ctx.subCtx(p => p.userQuery) } create={false} />
-                <ValueLine ctx={ctx.subCtx(p => p.allowSelection) } />
+                <ValueLine ctx={ctx.subCtx(p => p.allowSelection)} inlineCheckbox={true} />
             </div>
         );
     }

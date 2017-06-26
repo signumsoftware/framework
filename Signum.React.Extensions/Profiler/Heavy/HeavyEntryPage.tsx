@@ -20,11 +20,11 @@ interface HeavyEntryProps extends RouteComponentProps<{selectedIndex : string }>
 
 }
 
-export default class HeavyEntry extends React.Component<HeavyEntryProps, { entries?: HeavyProfilerEntry[], stackTrace?: StackTraceTS[]}> {
+export default class HeavyEntry extends React.Component<HeavyEntryProps, { entries?: HeavyProfilerEntry[], stackTrace?: StackTraceTS[], asyncDepth: boolean }> {
 
     constructor(props: HeavyEntryProps) {
         super(props);
-        this.state = { };
+        this.state = { asyncDepth: true };
     }
 
     componentWillMount() {
@@ -76,8 +76,9 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
         return (
             <div>
                 <h2><Link to="~/profiler/heavy">Heavy Profiler</Link> > Entry {index}</h2>
+                <label><input type="checkbox" checked={this.state.asyncDepth} onChange={a => this.setState({ asyncDepth: a.currentTarget.checked })} />Async Stack</label>
                 <br />
-                {this.state.entries && < HeavyProfilerDetailsD3 entries={this.state.entries} selected={current}/>}
+                {this.state.entries && <HeavyProfilerDetailsD3 entries={this.state.entries} selected={current} asyncDepth={this.state.asyncDepth} />}
                 <br />
                 <table className="table table-nonfluid">
                     <tbody>
@@ -165,31 +166,50 @@ function lerp(min: number, ratio: number, max: number) {
     return min * (1-ratio) + max * ratio;
 }
 
-export class HeavyProfilerDetailsD3 extends React.Component<{entries: HeavyProfilerEntry[], selected : HeavyProfilerEntry }, {min: number, max: number}>{
-    
-    
-    componentWillMount(){
+
+interface HeavyProfilerDetailsD3Props {
+    entries: HeavyProfilerEntry[];
+    selected: HeavyProfilerEntry;
+    asyncDepth: boolean; 
+}
+
+
+interface HeavyProfilerDetailsD3State {
+    min: number;
+    max: number;
+}
+
+
+
+export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetailsD3Props, HeavyProfilerDetailsD3State>{
+
+    componentWillMount() {
         this.resetZoom(this.props.selected);
     }
 
-    resetZoom(current: HeavyProfilerEntry){
+    resetZoom(current: HeavyProfilerEntry) {
         this.setState({
             min: lerp(current.BeforeStart, -0.1, current.End),
             max: lerp(current.BeforeStart, 1.1, current.End)
         });
     }
-    
-    componentDidMount(){
-        this.mountChart();
+
+    componentDidMount() {
+        this.mountChart(this.props);
+    }
+
+    componentWillReceiveProps(newProps: HeavyProfilerDetailsD3Props) {
+        if (newProps.asyncDepth != this.props.asyncDepth)
+            this.mountChart(newProps);
     }
 
     componentDidUpdate() {
-        this.updateChart();
+        this.updateChart!();
     }
 
-    chartContainer:HTMLDivElement;
+    chartContainer: HTMLDivElement;
 
-    handleWeel = (e: React.WheelEvent<any>)=>{
+    handleWeel = (e: React.WheelEvent<any>) => {
 
         e.preventDefault();
 
@@ -210,9 +230,9 @@ export class HeavyProfilerDetailsD3 extends React.Component<{entries: HeavyProfi
         let newMin = this.state.min - dist * delta * (ratio);
         let newMax = this.state.max + dist * delta * (1 - ratio);
 
-        this.setState({ 
+        this.setState({
             min: newMin,
-            max: newMax 
+            max: newMax
         });
     }
 
@@ -220,34 +240,26 @@ export class HeavyProfilerDetailsD3 extends React.Component<{entries: HeavyProfi
         return (<div className="sf-profiler-chart" ref={div => this.chartContainer = div} onWheel={this.handleWeel}></div>);
     }
 
-    chart: d3.Selection<SVGElement, any, any, any>;
-    groups: d3.Selection<SVGGElement, HeavyProfilerEntry, any, any>;
-    rects: d3.Selection<SVGGElement, HeavyProfilerEntry, any, any>;
-    rectsBefore: d3.Selection<SVGGElement, HeavyProfilerEntry, any, any>;
-    labelTop: d3.Selection<SVGGElement, HeavyProfilerEntry, any, any>;
-    labelBottom: d3.Selection<SVGGElement, HeavyProfilerEntry, any, any>;
-
-    
-
-    mountChart (){
+    mountChart(props: HeavyProfilerDetailsD3Props) {
 
         if (this.chartContainer == undefined)
             throw new Error("chartContainer not mounted!");
 
-        let data = this.props.entries;
+        let data = props.entries;
 
         if (data == undefined)
             throw new Error("no entries");
 
+        var getDepth = props.asyncDepth ?
+            (e: HeavyProfilerEntry) => e.AsyncDepth :
+            (e: HeavyProfilerEntry) => e.Depth;
+
         let fontSize = 12;
         let fontPadding = 3;
-        let minDepth = d3.min(data, e=> e.Depth)!;
-        let maxDepth = d3.max(data, e=> e.Depth)!;
-   
+        let maxDepth = d3.max(data, getDepth)!;
+
         let height = ((fontSize * 2) + (3 * fontPadding)) * (maxDepth + 1);
         this.chartContainer.style.height = height + "px";
-
-
 
         let y = d3.scaleLinear()
             .domain([0, maxDepth + 1])
@@ -257,84 +269,93 @@ export class HeavyProfilerDetailsD3 extends React.Component<{entries: HeavyProfi
 
         d3.select(this.chartContainer).select("svg").remove();
 
-        this.chart = d3.select(this.chartContainer)
+        const chart = d3.select(this.chartContainer)
             .append<SVGElement>('svg:svg').attr('height', height);
 
-        this.groups = this.chart.selectAll("g.entry").data(data).enter()
-            .append<SVGGElement>('svg:g').attr('class', 'entry');
 
-        this.rects = this.groups.append<SVGRectElement>('svg:rect').attr('class', 'shape')
-            .attr('y', v => y(v.Depth))            
-            .attr('height', entryHeight - 1)
-            .attr('fill', v => v.Color);
+        this.updateChart = () => {
 
-        this.rectsBefore = this.groups.append<SVGRectElement>('svg:rect').attr('class', 'shape-before')          
-            .attr('y', v => y(v.Depth) + 1)            
-            .attr('height', entryHeight - 2)
-            .attr('fill', '#fff');
+            let { min, max } = this.state;
+            let width = this.chartContainer.getBoundingClientRect().width;
+            let sel = this.props.selected;
+            let x = d3.scaleLinear()
+                .domain([min, max])
+                .range([0, width]);
 
-        this.labelTop = this.groups.append<SVGTextElement>('svg:text').attr('class', 'label label-top')
-            .attr('dy', v => y(v.Depth))
-            .attr('y', fontPadding + fontSize)
-            .text(v => v.Elapsed);
+            var filteredData = data.filter(a => a.End > min && a.BeforeStart < max && (x(a.End) - x(a.BeforeStart)) > 1);
 
-        this.labelBottom = this.groups.append<SVGTextElement>('svg:text').attr('class', 'label label-bottom')
-            .attr('dy', v => y(v.Depth))
-            .attr('y', (2 * fontPadding) + (2 * fontSize))
-            .text(v => v.Role + (v.AdditionalData ? (" - " + v.AdditionalData.etc(30)) : ""));
+            const selection = chart.selectAll<SVGGElement, any>("g.entry").data(filteredData, a => (a as HeavyProfilerEntry).FullIndex);
 
-        this.groups.append('svg:title').text(v => v.Role +  v.Elapsed);
+            selection.exit().remove();
 
-        this.groups.on("click", e=> {
+            var newGroups = selection.enter()
+                .append<SVGGElement>('svg:g')
+                .attr('class', 'entry')
+                .attr('data-key', a => a.FullIndex);
 
-            if(e == this.props.selected)
-            {
-                this.resetZoom(e);
-            }
-            else
-            {
-                let url = "~/profiler/heavy/entry/" + e.FullIndex;
+            newGroups.append<SVGRectElement>('svg:rect').attr('class', 'shape')
+                .attr('y', v => y(getDepth(v)))
+                .attr('height', entryHeight - 1)
+                .attr('fill', v => v.Color);
 
-                if (d3.event.ctrlKey) {
-                    window.open(Navigator.toAbsoluteUrl(url));
+            newGroups.append<SVGRectElement>('svg:rect').attr('class', 'shape-before')
+                .attr('y', v => y(getDepth(v)) + 1)
+                .attr('height', entryHeight - 2)
+                .attr('fill', '#fff');
+
+            newGroups.append<SVGTextElement>('svg:text').attr('class', 'label label-top')
+                .attr('dy', v => y(getDepth(v)))
+                .attr('y', fontPadding + fontSize)
+                .text(v => v.Elapsed);
+
+            newGroups.append<SVGTextElement>('svg:text').attr('class', 'label label-bottom')
+                .attr('dy', v => y(getDepth(v)))
+                .attr('y', (2 * fontPadding) + (2 * fontSize))
+                .text(v => v.Role + (v.AdditionalData ? (" - " + v.AdditionalData.etc(30)) : ""));
+
+            newGroups.append('svg:title').text(v => v.Role + v.Elapsed);
+
+            newGroups.on("click", e => {
+
+                if (e == this.props.selected) {
+                    this.resetZoom(e);
                 }
                 else {
-                    Navigator.history.push(url);
+                    let url = "~/profiler/heavy/entry/" + e.FullIndex;
+
+                    if (d3.event.ctrlKey) {
+                        window.open(Navigator.toAbsoluteUrl(url));
+                    }
+                    else {
+                        Navigator.history.push(url);
+                    }
                 }
-            }
-        });
+            });
+
+            chart.attr('width', width);
+
+            var updateGroups = newGroups.merge(selection);
+
+            updateGroups.select<SVGRectElement>("rect.shape")
+                .attr('x', v => x(Math.max(min, v.BeforeStart)))
+                .attr('width', v => Math.max(0, x(Math.min(max, v.End)) - x(Math.max(min, v.BeforeStart))))
+                .attr('stroke', v => v == sel ? '#000' : '#ccc');
+
+            updateGroups.select<SVGRectElement>("rect.shape-before")
+                .attr('x', v => x(Math.max(min, v.BeforeStart)))
+                .attr('width', v => Math.max(0, x(Math.min(max, v.Start)) - x(Math.max(min, v.BeforeStart))));
+
+            updateGroups.select<SVGTextElement>("text.label.label-top")
+                .attr('dx', v => x(Math.max(min, v.Start)) + 3)
+                .attr('fill', v => v == sel ? '#000' : '#fff');
+
+            updateGroups.select<SVGTextElement>("text.label.label-bottom")
+                .attr('dx', v => x(Math.max(min, v.Start)) + 3)
+                .attr('fill', v => v == sel ? '#000' : '#fff');
+        };
 
         this.updateChart();
     }
 
-    updateChart() {
-
-        let { min, max } = this.state;
-        let width = this.chartContainer.getBoundingClientRect().width;
-        let sel = this.props.selected;
-        let x = d3.scaleLinear()
-            .domain([min, max])
-            .range([0, width]);
-
-        this.chart.attr('width', width);
-
-        this.groups.style("display", a => a.End > min && a.BeforeStart < max ? "inline" : "none");
-
-        this.rects
-            .attr('x', v => x(Math.max(min, v.BeforeStart)))
-            .attr('width', v => Math.max(0, x(Math.min(max, v.End)) - x(Math.max(min, v.BeforeStart))))
-            .attr('stroke', v => v == sel ? '#000' : '#ccc');
-
-        this.rectsBefore
-            .attr('x', v => x(Math.max(min, v.BeforeStart)))
-            .attr('width', v => Math.max(0, x(Math.min(max, v.Start)) - x(Math.max(min, v.BeforeStart))));
-
-        this.labelTop
-            .attr('dx', v => x(Math.max(min, v.Start)) + 3)
-            .attr('fill', v => v == sel ? '#000' : '#fff');
-
-        this.labelBottom
-            .attr('dx', v => x(Math.max(min, v.Start)) + 3)
-            .attr('fill', v => v == sel ? '#000' : '#fff');
-    }
+    updateChart?: () => void;
 }

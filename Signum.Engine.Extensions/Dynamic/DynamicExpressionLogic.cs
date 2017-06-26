@@ -30,7 +30,7 @@ namespace Signum.Engine.Dynamic
                     .WithUniqueIndex(a => new { a.FromType, a.Name })
                     .WithSave(DynamicExpressionOperation.Save)
                     .WithDelete(DynamicExpressionOperation.Delete)
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,

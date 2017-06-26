@@ -14,6 +14,7 @@ using Signum.Utilities;
 using Signum.Entities.Translation;
 using Signum.Engine.Translation;
 using Signum.Engine.Mailing;
+using System.Threading;
 
 namespace Signum.Engine.Mailing
 {

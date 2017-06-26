@@ -27,7 +27,7 @@ namespace Signum.Engine.Chart
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<ChartColorEntity>()
-                    .WithQuery(dqm, cc => new
+                    .WithQuery(dqm, () => cc => new
                     {
                         Entity = cc,
                         cc.Related,

@@ -177,7 +177,7 @@ namespace Signum.Engine.Migrations
 
                     string version = DateTime.Now.ToString("yyyy.MM.dd-HH.mm.ss");
 
-                    string comment = SafeConsole.AskString("Comment for the new Migration? ", stringValidator: s => null);
+                    string comment = SafeConsole.AskString("Comment for the new Migration? ", stringValidator: s => null).Trim();
 
                     string fileName = version + (comment.HasText() ? "_" + FileNameValidatorAttribute.RemoveInvalidCharts(comment): null) + ".sql";
 

@@ -90,7 +90,7 @@ namespace Signum.Engine.Mailing
                 sb.Schema.Generating += Schema_Generating;
                 sb.Schema.Synchronizing += Schema_Synchronizing;
                 sb.Include<SystemEmailEntity>()
-                    .WithQuery(dqm, se => new
+                    .WithQuery(dqm, () => se => new
                     {
                         Entity = se,
                         se.Id,

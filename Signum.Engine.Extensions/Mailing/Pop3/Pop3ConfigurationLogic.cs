@@ -79,7 +79,7 @@ namespace Signum.Engine.Mailing.Pop3
 
                 sb.Include<Pop3ConfigurationEntity>()
                     .WithSave(Pop3ConfigurationOperation.Save)
-                    .WithQuery(dqm, s => new
+                    .WithQuery(dqm, () => s => new
                     {
                         Entity = s,
                         s.Id,
@@ -92,7 +92,7 @@ namespace Signum.Engine.Mailing.Pop3
                 sb.Include<Pop3ReceptionExceptionEntity>();
 
                 sb.Include<EmailMessageEntity>()
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -142,9 +142,9 @@ namespace Signum.Engine.Mailing.Pop3
                     }
                 }.Register();
 
-                SchedulerLogic.ExecuteTask.Register((Pop3ConfigurationEntity smtp) => smtp.ReceiveEmails().ToLite());
+                SchedulerLogic.ExecuteTask.Register((Pop3ConfigurationEntity smtp, ScheduledTaskContext ctx) => smtp.ReceiveEmails().ToLite());
 
-                SimpleTaskLogic.Register(Pop3ConfigurationAction.ReceiveAllActivePop3Configurations, () =>
+                SimpleTaskLogic.Register(Pop3ConfigurationAction.ReceiveAllActivePop3Configurations, (ScheduledTaskContext ctx) =>
                 {
                     if (!EmailLogic.Configuration.ReciveEmails)
                         throw new InvalidOperationException("EmailLogic.Configuration.ReciveEmails is set to false");

@@ -53,7 +53,7 @@ namespace Signum.Engine.Disconnected
                 ServerSeed = serverSeed;
 
                 sb.Include<DisconnectedMachineEntity>()
-                    .WithQuery(dqm, dm => new
+                    .WithQuery(dqm, () => dm => new
                     {
                         Entity = dm,
                         dm.MachineName,
@@ -63,7 +63,7 @@ namespace Signum.Engine.Disconnected
                     });
 
                 sb.Include<DisconnectedExportEntity>()
-                    .WithQuery(dqm, dm => new
+                    .WithQuery(dqm, () => dm => new
                     {
                         Entity = dm,
                         dm.CreationDate,
@@ -74,7 +74,7 @@ namespace Signum.Engine.Disconnected
                     });
 
                 sb.Include<DisconnectedImportEntity>()
-                    .WithQuery(dqm, dm => new
+                    .WithQuery(dqm, () => dm => new
                     {
                         Entity = dm,
                         dm.CreationDate,

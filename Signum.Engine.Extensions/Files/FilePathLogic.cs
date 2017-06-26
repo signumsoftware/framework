@@ -50,7 +50,7 @@ namespace Signum.Engine.Files
                 FileTypeLogic.Start(sb, dqm);
 
                 sb.Include<FilePathEntity>()
-                    .WithQuery(dqm, p => new
+                    .WithQuery(dqm, () => p => new
                     {
                         Entity = p,
                         p.Id,

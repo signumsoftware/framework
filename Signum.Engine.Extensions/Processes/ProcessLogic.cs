@@ -104,7 +104,7 @@ namespace Signum.Engine.Processes
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<ProcessAlgorithmSymbol>()
-                    .WithQuery(dqm, pa => new
+                    .WithQuery(dqm, () => pa => new
                     {
                         Entity = pa,
                         pa.Id,
@@ -112,7 +112,7 @@ namespace Signum.Engine.Processes
                     });
 
                 sb.Include<ProcessEntity>()
-                    .WithQuery(dqm, p => new
+                    .WithQuery(dqm, () => p => new
                     {
                         Entity = p,
                         p.Id,
@@ -132,7 +132,7 @@ namespace Signum.Engine.Processes
                     });
 
                 sb.Include<ProcessExceptionLineEntity>()
-                    .WithQuery(dqm, p => new
+                    .WithQuery(dqm, () => p => new
                     {
                         Entity = p,
                         p.Line,
@@ -162,20 +162,20 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters)
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            Remove(ProcessState.Canceled, parameters);
-            Remove(ProcessState.Finished, parameters);
-            Remove(ProcessState.Error, parameters);
-        }
+            void Remove(ProcessState processState)
+            {
+                var query = Database.Query<ProcessEntity>().Where(p => p.State == processState && p.CreationDate < parameters.DateLimit);
 
-        private static void Remove(ProcessState processState, DeleteLogParametersEmbedded parameters)
-        {
-            var query = Database.Query<ProcessEntity>().Where(p => p.State == processState && p.CreationDate < parameters.DateLimit);
+                query.SelectMany(a => a.ExceptionLines()).UnsafeDeleteChunksLog(parameters, sb, token);
 
-            query.SelectMany(a => a.ExceptionLines()).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
+                query.UnsafeDeleteChunksLog(parameters, sb, token);
+            }
 
-            query.UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
+            Remove(ProcessState.Canceled);
+            Remove(ProcessState.Finished);
+            Remove(ProcessState.Error);
         }
 
         public static IDisposable OnApplySession(ProcessEntity process)

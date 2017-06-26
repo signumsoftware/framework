@@ -126,7 +126,7 @@ namespace Signum.Engine.Workflow
             {
                 sb.Include<CaseEntity>()
                     .WithExpressionFrom(dqm, (WorkflowEntity w) => w.Cases())
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -137,7 +137,7 @@ namespace Signum.Engine.Workflow
 
                 sb.Include<CaseTagTypeEntity>()
                     .WithSave(CaseTagTypeOperation.Save)
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -148,7 +148,7 @@ namespace Signum.Engine.Workflow
 
                 sb.Include<CaseTagEntity>()
                     .WithExpressionFrom(dqm, (CaseEntity ce) => ce.Tags())
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -185,7 +185,7 @@ namespace Signum.Engine.Workflow
                     .WithExpressionFrom(dqm, (WorkflowActivityEntity c) => c.CaseActivities())
                     .WithExpressionFrom(dqm, (CaseEntity c) => c.CaseActivities())
                     .WithExpressionFrom(dqm, (CaseActivityEntity c) => c.NextActivities())
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -199,7 +199,7 @@ namespace Signum.Engine.Workflow
 
                 dqm.RegisterExpression((WorkflowActivityEntity a) => a.AverageDuration(), () => WorkflowActivityMessage.AverageDuration.NiceToString());
 
-                SimpleTaskLogic.Register(CaseActivityTask.Timeout, () =>
+                SimpleTaskLogic.Register(CaseActivityTask.Timeout, (ScheduledTaskContext ctx) =>
                 {
                     var candidates = Database.Query<CaseActivityEntity>()
                      .Where(a => a.State == CaseActivityState.PendingDecision || a.State == CaseActivityState.PendingNext)
@@ -220,7 +220,7 @@ namespace Signum.Engine.Workflow
 
                 sb.Include<CaseNotificationEntity>()
                     .WithExpressionFrom(dqm, (CaseActivityEntity c) => c.Notifications())
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -288,6 +288,7 @@ namespace Signum.Engine.Workflow
 
       
 
+#pragma warning disable IDE1006 // Naming Styles
         public class ActivityWithRemarks : IQueryTokenBag
         {
             public Lite<WorkflowActivityEntity> workflowActivity { get; set; }
@@ -298,6 +299,7 @@ namespace Signum.Engine.Workflow
             public int alerts { get; set; }
             public List<CaseTagTypeEntity> tags { get; set; }
         }
+#pragma warning restore IDE1006 // Naming Styles
 
         static readonly GenericInvoker<Action> giFixCaseDescriptions = new GenericInvoker<Action>(() => FixCaseDescriptions<Entity>());
         public static void FixCaseDescriptions<T>() where T : Entity

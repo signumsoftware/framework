@@ -665,7 +665,7 @@ export function addBreakLines(breakLines: boolean, message: string): React.React
 export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: TypeContext<ModifiableEntity>, options: { showAutoComplete?: boolean, showMove?: boolean, avoidGetComponent?: boolean }): EntityBaseProps {
 
     var result: EntityBaseProps = {
-        ctx: parentCtx.subCtx(asFieldFunction(dn.node.field), toStyleOptions(parentCtx, dn.node.styleOptions)),
+        ctx: parentCtx.subCtx(dn.node.field, toStyleOptions(parentCtx, dn.node.styleOptions)),
         labelText: evaluateAndValidate(parentCtx, dn.node, n => n.labelText, isStringOrNull),
         labelHtmlAttributes: toHtmlAttributes(parentCtx, dn.node.labelHtmlAttributes),
         formGroupHtmlAttributes: toHtmlAttributes(parentCtx, dn.node.formGroupHtmlAttributes),

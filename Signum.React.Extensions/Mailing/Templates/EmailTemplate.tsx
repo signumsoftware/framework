@@ -64,14 +64,12 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
 
     renderQueryPart() {
         const ec = this.props.ctx.subCtx({ labelColumns: { sm: 2 } });
-
+        const ecXs = ec.subCtx({ formGroupSize: "ExtraSmall" });
         return (
             <div>
-                <EntityDetail ctx={ec.subCtx(e => e.from)} onChange={() => this.forceUpdate()} getComponent={this.renderContact} />
-                <div className="repeater-inline">
-                    <EntityRepeater ctx={ec.subCtx(e => e.recipients)} onChange={() => this.forceUpdate()} getComponent={this.renderRecipient} />
-                </div>
-                <EntityList ctx={ec.subCtx(e => e.attachments)} />
+                <EntityDetail ctx={ecXs.subCtx(e => e.from)} onChange={() => this.forceUpdate()} getComponent={this.renderContact} />
+                <EntityRepeater ctx={ecXs.subCtx(e => e.recipients)} onChange={() => this.forceUpdate()} getComponent={this.renderRecipient} />
+                <EntityRepeater ctx={ecXs.subCtx(e => e.attachments)} />
                 <EntityLine ctx={ec.subCtx(e => e.masterTemplate)} />
                 <ValueLine ctx={ec.subCtx(e => e.isBodyHtml)} />
 

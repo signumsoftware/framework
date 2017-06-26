@@ -29,7 +29,7 @@ namespace Signum.Engine.Mailing
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<EmailMasterTemplateEntity>()
-                    .WithQuery(dqm, t => new
+                    .WithQuery(dqm, () => t => new
                     {
                         Entity = t,
                         t.Id,

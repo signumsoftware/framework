@@ -305,7 +305,7 @@ NodeUtils.register<RenderEntityNode>({
         viewPromise: node.viewName && { __code__: `(typeName: string) => DynamicViewClient.getDynamicViewPromise(typeName, "${node.viewName}")` },
     }),
     render: (dn, ctx) => {
-        var sctx = ctx.subCtx(NodeUtils.asFieldFunction(dn.node.field), toStyleOptions(ctx, dn.node.styleOptions));
+        var sctx = ctx.subCtx(dn.node.field, toStyleOptions(ctx, dn.node.styleOptions));
         return (
             <RenderEntity
                 ctx={sctx}
@@ -446,7 +446,7 @@ NodeUtils.register<ValueLineNode>({
         onChange: node.onChange
     }),
     render: (dn, ctx) => (<ValueLine
-        ctx={ctx.subCtx(NodeUtils.asFieldFunction(dn.node.field), toStyleOptions(ctx, dn.node.styleOptions))}
+        ctx={ctx.subCtx(dn.node.field, toStyleOptions(ctx, dn.node.styleOptions))}
         labelText={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
         labelHtmlAttributes={toHtmlAttributes(ctx, dn.node.labelHtmlAttributes)}
         formGroupHtmlAttributes={toHtmlAttributes(ctx, dn.node.formGroupHtmlAttributes)}
@@ -581,7 +581,7 @@ NodeUtils.register<FileLineNode>({
         onChange: node.onChange
     }),
     render: (dn, parentCtx) => (<FileLine
-        ctx={parentCtx.subCtx(NodeUtils.asFieldFunction(dn.node.field), toStyleOptions(parentCtx, dn.node.styleOptions))}
+        ctx={parentCtx.subCtx(dn.node.field, toStyleOptions(parentCtx, dn.node.styleOptions))}
         labelText={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
         labelHtmlAttributes={toHtmlAttributes(parentCtx, dn.node.labelHtmlAttributes)}
         formGroupHtmlAttributes={toHtmlAttributes(parentCtx, dn.node.formGroupHtmlAttributes)}
@@ -653,7 +653,7 @@ NodeUtils.register<EnumCheckboxListNode>({
         onChange: node.onChange,
     }),
     render: (dn, ctx) => (<EnumCheckboxList
-        ctx={ctx.subCtx(NodeUtils.asFieldFunction(dn.node.field), toStyleOptions(ctx, dn.node.styleOptions))}
+        ctx={ctx.subCtx(dn.node.field, toStyleOptions(ctx, dn.node.styleOptions))}
         labelText={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
         readOnly={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
         columnCount={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.columnCount, NodeUtils.isNumberOrNull)}

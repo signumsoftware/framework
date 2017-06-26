@@ -14,9 +14,9 @@ export interface CSharpMigrationEntity extends Entities.Entity {
     executionDate?: string;
 }
 
-export const ExecutedLoadProcessEntity = new Type<ExecutedLoadProcessEntity>("ExecutedLoadProcess");
-export interface ExecutedLoadProcessEntity extends Entities.Entity {
-    Type: "ExecutedLoadProcess";
+export const LoadMethodLogEntity = new Type<LoadMethodLogEntity>("LoadMethodLog");
+export interface LoadMethodLogEntity extends Entities.Entity {
+    Type: "LoadMethodLog";
     methodName?: string | null;
     className?: string | null;
     description?: string | null;
