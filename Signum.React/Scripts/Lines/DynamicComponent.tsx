@@ -32,7 +32,7 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
 
         const members = ctx.propertyRoute.subMembers();
 
-        const result = Dic.map(members, (n, m) => new TypeContext<any>(ctx, undefined, ctx.propertyRoute.addMember({ name: n, type: "Member" }), new Binding(ctx.value, n.firstLower())));
+        const result = Dic.map(members, (field, m) => ctx.subCtx(field));
 
         return result;
     }

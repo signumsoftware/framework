@@ -59,6 +59,7 @@
     <Member Name="DateLimit" Description="Frist" />
     <Member Name="DeleteLogsWithMoreThan" Description="Löschen Sie Protokolle mit mehr als" />
     <Member Name="MaxChunks" Description="Max Chunks" />
+    <Member Name="PauseTime" Description="Pausenzeit" />
   </Type>
   <Type Name="EmbeddedEntity" Description="Eingebettete Entität" />
   <Type Name="EngineMessage">
@@ -316,6 +317,7 @@
     <Member Name="Create" Description="Erstellen" />
     <Member Name="CreateNew0_G" Description="Neu[m:en|f:e|n:es] {0} erstellen" />
     <Member Name="DeleteFilter" Description="Filter löschen" />
+    <Member Name="Explore" Description="Erforsche" />
     <Member Name="Field" Description="Feld" />
     <Member Name="Filters" Description="Filter" />
     <Member Name="Find" Description="Finden" />

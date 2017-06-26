@@ -10,7 +10,7 @@ import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from
 import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
 import { EntityBase } from './EntityBase'
-import { EntityListBase, EntityListBaseProps } from './EntityListBase'
+import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBase'
 import { RenderEntity } from './RenderEntity'
 
 export interface EntityRepeaterProps extends EntityListBaseProps {
@@ -52,8 +52,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
                         mlistItemContext(ctx).map((mlec, i) =>
                             (<EntityRepeaterElement key={i}
                                 onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
-                                onMoveDown={this.canMove(mlec.value) && !readOnly ? e => this.moveDown(i) : undefined}
-                                onMoveUp={this.canMove(mlec.value) && !readOnly ? e => this.moveUp(i) : undefined}
+                                draggable={this.canMove(mlec.value) && !readOnly && this.getDragConfig(i, "v")}
                                 ctx={mlec}
                                 getComponent={this.props.getComponent}
                                 viewPromise={this.props.viewPromise} />))
@@ -79,40 +78,44 @@ export interface EntityRepeaterElementProps {
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
     viewPromise?: (typeName: string) => Navigator.ViewPromise<ModifiableEntity>;
     onRemove?: (event: React.MouseEvent<any>) => void;
-    onMoveUp?: (event: React.MouseEvent<any>) => void;
-    onMoveDown?: (event: React.MouseEvent<any>) => void;
+    draggable?: DragConfig;
+
 }
 
 export class EntityRepeaterElement extends React.Component<EntityRepeaterElementProps, void>
 {
     render() {
+        const drag = this.props.draggable;
+
         return (
-            <fieldset className="sf-repeater-element" {...EntityListBase.entityHtmlAttributes(this.props.ctx.value) }>
-                <legend>
-                    <div className="item-group">
-                        { this.props.onRemove && <a className={classes("sf-line-button", "sf-remove") }
-                            onClick={this.props.onRemove}
-                            title={EntityControlMessage.Remove.niceToString() }>
-                            <span className="glyphicon glyphicon-remove"/> 
-                        </a> }
-
-                        { this.props.onMoveUp && <a className={classes("sf-line-button", "move-up") }
-                            onClick={this.props.onMoveUp}
-                            title={EntityControlMessage.MoveUp.niceToString() }>
-                            <span className="glyphicon glyphicon-chevron-up"/>
-                        </a> }
-
-                        { this.props.onMoveDown && <a className={classes("sf-line-button", "move-down") }
-                            onClick={this.props.onMoveDown}
-                            title={EntityControlMessage.MoveDown.niceToString() }>
-                            <span className="glyphicon glyphicon-chevron-down"/>
-                        </a> }
+            <div className={drag && drag.dropClass}
+                onDragEnter={drag && drag.onDragOver}
+                onDragOver={drag && drag.onDragOver}
+                onDrop={drag && drag.onDrop}>
+                <fieldset className="sf-repeater-element"
+                    {...EntityListBase.entityHtmlAttributes(this.props.ctx.value) }>
+                    <legend>
+                        <div className="item-group">
+                            {this.props.onRemove && <a className={classes("sf-line-button", "sf-remove")}
+                                onClick={this.props.onRemove}
+                                title={EntityControlMessage.Remove.niceToString()}>
+                                <span className="glyphicon glyphicon-remove" />
+                            </a>}
+                            &nbsp;
+                        {drag && <a className={classes("sf-line-button", "sf-move")}
+                                draggable={true}
+                                onDragStart={drag.onDragStart}
+                                onDragEnd={drag.onDragEnd}
+                                title={EntityControlMessage.Move.niceToString()}>
+                                <span className="glyphicon glyphicon-menu-hamburger" />
+                            </a>}
+                        </div>
+                    </legend>
+                    <div className="sf-line-entity">
+                        <RenderEntity ctx={this.props.ctx} getComponent={this.props.getComponent} viewPromise={this.props.viewPromise} />
                     </div>
-                </legend>
-                <div className="sf-line-entity">
-                    <RenderEntity ctx={this.props.ctx} getComponent={this.props.getComponent} viewPromise={this.props.viewPromise} />
-                </div>
-            </fieldset>
+                </fieldset>
+            </div>
         );
     }
 }

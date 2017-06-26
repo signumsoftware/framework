@@ -26,6 +26,7 @@ namespace Signum.Test.Environment
                 }
 
                 sb.Include<AlbumEntity>()
+                    .WithExpressionFrom(dqm, (IAuthorEntity au) => Database.Query<AlbumEntity>().Where(a => a.Author == au))
                     .WithQuery(dqm, () => a => new
                     {
                         Entity = a,
@@ -35,8 +36,11 @@ namespace Signum.Test.Environment
                         a.Label,
                         a.Year
                     });
+                AlbumGraph.Register();
+
 
                 sb.Include<NoteWithDateEntity>()
+                    .WithSave(NoteWithDateOperation.Save)
                     .WithQuery(dqm, () => a => new
                     {
                         Entity = a,
@@ -46,12 +50,12 @@ namespace Signum.Test.Environment
                         a.CreationTime,
                     });
 
-                sb.Include<PersonalAwardEntity>();
-                sb.Include<AwardNominationEntity>();
-                sb.Include<ConfigEntity>();
+                sb.Include<ConfigEntity>()
+                    .WithSave(ConfigOperation.Save);
 
                 MinimumExtensions.IncludeFunction(sb.Schema.Assets);
                 sb.Include<ArtistEntity>()
+                    .WithSave(ArtistOperation.Save)
                     .WithQuery(dqm, () => a => new
                     {
                         Entity = a,
@@ -62,8 +66,14 @@ namespace Signum.Test.Environment
                         a.Dead,
                         a.LastAward,
                     });
-                
-                dqm.RegisterExpression((IAuthorEntity au) => Database.Query<AlbumEntity>().Where(a => a.Author == au), () => typeof(AlbumEntity).NicePluralName(), "Albums");
+
+                new Graph<ArtistEntity>.Execute(ArtistOperation.AssignPersonalAward)
+                {
+                    Lite = true,
+                    AllowsNew = false,
+                    CanExecute = a => a.LastAward != null ? "Artist already has an award" : null,
+                    Execute = (a, para) => a.LastAward = new PersonalAwardEntity() { Category = "Best Artist", Year = DateTime.Now.Year, Result = AwardResult.Won }.Execute(AwardOperation.Save)
+                }.Register();
 
                 sb.Include<BandEntity>()
                     .WithQuery(dqm, () => a => new
@@ -74,7 +84,21 @@ namespace Signum.Test.Environment
                         a.LastAward,
                     });
 
+                new Graph<BandEntity>.Execute(BandOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (b, _) =>
+                    {
+                        using (OperationLogic.AllowSave<ArtistEntity>())
+                        {
+                            b.Save();
+                        }
+                    }
+                }.Register();
+
                 sb.Include<LabelEntity>()
+                    .WithSave(LabelOperation.Save)
                     .WithQuery(dqm, () => a => new
                     {
                         Entity = a,
@@ -82,90 +106,49 @@ namespace Signum.Test.Environment
                         a.Name,
                     });
 
-                sb.Include<AmericanMusicAwardEntity>()
-                    .WithQuery(dqm, () => a => new
-                    {
-                        Entity = a,
-                        a.Id,
-                        a.Year,
-                        a.Category,
-                        a.Result,
-                    });
-
-                sb.Include<GrammyAwardEntity>()
-                    .WithQuery(dqm, () => a => new
-                    {
-                        Entity = a,
-                        a.Id,
-                        a.Year,
-                        a.Category,
-                        a.Result
-                    });
-
-                sb.Include<PersonalAwardEntity>()
-                    .WithQuery(dqm, () => a => new
-                    {
-                        Entity = a,
-                        a.Id,
-                        a.Year,
-                        a.Category,
-                        a.Result
-                    });
-
-                sb.Include<AwardNominationEntity>()
-                    .WithQuery(dqm, () => a => new
-                    {
-                        Entity = a,
-                        a.Id,
-                        a.Award,
-                        a.Author
-                    });
+                RegisterAwards(sb, dqm);
 
                 dqm.RegisterQuery(typeof(IAuthorEntity), () => DynamicQueryCore.Manual(async (request, descriptions, token) =>
-                    {
-                        var one = (from a in Database.Query<ArtistEntity>()
-                                   select new
-                                   {
-                                       Entity = (IAuthorEntity)a,
-                                       a.Id,
-                                       Type = "Artist",
-                                       a.Name,
-                                       Lonely = a.Lonely(),
-                                       LastAward = a.LastAward
-                                   })
-                                   .ToDQueryable(descriptions)
-                                   .AllQueryOperationsAsync(request, token);
+                {
+                    var one = (from a in Database.Query<ArtistEntity>()
+                               select new
+                               {
+                                   Entity = (IAuthorEntity)a,
+                                   a.Id,
+                                   Type = "Artist",
+                                   a.Name,
+                                   Lonely = a.Lonely(),
+                                   LastAward = a.LastAward
+                               })
+                               .ToDQueryable(descriptions)
+                               .AllQueryOperationsAsync(request, token);
 
-                        var two = (from a in Database.Query<BandEntity>()
-                                   select new
-                                   {
-                                       Entity = (IAuthorEntity)a,
-                                       a.Id,
-                                       Type = "Band",
-                                       a.Name,
-                                       Lonely = a.Lonely(),
-                                       LastAward = a.LastAward
-                                   })
-                                   .ToDQueryable(descriptions)
-                                   .AllQueryOperationsAsync(request, token);
+                    var two = (from a in Database.Query<BandEntity>()
+                               select new
+                               {
+                                   Entity = (IAuthorEntity)a,
+                                   a.Id,
+                                   Type = "Band",
+                                   a.Name,
+                                   Lonely = a.Lonely(),
+                                   LastAward = a.LastAward
+                               })
+                               .ToDQueryable(descriptions)
+                               .AllQueryOperationsAsync(request, token);
 
-                        return (await one).Concat(await two).OrderBy(request.Orders).TryPaginate(request.Pagination);
+                    return (await one).Concat(await two).OrderBy(request.Orders).TryPaginate(request.Pagination);
 
-                    })
+                })
                     .Column(a => a.LastAward, cl => cl.Implementations = Implementations.ByAll)
                     .ColumnProperyRoutes(a => a.Id, PropertyRoute.Construct((ArtistEntity a) => a.Id), PropertyRoute.Construct((BandEntity a) => a.Id)),
                     entityImplementations: Implementations.By(typeof(ArtistEntity), typeof(BandEntity)));
 
                 Validator.PropertyValidator((NoteWithDateEntity n) => n.Text)
-                    .IsApplicableValidator<StringLengthValidatorAttribute>(n => Corruption.Strict); 
-
-                AlbumGraph.Register();
-
-                RegisterOperations();
+                    .IsApplicableValidator<StringLengthValidatorAttribute>(n => Corruption.Strict);
             }
         }
 
-        private static void RegisterOperations()
+        private static void RegisterAwards(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             new Graph<AwardEntity>.Execute(AwardOperation.Save)
             {
@@ -175,54 +158,44 @@ namespace Signum.Test.Environment
             }.Register();
 
 
-            new Graph<NoteWithDateEntity>.Execute(NoteWithDateOperation.Save)
-            {
-                AllowsNew = true,
-                Lite = false,
-                Execute = (n, _) => { }
-            }.Register();
-
-            new Graph<ArtistEntity>.Execute(ArtistOperation.Save)
-            {
-                AllowsNew = true,
-                Lite = false,
-                Execute = (a, _) => { }
-            }.Register();
-
-            new Graph<ArtistEntity>.Execute(ArtistOperation.AssignPersonalAward)
-            {
-                Lite = true,
-                AllowsNew = false,
-                CanExecute = a => a.LastAward != null ? "Artist already has an award" : null,
-                Execute = (a, para) => a.LastAward = new PersonalAwardEntity() { Category = "Best Artist", Year = DateTime.Now.Year, Result = AwardResult.Won }.Execute(AwardOperation.Save)
-            }.Register();
-
-            new Graph<BandEntity>.Execute(BandOperation.Save)
-            {
-                AllowsNew = true,
-                Lite = false,
-                Execute = (b, _) => 
+            sb.Include<AmericanMusicAwardEntity>()
+                .WithQuery(dqm, () => a => new
                 {
-                    using (OperationLogic.AllowSave<ArtistEntity>())
-                    {
-                        b.Save();
-                    }
-                }
-            }.Register();
+                    Entity = a,
+                    a.Id,
+                    a.Year,
+                    a.Category,
+                    a.Result,
+                });
 
-            new Graph<LabelEntity>.Execute(LabelOperation.Save)
-            {
-                AllowsNew = true,
-                Lite = false,
-                Execute = (l, _) => { }
-            }.Register();
+            sb.Include<GrammyAwardEntity>()
+                .WithQuery(dqm, () => a => new
+                {
+                    Entity = a,
+                    a.Id,
+                    a.Year,
+                    a.Category,
+                    a.Result
+                });
 
-            new Graph<ConfigEntity>.Execute(ConfigOperation.Save)
-            {
-                AllowsNew = true,
-                Lite = false,
-                Execute = (e, _) => { },
-            }.Register();
+            sb.Include<PersonalAwardEntity>()
+                .WithQuery(dqm, () => a => new
+                {
+                    Entity = a,
+                    a.Id,
+                    a.Year,
+                    a.Category,
+                    a.Result
+                });
+
+            sb.Include<AwardNominationEntity>()
+                .WithQuery(dqm, () => a => new
+                {
+                    Entity = a,
+                    a.Id,
+                    a.Award,
+                    a.Author
+                });
         }
     }
 

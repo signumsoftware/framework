@@ -27,9 +27,9 @@ table.sf-search-results > tbody > tr > td {
     margin-bottom: 10px;
 }
 
-.sf-filter-table div.sf-query-token-builder {
+/*.sf-filter-table div.sf-query-token-builder {
     display: table;
-}
+}*/
 
 
 .sf-search-button {
@@ -39,12 +39,24 @@ table.sf-search-results > tbody > tr > td {
 
 /*Drag and drop*/
 
-th.drag-left {
+.drag-left {
     box-shadow: inset #AAA 3px 0px 0px 0px;
 }
 
-th.drag-right {
+.drag-right {
     box-shadow: inset #AAA -3px 0px 0px 0px;
+}
+
+.drag-top {
+    box-shadow: inset #AAA 0px 3px 0px 0px;
+}
+
+.drag-bottom {
+    box-shadow: inset #AAA 0px -3px 0px 0px;
+}
+
+.sf-dragging {
+    opacity: .5;
 }
 
 .sf-search-results > thead > tr > th {
@@ -52,7 +64,7 @@ th.drag-right {
     border-left: 1px solid #eee;
     border-right: 1px solid #eee;
     cursor: pointer;
-    background-color:#f8f8f8;
+    background-color: #f8f8f8;
 }
 
 .sf-search-results > thead > tr > th.noOrder{

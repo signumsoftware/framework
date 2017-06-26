@@ -19,14 +19,17 @@ export interface EntityListBaseProps extends EntityBaseProps {
     ctx: TypeContext<MList<Lite<Entity> | ModifiableEntity>>;
 }
 
+export interface EntityListBaseState extends EntityListBaseProps{
+    dragIndex?: number,
+    dropBorderIndex?: number,
+}
 
-export abstract class EntityListBase<T extends EntityListBaseProps, S extends EntityListBaseProps> extends EntityBase<T, S>
+export abstract class EntityListBase<T extends EntityListBaseProps, S extends EntityListBaseState> extends EntityBase<T, S>
 {
     calculateDefaultState(state: S) {
 
         if (state.onFind)
             throw new Error(`'onFind' property is not applicable to '${this}'. Use 'onFindMany' instead`);
-
 
         if(state.ctx.value == undefined)
             state.ctx.value = [];
@@ -112,8 +115,8 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
     defaultFindMany(): Promise<(ModifiableEntity | Lite<Entity>)[] | undefined> {
 
-        if (this.props.findOptions) {
-            return Finder.findMany(this.props.findOptions);
+        if (this.state.findOptions) {
+            return Finder.findMany(this.state.findOptions);
         }
 
         return this.chooseType(Finder.isFindable)
@@ -176,4 +179,120 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
         return move;
     }
+
+
+    handleHeaderDragStart = (de: React.DragEvent<any>, index: number) => {
+        de.dataTransfer.setData('text', "start"); //cannot be empty string
+        de.dataTransfer.effectAllowed = "move";
+        this.state.dragIndex = index;
+        this.forceUpdate();
+    }
+
+    handleHeaderDragEnd = (de: React.DragEvent<any>) => {
+        this.state.dragIndex = undefined;
+        this.state.dropBorderIndex = undefined;
+        this.forceUpdate();
+    }
+
+    getOffsetHorizontal(dragEvent: DragEvent, rect: ClientRect) {
+
+        const margin = Math.min(50, rect.width / 2);
+
+        const width = rect.width;
+        const offsetX = dragEvent.pageX - rect.left;
+
+        if (offsetX < margin)
+            return 0;
+
+        if (offsetX > (width - margin))
+            return 1;
+
+        return undefined;
+    }
+
+    getOffsetVertical(dragEvent: DragEvent, rect: ClientRect) {
+
+        var margin = Math.min(50, rect.height / 2);
+
+        const height = rect.height;
+        const offsetY = dragEvent.pageY - rect.top;
+
+        if (offsetY < margin)
+            return 0;
+
+        if (offsetY > (height - margin))
+            return 1;
+
+        return undefined;
+    }
+
+    handlerHeaderDragOver = (de: React.DragEvent<any>, index: number, orientation: "h" | "v") => {
+        de.preventDefault();
+
+        const th = de.currentTarget as HTMLElement;
+
+        const size = th.scrollWidth;
+
+        const offset = orientation == "v" ? 
+            this.getOffsetVertical((de.nativeEvent as DragEvent), th.getBoundingClientRect()):
+            this.getOffsetHorizontal((de.nativeEvent as DragEvent), th.getBoundingClientRect());
+
+        let dropBorderIndex = offset == undefined ? undefined : index + offset;
+
+        if (dropBorderIndex == this.state.dragIndex || dropBorderIndex == this.state.dragIndex ! + 1)
+            dropBorderIndex = undefined;
+
+        //de.dataTransfer.dropEffect = dropBorderIndex == undefined ? "none" : "move";
+
+        if (this.state.dropBorderIndex != dropBorderIndex) {
+            this.state.dropBorderIndex = dropBorderIndex;
+            this.forceUpdate();
+        }
+    }
+
+    getDragConfig(index: number, orientation: "h" | "v"): DragConfig{
+        return {
+            dropClass: classes(
+                index == this.state.dragIndex && "sf-dragging",
+                this.dropClass(index, orientation)),
+            onDragStart: e => this.handleHeaderDragStart(e, index),
+            onDragEnd: this.handleHeaderDragEnd,
+            onDragOver: e => this.handlerHeaderDragOver(e, index, orientation),
+            onDrop: this.handleHeaderDrop,
+        };
+    }
+
+    dropClass(index: number, orientation: "h" | "v") {
+        const dropBorderIndex = this.state.dropBorderIndex;
+
+        return dropBorderIndex != null && index == dropBorderIndex ? (orientation == "h" ? "drag-left" : "drag-top") :
+            dropBorderIndex != null && index == dropBorderIndex - 1 ? (orientation == "h" ? "drag-right" : "drag-bottom") :
+                undefined;
+    }
+
+    handleHeaderDrop = (de: React.DragEvent<any>) => {
+
+        const list = this.props.ctx.value!;
+        const dragIndex = this.state.dragIndex!;
+        const dropBorderIndex = this.state.dropBorderIndex!;
+        const temp = list[dragIndex!];
+        list.removeAt(dragIndex!);
+        const rebasedDropIndex = dropBorderIndex > dragIndex ? dropBorderIndex - 1 : dropBorderIndex;
+        list.insertAt(rebasedDropIndex, temp);
+
+
+        this.state.dropBorderIndex = undefined;
+        this.state.dragIndex = undefined;
+        this.forceUpdate();
+    }
+
+    
+}
+
+export interface DragConfig {
+    onDragStart?: React.DragEventHandler<any>;
+    onDragEnd?: React.DragEventHandler<any>;
+    onDragOver?: React.DragEventHandler<any>;
+    onDrop?: React.DragEventHandler<any>;
+    dropClass?: string;
 }
