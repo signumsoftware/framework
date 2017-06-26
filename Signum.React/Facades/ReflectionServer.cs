@@ -56,7 +56,11 @@ namespace Signum.React.Facades
             DescriptionManager.Invalidated += () => cache.Clear();
             Schema.Current.OnMetadataInvalidated += () => cache.Clear();
 
-            EntityAssemblies = Schema.Current.Tables.Keys.AgGroupToDictionary(t => t.Assembly, gr => gr.Select(a => a.Namespace).ToHashSet());
+            var mainTypes = Schema.Current.Tables.Keys;
+            var mixins = mainTypes.SelectMany(t => MixinDeclarations.GetMixinDeclarations(t));
+            var operations = OperationLogic.RegisteredOperations.Select(o => o.FieldInfo.DeclaringType);
+
+            EntityAssemblies = mainTypes.Concat(mixins).Concat(operations).AgGroupToDictionary(t => t.Assembly, gr => gr.Select(a => a.Namespace).ToHashSet());
             EntityAssemblies[typeof(PaginationMode).Assembly].Add(typeof(PaginationMode).Namespace);
         }
 
@@ -123,7 +127,7 @@ namespace Signum.React.Facades
                 var result = new Dictionary<string, TypeInfoTS>();
 
                 var allTypes = GetTypes();
-                allTypes = allTypes.Except(ExcludeTypes);
+                allTypes = allTypes.Except(ExcludeTypes).ToList();
 
                 result.AddRange(GetEntities(allTypes), "typeInfo");
                 result.AddRange(GetSymbolContainers(allTypes), "typeInfo");
@@ -133,7 +137,7 @@ namespace Signum.React.Facades
             });
         }
 
-        public static IEnumerable<Type> GetTypes()
+        public static List<Type> GetTypes()
         {
             return EntityAssemblies.SelectMany(kvp =>
             {
@@ -144,12 +148,12 @@ namespace Signum.React.Facades
                                  from p in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
                                  let pt = (p.PropertyType.ElementType() ?? p.PropertyType).UnNullify()
                                  where pt.IsEnum && !EntityAssemblies.ContainsKey(pt.Assembly)
-                                 select pt).Distinct().ToList();
+                                 select pt).ToList();
 
 
                 var importedTypes = kvp.Key.GetCustomAttributes<ImportInTypeScriptAttribute>().Where(a => kvp.Value.Contains(a.ForNamesace)).Select(a => a.Type);
-                return normalTypes.Concat(importedTypes).Concat(usedEnums).ToList();
-            });
+                return normalTypes.Concat(importedTypes).Concat(usedEnums);
+            }).Distinct().ToList();
         }
 
         static MethodInfo miToString = ReflectionTools.GetMethodInfo((object o) => o.ToString());
