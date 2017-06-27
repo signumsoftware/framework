@@ -421,11 +421,11 @@ export function setTypes(types: TypeInfoDictionary) {
 
                 const ti = _types[typeName];
                 if (!ti)
-                    console.error(`Type ${typeName} not found. Consider synchronizing.`);
+                    console.error(`Type ${typeName} not found (looking for operatons of ${t.name}). Consider synchronizing of calling ReflectionServer.RegisterLike.`);
                 else {
                     const member = ti.members[k2.after(".")];
                     if (!member)
-                        console.error(`Member ${memberName} not found in ${ti.name}. Consider synchronizing.`);
+                        console.error(`Member ${memberName} not found in ${ti.name} (looking for operatons of ${t.name}). Consider synchronizing of calling ReflectionServer.RegisterLike.`);
                     else
                         t2.niceName = member.niceName;
                 }
