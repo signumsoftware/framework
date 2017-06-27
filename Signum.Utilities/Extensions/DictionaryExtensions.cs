@@ -72,6 +72,16 @@ namespace Signum.Utilities
             return result;
         }
 
+        public static V GetOrCreate<K, V>(this IDictionary<K, V> dictionary, K key, Func<K, V> generator)
+        {
+            if (!dictionary.TryGetValue(key, out V result))
+            {
+                result = generator(key);
+                dictionary.Add(key, result);
+            }
+            return result;
+        }
+
         public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, Func<K, Exception> exception)
         {
             if (!dictionary.TryGetValue(key, out V result))

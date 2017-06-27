@@ -223,7 +223,7 @@ namespace Signum.Engine.CodeGeneration
                 "sb.Include<" + type.TypeName() + ">()",
                 save != null && ShouldWriteSimpleOperations(save) ? ("   .WithSave(" + save.Symbol.ToString() + ")") : null,
                 delete != null && ShouldWriteSimpleOperations(delete) ? ("   .WithDelete(" + delete.Symbol.ToString() + ")") : null,
-                p == null ? null : $"   .WithQuery(dqm, {p} => {WriteQueryConstructor(type, p)})"
+                p == null ? null : $"   .WithQuery(dqm, () => {p} => {WriteQueryConstructor(type, p)})"
             }.NotNull().ToString("\r\n") + ";";
         }
 

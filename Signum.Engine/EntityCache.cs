@@ -187,11 +187,6 @@ namespace Signum.Engine
             return Current.NewRetriever();
         }
     
-        internal static void ReleaseRetriever(IRetriever retriever)
-        {
-            Current.ReleaseRetriever(retriever);
-        }
-
         public static T Construct<T>(PrimaryKey id) where T : Entity
         {
             var result = Constructor<T>.Call();

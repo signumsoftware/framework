@@ -18,6 +18,7 @@ using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
 using System.Threading;
 using static Signum.Engine.Maps.SchemaBuilder;
+using System.Threading.Tasks;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -34,16 +35,19 @@ namespace Signum.Engine.DynamicQuery
         public Polymorphic<Dictionary<string, ExtensionInfo>> RegisteredExtensions =
             new Polymorphic<Dictionary<string, ExtensionInfo>>(PolymorphicMerger.InheritDictionaryInterfaces, null);
 
-     
+        public void RegisterQuery<T>(object queryName, Func<DynamicQueryCore<T>> lazyQueryCore, Implementations? entityImplementations = null)
+        {
+            queries[queryName] = new DynamicQueryBucket(queryName, lazyQueryCore, entityImplementations ?? DefaultImplementations(typeof(T), queryName));
+        }
 
         public void RegisterQuery<T>(object queryName, Func<IQueryable<T>> lazyQuery, Implementations? entityImplementations = null)
         {
             queries[queryName] = new DynamicQueryBucket(queryName, () => DynamicQueryCore.Auto(lazyQuery()), entityImplementations ?? DefaultImplementations(typeof(T), queryName));
         }
-
-        public void RegisterQuery<T>(object queryName, Func<DynamicQueryCore<T>> lazyQueryCore, Implementations? entityImplementations = null)
+    
+        public void RegisterQuery(object queryName, DynamicQueryBucket bucket)
         {
-            queries[queryName] = new DynamicQueryBucket(queryName, lazyQueryCore, entityImplementations ?? DefaultImplementations(typeof(T), queryName));
+            queries[queryName] = bucket;
         }
 
         static Implementations DefaultImplementations(Type type, object queryName)
@@ -96,6 +100,28 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
+        async Task<T> ExecuteAsync<T>(ExecuteType executeType, object queryName, BaseQueryRequest request, Func<DynamicQueryBucket, Task<T>> executor)
+        {
+            using (ExecutionMode.UserInterface())
+            using (HeavyProfiler.Log(executeType.ToString(), () => QueryUtils.GetKey(queryName)))
+            {
+                try
+                {
+                    var qb = GetQuery(queryName);
+
+                    using (Disposable.Combine(QueryExecuted, f => f(executeType, queryName, request)))
+                    {
+                        return await executor(qb);
+                    }
+                }
+                catch (Exception e)
+                {
+                    e.Data["QueryName"] = queryName;
+                    throw;
+                }
+            }
+        }
+
         public event Func<ExecuteType, object, BaseQueryRequest ,  IDisposable> QueryExecuted;
 
         public enum ExecuteType
@@ -110,7 +136,12 @@ namespace Signum.Engine.DynamicQuery
 
         public ResultTable ExecuteQuery(QueryRequest request)
         {
-            return Execute(ExecuteType.ExecuteQuery, request.QueryName,request, dqb => dqb.Core.Value.ExecuteQuery(request));
+            return Execute(ExecuteType.ExecuteQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQuery(request));
+        }
+
+        public Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken token)
+        {
+            return ExecuteAsync(ExecuteType.ExecuteQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryAsync(request, token));
         }
 
         public object ExecuteQueryCount(QueryValueRequest request)
@@ -118,14 +149,29 @@ namespace Signum.Engine.DynamicQuery
             return Execute(ExecuteType.ExecuteQueryCount, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryValue(request));
         }
 
+        public Task<object> ExecuteQueryCountAsync(QueryValueRequest request, CancellationToken token)
+        {
+            return ExecuteAsync(ExecuteType.ExecuteQueryCount, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryValueAsync(request, token));
+        }
+
         public ResultTable ExecuteGroupQuery(QueryGroupRequest request)
         {
-            return Execute(ExecuteType.ExecuteGroupQuery, request.QueryName,request, dqb => dqb.Core.Value.ExecuteQueryGroup(request));
+            return Execute(ExecuteType.ExecuteGroupQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryGroup(request));
+        }
+
+        public Task<ResultTable> ExecuteGroupQueryAsync(QueryGroupRequest request, CancellationToken token)
+        {
+            return ExecuteAsync(ExecuteType.ExecuteGroupQuery, request.QueryName,request, dqb => dqb.Core.Value.ExecuteQueryGroupAsync(request, token));
         }
 
         public Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
-            return Execute(ExecuteType.ExecuteUniqueEntity, request.QueryName,request, dqb => dqb.Core.Value.ExecuteUniqueEntity(request));
+            return Execute(ExecuteType.ExecuteUniqueEntity, request.QueryName, request, dqb => dqb.Core.Value.ExecuteUniqueEntity(request));
+        }
+
+        public Task<Lite<Entity>> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken token)
+        {
+            return ExecuteAsync(ExecuteType.ExecuteUniqueEntity, request.QueryName,request, dqb => dqb.Core.Value.ExecuteUniqueEntityAsync(request, token));
         }
 
         public QueryDescription QueryDescription(object queryName)
@@ -218,25 +264,27 @@ namespace Signum.Engine.DynamicQuery
 
             return dic.Values.Where(a => a.Inherit || a.SourceType == parentType).Select(v => v.CreateToken(parent));
         }
-
-
+        
         public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Func<string> niceName = null)
         {
-            if (lambdaToMethodOrProperty.Body.NodeType == ExpressionType.Call)
+            using (HeavyProfiler.LogNoStackTrace("RegisterExpression"))
             {
-                var mi = ReflectionTools.GetMethodInfo(lambdaToMethodOrProperty);
+                if (lambdaToMethodOrProperty.Body.NodeType == ExpressionType.Call)
+                {
+                    var mi = ReflectionTools.GetMethodInfo(lambdaToMethodOrProperty);
 
-                AssertExtensionMethod(mi);
+                    AssertExtensionMethod(mi);
 
-                return RegisterExpression<E, S>(lambdaToMethodOrProperty, niceName ?? (() => mi.Name.NiceName()), mi.Name);
+                    return RegisterExpression<E, S>(lambdaToMethodOrProperty, niceName ?? (() => mi.Name.NiceName()), mi.Name);
+                }
+                else if (lambdaToMethodOrProperty.Body.NodeType == ExpressionType.MemberAccess)
+                {
+                    var pi = ReflectionTools.GetPropertyInfo(lambdaToMethodOrProperty);
+
+                    return RegisterExpression<E, S>(lambdaToMethodOrProperty, niceName ?? (() => pi.NiceName()), pi.Name);
+                }
+                else throw new InvalidOperationException("argument 'lambdaToMethodOrProperty' should be a simple lambda calling a method or property: {0}".FormatWith(lambdaToMethodOrProperty.ToString()));
             }
-            else if (lambdaToMethodOrProperty.Body.NodeType == ExpressionType.MemberAccess)
-            {
-                var pi = ReflectionTools.GetPropertyInfo(lambdaToMethodOrProperty);
-
-                return RegisterExpression<E, S>(lambdaToMethodOrProperty, niceName ?? (() => pi.NiceName()), pi.Name);
-            }
-            else throw new InvalidOperationException("argument 'lambdaToMethodOrProperty' should be a simple lambda calling a method or property: {0}".FormatWith(lambdaToMethodOrProperty.ToString()));
         }
 
         private static void AssertExtensionMethod(MethodInfo mi)
@@ -263,45 +311,41 @@ namespace Signum.Engine.DynamicQuery
             return extension;
         }
 
-        public object[] BatchExecute(BaseQueryRequest[] requests)
+        public Task<object[]> BatchExecute(BaseQueryRequest[] requests, CancellationToken token)
         {
-            return requests.Select(r =>
+            return Task.WhenAll<object>(requests.Select<BaseQueryRequest, Task<object>>(r =>
             {
                 if (r is QueryValueRequest)
-                    return ExecuteQueryCount((QueryValueRequest)r);
+                    return ExecuteQueryCountAsync((QueryValueRequest)r, token);
 
                 if (r is QueryRequest)
-                    return ExecuteQuery((QueryRequest)r);
+                    return ExecuteQueryAsync((QueryRequest)r, token).ContinueWith(a => (object)a.Result);
 
                 if (r is UniqueEntityRequest)
-                    return ExecuteUniqueEntity((UniqueEntityRequest)r);
+                    return ExecuteUniqueEntityAsync((UniqueEntityRequest)r, token).ContinueWith(a => (object)a.Result);
 
                 if (r is QueryGroupRequest)
-                    return ExecuteGroupQuery((QueryGroupRequest)r);
+                    return ExecuteGroupQueryAsync((QueryGroupRequest)r, token).ContinueWith(a => (object)a.Result);
 
-                return (object)null;
-            }).ToArray(); 
+                throw new InvalidOperationException("Unexpected QueryRequest type"); ;
+            })); 
         }
     }
 
+
     public static class DynamicQueryFluentInclude
     {
-        public static FluentInclude<T> WithQuery<T, Q>(this FluentInclude<T> fi, DynamicQueryManager dqm, Expression<Func<T, Q>> simpleQuerySelector)
+        public static FluentInclude<T> WithQuery<T>(this FluentInclude<T> fi, DynamicQueryManager dqm, Func<Expression<Func<T, object>>> lazyQuerySelector)
             where T : Entity
         {
-            dqm.RegisterQuery<Q>(typeof(T), () => Database.Query<T>().Select(simpleQuerySelector));
+            dqm.RegisterQuery(typeof(T), new DynamicQueryBucket(typeof(T), () => DynamicQueryCore.FromSelectorUntyped(lazyQuerySelector()), Implementations.By(typeof(T))));
             return fi;
         }
 
-        public static FluentInclude<T> WithQuery<T, Q>(this FluentInclude<T> fi, DynamicQueryManager dqm, Expression<Func<T, Q>> simpleQuerySelector, Action<AutoDynamicQueryCore<Q>> modifyQuery)
-            where T : Entity
+        public static FluentInclude<T> WithQuery<T, Q>(this FluentInclude<T> fi, DynamicQueryManager dqm, Func<DynamicQueryCore<Q>> lazyGetQuery)
+             where T : Entity
         {
-            dqm.RegisterQuery<Q>(typeof(T), () =>
-            {
-                var autoQuery = DynamicQueryCore.Auto(Database.Query<T>().Select(simpleQuerySelector));
-                modifyQuery(autoQuery);
-                return autoQuery;
-            });
+            dqm.RegisterQuery<Q>(typeof(T), () => lazyGetQuery());
             return fi;
         }
 
@@ -380,17 +424,15 @@ namespace Signum.Engine.DynamicQuery
                         mpe = MetadataVisitor.AsProjection(e);
 
                     me = mpe == null ? null : mpe.Projector as MetaExpression;
-
-                }else 
+                }
+                else 
                 {
                     me = e as MetaExpression;
                 }
      
-                CleanMeta cm = me == null ? null : me.Meta as CleanMeta;
-
                 var result = new ExtensionRouteInfo();
 
-                if (cm != null && cm.PropertyRoutes.Any())
+                if (me?.Meta is CleanMeta cm && cm.PropertyRoutes.Any())
                 {
                     var cleanType = me.Type.CleanType();
 

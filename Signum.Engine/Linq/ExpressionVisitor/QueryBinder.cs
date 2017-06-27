@@ -106,7 +106,7 @@ namespace Signum.Engine.Linq
                     case "Average":
                     case "StdDev":
                     case "StdDevP":
-                        return this.BindAggregate(m.Type, m.Method.Name.ToEnum<AggregateFunction>(),
+                        return this.BindAggregate(m.Type, m.Method.Name.ToEnum<AggregateSqlFunction>(),
                             m.GetArgument("source"), m.TryGetArgument("selector").StripQuotes(), m == root);
                     case "First":
                     case "FirstOrDefault":
@@ -448,14 +448,14 @@ namespace Signum.Engine.Linq
 
         static MethodInfo miStringConcat = ReflectionTools.GetMethodInfo(() => string.Concat("", ""));
 
-        private Expression BindAggregate(Type resultType, AggregateFunction aggregateFunction, Expression source, LambdaExpression selector, bool isRoot)
+        private Expression BindAggregate(Type resultType, AggregateSqlFunction aggregateFunction, Expression source, LambdaExpression selector, bool isRoot)
         {
             ProjectionExpression projection = this.VisitCastProjection(source);
 
             GroupByInfo info = groupByMap.TryGetC(projection.Select.Alias);
             if (info != null)
             {
-                Expression exp = aggregateFunction == AggregateFunction.Count ? null :
+                Expression exp = aggregateFunction == AggregateSqlFunction.Count ? null :
                     selector != null ? MapVisitExpand(selector, info.Projector, info.Source) :
                     info.Projector;
 
@@ -470,14 +470,14 @@ namespace Signum.Engine.Linq
             }
             else
             {
-                Expression exp = aggregateFunction == AggregateFunction.Count ? null :
+                Expression exp = aggregateFunction == AggregateSqlFunction.Count ? null :
                     selector != null ? MapVisitExpand(selector, projection) :
                     projection.Projector;
 
                 exp = exp == null ? null : SmartEqualizer.UnwrapPrimaryKey(exp);
 
                 Expression aggregate;
-                if (aggregateFunction == AggregateFunction.Sum && !resultType.IsNullable())
+                if (aggregateFunction == AggregateSqlFunction.Sum && !resultType.IsNullable())
                 {
                     var nominated = DbExpressionNominator.FullNominate(exp).Nullify();
 
@@ -1264,7 +1264,7 @@ namespace Signum.Engine.Linq
                             }
 
                             PropertyInfo pi = (PropertyInfo)m.Member;
-                            return nex.Members.Zip(nex.Arguments).SingleEx(p => ReflectionTools.PropertyEquals((PropertyInfo)p.Item1, pi)).Item2;
+                            return nex.Members.Zip(nex.Arguments).SingleEx(p => ReflectionTools.PropertyEquals((PropertyInfo)p.first, pi)).second;
                         }
                         break;
                     }

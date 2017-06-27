@@ -58,8 +58,8 @@ export namespace Expander {
 }
 
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<ImportRoute path="~/view/:type/:id" onImportModule={() => _import("./Frames/FramePage")} />);
-    options.routes.push(<ImportRoute path="~/create/:type" onImportModule={() => _import("./Frames/FramePage")} />);
+    options.routes.push(<ImportRoute path="~/view/:type/:id" onImportModule={() => import("./Frames/FramePage")} />);
+    options.routes.push(<ImportRoute path="~/create/:type" onImportModule={() => import("./Frames/FramePage")} />);
 }
 
 export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined) {
@@ -124,7 +124,7 @@ export function createRoute(type: PseudoType) {
 export const entitySettings: { [type: string]: EntitySettings<ModifiableEntity> } = {};
 
 export function addSettings(...settings: EntitySettings<any>[]) {
-    settings.forEach(s => Dic.addOrThrow(entitySettings, s.type.typeName, s));
+    settings.forEach(s => Dic.addOrThrow(entitySettings, s.typeName, s));
 }
 
 
@@ -172,7 +172,7 @@ export class DynamicComponentViewDispatcher implements ViewDispatcher {
         const settings = getSettings(entity.Type) as EntitySettings<ModifiableEntity>;
 
         if (!settings || !settings.getViewPromise)
-            return new ViewPromise<ModifiableEntity>(_import('./Lines/DynamicComponent'));
+            return new ViewPromise<ModifiableEntity>(import('./Lines/DynamicComponent'));
 
         return settings.getViewPromise(entity).applyViewOverrides(settings);
     }
@@ -422,6 +422,23 @@ function typeIsNavigable(typeName: string): EntityWhen {
     }
 }
 
+export function defaultFindOptions(type: TypeReference): FindOptions | undefined {
+    if (type.isEmbedded || type.name == IsByAll)
+        return undefined;
+
+    const types = getTypeInfos(type);
+
+    if (types.length == 1) {
+        var s = getSettings(types[0]);
+
+        if (s && s.findOptions) {
+            return s.findOptions;
+        }
+    }
+
+    return undefined;
+}
+
 export function getAutoComplete(type: TypeReference, findOptions: FindOptions | undefined): AutocompleteConfig<any> | null {
     if (type.isEmbedded || type.name == IsByAll)
         return null;
@@ -492,7 +509,7 @@ export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<
 }
 
 export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions) {
-    return _import<{ default: typeof FrameModal }>("./Frames/FrameModal")
+    return import("./Frames/FrameModal")
         .then(NP => NP.default.openView(entityOrPack, viewOptions || {}));
 }
 
@@ -517,7 +534,7 @@ export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityP
 }
 
 export function navigateDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
-    return _import<{ default: typeof FrameModal }>("./Frames/FrameModal")
+    return import("./Frames/FrameModal")
         .then(NP => NP.default.openNavigate(entityOrPack, navigateOptions || {}));
 }
 
@@ -661,7 +678,7 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
 }
 
 export class EntitySettings<T extends ModifiableEntity> {
-    type: Type<T>;
+    typeName: string;
 
     avoidPopup: boolean;
 
@@ -678,6 +695,7 @@ export class EntitySettings<T extends ModifiableEntity> {
     isReadOnly: boolean;
     autocomplete?: AutocompleteConfig<T>;
     autocompleteDelay?: number;
+    findOptions?: FindOptions;
     onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;
     onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
     onNavigateRoute?: (typeName: string, id: string | number) => string;
@@ -689,9 +707,9 @@ export class EntitySettings<T extends ModifiableEntity> {
         this.viewOverrides.push(override);
     }
 
-    constructor(type: Type<T>, getViewModule?: (entity: T) => Promise<ViewModule<any>>, options?: EntitySettingsOptions<T>) {
+    constructor(type: Type<T> | string, getViewModule?: (entity: T) => Promise<ViewModule<any>>, options?: EntitySettingsOptions<T>) {
 
-        this.type = type;
+        this.typeName = (type as Type<T>).typeName || type as string;
         this.getViewPromise = getViewModule && (entity => new ViewPromise(getViewModule(entity)));
 
         Dic.assign(this, options);
@@ -707,7 +725,7 @@ export class ViewPromise<T extends ModifiableEntity> {
         if (promise)
             this.promise = promise
                 .then(mod => {
-                    return (ctx: TypeContext<T>) => React.createElement(mod.default, { ctx });
+                    return (ctx: TypeContext<T>): React.ReactElement<any> => React.createElement(mod.default, { ctx });
                 });
     }
 
@@ -722,7 +740,7 @@ export class ViewPromise<T extends ModifiableEntity> {
         var result = new ViewPromise<T>();
 
         result.promise = this.promise.then(func => {
-            return (ctx: TypeContext<T>) => {
+            return (ctx: TypeContext<T>): React.ReactElement<any> => {
                 var result = func(ctx);
                 return React.cloneElement(result, props);
             };

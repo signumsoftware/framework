@@ -39,6 +39,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     showContextMenu?: boolean | "Basic";
     onSelectionChanged?: (entity: Lite<Entity>[]) => void;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
+    onHeighChanged?: () => void;
     onResult?: (table: ResultTable) => void;
     onSearch?: (fo: FindOptionsParsed) => void;
     hideButtonBar?: boolean;
@@ -49,6 +50,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     extraButtons?: (searchControl: SearchControlLoaded) => React.ReactNode
     onCreate?: () => Promise<void>;
     getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
+    maxResultsHeight?: React.CSSWideKeyword | any;
 }
 
 export interface SearchControlState {
@@ -88,6 +90,13 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         this.initialLoad(newProps.findOptions);
     }
 
+    doSearch(avoidOnSearchEvent?: boolean) {
+        this.searchControlLoaded && this.searchControlLoaded.doSearch(avoidOnSearchEvent);
+    }
+
+    doSearchPage1(avoidOnSearchEvent?: boolean) {
+        this.searchControlLoaded && this.searchControlLoaded.doSearchPage1(avoidOnSearchEvent);
+    }
 
     initialLoad(propsFindOptions: FindOptions) {
 
@@ -134,6 +143,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             showContextMenu={this.props.showContextMenu}
             onSelectionChanged={this.props.onSelectionChanged}
             onFiltersChanged={this.props.onFiltersChanged}
+            onHeighChanged={this.props.onHeighChanged}
             onSearch={this.props.onSearch}
             onResult={this.props.onResult}
             hideButtonBar={this.props.hideButtonBar}
@@ -146,6 +156,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             querySettings={Finder.getSettings(fo.queryKey)}
             onCreate={this.props.onCreate}
             getViewPromise={this.props.getViewPromise}
+            maxResultsHeight={this.props.maxResultsHeight}
             />
     }
 }

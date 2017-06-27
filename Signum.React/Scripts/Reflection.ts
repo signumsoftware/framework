@@ -275,7 +275,7 @@ export function parseId(ti: TypeInfo, id: string): string | number {
 export const IsByAll = "[ALL]";
 export function getTypeInfos(typeReference: TypeReference | string): TypeInfo[] {
 
-    const name = (typeReference as TypeReference).name || typeReference as string;
+    const name = typeof typeReference == "string" ? typeReference : typeReference.name;
 
     if (name == IsByAll || name == "")
         return [];
@@ -421,11 +421,11 @@ export function setTypes(types: TypeInfoDictionary) {
 
                 const ti = _types[typeName];
                 if (!ti)
-                    console.error(`Type ${typeName} not found. Consider synchronizing.`);
+                    console.error(`Type ${typeName} not found (looking for operatons of ${t.name}). Consider synchronizing of calling ReflectionServer.RegisterLike.`);
                 else {
                     const member = ti.members[k2.after(".")];
                     if (!member)
-                        console.error(`Member ${memberName} not found in ${ti.name}. Consider synchronizing.`);
+                        console.error(`Member ${memberName} not found in ${ti.name} (looking for operatons of ${t.name}). Consider synchronizing of calling ReflectionServer.RegisterLike.`);
                     else
                         t2.niceName = member.niceName;
                 }
@@ -516,7 +516,8 @@ export class Binding<T> implements IBinding<T> {
         const oldVal = this.parentValue[this.member];
         this.parentValue[this.member] = val;
 
-        if (oldVal != val && (this.parentValue as ModifiableEntity).Type) {
+        if ((this.parentValue as ModifiableEntity).Type) {
+            if (oldVal !== val || Array.isArray(oldVal))
             (this.parentValue as ModifiableEntity).modified = true;
         }
     }
@@ -576,39 +577,31 @@ export class ReadonlyBinding<T> implements IBinding<T> {
     }
 }
 
-export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBinding<T> {
+export function createBinding(parentValue: any, lambdaMembers: LambdaMember[]): IBinding<any> {
 
-    var lambdaStr = (lambda as any).toString();
+    if (lambdaMembers.length == 0)
+        return new ReadonlyBinding<any>(parentValue, "");
 
-    const lambdaMatch = functionRegex.exec(lambdaStr) || lambdaRegex.exec(lambdaStr);
-    //const lambdaMatch = functionRegex.exec((lambda as any).toString());
+    let val = parentValue;
+    for (let i = 0; i < lambdaMembers.length  - 1; i++)
+    {
+        const member = lambdaMembers[i];
+        switch (member.type) {
 
-    if (lambdaMatch == undefined)
-        throw Error("invalid function");
+            case "Member": val = val[member.name]; break;
+            case "Mixin": val = val.mixins[member.name]; break;
+            default: throw new Error("Unexpected " + member.type);
 
-    const parameter = lambdaMatch[1];
-    let body = lambdaMatch[3];
-
-    if (parameter == body)
-        return new ReadonlyBinding<T>(parentValue as T, "");
-
-    body = body.replace(partialMixinRegex,
-        (...m: string[]) => `${m[2]}.mixins["${m[4]}"]`);
-
-    const m = memberRegex.exec(body) || memberIndexerRegex.exec(body);;
-
-    if (m == undefined) {
-        const realParentValue = eval(`(function(${parameter}){ return ${body};})`)(parentValue);
-
-        return new ReadonlyBinding<T>(realParentValue as T, "");
+        }
     }
 
-    let newBody = m[1];
+    const lastMember = lambdaMembers[lambdaMembers.length - 1];
+    switch (lastMember.type) {
 
-    const realParentValue = m[1] == parameter ? parentValue :
-        eval(`(function(${parameter}){ return ${newBody};})`)(parentValue);
-
-    return new Binding<T>(realParentValue, m[2]);
+        case "Member": return new Binding(val, lastMember.name); 
+        case "Mixin": return new ReadonlyBinding(val.mixins[lastMember.name], "");
+        default: throw new Error("Unexpected " + lastMember.type);
+    }
 }
 
 
@@ -617,9 +610,8 @@ const lambdaRegex = /^\s*\(?\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)?\s*=>\s*{?\s*(ret
 const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
 const memberIndexerRegex = /^(.*)\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; //Necessary for some crazy minimizers
 const indexRegex = /^(.*)\[(\d+)\]$/;
-const mixinRegex = /^(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)$/
+const mixinRegex = /^(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)$/;
 const mixinIndexerRegex = /^(.*).mixins\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; 
-const partialMixinRegex = /(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)/
 
 export function getLambdaMembers(lambda: Function): LambdaMember[]{
 
@@ -663,6 +655,25 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
 
     return result;
 }
+
+export function getFieldMembers(field: string): LambdaMember[]{
+    if (field.contains(".")) {
+        var mixinType = field.before(".").trimStart("[").trimEnd("]");
+        var fieldName = field.after(".");
+
+        return [
+            { type: "Mixin", name: mixinType },
+            { type: "Member", name: fieldName.firstLower() }
+        ];
+
+    } else {
+        return [
+            { type: "Member", name: field.firstLower() }
+        ];
+    }
+}
+
+
 
 
 export interface LambdaMember {
@@ -927,7 +938,7 @@ export class PropertyRoute {
             return { type: "Member", name: p };
         });
 
-        parts.forEach(p => result = result.addMember(p));
+        parts.forEach(p => result = result.addLambdaMember(p));
 
         return result;
     }
@@ -946,11 +957,13 @@ export class PropertyRoute {
         this.mixinName = mixinName;
     }
 
-    add(property: (val: any) => any): PropertyRoute {
-        const members = getLambdaMembers(property);
+    add(property: ((val: any) => any) | string): PropertyRoute {
+        const members = typeof property == "function" ?
+            getLambdaMembers(property) :
+            getFieldMembers(property);
 
         let current: PropertyRoute = this;
-        members.forEach(m=> current = current.addMember(m));
+        members.forEach(m=> current = current.addLambdaMember(m));
 
         return current;
     }
@@ -994,13 +1007,13 @@ export class PropertyRoute {
 
     tryAddMember(member: LambdaMember): PropertyRoute | undefined {
         try {
-            return this.addMember(member);
+            return this.addLambdaMember(member);
         } catch (e) {
             return undefined;
         }
     }
 
-    addMember(member: LambdaMember): PropertyRoute {
+    addLambdaMember(member: LambdaMember): PropertyRoute {
 
         if (member.type == "Member") {
 
@@ -1106,8 +1119,6 @@ export class PropertyRoute {
         }
     }
 
-    
-
     toString() {
         if (this.propertyRouteType == "Root")
             return `(${this.findRootType().name})`;
@@ -1133,7 +1144,7 @@ export class GraphExplorer {
         ge.modelState = modelState == undefined ? {} : { ...modelState };
         ge.isModifiableObject(e, initialPrefix);
         if (Dic.getValues(ge.modelState).length) //Assign remaining
-            e.error = { ...e.error, ...ge.modelState };
+            e.error = { ...e.error, ...ge.modelState } as any;
     }
 
     static collectModelState(e: ModifiableEntity, initialPrefix: string): ModelState {

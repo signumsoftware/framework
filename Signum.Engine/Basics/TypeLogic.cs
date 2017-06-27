@@ -69,7 +69,7 @@ namespace Signum.Engine.Basics
                     Schema.Current.InvalidateMetadata);
 
                 sb.Include<TypeEntity>()
-                    .WithQuery(dqm, t => new
+                    .WithQuery(dqm, () => t => new
                     {
                         Entity = t,
                         t.Id,

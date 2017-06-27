@@ -147,7 +147,7 @@ namespace Signum.Engine.Linq
                     case "Min":
                     case "Max":
                     case "Average":
-                        return this.BindAggregate(m.Type, m.Method.Name.ToEnum<AggregateFunction>(),
+                        return this.BindAggregate(m.Type, m.Method.Name.ToEnum<AggregateSqlFunction>(),
                             m.GetArgument("source"), m.TryGetArgument("selector").StripQuotes());
                     case "First":
                     case "FirstOrDefault":
@@ -295,7 +295,7 @@ namespace Signum.Engine.Linq
             return MakeVoidMeta(resultType);
         }
 
-        private Expression BindAggregate(Type resultType, AggregateFunction aggregateFunction, Expression source, LambdaExpression selector)
+        private Expression BindAggregate(Type resultType, AggregateSqlFunction aggregateFunction, Expression source, LambdaExpression selector)
         {
             MetaProjectorExpression mp = AsProjection(Visit(source));
             if (selector == null)
@@ -396,10 +396,10 @@ namespace Signum.Engine.Linq
                     TableMList rt = (TableMList)st.Table;
 
 
-                    PropertyRoute element = rt.Route.Add("Item");
+                    PropertyRoute element = rt.PropertyRoute.Add("Item");
 
                     return new MetaProjectorExpression(c.Type, new MetaMListExpression(type, 
-                        new CleanMeta(Implementations.By(parentType), PropertyRoute.Root(rt.Route.RootType)), 
+                        new CleanMeta(Implementations.By(parentType), PropertyRoute.Root(rt.PropertyRoute.RootType)), 
                         new CleanMeta(element.TryGetImplementations(), element)));
                 }
             }
@@ -437,7 +437,7 @@ namespace Signum.Engine.Linq
                     if (nex.Members != null)
                     {
                         PropertyInfo pi = (PropertyInfo)member;
-                        return nex.Members.Zip(nex.Arguments).SingleEx(p => ReflectionTools.PropertyEquals((PropertyInfo)p.Item1, pi)).Item2;
+                        return nex.Members.Zip(nex.Arguments).SingleEx(p => ReflectionTools.PropertyEquals((PropertyInfo)p.first, pi)).second;
                     }
                     break;
             }

@@ -20,6 +20,9 @@ interface SearchPageState {
 
 export default class SearchPage extends React.Component<SearchPageProps, SearchPageState> {
 
+    static marginDown = 130;
+    static minHeight = 600;
+
     constructor(props: SearchPageProps) {
         super(props);
         this.state = this.calculateState(this.props);
@@ -31,13 +34,34 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
         this.setState(this.calculateState(nextProps));
     }
 
-    
-    componentWillUnmount() {
-        Navigator.setTitle();
+    componentWillMount() {
+        window.addEventListener('resize', this.onResize);
     }
 
-    calculateState(props: SearchPageProps): SearchPageState {
+    
+    componentWillUnmount() {
+        window.removeEventListener('resize', this.onResize);
 
+        Navigator.setTitle();     
+    }
+
+    onResize = () => {
+
+        var containerDiv = this.searchControl.searchControlLoaded.containerDiv;
+
+        if (containerDiv) {
+            
+            var marginTop = containerDiv.offsetTop;
+
+            var maxHeight = (window.innerHeight - (marginTop + SearchPage.marginDown));
+
+            containerDiv.style.maxHeight = maxHeight < SearchPage.minHeight ? null : (maxHeight + "px");
+        }
+    }
+
+
+    calculateState(props: SearchPageProps): SearchPageState {
+     
         Navigator.setTitle(getQueryNiceName(props.match.params.queryName));
 
         return {
@@ -75,6 +99,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
                     </a>
                 </h2>
                 <SearchControl ref={(e: SearchControl) => this.searchControl = e}
+                    onHeighChanged={this.onResize}
                     throwIfNotFindable={true}
                     showBarExtension={true}
                     hideFullScreenButton={true}

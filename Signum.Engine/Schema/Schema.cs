@@ -448,7 +448,8 @@ namespace Signum.Engine.Maps
 
             using (ExecutionMode.Global())
                 foreach (var item in Initializing.GetInvocationListTyped())
-                    item();
+                    using (HeavyProfiler.Log("Initialize", () => item.Method.DeclaringType.ToString()))
+                        item();
 
             Initializing = null;
         }

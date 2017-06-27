@@ -43,7 +43,7 @@ namespace Signum.Engine.Basics
                 };
 
                 sb.Include<QueryEntity>()
-                    .WithQuery(dqm, q => new
+                    .WithQuery(dqm, () => q => new
                     {
                         Entity = q,
                         q.Key,
