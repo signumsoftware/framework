@@ -14,11 +14,11 @@ interface SearchPageProps extends RouteComponentProps<{ queryName: string }> {
 
 }
 
-interface SearchControlState {
+interface SearchPageState {
     findOptions: FindOptions;
 }
 
-export default class SearchPage extends React.Component<SearchPageProps, SearchControlState> {
+export default class SearchPage extends React.Component<SearchPageProps, SearchPageState> {
 
     static marginDown = 130;
     static minHeight = 600;
@@ -60,8 +60,8 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchC
     }
 
 
-    calculateState(props: SearchPageProps): SearchControlState {
-
+    calculateState(props: SearchPageProps): SearchPageState {
+     
         Navigator.setTitle(getQueryNiceName(props.match.params.queryName));
 
         return {
