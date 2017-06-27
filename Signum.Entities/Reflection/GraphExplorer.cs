@@ -49,7 +49,8 @@ namespace Signum.Entities.Reflection
             {
                 for (int i = 0; i < ((IList)mlist).Count; i++)
                 {
-                    mlist.SetRowId(i, DummyRowId);
+                    if (mlist.GetRowId(i) == null)
+                        mlist.SetRowId(i, DummyRowId);
                 }
             }
         }
