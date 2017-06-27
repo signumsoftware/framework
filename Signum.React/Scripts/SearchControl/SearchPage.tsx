@@ -14,11 +14,11 @@ interface SearchPageProps extends RouteComponentProps<{ queryName: string }> {
 
 }
 
-interface SearchControlState {
+interface SearchPageState {
     findOptions: FindOptions;
 }
 
-export default class SearchPage extends React.Component<SearchPageProps, SearchControlState> {
+export default class SearchPage extends React.Component<SearchPageProps, SearchPageState> {
 
     constructor(props: SearchPageProps) {
         super(props);
@@ -36,7 +36,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchC
         Navigator.setTitle();
     }
 
-    calculateState(props: SearchPageProps): SearchControlState {
+    calculateState(props: SearchPageProps): SearchPageState {
 
         Navigator.setTitle(getQueryNiceName(props.match.params.queryName));
 
