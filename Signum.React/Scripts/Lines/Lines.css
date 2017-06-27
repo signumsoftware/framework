@@ -66,12 +66,19 @@ label > input[type=checkbox] {
     margin-bottom: 0;
 }
 
+.sf-tab-dropable {
+    margin: -10px -15px;
+    padding: 10px 15px;
+}
+
+.sf-strip-dropable {
+    margin: -1px -10px -1px 0px;
+    padding: 1px 10px 1px 0px;
+}
 /* Buttons */
 /*.btn.btn-default.sf-line-button {
     background: transparent;
 }*/
-
-
 .sf-line-button {
     cursor: pointer;
     color: lightgray;
@@ -162,6 +169,7 @@ body.rtl-mode ul.sf-strip-horizontal > li {
 
 ul.sf-strip-vertical > li {
     margin: 1px 0px;
+    width: 100%
 }
 
     ul.sf-strip-vertical > li > .form-control {

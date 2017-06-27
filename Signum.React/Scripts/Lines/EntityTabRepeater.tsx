@@ -14,64 +14,80 @@ import { EntityListBase, EntityListBaseProps } from './EntityListBase'
 import { RenderEntity } from './RenderEntity'
 
 export interface EntityTabRepeaterProps extends EntityListBaseProps {
-	createAsLink?: boolean;
+    createAsLink?: boolean;
 }
 
 export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, EntityTabRepeaterProps> {
 
-	calculateDefaultState(state: EntityTabRepeaterProps) {
-		super.calculateDefaultState(state);
-		state.viewOnCreate = false;
-	}
+    calculateDefaultState(state: EntityTabRepeaterProps) {
+        super.calculateDefaultState(state);
+        state.viewOnCreate = false;
+    }
 
-	renderInternal() {
+    renderInternal() {
 
-		const buttons = (
-			<span className="pull-right">
-				{this.renderCreateButton(false) }
-				{this.renderFindButton(false) }
-			</span>
-		);
+        const buttons = (
+            <span className="pull-right">
+                {this.renderCreateButton(false)}
+                {this.renderFindButton(false)}
+            </span>
+        );
 
-		var ctx = this.state.ctx!;
+        var ctx = this.state.ctx!;
 
-	   const readOnly = this.state.ctx.readOnly;
+        const readOnly = this.state.ctx.readOnly;
 
-		return (
-			<fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass) }
+        return (
+            <fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass)}
                 {...this.baseHtmlAttributes() } {...this.state.formGroupHtmlAttributes}>
-				<legend>
-					<div>
-						<span>{this.state.labelText}</span>
-						{React.Children.count(buttons) ? buttons : undefined}
-					</div>
-				</legend>
+                <legend>
+                    <div>
+                        <span>{this.state.labelText}</span>
+                        {React.Children.count(buttons) ? buttons : undefined}
+                    </div>
+                </legend>
                 <Tabs id={ctx.compose("tabs")} unmountOnExit={true}>
-					{
-						mlistItemContext(ctx).map((mlec, i) =>
-							<Tab className="sf-repeater-element" eventKey={i} key={i} {...EntityListBase.entityHtmlAttributes(mlec.value) }
-								title={
-									<div>
-										{ getToString(mlec.value) }
+                    {
+                        mlistItemContext(ctx).map((mlec, i) => {
+                            const drag = this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "h") : undefined;
+
+                            return <Tab  eventKey={i} key={i}
+                                {...EntityListBase.entityHtmlAttributes(mlec.value) }
+                                className="sf-repeater-element"
+                                title={
+                                    <div 
+                                        className={classes("item-group", "sf-tab-dropable", drag && drag.dropClass)}
+                                        onDragEnter={drag && drag.onDragOver}
+                                        onDragOver={drag && drag.onDragOver}
+                                        onDrop={drag && drag.onDrop}>
+                                        {getToString(mlec.value)}
                                         &nbsp;
 										{this.canRemove(mlec.value) && !readOnly &&
-											<span className={classes("sf-line-button", "sf-create") }
-											onClick={e => this.handleRemoveElementClick(e, i) }
-											title={EntityControlMessage.Remove.niceToString() }>
-											<span className="glyphicon glyphicon-remove"/>
-											</span>
-										}
-									</div> as any
+                                            <span className={classes("sf-line-button", "sf-create")}
+                                                onClick={e => this.handleRemoveElementClick(e, i)}
+                                                title={EntityControlMessage.Remove.niceToString()}>
+                                                <span className="glyphicon glyphicon-remove" />
+                                            </span>
+                                        }
+                                        &nbsp;
+                                        {drag && <span className={classes("sf-line-button", "sf-move")}
+                                            draggable={true}
+                                            onDragStart={drag.onDragStart}
+                                            onDragEnd={drag.onDragEnd}
+                                            title={EntityControlMessage.Move.niceToString()}>
+                                            <span className="glyphicon glyphicon-menu-hamburger" />
+                                        </span>}
+                                    </div> as any
                                 }>
                                 <RenderEntity ctx={mlec} getComponent={this.props.getComponent} viewPromise={this.props.viewPromise} />
-							</Tab>
-						)
-						
-					}
-					<Tab eventKey={"x"} disabled></Tab> {/*Temporal hack*/}
-				</Tabs>
-			</fieldset>
-		);
-	}
+                            </Tab>
+                        })
+
+                    }
+                    <Tab eventKey={"x"} disabled></Tab> {/*Temporal hack*/}
+                </Tabs>
+            </fieldset>
+        );
+    }
 }
 

@@ -709,10 +709,15 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     handleHeaderDrop = (de: React.DragEvent<any>) => {
+        de.preventDefault();
+
+        const dropBorderIndex = this.state.dropBorderIndex!;
+        if (dropBorderIndex == null)
+            return;
 
         const columns = this.props.findOptions.columnOptions;
         const dragColumnIndex = this.state.dragColumnIndex!;
-        const dropBorderIndex = this.state.dropBorderIndex!;
+
         const temp = columns[dragColumnIndex!];
         columns.removeAt(dragColumnIndex!);
         const rebasedDropIndex = dropBorderIndex > dragColumnIndex ? dropBorderIndex - 1 : dropBorderIndex;

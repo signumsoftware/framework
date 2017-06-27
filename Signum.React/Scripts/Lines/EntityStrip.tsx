@@ -9,7 +9,7 @@ import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../Lines/LineBase'
 import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, isLite } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
-import { EntityListBase, EntityListBaseProps } from './EntityListBase'
+import { EntityListBase, EntityListBaseProps, DragConfig } from './EntityListBase'
 import { AutocompleteConfig } from './AutocompleteConfig'
 
 
@@ -17,14 +17,14 @@ import { AutocompleteConfig } from './AutocompleteConfig'
 export interface EntityStripProps extends EntityListBaseProps {
     vertical?: boolean;
     autoComplete?: AutocompleteConfig<any> | null;
-    onRenderItem?: (item: Lite<Entity> | ModifiableEntity) => React.ReactNode; 
+    onRenderItem?: (item: Lite<Entity> | ModifiableEntity) => React.ReactNode;
     onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
 }
 
 export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripProps> {
 
     calculateDefaultState(state: EntityStripProps) {
-        super.calculateDefaultState(state);   
+        super.calculateDefaultState(state);
     }
 
     componentWillUnmount() {
@@ -49,32 +49,33 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                 helpBlock={s.helpBlock}
                 htmlAttributes={{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes }}>
                 <div className="SF-entity-strip SF-control-container">
-                    <ul className={classes("sf-strip", this.props.vertical ? "sf-strip-vertical" : "sf-strip-horizontal") }>
+                    <ul className={classes("sf-strip", this.props.vertical ? "sf-strip-vertical" : "sf-strip-horizontal")}>
                         {
                             mlistItemContext(s.ctx).map((mlec, i) =>
                                 (<EntityStripElement key={i}
                                     ctx={mlec}
                                     autoComplete={s.autoComplete}
                                     onRenderItem={s.onRenderItem}
+                                    drag={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, this.props.vertical ? "v" : "h") : undefined}
                                     onItemHtmlAttributes={s.onItemHtmlAttributes}
                                     onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
                                     onView={this.canView(mlec.value) ? e => this.handleViewElement(e, i) : undefined}
-                                    />))
+                                />))
                         }
                         <li className="sf-strip-input input-group">
-                            {this.renderAutoComplete() }
+                            {this.renderAutoComplete()}
                             <span>
-                                { this.renderCreateButton(false) }
-                                { this.renderFindButton(false) }
+                                {this.renderCreateButton(false)}
+                                {this.renderFindButton(false)}
                             </span>
-                        </li> 
+                        </li>
                     </ul>
                 </div>
             </FormGroup>
         );
 
     }
-    
+
     handleOnSelect = (lite: Lite<Entity>, event: React.SyntheticEvent<any>) => {
         this.convert(lite)
             .then(e => this.addElement(e))
@@ -144,7 +145,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
 
                     return ({ 'data-entity-key': key }) as any;
                 }}
-                onSelect={this.handleOnSelect}/>
+                onSelect={this.handleOnSelect} />
         );
     }
 }
@@ -157,6 +158,7 @@ export interface EntityStripElementProps {
     autoComplete?: AutocompleteConfig<any> | null;
     onRenderItem?: (item: Lite<Entity> | ModifiableEntity) => React.ReactNode;
     onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+    drag?: DragConfig;
 }
 
 export interface EntityStripElementState {
@@ -193,7 +195,7 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
             }
         }
     }
-    
+
     render() {
 
         const toStr =
@@ -201,29 +203,46 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
                 this.state.currentItem && this.state.currentItem.item ? this.props.autoComplete!.renderItem(this.state.currentItem.item) :
                     getToString(this.props.ctx.value);
 
+        var drag = this.props.drag;
         const htmlAttributes = this.props.onItemHtmlAttributes && this.props.onItemHtmlAttributes(this.props.ctx.value);
-
         return (
-            <li className="sf-strip-element input-group" {...EntityListBase.entityHtmlAttributes(this.props.ctx.value) }>
-                {
-                    this.props.onView ?
-                        <a className="sf-entitStrip-link" href="" onClick={this.props.onView} {...htmlAttributes}>
-                            {toStr}
-                        </a>
-                        :
-                        <span className="sf-entitStrip-link" {...htmlAttributes}>
-                            {toStr}
+            <li className="sf-strip-element input-group"
+                {...EntityListBase.entityHtmlAttributes(this.props.ctx.value) }>
+                <div className={classes(drag && "sf-strip-dropable", drag && drag.dropClass)}
+                    onDragEnter={drag && drag.onDragOver}
+                    onDragOver={drag && drag.onDragOver}
+                    onDrop={drag && drag.onDrop}
+
+                >
+
+                    {
+                        this.props.onView ?
+                            <a className="sf-entitStrip-link" href="" onClick={this.props.onView} {...htmlAttributes}>
+                                {toStr}
+                            </a>
+                            :
+                            <span className="sf-entitStrip-link" {...htmlAttributes}>
+                                {toStr}
+                            </span>
+                    }
+
+                    {this.props.onRemove &&
+                        <span>
+                            <a className="sf-line-button sf-remove"
+                                onClick={this.props.onRemove}
+                                title={EntityControlMessage.Remove.niceToString()}>
+                                <span className="glyphicon glyphicon-remove"></span></a>
                         </span>
-                }
-               
-                {this.props.onRemove &&
-                    <span>
-                        <a className="sf-line-button sf-remove" 
-                            onClick={this.props.onRemove}
-                            title={EntityControlMessage.Remove.niceToString() }>
-                            <span className="glyphicon glyphicon-remove"></span></a>
-                    </span>
-                }
+                    }
+                    &nbsp;
+            {drag && <span className={classes("sf-line-button", "sf-move")}
+                        draggable={true}
+                        onDragStart={drag.onDragStart}
+                        onDragEnd={drag.onDragEnd}
+                        title={EntityControlMessage.Move.niceToString()}>
+                        <span className="glyphicon glyphicon-menu-hamburger" />
+                    </span>}
+                </div>
             </li>
         );
     }

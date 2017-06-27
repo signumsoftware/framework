@@ -181,14 +181,14 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     }
 
 
-    handleHeaderDragStart = (de: React.DragEvent<any>, index: number) => {
+    handleDragStart = (de: React.DragEvent<any>, index: number) => {
         de.dataTransfer.setData('text', "start"); //cannot be empty string
         de.dataTransfer.effectAllowed = "move";
         this.state.dragIndex = index;
         this.forceUpdate();
     }
 
-    handleHeaderDragEnd = (de: React.DragEvent<any>) => {
+    handleDragEnd = (de: React.DragEvent<any>) => {
         this.state.dragIndex = undefined;
         this.state.dropBorderIndex = undefined;
         this.forceUpdate();
@@ -226,10 +226,11 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
         return undefined;
     }
 
-    handlerHeaderDragOver = (de: React.DragEvent<any>, index: number, orientation: "h" | "v") => {
+    handlerDragOver = (de: React.DragEvent<any>, index: number, orientation: "h" | "v") => {
         de.preventDefault();
 
         const th = de.currentTarget as HTMLElement;
+        
 
         const size = th.scrollWidth;
 
@@ -239,7 +240,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
         let dropBorderIndex = offset == undefined ? undefined : index + offset;
 
-        if (dropBorderIndex == this.state.dragIndex || dropBorderIndex == this.state.dragIndex ! + 1)
+        if (dropBorderIndex == this.state.dragIndex || dropBorderIndex == this.state.dragIndex! + 1)
             dropBorderIndex = undefined;
 
         //de.dataTransfer.dropEffect = dropBorderIndex == undefined ? "none" : "move";
@@ -255,10 +256,10 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
             dropClass: classes(
                 index == this.state.dragIndex && "sf-dragging",
                 this.dropClass(index, orientation)),
-            onDragStart: e => this.handleHeaderDragStart(e, index),
-            onDragEnd: this.handleHeaderDragEnd,
-            onDragOver: e => this.handlerHeaderDragOver(e, index, orientation),
-            onDrop: this.handleHeaderDrop,
+            onDragStart: e => this.handleDragStart(e, index),
+            onDragEnd: this.handleDragEnd,
+            onDragOver: e => this.handlerDragOver(e, index, orientation),
+            onDrop: this.handleDrop,
         };
     }
 
@@ -270,11 +271,15 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
                 undefined;
     }
 
-    handleHeaderDrop = (de: React.DragEvent<any>) => {
+    handleDrop = (de: React.DragEvent<any>) => {
 
-        const list = this.props.ctx.value!;
-        const dragIndex = this.state.dragIndex!;
+        de.preventDefault();
         const dropBorderIndex = this.state.dropBorderIndex!;
+        if (dropBorderIndex == null)
+            return;
+
+        const dragIndex = this.state.dragIndex!;
+        const list = this.props.ctx.value!;
         const temp = list[dragIndex!];
         list.removeAt(dragIndex!);
         const rebasedDropIndex = dropBorderIndex > dragIndex ? dropBorderIndex - 1 : dropBorderIndex;
