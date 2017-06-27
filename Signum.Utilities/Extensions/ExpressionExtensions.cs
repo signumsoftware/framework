@@ -23,10 +23,11 @@ namespace Signum.Utilities
             return (T)(object)cache.GetOrAdd(expression, exp =>
             {
                 using (HeavyProfiler.Log("CompiledAndStore", () => exp.ToString()))
+                lock(registeredExpressions)
                 {
                     var already = registeredExpressions.TryGetC(exp);
                     if (already != null && already != exp)
-                        throw new InvalidOperationException(DuplicateMessage(exp, already)); 
+                        throw new InvalidOperationException(DuplicateMessage(exp, already));
 
                     var res = (Delegate)(object)exp.Compile();
                     registeredExpressions[exp] = exp;
