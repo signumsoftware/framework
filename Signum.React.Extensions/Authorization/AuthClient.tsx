@@ -19,6 +19,7 @@ import { PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, 
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import Login from './Login/Login';
 import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
+import * as QueryString from "query-string";
 
 export let userTicket: boolean;
 export let resetPassword: boolean;
@@ -26,12 +27,21 @@ export let resetPassword: boolean;
 
 Services.AuthTokenFilter.addAuthToken = addAuthToken;
 
+export function registerUserTicketAuthenticator() {
+    authenticators.push(loginFromCookie);
+}
+
 export function startPublic(options: { routes: JSX.Element[], userTicket: boolean, resetPassword: boolean }) {
     userTicket = options.userTicket;
     resetPassword = options.resetPassword;
 
-    options.routes.push(<ImportRoute path="~/auth/login" onImportModule={() => _import("./Login/Login")} />);
-    options.routes.push(<ImportRoute path="~/auth/changePassword" onImportModule={() => _import("./Login/ChangePassword")} />);
+    if (userTicket) {
+        if (!authenticators.contains(loginFromCookie))
+            throw new Error("call AuthClient.registerUserTicketAuthenticator in Main.tsx before AuthClient.autoLogin");
+    }
+
+    options.routes.push(<ImportRoute path="~/auth/login" onImportModule={() => import("./Login/Login")} />);
+    options.routes.push(<ImportRoute path="~/auth/changePassword" onImportModule={() => import("./Login/ChangePassword")} />);
 }
 
 export let types: boolean;
@@ -48,14 +58,14 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     queries = options.queries;
     permissions = options.permissions;
 
-    Navigator.addSettings(new EntitySettings(UserEntity, e => _import('./Templates/User')));
-    Navigator.addSettings(new EntitySettings(RoleEntity, e => _import('./Templates/Role')));
+    Navigator.addSettings(new EntitySettings(UserEntity, e => import('./Templates/User')));
+    Navigator.addSettings(new EntitySettings(RoleEntity, e => import('./Templates/Role')));
     Operations.addSettings(new EntityOperationSettings(UserOperation.SetPassword, { isVisible: ctx => false }));
 
     if (options.properties) {
         tasks.push(taskAuthorizeProperties);
         GraphExplorer.TypesLazilyCreated.push(PropertyRouteEntity.typeName);
-        Navigator.addSettings(new EntitySettings(PropertyRulePack, e => _import('./Admin/PropertyRulePackControl')));
+        Navigator.addSettings(new EntitySettings(PropertyRulePack, e => import('./Admin/PropertyRulePackControl')));
     }
 
     if (options.types) {
@@ -63,38 +73,38 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
         Navigator.isReadonlyEvent.push(navigatorIsReadOnly);
         Navigator.isViewableEvent.push(navigatorIsViewable);
 
-        Navigator.addSettings(new EntitySettings(TypeRulePack, e => _import('./Admin/TypeRulePackControl')));
+        Navigator.addSettings(new EntitySettings(TypeRulePack, e => import('./Admin/TypeRulePackControl')));
 
         QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("types", AuthAdminMessage.TypeRules.niceToString(),
-            e => Api.fetchTypeRulePack(ctx.lite.id!).then(pack => Navigator.navigate(pack)).done(),
+            e => API.fetchTypeRulePack(ctx.lite.id!).then(pack => Navigator.navigate(pack)).done(),
             { isVisible: isPermissionAuthorized(BasicPermission.AdminRules) }));
     }
 
     if (options.operations) {
         Operations.isOperationAllowedEvent.push(isOperationAuthorized);
 
-        Navigator.addSettings(new EntitySettings(OperationRulePack, e => _import('./Admin/OperationRulePackControl')));
+        Navigator.addSettings(new EntitySettings(OperationRulePack, e => import('./Admin/OperationRulePackControl')));
     }
 
     if (options.queries) {
         Finder.isFindableEvent.push(queryIsFindable);
 
-        Navigator.addSettings(new EntitySettings(QueryRulePack, e => _import('./Admin/QueryRulePackControl')));
+        Navigator.addSettings(new EntitySettings(QueryRulePack, e => import('./Admin/QueryRulePackControl')));
     }
 
     if (options.permissions) {
 
-        Navigator.addSettings(new EntitySettings(PermissionRulePack, e => _import('./Admin/PermissionRulePackControl')));
+        Navigator.addSettings(new EntitySettings(PermissionRulePack, e => import('./Admin/PermissionRulePackControl')));
 
         QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("permissions", AuthAdminMessage.PermissionRules.niceToString(),
-            e => Api.fetchPermissionRulePack(ctx.lite.id!).then(pack => Navigator.navigate(pack)).done(),
+            e => API.fetchPermissionRulePack(ctx.lite.id!).then(pack => Navigator.navigate(pack)).done(),
             { isVisible: isPermissionAuthorized(BasicPermission.AdminRules) }));
     }
 
     OmniboxClient.registerSpecialAction({
         allowed: () => isPermissionAuthorized(BasicPermission.AdminRules),
         key: "DownloadAuthRules",
-        onClick: () => { Api.downloadAuthRules(); return Promise.resolve(undefined); }
+        onClick: () => { API.downloadAuthRules(); return Promise.resolve(undefined); }
     });
 }
 
@@ -102,7 +112,7 @@ export function queryIsFindable(queryKey: string) {
     return getQueryInfo(queryKey).queryAllowed;
 }
 
-function isOperationAuthorized(operation: OperationInfo | OperationSymbol | string): boolean {
+export function isOperationAuthorized(operation: OperationInfo | OperationSymbol | string): boolean {
     var key = (operation as OperationInfo | OperationSymbol).key || operation as string;
     const member = getTypeInfo(key.before(".")).members[key.after(".")];
     if (member == null)
@@ -130,7 +140,7 @@ export function taskAuthorizeProperties(lineBase: LineBase<LineBaseProps, LineBa
     }
 }
 
-export function navigatorIsReadOnly(typeName: string, entityPack?: EntityPack<ModifiableEntity>) {
+export function navigatorIsReadOnly(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>) {
     const ti = getTypeInfo(typeName);
 
     if (ti == undefined)
@@ -142,7 +152,7 @@ export function navigatorIsReadOnly(typeName: string, entityPack?: EntityPack<Mo
     return ti.typeAllowed == "None" || ti.typeAllowed == "Read";
 }
 
-export function navigatorIsViewable(typeName: string, entityPack?: EntityPack<ModifiableEntity>) {
+export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>) {
     const ti = getTypeInfo(typeName);
 
     if (ti == undefined)
@@ -154,7 +164,7 @@ export function navigatorIsViewable(typeName: string, entityPack?: EntityPack<Mo
     return ti.typeAllowed != "None";
 }
 
-export function navigatorIsCreable(typeName: string) {
+export function navigatorIsCreable(typeName: PseudoType) {
     const ti = getTypeInfo(typeName);
   
     return ti == undefined || ti.typeAllowed == "Create";
@@ -195,7 +205,7 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
                 if (token != getAuthToken())
                     return makeCall();
 
-                return Api.refreshToken(token).then(resp => {
+                return API.refreshToken(token).then(resp => {
                     setAuthToken(resp.token);
                     setCurrentUser(resp.userEntity)
                     
@@ -226,13 +236,13 @@ export function setAuthToken(authToken: string | undefined): void{
     sessionStorage.setItem("authToken", authToken || "");
 }
 
-export function autoLogin(): Promise<UserEntity> {
+export function autoLogin(): Promise<UserEntity>  {
 
     if (Navigator.currentUser)
-        return Promise.resolve(Navigator.currentUser);
+        return Promise.resolve(Navigator.currentUser as UserEntity);
 
     if (getAuthToken())
-        return Api.fetchCurrentUser().then(u => {
+        return API.fetchCurrentUser().then(u => {
             setCurrentUser(u);
             Navigator.resetUI();
             return u;
@@ -241,23 +251,23 @@ export function autoLogin(): Promise<UserEntity> {
     return new Promise<UserEntity>((resolve) => {
         setTimeout(() => {
             if (getAuthToken()) {
-                Api.fetchCurrentUser()
+                API.fetchCurrentUser()
                     .then(u => {
                         setCurrentUser(u);
                         Navigator.resetUI();
                         resolve(u);
                     });
             } else {
-                Api.loginFromCookie()
-                    .then(respo => {
+                authenticate()
+                    .then(authenticatedUser => {
 
-                        if (!respo) {
+                        if (!authenticatedUser) {
                             resolve(undefined);
                         } else {
-                            setAuthToken(respo.token);
-                            setCurrentUser(respo.userEntity);
+                            setAuthToken(authenticatedUser.token);
+                            setCurrentUser(authenticatedUser.userEntity);
                             Navigator.resetUI();
-                            resolve(respo.userEntity);
+                            resolve(authenticatedUser.userEntity);
                         }
                     });
             }
@@ -265,9 +275,31 @@ export function autoLogin(): Promise<UserEntity> {
     });
 }
 
+export const authenticators: Array<() => Promise<AuthenticatedUser | undefined>> = [];  
+
+export function loginFromCookie(): Promise<AuthenticatedUser | undefined> {
+    return API.loginFromCookie();
+}
+
+export async function authenticate(): Promise<AuthenticatedUser | undefined> {
+
+    for (let i = 0; i < authenticators.length; i++) {
+        let aUser = await authenticators[i]();
+        if (aUser)
+            return aUser;
+    }
+
+    return undefined;
+}
+
+export interface AuthenticatedUser {
+    userEntity: UserEntity;
+    token: string;
+}
+
 export function logout() {
 
-    Api.logout().then(() => {
+    API.logout().then(() => {
         setAuthToken(undefined);
         setCurrentUser(undefined);
         Options.onLogout();
@@ -286,7 +318,14 @@ export namespace Options {
 
 export function isPermissionAuthorized(permission: PermissionSymbol | string) {
     var key = (permission as PermissionSymbol).key || permission as string;
-    const member = getTypeInfo(key.before(".")).members[key.after(".")];
+    const type = getTypeInfo(key.before("."));
+    if (!type)
+        throw new Error(`Type '${key.before(".")}' not found. Consider adding PermissionAuthLogic.RegisterPermissions(${key}) and Synchronize`);
+
+    const member = type.members[key.after(".")];
+    if (!member)
+        throw new Error(`Member '${key.after(".")}' not found. Consider adding PermissionAuthLogic.RegisterPermissions(${key}) and Synchronize`);
+
     return member.permissionAllowed;
 }
 
@@ -296,7 +335,7 @@ export function asserPermissionAuthorized(permission: PermissionSymbol | string)
         throw new Error(`Permission ${key} is denied`);
 }
 
-export module Api {
+export module API {
 
     export interface LoginRequest {
         userName: string;
@@ -317,6 +356,7 @@ export module Api {
     export function loginFromCookie(): Promise<LoginResponse> {
         return ajaxPost<LoginResponse>({ url: "~/api/auth/loginFromCookie", avoidAuthToken: true }, undefined);
     }
+    
 
     export function refreshToken(oldToken: string): Promise<LoginResponse> {
         return ajaxPost<LoginResponse>({ url: "~/api/auth/refreshToken", avoidAuthToken: true }, oldToken);

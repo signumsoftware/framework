@@ -189,16 +189,16 @@ namespace Signum.Entities.Authorization
         {
         }
 
-        public TypeAllowedAndConditions(TypeAllowed? fallback, ReadOnlyCollection<TypeConditionRuleEmbedded> conditions)
+        public TypeAllowedAndConditions(TypeAllowed? fallback, MList<TypeConditionRuleEmbedded> conditions)
         {
             this.fallback = fallback;
-            this.conditions = conditions;
+            this.Conditions = conditions;
         }
 
         public TypeAllowedAndConditions(TypeAllowed? fallback, params TypeConditionRuleEmbedded[] conditions)
         {
             this.fallback = fallback;
-            this.conditions = conditions.ToReadOnly();
+            this.Conditions = conditions.ToMList();
         }
 
         TypeAllowed? fallback;
@@ -214,19 +214,13 @@ namespace Signum.Entities.Authorization
         {
             get { return this.fallback ?? TypeAllowed.None; }
         }
-
-        ReadOnlyCollection<TypeConditionRuleEmbedded> conditions;
-        [InTypeScript(Undefined =false)]
-        public ReadOnlyCollection<TypeConditionRuleEmbedded> Conditions
-        {
-            get { return conditions; }
-            private set { conditions = value; }
-        }
+        
+        public MList<TypeConditionRuleEmbedded> Conditions { get; set; } = new MList<TypeConditionRuleEmbedded>();
 
         public bool Equals(TypeAllowedAndConditions other)
         {
             return this.fallback.Equals(other.fallback) &&
-                this.conditions.SequenceEqual(other.conditions);
+                this.Conditions.SequenceEqual(other.Conditions);
         }
 
         public override bool Equals(object obj)
@@ -262,42 +256,42 @@ namespace Signum.Entities.Authorization
 
         public TypeAllowedBasic MinUI()
         {
-            if (!conditions.Any())
+            if (!Conditions.Any())
                 return FallbackOrNone.GetUI();
 
-            return (TypeAllowedBasic)Math.Min((int)fallback.Value.GetUI(), conditions.Select(a => (int)a.Allowed.GetUI()).Min());
+            return (TypeAllowedBasic)Math.Min((int)fallback.Value.GetUI(), Conditions.Select(a => (int)a.Allowed.GetUI()).Min());
         }
 
         public TypeAllowedBasic MaxUI()
         {
-            if (!conditions.Any())
+            if (!Conditions.Any())
                 return FallbackOrNone.GetUI();
 
-            return (TypeAllowedBasic)Math.Max((int)fallback.Value.GetUI(), conditions.Select(a => (int)a.Allowed.GetUI()).Max());
+            return (TypeAllowedBasic)Math.Max((int)fallback.Value.GetUI(), Conditions.Select(a => (int)a.Allowed.GetUI()).Max());
         }
 
         public TypeAllowedBasic MinDB()
         {
-            if (!conditions.Any())
+            if (!Conditions.Any())
                 return FallbackOrNone.GetDB();
 
-            return (TypeAllowedBasic)Math.Min((int)fallback.Value.GetDB(), conditions.Select(a => (int)a.Allowed.GetDB()).Min());
+            return (TypeAllowedBasic)Math.Min((int)fallback.Value.GetDB(), Conditions.Select(a => (int)a.Allowed.GetDB()).Min());
         }
 
         public TypeAllowedBasic MaxDB()
         {
-            if (!conditions.Any())
+            if (!Conditions.Any())
                 return FallbackOrNone.GetDB();
 
-            return (TypeAllowedBasic)Math.Max((int)fallback.Value.GetDB(), conditions.Select(a => (int)a.Allowed.GetDB()).Max());
+            return (TypeAllowedBasic)Math.Max((int)fallback.Value.GetDB(), Conditions.Select(a => (int)a.Allowed.GetDB()).Max());
         }
 
         public override string ToString()
         {
-            if (conditions.IsEmpty())
+            if (Conditions.IsEmpty())
                 return Fallback.ToString();
 
-            return "{0} | {1}".FormatWith(Fallback, conditions.ToString(c => "{0} {1}".FormatWith(c.TypeCondition, c.Allowed), " | "));
+            return "{0} | {1}".FormatWith(Fallback, Conditions.ToString(c => "{0} {1}".FormatWith(c.TypeCondition, c.Allowed), " | "));
         }
 
         internal bool Exactly(TypeAllowed current)
@@ -306,7 +300,7 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    [Serializable, DescriptionOptions(DescriptionOptions.None), InTypeScript(Undefined = false)]
+    [Serializable, InTypeScript(Undefined = false)]
     public class TypeConditionRuleEmbedded : EmbeddedEntity, IEquatable<TypeConditionRuleEmbedded>
     {
         private TypeConditionRuleEmbedded() { }

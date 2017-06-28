@@ -60,12 +60,12 @@ namespace Signum.Web.Help
                     new EntitySettings<QueryHelpEntity>(),
                     new EntitySettings<AppendixHelpEntity>(),
                     new EntitySettings<NamespaceHelpEntity>(),
-                    new EmbeddedEntitySettings<PropertyRouteHelpEntity>(),
+                    new EmbeddedEntitySettings<PropertyRouteHelpEmbedded>(),
                     new EntitySettings<OperationHelpEntity>(),
-                    new EmbeddedEntitySettings<QueryColumnHelpEntity>(),
+                    new EmbeddedEntitySettings<QueryColumnHelpEmbedded>(),
                 });
 
-                Navigator.EmbeddedEntitySettings<PropertyRouteHelpEntity>().MappingDefault.AsEntityMapping()
+                Navigator.EmbeddedEntitySettings<PropertyRouteHelpEmbedded>().MappingDefault.AsEntityMapping()
                     .SetProperty(a => a.Property, ctx =>
                     {
                         var type = ctx.FindParent<EntityHelpEntity>().Value.Type.ToType();

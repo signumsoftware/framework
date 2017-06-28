@@ -2,7 +2,7 @@
 using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Entities.Basics;
-using Signum.Entities.RestLog;
+using Signum.Entities.Rest;
 using Signum.React.Filters;
 using Signum.Utilities;
 using System.IO;

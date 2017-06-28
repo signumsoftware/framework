@@ -32,8 +32,7 @@ import ActivityWithRemarks from './Case/ActivityWithRemarks'
 import CaseFrameModal from './Case/CaseFrameModal'
 export { CaseFrameModal };
 
-import CaseFramePage from './Case/CaseFrameModal'
-export { CaseFramePage };
+
 
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
@@ -61,9 +60,9 @@ import { getTypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection"
 export function start(options: { routes: JSX.Element[] }) {
 
     options.routes.push(
-        <ImportRoute path="~/workflow/activity/:caseActivityId" onImportModule={() => _import("./Case/CaseFramePage")} />,
-        <ImportRoute path="~/workflow/new/:workflowId/:mainEntityStrategy" onImportModule={() => _import("./Case/CaseFramePage")} />,
-        <ImportRoute path="~/workflow/panel" onImportModule={() => _import("./Workflow/WorkflowScriptRunnerPanelPage")} />
+        <ImportRoute path="~/workflow/activity/:caseActivityId" onImportModule={() => import("./Case/CaseFramePage")} />,
+        <ImportRoute path="~/workflow/new/:workflowId/:mainEntityStrategy" onImportModule={() => import("./Case/CaseFramePage")} />,
+        <ImportRoute path="~/workflow/panel" onImportModule={() => import("./Workflow/WorkflowScriptRunnerPanelPage")} />
     );
 
     QuickLinks.registerQuickLink(CaseActivityEntity, ctx => [
@@ -111,9 +110,9 @@ export function start(options: { routes: JSX.Element[] }) {
         }
     });
 
-    Navigator.addSettings(new EntitySettings(CaseEntity, w => _import('./Case/Case')));
-    Navigator.addSettings(new EntitySettings(CaseTagTypeEntity, w => _import('./Case/CaseTagType')));
-    Navigator.addSettings(new EntitySettings(CaseTagsModel, w => _import('./Case/CaseTagsModel')));
+    Navigator.addSettings(new EntitySettings(CaseEntity, w => import('./Case/Case')));
+    Navigator.addSettings(new EntitySettings(CaseTagTypeEntity, w => import('./Case/CaseTagType')));
+    Navigator.addSettings(new EntitySettings(CaseTagsModel, w => import('./Case/CaseTagsModel')));
 
     Navigator.addSettings(new EntitySettings(CaseActivityEntity, undefined, {
         onNavigateRoute: (typeName, id) => Navigator.toAbsoluteUrl("~/workflow/activity/" + id),
@@ -141,7 +140,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { style: "primary", onClick: executeWorkflowSave }));
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Delete, { contextualFromMany: { isVisible: ctx => false } }));
-    Navigator.addSettings(new EntitySettings(WorkflowEntity, w => _import('./Workflow/Workflow'), { avoidPopup: true }));
+    Navigator.addSettings(new EntitySettings(WorkflowEntity, w => import('./Workflow/Workflow'), { avoidPopup: true }));
 
     hide(WorkflowPoolEntity);
     hide(WorkflowLaneEntity);
@@ -150,15 +149,15 @@ export function start(options: { routes: JSX.Element[] }) {
     hide(WorkflowEventEntity);
     hide(WorkflowConnectionEntity);
 
-    Navigator.addSettings(new EntitySettings(WorkflowActivityModel, w => _import('./Workflow/WorkflowActivityModel')));
-    Navigator.addSettings(new EntitySettings(WorkflowConnectionModel, w => _import('./Workflow/WorkflowConnectionModel')));
-    Navigator.addSettings(new EntitySettings(WorkflowReplacementModel, w => _import('./Workflow/WorkflowReplacementComponent')));
-    Navigator.addSettings(new EntitySettings(WorkflowConditionEntity, w => _import('./Workflow/WorkflowCondition')));
-    Navigator.addSettings(new EntitySettings(WorkflowActionEntity, w => _import('./Workflow/WorkflowAction')));
-    Navigator.addSettings(new EntitySettings(WorkflowScriptEntity, w => _import('./Workflow/WorkflowScript')));
-    Navigator.addSettings(new EntitySettings(WorkflowLaneModel, w => _import('./Workflow/WorkflowLaneModel')));
-    Navigator.addSettings(new EntitySettings(WorkflowEventModel, w => _import('./Workflow/WorkflowEventModel')));
-    Navigator.addSettings(new EntitySettings(WorkflowEventTaskEntity, w => _import('./Workflow/WorkflowEventTask')));
+    Navigator.addSettings(new EntitySettings(WorkflowActivityModel, w => import('./Workflow/WorkflowActivityModel')));
+    Navigator.addSettings(new EntitySettings(WorkflowConnectionModel, w => import('./Workflow/WorkflowConnectionModel')));
+    Navigator.addSettings(new EntitySettings(WorkflowReplacementModel, w => import('./Workflow/WorkflowReplacementComponent')));
+    Navigator.addSettings(new EntitySettings(WorkflowConditionEntity, w => import('./Workflow/WorkflowCondition')));
+    Navigator.addSettings(new EntitySettings(WorkflowActionEntity, w => import('./Workflow/WorkflowAction')));
+    Navigator.addSettings(new EntitySettings(WorkflowScriptEntity, w => import('./Workflow/WorkflowScript')));
+    Navigator.addSettings(new EntitySettings(WorkflowLaneModel, w => import('./Workflow/WorkflowLaneModel')));
+    Navigator.addSettings(new EntitySettings(WorkflowEventModel, w => import('./Workflow/WorkflowEventModel')));
+    Navigator.addSettings(new EntitySettings(WorkflowEventTaskEntity, w => import('./Workflow/WorkflowEventTask')));
 
     Constructor.registerConstructor(WorkflowEntity, () => WorkflowEntity.New({ mainEntityStrategy: WorkflowMainEntityStrategy.value("CreateNew") }));
     Constructor.registerConstructor(WorkflowConditionEntity, () => WorkflowConditionEntity.New({ eval: WorkflowConditionEval.New() }));
@@ -365,12 +364,12 @@ export function executeAndClose(eoc: Operations.EntityOperationContext<CaseActiv
 
 export function navigateCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, readOnly?: boolean): Promise<void> {
 
-    return _import<{ default: typeof CaseFrameModal }>("./Case/CaseFrameModal")
-        .then(NP => NP.default.openNavigate(entityOrPack, readOnly));
+    return import("./Case/CaseFrameModal")
+        .then(NP => NP.default.openNavigate(entityOrPack, readOnly)) as Promise<void>;
 }
 
-export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, readOnly?: boolean): Promise<CaseActivityEntity> {
-    return _import<{ default: typeof CaseFrameModal }>("./Case/CaseFrameModal")
+export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, readOnly?: boolean): Promise<CaseActivityEntity | undefined> {
+    return import("./Case/CaseFrameModal")
         .then(NP => NP.default.openView(entityOrPack, readOnly));
     
 }
@@ -399,7 +398,7 @@ export function createNewCase(workflowId: number | string, mainEntityStrategy: W
 
 export function toEntityPackWorkflow(entityOrEntityPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack): Promise<CaseEntityPack> {
     if ((entityOrEntityPack as CaseEntityPack).canExecuteActivity)
-        return Promise.resolve(entityOrEntityPack);
+        return Promise.resolve(entityOrEntityPack as CaseEntityPack);
 
     const lite = isEntity(entityOrEntityPack) ? toLite(entityOrEntityPack) : entityOrEntityPack as Lite<CaseActivityEntity>;
 
@@ -411,6 +410,10 @@ interface TypeViewDictionary {
     [activityViewName: string]: ActivityViewSettings<ICaseMainEntity>
 }
 
+interface ActivityViewSettingsOptions<T extends ICaseMainEntity> {
+    getViewPromise?: (entity: T) => ViewPromise<T>;
+}
+
 export class ActivityViewSettings<T extends ICaseMainEntity> {
     type: Type<T>
 
@@ -418,10 +421,11 @@ export class ActivityViewSettings<T extends ICaseMainEntity> {
 
     getViewPromise?: (entity: T) => ViewPromise<T>;
 
-    constructor(type: Type<T>, activityViewName: string, getViewPromise?: (entity: T) => Promise<ViewModule<T>>) {
+    constructor(type: Type<T>, activityViewName: string, getViewModule?: (entity: T) => Promise<ViewModule<T>>, options?: ActivityViewSettingsOptions<T>) {
         this.type = type;
         this.activityViewName = activityViewName;
-        this.getViewPromise = getViewPromise && (entity => new ViewPromise(getViewPromise(entity)).withProps({ inWorkflow: true }));
+        this.getViewPromise = getViewModule && (entity => new ViewPromise(getViewModule(entity)).withProps({ inWorkflow: true }));
+        Dic.assign(this, options)
     }
 }
 
@@ -453,7 +457,7 @@ export function getViewPromise<T extends ICaseMainEntity>(entity: T, activityVie
         DynamicViewClient.createDefaultDynamicView(entity.Type) :
         DynamicViewClient.API.getDynamicView(entity.Type, activityViewName);
 
-    return ViewPromise.flat(promise.then(dv => new ViewPromise(_import('../../../Extensions/Signum.React.Extensions/Dynamic/View/DynamicViewComponent')).withProps({ initialDynamicView: dv })));
+    return ViewPromise.flat(promise.then(dv => new ViewPromise(import('../../../Extensions/Signum.React.Extensions/Dynamic/View/DynamicViewComponent')).withProps({ initialDynamicView: dv })));
 }
 
 export function getViewNames(typeName: string) {
@@ -481,14 +485,15 @@ export namespace API {
         return ajaxPost<PreviewResult>({ url: `~/api/workflow/previewChanges/${workflow.id} ` }, model);
     }
 
-    export function findMainEntityType(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {
+    export function findMainEntityType(request: { subString: string, count: number }, abortController?: FetchAbortController): Promise<Lite<TypeEntity>[]> {
         return ajaxGet<Lite<TypeEntity>[]>({
-            url: "~/api/workflow/findMainEntityType?" + QueryString.stringify(request)
+            url: "~/api/workflow/?findMainEntityType" + QueryString.stringify(request),
+            abortController
         });
     }
 
-    export function findNode(request: WorkflowFindNodeRequest): Promise<Lite<IWorkflowNodeEntity>[]> {
-        return ajaxPost<Lite<IWorkflowNodeEntity>[]>({ url: "~/api/workflow/findNode" }, request);
+    export function findNode(request: WorkflowFindNodeRequest, abortController?: FetchAbortController): Promise<Lite<IWorkflowNodeEntity>[]> {
+        return ajaxPost<Lite<IWorkflowNodeEntity>[]>({ url: "~/api/workflow/findNode", abortController }, request);
     }
 
     export function conditionTest(request: WorkflowConditionTestRequest): Promise<WorkflowConditionTestResponse> {

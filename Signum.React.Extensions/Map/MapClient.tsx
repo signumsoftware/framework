@@ -33,19 +33,19 @@ export function getAllProviders(info: SchemaMapInfo): Promise<ClientColorProvide
 export function start(options: { routes: JSX.Element[], auth: boolean; cache: boolean; disconnected: boolean; isolation: boolean }) {
 
     options.routes.push(
-        <ImportRoute path="~/map" exact onImportModule={() => _import("./Schema/SchemaMapPage")} />,
-        <ImportRoute path="~/map/:type" onImportModule={() => _import("./Operation/OperationMapPage")} />
+        <ImportRoute path="~/map" exact onImportModule={() => import("./Schema/SchemaMapPage")} />,
+        <ImportRoute path="~/map/:type" onImportModule={() => import("./Operation/OperationMapPage")} />
     );
 
-    getProviders.push(smi => _import("./Schema/ColorProviders/Default").then((c: any) => c.default(smi)));
+    getProviders.push(smi => import("./Schema/ColorProviders/Default").then((c: any) => c.default(smi)));
     if (options.auth)
-        getProviders.push(smi => _import("./Schema/ColorProviders/Auth").then((c: any) => c.default(smi)));
+        getProviders.push(smi => import("./Schema/ColorProviders/Auth").then((c: any) => c.default(smi)));
     if (options.cache)
-        getProviders.push(smi => _import("./Schema/ColorProviders/Cache").then((c: any) => c.default(smi)));
+        getProviders.push(smi => import("./Schema/ColorProviders/Cache").then((c: any) => c.default(smi)));
     if (options.disconnected)
-        getProviders.push(smi => _import("./Schema/ColorProviders/Disconnected").then((c: any) => c.default(smi)));
+        getProviders.push(smi => import("./Schema/ColorProviders/Disconnected").then((c: any) => c.default(smi)));
     if (options.isolation)
-        getProviders.push(smi => _import("./Schema/ColorProviders/Isolation").then((c: any) => c.default(smi)));
+        getProviders.push(smi => import("./Schema/ColorProviders/Isolation").then((c: any) => c.default(smi)));
 }
 
 export namespace API {

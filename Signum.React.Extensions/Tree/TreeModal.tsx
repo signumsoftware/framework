@@ -8,17 +8,19 @@ import { getTypeInfo, Type } from '../../../Framework/Signum.React/Scripts/Refle
 import { TreeViewerMessage, TreeEntity } from './Signum.Entities.Tree'
 import * as TreeClient from './TreeClient'
 import { TreeNode } from './TreeClient'
-import { TreeViewer} from './TreeViewer'
+import { TreeViewer } from './TreeViewer'
+import { FilterOption } from "../../../Framework/Signum.React/Scripts/FindOptions";
 
 
 interface TreeModalProps extends React.Props<TreeModal>, IModalProps {
     typeName: string;
+    filterOptions: FilterOption[];
     title?: string;
 }
 
 export default class TreeModal extends React.Component<TreeModalProps, { show: boolean; }>  {
 
-    constructor(props : any) {
+    constructor(props: any) {
         super(props);
 
         this.state = {
@@ -54,7 +56,9 @@ export default class TreeModal extends React.Component<TreeModalProps, { show: b
         this.okPressed = true;
         this.setState({ show: false });
     }
-    
+
+    treeView?: TreeViewer;
+
     render() {
 
         const okEnabled = this.selectedNode != null;
@@ -62,34 +66,41 @@ export default class TreeModal extends React.Component<TreeModalProps, { show: b
         return (
             <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited}>
                 <Modal.Header>
-                        <div className="btn-toolbar" style={{ float: "right" }}>
-                            <button className ="btn btn-primary sf-entity-button sf-close-button sf-ok-button" disabled={!okEnabled} onClick={this.handleOkClicked}>
-                                {JavascriptMessage.ok.niceToString() }
-                            </button>
+                    <div className="btn-toolbar" style={{ float: "right" }}>
+                        <button className="btn btn-primary sf-entity-button sf-close-button sf-ok-button" disabled={!okEnabled} onClick={this.handleOkClicked}>
+                            {JavascriptMessage.ok.niceToString()}
+                        </button>
 
-                            <button className ="btn btn-default sf-entity-button sf-close-button sf-cancel-button" onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString() }</button>
-                        </div>
-                        <h4>
-                            <span className="sf-entity-title"> {this.props.title || getTypeInfo(this.props.typeName).nicePluralName}</span>
+                        <button className="btn btn-default sf-entity-button sf-close-button sf-cancel-button" onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString()}</button>
+                    </div>
+                    <h4>
+                        <span className="sf-entity-title"> {this.props.title || getTypeInfo(this.props.typeName).nicePluralName}</span>
+                        &nbsp;
+                        <a className="sf-popup-fullscreen" href="" onClick={(e) => this.treeView && this.treeView.handleFullScreenClick(e)}>
+                            <span className="glyphicon glyphicon-new-window"></span>
+                        </a>
                     </h4>
                 </Modal.Header>
 
                 <Modal.Body>
                     <TreeViewer
+                        filterOptions={this.props.filterOptions}
                         typeName={this.props.typeName}
                         onSelectedNode={this.handleSelectedNode}
                         onDoubleClick={this.handleDoubleClick}
-                        />
+                        ref={tv => this.treeView = tv }
+                    />
                 </Modal.Body>
             </Modal>
         );
     }
 
-    static open(typeName: string, options?: TreeClient.TreeModalOptions): Promise<Lite<TreeEntity>> {
+    static open(typeName: string, filterOptions: FilterOption[],  options?: TreeClient.TreeModalOptions): Promise<Lite<TreeEntity> | undefined> {
         return openModal<TreeNode>(<TreeModal
-            typeName ={typeName}
+            filterOptions={filterOptions}
+            typeName={typeName}
             title={options && options.title} />)
-            .then(tn => tn ? tn.lite : null);
+            .then(tn => tn && tn.lite);
     }
 }
 

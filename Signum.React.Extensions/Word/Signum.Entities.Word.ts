@@ -10,6 +10,30 @@ import * as Signum from '../Basics/Signum.Entities.Basics'
 import * as Files from '../Files/Signum.Entities.Files'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
+import { FilterOptionParsed, OrderOptionParsed, FilterRequest, OrderRequest, Pagination } from '../../../Framework/Signum.React/Scripts/FindOptions' 
+
+//Partial
+export interface QueryModel {
+    queryKey: string;
+
+    filters: FilterRequest[];
+    orders: OrderRequest[];
+    pagination: Pagination;
+}
+export const MultiEntityModel = new Type<MultiEntityModel>("MultiEntityModel");
+export interface MultiEntityModel extends Entities.ModelEntity {
+    Type: "MultiEntityModel";
+    entities: Entities.MList<Entities.Lite<Entities.Entity>>;
+}
+
+export const QueryModel = new Type<QueryModel>("QueryModel");
+export interface QueryModel extends Entities.ModelEntity {
+    Type: "QueryModel";
+}
+
+export module QueryModelMessage {
+    export const ConfigureYourQueryAndPressSearchBeforeOk = new MessageKey("QueryModelMessage", "ConfigureYourQueryAndPressSearchBeforeOk");
+}
 
 export const SystemWordTemplateEntity = new Type<SystemWordTemplateEntity>("SystemWordTemplate");
 export interface SystemWordTemplateEntity extends Entities.Entity {
@@ -54,6 +78,8 @@ export module WordTemplateMessage {
     export const _01RequiresExtraParameters = new MessageKey("WordTemplateMessage", "_01RequiresExtraParameters");
     export const SelectTheSourceOfDataForYourTableOrChart = new MessageKey("WordTemplateMessage", "SelectTheSourceOfDataForYourTableOrChart");
     export const WriteThisKeyAsTileInTheAlternativeTextOfYourTableOrChart = new MessageKey("WordTemplateMessage", "WriteThisKeyAsTileInTheAlternativeTextOfYourTableOrChart");
+    export const NoDefaultTemplateDefined = new MessageKey("WordTemplateMessage", "NoDefaultTemplateDefined");
+    export const WordReport = new MessageKey("WordTemplateMessage", "WordReport");
 }
 
 export module WordTemplateOperation {
@@ -66,6 +92,12 @@ export module WordTemplateOperation {
 export module WordTemplatePermission {
     export const GenerateReport : Authorization.PermissionSymbol = registerSymbol("Permission", "WordTemplatePermission.GenerateReport");
 }
+
+export const WordTemplateVisibleOn = new EnumType<WordTemplateVisibleOn>("WordTemplateVisibleOn");
+export type WordTemplateVisibleOn =
+    "Single" |
+    "Multiple" |
+    "Query";
 
 export const WordTransformerSymbol = new Type<WordTransformerSymbol>("WordTransformer");
 export interface WordTransformerSymbol extends Entities.Symbol {

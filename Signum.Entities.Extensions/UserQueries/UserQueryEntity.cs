@@ -59,7 +59,11 @@ namespace Signum.Entities.UserQueries
 
         [NotNullable, PreserveOrder]
         public MList<QueryColumnEmbedded> Columns { get; set; } = new MList<QueryColumnEmbedded>();
+        
+        public bool SearchOnLoad { get; set; } = true;
 
+        public bool ShowFilterButton { get; set; } = true;
+        
         PaginationMode? paginationMode;
         public PaginationMode? PaginationMode
         {
@@ -149,9 +153,9 @@ namespace Signum.Entities.UserQueries
             ElementsPerPage = element.Attribute("ElementsPerPage")?.Let(a => int.Parse(a.Value));
             PaginationMode = element.Attribute("PaginationMode")?.Let(a => a.Value.ToEnum<PaginationMode>());
             ColumnsMode = element.Attribute("ColumnsMode").Value.ToEnum<ColumnOptionsMode>();
-            Filters.Synchronize(element.Element("Filters")?.Elements().EmptyIfNull().ToList(), (f, x) => f.FromXml(x, ctx));
-            Columns.Synchronize(element.Element("Columns")?.Elements().EmptyIfNull().ToList(), (c, x) => c.FromXml(x, ctx));
-            Orders.Synchronize(element.Element("Orders")?.Elements().EmptyIfNull().ToList(), (o, x) => o.FromXml(x, ctx));
+            Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
+            Columns.Synchronize(element.Element("Columns")?.Elements().ToList(), (c, x) => c.FromXml(x, ctx));
+            Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
             ParseData(ctx.GetQueryDescription(Query));
         }
 

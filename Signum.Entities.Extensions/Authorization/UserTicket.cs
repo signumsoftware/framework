@@ -37,7 +37,7 @@ namespace Signum.Entities.Authorization
         {
             Match m = Regex.Match(ticket, @"^(?<id>.*)\|(?<ticket>.*)$");
             if (!m.Success) throw new FormatException("The content of the ticket has an invalid format");
-            return (userId : PrimaryKey.Parse(m.Groups["id"].Value, typeof(UserEntity)), ticket: m.Groups["ticket"].Value);
+            return (userId: PrimaryKey.Parse(m.Groups["id"].Value, typeof(UserEntity)), ticket: m.Groups["ticket"].Value);
         }
     }
 }

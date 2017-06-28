@@ -18,7 +18,7 @@ import InlineCaseTags from './InlineCaseTags'
 import { RouteComponentProps } from "react-router";
 
 require("../../../../Framework/Signum.React/Scripts/Frames/Frames.css");
-require("./Case.css");
+require("./CaseAct.css");
 
 interface CaseFramePageProps extends RouteComponentProps<{ workflowId: string; mainEntityStrategy: string; caseActivityId?: string }> {
 }
@@ -54,8 +54,13 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
         });
     }
 
+    componentWillUnmount() {
+        Navigator.setTitle();
+    }
+
     load(props: CaseFramePageProps) {
         this.loadEntity(props)
+            .then(() => Navigator.setTitle(this.state.pack!.activity.case.toStr))
             .then(() => this.loadComponent())
             .done();
     }

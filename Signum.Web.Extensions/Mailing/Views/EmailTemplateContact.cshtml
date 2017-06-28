@@ -2,7 +2,7 @@
 @using Signum.Entities.DynamicQuery
 @using Signum.Web.UserAssets
 @using Signum.Web.Mailing
-@using (var tc = Html.TypeContext<EmailTemplateContactEntity>())
+@using (var tc = Html.TypeContext<EmailTemplateContactEmbedded>())
 {
     
     using(var sc = tc.SubContext())

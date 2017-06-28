@@ -67,7 +67,7 @@ WriteLiteral("\r\n");
 
             
             #line 6 "..\..\UserQueries\Views\QueryOrder.cshtml"
- using (var e = Html.TypeContext<QueryOrderEntity>())
+ using (var e = Html.TypeContext<QueryOrderEmbedded>())
 {
     e.FormGroupStyle = FormGroupStyle.None;
     

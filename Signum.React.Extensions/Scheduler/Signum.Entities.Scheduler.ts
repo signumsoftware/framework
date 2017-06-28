@@ -42,6 +42,17 @@ export interface IScheduleRuleEntity extends Entities.Entity {
 export interface ITaskEntity extends Entities.Entity {
 }
 
+export module ITaskMessage {
+    export const Execute = new MessageKey("ITaskMessage", "Execute");
+    export const Executions = new MessageKey("ITaskMessage", "Executions");
+    export const LastExecution = new MessageKey("ITaskMessage", "LastExecution");
+}
+
+export module ITaskOperation {
+    export const ExecuteSync : Entities.ConstructSymbol_From<ScheduledTaskLogEntity, ITaskEntity> = registerSymbol("Operation", "ITaskOperation.ExecuteSync");
+    export const ExecuteAsync : Entities.ExecuteSymbol<ITaskEntity> = registerSymbol("Operation", "ITaskOperation.ExecuteAsync");
+}
+
 export const ScheduledTaskEntity = new Type<ScheduledTaskEntity>("ScheduledTask");
 export interface ScheduledTaskEntity extends Entities.Entity {
     Type: "ScheduledTask";
@@ -56,15 +67,20 @@ export interface ScheduledTaskEntity extends Entities.Entity {
 export const ScheduledTaskLogEntity = new Type<ScheduledTaskLogEntity>("ScheduledTaskLog");
 export interface ScheduledTaskLogEntity extends Entities.Entity {
     Type: "ScheduledTaskLog";
+    task?: ITaskEntity | null;
     scheduledTask?: ScheduledTaskEntity | null;
     user?: Entities.Lite<Basics.IUserEntity> | null;
-    task?: ITaskEntity | null;
     startTime?: string;
     endTime?: string | null;
     machineName?: string | null;
     applicationName?: string | null;
     productEntity?: Entities.Lite<Entities.Entity> | null;
     exception?: Entities.Lite<Basics.ExceptionEntity> | null;
+    remarks?: string | null;
+}
+
+export module ScheduledTaskLogOperation {
+    export const CancelRunningTask : Entities.ExecuteSymbol<ScheduledTaskLogEntity> = registerSymbol("Operation", "ScheduledTaskLogOperation.CancelRunningTask");
 }
 
 export module ScheduledTaskOperation {
@@ -103,6 +119,7 @@ export module SchedulerMessage {
     export const ScheduleRuleWeeklyEntity = new MessageKey("SchedulerMessage", "ScheduleRuleWeeklyEntity");
     export const ScheduleRuleWeeklyDN_DayOfTheWeek = new MessageKey("SchedulerMessage", "ScheduleRuleWeeklyDN_DayOfTheWeek");
     export const Day0At1In2 = new MessageKey("SchedulerMessage", "Day0At1In2");
+    export const TaskIsNotRunning = new MessageKey("SchedulerMessage", "TaskIsNotRunning");
 }
 
 export module SchedulerPermission {
@@ -153,17 +170,6 @@ export interface ScheduleRuleWeekDaysEntity extends Entities.Entity, IScheduleRu
 export const SimpleTaskSymbol = new Type<SimpleTaskSymbol>("SimpleTask");
 export interface SimpleTaskSymbol extends Entities.Symbol, ITaskEntity {
     Type: "SimpleTask";
-}
-
-export module TaskMessage {
-    export const Execute = new MessageKey("TaskMessage", "Execute");
-    export const Executions = new MessageKey("TaskMessage", "Executions");
-    export const LastExecution = new MessageKey("TaskMessage", "LastExecution");
-}
-
-export module TaskOperation {
-    export const ExecuteSync : Entities.ConstructSymbol_From<Entities.Entity, ITaskEntity> = registerSymbol("Operation", "TaskOperation.ExecuteSync");
-    export const ExecuteAsync : Entities.ExecuteSymbol<ITaskEntity> = registerSymbol("Operation", "TaskOperation.ExecuteAsync");
 }
 
 export const TypeEvent = new EnumType<TypeEvent>("TypeEvent");

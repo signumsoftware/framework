@@ -56,7 +56,7 @@
   <Type Name="CachePermission" />
   <Type Name="CertFileType" />
   <Type Name="ChartColorEntity" />
-  <Type Name="ChartColumnEntity" />
+  <Type Name="ChartColumnEmbedded" />
   <Type Name="ChartColumnType" />
   <Type Name="ChartMessage" />
   <Type Name="ChartPaletteModel" />
@@ -66,15 +66,15 @@
     <Member Name="Filters" Description="Filtres" />
     <Member Name="QueryName" Description="Nom de la requête" />
   </Type>
-  <Type Name="ChartScriptColumnEntity" />
+  <Type Name="ChartScriptColumnEmbedded" />
   <Type Name="ChartScriptEntity" />
   <Type Name="ChartScriptOperation" />
-  <Type Name="ChartScriptParameterEntity" />
-  <Type Name="ClientCertificationFileEntity" />
+  <Type Name="ChartScriptParameterEmbedded" />
+  <Type Name="ClientCertificationFileEmbedded" />
   <Type Name="CountSearchControlPartEntity">
     <Member Name="UserQueries" Description="Requêtes utilisateur" />
   </Type>
-  <Type Name="CountUserQueryElementEntity" />
+  <Type Name="CountUserQueryElementEmbedded" />
   <Type Name="CSharpMigrationEntity" />
   <Type Name="CultureInfoEntity" />
   <Type Name="CultureInfoOperation" />
@@ -89,7 +89,7 @@
   </Type>
   <Type Name="DashboardOperation" />
   <Type Name="DashboardPermission" />
-  <Type Name="DateSpanEntity" Description="Date Span">
+  <Type Name="DateSpanEmbedded" Description="Date Span">
     <Member Name="Days" Description="Jours" />
     <Member Name="Months" Description="Mois" />
     <Member Name="Years" Description="Années" />
@@ -102,19 +102,19 @@
   <Type Name="DisconnectedExportTableEntity" />
   <Type Name="DisconnectedImportEntity" />
   <Type Name="DisconnectedImportState" />
-  <Type Name="DisconnectedImportTableEntity" />
+  <Type Name="DisconnectedImportTableEmbedded" />
   <Type Name="DisconnectedMachineEntity" />
   <Type Name="DisconnectedMachineOperation" />
   <Type Name="DisconnectedMachineState" />
   <Type Name="DisconnectedMessage" />
   <Type Name="DisconnectedSubsetMixin" />
-  <Type Name="EmailAddressEntity" />
-  <Type Name="EmailAttachmentEntity" />
+  <Type Name="EmailAddressEmbedded" />
+  <Type Name="EmailAttachmentEmbedded" />
   <Type Name="EmailAttachmentType" />
-  <Type Name="EmailConfigurationEntity" />
+  <Type Name="EmailConfigurationEmbedded" />
   <Type Name="EmailFileType" />
   <Type Name="EmailMasterTemplateEntity" />
-  <Type Name="EmailMasterTemplateMessageEntity" />
+  <Type Name="EmailMasterTemplateMessageEmbedded" />
   <Type Name="EmailMasterTemplateOperation" />
   <Type Name="EmailMessageEntity" Description="Message d'email">
     <Member Name="Body" Description="Corps" />
@@ -137,14 +137,14 @@
   <Type Name="EmailReceptionMixin" />
   <Type Name="EmailRecipientEntity" />
   <Type Name="EmailRecipientKind" />
-  <Type Name="EmailTemplateContactEntity" />
+  <Type Name="EmailTemplateContactEmbedded" />
   <Type Name="EmailTemplateEntity" Description="Modèle d'email" />
   <Type Name="EmailTemplateMessage" />
-  <Type Name="EmailTemplateMessageEntity" />
+  <Type Name="EmailTemplateMessageEmbedded" />
   <Type Name="EmailTemplateOperation" />
   <Type Name="EmailTemplateRecipientEntity" />
   <Type Name="EmailTemplateViewMessage" />
-  <Type Name="EmbeddedFileEntity" Description="Fichier incorporé">
+  <Type Name="FileEmbedded" Description="Fichier incorporé">
     <Member Name="BinaryFile" Description="Fichier binaire" />
     <Member Name="FileName" Description="Nom de fichier" />
     <Member Name="FullWebPath" Description="Chemin complet de Web" />
@@ -223,7 +223,7 @@
   <Type Name="HelpSyntaxMessage" />
   <Type Name="HolidayCalendarEntity" />
   <Type Name="HolidayCalendarOperation" />
-  <Type Name="HolidayEntity" Description="Vacances">
+  <Type Name="HolidayEmbedded" Description="Vacances">
     <Member Name="Date" Description="Date" />
     <Member Name="Name" Description="Nom" />
   </Type>
@@ -239,7 +239,7 @@
   <Type Name="ITaskEntity" />
   <Type Name="IUserAssetEntity" />
   <Type Name="LastAuthRulesImportEntity" />
-  <Type Name="LinkElementEntity" />
+  <Type Name="LinkElementEmbedded" />
   <Type Name="LinkListPartEntity" Description="Lien liste partie">
     <Member Name="Links" Description="Liens" />
   </Type>
@@ -274,7 +274,7 @@
   </Type>
   <Type Name="PackageOperationEntity" />
   <Type Name="PackageOperationProcess" />
-  <Type Name="PanelPartEntity" />
+  <Type Name="PanelPartEmbedded" />
   <Type Name="PanelStyle" />
   <Type Name="PasswordExpiresIntervalEntity" />
   <Type Name="PasswordExpiresIntervalOperation" />
@@ -314,26 +314,26 @@
   <Type Name="ProfilerPermission" />
   <Type Name="PropertyAllowed" />
   <Type Name="PropertyRouteEntity" />
-  <Type Name="PropertyRouteHelpEntity" />
+  <Type Name="PropertyRouteHelpEmbedded" />
   <Type Name="PropertyRulePack" />
-  <Type Name="QueryColumnEntity" Description="Colonne de requête">
+  <Type Name="QueryColumnEmbedded" Description="Colonne de requête">
     <Member Name="DisplayName" Description="Nom" />
   </Type>
-  <Type Name="QueryColumnHelpEntity" />
+  <Type Name="QueryColumnHelpEmbedded" />
   <Type Name="QueryEntity" Description="Recherche">
     <Member Name="Key" Description="Touche" />
   </Type>
-  <Type Name="QueryFilterEntity" Description="Filtre de requête">
+  <Type Name="QueryFilterEmbedded" Description="Filtre de requête">
     <Member Name="Operation" Description="Opération" />
     <Member Name="ValueString" Description="Chaîne de valeur" />
   </Type>
   <Type Name="QueryHelpEntity" />
   <Type Name="QueryHelpOperation" />
-  <Type Name="QueryOrderEntity" Description="Ordre de requête">
+  <Type Name="QueryOrderEmbedded" Description="Ordre de requête">
     <Member Name="OrderType" Description="Type d'ordre" />
   </Type>
   <Type Name="QueryRulePack" />
-  <Type Name="QueryTokenEntity" />
+  <Type Name="QueryTokenEmbedded" />
   <Type Name="ResetPasswordRequestEntity" Description="Demande de nouveau mot de passe">
     <Member Name="Code" Description="Code" />
     <Member Name="RequestDate" Description="Date de la demande" />
@@ -374,7 +374,7 @@
   <Type Name="SessionLogEntity" />
   <Type Name="SessionLogPermission" />
   <Type Name="SimpleTaskSymbol" />
-  <Type Name="SMSConfigurationEntity" />
+  <Type Name="SMSConfigurationEmbedded" />
   <Type Name="SmsMessage" />
   <Type Name="SMSMessageEntity" />
   <Type Name="SMSMessageOperation" />
@@ -384,12 +384,12 @@
   <Type Name="SMSSendPackageEntity" />
   <Type Name="SMSTemplateEntity" />
   <Type Name="SMSTemplateMessage" />
-  <Type Name="SMSTemplateMessageEntity" />
+  <Type Name="SMSTemplateMessageEmbedded" />
   <Type Name="SMSTemplateOperation" />
   <Type Name="SMSUpdatePackageEntity" />
   <Type Name="SmtpConfigurationEntity" />
   <Type Name="SmtpConfigurationOperation" />
-  <Type Name="SmtpNetworkDeliveryEntity" />
+  <Type Name="SmtpNetworkDeliveryEmbedded" />
   <Type Name="SqlMigrationEntity" />
   <Type Name="SystemEmailEntity" />
   <Type Name="SystemWordTemplateEntity" />
@@ -403,7 +403,7 @@
   <Type Name="TranslationPermission" />
   <Type Name="TranslationReplacementEntity" />
   <Type Name="TranslationReplacementOperation" />
-  <Type Name="TranslatorUserCultureEntity" />
+  <Type Name="TranslatorUserCultureEmbedded" />
   <Type Name="TranslatorUserEntity" />
   <Type Name="TranslatorUserOperation" />
   <Type Name="TypeAllowed" />
@@ -414,7 +414,7 @@
   <Type Name="TypeSearchResult" />
   <Type Name="UserAssetMessage" />
   <Type Name="UserAssetPermission" />
-  <Type Name="UserAssetPreviewLine" />
+  <Type Name="UserAssetPreviewLineEmbedded" />
   <Type Name="UserAssetPreviewModel" />
   <Type Name="UserChartEntity" Description="Graphique utilisateur">
     <Member Name="DisplayName" Description="Nom d'affichage" />

@@ -81,7 +81,7 @@ namespace Signum.Engine.SMS
                 SMSLogic.Provider = provider;
 
                 sb.Include<SMSMessageEntity>()
-                    .WithQuery(dqm, m => new
+                    .WithQuery(dqm, () => m => new
                     {
                         Entity = m,
                         m.Id,
@@ -93,7 +93,7 @@ namespace Signum.Engine.SMS
                     });
 
                 sb.Include<SMSTemplateEntity>()
-                    .WithQuery(dqm, t => new
+                    .WithQuery(dqm, () => t => new
                     {
                         Entity = t,
                         t.Id,
@@ -219,7 +219,7 @@ namespace Signum.Engine.SMS
                 {
                     var template = args.GetArg<SMSTemplateEntity>();
 
-                    if (TypeLogic.DnToType[template.AssociatedType] != typeof(T))
+                    if (TypeLogic.EntityToType[template.AssociatedType] != typeof(T))
                         throw new ArgumentException("The SMS template is associated with the type {0} instead of {1}"
                             .FormatWith(template.AssociatedType.FullClassName, typeof(T).FullName));
 
@@ -282,7 +282,7 @@ namespace Signum.Engine.SMS
                     var template = args.GetArg<SMSTemplateEntity>();
 
                     if (template.AssociatedType != null &&
-                        TypeLogic.DnToType[template.AssociatedType] != typeof(T))
+                        TypeLogic.EntityToType[template.AssociatedType] != typeof(T))
                         throw new ArgumentException("The SMS template is associated with the type {0} instead of {1}"
                             .FormatWith(template.AssociatedType.FullClassName, typeof(T).FullName));
 

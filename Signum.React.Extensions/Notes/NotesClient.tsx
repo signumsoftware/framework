@@ -16,8 +16,8 @@ import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 
 export function start(options: { routes: JSX.Element[], couldHaveNotes?: (typeName: string) => boolean }) {
-    Navigator.addSettings(new EntitySettings(NoteEntity, e => _import('./Templates/Note')));
-    Navigator.addSettings(new EntitySettings(NoteTypeEntity, e => _import('./Templates/NoteType')));
+    Navigator.addSettings(new EntitySettings(NoteEntity, e => import('./Templates/Note')));
+    Navigator.addSettings(new EntitySettings(NoteTypeEntity, e => import('./Templates/NoteType')));
 
     if (options.couldHaveNotes) {
         Operations.addSettings(new EntityOperationSettings(NoteOperation.CreateNoteFromEntity, {

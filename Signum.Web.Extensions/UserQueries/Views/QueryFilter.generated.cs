@@ -67,7 +67,7 @@ WriteLiteral("\r\n");
 
             
             #line 6 "..\..\UserQueries\Views\QueryFilter.cshtml"
- using (var e = Html.TypeContext<QueryFilterEntity>())
+ using (var e = Html.TypeContext<QueryFilterEmbedded>())
 {
     e.FormGroupStyle = FormGroupStyle.None;
         

@@ -15,6 +15,7 @@ export interface ToolbarElementEmbedded extends Entities.EmbeddedEntity {
     iconName?: string | null;
     iconColor?: string | null;
     content?: Entities.Lite<Entities.Entity> | null;
+    url?: string | null;
     openInPopup?: boolean;
     autoRefreshPeriod?: number | null;
 }

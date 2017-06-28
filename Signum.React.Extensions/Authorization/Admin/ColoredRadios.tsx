@@ -11,17 +11,22 @@ import { EntityLine, ValueLine } from '../../../../Framework/Signum.React/Script
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { Api } from '../AuthClient'
 import { PermissionRulePack, AuthAdminMessage, PermissionSymbol, AuthMessage } from '../Signum.Entities.Authorization'
 
 
 require("./AuthAdmin.css");
+interface ColorRadioProps {
+    checked: boolean;
+    onClicked: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+    color: string;
+ 	title?: string;
+}
 
-export class ColorRadio extends React.Component<{ checked: boolean, onClicked: (e: React.MouseEvent<any>) => void, color: string }, void>{
+export class ColorRadio extends React.Component<ColorRadioProps, void>{
 
     render() {
         return (
-            <a onClick={e => { e.preventDefault(); this.props.onClicked(e); } }
+            <a onClick={e => { e.preventDefault(); this.props.onClicked(e); }} title={this.props.title}
                 className={classes("sf-auth-chooser", "fa", this.props.checked ? "fa-dot-circle-o" : "fa-circle-o")}
                 style={{ color: this.props.checked ? this.props.color : "#aaa" }}>
             </a>

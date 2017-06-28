@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace Signum.Entities.Migrations
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
-    public class ExecutedLoadProcessEntity : Entity
+    public class LoadMethodLogEntity : Entity
     {
         [SqlDbType(Size = 400)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 400)]
@@ -29,7 +29,7 @@ namespace Signum.Entities.Migrations
 
         public DateTime? End { get; set; }
 
-        static Expression<Func<ExecutedLoadProcessEntity, double?>> DurationExpression =
+        static Expression<Func<LoadMethodLogEntity, double?>> DurationExpression =
             log => (double?)(log.End - log.Start).Value.TotalMilliseconds;
         [ExpressionField("DurationExpression"), Unit("ms")]
         public double? Duration
@@ -39,7 +39,7 @@ namespace Signum.Entities.Migrations
 
         public Lite<ExceptionEntity> Exception{ get; set; }
 
-        static Expression<Func<ExecutedLoadProcessEntity, string>> ToStringExpression = e => e.MethodName;
+        static Expression<Func<LoadMethodLogEntity, string>> ToStringExpression = e => e.MethodName;
         [ExpressionField]
         public override string ToString()
         {

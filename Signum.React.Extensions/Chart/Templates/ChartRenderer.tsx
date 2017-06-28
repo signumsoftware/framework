@@ -12,8 +12,6 @@ import {
    ChartColorEntity, ChartScriptEntity, ChartParameterEmbedded, ChartParameterType } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 
-const colorbrewer = require("colorbrewer");
-
 require("../Chart.css");
 
 declare global {
@@ -79,11 +77,11 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
         }); 
 
         const chart = d3.select(node)
-            .append('svg:svg').attr('width', rect.width).attr('height', rect.height);
+            .append('svg:svg').attr("direction", "ltr").attr('width', rect.width).attr('height', rect.height);
 
         node.addEventListener("click", this.handleOnClick);
 
-        let func: (chart: d3.Selection<any>, data: ChartClient.ChartTable) => void;
+        let func: (chart: d3.Selection<any, any, any, any>, data: ChartClient.ChartTable) => void;
         let __baseLineNumber__: number = 0;
         try {
             const width = rect.width;
@@ -184,7 +182,7 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
         }
     }
 
-    showError(e: any, __baseLineNumber__: number, chart: d3.Selection<any>) {
+    showError(e: any, __baseLineNumber__: number, chart: d3.Selection<any, any, any, any>) {
         let message = e.toString();
 
         const regex = /(DrawChart.*@.*:(.*))|(DrawChart .*:(.*):.*\)\))|(DrawChart .*:(.*):.*\))/;

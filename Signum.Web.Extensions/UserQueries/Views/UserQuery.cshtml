@@ -45,13 +45,15 @@
     <p class="messageEntity col-sm-offset-2">
         @UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().FormatWith(CurrentEntityConverter.CurrentEntityKey)
     </p>
-    
+
+    @Html.ValueLine(e, f => f.SearchOnLoad)
+    @Html.ValueLine(e, f => f.ShowFilterButton)
     @Html.ValueLine(e, f => f.WithoutFilters)
 
     using (var sc = e.SubContext())
     {
         sc.FormGroupSize = FormGroupSize.Small;
-        
+
     <div class="repeater-inline form-inline sf-filters-list ">
         @Html.EntityRepeater(e, f => f.Filters, er => { er.PreserveViewData = true; })
     </div>

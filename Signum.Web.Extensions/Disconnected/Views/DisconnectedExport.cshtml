@@ -17,8 +17,8 @@
             <table class="table table-condensed">
                 <thead>
                     <tr>
-                        <td>@Html.PropertyNiceName((DisconnectedExportTableEntity de) => de.Type)</td>
-                        <td>@Html.PropertyNiceName((DisconnectedExportTableEntity de) => de.CopyTable)</td>
+                        <td>@Html.PropertyNiceName((DisconnectedExportTableEmbedded de) => de.Type)</td>
+                        <td>@Html.PropertyNiceName((DisconnectedExportTableEmbedded de) => de.CopyTable)</td>
                     </tr>
                 </thead>
                 @foreach (var dtc in dc.TypeElementContext(a => a.Copies))

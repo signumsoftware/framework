@@ -56,7 +56,7 @@ namespace ASP
         }
         public override void Execute()
         {
-WriteLiteral("\r\n");
+WriteLiteral("\n");
 
             
             #line 5 "..\..\Omnibox\Views\OmniboxPanelPart.cshtml"
@@ -76,23 +76,23 @@ WriteLiteral(" type=\"text\"");
 
 WriteLiteral(" class=\"form-control\"");
 
-WriteAttribute("placeholder", Tuple.Create(" placeholder=\"", 194), Tuple.Create("\"", 245)
+WriteAttribute("placeholder", Tuple.Create(" placeholder=\"", 188), Tuple.Create("\"", 239)
             
             #line 7 "..\..\Omnibox\Views\OmniboxPanelPart.cshtml"
-          , Tuple.Create(Tuple.Create("", 208), Tuple.Create<System.Object, System.Int32>(OmniboxMessage.Search.NiceToString()
+          , Tuple.Create(Tuple.Create("", 202), Tuple.Create<System.Object, System.Int32>(OmniboxMessage.Search.NiceToString()
             
             #line default
             #line hidden
-, 208), false)
+, 202), false)
 );
 
-WriteLiteral(" />\r\n");
+WriteLiteral(" />\n");
 
 WriteLiteral("    <script");
 
 WriteLiteral(" type=\"text/javascript\"");
 
-WriteLiteral(">\r\n");
+WriteLiteral(">\n");
 
 WriteLiteral("        ");
 
@@ -103,7 +103,7 @@ WriteLiteral("        ");
             
             #line default
             #line hidden
-WriteLiteral("\r\n    </script>\r\n");
+WriteLiteral("\n    </script>\n");
 
             
             #line 11 "..\..\Omnibox\Views\OmniboxPanelPart.cshtml"

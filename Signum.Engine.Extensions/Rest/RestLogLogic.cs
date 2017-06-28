@@ -8,9 +8,10 @@ using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Entities.Basics;
-using Signum.Entities.RestLog;
+using Signum.Entities.Rest;
+using System.Threading;
 
-namespace Signum.Engine.RestLog
+namespace Signum.Engine.Rest
 {
     public class RestLogLogic
     {
@@ -19,11 +20,11 @@ namespace Signum.Engine.RestLog
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<RestLogEntity>()
-                    .WithIndex(a=>a.StartDate)
-                    .WithIndex(a=>a.EndDate)
-                    .WithIndex(a=>a.Controller)
-                    .WithIndex(a=>a.Action)
-                    .WithQuery(dqm, e => new
+                    .WithIndex(a => a.StartDate)
+                    .WithIndex(a => a.EndDate)
+                    .WithIndex(a => a.Controller)
+                    .WithIndex(a => a.Action)
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -34,13 +35,13 @@ namespace Signum.Engine.RestLog
                         e.Exception,
                     });
 
+                ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteRestLogs;
             }
-            ExceptionLogic.DeleteLogs += DeleteRestLogs;
         }
 
-        private static void DeleteRestLogs(DeleteLogParametersEmbedded parameters)
+        private static void ExceptionLogic_DeleteRestLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            Database.Query<RestLogEntity>().Where(a => a.StartDate < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize,parameters.MaxChunks);
+            Database.Query<RestLogEntity>().Where(a => a.StartDate < parameters.DateLimit).UnsafeDeleteChunksLog(parameters, sb, token);
         }
     }
 }

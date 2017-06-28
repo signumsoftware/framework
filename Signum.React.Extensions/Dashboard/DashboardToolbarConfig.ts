@@ -21,10 +21,10 @@ export default class DashboardToolbarConfig extends ToolbarConfig<DashboardEntit
     }
 
     getIcon(element: ToolbarResponse<DashboardEntity>) {
-        return this.coloredIcon(element.iconName || "glyphicon glyphicon-th-large", element.iconColor || "darkslateblue");
+        return ToolbarConfig.coloredIcon(element.iconName || "glyphicon glyphicon-th-large", element.iconColor || "darkslateblue");
     }
 
     navigateTo(element: ToolbarResponse<DashboardEntity>): Promise<string> {
-        return Promise.resolve(DashboardClient.dashboardUrl(element.lite!));
+        return Promise.resolve(DashboardClient.dashboardUrl(element.content!));
     }
 }

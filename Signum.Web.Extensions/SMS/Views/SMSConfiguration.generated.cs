@@ -54,7 +54,7 @@ WriteLiteral("\r\n");
 
             
             #line 4 "..\..\SMS\Views\SMSConfiguration.cshtml"
- using (var tc = Html.TypeContext<SMSConfigurationEntity>())
+ using (var tc = Html.TypeContext<SMSConfigurationEmbedded>())
 {   
     
             

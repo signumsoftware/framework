@@ -2,6 +2,7 @@
 import { Tabs, Tab } from 'react-bootstrap'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
+import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
 import {ValueSearchControl, SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
@@ -26,6 +27,12 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
 
     componentWillMount() {
         this.loadState().done();
+  
+        Navigator.setTitle("Times state");
+    }
+
+    componentWillUnmount() {
+        Navigator.setTitle();
     }
 
     loadState() {
@@ -39,7 +46,6 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
 
 
     render() {
-        document.title = "Times state";
 
         if (this.state.times == undefined)
             return <h3>Times (loading...)</h3>;

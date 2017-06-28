@@ -61,28 +61,28 @@ namespace ASP
         }
         public override void Execute()
         {
-WriteLiteral("\r\n");
+WriteLiteral("\n");
 
 WriteLiteral("<div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 140), Tuple.Create("\"", 164)
-, Tuple.Create(Tuple.Create("", 145), Tuple.Create("dashboard-", 145), true)
+WriteAttribute("id", Tuple.Create(" id=\"", 133), Tuple.Create("\"", 157)
+, Tuple.Create(Tuple.Create("", 138), Tuple.Create("dashboard-", 138), true)
             
             #line 8 "..\..\Dashboard\Views\DashboardNavbarView.cshtml"
-, Tuple.Create(Tuple.Create("", 155), Tuple.Create<System.Object, System.Int32>(Model.Id
+, Tuple.Create(Tuple.Create("", 148), Tuple.Create<System.Object, System.Int32>(Model.Id
             
             #line default
             #line hidden
-, 155), false)
+, 148), false)
 );
 
 WriteLiteral(" class=\"navbar-collapse collapse\"");
 
-WriteLiteral(">\r\n    <ul");
+WriteLiteral(">\n    <ul");
 
 WriteLiteral(" class=\"nav navbar-nav\"");
 
-WriteLiteral(">\r\n");
+WriteLiteral(">\n");
 
             
             #line 10 "..\..\Dashboard\Views\DashboardNavbarView.cshtml"
@@ -102,7 +102,7 @@ WriteLiteral(">\r\n");
             
             #line default
             #line hidden
-WriteLiteral("                <li>\r\n");
+WriteLiteral("                <li>\n");
 
 WriteLiteral("                    ");
 
@@ -113,7 +113,7 @@ WriteLiteral("                    ");
             
             #line default
             #line hidden
-WriteLiteral("\r\n                </li>\r\n");
+WriteLiteral("\n                </li>\n");
 
             
             #line 19 "..\..\Dashboard\Views\DashboardNavbarView.cshtml"
@@ -122,7 +122,7 @@ WriteLiteral("\r\n                </li>\r\n");
             
             #line default
             #line hidden
-WriteLiteral("\r\n    </ul>\r\n</div>\r\n\r\n<script>\r\n    $(function () {\r\n        $(\'#dashboard-");
+WriteLiteral("\n    </ul>\n</div>\n\n<script>\n    $(function () {\n        $(\'#dashboard-");
 
             
             #line 26 "..\..\Dashboard\Views\DashboardNavbarView.cshtml"
@@ -131,7 +131,7 @@ WriteLiteral("\r\n    </ul>\r\n</div>\r\n\r\n<script>\r\n    $(function () {\r\n
             
             #line default
             #line hidden
-WriteLiteral(" .dashboard-tooltip[data-toggle=\"tooltip\"]\').tooltip();\r\n    })\r\n</script>\r\n");
+WriteLiteral(" .dashboard-tooltip[data-toggle=\"tooltip\"]\').tooltip();\n    })\n</script>\n");
 
         }
     }

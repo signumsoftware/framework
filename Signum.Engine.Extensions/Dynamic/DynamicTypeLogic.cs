@@ -31,7 +31,7 @@ namespace Signum.Engine.Dynamic
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<DynamicTypeEntity>()
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -394,8 +394,8 @@ namespace Signum.Engine.Dynamic
 
             StringBuilder sb = new StringBuilder();
 
-            string inititalizer = (property.IsMList != null) ? $" = new {type}()": null;
-            string fieldName = property.Name.FirstLower();
+            string inititalizer = (property.IsMList != null) ? $" = new {type}()" : null;
+            string fieldName = GetFieldName(property);
 
             WriteAttributeTag(sb, GetFieldAttributes(property));
             sb.AppendLine($"{type} {fieldName}{inititalizer};");
@@ -407,6 +407,16 @@ namespace Signum.Engine.Dynamic
             sb.AppendLine("}");
 
             return sb.ToString();
+        }
+
+        private static string GetFieldName(DynamicProperty property)
+        {
+            var fn = property.Name.FirstLower();
+
+            if (CSharpRenderer.Keywords.Contains(fn))
+                return "@" + fn;
+
+            return fn;
         }
 
         private IEnumerable<string> GetPropertyAttributes(DynamicProperty property)
@@ -479,13 +489,17 @@ namespace Signum.Engine.Dynamic
                     atts.Add($"BackReferenceColumnName({Literal(mlist.BackReferenceName)})");
             }
 
+            if (property.CustomAttributes.HasText())
+                atts.Add(property.CustomAttributes);
+
+
             return atts;
         }
 
         private string ParseTableName(string value)
         {
 
-            var objName = ObjectName.Parse(Def.TableName);
+            var objName = ObjectName.Parse(value);
 
             return new List<string>
                 {
@@ -660,7 +674,7 @@ namespace Signum.Engine.Dynamic
             {
                 var lines = new[] { "Entity = e" }.Concat(queryFields);
 
-                sb.AppendLine($@"    .WithQuery(dqm, e => new 
+                sb.AppendLine($@"    .WithQuery(dqm, () => e => new 
     {{ 
 { lines.ToString(",\r\n").Indent(8)}
     }})");

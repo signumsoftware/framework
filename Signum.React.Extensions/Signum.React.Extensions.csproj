@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.4\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.4\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
-  <Import Project="..\..\packages\Microsoft.Net.Compilers.2.1.0\build\Microsoft.Net.Compilers.props" Condition="Exists('..\..\packages\Microsoft.Net.Compilers.2.1.0\build\Microsoft.Net.Compilers.props')" />
+  <Import Project="..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.5\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.5\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
+  <Import Project="..\..\packages\Microsoft.Net.Compilers.2.2.0\build\Microsoft.Net.Compilers.props" Condition="Exists('..\..\packages\Microsoft.Net.Compilers.2.2.0\build\Microsoft.Net.Compilers.props')" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -28,7 +28,7 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <TypeScriptToolsVersion>2.2</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>2.4</TypeScriptToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -52,15 +52,14 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DocumentFormat.OpenXml, Version=0.0.1.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\DocumentFormat.OpenXml.2.7.1\lib\net45\DocumentFormat.OpenXml.dll</HintPath>
+    <Reference Include="DocumentFormat.OpenXml, Version=2.7.2.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\DocumentFormat.OpenXml.2.7.2\lib\net46\DocumentFormat.OpenXml.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.4\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
+    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.5\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.SqlServer.Types, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.SqlServer.Types.Unofficial.12.0.2000.8\lib\net40\Microsoft.SqlServer.Types.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Microsoft.SqlServer.Types, Version=14.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.SqlServer.Types.14.0.314.76\lib\net40\Microsoft.SqlServer.Types.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
@@ -72,6 +71,12 @@
     <Reference Include="System.Activities" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.IdentityModel" />
+    <Reference Include="System.IO.FileSystem.Primitives, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.IO.FileSystem.Primitives.4.3.0\lib\net46\System.IO.FileSystem.Primitives.dll</HintPath>
+    </Reference>
+    <Reference Include="System.IO.Packaging, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.IO.Packaging.4.3.0\lib\net46\System.IO.Packaging.dll</HintPath>
+    </Reference>
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
@@ -86,8 +91,8 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.ValueTuple, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.ValueTuple.4.3.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+    <Reference Include="System.ValueTuple, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.ValueTuple.4.3.1\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
@@ -167,9 +172,11 @@
     <Compile Include="Isolation\IsolationServer.cs" />
     <Compile Include="Printing\PrintController.cs" />
     <Compile Include="Printing\PrintServer.cs" />
-    <Compile Include="RestLog\RestLogFilter.cs" />
     <Compile Include="Mailing\MailingController.cs" />
     <Compile Include="Mailing\MailingServer.cs" />
+    <Compile Include="Rest\RestApiKeyController.cs" />
+    <Compile Include="Rest\RestLogFilter.cs" />
+    <Compile Include="Rest\RestServer.cs" />
     <Compile Include="Toolbar\ToolbarController.cs" />
     <Compile Include="Toolbar\ToolbarServer.cs" />
     <Compile Include="Tree\TreeController.cs" />
@@ -182,6 +189,7 @@
     <TypeScriptCompile Include="Basics\BasicsClient.tsx" />
     <TypeScriptCompile Include="Basics\Color.ts" />
     <TypeScriptCompile Include="Basics\Templates\DateSpan.tsx" />
+    <TypeScriptCompile Include="Basics\Templates\PropertyRouteCombo.tsx" />
     <TypeScriptCompile Include="Basics\Templates\TimeSpan.tsx" />
     <TypeScriptCompile Include="Chart\UserChartToolbarConfig.ts" />
     <TypeScriptCompile Include="Codemirror\XmlCodeMirror.tsx" />
@@ -264,6 +272,10 @@
     <TypeScriptCompile Include="Printing\Templates\PrintPackage.tsx" />
     <TypeScriptCompile Include="Printing\Templates\PrintLine.tsx" />
     <TypeScriptCompile Include="HtmlEditor\react-rte.d.ts" />
+    <TypeScriptCompile Include="Rest\RestClient.tsx" />
+    <TypeScriptCompile Include="Rest\Signum.Entities.Rest.ts" />
+    <TypeScriptCompile Include="Rest\Templates\RestApiKey.tsx" />
+    <TypeScriptCompile Include="Rest\Templates\RestLog.tsx" />
     <TypeScriptCompile Include="Toolbar\QueryToolbarConfig.ts" />
     <TypeScriptCompile Include="Toolbar\Signum.Entities.Toolbar.ts">
       <DependentUpon>Signum.Entities.Toolbar.t4s</DependentUpon>
@@ -273,12 +285,15 @@
     <TypeScriptCompile Include="Toolbar\Templates\ToolbarRenderer.tsx" />
     <TypeScriptCompile Include="Toolbar\Templates\ToolbarElement.tsx" />
     <TypeScriptCompile Include="Toolbar\Templates\ToolbarMenu.tsx" />
+    <TypeScriptCompile Include="Tree\TreeButton.tsx" />
     <TypeScriptCompile Include="Tree\TreeClient.tsx" />
     <TypeScriptCompile Include="Tree\TreeModal.tsx" />
     <TypeScriptCompile Include="Tree\TreeOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Tree\TreePage.tsx" />
     <TypeScriptCompile Include="Tree\TreeViewer.tsx" />
     <TypeScriptCompile Include="UserQueries\UserQueryToolbarConfig.tsx" />
+    <TypeScriptCompile Include="Word\WordMenu.tsx" />
+    <TypeScriptCompile Include="Word\Templates\QueryModel.tsx" />
     <TypeScriptCompile Include="Word\Templates\WordTemplate.tsx" />
     <TypeScriptCompile Include="Word\WordClient.tsx" />
     <TypeScriptCompile Include="Workflow\bpmn-js.d.ts" />
@@ -342,7 +357,7 @@
     <Content Include="Workflow\Workflow\InitialWorkflow.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Workflow\Case\Case.css" />
+    <Content Include="Workflow\Case\CaseAct.css" />
     <Content Include="Workflow\Bpmn\Bpmn.css" />
   </ItemGroup>
   <ItemGroup>
@@ -377,11 +392,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj">
-      <Project>{7F2DB6FE-C109-4057-B207-C62A767F905D}</Project>
+      <Project>{7f2db6fe-c109-4057-b207-c62a767f905d}</Project>
       <Name>Signum.Engine</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj">
-      <Project>{F2B51D08-498D-4C9F-8112-9521A7762B02}</Project>
+      <Project>{f2b51d08-498d-4c9f-8112-9521a7762b02}</Project>
       <Name>Signum.Entities</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Framework\Signum.React\Signum.React.csproj">
@@ -513,8 +528,6 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="Profiler\Heavy\HeavyListPage.tsx" />
     <TypeScriptCompile Include="Profiler\Times\TimesPage.tsx" />
-    <TypeScriptCompile Include="RestLog\Templates\RestLog.tsx" />
-    <TypeScriptCompile Include="RestLog\RestLogClient.tsx" />
     <TypeScriptCompile Include="Templating\Signum.Entities.Templating.ts">
       <DependentUpon>Signum.Entities.Templating.t4s</DependentUpon>
     </TypeScriptCompile>
@@ -639,9 +652,6 @@
     <Content Include="Profiler\Signum.Entities.Profiler.t4s" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="RestLog\Signum.Entities.RestLog.t4s" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Dynamic\Signum.Entities.Dynamic.t4s" />
   </ItemGroup>
   <ItemGroup>
@@ -653,6 +663,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Tree\Signum.Entities.Tree.t4s" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Rest\Signum.Entities.Rest.t4s" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
@@ -706,8 +719,8 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\packages\Microsoft.Net.Compilers.2.1.0\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Net.Compilers.2.1.0\build\Microsoft.Net.Compilers.props'))" />
-    <Error Condition="!Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.4\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.4\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.Net.Compilers.2.2.0\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Net.Compilers.2.2.0\build\Microsoft.Net.Compilers.props'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.5\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.5\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
   </Target>
   <UsingTask TaskName="SignumTSGenerator" AssemblyFile="..\..\Framework\Signum.TSGenerator\Binaries\Signum.TSGenerator.dll" />
   <Target Name="GenerateSignumTS">

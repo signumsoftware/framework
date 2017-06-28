@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { Route } from 'react-router'
 import { Dic } from '../../../Framework/Signum.React/Scripts/Globals';
-import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
+import { ajaxPost, ajaxGet, AbortableRequest } from '../../../Framework/Signum.React/Scripts/Services';
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import Typeahead from '../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import * as OmniboxClient from './OmniboxClient'
@@ -15,31 +15,30 @@ export interface OmniboxAutocompleteProps {
 
 export default class OmniboxAutocomplete extends React.Component<OmniboxAutocompleteProps, void>
 {
-    handleOnSelect = (result: OmniboxClient.OmniboxResult, e: React.SyntheticEvent<any>) => {
+    handleOnSelect = (result: OmniboxClient.OmniboxResult, e: React.KeyboardEvent<any> | React.MouseEvent<any>) => {
+
+        this.abortRequest.abort();
 
         const ke = e as React.KeyboardEvent<any>;
-
         if (ke.keyCode && ke.keyCode == 9) {
             return OmniboxClient.toString(result);
         }
+        e.persist();
 
-        const ctrlKey = ke.ctrlKey;
         const promise = OmniboxClient.navigateTo(result);
         if (promise) {
             promise
                 .then(url => {
-                    if (url) {
-                        if (ctrlKey)
-                            window.open(Navigator.toAbsoluteUrl(url));
-                        else
-                            Navigator.history.push(url);
-                    }
+                    if (url)
+                        Navigator.pushOrOpen(url, e);
                 }).done();
         }
         this.typeahead.blur();
 
         return null;
     }
+
+    abortRequest = new AbortableRequest((ac, query: string) => OmniboxClient.API.getResults(query, ac));
 
     typeahead: Typeahead;
 
@@ -48,7 +47,7 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
         let inputAttr = { tabIndex: -1, placeholder: OmniboxMessage.Search.niceToString(), ...this.props.inputAttrs };
         
         const result = (
-            <Typeahead ref={ta => this.typeahead = ta} getItems={OmniboxClient.API.getResults} 
+            <Typeahead ref={ta => this.typeahead = ta} getItems={str => this.abortRequest.getData(str)} 
                 renderItem={OmniboxClient.renderItem}
                 onSelect={this.handleOnSelect}
                 spanAttrs={this.props.spanAttrs}

@@ -6,7 +6,7 @@
 @using Signum.Web
 @using Signum.Entities.DynamicQuery
 @using Signum.Web.Mailing
-@using (var ec = Html.TypeContext<EmailTemplateMessageEntity>())
+@using (var ec = Html.TypeContext<EmailTemplateMessageEmbedded>())
 {
     ec.LabelColumns = new BsColumn(1);
     <div class="sf-email-template-message">

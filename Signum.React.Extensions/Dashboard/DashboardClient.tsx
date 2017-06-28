@@ -29,7 +29,7 @@ import { ImportRoute, ComponentModule } from "../../../Framework/Signum.React/Sc
 
 export interface PanelPartContentProps<T extends IPartEntity> {
     part: T;
-    entity: Lite<Entity>;
+    entity?: Lite<Entity>;
 }
 
 export interface PartRenderer<T extends IPartEntity>{
@@ -46,48 +46,50 @@ export function start(options: { routes: JSX.Element[] }) {
     UserAssetClient.start({ routes: options.routes });
     UserAssetClient.registerExportAssertLink(DashboardEntity);
 
-    Navigator.addSettings(new EntitySettings(DashboardEntity, e => _import('./Admin/Dashboard')));
+    Navigator.addSettings(new EntitySettings(DashboardEntity, e => import('./Admin/Dashboard')));
 
-    Navigator.addSettings(new EntitySettings(ValueUserQueryListPartEntity, e => _import('./Admin/ValueUserQueryListPart')));
-    Navigator.addSettings(new EntitySettings(LinkListPartEntity, e => _import('./Admin/LinkListPart')));
-    Navigator.addSettings(new EntitySettings(UserChartPartEntity, e => _import('./Admin/UserChartPart')));
-    Navigator.addSettings(new EntitySettings(UserQueryPartEntity, e => _import('./Admin/UserQueryPart')));
+    Navigator.addSettings(new EntitySettings(ValueUserQueryListPartEntity, e => import('./Admin/ValueUserQueryListPart')));
+    Navigator.addSettings(new EntitySettings(LinkListPartEntity, e => import('./Admin/LinkListPart')));
+    Navigator.addSettings(new EntitySettings(UserChartPartEntity, e => import('./Admin/UserChartPart')));
+    Navigator.addSettings(new EntitySettings(UserQueryPartEntity, e => import('./Admin/UserQueryPart')));
 
     Finder.addSettings({ queryName: DashboardEntity, defaultOrderColumn: "DashboardPriority", defaultOrderType: "Descending" });
 
-    options.routes.push(<ImportRoute path="~/dashboard/:dashboardId" onImportModule={() => _import("./View/DashboardPage")} />);
+    options.routes.push(<ImportRoute path="~/dashboard/:dashboardId" onImportModule={() => import("./View/DashboardPage")} />);
 
     registerRenderer(ValueUserQueryListPartEntity, {
-        component: () => _import<ComponentModule>('./View/ValueUserQueryListPart').then(a => a.default)
+        component: () => import('./View/ValueUserQueryListPart').then(a => a.default)
     });
     registerRenderer(LinkListPartEntity, {
-        component: () => _import<ComponentModule>('./View/LinkListPart').then(a => a.default)
+        component: () => import('./View/LinkListPart').then(a => a.default)
     });
     registerRenderer(UserChartPartEntity, {
-        component: () => _import<ComponentModule>('./View/UserChartPart').then(a => a.default),
+        component: () => import('./View/UserChartPart').then(a => a.default),
         handleTitleClick: (p, e, ev) => {
             ev.preventDefault();
-            navigateOrWindowsOpen(ev, Navigator.navigateRoute(p.userChart!));
+            Navigator.pushOrOpen(Navigator.navigateRoute(p.userChart!), ev);
         },
         handleFullScreenClick: (p, e, ev) => {
             ev.preventDefault();
+            ev.persist();
             UserChartClient.Converter.toChartRequest(p.userChart!, e)
-                .then(cr => navigateOrWindowsOpen(ev, ChartClient.Encoder.chartRequestPath(cr, { userChart: liteKey(toLite(p.userChart!)) })))
+                .then(cr => Navigator.pushOrOpen(ChartClient.Encoder.chartRequestPath(cr, { userChart: liteKey(toLite(p.userChart!)) }), ev))
                 .done();
         }
     });
 
 
     registerRenderer(UserQueryPartEntity, {
-        component: () => _import('./View/UserQueryPart').then((a: any) => a.default),
+        component: () => import('./View/UserQueryPart').then((a: any) => a.default),
         handleTitleClick: (p, e, ev) => {
             ev.preventDefault();
-            navigateOrWindowsOpen(ev, Navigator.navigateRoute(p.userQuery!));
+            Navigator.pushOrOpen(Navigator.navigateRoute(p.userQuery!), ev);
         },
         handleFullScreenClick: (p, e, ev) => {
             ev.preventDefault();
+            ev.persist();
             UserQueryClient.Converter.toFindOptions(p.userQuery!, e)
-                .then(cr => navigateOrWindowsOpen(ev, Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(p.userQuery!)) })))
+                .then(cr => Navigator.pushOrOpen(Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(p.userQuery!)) }), ev))
                 .done()
         }
     });
@@ -104,7 +106,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
         return API.forEntityType(ctx.lite.EntityType).then(das =>
             das.map(d => new QuickLinks.QuickLinkAction(liteKey(d), d.toStr || "", e => {
-                navigateOrWindowsOpen(e, dashboardUrl(d, ctx.lite))
+                Navigator.pushOrOpen(dashboardUrl(d, ctx.lite), e)
             }, { icon: "glyphicon glyphicon-th-large", iconColor: "darkslateblue" })));
     });
 
@@ -112,7 +114,7 @@ export function start(options: { routes: JSX.Element[] }) {
         e => Navigator.API.fetchAndRemember(ctx.lite)
             .then(db => {
                 if (db.entityType == undefined)
-                    navigateOrWindowsOpen(e, dashboardUrl(ctx.lite));
+                    Navigator.pushOrOpen(dashboardUrl(ctx.lite), e);
                 else
                     Navigator.API.fetchAndRemember(db.entityType)
                         .then(t => Finder.find({ queryName: t.cleanName }))
@@ -120,21 +122,13 @@ export function start(options: { routes: JSX.Element[] }) {
                             if (!entity)
                                 return;
 
-                            navigateOrWindowsOpen(e, dashboardUrl(ctx.lite, entity));
+                            Navigator.pushOrOpen(dashboardUrl(ctx.lite, entity), e);
                         }).done();
             }).done()));
 }
 
 export function dashboardUrl(lite: Lite<DashboardEntity>, entity?: Lite<Entity>) {
     return "~/dashboard/" + lite.id + (!entity ? "" : "?entity=" + liteKey(entity)); 
-}
-
-function navigateOrWindowsOpen(e: React.MouseEvent<any>, url: string){
-    if (e.ctrlKey || e.button == 1) {
-        window.open(url);
-    } else {
-        Navigator.history.push(url);
-    }
 }
 
 export function registerRenderer<T extends IPartEntity>(type: Type<T>, renderer : PartRenderer<T>){
@@ -162,7 +156,7 @@ export interface DashboardWidgetProps {
 
 export interface DashboardWidgetState {
     dashboard?: DashboardEntity;
-    component?: React.ComponentClass<{ dashboard: DashboardEntity, entity: Entity}>
+    component?: React.ComponentClass<{ dashboard: DashboardEntity, entity?: Entity}>
 }
 
 export class DashboardWidget extends React.Component<DashboardWidgetProps, DashboardWidgetState> {
@@ -191,7 +185,7 @@ export class DashboardWidget extends React.Component<DashboardWidgetProps, Dashb
                 .then(d => {
                     this.setState({ dashboard: d });
                     if (d && !this.state.component)
-                        _import<ComponentModule>("./View/DashboardView")
+                        import("./View/DashboardView")
                             .then(mod => this.setState({ component: mod.default }))
                             .done();
                 }).done();

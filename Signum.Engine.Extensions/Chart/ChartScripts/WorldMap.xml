@@ -26,6 +26,7 @@ d3.geo.azimuthal = function() {
       y0,
       cy0,
       sy0;
+  
 
   function azimuthal(coordinates) {
     var x1 = coordinates[0] * d3_geo_radians - x0,
@@ -1127,17 +1128,12 @@ d3.geo.greatCircle = d3.geo.circle;
   
   
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
-  var colorSet = data.parameters["ColorSet"];
-  var scale = data.parameters["ColorScale"];
- 
+var colorSet = data.parameters["ColorSet"];
+var scale = data.parameters["ColorScale"];
 
-  var scaleFunc = scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0, 100, scale);
-
-  var colorQuantizer = d3.scale.quantize()
-    .domain([0, 100])
-    .range(colorbrewer[colorSet][9]);
-  
-  var color = function(v){return colorQuantizer(scaleFunc(v)); }
+var scaleFunc = scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0, 1, scale);
+var colorInterpolator = ChartUtils.getColorInterpolation(colorSet)   
+var color = function(v){return colorInterpolator(scaleFunc(v)); }
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
   
 var rad = Math.min(width/2, height/2);
@@ -1167,13 +1163,10 @@ var path = d3.geo.path()
 
 chart.on("mousedown", mousedown);
   
-  var colorMap = d3.nest()
-    .key(function(r){return r.c0.toString(); })
-    .rollup(function(r){return r[0].c1 })
-    .map(data.rows);                                                                              
+var colorMap = data.rows.toObject(r => r.c0.key, r => r.c1);                                                                              
   
 var feature  = chart.selectAll("path")
-      .data(countries)
+    .data(countries)
     .enter().append("svg:path")
     .attr("stroke","gray")
     .attr("fill",function(d){ 
@@ -1182,9 +1175,9 @@ var feature  = chart.selectAll("path")
     .attr("shape-rendering", "auto")
     .attr("d", clip);
                                                                                                       
- feature                                                                                                     
+feature                                                                                                     
     .append("svg:title")
-      .text(function(d) { return d.properties.name + ' ' + (colorMap[d.properties.name] || colorMap[d.id]); });
+    .text(function(d) { return d.properties.name + ' ' + (colorMap[d.properties.name] || colorMap[d.id]); });
 
 
 

@@ -16,6 +16,7 @@ using Signum.Entities.Authorization;
 using System.Linq.Expressions;
 using Signum.Engine.Authorization;
 using Signum.Entities.Basics;
+using System.Threading;
 
 namespace Signum.Engine.Scheduler
 {
@@ -26,7 +27,7 @@ namespace Signum.Engine.Scheduler
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<ApplicationEventLogEntity>()
-                    .WithQuery(dqm, s => new
+                    .WithQuery(dqm, () => s => new
                     {
                         Entity = s,
                         s.Id,
@@ -39,9 +40,9 @@ namespace Signum.Engine.Scheduler
             }
         }
 
-        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters)
+        public static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            Database.Query<ApplicationEventLogEntity>().Where(a => a.Date < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
+            Database.Query<ApplicationEventLogEntity>().Where(a => a.Date < parameters.DateLimit).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         public static void ApplicationStart()

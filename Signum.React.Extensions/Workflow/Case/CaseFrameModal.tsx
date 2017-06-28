@@ -20,7 +20,7 @@ import InlineCaseTags from './InlineCaseTags'
 import { OperationMessage } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
 
 require("../../../../Framework/Signum.React/Scripts/Frames/Frames.css");
-require("./Case.css");
+require("./CaseAct.css");
 
 interface CaseFrameModalProps extends React.Props<CaseFrameModal>, IModalProps {
     title?: string;
@@ -296,25 +296,17 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
             return null;
 
         return (
-            <a href={ "~/workflow/activity/" + entity.id } className="sf-popup-fullscreen" onClick={this.handlePopupFullScreen}>
+            <a href="" className="sf-popup-fullscreen" onClick={this.handlePopupFullScreen}>
                 <span className="glyphicon glyphicon-new-window"></span>
             </a>
         );
     }
 
     handlePopupFullScreen = (e: React.MouseEvent<any>) => {
-
-        if (e.ctrlKey || e.buttons) {
-
-        } else {
-
-            Navigator.history.push("~/workflow/activity/" + this.state.pack!.activity.id);
-
-            e.preventDefault();
-        }
+        Navigator.pushOrOpen("~/workflow/activity/" + this.state.pack!.activity.id, e);
     }
 
-    static openView(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, readOnly?: boolean): Promise<CaseActivityEntity> {
+    static openView(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, readOnly?: boolean): Promise<CaseActivityEntity | undefined> {
 
         return openModal<CaseActivityEntity>(<CaseFrameModal
             entityOrPack={entityOrPack}
@@ -330,6 +322,6 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
             entityOrPack={entityOrPack}
             readOnly={readOnly || false}
             isNavigate={true}
-        />);
+        />) as Promise<void>;
     }
 }

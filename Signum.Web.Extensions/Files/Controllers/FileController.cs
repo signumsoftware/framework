@@ -110,7 +110,7 @@ namespace Signum.Web.Files
 
         public FileResult DownloadEmbedded(Lite<FileTypeSymbol> lite, string suffix, string fileName)
         {
-            var virtualFile = new EmbeddedFilePathEntity(lite.Retrieve())
+            var virtualFile = new FilePathEmbedded(lite.Retrieve())
             {
                 Suffix = suffix,
                 FileName = fileName

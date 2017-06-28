@@ -29,7 +29,7 @@ import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport
 
 export function start(options: { routes: JSX.Element[] }) {
 
-    options.routes.push(<ImportRoute path="~/chart/:queryName" onImportModule={() => _import("./Templates/ChartRequestPage")} />);
+    options.routes.push(<ImportRoute path="~/chart/:queryName" onImportModule={() => import("./Templates/ChartRequestPage")} />);
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
         if (!ctx.searchControl.props.showBarExtension || !AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting))
@@ -38,7 +38,7 @@ export function start(options: { routes: JSX.Element[] }) {
         return <ChartButton searchControl={ctx.searchControl}/>;
     });
 
-    Navigator.addSettings(new EntitySettings(ChartScriptEntity, e => _import('./ChartScript/ChartScript')));
+    Navigator.addSettings(new EntitySettings(ChartScriptEntity, e => import('./ChartScript/ChartScript')));
 
     UserChartClient.start({ routes: options.routes });
 }
@@ -407,13 +407,11 @@ export module API {
         return clone;
     }
 
-    export function executeChart(request: ChartRequest): Promise<ExecuteChartResult> {
+    export function executeChart(request: ChartRequest, abortController?: FetchAbortController): Promise<ExecuteChartResult> {
 
         const clone = cleanedChartRequest(request);
 
-        return ajaxPost<ExecuteChartResult>({
-            url: "~/api/chart/execute"
-        }, clone);
+        return ajaxPost<ExecuteChartResult>({ url: "~/api/chart/execute", abortController }, clone);
 
     }
     export interface ExecuteChartResult {
@@ -445,8 +443,13 @@ export interface ChartValue {
 export interface ChartTable {
     columns: { [name: string]: ChartColumn },
     parameters: { [name: string]: string | null | undefined },
-    rows: { [name: string]: ChartValue }[]
+    rows: ChartRow[]
 }
+
+export interface ChartRow {
+    [name: string]: ChartValue
+}
+
 
 export interface ChartColumn {
     title?: string;

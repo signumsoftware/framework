@@ -250,6 +250,8 @@ namespace Signum.Engine.Word
         {
             return new MatchNode(this);
         }
+
+        public override string InnerText => Match.Value;
     }
 
     public abstract class BaseNode : AlternateContent
@@ -364,6 +366,8 @@ namespace Signum.Engine.Word
 
             ValueProvider.Declare(sc.Variables);
         }
+
+        public override string InnerText => this.ValueProvider?.ToString();
     }
 
     public class DeclareNode : BaseNode
@@ -531,11 +535,12 @@ namespace Signum.Engine.Word
                 var important = current.ChildElements.Where(c => c != next && IsImportant(c, NodeProvider));
 
                 if (important.Any())
-                    throw new InvalidOperationException("Node {0} is not at the same level than {1}{2}. Important nodes could be removed close to {0}:\r\n{3}".FormatWith(
-                        errorHint1.Match,
-                        errorHint2.Match,
-                        errorHintParent != errorHint1 && errorHintParent != errorHint2 ? " in " + errorHintParent.Match : "",
-                        current.NiceToString()));
+                {
+                    string hint = errorHintParent != errorHint1 && errorHintParent != errorHint2 ? " in " + errorHintParent.Match : "";
+                    
+                    throw new InvalidOperationException($"Node {errorHint1.Match} is not at the same level than {errorHint2.Match}{hint}. Important nodes could be removed in the chain:\r\n\r\n" +
+                        chain.Skip(chain.IndexOf(openXmlElement)).Select((a, p) => (a.GetType().Name + " with text:" + a.InnerText).Indent(p * 4)).ToString("\r\n\r\n"));
+                }
             }
         }
 
@@ -588,7 +593,7 @@ namespace Signum.Engine.Word
 
         public BlockNode ForeachBlock;
 
-        public ForeachNode(INodeProvider nodeProvider, ValueProviderBase valueProvider): base(nodeProvider)
+        public ForeachNode(INodeProvider nodeProvider, ValueProviderBase valueProvider) : base(nodeProvider)
         {
             this.ValueProvider = valueProvider;
             valueProvider.IsForeach = true;
@@ -638,13 +643,13 @@ namespace Signum.Engine.Word
         protected internal override void RenderNode(WordTemplateParameters p)
         {
             var parent = this.Parent;
-            
+
             this.ValueProvider.Foreach(p, () =>
             {
                 var clone = (BlockNode)this.ForeachBlock.CloneNode(true);
 
                 var index = parent.ChildElements.IndexOf(this);
-                
+
                 parent.InsertAt(clone, index);
 
                 clone.RenderNode(p);
@@ -680,6 +685,8 @@ namespace Signum.Engine.Word
                 this.ForeachBlock.Synchronize(sc);
             }
         }
+
+        public override string InnerText => $@"{this.ForeachToken.MatchNode.InnerText}{this.ForeachBlock.InnerText}{this.EndForeachToken.MatchNode.InnerText}";
     }
 
     public struct MatchNodePair
@@ -916,6 +923,8 @@ namespace Signum.Engine.Word
 
             parent.InsertAt(this.EndAnyToken.ReplaceMatchNode("@endany"), index++);
         }
+
+        public override string InnerText => $@"{this.AnyToken.MatchNode.InnerText}{this.AnyBlock.InnerText}{this.NotAnyToken.MatchNode?.InnerText}{this.NotAnyBlock?.InnerText}{this.EndAnyToken.MatchNode.InnerText}";
     }
 
     public class IfNode : BlockContainerNode
@@ -1092,6 +1101,8 @@ namespace Signum.Engine.Word
 
             parent.InsertAt(this.EndIfToken.ReplaceMatchNode("@endif"), index++);
         }
+
+        public override string InnerText => $@"{this.IfToken.MatchNode.InnerText}{this.IfBlock.InnerText}{this.ElseToken.MatchNode?.InnerText}{this.ElseBlock?.InnerText}{this.EndIfToken.MatchNode.InnerText}";
     }
 
     public static class OpenXmlElementExtensions

@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Signum.Engine.Excel
@@ -23,7 +24,7 @@ namespace Signum.Engine.Excel
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             sb.Include<ExcelAttachmentEntity>()
-                .WithQuery(dqm, s => new
+                .WithQuery(dqm, () => s => new
                 {
                     Entity = s,
                     s.Id,
@@ -56,7 +57,7 @@ namespace Signum.Engine.Excel
                     var title = GetTemplateString(ea.Title, ref ea.TitleNode, ctx);
                     var fileName = GetTemplateString(ea.FileName, ref ea.FileNameNode, ctx);
 
-                    var bytes = ExcelLogic.ExecutePlainExcel(request, title);
+                    var bytes = ExcelLogic.ExecutePlainExcel(request, title, CancellationToken.None).Result;
 
                     return new List<EmailAttachmentEmbedded>
                     {

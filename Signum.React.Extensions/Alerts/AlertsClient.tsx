@@ -19,8 +19,8 @@ import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 
 export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeName: string) => boolean }) {
-    Navigator.addSettings(new EntitySettings(AlertEntity, e => _import('./Templates/Alert')));
-    Navigator.addSettings(new EntitySettings(AlertTypeEntity, e => _import('./Templates/AlertType')));
+    Navigator.addSettings(new EntitySettings(AlertEntity, e => import('./Templates/Alert')));
+    Navigator.addSettings(new EntitySettings(AlertTypeEntity, e => import('./Templates/AlertType')));
 
 
     const couldHaveAlerts = options.couldHaveAlerts || (typeName => true);
@@ -61,7 +61,7 @@ function chooseDate(): Promise<moment.Moment | undefined>{
             return ValueLineModal.show({
                 title: AlertMessage.CustomDelay.niceToString(),
                 type: mi.type,
-                unit: mi.unit,
+                unitText: mi.unit,
                 labelText: mi.niceName,
                 initiallyFocused: true,
                 initialValue: result.format()

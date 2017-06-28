@@ -28,6 +28,9 @@ namespace Signum.Engine.Dashboard
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+
+                GetDashboard = GetDashboardDefault;
+
                 PermissionAuthLogic.RegisterPermissions(DashboardPermission.ViewDashboard);
 
                 UserAssetsImporter.RegisterName<DashboardEntity>("Dashboard");
@@ -40,7 +43,7 @@ namespace Signum.Engine.Dashboard
                 });
 
                 sb.Include<DashboardEntity>()
-                    .WithQuery(dqm, cp => new
+                    .WithQuery(dqm, () => cp => new
                     {
                         Entity = cp,
                         cp.Id,
@@ -51,7 +54,7 @@ namespace Signum.Engine.Dashboard
                     });
 
                 sb.Include<LinkListPartEntity>()
-                    .WithQuery(dqm, cp => new
+                    .WithQuery(dqm, () => cp => new
                     {
                         Entity = cp,
                         ToStr = cp.ToString(),
@@ -59,7 +62,7 @@ namespace Signum.Engine.Dashboard
                     });
                 
                 sb.Include<ValueUserQueryListPartEntity>()
-                    .WithQuery(dqm, cp => new
+                    .WithQuery(dqm, () => cp => new
                     {
                         Entity = cp,
                         ToStr = cp.ToString(),
@@ -171,7 +174,9 @@ namespace Signum.Engine.Dashboard
             return GetDashboard(true, key);
         }
 
-        static DashboardEntity GetDashboard(bool forNavbar, string key)
+        public static Func<bool, string, DashboardEntity> GetDashboard;
+
+        static DashboardEntity GetDashboardDefault(bool forNavbar, string key)
         {
             var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: true);
 

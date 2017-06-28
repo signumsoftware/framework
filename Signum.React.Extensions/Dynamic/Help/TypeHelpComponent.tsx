@@ -52,7 +52,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
             pr = pr.propertyPath();
 
         return pr.split(".").reduce((prev, curr) => {
-            if (curr.trimStart("[") && curr.endsWith("]")) {
+            if (curr.startsWith("[") && curr.endsWith("]")) {
                 const mixin = curr.trimStart("[").trimEnd("]");
                 return mode == "CSharp" ?
                     `${prev}.Mixin<${mixin}>()` :

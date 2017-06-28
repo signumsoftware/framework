@@ -23,7 +23,7 @@ import ExcelMenu from './ExcelMenu'
 export function start(options: { routes: JSX.Element[], plainExcel: boolean, excelReport: boolean }) {
     
     if (options.excelReport) {
-        Navigator.addSettings(new EntitySettings(ExcelReportEntity, e => _import('./Templates/ExcelReport')));
+        Navigator.addSettings(new EntitySettings(ExcelReportEntity, e => import('./Templates/ExcelReport')));
     }
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
@@ -43,7 +43,7 @@ export function start(options: { routes: JSX.Element[], plainExcel: boolean, exc
                 <button
                     className="sf-query-button sf-chart-script-edit btn btn-default"
                     onClick={() => { API.generateChartExcel(ChartClient.API.cleanedChartRequest(ctx.chartRequest)); } }>
-                    {ExcelMessage.ExcelReport.niceToString()}
+                    <i className="fa fa-file-excel-o"></i> &nbsp; {ExcelMessage.ExcelReport.niceToString()}
                 </button>
             );
         });

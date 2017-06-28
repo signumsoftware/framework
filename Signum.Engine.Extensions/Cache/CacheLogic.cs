@@ -165,13 +165,17 @@ namespace Signum.Engine.Cache
                 CacheLogic.LogWriter.WriteLine("Load ToListWithInvalidations {0} {1}".FormatWith(typeof(T).TypeName()), exceptionContext);
 
             using (new EntityCache())
+            using (var r = EntityCache.NewRetriever()) {
                 subConnector.ExecuteDataReaderDependency(tr.MainCommand, onChange, StartSqlDependencyAndEnableBrocker, fr =>
                     {
                         if (reader == null)
-                            reader = new SimpleReader(fr, EntityCache.NewRetriever());
+                            reader = new SimpleReader(fr, r);
 
                         list.Add(projector(reader));
                     }, CommandType.Text);
+
+                r.CompleteAll();
+            }
 
             return list;
         }
@@ -254,7 +258,7 @@ namespace Signum.Engine.Cache
                     //to avoid massive logs with SqlQueryNotificationStoredProcedure
                     //http://rusanu.com/2007/11/10/when-it-rains-it-pours/
                     var staleServices = (from s in Database.View<SysServiceQueues>()
-                                         where s.activation_procedure != null && !Database.View<SysProcedures>().Any(p => "[dbo].[" + p.name + "]" == s.activation_procedure)
+                                         where s.activation_procedure != null && !Database.View<SysProcedures>().Any(p => "[" + p.Schema().name + "].[" + p.name + "]" == s.activation_procedure)
                                          select new ObjectName(new SchemaName(null, s.Schema().name), s.name)).ToList();
 
                     foreach (var s in staleServices)
@@ -262,6 +266,16 @@ namespace Signum.Engine.Cache
                         TryDropService(s.Name);
                         TryDropQueue(s);
                     }
+
+                    var oldProcedures = (from p in Database.View<SysProcedures>()
+                                         where p.name.Contains("SqlQueryNotificationStoredProcedure-") && !Database.View<SysServiceQueues>().Any(s => "[" + p.Schema().name + "].[" + p.name + "]" == s.activation_procedure)
+                                         select new ObjectName(new SchemaName(null, p.Schema().name), p.name)).ToList();
+
+                    foreach (var item in oldProcedures)
+                    {
+                        Executor.ExecuteNonQuery(new SqlPreCommandSimple($"DROP PROCEDURE {item.ToString()}"));
+                    }
+
                 }
 
                 foreach (var database in Schema.Current.DatabaseNames())

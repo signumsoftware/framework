@@ -14,20 +14,20 @@
   var pInnerRadius = data.parameters.InnerRadious;
   var pSort = data.parameters.Sort;
 
-  var size = d3.scale.linear()
+  var size = d3.scaleLinear()
       .domain([0, d3.max(data.rows,function(r){return r.c1;})])
       .range([0, 1]);
 
   var r = d3.min([width / 2, height]) / 3;
   var rInner = r  * parseFloat(pInnerRadius);
-  var color = d3.scale.category20().domain( data.rows.map(function (v) { return v.c0; }));
+  var color = d3.scaleOrdinal(d3.schemeCategory20).domain( data.rows.map(function (v) { return v.c0; }));
   
-  var pie = d3.layout.pie()
+  var pie = d3.pie()
       .sort(pSort == "Ascending"? function(a, b) {return d3.descending(size(a.c1), size(b.c1)) }  :
             pSort == "Descending"? function(a, b) {return d3.ascending(size(a.c1), size(b.c1)) }: null )
       .value(function (v) { return size(v.c1); });
     
-   var arc = d3.svg.arc()     
+   var arc = d3.arc()     
        .outerRadius(r).innerRadius(rInner);
   
   chart.append('svg:g').attr('class', 'shape').attr('transform', translate(width / 2, height / 2))

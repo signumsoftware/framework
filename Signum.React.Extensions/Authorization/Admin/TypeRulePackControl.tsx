@@ -14,17 +14,15 @@ import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/Mess
 
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfo, Binding, GraphExplorer } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { Api, properties, queries, operations } from '../AuthClient'
+import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage, OperationSymbol, ModelEntity, newMListElement, NormalControlMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { API, properties, queries, operations } from '../AuthClient'
 import {
     TypeRulePack, AuthAdminMessage, PermissionSymbol, AuthMessage, TypeAllowed, TypeAllowedRule,
     TypeAllowedAndConditions, TypeAllowedBasic, TypeConditionRuleEmbedded, AuthThumbnail, PropertyRulePack, OperationRulePack, QueryRulePack, RoleEntity
 } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import { TypeConditionSymbol } from '../../Basics/Signum.Entities.Basics'
-import { OperationSymbol, ModelEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { QueryEntity, PropertyRouteEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
-import { NormalControlMessage } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
 
 
 require("./AuthAdmin.css");
@@ -36,8 +34,8 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
     handleSaveClick = (bc: ButtonsContext) => {
         let pack = this.props.ctx.value;
 
-        Api.saveTypeRulePack(pack)
-            .then(() => Api.fetchTypeRulePack(pack.role.id!))
+        API.saveTypeRulePack(pack)
+            .then(() => API.fetchTypeRulePack(pack.role.id!))
             .then(newPack => {
                 notifySuccess();
                 bc.frame.onReload({ entity: newPack, canExecute: {} });
@@ -48,7 +46,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
     handleResetChangesClick = (bc: ButtonsContext) => {
         let pack = this.props.ctx.value;
 
-        Api.fetchTypeRulePack(pack.role.id!)
+        API.fetchTypeRulePack(pack.role.id!)
             .then(newPack => {
                 bc.frame.onReload({ entity: newPack, canExecute: {} });
             })
@@ -62,7 +60,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
             if (!r)
                 return;
 
-            Api.fetchTypeRulePack(r.id!)
+            API.fetchTypeRulePack(r.id!)
                 .then(newPack => bc.frame.onReload({ entity: newPack, canExecute: {} }))
                 .done();
         });
@@ -198,10 +196,10 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                 if (!tc)
                     return;
 
-                taac.conditions.push(TypeConditionRuleEmbedded.New({
+                taac.conditions.push(newMListElement(TypeConditionRuleEmbedded.New({
                     typeCondition : tc!,
                     allowed : "None"
-                }));
+                })));
 
                 this.updateFrame();
             })
@@ -209,7 +207,8 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
     }
 
     handleRemoveConditionClick = (taac: TypeAllowedAndConditions, con: TypeConditionRuleEmbedded) => {
-        taac.conditions!.remove(con);
+        taac.conditions!.remove(taac.conditions.filter(mle => mle.element == con).single());
+        taac.modified = true;
         this.updateFrame();
     }
 
@@ -217,7 +216,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
 
         let roleId = this.props.ctx.value.role.id!;
 
-        let used = ctx.value.allowed.conditions.map(tcs => tcs.typeCondition.id!);
+        let used = ctx.value.allowed.conditions.map(mle => mle.element.typeCondition.id!);
 
         let remaining = ctx.value.availableConditions.filter(tcs => !used.contains(tcs.id!));
 
@@ -250,26 +249,26 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                     }} />
                 </td>
                 {properties && <td style={{ textAlign: "center" }}>
-                    {this.link("fa fa-pencil-square-o", ctx.value.properties,
-                        () => Api.fetchPropertyRulePack(ctx.value.resource.cleanName, roleId),
+                    {this.link("fa fa-pencil-square-o", ctx.value.modified ? "Invalidated" : ctx.value.properties,
+                        () => API.fetchPropertyRulePack(ctx.value.resource.cleanName, roleId),
                         m => ctx.value.properties = m.rules.every(a => a.element.allowed == "None") ? "None" :
                             m.rules.every(a => a.element.allowed == "Modify") ? "All" : "Mix"
                     )}
                 </td>}
                 {operations && <td style={{ textAlign: "center" }}>
-                    {this.link("fa fa-bolt", ctx.value.operations,
-                        () => Api.fetchOperationRulePack(ctx.value.resource.cleanName, roleId),
+                    {this.link("fa fa-bolt", ctx.value.modified ? "Invalidated" :  ctx.value.operations,
+                        () => API.fetchOperationRulePack(ctx.value.resource.cleanName, roleId),
                         m => ctx.value.operations = m.rules.every(a => a.element.allowed == "None") ? "None" :
                             m.rules.every(a => a.element.allowed == "Allow") ? "All" : "Mix")}
                 </td>}
                 {queries && <td style={{ textAlign: "center" }}>
-                    {this.link("fa fa-search", ctx.value.queries,
-                        () => Api.fetchQueryRulePack(ctx.value.resource.cleanName, roleId),
-                        m => ctx.value.queries = m.rules.every(a => a.element.allowed == false) ? "None" :
+                    {this.link("fa fa-search", ctx.value.modified ? "Invalidated" : ctx.value.queries,
+                        () => API.fetchQueryRulePack(ctx.value.resource.cleanName, roleId),
+                        m =>  ctx.value.queries = m.rules.every(a => a.element.allowed == false) ? "None" :
                             m.rules.every(a => a.element.allowed == true) ? "All" : "Mix")}
                 </td>}
             </tr>
-        ].concat(ctx.value.allowed!.conditions!.map(c => {
+        ].concat(ctx.value.allowed!.conditions!.map(mle => mle.element).map(c => {
             let b = Binding.create(c, ca => ca.allowed);
             return (
                 <tr key={ctx.value.resource.namespace + "." + ctx.value.resource.className + "_" + c.typeCondition.id} className= "sf-auth-condition" >
@@ -299,14 +298,26 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
 
     }
 
-    colorRadio(b: Binding<TypeAllowed | null>, part: TypeAllowedBasic, color: string) {
+    colorRadio(b: Binding<TypeAllowed | null>, basicAllowed: TypeAllowedBasic, color: string) {
+        const allowed = b.getValue();
+
+        const niceName = TypeAllowedBasic.niceName(basicAllowed)!;
+
+        const title = !allowed ? niceName :
+            getDB(allowed) == getUI(allowed) && getUI(allowed) == basicAllowed ? niceName :
+                getDB(allowed) == basicAllowed ? AuthAdminMessage._0InDB.niceToString(niceName) :
+                    getUI(allowed) == basicAllowed ? AuthAdminMessage._0InUI.niceToString(niceName) :
+                        niceName;
+
         return <ColorRadio
-            checked={isActive(b.getValue(), part)}
+            checked={isActive(allowed, basicAllowed)}
+            title={title}
             color={color}
-            onClicked={e => { b.setValue(select(b.getValue(), part, e)); this.updateFrame(); } }/>;
+            onClicked={e => { b.setValue(select(b.getValue(), basicAllowed, e)); this.updateFrame(); }}
+        />;
     }
 
-    link<T extends ModelEntity>(icon: string, allowed: AuthThumbnail | null, action: () => Promise<T>, setNewValue: (model: T) => void) {
+    link<T extends ModelEntity>(icon: string, allowed: AuthThumbnail | null | "Invalidated", action: () => Promise<T>, setNewValue: (model: T) => void) {
         
         if (!allowed)
             return undefined;
@@ -337,11 +348,12 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
         };
 
         return (
-            <a onClick={onClick}
-                className={classes("sf-auth-link", icon) }
+            <a onClick={onClick} title={allowed}
+                className={classes("sf-auth-link", icon)}
                 style={{
-                    color: allowed == "All" ? "green" :
-                        allowed == "Mix" ? "#FFAD00" : "red"
+                    color: allowed == "Invalidated" ? "gray" :
+                        allowed == "All" ? "green" :
+                            allowed == "Mix" ? "#FFAD00" : "red"
                 }}>
             </a>
         );
@@ -351,9 +363,9 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
 function typeAllowedEquals(allowed: TypeAllowedAndConditions, allowedBase: TypeAllowedAndConditions) {
     return allowed.fallback == allowedBase.fallback
         && allowed.conditions!.length == allowedBase.conditions!.length
-        && allowed.conditions!
+        && allowed.conditions!.map(mle => mle.element)
             .every((c, i) => {
-                let b = allowedBase.conditions![i];
+                let b = allowedBase.conditions![i].element;
                 return c.allowed == b.allowed && c.typeCondition!.id == b.typeCondition!.id;
             });
 }

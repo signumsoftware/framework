@@ -22,7 +22,7 @@ import { ViewReplacer } from '../../../Framework/Signum.React/Scripts/Frames/Rea
 import * as Lines from '../../../Framework/Signum.React/Scripts/Lines'
 import * as FileLineModule from '../Files/FileLine'
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
-import { DynamicViewEntity, DynamicViewSelectorEntity, DynamicViewOverrideEntity, DynamicViewMessage, DynamicViewOperation } from './Signum.Entities.Dynamic'
+import { DynamicViewEntity, DynamicViewSelectorEntity, DynamicViewOverrideEntity, DynamicViewMessage, DynamicViewOperation, DynamicViewSelectorOperation } from './Signum.Entities.Dynamic'
 import DynamicViewEntityComponent from './View/DynamicView' //Just Typing
 import * as DynamicClient from './DynamicClient'
 
@@ -31,13 +31,14 @@ import { DynamicViewComponentProps, DynamicViewPart } from './View/DynamicViewCo
 import * as Nodes from './View/Nodes' //Typings-only
 import * as NodeUtils from './View/NodeUtils' //Typings-only
 import MessageModal from "../../../Framework/Signum.React/Scripts/Modals/MessageModal";
+import { Dic } from "../../../Framework/Signum.React/Scripts/Globals";
 
 
 export function start(options: { routes: JSX.Element[] }) {
     
-    Navigator.addSettings(new EntitySettings(DynamicViewEntity, w => _import('./View/DynamicView')));
-    Navigator.addSettings(new EntitySettings(DynamicViewSelectorEntity, w => _import('./View/DynamicViewSelector')));
-    Navigator.addSettings(new EntitySettings(DynamicViewOverrideEntity, w => _import('./View/DynamicViewOverride')));
+    Navigator.addSettings(new EntitySettings(DynamicViewEntity, w => import('./View/DynamicView')));
+    Navigator.addSettings(new EntitySettings(DynamicViewSelectorEntity, w => import('./View/DynamicViewSelector')));
+    Navigator.addSettings(new EntitySettings(DynamicViewOverrideEntity, w => import('./View/DynamicViewOverride')));
 
     DynamicClient.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicViewEntity, parentColumn: "EntityType.CleanName", parentValue: type }} />);
     DynamicClient.Options.onGetDynamicLineForType.push((ctx, type) => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicViewSelectorEntity, parentColumn: "EntityType.CleanName", parentValue: type }} />);
@@ -45,8 +46,34 @@ export function start(options: { routes: JSX.Element[] }) {
     Operations.addSettings(new EntityOperationSettings(DynamicViewOperation.Save, {
         onClick: ctx => {
             (ctx.frame.entityComponent as DynamicViewEntityComponent).beforeSave();
+            cleanCaches();
             ctx.defaultClick();
         }
+    }));
+
+    Operations.addSettings(new EntityOperationSettings(DynamicViewOperation.Delete, {
+        onClick: ctx => {
+            cleanCaches();
+            ctx.defaultClick();
+        },
+        contextual: { onClick: ctx => { cleanCaches(); ctx.defaultContextualClick(); } },
+        contextualFromMany: { onClick: ctx => { cleanCaches(); ctx.defaultContextualClick(); } },
+    }));
+
+    Operations.addSettings(new EntityOperationSettings(DynamicViewSelectorOperation.Save, {
+        onClick: ctx => {
+            cleanCaches();
+            ctx.defaultClick();
+        }
+    }));
+
+    Operations.addSettings(new EntityOperationSettings(DynamicViewSelectorOperation.Delete, {
+        onClick: ctx => {
+            cleanCaches();
+            ctx.defaultClick();
+        },
+        contextual: { onClick: ctx => { cleanCaches(); ctx.defaultContextualClick(); } },
+        contextualFromMany: { onClick: ctx => { cleanCaches(); ctx.defaultContextualClick(); } },
     }));
 
     Navigator.setViewDispatcher(new DynamicViewViewDispatcher());
@@ -96,7 +123,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
     }
 
     dynamicViewComponent(dynamicView: DynamicViewEntity): ViewPromise<ModifiableEntity> {
-        return new ViewPromise(_import('./View/DynamicViewComponent'))
+        return new ViewPromise(import('./View/DynamicViewComponent'))
             .withProps({ initialDynamicView: dynamicView });
     }
 
@@ -106,7 +133,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
         if (!settings || !settings.getViewPromise) {
 
             if (!isTypeEntity(entity.Type))
-                return new ViewPromise(_import('../../../Framework/Signum.React/Scripts/Lines/DynamicComponent'));
+                return new ViewPromise(import('../../../Framework/Signum.React/Scripts/Lines/DynamicComponent'));
 
             return ViewPromise.flat(this.chooseDynamicView(entity.Type, true).then(dv => this.dynamicViewComponent(dv)));
         }
@@ -218,6 +245,12 @@ function getOrCreate<V>(cache: { [key: string]: V }, key: string, onCreate: (key
         return Promise.resolve(cache[key]);
 
     return onCreate(key).then(v => cache[key] = v);
+}
+
+
+export function cleanCaches() {
+    Dic.clear(viewNamesCache);
+    Dic.clear(selectorCache);
 }
 
 const viewNamesCache: { [typeName: string]: string[] } = {};
@@ -337,14 +370,14 @@ export function createDefaultDynamicView(typeName: string): Promise<DynamicViewE
 }
 
 export function loadNodes(): Promise<typeof Nodes> {
-    return _import<typeof Nodes>("./View/Nodes");
+    return import("./View/Nodes");
 }
 
 export function getDynamicViewPromise(typeName: string, viewName: string): ViewPromise<ModifiableEntity> {
 
     return ViewPromise.flat(
         API.getDynamicView(typeName, viewName)
-            .then(vn => new ViewPromise(_import('./View/DynamicViewComponent')).withProps({ initialDynamicView: vn }))
+            .then(vn => new ViewPromise(import('./View/DynamicViewComponent')).withProps({ initialDynamicView: vn }))
     );
 }
 

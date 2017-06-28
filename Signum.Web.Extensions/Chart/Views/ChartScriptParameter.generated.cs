@@ -47,7 +47,7 @@ namespace ASP
         {
             
             #line 2 "..\..\Chart\Views\ChartScriptParameter.cshtml"
- using (var cc = Html.TypeContext<ChartScriptParameterEntity>())
+ using (var cc = Html.TypeContext<ChartScriptParameterEmbedded>())
 {
     cc.FormGroupStyle = FormGroupStyle.Basic;
 

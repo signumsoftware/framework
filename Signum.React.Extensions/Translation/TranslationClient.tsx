@@ -21,9 +21,9 @@ export function start(options: { routes: JSX.Element[] }) {
     });
 
     options.routes.push(
-        <ImportRoute path="~/translation/status" onImportModule={() => _import("./Code/TranslationCodeStatus")} />,
-        <ImportRoute path="~/translation/view/:assembly/:culture?" onImportModule={() => _import("./Code/TranslationCodeView")} />,
-        <ImportRoute path="~/translation/sync/:assembly/:culture" onImportModule={() => _import("./Code/TranslationCodeSync")} />
+        <ImportRoute path="~/translation/status" onImportModule={() => import("./Code/TranslationCodeStatus")} />,
+        <ImportRoute path="~/translation/view/:assembly/:culture?" onImportModule={() => import("./Code/TranslationCodeView")} />,
+        <ImportRoute path="~/translation/sync/:assembly/:culture" onImportModule={() => import("./Code/TranslationCodeSync")} />
     );
 }
 

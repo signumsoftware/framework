@@ -54,7 +54,7 @@ namespace Signum.Entities.Scheduler
         public static DeleteSymbol<ScheduledTaskEntity> Delete;
     }
 
-    public enum TaskMessage
+    public enum ITaskMessage
     {
         Execute,
         Executions,
@@ -62,9 +62,9 @@ namespace Signum.Entities.Scheduler
     }
 
     [AutoInit]
-    public static class TaskOperation
+    public static class ITaskOperation
     {
-        public static ConstructSymbol<IEntity>.From<ITaskEntity> ExecuteSync;
+        public static ConstructSymbol<ScheduledTaskLogEntity>.From<ITaskEntity> ExecuteSync;
         public static ExecuteSymbol<ITaskEntity> ExecuteAsync;
     }
 

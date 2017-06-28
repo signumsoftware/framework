@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Data;
 using Signum.Entities.Word;
 using DocumentFormat.OpenXml;
+using System.Threading;
 
 namespace Signum.Engine.Word
 {
@@ -53,16 +54,19 @@ namespace Signum.Engine.Word
             var columns = tokens.NotNull().Distinct().Select(qt => new Signum.Entities.DynamicQuery.Column(qt, null)).ToList();
 
             var filters = systemWordTemplate != null ? systemWordTemplate.GetFilters(this.queryDescription) :
-                new List<Filter> { new Filter(QueryUtils.Parse("Entity", this.queryDescription, 0), FilterOperation.EqualTo, this.entity.ToLite()) };
+                entity != null ? new List<Filter> { new Filter(QueryUtils.Parse("Entity", this.queryDescription, 0), FilterOperation.EqualTo, this.entity.ToLite()) } :
+                throw new InvalidOperationException($"Impossible to create a Word report if '{nameof(entity)}' and '{nameof(systemWordTemplate)}' are both null");
 
             this.table = DynamicQueryManager.Current.ExecuteQuery(new QueryRequest
             {
                 QueryName = this.queryDescription.QueryName,
                 Columns = columns,
-                Pagination = new Pagination.All(),
+                Pagination = systemWordTemplate?.GetPagination() ?? new Pagination.All(),
                 Filters = filters,
-                Orders = new List<Order>(),
+                Orders = systemWordTemplate?.GetOrders(this.queryDescription) ?? new List<Order>(),
             });
+
+            var dt = this.table.ToDataTable();
 
             this.dicTokenColumn = table.Columns.ToDictionary(rc => rc.Column.Token);
         }

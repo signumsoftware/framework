@@ -92,8 +92,8 @@ function getProvider(resultTypeName: string) {
 
 export namespace API {
 
-    export function getResults(query: string): Promise<OmniboxResult[]> {
-        return ajaxPost<OmniboxResult[]>({ url: "~/api/omnibox" }, {
+    export function getResults(query: string, abortController: FetchAbortController): Promise<OmniboxResult[]> {
+        return ajaxPost<OmniboxResult[]>({ url: "~/api/omnibox", abortController }, {
             query: query || "help",
             specialActions: Dic.getKeys(specialActions).filter(a => specialActions[a].allowed == null || specialActions[a].allowed())
         })

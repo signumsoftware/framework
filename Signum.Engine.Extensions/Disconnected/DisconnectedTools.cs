@@ -141,7 +141,7 @@ MOVE '{4}' TO '{5}'{6}".FormatWith(databaseName, backupFile,
             }
         }
 
-        public static Regex IdentityMessageRegex = new Regex(@"Checking identity information: current identity value '(?<identity>.*)', current column value '(?<column>.*)'\.");
+        public static Regex IdentityMessageRegex = new Regex(@".*'(?<identity>(\d*|NULL))'.*'(?<column>(\d*|NULL))'");
 
             
 

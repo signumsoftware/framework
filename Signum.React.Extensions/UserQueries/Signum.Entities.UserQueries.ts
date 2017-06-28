@@ -44,6 +44,8 @@ export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetE
     orders: Entities.MList<QueryOrderEmbedded>;
     columnsMode?: DynamicQuery.ColumnOptionsMode;
     columns: Entities.MList<QueryColumnEmbedded>;
+    searchOnLoad?: boolean;
+    showFilterButton?: boolean;
     paginationMode?: DynamicQuery.PaginationMode | null;
     elementsPerPage?: number | null;
     guid?: string;

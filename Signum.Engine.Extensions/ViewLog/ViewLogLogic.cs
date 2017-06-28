@@ -16,6 +16,8 @@ using System.IO;
 using Signum.Utilities.ExpressionTrees;
 using System.Data.Common;
 using Signum.Engine;
+using Signum.Entities.Authorization;
+using System.Threading;
 
 namespace Signum.Engine.ViewLog
 {
@@ -30,16 +32,28 @@ namespace Signum.Engine.ViewLog
         {
             return ViewLogsExpression.Evaluate(a);
         }
+        
+        static Expression<Func<Entity, ViewLogEntity>> ViewLogMyLastExpression =
+            e => Database.Query<ViewLogEntity>()
+            .Where(a => a.User.RefersTo(UserEntity.Current) && a.Target.RefersTo(e))
+            .OrderBy(a => a.StartDate).FirstOrDefault();     
+        [ExpressionField]
+        public static ViewLogEntity ViewLogMyLast(this Entity e)
+        {
+            return ViewLogMyLastExpression.Evaluate(e);
+        }
 
         public static Func<Type, bool> LogType = type => true;
         public static Func<BaseQueryRequest, DynamicQueryManager.ExecuteType, bool> LogQuery = (request, type) => true;
+        public static Func<BaseQueryRequest, StringWriter, string> GetData = (request, sw) => request.QueryUrl + "\r\n\r\n" + sw.ToString();
+      
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, HashSet<Type> registerExpression)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<ViewLogEntity>()
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -54,10 +68,12 @@ namespace Signum.Engine.ViewLog
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
 
                 var exp = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity entity) => entity.ViewLogs());
+                var expLast = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity entity) => entity.ViewLogMyLast());
 
                 foreach (var t in registerExpression)
                 {
                     dqm.RegisterExpression(new ExtensionInfo(t, exp, exp.Body.Type, "ViewLogs", () => typeof(ViewLogEntity).NicePluralName()));
+                    dqm.RegisterExpression(new ExtensionInfo(t, expLast, expLast.Body.Type, "LastViewLog", () => ViewLogMessage.ViewLogMyLast.NiceToString()));
                 }
 
                 DynamicQueryManager.Current.QueryExecuted += Current_QueryExecuted;
@@ -103,7 +119,7 @@ namespace Signum.Engine.ViewLog
                     {
 
                         viewLog.EndDate = TimeZoneManager.Now;
-                        viewLog.Data = request.QueryUrl + "\r\n\r\n" + sw.ToString();
+                         viewLog.Data = GetData(request, sw);
                         using (ExecutionMode.Global())
                             viewLog.Save();
                         tr.Commit();
@@ -117,9 +133,9 @@ namespace Signum.Engine.ViewLog
             });
         }
 
-        static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters)
+        static void ExceptionLogic_DeleteLogs(DeleteLogParametersEmbedded parameters, StringBuilder sb, CancellationToken token)
         {
-            Database.Query<ViewLogEntity>().Where(view => view.StartDate < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
+            Database.Query<ViewLogEntity>().Where(view => view.StartDate < parameters.DateLimit).UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
         public static IDisposable LogView(Lite<IEntity> entity, string viewAction)

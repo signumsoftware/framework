@@ -32,12 +32,12 @@ export default class Alert extends React.Component<{ ctx: TypeContext<AlertEntit
                     </div>
                 }
                 {ec.value.target && <EntityLine ctx={ec.subCtx(n => n.target)} readOnly={true} />}
-                <EntityLine ctx={ec.subCtx(n => n.recipient)} readOnly={true} />
+                <EntityLine ctx={ec.subCtx(n => n.recipient)} />
                 <hr />
                 <ValueLine ctx={ec.subCtx(n => n.title)} />
                 <EntityCombo ctx={ec.subCtx(n => n.alertType)} />
                 <ValueLine ctx={ec.subCtx(n => n.alertDate)} />
-                <ValueLine ctx={ec.subCtx(n => n.text)} valueLineType="TextArea" valueHtmlAttributes={{ style: { height: "180px" } }} />
+                <ValueLine ctx={ec.subCtx(n => n.text)} valueHtmlAttributes={{ style: { height: "180px" } }} />
                 {ec.value.state == "Attended" &&
                     <div>
                         <hr />

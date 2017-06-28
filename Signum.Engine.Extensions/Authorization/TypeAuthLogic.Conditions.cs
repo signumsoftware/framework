@@ -15,6 +15,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Signum.Engine.Authorization
 {
@@ -183,7 +185,7 @@ namespace Signum.Engine.Authorization
         public static void AssertAllowed(this Lite<IEntity> lite, TypeAllowedBasic allowed, bool inUserInterface)
         {
             if (lite.IdOrNull == null)
-                AssertAllowed(lite.UntypedEntityOrNull, allowed, inUserInterface);
+                AssertAllowed(lite.EntityOrNull, allowed, inUserInterface);
 
             if (!lite.IsAllowedFor(allowed, inUserInterface))
                 throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().FormatWith(allowed.NiceToString().ToLower(), lite.EntityType.NiceName(), lite.Id));
@@ -584,27 +586,27 @@ namespace Signum.Engine.Authorization
                 : base(query)
             { }
 
-            public override ResultTable ExecuteQuery(QueryRequest request)
+            public override async Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken token)
             {
                 using (TypeAuthLogic.DisableQueryFilter())
                 {
-                    return base.ExecuteQuery(request);
+                    return await base.ExecuteQueryAsync(request, token);
                 }
             }
 
-            public override Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request)
+            public override async Task<Lite<Entity>> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken token)
             {
                 using (TypeAuthLogic.DisableQueryFilter())
                 {
-                    return base.ExecuteUniqueEntity(request);
+                    return await base.ExecuteUniqueEntityAsync(request, token);
                 }
             }
 
-            public override object ExecuteQueryValue(QueryValueRequest request)
+            public override async Task<object> ExecuteQueryValueAsync(QueryValueRequest request, CancellationToken token)
             {
                 using (TypeAuthLogic.DisableQueryFilter())
                 {
-                    return base.ExecuteQueryValue(request);
+                    return await base.ExecuteQueryValueAsync(request, token);
                 }
             }
         }
@@ -627,7 +629,7 @@ namespace Signum.Engine.Authorization
         public static TypeAllowedAndConditions ToTypeAllowedAndConditions(this RuleTypeEntity rule)
         {
             return new TypeAllowedAndConditions(rule.Allowed,
-                rule.Conditions.Select(c => new TypeConditionRuleEmbedded(c.Condition, c.Allowed)).ToReadOnly());
+                rule.Conditions.Select(c => new TypeConditionRuleEmbedded(c.Condition, c.Allowed)).ToMList());
         }
 
         static SqlPreCommand Schema_Synchronizing(Replacements rep)
@@ -637,7 +639,13 @@ namespace Signum.Engine.Authorization
                          select new { rt.Resource, c.Condition, rt.Role }).ToList();
 
             var errors = conds.GroupBy(a => new { a.Resource, a.Condition }, a => a.Role)
-                .Where(c => !TypeConditionLogic.IsDefined(c.Key.Resource.ToType(), c.Key.Condition))
+                .Where(gr =>
+                {
+                    if (gr.Key.Condition.FieldInfo == null)
+                        return rep.TryGetC(typeof(TypeConditionSymbol).Name)?.TryGetC(gr.Key.Condition.Key) == null;
+
+                    return !TypeConditionLogic.IsDefined(gr.Key.Resource.ToType(), gr.Key.Condition);
+                })
                 .ToList();
 
             using (rep.WithReplacedDatabaseName())

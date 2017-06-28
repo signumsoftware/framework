@@ -53,7 +53,7 @@ namespace Signum.Engine.Alerts
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<AlertEntity>()
-                    .WithQuery(dqm, a => new
+                    .WithQuery(dqm, () => a => new
                     {
                         Entity = a,
                         a.Id,
@@ -72,7 +72,7 @@ namespace Signum.Engine.Alerts
 
                 sb.Include<AlertTypeEntity>()
                     .WithSave(AlertTypeOperation.Save)
-                    .WithQuery(dqm, t => new
+                    .WithQuery(dqm, () => t => new
                     {
                         Entity = t,
                         t.Id,

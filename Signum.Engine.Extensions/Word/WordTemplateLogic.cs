@@ -28,6 +28,7 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.UserQueries;
 using System.Data;
 using Signum.Entities.Chart;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine.Word
 {
@@ -44,7 +45,7 @@ namespace Signum.Engine.Word
 
         public static ResetLazy<Dictionary<Lite<WordTemplateEntity>, WordTemplateEntity>> WordTemplatesLazy;
 
-        public static ResetLazy<Dictionary<TypeEntity, List<Lite<WordTemplateEntity>>>> TemplatesByType;
+        public static ResetLazy<Dictionary<object, List<WordTemplateEntity>>> TemplatesByQueryName;
 
         public static Dictionary<WordTransformerSymbol, Action<WordContext, OpenXmlPackage>> Transformers = new Dictionary<WordTransformerSymbol, Action<WordContext, OpenXmlPackage>>();
         public static Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>> Converters = new Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>>();
@@ -66,11 +67,13 @@ namespace Signum.Engine.Word
                 sb.Include<WordTemplateEntity>()
                     .WithSave(WordTemplateOperation.Save)
                     .WithDelete(WordTemplateOperation.Delete)
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
+                        e.Name,
                         e.Query,
+                        e.Culture,
                         e.Template.Entity.FileName
                     });
 
@@ -80,14 +83,14 @@ namespace Signum.Engine.Word
                 SymbolLogic<WordConverterSymbol>.Start(sb, dqm, () => Converters.Keys.ToHashSet());
 
                 sb.Include<WordTransformerSymbol>()
-                .WithQuery(dqm, f => new
+                .WithQuery(dqm, () => f => new
                 {
                     Entity = f,
                     f.Key
                 });
 
                 sb.Include<WordConverterSymbol>()
-                    .WithQuery(dqm, f => new
+                    .WithQuery(dqm, () => f => new
                     {
                         Entity = f,
                         f.Key
@@ -116,17 +119,9 @@ namespace Signum.Engine.Word
                     }
                 }.Register();
 
-                TemplatesByType = sb.GlobalLazy(() =>
+                TemplatesByQueryName = sb.GlobalLazy(() =>
                 {
-                    var list = Database.Query<WordTemplateEntity>().Select(r => KVP.Create(r.Query, r.ToLite())).ToList();
-
-                    return (from kvp in list
-                            let imp = dqm.GetEntityImplementations(kvp.Key.ToQueryName())
-                            where !imp.IsByAll
-                            from t in imp.Types
-                            group kvp.Value by t into g
-                            select KVP.Create(g.Key.ToTypeEntity(), g.ToList())).ToDictionary();
-
+                    return WordTemplatesLazy.Value.Values.GroupToDictionary(a => a.Query.ToQueryName());
                 }, new InvalidateWith(typeof(WordTemplateEntity)));
 
                 WordTemplatesLazy = sb.GlobalLazy(() => Database.Query<WordTemplateEntity>()
@@ -137,6 +132,32 @@ namespace Signum.Engine.Word
                 Validator.PropertyValidator((WordTemplateEntity e) => e.Template).StaticPropertyValidation += ValidateTemplate;
             }
         }
+
+
+        public static Dictionary<Type, WordTemplateVisibleOn> VisibleOnDictionary = new Dictionary<Type, WordTemplateVisibleOn>()
+        {
+            { typeof(MultiEntityModel), WordTemplateVisibleOn.Single | WordTemplateVisibleOn.Multiple},
+            { typeof(QueryModel), WordTemplateVisibleOn.Single | WordTemplateVisibleOn.Multiple| WordTemplateVisibleOn.Query},
+        };
+
+        public static bool IsVisible(WordTemplateEntity wt, WordTemplateVisibleOn visibleOn)
+        {
+            if (wt.SystemWordTemplate == null)
+                return visibleOn == WordTemplateVisibleOn.Single;
+
+            if (SystemWordTemplateLogic.HasDefaultTemplateConstructor(wt.SystemWordTemplate))
+                return false;
+
+            var entityType = SystemWordTemplateLogic.GetEntityType(wt.SystemWordTemplate.ToType());
+
+            if (entityType.IsEntity())
+                return visibleOn == WordTemplateVisibleOn.Single;
+
+            var should = VisibleOnDictionary.TryGetS(entityType);
+
+            return should.HasValue && ((should.Value & visibleOn) != 0);
+        }
+        
 
         public static void RegisterTransformer(WordTransformerSymbol transformerSymbol, Action<WordContext, OpenXmlPackage> transformer)
         {
@@ -151,6 +172,8 @@ namespace Signum.Engine.Word
             public WordTemplateEntity Template;
             public Entity Entity;
             public ISystemWordTemplate SystemWordTemplate;
+
+            public ModifiableEntity ModifiableEntity => Entity ?? SystemWordTemplate.UntypedEntity;
         }
 
         public static void RegisterConverter(WordConverterSymbol converterSymbol, Func<WordContext, byte[], byte[]> converter)
@@ -190,7 +213,7 @@ namespace Signum.Engine.Word
 
         public static string DumpFileFolder = null;
 
-        public static byte[] CreateReport(this Lite<WordTemplateEntity> liteTemplate, Entity entity, ISystemWordTemplate systemWordTemplate = null, bool avoidConversion = false)
+        public static byte[] CreateReport(this Lite<WordTemplateEntity> liteTemplate, Entity entity = null, ISystemWordTemplate systemWordTemplate = null, bool avoidConversion = false)
         {
             return liteTemplate.GetFromCache().CreateReport(entity, systemWordTemplate, avoidConversion);
         }
@@ -202,9 +225,9 @@ namespace Signum.Engine.Word
             return template;
         }
 
-        public static byte[] CreateReport(this WordTemplateEntity template, Entity entity, ISystemWordTemplate systemWordTemplate = null, bool avoidConversion = false)
+        public static byte[] CreateReport(this WordTemplateEntity template, Entity entity = null, ISystemWordTemplate systemWordTemplate = null, bool avoidConversion = false)
         {
-            if (systemWordTemplate != null && template.SystemWordTemplate.FullClassName != systemWordTemplate.GetType().FullName)
+            if (systemWordTemplate != null && template.SystemWordTemplate.ToType() != systemWordTemplate.GetType())
                 throw new ArgumentException("systemWordTemplate should be a {0} instead of {1}".FormatWith(template.SystemWordTemplate.FullClassName, systemWordTemplate.GetType().FullName));
 
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
@@ -298,7 +321,7 @@ namespace Signum.Engine.Word
         {
             try
             {
-                if (template.Template == null)
+                if (template.Template == null || !replacements.Interactive)
                     return null;
 
                 var queryName = QueryLogic.ToQueryName(template.Query.Key);
@@ -430,6 +453,8 @@ namespace Signum.Engine.Word
         private static SqlPreCommand Regenerate(WordTemplateEntity template, Replacements replacements)
         {
             var newTemplate = SystemWordTemplateLogic.CreateDefaultTemplate(template.SystemWordTemplate);
+            if (newTemplate == null)
+                return null;
 
             var file = template.Template.Retrieve();
 
@@ -464,7 +489,9 @@ namespace Signum.Engine.Word
             {
                 try
                 {
-                    SystemWordTemplateLogic.CreateDefaultTemplate(se).Save();
+                    var defaultTemplate = SystemWordTemplateLogic.CreateDefaultTemplate(se);
+                    if (defaultTemplate != null)
+                        defaultTemplate.Save();
                 }
                 catch (Exception ex)
                 {

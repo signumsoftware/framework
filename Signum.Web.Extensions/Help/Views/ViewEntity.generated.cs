@@ -90,7 +90,7 @@ namespace ASP
     {
 
 #line 20 "..\..\Help\Views\ViewEntity.cshtml"
-public System.Web.WebPages.HelperResult WriteProperty(Node<Tuple<PropertyHelp, TypeElementContext<PropertyRouteHelpEntity>>> node, string entityName)
+public System.Web.WebPages.HelperResult WriteProperty(Node<Tuple<PropertyHelp, TypeElementContext<PropertyRouteHelpEmbedded>>> node, string entityName)
 {
 #line default
 #line hidden
@@ -122,14 +122,14 @@ WriteTo(__razor_helper_writer, Html.HiddenRuntimeInfo(ctx));
 #line hidden
 WriteLiteralTo(__razor_helper_writer, "    <dt");
 
-WriteAttributeTo(__razor_helper_writer, "id", Tuple.Create(" id=\"", 683), Tuple.Create("\"", 726)
+WriteAttributeTo(__razor_helper_writer, "id", Tuple.Create(" id=\"", 685), Tuple.Create("\"", 728)
 
 #line 27 "..\..\Help\Views\ViewEntity.cshtml"
-, Tuple.Create(Tuple.Create("", 688), Tuple.Create<System.Object, System.Int32>(HelpUrls.IdProperty(ph.PropertyRoute)
+, Tuple.Create(Tuple.Create("", 690), Tuple.Create<System.Object, System.Int32>(HelpUrls.IdProperty(ph.PropertyRoute)
 
 #line default
 #line hidden
-, 688), false)
+, 690), false)
 );
 
 WriteLiteralTo(__razor_helper_writer, ">");
@@ -417,14 +417,14 @@ WriteLiteral(" class=\"edit-container\"");
 
 WriteLiteral(">\r\n                <h1");
 
-WriteAttribute("title", Tuple.Create(" title=\"", 2874), Tuple.Create("\"", 2900)
+WriteAttribute("title", Tuple.Create(" title=\"", 2876), Tuple.Create("\"", 2902)
             
             #line 76 "..\..\Help\Views\ViewEntity.cshtml"
-, Tuple.Create(Tuple.Create("", 2882), Tuple.Create<System.Object, System.Int32>(eh.Type.Namespace
+, Tuple.Create(Tuple.Create("", 2884), Tuple.Create<System.Object, System.Int32>(eh.Type.Namespace
             
             #line default
             #line hidden
-, 2882), false)
+, 2884), false)
 );
 
 WriteLiteral(">");
@@ -696,14 +696,14 @@ WriteLiteral(">\r\n");
             #line hidden
 WriteLiteral("                                <dt");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 5951), Tuple.Create("\"", 5985)
+WriteAttribute("id", Tuple.Create(" id=\"", 5953), Tuple.Create("\"", 5987)
             
             #line 137 "..\..\Help\Views\ViewEntity.cshtml"
-, Tuple.Create(Tuple.Create("", 5956), Tuple.Create<System.Object, System.Int32>(HelpUrls.IdOperation(op.Key)
+, Tuple.Create(Tuple.Create("", 5958), Tuple.Create<System.Object, System.Int32>(HelpUrls.IdOperation(op.Key)
             
             #line default
             #line hidden
-, 5956), false)
+, 5958), false)
 );
 
 WriteLiteral(">");
@@ -938,14 +938,14 @@ WriteLiteral("</h2>\r\n");
             #line hidden
 WriteLiteral("                            <h3");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 8161), Tuple.Create("\"", 8191)
+WriteAttribute("id", Tuple.Create(" id=\"", 8163), Tuple.Create("\"", 8193)
             
             #line 174 "..\..\Help\Views\ViewEntity.cshtml"
-, Tuple.Create(Tuple.Create("", 8166), Tuple.Create<System.Object, System.Int32>(HelpUrls.IdQuery(mq.Key)
+, Tuple.Create(Tuple.Create("", 8168), Tuple.Create<System.Object, System.Int32>(HelpUrls.IdQuery(mq.Key)
             
             #line default
             #line hidden
-, 8166), false)
+, 8168), false)
 );
 
 WriteLiteral(">");

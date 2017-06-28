@@ -11,7 +11,7 @@ import { EntityLine, ValueLine } from '../../../../Framework/Signum.React/Script
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { Api } from '../AuthClient'
+import { API } from '../AuthClient'
 import { PermissionRulePack, PermissionAllowedRule, AuthAdminMessage, PermissionSymbol, AuthMessage } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 
@@ -22,8 +22,8 @@ export default class PermissionRulesPackControl extends React.Component<{ ctx: T
     handleSaveClick = (bc: ButtonsContext) => {
         let pack = this.props.ctx.value;
 
-        Api.savePermissionRulePack(pack)
-            .then(() => Api.fetchPermissionRulePack(pack.role.id!))
+        API.savePermissionRulePack(pack)
+            .then(() => API.fetchPermissionRulePack(pack.role.id!))
             .then(newPack => {
                 notifySuccess();
                 bc.frame.onReload({ entity: newPack, canExecute: {} });

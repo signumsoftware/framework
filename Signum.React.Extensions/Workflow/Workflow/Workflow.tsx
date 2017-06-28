@@ -53,12 +53,11 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
 
     loadXml(w: WorkflowEntity) {
         if (w.isNew) {
-            _import<string>("raw-loader!./InitialWorkflow.xml")
-                .then(xml => this.updateState(WorkflowModel.New({
+            require(["raw-loader!./InitialWorkflow.xml"], (xml) =>
+                this.updateState(WorkflowModel.New({
                     diagramXml: xml,
                     entities: [],
-                })))
-                .done();
+                })));
         }
         else
             API.getWorkflowModel(toLite(w))
@@ -72,7 +71,7 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
             <div>
                 <ValueLine ctx={ctx.subCtx(d => d.name)} />
                 <EntityLine ctx={ctx.subCtx(d => d.mainEntityType)}
-                    autoComplete={new LiteAutocompleteConfig(str => API.findMainEntityType({ subString: str, count: 5 }), false)}
+                    autoComplete={new LiteAutocompleteConfig((abortController, str) => API.findMainEntityType({ subString: str, count: 5 }), false)}
                     find={false}
                     onRemove={this.handleMainEntityTypeChange} />
 

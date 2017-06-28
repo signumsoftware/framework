@@ -26,9 +26,9 @@ import * as AuthClient from '../Authorization/AuthClient'
 
 export function start(options: { routes: JSX.Element[] }) {
 
-    Navigator.addSettings(new EntitySettings(DynamicTypeEntity, w => _import('./Type/DynamicType')));
-    Navigator.addSettings(new EntitySettings(DynamicMixinConnectionEntity, w => _import('./Type/DynamicMixinConnection')));
-    Navigator.addSettings(new EntitySettings(DynamicSqlMigrationEntity, w => _import('./Type/DynamicSqlMigration')));
+    Navigator.addSettings(new EntitySettings(DynamicTypeEntity, w => import('./Type/DynamicType')));
+    Navigator.addSettings(new EntitySettings(DynamicMixinConnectionEntity, w => import('./Type/DynamicMixinConnection')));
+    Navigator.addSettings(new EntitySettings(DynamicSqlMigrationEntity, w => import('./Type/DynamicSqlMigration')));
 
     Operations.addSettings(new EntityOperationSettings(DynamicTypeOperation.Save, {
         onClick: eoc => {
@@ -117,6 +117,7 @@ export interface DynamicProperty {
     scale?: number;
     _propertyType_?: string;
     validators?: Validators.DynamicValidator[];
+    customAttributes?: string;
 }
 
 export interface DynamicTypePrimaryKeyDefinition {

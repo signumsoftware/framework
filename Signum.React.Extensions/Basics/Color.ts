@@ -160,7 +160,7 @@ export class Color {
 
     toString(): string {
         if (this.a != undefined)
-            return `rgb(${clamp(this.r)},${clamp(this.g)},${clamp(this.b)},${this.a.toString()})`;
+            return `rgba(${clamp(this.r)},${clamp(this.g)},${clamp(this.b)},${this.a.toString()})`;
         else
             return `rgb(${clamp(this.r)},${clamp(this.g)},${clamp(this.b)})`;
     }

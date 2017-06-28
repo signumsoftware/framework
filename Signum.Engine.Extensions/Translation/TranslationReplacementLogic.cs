@@ -25,7 +25,7 @@ namespace Signum.Engine.Translation
                 sb.Include<TranslationReplacementEntity>()
                     .WithSave(TranslationReplacementOperation.Save)
                     .WithDelete(TranslationReplacementOperation.Delete)
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,

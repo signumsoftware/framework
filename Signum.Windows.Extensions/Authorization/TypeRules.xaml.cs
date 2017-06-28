@@ -378,7 +378,7 @@ namespace Signum.Windows.Authorization
 
                 AllowedBase = AllowedBase,
                 Allowed = new TypeAllowedAndConditions(Allowed.TypeAllowed, 
-                    Conditions.Select(a => new TypeConditionRuleEmbedded(a.TypeCondition, a.Allowed.TypeAllowed.Value)).ToReadOnly()),
+                    Conditions.Select(a => new TypeConditionRuleEmbedded(a.TypeCondition, a.Allowed.TypeAllowed.Value)).ToMList()),
 
                 AvailableConditions = this.AvailableConditions,
 

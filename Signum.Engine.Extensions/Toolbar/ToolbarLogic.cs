@@ -39,7 +39,7 @@ namespace Signum.Engine.Toolbar
                 sb.Include<ToolbarEntity>()
                     .WithSave(ToolbarOperation.Save)
                     .WithDelete(ToolbarOperation.Delete)
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -52,7 +52,7 @@ namespace Signum.Engine.Toolbar
                 sb.Include<ToolbarMenuEntity>()
                     .WithSave(ToolbarMenuOperation.Save)
                     .WithDelete(ToolbarMenuOperation.Delete)
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -158,7 +158,7 @@ namespace Signum.Engine.Toolbar
             return new ToolbarResponse
             {
                 type = ToolbarElementType.Menu,
-                lite = curr.ToLite(),
+                content = curr.ToLite(),
                 label = curr.Name,
                 elements = responses,
             };
@@ -191,7 +191,8 @@ namespace Signum.Engine.Toolbar
             var result = new ToolbarResponse
             {
                 type = element.Type,
-                lite = element.Content,
+                content = element.Content,
+                url = element.Url,
                 label = element.Label,
                 iconName = element.IconName,
                 iconColor = element.IconColor,
@@ -234,7 +235,8 @@ namespace Signum.Engine.Toolbar
     {
         public ToolbarElementType type;
         public string label;
-        public Lite<Entity> lite;
+        public Lite<Entity> content;
+        public string url;
         public List<ToolbarResponse> elements;
         public string iconName;
         public string iconColor;

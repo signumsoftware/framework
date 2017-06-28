@@ -17,9 +17,9 @@ import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport
 
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(
-        <ImportRoute path="~/profiler/times" onImportModule={() => _import("./Times/TimesPage")} />,
-        <ImportRoute path="~/profiler/heavy" exact onImportModule={() => _import("./Heavy/HeavyListPage")} />,
-        <ImportRoute path="~/profiler/heavy/entry/:selectedIndex" onImportModule={() => _import("./Heavy/HeavyEntryPage")} />
+        <ImportRoute path="~/profiler/times" onImportModule={() => import("./Times/TimesPage")} />,
+        <ImportRoute path="~/profiler/heavy" exact onImportModule={() => import("./Heavy/HeavyListPage")} />,
+        <ImportRoute path="~/profiler/heavy/entry/:selectedIndex" onImportModule={() => import("./Heavy/HeavyEntryPage")} />
     );
 
 
@@ -111,6 +111,7 @@ export interface HeavyProfilerEntry {
     Role: string;
     Color: string;
     Depth : number;
+    AsyncDepth : number;
     AdditionalData: string;
     FullIndex: string;
     StackTrace: string;

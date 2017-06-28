@@ -42,7 +42,7 @@ namespace Signum.Engine.Printing
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<PrintLineEntity>()
-                    .WithQuery(dqm, p => new
+                    .WithQuery(dqm, () => p => new
                     {
                         Entity = p,
                         p.CreationDate,
@@ -54,7 +54,7 @@ namespace Signum.Engine.Printing
                     });
                 
                 sb.Include<PrintPackageEntity>()
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -66,7 +66,7 @@ namespace Signum.Engine.Printing
                 PermissionAuthLogic.RegisterPermissions(PrintPermission.ViewPrintPanel);
                 PrintLineGraph.Register();
 
-                SimpleTaskLogic.Register(PrintTask.RemoveOldFiles, () =>
+                SimpleTaskLogic.Register(PrintTask.RemoveOldFiles, (ScheduledTaskContext ctx) =>
                 {
                     var lines = Database.Query<PrintLineEntity>().Where(a => a.State == PrintLineState.Printed).Where(b => b.CreationDate <= DateTime.Now.AddMinutes(-DeleteFilesAfter));
                     foreach (var line in lines)

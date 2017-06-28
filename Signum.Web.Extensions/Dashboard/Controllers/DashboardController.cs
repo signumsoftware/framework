@@ -42,7 +42,7 @@ namespace Signum.Web.Dashboard
         {
             var type = Navigator.ResolveType(newPartType);
 
-            PanelPartEntity part = new PanelPartEntity
+            PanelPartEmbedded part = new PanelPartEmbedded
             {
                 StartColumn = 0,
                 Columns = 12,
@@ -51,7 +51,7 @@ namespace Signum.Web.Dashboard
 
             PropertyRoute route = PropertyRoute.Parse(TypeLogic.GetType(rootType), propertyRoute);
             ViewData[GridRepeaterHelper.LastEnd] = 0;
-            return Navigator.PartialView(this, new TypeContext<PanelPartEntity>(part, null, this.Prefix(), route), partialViewName);
+            return Navigator.PartialView(this, new TypeContext<PanelPartEmbedded>(part, null, this.Prefix(), route), partialViewName);
         }
     }
 }

@@ -48,7 +48,9 @@ export default class CodeMirrorComponent extends React.Component<CodeMirrorProps
     componentWillReceiveProps(nextProps: CodeMirrorProps) {
         if (this.codeMirror) {
             if (nextProps.value != undefined && this.codeMirror.getValue() !== nextProps.value) {
+                this.codeMirror.off('change', this.codemirrorValueChanged);
                 this.codeMirror.setValue(nextProps.value);
+                this.codeMirror.on('change', this.codemirrorValueChanged);
             }
 
             if (typeof nextProps.options === 'object') {

@@ -225,7 +225,7 @@ namespace Signum.Engine.Help
 
                 sb.Include<EntityHelpEntity>()
                     .WithSave(EntityHelpOperation.Save)
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,
@@ -235,7 +235,7 @@ namespace Signum.Engine.Help
 
                 sb.Include<NamespaceHelpEntity>()
                     .WithSave(NamespaceHelpOperation.Save)
-                    .WithQuery(dqm, n => new
+                    .WithQuery(dqm, () => n => new
                     {
                         Entity = n,
                         n.Id,
@@ -246,7 +246,7 @@ namespace Signum.Engine.Help
                 
                 sb.Include<AppendixHelpEntity>()
                 .WithSave(AppendixHelpOperation.Save)
-                .WithQuery(dqm, a => new
+                .WithQuery(dqm, () => a => new
                 {
                     Entity = a,
                     a.Id,
@@ -258,7 +258,7 @@ namespace Signum.Engine.Help
 
                 sb.Include<QueryHelpEntity>()
                     .WithSave(QueryHelpOperation.Save)
-                    .WithQuery(dqm, q => new
+                    .WithQuery(dqm, () => q => new
                     {
                         Entity = q,
                         q.Id,
@@ -269,7 +269,7 @@ namespace Signum.Engine.Help
             
                 sb.Include<OperationHelpEntity>()
                     .WithSave(OperationHelpOperation.Save)
-                    .WithQuery(dqm, o => new
+                    .WithQuery(dqm, () => o => new
                     {
                         Entity = o,
                         o.Id,

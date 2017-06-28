@@ -33,7 +33,7 @@ namespace Signum.Web.Chart
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EmbeddedEntitySettings<ChartPaletteModel> 
+                    new ModelEntitySettings<ChartPaletteModel> 
                     { 
                         PartialViewName = _ => ChartClient.ViewPrefix.FormatWith("ChartPalette"),
                         MappingDefault = new EntityMapping<ChartPaletteModel>(true)

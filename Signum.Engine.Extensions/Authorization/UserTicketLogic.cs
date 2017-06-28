@@ -31,7 +31,7 @@ namespace Signum.Engine.Authorization
 
                 AuthLogic.AssertStarted(sb);
                 sb.Include<UserTicketEntity>()
-                    .WithQuery(dqm, ut => new
+                    .WithQuery(dqm, () => ut => new
                     {
                         Entity = ut,
                         ut.Id,
@@ -40,10 +40,10 @@ namespace Signum.Engine.Authorization
                         ut.ConnectionDate,
                         ut.Device,
                     });
-                
+
                 dqm.RegisterExpression((UserEntity u) => u.UserTickets(), () => typeof(UserTicketEntity).NicePluralName());
 
-                sb.Schema.EntityEvents<UserEntity>().Saving += UserTicketLogic_Saving; 
+                sb.Schema.EntityEvents<UserEntity>().Saving += UserTicketLogic_Saving;
             }
         }
 
@@ -98,7 +98,7 @@ namespace Signum.Engine.Authorization
                 {
                     throw new UnauthorizedAccessException("User attempted to log-in with an invalid ticket");
                 }
-                
+
                 UserTicketEntity result = new UserTicketEntity
                 {
                     User = user.ToLite(),

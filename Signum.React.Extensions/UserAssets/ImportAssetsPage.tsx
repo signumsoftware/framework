@@ -2,6 +2,7 @@
 import { RouteComponentProps } from 'react-router'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
+import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
 import { ValueSearchControl, SearchControl } from '../../../Framework/Signum.React/Scripts/Search'
@@ -29,11 +30,15 @@ export default class ImportAssetsPage extends React.Component<ImportAssetsPagePr
     constructor(props: ImportAssetsPageProps) {
         super(props);
         this.state = { fileVer: 0 };
+    
+        Navigator.setTitle("Import Assets Page");
+    }
+
+    componentWillUnmount() {
+        Navigator.setTitle();
     }
 
     render() {
-        document.title = "Import Assets Page";
-
         return (
             <div>
                 <h2>{UserAssetMessage.ImportUserAssets.niceToString() }</h2>
