@@ -105,7 +105,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                                     onRowHtmlAttributes={this.props.onRowHtmlAttributes}
                                     fetchRowState={this.props.fetchRowState}
                                     onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
-                                    draggable={this.canMove(mlec.value) && !readOnly && this.getDragConfig(i, "v")}
+                                    draggable={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "v") : undefined}
                                     columns={this.state.columns!}
                                     ctx={mlec} />))
                         }
@@ -196,6 +196,9 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
         if (col.property == null)
             throw new Error("Column has no property and no template");
 
-        return DynamicComponent.getAppropiateComponent(this.props.ctx.subCtx(col.property));
+        if (typeof col.property == "string")
+            return DynamicComponent.getAppropiateComponent(this.props.ctx.subCtx(col.property));
+        else
+            return DynamicComponent.getAppropiateComponent(this.props.ctx.subCtx(col.property));
     }
 }
