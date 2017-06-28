@@ -32,29 +32,29 @@ namespace Signum.Engine.Excel
                     s.Related,
                 });
             
-            EmailTemplateLogic.FillAttachmentTokens.Register((ExcelAttachmentEntity uqe, EmailTemplateLogic.FillAttachmentTokenContext ctx) =>
+            EmailTemplateLogic.FillAttachmentTokens.Register((ExcelAttachmentEntity ea, EmailTemplateLogic.FillAttachmentTokenContext ctx) =>
             {
-                if (uqe.FileName != null)
-                    EmailTemplateParser.Parse(uqe.FileName, ctx.QueryDescription, ctx.ModelType).FillQueryTokens(ctx.QueryTokens);
+                if (ea.FileName != null)
+                    EmailTemplateParser.Parse(ea.FileName, ctx.QueryDescription, ctx.ModelType).FillQueryTokens(ctx.QueryTokens);
 
-                if (uqe.Title != null)
-                    EmailTemplateParser.Parse(uqe.Title, ctx.QueryDescription, ctx.ModelType).FillQueryTokens(ctx.QueryTokens);
+                if (ea.Title != null)
+                    EmailTemplateParser.Parse(ea.Title, ctx.QueryDescription, ctx.ModelType).FillQueryTokens(ctx.QueryTokens);
             });
 
             Validator.PropertyValidator((ExcelAttachmentEntity e) => e.FileName).StaticPropertyValidation = ExcelAttachmentFileName_StaticPropertyValidation;
             Validator.PropertyValidator((ExcelAttachmentEntity e) => e.Title).StaticPropertyValidation = ExcelAttachmentTitle_StaticPropertyValidation;
 
-            EmailTemplateLogic.GenerateAttachment.Register((ExcelAttachmentEntity uqe, EmailTemplateLogic.GenerateAttachmentContext ctx) =>
+            EmailTemplateLogic.GenerateAttachment.Register((ExcelAttachmentEntity ea, EmailTemplateLogic.GenerateAttachmentContext ctx) =>
             {
-                var finalEntity = uqe.Related?.Retrieve() ?? (Entity)ctx.Entity;
+                var finalEntity = ea.Related?.Retrieve() ?? (Entity)ctx.Entity;
 
                 using (finalEntity == null ? null : CurrentEntityConverter.SetCurrentEntity(finalEntity))
                 using (CultureInfoUtils.ChangeBothCultures(ctx.Culture))
                 {
-                    QueryRequest request = UserQueryLogic.ToQueryRequest(uqe.UserQuery.Retrieve());
+                    QueryRequest request = UserQueryLogic.ToQueryRequest(ea.UserQuery.Retrieve());
 
-                    var title = GetTemplateString(uqe.Title, ref uqe.TitleNode, ctx);
-                    var fileName = GetTemplateString(uqe.FileName, ref uqe.FileNameNode, ctx);
+                    var title = GetTemplateString(ea.Title, ref ea.TitleNode, ctx);
+                    var fileName = GetTemplateString(ea.FileName, ref ea.FileNameNode, ctx);
 
                     var bytes = ExcelLogic.ExecutePlainExcel(request, title);
 

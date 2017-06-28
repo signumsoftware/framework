@@ -5,6 +5,7 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import * as Mailing from '../Mailing/Signum.Entities.Mailing'
 import * as Signum from '../Basics/Signum.Entities.Basics'
 import * as Files from '../Files/Signum.Entities.Files'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
@@ -14,6 +15,14 @@ export const SystemWordTemplateEntity = new Type<SystemWordTemplateEntity>("Syst
 export interface SystemWordTemplateEntity extends Entities.Entity {
     Type: "SystemWordTemplate";
     fullClassName?: string | null;
+}
+
+export const WordAttachmentEntity = new Type<WordAttachmentEntity>("WordAttachment");
+export interface WordAttachmentEntity extends Entities.Entity, Mailing.IAttachmentGeneratorEntity {
+    Type: "WordAttachment";
+    fileName?: string | null;
+    wordTemplate?: Entities.Lite<WordTemplateEntity> | null;
+    related?: Entities.Lite<Entities.Entity> | null;
 }
 
 export const WordConverterSymbol = new Type<WordConverterSymbol>("WordConverter");

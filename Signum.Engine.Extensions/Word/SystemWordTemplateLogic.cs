@@ -295,5 +295,10 @@ namespace Signum.Engine.Word
                     where pi != null && pi.ParameterType == entityType
                     select ci).SingleOrDefaultEx();
         }
+
+        public static ISystemWordTemplate CreateDefaultSystemWordTemplate(SystemWordTemplateEntity systemWordTemplate, Entity entity)
+        {
+            return (ISystemWordTemplate)SystemWordTemplateLogic.GetEntityConstructor(systemWordTemplate.ToType()).Invoke(new[] { entity });
+        }
     }
 }

@@ -71,7 +71,7 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
                 <div className="repeater-inline">
                     <EntityRepeater ctx={ec.subCtx(e => e.recipients)} onChange={() => this.forceUpdate()} getComponent={this.renderRecipient} />
                 </div>
-                <EntityList ctx={ec.subCtx(e => e.attachments)} />
+                <EntityRepeater ctx={ec.subCtx(e => e.attachments)} />
                 <EntityLine ctx={ec.subCtx(e => e.masterTemplate)} />
                 <ValueLine ctx={ec.subCtx(e => e.isBodyHtml)} />
 

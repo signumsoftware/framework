@@ -37,8 +37,7 @@ namespace Signum.React.Word
             var template = request.template.Retrieve();
             var entity = request.entity.Retrieve();
 
-            ISystemWordTemplate systemWordReport = template.SystemWordTemplate == null ? null :
-                (ISystemWordTemplate)SystemWordTemplateLogic.GetEntityConstructor(template.SystemWordTemplate.ToType()).Invoke(new[] { entity });
+            ISystemWordTemplate systemWordReport = template.SystemWordTemplate == null ? null : SystemWordTemplateLogic.CreateDefaultSystemWordTemplate(template.SystemWordTemplate, entity);
 
             var bytes = request.template.CreateReport(entity, systemWordReport);
 
