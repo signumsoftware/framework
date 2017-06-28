@@ -23,7 +23,7 @@ namespace Signum.Engine.Word
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             sb.Include<WordAttachmentEntity>()
-                .WithQuery(dqm, s => new
+                .WithQuery(dqm, () => s => new
                 {
                     Entity = s,
                     s.Id,
