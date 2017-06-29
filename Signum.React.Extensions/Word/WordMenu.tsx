@@ -38,11 +38,14 @@ export default class WordMenu extends React.Component<WordMenuProps, { wordRepor
             .then(wordTemplate => WordClient.API.getConstructorType(wordTemplate.systemWordTemplate!))
             .then(ct => {
 
-                const constructor = WordClient.constructorContextual[ct];
-                if (!constructor)
-                    throw new Error("No 'constructorContextual' defined for '" + ct + "'");
+                var s = WordClient.settings[ct];
+                if (!s)
+                    throw new Error("No 'WordModelSettings' defined for '" + ct + "'");
 
-                return WordClient.constructorContextual[ct](wt, undefined, this.props.searchControl.getQueryRequest())
+                if (!s.createFromQuery)
+                    throw new Error("No 'createFromQuery' defined in the WordModelSettings of '" + ct + "'");
+
+                return s.createFromQuery(wt, this.props.searchControl.getQueryRequest())
                     .then<Response | undefined>(m => m && WordClient.API.createAndDownloadReport({ template: wt, entity: m }));
             })
             .then(response => response && saveFile(response))

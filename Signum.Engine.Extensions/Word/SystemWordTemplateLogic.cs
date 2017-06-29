@@ -72,7 +72,7 @@ namespace Signum.Engine.Word
                     new Filter(QueryUtils.Parse("Entity", qd, 0), FilterOperation.EqualTo, ((Entity)(ModifiableEntity)Entity).ToLite())
                 };
 
-            throw new InvalidOperationException($"Since {typeof(T).Name} is not in ${imp}, it's necessary to override ${nameof(GetFilters)} in ${this.GetType().Name}");
+            throw new InvalidOperationException($"Since {typeof(T).Name} is not in {imp}, it's necessary to override ${nameof(GetFilters)} in ${this.GetType().Name}");
         }
 
         public virtual List<Order> GetOrders(QueryDescription queryDescription)
