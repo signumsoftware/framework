@@ -21,7 +21,7 @@ namespace Signum.React.Selenium
 
         public virtual WebElementLocator ItemElement(int index)
         {
-            return this.ItemsContainerElement.CombineCss(" > fieldset.sf-repeater-element:nth-child({0})".FormatWith(index));
+            return this.ItemsContainerElement.CombineCss(" > div > fieldset.sf-repeater-element:nth-child({0})".FormatWith(index));
         }
 
         public void WaitItemLoaded(int index)
