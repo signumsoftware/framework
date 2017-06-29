@@ -4,8 +4,8 @@ import * as RootCloseWrapper from 'react-overlays/lib/RootCloseWrapper'
 
 
 export interface ContextMenuPosition {
-    pageX: number;
-    pageY: number;
+    left: number;
+    top: number;
     width: number; //Necessary for RTL
 }
 
@@ -19,11 +19,14 @@ export default class ContextMenu extends React.Component<ContextMenuProps, {}> {
     static getPosition(e: React.MouseEvent<any>, container: HTMLElement): ContextMenuPosition{
 
         const op = DomUtils.offsetParent(container);
+
+        const rec = op && op.getBoundingClientRect();
+
         var result = ({
-            pageX: e.pageX - (op ? op.offsetLeft : 0),
-            pageY: e.pageY - (op ? op.offsetTop : 0),
+            left: e.clientX - (rec ? rec.left : 0),
+            top: e.clientY - (rec ? rec.top : 0),
             width: (op ? op.offsetWidth : window.innerWidth)
-        });
+        }) as ContextMenuPosition;
 
         return result;
     }
@@ -37,11 +40,11 @@ export default class ContextMenu extends React.Component<ContextMenuProps, {}> {
 
         const style: React.CSSProperties = { zIndex: 999, display: "block", position: "absolute" };
 
-        style.top = position.pageY + "px";
+        style.top = position.top + "px";
         if (document.body.className.contains("rtl-mode"))
-            style.right = (position.width - position.pageX) + "px";
+            style.right = (position.width - position.left) + "px";
         else
-            style.left = position.pageX + "px";
+            style.left = position.left + "px";
 
         const childrens = React.Children.map(this.props.children,
             (c: React.ReactElement<any>) => c && React.cloneElement(c, { "onSelect": combineFunction(c.props.onSelect, onHide) }));
