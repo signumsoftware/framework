@@ -30,10 +30,7 @@ export default class ContextMenu extends React.Component<ContextMenuProps, {}> {
 
         return result;
     }
-
-
-
-
+    
     render() {
         
         const { position, onHide, ref, ...props } = this.props;
