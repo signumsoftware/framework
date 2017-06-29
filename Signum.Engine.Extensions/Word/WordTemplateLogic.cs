@@ -153,9 +153,9 @@ namespace Signum.Engine.Word
             if (entityType.IsEntity())
                 return visibleOn == WordTemplateVisibleOn.Single;
 
-            var should = VisibleOnDictionary.TryGetS(entityType);
+            var should = VisibleOnDictionary.TryGet(entityType, WordTemplateVisibleOn.Single);
 
-            return should.HasValue && ((should.Value & visibleOn) != 0);
+            return ((should & visibleOn) != 0);
         }
         
 
