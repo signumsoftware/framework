@@ -1,11 +1,11 @@
 ﻿import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import * as d3 from 'd3'
+import * as D3 from 'd3'
 import { DomUtils } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { is, SearchMessage, parseLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import * as ChartUtils from "./ChartUtils"
+import * as ChartUtils_Mod from "./ChartUtils"
 import { ResultTable, FindOptions, FilterOptionParsed, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption, hasAggregate } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import {
     ChartColumnEmbedded, ChartScriptColumnEmbedded, ChartScriptParameterEmbedded, ChartRequest, GroupByChart, ChartMessage,
@@ -67,7 +67,7 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
 
         const data = this.props.data;
 
-        ChartUtils.fillAllTokenValueFuntions(data);
+        ChartUtils_Mod.fillAllTokenValueFuntions(data);
 
         data.parameters = this.props.chartRequest.parameters.map(mle => mle.element).toObject(a => a.name!, a => a.value);
 
@@ -76,14 +76,16 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
                 data.columns["c" + i] = {};
         }); 
 
-        const chart = d3.select(node)
+        const chart = D3.select(node)
             .append('svg:svg').attr("direction", "ltr").attr('width', rect.width).attr('height', rect.height);
 
         node.addEventListener("click", this.handleOnClick);
 
-        let func: (chart: d3.Selection<any, any, any, any>, data: ChartClient.ChartTable) => void;
+        let func: (chart: D3.Selection<any, any, any, any>, data: ChartClient.ChartTable) => void;
         let __baseLineNumber__: number = 0;
         try {
+            const d3 = D3;
+            const ChartUtils = ChartUtils_Mod;
             const width = rect.width;
             const height = rect.height;
             const getClickKeys = ChartUtils.getClickKeys;
@@ -182,7 +184,7 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
         }
     }
 
-    showError(e: any, __baseLineNumber__: number, chart: d3.Selection<any, any, any, any>) {
+    showError(e: any, __baseLineNumber__: number, chart: D3.Selection<any, any, any, any>) {
         let message = e.toString();
 
         const regex = /(DrawChart.*@.*:(.*))|(DrawChart .*:(.*):.*\)\))|(DrawChart .*:(.*):.*\))/;
