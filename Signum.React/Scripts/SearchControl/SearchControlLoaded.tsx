@@ -262,8 +262,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     handleFiltersChanged = () => {
         if (this.props.onFiltersChanged)
-            this.props.onFiltersChanged(this.props.findOptions.filterOptions); 
-         
+            this.props.onFiltersChanged(this.props.findOptions.filterOptions);
+
     }
 
     handleHeightChanged = () => {
@@ -303,14 +303,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     <div onKeyUp={this.handleFiltersKeyUp}>
                         {
                             fo.showFilters ? <FilterBuilder
-                            queryDescription={qd}
-                            filterOptions={fo.filterOptions}
-                            lastToken={this.state.lastToken}
-                            subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement}
-                            onTokenChanged={this.handleFilterTokenChanged}
-                            onFiltersChanged={this.handleFiltersChanged}
-                            onHeightChanged={this.handleHeightChanged}
-                        /> :
+                                queryDescription={qd}
+                                filterOptions={fo.filterOptions}
+                                lastToken={this.state.lastToken}
+                                subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement}
+                                onTokenChanged={this.handleFilterTokenChanged}
+                                onFiltersChanged={this.handleFiltersChanged}
+                                onHeightChanged={this.handleHeightChanged}
+                            /> :
                                 sfb && <div className="simple-filter-builder">{sfb}</div>
                         }
                     </div>
@@ -403,29 +403,29 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         if (onCreate)
             onCreate().done();
         else {
-        const isWindowsOpen = ev.button == 1 || ev.ctrlKey;
+            const isWindowsOpen = ev.button == 1 || ev.ctrlKey;
 
-        this.chooseType().then(tn => {
-            if (tn == undefined)
-                return;
+            this.chooseType().then(tn => {
+                if (tn == undefined)
+                    return;
 
-            var s = Navigator.getSettings(tn);
+                var s = Navigator.getSettings(tn);
 
-            if (isWindowsOpen || (s != null && s.avoidPopup)) {
-                window.open(Navigator.createRoute(tn));
-            } else {
-                Constructor.construct(tn).then(e => {
-                    if (e == undefined)
-                        return;
+                if (isWindowsOpen || (s != null && s.avoidPopup)) {
+                    window.open(Navigator.createRoute(tn));
+                } else {
+                    Constructor.construct(tn).then(e => {
+                        if (e == undefined)
+                            return;
 
-                    Finder.setFilters(e.entity as Entity, this.props.findOptions.filterOptions)
-                        .then(() => Navigator.navigate(e!, { getViewPromise: this.props.getViewPromise }))
-                        .then(() => this.props.avoidAutoRefresh ? undefined : this.doSearch())
-                        .done();
-                }).done();
-            }
-        }).done();
-    }
+                        Finder.setFilters(e.entity as Entity, this.props.findOptions.filterOptions)
+                            .then(() => Navigator.navigate(e!, { getViewPromise: this.props.getViewPromise }))
+                            .then(() => this.props.avoidAutoRefresh ? undefined : this.doSearch())
+                            .done();
+                    }).done();
+                }
+            }).done();
+        }
     }
 
     handleFullScreenClick = (ev: React.MouseEvent<any>) => {
@@ -441,7 +441,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         else
             Navigator.history.push(path);
     };
-    
+
     createTitle() {
 
         const tis = this.entityColumnTypeInfos();
@@ -585,7 +585,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         if (this.canFilter() && cm.columnIndex != undefined)
             menuItems.push(<MenuItem className="sf-quickfilter-header" onClick={this.handleQuickFilter}>{JavascriptMessage.addFilter.niceToString()}</MenuItem>);
 
-        if (cm.rowIndex == undefined || fo.allowChangeColumns) {
+        if (cm.rowIndex == undefined && fo.allowChangeColumns) {
 
             if (menuItems.length)
                 menuItems.push(<MenuItem divider />);
@@ -739,10 +739,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 }
                 {this.props.findOptions.navigate && <th className="sf-th-entity" data-column-name="Entity"></th>}
                 {this.props.findOptions.columnOptions.map((co, i) =>
-                    <th key={ i }
+                    <th key={i}
                         draggable={true}
                         className={classes(
-                            i == this.state.dragColumnIndex  && "sf-draggin",
+                            i == this.state.dragColumnIndex && "sf-draggin",
                             co == this.state.editingColumn && "sf-current-column",
                             !this.canOrder(co) && "noOrder",
                             co == this.state.editingColumn && co.token && co.token.type.isCollection && "error",
@@ -793,7 +793,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         const cb = event.currentTarget;
 
-        const index = parseInt(cb.getAttribute("data-index") !);
+        const index = parseInt(cb.getAttribute("data-index")!);
 
         const row = this.state.resultTable!.rows[index];
 
@@ -805,7 +805,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         } else {
             selectedRows.remove(row);
         }
-        
+
         this.notifySelectedRowsChanged();
 
         this.setState({ currentMenuItems: undefined });
@@ -967,7 +967,7 @@ function withoutAllAny(qt: QueryToken | undefined): QueryToken | undefined {
     var par = withoutAllAny(qt.parent);
 
     if (par == qt.parent)
-        return qt; 
+        return qt;
 
-    return par; 
+    return par;
 }
