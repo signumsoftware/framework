@@ -43,11 +43,11 @@ namespace Signum.React.Word
             if (template.SystemWordTemplate != null)
             {
                 var systemWordTemplate = (ISystemWordTemplate)SystemWordTemplateLogic.GetEntityConstructor(template.SystemWordTemplate.ToType()).Invoke(new[] { entity });
-                bytes = request.template.CreateReport(entity: null, systemWordTemplate: systemWordTemplate);
+                bytes = request.template.CreateReport(systemWordTemplate: systemWordTemplate);
             }
             else
             {
-                bytes = request.template.CreateReport((Entity)entity);
+                bytes = request.template.CreateReport(entity : (Entity)entity);
             }
             
             return FilesController.GetHttpReponseMessage(new MemoryStream(bytes), template.FileName);            

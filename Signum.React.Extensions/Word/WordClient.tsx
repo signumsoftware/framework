@@ -23,9 +23,6 @@ import { ModelEntity } from "../../../Framework/Signum.React/Scripts/Signum.Enti
 import { QueryRequest, FilterRequest } from "../../../Framework/Signum.React/Scripts/FindOptions";
 import WordMenu from "./WordMenu";
 
-
-
-
 export function start(options: { routes: JSX.Element[], contextual: boolean, queryButton: boolean,  }) {
     
     register(QueryModel, {
@@ -100,7 +97,7 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
 }
 
 export interface WordModelSettings<T extends ModelEntity> {
-    createFromTemplate?: (wordTemplate: WordTemplateEntity) => Promise<ModelEntity | undefined>;
+    createFromTemplate?: (wt: WordTemplateEntity) => Promise<ModelEntity | undefined>;
     createFromEntities?: (wt: Lite<WordTemplateEntity>, lites: Array<Lite<Entity>>) => Promise<ModelEntity | undefined>;
     createFromQuery?: (wt: Lite<WordTemplateEntity>, req: QueryRequest) => Promise<ModelEntity | undefined>;
 }

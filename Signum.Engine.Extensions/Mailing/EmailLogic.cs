@@ -214,7 +214,7 @@ namespace Signum.Engine.Mailing
                     }
                 }.Register();
 
-                new ConstructFrom<EmailTemplateEntity>(EmailMessageOperation.CreateMailFromTemplate)
+                new ConstructFrom<EmailTemplateEntity>(EmailMessageOperation.CreateEmailFromTemplate)
                 {
                     AllowsNew = false,
                     ToStates = { EmailMessageState.Created },
@@ -230,9 +230,10 @@ namespace Signum.Engine.Mailing
                     },
                     Construct = (et, args) =>
                     {
-                        var entity = args.GetArg<Entity>();
+                        var entity = args.TryGetArgC<ModifiableEntity>() ?? args.GetArg<Lite<Entity>>().Retrieve();
 
-                        return et.ToLite().CreateEmailMessage(entity).Single();
+
+                        return et.ToLite().CreateEmailMessage(entity).FirstEx();
                     }
                 }.Register();
 

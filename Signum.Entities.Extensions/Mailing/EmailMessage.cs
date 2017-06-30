@@ -397,7 +397,7 @@ namespace Signum.Entities.Mailing
         public static ConstructSymbol<EmailMessageEntity>.From<EmailMessageEntity> ReSend;
         public static ConstructSymbol<ProcessEntity>.FromMany<EmailMessageEntity> ReSendEmails;
         public static ConstructSymbol<EmailMessageEntity>.Simple CreateMail;
-        public static ConstructSymbol<EmailMessageEntity>.From<EmailTemplateEntity> CreateMailFromTemplate;
+        public static ConstructSymbol<EmailMessageEntity>.From<EmailTemplateEntity> CreateEmailFromTemplate;
         public static DeleteSymbol<EmailMessageEntity> Delete;
     }
 

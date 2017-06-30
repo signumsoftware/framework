@@ -18,6 +18,9 @@ import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 import { ModifiableEntity } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
+import { ContextualItemsContext, MenuItemBlock } from "../../../Framework/Signum.React/Scripts/SearchControl/ContextualItems";
+import { ModelEntity } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
+import { QueryRequest } from "../../../Framework/Signum.React/Scripts/FindOptions";
 
 require("./Mailing.css");
 
@@ -82,6 +85,65 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
 
 }
 
+export interface EmailModelSettings<T extends ModelEntity> {
+    createFromTemplate?: (et: EmailTemplateEntity) => Promise<ModelEntity | undefined>;
+    createFromEntities?: (et: Lite<EmailTemplateEntity>, lites: Array<Lite<Entity>>) => Promise<ModelEntity | undefined>;
+    createFromQuery?: (et: Lite<EmailTemplateEntity>, req: QueryRequest) => Promise<ModelEntity | undefined>;
+}
+
+export const settings: { [typeName: string]: EmailModelSettings<ModifiableEntity> } = {};
+
+export function register<T extends ModifiableEntity>(type: Type<T>, setting: EmailModelSettings<T>) {
+    settings[type.typeName] = setting;
+}
+
+export function getEmailTemplaates(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
+
+    if (ctx.lites.length == 0)
+        return undefined;
+
+    return API.getEmailTemplates(ctx.queryDescription.queryKey, ctx.lites.length > 1 ? "Multiple" : "Single")
+        .then(wts => {
+            if (!wts.length)
+                return undefined;
+
+            return {
+                header: EmailTemplateEntity.nicePluralName(),
+                menuItems: wts.map(wt =>
+                    <MenuItem data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)}>
+                        <span className={classes("icon", "fa fa-file-word-o")}></span>
+                        {wt.toStr}
+                    </MenuItem>
+                )
+            } as MenuItemBlock;
+        });
+}
+
+export function handleMenuClick(et: Lite<EmailTemplateEntity>, ctx: ContextualItemsContext<Entity>) {
+
+    Navigator.API.fetchAndForget(et)
+        .then(emailTemplate => emailTemplate.systemEmail ? API.getConstructorType(emailTemplate.systemEmail) : Promise.resolve(undefined))
+        .then(ct => {
+            if (!ct)
+                return   API.createAndDownloadReport({ template: et, lite: ctx.lites.single() });
+
+            var s = settings[ct];
+            if (!s)
+                throw new Error("No 'WordModelSettings' defined for '" + ct + "'");
+
+            if (!s.createFromEntities)
+                throw new Error("No 'createFromEntities' defined in the WordModelSettings of '" + ct + "'");
+
+            return s.createFromEntities(et, ctx.lites)
+                .then<Response | undefined>(m => m && API.createAndDownloadReport({ template: et, entity: m }));
+        })
+        .then(response => response && saveFile(response))
+        .done();
+}
+
+function createAndViewEmail(template: Lite<EmailTemplateEntity>, lite: lite) {
+
+}
 
 export module API {
     export function start(): Promise<void> {
