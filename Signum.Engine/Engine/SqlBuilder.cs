@@ -341,9 +341,9 @@ FROM {1} as [table]".FormatWith(
                    columnNames.ToString(a => "[table]." + a.SqlEscape(), ", ")));
 
             return SqlPreCommand.Combine(Spacing.Simple,
-                new SqlPreCommandSimple("SET IDENTITY_INSERT {0} ON".FormatWith(newTable)),
+                new SqlPreCommandSimple("SET IDENTITY_INSERT {0} ON".FormatWith(newTable)) { GoBefore = true },
                 command,
-                new SqlPreCommandSimple("SET IDENTITY_INSERT {0} OFF".FormatWith(newTable)));
+                new SqlPreCommandSimple("SET IDENTITY_INSERT {0} OFF".FormatWith(newTable)) { GoAfter = true });
         }
 
         public static SqlPreCommand RenameTable(ObjectName oldName, string newName)
@@ -400,7 +400,10 @@ FROM {1} as [table]".FormatWith(
 
         public static SqlPreCommand CreateSchema(SchemaName schemaName)
         {
-            return new SqlPreCommandSimple("CREATE SCHEMA {0}".FormatWith(schemaName)) { GoAfter = true, GoBefore = true };
+            if (schemaName.Database == null)
+                return new SqlPreCommandSimple("CREATE SCHEMA {0}".FormatWith(schemaName)) { GoAfter = true, GoBefore = true };
+            else
+                return new SqlPreCommandSimple($"EXEC('use {schemaName.Database}; EXEC sp_executesql N''CREATE SCHEMA {schemaName.Name}'' ')");
         }
 
         public static SqlPreCommand DropSchema(SchemaName schemaName)

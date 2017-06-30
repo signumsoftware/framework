@@ -128,18 +128,16 @@ namespace Signum.Engine.Basics
             Table table = Schema.Current.Table<QueryEntity>();
 
             using (replacements.WithReplacedDatabaseName())
-                return Synchronizer.SynchronizeScriptReplacing(
-                    replacements,
-                    QueriesKey,
+                return Synchronizer.SynchronizeScriptReplacing(replacements, QueriesKey, Spacing.Double,
                     should.ToDictionaryEx(a => a.Key, "query in memory"),
                     current.ToDictionaryEx(a => a.Key, "query in database"),
-                    (n, s) => table.InsertSqlSync(s),
-                    (n, c) => table.DeleteSqlSync(c),
-                    (fn, s, c) =>
+                    createNew: (n, s) => table.InsertSqlSync(s),
+                    removeOld: (n, c) => table.DeleteSqlSync(c),
+                    mergeBoth: (fn, s, c) =>
                     {
                         c.Key = s.Key;
                         return table.UpdateSqlSync(c);
-                    }, Spacing.Double);
+                    });
         }
 
         public static QueryEntity GetQueryEntity(object queryName)

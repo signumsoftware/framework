@@ -103,8 +103,8 @@ namespace Signum.Engine.Basics
 
             { //Temporal solution until applications are updated
                 var repeated =
-                    should.Keys.Select(k=>ObjectName.Parse(k)).GroupBy(a => a.Name).Where(a => a.Count() > 1).Select(a => a.Key).Concat(
-                    current.Keys.Select(k=> ObjectName.Parse(k)).GroupBy(a => a.Name).Where(a => a.Count() > 1).Select(a => a.Key)).ToList();
+                    should.Keys.Select(k => ObjectName.Parse(k)).GroupBy(a => a.Name).Where(a => a.Count() > 1).Select(a => a.Key).Concat(
+                    current.Keys.Select(k => ObjectName.Parse(k)).GroupBy(a => a.Name).Where(a => a.Count() > 1).Select(a => a.Key)).ToList();
 
                 Func<string, string> simplify = tn =>
                 {
@@ -118,20 +118,22 @@ namespace Signum.Engine.Basics
 
             using (replacements.WithReplacedDatabaseName())
                 return Synchronizer.SynchronizeScript(
+                    Spacing.Double,
                     should,
                     current,
-                    (tn, s) => table.InsertSqlSync(s),
-                    (tn, c) => table.DeleteSqlSync(c),
-                    (tn, s, c) =>
+                    createNew: (tn, s) => table.InsertSqlSync(s),
+                    removeOld: (tn, c) => table.DeleteSqlSync(c),
+                    mergeBoth: (tn, s, c) =>
                     {
                         var originalName = c.FullClassName;
 
-                        c.TableName = s.TableName;
+                        if (c.TableName != s.TableName)
+                            c.TableName = ObjectName.Parse(s.TableName).ToString();
                         c.CleanName = s.CleanName;
                         c.Namespace = s.Namespace;
                         c.ClassName = s.ClassName;
                         return table.UpdateSqlSync(c, comment: originalName);
-                    }, Spacing.Double);
+                    });
         }
 
         static Dictionary<string, O> ApplyReplacementsToOld<O>(this Replacements replacements, Dictionary<string, O> oldDictionary, string replacementsKey)

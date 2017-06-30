@@ -83,14 +83,13 @@ namespace Signum.Engine.Maps
             }).ToDictionary();
 
             using (replacements.WithReplacedDatabaseName())
-                return Synchronizer.SynchronizeScript(
+                return Synchronizer.SynchronizeScript(Spacing.Double,
                     Views,
                     oldView,
-                    (name, newView) => newView.CreateView(),
-                    null,
-                    (name, newDef, oldDef) =>
-                        Clean(newDef.CreateView().Sql) == Clean(oldDef) ? null : newDef.AlterView(),
-                    Spacing.Double);
+                    createNew: (name, newView) => newView.CreateView(),
+                    removeOld: null,
+                    mergeBoth: (name, newDef, oldDef) => Clean(newDef.CreateView().Sql) == Clean(oldDef) ? null : newDef.AlterView()
+                );
         }
         #endregion
 
@@ -146,13 +145,13 @@ namespace Signum.Engine.Maps
             }).ToDictionary();
 
             return Synchronizer.SynchronizeScript(
+                Spacing.Double,
                 StoreProcedures,
                 oldProcedures,
-                (name, newProc) => newProc.CreateSql(),
-                null,
-                (name, newProc, oldProc) =>
-                    Clean(newProc.CreateSql().Sql) == Clean(oldProc) ? null : newProc.AlterSql(),
-                Spacing.Double);
+                createNew: (name, newProc) => newProc.CreateSql(),
+                removeOld: null,
+                mergeBoth: (name, newProc, oldProc) => Clean(newProc.CreateSql().Sql) == Clean(oldProc) ? null : newProc.AlterSql()
+                );
         }
 
         public class Procedure
