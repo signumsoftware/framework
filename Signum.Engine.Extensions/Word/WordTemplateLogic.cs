@@ -29,6 +29,7 @@ using Signum.Entities.UserQueries;
 using System.Data;
 using Signum.Entities.Chart;
 using Signum.Entities.Reflection;
+using Signum.Entities.Templating;
 
 namespace Signum.Engine.Word
 {

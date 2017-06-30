@@ -268,4 +268,12 @@ namespace Signum.Entities.Mailing
         [Description("Language")]
         Language
     }
+
+    [InTypeScript(true)]
+    public enum EmailTemplateVisibleOn
+    {
+        Single = 1,
+        Multiple = 2,
+        Query = 4
+    }
 }

@@ -16,6 +16,7 @@ using System.Text;
 using Signum.Engine.Isolation;
 using Signum.Entities.Isolation;
 using Signum.Engine.Templating;
+using Signum.Entities.Templating;
 
 namespace Signum.Engine.Word
 {

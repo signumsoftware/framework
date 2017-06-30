@@ -178,7 +178,7 @@ namespace Signum.Engine.Mailing
             };
         }
 
-        static Type GetEntityType(Type model)
+        public static Type GetEntityType(Type model)
         {
             var baseType = model.Follow(a => a.BaseType).FirstOrDefault(b => b.IsInstantiationOf(typeof(SystemEmail<>)));
 
@@ -310,6 +310,13 @@ namespace Signum.Engine.Mailing
         public static bool RequiresExtraParameters(SystemEmailEntity systemEmailEntity)
         {
             return GetEntityConstructor(systemEmailToType.Value.GetOrThrow(systemEmailEntity)) == null;
+        }
+
+        internal static bool HasDefaultTemplateConstructor(SystemEmailEntity systemEmailTemplate)
+        {
+            SystemEmailInfo info = systemEmails.GetOrThrow(systemEmailTemplate.ToType());
+            
+            return info.DefaultTemplateConstructor != null;
         }
 
         public static ConstructorInfo GetEntityConstructor(Type systemEmail)

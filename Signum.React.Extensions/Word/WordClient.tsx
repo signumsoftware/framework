@@ -12,7 +12,8 @@ import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName, 
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
-import { WordTemplateEntity, WordTemplateOperation, SystemWordTemplateEntity, MultiEntityModel, WordTemplatePermission, QueryModel, WordTemplateVisibleOn } from './Signum.Entities.Word'
+import { WordTemplateEntity, WordTemplateOperation, SystemWordTemplateEntity, WordTemplateVisibleOn, WordTemplatePermission } from './Signum.Entities.Word'
+import { QueryModel, MultiEntityModel } from '../Templating/Signum.Entities.Templating'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
@@ -26,7 +27,7 @@ import WordMenu from "./WordMenu";
 
 
 export function start(options: { routes: JSX.Element[], contextual: boolean, queryButton: boolean,  }) {
-
+    
     register(QueryModel, {
         createFromTemplate: wt => Navigator.view(QueryModel.New({ queryKey: wt.query!.key })),
         createFromEntities: (wt, lites) => {
@@ -47,6 +48,9 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
         }
     });
 
+    if (!Navigator.getSettings(QueryModel))
+        Navigator.addSettings(new EntitySettings(QueryModel, e => import('../Templating/Templates/QueryModel')));
+
     register(MultiEntityModel, {
         createFromTemplate: wt => Finder.findMany({ queryName: wt.query!.key })
             .then(lites => lites && MultiEntityModel.New({ entities: toMList(lites) })),
@@ -54,7 +58,7 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
     });
 
     Navigator.addSettings(new EntitySettings(WordTemplateEntity, e => import('./Templates/WordTemplate')));
-    Navigator.addSettings(new EntitySettings(QueryModel, e => import('./Templates/QueryModel')));
+  
 
     Operations.addSettings(new EntityOperationSettings(WordTemplateOperation.CreateWordReport, {
         onClick: ctx => {

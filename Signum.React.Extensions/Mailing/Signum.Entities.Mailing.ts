@@ -262,6 +262,12 @@ export module EmailTemplateViewMessage {
     export const Language = new MessageKey("EmailTemplateViewMessage", "Language");
 }
 
+export const EmailTemplateVisibleOn = new EnumType<EmailTemplateVisibleOn>("EmailTemplateVisibleOn");
+export type EmailTemplateVisibleOn =
+    "Single" |
+    "Multiple" |
+    "Query";
+
 export interface IAttachmentGeneratorEntity extends Entities.Entity {
 }
 

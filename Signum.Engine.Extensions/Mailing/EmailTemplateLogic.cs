@@ -24,6 +24,8 @@ using Signum.Entities.Basics;
 using Signum.Engine.Templating;
 using System.Net.Mail;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities.Templating;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine.Mailing
 {
@@ -46,6 +48,7 @@ namespace Signum.Engine.Mailing
         }
         
         public static ResetLazy<Dictionary<Lite<EmailTemplateEntity>, EmailTemplateEntity>> EmailTemplatesLazy;
+        public static ResetLazy<Dictionary<object, List<EmailTemplateEntity>>> TemplatesByQueryName;
 
 
         public static Polymorphic<Action<IAttachmentGeneratorEntity, FillAttachmentTokenContext>> FillAttachmentTokens =
@@ -94,9 +97,15 @@ namespace Signum.Engine.Mailing
                         t.IsBodyHtml
                     });       
 
-                EmailTemplatesLazy = sb.GlobalLazy(() => Database.Query<EmailTemplateEntity>()
-                    .ToDictionary(et => et.ToLite()), new InvalidateWith(typeof(EmailTemplateEntity)));
-
+                EmailTemplatesLazy = sb.GlobalLazy(() => 
+                Database.Query<EmailTemplateEntity>().ToDictionary(et => et.ToLite())
+                , new InvalidateWith(typeof(EmailTemplateEntity)));
+                
+                TemplatesByQueryName = sb.GlobalLazy(() =>
+                {
+                    return EmailTemplatesLazy.Value.Values.GroupToDictionary(a => a.Query.ToQueryName());
+                }, new InvalidateWith(typeof(EmailTemplateEntity)));
+                
                 SystemEmailLogic.Start(sb, dqm);
                 EmailMasterTemplateLogic.Start(sb, dqm);
                 
@@ -371,5 +380,30 @@ namespace Signum.Engine.Mailing
             leaves.ExecuteLeaves();
             return true;
         }
+
+        public static Dictionary<Type, EmailTemplateVisibleOn> VisibleOnDictionary = new Dictionary<Type, EmailTemplateVisibleOn>()
+        {
+            { typeof(MultiEntityModel), EmailTemplateVisibleOn.Single | EmailTemplateVisibleOn.Multiple},
+            { typeof(QueryModel), EmailTemplateVisibleOn.Single | EmailTemplateVisibleOn.Multiple| EmailTemplateVisibleOn.Query},
+        };
+
+        public static bool IsVisible(EmailTemplateEntity et, EmailTemplateVisibleOn visibleOn)
+        {
+            if (et.SystemEmail == null)
+                return visibleOn == EmailTemplateVisibleOn.Single;
+
+            if (SystemEmailLogic.HasDefaultTemplateConstructor(et.SystemEmail))
+                return false;
+
+            var entityType = SystemEmailLogic.GetEntityType(et.SystemEmail.ToType());
+
+            if (entityType.IsEntity())
+                return visibleOn == EmailTemplateVisibleOn.Single;
+
+            var should = VisibleOnDictionary.TryGet(entityType, EmailTemplateVisibleOn.Single);
+
+            return ((should & visibleOn) != 0);
+        }
+
     }
 }

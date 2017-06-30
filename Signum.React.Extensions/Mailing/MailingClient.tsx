@@ -11,12 +11,13 @@ import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { EmailMessageEntity, EmailTemplateMessageEmbedded, EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailMessageOperation, EmailPackageEntity, EmailRecipientEntity, EmailConfigurationEmbedded, EmailTemplateEntity, AsyncEmailSenderPermission } from './Signum.Entities.Mailing'
-import { SmtpConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, Pop3ReceptionExceptionEntity, EmailAddressEmbedded} from './Signum.Entities.Mailing'
-import { NewsletterEntity, NewsletterDeliveryEntity, SendEmailTaskEntity } from './Signum.Entities.Mailing'
+import { SmtpConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, Pop3ReceptionExceptionEntity, EmailAddressEmbedded } from './Signum.Entities.Mailing'
+import { NewsletterEntity, NewsletterDeliveryEntity, SendEmailTaskEntity, SystemEmailEntity, EmailTemplateVisibleOn } from './Signum.Entities.Mailing'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
+import { ModifiableEntity } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
 
 require("./Mailing.css");
 
@@ -93,6 +94,21 @@ export module API {
 
     export function view(): Promise<AsyncEmailSenderState> {
         return ajaxGet<AsyncEmailSenderState>({ url: "~/api/asyncEmailSender/view" });
+    }
+
+
+    export interface CreateEmailRequest {
+        template: Lite<EmailTemplateEntity>;
+        lite?: Lite<Entity>;
+        entity?: ModifiableEntity;
+    }
+    
+    export function getConstructorType(systemEmailTemplate: SystemEmailEntity): Promise<string> {
+        return ajaxPost<string>({ url: "~/api/mail/constructorType" }, systemEmailTemplate);
+    }
+
+    export function getEmailTemplates(queryKey: string, visibleOn: EmailTemplateVisibleOn): Promise<Lite<EmailTemplateEntity>[]> {
+        return ajaxGet<Lite<EmailTemplateEntity>[]>({ url: `~/api/mail/emailTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` });
     }
 }
 
