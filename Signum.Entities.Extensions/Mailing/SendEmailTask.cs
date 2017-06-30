@@ -10,6 +10,7 @@ using System.Reflection;
 using Signum.Entities.Scheduler;
 using Signum.Entities.UserQueries;
 using Signum.Entities.Processes;
+using Signum.Entities.Templating;
 
 namespace Signum.Entities.Mailing
 {
@@ -28,6 +29,8 @@ namespace Signum.Entities.Mailing
         public Lite<Entity> UniqueTarget { get; set; }
 
         public Lite<UserQueryEntity> TargetsFromUserQuery { get; set; }
+
+        public ModelConverterSymbol ModelConverter { get; set; }
 
         static Expression<Func<SendEmailTaskEntity, string>> ToStringExpression = @this => @this.Name;
         [ExpressionField]

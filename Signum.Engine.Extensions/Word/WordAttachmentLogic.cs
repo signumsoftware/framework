@@ -15,6 +15,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Signum.Engine.Templating;
 
 namespace Signum.Engine.Word
 {
@@ -29,7 +30,7 @@ namespace Signum.Engine.Word
                     s.Id,
                     s.FileName,
                     s.WordTemplate,
-                    s.Related,
+                    s.OverrideModel,
                 });
             
             EmailTemplateLogic.FillAttachmentTokens.Register((WordAttachmentEntity wa, EmailTemplateLogic.FillAttachmentTokenContext ctx) =>
@@ -42,7 +43,10 @@ namespace Signum.Engine.Word
 
             EmailTemplateLogic.GenerateAttachment.Register((WordAttachmentEntity wa, EmailTemplateLogic.GenerateAttachmentContext ctx) =>
             {
-                var entity = wa.Related?.Retrieve() ?? (Entity)ctx.Entity;
+                var entity = wa.OverrideModel?.Retrieve() ??  (Entity)ctx.Entity ?? ctx.SystemEmail.UntypedEntity;
+
+                if (wa.ModelConverter != null)
+                    entity = wa.ModelConverter.Convert(entity);
                 
                 using (CultureInfoUtils.ChangeBothCultures(ctx.Culture))
                 {

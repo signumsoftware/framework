@@ -239,15 +239,25 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this Lite<EmailTemplateEntity> liteTemplate, Entity entity = null, ISystemEmail systemEmail = null)
+        public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this Lite<EmailTemplateEntity> liteTemplate, ModifiableEntity model = null, ISystemEmail systemEmail = null)
         {
             EmailTemplateEntity template = EmailTemplatesLazy.Value.GetOrThrow(liteTemplate, "Email template {0} not in cache".FormatWith(liteTemplate));
 
-            if (template.SystemEmail != null && systemEmail == null)
-                systemEmail = (ISystemEmail)SystemEmailLogic.GetEntityConstructor(template.SystemEmail.ToType()).Invoke(new[] { entity });
+            Entity entity = null;
+            if (template.SystemEmail != null)
+            {
+                if (systemEmail == null)
+                    systemEmail = SystemEmailLogic.CreateSystemEmail(template.SystemEmail, model);
+                else if (template.SystemEmail.ToType() != systemEmail.GetType())
+                    throw new ArgumentException("systemEmail should be a {0} instead of {1}".FormatWith(template.SystemEmail.FullClassName, systemEmail.GetType().FullName));
+            }
+            else
+            {
+                entity = model as Entity ?? throw new InvalidOperationException("Model should be an Entity");
+            }
 
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
-                return new EmailMessageBuilder(template, entity, systemEmail).CreateEmailMessageInternal().ToList();
+                return new EmailMessageBuilder(template, systemEmail == null ? (Entity)entity : null, systemEmail).CreateEmailMessageInternal().ToList();
         }
 
         class EmailTemplateGraph : Graph<EmailTemplateEntity>

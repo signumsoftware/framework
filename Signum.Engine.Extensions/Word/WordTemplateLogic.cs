@@ -65,6 +65,7 @@ namespace Signum.Engine.Word
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                
                 sb.Include<WordTemplateEntity>()
                     .WithSave(WordTemplateOperation.Save)
                     .WithDelete(WordTemplateOperation.Delete)
@@ -214,7 +215,7 @@ namespace Signum.Engine.Word
 
         public static string DumpFileFolder = null;
 
-        public static byte[] CreateReport(this Lite<WordTemplateEntity> liteTemplate, Entity entity = null, ISystemWordTemplate systemWordTemplate = null, bool avoidConversion = false)
+        public static byte[] CreateReport(this Lite<WordTemplateEntity> liteTemplate, ModifiableEntity entity = null, ISystemWordTemplate systemWordTemplate = null, bool avoidConversion = false)
         {
             return liteTemplate.GetFromCache().CreateReport(entity, systemWordTemplate, avoidConversion);
         }
@@ -226,11 +227,21 @@ namespace Signum.Engine.Word
             return template;
         }
 
-        public static byte[] CreateReport(this WordTemplateEntity template, Entity entity = null, ISystemWordTemplate systemWordTemplate = null, bool avoidConversion = false)
+        public static byte[] CreateReport(this WordTemplateEntity template, ModifiableEntity model = null, ISystemWordTemplate systemWordTemplate = null, bool avoidConversion = false)
         {
-            if (systemWordTemplate != null && template.SystemWordTemplate.ToType() != systemWordTemplate.GetType())
-                throw new ArgumentException("systemWordTemplate should be a {0} instead of {1}".FormatWith(template.SystemWordTemplate.FullClassName, systemWordTemplate.GetType().FullName));
-
+            Entity entity = null;
+            if (template.SystemWordTemplate != null)
+            {
+                if (systemWordTemplate == null)
+                    systemWordTemplate = SystemWordTemplateLogic.CreateDefaultSystemWordTemplate(template.SystemWordTemplate, model);
+                else if(template.SystemWordTemplate.ToType() != systemWordTemplate.GetType())
+                    throw new ArgumentException("systemWordTemplate should be a {0} instead of {1}".FormatWith(template.SystemWordTemplate.FullClassName, systemWordTemplate.GetType().FullName));
+            }
+            else
+            {
+                entity = model as Entity ?? throw new InvalidOperationException("Model should be an Entity"); 
+            }
+            
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
             using (CultureInfoUtils.ChangeBothCultures(template.Culture.ToCultureInfo()))
             {

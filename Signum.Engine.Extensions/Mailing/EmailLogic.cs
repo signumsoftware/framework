@@ -98,7 +98,7 @@ namespace Signum.Engine.Mailing
                 SenderManager.Send(email);
         }
 
-        public static void SendMail(this Lite<EmailTemplateEntity> template, IEntity entity)
+        public static void SendMail(this Lite<EmailTemplateEntity> template, ModelEntity entity)
         {
             foreach (var email in template.CreateEmailMessage(entity))
                 SenderManager.Send(email);
@@ -115,7 +115,7 @@ namespace Signum.Engine.Mailing
                 email.SendMailAsync();
         }
 
-        public static void SendMailAsync(this Lite<EmailTemplateEntity> template, IEntity entity)
+        public static void SendMailAsync(this Lite<EmailTemplateEntity> template, ModelEntity entity)
         {
             foreach (var email in template.CreateEmailMessage(entity))
                 email.SendMailAsync();
@@ -231,8 +231,7 @@ namespace Signum.Engine.Mailing
                     Construct = (et, args) =>
                     {
                         var entity = args.TryGetArgC<ModifiableEntity>() ?? args.GetArg<Lite<Entity>>().Retrieve();
-
-
+                        
                         return et.ToLite().CreateEmailMessage(entity).FirstEx();
                     }
                 }.Register();

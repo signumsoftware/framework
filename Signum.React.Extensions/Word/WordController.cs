@@ -37,18 +37,9 @@ namespace Signum.React.Word
         public HttpResponseMessage View(CreateWordReportRequest request)
         {
             var template = request.template.Retrieve();
-            var entity = request.entity ?? request.lite.Retrieve();
+            var model = request.entity ?? request.lite.Retrieve();
 
-            byte[] bytes;
-            if (template.SystemWordTemplate != null)
-            {
-                var systemWordTemplate = (ISystemWordTemplate)SystemWordTemplateLogic.GetEntityConstructor(template.SystemWordTemplate.ToType()).Invoke(new[] { entity });
-                bytes = request.template.CreateReport(systemWordTemplate: systemWordTemplate);
-            }
-            else
-            {
-                bytes = request.template.CreateReport(entity : (Entity)entity);
-            }
+            var bytes = template.CreateReport(model);
             
             return FilesController.GetHttpReponseMessage(new MemoryStream(bytes), template.FileName);            
         }

@@ -261,6 +261,7 @@
     <Compile Include="UserQueries\UserQueryServer.cs" />
     <Compile Include="Word\WordServer.cs" />
     <Compile Include="Word\WordController.cs" />
+    <TypeScriptCompile Include="Mailing\MailingMenu.tsx" />
     <TypeScriptCompile Include="Notes\NotesClient.tsx" />
     <TypeScriptCompile Include="Notes\Templates\NoteType.tsx" />
     <TypeScriptCompile Include="Notes\Templates\Note.tsx" />

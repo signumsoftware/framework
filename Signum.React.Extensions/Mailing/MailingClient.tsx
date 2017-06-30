@@ -21,10 +21,20 @@ import { ModifiableEntity } from "../../../Framework/Signum.React/Scripts/Signum
 import { ContextualItemsContext, MenuItemBlock } from "../../../Framework/Signum.React/Scripts/SearchControl/ContextualItems";
 import { ModelEntity } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
 import { QueryRequest } from "../../../Framework/Signum.React/Scripts/FindOptions";
+import * as ContexualItems from '../../../Framework/Signum.React/Scripts/SearchControl/ContextualItems'
+import MailingMenu from "./MailingMenu";
 
-require("./Mailing.css");
+import "./Mailing.css";
 
-export function start(options: { routes: JSX.Element[], smtpConfig: boolean, newsletter: boolean, pop3Config: boolean, sendEmailTask: boolean, quickLinksFrom: PseudoType[] | undefined }) {
+export function start(options: {
+    routes: JSX.Element[], smtpConfig: boolean,
+    newsletter: boolean,
+    pop3Config: boolean,
+    sendEmailTask: boolean,
+    contextual: boolean,
+    queryButton: boolean,
+    quickLinksFrom: PseudoType[] | undefined
+}) {
     options.routes.push(<ImportRoute path="~/asyncEmailSender/view" onImportModule={() => import("./AsyncEmailSenderPage")} />);
 
     OmniboxClient.registerSpecialAction({
@@ -44,8 +54,12 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
     Navigator.addSettings(new EntitySettings(EmailAddressEmbedded, e => import('./Templates/EmailAddress')));
     Navigator.addSettings(new EntitySettings(EmailConfigurationEmbedded, e => import('./Templates/EmailConfiguration')));
 
-    Operations.addSettings(new EntityOperationSettings(EmailMessageOperation.CreateMailFromTemplate, {
+    Operations.addSettings(new EntityOperationSettings(EmailMessageOperation.CreateEmailFromTemplate, {
         onClick: (ctx) => {
+
+            var promise: Promise<string | undefined> = ctx.entity.systemEmail ? API.getConstructorType(ctx.entity.systemEmail) : Promise.resolve(undefined);
+            promise
+
             Finder.find({ queryName: ctx.entity.query!.key }).then(lite => {
                 if (!lite)
                     return;
@@ -83,6 +97,18 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
         });
     }
 
+    if (options.contextual)
+        ContexualItems.onContextualItems.push(getEmailTemplates);
+
+    if (options.queryButton)
+        Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
+
+            if (!ctx.searchControl.props.showBarExtension)
+                return undefined;
+
+            return <MailingMenu searchControl={ctx.searchControl} />;
+        });
+
 }
 
 export interface EmailModelSettings<T extends ModelEntity> {
@@ -97,7 +123,7 @@ export function register<T extends ModifiableEntity>(type: Type<T>, setting: Ema
     settings[type.typeName] = setting;
 }
 
-export function getEmailTemplaates(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
+export function getEmailTemplates(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
 
     if (ctx.lites.length == 0)
         return undefined;
@@ -111,7 +137,7 @@ export function getEmailTemplaates(ctx: ContextualItemsContext<Entity>): Promise
                 header: EmailTemplateEntity.nicePluralName(),
                 menuItems: wts.map(wt =>
                     <MenuItem data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)}>
-                        <span className={classes("icon", "fa fa-file-word-o")}></span>
+                        <span className={classes("icon", "fa fa-envelope-o")}></span>
                         {wt.toStr}
                     </MenuItem>
                 )
@@ -125,7 +151,7 @@ export function handleMenuClick(et: Lite<EmailTemplateEntity>, ctx: ContextualIt
         .then(emailTemplate => emailTemplate.systemEmail ? API.getConstructorType(emailTemplate.systemEmail) : Promise.resolve(undefined))
         .then(ct => {
             if (!ct)
-                return   API.createAndDownloadReport({ template: et, lite: ctx.lites.single() });
+                return createAndViewEmail(et, ctx.lites.single());
 
             var s = settings[ct];
             if (!s)
@@ -135,14 +161,16 @@ export function handleMenuClick(et: Lite<EmailTemplateEntity>, ctx: ContextualIt
                 throw new Error("No 'createFromEntities' defined in the WordModelSettings of '" + ct + "'");
 
             return s.createFromEntities(et, ctx.lites)
-                .then<Response | undefined>(m => m && API.createAndDownloadReport({ template: et, entity: m }));
+                .then(m => m && createAndViewEmail(et, m));
         })
-        .then(response => response && saveFile(response))
         .done();
 }
 
-function createAndViewEmail(template: Lite<EmailTemplateEntity>, lite: lite) {
+export function createAndViewEmail(template: Lite<EmailTemplateEntity>, ...args: any[]) {
 
+    Operations.API.executeLite(template, EmailMessageOperation.CreateEmailFromTemplate.key, ...args)
+        .then(pack => pack && Navigator.navigate(pack))
+        .done();
 }
 
 export module API {

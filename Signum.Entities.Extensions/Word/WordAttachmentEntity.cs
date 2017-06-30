@@ -11,6 +11,7 @@ using System.ComponentModel;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.UserQueries;
 using Signum.Entities.Mailing;
+using Signum.Entities.Templating;
 
 namespace Signum.Entities.Word
 {
@@ -41,9 +42,11 @@ namespace Signum.Entities.Word
         [NotNullable]
         [NotNullValidator]
         public Lite<WordTemplateEntity> WordTemplate { get; set; }
-
+        
         [ImplementedByAll]
-        public Lite<Entity> Related { get; set; }
+        public Lite<Entity> OverrideModel { get; set; }
+
+        public ModelConverterSymbol ModelConverter { get; set; }
         
         static Expression<Func<WordAttachmentEntity, string>> ToStringExpression = @this => @this.FileName;
         [ExpressionField]

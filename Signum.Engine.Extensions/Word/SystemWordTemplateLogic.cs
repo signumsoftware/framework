@@ -361,7 +361,7 @@ namespace Signum.Engine.Word
                     select ci).SingleOrDefaultEx();
         }
 
-        public static ISystemWordTemplate CreateDefaultSystemWordTemplate(SystemWordTemplateEntity systemWordTemplate, Entity entity)
+        public static ISystemWordTemplate CreateDefaultSystemWordTemplate(SystemWordTemplateEntity systemWordTemplate, ModifiableEntity entity)
         {
             return (ISystemWordTemplate)SystemWordTemplateLogic.GetEntityConstructor(systemWordTemplate.ToType()).Invoke(new[] { entity });
         }
