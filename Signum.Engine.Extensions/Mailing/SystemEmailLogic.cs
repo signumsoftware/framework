@@ -148,16 +148,15 @@ namespace Signum.Engine.Mailing
             Dictionary<string, SystemEmailEntity> current = replacements.ApplyReplacementsToOld(old, systemTemplatesReplacementKey);
 
             using (replacements.WithReplacedDatabaseName())
-                return Synchronizer.SynchronizeScript(should, current,
-                    (tn, s) => table.InsertSqlSync(s),
-                    (tn, c) => table.DeleteSqlSync(c),
-                    (tn, s, c) =>
+                return Synchronizer.SynchronizeScript(Spacing.Double, should, current,
+                    createNew: (tn, s) => table.InsertSqlSync(s),
+                    removeOld: (tn, c) => table.DeleteSqlSync(c),
+                    mergeBoth: (tn, s, c) =>
                     {
                         var oldClassName = c.FullClassName;
                         c.FullClassName = s.FullClassName;
                         return table.UpdateSqlSync(c, comment: oldClassName);
-                    },
-                    Spacing.Double);
+                    });
         }
 
         public static void RegisterSystemEmail<T>(Func<EmailTemplateEntity> defaultTemplateConstructor, object queryName = null)
