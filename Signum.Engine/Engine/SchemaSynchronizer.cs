@@ -309,6 +309,8 @@ namespace Signum.Engine
             }
         }
 
+        public static Func<SchemaName, bool> IgnoreSchema = s => s.Name.Contains("\\");
+
         private static HashSet<SchemaName> DefaultGetSchemas(List<DatabaseName> list)
         {
             HashSet<SchemaName> result = new HashSet<SchemaName>();
@@ -318,7 +320,7 @@ namespace Signum.Engine
                 {
                     var schemaNames = Database.View<SysSchemas>().Select(s => s.name).ToList().Except(SqlBuilder.SystemSchemas);
 
-                    result.AddRange(schemaNames.Select(sn => new SchemaName(db, sn)));
+                    result.AddRange(schemaNames.Select(sn => new SchemaName(db, sn)).Where(a => !IgnoreSchema(a)));
                 }
             }
             return result;
