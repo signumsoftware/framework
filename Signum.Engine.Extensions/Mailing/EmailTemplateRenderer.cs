@@ -21,13 +21,13 @@ namespace Signum.Engine.Mailing
     class EmailMessageBuilder
     {
         EmailTemplateEntity template;
-        IEntity entity;
+        Entity entity;
         ISystemEmail systemEmail;
         object queryName;
         QueryDescription qd;
         SmtpConfigurationEntity smtpConfig;
 
-        public EmailMessageBuilder(EmailTemplateEntity template, IEntity entity, ISystemEmail systemEmail)
+        public EmailMessageBuilder(EmailTemplateEntity template, Entity entity, ISystemEmail systemEmail)
         {
             this.template = template;
             this.entity = entity;
@@ -315,9 +315,9 @@ namespace Signum.Engine.Mailing
                 {
                     QueryName = queryName,
                     Columns = columns,
-                    Pagination = new Pagination.All(),
+                    Pagination = systemEmail?.GetPagination() ?? new Pagination.All(),
                     Filters = filters,
-                    Orders = new List<Order>(),
+                    Orders = systemEmail?.GetOrders(qd) ?? new List<Order>(),
                 });
 
                 this.dicTokenColumn = table.Columns.ToDictionary(rc => rc.Column.Token);

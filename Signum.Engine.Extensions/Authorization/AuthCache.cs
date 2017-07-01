@@ -332,8 +332,10 @@ namespace Signum.Entities.Authorization
 
             Table table = Schema.Current.Table(typeof(RT));
 
-            return Synchronizer.SynchronizeScript(should, current,
-                (role, x) =>
+
+
+            return Synchronizer.SynchronizeScript(Spacing.Double, should, current, 
+                createNew: (role, x) =>
                 {
                     var dic = (from xr in x.Elements(elementName)
                                let r = toResource(xr.Attribute("Resource").Value)
@@ -350,8 +352,8 @@ namespace Signum.Entities.Authorization
 
                     return restSql;
                 },
-                (role, list) => list.Select(rt => table.DeleteSqlSync(rt)).Combine(Spacing.Simple)?.Do(p => p.GoBefore = true),
-                (role, x, list) =>
+                removeOld: (role, list) => list.Select(rt => table.DeleteSqlSync(rt)).Combine(Spacing.Simple)?.Do(p => p.GoBefore = true),
+                mergeBoth: (role, x, list) =>
                 {
                     var def = list.SingleOrDefaultEx(a => a.Resource == null);
 
@@ -361,9 +363,7 @@ namespace Signum.Entities.Authorization
                                select KVP.Create(r, xr))
                                .ToDictionaryEx("{0} rules for {1}".FormatWith(typeof(R).NiceName(), role));
 
-                    SqlPreCommand restSql = Synchronizer.SynchronizeScript(
-                        dic,
-                        list.Where(a => a.Resource != null).ToDictionary(a => a.Resource),
+                    SqlPreCommand restSql = Synchronizer.SynchronizeScript(Spacing.Simple, dic, list.Where(a => a.Resource != null).ToDictionary(a => a.Resource),
                         (r, xr) =>
                         {
                             var a = parseAllowed(xr.Attribute("Allowed").Value);
@@ -375,11 +375,10 @@ namespace Signum.Entities.Authorization
                             var oldA = rt.Allowed;
                             rt.Allowed = parseAllowed(xr.Attribute("Allowed").Value);
                             return table.UpdateSqlSync(rt, comment: Comment(role, r, oldA, rt.Allowed));
-                        }, Spacing.Simple)?.Do(p => p.GoBefore = true);
+                        })?.Do(p => p.GoBefore = true);
 
                     return restSql;
-                },
-                Spacing.Double);
+                });
         }
 
 

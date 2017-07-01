@@ -15,6 +15,7 @@ using Signum.Utilities;
 using Signum.Engine.Scheduler;
 using Signum.Engine.Authorization;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities.Templating;
 
 namespace Signum.Engine.Mailing
 {
@@ -97,9 +98,9 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        public static ProcessEntity SendMultipleEmailsAsync(Lite<EmailTemplateEntity> template, List<Lite<Entity>> targets)
+        public static ProcessEntity SendMultipleEmailsAsync(Lite<EmailTemplateEntity> template, List<Lite<Entity>> targets, ModelConverterSymbol converter)
         {
-            return ProcessLogic.Create(EmailMessageProcess.CreateEmailsSendAsync, new PackageEntity { OperationArgs = new[] { template } }.CreateLines(targets));
+            return ProcessLogic.Create(EmailMessageProcess.CreateEmailsSendAsync, new PackageEntity { OperationArgs = new object[] { template, converter } }.CreateLines(targets));
         }
     }
 

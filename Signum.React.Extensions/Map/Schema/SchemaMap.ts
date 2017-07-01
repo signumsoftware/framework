@@ -332,8 +332,8 @@ export class SchemaMapD3 {
         const visibleLink = this.link.filter(f => this.links.indexOf(f) != -1);
 
         visibleLink.each(rel => {
-            rel.sourcePoint = calculatePoint(<ITableInfo>rel.source, rel.target);
-            rel.targetPoint = calculatePoint(<ITableInfo>rel.target, rel.source);
+            rel.sourcePoint = calculatePoint(rel.source as ITableInfo, rel.target as ITableInfo);
+            rel.targetPoint = calculatePoint(rel.target as ITableInfo, rel.source as ITableInfo);
         });
 
         visibleLink.attr("d", l => this.getPathExpression(l));

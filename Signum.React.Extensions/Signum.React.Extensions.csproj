@@ -66,7 +66,7 @@
       <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System.Activities" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -261,6 +261,7 @@
     <Compile Include="UserQueries\UserQueryServer.cs" />
     <Compile Include="Word\WordServer.cs" />
     <Compile Include="Word\WordController.cs" />
+    <TypeScriptCompile Include="Mailing\MailingMenu.tsx" />
     <TypeScriptCompile Include="Notes\NotesClient.tsx" />
     <TypeScriptCompile Include="Notes\Templates\NoteType.tsx" />
     <TypeScriptCompile Include="Notes\Templates\Note.tsx" />
@@ -276,6 +277,7 @@
     <TypeScriptCompile Include="Rest\Signum.Entities.Rest.ts" />
     <TypeScriptCompile Include="Rest\Templates\RestApiKey.tsx" />
     <TypeScriptCompile Include="Rest\Templates\RestLog.tsx" />
+    <TypeScriptCompile Include="Templating\Templates\QueryModel.tsx" />
     <TypeScriptCompile Include="Toolbar\QueryToolbarConfig.ts" />
     <TypeScriptCompile Include="Toolbar\Signum.Entities.Toolbar.ts">
       <DependentUpon>Signum.Entities.Toolbar.t4s</DependentUpon>
@@ -293,7 +295,6 @@
     <TypeScriptCompile Include="Tree\TreeViewer.tsx" />
     <TypeScriptCompile Include="UserQueries\UserQueryToolbarConfig.tsx" />
     <TypeScriptCompile Include="Word\WordMenu.tsx" />
-    <TypeScriptCompile Include="Word\Templates\QueryModel.tsx" />
     <TypeScriptCompile Include="Word\Templates\WordTemplate.tsx" />
     <TypeScriptCompile Include="Word\WordClient.tsx" />
     <TypeScriptCompile Include="Workflow\bpmn-js.d.ts" />

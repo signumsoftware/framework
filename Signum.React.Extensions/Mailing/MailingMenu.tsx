@@ -8,17 +8,17 @@ import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../
 import { SearchMessage, JavascriptMessage, parseLite, is, Lite, toLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import SearchControlLoaded from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded'
-import { WordTemplateEntity, WordTemplateMessage } from './Signum.Entities.Word'
-import * as WordClient from './WordClient'
+import { EmailTemplateEntity, EmailMessageEntity } from './Signum.Entities.Mailing'
+import * as MailingClient from './MailingClient'
 import { saveFile } from "../../../Framework/Signum.React/Scripts/Services";
 
-export interface WordMenuProps {
+export interface MailingMenuProps {
     searchControl: SearchControlLoaded;
 }
 
-export default class WordMenu extends React.Component<WordMenuProps, { wordReports?: Lite<WordTemplateEntity>[] }> {
+export default class MailingMenu extends React.Component<MailingMenuProps, { wordReports?: Lite<EmailTemplateEntity>[] }> {
 
-    constructor(props: WordMenuProps) {
+    constructor(props: MailingMenuProps) {
         super(props);
         this.state = { };
     }
@@ -28,27 +28,26 @@ export default class WordMenu extends React.Component<WordMenuProps, { wordRepor
     }
 
     reloadList(): Promise<void> {
-        return WordClient.API.getWordTemplates(this.props.searchControl.props.findOptions.queryKey, "Query")
+        return MailingClient.API.getEmailTemplates(this.props.searchControl.props.findOptions.queryKey, "Query")
             .then(list => this.setState({ wordReports: list }));
     }
 
-    handleSelect = (wt: Lite<WordTemplateEntity>) => {
+    handleSelect = (et: Lite<EmailTemplateEntity>) => {
 
-        Navigator.API.fetchAndForget(wt)
-            .then(wordTemplate => WordClient.API.getConstructorType(wordTemplate.systemWordTemplate!))
+        Navigator.API.fetchAndForget(et)
+            .then(emailTemplate => MailingClient.API.getConstructorType(emailTemplate.systemEmail!))
             .then(ct => {
 
-                var s = WordClient.settings[ct];
+                var s = MailingClient.settings[ct];
                 if (!s)
                     throw new Error("No 'WordModelSettings' defined for '" + ct + "'");
 
                 if (!s.createFromQuery)
                     throw new Error("No 'createFromQuery' defined in the WordModelSettings of '" + ct + "'");
 
-                return s.createFromQuery(wt, this.props.searchControl.getQueryRequest())
-                    .then<Response | undefined>(m => m && WordClient.API.createAndDownloadReport({ template: wt, entity: m }));
+                return s.createFromQuery(et, this.props.searchControl.getQueryRequest())
+                    .then(m => m && MailingClient.createAndViewEmail(et, m ));
             })
-            .then(response => response && saveFile(response))
             .done();
     }
 
@@ -57,7 +56,7 @@ export default class WordMenu extends React.Component<WordMenuProps, { wordRepor
         if (!this.state.wordReports || !this.state.wordReports.length)
             return null;
 
-        const label = <span><i className="fa fa-file-word-o"></i> &nbsp; {WordTemplateMessage.WordReport.niceToString()}</span>;
+        const label = <span><i className="fa fa-file-word-o"></i> &nbsp; {EmailMessageEntity.nicePluralName()}</span>;
 
         return (
             <DropdownButton title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown">

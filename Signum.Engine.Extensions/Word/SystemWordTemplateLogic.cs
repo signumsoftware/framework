@@ -16,6 +16,7 @@ using System.Text;
 using Signum.Engine.Isolation;
 using Signum.Entities.Isolation;
 using Signum.Engine.Templating;
+using Signum.Entities.Templating;
 
 namespace Signum.Engine.Word
 {
@@ -72,7 +73,7 @@ namespace Signum.Engine.Word
                     new Filter(QueryUtils.Parse("Entity", qd, 0), FilterOperation.EqualTo, ((Entity)(ModifiableEntity)Entity).ToLite())
                 };
 
-            throw new InvalidOperationException($"Since {typeof(T).Name} is not in ${imp}, it's necessary to override ${nameof(GetFilters)} in ${this.GetType().Name}");
+            throw new InvalidOperationException($"Since {typeof(T).Name} is not in {imp}, it's necessary to override ${nameof(GetFilters)} in ${this.GetType().Name}");
         }
 
         public virtual List<Order> GetOrders(QueryDescription queryDescription)
@@ -299,16 +300,15 @@ namespace Signum.Engine.Word
             Dictionary<string, SystemWordTemplateEntity> current = replacements.ApplyReplacementsToOld(old, systemTemplatesReplacementKey);
 
             using (replacements.WithReplacedDatabaseName())
-                return Synchronizer.SynchronizeScript(should, current,
-                    (tn, s) => table.InsertSqlSync(s),
-                    (tn, c) => table.DeleteSqlSync(c),
-                    (tn, s, c) =>
+                return Synchronizer.SynchronizeScript(Spacing.Double, should, current,
+                    createNew: (tn, s) => table.InsertSqlSync(s),
+                    removeOld: (tn, c) => table.DeleteSqlSync(c),
+                    mergeBoth: (tn, s, c) =>
                     {
                         var oldClassName = c.FullClassName;
                         c.FullClassName = s.FullClassName;
                         return table.UpdateSqlSync(c, comment: oldClassName);
-                    },
-                    Spacing.Double);
+                    });
         }
 
         public static void RegisterSystemWordReport<T>(Func<WordTemplateEntity> defaultTemplateConstructor, object queryName = null)
@@ -359,6 +359,11 @@ namespace Signum.Engine.Word
                     let pi = ci.GetParameters().Only()
                     where pi != null && pi.ParameterType == entityType
                     select ci).SingleOrDefaultEx();
+        }
+
+        public static ISystemWordTemplate CreateDefaultSystemWordTemplate(SystemWordTemplateEntity systemWordTemplate, ModifiableEntity entity)
+        {
+            return (ISystemWordTemplate)SystemWordTemplateLogic.GetEntityConstructor(systemWordTemplate.ToType()).Invoke(new[] { entity });
         }
     }
 }

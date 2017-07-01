@@ -20,6 +20,7 @@ using Signum.Engine.UserQueries;
 using Signum.Entities.Processes;
 using Signum.Engine.Processes;
 using System.Threading;
+using Signum.Engine.Templating;
 
 namespace Signum.Engine.Mailing
 {
@@ -85,9 +86,18 @@ namespace Signum.Engine.Mailing
                 {
                     if (er.UniqueTarget != null)
                     {
-                        var email = er.EmailTemplate.CreateEmailMessage(er.UniqueTarget?.Retrieve()).SingleEx();
-                        email.SendMailAsync();
-                        return email.ToLite();
+                        ModifiableEntity entity = er.UniqueTarget?.Retrieve();
+
+                        if (er.ModelConverter != null)
+                            entity = er.ModelConverter.Convert(entity);
+
+                        Lite<EmailMessageEntity> last = null; 
+                        foreach (var email in er.EmailTemplate.CreateEmailMessage(entity))
+                        {
+                            email.SendMailAsync();
+                            last = email.ToLite();
+                        }
+                        return last;
                     }
                     else
                     {
@@ -99,7 +109,7 @@ namespace Signum.Engine.Mailing
                         if (entities.IsEmpty())
                             return null;
 
-                        return EmailPackageLogic.SendMultipleEmailsAsync(er.EmailTemplate, entities).Execute(ProcessOperation.Execute).ToLite();
+                        return EmailPackageLogic.SendMultipleEmailsAsync(er.EmailTemplate, entities, er.ModelConverter).Execute(ProcessOperation.Execute).ToLite();
                     }
                 });
             }

@@ -60,13 +60,13 @@ export default class WordTemplate extends React.Component<{ ctx: TypeContext<Wor
 
                 {sc.value.query &&
                     <div>
-                        <div className="form-vertical">
+                        <div>
                             <div className="panel panel-default form-xs" style={{ marginTop: "10px", marginBottom: "10px" }}>
                                 <div className="panel-heading" style={{ padding: "5px" }}>
                                     <TemplateControls queryKey={sc.value.query.key} forHtml={false} onInsert={this.handleOnInsert} />
                                 </div>
                             </div>
-                            <FileLine ctx={sc.subCtx(e => e.template)} />
+                            <FileLine ctx={ctx.subCtx(e => e.template)} />
                         </div>
                     </div>
                 }

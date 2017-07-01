@@ -24,6 +24,8 @@ using Signum.Entities.Basics;
 using Signum.Engine.Templating;
 using System.Net.Mail;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities.Templating;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine.Mailing
 {
@@ -46,6 +48,7 @@ namespace Signum.Engine.Mailing
         }
         
         public static ResetLazy<Dictionary<Lite<EmailTemplateEntity>, EmailTemplateEntity>> EmailTemplatesLazy;
+        public static ResetLazy<Dictionary<object, List<EmailTemplateEntity>>> TemplatesByQueryName;
 
 
         public static Polymorphic<Action<IAttachmentGeneratorEntity, FillAttachmentTokenContext>> FillAttachmentTokens =
@@ -94,9 +97,15 @@ namespace Signum.Engine.Mailing
                         t.IsBodyHtml
                     });       
 
-                EmailTemplatesLazy = sb.GlobalLazy(() => Database.Query<EmailTemplateEntity>()
-                    .ToDictionary(et => et.ToLite()), new InvalidateWith(typeof(EmailTemplateEntity)));
-
+                EmailTemplatesLazy = sb.GlobalLazy(() => 
+                Database.Query<EmailTemplateEntity>().ToDictionary(et => et.ToLite())
+                , new InvalidateWith(typeof(EmailTemplateEntity)));
+                
+                TemplatesByQueryName = sb.GlobalLazy(() =>
+                {
+                    return EmailTemplatesLazy.Value.Values.GroupToDictionary(a => a.Query.ToQueryName());
+                }, new InvalidateWith(typeof(EmailTemplateEntity)));
+                
                 SystemEmailLogic.Start(sb, dqm);
                 EmailMasterTemplateLogic.Start(sb, dqm);
                 
@@ -230,15 +239,25 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this Lite<EmailTemplateEntity> liteTemplate, IEntity entity, ISystemEmail systemEmail = null)
+        public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this Lite<EmailTemplateEntity> liteTemplate, ModifiableEntity model = null, ISystemEmail systemEmail = null)
         {
             EmailTemplateEntity template = EmailTemplatesLazy.Value.GetOrThrow(liteTemplate, "Email template {0} not in cache".FormatWith(liteTemplate));
 
-            if (template.SystemEmail != null && systemEmail == null)
-                systemEmail = (ISystemEmail)SystemEmailLogic.GetEntityConstructor(template.SystemEmail.ToType()).Invoke(new[] { entity });
+            Entity entity = null;
+            if (template.SystemEmail != null)
+            {
+                if (systemEmail == null)
+                    systemEmail = SystemEmailLogic.CreateSystemEmail(template.SystemEmail, model);
+                else if (template.SystemEmail.ToType() != systemEmail.GetType())
+                    throw new ArgumentException("systemEmail should be a {0} instead of {1}".FormatWith(template.SystemEmail.FullClassName, systemEmail.GetType().FullName));
+            }
+            else
+            {
+                entity = model as Entity ?? throw new InvalidOperationException("Model should be an Entity");
+            }
 
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
-                return new EmailMessageBuilder(template, entity, systemEmail).CreateEmailMessageInternal().ToList();
+                return new EmailMessageBuilder(template, systemEmail == null ? (Entity)entity : null, systemEmail).CreateEmailMessageInternal().ToList();
         }
 
         class EmailTemplateGraph : Graph<EmailTemplateEntity>
@@ -371,5 +390,30 @@ namespace Signum.Engine.Mailing
             leaves.ExecuteLeaves();
             return true;
         }
+
+        public static Dictionary<Type, EmailTemplateVisibleOn> VisibleOnDictionary = new Dictionary<Type, EmailTemplateVisibleOn>()
+        {
+            { typeof(MultiEntityModel), EmailTemplateVisibleOn.Single | EmailTemplateVisibleOn.Multiple},
+            { typeof(QueryModel), EmailTemplateVisibleOn.Single | EmailTemplateVisibleOn.Multiple| EmailTemplateVisibleOn.Query},
+        };
+
+        public static bool IsVisible(EmailTemplateEntity et, EmailTemplateVisibleOn visibleOn)
+        {
+            if (et.SystemEmail == null)
+                return visibleOn == EmailTemplateVisibleOn.Single;
+
+            if (SystemEmailLogic.HasDefaultTemplateConstructor(et.SystemEmail))
+                return false;
+
+            var entityType = SystemEmailLogic.GetEntityType(et.SystemEmail.ToType());
+
+            if (entityType.IsEntity())
+                return visibleOn == EmailTemplateVisibleOn.Single;
+
+            var should = VisibleOnDictionary.TryGet(entityType, EmailTemplateVisibleOn.Single);
+
+            return ((should & visibleOn) != 0);
+        }
+
     }
 }

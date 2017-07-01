@@ -75,7 +75,7 @@
       <HintPath>..\..\packages\Microsoft.SqlServer.Types.14.0.314.76\lib\net40\Microsoft.SqlServer.Types.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -123,6 +123,7 @@
     <Compile Include="Dynamic\Dynamic.cs" />
     <Compile Include="Dynamic\DynamicMixinConnection.cs" />
     <Compile Include="Migrations\ExecutedLoadProcess.cs" />
+    <Compile Include="Templating\TemplatingModelConverterSymbole.cs" />
     <Compile Include="Toolbar\Toolbar.cs" />
     <Compile Include="Dynamic\DynamicSqlMigration.cs" />
     <Compile Include="Dynamic\DynamicType.cs" />
@@ -230,6 +231,7 @@
     <Compile Include="SMS\SMSMessage.cs" />
     <Compile Include="SMS\SMSTemplate.cs" />
     <Compile Include="SMS\SMSPackages.cs" />
+    <Compile Include="Word\WordAttachmentEntity.cs" />
     <Compile Include="Word\WordTemplate.cs" />
     <Compile Include="Word\SystemWordTemplate.cs" />
     <Compile Include="Workflow\Case.cs" />

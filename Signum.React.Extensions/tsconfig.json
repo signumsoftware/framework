@@ -2,13 +2,11 @@
   "compilerOptions": {
     "target": "es5",
     "sourceMap": true,
-    "module": "commonjs",
+    "module": "esnext",
+    "moduleResolution": "node",
     "jsx": "react",
     "noEmit": true,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
-    "noImplicitReturns": true,
-    "strictNullChecks": true,
+    "strict": true,
     "baseUrl": ".",
     "paths": {
       "*": [

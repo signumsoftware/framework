@@ -12,7 +12,8 @@ import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName, 
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import SelectorModal from '../../../Framework/Signum.React/Scripts/SelectorModal'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
-import { WordTemplateEntity, WordTemplateOperation, SystemWordTemplateEntity, MultiEntityModel, WordTemplatePermission, QueryModel, WordTemplateVisibleOn } from './Signum.Entities.Word'
+import { WordTemplateEntity, WordTemplateOperation, SystemWordTemplateEntity, WordTemplateVisibleOn, WordTemplatePermission } from './Signum.Entities.Word'
+import { QueryModel, MultiEntityModel } from '../Templating/Signum.Entities.Templating'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
@@ -22,39 +23,39 @@ import { ModelEntity } from "../../../Framework/Signum.React/Scripts/Signum.Enti
 import { QueryRequest, FilterRequest } from "../../../Framework/Signum.React/Scripts/FindOptions";
 import WordMenu from "./WordMenu";
 
-
-export const constructorForTesting: { [typeName: string]: (wordTemplate: WordTemplateEntity) => Promise<ModelEntity | undefined>; } = {};
-export const constructorContextual: { [typeName: string]: (wt: Lite<WordTemplateEntity>, lites?: Array<Lite<Entity>>, req?: QueryRequest) => Promise<ModelEntity | undefined>; } = {};
-
-export function start(options: { routes: JSX.Element[] }) {
-
-    constructorForTesting[QueryModel.typeName] = wt => Navigator.view(QueryModel.New({ queryKey: wt.query!.key }));
-    constructorContextual[QueryModel.typeName] = (wt, lites, req) => {
-        if (req) {
-            return Promise.resolve(QueryModel.New({
-                queryKey: req.queryKey,
-                filters: [...req.filters, ...(!lites ? [] : [{ token: "Entity", operation: "IsIn", value: lites } as FilterRequest])],
-                orders: req.orders,
-                pagination: req.pagination,
-            }));
-        } else {
+export function start(options: { routes: JSX.Element[], contextual: boolean, queryButton: boolean,  }) {
+    
+    register(QueryModel, {
+        createFromTemplate: wt => Navigator.view(QueryModel.New({ queryKey: wt.query!.key })),
+        createFromEntities: (wt, lites) => {
             return Navigator.API.fetchAndForget(wt).then(template => QueryModel.New({
                 queryKey: template.query!.key,
                 filters: [{ token: "Entity", operation: "IsIn", value: lites }],
                 orders: [],
                 pagination: { mode: "All" },
             }));
+        },
+        createFromQuery: (wt, req) => {
+            return Promise.resolve(QueryModel.New({
+                queryKey: req.queryKey,
+                filters: req.filters,
+                orders: req.orders,
+                pagination: req.pagination,
+            }));
         }
-    };
+    });
 
-    constructorForTesting[MultiEntityModel.typeName] = wt =>
-        Finder.findMany({ queryName: wt.query!.key })
-        .then(lites => lites && MultiEntityModel.New({ entities: toMList(lites) }));
+    if (!Navigator.getSettings(QueryModel))
+        Navigator.addSettings(new EntitySettings(QueryModel, e => import('../Templating/Templates/QueryModel')));
 
-    constructorContextual[MultiEntityModel.typeName] = (wt, lites, req) => Navigator.view(MultiEntityModel.New({ entities: toMList(lites!) }));
+    register(MultiEntityModel, {
+        createFromTemplate: wt => Finder.findMany({ queryName: wt.query!.key })
+            .then(lites => lites && MultiEntityModel.New({ entities: toMList(lites) })),
+        createFromEntities: (wt, lites) => Navigator.view(MultiEntityModel.New({ entities: toMList(lites) }))
+    });
 
     Navigator.addSettings(new EntitySettings(WordTemplateEntity, e => import('./Templates/WordTemplate')));
-    Navigator.addSettings(new EntitySettings(QueryModel, e => import('./Templates/QueryModel')));
+  
 
     Operations.addSettings(new EntityOperationSettings(WordTemplateOperation.CreateWordReport, {
         onClick: ctx => {
@@ -67,9 +68,11 @@ export function start(options: { routes: JSX.Element[] }) {
                     if (!ct || isTypeEntity(ct))
                         return Finder.find({ queryName: ctx.entity.query!.key })
                             .then<Response | undefined>(lite => lite && API.createAndDownloadReport({ template, lite }));
-                    else
-                        return (constructorForTesting[ct] && constructorForTesting[ct](ctx.entity) || Constructor.construct(ct))
-                            .then<Response | undefined>(entity => entity && API.createAndDownloadReport({ template, entity }));
+                    else {
+                        var s = settings[ct];
+                        var promise = (s && s.createFromTemplate ? s.createFromTemplate(ctx.entity) : Constructor.construct(ct).then(a => a && Navigator.view(a)));
+                        return promise.then<Response | undefined>(entity => entity && API.createAndDownloadReport({ template, entity }));
+                    }     
                 })
                 .then(response => {
                     if (!response)
@@ -80,16 +83,31 @@ export function start(options: { routes: JSX.Element[] }) {
         }
     }));
 
-    ContexualItems.onContextualItems.push(getWordTemplates);
+    if (options.contextual)
+        ContexualItems.onContextualItems.push(getWordTemplates);
 
-    Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
+    if (options.queryButton)
+        Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
 
-        if (!ctx.searchControl.props.showBarExtension)
-            return undefined;
+            if (!ctx.searchControl.props.showBarExtension)
+                return undefined;
 
-        return <WordMenu searchControl={ctx.searchControl} />;
-    }); 
+            return <WordMenu searchControl={ctx.searchControl} />;
+        });
 }
+
+export interface WordModelSettings<T extends ModelEntity> {
+    createFromTemplate?: (wt: WordTemplateEntity) => Promise<ModelEntity | undefined>;
+    createFromEntities?: (wt: Lite<WordTemplateEntity>, lites: Array<Lite<Entity>>) => Promise<ModelEntity | undefined>;
+    createFromQuery?: (wt: Lite<WordTemplateEntity>, req: QueryRequest) => Promise<ModelEntity | undefined>;
+}
+
+export const settings: { [typeName: string]: WordModelSettings<ModifiableEntity> } = {};
+
+export function register<T extends ModifiableEntity>(type: Type<T>, setting: WordModelSettings<T>) {
+    settings[type.typeName] = setting;
+}
+
 
 export function getWordTemplates(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
 
@@ -121,11 +139,14 @@ export function handleMenuClick(wt: Lite<WordTemplateEntity>, ctx: ContextualIte
             if (!ct)
                 return API.createAndDownloadReport({ template: wt, lite: ctx.lites.single() });
 
-            const constructor = constructorContextual[ct];
-            if (!constructor)
-                throw new Error("No 'constructorContextual' defined for '" + ct + "'");
+            var s = settings[ct];
+            if (!s)
+                throw new Error("No 'WordModelSettings' defined for '" + ct + "'");
 
-            return constructorContextual[ct](wt, ctx.lites, ctx.searchControl.getQueryRequest())
+            if (!s.createFromEntities)
+                throw new Error("No 'createFromEntities' defined in the WordModelSettings of '" + ct + "'");
+
+            return s.createFromEntities(wt, ctx.lites)
                 .then<Response | undefined>(m => m && API.createAndDownloadReport({ template: wt, entity: m }));
         })
         .then(response => response && saveFile(response))

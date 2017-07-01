@@ -23,6 +23,7 @@ using Signum.React.ApiControllers;
 using Signum.Engine.Basics;
 using Signum.Entities.Mailing;
 using Signum.Engine.Mailing;
+using Signum.Engine.Maps;
 
 namespace Signum.React.Mailing
 {
@@ -56,6 +57,37 @@ namespace Signum.React.Mailing
             AsyncEmailSenderLogic.Stop();
 
             Thread.Sleep(1000);
+        }
+
+
+
+#pragma warning disable IDE1006 // Naming Styles
+        public class CreateEmailRequest
+        {
+            public Lite<EmailTemplateEntity> template { get; set; }
+            public Lite<Entity> lite { get; set; }
+            public ModifiableEntity entity { get; set; }
+        }
+#pragma warning restore IDE1006 // Naming Styles
+
+        [Route("api/email/constructorType"), HttpPost]
+        public string GetConstructorType(SystemEmailEntity systemEmailTemplate)
+        {
+            var type = SystemEmailLogic.GetEntityType(systemEmailTemplate.ToType());
+
+            return ReflectionServer.GetTypeName(type);
+        }
+
+        [Route("api/email/emailTemplates"), HttpGet]
+        public List<Lite<EmailTemplateEntity>> GetWordTemplates(string queryKey, EmailTemplateVisibleOn visibleOn)
+        {
+            object type = QueryLogic.ToQueryName(queryKey);
+
+            var isAllowed = Schema.Current.GetInMemoryFilter<EmailTemplateEntity>(userInterface: true);
+            return EmailTemplateLogic.TemplatesByQueryName.Value.TryGetC(type).EmptyIfNull()
+                .Where(a => isAllowed(a) && EmailTemplateLogic.IsVisible(a, visibleOn))
+                .Select(a => a.ToLite())
+                .ToList();
         }
     }
 }

@@ -11,16 +11,30 @@ import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { EmailMessageEntity, EmailTemplateMessageEmbedded, EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailMessageOperation, EmailPackageEntity, EmailRecipientEntity, EmailConfigurationEmbedded, EmailTemplateEntity, AsyncEmailSenderPermission } from './Signum.Entities.Mailing'
-import { SmtpConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, Pop3ReceptionExceptionEntity, EmailAddressEmbedded} from './Signum.Entities.Mailing'
-import { NewsletterEntity, NewsletterDeliveryEntity, SendEmailTaskEntity } from './Signum.Entities.Mailing'
+import { SmtpConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, Pop3ReceptionExceptionEntity, EmailAddressEmbedded } from './Signum.Entities.Mailing'
+import { NewsletterEntity, NewsletterDeliveryEntity, SendEmailTaskEntity, SystemEmailEntity, EmailTemplateVisibleOn } from './Signum.Entities.Mailing'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
+import { ModifiableEntity } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
+import { ContextualItemsContext, MenuItemBlock } from "../../../Framework/Signum.React/Scripts/SearchControl/ContextualItems";
+import { ModelEntity } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
+import { QueryRequest } from "../../../Framework/Signum.React/Scripts/FindOptions";
+import * as ContexualItems from '../../../Framework/Signum.React/Scripts/SearchControl/ContextualItems'
+import MailingMenu from "./MailingMenu";
 
-require("./Mailing.css");
+import "./Mailing.css";
 
-export function start(options: { routes: JSX.Element[], smtpConfig: boolean, newsletter: boolean, pop3Config: boolean, sendEmailTask: boolean, quickLinksFrom: PseudoType[] | undefined }) {
+export function start(options: {
+    routes: JSX.Element[], smtpConfig: boolean,
+    newsletter: boolean,
+    pop3Config: boolean,
+    sendEmailTask: boolean,
+    contextual: boolean,
+    queryButton: boolean,
+    quickLinksFrom: PseudoType[] | undefined
+}) {
     options.routes.push(<ImportRoute path="~/asyncEmailSender/view" onImportModule={() => import("./AsyncEmailSenderPage")} />);
 
     OmniboxClient.registerSpecialAction({
@@ -40,8 +54,12 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
     Navigator.addSettings(new EntitySettings(EmailAddressEmbedded, e => import('./Templates/EmailAddress')));
     Navigator.addSettings(new EntitySettings(EmailConfigurationEmbedded, e => import('./Templates/EmailConfiguration')));
 
-    Operations.addSettings(new EntityOperationSettings(EmailMessageOperation.CreateMailFromTemplate, {
+    Operations.addSettings(new EntityOperationSettings(EmailMessageOperation.CreateEmailFromTemplate, {
         onClick: (ctx) => {
+
+            var promise: Promise<string | undefined> = ctx.entity.systemEmail ? API.getConstructorType(ctx.entity.systemEmail) : Promise.resolve(undefined);
+            promise
+
             Finder.find({ queryName: ctx.entity.query!.key }).then(lite => {
                 if (!lite)
                     return;
@@ -79,8 +97,81 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
         });
     }
 
+    if (options.contextual)
+        ContexualItems.onContextualItems.push(getEmailTemplates);
+
+    if (options.queryButton)
+        Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
+
+            if (!ctx.searchControl.props.showBarExtension)
+                return undefined;
+
+            return <MailingMenu searchControl={ctx.searchControl} />;
+        });
+
 }
 
+export interface EmailModelSettings<T extends ModelEntity> {
+    createFromTemplate?: (et: EmailTemplateEntity) => Promise<ModelEntity | undefined>;
+    createFromEntities?: (et: Lite<EmailTemplateEntity>, lites: Array<Lite<Entity>>) => Promise<ModelEntity | undefined>;
+    createFromQuery?: (et: Lite<EmailTemplateEntity>, req: QueryRequest) => Promise<ModelEntity | undefined>;
+}
+
+export const settings: { [typeName: string]: EmailModelSettings<ModifiableEntity> } = {};
+
+export function register<T extends ModifiableEntity>(type: Type<T>, setting: EmailModelSettings<T>) {
+    settings[type.typeName] = setting;
+}
+
+export function getEmailTemplates(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
+
+    if (ctx.lites.length == 0)
+        return undefined;
+
+    return API.getEmailTemplates(ctx.queryDescription.queryKey, ctx.lites.length > 1 ? "Multiple" : "Single")
+        .then(wts => {
+            if (!wts.length)
+                return undefined;
+
+            return {
+                header: EmailTemplateEntity.nicePluralName(),
+                menuItems: wts.map(wt =>
+                    <MenuItem data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)}>
+                        <span className={classes("icon", "fa fa-envelope-o")}></span>
+                        {wt.toStr}
+                    </MenuItem>
+                )
+            } as MenuItemBlock;
+        });
+}
+
+export function handleMenuClick(et: Lite<EmailTemplateEntity>, ctx: ContextualItemsContext<Entity>) {
+
+    Navigator.API.fetchAndForget(et)
+        .then(emailTemplate => emailTemplate.systemEmail ? API.getConstructorType(emailTemplate.systemEmail) : Promise.resolve(undefined))
+        .then(ct => {
+            if (!ct)
+                return createAndViewEmail(et, ctx.lites.single());
+
+            var s = settings[ct];
+            if (!s)
+                throw new Error("No 'WordModelSettings' defined for '" + ct + "'");
+
+            if (!s.createFromEntities)
+                throw new Error("No 'createFromEntities' defined in the WordModelSettings of '" + ct + "'");
+
+            return s.createFromEntities(et, ctx.lites)
+                .then(m => m && createAndViewEmail(et, m));
+        })
+        .done();
+}
+
+export function createAndViewEmail(template: Lite<EmailTemplateEntity>, ...args: any[]) {
+
+    Operations.API.executeLite(template, EmailMessageOperation.CreateEmailFromTemplate.key, ...args)
+        .then(pack => pack && Navigator.navigate(pack))
+        .done();
+}
 
 export module API {
     export function start(): Promise<void> {
@@ -93,6 +184,21 @@ export module API {
 
     export function view(): Promise<AsyncEmailSenderState> {
         return ajaxGet<AsyncEmailSenderState>({ url: "~/api/asyncEmailSender/view" });
+    }
+
+
+    export interface CreateEmailRequest {
+        template: Lite<EmailTemplateEntity>;
+        lite?: Lite<Entity>;
+        entity?: ModifiableEntity;
+    }
+    
+    export function getConstructorType(systemEmailTemplate: SystemEmailEntity): Promise<string> {
+        return ajaxPost<string>({ url: "~/api/mail/constructorType" }, systemEmailTemplate);
+    }
+
+    export function getEmailTemplates(queryKey: string, visibleOn: EmailTemplateVisibleOn): Promise<Lite<EmailTemplateEntity>[]> {
+        return ajaxGet<Lite<EmailTemplateEntity>[]>({ url: `~/api/mail/emailTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` });
     }
 }
 

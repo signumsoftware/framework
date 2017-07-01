@@ -488,19 +488,19 @@ namespace Signum.Engine.Authorization
 
                 Console.WriteLine("Part 1: Syncronize roles without relationships");
 
-                var roleInsertsDeletes = Synchronizer.SynchronizeScript(rolesXml, rolesDic,
-                    (name, xelement) => table.InsertSqlSync(new RoleEntity { Name = name }, includeCollections: false),
-                    (name, role) => SqlPreCommand.Combine(Spacing.Simple,
+                var roleInsertsDeletes = Synchronizer.SynchronizeScript(Spacing.Double, rolesXml, rolesDic,
+                    createNew: (name, xelement) => table.InsertSqlSync(new RoleEntity { Name = name }, includeCollections: false),
+                    removeOld: (name, role) => SqlPreCommand.Combine(Spacing.Simple,
                             new SqlPreCommandSimple("DELETE {0} WHERE {1} = {2} --{3}"
                                 .FormatWith(relationalTable.Name, ((IColumn)relationalTable.Field).Name.SqlEscape(), role.Id, role.Name)),
                             table.DeleteSqlSync(role)),
-                    (name, xElement, role) =>
+                    mergeBoth: (name, xElement, role) =>
                     {
                         var oldName = role.Name;
                         role.Name = name;
                         role.MergeStrategy = xElement.Attribute("MergeStrategy")?.Let(t => t.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union;
                         return table.UpdateSqlSync(role, includeCollections: false, comment: oldName);
-                    }, Spacing.Double);
+                    });
 
                 if (roleInsertsDeletes != null)
                 {
@@ -523,10 +523,10 @@ namespace Signum.Engine.Authorization
                 Console.WriteLine("Part 2: Syncronize roles relationships");
                 Dictionary<string, RoleEntity> rolesDic = Database.Query<RoleEntity>().ToDictionary(a => a.ToString());
 
-                var roleRelationships = Synchronizer.SynchronizeScript(rolesXml, rolesDic,
-                 (name, xelement) => { throw new InvalidOperationException("No new roles should be at this stage. Did you execute the script?"); },
-                 (name, role) => { throw new InvalidOperationException("No old roles should be at this stage. Did you execute the script?"); },
-                 (name, xElement, role) =>
+                var roleRelationships = Synchronizer.SynchronizeScript(Spacing.Double, rolesXml, rolesDic, 
+                 createNew: (name, xelement) => { throw new InvalidOperationException("No new roles should be at this stage. Did you execute the script?"); },
+                 removeOld: (name, role) => { throw new InvalidOperationException("No old roles should be at this stage. Did you execute the script?"); },
+                 mergeBoth: (name, xElement, role) =>
                  {
                      var should = xElement.Attribute("Contains").Value.Split(new []{','},  StringSplitOptions.RemoveEmptyEntries);
                      var current = role.Roles.Select(a=>a.ToString());
@@ -537,7 +537,7 @@ namespace Signum.Engine.Authorization
                      role.Roles = should.Select(rs => rolesDic.GetOrThrow(rs).ToLite()).ToMList();
 
                      return table.UpdateSqlSync(role);
-                 }, Spacing.Double);
+                 });
 
                 if (roleRelationships != null)
                 {

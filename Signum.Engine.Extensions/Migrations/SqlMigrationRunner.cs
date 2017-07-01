@@ -123,7 +123,7 @@ namespace Signum.Engine.Migrations
             return list;
         }
 
-        public const string DatabaseNameReplacement = "$DatabaseName$";
+        public const string DatabaseNameReplacement = "#DatabaseName#";
 
         private static bool Prompt(List<MigrationInfo> migrations, bool autoRun)
         {
