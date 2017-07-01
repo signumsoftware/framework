@@ -113,17 +113,17 @@ namespace Signum.Engine
             IEnumerable<T> should = getSymbols();
 
             using (replacements.WithReplacedDatabaseName())
-                return Synchronizer.SynchronizeScriptReplacing(replacements, typeof(T).Name,
+                return Synchronizer.SynchronizeScriptReplacing(replacements, typeof(T).Name, Spacing.Double,
                     should.ToDictionary(s => s.Key),
                     current.ToDictionary(c => c.Key),
-                    (k, s) => table.InsertSqlSync(s),
-                    (k, c) => table.DeleteSqlSync(c),
-                    (k, s, c) =>
+                    createNew: (k, s) => table.InsertSqlSync(s),
+                    removeOld: (k, c) => table.DeleteSqlSync(c),
+                    mergeBoth: (k, s, c) =>
                     {
                         var originalName = c.Key;
                         c.Key = s.Key;
                         return table.UpdateSqlSync(c, comment: originalName);
-                    }, Spacing.Double);
+                    });
         }
 
         static Dictionary<string, T> AssertStarted()

@@ -57,21 +57,21 @@ namespace Signum.Engine.Basics
             Table table = Schema.Current.Table<PropertyRouteEntity>();
 
             using (rep.WithReplacedDatabaseName())
-                return Synchronizer.SynchronizeScript(should, current,
-                    null,
-                    null,
-                    (fullName, dicShould, dicCurr) =>
-                        Synchronizer.SynchronizeScriptReplacing(rep, PropertiesFor.FormatWith(fullName),
+                return Synchronizer.SynchronizeScript(Spacing.Double, should, current,
+                    createNew: null,
+                    removeOld: null,
+                    mergeBoth: (fullName, dicShould, dicCurr) =>
+                        Synchronizer.SynchronizeScriptReplacing(rep, PropertiesFor.FormatWith(fullName), Spacing.Simple,
                         dicShould,
                         dicCurr,
-                        null,
-                        (path, c) => table.DeleteSqlSync(c),
-                        (path, s, c) =>
+                        createNew: null,
+                        removeOld: (path, c) => table.DeleteSqlSync(c),
+                        mergeBoth: (path, s, c) =>
                         {
                             c.Path = s.Path;
                             return table.UpdateSqlSync(c);
-                        }, Spacing.Simple),
-                    Spacing.Double);
+                        })
+                    );
         }
 
         public static List<PropertyRouteEntity> RetrieveOrGenerateProperties(TypeEntity typeEntity)

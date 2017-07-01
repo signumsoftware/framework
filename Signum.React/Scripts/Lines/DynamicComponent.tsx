@@ -4,7 +4,7 @@ import { Binding, LambdaMemberType, getTypeInfos, EntityKind, KindOfType } from 
 import { ModifiableEntity } from '../Signum.Entities'
 import * as Navigator from '../Navigator'
 import { ViewReplacer } from '../Frames/ReactVisitor'
-import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, TypeContext, EntityCheckboxList, EntityTable } from '../Lines'
+import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, TypeContext, EntityCheckboxList, EnumCheckboxList, EntityTable } from '../Lines'
 
 export default class DynamicComponent extends React.Component<{ ctx: TypeContext<ModifiableEntity> }, void> {
 
@@ -65,37 +65,47 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
             if (tr.name == "[ALL]")
                 return <EntityStrip ctx={ctx} />;
 
-            if (tr.isEmbedded || tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
-                return <EntityTable ctx={ctx}/>;
-            else if (tis.every(t => t.isLowPopulation == true))
-                return <EntityCheckboxList ctx ={ctx}/>;
-            else
-                return <EntityStrip ctx={ctx}/>;
-        }
+            if (tis.length) {
+                if (tis.length == 1 && tis.first().kind == "Enum")
+                    return <EnumCheckboxList ctx={ctx} />;
 
-        if (tr.name == "[ALL]")
-            return <EntityLine ctx={ctx}/>;
+                if (tr.isEmbedded || tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
+                    return <EntityTable ctx={ctx} />;
 
-        if (tis.length) {
-            if (tis.length == 1 && tis.first().kind == "Enum")
-                return <ValueLine ctx={ctx}/>;
+                if (tis.every(t => t.isLowPopulation == true))
+                    return <EntityCheckboxList ctx={ctx} />;
 
-            if (tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
+                return <EntityStrip ctx={ctx} />;
+            }
+
+            return undefined; 
+
+        } else {
+
+            if (tr.name == "[ALL]")
+                return <EntityLine ctx={ctx} />;
+
+            if (tis.length) {
+                if (tis.length == 1 && tis.first().kind == "Enum")
+                    return <ValueLine ctx={ctx} />;
+
+                if (tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
+                    return <EntityDetail ctx={ctx} />;
+
+                if (tis.every(t => t.isLowPopulation == true))
+                    return <EntityCombo ctx={ctx} />;
+
+                return <EntityLine ctx={ctx} />;
+            }
+
+            if (tr.isEmbedded)
                 return <EntityDetail ctx={ctx} />;
 
-            if (tis.every(t => t.isLowPopulation == true))
-                return <EntityCombo ctx={ctx}/>;           
+            if (ValueLine.getValueLineType(tr) != undefined)
+                return <ValueLine ctx={ctx} />;
 
-            return <EntityLine ctx={ctx}/>;
+            return undefined;
         }
-
-        if (tr.isEmbedded)
-            return <EntityDetail ctx={ctx} />;
-
-        if (ValueLine.getValueLineType(tr) != undefined)
-            return <ValueLine ctx={ctx} />;
-
-        return undefined;
     }
 
 }

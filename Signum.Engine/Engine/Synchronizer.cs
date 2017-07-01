@@ -112,11 +112,12 @@ namespace Signum.Engine
         }
 
         public static SqlPreCommand SynchronizeScript<K, N, O>(
+            Spacing spacing,
             Dictionary<K, N> newDictionary,
             Dictionary<K, O> oldDictionary,
             Func<K, N, SqlPreCommand> createNew,
             Func<K, O, SqlPreCommand> removeOld,
-            Func<K, N, O, SqlPreCommand> merge, Spacing spacing)
+            Func<K, N, O, SqlPreCommand> mergeBoth)
             where O : class
             where N : class
         {
@@ -128,7 +129,7 @@ namespace Signum.Engine
                 if (oldVal == null)
                     return createNew == null ? null : createNew(key, newVal);
 
-                return merge == null ? null : merge(key, newVal, oldVal);
+                return mergeBoth == null ? null : mergeBoth(key, newVal, oldVal);
             }).Values.Combine(spacing);
         }
 
@@ -137,12 +138,12 @@ namespace Signum.Engine
         public static SqlPreCommand SynchronizeScriptReplacing<N, O>(
             Replacements replacements,
             string replacementsKey,
+            Spacing spacing,
             Dictionary<string, N> newDictionary,
             Dictionary<string, O> oldDictionary,
             Func<string, N, SqlPreCommand> createNew,
             Func<string, O, SqlPreCommand> removeOld,
-            Func<string, N, O, SqlPreCommand> merge,
-            Spacing spacing)
+            Func<string, N, O, SqlPreCommand> mergeBoth)
             where O : class
             where N : class
         {
@@ -152,7 +153,7 @@ namespace Signum.Engine
 
             var repOldDictionary = replacements.ApplyReplacementsToOld(oldDictionary, replacementsKey);
 
-            return SynchronizeScript(newDictionary, repOldDictionary, createNew, removeOld, merge, spacing);
+            return SynchronizeScript(spacing, newDictionary, repOldDictionary, createNew, removeOld, mergeBoth);
         }
 
         public static IDisposable RenameTable(Table table, Replacements replacements)

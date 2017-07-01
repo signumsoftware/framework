@@ -106,18 +106,18 @@ namespace Signum.Engine.Extensions.Basics
             IEnumerable<T> should = CreateSemiSymbols();
 
             using (replacements.WithReplacedDatabaseName())
-                return Synchronizer.SynchronizeScriptReplacing(replacements, typeof(T).Name,
+                return Synchronizer.SynchronizeScriptReplacing(replacements, typeof(T).Name, Spacing.Double,
                     should.ToDictionary(s => s.Key),
                     current.Where(c => c.Key.HasText()).ToDictionary(c => c.Key),
-                    (k, s) => table.InsertSqlSync(s),
-                    (k, c) => table.DeleteSqlSync(c),
-                    (k, s, c) =>
+                    createNew: (k, s) => table.InsertSqlSync(s),
+                    removeOld: (k, c) => table.DeleteSqlSync(c),
+                    mergeBoth: (k, s, c) =>
                     {
                         var originalName = c.Key;
                         c.Key = s.Key;
                         c.Name = s.Name;
                         return table.UpdateSqlSync(c, comment: originalName);
-                    }, Spacing.Double);
+                    });
         }
 
         static Dictionary<string, T> AssertStarted()

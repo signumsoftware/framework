@@ -79,8 +79,7 @@ namespace Signum.Engine.Maps
         {
             var options = ObjectName.CurrentOptions;
 
-            var name = !options.DatabaseNameReplacement.HasText() ? Name.SqlEscape():
-                ("[" + Name.Replace(Connector.Current.DatabaseName(), options.DatabaseNameReplacement) + "]");
+            var name = !options.DatabaseNameReplacement.HasText() ? Name.SqlEscape(): Name.Replace(Connector.Current.DatabaseName(), options.DatabaseNameReplacement).SqlEscape();
 
             if (Server == null)
                 return name;

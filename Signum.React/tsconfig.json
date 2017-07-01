@@ -2,7 +2,8 @@
   "compilerOptions": {
     "target": "es5",
     "sourceMap": false,
-    "module": "commonjs",
+    "module": "esnext",
+    "moduleResolution": "node",
     "jsx": "react",
     "noEmit": true,
     "strict": true,
