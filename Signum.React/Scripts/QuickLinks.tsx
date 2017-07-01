@@ -244,7 +244,7 @@ export class QuickLinkAction extends QuickLink {
     toMenuItem(key: any) {
 
         return (
-            <MenuItem data-name={this.name} className="sf-quick-link" key={key} onMouseUp={this.action}>
+            <MenuItem data-name={this.name} className="sf-quick-link" onMouseUp={this.action}>
                 {this.renderIcon()}
                 {this.text}
             </MenuItem>
@@ -264,7 +264,7 @@ export class QuickLinkLink extends QuickLink {
     toMenuItem(key: any) {
 
         return (
-            <MenuItem data-name={this.name} className="sf-quick-link" key={key} onMouseUp={this.handleClick}>
+            <MenuItem data-name={this.name} className="sf-quick-link" onMouseUp={this.handleClick}>
                 {this.renderIcon()}
                 {this.text}
             </MenuItem>
@@ -291,7 +291,7 @@ export class QuickLinkExplore extends QuickLink {
 
     toMenuItem(key: any) {
         return (
-            <MenuItem data-name={this.name} className="sf-quick-link" key={key} onMouseUp={this.exploreOrPopup}>
+            <MenuItem data-name={this.name} className="sf-quick-link" onMouseUp={this.exploreOrPopup}>
                 {this.renderIcon()}
                 {this.text}
             </MenuItem>
@@ -322,7 +322,7 @@ export class QuickLinkNavigate extends QuickLink {
 
     toMenuItem(key: any) {
         return (
-            <MenuItem data-name={this.name} className="sf-quick-link" key={key} onMouseUp={this.navigateOrPopup}>
+            <MenuItem data-name={this.name} className="sf-quick-link" onMouseUp={this.navigateOrPopup}>
                 {this.renderIcon()}
                 {this.text}
             </MenuItem>

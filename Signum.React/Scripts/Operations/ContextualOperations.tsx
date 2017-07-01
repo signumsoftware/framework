@@ -218,8 +218,7 @@ export namespace MenuItemConstructor { //To allow monkey patching
         const menuItem = <MenuItem
             className={disabled ? "disabled" : undefined}
             onClick={disabled ? undefined : onClick}
-            data-operation={coc.operationInfo.key}
-            key={key}>
+            data-operation={coc.operationInfo.key}>
             {icon ? <span className={classes("icon", icon)} style={{ color: coc.settings && coc.settings.iconColor }}></span> :
                 bsStyle ? <span className={classes("icon", "empty-icon", "btn-" + bsStyle)}></span> : undefined}
             {text}
