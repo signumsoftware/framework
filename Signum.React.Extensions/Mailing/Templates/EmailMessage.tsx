@@ -70,9 +70,9 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
     }
 
 
-    renderEmailReceptionMixin = () => {
+    renderEmailReceptionMixin(){
 
-        const ri = this.props.ctx.subCtx(a => getMixin(a, EmailReceptionMixin).receptionInfo!);
+        const ri = this.props.ctx.subCtx(EmailReceptionMixin).subCtx(a => a.receptionInfo!);
 
         return <Tab title={EmailReceptionMixin.niceName()}>
             <fieldset>

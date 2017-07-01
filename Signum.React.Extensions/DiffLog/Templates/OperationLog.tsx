@@ -66,7 +66,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
 
     mctx()
     {
-        return this.props.ctx.subCtx(a => getMixin(a, DiffLogMixin));
+        return this.props.ctx.subCtx(DiffLogMixin);
     }
 
     render() {
