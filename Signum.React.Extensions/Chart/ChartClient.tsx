@@ -218,8 +218,9 @@ export function synchronizeColumns(chart: IChartBase) {
             }
             else {
                 const column = sp.element.columnIndex == undefined ? undefined : chart.columns![sp.element.columnIndex].element;
-                if (isValidParameterValue(cp.value, sp.element, column && column.token && column.token.token))
-                    defaultParameterValue(sp.element, column && column.token && column.token.token);
+                if (!isValidParameterValue(cp.value, sp.element, column && column.token && column.token.token))
+                    cp.value = defaultParameterValue(sp.element, column && column.token && column.token.token);
+                cp.modified = true;
             }
 
             chart.parameters!.push({ rowId: null, element: cp });
@@ -247,6 +248,7 @@ export function synchronizeColumns(chart: IChartBase) {
                     tokenString : parentToken && parentToken.fullKey,
                     token : parentToken
                 });
+                cc.modified = true;
             }
         }
     });

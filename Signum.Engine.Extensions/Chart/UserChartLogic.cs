@@ -39,9 +39,9 @@ namespace Signum.Engine.Chart
                     .WithQuery(dqm, () => uq => new
                     {
                         Entity = uq,
+                        uq.Id,
                         uq.Query,
                         uq.EntityType,
-                        uq.Id,
                         uq.DisplayName,
                         uq.ChartScript,
                         uq.GroupResults,

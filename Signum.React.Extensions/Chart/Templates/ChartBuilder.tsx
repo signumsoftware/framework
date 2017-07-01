@@ -98,6 +98,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
         let compatible = ChartClient.isCompatibleWith(cs, chart)
         chart.chartScript = cs;
         ChartClient.synchronizeColumns(chart);
+        chart.modified = true;
 
         if (!compatible)
             this.props.onInvalidate();
