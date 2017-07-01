@@ -186,6 +186,7 @@
     <TypeScriptCompile Include="Alerts\AlertsClient.tsx" />
     <TypeScriptCompile Include="Alerts\Templates\AlertType.tsx" />
     <TypeScriptCompile Include="Alerts\Templates\Alert.tsx" />
+    <TypeScriptCompile Include="Basics\DisabledClient.tsx" />
     <TypeScriptCompile Include="Basics\BasicsClient.tsx" />
     <TypeScriptCompile Include="Basics\Color.ts" />
     <TypeScriptCompile Include="Basics\Templates\DateSpan.tsx" />

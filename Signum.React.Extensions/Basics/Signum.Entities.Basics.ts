@@ -26,6 +26,21 @@ export interface DateSpanEmbedded extends Entities.EmbeddedEntity {
     days?: number;
 }
 
+export module DisabledMessage {
+    export const ParentIsDisabled = new MessageKey("DisabledMessage", "ParentIsDisabled");
+}
+
+export const DisabledMixin = new Type<DisabledMixin>("DisabledMixin");
+export interface DisabledMixin extends Entities.MixinEntity {
+    Type: "DisabledMixin";
+    isDisabled?: boolean;
+}
+
+export module DisableOperation {
+    export const Disable : Entities.ExecuteSymbol<Entities.Entity> = registerSymbol("Operation", "DisableOperation.Disable");
+    export const Enabled : Entities.ExecuteSymbol<Entities.Entity> = registerSymbol("Operation", "DisableOperation.Enabled");
+}
+
 export const TimeSpanEmbedded = new Type<TimeSpanEmbedded>("TimeSpanEmbedded");
 export interface TimeSpanEmbedded extends Entities.EmbeddedEntity {
     Type: "TimeSpanEmbedded";
