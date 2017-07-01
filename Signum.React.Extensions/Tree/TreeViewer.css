@@ -1,5 +1,5 @@
 .fa-sm {
-    font-size:0.5em;
+    font-size: 0.5em;
 }
 
 .tree-container {
@@ -14,18 +14,18 @@
 }
 
 
-.tree-container ul {
-    padding-left: 16px;
-    margin-bottom: 0px;
-}
+    .tree-container ul {
+        padding-left: 16px;
+        margin-bottom: 0px;
+    }
 
-.tree-container ul li {
-    list-style:none
-}
+        .tree-container ul li {
+            list-style: none
+        }
 
 span.place-holder {
-    display:inline-block;
-    width:12px;
+    display: inline-block;
+    width: 12px;
 }
 
 
@@ -38,12 +38,18 @@ span.place-holder {
     user-select: none;
 }
 
-.tree-label.tree-selected {
-    color: #fff;
-    background-color: #337ab7;
-}
+    .tree-label.tree-selected {
+        color: #fff !important;
+        background-color: #337ab7;
+    }
+
+    .tree-label.tree-disabled {
+        color: gray;
+        font-style: italic;
+    }
+
 
 .tree-icon {
-    cursor:pointer;
-    width:12px;
+    cursor: pointer;
+    width: 12px;
 }

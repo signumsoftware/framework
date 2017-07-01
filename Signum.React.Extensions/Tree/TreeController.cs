@@ -17,6 +17,7 @@ using Signum.React.ApiControllers;
 using Signum.Entities.Tree;
 using Signum.Engine.Tree;
 using Signum.Entities.DynamicQuery;
+using Signum.Entities.Basics;
 
 namespace Signum.React.Tree
 {
@@ -46,13 +47,14 @@ namespace Signum.React.Tree
         {
             var parentRoute = lite == null ? SqlHierarchyId.GetRoot() : lite.InDB(a => a.Route);
             //var parentRoute = lite == null ? SqlHierarchyId.GetRoot() : (lite.Id.ToString() == "6" ? SqlHierarchyId.Parse("/1/") : SqlHierarchyId.Parse("/1/1/"));
-
+            var disabledMixin = MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin));
             return Database.Query<T>()
                 .Where(t => (bool)(t.Route.GetAncestor(1) == parentRoute))
                 .Select(t => new TreeNode
                 {
                     lite = t.ToLite(),
                     level = t.Level(),
+                    disabled = disabledMixin && t.Mixin<DisabledMixin>().IsDisabled,
                     childrenCount = t.Children().Count(),
                     loadedChildren = new List<TreeNode>()
                 })
@@ -70,6 +72,8 @@ namespace Signum.React.Tree
                 return giFindNodesGeneric.GetInvoker(type)(filters);
         }
 
+
+
         static GenericInvoker<Func<List<FilterTS>, List<TreeNode>>> giFindNodesGeneric =
             new GenericInvoker<Func<List<FilterTS>, List<TreeNode>>>(filters => FindNodesGeneric<TreeEntity>(filters));
         static List<TreeNode> FindNodesGeneric<T>(List<FilterTS> filtersTs)
@@ -78,15 +82,18 @@ namespace Signum.React.Tree
             var qd = DynamicQueryManager.Current.QueryDescription(typeof(T));
             var filters = filtersTs.Select(f => f.ToFilter(qd, false)).ToList();
 
+            var disabledMixin = MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin));
             var dictionary = DynamicQueryManager.Current.GetEntities(new QueryEntitiesRequest { QueryName = typeof(T), Filters = filters, Orders = new List<Order>() })
                             .Select(a => (T)a.Entity)
                             .SelectMany(t => t.Ascendants())
                             .Distinct()
-                            .Select(tp => new TreeInfo
+                            .Select(t => new TreeInfo
                             {
-                                route = tp.Route,
-                                lite = tp.ToLite(),
-                                childrenCount = tp.Children().Count(),
+                                route = t.Route,
+                                lite = t.ToLite(),
+                                level = t.Level(),
+                                disabled = disabledMixin && t.Mixin<DisabledMixin>().IsDisabled,
+                                childrenCount = t.Children().Count(),
                             }).ToDictionary(a => a.route);
 
             var parentNodes = TreeHelper.ToTreeC(dictionary.Values, a => a.route.GetLevel() == 1 ? null :
@@ -101,6 +108,7 @@ namespace Signum.React.Tree
     {
         public int childrenCount { get; set; }
         public Lite<TreeEntity> lite { get; set; }
+        public bool disabled { get; set; }
         public SqlHierarchyId route { get; set; }
         public short level { get; set; }
     }
@@ -111,12 +119,14 @@ namespace Signum.React.Tree
         internal TreeNode(Node<TreeInfo> node)
         {
             this.lite = node.Value.lite;
+            this.disabled = node.Value.disabled;
             this.childrenCount = node.Value.childrenCount;
             this.loadedChildren = node.Children.Select(a => new TreeNode(a)).ToList();
             this.level = node.Value.level;
         }
 
         public Lite<TreeEntity> lite { set; get; }
+        public bool disabled { get; set; }
         public int childrenCount { set; get; }
         public List<TreeNode> loadedChildren { set; get; }
         public short level { get; set; }

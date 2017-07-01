@@ -102,6 +102,16 @@ namespace Signum.Engine.Tree
                     .OrderByDescending(n => n).FirstOrDefault() ?? SqlHierarchyId.Null;
         }
 
+        static SqlHierarchyId FirstChild<T>(SqlHierarchyId node)
+            where T : TreeEntity
+        {
+            using (ExecutionMode.Global())
+                return Database.Query<T>()
+                    .Select(c => (SqlHierarchyId?)c.Route)
+                    .Where(n => (bool)((SqlHierarchyId)n.Value.GetAncestor(1) == node))
+                    .OrderBy(n => n).FirstOrDefault() ?? SqlHierarchyId.Null;
+        }
+
         private static SqlHierarchyId Next<T>(SqlHierarchyId node)
             where T : TreeEntity
         {
@@ -110,6 +120,16 @@ namespace Signum.Engine.Tree
                     .Select(t => (SqlHierarchyId?)t.Route)
                     .Where(n => (bool)(n.Value.GetAncestor(1) == node.GetAncestor(1)) && (bool)(n.Value > node))
                     .OrderBy(n => n).FirstOrDefault() ?? SqlHierarchyId.Null;
+        }
+
+        private static SqlHierarchyId Previous<T>(SqlHierarchyId node)
+        where T : TreeEntity
+        {
+            using (ExecutionMode.Global())
+                return Database.Query<T>()
+                    .Select(t => (SqlHierarchyId?)t.Route)
+                    .Where(n => (bool)(n.Value.GetAncestor(1) == node.GetAncestor(1)) && (bool)(n.Value < node))
+                    .OrderByDescending(n => n).FirstOrDefault() ?? SqlHierarchyId.Null;
         }
 
 
@@ -146,16 +166,14 @@ namespace Signum.Engine.Tree
             }
         }
 
-        internal static void FixRouteAndNames<T>(T f, Lite<T> parent)
+        internal static void FixRouteAndNames<T>(T f, MoveTreeModel model)
             where T : TreeEntity
         {
             var list = f.Descendants().Where(c => c != f).ToList();
 
             var oldNode = f.Route;
-
-            var catRoute = parent.InDB().Select(a => a.Route).SingleEx();
-
-            f.Route = catRoute.GetDescendant(LastChild<T>(catRoute), SqlHierarchyId.Null);
+         
+            f.Route = GetNewPosition<T>(model);
 
             f.Save();
             CalculateFullName(f);
@@ -168,6 +186,28 @@ namespace Signum.Engine.Tree
                 CalculateFullName(h);
                 h.Save();
             }
+        }
+
+        private static SqlHierarchyId GetNewPosition<T>(MoveTreeModel model)
+            where T : TreeEntity
+        {
+            var newParentRoute = model.NewParent == null ? SqlHierarchyId.GetRoot() : model.NewParent.InDB().Select(a => a.Route).SingleEx();
+
+            if (model.InsertPlace == InsertPlace.First)
+                return newParentRoute.GetDescendant(SqlHierarchyId.Null, FirstChild<T>(newParentRoute));
+
+            if(model.InsertPlace == InsertPlace.Last)
+                return newParentRoute.GetDescendant(LastChild<T>(newParentRoute), SqlHierarchyId.Null);
+
+            var newSiblingRoute = model.Sibling.InDB().Select(a => a.Route).SingleEx();
+
+            if (model.InsertPlace == InsertPlace.After)
+                return newParentRoute.GetDescendant(newSiblingRoute, Next<T>(newSiblingRoute));
+            
+            if (model.InsertPlace == InsertPlace.Before)
+                return newParentRoute.GetDescendant(Previous<T>(newSiblingRoute), newSiblingRoute);
+
+            throw new InvalidOperationException("Unexpected InsertPlace " + model.InsertPlace);
         }
 
         public static FluentInclude<T> WithTree<T>(this FluentInclude<T> include, DynamicQueryManager dqm) where T : TreeEntity, new()
@@ -244,9 +284,9 @@ namespace Signum.Engine.Tree
             {
                 Execute = (f, args) =>
                 {
-                    var parent = args.GetArg<Lite<T>>();
+                    var model = args.GetArg<MoveTreeModel>();
 
-                    TreeLogic.FixRouteAndNames(f, parent);
+                    TreeLogic.FixRouteAndNames(f, model);
                 }
             }.Register();
 

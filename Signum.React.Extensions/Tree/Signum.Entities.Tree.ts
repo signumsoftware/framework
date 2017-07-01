@@ -6,6 +6,21 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../F
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 
 
+export const InsertPlace = new EnumType<InsertPlace>("InsertPlace");
+export type InsertPlace =
+    "First" |
+    "After" |
+    "Before" |
+    "Last";
+
+export const MoveTreeModel = new Type<MoveTreeModel>("MoveTreeModel");
+export interface MoveTreeModel extends Entities.ModelEntity {
+    Type: "MoveTreeModel";
+    newParent?: Entities.Lite<TreeEntity> | null;
+    insertPlace?: InsertPlace;
+    sibling?: Entities.Lite<TreeEntity> | null;
+}
+
 export interface TreeEntity extends Entities.Entity {
     parentRoute?: string | null;
     level?: number | null;

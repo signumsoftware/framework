@@ -16,11 +16,14 @@ import FilterBuilder from "../../../Framework/Signum.React/Scripts/SearchControl
 import { ISimpleFilterBuilder } from "../../../Framework/Signum.React/Scripts/Search";
 import { is } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
 import MessageModal from "../../../Framework/Signum.React/Scripts/Modals/MessageModal";
+import { ContextualItemsContext, renderContextualItems } from "../../../Framework/Signum.React/Scripts/SearchControl/ContextualItems";
+import { Entity } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
 
 require("./TreeViewer.css");
 
 interface TreeViewerProps {
     typeName: string;
+    showContextMenu?: boolean | "Basic";
     onDoubleClick?: (selectedNode: TreeNode, e: React.MouseEvent<any>) => void;
     onSelectedNode?: (selectedNode: TreeNode | undefined) => void;
     onSearch?: () => void;
@@ -36,6 +39,7 @@ interface TreeViewerState {
     simpleFilterBuilder?: React.ReactElement<any>;
     showFilters?: boolean;
 
+    currentMenuItems?: React.ReactElement<any>[];
     contextualMenu?: {
         position: ContextMenuPosition;
     };
@@ -224,11 +228,28 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
             contextualMenu: {
                 position: ContextMenu.getPosition(e, this.treeContainer)
             }
-        });
+        }, () => this.loadMenuItems());
+    }
+
+     loadMenuItems() {
+        if (this.props.showContextMenu == "Basic")
+            this.setState({ currentMenuItems: [] });
+        else {
+            const options: ContextualItemsContext<Entity> = {
+                lites: [this.state.selectedNode!.lite],
+                queryDescription: this.state.queryDescription!,
+                markRows: () => { this.search(); },
+                container: this,
+            };
+
+            renderContextualItems(options)
+                .then(menuItems => this.setState({ currentMenuItems: menuItems }))
+                .done();
+        }
     }
 
     handleContextOnHide = () => {
-        this.setState({ contextualMenu: undefined });
+        this.setState({ contextualMenu: undefined, currentMenuItems: undefined });
     }
 
     renderContextualMenu() {
@@ -236,16 +257,31 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         if (!this.state.selectedNode)
             return null;
 
-        return React.cloneElement(<ContextMenu position={cm.position} onHide={this.handleContextOnHide} />, undefined, ...this.renderMenuItems());
+        return (
+            <ContextMenu position={cm.position} onHide={this.handleContextOnHide}>
+                {this.renderMenuItems().map((e, i) => React.cloneElement(e, { key: i }))}
+            </ContextMenu>
+        );
     }
 
     renderMenuItems(): React.ReactElement<any>[] {
-        return [
+
+        var menuItems = [
             <MenuItem onClick={this.handleNavigate} bsClass="danger"><i className="fa fa-arrow-right" aria-hidden="true"></i>&nbsp; {EntityControlMessage.View.niceToString()}</MenuItem>,
             <MenuItem onClick={this.handleAddChildren}><i className="fa fa-caret-square-o-right" aria-hidden="true"></i>&nbsp; {TreeViewerMessage.AddChild.niceToString()}</MenuItem>,
             <MenuItem onClick={this.handleAddSibling}><i className="fa fa-caret-square-o-down" aria-hidden="true"></i>&nbsp; {TreeViewerMessage.AddSibling.niceToString()}</MenuItem>,
-            <MenuItem onClick={this.handleRemove} bsClass="danger"><i className="fa fa-trash" aria-hidden="true"></i>&nbsp; {TreeViewerMessage.Remove.niceToString()}</MenuItem>,
         ];
+
+        if (this.state.currentMenuItems == undefined) {
+            menuItems.push(<MenuItem header>{JavascriptMessage.loading.niceToString()}</MenuItem>);
+        } else {
+            if (menuItems.length && this.state.currentMenuItems.length)
+                menuItems.push(<MenuItem divider />);
+
+            menuItems.splice(menuItems.length, 0, ...this.state.currentMenuItems);
+        }
+
+        return menuItems;
     }
 
     handleSearchSubmit = (e: React.FormEvent<any>) => {
@@ -342,29 +378,6 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         return this.state.treeNodes!.flatMap(allNodes).filter(n => n.loadedChildren.contains(childNode)).singleOrNull();
     }
 
-    handleRemove = () => {
-
-        var node = this.state.selectedNode!;
-        return MessageModal.show({
-            title: OperationMessage.Confirm.niceToString(),
-            message: OperationMessage.PleaseConfirmYouDLikeToDelete0FromTheSystem.niceToString(node.lite.toStr),
-            buttons: "yes_no",
-            icon: "question"
-        }).then(result => {
-
-            if (result != "yes")
-                return;
-
-            Operations.API.deleteLite(node.lite, TreeOperation.Delete)
-                .then(() => {
-                    var parent = this.findParent(node);
-                    (parent ? parent.loadedChildren : this.state.treeNodes!).remove(node);
-                    this.selectNode(parent || undefined);
-                })
-                .done();
-        }).done();
-    }
-
     simpleFilterBuilderInstance?: ISimpleFilterBuilder;
     getFilterOptionsWithSFB(): Promise<FilterOptionParsed[]> {
 
@@ -432,6 +445,7 @@ function toTreeNode(treeEntity: TreeEntity): TreeNode {
     return {
         lite: toLite(treeEntity),
         childrenCount: 0,
+        disabled: false,
         level: 0,
         loadedChildren: [],
         nodeState: "Leaf"
@@ -471,11 +485,10 @@ class TreeNodeControl extends React.Component<TreeNodeControlProps, void> {
             <li>
                 {this.renderIcon(node.nodeState)}
 
-                <span className={classes("tree-label", node == this.props.selectedNode && "tree-selected")}
+                <span className={classes("tree-label", node == this.props.selectedNode && "tree-selected", node.disabled && "tree-disabled")}
                     onDoubleClick={e => this.props.onNodeTextDoubleClick(node, e)}
                     onClick={e => this.props.onNodeTextClick(node, e)}
-                    onContextMenu={e => this.props.onNodeTextContextMenu(node, e)}
-                >
+                    onContextMenu={e => this.props.onNodeTextContextMenu(node, e)}>
                     {node.lite.toStr}
                 </span>
 

@@ -103,6 +103,7 @@ export type TreeNodeState = "Collapsed" | "Expanded" | "Filtered" | "Leaf";
 export interface TreeNode {
 
     lite: Lite<TreeEntity>;
+    disabled: boolean;
     childrenCount: number;
     level: number;
     loadedChildren: Array<TreeNode>;

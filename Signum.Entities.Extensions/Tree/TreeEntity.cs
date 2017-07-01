@@ -110,4 +110,24 @@ namespace Signum.Entities.Tree
         Remove,
         None,
     }
+
+    [Serializable]
+    public class MoveTreeModel : ModelEntity
+    {
+        [ImplementedByAll]
+        public Lite<TreeEntity> NewParent { get; set; }
+        public InsertPlace InsertPlace { get; set; }
+
+        [ImplementedByAll]
+        public Lite<TreeEntity> Sibling { get; set; }
+    }
+
+    public enum InsertPlace
+    {
+        First,
+        After,
+        Before,
+        Last,
+    }
+
 }
