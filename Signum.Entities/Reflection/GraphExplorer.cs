@@ -136,9 +136,9 @@ namespace Signum.Entities.Reflection
                 p.ToString(m => "  {0}{1}".FormatWith(m.Modified, m), "\r\n")), "\r\n\r\n"));
         }
 
-        public static bool IsGraphModified(ModifiableEntity entity)
+        public static bool IsGraphModified(Modifiable modifiable)
         {
-            var graph = FromRoot(entity);
+            var graph = FromRoot(modifiable);
             return graph.Any(a => a.IsGraphModified);
         }
 
