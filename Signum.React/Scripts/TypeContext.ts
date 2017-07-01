@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
-import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, LambdaMemberType, Type, PseudoType, getTypeName, Binding, getFieldMembers } from './Reflection'
-import { ModelState, MList, ModifiableEntity, EntityPack, Entity } from './Signum.Entities'
+import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, LambdaMemberType, Type, PseudoType, getTypeName, Binding, getFieldMembers, LambdaMember, IType, isType } from './Reflection'
+import { ModelState, MList, ModifiableEntity, EntityPack, Entity, MixinEntity } from './Signum.Entities'
 import { EntityOperationContext } from './Operations'
 
 export type FormGroupStyle =
@@ -188,15 +188,17 @@ export class TypeContext<T> extends StyleContext {
   
     subCtx(styleOptions: StyleOptions): TypeContext<T>     
     subCtx<R>(property: (val: T) => R, styleOptions?: StyleOptions): TypeContext<R>
+    subCtx<M extends MixinEntity>(mixin: Type<M>, styleOptions?: StyleOptions): TypeContext<M> //Only id T extends Entity!
     subCtx(field: string, styleOptions?: StyleOptions): TypeContext<any>
-    subCtx(propertyFieldOrStyleOptions: ((val: T) => any) | StyleOptions | string, styleOptions?: StyleOptions): TypeContext<any>
+    subCtx(arg: ((val: T) => any) | IType | string | StyleOptions , styleOptions?: StyleOptions): TypeContext<any>
     {
-        if (typeof propertyFieldOrStyleOptions == "object")
-            return new TypeContext<T>(this, propertyFieldOrStyleOptions, this.propertyRoute, this.binding);
+        if (typeof arg == "object" && !isType(arg))
+            return new TypeContext<T>(this, arg, this.propertyRoute, this.binding);
         
-        const lambdaMembers = typeof propertyFieldOrStyleOptions == "function" ?
-            getLambdaMembers(propertyFieldOrStyleOptions) :
-            getFieldMembers(propertyFieldOrStyleOptions);
+        const lambdaMembers =
+            typeof arg == "function" ? getLambdaMembers(arg) :
+                isType(arg) ? [{ type: "Mixin", name: arg.typeName } as LambdaMember] :
+                    getFieldMembers(arg);
 
         const subRoute = lambdaMembers.reduce<PropertyRoute>((pr, m) => pr.addLambdaMember(m), this.propertyRoute);
         

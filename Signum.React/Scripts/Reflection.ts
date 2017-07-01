@@ -610,8 +610,6 @@ const lambdaRegex = /^\s*\(?\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)?\s*=>\s*{?\s*(ret
 const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
 const memberIndexerRegex = /^(.*)\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; //Necessary for some crazy minimizers
 const indexRegex = /^(.*)\[(\d+)\]$/;
-const mixinRegex = /^(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)$/;
-const mixinIndexerRegex = /^(.*).mixins\["([$a-zA-Z_][0-9a-zA-Z_$]*)"\]$/; 
 
 export function getLambdaMembers(lambda: Function): LambdaMember[]{
 
@@ -628,11 +626,7 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
 
     while (body != parameter) {
         let m: RegExpExecArray | null;
-        if (m = mixinIndexerRegex.exec(body)) {
-            result.push({ name: m[2], type: "Mixin" });
-            body = m[1];
-        }
-        else if (m = memberRegex.exec(body) || memberIndexerRegex.exec(body)) {
+        if (m = memberRegex.exec(body) || memberIndexerRegex.exec(body)) {
             result.push({ name: m[2], type: "Member" });
             body = m[1];
         }
@@ -640,12 +634,9 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
             result.push({ name: m[2], type: "Indexer" });
             body = m[1];
         }
-        else if (m = mixinRegex.exec(body)) {
-            result.push({ name: m[4], type: "Mixin" });
-            body = m[2];
-        }
         else {
-            throw new Error(`Unexpected body in Property Route ${body}`);
+            throw new Error(`Impossible to extract the properties from: ${body}` +
+                (body.contains("Mixin") ? "\r\n Consider using subCtx(MyMixin) directly." : null));
         }
     }
 
@@ -717,6 +708,10 @@ export function New(type: PseudoType, props?: any): ModifiableEntity {
 
 export interface IType {
     typeName: string;
+}
+
+export function isType(obj: any): obj is IType {
+    return (obj as IType).typeName != undefined;
 }
 
 export class Type<T extends ModifiableEntity> implements IType {
