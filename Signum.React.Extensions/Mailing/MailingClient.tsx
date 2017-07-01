@@ -168,7 +168,7 @@ export function handleMenuClick(et: Lite<EmailTemplateEntity>, ctx: ContextualIt
 
 export function createAndViewEmail(template: Lite<EmailTemplateEntity>, ...args: any[]) {
 
-    Operations.API.executeLite(template, EmailMessageOperation.CreateEmailFromTemplate.key, ...args)
+    Operations.API.constructFromLite(template, EmailMessageOperation.CreateEmailFromTemplate, ...args)
         .then(pack => pack && Navigator.navigate(pack))
         .done();
 }
@@ -194,11 +194,11 @@ export module API {
     }
     
     export function getConstructorType(systemEmailTemplate: SystemEmailEntity): Promise<string> {
-        return ajaxPost<string>({ url: "~/api/mail/constructorType" }, systemEmailTemplate);
+        return ajaxPost<string>({ url: "~/api/email/constructorType" }, systemEmailTemplate);
     }
 
     export function getEmailTemplates(queryKey: string, visibleOn: EmailTemplateVisibleOn): Promise<Lite<EmailTemplateEntity>[]> {
-        return ajaxGet<Lite<EmailTemplateEntity>[]>({ url: `~/api/mail/emailTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` });
+        return ajaxGet<Lite<EmailTemplateEntity>[]>({ url: `~/api/email/emailTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` });
     }
 }
 

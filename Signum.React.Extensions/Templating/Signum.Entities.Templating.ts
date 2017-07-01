@@ -15,6 +15,11 @@ export interface QueryModel {
     orders: OrderRequest[];
     pagination: Pagination;
 }
+export const ModelConverterSymbol = new Type<ModelConverterSymbol>("ModelConverter");
+export interface ModelConverterSymbol extends Entities.Symbol {
+    Type: "ModelConverter";
+}
+
 export const MultiEntityModel = new Type<MultiEntityModel>("MultiEntityModel");
 export interface MultiEntityModel extends Entities.ModelEntity {
     Type: "MultiEntityModel";
