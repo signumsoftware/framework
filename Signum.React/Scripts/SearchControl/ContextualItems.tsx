@@ -17,7 +17,7 @@ export interface ContextualItemsContext<T extends Entity> {
     lites: Lite<T>[];
     queryDescription: QueryDescription;
     markRows: (dictionary: MarkedRowsDictionary) => void;
-    searchControl: SearchControlLoaded;
+    container?: SearchControlLoaded | React.Component<any, any>; 
 }
 
 export interface MarkedRowsDictionary {

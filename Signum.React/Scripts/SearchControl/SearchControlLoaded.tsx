@@ -472,7 +472,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 lites: this.getSelectedEntities(),
                 queryDescription: this.props.queryDescription,
                 markRows: this.markRows,
-                searchControl: this,
+                container: this,
             };
 
             renderContextualItems(options)
