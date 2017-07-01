@@ -92,7 +92,7 @@ export function getQuickLinkContextMenus(ctx: ContextualItemsContext<Entity>): P
 
         return {
             header: QuickLinkMessage.Quicklinks.niceToString(),
-            menuItems: links.map((ql, i) => ql.toMenuItem(i))
+            menuItems: links.map(ql => ql.toMenuItem())
         } as MenuItemBlock;
     });
 }
@@ -158,7 +158,7 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
             <Dropdown id="quickLinksWidget" pullRight>
                 <QuickLinkToggle bsRole="toggle" links={links} />
                 <Dropdown.Menu>
-                    {links && links.orderBy(a => a.order).map((a, i) => a.toMenuItem(i))}
+                    {links && links.orderBy(a => a.order).map((a, i) => React.cloneElement(a.toMenuItem(), { key: i }))}
                 </Dropdown.Menu>
             </Dropdown>
 
@@ -214,7 +214,7 @@ export abstract class QuickLink {
         Dic.assign(this, { isVisible: true, text: "", order: 0, ...options });
     }
 
-    abstract toMenuItem(key: any): React.ReactElement<any>;
+    abstract toMenuItem(): React.ReactElement<any>;
 
     renderIcon() {
         if (this.icon == undefined)
@@ -241,7 +241,7 @@ export class QuickLinkAction extends QuickLink {
         this.action = action;
     }
 
-    toMenuItem(key: any) {
+    toMenuItem() {
 
         return (
             <MenuItem data-name={this.name} className="sf-quick-link" onMouseUp={this.action}>
@@ -261,7 +261,7 @@ export class QuickLinkLink extends QuickLink {
         this.url = url;
     }
 
-    toMenuItem(key: any) {
+    toMenuItem() {
 
         return (
             <MenuItem data-name={this.name} className="sf-quick-link" onMouseUp={this.handleClick}>
@@ -289,7 +289,7 @@ export class QuickLinkExplore extends QuickLink {
         this.findOptions = findOptions;
     }
 
-    toMenuItem(key: any) {
+    toMenuItem() {
         return (
             <MenuItem data-name={this.name} className="sf-quick-link" onMouseUp={this.exploreOrPopup}>
                 {this.renderIcon()}
@@ -320,7 +320,7 @@ export class QuickLinkNavigate extends QuickLink {
         this.lite = lite;
     }
 
-    toMenuItem(key: any) {
+    toMenuItem() {
         return (
             <MenuItem data-name={this.name} className="sf-quick-link" onMouseUp={this.navigateOrPopup}>
                 {this.renderIcon()}
