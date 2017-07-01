@@ -71,6 +71,8 @@ export default class UserChart extends React.Component<{ ctx: TypeContext<UserCh
 
             oldOrders.forEach(o => this.props.ctx.value.orders.remove(o));
         }
+
+        this.forceUpdate();
     }
 
     renderFilter = (ctx: TypeContext<QueryFilterEmbedded>) => {
