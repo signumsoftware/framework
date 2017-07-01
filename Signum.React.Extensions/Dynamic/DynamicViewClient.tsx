@@ -328,8 +328,6 @@ export function asOverrideFunction(dvr: DynamicViewOverrideEntity): (vr: ViewRep
     var Collapse = ReactBootstrap.Collapse;
     var Dropdown = ReactBootstrap.Dropdown;
     var DropdownButton = ReactBootstrap.DropdownButton;
-    var DropdownMenu = ReactBootstrap.DropdownMenu;
-    var DropdownToggle = ReactBootstrap.DropdownToggle;
     var Image = ReactBootstrap.Image;
     var Label = ReactBootstrap.Label;
     var ListGroup = ReactBootstrap.ListGroup;
