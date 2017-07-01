@@ -84,6 +84,8 @@ namespace Signum.Engine.Mailing
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 CultureInfoLogic.AssertStarted(sb);
+                TemplatingLogic.Start(sb, dqm);
+
 
                 GetSmtpConfiguration = getSmtpConfiguration;
 
