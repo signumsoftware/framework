@@ -402,6 +402,8 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     renderToolbar() {
         const s = this.state;
         const selected = s.selectedNode;
+        const menuItems = this.renderMenuItems();
+
         return (
             <div className="btn-toolbar">
                 <a className={"sf-query-button sf-filters-header btn btn-default" + (s.showFilters ? " active" : "")}
@@ -409,13 +411,24 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
                     title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="glyphicon glyphicon glyphicon-filter"></span></a>
                 <button className="btn btn-primary" onClick={this.handleSearchSubmit}>{JavascriptMessage.search.niceToString()}</button>
                 <button className="btn btn-default" onClick={this.handleAddRoot} disabled={s.treeNodes == null}><i className="fa fa-star" aria-hidden="true"></i>&nbsp; {TreeViewerMessage.AddRoot.niceToString()}</button>
-                {React.cloneElement(<DropdownButton id="selectedButton"
+                <DropdownButton id="selectedButton"
                     className="sf-query-button sf-tm-selected"
                     title={`${JavascriptMessage.Selected.niceToString()} (${selected && selected.lite.toStr || TreeViewerMessage.AddRoot.niceToString()})`}
-                    disabled={selected == undefined} />, undefined, ...this.renderMenuItems())}
+                    onToggle={this.handleSelectedToggle}
+                    disabled={selected == undefined}>
+                    {menuItems == undefined ? <MenuItem className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</MenuItem> :
+                        menuItems.length == 0 ? <MenuItem className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</MenuItem> :
+                            menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
+                </DropdownButton>
                 <button className="btn btn-default" onClick={this.handleExplore} ><i className="glyphicon glyphicon-search"></i> &nbsp; {SearchMessage.Explore.niceToString()}</button>
             </div>
         );
+    }
+
+    handleSelectedToggle = (isOpen: boolean) => {
+
+        if (isOpen && this.state.currentMenuItems == undefined)
+            this.loadMenuItems();
     }
 
     handleExplore = (e: React.MouseEvent<any>) => {

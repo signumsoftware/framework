@@ -59,15 +59,30 @@ export function hideSiblings(ti: TypeInfo) {
         type.memberInfo(a => a.parentOrSibling).notVisible = true;
 }
 
-export function overrideOnFind(ti: TypeInfo) {
-    var s = Finder.getSettings(ti.name);
-    if (!s) {
-        s = { queryName: ti.name };
-        Finder.addSettings(s);
+function getQuerySetting(typeName: string)
+{
+    var qs = Finder.getSettings(typeName);
+    if (!qs) {
+        qs = { queryName: typeName };
+        Finder.addSettings(qs);
     }
+    return qs;
+}
 
-    if (!s.onFind)
-      s.onFind = (fo, mo) => openTree(ti.name, fo.filterOptions, { title: mo && mo.title });
+export function overrideOnFind(ti: TypeInfo) {
+    var qs = getQuerySetting(ti.name);
+
+    if (!qs.onFind)
+      qs.onFind = (fo, mo) => openTree(ti.name, fo.filterOptions, { title: mo && mo.title });
+}
+
+export function overrideDefaultOrder(ti: TypeInfo) {
+    var qs = getQuerySetting(ti.name);
+
+    if (!qs.defaultOrderColumn) {
+        qs.defaultOrderColumn = "FullName";
+        qs.defaultOrderType = "Ascending";
+    }
 }
 
 export function isTree(t: TypeInfo) {
