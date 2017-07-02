@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar, Button } from 'react-bootstrap'
+import { Modal, ModalProps, ModalClass, ButtonToolbar, Button, Sizes } from 'react-bootstrap'
 import { openModal, IModalProps } from '../Modals'
 import MessageModal from '../Modals/MessageModal'
 import * as Navigator from '../Navigator'
@@ -31,6 +31,7 @@ interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
     getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
     isNavigate?: boolean;
     readOnly?: boolean;
+    modalSize?: Sizes;
 }
 
 interface FrameModalState {
@@ -196,7 +197,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         const pack = this.state.pack;
 
         return (
-            <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-popup-control">
+            <Modal bsSize={this.props.modalSize || "lg"} onHide= { this.handleCancelClicked } show= { this.state.show } onExited= { this.handleOnExited } className= "sf-popup-control" >
                 <Modal.Header closeButton={this.props.isNavigate}>
                     {!this.props.isNavigate && <ButtonToolbar className="pull-right flip">
                         <Button className="sf-entity-button sf-close-button sf-ok-button" bsStyle="primary" disabled={!pack} onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString()}</Button>
@@ -302,6 +303,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         return openModal<Entity>(<FrameModal
             entityOrPack={entityOrPack}
             readOnly={options.readOnly}
+            modalSize={options.modalSize}
             propertyRoute={options.propertyRoute}
             viewPromise={options.viewPromise}
             getViewPromise={options.getViewPromise}
@@ -326,6 +328,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         return openModal<void>(<FrameModal
             entityOrPack={entityOrPack}
             readOnly={options.readOnly}
+            modalSize={options.modalSize}
             propertyRoute={undefined}
             viewPromise={options.viewPromise}
             getViewPromise={options.getViewPromise}
