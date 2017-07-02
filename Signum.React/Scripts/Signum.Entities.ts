@@ -16,7 +16,7 @@ export interface ModifiableEntity {
 export interface Entity extends ModifiableEntity {
     id: number | string;
     ticks: string; //max value
-    mixins: { [name: string]: MixinEntity }
+    mixins?: { [name: string]: MixinEntity }
 }
 
 export interface EnumEntity<T> extends Entity {
@@ -26,7 +26,15 @@ export interface EnumEntity<T> extends Entity {
 export interface MixinEntity extends ModifiableEntity {
 }
 
-export function getMixin<M extends MixinEntity>(entity: Entity, type: Type<M>) {
+export function getMixin<M extends MixinEntity>(entity: Entity, type: Type<M>): M {
+
+    var mixin = tryGetMixin(entity, type);
+    if (!mixin)
+        throw new Error("Entity " + entity + " does not contain mixin " + type.typeName);
+    return mixin;
+}
+
+export function tryGetMixin<M extends MixinEntity>(entity: Entity, type: Type<M>) : M | undefined  {
     return entity.mixins && entity.mixins[type.typeName] as M;
 }
 

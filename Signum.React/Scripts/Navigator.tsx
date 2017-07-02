@@ -17,6 +17,7 @@ import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConf
 import { FindOptions } from './FindOptions'
 import { ImportRoute } from "./AsyncImport";
 import * as AppRelativeRoutes from "./AppRelativeRoutes";
+import { Sizes } from "react-bootstrap";
 
 
 Dic.skipClasses.push(React.Component);
@@ -478,11 +479,11 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
     return config;
 }
 
-
 export interface ViewOptions {
     title?: string;
     propertyRoute?: PropertyRoute;
     readOnly?: boolean;
+    modalSize?: Sizes;
     isOperationVisible?: (eoc: Operations.EntityOperationContext<Entity>) => boolean;
     validate?: boolean;
     requiresSaveOperation?: boolean;
@@ -515,6 +516,7 @@ export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | Enti
 
 export interface NavigateOptions {
     readOnly?: boolean;
+    modalSize?: Sizes;
     avoidPromptLooseChange?: boolean;
     viewPromise?: ViewPromise<ModifiableEntity>;
     getViewPromise?: (entity: ModifiableEntity) => ViewPromise<ModifiableEntity>;

@@ -248,7 +248,8 @@ export function defaultContextualClick(coc: ContextualOperationContext<Entity>,.
                     API.constructFromLite(coc.context.lites[0], coc.operationInfo.key, ...args)
                         .then(pack => {
                             coc.context.markRows({});
-                            Navigator.createNavigateOrTab(pack, coc.event!);
+                            if (!coc.avoidViewNewEntity)
+                                Navigator.createNavigateOrTab(pack, coc.event!);
                         })
                         .done();
                 } else {

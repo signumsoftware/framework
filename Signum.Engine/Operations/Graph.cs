@@ -481,10 +481,7 @@ namespace Signum.Engine.Operations
 
             public Execute(ExecuteSymbol<T> symbol)
             {
-                if (symbol == null)
-                    throw AutoInitAttribute.ArgumentNullException(typeof(ExecuteSymbol<T>), nameof(symbol));
-
-                this.Symbol = symbol;
+                this.Symbol = symbol ?? throw AutoInitAttribute.ArgumentNullException(typeof(ExecuteSymbol<T>), nameof(symbol));
                 this.Lite = true;
             }
 
@@ -623,10 +620,7 @@ namespace Signum.Engine.Operations
 
             public Delete(DeleteSymbol<T> symbol)
             {
-                if (symbol == null)
-                    throw AutoInitAttribute.ArgumentNullException(typeof(DeleteSymbol<T>), nameof(symbol));
-
-                this.Symbol = symbol;
+                this.Symbol = symbol ?? throw AutoInitAttribute.ArgumentNullException(typeof(DeleteSymbol<T>), nameof(symbol));
                 this.Lite = true;
             }
 
