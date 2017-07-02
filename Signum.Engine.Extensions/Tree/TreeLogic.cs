@@ -4,6 +4,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
+using Signum.Entities.Basics;
 using Signum.Entities.Tree;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
@@ -133,30 +134,30 @@ namespace Signum.Engine.Tree
         }
 
 
-        internal static int RemoveDescendants<T>(T f)
+        internal static int RemoveDescendants<T>(T t)
             where T : TreeEntity
         {
-            return f.Descendants().UnsafeDelete();
+            return t.Descendants().UnsafeDelete();
         }
 
 
-        public static void FixName<T>(T f)
+        public static void FixName<T>(T t)
             where T : TreeEntity
         {
-            if (f.IsNew)
+            if (t.IsNew)
             {
-                f.SetFullName(f.Name);
-                f.Save();
-                CalculateFullName(f);
+                t.SetFullName(t.Name);
+                t.Save();
+                CalculateFullName(t);
             }
             else
             {
-                f.Save();
-                CalculateFullName(f);
+                t.Save();
+                CalculateFullName(t);
 
-                if (f.IsGraphModified)
+                if (t.IsGraphModified)
                 {
-                    var list = f.Descendants().Where(c => c != f).ToList();
+                    var list = t.Descendants().Where(c => c != t).ToList();
                     foreach (T h in list)
                     {
                         CalculateFullName(h);
@@ -166,40 +167,48 @@ namespace Signum.Engine.Tree
             }
         }
 
-        internal static void FixRouteAndNames<T>(T f, MoveTreeModel model)
+        internal static void FixRouteAndNames<T>(T t, MoveTreeModel model)
             where T : TreeEntity
         {
-            var list = f.Descendants().Where(c => c != f).ToList();
+            var list = t.Descendants().Where(c => c != t).ToList();
 
-            var oldNode = f.Route;
+            var oldNode = t.Route;
          
-            f.Route = GetNewPosition<T>(model);
+            t.Route = GetNewPosition<T>(model, t);
 
-            f.Save();
-            CalculateFullName(f);
-            f.Save();
+            t.Save();
+            CalculateFullName(t);
+            t.Save();
 
             foreach (T h in list)
             {
-                h.Route = h.Route.GetReparentedValue(oldNode, f.Route);
+                h.Route = h.Route.GetReparentedValue(oldNode, t.Route);
                 h.Save();
                 CalculateFullName(h);
                 h.Save();
             }
         }
 
-        private static SqlHierarchyId GetNewPosition<T>(MoveTreeModel model)
+        private static SqlHierarchyId GetNewPosition<T>(MoveTreeModel model, TreeEntity entity)
             where T : TreeEntity
         {
-            var newParentRoute = model.NewParent == null ? SqlHierarchyId.GetRoot() : model.NewParent.InDB().Select(a => a.Route).SingleEx();
+            var newParentRoute = model.NewParent == null ? SqlHierarchyId.GetRoot() : model.NewParent.InDB(a => a.Route);
+            
+            if (newParentRoute.IsDescendantOf(entity.Route))
+                throw new Exception(TreeMessage.ImpossibleToMove0InsideOf1.NiceToString(entity, model.NewParent));
 
-            if (model.InsertPlace == InsertPlace.First)
+            if (model.InsertPlace == InsertPlace.FirstNode)
                 return newParentRoute.GetDescendant(SqlHierarchyId.Null, FirstChild<T>(newParentRoute));
 
-            if(model.InsertPlace == InsertPlace.Last)
+            if(model.InsertPlace == InsertPlace.LastNode)
                 return newParentRoute.GetDescendant(LastChild<T>(newParentRoute), SqlHierarchyId.Null);
 
-            var newSiblingRoute = model.Sibling.InDB().Select(a => a.Route).SingleEx();
+            var newSiblingRoute = model.Sibling.InDB(a => a.Route);
+
+            if (!newSiblingRoute.IsDescendantOf(newParentRoute) || 
+                newSiblingRoute.GetLevel() != newParentRoute.GetLevel() + 1 || 
+                newSiblingRoute == entity.Route)
+                throw new Exception(TreeMessage.ImpossibleToMove01Of2.NiceToString(entity, model.InsertPlace.NiceToString(), model.NewParent));
 
             if (model.InsertPlace == InsertPlace.After)
                 return newParentRoute.GetDescendant(newSiblingRoute, Next<T>(newSiblingRoute));
@@ -210,10 +219,10 @@ namespace Signum.Engine.Tree
             throw new InvalidOperationException("Unexpected InsertPlace " + model.InsertPlace);
         }
 
-        public static FluentInclude<T> WithTree<T>(this FluentInclude<T> include, DynamicQueryManager dqm) where T : TreeEntity, new()
+        public static FluentInclude<T> WithTree<T>(this FluentInclude<T> include, DynamicQueryManager dqm, Func<T, MoveTreeModel, T> copy = null) where T : TreeEntity, new()
         {
             RegisterExpressions<T>(dqm);
-            RegisterOperations<T>();
+            RegisterOperations<T>(copy);
             include.WithUniqueIndex(n => new { n.ParentRoute, n.Name });
             return include;
         }
@@ -228,7 +237,7 @@ namespace Signum.Engine.Tree
             dqm.RegisterExpression((T c) => c.Level(), () => TreeMessage.Level.NiceToString());
         }
 
-        public static void RegisterOperations<T>() where T : TreeEntity, new()
+        public static void RegisterOperations<T>(Func<T, MoveTreeModel, T> copy) where T : TreeEntity, new()
         {
             Graph<T>.Construct.Untyped(TreeOperation.CreateRoot).Do(c =>
             {
@@ -273,7 +282,9 @@ namespace Signum.Engine.Tree
                 {
                     if (t.IsNew)
                     {
-                        t.Route = CalculateRoute(t);                       
+                        t.Route = CalculateRoute(t);
+                        if (MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin)))
+                            t.Mixin<DisabledMixin>().IsDisabled = t.Parent().Mixin<DisabledMixin>().IsDisabled;
                     }
 
                     TreeLogic.FixName(t);
@@ -282,13 +293,60 @@ namespace Signum.Engine.Tree
 
             new Graph<T>.Execute(TreeOperation.Move)
             {
-                Execute = (f, args) =>
+                Execute = (t, args) =>
                 {
                     var model = args.GetArg<MoveTreeModel>();
 
-                    TreeLogic.FixRouteAndNames(f, model);
+                    TreeLogic.FixRouteAndNames(t, model);
+                    t.Save();
+
+                    if (MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin)) && model.NewParent != null && model.NewParent.InDB(e => e.Mixin<DisabledMixin>().IsDisabled) && !t.Mixin<DisabledMixin>().IsDisabled)
+                    {
+                        t.Execute(DisableOperation.Disable);
+                    }
+
                 }
             }.Register();
+
+            if(copy != null)
+            {
+                Graph<T>.ConstructFrom<T>.Untyped(TreeOperation.Copy).Do(c =>
+                {
+                    c.Construct = (t, args) =>
+                     {
+                         var model = args.GetArg<MoveTreeModel>();
+                         var newRoute = GetNewPosition<T>(model, t);
+
+                         var descendants = t.Descendants().OrderBy(a => a.Route).ToList();
+
+                         var hasDisabledMixin = MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin));
+                         var isParentDisabled = hasDisabledMixin  && model.NewParent != null && model.NewParent.InDB(e => e.Mixin<DisabledMixin>().IsDisabled);
+
+                         var list = descendants.Select(oldNode =>
+                         {
+                             var newNode = copy(oldNode, model);
+                             newNode.Name = oldNode.Name;
+                             if (hasDisabledMixin)
+                                 newNode.Mixin<DisabledMixin>().IsDisabled = oldNode.Mixin<DisabledMixin>().IsDisabled || isParentDisabled;
+
+                             newNode.Route = oldNode.Route.GetReparentedValue(t.Route, newRoute);
+                             newNode.SetFullName(newNode.Name);
+                             return newNode;
+                         }).ToList();
+
+                         list.SaveList();
+
+                         foreach (T h in list)
+                         {
+                             CalculateFullName(h);
+                             h.Save();
+                         }
+
+                         return list.First();
+
+                     };
+                }).Register();
+            }
 
             new Graph<T>.Delete(TreeOperation.Delete)
             {

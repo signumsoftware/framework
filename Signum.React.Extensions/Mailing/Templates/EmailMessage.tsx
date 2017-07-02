@@ -13,6 +13,7 @@ import { EmailTemplateEntity, EmailTemplateContactEmbedded, EmailTemplateRecipie
 import FileLine from '../../Files/FileLine'
 import IFrameRenderer from './IFrameRenderer'
 import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
+import { tryGetMixin } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
 
 
 export default class EmailMessage extends React.Component<{ ctx: TypeContext<EmailMessageEntity> }, void> {
@@ -64,13 +65,17 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
                     }
                     <EmailMessageComponent ctx={e} invalidate={() => this.forceUpdate()} />
                 </Tab>
-                {getMixin(e.value, EmailReceptionMixin) && getMixin(e.value, EmailReceptionMixin).receptionInfo && this.renderEmailReceptionMixin()}
+                {this.renderEmailReceptionMixin()}
             </Tabs>
         );
     }
 
 
     renderEmailReceptionMixin(){
+        
+        var erm = tryGetMixin(this.props.ctx.value, EmailReceptionMixin);
+        if (!erm || !erm.receptionInfo)
+            return null;
 
         const ri = this.props.ctx.subCtx(EmailReceptionMixin).subCtx(a => a.receptionInfo!);
 
