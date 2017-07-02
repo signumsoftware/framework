@@ -4,6 +4,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
+using Signum.Entities.Basics;
 using Signum.Entities.Tree;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
@@ -281,7 +282,9 @@ namespace Signum.Engine.Tree
                 {
                     if (t.IsNew)
                     {
-                        t.Route = CalculateRoute(t);                       
+                        t.Route = CalculateRoute(t);
+                        if (MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin)))
+                            t.Mixin<DisabledMixin>().IsDisabled = t.Parent().Mixin<DisabledMixin>().IsDisabled;
                     }
 
                     TreeLogic.FixName(t);
@@ -290,11 +293,18 @@ namespace Signum.Engine.Tree
 
             new Graph<T>.Execute(TreeOperation.Move)
             {
-                Execute = (f, args) =>
+                Execute = (t, args) =>
                 {
                     var model = args.GetArg<MoveTreeModel>();
 
-                    TreeLogic.FixRouteAndNames(f, model);
+                    TreeLogic.FixRouteAndNames(t, model);
+                    t.Save();
+
+                    if (MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin)) && model.NewParent != null && model.NewParent.InDB(e => e.Mixin<DisabledMixin>().IsDisabled) && !t.Mixin<DisabledMixin>().IsDisabled)
+                    {
+                        t.Execute(DisableOperation.Disable);
+                    }
+
                 }
             }.Register();
 

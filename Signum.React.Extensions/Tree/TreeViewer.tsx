@@ -19,6 +19,9 @@ import MessageModal from "../../../Framework/Signum.React/Scripts/Modals/Message
 import { ContextualItemsContext, renderContextualItems } from "../../../Framework/Signum.React/Scripts/SearchControl/ContextualItems";
 import { Entity } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
 import { Lite } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
+import { DisabledMixin } from "../Basics/Signum.Entities.Basics";
+import { getMixin } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
+import { tryGetMixin } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
 
 require("./TreeViewer.css");
 
@@ -535,10 +538,12 @@ function allNodes(node: TreeNode): TreeNode[] {
 }
 
 function toTreeNode(treeEntity: TreeEntity): TreeNode {
+
+    var dm = tryGetMixin(treeEntity, DisabledMixin);
     return {
         lite: toLite(treeEntity),
         childrenCount: 0,
-        disabled: false,
+        disabled: dm != null && Boolean(dm.isDisabled),
         level: 0,
         loadedChildren: [],
         nodeState: "Leaf"
