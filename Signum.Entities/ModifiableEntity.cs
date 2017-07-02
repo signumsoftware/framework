@@ -305,7 +305,7 @@ namespace Signum.Entities
                         if (dic == null)
                             dic = new Dictionary<string, string>();
 
-                        dic.Add(pv.PropertyInfo.Name, error);
+                        dic.Add(pv.PropertyInfo.DeclaringType + "." + pv.PropertyInfo.Name, error);
                     }
                 }
                 if (dic == null)
