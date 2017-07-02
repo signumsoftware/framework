@@ -190,7 +190,8 @@ export function defaultConstructFromEntity(eoc: EntityOperationContext<Entity>, 
         API.constructFromEntity(eoc.entity, eoc.operationInfo.key, ...args)
             .then(pack => {
                 notifySuccess();
-                Navigator.createNavigateOrTab(pack, eoc.event!);
+                if (!eoc.avoidViewNewEntity)
+                    Navigator.createNavigateOrTab(pack, eoc.event!);
             })
             .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
             .done();
@@ -206,7 +207,8 @@ export function defaultConstructFromLite(eoc: EntityOperationContext<Entity>, ..
         API.constructFromLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
             .then(pack => {
                 notifySuccess();
-                Navigator.createNavigateOrTab(pack, eoc.event!);
+                if (!eoc.avoidViewNewEntity)
+                    Navigator.createNavigateOrTab(pack, eoc.event!);
             })
             .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
             .done();
