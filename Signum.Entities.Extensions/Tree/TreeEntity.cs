@@ -9,6 +9,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
 
 namespace Signum.Entities.Tree
 {
@@ -26,6 +27,15 @@ namespace Signum.Entities.Tree
                 if (this.Set(ref route, value))
                     this.ParentRoute = value.GetAncestor(1).ToString();
             }
+        }
+
+
+        static Expression<Func<TreeEntity, string>> RouteToStringExpression =
+        @this => @this.Route.ToString();
+        [ExpressionField]
+        public string RouteToString
+        {
+            get { return RouteToStringExpression.Evaluate(this); }
         }
 
         [NotNullable, SqlDbType(Size = 255, SqlDbType = SqlDbType.VarChar)]
@@ -97,7 +107,11 @@ namespace Signum.Entities.Tree
         Level,
         TreeType,
         [Description("Level should not be greater than {0}")]
-        LevelShouldNotBeGreaterThan0
+        LevelShouldNotBeGreaterThan0,
+        [Description("Impossible to move {0} inside of {1}")]
+        ImpossibleToMove0InsideOf1,
+        [Description("Impossible to move {0} {1} of {2}")]
+        ImpossibleToMove01Of2
     }
 
 
@@ -120,14 +134,25 @@ namespace Signum.Entities.Tree
 
         [ImplementedByAll]
         public Lite<TreeEntity> Sibling { get; set; }
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if(pi.Name == nameof(Sibling) && Sibling == null && 
+                (InsertPlace == InsertPlace.After || InsertPlace == InsertPlace.Before))
+            {
+                return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+            }
+
+            return base.PropertyValidation(pi);
+        }
     }
 
     public enum InsertPlace
     {
-        First,
+        FirstNode,
         After,
         Before,
-        Last,
+        LastNode,
     }
 
 }

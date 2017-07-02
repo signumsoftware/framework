@@ -14,7 +14,7 @@ import { UserEntity } from '../../../Extensions/Signum.React.Extensions/Authoriz
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import { SearchMessage, JavascriptMessage, ExecuteSymbol, ConstructSymbol_From, ConstructSymbol_Simple, DeleteSymbol } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { TreeEntity, TreeOperation } from './Signum.Entities.Tree'
+import { TreeEntity, TreeOperation, MoveTreeModel } from './Signum.Entities.Tree'
 import TreeModal from './TreeModal'
 import { FilterRequest, FilterOption, FilterOptionParsed } from "../../../Framework/Signum.React/Scripts/FindOptions";
 import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
@@ -22,14 +22,21 @@ import { getAllTypes, getTypeInfo } from "../../../Framework/Signum.React/Script
 import { TypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection";
 import * as AuthClient from '../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
 import TreeButton from './TreeButton'
+import { toLite } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
+import { SearchControlLoaded } from "../../../Framework/Signum.React/Scripts/Search";
 
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<ImportRoute path="~/tree/:typeName" onImportModule={() => import("./TreePage")} />);
 
+    Navigator.addSettings(new EntitySettings(MoveTreeModel, e => import('./Templates/MoveTreeModel')));
+    
     Operations.addSettings(
-        new EntityOperationSettings(TreeOperation.CreateChild, { isVisible: _ => false }),
-        new EntityOperationSettings(TreeOperation.CreateNextSibling, { isVisible: _ => false }),
-        new EntityOperationSettings(TreeOperation.Move, { isVisible: _ => false })
+        new EntityOperationSettings(TreeOperation.CreateChild, { contextual: { isVisible: ctx => ctx.context.container instanceof SearchControlLoaded } }),
+        new EntityOperationSettings(TreeOperation.CreateNextSibling, { contextual: { isVisible: ctx => ctx.context.container instanceof SearchControlLoaded } }),
+        new EntityOperationSettings(TreeOperation.Move, {
+            onClick: ctx => moveModal(toLite(ctx.entity)).then(m => m && ctx.defaultClick(m)),
+            contextual: { onClick: ctx => moveModal(ctx.context.lites[0]).then(m => m && ctx.defaultContextualClick(m)) }
+        })
     );    
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
@@ -41,6 +48,11 @@ export function start(options: { routes: JSX.Element[] }) {
         return <TreeButton searchControl={ctx.searchControl} />;
     });
 }
+
+function moveModal(lite: Lite<TreeEntity>) {
+    return Navigator.view(MoveTreeModel.New(), { extraComponentProps: { typeName: lite.EntityType }, title: lite.toStr, modalSize: "medium" })
+}
+
 
 export function treePath(typeName:string, filterOptions?: FilterOption[]): string {
 
@@ -155,7 +167,12 @@ export namespace API {
         return ajaxGet<Array<TreeNode>>({ url: `~/api/tree/roots/${typeName}` }).then(ns => fixNodes(ns));
     }
 
-    export function findNodes(typeName: string, filters: FilterRequest[]): Promise<Array<TreeNode>> {
-        return ajaxPost<Array<TreeNode>>({ url: `~/api/tree/findNodes/${typeName}` }, filters).then(ns => fixNodes(ns));
+    export function findNodes(typeName: string, request: FindNodesRequest): Promise<Array<TreeNode>> {
+        return ajaxPost<Array<TreeNode>>({ url: `~/api/tree/findNodes/${typeName}` }, request).then(ns => fixNodes(ns));
+    }
+
+    export interface FindNodesRequest {
+        filters: Array<FilterRequest>;
+        expandedNodes: Array<Lite<TreeEntity>>;
     }
 }

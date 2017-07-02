@@ -247,6 +247,43 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
         }
     }
 
+    getOffset(pageY: number, rect: ClientRect, margin: number): DraggedPosition {
+
+        const height = Math.round(rect.height / 5) * 5;
+        const offsetY = pageY - rect.top;
+
+        if (offsetY < margin)
+            return "Top";
+
+        if (offsetY > (height - margin))
+            return "Bottom";
+
+        return "Middle";
+    }
+
+    getError(position: DraggedPosition): DraggedError {
+        const parent = position == "Middle" ? this.props.node : this.props.node.parent;
+
+        if (!parent || !parent.node)
+            return "Error";
+
+        const parentOptions = NodeUtils.registeredNodes[parent.node.kind];
+        if (!parentOptions.isContainer)
+            return "Error";
+
+        const dragged = this.props.dynamicTreeView.state.draggedNode!;
+        const draggedOptions = NodeUtils.registeredNodes[dragged.node.kind];
+        if (parentOptions.validChild && parentOptions.validChild != dragged.node.kind ||
+            draggedOptions.validParent && draggedOptions.validParent != parent.node.kind)
+            return "Error";
+
+        const draggedField = (dragged.node as LineBaseNode).field;
+        if (draggedField && (parent.route == undefined || parent.route.subMembers()[draggedField] === undefined))
+            return "Warning";
+
+        return "Ok";
+    }
+
     handleDragEnd = (e: React.DragEvent<any>) => {
         this.props.dynamicTreeView.setState({ draggedNode: undefined, draggedOver: undefined });
     }
@@ -272,44 +309,6 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
             parent.children.insertAt(index + (over.position == "Top" ? 0 : 1), dragged.node);
             this.props.node.context.setSelectedNode(over.dn.parent!.createChild(dragged.node));
         }
-    }
-
-
-    getOffset(pageY: number, rect: ClientRect, margin: number): DraggedPosition {
-        
-        const height = Math.round(rect.height / 5) * 5;
-        const offsetY = pageY - rect.top;
-
-        if (offsetY < margin)
-            return "Top";
-
-        if (offsetY > (height - margin))
-            return "Bottom";
-
-        return "Middle";
-    }
-
-    getError(position: DraggedPosition): DraggedError{
-        const parent = position == "Middle" ? this.props.node : this.props.node.parent;
-
-        if (!parent || !parent.node)
-            return "Error";
-
-        const parentOptions = NodeUtils.registeredNodes[parent.node.kind];    
-        if (!parentOptions.isContainer)
-            return "Error";
-
-        const dragged = this.props.dynamicTreeView.state.draggedNode!;
-        const draggedOptions = NodeUtils.registeredNodes[dragged.node.kind];
-        if (parentOptions.validChild && parentOptions.validChild != dragged.node.kind ||
-            draggedOptions.validParent && draggedOptions.validParent != parent.node.kind)
-            return "Error";
-
-        const draggedField = (dragged.node as LineBaseNode).field;
-        if (draggedField && (parent.route == undefined || parent.route.subMembers()[draggedField] === undefined))
-            return "Warning";
-
-        return "Ok";
     }
 
     render(): React.ReactElement<any> {

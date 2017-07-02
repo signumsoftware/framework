@@ -2,10 +2,12 @@
 import { getTypeInfo } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
+import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { TreeViewer } from './TreeViewer'
 import { RouteComponentProps } from "react-router";
 import { FilterOption } from "../../../Framework/Signum.React/Scripts/FindOptions";
 import * as QueryString from 'query-string'
+import { TreeOperation } from "./Signum.Entities.Tree";
 
 
 interface TreePageProps extends RouteComponentProps<{ typeName: string }> {
@@ -61,6 +63,7 @@ export default class TreePage extends React.Component<TreePageProps, TreePageSta
                 <TreeViewer ref={tv => { this.treeView = tv; }}
                     initialShowFilters={true}
                     typeName={ti.name}
+                    allowMove={Operations.isOperationAllowed(TreeOperation.Move)}
                     filterOptions={this.state.filterOptions}
                     key={ti.name}
                     onSearch={() => this.changeUrl()} />

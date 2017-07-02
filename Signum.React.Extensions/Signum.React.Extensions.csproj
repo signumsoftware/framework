@@ -288,6 +288,7 @@
     <TypeScriptCompile Include="Toolbar\Templates\ToolbarRenderer.tsx" />
     <TypeScriptCompile Include="Toolbar\Templates\ToolbarElement.tsx" />
     <TypeScriptCompile Include="Toolbar\Templates\ToolbarMenu.tsx" />
+    <TypeScriptCompile Include="Tree\Templates\MoveTreeModel.tsx" />
     <TypeScriptCompile Include="Tree\TreeButton.tsx" />
     <TypeScriptCompile Include="Tree\TreeClient.tsx" />
     <TypeScriptCompile Include="Tree\TreeModal.tsx" />

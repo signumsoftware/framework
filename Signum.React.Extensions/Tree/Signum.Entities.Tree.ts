@@ -8,10 +8,10 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 
 export const InsertPlace = new EnumType<InsertPlace>("InsertPlace");
 export type InsertPlace =
-    "First" |
+    "FirstNode" |
     "After" |
     "Before" |
-    "Last";
+    "LastNode";
 
 export const MoveTreeModel = new Type<MoveTreeModel>("MoveTreeModel");
 export interface MoveTreeModel extends Entities.ModelEntity {
@@ -39,6 +39,8 @@ export module TreeMessage {
     export const Level = new MessageKey("TreeMessage", "Level");
     export const TreeType = new MessageKey("TreeMessage", "TreeType");
     export const LevelShouldNotBeGreaterThan0 = new MessageKey("TreeMessage", "LevelShouldNotBeGreaterThan0");
+    export const ImpossibleToMove0InsideOf1 = new MessageKey("TreeMessage", "ImpossibleToMove0InsideOf1");
+    export const ImpossibleToMove01Of2 = new MessageKey("TreeMessage", "ImpossibleToMove01Of2");
 }
 
 export module TreeOperation {
