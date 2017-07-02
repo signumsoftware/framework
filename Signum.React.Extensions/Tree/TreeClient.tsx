@@ -1,12 +1,13 @@
 import * as React from 'react'
 import { Route } from 'react-router'
 import * as QueryString from 'query-string'
-import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
+import { ajaxPost, ajaxGet, ValidationError } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
+import { EntityOperationSettings, EntityOperationContext, ContextualOperationContext } from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
+import * as EntityOperations from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 
 import { Type } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { getMixin, Lite, isLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -14,7 +15,7 @@ import { UserEntity } from '../../../Extensions/Signum.React.Extensions/Authoriz
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import { SearchMessage, JavascriptMessage, ExecuteSymbol, ConstructSymbol_From, ConstructSymbol_Simple, DeleteSymbol } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { TreeEntity, TreeOperation, MoveTreeModel } from './Signum.Entities.Tree'
+import { TreeEntity, TreeOperation, MoveTreeModel, TreeMessage } from './Signum.Entities.Tree'
 import TreeModal from './TreeModal'
 import { FilterRequest, FilterOption, FilterOptionParsed } from "../../../Framework/Signum.React/Scripts/FindOptions";
 import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
@@ -24,6 +25,8 @@ import * as AuthClient from '../../../Extensions/Signum.React.Extensions/Authori
 import TreeButton from './TreeButton'
 import { toLite } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
 import { SearchControlLoaded } from "../../../Framework/Signum.React/Scripts/Search";
+import { MessageKey } from "../../../Framework/Signum.React/Scripts/Reflection";
+import { ifError } from "../../../Framework/Signum.React/Scripts/Globals";
 
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<ImportRoute path="~/tree/:typeName" onImportModule={() => import("./TreePage")} />);
@@ -36,6 +39,10 @@ export function start(options: { routes: JSX.Element[] }) {
         new EntityOperationSettings(TreeOperation.Move, {
             onClick: ctx => moveModal(toLite(ctx.entity)).then(m => m && ctx.defaultClick(m)),
             contextual: { onClick: ctx => moveModal(ctx.context.lites[0]).then(m => m && ctx.defaultContextualClick(m)) }
+        }),
+        new EntityOperationSettings(TreeOperation.Copy, {
+            onClick: ctx => copyModal(toLite(ctx.entity)).then(m => { ctx.avoidViewNewEntity = true; m && ctx.defaultClick(m); }),
+            contextual: { onClick: ctx => copyModal(ctx.context.lites[0]).then(m => { ctx.avoidViewNewEntity = true; m && ctx.defaultContextualClick(m); }) }
         })
     );    
 
@@ -49,8 +56,26 @@ export function start(options: { routes: JSX.Element[] }) {
     });
 }
 
+
+
 function moveModal(lite: Lite<TreeEntity>) {
-    return Navigator.view(MoveTreeModel.New(), { extraComponentProps: { typeName: lite.EntityType }, title: lite.toStr, modalSize: "medium" })
+    return Navigator.view(MoveTreeModel.New(), {
+        title: TreeMessage.Move0.niceToString(lite.toStr),
+        modalSize: "medium",
+        extraComponentProps: { typeName: lite.EntityType },
+    })
+}
+
+function copyModal(lite: Lite<TreeEntity>) {
+    const s = settings[lite.EntityType];
+    if (s && s.createCopyModel)
+        return s.createCopyModel(lite, {});
+    else
+        return Navigator.view(MoveTreeModel.New(), {
+            title: TreeMessage.Copy0.niceToString(lite.toStr),
+            modalSize: "medium",
+            extraComponentProps: { typeName: lite.EntityType },
+        });
 }
 
 
@@ -119,9 +144,16 @@ export interface TreeModalOptions {
 }
 
 
-export interface TreeConfiguration<T extends TreeEntity> {
-    hideSiblings: boolean,
-    replaceEntityLine: boolean
+export interface TreeSettings<T extends TreeEntity> {
+    createCopyModel?: (from: T | Lite<T>, dropConfig: Partial<MoveTreeModel>) => Promise<MoveTreeModel | undefined>;
+}
+
+export const settings: {
+    [typeName: string]: TreeSettings<any>;
+} = {};
+
+export function register<T extends TreeEntity>(type: Type<T>, setting: TreeSettings<T>) {
+    settings[type.typeName] = setting;
 }
 
 

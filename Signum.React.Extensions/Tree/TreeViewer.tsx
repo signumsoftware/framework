@@ -47,6 +47,7 @@ interface TreeViewerState {
     showFilters?: boolean;
 
     draggedNode?: TreeNode;
+    draggedKind?: "Move" | "Copy";
     draggedOver?: {
         node: TreeNode;
         position: DraggedPosition;
@@ -465,8 +466,10 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
     handleDragStart = (node: TreeNode, e: React.DragEvent<any>) => {
         e.dataTransfer.setData('text', "start"); //cannot be empty string
-        e.dataTransfer.effectAllowed = "move";
-        this.setState({ draggedNode: node });
+
+        var isCopy = e.ctrlKey || e.shiftKey || e.altKey;
+        e.dataTransfer.effectAllowed = isCopy ? "copy" : "move";
+        this.setState({ draggedNode: node, draggedKind: isCopy? "Copy":  "Move" });
     }
 
 
@@ -506,7 +509,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     }
 
     handleDragEnd = (node: TreeNode, e: React.DragEvent<any>) => {
-        this.setState({ draggedNode: undefined, draggedOver: undefined });
+        this.setState({ draggedNode: undefined, draggedOver: undefined, draggedKind: undefined });
     }
 
     handleDrop = (node: TreeNode, e: React.DragEvent<any>) => {
@@ -515,21 +518,35 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
         if (dragged == over.node)
             return;
-
+        
         var nodeParent = this.findParent(over.node);
 
-        var treeModel = over.position == "Middle" ? MoveTreeModel.New({ newParent: over.node.lite, insertPlace: "LastNode" }) :
-            over.position == "Top" ? MoveTreeModel.New({ newParent: nodeParent && nodeParent.lite, insertPlace: "Before", sibling: over.node.lite }) :
-                over.position == "Bottom" ? MoveTreeModel.New({ newParent: nodeParent && nodeParent.lite, insertPlace: "After", sibling: over.node.lite }) : 
-                    null;
+        var partial: Partial<MoveTreeModel> =
+            over.position == "Middle" ? { newParent: over.node.lite, insertPlace: "LastNode" } :
+                over.position == "Top" ? { newParent: nodeParent && nodeParent.lite, insertPlace: "Before", sibling: over.node.lite } :
+                    over.position == "Bottom" ? { newParent: nodeParent && nodeParent.lite, insertPlace: "After", sibling: over.node.lite } :
+                        {};
+        
 
-        if (treeModel) {
+        if (this.state.draggedKind == "Move") {
+            const treeModel = MoveTreeModel.New(partial);
             Operations.API.executeLite(dragged.lite, TreeOperation.Move, treeModel).then(() =>
-                this.setState({ draggedNode: undefined, draggedOver: undefined, selectedNode: dragged }, () =>
+                this.setState({ draggedNode: undefined, draggedOver: undefined, draggedKind: undefined, selectedNode: dragged }, () =>
                     this.search(treeModel!.newParent)
                 )
             ).done();
-        }
+
+        } else {
+            const s = TreeClient.settings[this.props.typeName];
+            var promise = s && s.createCopyModel ? s.createCopyModel(dragged, partial) : Promise.resolve(MoveTreeModel.New(partial));
+            promise.then(treeModel => treeModel &&
+                Operations.API.constructFromLite(dragged.lite, TreeOperation.Copy, treeModel).then(() =>
+                    this.setState({ draggedNode: undefined, draggedOver: undefined, draggedKind: undefined, selectedNode: dragged }, () =>
+                        this.search(treeModel!.newParent)
+                    )
+                ))
+                .done();
+        };
     }
 }
 

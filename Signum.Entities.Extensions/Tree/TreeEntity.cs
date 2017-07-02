@@ -92,6 +92,7 @@ namespace Signum.Entities.Tree
         public static readonly ConstructSymbol<TreeEntity>.From<TreeEntity> CreateNextSibling;
         public static readonly ExecuteSymbol<TreeEntity> Save;
         public static readonly ExecuteSymbol<TreeEntity> Move;
+        public static readonly ConstructSymbol<TreeEntity>.From<TreeEntity> Copy;
         public static readonly DeleteSymbol<TreeEntity> Delete;
     }
 
@@ -111,7 +112,11 @@ namespace Signum.Entities.Tree
         [Description("Impossible to move {0} inside of {1}")]
         ImpossibleToMove0InsideOf1,
         [Description("Impossible to move {0} {1} of {2}")]
-        ImpossibleToMove01Of2
+        ImpossibleToMove01Of2,
+        [Description("Move {0}")]
+        Move0,
+        [Description("Copy {0}")]
+        Copy0,
     }
 
 

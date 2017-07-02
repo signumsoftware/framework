@@ -219,10 +219,10 @@ namespace Signum.Engine.Tree
             throw new InvalidOperationException("Unexpected InsertPlace " + model.InsertPlace);
         }
 
-        public static FluentInclude<T> WithTree<T>(this FluentInclude<T> include, DynamicQueryManager dqm) where T : TreeEntity, new()
+        public static FluentInclude<T> WithTree<T>(this FluentInclude<T> include, DynamicQueryManager dqm, Func<T, MoveTreeModel, T> copy = null) where T : TreeEntity, new()
         {
             RegisterExpressions<T>(dqm);
-            RegisterOperations<T>();
+            RegisterOperations<T>(copy);
             include.WithUniqueIndex(n => new { n.ParentRoute, n.Name });
             return include;
         }
@@ -237,7 +237,7 @@ namespace Signum.Engine.Tree
             dqm.RegisterExpression((T c) => c.Level(), () => TreeMessage.Level.NiceToString());
         }
 
-        public static void RegisterOperations<T>() where T : TreeEntity, new()
+        public static void RegisterOperations<T>(Func<T, MoveTreeModel, T> copy) where T : TreeEntity, new()
         {
             Graph<T>.Construct.Untyped(TreeOperation.CreateRoot).Do(c =>
             {
@@ -307,6 +307,46 @@ namespace Signum.Engine.Tree
 
                 }
             }.Register();
+
+            if(copy != null)
+            {
+                Graph<T>.ConstructFrom<T>.Untyped(TreeOperation.Copy).Do(c =>
+                {
+                    c.Construct = (t, args) =>
+                     {
+                         var model = args.GetArg<MoveTreeModel>();
+                         var newRoute = GetNewPosition<T>(model, t);
+
+                         var descendants = t.Descendants().OrderBy(a => a.Route).ToList();
+
+                         var hasDisabledMixin = MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin));
+                         var isParentDisabled = hasDisabledMixin  && model.NewParent != null && model.NewParent.InDB(e => e.Mixin<DisabledMixin>().IsDisabled);
+
+                         var list = descendants.Select(oldNode =>
+                         {
+                             var newNode = copy(oldNode, model);
+                             newNode.Name = oldNode.Name;
+                             if (hasDisabledMixin)
+                                 newNode.Mixin<DisabledMixin>().IsDisabled = oldNode.Mixin<DisabledMixin>().IsDisabled || isParentDisabled;
+
+                             newNode.Route = oldNode.Route.GetReparentedValue(t.Route, newRoute);
+                             newNode.SetFullName(newNode.Name);
+                             return newNode;
+                         }).ToList();
+
+                         list.SaveList();
+
+                         foreach (T h in list)
+                         {
+                             CalculateFullName(h);
+                             h.Save();
+                         }
+
+                         return list.First();
+
+                     };
+                }).Register();
+            }
 
             new Graph<T>.Delete(TreeOperation.Delete)
             {

@@ -41,6 +41,8 @@ export module TreeMessage {
     export const LevelShouldNotBeGreaterThan0 = new MessageKey("TreeMessage", "LevelShouldNotBeGreaterThan0");
     export const ImpossibleToMove0InsideOf1 = new MessageKey("TreeMessage", "ImpossibleToMove0InsideOf1");
     export const ImpossibleToMove01Of2 = new MessageKey("TreeMessage", "ImpossibleToMove01Of2");
+    export const Move0 = new MessageKey("TreeMessage", "Move0");
+    export const Copy0 = new MessageKey("TreeMessage", "Copy0");
 }
 
 export module TreeOperation {
@@ -49,6 +51,7 @@ export module TreeOperation {
     export const CreateNextSibling : Entities.ConstructSymbol_From<TreeEntity, TreeEntity> = registerSymbol("Operation", "TreeOperation.CreateNextSibling");
     export const Save : Entities.ExecuteSymbol<TreeEntity> = registerSymbol("Operation", "TreeOperation.Save");
     export const Move : Entities.ExecuteSymbol<TreeEntity> = registerSymbol("Operation", "TreeOperation.Move");
+    export const Copy : Entities.ConstructSymbol_From<TreeEntity, TreeEntity> = registerSymbol("Operation", "TreeOperation.Copy");
     export const Delete : Entities.DeleteSymbol<TreeEntity> = registerSymbol("Operation", "TreeOperation.Delete");
 }
 

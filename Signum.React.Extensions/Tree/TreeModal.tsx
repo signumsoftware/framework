@@ -99,7 +99,8 @@ export default class TreeModal extends React.Component<TreeModalProps, { show: b
         return openModal<TreeNode>(<TreeModal
             filterOptions={filterOptions}
             typeName={typeName}
-            title={options && options.title} />)
+            title={options && options.title}
+        />)
             .then(tn => tn && tn.lite);
     }
 }

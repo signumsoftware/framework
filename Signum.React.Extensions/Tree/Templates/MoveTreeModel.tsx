@@ -7,6 +7,7 @@ import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search
 import { getToString, getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { MoveTreeModel } from '../Signum.Entities.Tree'
+import * as TreeClient from '../TreeClient'
 import { TypeReference } from "../../../../Framework/Signum.React/Scripts/Reflection";
 
 export default class MoveTreeModelComponent extends React.Component<{ ctx: TypeContext<MoveTreeModel>, typeName: string }, void> {
@@ -16,13 +17,16 @@ export default class MoveTreeModelComponent extends React.Component<{ ctx: TypeC
         const type = { name: this.props.typeName, isLite: true } as TypeReference; 
         return (
             <div>
-                <EntityLine ctx={ctx.subCtx(a => a.newParent)} type={type} onChange={() => this.forceUpdate()} />
+                <EntityLine ctx={ctx.subCtx(a => a.newParent)} type={type} onChange={() => this.forceUpdate()} onFind={() => TreeClient.openTree(this.props.typeName)} />
                 <ValueLine ctx={ctx.subCtx(a => a.insertPlace)} onChange={() => this.forceUpdate()} />
                 {(ctx.value.insertPlace == "Before" || ctx.value.insertPlace == "After") &&
                     <EntityLine ctx={ctx.subCtx(a => a.sibling)} type={type}
-                    findOptions={{ queryName: this.props.typeName, parentColumn: "Entity.Parent", parentValue: ctx.value.newParent }} />}
+                        findOptions={{ queryName: this.props.typeName, parentColumn: "Entity.Parent", parentValue: ctx.value.newParent }}
+                        onFind={() => TreeClient.openTree(this.props.typeName, [{ columnName: "Entity.Parent", value: ctx.value.newParent }])} />}
             </div>
         );
     }
+
+    
 }
                 
