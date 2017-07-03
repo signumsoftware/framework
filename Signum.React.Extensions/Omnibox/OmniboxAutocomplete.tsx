@@ -30,7 +30,7 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
             promise
                 .then(url => {
                     if (url)
-                        Navigator.pushOrOpen(url, e);
+                        Navigator.pushOrOpenInTab(url, e);
                 }).done();
         }
         this.typeahead.blur();

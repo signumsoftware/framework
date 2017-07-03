@@ -303,7 +303,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     }
 
     handlePopupFullScreen = (e: React.MouseEvent<any>) => {
-        Navigator.pushOrOpen("~/workflow/activity/" + this.state.pack!.activity.id, e);
+        Navigator.pushOrOpenInTab("~/workflow/activity/" + this.state.pack!.activity.id, e);
     }
 
     static openView(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, readOnly?: boolean): Promise<CaseActivityEntity | undefined> {

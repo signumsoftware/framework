@@ -187,7 +187,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
             showFilters: cr.filterOptions.length > 0
         });
 
-        Navigator.pushOrOpen(path, e);
+        Navigator.pushOrOpenInTab(path, e);
     }
 }
 

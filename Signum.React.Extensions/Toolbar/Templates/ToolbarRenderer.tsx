@@ -100,7 +100,7 @@ export default class ToolbarRenderer extends React.Component<{}, ToolbarRenderer
                         return <MenuItem style={{ color: "red" }}>{"No Content or Url found"}</MenuItem>;
 
                     return (
-                        <NavItem onClick={e => Navigator.pushOrOpen(res.url!, e)}>
+                        <NavItem onClick={e => Navigator.pushOrOpenInTab(res.url!, e)}>
                             {ToolbarConfig.coloredIcon(res.iconName, res.iconColor)}{res.label}
                         </NavItem>
                     );
@@ -167,7 +167,7 @@ export default class ToolbarRenderer extends React.Component<{}, ToolbarRenderer
                         return [<MenuItem style={{ color: "red" }}>{"No Content or Url found"}</MenuItem>];
 
                     return [
-                        <NavItem onClick={e => Navigator.pushOrOpen(res.url!, e)}>
+                        <NavItem onClick={e => Navigator.pushOrOpenInTab(res.url!, e)}>
                             {ToolbarConfig.coloredIcon(res.iconName, res.iconColor)}{res.label}
                         </NavItem>
                     ];
