@@ -157,7 +157,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
         const ctx = new TypeContext<Entity>(undefined, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(entity, ""));
 
 
-        const wc: WidgetContext = {
+        const wc: WidgetContext<Entity> = {
             ctx: ctx,
             pack: this.state.pack,
         };

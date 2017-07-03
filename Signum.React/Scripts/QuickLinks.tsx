@@ -18,7 +18,7 @@ export function start() {
 
 export interface QuickLinkContext<T extends Entity> {
     lite: Lite<T>;
-    widgetContext?: WidgetContext;
+    widgetContext?: WidgetContext<T>;
     contextualContext?: ContextualItemsContext<T>;
 }
 
@@ -72,7 +72,7 @@ function asArray<T>(valueOrArray: Seq<T>): T[] {
         return [valueOrArray];
 }
 
-export function getQuickLinkWidget(ctx: WidgetContext): React.ReactElement<any> {
+export function getQuickLinkWidget(ctx: WidgetContext<ModifiableEntity>): React.ReactElement<any> {
 
     return <QuickLinkWidget ctx={ctx} />;
 }
@@ -98,7 +98,7 @@ export function getQuickLinkContextMenus(ctx: ContextualItemsContext<Entity>): P
 }
 
 export interface QuickLinkWidgetProps {
-    ctx: WidgetContext
+    ctx: WidgetContext<ModifiableEntity>
 }
 
 export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { links?: QuickLink[] }> {
@@ -128,7 +128,7 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
         } else {
             getQuickLinks({
                 lite: toLiteFat(props.ctx.pack.entity as Entity),
-                widgetContext: props.ctx
+                widgetContext: props.ctx as WidgetContext<Entity>
             }).then(links => this.setState({ links }))
                 .done();
         }
