@@ -69,7 +69,7 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
                 if (tis.length == 1 && tis.first().kind == "Enum")
                     return <EnumCheckboxList ctx={ctx} />;
 
-                if (tr.isEmbedded || tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
+                if (tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
                     return <EntityTable ctx={ctx} />;
 
                 if (tis.every(t => t.isLowPopulation == true))
@@ -77,6 +77,9 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
 
                 return <EntityStrip ctx={ctx} />;
             }
+
+            if (tr.isEmbedded)
+                return <EntityTable ctx={ctx} />;
 
             return undefined; 
 
