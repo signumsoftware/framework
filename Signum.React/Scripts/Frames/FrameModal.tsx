@@ -295,7 +295,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
     handlePopupFullScreen = (e: React.MouseEvent<any>) => {
         e.preventDefault();
-        Navigator.pushOrOpen(Navigator.navigateRoute(this.state.pack!.entity as Entity), e);
+        Navigator.pushOrOpenInTab(Navigator.navigateRoute(this.state.pack!.entity as Entity), e);
     }
 
     static openView(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, options: Navigator.ViewOptions): Promise<Entity | undefined> {

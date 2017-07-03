@@ -272,7 +272,7 @@ export class QuickLinkLink extends QuickLink {
     }
 
     handleClick = (e: React.MouseEvent<any>) => {
-        Navigator.pushOrOpen(this.url, e);
+        Navigator.pushOrOpenInTab(this.url, e);
     }
 }
 
