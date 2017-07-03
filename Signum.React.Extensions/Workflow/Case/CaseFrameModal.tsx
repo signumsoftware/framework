@@ -251,7 +251,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
         var mainPack = { entity: mainEntity, canExecute: pack.canExecuteMainEntity };
 
-        const wc: WidgetContext = {
+        const wc: WidgetContext<ICaseMainEntity> = {
             ctx: ctx,
             pack: mainPack,
         };
