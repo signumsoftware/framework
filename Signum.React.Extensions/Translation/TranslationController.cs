@@ -158,7 +158,7 @@ namespace Signum.React.Translation
 
 
         [Route("api/translation/sync"), HttpPost]
-        public AssemblyResultTS Sync(string assembly, string culture)
+        public AssemblyResultTS Sync(string assembly, string culture, string @namespace = null)
         {
             Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".FormatWith(assembly));
             CultureInfo targetCulture = CultureInfo.GetCultureInfo(culture);
@@ -166,7 +166,6 @@ namespace Signum.React.Translation
             CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.GetCustomAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
 
             var cultures = TranslationLogic.CurrentCultureInfos(defaultCulture);
-
             Dictionary<CultureInfo, LocalizedAssembly> reference = (from ci in cultures
                                                                     let la = DescriptionManager.GetLocalizedAssembly(ass, ci)
                                                                     where la != null || ci == defaultCulture || ci == targetCulture
@@ -174,7 +173,7 @@ namespace Signum.React.Translation
 
             var master = reference.Extract(defaultCulture);
             var target = reference.Extract(targetCulture);
-            var changes = TranslationSynchronizer.GetAssemblyChanges(TranslationServer.Translator, target, master, reference.Values.ToList(), false, null, out int totalTypes);
+            var changes = TranslationSynchronizer.GetAssemblyChanges(TranslationServer.Translator, target, master, reference.Values.ToList(), null, @namespace, out int totalTypes);
 
             return new AssemblyResultTS
             {
@@ -185,6 +184,19 @@ namespace Signum.React.Translation
                 }).ToDictionary(lt => lt.type),
                 cultures = cultures.Select(c => new CulturesTS(c)).ToDictionary(a => a.name)
             };
+        }
+        
+        [Route("api/translation/syncStats"), HttpGet]
+        public List<NamespaceSyncStats> SyncStats(string assembly, string culture)
+        {
+            Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".FormatWith(assembly));
+            CultureInfo targetCulture = CultureInfo.GetCultureInfo(culture);
+            CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.GetCustomAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
+
+            var targetAssembly = DescriptionManager.GetLocalizedAssembly(ass, targetCulture) ?? LocalizedAssembly.ImportXml(ass, targetCulture, forceCreate: true);
+            var defaultAssembly = DescriptionManager.GetLocalizedAssembly(ass, defaultCulture) ?? LocalizedAssembly.ImportXml(ass, defaultCulture, forceCreate: true);
+
+            return TranslationSynchronizer.SyncNamespaceStats(targetAssembly, defaultAssembly);
         }
 
         private LocalizedTypeTS GetLocalizedType(LocalizedTypeChanges t, CultureInfo c, bool isTarget)

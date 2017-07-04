@@ -15,29 +15,48 @@ namespace Signum.Engine.Translation
     {
         public static int MaxTotalSyncCharacters = 800;
 
-        public static LocalizedAssemblyChanges GetAssemblyChanges(ITranslator translator, LocalizedAssembly target, LocalizedAssembly master, List<LocalizedAssembly> support, bool translatedOnly, Lite<RoleEntity> role, out int totalTypes )
+        public static LocalizedAssemblyChanges GetAssemblyChanges(ITranslator translator, LocalizedAssembly target, LocalizedAssembly master, List<LocalizedAssembly> support, Lite<RoleEntity> role, string @namespace, out int totalTypes)
         {
             var types = GetMergeChanges(target, master, support);
 
+            if (role != null)
+                types = types.Where(t => TranslationLogic.GetCountNotLocalizedMemebers(role, t.Type.Assembly.Culture, t.Type.Type) > 0).ToList();
+
+            if (@namespace != null)
+                types = types.Where(t => t.Type.Type.Namespace == @namespace).ToList();
+
             totalTypes = types.Count;
 
-            if (role != null)
-                types = types.Where(t => TranslationLogic.GetCountNotLocalizedMemebers(role, t.Type.Assembly.Culture,t.Type.Type) > 0).ToList();
-
-
-            if (!translatedOnly && types.Sum(a => a.TotalOriginalLength()) > MaxTotalSyncCharacters)
+            if (types.Sum(a => a.TotalOriginalLength()) > MaxTotalSyncCharacters)
                 types = types.GroupsOf(a => a.TotalOriginalLength(), MaxTotalSyncCharacters).First().ToList();
 
-            var result =  Translate(translator, target, types);
-
-            if (translatedOnly)
-                result.Types = result.Types.Where(t =>
-                    t.TypeConflict != null && t.TypeConflict.Values.Any(tc => tc.Translated.HasText()) ||
-                    t.MemberConflicts != null && t.MemberConflicts.Values.Any(m => m.Values.Any(mc => mc.Translated.HasText())))
-                    .ToList();
+            var result = Translate(translator, target, types);
 
             return result;
         }
+
+        public static List<NamespaceSyncStats> SyncNamespaceStats(LocalizedAssembly target, LocalizedAssembly master)
+        {
+            return master.Types.Select(kvp =>
+            {
+                var ltm = kvp.Value;
+                var ltt = target.Types.TryGetC(kvp.Key);
+
+                var count = (ltm.Description != null && ltt?.Description == null ? 1 : 0) +
+                ltm.Members.Count(kvp2 => kvp2.Value != null && ltt.Members.TryGetC(kvp2.Key) == null);
+
+                return new { Type = kvp.Key, count };
+            })
+            .Where(a => a.count > 0)
+            .GroupBy(a => a.Type.Namespace)
+            .Select(gr => new NamespaceSyncStats
+            {
+                @namespace = gr.Key,
+                types = gr.Count(),
+                translations = gr.Sum(a => a.count)
+            }).ToList();
+        }
+
 
         private static LocalizedAssemblyChanges Translate(ITranslator translator, LocalizedAssembly target, List<LocalizedTypeChanges> types)
         {
@@ -109,9 +128,10 @@ namespace Signum.Engine.Translation
             if (target != null && target.Description != null)
                 return null;
 
-            var sentences = new Dictionary<CultureInfo, TypeNameConflict>();
-
-            sentences.Add(master.Assembly.Culture, new TypeNameConflict { Original = master });
+            var sentences = new Dictionary<CultureInfo, TypeNameConflict>
+            {
+                { master.Assembly.Culture, new TypeNameConflict { Original = master } }
+            };
 
             sentences.AddRange(from lt in support
                                where lt.Description != null
@@ -128,10 +148,10 @@ namespace Signum.Engine.Translation
             if (target != null && target.Members.TryGetC(member) != null)
                 return null;
 
-            var sentences = new Dictionary<CultureInfo, MemberNameConflict>();
-
-            sentences.Add(master.Assembly.Culture, new MemberNameConflict { Original = master.Members.TryGetC(member) });
-
+            var sentences = new Dictionary<CultureInfo, MemberNameConflict>
+            {
+                { master.Assembly.Culture, new MemberNameConflict { Original = master.Members.TryGetC(member) } }
+            };
             sentences.AddRange(from lt in support
                                where lt.Members.TryGetC(member).HasText()
                                select KVP.Create(lt.Assembly.Culture, new MemberNameConflict { Original = lt.Members.TryGetC(member) }));
@@ -194,5 +214,12 @@ namespace Signum.Engine.Translation
         {
             return "Conflict {0} -> {1}".FormatWith(Original, Translated);
         }
+    }
+
+    public class NamespaceSyncStats
+    {
+        public string @namespace;
+        public int types;
+        public int translations;
     }
 }
