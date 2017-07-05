@@ -25,7 +25,8 @@ namespace Signum.Engine.Translation
 {
     public static class TranslationLogic
     {
-        public static TranslationOccurrences Occurrences = new TranslationOccurrences();
+        public static ConcurrentDictionary<Lite<RoleEntity>, ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>>> NonLocalized =
+         new ConcurrentDictionary<Lite<RoleEntity>, ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>>>();
 
 
         static Expression<Func<IUserEntity, TranslatorUserEntity>> TranslatorUserExpression =
@@ -79,67 +80,25 @@ namespace Signum.Engine.Translation
         {
             if (UserEntity.Current == null)
                 return;
-
-            var typeUsed = mi != null ? mi.ReflectedType : type;
-
-
-            var dict = GetRoleNotLocalizedMemebers(UserEntity.Current.Role);
-            var typeMiLongDit = dict.GetTypeMiLongDit(ci, typeUsed);
+            
+            var typeOccurrences = NonLocalized.GetOrAdd(UserEntity.Current.Role).GetOrAdd(ci).GetOrAdd(mi?.ReflectedType ?? type);
 
             if (mi == null)
-                typeMiLongDit.AddOrUpdate(type, new TypeOccurrentes { Ocurrences = 1 }, (id, e) => { e.Ocurrences += 1; return e; });
+                typeOccurrences.Ocurrences++;
             else
-            {
-                var miLongDit = typeMiLongDit.GetMiLongDit(typeUsed);
-                miLongDit.DictMi.AddOrUpdate(mi, 1, (id, count) => count + 1);
-            }
+                typeOccurrences.Members.AddOrUpdate(mi, 1, (id, count) => count + 1);
         }
-
-        public static ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>> GetRoleNotLocalizedMemebers(Lite<RoleEntity> role)
-        {
-            return Occurrences.LocalizableTypeUsedNotLocalized.GetOrCreate(role, new ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>>());
-        }
-
-        public static ConcurrentDictionary<Type, TypeOccurrentes> GetTypeMiLongDit(this ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>> dict, CultureInfo ci, Type type)
-        {
-            return dict.GetOrCreate(ci, new ConcurrentDictionary<Type, TypeOccurrentes>());
-        }
-
-
-        public static TypeOccurrentes GetMiLongDit(this ConcurrentDictionary<Type, TypeOccurrentes> dict, Type type)
-        {
-            return dict.GetOrCreate(type, new TypeOccurrentes());
-        }
-
-
+        
 
         public static long GetCountNotLocalizedMemebers(Lite<RoleEntity> role, CultureInfo ci, MemberInfo mi)
         {
-            var dict = GetRoleNotLocalizedMemebers(role);
-            var typeMiLongDit = dict.GetTypeMiLongDit(ci, mi.ReflectedType);
-
-
-            var miLongDit = typeMiLongDit.GetMiLongDit(mi.ReflectedType);
-
-            return miLongDit.DictMi.GetOrCreate(mi, 0);
-
+            return NonLocalized.GetOrAdd(role).GetOrAdd(ci).GetOrThrow(mi.ReflectedType).Members.GetOrAdd(mi, 0);
         }
 
         public static long GetCountNotLocalizedMemebers(Lite<RoleEntity> role, CultureInfo ci, Type type)
         {
-
-            var dict = GetRoleNotLocalizedMemebers(role);
-            var typeMiLongDit = dict.GetTypeMiLongDit(ci, type);
-
-          
-            var miLongDit = typeMiLongDit.GetMiLongDit(type);
-
-            return miLongDit.Ocurrences + miLongDit.DictMi.Values.Sum(e => e);
-
+            return NonLocalized.GetOrAdd(role).GetOrAdd(ci).GetOrThrow(type).TotalCount;          
         }
-
-
-
 
         public static List<CultureInfo> CurrentCultureInfos(CultureInfo defaultCulture)
         {
@@ -224,16 +183,12 @@ namespace Signum.Engine.Translation
 
     }
 
-    public class TranslationOccurrences
-    {
-        public ConcurrentDictionary<Lite<RoleEntity>, ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>>> LocalizableTypeUsedNotLocalized =
-           new ConcurrentDictionary<Lite<RoleEntity>, ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>>>();
-
-    }
 
     public class TypeOccurrentes
     {
         public long Ocurrences;
-        public ConcurrentDictionary<MemberInfo, long> DictMi = new ConcurrentDictionary<MemberInfo, long>();
+        public ConcurrentDictionary<MemberInfo, long> Members = new ConcurrentDictionary<MemberInfo, long>();
+
+        public long TotalCount => Ocurrences + Members.Values.Sum();
     }
 }

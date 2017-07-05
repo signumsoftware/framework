@@ -54,6 +54,10 @@ export module TranslationMessage {
     export const Search = new MessageKey("TranslationMessage", "Search");
     export const PressSearchForResults = new MessageKey("TranslationMessage", "PressSearchForResults");
     export const NoResultsFound = new MessageKey("TranslationMessage", "NoResultsFound");
+    export const Namespace = new MessageKey("TranslationMessage", "Namespace");
+    export const NewTypes = new MessageKey("TranslationMessage", "NewTypes");
+    export const NewTranslations = new MessageKey("TranslationMessage", "NewTranslations");
+    export const BackToTranslationStatus = new MessageKey("TranslationMessage", "BackToTranslationStatus");
 }
 
 export module TranslationPermission {
