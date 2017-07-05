@@ -25,7 +25,7 @@ declare global {
     }
 }
 
-export default class ChartRenderer extends React.Component<{ data: ChartClient.ChartTable; chartRequest: ChartRequest }, void> {
+export default class ChartRenderer extends React.Component<{ data: ChartClient.ChartTable; chartRequest: ChartRequest; lastChartRequest?: ChartRequest }, void> {
 
     exceptionLine: number | null;
 
@@ -130,7 +130,7 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
 
             const obj = val!.split("&").filter(a => !!a).toObject(a => a.before("="), a => a.after("="));
 
-            const cr = this.props.chartRequest;
+            const cr = this.props.lastChartRequest!;
 
             if (cr.groupResults == false) {
 
