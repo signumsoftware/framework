@@ -1,8 +1,8 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
-/// <reference path="../../../../Framework/Signum.Web/node_modules/@types/d3/index.d.ts"/>
-/// <reference path="../../../../Framework/Signum.Web/node_modules/@types/d3-scale-chromatic/index.d.ts"/>
 
-
+import d3 = require("d3");
+//import d3sc = require("d3-scale-chromatic");
+const d3sc: any = {};
 module ChartUtils {
 
     
@@ -600,8 +600,7 @@ interface ChartColumn {
     type?: string;
 }
 
-declare module "ChartUtils" {
-    export = ChartUtils;
-}
+export = ChartUtils;
+
 
 
