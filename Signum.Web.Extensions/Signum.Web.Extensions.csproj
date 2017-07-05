@@ -942,11 +942,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Translation\Views\Index.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Index.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="Translation\Views\TranslatorUserCulture.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

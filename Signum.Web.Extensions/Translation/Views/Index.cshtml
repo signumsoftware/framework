@@ -35,7 +35,7 @@ else
 
                 @Html.ActionLink(TranslationMessage.All.NiceToString(), (TranslationController tc) => tc.Index(null))
 
-                @foreach (var role in TranslationLogic.Occurrences.LocalizableTypeUsedNotLocalized.Keys)
+                @foreach (var role in TranslationLogic.NonLocalized.Keys)
                 {
                     @Html.ActionLink(role.ToString(), (TranslationController tc) => tc.Index(role))
                 }
