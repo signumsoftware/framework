@@ -81,7 +81,7 @@ export default class TranslationCodeStatus extends React.Component<TranslationCo
                                     <br/>
                                     {
                                         !tree[assembly][culture].isDefault &&
-                                        <Link to={`~/translation/sync/${assembly}/${culture}`} className={"status-" + tree[assembly][culture].status}>
+                                        <Link to={`~/translation/syncNamespaces/${assembly}/${culture}`} className={"status-" + tree[assembly][culture].status}>
                                             {TranslationMessage.Sync.niceToString() }
                                         </Link>
                                     }

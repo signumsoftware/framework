@@ -119,6 +119,12 @@ namespace Signum.Entities.Translation
         [Description("Press search for results...")]
         PressSearchForResults,
         NoResultsFound,
+
+        Namespace, 
+        NewTypes, 
+        NewTranslations, 
+
+        BackToTranslationStatus,
     }
 
     public enum TranslationJavascriptMessage

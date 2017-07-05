@@ -5,7 +5,7 @@ import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOpti
 import { ChartColumnEmbedded, ChartScriptColumnEmbedded, ChartScriptParameterEmbedded, ChartRequest, GroupByChart, ChartMessage,
    ChartColorEntity, ChartScriptEntity, ChartParameterEmbedded, ChartParameterType } from '../Signum.Entities.Chart'
 
-export default class ChartTable extends React.Component<{ resultTable: ResultTable, chartRequest: ChartRequest, onRedraw: () => void }, void> {
+export default class ChartTable extends React.Component<{ resultTable: ResultTable; chartRequest: ChartRequest; lastChartRequest?: ChartRequest; onRedraw: () => void }, void> {
 
 
     handleHeaderClick = (e: React.MouseEvent<any>) => {
@@ -92,7 +92,7 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
     handleOnDoubleClick = (e: React.MouseEvent<HTMLTableRowElement>, row: ResultRow) => {
 
 
-        const cr = this.props.chartRequest;
+        const cr = this.props.lastChartRequest!;
 
         if (cr.groupResults == false) {
             
