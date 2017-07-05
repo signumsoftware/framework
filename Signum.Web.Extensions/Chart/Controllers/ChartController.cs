@@ -22,6 +22,7 @@ using Signum.Engine.Excel;
 using Signum.Entities.UserAssets;
 using Signum.Entities.UserQueries;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Signum.Web.Chart
 {
@@ -119,7 +120,7 @@ namespace Signum.Web.Chart
 
             var request = requestCtx.Value;
 
-            var resultTable = ChartLogic.ExecuteChartAsync(request, CancellationToken.None).Result;
+            var resultTable = ChartLogic.ExecuteChart(request);
 
             var querySettings = Finder.QuerySettings(request.QueryName);
 
