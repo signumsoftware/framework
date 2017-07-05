@@ -8,13 +8,8 @@ import Validator = require("Framework/Signum.Web/Signum/Scripts/Validator")
 import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
 
 import ChartUtils = require("ChartUtils");
-import colorbrewer = require("colorbrewer");
-
-var rubish = colorbrewer.hasOwnProperty;
 
 import d3 = require("d3")
-
-
 
 export function openChart(prefix: string, url: string) {
     Finder.getFor(prefix)
@@ -304,6 +299,7 @@ export class ChartRequest {
         var $chartContainer = this.chartControl.find(".sf-chart-container");
 
         $chartContainer.html("");
+        
 
         var data = JSON.parse($chartContainer.attr("data-json"));
         ChartUtils.fillAllTokenValueFuntions(data);
@@ -342,16 +338,16 @@ export class ChartRequest {
         var func;
         var __baseLineNumber__: number;
         try {
-            var getClickKeys = ChartUtils.getClickKeys;
-            var translate = ChartUtils.translate;
-            var scale = ChartUtils.scale;
-            var rotate = ChartUtils.rotate;
-            var skewX = ChartUtils.skewX;
-            var skewY = ChartUtils.skewY;
-            var matrix = ChartUtils.matrix;
-            var scaleFor = ChartUtils.scaleFor;
-            var rule = ChartUtils.rule;
-            var ellipsis = ChartUtils.ellipsis;
+            const getClickKeys = ChartUtils.getClickKeys;
+            const translate = ChartUtils.translate;
+            const scale = ChartUtils.scale;
+            const rotate = ChartUtils.rotate;
+            const skewX = ChartUtils.skewX;
+            const skewY = ChartUtils.skewY;
+            const matrix = ChartUtils.matrix;
+            const scaleFor = ChartUtils.scaleFor;
+            const rule = ChartUtils.rule;
+            const ellipsis = ChartUtils.ellipsis;
             __baseLineNumber__ = new Error().lineNumber;
             func = eval(code);
         } catch (e) {

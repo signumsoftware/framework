@@ -21,6 +21,7 @@ using Signum.Engine.Authorization;
 using Signum.Engine.Excel;
 using Signum.Entities.UserAssets;
 using Signum.Entities.UserQueries;
+using System.Threading;
 
 namespace Signum.Web.Chart
 {
@@ -97,9 +98,12 @@ namespace Signum.Web.Chart
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
 
-            FilterOption fo = new FilterOption(tokenName, null);
-            fo.Token = QueryUtils.Parse(tokenName, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | (request.GroupResults ? SubTokensOptions.CanAggregate : 0));
-            fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).FirstEx();
+            var token = QueryUtils.Parse(tokenName, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | (request.GroupResults ? SubTokensOptions.CanAggregate : 0));
+            FilterOption fo = new FilterOption(tokenName, null)
+            {
+                Token = token,
+                Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(token.Type)).FirstEx(),
+            };
 
             return Content(FilterBuilderHelper.NewFilter(
                     FinderController.CreateHtmlHelper(this), fo, new Context(null, this.Prefix()), index).ToHtmlString());
@@ -115,7 +119,7 @@ namespace Signum.Web.Chart
 
             var request = requestCtx.Value;
 
-            var resultTable = ChartLogic.ExecuteChart(request);
+            var resultTable = ChartLogic.ExecuteChartAsync(request, CancellationToken.None).Result;
 
             var querySettings = Finder.QuerySettings(request.QueryName);
 
@@ -223,7 +227,7 @@ namespace Signum.Web.Chart
             if (!Finder.IsFindable(request.QueryName))
                 throw new UnauthorizedAccessException(ChartMessage.Chart_Query0IsNotAllowed.NiceToString().FormatWith(request.QueryName));
 
-            var resultTable = ChartLogic.ExecuteChart(request);
+            var resultTable = ChartLogic.ExecuteChartAsync(request, CancellationToken.None).Result;
 
             byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(resultTable, QueryUtils.GetNiceName(request.QueryName));
 
