@@ -283,7 +283,7 @@ namespace Signum.Engine.Tree
                     if (t.IsNew)
                     {
                         t.Route = CalculateRoute(t);
-                        if (MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin)))
+                        if (MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin)) && t.ParentOrSibling != null)
                             t.Mixin<DisabledMixin>().IsDisabled = t.Parent().Mixin<DisabledMixin>().IsDisabled;
                     }
 
