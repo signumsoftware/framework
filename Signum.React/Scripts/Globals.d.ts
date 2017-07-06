@@ -27,8 +27,11 @@ interface Array<T> {
     clear(this: Array<T>): void;
     groupsOf(this: Array<T>, groupSize: number, elementSize?: (item: T) => number): T[][];
     max(this: Array<T>): T;
+    max<V>(this: Array<T>, selector: (element: T, index: number, array: V) => number): V;
     min(this: Array<T>): T;
+    min<V>(this: Array<T>, selector: (element: T, index: number, array: V) => number): V;
     sum(this: Array<number>): number;
+    sum(this: Array<T>, selector: (element: T, index: number, array: T[]) => number): number;
     first(this: Array<T>, errorContext?: string): T;
     firstOrNull(this: Array<T>, ): T | null;
     last(this: Array<T>, errorContext?: string): T;

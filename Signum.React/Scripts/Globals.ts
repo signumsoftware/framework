@@ -220,31 +220,34 @@ Array.prototype.groupsOf = function (this: any[], groupSize: number, elementSize
     return result;
 }
 
-Array.prototype.max = function (this: any[]) {
+Array.prototype.max = function (this: any[], selector?: (element: any, index: number, array: any[]) => any) {
+
+    if (selector)
+        return Math.max.apply(undefined, this.map(selector));
+
     return Math.max.apply(undefined, this);
 };
 
-Array.prototype.sum = function (this: any[]) {
-    var result = 0;
-    this.forEach(v => result += v);
-    return result;
-};
+Array.prototype.min = function (this: any[], selector?: (element: any, index: number, array: any[]) => any) {
 
-Array.prototype.min = function (this: any[]) {
+    if (selector)
+        return Math.max.apply(undefined, this.map(selector));
+
     return Math.min.apply(undefined, this);
 };
 
-Array.prototype.sum = function (this: any[]) {
+Array.prototype.sum = function (this: any[], selector?: (element: any, index: number, array: any[]) => any) {
 
     if (this.length == 0)
         return 0;
 
     var result = this[0];
     for (var i = 1; i < this.length; i++) {
-        result += this[i];
+        result += selector ? selector(this[i], i, this) : this[i];
     }
     return result;
 };
+
 
 Array.prototype.first = function (this: any[], errorContext: string) {
 
