@@ -452,7 +452,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
             showFilters: this.state.filterOptions.length > 0
         });
 
-        Navigator.pushOrOpen(path, e);
+        Navigator.pushOrOpenInTab(path, e);
     }
 
     handleToggleFilters = () => {
