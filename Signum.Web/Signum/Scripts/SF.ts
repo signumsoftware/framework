@@ -304,8 +304,10 @@ interface Array<T> {
     groupToObject(keySelector: (element: T) => string): { [key: string]: T[] };
     orderBy<V>(keySelector: (element: T) => V): T[];
     orderByDescending<V>(keySelector: (element: T) => V): T[];
-    toObject(keySelector: (element: T) => string): { [key: string]: T };
-    toObjectDistinct(keySelector: (element: T) => string): { [key: string]: T };
+    toObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T };
+    toObject<V>(this: Array<T>, keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
+    toObjectDistinct(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T };
+    toObjectDistinct<V>(this: Array<T>, keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
     flatMap<R>(selector: (element: T) => R[]): R[];
     max(): T;
     min(): T;
@@ -363,28 +365,28 @@ once("arrayExtensions", () => {
         return cloned;
     };
 
-    Array.prototype.toObject = function (keySelector: (element: any) => any): any {
-        var obj = {};
+    Array.prototype.toObject = function (this: any[], keySelector: (element: any) => any, valueSelector?: (element: any) => any): any {
+        const obj: any = {};
 
-        (<Array<any>>this).forEach(item => {
-            var key = keySelector(item);
+        this.forEach(item => {
+            const key = keySelector(item);
 
             if (obj[key])
                 throw new Error("Repeated key {0}".format(key));
 
-            obj[key] = item;
+            obj[key] = valueSelector ? valueSelector(item) : item;
         });
 
         return obj;
     };
 
-    Array.prototype.toObjectDistinct = function (keySelector: (element: any) => any): any {
-        var obj = {};
+    Array.prototype.toObjectDistinct = function (this: any[], keySelector: (element: any) => any, valueSelector?: (element: any) => any): any {
+        const obj: any = {};
 
-        (<Array<any>>this).forEach(item => {
-            var key = keySelector(item);
+        this.forEach(item => {
+            const key = keySelector(item);
 
-            obj[key] = item;
+            obj[key] = valueSelector ? valueSelector(item) : item;
         });
 
         return obj;

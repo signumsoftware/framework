@@ -2,7 +2,6 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.5\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.5\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="..\..\packages\Microsoft.Net.Compilers.2.2.0\build\Microsoft.Net.Compilers.props" Condition="Exists('..\..\packages\Microsoft.Net.Compilers.2.2.0\build\Microsoft.Net.Compilers.props')" />
-  <Import Project="..\..\packages\Microsoft.TypeScript.MSBuild.2.1.5\build\Microsoft.TypeScript.MSBuild.props" Condition="Exists('..\..\packages\Microsoft.TypeScript.MSBuild.2.1.5\build\Microsoft.TypeScript.MSBuild.props')" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -78,7 +77,7 @@
       <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System.Activities" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -338,9 +337,40 @@
     <Content Include="Facades\Navigator.md" />
     <Content Include="Operations\OperationsClient.md" />
     <Content Include="LineHelpers\EntityControls.md" />
-    <Content Include="Signum\Headers\d3\d3.d.ts" />
     <Content Include="Signum\Headers\jquery\jquery.d.ts" />
     <Content Include="tsconfig.json" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-array\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-axis\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-brush\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-chord\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-collection\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-color\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-dispatch\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-drag\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-dsv\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-ease\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-force\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-format\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-geo\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-hierarchy\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-interpolate\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-path\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-polygon\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-quadtree\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-queue\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-random\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-request\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-scale\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-selection\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-shape\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-time-format\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-timer\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-time\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-transition\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-voronoi\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3-zoom\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\d3\index.d.ts" />
+    <TypeScriptCompile Include="node_modules\%40types\geojson\index.d.ts" />
     <TypeScriptCompile Include="Signum\Scripts\globals.ts" />
     <TypeScriptCompile Include="Signum\Scripts\Finder.ts" />
     <TypeScriptCompile Include="Signum\Scripts\Operations.ts" />
@@ -400,6 +430,99 @@
       <LastGenOutput>FilterRows.generated.cs</LastGenOutput>
       <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </Content>
+    <Content Include="node_modules\%40types\d3-array\LICENSE" />
+    <Content Include="node_modules\%40types\d3-array\package.json" />
+    <Content Include="node_modules\%40types\d3-array\README.md" />
+    <Content Include="node_modules\%40types\d3-axis\package.json" />
+    <Content Include="node_modules\%40types\d3-axis\README.md" />
+    <Content Include="node_modules\%40types\d3-brush\package.json" />
+    <Content Include="node_modules\%40types\d3-brush\README.md" />
+    <Content Include="node_modules\%40types\d3-chord\package.json" />
+    <Content Include="node_modules\%40types\d3-chord\README.md" />
+    <Content Include="node_modules\%40types\d3-chord\types-metadata.json" />
+    <Content Include="node_modules\%40types\d3-collection\LICENSE" />
+    <Content Include="node_modules\%40types\d3-collection\package.json" />
+    <Content Include="node_modules\%40types\d3-collection\README.md" />
+    <Content Include="node_modules\%40types\d3-color\LICENSE" />
+    <Content Include="node_modules\%40types\d3-color\package.json" />
+    <Content Include="node_modules\%40types\d3-color\README.md" />
+    <Content Include="node_modules\%40types\d3-dispatch\LICENSE" />
+    <Content Include="node_modules\%40types\d3-dispatch\package.json" />
+    <Content Include="node_modules\%40types\d3-dispatch\README.md" />
+    <Content Include="node_modules\%40types\d3-drag\LICENSE" />
+    <Content Include="node_modules\%40types\d3-drag\package.json" />
+    <Content Include="node_modules\%40types\d3-drag\README.md" />
+    <Content Include="node_modules\%40types\d3-dsv\package.json" />
+    <Content Include="node_modules\%40types\d3-dsv\README.md" />
+    <Content Include="node_modules\%40types\d3-dsv\types-metadata.json" />
+    <Content Include="node_modules\%40types\d3-ease\LICENSE" />
+    <Content Include="node_modules\%40types\d3-ease\package.json" />
+    <Content Include="node_modules\%40types\d3-ease\README.md" />
+    <Content Include="node_modules\%40types\d3-force\package.json" />
+    <Content Include="node_modules\%40types\d3-force\README.md" />
+    <Content Include="node_modules\%40types\d3-format\LICENSE" />
+    <Content Include="node_modules\%40types\d3-format\package.json" />
+    <Content Include="node_modules\%40types\d3-format\README.md" />
+    <Content Include="node_modules\%40types\d3-geo\LICENSE" />
+    <Content Include="node_modules\%40types\d3-geo\package.json" />
+    <Content Include="node_modules\%40types\d3-geo\README.md" />
+    <Content Include="node_modules\%40types\d3-hierarchy\package.json" />
+    <Content Include="node_modules\%40types\d3-hierarchy\README.md" />
+    <Content Include="node_modules\%40types\d3-hierarchy\types-metadata.json" />
+    <Content Include="node_modules\%40types\d3-interpolate\LICENSE" />
+    <Content Include="node_modules\%40types\d3-interpolate\package.json" />
+    <Content Include="node_modules\%40types\d3-interpolate\README.md" />
+    <Content Include="node_modules\%40types\d3-path\LICENSE" />
+    <Content Include="node_modules\%40types\d3-path\package.json" />
+    <Content Include="node_modules\%40types\d3-path\README.md" />
+    <Content Include="node_modules\%40types\d3-polygon\LICENSE" />
+    <Content Include="node_modules\%40types\d3-polygon\package.json" />
+    <Content Include="node_modules\%40types\d3-polygon\README.md" />
+    <Content Include="node_modules\%40types\d3-quadtree\LICENSE" />
+    <Content Include="node_modules\%40types\d3-quadtree\package.json" />
+    <Content Include="node_modules\%40types\d3-quadtree\README.md" />
+    <Content Include="node_modules\%40types\d3-queue\LICENSE" />
+    <Content Include="node_modules\%40types\d3-queue\package.json" />
+    <Content Include="node_modules\%40types\d3-queue\README.md" />
+    <Content Include="node_modules\%40types\d3-random\LICENSE" />
+    <Content Include="node_modules\%40types\d3-random\package.json" />
+    <Content Include="node_modules\%40types\d3-random\README.md" />
+    <Content Include="node_modules\%40types\d3-request\LICENSE" />
+    <Content Include="node_modules\%40types\d3-request\package.json" />
+    <Content Include="node_modules\%40types\d3-request\README.md" />
+    <Content Include="node_modules\%40types\d3-scale\LICENSE" />
+    <Content Include="node_modules\%40types\d3-scale\package.json" />
+    <Content Include="node_modules\%40types\d3-scale\README.md" />
+    <Content Include="node_modules\%40types\d3-selection\LICENSE" />
+    <Content Include="node_modules\%40types\d3-selection\package.json" />
+    <Content Include="node_modules\%40types\d3-selection\README.md" />
+    <Content Include="node_modules\%40types\d3-shape\LICENSE" />
+    <Content Include="node_modules\%40types\d3-shape\package.json" />
+    <Content Include="node_modules\%40types\d3-shape\README.md" />
+    <Content Include="node_modules\%40types\d3-time-format\LICENSE" />
+    <Content Include="node_modules\%40types\d3-time-format\package.json" />
+    <Content Include="node_modules\%40types\d3-time-format\README.md" />
+    <Content Include="node_modules\%40types\d3-timer\LICENSE" />
+    <Content Include="node_modules\%40types\d3-timer\package.json" />
+    <Content Include="node_modules\%40types\d3-timer\README.md" />
+    <Content Include="node_modules\%40types\d3-time\LICENSE" />
+    <Content Include="node_modules\%40types\d3-time\package.json" />
+    <Content Include="node_modules\%40types\d3-time\README.md" />
+    <Content Include="node_modules\%40types\d3-transition\LICENSE" />
+    <Content Include="node_modules\%40types\d3-transition\package.json" />
+    <Content Include="node_modules\%40types\d3-transition\README.md" />
+    <Content Include="node_modules\%40types\d3-voronoi\LICENSE" />
+    <Content Include="node_modules\%40types\d3-voronoi\package.json" />
+    <Content Include="node_modules\%40types\d3-voronoi\README.md" />
+    <Content Include="node_modules\%40types\d3-zoom\LICENSE" />
+    <Content Include="node_modules\%40types\d3-zoom\package.json" />
+    <Content Include="node_modules\%40types\d3-zoom\README.md" />
+    <Content Include="node_modules\%40types\d3\LICENSE" />
+    <Content Include="node_modules\%40types\d3\package.json" />
+    <Content Include="node_modules\%40types\d3\README.md" />
+    <Content Include="node_modules\%40types\geojson\LICENSE" />
+    <Content Include="node_modules\%40types\geojson\package.json" />
+    <Content Include="node_modules\%40types\geojson\README.md" />
     <None Include="Signum\Views\PaginationSelector.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>PaginationSelector.generated.cs</LastGenOutput>
@@ -544,10 +667,7 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\packages\Microsoft.TypeScript.MSBuild.2.1.5\build\Microsoft.TypeScript.MSBuild.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.TypeScript.MSBuild.2.1.5\build\Microsoft.TypeScript.MSBuild.props'))" />
-    <Error Condition="!Exists('..\..\packages\Microsoft.TypeScript.MSBuild.2.1.5\build\Microsoft.TypeScript.MSBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.TypeScript.MSBuild.2.1.5\build\Microsoft.TypeScript.MSBuild.targets'))" />
     <Error Condition="!Exists('..\..\packages\Microsoft.Net.Compilers.2.2.0\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Net.Compilers.2.2.0\build\Microsoft.Net.Compilers.props'))" />
     <Error Condition="!Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.5\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.5\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
   </Target>
-  <Import Project="..\..\packages\Microsoft.TypeScript.MSBuild.2.1.5\build\Microsoft.TypeScript.MSBuild.targets" Condition="Exists('..\..\packages\Microsoft.TypeScript.MSBuild.2.1.5\build\Microsoft.TypeScript.MSBuild.targets')" />
 </Project>
