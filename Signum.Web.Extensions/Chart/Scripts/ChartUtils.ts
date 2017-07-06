@@ -1,61 +1,66 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
-/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/d3/d3.d.ts"/>
 
+import d3 = require("d3");
+//import d3sc = require("d3-scale-chromatic");
+const d3sc: any = {};
 module ChartUtils {
 
-    (<D3.Selection<any>>Array.prototype).enterData = function (data: any, tag: string, cssClass: string) {
+    
+    ((d3.select(document) as any).__proto__ as d3.Selection<any, any, any, any>).enterData = function (this: d3.Selection<any, any, any, any>, data: any, tag: string, cssClass: string) {
         return this.selectAll(tag + "." + cssClass).data(data)
             .enter().append("svg:" + tag)
             .attr("class", cssClass);
     };
 
-    export function fillAllTokenValueFuntions(data) {
+    export function fillAllTokenValueFuntions(data: ChartTable) {
 
-        for (var i = 0; ; i++) {
-            if (data.columns['c' + i] === undefined)
+        for (let i = 0; ; i++) {
+            if (data.columns['c' + i] == undefined)
                 break;
 
-            for (var j = 0; j < data.rows.length; j++) {
+            for (let j = 0; j < data.rows.length; j++) {
                 makeItTokenValue(data.rows[j]['c' + i]);
             }
         }
     }
 
-    export function makeItTokenValue(value) {
+    export function makeItTokenValue(value: ChartValue) {
 
-        if (value === null || value === undefined)
+        if (value == undefined)
             return;
 
-        value.toString = function () {
-            var key = (this.key !== undefined ? this.key : this);
+        value.toString = function (this: ChartValue) {
+            const key = (this.key !== undefined ? this.key : this);
 
-            if (key === null || key === undefined)
+            if (key == undefined)
                 return "null";
 
-            return key;
+            return key.toString();
         };
 
-        value.niceToString = function () {
-            var result = (this.toStr !== undefined ? this.toStr : this);
+        value.valueOf = function (this: ChartValue) { return this.key as any; };
 
-            if (result === null || result === undefined)
+        value.niceToString = function (this: ChartValue) {
+            const result = (this.toStr !== undefined ? this.toStr : this);
+
+            if (result == undefined)
                 return this.key != undefined ? "[ no text ]" : "[ null ]";
 
             return result.toString();
         };
     }
 
-    export function ellipsis(elem : SVGTextElement, width: number, padding? : number, ellipsisSymbol?: string) {
+    export function ellipsis(elem: SVGTextElement, width: number, padding?: number, ellipsisSymbol?: string) {
 
-        if (ellipsisSymbol === null || ellipsisSymbol == undefined)
+        if (ellipsisSymbol == undefined)
             ellipsisSymbol = '…';
 
         if (padding)
             width -= padding * 2;
 
-        var self = d3.select(elem);
-        var textLength = (<any>self.node()).getComputedTextLength();
-        var text = self.text();
+        const self = d3.select(elem);
+        let textLength = (<any>self.node()).getComputedTextLength();
+        let text = self.text();
         while (textLength > width && text.length > 0) {
             text = text.slice(0, -1);
             while (text[text.length - 1] == ' ' && text.length > 0)
@@ -63,15 +68,15 @@ module ChartUtils {
             self.text(text + ellipsisSymbol);
             textLength = (<any>self.node()).getComputedTextLength();
         }
-    } 
+    }
 
-    export function getClickKeys(row, columns) {
-        var options = "";
-        for (var k in columns) {
-            var col = columns[k];
+    export function getClickKeys(row: any, columns: any) {
+        let options = "";
+        for (const k in columns) {
+            const col = columns[k];
             if (col.isGroupKey == true) {
-                var tokenValue = row[k];
-                if (tokenValue != null) {
+                const tokenValue = row[k];
+                if (tokenValue != undefined) {
                     options += "&" + k + "=" + (tokenValue.keyForFilter || tokenValue.toString());
                 }
             }
@@ -81,21 +86,21 @@ module ChartUtils {
     }
 
     export function translate(x: number, y: number) {
-        if (y === undefined)
+        if (y == undefined)
             return 'translate(' + x + ')';
 
         return 'translate(' + x + ',' + y + ')';
     }
 
     export function scale(x: number, y: number) {
-        if (y === undefined)
+        if (y == undefined)
             return 'scale(' + x + ')';
 
         return 'scale(' + x + ',' + y + ')';
     }
 
     export function rotate(angle: number, x?: number, y?: number): string {
-        if (x === undefined || y == undefined)
+        if (x == undefined || y == undefined)
             return 'rotate(' + angle + ')';
 
         return 'rotate(' + angle + ',' + y + ',' + y + ')';
@@ -113,52 +118,52 @@ module ChartUtils {
         return 'matrix(' + a + ',' + b + ',' + c + ',' + d + ',' + e + ',' + f + ')';
     }
 
-    export function scaleFor(column, values, minRange, maxRange, scaleName: string): D3.Scale.Scale {
+    export function scaleFor(column: { type: string }, values: any[], minRange: number, maxRange: number, scaleName: string): { (x: any): any; } {
 
         if (scaleName == "Elements")
-            return d3.scale.ordinal()
+            return d3.scaleBand()
                 .domain(values)
-                .rangeBands([minRange, maxRange]);
+                .range([minRange, maxRange]);
 
         if (scaleName == "ZeroMax")
-            return d3.scale.linear()
+            return d3.scaleLinear()
                 .domain([0, d3.max(values)])
                 .range([minRange, maxRange]);
 
         if (scaleName == "MinMax") {
             if (column.type == "Date" || column.type == "DateTime") {
-                var scale = d3.time.scale()
+                const scale = d3.scaleTime()
                     .domain([new Date(<any>d3.min(values)), new Date(<any>d3.max(values))])
                     .range([minRange, maxRange]);
 
-                var f = function (d) { return scale(new Date(d)); };
-                (<any>f).ticks = scale.ticks; 
-                (<any>f).tickFormat = scale.tickFormat; 
-                return  <D3.Scale.Scale>f;
+                const f = function (d: string) { return scale(new Date(d)); };
+                (<any>f).ticks = scale.ticks;
+                (<any>f).tickFormat = scale.tickFormat;
+                return f;
             }
             else {
-                return <D3.Scale.Scale>d3.scale.linear()
+                return d3.scaleLinear()
                     .domain([d3.min(values), d3.max(values)])
                     .range([minRange, maxRange]);
             }
         }
 
         if (scaleName == "Log")
-            return d3.scale.log()
+            return d3.scaleLog()
                 .domain([d3.min(values),
-                    d3.max(values)])
+                d3.max(values)])
                 .range([minRange, maxRange]);
 
         if (scaleName == "Sqrt")
-            return d3.scale.pow().exponent(.5)
+            return d3.scalePow().exponent(.5)
                 .domain([d3.min(values),
-                    d3.max(values)])
+                d3.max(values)])
                 .range([minRange, maxRange]);
 
         throw Error("Unexpected scale: " + scaleName);
     }
 
-    export function rule(object : any, totalSize?: number) : Rule {
+    export function rule(object: any, totalSize?: number): Rule {
         return new Rule(object, totalSize);
     }
 
@@ -168,14 +173,14 @@ module ChartUtils {
         private starts: { [key: string]: number } = {};
         private ends: { [key: string]: number } = {};
 
-        totalSize : number;
+        totalSize: number;
 
         constructor(object: any, totalSize?: number) {
 
-            var fixed = 0;
-            var proportional = 0;
-            for (var p in object) {
-                var value = object[p];
+            let fixed = 0;
+            let proportional = 0;
+            for (const p in object) {
+                const value = object[p];
                 if (typeof value === 'number')
                     fixed += value;
                 else if (Rule.isStar(value))
@@ -193,31 +198,31 @@ module ChartUtils {
 
             this.totalSize = totalSize;
 
-            var remaining = totalSize - fixed;
-            var star = proportional <= 0 ? 0 : remaining / proportional;
+            const remaining = totalSize - fixed;
+            const star = proportional <= 0 ? 0 : remaining / proportional;
 
-            for (var p in object) {
-                var value = object[p];
+            for (const p in object) {
+                const value = object[p];
                 if (typeof value === 'number')
                     this.sizes[p] = value;
                 else if (Rule.isStar(value))
                     this.sizes[p] = Rule.getStar(value) * star;
             }
 
-            var acum = 0;
+            let acum = 0;
 
-            for (var p in this.sizes) {
+            for (const p in this.sizes) {
                 this.starts[p] = acum;
                 acum += this.sizes[p];
                 this.ends[p] = acum;
             }
         }
 
-        static isStar(val) {
+        static isStar(val: string) {
             return typeof val === 'string' && val[val.length - 1] == '*';
         }
 
-        static getStar(val) {
+        static getStar(val: string) {
             if (val === '*')
                 return 1;
 
@@ -225,31 +230,31 @@ module ChartUtils {
         }
 
 
-        size(name) {
+        size(name: string) {
             return this.sizes[name];
         }
 
-        start(name) {
+        start(name: string) {
             return this.starts[name];
         }
 
-        end(name) {
+        end(name: string) {
             return this.ends[name];
         }
 
-        middle(name) {
+        middle(name: string) {
             return this.starts[name] + this.sizes[name] / 2;
         }
 
-        debugX(chart) {
+        debugX(chart: d3.Selection<any, any, any, any>) {
 
-            var keys = d3.keys(this.sizes);
+            const keys = d3.keys(this.sizes);
 
             //paint x-axis rule
             chart.append('svg:g').attr('class', 'x-rule-tick')
                 .enterData(keys, 'line', 'x-rule-tick')
-                .attr('x1', function (d) { return this.ends[d]; })
-                .attr('x2', function (d) { return this.ends[d]; })
+                .attr('x1', d => this.ends[d])
+                .attr('x2', d => this.ends[d])
                 .attr('y1', 0)
                 .attr('y2', 10000)
                 .style('stroke-width', 2)
@@ -258,94 +263,344 @@ module ChartUtils {
             //paint y-axis rule labels
             chart.append('svg:g').attr('class', 'x-axis-rule-label')
                 .enterData(keys, 'text', 'x-axis-rule-label')
-                .attr('transform', function (d, i) {
+                .attr('transform', (d, i) => {
                     return translate(this.starts[d] + this.sizes[d] / 2 - 5, 10 + 100 * (i % 3)) +
                         rotate(90);
                 })
                 .attr('fill', 'DeepPink')
-                .text(function (d) { return d; });
+                .text(d => d);
         }
 
-        debugY(chart) {
+        debugY(chart: d3.Selection<any, any, any, any>) {
 
-            var keys = d3.keys(this.sizes);
+            const keys = d3.keys(this.sizes);
 
             //paint y-axis rule
             chart.append('svg:g').attr('class', 'y-rule-tick')
                 .enterData(keys, 'line', 'y-rule-tick')
                 .attr('x1', 0)
                 .attr('x2', 10000)
-                .attr('y1', function (d) { return this.ends[d]; })
-                .attr('y2', function (d) { return this.ends[d]; })
+                .attr('y1', d => this.ends[d])
+                .attr('y2', d => this.ends[d])
                 .style('stroke-width', 2)
                 .style('stroke', 'Violet');
 
             //paint y-axis rule labels
             chart.append('svg:g').attr('class', 'y-axis-rule-label')
                 .enterData(keys, 'text', 'y-axis-rule-label')
-                .attr('transform', function (d, i) { return translate(100 * (i % 3), this.starts[d] + this.sizes[d] / 2 + 4); })
+                .attr('transform', (d, i) => translate(100 * (i % 3), this.starts[d] + this.sizes[d] / 2 + 4))
                 .attr('fill', 'DarkViolet')
-                .text(function (d) { return d; });
+                .text(d => d);
         }
     }
 
 
-    export function toTree<T>(elements: T[], getKey : (elem: T)=> string,  getParent: (elem: T) => T): Node<T>[]{
+    export function getStackOffset(curveName: string): ((series: d3.Series<any, any>, order: number[]) => void) | undefined {
+        switch (curveName) {
+            case "zero": return d3.stackOffsetNone;
+            case "expand": return d3.stackOffsetExpand;
+            case "silhouette": return d3.stackOffsetSilhouette;
+            case "wiggle": return d3.stackOffsetWiggle;
+        }
 
-        var root = { item: null, children: [] }; 
+        return undefined;
+    }
 
-        var dic: { [key: string]: Node<T> } = {}; 
 
-        function getOrCreateNode(elem: T) {
 
-            var key = getKey(elem);
+    export function getStackOrder(schemeName: string): ((series: d3.Series<any, any>) => number[]) | undefined {
+        switch (schemeName) {
+            case "none": return d3.stackOrderNone;
+            case "ascending": return d3.stackOrderAscending;
+            case "descending": return d3.stackOrderDescending;
+            case "insideOut": return d3.stackOrderInsideOut;
+            case "reverse": return d3.stackOrderReverse;
+        }
 
-            if (dic[key]) 
-                return dic[key];
+        return undefined;
+    }
 
-            var node = { item: elem, children: [] }; 
 
-            var parent = getParent(elem);
+    export function getCurveByName(curveName: string): d3.CurveFactoryLineOnly | undefined {
+        switch (curveName) {
+            case "basis": return d3.curveBasis;
+            case "bundle": return d3.curveBundle.beta(0.5);
+            case "cardinal": return d3.curveCardinal;
+            case "catmull-rom": return d3.curveCatmullRom;
+            case "linear": return d3.curveLinear;
+            case "monotone": return d3.curveMonotoneX;
+            case "natural": return d3.curveNatural;
+            case "step": return d3.curveStep;
+            case "step-after": return d3.curveStepAfter;
+            case "step-before": return d3.curveStepBefore;
+        }
 
-            if (parent) {
-                var parentNode = getOrCreateNode(parent);
+        return undefined;
+    }
 
-                parentNode.children.push(node);
-            } else {
-                root.children.push(node);
+    export function getColorInterpolation(interpolationName: string): ((value: number) => string) | undefined {
+        switch (interpolationName) {
+            case "YlGn": return d3sc.interpolateYlGn;
+            case "YlGnBu": return d3sc.interpolateYlGnBu;
+            case "GnBu": return d3sc.interpolateGnBu;
+            case "BuGn": return d3sc.interpolateBuGn;
+            case "PuBuGn": return d3sc.interpolatePuBuGn;
+            case "PuBu": return d3sc.interpolatePuBu;
+            case "BuPu": return d3sc.interpolateBuPu;
+            case "RdPu": return d3sc.interpolateRdPu;
+            case "PuRd": return d3sc.interpolatePuRd;
+            case "OrRd": return d3sc.interpolateOrRd;
+            case "YlOrRd": return d3sc.interpolateYlOrRd;
+            case "YlOrBr": return d3sc.interpolateYlOrBr;
+            case "Purples": return d3sc.interpolatePurples;
+            case "Blues": return d3sc.interpolateBlues;
+            case "Greens": return d3sc.interpolateGreens;
+            case "Oranges": return d3sc.interpolateOranges;
+            case "Reds": return d3sc.interpolateReds;
+            case "Greys": return d3sc.interpolateGreys;
+            case "PuOr": return d3sc.interpolatePuOr;
+            case "BrBG": return d3sc.interpolateBrBG;
+            case "PRGn": return d3sc.interpolatePRGn;
+            case "PiYG": return d3sc.interpolatePiYG;
+            case "RdBu": return d3sc.interpolateRdBu;
+            case "RdGy": return d3sc.interpolateRdGy;
+            case "RdYlBu": return d3sc.interpolateRdYlBu;
+            case "Spectral": return d3sc.interpolateSpectral;
+            case "RdYlGn": return d3sc.interpolateRdYlGn;
+        }
+
+        return undefined;
+    }
+
+    export function getColorScheme(schemeName: string): string[] | undefined {
+        switch (schemeName) {
+            case "category10": return d3.schemeCategory10;
+            case "category20": return d3.schemeCategory20;
+            case "category20b": return d3.schemeCategory20b;
+            case "category20c": return d3.schemeCategory20c;
+            case "accent": return d3sc.schemeAccent;
+            case "dark2": return d3sc.schemeDark2;
+            case "paired": return d3sc.schemePaired;
+            case "pastel1": return d3sc.schemePastel1;
+            case "pastel2": return d3sc.schemePastel2;
+            case "set1": return d3sc.schemeSet1;
+            case "set2": return d3sc.schemeSet2;
+            case "set3": return d3sc.schemeSet3;
+        }
+
+        return undefined;
+    }
+
+
+
+    export function stratifyTokens(
+        data: ChartTable,
+        keyColumn: string, /*Employee*/
+        keyColumnParent: string, /*Employee.ReportsTo*/):
+        d3.HierarchyNode<ChartRow | Folder | Root> {
+
+        const folders = data.rows
+            .filter(r => r[keyColumnParent] && r[keyColumnParent].key)
+            .map(r => ({ folder: r[keyColumnParent] }) as Folder)
+            .toObjectDistinct(r => r.folder.key!.toString());
+
+        const root: Root = { isRoot: true };
+
+        const NullConst = "- Null -";
+
+        const dic = data.rows.filter(r => r[keyColumn].key != null).toObjectDistinct(r => r[keyColumn]!.key as string);
+
+        const getParent = (d: ChartRow | Folder | Root) => {
+            if ((d as Root).isRoot)
+                return null;
+
+            if ((d as Folder).folder) {
+                const r = dic[(d as Folder).folder.key!];
+
+                if (!r)
+                    return root;
+
+                const parentValue = r[keyColumnParent];
+                if (!parentValue || !parentValue.key)
+                    return root;  //Either null
+
+                return folders[parentValue.key as string]; // Parent folder
             }
 
-            dic[key] = node;
+            if ((d as ChartRow)[keyColumn]) {
+                const r = d as ChartRow;
 
-            return node;
+                var fold = r[keyColumn] && r[keyColumn].key != null && folders[r[keyColumn].key as string];
+                if (fold)
+                    return fold; //My folder
+
+                const parentValue = r[keyColumnParent];
+
+                const parentFolder = parentValue && parentValue.key && folders[parentValue.key as string];
+
+                if (!parentFolder)
+                    return root; //No key an no parent
+
+                return folders[parentFolder.folder!.key as string]; //only parent
+            }
+
+            throw new Error("Unexpected " + JSON.stringify(d))
+        };
+
+        var getKey = (r: ChartRow | Folder | Root) => {
+
+            if ((r as Root).isRoot)
+                return "#Root";
+
+            if ((r as Folder).folder)
+                return "F#" + (r as Folder).folder.key;
+
+            const cr = (r as ChartRow);
+
+            if (cr[keyColumn].key != null)
+                return cr[keyColumn].key as string;
+
+            return NullConst;
         }
 
-        elements.forEach(getOrCreateNode);
+        var rootNode = d3.stratify<ChartRow | Folder | Root>()
+            .id(getKey)
+            .parentId(r => {
+                var parent = getParent(r);
+                return parent ? getKey(parent) : null
+            })([root, ...Object.values(folders), ...data.rows]);
 
-        return root.children;
+        return rootNode
+
+    }
+
+    interface Folder {
+        folder: ChartValue;
+    }
+
+    interface Root {
+        isRoot: true;
     }
 
 
-    export interface Node<T> {
-        item: T;
-        children: Node<T>[]; 
+    export function toPivotTable(data: ChartTable,
+        col0: string, /*Employee*/
+        otherCols: string[]): PivotTable {
+
+        var usedCols = otherCols
+            .filter(function (cn) { return data.columns[cn].token != undefined; });
+
+        var rows = data.rows
+            .map(function (r) {
+                return {
+                    rowValue: r[col0],
+                    values: usedCols.toObject(cn => cn, cn => ({
+                        rowClick: r,
+                        value: r[cn],
+                    }) as PivotValue)
+                } as PivotRow;
+            });
+
+        var title = otherCols
+            .filter(function (cn) { return data.columns[cn].token != undefined; })
+            .map(function (cn) { return data.columns[cn].title; })
+            .join(" | ");
+
+        return {
+            title,
+            columns: d3.values(usedCols.toObject(c => c, c => ({
+                color: null,
+                key: c,
+                niceName: data.columns[c].title,
+            } as PivotColumn))),
+            rows,
+        };
+    }
+
+    export function groupedPivotTable(data: ChartTable,
+        col0: string, /*Employee*/
+        colSplit: string,
+        colValue: string): PivotTable {
+
+        var columns = d3.values(data.rows.toObjectDistinct(cr => cr[colSplit].key as string, cr => ({
+            niceName: cr[colSplit].niceToString(),
+            color: cr[colSplit].color,
+            key: cr[colSplit].key,
+        }) as PivotColumn));
+
+        var rows = data.rows.groupBy(r => "k" + r[col0].key)
+            .map(gr => {
+
+                return {
+                    rowValue: gr.elements[0][col0],
+                    values: gr.elements.toObject(
+                        r => r[colSplit].key as string,
+                        r => ({ value: r[colValue], rowClick: r }) as PivotValue),
+                } as PivotRow;
+            });
+
+        var title = data.columns.c2.title + " / " + data.columns.c1.title;
+
+        return {
+            title,
+            columns,
+            rows,
+        } as PivotTable;
+    }
+
+    interface PivotTable {
+        title: string;
+        columns: PivotColumn[];
+        rows: PivotRow[];
+    }
+
+    interface PivotColumn {
+        key: string;
+        color?: string | null;
+        niceName?: string | null;
+    }
+
+    interface PivotRow {
+        rowValue: ChartValue;
+        values: { [key: string /*| number*/]: PivotValue };
+    }
+
+
+    interface PivotValue {
+        rowClick: ChartRow;
+        value: ChartValue;
     }
 
 
 }
 
-module D3 {
-    export interface Selection<T> {
-        enterData<S>(data: S[], tag: string, cssClass: string): D3.UpdateSelection<S>
-        enterData<S>(data: (data: T) => S[], tag: string, cssClass: string): D3.UpdateSelection<S>
-    }
+interface ChartValue {
+    key: string | number | undefined,
+    toStr: string,
+    color: string,
+    niceToString(): string;
 }
 
-declare module "ChartUtils" {
-    export = ChartUtils;
+interface ChartTable {
+    columns: { [name: string]: ChartColumn },
+    parameters: { [name: string]: string | null | undefined },
+    rows: ChartRow[]
+}
+
+interface ChartRow {
+    [name: string]: ChartValue
 }
 
 
-declare module "colorbrewer" {
-
+interface ChartColumn {
+    title?: string;
+    displayName?: string;
+    token?: string;
+    isGroupKey?: boolean;
+    type?: string;
 }
+
+export = ChartUtils;
+
+
+

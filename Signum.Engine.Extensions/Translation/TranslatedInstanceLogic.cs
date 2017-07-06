@@ -80,7 +80,7 @@ namespace Signum.Engine.Translation
                                where pr.PropertyRouteType == PropertyRouteType.FieldOrProperty && pr.FieldInfo != null && pr.FieldInfo.FieldType == typeof(string) &&
                                s.Settings.FieldAttribute<TranslateFieldAttribute>(pr) != null &&
                                s.Settings.FieldAttribute<IgnoreAttribute>(pr) == null
-                               select KVP.Create(pr, s.Settings.FieldAttribute<TranslateFieldAttribute>(pr).TraducibleRouteType)).ToList();
+                               select KVP.Create(pr, s.Settings.FieldAttribute<TranslateFieldAttribute>(pr).TranslatableRouteType)).ToList();
 
                     foreach (var kvp in prs)
                     {

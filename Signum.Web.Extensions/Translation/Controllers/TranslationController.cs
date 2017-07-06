@@ -58,7 +58,7 @@ namespace Signum.Web.Translation.Controllers
 
             if (role != null)
                 ViewBag.Role = role.InDB().Select(e => e.ToLite()).SingleEx();
-            return base.View(TranslationClient.ViewPrefix.FormatWith("LocalizableTypeUsedNotLocalized"), TranslationLogic.Occurrences);
+            return base.View(TranslationClient.ViewPrefix.FormatWith("LocalizableTypeUsedNotLocalized"), TranslationLogic.NonLocalized);
         }
 
 
@@ -204,7 +204,7 @@ namespace Signum.Web.Translation.Controllers
             var target = reference.Extract(targetCulture);
             DictionaryByTypeName(target); //To avoid finding duplicated types on save
             int totalTypes;
-            var changes = TranslationSynchronizer.GetAssemblyChanges(TranslationClient.Translator, target, master, reference.Values.ToList(), false, role, out totalTypes);
+            var changes = TranslationSynchronizer.GetAssemblyChanges(TranslationClient.Translator, target, master, reference.Values.ToList(), role, null, out totalTypes);
 
             ViewBag.Role = role;
             ViewBag.TotalTypes = totalTypes;
