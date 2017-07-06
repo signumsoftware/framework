@@ -80,6 +80,16 @@ export default class TranslationCodeSyncNamespaces extends React.Component<Trans
                     </tr>
                 </thead>
                 <tbody>
+                    <tr key={"All"}>
+                        <th>
+                            <Link to={`~/translation/sync/${p.assembly}/${p.culture}`}>
+                                {TranslationMessage.All.niceToString()}
+                            </Link>
+                        </th>
+                        <th> {this.state.result.sum(a => a.types)}</th>
+                        <th> {this.state.result.sum(a => a.translations)}</th>
+                    </tr>
+
                     {this.state.result.map(stats =>
                         <tr key={stats.namespace}>
                             <td>
