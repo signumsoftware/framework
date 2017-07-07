@@ -55,7 +55,7 @@ namespace Signum.Engine.Mailing
 
                     EmailMessageEntity email = new EmailMessageEntity
                     {
-                        Target = (Lite<Entity>)entity.ToLite(),
+                        Target = entity?.ToLite() ?? (this.systemEmail.UntypedEntity as Entity)?.ToLite(),
                         Recipients = recipients.Select(r => new EmailRecipientEntity(r.OwnerData) { Kind = r.Kind }).ToMList(),
                         From = from,
                         IsBodyHtml = template.IsBodyHtml,
