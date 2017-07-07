@@ -64,7 +64,7 @@ namespace Signum.Engine.Migrations
                     migrations.Add(new MigrationInfo
                     {
                         FileName = null,
-                        Comment = ">> In Database Only <<" + migration.Comment,
+                        Comment = ">> In Database Only << " + migration.Comment,
                         IsExecuted = true,
                         Version = migration.VersionNumber
                     });
