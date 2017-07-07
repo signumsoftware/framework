@@ -5,7 +5,8 @@
 @using Signum.Entities.Translation
 @using Signum.Entities.Authorization
 @using Signum.Engine.Translation
-@model TranslationOccurrences
+@using System.Collections.Concurrent;
+@model ConcurrentDictionary<Lite<RoleEntity>, ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>>>
 
 @{
     ViewBag.Title = TranslationMessage.CodeTranslations.NiceToString();
@@ -31,7 +32,7 @@ else
                 { @selectedRole.ToString() }
             </button>
             <div id="myDropdown" class="dropdown-content">
-                @foreach (var role in Model.LocalizableTypeUsedNotLocalized.Keys)
+                @foreach (var role in Model.Keys)
                 {
                     @Html.ActionLink(role.ToString(), (TranslationController tc) => tc.LocalizableTypeUsedNotLocalized(role))
                 }
@@ -52,13 +53,13 @@ else
             <th>Member Occurrences</th>
         </tr>
 
-        @foreach (var reDict in Model.LocalizableTypeUsedNotLocalized)
+        @foreach (var reDict in Model)
         {
             foreach (var ci in reDict.Value)
             {
                 foreach (var ty in ci.Value)
                 {
-                    foreach (var m in ty.Value.DictMi)
+                    foreach (var m in ty.Value.Members)
                     {
                         <tr>
                             <td>@reDict.Key.ToString() </td>

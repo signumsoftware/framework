@@ -34,7 +34,7 @@ namespace Signum.Web.Maps
                              total_size_kb = getStats.GetOrThrow(t.Name).total_size_kb,
                              mlistTables = t.TablesMList().Select(ml => new MListTableInfo
                              {
-                                 niceName = ml.Route.PropertyInfo.NiceName(),
+                                 niceName = ml.Field.Route.PropertyInfo.NiceName(),
                                  tableName = ml.Name.ToString(),
                                  rows = getStats.GetOrThrow(t.Name).rows,
                                  total_size_kb = getStats.GetOrThrow(t.Name).total_size_kb,

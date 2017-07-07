@@ -112,7 +112,7 @@ namespace Signum.Web.Mailing
 
                 OperationClient.AddSettings(new List<OperationSettings>
                 {
-                    new EntityOperationSettings<EmailTemplateEntity>(EmailMessageOperation.CreateMailFromTemplate)
+                    new EntityOperationSettings<EmailTemplateEntity>(EmailMessageOperation.CreateEmailFromTemplate)
                     {
                         Group = EntityOperationGroup.None,
                         Click = ctx => Module["createMailFromTemplate"](ctx.Options(), JsFunction.Event, 
