@@ -27,6 +27,8 @@ import { toLite } from "../../../Framework/Signum.React/Scripts/Signum.Entities"
 import { SearchControlLoaded } from "../../../Framework/Signum.React/Scripts/Search";
 import { MessageKey } from "../../../Framework/Signum.React/Scripts/Reflection";
 import { ifError } from "../../../Framework/Signum.React/Scripts/Globals";
+import { DisabledMixin } from "../Basics/Signum.Entities.Basics";
+import { tryGetMixin } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
 
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<ImportRoute path="~/tree/:typeName" onImportModule={() => import("./TreePage")} />);
@@ -88,12 +90,20 @@ export function treePath(typeName:string, filterOptions?: FilterOption[]): strin
     return Navigator.history.createHref({ pathname: "~/tree/" + typeName, search: QueryString.stringify(query) });
 }
 
-export function hideSiblings(ti: TypeInfo) {
+export function hideSiblingsAndIsDisabled(ti: TypeInfo) {
     const type = new Type<TreeEntity>(ti.name);
+
     if (type.memberInfo(a => a.isSibling).notVisible == undefined)
         type.memberInfo(a => a.isSibling).notVisible = true;
+
     if (type.memberInfo(a => a.parentOrSibling).notVisible == undefined)
         type.memberInfo(a => a.parentOrSibling).notVisible = true;
+
+    if (type.hasMixin(DisabledMixin)) {
+        var mi = type.mixinMemberInfo(DisabledMixin, e => e.isDisabled);
+        if (mi.notVisible == undefined)
+            mi.notVisible = true;
+    }
 }
 
 function getQuerySetting(typeName: string)
