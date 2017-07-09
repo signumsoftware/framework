@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
+import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { TypeContext, StyleOptions, EntityFrame } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
@@ -8,12 +8,13 @@ import { EntityPack, Entity, Lite, JavascriptMessage, entityInfo, getToString } 
 import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from '../../../../Framework/Signum.React/Scripts/Frames/Widgets'
 import ValidationErrors from '../../../../Framework/Signum.React/Scripts/Frames/ValidationErrors'
 import ButtonBar from '../../../../Framework/Signum.React/Scripts/Frames/ButtonBar'
-import { ToolbarElementEmbedded, ToolbarElementType, ToolbarMenuEntity } from '../Signum.Entities.Toolbar'
+import { ToolbarElementEmbedded, ToolbarElementType, ToolbarMenuEntity, ToolbarLocation } from '../Signum.Entities.Toolbar'
 import * as ToolbarClient from '../ToolbarClient'
 import { Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap'
 import { LinkContainer, IndexLinkContainer } from 'react-router-bootstrap'
 import { ToolbarConfig } from "../ToolbarClient";
 
+import "./ToolbarRenderer.css"
 
 export interface ToolbarRendererState {
     response?: ToolbarClient.ToolbarResponse<any>;
@@ -22,8 +23,10 @@ export interface ToolbarRendererState {
     isRtl: boolean;
 }
 
-export default class ToolbarRenderer extends React.Component<{}, ToolbarRendererState>
+export default class ToolbarRenderer extends React.Component<{ location?: ToolbarLocation;}, ToolbarRendererState>
 {
+    static defaultProps = { location: "Top" as ToolbarLocation };
+
     constructor(props: {}) {
         super(props);
         this.state = {
@@ -34,7 +37,7 @@ export default class ToolbarRenderer extends React.Component<{}, ToolbarRenderer
     }
 
     componentWillMount() {
-        ToolbarClient.API.getCurrentToolbar()
+        ToolbarClient.API.getCurrentToolbar(this.props.location!)
             .then(res => this.setState({ response: res }))
             .done();
     }
@@ -46,11 +49,18 @@ export default class ToolbarRenderer extends React.Component<{}, ToolbarRenderer
         if (!r)
             return null;
 
-        return (
-            <ul className="nav navbar-nav">
-                {r.elements && r.elements.map((res, i) => withKey( this.renderNavItem(res, i), i))}
-            </ul>
-        );
+        if (this.props.location == "Top")
+            return (
+                <ul className="nav navbar-nav">
+                    {r.elements && r.elements.map((res, i) => withKey(this.renderNavItem(res, i), i))}
+                </ul>
+            );
+        else
+            return (
+                <ul className="nav">
+                    {r.elements && r.elements.flatMap(sr => this.renderMenuItem(sr, 0, r)).map((sr, i) => withKey(sr, i))}
+                </ul>
+            );
     }
 
     handleOnToggle = (isOpen: boolean, res: ToolbarClient.ToolbarResponse<any>)  => {
@@ -79,7 +89,10 @@ export default class ToolbarRenderer extends React.Component<{}, ToolbarRenderer
                 var icon = this.icon(res);
 
                 return (
-                    <NavDropdown title={!icon ? title : (<span>{icon}{title}</span>) as any} id={"menu-" + index}onToggle={isOpen => this.handleOnToggle(isOpen, res)}open={this.state.expanded.contains(res)}>
+                    <NavDropdown title={!icon ? title : (<span>{icon}{title}</span>) as any}
+                        id={"menu-" + index}
+                        onToggle={isOpen => this.handleOnToggle(isOpen, res)}
+                        open={this.state.expanded.contains(res)}>
                         {res.elements && res.elements.flatMap(sr => this.renderMenuItem(sr, 0, res)).map((sr, i) => withKey(sr, i))}
                     </NavDropdown>
                 );
@@ -146,8 +159,8 @@ export default class ToolbarRenderer extends React.Component<{}, ToolbarRenderer
         switch (res.type) {
             case "Menu":
                 return [
-                    <MenuItem onClick={e => this.handleClick(e, res, topRes)} style={style}>
-                        {this.icon(res)}<strong>{res.label || res.content!.toStr}</strong>
+                    <MenuItem onClick={e => this.handleClick(e, res, topRes)} style={style} className={this.state.expanded.contains(res) ? "active" : undefined}>
+                        {this.icon(res)}{res.label || res.content!.toStr}<span className="fa arrow" />
                     </MenuItem>
                 ].concat(res.elements && res.elements.length && this.state.expanded.contains(res) ? res.elements.flatMap(r => this.renderMenuItem(r, indent + 1, topRes)) : []);
             case "Header":
