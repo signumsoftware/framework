@@ -29,6 +29,8 @@ namespace Signum.Entities.Toolbar
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
+        public ToolbarLocation Location { get; set; }
+
         public int? Priority { get; set; }
         
         [NotNullable, PreserveOrder]
@@ -63,6 +65,12 @@ namespace Signum.Entities.Toolbar
         {
             return ToStringExpression.Evaluate(this);
         }
+    }
+
+    public enum ToolbarLocation
+    {
+        Top,
+        Side,
     }
 
     [AutoInit]
