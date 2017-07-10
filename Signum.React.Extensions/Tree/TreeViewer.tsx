@@ -23,7 +23,7 @@ import { DisabledMixin } from "../Basics/Signum.Entities.Basics";
 import { getMixin } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
 import { tryGetMixin } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
 
-require("./TreeViewer.css");
+import "./TreeViewer.css"
 
 interface TreeViewerProps {
     typeName: string;

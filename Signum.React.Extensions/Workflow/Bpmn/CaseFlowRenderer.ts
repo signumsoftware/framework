@@ -9,8 +9,8 @@ import { Color, Gradient } from '../../Basics/Color'
 import { CaseFlow, CaseConnectionStats, CaseActivityStats  } from '../WorkflowClient'
 import * as BpmnUtils from './BpmnUtils'
 import { calculatePoint, Rectangle } from "../../Map/Utils";
-require("moment-duration-format");
 import NavigatedViewer = require("bpmn-js/lib/NavigatedViewer");
+import "moment-duration-format"
 
 export class CaseFlowRenderer extends CustomRenderer {
 

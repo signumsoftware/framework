@@ -18,7 +18,7 @@ import { DesignerContext, DesignerNode } from './NodeUtils'
 import { BaseNode, ContainerNode, LineBaseNode, NodeConstructor, EntityTableNode, EntityTableColumnNode } from './Nodes'
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 
-require("./DynamicViewTree.css");
+import "./DynamicViewTree.css"
 
 export interface DynamicViewTreeProps {
     rootNode: DesignerNode<BaseNode>;

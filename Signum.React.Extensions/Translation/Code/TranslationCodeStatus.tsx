@@ -12,7 +12,7 @@ import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString,
 import { API, LocalizedType, TranslationFileStatus } from '../TranslationClient'
 import { TranslationMessage } from '../Signum.Entities.Translation'
 
-require("../Translation.css");
+import "../Translation.css"
 
 interface TranslationCodeStatusProps extends RouteComponentProps<{}> {
 

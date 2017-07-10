@@ -17,7 +17,7 @@ import { TranslationMessage } from '../Signum.Entities.Translation'
 import { TranslationTypeTable } from './TranslationCodeView'
 import { Link } from "react-router-dom";
 
-require("../Translation.css");
+import "../Translation.css"
 
 interface TranslationCodeSyncProps extends RouteComponentProps<{ culture: string; assembly: string; namespace?: string; }> {
 

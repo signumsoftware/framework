@@ -17,8 +17,8 @@ import CaseFlowButton from './CaseFlowButton'
 import InlineCaseTags from './InlineCaseTags'
 import { RouteComponentProps } from "react-router";
 
-require("../../../../Framework/Signum.React/Scripts/Frames/Frames.css");
-require("./CaseAct.css");
+import "../../../../Framework/Signum.React/Scripts/Frames/Frames.css"
+import "./CaseAct.css"
 
 interface CaseFramePageProps extends RouteComponentProps<{ workflowId: string; mainEntityStrategy: string; caseActivityId?: string }> {
 }

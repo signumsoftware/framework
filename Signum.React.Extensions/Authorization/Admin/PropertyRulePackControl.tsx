@@ -15,7 +15,7 @@ import { API } from '../AuthClient'
 import { PropertyRulePack, PropertyAllowedRule, PropertyAllowed, AuthAdminMessage, PermissionSymbol, AuthMessage } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 
-require("./AuthAdmin.css");
+import "./AuthAdmin.css"
 
 export default class PropertyRulesPackControl extends React.Component<{ ctx: TypeContext<PropertyRulePack> }, void> implements IRenderButtons {
 

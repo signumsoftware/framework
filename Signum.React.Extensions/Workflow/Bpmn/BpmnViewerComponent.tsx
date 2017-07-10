@@ -14,9 +14,9 @@ import * as searchPad from 'bpmn-js/lib/features/search';
 import * as BpmnUtils from './BpmnUtils'
 import CaseActivityStatsModal from "../Case/CaseActivityStatsModal";
 
-require("bpmn-js/assets/bpmn-font/css/bpmn-embedded.css");
-require("diagram-js/assets/diagram-js.css");
-require("./Bpmn.css");
+import "bpmn-js/assets/bpmn-font/css/bpmn-embedded.css"
+import "diagram-js/assets/diagram-js.css"
+import "./Bpmn.css"
 
 export interface BpmnViewerComponentProps {
     diagramXML?: string;

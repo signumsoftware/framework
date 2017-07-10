@@ -13,7 +13,7 @@ import { IFile, IFilePath, FileMessage, FileTypeSymbol, FileEntity, FilePathEnti
 import Typeahead from '../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import { EntityBase, EntityBaseProps} from '../../../Framework/Signum.React/Scripts/Lines/EntityBase'
 
-require("./Files.css");
+import "./Files.css"
 
 export { FileTypeSymbol };
 

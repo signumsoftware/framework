@@ -19,7 +19,7 @@ import * as NodeUtils from './NodeUtils'
 import ShowCodeModal from './ShowCodeModal'
 import { ButtonsContext, IRenderButtons } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 
-require("./DynamicView.css");
+import "./DynamicView.css"
 
 interface DynamicViewEntityComponentProps {
     ctx: TypeContext<DynamicViewEntity>;

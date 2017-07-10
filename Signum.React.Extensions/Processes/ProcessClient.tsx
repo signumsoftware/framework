@@ -16,7 +16,7 @@ import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
-require("./Processes.css");
+import "./Processes.css"
 
 export function start(options: { routes: JSX.Element[], packages: boolean, packageOperations: boolean }) {
 

@@ -15,7 +15,7 @@ import { CultureInfoEntity } from '../../Basics/Signum.Entities.Basics'
 import { TranslationMessage } from '../Signum.Entities.Translation'
 import { RouteComponentProps } from "react-router";
 
-require("../Translation.css");
+import "../Translation.css"
 
 interface TranslationCodeViewProps extends RouteComponentProps<{ culture: string; assembly: string }> {
 

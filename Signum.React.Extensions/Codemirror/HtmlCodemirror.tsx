@@ -5,22 +5,22 @@ import { TypeContext, FormGroupStyle } from '../../../Framework/Signum.React/Scr
 import CodeMirrorComponent from '../Codemirror/CodeMirrorComponent'
 import * as CodeMirror from 'codemirror'
 
-require("codemirror/lib/codemirror.css");
-require("codemirror/addon/dialog/dialog.css");
-require("codemirror/addon/display/fullscreen.css");
-require("codemirror/addon/hint/show-hint.css");
+import "codemirror/lib/codemirror.css"
+import "codemirror/addon/dialog/dialog.css"
+import "codemirror/addon/display/fullscreen.css"
+import "codemirror/addon/hint/show-hint.css"
 
 
-require("codemirror/lib/codemirror");
-require("codemirror/mode/htmlmixed/htmlmixed");
-require("codemirror/addon/comment/comment");
-require("codemirror/addon/comment/continuecomment");
-require("codemirror/addon/dialog/dialog");
-require("codemirror/addon/display/fullscreen");
-require("codemirror/addon/hint/show-hint");
-require("codemirror/addon/search/match-highlighter");
-require("codemirror/addon/search/search");
-require("codemirror/addon/search/searchcursor");
+import "codemirror/lib/codemirror"
+import "codemirror/mode/htmlmixed/htmlmixed"
+import "codemirror/addon/comment/comment"
+import "codemirror/addon/comment/continuecomment"
+import "codemirror/addon/dialog/dialog"
+import "codemirror/addon/display/fullscreen"
+import "codemirror/addon/hint/show-hint"
+import "codemirror/addon/search/match-highlighter"
+import "codemirror/addon/search/search"
+import "codemirror/addon/search/searchcursor"
 
 export default class HtmlCodemirror extends React.Component<{ ctx: TypeContext<string | null | undefined>, onChange?: (newValue: string) => void }, void> {
 

@@ -13,8 +13,8 @@ import * as ToolbarClient from '../ToolbarClient'
 import { Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap'
 import { LinkContainer, IndexLinkContainer } from 'react-router-bootstrap'
 import { ToolbarConfig } from "../ToolbarClient";
+import '../../../../Framework/Signum.React/Scripts/Frames/MenuIcons.css'
 
-import "./ToolbarRenderer.css"
 
 export interface ToolbarRendererState {
     response?: ToolbarClient.ToolbarResponse<any>;

@@ -12,7 +12,7 @@ import { MapMessage } from '../Signum.Entities.Map'
 import * as MapClient from '../MapClient'
 import { OperationMapInfo, OperationMapD3, ForceNode, ForceLink, Transition} from './OperationMap'
 
-require("./operationMap.css");
+import "./operationMap.css"
 
 interface OperationMapPageProps extends RouteComponentProps<{ type: string}> {
     

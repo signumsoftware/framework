@@ -14,7 +14,7 @@ import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString,
 import { API, HeavyProfilerEntry, StackTraceTS } from '../ProfilerClient'
 import { RouteComponentProps } from "react-router";
 
-require("./Profiler.css");
+import "./Profiler.css"
 
 interface HeavyEntryProps extends RouteComponentProps<{selectedIndex : string }> {
 

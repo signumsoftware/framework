@@ -19,8 +19,8 @@ import CaseFlowButton from './CaseFlowButton'
 import InlineCaseTags from './InlineCaseTags'
 import { OperationMessage } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
 
-require("../../../../Framework/Signum.React/Scripts/Frames/Frames.css");
-require("./CaseAct.css");
+import "../../../../Framework/Signum.React/Scripts/Frames/Frames.css"
+import "./CaseAct.css"
 
 interface CaseFrameModalProps extends React.Props<CaseFrameModal>, IModalProps {
     title?: string;
