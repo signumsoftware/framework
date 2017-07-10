@@ -249,60 +249,72 @@ Array.prototype.sum = function (this: any[], selector?: (element: any, index: nu
 };
 
 
-Array.prototype.first = function (this: any[], errorContext: string) {
+Array.prototype.first = function (this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => boolean)) {
 
-    if (this.length == 0)
-        throw new Error("No " + (errorContext || "element") + " found");
+    var array = typeof errorContextOrPredicate == "function" ? this.filter(errorContextOrPredicate) : this;
 
-    return this[0];
+    if (array.length == 0)
+        throw new Error("No " + (typeof errorContextOrPredicate == "string" ? errorContextOrPredicate : "element") + " found");
+
+    return array[0];
 };
 
 
-Array.prototype.firstOrNull = function (this: any[]) {
+Array.prototype.firstOrNull = function (this: any[], predicate?: ((element: any, index: number, array: any[]) => boolean)) {
 
-    if (this.length == 0)
+    var array = typeof predicate == "function" ? this.filter(predicate) : this;
+
+    if (array.length == 0)
         return null;
 
-    return this[0];
+    return array[0];
 };
 
-Array.prototype.last = function (this: any[], errorContext: string) {
+Array.prototype.last = function (this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => boolean)) {
 
-    if (this.length == 0)
-        throw new Error("No " + (errorContext || "element") + " found");
+    var array = typeof errorContextOrPredicate == "function" ? this.filter(errorContextOrPredicate) : this;
 
-    return this[this.length - 1];
+    if (array.length == 0)
+        throw new Error("No " + (typeof errorContextOrPredicate == "string" ? errorContextOrPredicate : "element") + " found");
+
+    return array[array.length - 1];
 };
 
 
-Array.prototype.lastOrNull = function (this: any[]) {
+Array.prototype.lastOrNull = function (this: any[], predicate?: ((element: any, index: number, array: any[]) => boolean)) {
 
-    if (this.length == 0)
+    var array = typeof predicate == "function" ? this.filter(predicate) : this;
+
+    if (array.length == 0)
         return null;
 
-    return this[this.length - 1];
+    return array[array.length - 1];
 };
 
-Array.prototype.single = function (this: any[], errorContext: string) {
+Array.prototype.single = function (this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => boolean)) {
 
-    if (this.length == 0)
-        throw new Error("No " + (errorContext || "element")  + " found");
+    var array = typeof errorContextOrPredicate == "function" ? this.filter(errorContextOrPredicate) : this;
 
-    if (this.length > 1)
-        throw new Error("More than one " + (errorContext || "element")  + " found");
+    if (array.length == 0)
+        throw new Error("No " + (typeof errorContextOrPredicate == "string" ? errorContextOrPredicate : "element")  + " found");
 
-    return this[0];
+    if (array.length > 1)
+        throw new Error("More than one " + (typeof errorContextOrPredicate == "string" ? errorContextOrPredicate : "element")  + " found");
+
+    return array[0];
 };
 
-Array.prototype.singleOrNull = function (this: any[], errorContext: string) {
+Array.prototype.singleOrNull = function (this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => boolean)) {
 
-    if (this.length == 0)
+    var array = typeof errorContextOrPredicate == "function" ? this.filter(errorContextOrPredicate) : this;
+
+    if (array.length == 0)
         return null;
 
-    if (this.length > 1)
-        throw new Error("More than one " + (errorContext || "element")  + " found");
+    if (array.length > 1)
+        throw new Error("More than one " + (typeof errorContextOrPredicate == "string" ? errorContextOrPredicate : "element")  + " found");
 
-    return this[0];
+    return array[0];
 };
 
 Array.prototype.contains = function (this: any[], element: any) {
