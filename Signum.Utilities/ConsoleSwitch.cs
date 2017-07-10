@@ -62,11 +62,13 @@ namespace Signum.Utilities
 
         public WithDescription<V> ChooseTuple(string endMessage, int? numberOfOptions = null)
         {
+            Console.WriteLine(welcomeMessage);
             var noOfOptsPerScreen = numberOfOptions.GetValueOrDefault(Console.WindowHeight - 10);
             PrintOptions(0, noOfOptsPerScreen);
             var noOfOptsPrinted = noOfOptsPerScreen;
             do
             {
+            
                 var input = Console.ReadLine().Trim();
                 if (input == "+")
                 {
@@ -285,20 +287,13 @@ namespace Signum.Utilities
 
     public static class ConsoleSwitchExtensions
     {
-        public static T ChooseConsole<T>(this IEnumerable<T> collection, Func<T, string> getString = null, string message = null) where T : class
-        {
-            return ChooseConsoleWithFilter(collection, t => true, getString, message);
-        }
-
-
-        public static T ChooseConsoleWithFilter<T>(this IEnumerable<T> collection, Func<T,bool> predicate, Func<T, string> getString = null,
-            string message = null) where T : class
-        {
+        public static T ChooseConsole<T>(this IEnumerable<T> collection, Func<T, string> getString = null, string message = null) where T : class        {
+      
             if (message != null)
                 Console.WriteLine(message);
 
             var cs = new ConsoleSwitch<int, T>();
-            cs.Load(collection.Where(predicate).ToList(), getString);
+            cs.Load(collection.ToList(), getString);
             return cs.Choose();
         }
 

@@ -746,8 +746,25 @@ export class Type<T extends ModifiableEntity> implements IType {
         return pr.member;
     }
 
+    hasMixin(mixinType: Type<MixinEntity>): boolean {
+        return Dic.getKeys(this.typeInfo().members).some(k => k.startsWith("[" + mixinType.typeName + "]"));
+    }
+
+    mixinMemberInfo<M extends MixinEntity>(mixinType: Type<M>, lambdaToProperty: (v: M) => any): MemberInfo {
+        var pr = this.mixinPropertyRoute(mixinType, lambdaToProperty);
+
+        if (!pr.member)
+            throw new Error(`${pr.propertyPath()} has no member`);
+
+        return pr.member;
+    }
+
     propertyRoute(lambdaToProperty: (v: T) => any): PropertyRoute {
         return PropertyRoute.root(this.typeInfo()).add(lambdaToProperty);
+    }
+
+    mixinPropertyRoute<M extends MixinEntity>(mixinType: Type<M>, lambdaToProperty: (v: M) => any): PropertyRoute {
+        return PropertyRoute.root(this.typeInfo()).addLambdaMember({ type: "Mixin", name: mixinType.typeName }).add(lambdaToProperty);
     }
 
     niceName(): string {

@@ -81,7 +81,7 @@ namespace Signum.Engine
                 }
 
                 if (setter == null)
-                    setter = ReflectionTools.CreateSetter<L, Lite<T>>(((MemberExpression)getBackReference.Body).Member);
+                    setter = CreateGetter(getBackReference);
 
                 mlist.ForEach(line => setter(line, e.ToLite()));
                 if (onSave == null)
@@ -122,7 +122,7 @@ namespace Signum.Engine
                     return;
 
                 if (setter == null)
-                    setter = ReflectionTools.CreateSetter<L, Lite<T>>(((MemberExpression)getBackReference.Body).Member);
+                    setter = CreateGetter(getBackReference);
 
                 mlist.ForEach(line => setter(line, e.ToLite()));
                 if (onSave == null)
@@ -138,6 +138,17 @@ namespace Signum.Engine
             };
 
             return fi;
+        }
+
+        private static Action<L, Lite<T>> CreateGetter<T, L>(Expression<Func<L, Lite<T>>> getBackReference)
+            where T : Entity
+            where L : Entity
+        {
+            var body = getBackReference.Body;
+            if (body.NodeType == ExpressionType.Convert)
+                body = ((UnaryExpression)body).Operand;
+            
+            return ReflectionTools.CreateSetter<L, Lite<T>>(((MemberExpression)body).Member);
         }
     }
 }
