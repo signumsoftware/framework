@@ -21,7 +21,7 @@ import ContextMenu from './ContextMenu'
 import SelectorModal from '../SelectorModal'
 import SearchControlLoaded from './SearchControlLoaded'
 
-require("./Search.css");
+import "./Search.css"
 
 export interface SimpleFilterBuilderProps {
     findOptions: FindOptions;

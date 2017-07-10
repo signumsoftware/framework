@@ -6,7 +6,7 @@ import { Entity, Lite, is, toLite, LiteMessage, getToString, EntityPack, ModelSt
 import { TypeContext, StyleOptions, EntityFrame } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos } from '../Reflection'
 
-require("./Widgets.css");
+import "./Widgets.css"
 
 export interface WidgetContext<T extends ModifiableEntity> {
     ctx: TypeContext<T>;

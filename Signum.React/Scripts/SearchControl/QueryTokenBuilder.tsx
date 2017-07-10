@@ -12,7 +12,7 @@ import { default as SearchControl, SearchControlProps} from './SearchControl'
 import * as PropTypes from "prop-types";
 
 
-require("./QueryTokenBuilder.css");
+import "./QueryTokenBuilder.css"
 
 
 interface QueryTokenBuilderProps extends React.Props<QueryTokenBuilder> {

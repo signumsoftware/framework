@@ -13,7 +13,7 @@ import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos, Gr
 import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from './Widgets'
 import ValidationErrors from './ValidationErrors'
 import * as QueryString from 'query-string'
-require("./Frames.css");
+import "./Frames.css"
 
 interface FramePageProps extends RouteComponentProps<{ type: string; id?: string, waitData?: string }> {
 }
