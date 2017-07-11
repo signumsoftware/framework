@@ -256,7 +256,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
     }
 }
 
-class ScriptComponent extends React.Component<{ ctx: TypeContext<WorkflowScriptPartEmbedded>, mainEntityType: TypeEntity, workflow: WorkflowEntity }, void>{
+class ScriptComponent extends React.Component<{ ctx: TypeContext<WorkflowScriptPartEmbedded>, mainEntityType: TypeEntity, workflow: WorkflowEntity }>{
 
 
     render() {
@@ -282,7 +282,7 @@ class ScriptComponent extends React.Component<{ ctx: TypeContext<WorkflowScriptP
     }
 }
 
-class DecompositionComponent extends React.Component<{ ctx: TypeContext<SubWorkflowEmbedded>, mainEntityType: TypeEntity }, void>{
+class DecompositionComponent extends React.Component<{ ctx: TypeContext<SubWorkflowEmbedded>, mainEntityType: TypeEntity }>{
 
     handleCodeChange = (newScript: string) => {
         const subEntitiesEval = this.props.ctx.value.subEntitiesEval!;

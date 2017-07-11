@@ -215,7 +215,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
                 <br />
                 {this.renderToolbar()}
                 <br />
-                <div className="tree-container" ref={(t) => { this.treeContainer = t }} >
+                <div className="tree-container" ref={(t) => this.treeContainer = t!} >
                     <ul>
                         {!this.state.treeNodes ? JavascriptMessage.loading.niceToString() :
                             this.state.treeNodes.map((node, i) =>
@@ -573,7 +573,7 @@ interface TreeNodeControlProps {
     dropDisabled: boolean;
 }
 
-class TreeNodeControl extends React.Component<TreeNodeControlProps, void> {
+class TreeNodeControl extends React.Component<TreeNodeControlProps> {
 
     renderIcon(nodeState: TreeNodeState) {
 

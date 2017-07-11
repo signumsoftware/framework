@@ -14,7 +14,7 @@ interface WorkflowLaneModelComponentProps {
 
 
 
-export default class WorkflowLaneModelComponent extends React.Component<WorkflowLaneModelComponentProps, void> {
+export default class WorkflowLaneModelComponent extends React.Component<WorkflowLaneModelComponentProps> {
 
 
     render() {

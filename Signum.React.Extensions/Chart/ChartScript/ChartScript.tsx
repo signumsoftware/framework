@@ -14,7 +14,7 @@ import ChartScriptCode from './ChartScriptCode'
 
 import "../Chart.css"
 
-export default class ChartScript extends React.Component<{ ctx: TypeContext<ChartScriptEntity> }, void> {
+export default class ChartScript extends React.Component<{ ctx: TypeContext<ChartScriptEntity> }> {
 
     componentWillMount() {
         this.loadIcon(this.props);

@@ -17,7 +17,7 @@ interface QueryModelComponentProps {
     ctx: TypeContext<QueryModel>
 }
 
-export default class QueryModelComponent extends React.Component<QueryModelComponentProps, void> {
+export default class QueryModelComponent extends React.Component<QueryModelComponentProps> {
     
     handleOnSearch = () => {
         const qr = this.searchControl.searchControlLoaded.getQueryRequest();
@@ -34,7 +34,7 @@ export default class QueryModelComponent extends React.Component<QueryModelCompo
         return (
             <div>
                 <p>{QueryModelMessage.ConfigureYourQueryAndPressSearchBeforeOk.niceToString()}</p>
-                <SearchControl ref={sc => this.searchControl = sc}
+                <SearchControl ref={sc => this.searchControl = sc!}
                     hideButtonBar={true}
                     showContextMenu="Basic"
                     allowSelection={false}

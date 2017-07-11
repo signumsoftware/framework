@@ -28,7 +28,7 @@ interface CSharpCodeMirrorProps {
     errorLineNumber?: number;
 }
 
-export default class CSharpCodeMirror extends React.Component<CSharpCodeMirrorProps, void> { 
+export default class CSharpCodeMirror extends React.Component<CSharpCodeMirrorProps> { 
 
     codeMirrorComponent: CodeMirrorComponent;
 
@@ -55,7 +55,7 @@ export default class CSharpCodeMirror extends React.Component<CSharpCodeMirrorPr
         (options as any).matchBrackets = true;
         
         return (
-            <CodeMirrorComponent value={this.props.script} ref={cm => this.codeMirrorComponent = cm}
+            <CodeMirrorComponent value={this.props.script} ref={cm => this.codeMirrorComponent = cm!}
                 options={options}
                 onChange={this.props.isReadOnly ? undefined : this.props.onChange}
                 errorLineNumber={this.props.errorLineNumber}

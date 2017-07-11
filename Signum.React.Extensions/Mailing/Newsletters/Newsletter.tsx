@@ -9,7 +9,7 @@ import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/
 import { NewsletterEntity } from '../Signum.Entities.Mailing'
 import TemplateControls from '../../Templating/TemplateControls'
 
-export default class Newsletter extends React.Component<{ ctx: TypeContext<NewsletterEntity> }, void> {
+export default class Newsletter extends React.Component<{ ctx: TypeContext<NewsletterEntity> }> {
 
     render() {
 

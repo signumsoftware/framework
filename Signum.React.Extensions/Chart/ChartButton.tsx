@@ -16,7 +16,7 @@ export interface ChartButtonProps {
     searchControl: SearchControlLoaded;
 }
 
-export default class ChartButton extends React.Component<ChartButtonProps, void> {
+export default class ChartButton extends React.Component<ChartButtonProps> {
 
     handleOnMouseUp = (e: React.MouseEvent<any>) => {
 

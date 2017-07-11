@@ -5,7 +5,7 @@ import { RestLogEntity } from '../Signum.Entities.Rest'
 import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityRepeater } from "../../../../Framework/Signum.React/Scripts/Lines";
 import { } from "../../../../Framework/Signum.React/Scripts/ConfigureReactWidgets";
 
-export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogEntity> }, void> {
+export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogEntity> }> {
     render() {
         const ctx = this.props.ctx;
         return (

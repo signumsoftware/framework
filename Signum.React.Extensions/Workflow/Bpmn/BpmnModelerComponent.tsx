@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { Button } from "react-bootstrap";
 import { WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity, IWorkflowNodeEntity, WorkflowMessage } from '../Signum.Entities.Workflow'
-import Modeler = require("bpmn-js/lib/Modeler");
+import * as Modeler from "bpmn-js/lib/Modeler"
 import { ModelEntity, ValidationMessage, parseLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as connectionIcons from './ConnectionIcons'
@@ -27,7 +27,7 @@ class CustomModeler extends Modeler {
 CustomModeler.prototype._modules =
     CustomModeler.prototype._modules.concat([customRenderer, customPopupMenu]);
 
-export default class BpmnModelerComponent extends React.Component<BpmnModelerComponentProps, void> {
+export default class BpmnModelerComponent extends React.Component<BpmnModelerComponentProps> {
 
     private modeler: Modeler;
     private elementRegistry: BPMN.ElementRegistry;

@@ -1,7 +1,6 @@
 ﻿/// <reference path="../bpmn-js.d.ts" />
-import Modeler = require("bpmn-js/lib/Modeler");
-import BpmnReplaceMenuProvider = require("bpmn-js/lib/features/popup-menu/ReplaceMenuProvider");
-import {  } from '../Signum.Entities.Workflow'
+import * as Modeler from "bpmn-js/lib/Modeler"
+import * as BpmnReplaceMenuProvider from "bpmn-js/lib/features/popup-menu/ReplaceMenuProvider"
 import * as BpmnUtils from './BpmnUtils'
 import { Lite, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 

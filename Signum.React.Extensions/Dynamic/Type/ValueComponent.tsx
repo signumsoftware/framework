@@ -20,7 +20,7 @@ export interface ValueComponentProps {
     onChange?: () => void;
 }
 
-export default class ValueComponent extends React.Component<ValueComponentProps, void> {
+export default class ValueComponent extends React.Component<ValueComponentProps> {
 
     updateValue(value: string | boolean | undefined) {
         var p = this.props;

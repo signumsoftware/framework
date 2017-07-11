@@ -5,7 +5,7 @@ import {SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { ScheduleRuleMonthsEntity } from '../Signum.Entities.Scheduler'
 
-export default class ScheduleRuleMonths extends React.Component<{ ctx: TypeContext<ScheduleRuleMonthsEntity> }, void> {
+export default class ScheduleRuleMonths extends React.Component<{ ctx: TypeContext<ScheduleRuleMonthsEntity> }> {
 
     render() {
         

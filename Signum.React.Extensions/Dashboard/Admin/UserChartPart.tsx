@@ -12,7 +12,7 @@ import FileLine, {FileTypeSymbol} from '../../Files/FileLine'
 import { UserChartPartEntity } from '../Signum.Entities.Dashboard'
 
 
-export default class UserChartPart extends React.Component<{ ctx: TypeContext<UserChartPartEntity> }, void> {
+export default class UserChartPart extends React.Component<{ ctx: TypeContext<UserChartPartEntity> }> {
 
     render() {
         const ctx = this.props.ctx;

@@ -8,7 +8,7 @@ import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 
 const CurrentEntityKey = "[CurrentEntity]";
-export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQueryEntity> }, void> {
+export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQueryEntity> }> {
 
     render() {
 

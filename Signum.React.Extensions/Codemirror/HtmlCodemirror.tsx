@@ -22,7 +22,7 @@ import "codemirror/addon/search/match-highlighter"
 import "codemirror/addon/search/search"
 import "codemirror/addon/search/searchcursor"
 
-export default class HtmlCodemirror extends React.Component<{ ctx: TypeContext<string | null | undefined>, onChange?: (newValue: string) => void }, void> {
+export default class HtmlCodemirror extends React.Component<{ ctx: TypeContext<string | null | undefined>, onChange?: (newValue: string) => void }> {
 
     get entity() {
         return this.props.ctx.value;
@@ -64,7 +64,7 @@ export default class HtmlCodemirror extends React.Component<{ ctx: TypeContext<s
         
         return (
             <div>
-                <CodeMirrorComponent value={this.props.ctx.value} ref={cm => this.codeMirrorComponent = cm}
+                <CodeMirrorComponent value={this.props.ctx.value} ref={cm => this.codeMirrorComponent = cm!}
                     options={options}
                     onChange={this.handleOnChange}/>
             </div>

@@ -214,7 +214,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         );
     }
 
-    validationErrors: ValidationErrors;
+    validationErrors?: ValidationErrors | null;
 
     getMainTypeInfo(): TypeInfo {
         return getTypeInfo(this.state.pack!.activity.case.mainEntity.Type);

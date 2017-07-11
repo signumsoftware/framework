@@ -19,7 +19,7 @@ import { DashboardEntity, PanelPartEmbedded, IPartEntity } from '../Signum.Entit
 import "../Dashboard.css"
 
 
-export default class DashboardView extends React.Component<{ dashboard: DashboardEntity, entity?: Entity }, void> {
+export default class DashboardView extends React.Component<{ dashboard: DashboardEntity, entity?: Entity }> {
 
     render() {
 

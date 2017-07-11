@@ -9,7 +9,7 @@ import { TypeContext, ValueLine, EntityLine, EntityCombo, EntityList, EntityDeta
 import { SearchControl, ValueSearchControl, FilterOperation, OrderType, PaginationMode, ISimpleFilterBuilder, extractFilterValue, FilterOption, FindOptionsParsed } from '../../../../Framework/Signum.React/Scripts/Search'
 import { FilterOptionParsed } from "../../../../Framework/Signum.React/Scripts/FindOptions";
 
-export default class InboxFilter extends React.Component<{ ctx: TypeContext<InboxFilterModel> }, void> implements ISimpleFilterBuilder {
+export default class InboxFilter extends React.Component<{ ctx: TypeContext<InboxFilterModel> }> implements ISimpleFilterBuilder {
 
     handleOnClearFiltersClick = () => {
         //this.props.ctx.value = CaseNotificationFilterModel.New();

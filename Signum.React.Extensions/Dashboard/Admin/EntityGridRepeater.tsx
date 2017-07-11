@@ -308,7 +308,7 @@ export interface EntityGridItemProps {
 }
 
 
-export class EntityGridItem extends React.Component<EntityGridItemProps, void>{
+export class EntityGridItem extends React.Component<EntityGridItemProps>{
 
     render() {
 

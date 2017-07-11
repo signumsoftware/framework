@@ -8,7 +8,7 @@ import { getToString, getMixin } from '../../../../Framework/Signum.React/Script
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { ToolbarEntity, ToolbarElementEmbedded } from '../Signum.Entities.Toolbar'
 
-export default class Toolbar extends React.Component<{ ctx: TypeContext<ToolbarEntity> }, void> {
+export default class Toolbar extends React.Component<{ ctx: TypeContext<ToolbarEntity> }> {
     
     render() {
         const ctx = this.props.ctx;

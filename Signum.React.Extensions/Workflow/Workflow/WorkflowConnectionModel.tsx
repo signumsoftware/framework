@@ -8,7 +8,7 @@ import {
 } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl, ValueSearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 
-export default class WorkflowConnectionModelComponent extends React.Component<{ ctx: TypeContext<WorkflowConnectionModel> }, void> {
+export default class WorkflowConnectionModelComponent extends React.Component<{ ctx: TypeContext<WorkflowConnectionModel> }> {
 
     render() {
         var ctx = this.props.ctx;

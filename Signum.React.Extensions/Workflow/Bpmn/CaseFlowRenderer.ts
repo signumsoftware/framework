@@ -1,6 +1,6 @@
 ﻿/// <reference path="../bpmn-js.d.ts" />
-import Modeler = require("bpmn-js/lib/Modeler");
-import BpmnRenderer = require("bpmn-js/lib/draw/BpmnRenderer");
+import * as Modeler from "bpmn-js/lib/Modeler"
+import * as BpmnRenderer from "bpmn-js/lib/draw/BpmnRenderer"
 import * as moment from 'moment'
 import { WorkflowConditionEntity, WorkflowActionEntity, DecisionResult, CaseActivityEntity, CaseNotificationEntity, DoneType, WorkflowActivityEntity, CaseFlowColor } from '../Signum.Entities.Workflow'
 import { Lite, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -8,8 +8,8 @@ import { CustomRenderer } from './CustomRenderer'
 import { Color, Gradient } from '../../Basics/Color'
 import { CaseFlow, CaseConnectionStats, CaseActivityStats  } from '../WorkflowClient'
 import * as BpmnUtils from './BpmnUtils'
-import { calculatePoint, Rectangle } from "../../Map/Utils";
-import NavigatedViewer = require("bpmn-js/lib/NavigatedViewer");
+import { calculatePoint, Rectangle } from "../../Map/Utils"
+import * as NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import "moment-duration-format"
 
 export class CaseFlowRenderer extends CustomRenderer {

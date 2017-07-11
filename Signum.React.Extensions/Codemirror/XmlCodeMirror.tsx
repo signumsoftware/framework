@@ -27,7 +27,7 @@ interface XmlCodeMirrorProps {
     isReadOnly?: boolean;
 }
 
-export default class XmlCodeMirror extends React.Component<XmlCodeMirrorProps, void> {
+export default class XmlCodeMirror extends React.Component<XmlCodeMirrorProps> {
 
     codeMirrorComponent: CodeMirrorComponent;
 
@@ -54,7 +54,7 @@ export default class XmlCodeMirror extends React.Component<XmlCodeMirrorProps, v
         (options as any).matchBrackets = true;
 
         return (
-            <CodeMirrorComponent value={this.props.script} ref={cm => this.codeMirrorComponent = cm}
+            <CodeMirrorComponent value={this.props.script} ref={cm => this.codeMirrorComponent = cm!}
                 options={options}
                 onChange={this.props.onChange} />
         );

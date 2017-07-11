@@ -81,7 +81,7 @@ export interface ChartColumnInfoProps {
     colorPalettes: string[];
 }
 
-export class ChartColumnInfo extends React.Component<ChartColumnInfoProps, void> {
+export class ChartColumnInfo extends React.Component<ChartColumnInfoProps> {
 
     getColorPalettes() {
         const token = this.props.ctx.value.token;

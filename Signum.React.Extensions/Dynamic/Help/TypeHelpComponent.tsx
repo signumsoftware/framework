@@ -112,7 +112,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
 
     render() {
         return (
-            <div className="sf-dynamic-type-help" ref={(th) => { this.typeHelpContainer = th } }>
+            <div className="sf-dynamic-type-help" ref={(th) => this.typeHelpContainer = th!}>
                 {this.renderHeader()}
                 {this.state.help == undefined ? <h4>Loading {this.currentType()}…</h4> : 
                     this.state.help == false ? <h4>Not found {this.currentType()}</h4> :
@@ -192,6 +192,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
             </div>
         );
     }
+
     typeHelpContainer: HTMLElement;
 
     renderHelp(h: DynamicClient.TypeHelp) {

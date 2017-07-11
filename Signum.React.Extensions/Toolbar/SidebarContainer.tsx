@@ -8,7 +8,7 @@ interface SidebarContainerProps {
     sidebarContent: React.ReactElement<any>;
 }
 
-export default class SidebarContainer extends React.Component<SidebarContainerProps, void> {
+export default class SidebarContainer extends React.Component<SidebarContainerProps> {
 
     render() {
         const visible = this.props.sidebarVisible;

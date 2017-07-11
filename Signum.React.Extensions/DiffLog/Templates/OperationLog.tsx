@@ -13,7 +13,7 @@ import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/
 
 import "./DiffLog.css"
 
-export default class OperationLog extends React.Component<{ ctx: TypeContext<OperationLogEntity> }, void> {
+export default class OperationLog extends React.Component<{ ctx: TypeContext<OperationLogEntity> }> {
 
     render() {
         

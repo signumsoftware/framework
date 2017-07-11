@@ -127,7 +127,7 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
         this.mountChart();
     }
 
-    chartContainer: HTMLDivElement;
+    chartContainer?: HTMLDivElement | null;
 
     mountChart() {
 

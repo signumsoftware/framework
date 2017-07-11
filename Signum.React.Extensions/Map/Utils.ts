@@ -63,7 +63,7 @@ function getRatio(vOut: Point, vIn: Point) {
 
 
 export function wrap(textElement: SVGTextElement, width: number) {
-    const text = d3.select<SVGTextElement, void>(textElement);
+    const text = d3.select(textElement);
     const words: string[] = text.text().split(/\s+/).reverse();
     let word: string;
 
