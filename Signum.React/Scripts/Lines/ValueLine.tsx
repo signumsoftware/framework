@@ -31,7 +31,7 @@ export interface OptionItem {
 }
 
 export type ValueLineType =
-    "Boolean" |
+    "Checkbox" |
     "ComboBox" |
     "DateTime" |
     "TextBox" |
@@ -74,7 +74,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
             return "ComboBox";
 
         if (t.name == "boolean")
-            return "Boolean";
+            return "Checkbox";
 
         if (t.name == "datetime")
             return "DateTime";
@@ -162,7 +162,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
     }
 }
 
-ValueLine.renderers["Boolean" as ValueLineType] = (vl) => {
+ValueLine.renderers["Checkbox" as ValueLineType] = (vl) => {
     const s = vl.state;
 
     const handleCheckboxOnChange = (e: React.SyntheticEvent<any>) => {

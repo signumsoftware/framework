@@ -16,7 +16,7 @@ import { renderWidgets, WidgetContext } from './Widgets'
 import { needsCanExecute } from '../Operations/EntityOperations'
 import { EntityOperationContext } from '../Operations'
 
-require("./Frames.css");
+import "./Frames.css"
 
 interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
     title?: string;

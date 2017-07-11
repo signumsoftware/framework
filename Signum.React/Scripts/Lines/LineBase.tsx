@@ -7,7 +7,7 @@ import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../Type
 import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference } from '../Reflection'
 import { ValidationMessage } from '../Signum.Entities'
 
-require("./Lines.css");
+import "./Lines.css"
 
 export interface FormGroupProps extends React.Props<FormGroup> {
     labelText?: React.ReactChild;

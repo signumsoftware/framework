@@ -21,7 +21,7 @@ import ContextMenu from './ContextMenu'
 import SelectorModal from '../SelectorModal'
 import SearchControlLoaded from './SearchControlLoaded'
 
-require("./Search.css");
+import "./Search.css"
 
 export interface SimpleFilterBuilderProps {
     findOptions: FindOptions;
@@ -46,6 +46,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     hideFullScreenButton?: boolean;
     showBarExtension?: boolean;
     largeToolbarButtons?: boolean; 
+    avoidAutoRefresh?: boolean;
     throwIfNotFindable?: boolean;
     extraButtons?: (searchControl: SearchControlLoaded) => React.ReactNode
     onCreate?: () => Promise<void>;
@@ -151,6 +152,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             showBarExtension={this.props.showBarExtension}
             extraButtons={this.props.extraButtons}
             largeToolbarButtons={this.props.largeToolbarButtons}
+            avoidAutoRefresh={this.props.avoidAutoRefresh}
             findOptions={fo}
             queryDescription={this.state.queryDescription!}
             querySettings={Finder.getSettings(fo.queryKey)}

@@ -9,7 +9,7 @@ import { ServiceError, WebApiHttpError, ValidationError } from '../Services';
 import { SearchMessage, JavascriptMessage, Lite, Entity, NormalWindowMessage } from '../Signum.Entities'
 import { ExceptionEntity } from '../Signum.Entities.Basics'
 
-require("./Modals.css");
+import "./Modals.css"
 //http://codepen.io/m-e-conroy/pen/ALsdF
 interface ErrorModalProps extends IModalProps {
     error: any;

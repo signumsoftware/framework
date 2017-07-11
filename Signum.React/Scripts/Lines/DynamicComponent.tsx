@@ -104,6 +104,9 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
             if (tr.isEmbedded)
                 return <EntityDetail ctx={ctx} />;
 
+            if (ValueLine.getValueLineType(tr) == "Checkbox")
+                return <ValueLine ctx={ctx} inlineCheckbox={true} />;
+
             if (ValueLine.getValueLineType(tr) != undefined)
                 return <ValueLine ctx={ctx} />;
 
