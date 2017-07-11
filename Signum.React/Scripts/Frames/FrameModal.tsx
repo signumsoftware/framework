@@ -254,7 +254,7 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         );
     }
 
-    validationErrors: ValidationErrors;
+    validationErrors?: ValidationErrors | null;
 
     renderTitle() {
 

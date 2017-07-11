@@ -179,7 +179,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
         );
     }
 
-    validationErrors: ValidationErrors;
+    validationErrors?: ValidationErrors | null;
 
     renderTitle() {
 

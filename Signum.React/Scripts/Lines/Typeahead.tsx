@@ -239,8 +239,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
     input: HTMLInputElement;
 
-
-    handlePopupLoaded = (elem: HTMLElement) => {
+    handlePopupLoaded = (elem: HTMLElement | null) => {
         if (!this.input)
             return;
 
@@ -266,7 +265,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
         return (
             <span {...this.props.spanAttrs} className={classes(this.props.spanAttrs && this.props.spanAttrs.className, "sf-typeahead")}>
-                <input type="text" autoComplete="off" ref={inp => this.input = inp} {...this.props.inputAttrs}
+                <input type="text" autoComplete="off" ref={inp => this.input = inp!} {...this.props.inputAttrs}
                     value={this.props.value}
                     onFocus={this.handleFocus}
                     onBlur={this.handleBlur}

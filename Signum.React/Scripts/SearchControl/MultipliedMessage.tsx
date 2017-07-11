@@ -10,7 +10,7 @@ import { Binding, IsByAll, getTypeInfos, TypeReference } from '../Reflection'
 import { TypeContext, FormGroupStyle } from '../TypeContext'
 
 
-export default class MultipliedMessage extends React.Component<{ findOptions: FindOptionsParsed, mainType : TypeReference }, {}>  {
+export default class MultipliedMessage extends React.Component<{ findOptions: FindOptionsParsed, mainType : TypeReference }>{
 
     render() {
         const fo = this.props.findOptions;

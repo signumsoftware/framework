@@ -25,7 +25,7 @@ interface FilterBuilderProps extends React.Props<FilterBuilder> {
     onHeightChanged?: () => void;
 }
 
-export default class FilterBuilder extends React.Component<FilterBuilderProps, {}>  {
+export default class FilterBuilder extends React.Component<FilterBuilderProps>{
 
     handlerNewFilter = () => {
 
@@ -113,7 +113,7 @@ export interface FilterComponentProps extends React.Props<FilterComponent> {
     onFilterChanged: (filter: FilterOptionParsed) => void;
 }
 
-export class FilterComponent extends React.Component<FilterComponentProps, {}>{
+export class FilterComponent extends React.Component<FilterComponentProps>{
 
     handleDeleteFilter = () => {
         this.props.onDeleteFilter(this.props.filter);
@@ -251,7 +251,7 @@ export interface MultiValueProps {
     onChange: () => void;
 }
 
-export class MultiValue extends React.Component<MultiValueProps, void> {
+export class MultiValue extends React.Component<MultiValueProps> {
 
     handleDeleteValue = (index: number) => {
 

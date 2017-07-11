@@ -10,7 +10,7 @@ export interface ButtonBarProps extends ButtonsContext {
     align?: "left" | "right";
 }
 
-export default class ButtonBar extends React.Component<ButtonBarProps, void>{
+export default class ButtonBar extends React.Component<ButtonBarProps>{
 
     static onButtonBarRender: Array<(ctx: ButtonsContext) => Array<React.ReactElement<any> | undefined> | undefined> = [];
 

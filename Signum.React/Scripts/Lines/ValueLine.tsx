@@ -50,7 +50,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
             throw new Error(`No ValueLine found for '${state.type!.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
     }
 
-    inputElement?: HTMLElement;
+    inputElement?: HTMLElement | null;
 
     componentDidMount() {
         setTimeout(() => {

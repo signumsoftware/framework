@@ -284,8 +284,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
 
-    containerDiv?: HTMLDivElement;
-    thead?: HTMLTableSectionElement;
+    containerDiv?: HTMLDivElement | null;
+    thead?: HTMLTableSectionElement | null;
 
     render() {
 

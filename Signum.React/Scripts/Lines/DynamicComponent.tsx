@@ -6,7 +6,7 @@ import * as Navigator from '../Navigator'
 import { ViewReplacer } from '../Frames/ReactVisitor'
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, TypeContext, EntityCheckboxList, EnumCheckboxList, EntityTable } from '../Lines'
 
-export default class DynamicComponent extends React.Component<{ ctx: TypeContext<ModifiableEntity> }, void> {
+export default class DynamicComponent extends React.Component<{ ctx: TypeContext<ModifiableEntity> }> {
 
     render() {
 

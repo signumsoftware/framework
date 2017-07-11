@@ -18,7 +18,7 @@ interface PaginationSelectorProps {
 }
 
 
-export default class PaginationSelector extends React.Component<PaginationSelectorProps, {}> {
+export default class PaginationSelector extends React.Component<PaginationSelectorProps> {
 
     render() {
 

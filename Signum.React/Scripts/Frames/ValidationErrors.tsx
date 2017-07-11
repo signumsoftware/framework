@@ -4,7 +4,7 @@ import { ModifiableEntity, getToString, EntityPack, ModelState, JavascriptMessag
 import { GraphExplorer } from '../Reflection'
 
 
-export default class ValidationErrors extends React.Component<{ entity: ModifiableEntity }, void>
+export default class ValidationErrors extends React.Component<{ entity: ModifiableEntity }>
 {
     render() {
 

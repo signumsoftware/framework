@@ -24,7 +24,7 @@ interface QueryTokenBuilderProps extends React.Props<QueryTokenBuilder> {
     className?: string;
 }
 
-export default class QueryTokenBuilder extends React.Component<QueryTokenBuilderProps, void>  {
+export default class QueryTokenBuilder extends React.Component<QueryTokenBuilderProps>{
 
     lastTokenChanged: string | undefined;
 
@@ -149,7 +149,7 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
     }
 }
 
-export class QueryTokenItem extends React.Component<{ item: QueryToken | null }, void> {
+export class QueryTokenItem extends React.Component<{ item: QueryToken | null }> {
     render() {
 
         const item = this.props.item;
@@ -168,7 +168,7 @@ export class QueryTokenItem extends React.Component<{ item: QueryToken | null },
 }
   
 
-export class QueryTokenOptionalItem extends React.Component<{ item: QueryToken | null }, void> {
+export class QueryTokenOptionalItem extends React.Component<{ item: QueryToken | null }> {
 
     static contextTypes = { "parentToken": PropTypes.object };
 

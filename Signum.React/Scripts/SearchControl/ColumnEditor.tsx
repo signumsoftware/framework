@@ -20,7 +20,7 @@ interface ColumnEditorProps extends React.Props<ColumnEditor> {
     close: () => void;
 }
 
-export default class ColumnEditor extends React.Component<ColumnEditorProps, {}>  {
+export default class ColumnEditor extends React.Component<ColumnEditorProps>{
 
     handleTokenChanged = (newToken: QueryToken) => {
         this.props.columnOption.token = newToken;

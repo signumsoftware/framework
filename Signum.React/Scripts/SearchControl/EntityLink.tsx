@@ -14,7 +14,7 @@ export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement>
 }
 
 
-export default class EntityLink extends React.Component<EntityLinkProps, void>{
+export default class EntityLink extends React.Component<EntityLinkProps>{
 
     render() {
         const { lite, inSearch, children, onNavigated, getViewPromise, ...htmlAtts } = this.props;

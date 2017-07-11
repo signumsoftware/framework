@@ -166,7 +166,7 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
     }
 }
 
-class QuickLinkToggle extends React.Component<{ bsRole: string, onClick?: (e: React.MouseEvent<any>) => void, links: any[] | undefined }, void>{
+class QuickLinkToggle extends React.Component<{ bsRole: string, onClick?: (e: React.MouseEvent<any>) => void, links: any[] | undefined }>{
 
     handleOnClick = (e: React.MouseEvent<any>) => {
         e.preventDefault();
