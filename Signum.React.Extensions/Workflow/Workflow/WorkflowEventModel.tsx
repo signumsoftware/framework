@@ -13,7 +13,7 @@ interface WorkflowEventModelComponentProps {
     ctx: TypeContext<WorkflowEventModel>;
 }
 
-export default class WorkflowEventModelComponent extends React.Component<WorkflowEventModelComponentProps, void> {
+export default class WorkflowEventModelComponent extends React.Component<WorkflowEventModelComponentProps> {
 
     isTimerStart() {
         return (this.props.ctx.value.type == "TimerStart");

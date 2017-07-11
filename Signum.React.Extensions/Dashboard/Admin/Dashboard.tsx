@@ -18,7 +18,7 @@ import { EntityGridRepeater, EntityGridItem } from './EntityGridRepeater'
 
 require("../Dashboard.css");
 
-export default class Dashboard extends React.Component<{ ctx: TypeContext<DashboardEntity> }, void> {
+export default class Dashboard extends React.Component<{ ctx: TypeContext<DashboardEntity> }> {
 
     handleEntityTypeChange = () => {
         if (!this.props.ctx.value.entityType)

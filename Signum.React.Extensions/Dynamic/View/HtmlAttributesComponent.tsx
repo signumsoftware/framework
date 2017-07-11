@@ -29,7 +29,7 @@ interface HtmlAttributesLineProps {
     dn: DesignerNode<BaseNode>;
 }
 
-export class HtmlAttributesLine extends React.Component<HtmlAttributesLineProps, void>{
+export class HtmlAttributesLine extends React.Component<HtmlAttributesLineProps>{
 
     renderMember(expr: HtmlAttributesExpression | undefined): React.ReactNode {
         return (<span
@@ -160,7 +160,7 @@ const cssPropertyList = ["color", "opacity", "background", "background-attachmen
     "rest-after", "rest-before", "voice-balance", "voice-duration", "voice-pitch", "voice-pitch-range", "voice-rate", "voice-stress", "voice-volume", "marquee-direction",
     "marquee-play-count", "marquee-speed", "marquee-style"].sort();
 
-export class HtmlExpressionComponent extends React.Component<HtmlExpressionComponentProps, void>{
+export class HtmlExpressionComponent extends React.Component<HtmlExpressionComponentProps>{
     render() {
         
         return (
@@ -187,7 +187,7 @@ export interface ExpressionOrValueStripProps {
     filterKey: (key: string) => boolean;
 }
 
-export class ExpressionOrValueStrip extends React.Component<ExpressionOrValueStripProps, void>{
+export class ExpressionOrValueStrip extends React.Component<ExpressionOrValueStripProps>{
 
     render() {
 

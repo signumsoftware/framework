@@ -32,7 +32,7 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
         this.state = { };
     }
 
-    bpmnViewerComponent: BpmnViewerComponent;
+    bpmnViewerComponent?: BpmnViewerComponent | null;
 
     loadState(props: CaseComponentProps) {
         API.getWorkflowModel(toLite(props.ctx.value.workflow))

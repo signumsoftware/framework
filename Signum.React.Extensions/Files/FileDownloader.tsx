@@ -27,7 +27,7 @@ export interface FileDownloaderProps {
     htmlAttributes: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>
 }
 
-export default class FileDownloader extends React.Component<FileDownloaderProps, void> {
+export default class FileDownloader extends React.Component<FileDownloaderProps> {
 
     static configurtions: { [typeName: string]: FileDownloaderConfiguration<IFile> } = {};
 

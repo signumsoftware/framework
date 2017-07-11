@@ -12,7 +12,7 @@ import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntity
 require("../Chart.css");
 
 const CurrentEntityKey = "[CurrentEntity]";
-export default class UserChart extends React.Component<{ ctx: TypeContext<UserChartEntity> }, void> {
+export default class UserChart extends React.Component<{ ctx: TypeContext<UserChartEntity> }> {
 
     render() {
         const ctx = this.props.ctx;

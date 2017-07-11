@@ -5,7 +5,7 @@ import {SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { HolidayCalendarEntity, HolidayEmbedded } from '../Signum.Entities.Scheduler'
 
-export default class HolidayCalendar extends React.Component<{ ctx: TypeContext<HolidayCalendarEntity> }, void> {
+export default class HolidayCalendar extends React.Component<{ ctx: TypeContext<HolidayCalendarEntity> }> {
 
     render() {
         

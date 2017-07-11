@@ -65,7 +65,7 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
     render() {
         return (
             <div>
-                <div className="dynamic-view-tree" ref={(t) => { this.treeContainer = t } } >
+                <div className="dynamic-view-tree" ref={(t) => this.treeContainer = t!} >
                     <ul>
                         <DynamicViewNode
                             node={this.props.rootNode}

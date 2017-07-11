@@ -17,7 +17,7 @@ import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 
 require("./AuthAdmin.css");
 
-export default class PermissionRulesPackControl extends React.Component<{ ctx: TypeContext<PermissionRulePack> }, void> implements IRenderButtons {
+export default class PermissionRulesPackControl extends React.Component<{ ctx: TypeContext<PermissionRulePack> }> implements IRenderButtons {
 
     handleSaveClick = (bc: ButtonsContext) => {
         let pack = this.props.ctx.value;

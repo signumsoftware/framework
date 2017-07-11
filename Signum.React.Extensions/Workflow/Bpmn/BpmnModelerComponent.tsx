@@ -27,7 +27,7 @@ class CustomModeler extends Modeler {
 CustomModeler.prototype._modules =
     CustomModeler.prototype._modules.concat([customRenderer, customPopupMenu]);
 
-export default class BpmnModelerComponent extends React.Component<BpmnModelerComponentProps, void> {
+export default class BpmnModelerComponent extends React.Component<BpmnModelerComponentProps> {
 
     private modeler: Modeler;
     private elementRegistry: BPMN.ElementRegistry;

@@ -18,7 +18,7 @@ interface QueryTokenEntityBuilderProps {
     onTokenChanged?: (newToken: QueryToken) => void;
 }
 
-export default class QueryTokenEntityBuilder extends React.Component<QueryTokenEntityBuilderProps, {}> {
+export default class QueryTokenEntityBuilder extends React.Component<QueryTokenEntityBuilderProps> {
 
     handleTokenChanged = (newToken: QueryToken) => {
         if (newToken == undefined)

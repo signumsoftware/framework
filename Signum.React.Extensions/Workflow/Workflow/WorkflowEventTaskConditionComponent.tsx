@@ -8,7 +8,7 @@ export interface WorkflowEventTaskConditionComponentProps {
     ctx: TypeContext<WorkflowEventTaskConditionEval | undefined | null>;
 }
 
-export default class WorkflowEventTaskConditionComponent extends React.Component<WorkflowEventTaskConditionComponentProps, void> {
+export default class WorkflowEventTaskConditionComponent extends React.Component<WorkflowEventTaskConditionComponentProps> {
 
     render() {
         var ctx = this.props.ctx;

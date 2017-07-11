@@ -10,7 +10,7 @@ import { ToolbarElementEmbedded } from '../Signum.Entities.Toolbar'
 import { ColorTypeaheadLine } from '../../Basics/Templates/ColorTypeahead'
 import { IconTypeaheadLine } from '../../Basics/Templates/IconTypeahead'
 
-export default class ToolbarElement extends React.Component<{ ctx: TypeContext<ToolbarElementEmbedded> }, void> {
+export default class ToolbarElement extends React.Component<{ ctx: TypeContext<ToolbarElementEmbedded> }> {
 
     handleTypeChanges = () => {
         var a = this.props.ctx.value;

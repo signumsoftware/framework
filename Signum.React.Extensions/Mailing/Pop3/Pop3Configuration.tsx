@@ -7,7 +7,7 @@ import { ExceptionEntity }  from '../../../../Framework/Signum.React/Scripts/Sig
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { Pop3ConfigurationEntity, EmailMessageEntity } from '../Signum.Entities.Mailing'
 
-export default class Pop3Configuration extends React.Component<{ ctx: TypeContext<Pop3ConfigurationEntity> }, void> {
+export default class Pop3Configuration extends React.Component<{ ctx: TypeContext<Pop3ConfigurationEntity> }> {
 
     render() {
 

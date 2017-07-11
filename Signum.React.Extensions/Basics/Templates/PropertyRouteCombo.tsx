@@ -12,7 +12,7 @@ export interface PropertyRouteComboProps {
     onChange?: () => void;
 }
 
-export default class PropertyRouteCombo extends React.Component<PropertyRouteComboProps, void> {
+export default class PropertyRouteCombo extends React.Component<PropertyRouteComboProps> {
 
     static defaultProps: Partial<PropertyRouteComboProps> = {
         filter: a => a.name != "Id"

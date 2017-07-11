@@ -28,7 +28,7 @@ interface JavascriptCodeMirrorProps {
 }
 
 
-export default class JavascriptCodeMirror extends React.Component<JavascriptCodeMirrorProps, void> {
+export default class JavascriptCodeMirror extends React.Component<JavascriptCodeMirrorProps> {
     
     codeMirrorComponent: CodeMirrorComponent;
 
@@ -55,7 +55,7 @@ export default class JavascriptCodeMirror extends React.Component<JavascriptCode
 
         return (
             <div className="small-codemirror">
-                <CodeMirrorComponent value={this.props.code} ref={cm => this.codeMirrorComponent = cm}
+                <CodeMirrorComponent value={this.props.code} ref={cm => this.codeMirrorComponent = cm!}
                     options={options}
                     onChange={this.props.onChange} />
             </div>

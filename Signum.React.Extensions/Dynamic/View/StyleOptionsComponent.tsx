@@ -29,7 +29,7 @@ interface StyleOptionsLineProps {
     dn: DesignerNode<BaseNode>;
 }
 
-export class StyleOptionsLine extends React.Component<StyleOptionsLineProps, void>{
+export class StyleOptionsLine extends React.Component<StyleOptionsLineProps>{
 
     renderMember(expr: StyleOptionsExpression | undefined): React.ReactNode {
         return (<span
@@ -109,7 +109,7 @@ export interface StyleOptionsComponentProps {
     styleOptions: StyleOptionsExpression
 }
 
-export class StyleOptionsComponent extends React.Component<StyleOptionsComponentProps, void>{
+export class StyleOptionsComponent extends React.Component<StyleOptionsComponentProps>{
     render() {
         const so = this.props.styleOptions;
         const dn = this.props.dn;

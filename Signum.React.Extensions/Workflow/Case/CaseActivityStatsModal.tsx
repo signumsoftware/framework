@@ -88,7 +88,7 @@ interface CaseActivityStatsComponentProps {
     stats: CaseActivityStats;
 }
 
-export class CaseActivityStatsComponent extends React.Component<CaseActivityStatsComponentProps, void> {
+export class CaseActivityStatsComponent extends React.Component<CaseActivityStatsComponentProps> {
     render() {
 
         var ctx = new StyleContext(undefined, { labelColumns: 3 });

@@ -24,7 +24,7 @@ export default class Workflow extends React.Component<WorkflowProps, WorkflowSta
         this.state = {};
     }
 
-    private bpmnModelerComponent: BpmnModelerComponent | undefined;
+    bpmnModelerComponent?: BpmnModelerComponent | null;
 
     getXml(): Promise<string> {
         return this.bpmnModelerComponent!.getXml();

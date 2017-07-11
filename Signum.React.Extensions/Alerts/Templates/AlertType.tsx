@@ -12,7 +12,7 @@ import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntity
 import TemplateControls from '../../Templating/TemplateControls'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
-export default class AlertType extends React.Component<{ ctx: TypeContext<AlertTypeEntity> }, void> {
+export default class AlertType extends React.Component<{ ctx: TypeContext<AlertTypeEntity> }> {
 
     render() {
         const ctx = this.props.ctx;

@@ -17,7 +17,7 @@ import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 
 require("./AuthAdmin.css");
 
-export default class QueryRulesPackControl extends React.Component<{ ctx: TypeContext<QueryRulePack> }, void> implements IRenderButtons {
+export default class QueryRulesPackControl extends React.Component<{ ctx: TypeContext<QueryRulePack> }> implements IRenderButtons {
 
     handleSaveClick = (bc: ButtonsContext) => {
         let pack = this.props.ctx.value;

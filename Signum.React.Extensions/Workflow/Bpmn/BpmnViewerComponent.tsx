@@ -164,7 +164,7 @@ export default class BpmnViewerComponent extends React.Component<BpmnViewerCompo
                     {this.menuItem("EstimatedDuration")}
                 </DropdownButton>{" "}
                 <Button onClick={this.handleSearchClick}>{JavascriptMessage.search.niceToString()}</Button>
-                <div ref={de => this.divArea = de} />
+                <div ref={de => this.divArea = de!} />
             </div>
         );
     }

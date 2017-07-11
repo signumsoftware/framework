@@ -27,7 +27,7 @@ interface SqlCodeMirrorProps {
     isReadOnly?: boolean;
 }
 
-export default class SqlCodeMirror extends React.Component<SqlCodeMirrorProps, void> {
+export default class SqlCodeMirror extends React.Component<SqlCodeMirrorProps> {
 
     codeMirrorComponent: CodeMirrorComponent;
 
@@ -54,7 +54,7 @@ export default class SqlCodeMirror extends React.Component<SqlCodeMirrorProps, v
         (options as any).matchBrackets = true;
 
         return (
-            <CodeMirrorComponent value={this.props.script} ref={cm => this.codeMirrorComponent = cm}
+            <CodeMirrorComponent value={this.props.script} ref={cm => this.codeMirrorComponent = cm!}
                 options={options}
                 onChange={this.props.onChange} />
         );

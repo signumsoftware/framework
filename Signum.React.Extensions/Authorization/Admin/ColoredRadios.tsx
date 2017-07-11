@@ -22,7 +22,7 @@ interface ColorRadioProps {
  	title?: string;
 }
 
-export class ColorRadio extends React.Component<ColorRadioProps, void>{
+export class ColorRadio extends React.Component<ColorRadioProps>{
 
     render() {
         return (
@@ -34,7 +34,7 @@ export class ColorRadio extends React.Component<ColorRadioProps, void>{
     }
 }
 
-export class GrayCheckbox extends React.Component<{ checked: boolean, onUnchecked: () => void }, void>{
+export class GrayCheckbox extends React.Component<{ checked: boolean, onUnchecked: () => void }>{
 
     render() {
         return (

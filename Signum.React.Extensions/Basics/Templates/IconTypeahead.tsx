@@ -17,7 +17,7 @@ export interface IconTypeaheadLineProps {
 
 }
 
-export class IconTypeaheadLine extends React.Component<IconTypeaheadLineProps, void>{
+export class IconTypeaheadLine extends React.Component<IconTypeaheadLineProps>{
 
     render() {
         var ctx = this.props.ctx;
@@ -43,7 +43,7 @@ export interface IconTypeaheadProps {
     extraIcons?: string[];
 }
 
-export class IconTypeahead extends React.Component<IconTypeaheadProps, void>{
+export class IconTypeahead extends React.Component<IconTypeaheadProps>{
 
     icons: string[]; 
     constructor(props: IconTypeaheadProps) {

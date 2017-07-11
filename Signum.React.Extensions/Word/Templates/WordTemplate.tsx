@@ -13,7 +13,7 @@ import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntity
 import TemplateControls from '../../Templating/TemplateControls'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
-export default class WordTemplate extends React.Component<{ ctx: TypeContext<WordTemplateEntity> }, void> {
+export default class WordTemplate extends React.Component<{ ctx: TypeContext<WordTemplateEntity> }> {
 
     handleOnInsert = (newCode: string) => {
         ValueLineModal.show({

@@ -13,7 +13,7 @@ export interface OmniboxAutocompleteProps {
     inputAttrs?: React.HTMLAttributes<HTMLInputElement>;
 }
 
-export default class OmniboxAutocomplete extends React.Component<OmniboxAutocompleteProps, void>
+export default class OmniboxAutocomplete extends React.Component<OmniboxAutocompleteProps>
 {
     handleOnSelect = (result: OmniboxClient.OmniboxResult, e: React.KeyboardEvent<any> | React.MouseEvent<any>) => {
 
@@ -47,7 +47,7 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
         let inputAttr = { tabIndex: -1, placeholder: OmniboxMessage.Search.niceToString(), ...this.props.inputAttrs };
         
         const result = (
-            <Typeahead ref={ta => this.typeahead = ta} getItems={str => this.abortRequest.getData(str)} 
+            <Typeahead ref={ta => this.typeahead = ta!} getItems={str => this.abortRequest.getData(str)} 
                 renderItem={OmniboxClient.renderItem}
                 onSelect={this.handleOnSelect}
                 spanAttrs={this.props.spanAttrs}

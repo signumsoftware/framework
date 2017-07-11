@@ -180,7 +180,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     }
 
 
-    validationErrors: ValidationErrors;
+    validationErrors?: ValidationErrors | null;
 
     getMainTypeInfo(): TypeInfo {
         return getTypeInfo(this.state.pack!.activity.case.mainEntity.Type);

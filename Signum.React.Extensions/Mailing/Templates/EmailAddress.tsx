@@ -6,7 +6,7 @@ import { getToString }  from '../../../../Framework/Signum.React/Scripts/Signum.
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { EmailAddressEmbedded } from '../Signum.Entities.Mailing'
 
-export default class EmailAddress extends React.Component<{ ctx: TypeContext<EmailAddressEmbedded> }, void> {
+export default class EmailAddress extends React.Component<{ ctx: TypeContext<EmailAddressEmbedded> }> {
 
     render() {
 
