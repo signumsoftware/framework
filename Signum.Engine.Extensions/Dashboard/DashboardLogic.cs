@@ -40,6 +40,7 @@ namespace Signum.Engine.Dashboard
                     {"UserChartPart", typeof(UserChartPartEntity)},
                     {"UserQueryPart", typeof(UserQueryPartEntity)},
                     {"LinkListPart", typeof(LinkListPartEntity)},
+                    {"ValueUserQueryListPart", typeof(ValueUserQueryListPartEntity)},
                 });
 
                 sb.Include<DashboardEntity>()
