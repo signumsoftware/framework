@@ -295,11 +295,12 @@ export class MultiValue extends React.Component<MultiValueProps> {
                     }
                     <tr >
                         <td colSpan={4}>
-                            <a title={SearchMessage.AddValue.niceToString() }
-                                className="sf-line-button sf-create"
-                                onClick={this.handleAddValue}>
-                                <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{SearchMessage.AddValue.niceToString() }
-                            </a>
+                            {!this.props.frozen &&
+                                <a title={SearchMessage.AddValue.niceToString()}
+                                    className="sf-line-button sf-create"
+                                    onClick={this.handleAddValue}>
+                                    <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{SearchMessage.AddValue.niceToString()}
+                                </a>}
                         </td>
                     </tr>
                 </tbody>
