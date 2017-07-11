@@ -156,7 +156,7 @@ declare module 'bpmn-js/lib/Viewer' {
         get<T>(module: string): T;
         _emit(event: string, element: Object): void;
     }
-
+    namespace Viewer { }
     export = Viewer;
 }
 
@@ -168,6 +168,7 @@ declare module 'bpmn-js/lib/NavigatedViewer' {
       
     }
 
+    namespace NavigatedViewer { }
     export = NavigatedViewer;
 }
 
@@ -180,6 +181,7 @@ declare module 'bpmn-js/lib/Modeler' {
         createDiagram(done: (error: string, warning: string[]) => void): void;
     }
 
+    namespace Modeler { }
     export = Modeler
 }
 
@@ -192,6 +194,7 @@ declare module 'bpmn-js/lib/draw/BpmnRenderer' {
         drawConnection(visuals: any, element: BPMN.DiElement): SVGElement;
     }
 
+    namespace BpmnRenderer { }
     export = BpmnRenderer
 }
 
@@ -204,6 +207,7 @@ declare module 'bpmn-js/lib/features/popup-menu/ReplaceMenuProvider' {
         _createEntries(element: BPMN.DiElement, replaceOptions: any): any;
     }
 
+    namespace BpmnReplaceMenuProvider { }
     export = BpmnReplaceMenuProvider
 }
 
