@@ -177,6 +177,7 @@
     <Compile Include="Rest\RestApiKeyController.cs" />
     <Compile Include="Rest\RestLogFilter.cs" />
     <Compile Include="Rest\RestServer.cs" />
+    <TypeScriptCompile Include="Toolbar\SidebarContainer.tsx" />
     <Compile Include="Toolbar\ToolbarController.cs" />
     <Compile Include="Toolbar\ToolbarServer.cs" />
     <Compile Include="Tree\TreeController.cs" />
@@ -355,6 +356,7 @@
     <Content Include="Map\Operation\operationMap.css" />
     <Content Include="Map\Schema\schemaMap.css" />
     <Content Include="packages.config" />
+    <Content Include="Toolbar\Sidebar.css" />
     <Content Include="Tree\TreeViewer.css" />
     <Content Include="Workflow\Case\Tag.css" />
     <Content Include="Workflow\Case\Inbox.css" />

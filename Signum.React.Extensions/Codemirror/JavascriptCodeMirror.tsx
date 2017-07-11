@@ -2,25 +2,25 @@
 import CodeMirrorComponent from './CodeMirrorComponent'
 import * as CodeMirror from 'codemirror'
 
-require("codemirror/lib/codemirror.css");
-require("codemirror/addon/dialog/dialog.css");
-require("codemirror/addon/display/fullscreen.css");
-require("codemirror/addon/hint/show-hint.css");
+import "codemirror/lib/codemirror.css"
+import "codemirror/addon/dialog/dialog.css"
+import "codemirror/addon/display/fullscreen.css"
+import "codemirror/addon/hint/show-hint.css"
 
 
-require("codemirror/lib/codemirror");
-require("codemirror/mode/javascript/javascript");
-require("codemirror/addon/comment/comment");
-require("codemirror/addon/comment/continuecomment");
-require("codemirror/addon/dialog/dialog");
-require("codemirror/addon/display/fullscreen");
-require("codemirror/addon/edit/closebrackets");
-require("codemirror/addon/edit/matchbrackets");
-require("codemirror/addon/hint/show-hint");
-require("codemirror/addon/hint/javascript-hint");
-require("codemirror/addon/search/match-highlighter");
-require("codemirror/addon/search/search");
-require("codemirror/addon/search/searchcursor");
+import "codemirror/lib/codemirror"
+import "codemirror/mode/javascript/javascript"
+import "codemirror/addon/comment/comment"
+import "codemirror/addon/comment/continuecomment"
+import "codemirror/addon/dialog/dialog"
+import "codemirror/addon/display/fullscreen"
+import "codemirror/addon/edit/closebrackets"
+import "codemirror/addon/edit/matchbrackets"
+import "codemirror/addon/hint/show-hint"
+import "codemirror/addon/hint/javascript-hint"
+import "codemirror/addon/search/match-highlighter"
+import "codemirror/addon/search/search"
+import "codemirror/addon/search/searchcursor"
 
 interface JavascriptCodeMirrorProps {
     code: string;

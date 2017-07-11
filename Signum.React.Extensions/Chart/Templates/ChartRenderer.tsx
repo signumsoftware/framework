@@ -12,7 +12,7 @@ import {
    ChartColorEntity, ChartScriptEntity, ChartParameterEmbedded, ChartParameterType } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 
-require("../Chart.css");
+import "../Chart.css"
 
 declare global {
     interface Error {

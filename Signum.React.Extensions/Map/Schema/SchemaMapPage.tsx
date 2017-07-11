@@ -13,7 +13,7 @@ import * as MapClient from '../MapClient'
 import { SchemaMapInfo, EntityBaseType, ITableInfo, MListRelationInfo, IRelationInfo, ClientColorProvider, SchemaMapD3 } from './SchemaMap'
 import { RouteComponentProps } from "react-router";
 
-require("./schemaMap.css");
+import "./schemaMap.css"
 
 interface SchemaMapPageProps extends RouteComponentProps<{}> {
 

@@ -20,7 +20,7 @@ import { DynamicViewTree } from './DynamicViewTree'
 import ShowCodeModal from './ShowCodeModal'
 import { DynamicViewEntity, DynamicViewOperation, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 
-require("./DynamicView.css");
+import "./DynamicView.css"
 
 export interface DynamicViewComponentProps {
     ctx: TypeContext<ModifiableEntity>;

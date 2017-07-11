@@ -15,7 +15,7 @@ import Typeahead from '../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import { EntityBase, EntityBaseProps} from '../../../Framework/Signum.React/Scripts/Lines/EntityBase'
 import * as QueryString from 'query-string'
 
-require("./Files.css");
+import "./Files.css"
 
 
 export type DownloadBehaviour = "SaveAs" | "View" | "None";

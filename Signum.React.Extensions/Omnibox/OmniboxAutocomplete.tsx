@@ -6,7 +6,8 @@ import { ajaxPost, ajaxGet, AbortableRequest } from '../../../Framework/Signum.R
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import Typeahead from '../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import * as OmniboxClient from './OmniboxClient'
-import {  OmniboxMessage } from './Signum.Entities.Omnibox'
+import { OmniboxMessage } from './Signum.Entities.Omnibox'
+import '../../../Framework/Signum.React/Scripts/Frames/MenuIcons.css'
 
 export interface OmniboxAutocompleteProps {
     spanAttrs?: React.HTMLAttributes<HTMLSpanElement>;

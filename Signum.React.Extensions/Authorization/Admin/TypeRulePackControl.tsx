@@ -25,7 +25,7 @@ import { TypeConditionSymbol } from '../../Basics/Signum.Entities.Basics'
 import { QueryEntity, PropertyRouteEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 
 
-require("./AuthAdmin.css");
+import "./AuthAdmin.css"
 
 export default class TypesRulesPackControl extends React.Component<{ ctx: TypeContext<TypeRulePack> }, { filter: string }> implements IRenderButtons {
 

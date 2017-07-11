@@ -12,17 +12,18 @@ export default class Toolbar extends React.Component<{ ctx: TypeContext<ToolbarE
     
     render() {
         const ctx = this.props.ctx;
-        
+        const ctx3 = ctx.subCtx({ labelColumns: 3 });
         return (
             <div>
-                <ValueLine ctx={ctx.subCtx(f => f.name)} />
                 <div className="row">
-                    <div className="col-sm-8">
-                        <EntityLine ctx={ctx.subCtx(e => e.owner)} labelColumns={3} />
+                    <div className="col-sm-7">
+                        <ValueLine ctx={ctx3.subCtx(f => f.name)} />
+                        <EntityLine ctx={ctx3.subCtx(e => e.owner)} />
                     </div>
 
-                    <div className="col-sm-4">
-                        <ValueLine ctx={ctx.subCtx(e => e.priority)} />
+                    <div className="col-sm-5">
+                        <ValueLine ctx={ctx3.subCtx(f => f.location)} />
+                        <ValueLine ctx={ctx3.subCtx(e => e.priority)} />
                     </div>
                 </div>
                 <EntityRepeater ctx={ctx.subCtx(f => f.elements)} />

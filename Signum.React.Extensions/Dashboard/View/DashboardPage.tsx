@@ -17,7 +17,7 @@ import { RouteComponentProps } from "react-router";
 import * as QueryString from 'query-string'
 
 
-require("../Dashboard.css");
+import "../Dashboard.css"
 
 interface DashboardPageProps extends RouteComponentProps<{ dashboardId: string }> {
 

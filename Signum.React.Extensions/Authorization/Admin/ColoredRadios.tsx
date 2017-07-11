@@ -14,7 +14,7 @@ import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString,
 import { PermissionRulePack, AuthAdminMessage, PermissionSymbol, AuthMessage } from '../Signum.Entities.Authorization'
 
 
-require("./AuthAdmin.css");
+import "./AuthAdmin.css"
 interface ColorRadioProps {
     checked: boolean;
     onClicked: (e: React.MouseEvent<HTMLAnchorElement>) => void;

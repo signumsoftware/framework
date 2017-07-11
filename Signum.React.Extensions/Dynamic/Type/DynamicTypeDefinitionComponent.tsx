@@ -27,7 +27,7 @@ import ContextMenu from '../../../../Framework/Signum.React/Scripts/SearchContro
 import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
-require("./DynamicType.css");
+import "./DynamicType.css"
 
 export interface DynamicTypeDesignContext {
     refreshView: () => void;

@@ -15,7 +15,7 @@ import { API } from '../AuthClient'
 import { PermissionRulePack, PermissionAllowedRule, AuthAdminMessage, PermissionSymbol, AuthMessage } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 
-require("./AuthAdmin.css");
+import "./AuthAdmin.css"
 
 export default class PermissionRulesPackControl extends React.Component<{ ctx: TypeContext<PermissionRulePack> }> implements IRenderButtons {
 

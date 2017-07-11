@@ -11,7 +11,7 @@ import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType } from './Signum.Entities.Toolbar'
+import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType, ToolbarLocation } from './Signum.Entities.Toolbar'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
 
 export function start(...configs: ToolbarConfig<any>[]) {
@@ -67,8 +67,8 @@ export function registerConfig<T extends Entity>(config: ToolbarConfig<T>) {
 }
 
 export namespace API {
-    export function getCurrentToolbar(): Promise<ToolbarResponse<any>> {
-        return ajaxGet < ToolbarResponse<any>>({ url: `~/api/toolbar/current` });
+    export function getCurrentToolbar(location: ToolbarLocation): Promise<ToolbarResponse<any>> {
+        return ajaxGet<ToolbarResponse<any>>({ url: `~/api/toolbar/current/${location}` });
     }
 }
 

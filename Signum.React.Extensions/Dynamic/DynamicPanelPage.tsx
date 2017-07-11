@@ -20,7 +20,7 @@ import { DynamicPanelPermission, DynamicTypeMessage } from './Signum.Entities.Dy
 import { RouteComponentProps } from "react-router";
 import * as QueryString from 'query-string';
 
-require("./DynamicPanelPage.css");
+import "./DynamicPanelPage.css"
 
 interface DynamicPanelProps extends RouteComponentProps<{}> {
 }
