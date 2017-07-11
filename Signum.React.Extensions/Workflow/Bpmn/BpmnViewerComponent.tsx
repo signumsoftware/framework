@@ -7,12 +7,12 @@ import {
 import { JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { CaseFlow } from '../WorkflowClient'
-import NavigatedViewer = require("bpmn-js/lib/NavigatedViewer");
+import * as NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import * as caseFlowRenderer from './CaseFlowRenderer'
 import * as connectionIcons from './ConnectionIcons'
-import * as searchPad from 'bpmn-js/lib/features/search';
+import * as searchPad from 'bpmn-js/lib/features/search'
 import * as BpmnUtils from './BpmnUtils'
-import CaseActivityStatsModal from "../Case/CaseActivityStatsModal";
+import CaseActivityStatsModal from "../Case/CaseActivityStatsModal"
 
 import "bpmn-js/assets/bpmn-font/css/bpmn-embedded.css"
 import "diagram-js/assets/diagram-js.css"

@@ -487,7 +487,7 @@ export namespace API {
 
     export function findMainEntityType(request: { subString: string, count: number }, abortController?: FetchAbortController): Promise<Lite<TypeEntity>[]> {
         return ajaxGet<Lite<TypeEntity>[]>({
-            url: "~/api/workflow/?findMainEntityType" + QueryString.stringify(request),
+            url: "~/api/workflow/findMainEntityType?" + QueryString.stringify(request),
             abortController
         });
     }
