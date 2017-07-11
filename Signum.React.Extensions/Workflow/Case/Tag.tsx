@@ -10,10 +10,10 @@ import {
 import { SearchControl, ValueSearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { Color } from '../../Basics/Color'
 
-require("./Tag.css");
+import "./Tag.css"
 
 
-export default class Tag extends React.Component<{ tag: CaseTagTypeEntity }, void> {
+export default class Tag extends React.Component<{ tag: CaseTagTypeEntity }> {
     render() {
         const tag = this.props.tag;
         var color = Color.tryParse(tag.color!) || Color.Black;

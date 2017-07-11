@@ -14,9 +14,9 @@ import * as searchPad from 'bpmn-js/lib/features/search'
 import * as BpmnUtils from './BpmnUtils'
 import CaseActivityStatsModal from "../Case/CaseActivityStatsModal"
 
-require("bpmn-js/assets/bpmn-font/css/bpmn-embedded.css");
-require("diagram-js/assets/diagram-js.css");
-require("./Bpmn.css");
+import "bpmn-js/assets/bpmn-font/css/bpmn-embedded.css"
+import "diagram-js/assets/diagram-js.css"
+import "./Bpmn.css"
 
 export interface BpmnViewerComponentProps {
     diagramXML?: string;
@@ -164,7 +164,7 @@ export default class BpmnViewerComponent extends React.Component<BpmnViewerCompo
                     {this.menuItem("EstimatedDuration")}
                 </DropdownButton>{" "}
                 <Button onClick={this.handleSearchClick}>{JavascriptMessage.search.niceToString()}</Button>
-                <div ref={de => this.divArea = de} />
+                <div ref={de => this.divArea = de!} />
             </div>
         );
     }

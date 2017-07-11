@@ -15,7 +15,7 @@ interface DynamicSqlMigrationComponentProps {
     ctx: TypeContext<DynamicSqlMigrationEntity>;
 }
 
-export default class DynamicSqlMigrationComponent extends React.Component<DynamicSqlMigrationComponentProps, void> {
+export default class DynamicSqlMigrationComponent extends React.Component<DynamicSqlMigrationComponentProps> {
 
     handleScriptChange = (newScript: string) => {
 

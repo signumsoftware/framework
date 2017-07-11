@@ -23,7 +23,7 @@ interface CaseButtonBarProps {
     pack: EntityPack<CaseActivityEntity>;
 }
 
-export default class CaseButtonBar extends React.Component<CaseButtonBarProps, void>{
+export default class CaseButtonBar extends React.Component<CaseButtonBarProps>{
 
 
     render() {

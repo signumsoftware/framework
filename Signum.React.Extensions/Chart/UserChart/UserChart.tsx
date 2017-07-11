@@ -9,10 +9,10 @@ import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Ref
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 
-require("../Chart.css");
+import "../Chart.css"
 
 const CurrentEntityKey = "[CurrentEntity]";
-export default class UserChart extends React.Component<{ ctx: TypeContext<UserChartEntity> }, void> {
+export default class UserChart extends React.Component<{ ctx: TypeContext<UserChartEntity> }> {
 
     render() {
         const ctx = this.props.ctx;

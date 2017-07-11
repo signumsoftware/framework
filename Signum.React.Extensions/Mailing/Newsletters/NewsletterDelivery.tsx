@@ -8,7 +8,7 @@ import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/
 import { NewsletterDeliveryEntity } from '../Signum.Entities.Mailing'
 import { ProcessExceptionLineEntity } from '../../Processes/Signum.Entities.Processes'
 
-export default class NewsletterDelivery extends React.Component<{ ctx: TypeContext<NewsletterDeliveryEntity> }, void> {
+export default class NewsletterDelivery extends React.Component<{ ctx: TypeContext<NewsletterDeliveryEntity> }> {
 
     render() {
 

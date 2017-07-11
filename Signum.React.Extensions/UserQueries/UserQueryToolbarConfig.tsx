@@ -21,7 +21,7 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
         this.type = UserQueryEntity;
     }
 
-    countIcon: CountUserQueryIcon | undefined;
+    countIcon?: CountUserQueryIcon | null;
     getIcon(element: ToolbarResponse<UserQueryEntity>) {
 
         if (element.iconName == "count")
@@ -99,7 +99,7 @@ export class CountUserQueryIcon extends React.Component<CountUserQueryIconProps,
         this.valueSearchControl && this.valueSearchControl.refreshValue();
     }
 
-    valueSearchControl: ValueSearchControl | undefined;
+    valueSearchControl?: ValueSearchControl | null;
 
     render() {
 

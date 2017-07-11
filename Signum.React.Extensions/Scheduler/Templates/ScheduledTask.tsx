@@ -5,7 +5,7 @@ import {SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { ScheduledTaskEntity } from '../Signum.Entities.Scheduler'
 
-export default class ScheduledTask extends React.Component<{ ctx: TypeContext<ScheduledTaskEntity> }, void> {
+export default class ScheduledTask extends React.Component<{ ctx: TypeContext<ScheduledTaskEntity> }> {
 
     render() {
         

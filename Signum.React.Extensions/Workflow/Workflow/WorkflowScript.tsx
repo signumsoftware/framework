@@ -12,7 +12,7 @@ interface WorkflowScriptComponentProps {
     ctx: TypeContext<WorkflowScriptEntity>;
 }
 
-export default class WorkflowScriptComponent extends React.Component<WorkflowScriptComponentProps, void> {
+export default class WorkflowScriptComponent extends React.Component<WorkflowScriptComponentProps> {
 
     handleMainEntityTypeChange = () => {
         this.props.ctx.value.eval!.script = "";

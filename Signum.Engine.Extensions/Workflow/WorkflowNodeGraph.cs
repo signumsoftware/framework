@@ -114,16 +114,16 @@ namespace Signum.Engine.Workflow
                     var schedule = e.ScheduledTask();
 
                     if (schedule == null)
-                        errors.Add(WorkflowValidationMessage._0IsTimerStartAndSchedulerIsMandotary.NiceToString(e));
+                        errors.Add(WorkflowValidationMessage._0IsTimerStartAndSchedulerIsMandatory.NiceToString(e));
 
                     var wet = e.WorkflowEventTask();
 
                     if (wet == null)
-                        errors.Add(WorkflowValidationMessage._0IsTimerStartAndTaskIsMandotary.NiceToString(e));
+                        errors.Add(WorkflowValidationMessage._0IsTimerStartAndTaskIsMandatory.NiceToString(e));
                     else if (wet.TriggeredOn != TriggeredOn.Always)
                     {
                         if (wet.Condition?.Script == null || !wet.Condition.Script.Trim().HasText())
-                            errors.Add(WorkflowValidationMessage._0IsConditionalStartAndTaskConditionIsMandotary.NiceToString(e));
+                            errors.Add(WorkflowValidationMessage._0IsConditionalStartAndTaskConditionIsMandatory.NiceToString(e));
                     }
                 }
             });

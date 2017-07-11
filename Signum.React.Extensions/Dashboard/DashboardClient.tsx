@@ -67,13 +67,13 @@ export function start(options: { routes: JSX.Element[] }) {
         component: () => import('./View/UserChartPart').then(a => a.default),
         handleTitleClick: (p, e, ev) => {
             ev.preventDefault();
-            Navigator.pushOrOpen(Navigator.navigateRoute(p.userChart!), ev);
+            Navigator.pushOrOpenInTab(Navigator.navigateRoute(p.userChart!), ev);
         },
         handleFullScreenClick: (p, e, ev) => {
             ev.preventDefault();
             ev.persist();
             UserChartClient.Converter.toChartRequest(p.userChart!, e)
-                .then(cr => Navigator.pushOrOpen(ChartClient.Encoder.chartRequestPath(cr, { userChart: liteKey(toLite(p.userChart!)) }), ev))
+                .then(cr => Navigator.pushOrOpenInTab(ChartClient.Encoder.chartRequestPath(cr, { userChart: liteKey(toLite(p.userChart!)) }), ev))
                 .done();
         }
     });
@@ -83,13 +83,13 @@ export function start(options: { routes: JSX.Element[] }) {
         component: () => import('./View/UserQueryPart').then((a: any) => a.default),
         handleTitleClick: (p, e, ev) => {
             ev.preventDefault();
-            Navigator.pushOrOpen(Navigator.navigateRoute(p.userQuery!), ev);
+            Navigator.pushOrOpenInTab(Navigator.navigateRoute(p.userQuery!), ev);
         },
         handleFullScreenClick: (p, e, ev) => {
             ev.preventDefault();
             ev.persist();
             UserQueryClient.Converter.toFindOptions(p.userQuery!, e)
-                .then(cr => Navigator.pushOrOpen(Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(p.userQuery!)) }), ev))
+                .then(cr => Navigator.pushOrOpenInTab(Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(p.userQuery!)) }), ev))
                 .done()
         }
     });
@@ -106,7 +106,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
         return API.forEntityType(ctx.lite.EntityType).then(das =>
             das.map(d => new QuickLinks.QuickLinkAction(liteKey(d), d.toStr || "", e => {
-                Navigator.pushOrOpen(dashboardUrl(d, ctx.lite), e)
+                Navigator.pushOrOpenInTab(dashboardUrl(d, ctx.lite), e)
             }, { icon: "glyphicon glyphicon-th-large", iconColor: "darkslateblue" })));
     });
 
@@ -114,7 +114,7 @@ export function start(options: { routes: JSX.Element[] }) {
         e => Navigator.API.fetchAndRemember(ctx.lite)
             .then(db => {
                 if (db.entityType == undefined)
-                    Navigator.pushOrOpen(dashboardUrl(ctx.lite), e);
+                    Navigator.pushOrOpenInTab(dashboardUrl(ctx.lite), e);
                 else
                     Navigator.API.fetchAndRemember(db.entityType)
                         .then(t => Finder.find({ queryName: t.cleanName }))
@@ -122,7 +122,7 @@ export function start(options: { routes: JSX.Element[] }) {
                             if (!entity)
                                 return;
 
-                            Navigator.pushOrOpen(dashboardUrl(ctx.lite, entity), e);
+                            Navigator.pushOrOpenInTab(dashboardUrl(ctx.lite, entity), e);
                         }).done();
             }).done()));
 }

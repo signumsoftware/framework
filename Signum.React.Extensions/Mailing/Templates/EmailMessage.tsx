@@ -16,7 +16,7 @@ import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
 import { tryGetMixin } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
 
 
-export default class EmailMessage extends React.Component<{ ctx: TypeContext<EmailMessageEntity> }, void> {
+export default class EmailMessage extends React.Component<{ ctx: TypeContext<EmailMessageEntity> }> {
 
     render() {
 

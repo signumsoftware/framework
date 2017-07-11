@@ -16,7 +16,7 @@ import IFrameRenderer from './IFrameRenderer'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
 
-export default class EmailTemplate extends React.Component<{ ctx: TypeContext<EmailTemplateEntity> }, void> {
+export default class EmailTemplate extends React.Component<{ ctx: TypeContext<EmailTemplateEntity> }> {
 
     render() {
 

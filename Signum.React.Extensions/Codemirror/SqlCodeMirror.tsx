@@ -2,24 +2,24 @@
 import CodeMirrorComponent from './CodeMirrorComponent'
 import * as CodeMirror from 'codemirror'
 
-require("codemirror/lib/codemirror.css");
-require("codemirror/addon/dialog/dialog.css");
-require("codemirror/addon/display/fullscreen.css");
-require("codemirror/addon/hint/show-hint.css");
+import "codemirror/lib/codemirror.css"
+import "codemirror/addon/dialog/dialog.css"
+import "codemirror/addon/display/fullscreen.css"
+import "codemirror/addon/hint/show-hint.css"
 
 
-require("codemirror/lib/codemirror");
-require("codemirror/mode/sql/sql");
-require("codemirror/addon/comment/comment");
-require("codemirror/addon/comment/continuecomment");
-require("codemirror/addon/dialog/dialog");
-require("codemirror/addon/display/fullscreen");
-require("codemirror/addon/edit/closebrackets");
-require("codemirror/addon/edit/matchbrackets");
-require("codemirror/addon/hint/show-hint");
-require("codemirror/addon/search/match-highlighter");
-require("codemirror/addon/search/search");
-require("codemirror/addon/search/searchcursor");
+import "codemirror/lib/codemirror"
+import "codemirror/mode/sql/sql"
+import "codemirror/addon/comment/comment"
+import "codemirror/addon/comment/continuecomment"
+import "codemirror/addon/dialog/dialog"
+import "codemirror/addon/display/fullscreen"
+import "codemirror/addon/edit/closebrackets"
+import "codemirror/addon/edit/matchbrackets"
+import "codemirror/addon/hint/show-hint"
+import "codemirror/addon/search/match-highlighter"
+import "codemirror/addon/search/search"
+import "codemirror/addon/search/searchcursor"
 
 interface SqlCodeMirrorProps {
     script: string;
@@ -27,7 +27,7 @@ interface SqlCodeMirrorProps {
     isReadOnly?: boolean;
 }
 
-export default class SqlCodeMirror extends React.Component<SqlCodeMirrorProps, void> {
+export default class SqlCodeMirror extends React.Component<SqlCodeMirrorProps> {
 
     codeMirrorComponent: CodeMirrorComponent;
 
@@ -54,7 +54,7 @@ export default class SqlCodeMirror extends React.Component<SqlCodeMirrorProps, v
         (options as any).matchBrackets = true;
 
         return (
-            <CodeMirrorComponent value={this.props.script} ref={cm => this.codeMirrorComponent = cm}
+            <CodeMirrorComponent value={this.props.script} ref={cm => this.codeMirrorComponent = cm!}
                 options={options}
                 onChange={this.props.onChange} />
         );

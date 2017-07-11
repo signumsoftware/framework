@@ -23,7 +23,7 @@ import { DisabledMixin } from "../Basics/Signum.Entities.Basics";
 import { getMixin } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
 import { tryGetMixin } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
 
-require("./TreeViewer.css");
+import "./TreeViewer.css"
 
 interface TreeViewerProps {
     typeName: string;
@@ -215,7 +215,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
                 <br />
                 {this.renderToolbar()}
                 <br />
-                <div className="tree-container" ref={(t) => { this.treeContainer = t }} >
+                <div className="tree-container" ref={(t) => this.treeContainer = t!} >
                     <ul>
                         {!this.state.treeNodes ? JavascriptMessage.loading.niceToString() :
                             this.state.treeNodes.map((node, i) =>
@@ -452,7 +452,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
             showFilters: this.state.filterOptions.length > 0
         });
 
-        Navigator.pushOrOpen(path, e);
+        Navigator.pushOrOpenInTab(path, e);
     }
 
     handleToggleFilters = () => {
@@ -573,7 +573,7 @@ interface TreeNodeControlProps {
     dropDisabled: boolean;
 }
 
-class TreeNodeControl extends React.Component<TreeNodeControlProps, void> {
+class TreeNodeControl extends React.Component<TreeNodeControlProps> {
 
     renderIcon(nodeState: TreeNodeState) {
 

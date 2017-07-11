@@ -5,7 +5,7 @@ import {SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { PrintPackageEntity, PrintLineEntity } from '../Signum.Entities.Printing'
 
-export default class PrintPackage extends React.Component<{ ctx: TypeContext<PrintPackageEntity> }, void> {
+export default class PrintPackage extends React.Component<{ ctx: TypeContext<PrintPackageEntity> }> {
 
     render() {
         

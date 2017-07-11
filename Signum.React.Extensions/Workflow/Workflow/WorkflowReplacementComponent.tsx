@@ -6,7 +6,7 @@ import { symbolNiceName } from '../../../../Framework/Signum.React/Scripts/Refle
 import { PreviewTask } from '../WorkflowClient'
 import { is } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
 
-export default class WorkflowReplacementComponent extends React.Component<{ ctx: TypeContext<WorkflowReplacementModel>, previewTasks: PreviewTask[] }, void> {
+export default class WorkflowReplacementComponent extends React.Component<{ ctx: TypeContext<WorkflowReplacementModel>, previewTasks: PreviewTask[] }> {
 
     render() {
         var ctx = this.props.ctx;
@@ -48,7 +48,7 @@ export default class WorkflowReplacementComponent extends React.Component<{ ctx:
     }
 }
 
-export class WorkflowReplacementItemCombo extends React.Component<{ ctx: TypeContext<WorkflowReplacementItemEmbedded>, previewTasks: PreviewTask[] }, void> {
+export class WorkflowReplacementItemCombo extends React.Component<{ ctx: TypeContext<WorkflowReplacementItemEmbedded>, previewTasks: PreviewTask[] }> {
 
     handleChange = (e: React.FormEvent<any>) => {
         this.props.ctx.subCtx(a => a.newTask).value = (e.currentTarget as HTMLSelectElement).value;

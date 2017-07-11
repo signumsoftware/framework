@@ -15,10 +15,11 @@ import { API, AssemblyResult, LocalizedType, LocalizableType } from '../Translat
 import { CultureInfoEntity } from '../../Basics/Signum.Entities.Basics'
 import { TranslationMessage } from '../Signum.Entities.Translation'
 import { TranslationTypeTable } from './TranslationCodeView'
+import { Link } from "react-router-dom";
 
-require("../Translation.css");
+import "../Translation.css"
 
-interface TranslationCodeSyncProps extends RouteComponentProps<{ culture: string; assembly: string }> {
+interface TranslationCodeSyncProps extends RouteComponentProps<{ culture: string; assembly: string; namespace?: string; }> {
 
 }
 
@@ -36,25 +37,28 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
     }
 
     loadSync() {
-        const { assembly, culture } = this.props.match.params;
-        return API.sync(assembly, culture).then(result => this.setState({ result }))
+        const { assembly, culture, namespace } = this.props.match.params;
+        return API.sync(assembly, culture, namespace).then(result => this.setState({ result }))
     }
 
     render() {
 
-        const { assembly, culture } = this.props.match.params;
+        const { assembly, culture, namespace } = this.props.match.params;
 
 
         if (this.state.result && this.state.result.totalTypes == 0) {
             return (
                 <div>
                     <h2>{TranslationMessage._0AlreadySynchronized.niceToString(this.props.match.params.assembly)}</h2>
+                    <Link to={`~/translation/status`}>
+                        {TranslationMessage.BackToTranslationStatus.niceToString()}
+                    </Link>
                 </div>
             );
         }
 
-        let message = TranslationMessage.Synchronize0In1.niceToString(assembly,
-                this.state.cultures ? this.state.cultures[culture].toStr : culture);
+        let message = TranslationMessage.Synchronize0In1.niceToString(namespace || assembly,
+            this.state.cultures ? this.state.cultures[culture].toStr : culture);
 
         if (this.state.result) {
             message += ` [${Dic.getKeys(this.state.result.types).length}/${this.state.result.totalTypes}]`;
@@ -63,8 +67,8 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
         return (
             <div>
                 <h2>{message}</h2>
-                <br/>
-                { this.renderTable() }
+                <br />
+                {this.renderTable()}
             </div>
         );
     }
@@ -86,12 +90,12 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
 
 
         if (Dic.getKeys(this.state.result).length == 0)
-            return <strong> {TranslationMessage.NoResultsFound.niceToString() }</strong>;
+            return <strong> {TranslationMessage.NoResultsFound.niceToString()}</strong>;
 
         return (
             <div>
                 {Dic.getValues(this.state.result.types).map(type => <TranslationTypeTable key={type.type} type={type} result={this.state.result!} currentCulture={this.props.match.params.culture} />)}
-                <input type="submit" value={ TranslationMessage.Save.niceToString() } className="btn btn-primary" onClick={this.handleSave}/>
+                <input type="submit" value={TranslationMessage.Save.niceToString()} className="btn btn-primary" onClick={this.handleSave} />
             </div>
         );
     }

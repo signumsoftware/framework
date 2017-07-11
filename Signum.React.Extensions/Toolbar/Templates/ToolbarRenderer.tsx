@@ -13,8 +13,8 @@ import * as ToolbarClient from '../ToolbarClient'
 import { Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap'
 import { LinkContainer, IndexLinkContainer } from 'react-router-bootstrap'
 import { ToolbarConfig } from "../ToolbarClient";
+import '../../../../Framework/Signum.React/Scripts/Frames/MenuIcons.css'
 
-import "./ToolbarRenderer.css"
 
 export interface ToolbarRendererState {
     response?: ToolbarClient.ToolbarResponse<any>;
@@ -113,7 +113,7 @@ export default class ToolbarRenderer extends React.Component<{ location?: Toolba
                         return <MenuItem style={{ color: "red" }}>{"No Content or Url found"}</MenuItem>;
 
                     return (
-                        <NavItem onClick={e => Navigator.pushOrOpen(res.url!, e)}>
+                        <NavItem onClick={e => Navigator.pushOrOpenInTab(res.url!, e)}>
                             {ToolbarConfig.coloredIcon(res.iconName, res.iconColor)}{res.label}
                         </NavItem>
                     );
@@ -180,7 +180,7 @@ export default class ToolbarRenderer extends React.Component<{ location?: Toolba
                         return [<MenuItem style={{ color: "red" }}>{"No Content or Url found"}</MenuItem>];
 
                     return [
-                        <NavItem onClick={e => Navigator.pushOrOpen(res.url!, e)}>
+                        <NavItem onClick={e => Navigator.pushOrOpenInTab(res.url!, e)}>
                             {ToolbarConfig.coloredIcon(res.iconName, res.iconColor)}{res.label}
                         </NavItem>
                     ];

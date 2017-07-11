@@ -60,7 +60,7 @@ export default class TreePage extends React.Component<TreePageProps, TreePageSta
                         <span className="glyphicon glyphicon-new-window"></span>
                     </a>
                 </h2>
-                <TreeViewer ref={tv => { this.treeView = tv; }}
+                <TreeViewer ref={tv => this.treeView = tv!}
                     initialShowFilters={true}
                     typeName={ti.name}
                     allowMove={Operations.isOperationAllowed(TreeOperation.Move)}

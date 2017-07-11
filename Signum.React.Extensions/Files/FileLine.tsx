@@ -15,7 +15,7 @@ import { EntityBase, EntityBaseProps } from '../../../Framework/Signum.React/Scr
 import { default as FileDownloader, FileDownloaderConfiguration, DownloadBehaviour } from './FileDownloader'
 import FileUploader from './FileUploader'
 
-require("./Files.css");
+import "./Files.css"
 
 export { FileTypeSymbol };
 

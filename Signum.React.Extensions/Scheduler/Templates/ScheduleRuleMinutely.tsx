@@ -5,7 +5,7 @@ import {SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { ScheduleRuleMinutelyEntity } from '../Signum.Entities.Scheduler'
 
-export default class ScheduleRuleMinutely extends React.Component<{ ctx: TypeContext<ScheduleRuleMinutelyEntity> }, void> {
+export default class ScheduleRuleMinutely extends React.Component<{ ctx: TypeContext<ScheduleRuleMinutelyEntity> }> {
 
     render() {
         const ctx4 = this.props.ctx.subCtx({ labelColumns: {sm: 2}});

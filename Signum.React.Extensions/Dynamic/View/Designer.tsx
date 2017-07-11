@@ -31,7 +31,7 @@ export interface ExpressionOrValueProps {
     exampleExpression?: string;
 }
 
-export class ExpressionOrValueComponent extends React.Component<ExpressionOrValueProps, void> {
+export class ExpressionOrValueComponent extends React.Component<ExpressionOrValueProps> {
 
     updateValue(value: string | boolean | undefined) {
         var p = this.props;
@@ -237,7 +237,7 @@ interface NullableCheckBoxProps {
     onChange: (newValue: boolean | undefined) => void;
 }
 
-export class NullableCheckBox extends React.Component<NullableCheckBoxProps, void>{
+export class NullableCheckBox extends React.Component<NullableCheckBoxProps>{
 
     getIcon() {
         switch (this.props.value) {
@@ -272,7 +272,7 @@ export interface FieldComponentProps  {
     binding: Binding<string | undefined>,
 }
 
-export class FieldComponent extends React.Component<FieldComponentProps, void> {
+export class FieldComponent extends React.Component<FieldComponentProps> {
     
     handleChange = (e: React.ChangeEvent<any>) => {
         var sender = (e.currentTarget as HTMLSelectElement);
@@ -320,7 +320,7 @@ export class FieldComponent extends React.Component<FieldComponentProps, void> {
     }
 }
 
-export class DynamicViewInspector extends React.Component<{ selectedNode?: DesignerNode<BaseNode> }, void>{
+export class DynamicViewInspector extends React.Component<{ selectedNode?: DesignerNode<BaseNode> }>{
     render() {
 
         const sn = this.props.selectedNode;

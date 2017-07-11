@@ -14,7 +14,7 @@ import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString,
 import { PermissionRulePack, AuthAdminMessage, PermissionSymbol, AuthMessage } from '../Signum.Entities.Authorization'
 
 
-require("./AuthAdmin.css");
+import "./AuthAdmin.css"
 interface ColorRadioProps {
     checked: boolean;
     onClicked: (e: React.MouseEvent<HTMLAnchorElement>) => void;
@@ -22,7 +22,7 @@ interface ColorRadioProps {
  	title?: string;
 }
 
-export class ColorRadio extends React.Component<ColorRadioProps, void>{
+export class ColorRadio extends React.Component<ColorRadioProps>{
 
     render() {
         return (
@@ -34,7 +34,7 @@ export class ColorRadio extends React.Component<ColorRadioProps, void>{
     }
 }
 
-export class GrayCheckbox extends React.Component<{ checked: boolean, onUnchecked: () => void }, void>{
+export class GrayCheckbox extends React.Component<{ checked: boolean, onUnchecked: () => void }>{
 
     render() {
         return (

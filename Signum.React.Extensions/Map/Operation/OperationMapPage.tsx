@@ -12,7 +12,7 @@ import { MapMessage } from '../Signum.Entities.Map'
 import * as MapClient from '../MapClient'
 import { OperationMapInfo, OperationMapD3, ForceNode, ForceLink, Transition} from './OperationMap'
 
-require("./operationMap.css");
+import "./operationMap.css"
 
 interface OperationMapPageProps extends RouteComponentProps<{ type: string}> {
     
@@ -252,7 +252,7 @@ export class OperationMapRenderer extends React.Component<OperationMapRendererPr
 
         return (
             <div id="map" style={{ backgroundColor: "white", width: "100%", height: this.props.height + "px" }}>
-                <svg id="svgMap" ref={svg => this.svg = svg}>
+                <svg id="svgMap" ref={svg => this.svg = svg!}>
                     <defs>
                         <marker id="normal_arrow" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="10" markerHeight="10" orient="auto">
                             <path fill="gray" d="M0,0L0,-5L10,0L0,5L0,0" />

@@ -13,7 +13,7 @@ import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntity
 import TemplateControls from '../../Templating/TemplateControls'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
-export default class DateSpan extends React.Component<{ ctx: TypeContext<DateSpanEmbedded> }, void> {
+export default class DateSpan extends React.Component<{ ctx: TypeContext<DateSpanEmbedded> }> {
 
     render() {
 

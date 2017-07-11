@@ -54,7 +54,7 @@ export abstract class ToolbarConfig<T extends Entity> {
         var openWindow = e.ctrlKey || e.button == 1;
         e.persist();
         this.navigateTo(res).then(url => {
-            Navigator.pushOrOpen(url, e);
+            Navigator.pushOrOpenInTab(url, e);
         }).done();
     }
 }

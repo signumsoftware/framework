@@ -15,9 +15,9 @@ import { API } from '../AuthClient'
 import { OperationRulePack, OperationAllowed, OperationAllowedRule, AuthAdminMessage, PermissionSymbol, AuthMessage } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 
-require("./AuthAdmin.css");
+import "./AuthAdmin.css"
 
-export default class OperationRulePackControl extends React.Component<{ ctx: TypeContext<OperationRulePack> }, void> implements IRenderButtons {
+export default class OperationRulePackControl extends React.Component<{ ctx: TypeContext<OperationRulePack> }> implements IRenderButtons {
 
     handleSaveClick = (bc: ButtonsContext) => {
         let pack = this.props.ctx.value;

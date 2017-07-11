@@ -7,6 +7,7 @@ using Signum.Utilities;
 using System.ComponentModel;
 using System.IO;
 using System.Web;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.Files
 {
@@ -65,10 +66,13 @@ namespace Signum.Entities.Files
         }
 
         public int FileLength { get; internal set; }
-
+        
+        static Expression<Func<FilePathEmbedded, string>> FileLengthStringExpression =
+          @this => ((long)@this.FileLength).ToComputerSize(true);
+        [ExpressionField]
         public string FileLengthString
         {
-            get { return ((long)FileLength).ToComputerSize(true); }
+            get { return FileLengthStringExpression.Evaluate(this); }
         }
 
         [NotNullable, SqlDbType(Size = 260)]

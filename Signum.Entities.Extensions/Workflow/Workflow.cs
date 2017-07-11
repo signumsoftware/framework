@@ -230,11 +230,11 @@ namespace Signum.Entities.Workflow
         Activity0WithDecisionTypeShouldGoToAnExclusiveOrInclusiveGateways,
         [Description("Activity '{0}' should be decision.")]
         Activity0ShouldBeDecision,
-        [Description("'{0}' is timer start and scheduler is mandotary.")]
-        _0IsTimerStartAndSchedulerIsMandotary,
-        [Description("'{0}' is timer start and task is mandotary.")]
-        _0IsTimerStartAndTaskIsMandotary,
-        [Description("'{0}' is conditional start and condition is mandotary.")]
-        _0IsConditionalStartAndTaskConditionIsMandotary
+        [Description("'{0}' is timer start and scheduler is mandatory.")]
+        _0IsTimerStartAndSchedulerIsMandatory,
+        [Description("'{0}' is timer start and task is mandatory.")]
+        _0IsTimerStartAndTaskIsMandatory,
+        [Description("'{0}' is conditional start and condition is mandatory.")]
+        _0IsConditionalStartAndTaskConditionIsMandatory
     }
 }

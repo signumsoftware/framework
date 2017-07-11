@@ -17,8 +17,8 @@ import CaseFlowButton from './CaseFlowButton'
 import InlineCaseTags from './InlineCaseTags'
 import { RouteComponentProps } from "react-router";
 
-require("../../../../Framework/Signum.React/Scripts/Frames/Frames.css");
-require("./CaseAct.css");
+import "../../../../Framework/Signum.React/Scripts/Frames/Frames.css"
+import "./CaseAct.css"
 
 interface CaseFramePageProps extends RouteComponentProps<{ workflowId: string; mainEntityStrategy: string; caseActivityId?: string }> {
 }
@@ -180,7 +180,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
     }
 
 
-    validationErrors: ValidationErrors;
+    validationErrors?: ValidationErrors | null;
 
     getMainTypeInfo(): TypeInfo {
         return getTypeInfo(this.state.pack!.activity.case.mainEntity.Type);
@@ -217,7 +217,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
 
         var mainPack = { entity: mainEntity, canExecute: pack.canExecuteMainEntity };
 
-        const wc: WidgetContext = {
+        const wc: WidgetContext<ICaseMainEntity> = {
             ctx: ctx,
             pack: mainPack,
         };

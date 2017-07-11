@@ -27,7 +27,7 @@ import ContextMenu from '../../../../Framework/Signum.React/Scripts/SearchContro
 import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
-require("./DynamicType.css");
+import "./DynamicType.css"
 
 export interface DynamicTypeDesignContext {
     refreshView: () => void;
@@ -337,7 +337,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
 }
 
 
-export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefinition, dynamicType: DynamicTypeEntity }, void>{
+export class CustomCodeTab extends React.Component<{ definition: DynamicTypeDefinition, dynamicType: DynamicTypeEntity }>{
 
     static suggestWorkflow = true;
     static suggestTree = true;
@@ -635,7 +635,7 @@ export interface CSharpExpressionCodeMirrorProps {
     signature?: string;
 }
 
-export class CSharpExpressionCodeMirror extends React.Component<CSharpExpressionCodeMirrorProps, void>{
+export class CSharpExpressionCodeMirror extends React.Component<CSharpExpressionCodeMirrorProps>{
 
     render() {
         let val = this.props.binding.getValue();
@@ -664,7 +664,7 @@ export interface CustomFieldsetComponentProps<T> {
     onChange?: () => void;
 }
 
-export class CustomFieldsetComponent<T> extends React.Component<CustomFieldsetComponentProps<T>, void> {
+export class CustomFieldsetComponent<T> extends React.Component<CustomFieldsetComponentProps<T>> {
 
     handleChecked = (e: React.FormEvent<any>) => {
         let val = this.props.binding.getValue();
@@ -876,7 +876,7 @@ export interface PropertyComponentProps {
     dc: DynamicTypeDesignContext;
 }
 
-export class PropertyComponent extends React.Component<PropertyComponentProps, void>{
+export class PropertyComponent extends React.Component<PropertyComponentProps>{
 
     handleAutoFix = () => {
 
@@ -1043,7 +1043,7 @@ export interface ComboBoxRepeaterComponentProps {
     list: string[];
 }
 
-export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterComponentProps, void> {
+export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterComponentProps> {
 
     handleChange = (val: string, index: number) => {
         var list = this.props.list;
@@ -1140,7 +1140,7 @@ export interface ValidatorRepeaterComponentProps {
     dc: DynamicTypeDesignContext;
 }
 
-export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeaterComponentProps, void> {
+export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeaterComponentProps> {
 
 
     handleOnRemove = (event: React.MouseEvent<any>, index: number) => {

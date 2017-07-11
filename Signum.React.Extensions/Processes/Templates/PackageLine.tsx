@@ -5,7 +5,7 @@ import {SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { PackageLineEntity, ProcessExceptionLineEntity } from '../Signum.Entities.Processes'
 
-export default class Package extends React.Component<{ ctx: TypeContext<PackageLineEntity> }, void> {
+export default class Package extends React.Component<{ ctx: TypeContext<PackageLineEntity> }> {
 
     render() {
         

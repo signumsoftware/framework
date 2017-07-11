@@ -317,7 +317,7 @@ interface RenderWithReplacementsProps {
     viewOverride?: (vr: ViewReplacer<Entity>) => void;
 }
 
-export class RenderWithReplacements extends React.Component<RenderWithReplacementsProps, void> {
+export class RenderWithReplacements extends React.Component<RenderWithReplacementsProps> {
 
 
     originalRender: any;

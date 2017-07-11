@@ -12,7 +12,7 @@ import FileLine, {FileTypeSymbol} from '../../Files/FileLine'
 import { LinkListPartEntity, LinkElementEmbedded } from '../Signum.Entities.Dashboard'
 
 
-export default class ValueSearchControlPart extends React.Component<{ ctx: TypeContext<LinkListPartEntity> }, void> {
+export default class ValueSearchControlPart extends React.Component<{ ctx: TypeContext<LinkListPartEntity> }> {
 
     render() {
         const ctx = this.props.ctx.subCtx({ formGroupStyle: "SrOnly", placeholderLabels: true });

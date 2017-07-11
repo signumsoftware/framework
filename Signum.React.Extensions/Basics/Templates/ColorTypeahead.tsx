@@ -11,7 +11,7 @@ import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/
 import { namedColors } from '../Color'
 
 
-export class ColorTypeaheadLine extends React.Component<{ ctx: TypeContext<string | null | undefined>; onChange?: () => void }, void>{
+export class ColorTypeaheadLine extends React.Component<{ ctx: TypeContext<string | null | undefined>; onChange?: () => void }>{
 
     render() {
         var ctx = this.props.ctx;
@@ -29,7 +29,7 @@ export class ColorTypeaheadLine extends React.Component<{ ctx: TypeContext<strin
     }
 }
 
-export class ColorTypeahead extends React.Component<{ color: string | null | undefined, onChange: (newColor: string | null | undefined) => void }, void>{
+export class ColorTypeahead extends React.Component<{ color: string | null | undefined, onChange: (newColor: string | null | undefined) => void }>{
 
     handleGetItems = (query: string) => {
         if (!query)
