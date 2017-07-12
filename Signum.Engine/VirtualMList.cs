@@ -94,6 +94,7 @@ namespace Signum.Engine
                     if (priv.GetRowId(i) == null)
                         priv.SetRowId(i, mlist[i].Id);
                 }
+                mlist.SetCleanModified(false);
             };
 
             return fi;
@@ -135,6 +136,7 @@ namespace Signum.Engine
                     if (priv.GetRowId(i) == null)
                         priv.SetRowId(i, mlist[i].Id);
                 }
+                mlist.SetCleanModified(false);
             };
 
             return fi;
