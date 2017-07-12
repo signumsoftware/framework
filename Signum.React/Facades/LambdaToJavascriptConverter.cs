@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Web;
 
 namespace Signum.React.Facades
@@ -55,6 +56,14 @@ namespace Signum.React.Facades
                 if (a == null)
                     return null;
 
+                if (me.Expression.Type.IsNullable())
+                {
+                    if (me.Member.Name == "HasValue")
+                        return a + " != null";
+                    else if (me.Member.Name == "Value")
+                        return a;
+                }
+
                 return a + "." + me.Member.Name.FirstLower();
             }
 
@@ -102,6 +111,18 @@ namespace Signum.React.Facades
             if (expr is UnaryExpression ue && ue.NodeType == ExpressionType.Convert)
             {
                 return ToJavascriptToString(param, ue.Operand);
+            }
+
+            if (expr is ConditionalExpression iff)
+            {
+                var t = ToJavascript(param, iff.Test);
+                var a = ToJavascriptToString(param, iff.IfTrue);
+                var b = ToJavascriptToString(param, iff.IfFalse);
+
+                if (t != null && a != null && b != null)
+                    return "(" + t + " ? " + a + " : " + b + ")";
+
+                return null;
             }
 
             return null;
