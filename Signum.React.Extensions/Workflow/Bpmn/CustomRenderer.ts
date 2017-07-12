@@ -1,6 +1,6 @@
 ﻿/// <reference path="../bpmn-js.d.ts" />
-import Modeler = require("bpmn-js/lib/Modeler");
-import BpmnRenderer = require("bpmn-js/lib/draw/BpmnRenderer");
+import * as Modeler from "bpmn-js/lib/Modeler"
+import * as BpmnRenderer from "bpmn-js/lib/draw/BpmnRenderer"
 import { WorkflowConditionEntity, WorkflowActionEntity, DecisionResult } from '../Signum.Entities.Workflow'
 import { Lite, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as BpmnUtils from './BpmnUtils'
