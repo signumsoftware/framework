@@ -14,7 +14,8 @@ import { Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap'
 import { LinkContainer, IndexLinkContainer } from 'react-router-bootstrap'
 import { ToolbarConfig } from "../ToolbarClient";
 import '../../../../Framework/Signum.React/Scripts/Frames/MenuIcons.css'
-
+import './Toolbar.css'
+import { PermissionSymbol } from "../../Authorization/Signum.Entities.Authorization";
 
 export interface ToolbarRendererState {
     response?: ToolbarClient.ToolbarResponse<any>;
@@ -108,17 +109,14 @@ export default class ToolbarRenderer extends React.Component<{ location?: Toolba
 
             case "Link":
 
-                if (res.content == null) {
-                    if (!res.url)
-                        return <MenuItem style={{ color: "red" }}>{"No Content or Url found"}</MenuItem>;
-
+                if (res.url)
+                {
                     return (
                         <NavItem onClick={e => Navigator.pushOrOpenInTab(res.url!, e)}>
                             {ToolbarConfig.coloredIcon(res.iconName, res.iconColor)}{res.label}
                         </NavItem>
                     );
-
-                } else {
+                } else if (res.content) {
 
                     var config = ToolbarClient.configs[res.content!.EntityType];
 
@@ -130,6 +128,8 @@ export default class ToolbarRenderer extends React.Component<{ location?: Toolba
                             {config.getIcon(res)}{config.getLabel(res)}
                         </NavItem>
                     );
+                }else{
+                    return <MenuItem style={{ color: "red" }}>{"No Content or Url found"}</MenuItem>;
                 }
             default: throw new Error("Unexpected " + res.type);
         }
@@ -151,51 +151,50 @@ export default class ToolbarRenderer extends React.Component<{ location?: Toolba
 
         var padding  = (indent * 20) + "px";
 
-        var style: React.CSSProperties = {
-            paddingLeft: this.state.isRtl ? "" : padding,
-            paddingRight: this.state.isRtl ? padding : ""
-        };
+
+
+        const menuItemN = "menu-item-" + indent;
 
         switch (res.type) {
             case "Menu":
                 return [
-                    <MenuItem onClick={e => this.handleClick(e, res, topRes)} style={style} className={this.state.expanded.contains(res) ? "active" : undefined}>
+                    <MenuItem onClick={e => this.handleClick(e, res, topRes)}
+                        className={classes(menuItemN, this.state.expanded.contains(res) && "active")}>
                         {this.icon(res)}{res.label || res.content!.toStr}<span className="fa arrow" />
                     </MenuItem>
                 ].concat(res.elements && res.elements.length && this.state.expanded.contains(res) ? res.elements.flatMap(r => this.renderMenuItem(r, indent + 1, topRes)) : []);
             case "Header":
                 return [
-                    <MenuItem header style={style}>{this.icon(res)}{res.label}</MenuItem>
+                    <MenuItem header className={menuItemN}>{this.icon(res)}{res.label}</MenuItem>
                 ];
 
             case "Divider":
                 return [
-                    <MenuItem divider style={style}/>
+                    <MenuItem divider className={menuItemN}/>
                 ];
 
             case "Link":
-
-                if (res.content == null) {
-                    if (!res.url)
-                        return [<MenuItem style={{ color: "red" }}>{"No Content or Url found"}</MenuItem>];
-
+                if (res.url) {
                     return [
-                        <NavItem onClick={e => Navigator.pushOrOpenInTab(res.url!, e)}>
+                        <NavItem onClick={e => Navigator.pushOrOpenInTab(res.url!, e)} className={menuItemN}>
                             {ToolbarConfig.coloredIcon(res.iconName, res.iconColor)}{res.label}
                         </NavItem>
                     ];
 
-                } else {
+                } else if (res.content) {
                     var config = ToolbarClient.configs[res.content!.EntityType]
 
                     if (!config)
-                        return [<MenuItem style={{ color: "red", ...style }}> {res.content!.EntityType + "ToolbarConfig not registered"}</MenuItem>];
+                        return [<MenuItem style={{ color: "red" }} className={menuItemN}> {res.content!.EntityType + "ToolbarConfig not registered"}</MenuItem>];
 
                     return [
-                        <MenuItem onClick={e => config.handleNavigateClick(e, res)} style={style}>
+                        <MenuItem onClick={e => config.handleNavigateClick(e, res)} className={menuItemN}>
                             {config.getIcon(res)}{config.getLabel(res)}
                         </MenuItem>
                     ];
+                }
+                else {
+                    return [<MenuItem style={{ color: "red" }} className={menuItemN}>{"No Content or Url found"}</MenuItem>];
                 }
             default: throw new Error("Unexpected " + res.type);
         }

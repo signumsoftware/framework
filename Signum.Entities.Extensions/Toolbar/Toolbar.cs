@@ -97,7 +97,7 @@ namespace Signum.Entities.Toolbar
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string IconColor { get; set; }
         
-        [ImplementedBy(typeof(ToolbarMenuEntity), typeof(UserQueryEntity), typeof(UserChartEntity), typeof(QueryEntity), typeof(DashboardEntity))]
+        [ImplementedBy(typeof(ToolbarMenuEntity), typeof(UserQueryEntity), typeof(UserChartEntity), typeof(QueryEntity), typeof(DashboardEntity), typeof(PermissionSymbol))]
         public Lite<Entity> Content { get; set; }
 
         [SqlDbType(Size = 200)]
@@ -113,22 +113,22 @@ namespace Signum.Entities.Toolbar
         internal XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("ToolbarElement",
-                Label == null ? null : new XAttribute("Label", Label),
                 new XAttribute("Type", Type),
-                new XAttribute("IconName", IconName),
-                new XAttribute("IconColor", IconColor),
+                string.IsNullOrEmpty(Label) ? null : new XAttribute("Label", Label),
+                string.IsNullOrEmpty(IconName) ? null : new XAttribute("IconName", IconName),
+                string.IsNullOrEmpty(IconColor) ? null :  new XAttribute("IconColor", IconColor),
                 OpenInPopup ? new XAttribute("OpenInPopup", OpenInPopup) : null,
                 AutoRefreshPeriod == null ? null : new XAttribute("AutoRefreshPeriod", AutoRefreshPeriod),
-                this.Content == null ? null : new XElement("Content", this.Content is Lite<QueryEntity> ? ctx.QueryToName((Lite<QueryEntity>)this.Content) : (object)ctx.Include((Lite<IUserAssetEntity>)this.Content)),
+                this.Content == null ? null : new XElement("Content", this.Content is Lite<QueryEntity> ? 
+                ctx.QueryToName((Lite<QueryEntity>)this.Content) : 
+                (object)ctx.Include((Lite<IUserAssetEntity>)this.Content)),
                 string.IsNullOrEmpty(this.Url) ? null : new XElement("Url", this.Url));
         }
 
-
-
         internal void FromXml(XElement x, IFromXmlContext ctx)
         {
-            Label = x.Attribute("Label")?.Value;
             Type = x.Attribute("Type").Value.ToEnum<ToolbarElementType>();
+            Label = x.Attribute("Label")?.Value;
             IconName = x.Attribute("IconName")?.Value;
             IconColor = x.Attribute("IconColor")?.Value;
             OpenInPopup = x.Attribute("OpenInPopup")?.Value.ToBool() ?? false;
@@ -170,17 +170,11 @@ namespace Signum.Entities.Toolbar
                         return ValidationMessage._0ShouldBeOfType1.NiceToString(pi.NiceName(), typeof(ToolbarMenuEntity));
                 }
             }
-
-            if(pi.Name == nameof(this.Url))
+            
+            if (pi.Name == nameof(this.Label) && (this.Type == ToolbarElementType.Menu || this.Type == ToolbarElementType.Link))
             {
-                if(this.Url.HasText() && this.Content != null)
-                    return ValidationMessage._0ShouldBeNullWhen1IsSet.NiceToString(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => Content).NiceName());          
-            }
-
-            if (pi.Name == nameof(this.Label))
-            {
-                if (string.IsNullOrEmpty(this.Label) && this.Url.HasText())
-                    return ValidationMessage._0IsMandatoryWhen1IsSet.NiceToString(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => Url).NiceName());
+                if (string.IsNullOrEmpty(this.Label) && this.Content == null)
+                    return ValidationMessage._0IsMandatoryWhen1IsNotSet.NiceToString(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => Content).NiceName());
             }
 
             return stateValidator.Validate(this, pi) ?? base.PropertyValidation(pi);

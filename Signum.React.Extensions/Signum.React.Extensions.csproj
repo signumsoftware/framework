@@ -357,6 +357,7 @@
     <Content Include="Map\Schema\schemaMap.css" />
     <Content Include="packages.config" />
     <Content Include="Toolbar\Sidebar.css" />
+    <Content Include="Toolbar\Templates\Toolbar.css" />
     <Content Include="Tree\TreeViewer.css" />
     <Content Include="Workflow\Case\Tag.css" />
     <Content Include="Workflow\Case\Inbox.css" />
