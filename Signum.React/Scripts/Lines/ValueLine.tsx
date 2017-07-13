@@ -17,7 +17,7 @@ export interface ValueLineProps extends LineBaseProps, React.Props<ValueLine> {
     unitText?: React.ReactChild;
     formatText?: string;
     autoTrim?: boolean;
-    inlineCheckbox?: boolean;
+    inlineCheckbox?: boolean | "block";
     comboBoxItems?: (OptionItem | MemberInfo | string)[];
     onTextboxBlur?: (val: any) => void;
     valueHtmlAttributes?: React.HTMLAttributes<any>;
@@ -172,7 +172,7 @@ ValueLine.renderers["Checkbox" as ValueLineType] = (vl) => {
 
     if (s.inlineCheckbox) {
         return (
-            <label className={vl.state.ctx.error} {...vl.baseHtmlAttributes() } { ...s.formGroupHtmlAttributes }>
+            <label className={vl.state.ctx.error} style={{ display: s.inlineCheckbox == "block" ? "block" : undefined }} {...vl.baseHtmlAttributes() } { ...s.formGroupHtmlAttributes }>
                 <input type="checkbox" {...vl.state.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly} />
                 {" " + s.labelText}
             </label>
