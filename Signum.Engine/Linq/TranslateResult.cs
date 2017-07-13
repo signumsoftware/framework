@@ -88,7 +88,7 @@ namespace Signum.Engine.Linq
 
                     lookups.Add(Token, lookUp);
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (!(ex is OperationCanceledException))
                 {
                     FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
                     fieldEx.Command = Command;
@@ -177,7 +177,7 @@ namespace Signum.Engine.Linq
                         retriever.ModifiablePostRetrieving(kvp.Value);
                     }
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (!(ex is OperationCanceledException))
                 {
                     FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
                     fieldEx.Command = Command;
@@ -283,7 +283,7 @@ namespace Signum.Engine.Linq
                             else
                                 result = UniqueMethod(enumerable, Unique.Value);
                         }
-                        catch (Exception ex)
+                        catch (Exception ex) when (!(ex is OperationCanceledException))
                         {
                             FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
                             fieldEx.Command = MainCommand;
