@@ -149,7 +149,8 @@ export class ContextualOperationContext<T extends Entity> {
     entityOperationSettings?: EntityOperationSettings<T>;
     canExecute?: string;
     event?: React.MouseEvent<any>;
-    avoidViewNewEntity?: boolean;
+    onContextualSuccess?: (pack: API.ErrorReport) => void;
+    onConstructFromSuccess?: (pack: EntityPack<Entity>) => void;
     defaultContextualClick(...args: any[]) {
         defaultContextualClick(this, ...args);
     }
@@ -177,7 +178,9 @@ export class EntityOperationContext<T extends Entity> {
     canExecute?: string;
     closeRequested?: boolean;
     event?: React.MouseEvent<any>;
-    avoidViewNewEntity?: boolean;
+    onExecuteSuccess?: (pack: EntityPack<T>) => void;
+    onConstructFromSuccess?: (pack: EntityPack<Entity>) => void;
+    onDeleteSuccess?: () => void;
 
     defaultClick(...args: any[]) {
         defaultOnClick(this, ...args);
