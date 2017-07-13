@@ -100,9 +100,11 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
             window.open(route);
         }
         else {
+            const pr = ctx.propertyRoute.add(a => a[0]);
+
             const promise = this.props.onView ?
-                this.props.onView(entity, ctx.propertyRoute) :
-                this.defaultView(entity, ctx.propertyRoute);
+                this.props.onView(entity, pr) :
+                this.defaultView(entity, pr);
 
             if (promise == null)
                 return;
@@ -112,12 +114,15 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                     return;
 
                 this.convert(e).then(m => {
-                    if (is(list[index].element as Entity, e as Entity))
+                    if (is(list[index].element as Entity, e as Entity)) {
                         list[index].element = m;
-                    else
+                        if (e.modified)
+                            this.setValue(list);
+                    } else {
                         list[index] = { rowId: null, element: m };
+                        this.setValue(list);
+                    }
 
-                    this.setValue(list);
                 }).done();
             }).done();
         }
