@@ -191,7 +191,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
     }
 
     handleAddConditionClick = (remainig: TypeConditionSymbol[], taac: TypeAllowedAndConditions) => {
-        SelectorModal.chooseElement(remainig, { display: a => a.toStr.tryAfter(".") || a.toStr })
+        SelectorModal.chooseElement(remainig, { buttonDisplay: a => a.toStr.tryAfter(".") || a.toStr })
             .then(tc => {
                 if (!tc)
                     return;

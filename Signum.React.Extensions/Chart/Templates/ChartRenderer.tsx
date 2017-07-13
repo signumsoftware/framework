@@ -25,7 +25,7 @@ declare global {
     }
 }
 
-export default class ChartRenderer extends React.Component<{ data: ChartClient.ChartTable; chartRequest: ChartRequest; lastChartRequest?: ChartRequest }> {
+export default class ChartRenderer extends React.Component<{ data: ChartClient.ChartTable; chartRequest: ChartRequest; lastChartRequest: ChartRequest }> {
 
     exceptionLine: number | null;
 

@@ -52,7 +52,7 @@ export class FindOptionsLine extends React.Component<FindOptionsLineProps>{
                 .then(sfos => SelectorModal.chooseElement(sfos, {
                     title: DynamicViewMessage.SuggestedFindOptions.niceToString(),
                     message: DynamicViewMessage.TheFollowingQueriesReference0.niceToString().formatHtml(<strong>{ti.niceName}</strong>),
-                    display: sfo => <div><strong>{sfo.queryKey}</strong><br /><small>(by <code>{sfo.parentColumn}</code>)</small></div>
+                    buttonDisplay: sfo => <div><strong>{sfo.queryKey}</strong><br /><small>(by <code>{sfo.parentColumn}</code>)</small></div>
                 }))
                 .then(sfo => ({
                     queryName: sfo && sfo.queryKey,

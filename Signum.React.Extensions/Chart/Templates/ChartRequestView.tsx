@@ -161,7 +161,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                     </div>
                     <br />
                     <div className="sf-search-results-container" >
-                        {!s.chartResult ? JavascriptMessage.searchForResults.niceToString() :
+                        {!s.chartResult || !s.lastChartRequest ? JavascriptMessage.searchForResults.niceToString() :
 
                             <Tabs id="chartResultTabs" animation={false} unmountOnExit={true}>
                                 <Tab eventKey="chart" title={ChartMessage.Chart.niceToString()}>

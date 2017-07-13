@@ -1161,7 +1161,7 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
         SelectorModal.chooseElement(Dic.getValues(registeredValidators).filter(a => a.allowed(this.props.property)), {
             title: "New Validator",
             message: "Please select a validator type",
-            display: vo => vo.name
+            buttonDisplay: vo => vo.name
         }).then(vo => {
             if (vo == undefined)
                 return;
