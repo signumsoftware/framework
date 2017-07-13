@@ -188,11 +188,10 @@ export function defaultConstructFromEntity(eoc: EntityOperationContext<Entity>, 
             return;
 
         API.constructFromEntity(eoc.entity, eoc.operationInfo.key, ...args)
-            .then(pack => {
+            .then(eoc.onConstructFromSuccess || (pack => {
                 notifySuccess();
-                if (!eoc.avoidViewNewEntity)
-                    Navigator.createNavigateOrTab(pack, eoc.event!);
-            })
+                Navigator.createNavigateOrTab(pack, eoc.event!);
+            }))
             .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
             .done();
     }).done();
@@ -205,11 +204,10 @@ export function defaultConstructFromLite(eoc: EntityOperationContext<Entity>, ..
             return;
 
         API.constructFromLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
-            .then(pack => {
+            .then(eoc.onConstructFromSuccess || (pack => {
                 notifySuccess();
-                if (!eoc.avoidViewNewEntity)
-                    Navigator.createNavigateOrTab(pack, eoc.event!);
-            })
+                Navigator.createNavigateOrTab(pack, eoc.event!);
+            }))
             .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
             .done();
     }).done();
@@ -223,7 +221,12 @@ export function defaultExecuteEntity(eoc: EntityOperationContext<Entity>, ...arg
             return;
 
         API.executeEntity(eoc.entity, eoc.operationInfo.key, ...args)
-            .then(pack => { eoc.frame.onReload(pack); notifySuccess(); if (eoc.closeRequested) { eoc.frame.onClose(true); } })
+            .then(eoc.onExecuteSuccess || (pack => {
+                eoc.frame.onReload(pack);
+                notifySuccess();
+                if (eoc.closeRequested)
+                    eoc.frame.onClose(true);
+            }))
             .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
             .done();
     }).done();
@@ -236,7 +239,12 @@ export function defaultExecuteLite(eoc: EntityOperationContext<Entity>, ...args:
             return;
 
         API.executeLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
-            .then(pack => { eoc.frame.onReload(pack); notifySuccess(); if (eoc.closeRequested) { eoc.frame.onClose(true); } })
+            .then(eoc.onExecuteSuccess || (pack => {
+                eoc.frame.onReload(pack);
+                notifySuccess();
+                if (eoc.closeRequested)
+                    eoc.frame.onClose(true);
+            }))
             .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
             .done();
     }).done();
@@ -249,7 +257,10 @@ export function defaultDeleteEntity(eoc: EntityOperationContext<Entity>, ...args
             return;
 
         API.deleteEntity(eoc.entity, eoc.operationInfo.key, ...args)
-            .then(() => { eoc.frame.onClose(); notifySuccess(); })
+            .then(eoc.onDeleteSuccess || (() => {
+                eoc.frame.onClose();
+                notifySuccess();
+            }))
             .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
             .done();
     }).done();
@@ -262,11 +273,13 @@ export function defaultDeleteLite(eoc: EntityOperationContext<Entity>, ...args: 
             return;
 
         API.deleteLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
-            .then(() => { eoc.frame.onClose(); notifySuccess(); })
+            .then(eoc.onDeleteSuccess || (() => {
+                eoc.frame.onClose();
+                notifySuccess();
+            }))
             .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
             .done();
     }).done();
-
 }
 
 

@@ -246,26 +246,25 @@ export function defaultContextualClick(coc: ContextualOperationContext<Entity>,.
             case OperationType.ConstructorFrom:
                 if (coc.context.lites.length == 1) {
                     API.constructFromLite(coc.context.lites[0], coc.operationInfo.key, ...args)
-                        .then(pack => {
+                        .then(coc.onConstructFromSuccess || (pack => {
                             coc.context.markRows({});
-                            if (!coc.avoidViewNewEntity)
-                                Navigator.createNavigateOrTab(pack, coc.event!);
-                        })
+                            Navigator.createNavigateOrTab(pack, coc.event!);
+                        }))
                         .done();
                 } else {
                     API.constructFromMultiple(coc.context.lites, coc.operationInfo.key, ...args)
-                        .then(report => coc.context.markRows(report.errors))
+                        .then(coc.onContextualSuccess || (report => coc.context.markRows(report.errors)))
                         .done();
                 }
                 break;
             case OperationType.Execute:
                 API.executeMultiple(coc.context.lites, coc.operationInfo.key, ...args)
-                    .then(report => coc.context.markRows(report.errors))
+                    .then(coc.onContextualSuccess || (report => coc.context.markRows(report.errors)))
                     .done();
                 break;
             case OperationType.Delete:
                 API.deleteMultiple(coc.context.lites, coc.operationInfo.key, ...args)
-                    .then(report => coc.context.markRows(report.errors))
+                    .then(coc.onContextualSuccess || (report => coc.context.markRows(report.errors)))
                     .done();
                 break;
         }
