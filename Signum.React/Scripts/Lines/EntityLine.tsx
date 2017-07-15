@@ -77,7 +77,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
     }
 
 
-    typeahead?: Typeahead;
+    typeahead?: Typeahead | null;
     writeInTypeahead(query: string) {
         this.typeahead!.writeInInput(query);
     }

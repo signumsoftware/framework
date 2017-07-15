@@ -220,86 +220,101 @@ Array.prototype.groupsOf = function (this: any[], groupSize: number, elementSize
     return result;
 }
 
-Array.prototype.max = function (this: any[]) {
+Array.prototype.max = function (this: any[], selector?: (element: any, index: number, array: any[]) => any) {
+
+    if (selector)
+        return Math.max.apply(undefined, this.map(selector));
+
     return Math.max.apply(undefined, this);
 };
 
-Array.prototype.sum = function (this: any[]) {
-    var result = 0;
-    this.forEach(v => result += v);
-    return result;
-};
+Array.prototype.min = function (this: any[], selector?: (element: any, index: number, array: any[]) => any) {
 
-Array.prototype.min = function (this: any[]) {
+    if (selector)
+        return Math.max.apply(undefined, this.map(selector));
+
     return Math.min.apply(undefined, this);
 };
 
-Array.prototype.sum = function (this: any[]) {
+Array.prototype.sum = function (this: any[], selector?: (element: any, index: number, array: any[]) => any) {
 
     if (this.length == 0)
         return 0;
 
     var result = this[0];
     for (var i = 1; i < this.length; i++) {
-        result += this[i];
+        result += selector ? selector(this[i], i, this) : this[i];
     }
     return result;
 };
 
-Array.prototype.first = function (this: any[], errorContext: string) {
 
-    if (this.length == 0)
-        throw new Error("No " + (errorContext || "element") + " found");
+Array.prototype.first = function (this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => boolean)) {
 
-    return this[0];
+    var array = typeof errorContextOrPredicate == "function" ? this.filter(errorContextOrPredicate) : this;
+
+    if (array.length == 0)
+        throw new Error("No " + (typeof errorContextOrPredicate == "string" ? errorContextOrPredicate : "element") + " found");
+
+    return array[0];
 };
 
 
-Array.prototype.firstOrNull = function (this: any[]) {
+Array.prototype.firstOrNull = function (this: any[], predicate?: ((element: any, index: number, array: any[]) => boolean)) {
 
-    if (this.length == 0)
+    var array = typeof predicate == "function" ? this.filter(predicate) : this;
+
+    if (array.length == 0)
         return null;
 
-    return this[0];
+    return array[0];
 };
 
-Array.prototype.last = function (this: any[], errorContext: string) {
+Array.prototype.last = function (this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => boolean)) {
 
-    if (this.length == 0)
-        throw new Error("No " + (errorContext || "element") + " found");
+    var array = typeof errorContextOrPredicate == "function" ? this.filter(errorContextOrPredicate) : this;
 
-    return this[this.length - 1];
+    if (array.length == 0)
+        throw new Error("No " + (typeof errorContextOrPredicate == "string" ? errorContextOrPredicate : "element") + " found");
+
+    return array[array.length - 1];
 };
 
 
-Array.prototype.lastOrNull = function (this: any[]) {
+Array.prototype.lastOrNull = function (this: any[], predicate?: ((element: any, index: number, array: any[]) => boolean)) {
 
-    if (this.length == 0)
+    var array = typeof predicate == "function" ? this.filter(predicate) : this;
+
+    if (array.length == 0)
         return null;
 
-    return this[this.length - 1];
+    return array[array.length - 1];
 };
 
-Array.prototype.single = function (this: any[], errorContext: string) {
+Array.prototype.single = function (this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => boolean)) {
 
-    if (this.length == 0)
-        throw new Error("No " + (errorContext || "element")  + " found");
+    var array = typeof errorContextOrPredicate == "function" ? this.filter(errorContextOrPredicate) : this;
 
-    if (this.length > 1)
-        throw new Error("More than one " + (errorContext || "element")  + " found");
+    if (array.length == 0)
+        throw new Error("No " + (typeof errorContextOrPredicate == "string" ? errorContextOrPredicate : "element")  + " found");
 
-    return this[0];
+    if (array.length > 1)
+        throw new Error("More than one " + (typeof errorContextOrPredicate == "string" ? errorContextOrPredicate : "element")  + " found");
+
+    return array[0];
 };
 
-Array.prototype.singleOrNull = function (this: any[], errorContext: string) {
+Array.prototype.singleOrNull = function (this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => boolean)) {
 
-    if (this.length == 0)
+    var array = typeof errorContextOrPredicate == "function" ? this.filter(errorContextOrPredicate) : this;
+
+    if (array.length == 0)
         return null;
 
-    if (this.length > 1)
-        throw new Error("More than one " + (errorContext || "element")  + " found");
+    if (array.length > 1)
+        throw new Error("More than one " + (typeof errorContextOrPredicate == "string" ? errorContextOrPredicate : "element")  + " found");
 
-    return this[0];
+    return array[0];
 };
 
 Array.prototype.contains = function (this: any[], element: any) {

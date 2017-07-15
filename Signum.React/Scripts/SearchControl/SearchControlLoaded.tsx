@@ -22,7 +22,7 @@ import { ContextMenuPosition } from './ContextMenu'
 import SelectorModal from '../SelectorModal'
 import { ISimpleFilterBuilder } from './SearchControl'
 
-require("./Search.css");
+import "./Search.css"
 
 export interface SearchControlLoadedProps {
     allowSelection?: boolean;
@@ -284,8 +284,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
 
-    containerDiv?: HTMLDivElement;
-    thead?: HTMLTableSectionElement;
+    containerDiv?: HTMLDivElement | null;
+    thead?: HTMLTableSectionElement | null;
 
     render() {
 

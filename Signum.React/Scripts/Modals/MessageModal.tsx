@@ -7,7 +7,7 @@ import * as Navigator from '../Navigator';
 import { classes, Dic } from '../Globals';
 import { SearchMessage, JavascriptMessage, Lite, Entity, NormalWindowMessage, BooleanEnum } from '../Signum.Entities'
 
-require("./Modals.css");
+import "./Modals.css"
 
 export type MessageModalStyle = "success" | "info" | "warning" | "error";
 

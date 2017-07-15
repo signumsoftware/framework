@@ -82,7 +82,7 @@ export interface EntityRepeaterElementProps {
 
 }
 
-export class EntityRepeaterElement extends React.Component<EntityRepeaterElementProps, void>
+export class EntityRepeaterElement extends React.Component<EntityRepeaterElementProps>
 {
     render() {
         const drag = this.props.draggable;

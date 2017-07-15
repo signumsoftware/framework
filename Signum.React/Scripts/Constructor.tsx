@@ -40,7 +40,7 @@ export function construct(type: string | Type<any>): Promise<EntityPack<Modifiab
             if (!ctrs.length)
                 throw new Error("No constructor is allowed!");
 
-            return SelectorModal.chooseElement(ctrs, { display: c => c.niceName, name: c => c.key, message: SelectorMessage.PleaseSelectAConstructor.niceToString() })
+            return SelectorModal.chooseElement(ctrs, { buttonDisplay: c => c.niceName, buttonName: c => c.key, message: SelectorMessage.PleaseSelectAConstructor.niceToString() })
                 .then((oi: OperationInfo | undefined) => {
 
                     if (!oi)

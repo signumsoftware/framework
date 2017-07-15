@@ -7,7 +7,7 @@ import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../Type
 import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference } from '../Reflection'
 import { ValidationMessage } from '../Signum.Entities'
 
-require("./Lines.css");
+import "./Lines.css"
 
 export interface FormGroupProps extends React.Props<FormGroup> {
     labelText?: React.ReactChild;
@@ -18,7 +18,7 @@ export interface FormGroupProps extends React.Props<FormGroup> {
     helpBlock?: React.ReactChild;
 }
 
-export class FormGroup extends React.Component<FormGroupProps, {}> {
+export class FormGroup extends React.Component<FormGroupProps> {
 
     render() {
 
@@ -71,7 +71,7 @@ export interface FormControlStaticProps extends React.Props<FormControlStatic> {
     className?: string
 }
 
-export class FormControlStatic extends React.Component<FormControlStaticProps, {}>
+export class FormControlStatic extends React.Component<FormControlStaticProps>
 {
     render() {
         const ctx = this.props.ctx;

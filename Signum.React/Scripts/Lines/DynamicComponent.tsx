@@ -6,7 +6,7 @@ import * as Navigator from '../Navigator'
 import { ViewReplacer } from '../Frames/ReactVisitor'
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, TypeContext, EntityCheckboxList, EnumCheckboxList, EntityTable } from '../Lines'
 
-export default class DynamicComponent extends React.Component<{ ctx: TypeContext<ModifiableEntity> }, void> {
+export default class DynamicComponent extends React.Component<{ ctx: TypeContext<ModifiableEntity> }> {
 
     render() {
 
@@ -69,7 +69,7 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
                 if (tis.length == 1 && tis.first().kind == "Enum")
                     return <EnumCheckboxList ctx={ctx} />;
 
-                if (tr.isEmbedded || tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
+                if (tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
                     return <EntityTable ctx={ctx} />;
 
                 if (tis.every(t => t.isLowPopulation == true))
@@ -77,6 +77,9 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
 
                 return <EntityStrip ctx={ctx} />;
             }
+
+            if (tr.isEmbedded)
+                return <EntityTable ctx={ctx} />;
 
             return undefined; 
 
@@ -100,6 +103,9 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
 
             if (tr.isEmbedded)
                 return <EntityDetail ctx={ctx} />;
+
+            if (ValueLine.getValueLineType(tr) == "Checkbox")
+                return <ValueLine ctx={ctx} inlineCheckbox="block" />;
 
             if (ValueLine.getValueLineType(tr) != undefined)
                 return <ValueLine ctx={ctx} />;

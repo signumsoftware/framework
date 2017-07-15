@@ -113,17 +113,32 @@ namespace Signum.Engine.DynamicQuery
 
             return (Lite<Entity>)result;
         }
-
-
         
-
         public override ResultTable ExecuteQueryGroup(QueryGroupRequest request)
         {
-            throw new NotImplementedException();
+            DQueryable<T> query = GetDQueryable(request);
+
+            var values = query.Query.ToArray();
+
+            var cols = request.Columns
+               .Select(column => (column, Expression.Lambda(column.Token.BuildExpression(query.Context), query.Context.Parameter))).ToList();
+
+            return values.ToResultTable(cols, values.Length, new Pagination.All());
+        }
+        
+        public override async Task<ResultTable> ExecuteQueryGroupAsync(QueryGroupRequest request, CancellationToken token)
+        {
+            DQueryable<T> query = GetDQueryable(request);
+            
+            var values = await query.Query.ToArrayAsync(token);
+
+            var cols = request.Columns
+               .Select(column => (column, Expression.Lambda(column.Token.BuildExpression(query.Context), query.Context.Parameter))).ToList();
+
+            return values.ToResultTable(cols, values.Length, new Pagination.All());
         }
 
-
-        public override async Task<ResultTable> ExecuteQueryGroupAsync(QueryGroupRequest request, CancellationToken token)
+        private DQueryable<T> GetDQueryable(QueryGroupRequest request)
         {
             var simpleFilters = request.Filters.Where(f => !(f.Token is AggregateToken)).ToList();
             var aggregateFilters = request.Filters.Where(f => f.Token is AggregateToken).ToList();
@@ -139,16 +154,9 @@ namespace Signum.Engine.DynamicQuery
                 .GroupBy(keys, allAggregates)
                 .Where(aggregateFilters)
                 .OrderBy(request.Orders);
-
-            var cols = request.Columns
-                .Select(column => (column, Expression.Lambda(column.Token.BuildExpression(query.Context), query.Context.Parameter))).ToList();
-
-            var values = await query.Query.ToArrayAsync();
-
-            return values.ToResultTable(cols, values.Length, new Pagination.All());
+            return query;
         }
 
-        
 
         public override IQueryable<Lite<Entity>> GetEntities(QueryEntitiesRequest request)
         {

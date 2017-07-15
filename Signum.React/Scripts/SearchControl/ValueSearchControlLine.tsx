@@ -33,12 +33,12 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
 }
 
 
-export default class ValueSearchControlLine extends React.Component<ValueSearchControlLineProps, void> {
+export default class ValueSearchControlLine extends React.Component<ValueSearchControlLineProps> {
 
 
-    valueSearchControl?: ValueSearchControl;
+    valueSearchControl?: ValueSearchControl | null;
 
-    handleValueSearchControlLoaded = (vsc: ValueSearchControl | undefined) => {
+    handleValueSearchControlLoaded = (vsc: ValueSearchControl | null) => {
 
         if (vsc != this.valueSearchControl)
             this.forceUpdate();

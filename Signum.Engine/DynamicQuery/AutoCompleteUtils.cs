@@ -172,16 +172,17 @@ namespace Signum.Engine.DynamicQuery
 
         static GenericInvoker<Func<string[], int, CancellationToken, Task<List<Lite<Entity>>>>> giLiteContainingAsync =
             new GenericInvoker<Func<string[], int, CancellationToken, Task<List<Lite<Entity>>>>>((parts, c, token) => LiteContaining<TypeEntity>(parts, c, token));
-        static Task<List<Lite<Entity>>> LiteContaining<T>(string[] parts, int count, CancellationToken token)
+        static async Task<List<Lite<Entity>>> LiteContaining<T>(string[] parts, int count, CancellationToken token)
             where T : Entity
         {
-            return Database.Query<T>()
+            var list = await Database.Query<T>()
                 .Where(a => a.ToString().ContainsAll(parts))
                 .OrderBy(a => a.ToString().Length)
                 .Select(a => a.ToLite())
                 .Take(count)
-                .ToListAsync(token)
-                .ContinueWith(t => t.Result.Cast<Lite<Entity>>().ToList());
+                .ToListAsync(token);
+
+            return list.Cast<Lite<Entity>>().ToList();
         }
 
         public static List<Lite<Entity>> FindAllLite(Implementations implementations)

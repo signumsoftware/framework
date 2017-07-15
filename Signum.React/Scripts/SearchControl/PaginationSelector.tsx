@@ -9,7 +9,7 @@ import { Pagination as BPagination } from 'react-bootstrap'
 
 
 
-require("./PaginationSelector.css");
+import "./PaginationSelector.css"
 
 interface PaginationSelectorProps {
     resultTable?: ResultTable;
@@ -18,7 +18,7 @@ interface PaginationSelectorProps {
 }
 
 
-export default class PaginationSelector extends React.Component<PaginationSelectorProps, {}> {
+export default class PaginationSelector extends React.Component<PaginationSelectorProps> {
 
     render() {
 

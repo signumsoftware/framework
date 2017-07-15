@@ -17,7 +17,7 @@ export interface ValueLineProps extends LineBaseProps, React.Props<ValueLine> {
     unitText?: React.ReactChild;
     formatText?: string;
     autoTrim?: boolean;
-    inlineCheckbox?: boolean;
+    inlineCheckbox?: boolean | "block";
     comboBoxItems?: (OptionItem | MemberInfo | string)[];
     onTextboxBlur?: (val: any) => void;
     valueHtmlAttributes?: React.HTMLAttributes<any>;
@@ -31,7 +31,7 @@ export interface OptionItem {
 }
 
 export type ValueLineType =
-    "Boolean" |
+    "Checkbox" |
     "ComboBox" |
     "DateTime" |
     "TextBox" |
@@ -50,7 +50,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
             throw new Error(`No ValueLine found for '${state.type!.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
     }
 
-    inputElement?: HTMLElement;
+    inputElement?: HTMLElement | null;
 
     componentDidMount() {
         setTimeout(() => {
@@ -74,7 +74,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
             return "ComboBox";
 
         if (t.name == "boolean")
-            return "Boolean";
+            return "Checkbox";
 
         if (t.name == "datetime")
             return "DateTime";
@@ -162,7 +162,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
     }
 }
 
-ValueLine.renderers["Boolean" as ValueLineType] = (vl) => {
+ValueLine.renderers["Checkbox" as ValueLineType] = (vl) => {
     const s = vl.state;
 
     const handleCheckboxOnChange = (e: React.SyntheticEvent<any>) => {
@@ -172,7 +172,7 @@ ValueLine.renderers["Boolean" as ValueLineType] = (vl) => {
 
     if (s.inlineCheckbox) {
         return (
-            <label className={vl.state.ctx.error} {...vl.baseHtmlAttributes() } { ...s.formGroupHtmlAttributes }>
+            <label className={vl.state.ctx.error} style={{ display: s.inlineCheckbox == "block" ? "block" : undefined }} {...vl.baseHtmlAttributes() } { ...s.formGroupHtmlAttributes }>
                 <input type="checkbox" {...vl.state.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly} />
                 {" " + s.labelText}
             </label>

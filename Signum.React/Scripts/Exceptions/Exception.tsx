@@ -4,7 +4,7 @@ import { Tabs, Tab } from 'react-bootstrap'
 import { ExceptionEntity } from '../Signum.Entities.Basics'
 import { ValueLine, ValueLineType, EntityLine, TypeContext } from '../Lines'
 
-export default class Exception extends React.Component<{ ctx: TypeContext<ExceptionEntity> }, void> {
+export default class Exception extends React.Component<{ ctx: TypeContext<ExceptionEntity> }> {
     render() {
         const ctx = this.props.ctx;
         const sc = this.props.ctx.subCtx({ labelColumns: { sm: 4 } });

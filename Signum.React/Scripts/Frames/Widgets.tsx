@@ -6,16 +6,16 @@ import { Entity, Lite, is, toLite, LiteMessage, getToString, EntityPack, ModelSt
 import { TypeContext, StyleOptions, EntityFrame } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos } from '../Reflection'
 
-require("./Widgets.css");
+import "./Widgets.css"
 
-export interface WidgetContext {
-    ctx: TypeContext<ModifiableEntity>;
-    pack: EntityPack<ModifiableEntity>;
+export interface WidgetContext<T extends ModifiableEntity> {
+    ctx: TypeContext<T>;
+    pack: EntityPack<T>;
 }
 
-export const onWidgets: Array<(ctx: WidgetContext) => React.ReactElement<any>> = [];
+export const onWidgets: Array<(ctx: WidgetContext<ModifiableEntity>) => React.ReactElement<any>> = [];
 
-export function renderWidgets(wc: WidgetContext): React.ReactNode | undefined
+export function renderWidgets(wc: WidgetContext<ModifiableEntity>): React.ReactNode | undefined
 {
     const widgets = onWidgets.map(a => a(wc)).filter(a => a != undefined);
 
@@ -34,9 +34,9 @@ export interface EmbeddedWidget {
 
 export type EmbeddedWidgetPosition = "Top" | "Bottom";
 
-export const onEmbeddedWidgets: Array<(ctx: WidgetContext) => EmbeddedWidget | undefined> = [];
+export const onEmbeddedWidgets: Array<(ctx: WidgetContext<ModifiableEntity>) => EmbeddedWidget | undefined> = [];
 
-export function renderEmbeddedWidgets(wc: WidgetContext): { top: React.ReactElement<any>[]; bottom: React.ReactElement<any>[] } {
+export function renderEmbeddedWidgets(wc: WidgetContext<ModifiableEntity>): { top: React.ReactElement<any>[]; bottom: React.ReactElement<any>[] } {
     const widgets = onEmbeddedWidgets.map(a => a(wc)).filter(a => a != undefined).map(a => a!);
     
     return {
