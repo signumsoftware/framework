@@ -681,27 +681,29 @@ Consider the following options:
                 log.Save();
         }
     }
-    
+
     public static class FluentOperationInclude
     {
-        public static FluentInclude<T> WithSave<T>(this FluentInclude<T> fi, ExecuteSymbol<T> saveOperation)
+        public static FluentInclude<T> WithSave<T>(this FluentInclude<T> fi, ExecuteSymbol<T> saveOperation, Action<T, object[]> saveAction = null, Func<T, string> canSave = null)
             where T : Entity
         {
             new Graph<T>.Execute(saveOperation)
             {
+                CanExecute = canSave ?? (e => null),
                 AllowsNew = true,
                 Lite = false,
-                Execute = (e, _) => { }
+                Execute = saveAction ?? ((e, _) => { })
             }.Register();
             return fi;
         }
 
-        public static FluentInclude<T> WithDelete<T>(this FluentInclude<T> fi, DeleteSymbol<T> delete)
+        public static FluentInclude<T> WithDelete<T>(this FluentInclude<T> fi, DeleteSymbol<T> delete, Action<T, object[]> deleteAction = null, Func<T, string> canDelete = null)
                where T : Entity
         {
             new Graph<T>.Delete(delete)
             {
-                Delete = (e, _) => e.Delete()
+                CanDelete = canDelete ?? (e => null),
+                Delete = deleteAction ?? ((e, _) => e.Delete())
             }.Register();
             return fi;
         }
