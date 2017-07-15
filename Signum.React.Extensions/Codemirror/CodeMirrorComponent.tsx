@@ -3,7 +3,7 @@ import * as React from 'react'
 import * as CodeMirror from 'codemirror'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 
-require("codemirror/lib/codemirror.css");
+import "codemirror/lib/codemirror.css"
 
 
 export interface CodeMirrorProps {
@@ -28,7 +28,7 @@ export default class CodeMirrorComponent extends React.Component<CodeMirrorProps
     textArea: HTMLTextAreaElement; 
 
     componentDidMount() {
-        this.codeMirror = CodeMirror.fromTextArea(this.textArea, this.props.options);
+        this.codeMirror = CodeMirror.fromTextArea(this.textArea!, this.props.options);
         if (this.props.onChange)
             this.codeMirror.on('change', this.codemirrorValueChanged);
         this.codeMirror.on('focus', () => this.focusChanged(true));
@@ -99,7 +99,7 @@ export default class CodeMirrorComponent extends React.Component<CodeMirrorProps
         return (
             <div className={editorClassName}>
                 <style>{css}</style>
-                <textarea ref={ta => this.textArea = ta} name={this.props.path} defaultValue={this.props.value || undefined} autoComplete="off" />
+                <textarea ref={ta => this.textArea = ta!} name={this.props.path} defaultValue={this.props.value || undefined} autoComplete="off" />
             </div>
         );
     }

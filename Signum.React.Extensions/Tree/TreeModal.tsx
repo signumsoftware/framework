@@ -88,7 +88,7 @@ export default class TreeModal extends React.Component<TreeModalProps, { show: b
                         typeName={this.props.typeName}
                         onSelectedNode={this.handleSelectedNode}
                         onDoubleClick={this.handleDoubleClick}
-                        ref={tv => this.treeView = tv }
+                        ref={tv => this.treeView = tv!}
                     />
                 </Modal.Body>
             </Modal>

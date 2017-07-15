@@ -91,8 +91,8 @@ export default class UserChartPart extends React.Component<UserChartPartProps, U
                         {" "}{UserChartPartEntity.nicePropertyName(a => a.showData)}
                     </label>}
                 {this.state.showData ?
-                    <ChartTable chartRequest={s.chartRequest} resultTable={s.result.resultTable} onRedraw={() => this.makeQuery()} /> :
-                    <ChartRenderer chartRequest={s.chartRequest} data={s.result.chartTable} />
+                    <ChartTable chartRequest={s.chartRequest} lastChartRequest={s.chartRequest} resultTable={s.result.resultTable} onRedraw={() => this.makeQuery()} /> :
+                    <ChartRenderer chartRequest={s.chartRequest} lastChartRequest={s.chartRequest} data={s.result.chartTable} />
                 }
             </div>
         );

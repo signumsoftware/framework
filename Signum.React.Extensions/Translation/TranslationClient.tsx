@@ -23,7 +23,8 @@ export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(
         <ImportRoute path="~/translation/status" onImportModule={() => import("./Code/TranslationCodeStatus")} />,
         <ImportRoute path="~/translation/view/:assembly/:culture?" onImportModule={() => import("./Code/TranslationCodeView")} />,
-        <ImportRoute path="~/translation/sync/:assembly/:culture" onImportModule={() => import("./Code/TranslationCodeSync")} />
+        <ImportRoute path="~/translation/syncNamespaces/:assembly/:culture" onImportModule={() => import("./Code/TranslationCodeSyncNamespaces")} />,
+        <ImportRoute path="~/translation/sync/:assembly/:culture/:namespace?" onImportModule={() => import("./Code/TranslationCodeSync")} />
     );
 }
 
@@ -37,8 +38,12 @@ export module API {
         return ajaxPost<AssemblyResult>({ url: `~/api/translation/retrieve?assembly=${assembly}&culture=${culture}&filter=${filter}` }, undefined);
     }
 
-    export function sync(assembly: string, culture: string): Promise<AssemblyResult> {
-        return ajaxPost<AssemblyResult>({ url: `~/api/translation/sync?assembly=${assembly}&culture=${culture}` }, undefined);
+    export function namespaceStatus(assembly: string, culture: string): Promise<Array<NamespaceSyncStats>> {
+        return ajaxGet<Array<NamespaceSyncStats>>({ url: `~/api/translation/syncStats?assembly=${assembly}&culture=${culture}` });
+    }
+
+    export function sync(assembly: string, culture: string, namespace?: string): Promise<AssemblyResult> {
+        return ajaxPost<AssemblyResult>({ url: `~/api/translation/sync?assembly=${assembly}&culture=${culture}&namespace=${namespace || ""}` }, undefined);
     }
 
     export function save(assembly: string, culture: string, result: AssemblyResult): Promise<void> {
@@ -52,6 +57,12 @@ export module API {
     export function gender(culture: string, singular: string): Promise<string> {
         return ajaxPost<string>({ url: `~/api/translation/gender?culture=${culture}` }, singular);
     }
+}
+
+export interface NamespaceSyncStats {
+    namespace: string;
+    types: number;
+    translations: number;
 }
 
 export interface TranslationFileStatus {

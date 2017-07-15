@@ -19,8 +19,8 @@ import CaseFlowButton from './CaseFlowButton'
 import InlineCaseTags from './InlineCaseTags'
 import { OperationMessage } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
 
-require("../../../../Framework/Signum.React/Scripts/Frames/Frames.css");
-require("./CaseAct.css");
+import "../../../../Framework/Signum.React/Scripts/Frames/Frames.css"
+import "./CaseAct.css"
 
 interface CaseFrameModalProps extends React.Props<CaseFrameModal>, IModalProps {
     title?: string;
@@ -214,7 +214,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         );
     }
 
-    validationErrors: ValidationErrors;
+    validationErrors?: ValidationErrors | null;
 
     getMainTypeInfo(): TypeInfo {
         return getTypeInfo(this.state.pack!.activity.case.mainEntity.Type);
@@ -251,7 +251,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
         var mainPack = { entity: mainEntity, canExecute: pack.canExecuteMainEntity };
 
-        const wc: WidgetContext = {
+        const wc: WidgetContext<ICaseMainEntity> = {
             ctx: ctx,
             pack: mainPack,
         };
@@ -303,7 +303,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
     }
 
     handlePopupFullScreen = (e: React.MouseEvent<any>) => {
-        Navigator.pushOrOpen("~/workflow/activity/" + this.state.pack!.activity.id, e);
+        Navigator.pushOrOpenInTab("~/workflow/activity/" + this.state.pack!.activity.id, e);
     }
 
     static openView(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, readOnly?: boolean): Promise<CaseActivityEntity | undefined> {

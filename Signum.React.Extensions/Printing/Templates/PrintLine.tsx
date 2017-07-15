@@ -7,7 +7,7 @@ import { PrintLineEntity } from '../Signum.Entities.Printing'
 import { ProcessExceptionLineEntity } from '../../Processes/Signum.Entities.Processes'
 import FileLine from '../../Files/FileLine'
 
-export default class PrintLine extends React.Component<{ ctx: TypeContext<PrintLineEntity> }, void> {
+export default class PrintLine extends React.Component<{ ctx: TypeContext<PrintLineEntity> }> {
 
     render() {
         

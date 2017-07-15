@@ -18,7 +18,7 @@ import { DesignerContext, DesignerNode } from './NodeUtils'
 import { BaseNode, ContainerNode, LineBaseNode, NodeConstructor, EntityTableNode, EntityTableColumnNode } from './Nodes'
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 
-require("./DynamicViewTree.css");
+import "./DynamicViewTree.css"
 
 export interface DynamicViewTreeProps {
     rootNode: DesignerNode<BaseNode>;
@@ -65,7 +65,7 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
     render() {
         return (
             <div>
-                <div className="dynamic-view-tree" ref={(t) => { this.treeContainer = t } } >
+                <div className="dynamic-view-tree" ref={(t) => this.treeContainer = t!} >
                     <ul>
                         <DynamicViewNode
                             node={this.props.rootNode}

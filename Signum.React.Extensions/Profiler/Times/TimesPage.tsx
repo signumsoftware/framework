@@ -12,7 +12,7 @@ import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString,
 import { API, TimeTrackerEntry } from '../ProfilerClient'
 import { RouteComponentProps } from "react-router";
 
-require("./Times.css");
+import "./Times.css"
 
 interface TimesPageProps extends RouteComponentProps<{}> {
 

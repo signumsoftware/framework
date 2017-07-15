@@ -11,9 +11,9 @@ import { API, DiffLogResult, DiffPair } from '../DiffLogClient'
 import {SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 
-require("./DiffLog.css");
+import "./DiffLog.css"
 
-export default class OperationLog extends React.Component<{ ctx: TypeContext<OperationLogEntity> }, void> {
+export default class OperationLog extends React.Component<{ ctx: TypeContext<OperationLogEntity> }> {
 
     render() {
         

@@ -10,7 +10,7 @@ import { MoveTreeModel } from '../Signum.Entities.Tree'
 import * as TreeClient from '../TreeClient'
 import { TypeReference } from "../../../../Framework/Signum.React/Scripts/Reflection";
 
-export default class MoveTreeModelComponent extends React.Component<{ ctx: TypeContext<MoveTreeModel>, typeName: string }, void> {
+export default class MoveTreeModelComponent extends React.Component<{ ctx: TypeContext<MoveTreeModel>, typeName: string }> {
 
     render() {
         const ctx = this.props.ctx;

@@ -13,7 +13,7 @@ import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntity
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
 import { LinkListPartEntity, LinkElementEmbedded } from '../Signum.Entities.Dashboard'
 
-export default class LinkListPart extends React.Component<{ part: LinkListPartEntity }, void> {
+export default class LinkListPart extends React.Component<{ part: LinkListPartEntity }> {
 
     render() {
 

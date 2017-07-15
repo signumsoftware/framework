@@ -13,18 +13,21 @@ import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType, ToolbarLocation } from './Signum.Entities.Toolbar'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
+import * as UserAssetClient from '../UserAssets/UserAssetClient'
 
-export function start(...configs: ToolbarConfig<any>[]) {
+export function start(options: { routes: JSX.Element[] }, ...configs: ToolbarConfig<any>[]) {
     Navigator.addSettings(new EntitySettings(ToolbarEntity, t => import('./Templates/Toolbar')));
     Navigator.addSettings(new EntitySettings(ToolbarMenuEntity, t => import('./Templates/ToolbarMenu')));
     Navigator.addSettings(new EntitySettings(ToolbarElementEmbedded, t => import('./Templates/ToolbarElement')));   
-
-
+    
     Finder.addSettings({ queryName: ToolbarEntity, defaultOrderColumn: "Priority", defaultOrderType: "Descending" });
 
     Constructor.registerConstructor(ToolbarElementEmbedded, tn => ToolbarElementEmbedded.New({ type: "Link" }));
 
     configs.forEach(c => registerConfig(c));
+    
+    UserAssetClient.start({ routes: options.routes });
+    UserAssetClient.registerExportAssertLink(ToolbarEntity);
 }
 
 
@@ -54,7 +57,7 @@ export abstract class ToolbarConfig<T extends Entity> {
         var openWindow = e.ctrlKey || e.button == 1;
         e.persist();
         this.navigateTo(res).then(url => {
-            Navigator.pushOrOpen(url, e);
+            Navigator.pushOrOpenInTab(url, e);
         }).done();
     }
 }

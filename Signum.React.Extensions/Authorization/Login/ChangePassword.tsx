@@ -89,21 +89,21 @@ export default class ChangePassword extends React.Component<{}, { modelState?: M
                     <div className="form-group">
                         <label className="col-sm-offset-2 col-sm-2 control-label">{AuthMessage.ChangePasswordAspx_ActualPassword.niceToString() }</label>
                         <div className="col-sm-4">
-                            <input type="password" className="form-control" id="currentPassword" ref={r => this.oldPassword = r} placeholder={AuthMessage.ChangePasswordAspx_ActualPassword.niceToString() } onBlur={()=>this.forceUpdate()}/>
+                            <input type="password" className="form-control" id="currentPassword" ref={r => this.oldPassword = r!} placeholder={AuthMessage.ChangePasswordAspx_ActualPassword.niceToString() } onBlur={()=>this.forceUpdate()}/>
                             {this.error("oldPassword") && <span className="help-block">{this.error("oldPassword") }</span>}
                         </div>
                     </div>
                     <div className="form-group">
                         <label className="col-sm-offset-2 col-sm-2 control-label">{AuthMessage.EnterTheNewPassword.niceToString() }</label>
                         <div className="col-sm-4">
-                            <input type="password" className="form-control" id="newPassword" ref={r => this.newPassword = r} placeholder={AuthMessage.NewPassword.niceToString() } onBlur={this.handlePasswordBlur}/>
+                            <input type="password" className="form-control" id="newPassword" ref={r => this.newPassword = r!} placeholder={AuthMessage.NewPassword.niceToString() } onBlur={this.handlePasswordBlur}/>
                             {this.error("newPassword") && <span className="help-block">{this.error("newPassword") }</span>}
                         </div>
                     </div>
                     <div className="form-group">
                         <label className="col-sm-offset-2 col-sm-2 control-label">{AuthMessage.ChangePasswordAspx_ConfirmNewPassword.niceToString() }</label>
                         <div className="col-sm-4">
-                            <input type="password" className="form-control" id="newPassword2" ref={r => this.newPassword2 = r} placeholder={AuthMessage.ConfirmNewPassword.niceToString() } onBlur={this.handlePasswordBlur}/>
+                            <input type="password" className="form-control" id="newPassword2" ref={r => this.newPassword2 = r!} placeholder={AuthMessage.ConfirmNewPassword.niceToString() } onBlur={this.handlePasswordBlur}/>
                             {this.error("newPassword") && <span className="help-block">{this.error("newPassword") }</span>}
                         </div>
                     </div>

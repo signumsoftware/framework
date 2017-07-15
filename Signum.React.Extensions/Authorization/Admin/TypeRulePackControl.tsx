@@ -25,7 +25,7 @@ import { TypeConditionSymbol } from '../../Basics/Signum.Entities.Basics'
 import { QueryEntity, PropertyRouteEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 
 
-require("./AuthAdmin.css");
+import "./AuthAdmin.css"
 
 export default class TypesRulesPackControl extends React.Component<{ ctx: TypeContext<TypeRulePack> }, { filter: string }> implements IRenderButtons {
 
@@ -191,7 +191,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
     }
 
     handleAddConditionClick = (remainig: TypeConditionSymbol[], taac: TypeAllowedAndConditions) => {
-        SelectorModal.chooseElement(remainig, { display: a => a.toStr.tryAfter(".") || a.toStr })
+        SelectorModal.chooseElement(remainig, { buttonDisplay: a => a.toStr.tryAfter(".") || a.toStr })
             .then(tc => {
                 if (!tc)
                     return;

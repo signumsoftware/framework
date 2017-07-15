@@ -22,8 +22,8 @@ import ChartTable from './ChartTable'
 import ChartRenderer from './ChartRenderer'
 
 
-require("../Chart.css");
-require("../../../../Framework/Signum.React/Scripts/SearchControl/Search.css");
+import "../Chart.css"
+import "../../../../Framework/Signum.React/Scripts/SearchControl/Search.css"
 
 
 interface ChartRequestViewProps {
@@ -35,6 +35,7 @@ interface ChartRequestViewProps {
 
 interface ChartRequestViewState {
     queryDescription?: QueryDescription;
+    lastChartRequest?: ChartRequest;
     chartResult?: ChartClient.API.ExecuteChartResult;
 }
 
@@ -72,7 +73,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
     handleInvalidate = () => {
         this.removeObsoleteOrders();
-        this.setState({ chartResult: undefined });
+        this.setState({ chartResult: undefined, lastChartRequest: undefined });
     }
 
     removeObsoleteOrders() {
@@ -98,10 +99,10 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
     handleOnDrawClick = () => {
 
-        this.setState({ chartResult: undefined });
+        this.setState({ chartResult: undefined, lastChartRequest: undefined });
 
         this.abortableQuery.getData(this.props.chartRequest!)
-            .then(rt => this.setState({ chartResult: rt }),
+            .then(rt => this.setState({ chartResult: rt, lastChartRequest: JSON.parse(JSON.stringify(this.props.chartRequest)) }),
             ifError(ValidationError, e => {
                 GraphExplorer.setModelState(this.props.chartRequest!, e.modelState, "request");
                 this.forceUpdate();
@@ -122,6 +123,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
         const cr = this.props.chartRequest;
         const qd = this.state.queryDescription;
+        const s = this.state;
 
         if (cr == undefined || qd == undefined)
             return null;
@@ -159,15 +161,15 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                     </div>
                     <br />
                     <div className="sf-search-results-container" >
-                        {!this.state.chartResult ? JavascriptMessage.searchForResults.niceToString() :
+                        {!s.chartResult || !s.lastChartRequest ? JavascriptMessage.searchForResults.niceToString() :
 
                             <Tabs id="chartResultTabs" animation={false} unmountOnExit={true}>
-                                <Tab eventKey="chart" title={ChartMessage.Chart.niceToString() }>
-                                    <ChartRenderer  chartRequest={cr} data={this.state.chartResult.chartTable}/>
+                                <Tab eventKey="chart" title={ChartMessage.Chart.niceToString()}>
+                                    <ChartRenderer chartRequest={cr} lastChartRequest={s.lastChartRequest} data={s.chartResult.chartTable} />
                                 </Tab>
 
                                 <Tab eventKey="data" title={ChartMessage.Data.niceToString() }>
-                                    <ChartTable chartRequest={cr} resultTable={this.state.chartResult.resultTable} onRedraw={this.handleOnDrawClick} />
+                                    <ChartTable chartRequest={cr} lastChartRequest={s.lastChartRequest} resultTable={s.chartResult.resultTable} onRedraw={this.handleOnDrawClick} />
                                 </Tab>
                             </Tabs>
                         }
@@ -187,7 +189,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
             showFilters: cr.filterOptions.length > 0
         });
 
-        Navigator.pushOrOpen(path, e);
+        Navigator.pushOrOpenInTab(path, e);
     }
 }
 

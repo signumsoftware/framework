@@ -14,7 +14,7 @@ interface DynamicMixinConnectionComponentProps {
     ctx: TypeContext<DynamicMixinConnectionEntity>;
 }
 
-export default class DynamicMixinConnectionComponent extends React.Component<DynamicMixinConnectionComponentProps, void> {
+export default class DynamicMixinConnectionComponent extends React.Component<DynamicMixinConnectionComponentProps> {
 
     render() {
         const ctx = this.props.ctx;

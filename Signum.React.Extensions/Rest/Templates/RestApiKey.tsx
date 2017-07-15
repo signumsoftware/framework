@@ -5,8 +5,9 @@ import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityRepeater } fro
 import { classes } from "../../../../Framework/Signum.React/Scripts/Globals";
 import { API } from "../RestClient";
 
-export default class RestApiKeyComponent extends React.Component<{ ctx: TypeContext<RestApiKeyEntity> }, void> {
-    apiKey: ValueLine;
+export default class RestApiKeyComponent extends React.Component<{ ctx: TypeContext<RestApiKeyEntity> }> {
+
+    apiKey?: ValueLine | null;
 
     render() {
         const ctx = this.props.ctx;
@@ -26,7 +27,7 @@ export default class RestApiKeyComponent extends React.Component<{ ctx: TypeCont
 
     generateApiKey = () => {
         API.generateRestApiKey()
-            .then(key => this.apiKey.setValue(key))
+            .then(key => this.apiKey!.setValue(key))
             .done();
     }
 }

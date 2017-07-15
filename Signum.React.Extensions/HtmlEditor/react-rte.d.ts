@@ -19,7 +19,7 @@ declare module 'react-rte' {
     }
 
 
-    export default class RichTextEditor extends React.Component<RichTextEditorProps, {}>{
+    export default class RichTextEditor extends React.Component<RichTextEditorProps>{
         static createEmptyValue(): EditorValue;
         static createValueFromString(markup: string, format: EditorFormat): EditorValue;
     }

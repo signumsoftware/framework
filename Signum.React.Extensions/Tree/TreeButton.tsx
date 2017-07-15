@@ -16,7 +16,7 @@ export interface TreeButtonProps {
     searchControl: SearchControlLoaded;
 }
 
-export default class TreeButton extends React.Component<TreeButtonProps, void> {
+export default class TreeButton extends React.Component<TreeButtonProps> {
 
     handleClick = (e: React.MouseEvent<any>) => {
 
@@ -24,7 +24,7 @@ export default class TreeButton extends React.Component<TreeButtonProps, void> {
 
         const path = TreeClient.treePath(fo.queryKey, Finder.toFilterOptions(fo.filterOptions));
 
-        Navigator.pushOrOpen(path, e);
+        Navigator.pushOrOpenInTab(path, e);
     }
     
     render() {

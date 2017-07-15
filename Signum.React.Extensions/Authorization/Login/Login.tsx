@@ -67,7 +67,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                         <div className="col-sm-4">
                             <div className="input-group">
                                 <span className="input-group-addon"><i className="glyphicon glyphicon-user"></i></span>
-                                <input type="text" className="form-control" id="userName" ref={r => this.userName = r} placeholder={AuthMessage.Username.niceToString()} />
+                                <input type="text" className="form-control" id="userName" ref={r => this.userName = r!} placeholder={AuthMessage.Username.niceToString()} />
                             </div>
                             {this.error("userName") && <span className="help-block">{this.error("userName")}</span>}
                         </div>
@@ -78,7 +78,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                         <div className="col-sm-4">
                             <div className="input-group">
                                 <span className="input-group-addon"><i className="glyphicon glyphicon-lock"></i></span>
-                                <input type="password" className="form-control" id="password" ref={r => this.password = r} placeholder={AuthMessage.Password.niceToString()} />
+                                <input type="password" className="form-control" id="password" ref={r => this.password = r!} placeholder={AuthMessage.Password.niceToString()} />
                             </div>
                             {this.error("password") && <span className="help-block">{this.error("password")}</span>}
                         </div>
@@ -88,7 +88,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                         <div className="form-group">
                             <div className="col-sm-offset-4 col-sm-6">
                                 <div className="checkbox">
-                                    <label> <input type="checkbox" ref={r => this.rememberMe = r} />{AuthMessage.RememberMe.niceToString()}</label>
+                                    <label> <input type="checkbox" ref={r => this.rememberMe = r!} />{AuthMessage.RememberMe.niceToString()}</label>
                                 </div>
                             </div>
                         </div>

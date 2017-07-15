@@ -70,7 +70,7 @@
       <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Signum.Analyzer">
       <HintPath>..\..\Framework\Signum.Analyzer\Binaries\Signum.Analyzer.dll</HintPath>
@@ -942,11 +942,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Translation\Views\Index.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Index.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="Translation\Views\TranslatorUserCulture.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -1042,32 +1037,11 @@
     <EmbeddedResource Include="Word\Scripts\Word.js">
       <DependentUpon>Word.ts</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Maps\Scripts\SchemaMap.js">
-      <DependentUpon>SchemaMap.ts</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Maps\Scripts\MapColors.js">
-      <DependentUpon>MapColors.ts</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Cache\Scripts\CacheColors.js">
-      <DependentUpon>CacheColors.ts</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Disconnected\Scripts\DisconnectedColors.js">
-      <DependentUpon>DisconnectedColors.ts</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Isolation\Scripts\IsolationColors.js">
-      <DependentUpon>IsolationColors.ts</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="AuthAdmin\Scripts\AuthAdminColors.js">
-      <DependentUpon>AuthAdminColors.ts</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Mailing\Scripts\AsyncEmailSender.js">
       <DependentUpon>AsyncEmailSender.ts</DependentUpon>
     </EmbeddedResource>
     <Content Include="Maps\Content\operationMap.css" />
     <Content Include="Maps\Content\schemaMap.css" />
-    <EmbeddedResource Include="Maps\Scripts\OperationMap.js">
-      <DependentUpon>OperationMap.ts</DependentUpon>
-    </EmbeddedResource>
     <Content Include="SqlServerTypes\readme.htm" />
     <Content Include="SqlServerTypes\x64\msvcr120.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -1163,7 +1137,6 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>User.generated.cs</LastGenOutput>
     </None>
-    <TypeScriptCompile Include="AuthAdmin\Scripts\AuthAdminColors.ts" />
     <TypeScriptCompile Include="Auth\Scripts\Auth.ts" />
     <EmbeddedResource Include="Auth\Scripts\Auth.js">
       <DependentUpon>Auth.ts</DependentUpon>
@@ -1185,7 +1158,6 @@
       <DependentUpon>Cache.ts</DependentUpon>
     </EmbeddedResource>
     <Content Include="Calendar\Content\calendar.css" />
-    <TypeScriptCompile Include="Cache\Scripts\CacheColors.ts" />
     <TypeScriptCompile Include="Calendar\Scripts\calendar.ts" />
     <EmbeddedResource Include="Calendar\Scripts\calendar.js">
       <DependentUpon>calendar.ts</DependentUpon>
@@ -1241,8 +1213,6 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
-    <TypeScriptCompile Include="Disconnected\Scripts\DisconnectedColors.ts" />
-    <TypeScriptCompile Include="Isolation\Scripts\IsolationColors.ts" />
     <TypeScriptCompile Include="Isolation\Scripts\Isolation.ts" />
     <EmbeddedResource Include="Excel\Scripts\Excel.js">
       <DependentUpon>Excel.ts</DependentUpon>
@@ -1276,9 +1246,6 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
-    <TypeScriptCompile Include="Maps\Scripts\OperationMap.ts" />
-    <TypeScriptCompile Include="Maps\Scripts\SchemaMap.ts" />
-    <TypeScriptCompile Include="Maps\Scripts\MapColors.ts" />
     <TypeScriptCompile Include="Omnibox\Scripts\Omnibox.ts" />
     <TypeScriptCompile Include="Processes\Scripts\Processes.ts" />
     <TypeScriptCompile Include="Notes\Scripts\Notes.ts" />

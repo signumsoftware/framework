@@ -6,7 +6,7 @@ import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/
 import FileLine from '../../../../Extensions/Signum.React.Extensions/Files/FileLine'
 import { ExcelReportEntity} from '../Signum.Entities.Excel'
 
-export default class ExcelReport extends React.Component<{ ctx: TypeContext<ExcelReportEntity> }, void> {
+export default class ExcelReport extends React.Component<{ ctx: TypeContext<ExcelReportEntity> }> {
 
     render() {
         

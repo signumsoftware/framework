@@ -43,8 +43,20 @@ export function start(options: { routes: JSX.Element[] }) {
             contextual: { onClick: ctx => moveModal(ctx.context.lites[0]).then(m => m && ctx.defaultContextualClick(m)) }
         }),
         new EntityOperationSettings(TreeOperation.Copy, {
-            onClick: ctx => copyModal(toLite(ctx.entity)).then(m => { ctx.avoidViewNewEntity = true; m && ctx.defaultClick(m); }),
-            contextual: { onClick: ctx => copyModal(ctx.context.lites[0]).then(m => { ctx.avoidViewNewEntity = true; m && ctx.defaultContextualClick(m); }) }
+            onClick: ctx => copyModal(toLite(ctx.entity)).then(m => {
+                if (m) {
+                    ctx.onConstructFromSuccess = pack => EntityOperations.notifySuccess();
+                    ctx.defaultClick(m);
+                }
+            }),
+            contextual: {
+                onClick: ctx => copyModal(ctx.context.lites[0]).then(m => {
+                    if (m) {
+                        ctx.onConstructFromSuccess = pack => EntityOperations.notifySuccess();
+                        ctx.defaultContextualClick(m);
+                    }
+                })
+            }
         })
     );    
 

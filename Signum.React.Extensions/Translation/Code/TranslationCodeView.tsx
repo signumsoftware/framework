@@ -15,7 +15,7 @@ import { CultureInfoEntity } from '../../Basics/Signum.Entities.Basics'
 import { TranslationMessage } from '../Signum.Entities.Translation'
 import { RouteComponentProps } from "react-router";
 
-require("../Translation.css");
+import "../Translation.css"
 
 interface TranslationCodeViewProps extends RouteComponentProps<{ culture: string; assembly: string }> {
 
@@ -116,7 +116,7 @@ export class TranslateSearchBox extends React.Component<{ search: (newValue: str
     }
 }
 
-export class TranslationTypeTable extends React.Component<{ type: LocalizableType, result: AssemblyResult, currentCulture: string }, void>{
+export class TranslationTypeTable extends React.Component<{ type: LocalizableType, result: AssemblyResult, currentCulture: string }>{
     render() {
 
         let {type, result} = this.props;

@@ -10,9 +10,9 @@ import * as customRenderer from './CustomRenderer'
 import * as customPopupMenu from './CustomPopupMenu'
 import * as BpmnUtils from './BpmnUtils'
 
-require("bpmn-js/assets/bpmn-font/css/bpmn-embedded.css");
-require("diagram-js/assets/diagram-js.css");
-require("./Bpmn.css");
+import "bpmn-js/assets/bpmn-font/css/bpmn-embedded.css"
+import "diagram-js/assets/diagram-js.css"
+import "./Bpmn.css"
 
 export interface BpmnModelerComponentProps {
     workflow: WorkflowEntity;
@@ -27,7 +27,7 @@ class CustomModeler extends Modeler {
 CustomModeler.prototype._modules =
     CustomModeler.prototype._modules.concat([customRenderer, customPopupMenu]);
 
-export default class BpmnModelerComponent extends React.Component<BpmnModelerComponentProps, void> {
+export default class BpmnModelerComponent extends React.Component<BpmnModelerComponentProps> {
 
     private modeler: Modeler;
     private elementRegistry: BPMN.ElementRegistry;

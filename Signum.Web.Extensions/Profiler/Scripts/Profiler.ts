@@ -1,5 +1,4 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
-/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/d3/d3.d.ts"/>
 
 import d3 = require("d3")
 
@@ -77,11 +76,11 @@ export function heavyDetailsChart(data: ProfilerEntry[], currentDepth) {
 
     var currentEntry = data.filter(function (e) { return e.Depth == currentDepth; })[0];
 
-    var x = d3.scale.linear()
+    var x = d3.scaleLinear()
         .domain([currentEntry.BeforeStart, currentEntry.End])
         .range([0, width]);
 
-    var y = d3.scale.linear()
+    var y = d3.scaleLinear()
         .domain([0, maxDepth + 1])
         .range([0, height]);
 
@@ -142,9 +141,9 @@ export function heavyDetailsChart(data: ProfilerEntry[], currentDepth) {
 
 
 export interface HeavyProfilerEntryJson {
-    BeforeStart: string;
-    Start: string;
-    End: string;
+    BeforeStart: number;
+    Start: number;
+    End: number;
     Elapsed: string;
     Role: string;
     Color: string;
@@ -171,11 +170,11 @@ export function heavyListChart(data: HeavyProfilerEntryJson[]) {
     var minStart = d3.min($.map(data, function (e) { return e.Start; }));
     var maxEnd = d3.max($.map(data, function (e) { return e.End; }));
 
-    var x = d3.scale.linear()
+    var x = d3.scaleLinear()
         .domain([minStart, maxEnd])
         .range([labelWidth + 3, width - rightMargin]);
 
-    var y = d3.scale.linear()
+    var y = d3.scaleLinear()
         .domain([0, data.length])
         .range([0, height - 1]);
 

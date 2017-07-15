@@ -6,14 +6,15 @@ import { ajaxPost, ajaxGet, AbortableRequest } from '../../../Framework/Signum.R
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import Typeahead from '../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import * as OmniboxClient from './OmniboxClient'
-import {  OmniboxMessage } from './Signum.Entities.Omnibox'
+import { OmniboxMessage } from './Signum.Entities.Omnibox'
+import '../../../Framework/Signum.React/Scripts/Frames/MenuIcons.css'
 
 export interface OmniboxAutocompleteProps {
     spanAttrs?: React.HTMLAttributes<HTMLSpanElement>;
     inputAttrs?: React.HTMLAttributes<HTMLInputElement>;
 }
 
-export default class OmniboxAutocomplete extends React.Component<OmniboxAutocompleteProps, void>
+export default class OmniboxAutocomplete extends React.Component<OmniboxAutocompleteProps>
 {
     handleOnSelect = (result: OmniboxClient.OmniboxResult, e: React.KeyboardEvent<any> | React.MouseEvent<any>) => {
 
@@ -30,7 +31,7 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
             promise
                 .then(url => {
                     if (url)
-                        Navigator.pushOrOpen(url, e);
+                        Navigator.pushOrOpenInTab(url, e);
                 }).done();
         }
         this.typeahead.blur();
@@ -47,7 +48,7 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
         let inputAttr = { tabIndex: -1, placeholder: OmniboxMessage.Search.niceToString(), ...this.props.inputAttrs };
         
         const result = (
-            <Typeahead ref={ta => this.typeahead = ta} getItems={str => this.abortRequest.getData(str)} 
+            <Typeahead ref={ta => this.typeahead = ta!} getItems={str => this.abortRequest.getData(str)} 
                 renderItem={OmniboxClient.renderItem}
                 onSelect={this.handleOnSelect}
                 spanAttrs={this.props.spanAttrs}

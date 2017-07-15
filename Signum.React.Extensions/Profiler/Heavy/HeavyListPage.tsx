@@ -12,7 +12,7 @@ import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Frame
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { API, HeavyProfilerEntry} from '../ProfilerClient'
 
-require("./Profiler.css");
+import "./Profiler.css"
 
 interface HeavyListProps extends RouteComponentProps<{}> {
 
@@ -127,7 +127,7 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
         this.mountChart();
     }
 
-    chartContainer: HTMLDivElement;
+    chartContainer?: HTMLDivElement | null;
 
     mountChart() {
 

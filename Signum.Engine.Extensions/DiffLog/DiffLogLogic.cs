@@ -18,7 +18,7 @@ namespace Signum.Engine.DiffLog
 {
     public static class DiffLogLogic
     {
-        public static Polymorphic<Func<IEntity, IOperation, bool>> Types = new Polymorphic<Func<IEntity, IOperation, bool>>(minimumType: typeof(Entity));
+        public static Polymorphic<Func<IEntity, IOperation, bool>> ShouldLog = new Polymorphic<Func<IEntity, IOperation, bool>>(minimumType: typeof(Entity));
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool registerAll)
         {
@@ -29,48 +29,37 @@ namespace Signum.Engine.DiffLog
                 OperationLogic.SurroundOperation += OperationLogic_SurroundOperation;
 
                 if (registerAll)
-                    RegisterGraph<Entity>((entity, oper) => true);
+                    RegisterShouldLog<Entity>((entity, oper) => true);
             }
         }
 
-        public static void RegisterGraph<T>(Func<IEntity, IOperation, bool> func) where T : Entity
+        public static void RegisterShouldLog<T>(Func<IEntity, IOperation, bool> func) where T : Entity
         {
-            Types.SetDefinition(typeof(T), func);
+            ShouldLog.SetDefinition(typeof(T), func);
         }
 
         static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity entity, object[] args)
         {
-            if (entity == null)
-                return null;
-
-            var type = entity.GetType();
-
-            bool? strategy = type == null ? (bool?)null : Types.GetValue(type)(entity, operation);
-
-            if (strategy == false)
-                return null;
-
-            using (CultureInfoUtils.ChangeBothCultures(Schema.Current.ForceCultureInfo))
+            if (entity != null && ShouldLog.Invoke(entity, operation))
             {
-                if (operation.OperationType == OperationType.Delete)
+                if (operation.OperationType == OperationType.Execute && !entity.IsNew && !((IEntityOperation)operation).Lite)
+                    entity = RetrieveFresh(entity);
+
+                using (CultureInfoUtils.ChangeBothCultures(Schema.Current.ForceCultureInfo))
+                {
                     log.Mixin<DiffLogMixin>().InitialState = entity.Dump();
-                else if (operation.OperationType == OperationType.Execute && !entity.IsNew)
-                    log.Mixin<DiffLogMixin>().InitialState = ((IEntityOperation)operation).Lite ? entity.Dump() : RetrieveFresh(entity).Dump();
+                }
             }
 
             return new Disposable(() =>
             {
-                if (log != null)
-                {
-                    var target = log.GetTarget();
+                var target = log.GetTarget();
 
-                    if (target != null && operation.OperationType != OperationType.Delete && !target.IsNew)
+                if (target != null && ShouldLog.Invoke(target, operation) && operation.OperationType != OperationType.Delete)
+                {
+                    using (CultureInfoUtils.ChangeBothCultures(Schema.Current.ForceCultureInfo))
                     {
-                        using (CultureInfoUtils.ChangeBothCultures(Schema.Current.ForceCultureInfo))
-                        {
-                            if (Types.GetValue(type)(entity, operation))
-                                log.Mixin<DiffLogMixin>().FinalState = entity.Dump();
-                        }
+                        log.Mixin<DiffLogMixin>().FinalState = target.Dump();
                     }
                 }
             });

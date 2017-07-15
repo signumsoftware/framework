@@ -7,7 +7,7 @@ import * as Navigator  from '../../../../Framework/Signum.React/Scripts/Navigato
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { ProcessEntity, ProcessState, ProcessExceptionLineEntity } from '../Signum.Entities.Processes'
 
-export default class Process extends React.Component<{ ctx: TypeContext<ProcessEntity> }, void> {
+export default class Process extends React.Component<{ ctx: TypeContext<ProcessEntity> }> {
 
     handler: number | undefined;
     componentWillMount(){

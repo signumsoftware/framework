@@ -11,9 +11,9 @@ import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
 
-require("../Chart.css");
+import "../Chart.css"
 
-export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<ChartScriptEntity> }, void> {
+export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<ChartScriptEntity> }> {
 
     get entity() {
         return this.props.ctx.value;
@@ -65,7 +65,7 @@ export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<
             <div className="code-container">
                 <pre style={{ color: "Green", overflowStyle: "inherit" }}>{ChartScriptCode.example}</pre>
                 <style>{css}</style>
-                <JavascriptCodeMirror code={this.props.ctx.value.script || ""} ref={jscm => this.jsCodeMirror = jscm}
+                <JavascriptCodeMirror code={this.props.ctx.value.script || ""} ref={jscm => this.jsCodeMirror = jscm!}
                     onChange={this.handleOnChange}/>
             </div>
         );

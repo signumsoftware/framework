@@ -589,70 +589,69 @@ namespace Signum.Engine.Authorization
 
         public static void ImportExportAuthRules(string fileName)
         {
-            Console.WriteLine("Do you want to import (i), export (e) or sync roles (r) AuthRules? (nothing to exit)".FormatWith(fileName));
-
-            string answer = Console.ReadLine();
-
-            switch (answer.ToLower())
+            Action syncRoles = null;
+            Action import = () =>
             {
-                case "i":
-                    {
-                        Console.Write("Reading {0}...".FormatWith(fileName));
-                        var doc = XDocument.Load(fileName);
-                        Console.WriteLine("Ok");
+                Console.Write("Reading {0}...".FormatWith(fileName));
+                var doc = XDocument.Load(fileName);
+                Console.WriteLine("Ok");
 
-                        Console.WriteLine("Generating SQL script to import auth rules (without modifying the role graph or entities):");
-                        SqlPreCommand command;
-                        try
-                        {
-                            command = ImportRulesScript(doc, interactive: true);
-                        }
-                        catch (InvalidRoleGraphException ex)
-                        {
-                            SafeConsole.WriteLineColor(ConsoleColor.Red, ex.Message);
+                Console.WriteLine("Generating SQL script to import auth rules (without modifying the role graph or entities):");
+                SqlPreCommand command;
+                try
+                {
+                    command = ImportRulesScript(doc, interactive: true);
+                }
+                catch (InvalidRoleGraphException ex)
+                {
+                    SafeConsole.WriteLineColor(ConsoleColor.Red, ex.Message);
 
-                            if(SafeConsole.Ask("Import roles first?"))
-                                goto case "r";
+                    if (SafeConsole.Ask("Sync roles first?"))
+                        syncRoles();
 
-                            return;
-                        }
+                    return;
+                }
 
-                        if (command == null)
-                            SafeConsole.WriteLineColor(ConsoleColor.Green, "Already syncronized");
-                        else
-                            command.OpenSqlFileRetry();
+                if (command == null)
+                    SafeConsole.WriteLineColor(ConsoleColor.Green, "Already syncronized");
+                else
+                    command.OpenSqlFileRetry();
 
-                        break;
-                    }
-                case "e":
-                    {
-                        var doc = ExportRules();
-                        doc.Save(fileName);
-                        Console.WriteLine("Sucesfully exported to {0}".FormatWith(fileName));
+            };
 
-                        if (SafeConsole.Ask("Publish to Load?"))
-                            File.Copy(fileName, "../../" + Path.GetFileName(fileName), overwrite: true);
+            Action export = () =>
+            {
+                var doc = ExportRules();
+                doc.Save(fileName);
+                Console.WriteLine("Sucesfully exported to {0}".FormatWith(fileName));
 
-                        break;
-                    }
-                case "r":
-                    {
-                        Console.Write("Reading {0}...".FormatWith(fileName));
-                        var doc = XDocument.Load(fileName);
-                        Console.WriteLine("Ok");
+                if (SafeConsole.Ask("Publish to Load?"))
+                    File.Copy(fileName, "../../" + Path.GetFileName(fileName), overwrite: true);
+            };
+
+            syncRoles = () =>
+            {
+                Console.Write("Reading {0}...".FormatWith(fileName));
+                var doc = XDocument.Load(fileName);
+                Console.WriteLine("Ok");
 
 
-                        Console.WriteLine("Generating script to synchronize roles...");
+                Console.WriteLine("Generating script to synchronize roles...");
 
-                        SynchronizeRoles(doc);
-                        if (SafeConsole.Ask("Import rules now?"))
-                            goto case "i";
+                SynchronizeRoles(doc);
+                if (SafeConsole.Ask("Import rules now?"))
+                    import();
 
-                        break;
-                    }
-                default:
-                    break;
-            }
+            };
+
+            var action = new ConsoleSwitch<char, Action>("What do you want to do with AuthRules?")
+            {
+                { 'i', import, "Import into database" },
+                { 'e', export, "Export to local folder" },
+                { 'r', syncRoles, "Sync roles"},
+            }.Choose();
+
+            action?.Invoke();
         }
 
         public static string OnLoginMessage()

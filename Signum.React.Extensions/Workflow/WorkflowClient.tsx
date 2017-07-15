@@ -343,8 +343,8 @@ function getWorkflowJumpSelector(jumps: MListElement<WorkflowJumpEmbedded>[]): P
     var opts = jumps.map(j => j.element);
     return SelectorModal.chooseElement(opts,
         {
-            display: a => a.to!.toStr || "",
             title: WorkflowActivityMessage.ChooseADestinationForWorkflowJumping.niceToString(),
+            buttonDisplay: a => a.to!.toStr || "",
             forceShow: true
         });
 }

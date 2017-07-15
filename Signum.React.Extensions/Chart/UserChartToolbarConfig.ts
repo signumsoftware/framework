@@ -14,7 +14,7 @@ import * as UserChartClient from './UserChart/UserChartClient'
 import * as ChartClient from './ChartClient'
 import { UserChartEntity  } from './Signum.Entities.Chart'
 
-export default class DashboardToolbarConfig extends ToolbarConfig<UserChartEntity> {
+export default class UserChartToolbarConfig extends ToolbarConfig<UserChartEntity> {
 
     constructor() {
         super();

@@ -28,7 +28,7 @@ interface FindOptionsLineProps {
     avoidSuggestion?: boolean;
 }
 
-export class FindOptionsLine extends React.Component<FindOptionsLineProps, void>{
+export class FindOptionsLine extends React.Component<FindOptionsLineProps>{
 
     renderMember(fo: FindOptionsExpr | undefined): React.ReactNode {
         return (<span
@@ -52,7 +52,7 @@ export class FindOptionsLine extends React.Component<FindOptionsLineProps, void>
                 .then(sfos => SelectorModal.chooseElement(sfos, {
                     title: DynamicViewMessage.SuggestedFindOptions.niceToString(),
                     message: DynamicViewMessage.TheFollowingQueriesReference0.niceToString().formatHtml(<strong>{ti.niceName}</strong>),
-                    display: sfo => <div><strong>{sfo.queryKey}</strong><br /><small>(by <code>{sfo.parentColumn}</code>)</small></div>
+                    buttonDisplay: sfo => <div><strong>{sfo.queryKey}</strong><br /><small>(by <code>{sfo.parentColumn}</code>)</small></div>
                 }))
                 .then(sfo => ({
                     queryName: sfo && sfo.queryKey,
@@ -197,7 +197,7 @@ interface FindOptionsComponentProps {
     findOptions: FindOptionsExpr;
 }
 
-export class FindOptionsComponent extends React.Component<FindOptionsComponentProps, void> {
+export class FindOptionsComponent extends React.Component<FindOptionsComponentProps> {
 
 
     handleChangeQueryKey = (queryKey: string) => {
@@ -264,7 +264,7 @@ export class FindOptionsComponent extends React.Component<FindOptionsComponentPr
     }
 }
 
-export class QueryKeyLine extends React.Component<{ queryKey: string | undefined, label: string; onChange: (queryKey: string | undefined) => void }, void>{
+export class QueryKeyLine extends React.Component<{ queryKey: string | undefined, label: string; onChange: (queryKey: string | undefined) => void }>{
 
     handleGetItems = (query: string) => {
         return Finder.API.findLiteLike({ types: QueryEntity.typeName, subString: query, count: 5 })
@@ -320,7 +320,7 @@ interface QueryTokenBuilderStringProps {
     hideLabel?: boolean;
 }
 
-class QueryTokenBuilderString extends React.Component<QueryTokenBuilderStringProps, void>{
+class QueryTokenBuilderString extends React.Component<QueryTokenBuilderStringProps>{
 
     componentWillMount() {
         this.loadInitialToken(this.props);
@@ -373,7 +373,7 @@ interface BaseOptionsComponentProps<T> {
     queryKey: string;
 }
 
-abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsComponentProps<T>, void>{
+abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsComponentProps<T>>{
 
 
     handleOnRemove = (event: React.MouseEvent<any>, index: number) => {
@@ -630,7 +630,7 @@ class ColumnOptionsComponent extends BaseOptionsComponent<ColumnOptionExpr> {
     }
 }
 
-class PaginationComponent extends React.Component<{ findOptions: FindOptionsExpr, dn: DesignerNode<BaseNode>; refreshView: () => void }, void> {
+class PaginationComponent extends React.Component<{ findOptions: FindOptionsExpr, dn: DesignerNode<BaseNode>; refreshView: () => void }> {
 
     render() {
         const fo = this.props.findOptions;

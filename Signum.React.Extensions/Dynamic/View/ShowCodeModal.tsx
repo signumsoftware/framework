@@ -78,7 +78,7 @@ import { ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDet
 import { SearchControl, ValueSearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 ${Dic.getValues(cc.imports.toObjectDistinct(a => a)).join("\n")}
 
-export default class ${typeName}Component extends React.Component<{ ctx: TypeContext<${typeName}Entity> }, void> {
+export default class ${typeName}Component extends React.Component<{ ctx: TypeContext<${typeName}Entity> }> {
 
     render() {
         const ctx = this.props.ctx;

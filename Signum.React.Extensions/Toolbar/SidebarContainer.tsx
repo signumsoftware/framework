@@ -8,14 +8,14 @@ interface SidebarContainerProps {
     sidebarContent: React.ReactElement<any>;
 }
 
-export default class SidebarContainer extends React.Component<SidebarContainerProps, void> {
+export default class SidebarContainer extends React.Component<SidebarContainerProps> {
 
     render() {
         const visible = this.props.sidebarVisible;
         return (
             <div>
                 {visible && this.renderSideBar()}
-                <div className={visible ? "sidebar-container" : "container-fluid"}>
+                <div className={visible ? "sidebar-container container-fluid" : "container-fluid"}>
                     {this.props.children}
                 </div>
             </div>

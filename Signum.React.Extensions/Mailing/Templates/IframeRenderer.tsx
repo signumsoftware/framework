@@ -12,7 +12,7 @@ export interface IFrameRendererProps extends React.HTMLAttributes<HTMLIFrameElem
     html: string | null | undefined;
 }
 
-export default class IFrameRenderer extends React.Component<IFrameRendererProps, void> {
+export default class IFrameRenderer extends React.Component<IFrameRendererProps> {
 
     componentDidMount() {
         this.load(this.props.html);
@@ -34,7 +34,7 @@ export default class IFrameRenderer extends React.Component<IFrameRendererProps,
 
         var { html, ...props } = this.props;
 
-        return (<iframe {...props} ref={e => this.iframe = e}></iframe>);
+        return (<iframe {...props} ref={e => this.iframe = e!}></iframe>);
     }
 }
 

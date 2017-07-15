@@ -14,7 +14,7 @@ import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString,
 import { API, HeavyProfilerEntry, StackTraceTS } from '../ProfilerClient'
 import { RouteComponentProps } from "react-router";
 
-require("./Profiler.css");
+import "./Profiler.css"
 
 interface HeavyEntryProps extends RouteComponentProps<{selectedIndex : string }> {
 
@@ -118,7 +118,7 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
 }
 
 
-export class StackFrameTable extends React.Component<{stackTrace : StackTraceTS[]}, void>{
+export class StackFrameTable extends React.Component<{stackTrace : StackTraceTS[]}>{
 
     render(){
         if(this.props.stackTrace == undefined)
@@ -237,7 +237,7 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
     }
 
     render() {
-        return (<div className="sf-profiler-chart" ref={div => this.chartContainer = div} onWheel={this.handleWeel}></div>);
+        return (<div className="sf-profiler-chart" ref={div => this.chartContainer = div!} onWheel={this.handleWeel}></div>);
     }
 
     mountChart(props: HeavyProfilerDetailsD3Props) {

@@ -11,7 +11,7 @@ export interface WorkflowEventTaskActionComponentProps {
     mainEntityType: TypeEntity;
 }
 
-export default class WorkflowEventTaskActionComponent extends React.Component<WorkflowEventTaskActionComponentProps, void> {
+export default class WorkflowEventTaskActionComponent extends React.Component<WorkflowEventTaskActionComponentProps> {
 
     render() {
         var ctx = this.props.ctx;

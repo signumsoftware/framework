@@ -27,14 +27,22 @@ namespace Signum.React.Selenium
             IWebElement dateTimePicker = this.Element.TryFindElement(By.CssSelector("div.rw-datetime-picker input[type=text]"));
             if(dateTimePicker != null)
             {
-                var js = this.Element.GetDriver() as IJavaScriptExecutor;
+                dateTimePicker.Click();
+                dateTimePicker.SendKeys(value);
+                dateTimePicker.LoseFocus();
+                dateTimePicker.SendKeys(value);
+                dateTimePicker.LoseFocus();
 
-                var script = 
-$@"arguments[0].value = '{value}'; 
-arguments[0].dispatchEvent(new Event('input', {{ bubbles: true }}));
-arguments[0].dispatchEvent(new Event('blur'));";
+//                var js = this.Element.GetDriver() as IJavaScriptExecutor;
 
-                js.ExecuteScript(script, dateTimePicker);
+//                var script = 
+//$@"arguments[0].value = '{value}'; 
+//arguments[0].dispatchEvent(new Event('input', {{ bubbles: true }}));
+//arguments[0].dispatchEvent(new Event('blur'));";
+
+//                js.ExecuteScript(script, dateTimePicker);
+
+
                 return;
             }
 

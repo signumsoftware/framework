@@ -150,7 +150,7 @@ namespace Signum.Engine.Toolbar
             if (curr == null)
                 return null;
 
-            var responses = ToResponses(curr.Elements);
+            var responses = ToResponseList(curr.Elements);
 
             if (responses.Count == 0)
                 return null;
@@ -164,7 +164,7 @@ namespace Signum.Engine.Toolbar
             };
         }
 
-        private static List<ToolbarResponse> ToResponses(MList<ToolbarElementEmbedded> elements)
+        private static List<ToolbarResponse> ToResponseList(MList<ToolbarElementEmbedded> elements)
         {
             var result = elements.Select(a => ToResponse(a)).NotNull().ToList();
 
@@ -203,7 +203,7 @@ namespace Signum.Engine.Toolbar
             if (element.Content is Lite<ToolbarMenuEntity>)
             {
                 var tme = ToolbarMenus.Value.GetOrThrow((Lite<ToolbarMenuEntity>)element.Content);
-                result.elements = ToResponses(tme.Elements);
+                result.elements = ToResponseList(tme.Elements);
                 if (result.elements.Count == 0)
                     return null;
             }
@@ -214,6 +214,7 @@ namespace Signum.Engine.Toolbar
         static Dictionary<Type, Func<Lite<Entity>, bool>> IsAuthorizedDictionary = new Dictionary<Type, Func<Lite<Entity>, bool>>
         {
             { typeof(QueryEntity), a => DynamicQueryManager.Current.QueryAllowed(QueryLogic.QueryNames.GetOrThrow(a.ToString()))  },
+            { typeof(PermissionSymbol), a => PermissionAuthLogic.IsAuthorized((PermissionSymbol)a.Retrieve()) },
             { typeof(UserQueryEntity), a => InMemoryFilter(UserQueryLogic.UserQueries.Value.GetOrCreate((Lite<UserQueryEntity>)a)) },
             { typeof(UserChartEntity), a => InMemoryFilter(UserChartLogic.UserCharts.Value.GetOrCreate((Lite<UserChartEntity>)a)) },
             { typeof(DashboardEntity), a => InMemoryFilter(DashboardLogic.Dashboards.Value.GetOrCreate((Lite<DashboardEntity>)a)) },
