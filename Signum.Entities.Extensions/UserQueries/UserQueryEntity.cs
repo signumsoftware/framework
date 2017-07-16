@@ -342,7 +342,7 @@ namespace Signum.Entities.UserQueries
             return new XElement("Filter",
                 new XAttribute("Token", Token.Token.FullKey()),
                 new XAttribute("Operation", Operation),
-                new XAttribute("Value", ValueString));
+                new XAttribute("Value", ValueString??""));
         }
 
         public void FromXml(XElement element, IFromXmlContext ctx)

@@ -24,7 +24,6 @@ export class CustomReplaceMenuProvider extends BpmnReplaceMenuProvider {
 
     _createEntries(element: BPMN.DiElement, replaceOptions: ReplaceOptions[]) {
 
-        debugger;
         if (BpmnUtils.isGatewayAnyKind(element.type))
             return super._createEntries(element, replaceOptions.filter(a =>
                 a.actionName == "replace-with-parallel-gateway" ||
