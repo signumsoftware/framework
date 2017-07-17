@@ -1,7 +1,6 @@
 ﻿
 
 .sidebar-container {
-    padding: 1px 15px;
     min-height: 568px;
     background-color: white;
 }
@@ -10,14 +9,12 @@
     body:not(.rtl-mode) .sidebar-container {
         position: inherit;
         margin: 0 0 0 250px;
-        padding: 1px 30px;
         border-left: 1px solid #e7e7e7;
     }
 
     body.rtl-mode .sidebar-container {
         position: inherit;
         margin: 0 250px 0 0;
-        padding: 1px 30px;
         border-right: 1px solid #e7e7e7;
     }
 }

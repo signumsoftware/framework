@@ -43,8 +43,20 @@ export function start(options: { routes: JSX.Element[] }) {
             contextual: { onClick: ctx => moveModal(ctx.context.lites[0]).then(m => m && ctx.defaultContextualClick(m)) }
         }),
         new EntityOperationSettings(TreeOperation.Copy, {
-            onClick: ctx => copyModal(toLite(ctx.entity)).then(m => { ctx.avoidViewNewEntity = true; m && ctx.defaultClick(m); }),
-            contextual: { onClick: ctx => copyModal(ctx.context.lites[0]).then(m => { ctx.avoidViewNewEntity = true; m && ctx.defaultContextualClick(m); }) }
+            onClick: ctx => copyModal(toLite(ctx.entity)).then(m => {
+                if (m) {
+                    ctx.onConstructFromSuccess = pack => EntityOperations.notifySuccess();
+                    ctx.defaultClick(m);
+                }
+            }),
+            contextual: {
+                onClick: ctx => copyModal(ctx.context.lites[0]).then(m => {
+                    if (m) {
+                        ctx.onConstructFromSuccess = pack => EntityOperations.notifySuccess();
+                        ctx.defaultContextualClick(m);
+                    }
+                })
+            }
         })
     );    
 
@@ -61,7 +73,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
 
 function moveModal(lite: Lite<TreeEntity>) {
-    return Navigator.view(MoveTreeModel.New(), {
+    return Navigator.view(MoveTreeModel.New({ insertPlace: "LastNode" }), {
         title: TreeMessage.Move0.niceToString(lite.toStr),
         modalSize: "medium",
         extraComponentProps: { typeName: lite.EntityType },
@@ -73,7 +85,7 @@ function copyModal(lite: Lite<TreeEntity>) {
     if (s && s.createCopyModel)
         return s.createCopyModel(lite, {});
     else
-        return Navigator.view(MoveTreeModel.New(), {
+        return Navigator.view(MoveTreeModel.New({ insertPlace: "LastNode" }), {
             title: TreeMessage.Copy0.niceToString(lite.toStr),
             modalSize: "medium",
             extraComponentProps: { typeName: lite.EntityType },

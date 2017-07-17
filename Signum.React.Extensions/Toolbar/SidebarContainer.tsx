@@ -15,7 +15,7 @@ export default class SidebarContainer extends React.Component<SidebarContainerPr
         return (
             <div>
                 {visible && this.renderSideBar()}
-                <div className={visible ? "sidebar-container" : "container-fluid"}>
+                <div className={visible ? "sidebar-container container-fluid" : "container-fluid"}>
                     {this.props.children}
                 </div>
             </div>
