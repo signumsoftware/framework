@@ -136,7 +136,8 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
                 if (e == undefined)
                     return;
 
-                this.convert(e).then(m => this.setValue(m)).done();
+                if (e.modified || !is(e, entity))
+                    this.convert(e).then(m => this.setValue(m)).done();
             }).done();
         }
     }
