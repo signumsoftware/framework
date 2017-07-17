@@ -16,6 +16,7 @@ using Signum.Engine.Cache;
 using Signum.Engine;
 using Signum.Entities.Cache;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Engine.Scheduler;
 
 namespace Signum.React.Cache
 {
@@ -44,7 +45,7 @@ namespace Signum.React.Cache
             CachePermission.ViewCache.AssertAuthorized();
 
             CacheLogic.GloballyDisabled = false;
-
+            SystemEventLogLogic.Log("CacheLogic.Enable");
         }
 
         [Route("api/cache/disable"), HttpPost]
@@ -53,7 +54,7 @@ namespace Signum.React.Cache
             CachePermission.ViewCache.AssertAuthorized();
 
             CacheLogic.GloballyDisabled = true;
-
+            SystemEventLogLogic.Log("CacheLogic.Disable");
         }
 
         [Route("api/cache/clear"), HttpPost]

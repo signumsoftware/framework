@@ -8,14 +8,6 @@ import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
-export const ApplicationEventLogEntity = new Type<ApplicationEventLogEntity>("ApplicationEventLog");
-export interface ApplicationEventLogEntity extends Entities.Entity {
-    Type: "ApplicationEventLog";
-    machineName?: string | null;
-    date?: string;
-    globalEvent?: TypeEvent;
-}
-
 export const HolidayCalendarEntity = new Type<HolidayCalendarEntity>("HolidayCalendar");
 export interface HolidayCalendarEntity extends Entities.Entity {
     Type: "HolidayCalendar";
@@ -172,9 +164,14 @@ export interface SimpleTaskSymbol extends Entities.Symbol, ITaskEntity {
     Type: "SimpleTask";
 }
 
-export const TypeEvent = new EnumType<TypeEvent>("TypeEvent");
-export type TypeEvent =
-    "Start" |
-    "Stop";
+export const SystemEventLogEntity = new Type<SystemEventLogEntity>("SystemEventLog");
+export interface SystemEventLogEntity extends Entities.Entity {
+    Type: "SystemEventLog";
+    machineName?: string | null;
+    date?: string;
+    user?: Entities.Lite<Basics.IUserEntity> | null;
+    eventType?: string | null;
+    exception?: Entities.Lite<Basics.ExceptionEntity> | null;
+}
 
 

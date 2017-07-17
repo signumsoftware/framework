@@ -216,6 +216,8 @@ namespace Signum.Engine.Scheduler
             running = true;
 
             ReloadPlan();
+
+            SystemEventLogLogic.Log("Start ScheduledTasks");
         }
 
         public static void StartScheduledTaskAfter(int initialDelayMilliseconds)
@@ -243,6 +245,8 @@ namespace Signum.Engine.Scheduler
                 timer.Change(Timeout.Infinite, Timeout.Infinite);
                 priorityQueue.Clear();
             }
+
+            SystemEventLogLogic.Log("Stop ScheduledTasks");
         }
 
         static void ReloadPlan()

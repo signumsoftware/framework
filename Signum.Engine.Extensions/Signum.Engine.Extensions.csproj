@@ -182,7 +182,7 @@
     <Compile Include="Migrations\CSharpMigrationRunner.cs" />
     <Compile Include="Migrations\SqlMigrationRunner.cs" />
     <Compile Include="Processes\ProcessRunnerLogic.cs" />
-    <Compile Include="Scheduler\ApplicationEventLogLogic.cs" />
+    <Compile Include="Scheduler\SystemEventLogLogic.cs" />
     <Compile Include="Basics\CultureInfoLogic.cs" />
     <Compile Include="Templating\ValueProviders.cs" />
     <Compile Include="Translation\AzureTranslator.cs" />

@@ -161,7 +161,7 @@
     <Compile Include="Migrations\CSharpMigration.cs" />
     <Compile Include="Migrations\SqlMigration.cs" />
     <Compile Include="Scheduler\ScheduledTaskLogEntity.cs" />
-    <Compile Include="Scheduler\ApplicationEventLog.cs" />
+    <Compile Include="Scheduler\SystemEventLog.cs" />
     <Compile Include="SMS\SMSConfigurationEntity.cs" />
     <Compile Include="Basics\CultureInfoEntity.cs" />
     <Compile Include="Basics\DateSpanEntity.cs" />

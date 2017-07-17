@@ -139,6 +139,8 @@ namespace Signum.Engine.Processes
                 {
                     var database = Schema.Current.Table(typeof(ProcessEntity)).Name.Schema?.Database;
 
+                    SystemEventLogLogic.Log("Start ProcessRunner");
+                    ExceptionEntity exception = null;
                     using (AuthLogic.Disable())
                     {
                         try
@@ -305,6 +307,8 @@ namespace Signum.Engine.Processes
                         {
                             lock (executing)
                                 executing.Clear();
+
+                            SystemEventLogLogic.Log("Stop ProcessRunner", exception);
 
                             running = false;
                         }

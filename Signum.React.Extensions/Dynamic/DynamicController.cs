@@ -2,6 +2,7 @@
 using Signum.Engine.Dynamic;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
+using Signum.Engine.Scheduler;
 using Signum.Entities;
 using Signum.Entities.Dynamic;
 using Signum.React.Facades;
@@ -23,6 +24,7 @@ namespace Signum.React.Dynamic
         [Route("api/dynamic/compile"), HttpPost]
         public List<CompilationErrorTS> Compile()
         {
+            SystemEventLogLogic.Log("DynamicController.Compile");
             Dictionary<string, CodeFile> codeFiles = DynamicLogic.GetCodeFilesDictionary();
             var result = DynamicLogic.Compile(codeFiles, inMemory: true);
             return (from ce in result.Errors.Cast<CompilerError>()
@@ -51,6 +53,7 @@ namespace Signum.React.Dynamic
         [Route("api/dynamic/restartServer"), HttpPost]
         public void RestartServer()
         {
+            SystemEventLogLogic.Log("DynamicController.RestartServer");
             System.Web.HttpRuntime.UnloadAppDomain();
         }
 
