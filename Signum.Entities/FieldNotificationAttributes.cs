@@ -22,7 +22,7 @@ namespace Signum.Entities
     }
 
 
-    //Used by NotifyCollectionChangedAttribute, NotifyChildPropertyAttribute, ValidateChildPropertyAttribute
+    //Used by NotifyCollectionChangedAttribute, NotifyChildPropertyAttribute
     internal static class AttributeManager<T>
         where T : Attribute
     {
