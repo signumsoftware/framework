@@ -2,7 +2,7 @@
 <Translations>
   <Type Name="AggregateFunction">
     <Member Name="Average" Description="Durchschnitt" />
-    <Member Name="Count" Description="Zählung" />
+    <Member Name="Count" Description="Anzahl" />
     <Member Name="Max" Description="Max" />
     <Member Name="Min" Description="Min" />
     <Member Name="Sum" Description="Summe" />

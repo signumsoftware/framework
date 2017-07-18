@@ -128,13 +128,29 @@ namespace Signum.Engine.Basics
                         var originalName = c.FullClassName;
 
                         if (c.TableName != s.TableName)
-                            c.TableName = ObjectName.Parse(s.TableName).ToString();
+                        {
+                            var pc = ObjectName.Parse(c.TableName);
+                            var ps = ObjectName.Parse(s.TableName);
+
+                            if (!EqualsIgnoringDatabasePrefix(pc, ps))
+                            {
+                                c.TableName = ps.ToString();
+                            }
+                        }
+                          
                         c.CleanName = s.CleanName;
                         c.Namespace = s.Namespace;
                         c.ClassName = s.ClassName;
                         return table.UpdateSqlSync(c, comment: originalName);
                     });
         }
+
+        static bool EqualsIgnoringDatabasePrefix(ObjectName pc, ObjectName ps) => 
+            ps.Name == pc.Name &&
+            pc.Schema.Name  == ps.Schema.Name &&
+            Suffix(pc.Schema.Database?.Name) == Suffix(ps.Schema.Database?.Name);
+
+        static string Suffix(string name) => name.TryAfterLast("_") ?? name;
 
         static Dictionary<string, O> ApplyReplacementsToOld<O>(this Replacements replacements, Dictionary<string, O> oldDictionary, string replacementsKey)
         {
