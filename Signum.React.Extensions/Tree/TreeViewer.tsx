@@ -38,6 +38,11 @@ interface TreeViewerProps {
 
 export type DraggedPosition = "Top" | "Bottom" | "Middle";
 
+export interface DraggedOver {
+    node: TreeNode;
+    position: DraggedPosition;
+}
+
 interface TreeViewerState {
     treeNodes?: Array<TreeNode>;
     selectedNode?: TreeNode;
@@ -48,10 +53,7 @@ interface TreeViewerState {
 
     draggedNode?: TreeNode;
     draggedKind?: "Move" | "Copy";
-    draggedOver?: {
-        node: TreeNode;
-        position: DraggedPosition;
-    }
+    draggedOver?: DraggedOver;
 
     currentMenuItems?: React.ReactElement<any>[];
     contextualMenu?: {
@@ -480,7 +482,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         const newPosition = this.getOffset(de.pageY, span.getBoundingClientRect(), 7);
 
         const s = this.state;
-        
+
         if (s.draggedOver == null ||
             s.draggedOver.node != node ||
             s.draggedOver.position != newPosition) {
@@ -520,13 +522,27 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
             return;
         
         var nodeParent = this.findParent(over.node);
+        const ts = TreeClient.settings[this.props.typeName];
+        if (ts && ts.dragTargetIsValid)
+            ts.dragTargetIsValid(dragged, over.position == "Middle" ? over.node : nodeParent)
+                .then(valid => {
+                    if (!valid)
+                        return;
+
+                    this.moveOrCopyOperation(nodeParent, dragged, over);
+
+                }).done()
+        else
+            this.moveOrCopyOperation(nodeParent, dragged, over);
+    }
+
+    moveOrCopyOperation(nodeParent: TreeNode | null, dragged: TreeNode, over: DraggedOver) {
 
         var partial: Partial<MoveTreeModel> =
             over.position == "Middle" ? { newParent: over.node.lite, insertPlace: "LastNode" } :
                 over.position == "Top" ? { newParent: nodeParent && nodeParent.lite, insertPlace: "Before", sibling: over.node.lite } :
                     over.position == "Bottom" ? { newParent: nodeParent && nodeParent.lite, insertPlace: "After", sibling: over.node.lite } :
                         {};
-        
 
         if (this.state.draggedKind == "Move") {
             const treeModel = MoveTreeModel.New(partial);
@@ -538,7 +554,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
         } else {
             const s = TreeClient.settings[this.props.typeName];
-            var promise = s && s.createCopyModel ? s.createCopyModel(dragged, partial) : Promise.resolve(MoveTreeModel.New(partial));
+            var promise = s && s.createCopyModel ? s.createCopyModel(dragged.lite, partial) : Promise.resolve(MoveTreeModel.New(partial));
             promise.then(treeModel => treeModel &&
                 Operations.API.constructFromLite(dragged.lite, TreeOperation.Copy, treeModel).then(() =>
                     this.setState({ draggedNode: undefined, draggedOver: undefined, draggedKind: undefined, selectedNode: dragged }, () =>
@@ -549,6 +565,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         };
     }
 }
+
 
 function allNodes(node: TreeNode): TreeNode[] {
     return [node].concat(node.loadedChildren ? node.loadedChildren.flatMap(allNodes) : []);
