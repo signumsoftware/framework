@@ -73,11 +73,15 @@ export function start(options: { routes: JSX.Element[] }) {
 
 
 function moveModal(lite: Lite<TreeEntity>) {
-    return Navigator.view(MoveTreeModel.New({ insertPlace: "LastNode" }), {
-        title: TreeMessage.Move0.niceToString(lite.toStr),
-        modalSize: "medium",
-        extraComponentProps: { typeName: lite.EntityType },
-    })
+    const s = settings[lite.EntityType];
+    if (s && s.createMoveModel)
+        return s.createMoveModel(lite, {});
+    else
+        return Navigator.view(MoveTreeModel.New({ insertPlace: "LastNode" }), {
+            title: TreeMessage.Move0.niceToString(lite.toStr),
+            modalSize: "medium",
+            extraComponentProps: { lite },
+        })
 }
 
 function copyModal(lite: Lite<TreeEntity>) {
@@ -88,7 +92,7 @@ function copyModal(lite: Lite<TreeEntity>) {
         return Navigator.view(MoveTreeModel.New({ insertPlace: "LastNode" }), {
             title: TreeMessage.Copy0.niceToString(lite.toStr),
             modalSize: "medium",
-            extraComponentProps: { typeName: lite.EntityType },
+            extraComponentProps: { lite },
         });
 }
 
@@ -168,6 +172,8 @@ export interface TreeModalOptions {
 
 export interface TreeSettings<T extends TreeEntity> {
     createCopyModel?: (from: T | Lite<T>, dropConfig: Partial<MoveTreeModel>) => Promise<MoveTreeModel | undefined>;
+    createMoveModel?: (from: T | Lite<T>, dropConfig: Partial<MoveTreeModel>) => Promise<MoveTreeModel | undefined>;
+    dragTargetIsValid?: (draggedNode: TreeNode, targetNode: TreeNode | null) => Promise<boolean>;
 }
 
 export const settings: {
