@@ -25,6 +25,10 @@ export default class MoveTreeModelComponent extends React.Component<MoveTreeMode
         return (
             <div>
                 <EntityLine ctx={ctx.subCtx(a => a.newParent)} type={type} onChange={() => this.forceUpdate()}
+                    findOptions={{
+                        queryName: typeName,
+                        filterOptions: [{ columnName: "Entity", operation: "DistinctTo", value: this.props.lite, frozen: true }]
+                    }}
                     onFind={() => TreeClient.openTree(typeName, [{ columnName: "Entity", operation: "DistinctTo", value: this.props.lite, frozen: true }])} />
 
                 <ValueLine ctx={ctx.subCtx(a => a.insertPlace)} onChange={() => this.forceUpdate()} />
