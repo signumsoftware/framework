@@ -147,14 +147,21 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         }
     }
 
+    getPromiseFilterRequests() : Promise<Array<FilterRequest>> {
+        return this.getFilterOptionsWithSFB().then(fos =>
+            fos.filter(fo => fo.token != undefined && fo.operation != undefined)
+               .map(fo => ({ token: fo.token!.fullKey, operation: fo.operation!, value: fo.value }) as FilterRequest));
+    }
+
     reloadNode(n: TreeNode) {
-        API.getChildren(this.props.typeName, n.lite.id!.toString())
-            .then(t => {
-                var oldNodes = n.loadedChildren.toObject(a => a.lite.id!.toString());
-                n.loadedChildren = t.map(n => oldNodes[n.lite.id!.toString()] || n);
-                n.nodeState = "Expanded";
-                this.forceUpdate();
-            })
+        this.getPromiseFilterRequests().then(filters => 
+            API.getChildren(this.props.typeName, n.lite.id!.toString(), { filters, expandedNodes: [] })
+                .then(t => {
+                    var oldNodes = n.loadedChildren.toObject(a => a.lite.id!.toString());
+                    n.loadedChildren = t.map(n => oldNodes[n.lite.id!.toString()] || n);
+                    n.nodeState = "Expanded";
+                    this.forceUpdate();
+                }))
             .done();
     }
 
@@ -181,7 +188,9 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
         var parent = this.findParent(node);
 
-        var promise = parent == null ? API.getRoots(this.props.typeName) : API.getChildren(parent.lite);
+        var promise = parent == null ?
+            this.getPromiseFilterRequests().then(filters => API.getRoots(this.props.typeName, { filters, expandedNodes: [] })) :
+            this.getPromiseFilterRequests().then(filters => API.getChildren(parent!.lite, { filters, expandedNodes: [] }));
 
         promise.then(newSiblings => {
 
@@ -302,10 +311,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     }
 
     search(expandAlso?: Lite<TreeEntity> | null) {
-        this.getFilterOptionsWithSFB().then(fos => {
-            const filters = fos
-                .filter(fo => fo.token != undefined && fo.operation != undefined)
-                .map(fo => ({ token: fo.token!.fullKey, operation: fo.operation!, value: fo.value }) as FilterRequest);
+        this.getPromiseFilterRequests().then(filters => {
 
             const expandedNodes = !this.state.treeNodes ? [] :
                 this.state.treeNodes!.flatMap(allNodes).filter(a => a.nodeState == "Expanded").map(a => a.lite);
