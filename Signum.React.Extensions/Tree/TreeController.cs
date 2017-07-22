@@ -32,6 +32,7 @@ namespace Signum.React.Tree
                 .OrderBy(a => a.route)
                 .Select(a => new TreeNode
                 {
+                    name = a.name,
                     lite = a.lite,
                     level = a.level,
                     disabled = a.disabled,
@@ -64,6 +65,7 @@ namespace Signum.React.Tree
                             .Select(t => new TreeInfo
                             {
                                 route = t.Route,
+                                name = t.Name,
                                 lite = t.ToLite(),
                                 level = t.Level(),
                                 disabled = disabledMixin && t.Mixin<DisabledMixin>().IsDisabled,
@@ -108,6 +110,7 @@ namespace Signum.React.Tree
                             .Select(t => new TreeInfo
                             {
                                 route = t.Route,
+                                name = t.Name,
                                 lite = t.ToLite(),
                                 level = t.Level(),
                                 disabled = disabledMixin && t.Mixin<DisabledMixin>().IsDisabled,
@@ -131,6 +134,7 @@ namespace Signum.React.Tree
                             .Select(t => new TreeInfo
                             {
                                 route = t.Route,
+                                name = t.Name,
                                 lite = t.ToLite(),
                                 level = t.Level(),
                                 disabled = disabledMixin && t.Mixin<DisabledMixin>().IsDisabled,
@@ -155,9 +159,10 @@ namespace Signum.React.Tree
 #pragma warning disable IDE1006 // Naming Styles
     class TreeInfo
     {
-        public int childrenCount { get; set; }
+        public string name { get; set; }
         public Lite<TreeEntity> lite { get; set; }
         public bool disabled { get; set; }
+        public int childrenCount { get; set; }
         public SqlHierarchyId route { get; set; }
         public short level { get; set; }
     }
@@ -167,13 +172,15 @@ namespace Signum.React.Tree
         public TreeNode() { }
         internal TreeNode(Node<TreeInfo> node)
         {
+            this.name = node.Value.name;
             this.lite = node.Value.lite;
             this.disabled = node.Value.disabled;
             this.childrenCount = node.Value.childrenCount;
             this.loadedChildren = node.Children.OrderBy(a => a.Value.route).Select(a => new TreeNode(a)).ToList();
             this.level = node.Value.level;
         }
-        
+
+        public string name { set; get; }
         public Lite<TreeEntity> lite { set; get; }
         public bool disabled { get; set; }
         public int childrenCount { set; get; }

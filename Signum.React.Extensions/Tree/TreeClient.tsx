@@ -189,8 +189,8 @@ export function register<T extends TreeEntity>(type: Type<T>, setting: TreeSetti
 export type TreeNodeState = "Collapsed" | "Expanded" | "Filtered" | "Leaf";
 
 export interface TreeNode {
-
     lite: Lite<TreeEntity>;
+    name: string;
     disabled: boolean;
     childrenCount: number;
     level: number;

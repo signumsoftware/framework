@@ -582,6 +582,7 @@ function toTreeNode(treeEntity: TreeEntity): TreeNode {
     var dm = tryGetMixin(treeEntity, DisabledMixin);
     return {
         lite: toLite(treeEntity),
+        name: treeEntity.name!,
         childrenCount: 0,
         disabled: dm != null && Boolean(dm.isDisabled),
         level: 0,
@@ -633,7 +634,7 @@ class TreeNodeControl extends React.Component<TreeNodeControlProps> {
                         onDoubleClick={e => tv.handleNodeTextDoubleClick(node, e)}
                         onClick={() => tv.handleNodeTextClick(node)}
                         onContextMenu={tv.props.showContextMenu != false ? e => tv.handleNodeTextContextMenu(node, e) : undefined}>
-                        {node.lite.toStr}
+                        {node.name}
                     </span>
                 </div>
 
