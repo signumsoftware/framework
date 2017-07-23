@@ -18,6 +18,8 @@ export interface EntityLineProps extends EntityBaseProps {
     autoComplete?: AutocompleteConfig<any> | null;
     renderItem?: React.ReactNode; 
     itemHtmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+    hasValueExtraButtons?: () => React.ReactElement<any>[];
+    noValueExtraButtons?: () => React.ReactElement<any>[];
 }
 
 export interface EntityLineState extends EntityLineProps {
@@ -109,10 +111,16 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
         const buttons = (
             <span className="input-group-btn">
-                {!hasValue && this.renderCreateButton(true) }
+                {!hasValue && this.renderCreateButton(true)}
                 {!hasValue && this.renderFindButton(true)}
+                {!hasValue && this.props.noValueExtraButtons && this.props.noValueExtraButtons().map((btn, i) => {
+                    return React.cloneElement(btn, { key: i });
+                })}
                 {hasValue && this.renderViewButton(true, s.ctx.value!)}
-                {hasValue && this.renderRemoveButton(true, s.ctx.value!) }
+                {hasValue && this.renderRemoveButton(true, s.ctx.value!)}
+                {hasValue && this.props.hasValueExtraButtons && this.props.hasValueExtraButtons().map((btn, i) => {
+                    return React.cloneElement(btn, { key: i });
+                })}
             </span>
         );
 
