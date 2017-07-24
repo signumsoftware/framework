@@ -328,6 +328,7 @@ namespace Signum.Engine.Tree
                              if (hasDisabledMixin)
                                  newNode.Mixin<DisabledMixin>().IsDisabled = oldNode.Mixin<DisabledMixin>().IsDisabled || isParentDisabled;
 
+                             newNode.ParentOrSibling = model.NewParent;
                              newNode.Route = oldNode.Route.GetReparentedValue(t.Route, newRoute);
                              newNode.SetFullName(newNode.Name);
                              return newNode;

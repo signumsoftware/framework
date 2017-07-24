@@ -177,6 +177,7 @@
     <Compile Include="Rest\RestApiKeyController.cs" />
     <Compile Include="Rest\RestLogFilter.cs" />
     <Compile Include="Rest\RestServer.cs" />
+    <TypeScriptCompile Include="Basics\Templates\CollapsablePanel.tsx" />
     <TypeScriptCompile Include="Toolbar\SidebarContainer.tsx" />
     <Compile Include="Toolbar\ToolbarController.cs" />
     <Compile Include="Toolbar\ToolbarServer.cs" />
