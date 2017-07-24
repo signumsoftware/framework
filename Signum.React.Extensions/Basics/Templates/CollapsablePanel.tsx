@@ -1,8 +1,9 @@
 ﻿import * as React from 'react'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
+import { BsStyle } from "../../../../Framework/Signum.React/Scripts/Operations";
 
 export interface CollapsablePanelProps {
-    type?: "primary" | "info" | "success" | "warning" | "danger";
+    type?: BsStyle;
     header?: React.ReactNode;
     body?: React.ReactNode;
     defaultOpen?: boolean;
@@ -16,7 +17,7 @@ export interface CollapsablePanelState {
 
 export default class CollapsablePanel extends React.Component<CollapsablePanelProps, CollapsablePanelState> {
 
-    constructor(props: any) {
+    constructor(props: CollapsablePanelProps) {
         super(props);
         this.state = { open: this.props.defaultOpen == true, isRTL: document.body.classList.contains("rtl-mode") };
     }
