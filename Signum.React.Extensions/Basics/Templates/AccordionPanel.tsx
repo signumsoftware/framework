@@ -3,14 +3,8 @@ import { Panel, PanelGroup } from "react-bootstrap";
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { BsStyle } from "../../../../Framework/Signum.React/Scripts/Operations";
 
-export interface PanelInfo {
-    type: BsStyle;
-    header: React.ReactNode;
-    body: React.ReactNode;
-}
-
 export interface AccordionPanelProps {
-    panels: PanelInfo[];
+    panels: Panel[];
 }
 
 export interface AccordionPanelState {
@@ -33,10 +27,8 @@ export default class AccordionPanel extends React.Component<AccordionPanelProps,
             <div>
                 <PanelGroup activeKey={this.state.activeIndex} onSelect={this.handleSelect as any} accordion>
                     {
-                        this.props.panels.map((p, i) =>
-                            <Panel header={p.header} eventKey={i} key={i} bsStyle={p.type}>
-                                {p.body}
-                            </Panel>)
+                        React.Children.map(this.props.panels,
+                            (p, i) => React.cloneElement((p as React.ReactElement<any>), { eventKey: i, key: i }))
                     }
                 </PanelGroup>
             </div>);
