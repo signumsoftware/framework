@@ -26,7 +26,9 @@ export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<ImportRoute path="~/userQuery/:userQueryId/:entity?" onImportModule={() => import("./Templates/UserQueryPage")} />);
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
-        if (!ctx.searchControl.props.showBarExtension || !AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
+        if (!ctx.searchControl.props.showBarExtension ||
+            !AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery) ||
+            (ctx.searchControl.props.showBarExtensionOption && ctx.searchControl.props.showBarExtensionOption.showUserQuery == false))
             return undefined;
 
         return <UserQueryMenu searchControl={ctx.searchControl}/>;
