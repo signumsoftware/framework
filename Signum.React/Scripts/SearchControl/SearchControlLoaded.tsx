@@ -24,6 +24,13 @@ import { ISimpleFilterBuilder } from './SearchControl'
 
 import "./Search.css"
 
+export interface ShowBarExtensionOption {
+    showUserQuery?: boolean;
+    showWordReport?: boolean;
+    showExcelMenu?: boolean;
+    showChartButton?: boolean;
+}
+
 export interface SearchControlLoadedProps {
     allowSelection?: boolean;
     findOptions: FindOptionsParsed;
@@ -43,6 +50,7 @@ export interface SearchControlLoadedProps {
     hideButtonBar?: boolean;
     hideFullScreenButton?: boolean;
     showBarExtension?: boolean;
+    showBarExtensionOption?: ShowBarExtensionOption;
     largeToolbarButtons?: boolean;
     avoidAutoRefresh?: boolean;
     extraButtons?: (searchControl: SearchControlLoaded) => React.ReactNode
