@@ -28,7 +28,7 @@ export function start(options: { routes: JSX.Element[], plainExcel: boolean, exc
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
 
-        if (!ctx.searchControl.props.showBarExtension)
+        if (!ctx.searchControl.props.showBarExtension || (ctx.searchControl.props.showBarExtensionOption && ctx.searchControl.props.showBarExtensionOption.showExcelMenu == false))
             return undefined;
 
         return <ExcelMenu searchControl={ctx.searchControl} plainExcel={options.plainExcel} excelReport={options.excelReport} />;
