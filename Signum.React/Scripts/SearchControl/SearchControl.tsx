@@ -19,14 +19,13 @@ import MultipliedMessage from './MultipliedMessage'
 import { renderContextualItems, ContextualItemsContext, MarkedRowsDictionary, MarkedRow } from './ContextualItems'
 import ContextMenu from './ContextMenu'
 import SelectorModal from '../SelectorModal'
-import SearchControlLoaded from './SearchControlLoaded'
+import SearchControlLoaded, { ShowBarExtensionOption } from './SearchControlLoaded'
 
 import "./Search.css"
 
 export interface SimpleFilterBuilderProps {
     findOptions: FindOptions;
 }
-
 
 export interface SearchControlProps extends React.Props<SearchControl> {
     allowSelection?: boolean
@@ -45,6 +44,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     hideButtonBar?: boolean;
     hideFullScreenButton?: boolean;
     showBarExtension?: boolean;
+    showBarExtensionOption?: ShowBarExtensionOption;
     largeToolbarButtons?: boolean; 
     avoidAutoRefresh?: boolean;
     throwIfNotFindable?: boolean;
@@ -150,6 +150,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             hideButtonBar={this.props.hideButtonBar}
             hideFullScreenButton={this.props.hideFullScreenButton}
             showBarExtension={this.props.showBarExtension}
+            showBarExtensionOption={this.props.showBarExtensionOption}
             extraButtons={this.props.extraButtons}
             largeToolbarButtons={this.props.largeToolbarButtons}
             avoidAutoRefresh={this.props.avoidAutoRefresh}
