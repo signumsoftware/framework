@@ -499,7 +499,10 @@ namespace Signum.Entities.DynamicQuery
             if (!type.IsEnum)
                 return expression;
 
-            var uType = expression.Type.IsNullable() ? type.UnderlyingSystemType.Nullify() : type.UnderlyingSystemType;
+            var uType = Enum.GetUnderlyingType(type);
+
+            if(expression.Type.IsNullable())
+                uType = uType.Nullify();
 
             return Expression.Convert(expression, uType);
         }
