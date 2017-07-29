@@ -19,6 +19,7 @@ export function getEnumInfo(enumTypeName: string, enumId: number) {
 export interface TypeInfo {
     kind: KindOfType;
     name: string;
+    fullName: string;
     niceName?: string;
     nicePluralName?: string;
     gender?: string;

@@ -174,6 +174,7 @@ namespace Signum.React.Facades
                           select KVP.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
                           {
                               Kind = KindOfType.Entity,
+                              FullName = type.FullName,
                               NiceName = descOptions.HasFlag(DescriptionOptions.Description) ? type.NiceName() : null,
                               NicePluralName = descOptions.HasFlag(DescriptionOptions.PluralDescription) ? type.NicePluralName() : null,
                               Gender = descOptions.HasFlag(DescriptionOptions.Gender) ? type.GetGender().ToString() : null,
@@ -238,6 +239,7 @@ namespace Signum.React.Facades
                           select KVP.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
                           {
                               Kind = kind,
+                              FullName = type.FullName,
                               NiceName = descOptions.HasFlag(DescriptionOptions.Description) ? type.NiceName() : null,
                               Members = type.GetFields(staticFlags)
                               .Where(fi => kind != KindOfType.Query || dqm.QueryDefined(fi.GetValue(null)))
@@ -260,6 +262,7 @@ namespace Signum.React.Facades
                           select KVP.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
                           {
                               Kind = KindOfType.SymbolContainer,
+                              FullName = type.FullName,
                               Members = type.GetFields(staticFlags)
                                   .Select(f => GetSymbol(f))
                                   .Where(s =>
@@ -303,6 +306,8 @@ namespace Signum.React.Facades
     {
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "kind")]
         public KindOfType Kind { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "fullName")]
+        public string FullName { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "niceName")]
         public string NiceName { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "nicePluralName")]
