@@ -19,6 +19,7 @@ using System.Data.SqlClient;
 using Signum.Engine.Maps;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
+using Signum.Engine.Scheduler;
 
 namespace Signum.Engine.Processes
 {
@@ -55,11 +56,11 @@ namespace Signum.Engine.Processes
                 Executing = executing.Values.Select(p => new ExecutionState
                 {
                     IsCancellationRequested = p.CancelationSource.IsCancellationRequested,
-                    Process = p.CurrentExecution.ToLite(),
-                    State = p.CurrentExecution.State,
-                    Progress = p.CurrentExecution.Progress,
-                    MachineName = p.CurrentExecution.MachineName,
-                    ApplicationName = p.CurrentExecution.ApplicationName,
+                    Process = p.CurrentProcess.ToLite(),
+                    State = p.CurrentProcess.State,
+                    Progress = p.CurrentProcess.Progress,
+                    MachineName = p.CurrentProcess.MachineName,
+                    ApplicationName = p.CurrentProcess.ApplicationName,
                 }).ToList()
             };
         }
@@ -84,6 +85,7 @@ namespace Signum.Engine.Processes
             .Set(p => p.ExecutionEnd, p => null)
             .Set(p => p.SuspendDate, p => null)
             .Set(p => p.Progress, p => null)
+            .Set(p => p.Status, p => null)
             .Set(p => p.Exception, p => null)
             .Set(p => p.ExceptionDate, p => null)
             .Set(p => p.MachineName, p => ProcessLogic.JustMyProcesses ? Environment.MachineName : ProcessEntity.None)
@@ -99,6 +101,7 @@ namespace Signum.Engine.Processes
             process.ExecutionEnd = null;
             process.SuspendDate = null;
             process.Progress = null;
+            process.Status = null;
             process.Exception = null;
             process.ExceptionDate = null;
             process.MachineName = ProcessLogic.JustMyProcesses ? Environment.MachineName : ProcessEntity.None;
@@ -139,6 +142,8 @@ namespace Signum.Engine.Processes
                 {
                     var database = Schema.Current.Table(typeof(ProcessEntity)).Name.Schema?.Database;
 
+                    SystemEventLogLogic.Log("Start ProcessRunner");
+                    ExceptionEntity exception = null;
                     using (AuthLogic.Disable())
                     {
                         try
@@ -247,7 +252,7 @@ namespace Signum.Engine.Processes
                                                                 ex.LogException(edn =>
                                                                 {
                                                                     edn.ControllerName = "ProcessWorker";
-                                                                    edn.ActionName = executingProcess.CurrentExecution.ToLite().Key();
+                                                                    edn.ActionName = executingProcess.CurrentProcess.ToLite().Key();
                                                                 });
                                                             }
                                                             catch { }
@@ -274,9 +279,9 @@ namespace Signum.Engine.Processes
                                             {
                                                 ExecutingProcess execProc = executing.GetOrThrow(s);
 
-                                                if (execProc.CurrentExecution.State != ProcessState.Finished)
+                                                if (execProc.CurrentProcess.State != ProcessState.Finished)
                                                 {
-                                                    execProc.CurrentExecution = s.Retrieve();
+                                                    execProc.CurrentProcess = s.Retrieve();
                                                     execProc.CancelationSource.Cancel();
                                                 }
                                             }
@@ -293,7 +298,7 @@ namespace Signum.Engine.Processes
                         {
                             try
                             {
-                                e.LogException(edn =>
+                                exception = e.LogException(edn =>
                                 {
                                     edn.ControllerName = "ProcessWorker";
                                     edn.ActionName = "MainLoop";
@@ -305,6 +310,8 @@ namespace Signum.Engine.Processes
                         {
                             lock (executing)
                                 executing.Clear();
+
+                            SystemEventLogLogic.Log("Stop ProcessRunner", exception);
 
                             running = false;
                         }
@@ -372,7 +379,7 @@ namespace Signum.Engine.Processes
 
     public sealed class ExecutingProcess
     {
-        public ProcessEntity CurrentExecution { get; internal set; }
+        public ProcessEntity CurrentProcess { get; internal set; }
         internal IProcessAlgorithm Algorithm;
         internal CancellationTokenSource CancelationSource;
 
@@ -382,12 +389,12 @@ namespace Signum.Engine.Processes
         {
             this.CancelationSource = new CancellationTokenSource();
             this.Algorithm = processAlgorithm;
-            this.CurrentExecution = process;
+            this.CurrentProcess = process;
         }
 
         public IProcessDataEntity Data
         {
-            get { return CurrentExecution.Data; }
+            get { return CurrentProcess.Data; }
         }
 
         public CancellationToken CancellationToken
@@ -397,7 +404,7 @@ namespace Signum.Engine.Processes
 
         public static int DecimalPlaces = 3;
 
-        public void ProgressChanged(int position, int count)
+        public void ProgressChanged(int position, int count, string status = null)
         {
             if (position > count)
                 throw new InvalidOperationException("Position ({0}) should not be greater thant count ({1}). Maybe the process is not making progress.".FormatWith(position, count));
@@ -407,35 +414,40 @@ namespace Signum.Engine.Processes
             if (WriteToConsole)
                 SafeConsole.WriteSameLine("{0:p} [{1}/{2}]".FormatWith(progress, position, count));
 
-            ProgressChanged(progress);
+            ProgressChanged(progress, status);
         }
 
-        public void ProgressChanged(decimal progress)
+        public void ProgressChanged(decimal progress, string status = null)
         {
-            if (progress != CurrentExecution.Progress)
+            if (progress != CurrentProcess.Progress || status != CurrentProcess.Status)
             {
-                CurrentExecution.Progress = progress;
-                CurrentExecution.InDB().UnsafeUpdate().Set(a => a.Progress, a => progress).Execute();
+                CurrentProcess.Progress = progress;
+                CurrentProcess.Status = status;
+                CurrentProcess.InDB()
+                    .UnsafeUpdate()
+                    .Set(a => a.Progress, a => progress)
+                    .Set(a => a.Status, a => status)
+                    .Execute();
             }
         }
 
 
         public void TakeForThisMachine()
         {
-            CurrentExecution.State = ProcessState.Executing;
-            CurrentExecution.ExecutionStart = TimeZoneManager.Now;
-            CurrentExecution.ExecutionEnd = null;
-            CurrentExecution.Progress = 0;
-            CurrentExecution.MachineName = Environment.MachineName;
-            CurrentExecution.ApplicationName = Schema.Current.ApplicationName;
+            CurrentProcess.State = ProcessState.Executing;
+            CurrentProcess.ExecutionStart = TimeZoneManager.Now;
+            CurrentProcess.ExecutionEnd = null;
+            CurrentProcess.Progress = 0;
+            CurrentProcess.MachineName = Environment.MachineName;
+            CurrentProcess.ApplicationName = Schema.Current.ApplicationName;
 
             using (Transaction tr = new Transaction())
             {
-                if (CurrentExecution.InDB().Any(a => a.State == ProcessState.Executing))
-                    throw new InvalidOperationException("The process {0} is allready Executing!".FormatWith(CurrentExecution.Id));
+                if (CurrentProcess.InDB().Any(a => a.State == ProcessState.Executing))
+                    throw new InvalidOperationException("The process {0} is allready Executing!".FormatWith(CurrentProcess.Id));
                          
                 using (OperationLogic.AllowSave<ProcessEntity>())
-                    CurrentExecution.Save();
+                    CurrentProcess.Save();
 
                 tr.Commit();
             }
@@ -443,11 +455,11 @@ namespace Signum.Engine.Processes
 
         public void Execute()
         {
-            var user = ExecutionMode.Global().Using(_ => CurrentExecution.User.Retrieve());
+            var user = ExecutionMode.Global().Using(_ => CurrentProcess.User.Retrieve());
 
             using (UserHolder.UserSession(user))
             {
-                using (ProcessLogic.OnApplySession(CurrentExecution))
+                using (ProcessLogic.OnApplySession(CurrentProcess))
                 {
                     if (UserEntity.Current == null)
                         UserEntity.Current = AuthLogic.SystemUser;
@@ -455,33 +467,33 @@ namespace Signum.Engine.Processes
                     {
                         Algorithm.Execute(this);
 
-                        CurrentExecution.ExecutionEnd = TimeZoneManager.Now;
-                        CurrentExecution.State = ProcessState.Finished;
-                        CurrentExecution.Progress = null;
-                        CurrentExecution.User.ClearEntity();
+                        CurrentProcess.ExecutionEnd = TimeZoneManager.Now;
+                        CurrentProcess.State = ProcessState.Finished;
+                        CurrentProcess.Progress = null;
+                        CurrentProcess.User.ClearEntity();
                         using (OperationLogic.AllowSave<ProcessEntity>())
-                            CurrentExecution.Save();
+                            CurrentProcess.Save();
                     }
                     catch (OperationCanceledException e)
                     {
                         if (!e.CancellationToken.Equals(this.CancellationToken))
                             throw;
 
-                        CurrentExecution.SuspendDate = TimeZoneManager.Now;
-                        CurrentExecution.State = ProcessState.Suspended;
+                        CurrentProcess.SuspendDate = TimeZoneManager.Now;
+                        CurrentProcess.State = ProcessState.Suspended;
                         using (OperationLogic.AllowSave<ProcessEntity>())
-                            CurrentExecution.Save();
+                            CurrentProcess.Save();
                     }
                     catch (Exception e)
                     {
                         if (Transaction.InTestTransaction)
                             throw;
 
-                        CurrentExecution.State = ProcessState.Error;
-                        CurrentExecution.ExceptionDate = TimeZoneManager.Now;
-                        CurrentExecution.Exception = e.LogException(el => el.ActionName = CurrentExecution.Algorithm.ToString()).ToLite();
+                        CurrentProcess.State = ProcessState.Error;
+                        CurrentProcess.ExceptionDate = TimeZoneManager.Now;
+                        CurrentProcess.Exception = e.LogException(el => el.ActionName = CurrentProcess.Algorithm.ToString()).ToLite();
                         using (OperationLogic.AllowSave<ProcessEntity>())
-                            CurrentExecution.Save();
+                            CurrentProcess.Save();
                     }
                 }
             }
@@ -489,7 +501,7 @@ namespace Signum.Engine.Processes
 
         public override string ToString()
         {
-            return "Execution (ID = {0}): {1} ".FormatWith(CurrentExecution.Id, CurrentExecution);
+            return "Execution (ID = {0}): {1} ".FormatWith(CurrentProcess.Id, CurrentProcess);
         }
     }
 

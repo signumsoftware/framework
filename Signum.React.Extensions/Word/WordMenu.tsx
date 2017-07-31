@@ -54,10 +54,11 @@ export default class WordMenu extends React.Component<WordMenuProps, { wordRepor
 
     render() {
 
-        if (!this.state.wordReports || !this.state.wordReports.length)
+        if (!this.state.wordReports || !this.state.wordReports.length ||
+            (this.props.searchControl.props.showBarExtensionOption && this.props.searchControl.props.showBarExtensionOption.showWordReport == false))
             return null;
 
-        const label = <span><i className="fa fa-file-word-o"></i> &nbsp; {WordTemplateMessage.WordReport.niceToString()}</span>;
+        const label = <span><i className="fa fa-file-word-o"></i>&nbsp;{this.props.searchControl.props.largeToolbarButtons == true ? " " + WordTemplateMessage.WordReport.niceToString() : undefined}</span>;
 
         return (
             <DropdownButton title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown">

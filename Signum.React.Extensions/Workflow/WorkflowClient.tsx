@@ -123,9 +123,7 @@ export function start(options: { routes: JSX.Element[] }) {
     Operations.addSettings(new EntityOperationSettings(CaseOperation.SetTags, { isVisible: ctx => false }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { hideOnCanExecute: true, style: "primary" }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Delete, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
-    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Undo, { hideOnCanExecute: true, style: "danger" }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Jump, { onClick: executeWorkflowJump, contextual: { isVisible: ctx => true, onClick: executeWorkflowJumpContextual } }));
-    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Reject, { contextual: { isVisible: ctx => true } }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Timeout, { isVisible: ctx => false }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.MarkAsUnread, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.ScriptExecute, { isVisible: ctx => false }));
@@ -137,6 +135,8 @@ export function start(options: { routes: JSX.Element[] }) {
     caseActivityOperation(CaseActivityOperation.Next, "primary");
     caseActivityOperation(CaseActivityOperation.Approve, "success");
     caseActivityOperation(CaseActivityOperation.Decline, "warning");
+    caseActivityOperation(CaseActivityOperation.Undo, "danger");
+    caseActivityOperation(CaseActivityOperation.Reject, "default");
 
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { style: "primary", onClick: executeWorkflowSave }));
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Delete, { contextualFromMany: { isVisible: ctx => false } }));
@@ -278,7 +278,10 @@ function caseActivityOperation(operation: ExecuteSymbol<CaseActivityEntity>, sty
         style: style,
         onClick: executeAndClose,
         contextual: { isVisible: ctx => true },
-        contextualFromMany: { isVisible: ctx => true },
+        contextualFromMany: {
+            isVisible: ctx => true,
+            style: style
+        },
     }));
 }
 

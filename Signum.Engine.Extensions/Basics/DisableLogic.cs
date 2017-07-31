@@ -99,7 +99,7 @@ namespace Signum.Engine.Basics
                 }.Register();
         }
 
-        static string DisabledIsNotSetMessage() => ValidationMessage._0IsNotSet.NiceToString(ReflectionTools.GetPropertyInfo((DisabledMixin m) => m.IsDisabled).NiceName());
-        static string DisabledIsSetMessage() => ValidationMessage._0IsSet.NiceToString(ReflectionTools.GetPropertyInfo((DisabledMixin m) => m.IsDisabled).NiceName());
+        public static string DisabledIsNotSetMessage() => ValidationMessage._0IsNotSet.NiceToString(ReflectionTools.GetPropertyInfo((DisabledMixin m) => m.IsDisabled).NiceName());
+        public static string DisabledIsSetMessage() => ValidationMessage._0IsSet.NiceToString(ReflectionTools.GetPropertyInfo((DisabledMixin m) => m.IsDisabled).NiceName());
     }
 }

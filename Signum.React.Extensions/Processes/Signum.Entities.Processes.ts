@@ -63,11 +63,13 @@ export interface ProcessEntity extends Entities.Entity {
     exceptionDate?: string | null;
     exception?: Entities.Lite<Basics.ExceptionEntity> | null;
     progress?: number | null;
+    status?: string | null;
 }
 
 export const ProcessExceptionLineEntity = new Type<ProcessExceptionLineEntity>("ProcessExceptionLine");
 export interface ProcessExceptionLineEntity extends Entities.Entity {
     Type: "ProcessExceptionLine";
+    elementInfo?: string | null;
     line?: Entities.Lite<IProcessLineDataEntity> | null;
     process?: Entities.Lite<ProcessEntity> | null;
     exception?: Entities.Lite<Basics.ExceptionEntity> | null;

@@ -16,6 +16,7 @@ using Signum.Entities.Workflow;
 using Signum.Engine.Operations;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
+using Signum.Engine.Scheduler;
 
 namespace Signum.Engine.Workflow
 {
@@ -67,6 +68,8 @@ namespace Signum.Engine.Workflow
             {
                 Task.Factory.StartNew(() =>
                 {
+                    SystemEventLogLogic.Log("Start WorkflowScriptRunner");
+                    ExceptionEntity exception = null;
                     try
                     {
                         running = true;
@@ -158,7 +161,7 @@ namespace Signum.Engine.Workflow
                     {
                         try
                         {
-                            e.LogException(edn =>
+                            exception = e.LogException(edn =>
                             {
                                 edn.ControllerName = "WorkflowScriptRunner";
                                 edn.ActionName = "ExecuteProcess";
@@ -168,6 +171,7 @@ namespace Signum.Engine.Workflow
                     }
                     finally
                     {
+                        SystemEventLogLogic.Log("Stop WorkflowScriptRunner", exception);
                         running = false;
                     }
                 }, TaskCreationOptions.LongRunning);

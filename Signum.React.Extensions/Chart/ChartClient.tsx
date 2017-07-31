@@ -32,7 +32,9 @@ export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<ImportRoute path="~/chart/:queryName" onImportModule={() => import("./Templates/ChartRequestPage")} />);
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
-        if (!ctx.searchControl.props.showBarExtension || !AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting))
+        if (!ctx.searchControl.props.showBarExtension ||
+            !AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) ||
+            (ctx.searchControl.props.showBarExtensionOption && ctx.searchControl.props.showBarExtensionOption.showChartButton == false))
             return undefined;
 
         return <ChartButton searchControl={ctx.searchControl}/>;

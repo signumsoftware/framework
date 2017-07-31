@@ -27,6 +27,7 @@ using Signum.Engine.Linq;
 using System.Linq.Expressions;
 using System.IO;
 using System.Data;
+using Signum.Engine.Scheduler;
 
 namespace Signum.Engine.Cache
 {
@@ -715,6 +716,8 @@ namespace Signum.Engine.Cache
             {
                 controller.ForceReset();
             }
+
+            SystemEventLogLogic.Log("CacheLogic.ForceReset");
         }
 
         public static XDocument SchemaGraph(Func<Type, bool> cacheHint)

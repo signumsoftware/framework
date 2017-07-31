@@ -159,7 +159,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         var pack = this.state.pack;
 
         return (
-            <Modal bsSize="lg" onHide={this.handleCloseClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-popup-control">
+            <Modal bsSize="lg" onHide= { this.handleCloseClicked } show= { this.state.show } onExited= { this.handleOnExited } className= "sf-popup-control" >
                 <Modal.Header closeButton={this.props.isNavigate}>
                     {!this.props.isNavigate && <ButtonToolbar className="pull-right flip">
                         <Button className="sf-entity-button sf-close-button sf-ok-button" bsStyle="primary" disabled={!pack} onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString()}</Button>
@@ -259,7 +259,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         return (
             <div className="sf-main-entity case-main-entity" data-main-entity={entityInfo(mainEntity)}>
                 {renderWidgets(wc)}
-                {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy && <ButtonBar frame={mainFrame} pack={mainPack} />}
+                {this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar frame={mainFrame} pack={mainPack} /> : <br />}
                 <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve} />
                 {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any>) => this.setComponent(c) })}
             </div>
