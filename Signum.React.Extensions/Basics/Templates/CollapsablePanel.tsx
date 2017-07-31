@@ -22,16 +22,20 @@ export default class CollapsablePanel extends React.Component<CollapsablePanelPr
         this.state = { open: this.props.defaultOpen == true, isRTL: document.body.classList.contains("rtl-mode") };
     }
 
+    changeState = () => {
+        this.setState({ open: !this.state.open });
+    }
+
     render() {
         return (
             <div className={classes("panel", this.props.type ? "panel-" + this.props.type : "panel-default")}>
-                <div className="panel-heading">
+                <div className="panel-heading" onClick={this.changeState}>
                     {this.props.header}
                     {(this.props.collapsable == undefined || this.props.collapsable == true) &&
                         <span
                             className={classes(this.state.isRTL ? "pull-left" : "pull-right", "glyphicon", this.state.open ? "glyphicon-chevron-up" : "glyphicon-chevron-down")}
                             style={{ cursor: "pointer" }}
-                            onClick={() => this.setState({ open: !this.state.open })}>
+                            onClick={this.changeState}>
                         </span>}
                 </div>
                 {this.state.open &&
