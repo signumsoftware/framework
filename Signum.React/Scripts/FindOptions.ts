@@ -337,8 +337,12 @@ filterOperations["Decimal"] = [
 filterOperations["Enum"] = [
     "EqualTo",
     "DistinctTo",
+    "GreaterThan",
+    "GreaterThanOrEqual",
+    "LessThan",
+    "LessThanOrEqual",
     "IsIn",
-    "IsNotIn"
+    "IsNotIn",
 ];
 
 filterOperations["Guid"] = [
