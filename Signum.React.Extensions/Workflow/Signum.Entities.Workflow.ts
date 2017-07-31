@@ -216,6 +216,7 @@ export module InboxMessage {
     export const Activity = new MessageKey("InboxMessage", "Activity");
     export const SenderNote = new MessageKey("InboxMessage", "SenderNote");
     export const Sender = new MessageKey("InboxMessage", "Sender");
+    export const Filters = new MessageKey("InboxMessage", "Filters");
 }
 
 export interface IWorkflowNodeEntity extends IWorkflowObjectEntity, Entities.Entity {
