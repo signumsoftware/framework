@@ -31,7 +31,7 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
 
     render() {
         var ctx = this.props.ctx;
-        var ctx2 = this.props.ctx.subCtx({ labelColumns: 4 });
+        var ctx4 = this.props.ctx.subCtx({ labelColumns: 4 });
 
         return (
             <CollapsablePanel
@@ -44,9 +44,9 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
                                 <EnumCheckboxList ctx={ctx.subCtx(o => o.states)} columnCount={2} columnWidth={75} formGroupHtmlAttributes={{ style: { marginTop: -15, marginBottom: -15 } }} />
                             </div>
                             <div className="col-sm-2">
-                                <ValueLine ctx={ctx2.subCtx(o => o.range)} />
-                                <ValueLine ctx={ctx2.subCtx(o => o.fromDate)} />
-                                <ValueLine ctx={ctx2.subCtx(o => o.toDate)} />
+                                <ValueLine ctx={ctx4.subCtx(o => o.range)} />
+                                <ValueLine ctx={ctx4.subCtx(o => o.fromDate)} />
+                                <ValueLine ctx={ctx4.subCtx(o => o.toDate)} />
                             </div>
                             <div className="col-sm-1">
                                 <Button bsStyle="warning" className="btn" onClick={this.handleOnClearFiltersClick}>{InboxMessage.Clear.niceToString()}</Button>
