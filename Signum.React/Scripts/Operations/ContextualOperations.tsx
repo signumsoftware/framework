@@ -177,7 +177,7 @@ export function confirmInNecessary(coc: ContextualOperationContext<Entity>): Pro
 }
 
 function getConfirmMessage(coc: ContextualOperationContext<Entity>) {
-    if (coc.settings && coc.settings.confirmMessage === undefined)
+    if (coc.settings && coc.settings.confirmMessage === null)
         return undefined;
 
     if (coc.settings && coc.settings.confirmMessage != undefined)
