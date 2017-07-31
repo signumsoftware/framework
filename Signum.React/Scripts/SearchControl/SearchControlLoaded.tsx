@@ -57,6 +57,7 @@ export interface SearchControlLoadedProps {
     onCreate?: () => Promise<void>;
     getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
     maxResultsHeight?: React.CSSWideKeyword | any;
+    tag?: string | {};
 }
 
 export interface SearchControlLoadedState {

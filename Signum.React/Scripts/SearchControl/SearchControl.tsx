@@ -52,6 +52,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     onCreate?: () => Promise<void>;
     getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
     maxResultsHeight?: React.CSSWideKeyword | any;
+    tag?: string | {};
 }
 
 export interface SearchControlState {
@@ -160,6 +161,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             onCreate={this.props.onCreate}
             getViewPromise={this.props.getViewPromise}
             maxResultsHeight={this.props.maxResultsHeight}
+            tag={this.props.tag}
             />
     }
 }
