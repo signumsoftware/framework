@@ -65,6 +65,7 @@ namespace Signum.Entities.Workflow
         Activity,
         SenderNote,
         Sender,
+        Filters,
     }
 
     public enum DateFilterRange
