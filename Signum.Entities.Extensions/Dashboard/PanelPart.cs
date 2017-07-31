@@ -17,7 +17,17 @@ namespace Signum.Entities.Dashboard
     [Serializable]
     public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
     {
+        [SqlDbType(Size = 100)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string Title { get; set; }
+
+        [SqlDbType(Size = 100)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
+        public string IconName { get; set; }
+
+        [SqlDbType(Size = 100)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
+        public string IconColor { get; set; }
 
         [NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
         public int Row { get; set; }

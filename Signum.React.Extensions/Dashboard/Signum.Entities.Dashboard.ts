@@ -74,6 +74,8 @@ export const PanelPartEmbedded = new Type<PanelPartEmbedded>("PanelPartEmbedded"
 export interface PanelPartEmbedded extends Entities.EmbeddedEntity {
     Type: "PanelPartEmbedded";
     title?: string | null;
+    iconName?: string | null;
+    iconColor?: string | null;
     row?: number;
     startColumn?: number;
     columns?: number;

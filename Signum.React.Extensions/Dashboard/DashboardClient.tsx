@@ -34,6 +34,7 @@ export interface PanelPartContentProps<T extends IPartEntity> {
 
 export interface PartRenderer<T extends IPartEntity>{
     component: () => Promise<React.ComponentClass<PanelPartContentProps<T>>>;
+    defaultIcon: (element: T) => string;
     handleTitleClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent<any>) => void;
     handleFullScreenClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent<any>) => void;
 }
@@ -125,6 +126,10 @@ export function start(options: { routes: JSX.Element[] }) {
                             Navigator.pushOrOpenInTab(dashboardUrl(ctx.lite, entity), e);
                         }).done();
             }).done()));
+}
+
+export function defaultIcon<T extends IPartEntity>(part: T) {
+    return partRenderers[part.Type].defaultIcon(part);
 }
 
 export function dashboardUrl(lite: Lite<DashboardEntity>, entity?: Lite<Entity>) {
