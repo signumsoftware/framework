@@ -152,7 +152,7 @@ export class SchemaMapD3 {
             .data(map.allNodes)
             .enter()
             .append<SVGGElement>("svg:g").attr("class", "nodeGroup")
-            .style("cursor", d => (d as TableInfo).typeName && Finder.isFindable((d as TableInfo).typeName) ? "pointer" : null)
+            .style("cursor", d => (d as TableInfo).typeName && Finder.isFindable((d as TableInfo).typeName, true) ? "pointer" : null)
             .on("click", d => {
 
                 this.selectedTable = this.selectedTable == d ? undefined : d;

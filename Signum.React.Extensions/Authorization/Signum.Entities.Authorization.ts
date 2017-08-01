@@ -228,8 +228,14 @@ export interface PropertyRulePack extends BaseRulePack<PropertyAllowedRule> {
     type: Basics.TypeEntity;
 }
 
+export const QueryAllowed = new EnumType<QueryAllowed>("QueryAllowed");
+export type QueryAllowed =
+    "None" |
+    "EmbeddedOnly" |
+    "Allow";
+
 export const QueryAllowedRule = new Type<QueryAllowedRule>("QueryAllowedRule");
-export interface QueryAllowedRule extends AllowedRuleCoerced<Basics.QueryEntity, boolean> {
+export interface QueryAllowedRule extends AllowedRuleCoerced<Basics.QueryEntity, QueryAllowed> {
     Type: "QueryAllowedRule";
 }
 
@@ -287,7 +293,7 @@ export interface RulePropertyEntity extends RuleEntity<Basics.PropertyRouteEntit
 }
 
 export const RuleQueryEntity = new Type<RuleQueryEntity>("RuleQuery");
-export interface RuleQueryEntity extends RuleEntity<Basics.QueryEntity, boolean> {
+export interface RuleQueryEntity extends RuleEntity<Basics.QueryEntity, QueryAllowed> {
     Type: "RuleQuery";
 }
 

@@ -22,7 +22,7 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
                 <FormGroup ctx={ctx.subCtx(e => e.query)}>
                     {
                         query && (
-                            Finder.isFindable(query.key) ?
+                            Finder.isFindable(query.key, true) ?
                                 <a className="form-control-static" href={Finder.findOptionsPath({ queryName: query.key })}>{getQueryNiceName(query.key)}</a> :
                                 <span>{getQueryNiceName(query.key)}</span>)
                     }
