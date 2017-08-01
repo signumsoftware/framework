@@ -106,7 +106,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
 
         var fo = props.findOptions;
 
-        if (!Finder.isFindable(fo.queryName))
+        if (!Finder.isFindable(fo.queryName, false))
             return;
 
         Finder.getQueryDescription(fo.queryName)
@@ -128,7 +128,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
 
         const p = this.props;
 
-        if (!Finder.isFindable(p.findOptions.queryName))
+        if (!Finder.isFindable(p.findOptions.queryName, false))
             return null;
 
         let className = classes(

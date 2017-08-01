@@ -247,7 +247,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             return Finder.find(this.state.findOptions);
         }
 
-        return this.chooseType(Finder.isFindable)
+        return this.chooseType(ti => Finder.isFindable(ti, false))
             .then<ModifiableEntity | Lite<Entity> | undefined>(qn =>
                 qn == undefined ? undefined : Finder.find({ queryName: qn } as FindOptions));
     }

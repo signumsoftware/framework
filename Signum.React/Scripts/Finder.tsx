@@ -46,16 +46,16 @@ export function getSettings(queryName: PseudoType | QueryKey): QuerySettings {
     return querySettings[getQueryKey(queryName)];
 }
 
-export const isFindableEvent: Array<(queryKey: string) => boolean> = [];
+export const isFindableEvent: Array<(queryKey: string, fullScreen: boolean) => boolean> = [];
 
-export function isFindable(queryName: PseudoType | QueryKey): boolean {
+export function isFindable(queryName: PseudoType | QueryKey, fullScreen: boolean): boolean {
 
     if (!isQueryDefined(queryName))
         return false;
 
     const queryKey = getQueryKey(queryName);
 
-    return isFindableEvent.every(f => f(queryKey));
+    return isFindableEvent.every(f => f(queryKey, fullScreen));
 }
 
 export function find(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<Entity> | undefined>;

@@ -88,6 +88,15 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
 
     render() {
         const fo = this.state.findOptions;
+        if (!Finder.isFindable(fo.queryName, true))
+            return (
+                <div id="divSearchPage">
+                    <h2>
+                        <span className="sf-entity-title">{getQueryNiceName(fo.queryName)}</span>
+                        <small>Error: Query not allowed in full screen</small>
+                    </h2>
+                </div>
+            );
 
         return (
             <div id="divSearchPage">
