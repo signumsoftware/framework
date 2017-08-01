@@ -40,6 +40,9 @@ export module AuthAdminMessage {
     export const SwitchTo = new MessageKey("AuthAdminMessage", "SwitchTo");
     export const _0InUI = new MessageKey("AuthAdminMessage", "_0InUI");
     export const _0InDB = new MessageKey("AuthAdminMessage", "_0InDB");
+    export const CanNotBeModified = new MessageKey("AuthAdminMessage", "CanNotBeModified");
+    export const CanNotBeModifiedBecauseIsA0 = new MessageKey("AuthAdminMessage", "CanNotBeModifiedBecauseIsA0");
+    export const CanNotBeModifiedBecauseIsNotA0 = new MessageKey("AuthAdminMessage", "CanNotBeModifiedBecauseIsNotA0");
 }
 
 export module AuthEmailMessage {
