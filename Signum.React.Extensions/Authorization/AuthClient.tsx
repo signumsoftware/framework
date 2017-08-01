@@ -134,7 +134,7 @@ export function taskAuthorizeProperties(lineBase: LineBase<LineBaseProps, LineBa
                 state.visible = false;
                 break;
             case "Read":
-                state.readOnly = true;
+                state.ctx.readOnly = true;
                 break;
             case "Modify":
                 break;
