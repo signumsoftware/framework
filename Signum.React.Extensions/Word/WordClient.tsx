@@ -16,14 +16,17 @@ import { WordTemplateEntity, WordTemplateOperation, SystemWordTemplateEntity, Wo
 import { QueryModel, MultiEntityModel } from '../Templating/Signum.Entities.Templating'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
+import ButtonBar from '../../../Framework/Signum.React/Scripts/Frames/ButtonBar';
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import * as ContexualItems from '../../../Framework/Signum.React/Scripts/SearchControl/ContextualItems'
 import { ContextualItemsContext, MenuItemBlock } from "../../../Framework/Signum.React/Scripts/SearchControl/ContextualItems";
 import { ModelEntity } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
 import { QueryRequest, FilterRequest } from "../../../Framework/Signum.React/Scripts/FindOptions";
-import WordMenu from "./WordMenu";
+import WordSearchMenu from "./WordSearchMenu";
+import WordEntityMenu from "./WordEntityMenu";
+import { ButtonsContext } from "../../../Framework/Signum.React/Scripts/TypeContext";
 
-export function start(options: { routes: JSX.Element[], contextual: boolean, queryButton: boolean,  }) {
+export function start(options: { routes: JSX.Element[], contextual: boolean, queryButton: boolean, entityButton: boolean  }) {
     
     register(QueryModel, {
         createFromTemplate: wt => Navigator.view(QueryModel.New({ queryKey: wt.query!.key })),
@@ -83,6 +86,8 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
         }
     }));
 
+
+
     if (options.contextual)
         ContexualItems.onContextualItems.push(getWordTemplates);
 
@@ -92,8 +97,19 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
             if (!ctx.searchControl.props.showBarExtension)
                 return undefined;
 
-            return <WordMenu searchControl={ctx.searchControl} />;
+            return <WordSearchMenu searchControl={ctx.searchControl} />;
         });
+
+    if (options.entityButton) {
+        ButtonBar.onButtonBarRender.push(getEntityWordButtons);
+    }
+}
+
+export function getEntityWordButtons(ctx: ButtonsContext): Array<React.ReactElement<any> | undefined> | undefined {
+
+    if (ctx.pack.wordTemplates && ctx.pack.wordTemplates.length > 0) {
+        return [<WordEntityMenu entityPack={ctx.pack as EntityPack<Entity>} />]
+    }
 }
 
 export interface WordModelSettings<T extends ModelEntity> {
@@ -171,5 +187,12 @@ export namespace API {
 
     export function getWordTemplates(queryKey: string, visibleOn: WordTemplateVisibleOn): Promise<Lite<WordTemplateEntity>[]> {
         return ajaxGet<Lite<WordTemplateEntity>[]>({ url: `~/api/word/wordTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` });
+    }
+}
+
+declare module '../../../Framework/Signum.React/Scripts/Signum.Entities' {
+
+    export interface EntityPack<T extends ModifiableEntity> {
+        wordTemplates?: Array<Lite<WordTemplateEntity>>;
     }
 }
