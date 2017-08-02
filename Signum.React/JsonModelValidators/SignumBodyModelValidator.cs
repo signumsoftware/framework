@@ -39,61 +39,64 @@ namespace Signum.React.Json
 
         private bool ValidateModifiableEntity(ValidationContext validationContext, ModifiableEntity mod)
         {
-            if (mod is Entity && validationContext.Visited.Contains(mod))
-                return true;
-
-            validationContext.Visited.Add(mod);
-
-            bool isValid = true;
-            PropertyScope propertyScope = new PropertyScope();
-            validationContext.KeyBuilders.Push(propertyScope);
-
-            var entity = mod as Entity;
-            using (entity == null ? null : entity.Mixins.OfType<CorruptMixin>().Any(c => c.Corrupt) ? Corruption.AllowScope() : Corruption.DenyScope())
+            using (Validator.ModelBinderScope())
             {
-                foreach (var kvp in PropertyConverter.GetPropertyConverters(mod.GetType()))
+                if (mod is Entity && validationContext.Visited.Contains(mod))
+                    return true;
+
+                validationContext.Visited.Add(mod);
+
+                bool isValid = true;
+                PropertyScope propertyScope = new PropertyScope();
+                validationContext.KeyBuilders.Push(propertyScope);
+
+                var entity = mod as Entity;
+                using (entity == null ? null : entity.Mixins.OfType<CorruptMixin>().Any(c => c.Corrupt) ? Corruption.AllowScope() : Corruption.DenyScope())
                 {
-                    if (kvp.Value.AvoidValidate)
-                        continue;
-
-                    propertyScope.PropertyName = kvp.Key;
-                    if (SignumValidate(validationContext, kvp.Value.GetValue(mod)) ?? true)
+                    foreach (var kvp in PropertyConverter.GetPropertyConverters(mod.GetType()))
                     {
-                        isValid = false;
-                    }
+                        if (kvp.Value.AvoidValidate)
+                            continue;
 
-                    string error = kvp.Value.PropertyValidator.PropertyCheck(mod);
-
-                    if (error != null)
-                    {
-                        string key = CalculateKey(validationContext);
-                        if (validationContext.ModelState.IsValidField(key))
+                        propertyScope.PropertyName = kvp.Key;
+                        if (SignumValidate(validationContext, kvp.Value.GetValue(mod)) ?? true)
                         {
                             isValid = false;
-                            validationContext.ModelState.AddModelError(key, error);
+                        }
+
+                        string error = kvp.Value.PropertyValidator.PropertyCheck(mod);
+
+                        if (error != null)
+                        {
+                            string key = CalculateKey(validationContext);
+                            if (validationContext.ModelState.IsValidField(key))
+                            {
+                                isValid = false;
+                                validationContext.ModelState.AddModelError(key, error);
+                            }
                         }
                     }
                 }
-            }
-            
-            if (entity != null && entity.Mixins.Any())
-            {
-                propertyScope.PropertyName = "mixins";
-                PropertyScope mixinScope = new PropertyScope();
-                validationContext.KeyBuilders.Push(mixinScope);
-                foreach (var mixin in entity.Mixins)
+
+                if (entity != null && entity.Mixins.Any())
                 {
-                    mixinScope.PropertyName = mixin.GetType().Name;
-                    if (!ValidateModifiableEntity(validationContext, mixin))
-                        isValid = false;
+                    propertyScope.PropertyName = "mixins";
+                    PropertyScope mixinScope = new PropertyScope();
+                    validationContext.KeyBuilders.Push(mixinScope);
+                    foreach (var mixin in entity.Mixins)
+                    {
+                        mixinScope.PropertyName = mixin.GetType().Name;
+                        if (!ValidateModifiableEntity(validationContext, mixin))
+                            isValid = false;
+                    }
+                    validationContext.KeyBuilders.Pop();
                 }
+
                 validationContext.KeyBuilders.Pop();
+
+                validationContext.Visited.Remove(mod);
+                return isValid;
             }
-
-            validationContext.KeyBuilders.Pop();
-
-            validationContext.Visited.Remove(mod);
-            return isValid;
         }
 
         private bool ValidateLite(ValidationContext validationContext, Lite<Entity> lite)
