@@ -170,5 +170,14 @@ namespace Signum.Entities.Authorization
         _0InUI,
         [Description("{0} (in DB only)")]
         _0InDB,
+
+        [Description("Can not be modified")]
+        CanNotBeModified,
+
+        [Description("Can not be modified because is a {0}")]
+        CanNotBeModifiedBecauseIsA0,
+
+        [Description("Can not be modified because is not a {0}")]
+        CanNotBeModifiedBecauseIsNotA0,
     }
 }

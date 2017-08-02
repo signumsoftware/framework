@@ -40,6 +40,9 @@ export module AuthAdminMessage {
     export const SwitchTo = new MessageKey("AuthAdminMessage", "SwitchTo");
     export const _0InUI = new MessageKey("AuthAdminMessage", "_0InUI");
     export const _0InDB = new MessageKey("AuthAdminMessage", "_0InDB");
+    export const CanNotBeModified = new MessageKey("AuthAdminMessage", "CanNotBeModified");
+    export const CanNotBeModifiedBecauseIsA0 = new MessageKey("AuthAdminMessage", "CanNotBeModifiedBecauseIsA0");
+    export const CanNotBeModifiedBecauseIsNotA0 = new MessageKey("AuthAdminMessage", "CanNotBeModifiedBecauseIsNotA0");
 }
 
 export module AuthEmailMessage {
@@ -228,8 +231,14 @@ export interface PropertyRulePack extends BaseRulePack<PropertyAllowedRule> {
     type: Basics.TypeEntity;
 }
 
+export const QueryAllowed = new EnumType<QueryAllowed>("QueryAllowed");
+export type QueryAllowed =
+    "None" |
+    "EmbeddedOnly" |
+    "Allow";
+
 export const QueryAllowedRule = new Type<QueryAllowedRule>("QueryAllowedRule");
-export interface QueryAllowedRule extends AllowedRuleCoerced<Basics.QueryEntity, boolean> {
+export interface QueryAllowedRule extends AllowedRuleCoerced<Basics.QueryEntity, QueryAllowed> {
     Type: "QueryAllowedRule";
 }
 
@@ -287,7 +296,7 @@ export interface RulePropertyEntity extends RuleEntity<Basics.PropertyRouteEntit
 }
 
 export const RuleQueryEntity = new Type<RuleQueryEntity>("RuleQuery");
-export interface RuleQueryEntity extends RuleEntity<Basics.QueryEntity, boolean> {
+export interface RuleQueryEntity extends RuleEntity<Basics.QueryEntity, QueryAllowed> {
     Type: "RuleQuery";
 }
 

@@ -34,7 +34,7 @@ namespace Signum.Entities.Authorization
     }
 
     [Serializable]
-    public class RuleQueryEntity : RuleEntity<QueryEntity, bool> { }
+    public class RuleQueryEntity : RuleEntity<QueryEntity, QueryAllowed> { }
 
     [Serializable]
     public class RulePermissionEntity : RuleEntity<PermissionSymbol, bool> { }
@@ -70,6 +70,14 @@ namespace Signum.Entities.Authorization
         {
             return "{0} ({1})".FormatWith(Condition, Allowed);
         }
+    }
+
+    [DescriptionOptions(DescriptionOptions.Members)]
+    public enum QueryAllowed
+    {
+        None = 0,
+        EmbeddedOnly = 1,
+        Allow = 2,
     }
 
     [DescriptionOptions(DescriptionOptions.Members)]

@@ -15,7 +15,7 @@ import ButtonBar from '../../../Framework/Signum.React/Scripts/Frames/ButtonBar'
 import { PseudoType, QueryKey, getTypeInfo, PropertyRouteType, OperationInfo, isQueryDefined, getQueryInfo, GraphExplorer } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission } from './Signum.Entities.Authorization'
-import { PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack} from './Signum.Entities.Authorization'
+import { PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack, QueryAllowed} from './Signum.Entities.Authorization'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import Login from './Login/Login';
 import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
@@ -108,8 +108,10 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     });
 }
 
-export function queryIsFindable(queryKey: string) {
-    return getQueryInfo(queryKey).queryAllowed;
+export function queryIsFindable(queryKey: string, fullScreen: boolean) {
+    var allowed = getQueryInfo(queryKey).queryAllowed;
+
+    return allowed == "Allow" || allowed == "EmbeddedOnly" && !fullScreen;
 }
 
 export function isOperationAuthorized(operation: OperationInfo | OperationSymbol | string): boolean {
@@ -132,7 +134,7 @@ export function taskAuthorizeProperties(lineBase: LineBase<LineBaseProps, LineBa
                 state.visible = false;
                 break;
             case "Read":
-                state.readOnly = true;
+                state.ctx.readOnly = true;
                 break;
             case "Modify":
                 break;
@@ -439,12 +441,12 @@ declare module '../../../Framework/Signum.React/Scripts/Reflection' {
 
     export interface TypeInfo {
         typeAllowed: TypeAllowedBasic;
-        queryAllowed: boolean;
+        queryAllowed: QueryAllowed;
     }
 
     export interface MemberInfo {
         propertyAllowed: PropertyAllowed;
-        queryAllowed: boolean;
+        queryAllowed: QueryAllowed;
         operationAllowed: boolean;
         permissionAllowed: boolean;
     }
