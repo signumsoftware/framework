@@ -310,7 +310,7 @@ export function isFindable(type: PseudoType, isSearch?: boolean) {
 
     const baseIsReadOnly = typeIsFindable(typeName);
 
-    return baseIsReadOnly && Finder.isFindable(typeName);
+    return baseIsReadOnly && Finder.isFindable(typeName, true);
 }
 
 function typeIsFindable(typeName: string) {

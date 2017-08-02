@@ -383,7 +383,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 </a>}
                 {this.props.showContextMenu != false && this.renderSelecterButton()}
                 {!this.props.hideButtonBar && Finder.ButtonBarQuery.getButtonBarElements({ findOptions: fo, searchControl: this }).map((a, i) => React.cloneElement(a, { key: i }))}
-                {!this.props.hideFullScreenButton &&
+                {!this.props.hideFullScreenButton && Finder.isFindable(fo.queryKey, true) &&
                     <a className="sf-query-button btn btn-default" href="#" onClick={this.handleFullScreenClick} >
                         <span className="glyphicon glyphicon-new-window"></span>
                     </a>}

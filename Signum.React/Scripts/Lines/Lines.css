@@ -370,7 +370,7 @@ ul.nav-tabs {
 
 .form-sm .form-control,
 .form-sm .form-control-static {
-    padding: 3px 6px;
+    padding: 2px 6px;
 }
 
     .form-sm .form-control:not(textarea) {

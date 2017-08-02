@@ -102,7 +102,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
     }
 
     onClose() {
-        if (Finder.isFindable(this.state.pack!.entity.Type))
+        if (Finder.isFindable(this.state.pack!.entity.Type, true))
             Navigator.history.push(Finder.findOptionsPath({ queryName: this.state.pack!.entity.Type }));
         else
             Navigator.history.push("~/");
