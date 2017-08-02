@@ -32,12 +32,17 @@ namespace Signum.Entities
 
         public int Order { get; set; }
 
+        public bool DisabledInModelBinder { get; set; } = false;
+
         //Descriptive information that continues the sentence: The property should {HelpMessage}
         //Used for documentation purposes only
         public abstract string HelpMessage { get; }
 
         public string Error(ModifiableEntity entity, PropertyInfo property, object value)
         {
+            if (DisabledInModelBinder && Validator.InModelBinder)
+                return null;
+
             if (IsApplicable != null && !IsApplicable(entity))
                 return null;
 
