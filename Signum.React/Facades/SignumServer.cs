@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Converters;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
@@ -59,16 +60,23 @@ namespace Signum.React.Facades
             ReflectionServer.Start();
         }
 
-
+        public static Action<EntityPackTS> AddEntityPackExtension;
         public static EntityPackTS GetEntityPack(Entity entity)
         {
             var canExecutes = OperationLogic.ServiceCanExecute(entity);
 
-            return new EntityPackTS
+            var result = new EntityPackTS
             {
                 entity = entity,
                 canExecute = canExecutes.ToDictionary(a => a.Key.Key, a => a.Value)
             };
+
+            foreach (var action in AddEntityPackExtension.GetInvocationListTyped())
+            {
+                action(result);
+            }
+
+            return result;
         }
     }
 
@@ -76,5 +84,8 @@ namespace Signum.React.Facades
     {
         public Entity entity { get; set; }
         public Dictionary<string, string> canExecute { get; set; }
+
+        [JsonExtensionData]
+        public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
     }
 }
