@@ -12,13 +12,13 @@ import { WordTemplateEntity, WordTemplateMessage } from './Signum.Entities.Word'
 import * as WordClient from './WordClient'
 import { saveFile } from "../../../Framework/Signum.React/Scripts/Services";
 
-export interface WordMenuProps {
+export interface WordSearchMenuProps {
     searchControl: SearchControlLoaded;
 }
 
-export default class WordMenu extends React.Component<WordMenuProps, { wordReports?: Lite<WordTemplateEntity>[] }> {
+export default class WordSearchMenu extends React.Component<WordSearchMenuProps, { wordReports?: Lite<WordTemplateEntity>[] }> {
 
-    constructor(props: WordMenuProps) {
+    constructor(props: WordSearchMenuProps) {
         super(props);
         this.state = { };
     }
