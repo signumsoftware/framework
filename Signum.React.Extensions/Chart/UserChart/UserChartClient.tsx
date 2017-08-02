@@ -40,10 +40,14 @@ export function start(options: { routes: JSX.Element[] }) {
         if (!AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting))
             return undefined;
 
-        return API.forEntityType(ctx.lite.EntityType).then(uqs =>
+        var promise = ctx.widgetContext ?
+            Promise.resolve(ctx.widgetContext.pack.userCharts || []) :
+            API.forEntityType(ctx.lite.EntityType);
+
+        return promise.then(uqs =>
             uqs.map(uc => new QuickLinks.QuickLinkAction(liteKey(uc), uc.toStr || "", e => {
                 window.open(Navigator.toAbsoluteUrl(`~/userChart/${uc.id}/${liteKey(ctx.lite)}`));
-            }, { icon: "glyphicon glyphicon-list-alt", iconColor: "dodgerblue" })));
+            }, { icon: "glyphicon glyphicon-stats", iconColor: "darkviolet" })));
     });
 
     QuickLinks.registerQuickLink(UserChartEntity, ctx => new QuickLinks.QuickLinkAction("preview", ChartMessage.Preview.niceToString(),
@@ -154,5 +158,12 @@ export module API {
         const clone = ChartClient.API.cleanedChartRequest(chartRequest)
 
         return ajaxPost<UserChartEntity>({ url: "~/api/userChart/fromChartRequest/" }, clone);
+    }
+}
+
+declare module '../../../../Framework/Signum.React/Scripts/Signum.Entities' {
+
+    export interface EntityPack<T extends ModifiableEntity> {
+        userCharts?: Array<Lite<UserChartEntity>>;
     }
 }
