@@ -59,13 +59,16 @@ export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<ImportRoute path="~/dashboard/:dashboardId" onImportModule={() => import("./View/DashboardPage")} />);
 
     registerRenderer(ValueUserQueryListPartEntity, {
-        component: () => import('./View/ValueUserQueryListPart').then(a => a.default)
+        component: () => import('./View/ValueUserQueryListPart').then(a => a.default),
+        defaultIcon: () => "fa fa-list"
     });
     registerRenderer(LinkListPartEntity, {
-        component: () => import('./View/LinkListPart').then(a => a.default)
+        component: () => import('./View/LinkListPart').then(a => a.default),
+        defaultIcon: () => "fa fa-list"
     });
     registerRenderer(UserChartPartEntity, {
         component: () => import('./View/UserChartPart').then(a => a.default),
+        defaultIcon: () =>"glyphicon glyphicon-stats",
         handleTitleClick: (p, e, ev) => {
             ev.preventDefault();
             Navigator.pushOrOpenInTab(Navigator.navigateRoute(p.userChart!), ev);
@@ -76,12 +79,13 @@ export function start(options: { routes: JSX.Element[] }) {
             UserChartClient.Converter.toChartRequest(p.userChart!, e)
                 .then(cr => Navigator.pushOrOpenInTab(ChartClient.Encoder.chartRequestPath(cr, { userChart: liteKey(toLite(p.userChart!)) }), ev))
                 .done();
-        }
+        },
+
     });
-
-
+    
     registerRenderer(UserQueryPartEntity, {
         component: () => import('./View/UserQueryPart').then((a: any) => a.default),
+        defaultIcon: () => "glyphicon glyphicon-list-alt",
         handleTitleClick: (p, e, ev) => {
             ev.preventDefault();
             Navigator.pushOrOpenInTab(Navigator.navigateRoute(p.userQuery!), ev);

@@ -80,13 +80,13 @@ export default class Dashboard extends React.Component<{ ctx: TypeContext<Dashbo
 
     renderPart = (tc: TypeContext<PanelPartEmbedded>) => {
 
-        const bgColor = (ctx4.value.iconColor && ctx4.value.iconColor.toLowerCase() == "white" ? "black" : undefined);
+        const bgColor = (tc.value.iconColor && tc.value.iconColor.toLowerCase() == "white" ? "black" : undefined);
 
         const icon = tc.value.iconName || DashboardClient.defaultIcon(tc.value.content!);
 
         const title = (
             <div>
-                <span className={ctx4.value.iconName} style={{ backgroundColor: bgColor, color: ctx4.value.iconColor, fontSize: "25px", marginTop: "17px" }} />
+                <span className={tc.value.iconName || undefined} style={{ backgroundColor: bgColor, color: tc.value.iconColor || undefined, fontSize: "25px", marginTop: "17px" }} />
 
                 <ValueLine ctx={tc.subCtx(pp => pp.title, { formGroupStyle: "None", placeholderLabels: true }) }  />
                 &nbsp;
