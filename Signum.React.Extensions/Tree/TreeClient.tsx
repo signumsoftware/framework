@@ -214,28 +214,13 @@ function fixNodes(nodes: Array<TreeNode>) {
 
 
 export namespace API {
-
-    export function getChildren(lite: Lite<TreeEntity>): Promise<Array<TreeNode>>;
-    export function getChildren(lite: Lite<TreeEntity>, request: FindNodesRequest): Promise<Array<TreeNode>>;
-    export function getChildren(typeName: string, id: string): Promise<Array<TreeNode>>;
-    export function getChildren(typeName: string, id: string, request: FindNodesRequest): Promise<Array<TreeNode>>;
-    export function getChildren(typeNameOrLite: string | Lite<TreeEntity>, idOrRequest?: string | FindNodesRequest, request?: FindNodesRequest): Promise<Array<TreeNode>> {
-        if (isLite(typeNameOrLite))
-            return ajaxPost<Array<TreeNode>>({ url: `~/api/tree/children/${typeNameOrLite.EntityType}/${typeNameOrLite.id != null ? typeNameOrLite.id : ""}` }, request).then(ns => fixNodes(ns));
-        else
-            return ajaxPost<Array<TreeNode>>({ url: `~/api/tree/children/${typeNameOrLite}/${idOrRequest != null ? idOrRequest : ""}` }, request).then(ns => fixNodes(ns));
-    }
-
-    export function getRoots(typeName: string, request?: FindNodesRequest): Promise<Array<TreeNode>> {
-        return ajaxPost<Array<TreeNode>>({ url: `~/api/tree/roots/${typeName}` }, request).then(ns => fixNodes(ns));
-    }
-
     export function findNodes(typeName: string, request: FindNodesRequest): Promise<Array<TreeNode>> {
         return ajaxPost<Array<TreeNode>>({ url: `~/api/tree/findNodes/${typeName}` }, request).then(ns => fixNodes(ns));
     }
 
     export interface FindNodesRequest {
-        filters: Array<FilterRequest>;
+        userFilters: Array<FilterRequest>;
+        frozenFilters: Array<FilterRequest>;
         expandedNodes: Array<Lite<TreeEntity>>;
     }
 }

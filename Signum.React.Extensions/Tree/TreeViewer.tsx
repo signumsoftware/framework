@@ -112,7 +112,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
                         if (sfb)
                             this.setState({ showFilters: false });
 
-                        this.search();
+                        this.search(true);
                     });
                 });
             })
@@ -139,30 +139,13 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
     handleNodeIconClick = (n: TreeNode) => {
         if (n.nodeState == "Collapsed" || n.nodeState == "Filtered") {
-            this.reloadNode(n);
+            n.nodeState = "Expanded";
+            this.search(false);
         }
         else if (n.nodeState == "Expanded") {
             n.nodeState = "Collapsed";
             this.forceUpdate();
         }
-    }
-
-    getPromiseFilterRequests() : Promise<Array<FilterRequest>> {
-        return this.getFilterOptionsWithSFB().then(fos =>
-            fos.filter(fo => fo.token != undefined && fo.operation != undefined)
-               .map(fo => ({ token: fo.token!.fullKey, operation: fo.operation!, value: fo.value }) as FilterRequest));
-    }
-
-    reloadNode(n: TreeNode) {
-        this.getPromiseFilterRequests().then(filters => 
-            API.getChildren(this.props.typeName, n.lite.id!.toString(), { filters, expandedNodes: [] })
-                .then(t => {
-                    var oldNodes = n.loadedChildren.toObject(a => a.lite.id!.toString());
-                    n.loadedChildren = t.map(n => oldNodes[n.lite.id!.toString()] || n);
-                    n.nodeState = "Expanded";
-                    this.forceUpdate();
-                }))
-            .done();
     }
 
     handleNodeTextClick = (n: TreeNode) => {
@@ -179,42 +162,8 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     handleNavigate = () => {
         const node = this.state.selectedNode!;
         Navigator.navigate(node.lite)
-            .then(() => this.refreshSelectedAndSiblings())
+            .then(() => this.search(false))
             .done();
-    }
-
-    refreshSelectedAndSiblings() {
-        const node = this.state.selectedNode!;
-
-        var parent = this.findParent(node);
-
-        var promise = parent == null ?
-            this.getPromiseFilterRequests().then(filters => API.getRoots(this.props.typeName, { filters, expandedNodes: [] })) :
-            this.getPromiseFilterRequests().then(filters => API.getChildren(parent!.lite, { filters, expandedNodes: [] }));
-
-        promise.then(newSiblings => {
-
-            const newSiblingsDic = newSiblings.toObject(a => liteKey(a.lite));
-
-            if (parent) {
-                parent.childrenCount = newSiblings.length;
-                if (parent.childrenCount == 0)
-                    parent.nodeState = "Leaf";
-            }
-
-            const currentSiblings = parent == null ? this.state.treeNodes! : parent.loadedChildren;
-            currentSiblings.extract(c => !newSiblingsDic[liteKey(c.lite)]);
-            currentSiblings.forEach(c => {
-                const n = newSiblingsDic[liteKey(c.lite)];
-                c.lite = n.lite;
-                c.childrenCount = n.childrenCount;
-            });
-
-            if (!newSiblingsDic[liteKey(node.lite)])
-                this.setState({ selectedNode: undefined });
-            else
-                this.forceUpdate();
-        }).done();
     }
 
     treeContainer: HTMLElement;
@@ -257,7 +206,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
             const options: ContextualItemsContext<Entity> = {
                 lites: [this.state.selectedNode!.lite],
                 queryDescription: this.state.queryDescription!,
-                markRows: () => { this.search(); },
+                markRows: () => { this.search(false); },
                 container: this,
             };
 
@@ -307,19 +256,27 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         e.preventDefault();
         e.stopPropagation();
 
-        this.search();
+        this.search(true);
     }
 
-    search(expandAlso?: Lite<TreeEntity> | null) {
-        this.getPromiseFilterRequests().then(filters => {
 
-            const expandedNodes = !this.state.treeNodes ? [] :
+    search(clearExpanded: boolean) {
+        this.getFilterOptionsWithSFB().then(filters => {
+
+            let expandedNodes = clearExpanded || !this.state.treeNodes ? [] :
                 this.state.treeNodes!.flatMap(allNodes).filter(a => a.nodeState == "Expanded").map(a => a.lite);
 
-            if (expandAlso)
-                expandedNodes.push(expandAlso);
+            const validFilters = filters.filter(fo => fo.token != undefined && fo.operation != undefined);
 
-            return API.findNodes(this.props.typeName, { filters, expandedNodes });
+            const userFilters = validFilters.filter(fo => fo.frozen == false).map(fo => ({ token: fo.token!.fullKey, operation: fo.operation!, value: fo.value }) as FilterRequest);
+            const frozenFilters = validFilters.filter(fo => fo.frozen == true).map(fo => ({ token: fo.token!.fullKey, operation: fo.operation!, value: fo.value }) as FilterRequest);
+
+            const newLastFilters = JSON.stringify(userFilters);
+            
+            if (userFilters.length == 0 && frozenFilters.length == 0)
+                userFilters.push({ token: "Entity.Level", operation: "EqualTo", value: 1 });
+
+            return API.findNodes(this.props.typeName, { userFilters, frozenFilters, expandedNodes });
         })
             .then(nodes => {
                 const selectedLite = this.state.selectedNode && this.state.selectedNode.lite;
@@ -550,12 +507,18 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
                     over.position == "Bottom" ? { newParent: nodeParent && nodeParent.lite, insertPlace: "After", sibling: over.node.lite } :
                         {};
 
+        var toExpand = over.position == "Middle" ? over.node : nodeParent;
+
         if (this.state.draggedKind == "Move") {
             const treeModel = MoveTreeModel.New(partial);
             Operations.API.executeLite(dragged.lite, TreeOperation.Move, treeModel).then(() =>
-                this.setState({ draggedNode: undefined, draggedOver: undefined, draggedKind: undefined, selectedNode: dragged }, () =>
-                    this.search(treeModel!.newParent)
-                )
+                
+                this.setState({ draggedNode: undefined, draggedOver: undefined, draggedKind: undefined, selectedNode: dragged }, () => {
+                    if (toExpand)
+                        toExpand.nodeState = "Expanded";
+
+                    this.search(false);
+                })
             ).done();
 
         } else {
@@ -563,9 +526,12 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
             var promise = s && s.createCopyModel ? s.createCopyModel(dragged.lite, partial) : Promise.resolve(MoveTreeModel.New(partial));
             promise.then(treeModel => treeModel &&
                 Operations.API.constructFromLite(dragged.lite, TreeOperation.Copy, treeModel).then(() =>
-                    this.setState({ draggedNode: undefined, draggedOver: undefined, draggedKind: undefined, selectedNode: dragged }, () =>
-                        this.search(treeModel!.newParent)
-                    )
+                    this.setState({ draggedNode: undefined, draggedOver: undefined, draggedKind: undefined, selectedNode: dragged }, () => {
+                        if (toExpand)
+                            toExpand.nodeState = "Expanded";
+
+                        this.search(false);
+                    })
                 ))
                 .done();
         };
