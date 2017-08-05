@@ -334,6 +334,7 @@ export function executeWorkflowJumpContextual(coc: Operations.ContextualOperatio
 
 export function executeWorkflowJump(eoc: Operations.EntityOperationContext<CaseActivityEntity>) {
 
+    eoc.closeRequested = true;
     var jumps = eoc.entity.workflowActivity.jumps;
 
     getWorkflowJumpSelector(jumps)
