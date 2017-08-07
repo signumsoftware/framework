@@ -24,12 +24,7 @@ import { ISimpleFilterBuilder } from './SearchControl'
 
 import "./Search.css"
 
-export interface ShowBarExtensionOption {
-    showUserQuery?: boolean;
-    showWordReport?: boolean;
-    showExcelMenu?: boolean;
-    showChartButton?: boolean;
-}
+export interface ShowBarExtensionOption {}
 
 export interface SearchControlLoadedProps {
     allowSelection?: boolean;
