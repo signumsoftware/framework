@@ -165,3 +165,10 @@ declare module '../../../Framework/Signum.React/Scripts/Signum.Entities' {
         userQueries?: Array<Lite<UserQueryEntity>>;
     }
 }
+
+declare module '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded' {
+
+    export interface ShowBarExtensionOption {
+        showUserQuery?: boolean;
+    }
+}
