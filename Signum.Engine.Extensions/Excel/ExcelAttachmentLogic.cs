@@ -57,7 +57,7 @@ namespace Signum.Engine.Excel
                     var title = GetTemplateString(ea.Title, ref ea.TitleNode, ctx);
                     var fileName = GetTemplateString(ea.FileName, ref ea.FileNameNode, ctx);
 
-                    var bytes = ExcelLogic.ExecutePlainExcel(request, title, CancellationToken.None).Result;
+                    var bytes = ExcelLogic.ExecutePlainExcel(request, title);
 
                     return new List<EmailAttachmentEmbedded>
                     {
