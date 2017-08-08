@@ -58,21 +58,43 @@ namespace Signum.Engine.Excel
                     select er.ToLite()).ToList();
         }
 
-        public static async Task<byte[]> ExecuteExcelReport(Lite<ExcelReportEntity> excelReport, QueryRequest request, CancellationToken token)
+        public static async Task<byte[]> ExecuteExcelReportAsync(Lite<ExcelReportEntity> excelReport, QueryRequest request, CancellationToken token)
         {
             ResultTable queryResult = await DynamicQueryManager.Current.ExecuteQueryAsync(request, token);
 
             ExcelReportEntity report = excelReport.RetrieveAndForget();
-            string extension = Path.GetExtension(report.File.FileName);
-            if (extension != ".xlsx")
-                throw new ApplicationException(ExcelMessage.ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0.NiceToString().FormatWith(extension));
+            AsserExtension(report);
 
             return ExcelGenerator.WriteDataInExcelFile(queryResult, report.File.BinaryFile);
         }
 
-        public static async Task<byte[]> ExecutePlainExcel(QueryRequest request, string title, CancellationToken token)
+        private static void AsserExtension(ExcelReportEntity report)
+        {
+            string extension = Path.GetExtension(report.File.FileName);
+            if (extension != ".xlsx")
+                throw new ApplicationException(ExcelMessage.ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0.NiceToString().FormatWith(extension));
+        }
+
+        public static byte[] ExecuteExcelReport(Lite<ExcelReportEntity> excelReport, QueryRequest request)
+        {
+            ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
+
+            ExcelReportEntity report = excelReport.RetrieveAndForget();
+            AsserExtension(report);
+
+            return ExcelGenerator.WriteDataInExcelFile(queryResult, report.File.BinaryFile);
+        }
+
+        public static async Task<byte[]> ExecutePlainExcelAsync(QueryRequest request, string title, CancellationToken token)
         {
             ResultTable queryResult = await DynamicQueryManager.Current.ExecuteQueryAsync(request, token);
+
+            return PlainExcelGenerator.WritePlainExcel(queryResult, title);
+        }
+
+        public static byte[] ExecutePlainExcel(QueryRequest request, string title)
+        {
+            ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
 
             return PlainExcelGenerator.WritePlainExcel(queryResult, title);
         }
