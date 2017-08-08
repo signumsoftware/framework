@@ -447,7 +447,16 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?
 
     handleOnBlur = (e: React.SyntheticEvent<any>) => {
         const input = e.currentTarget as HTMLInputElement;
-        const result = input.value == undefined || input.value.length == 0 ? null : numbro().unformat(input.value);
+
+        let value = input.value;
+
+        if (this.props.format && this.props.format.endsWith("%"))
+        {
+            if (value && !value.endsWith("%"))
+                value += "%";
+        }
+
+        const result = value == undefined || value.length == 0 ? null : numbro().unformat(value);
         this.setState({ text: undefined });
         this.props.onChange(result);
     }
