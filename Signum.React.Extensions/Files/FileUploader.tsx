@@ -106,7 +106,12 @@ export default class FileUploader extends React.Component<FileUploaderProps, Fil
     render() {
         return (
             <div {...this.props.divHtmlAttributes}>
-                <input type='file' className='form-control' accept={this.props.accept} onChange={this.handleFileChange} multiple={this.props.multiple}/>
+                <button className="sf-upload btn btn-default">
+                    <i className="fa fa-upload" />
+                    {FileMessage.SelectFile.niceToString()}
+                    <input type='file' accept={this.props.accept} onChange={this.handleFileChange} multiple={this.props.multiple}/>
+                </button>
+                
                 {this.state.isLoading ? <div className="sf-file-drop">{JavascriptMessage.loading.niceToString()}</div> :
                     (this.props.dragAndDrop && <div className={classes("sf-file-drop", this.state.isOver ? "sf-file-drop-over" : undefined)}
                         onDragEnter={this.handleDragOver}

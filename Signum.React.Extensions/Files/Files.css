@@ -32,3 +32,27 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/*Upload file*/
+.sf-upload {
+    padding: 8px 10px;
+    position: relative;
+}
+
+    .sf-upload i {
+        padding-right: 10px;
+    }
+
+    .sf-upload input[type="file"] {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+        filter: alpha(opacity=0);
+        -moz-opacity: 0;
+        -khtml-opacity: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
