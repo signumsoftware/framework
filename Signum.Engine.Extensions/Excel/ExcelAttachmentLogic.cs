@@ -47,7 +47,7 @@ namespace Signum.Engine.Excel
 
             EmailTemplateLogic.GenerateAttachment.Register((ExcelAttachmentEntity ea, EmailTemplateLogic.GenerateAttachmentContext ctx) =>
             {
-                var finalEntity = ea.Related?.Retrieve() ?? (Entity)ctx.Entity;
+                var finalEntity = ea.Related?.Retrieve() ?? (Entity)ctx.Entity ?? ctx.SystemEmail.UntypedEntity as Entity;
 
                 using (finalEntity == null ? null : CurrentEntityConverter.SetCurrentEntity(finalEntity))
                 using (CultureInfoUtils.ChangeBothCultures(ctx.Culture))
