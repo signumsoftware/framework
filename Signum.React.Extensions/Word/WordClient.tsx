@@ -107,9 +107,10 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
 
 export function getEntityWordButtons(ctx: ButtonsContext): Array<React.ReactElement<any> | undefined> | undefined {
 
-    if (ctx.pack.wordTemplates && ctx.pack.wordTemplates.length > 0) {
+    if (ctx.pack.wordTemplates && ctx.pack.wordTemplates.length > 0)
         return [<WordEntityMenu entityPack={ctx.pack as EntityPack<Entity>} />]
-    }
+
+    return undefined;
 }
 
 export interface WordModelSettings<T extends ModelEntity> {
