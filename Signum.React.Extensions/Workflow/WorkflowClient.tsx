@@ -121,7 +121,7 @@ export function start(options: { routes: JSX.Element[] }) {
     }));
 
     Operations.addSettings(new EntityOperationSettings(CaseOperation.SetTags, { isVisible: ctx => false }));
-    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { hideOnCanExecute: true, style: "primary" }));
+    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { hideOnCanExecute: true, style: "primary", onClick: executeWorkflowRegister }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Delete, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Jump, { onClick: executeWorkflowJump, contextual: { isVisible: ctx => true, onClick: executeWorkflowJumpContextual } }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Timeout, { isVisible: ctx => false }));
@@ -289,6 +289,16 @@ function hide<T extends Entity>(type: Type<T>) {
     Navigator.addSettings(new EntitySettings(type, undefined, { isNavigable: "Never", isViewable: false, isCreable: "Never" }));
 }
 
+export function executeWorkflowRegister(eoc: Operations.EntityOperationContext<CaseActivityEntity>) {
+    debugger;
+    const cr = canRegisters[eoc.entity.case.mainEntity.Type];
+
+    if (!cr)
+        eoc.defaultClick();
+    else
+        cr(eoc.entity).then(res => res && eoc.defaultClick());
+}
+
 export function executeWorkflowSave(eoc: Operations.EntityOperationContext<WorkflowEntity>) {
 
     let wf = eoc.frame.entityComponent as Workflow;
@@ -440,6 +450,14 @@ export function registerActivityView<T extends ICaseMainEntity>(settings: Activi
 
     tvDic[settings.activityViewName] = settings;
 }
+
+export const canRegisters: { [typeName: string]: (ca: CaseActivityEntity) => Promise<boolean> } = {};
+
+export function canRegister<T extends ICaseMainEntity>(type: Type<T>, action: (ca: CaseActivityEntity) => Promise<boolean>) {
+    debugger;
+    canRegisters[type.typeName] = action;
+}
+
 
 export function getSettings(typeName: string, activityViewName: string): ActivityViewSettings<ICaseMainEntity> | undefined {
 
