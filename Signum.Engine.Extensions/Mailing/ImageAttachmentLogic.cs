@@ -37,19 +37,19 @@ namespace Signum.Engine.Mailing
                     EmailTemplateParser.Parse(wa.FileName, ctx.QueryDescription, ctx.ModelType).FillQueryTokens(ctx.QueryTokens);
             });
             
-            EmailTemplateLogic.GenerateAttachment.Register((ImageAttachmentEntity wa, EmailTemplateLogic.GenerateAttachmentContext ctx) =>
+            EmailTemplateLogic.GenerateAttachment.Register((ImageAttachmentEntity a, EmailTemplateLogic.GenerateAttachmentContext ctx) =>
             {
                 using (CultureInfoUtils.ChangeBothCultures(ctx.Culture))
                 {
-                    var fileName = wa.FileName.IsEmpty() ? wa.File.FileName : GetTemplateString(wa.FileName, ref wa.FileNameNode, ctx);
+                    var fileName = a.FileName.IsEmpty() ? a.File.FileName : GetTemplateString(a.FileName, ref a.FileNameNode, ctx);
                     
                     return new List<EmailAttachmentEmbedded>
                     {
                         new EmailAttachmentEmbedded
                         {
-                            File = new FilePathEmbedded(EmailFileType.Attachment, fileName, wa.File.BinaryFile).SaveFile(),
-                            Type = EmailAttachmentType.Attachment,
-                            ContentId = wa.ContentId,
+                            File = new FilePathEmbedded(EmailFileType.Attachment, fileName, a.File.BinaryFile).SaveFile(),
+                            Type = a.Type,
+                            ContentId = a.ContentId,
                         }
                     };
                 }

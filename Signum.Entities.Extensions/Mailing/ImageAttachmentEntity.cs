@@ -31,7 +31,9 @@ namespace Signum.Entities.Mailing
         [NotNullable, SqlDbType(Size = 300)]
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 300)]
         public string ContentId { get; set; }
-        
+
+        public EmailAttachmentType Type { get; set; }
+
         [NotNullable]
         [NotNullValidator]
         public FileEmbedded File { get; set; }
