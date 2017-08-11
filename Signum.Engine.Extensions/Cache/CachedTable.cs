@@ -160,6 +160,7 @@ namespace Signum.Engine.Cache
         Action<object, IRetriever, T> completer;
         Expression<Action<object, IRetriever, T>> completerExpression;
         Func<object, PrimaryKey> idGetter;
+        Expression<Func<PrimaryKey, string>> toStrGetterExpression;
         Func<PrimaryKey, string> toStrGetter;
 
         public override IColumn ParentColumn { get; set; }
@@ -244,7 +245,8 @@ namespace Signum.Engine.Cache
 
         public override void SchemaCompleted()
         {
-            toStrGetter = ToStringExpressionVisitor.GetToString<T>(this.Constructor, s => s.ToString());
+            toStrGetterExpression = ToStringExpressionVisitor.GetToString<T>(this.Constructor, s => s.ToString());
+            toStrGetter = toStrGetterExpression.Compile();
             if (this.subTables != null)
                 foreach (var item in this.subTables)
                     item.SchemaCompleted();
