@@ -280,6 +280,7 @@ export interface ImageAttachmentEntity extends Entities.Entity, IAttachmentGener
     Type: "ImageAttachment";
     fileName?: string | null;
     contentId?: string | null;
+    type?: EmailAttachmentType;
     file?: Files.FileEmbedded | null;
 }
 

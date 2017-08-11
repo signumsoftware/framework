@@ -47,7 +47,7 @@ namespace Signum.Engine.Mailing
                     {
                         new EmailAttachmentEmbedded
                         {
-                            File = new FilePathEmbedded(EmailFileType.Attachment, fileName, a.File.BinaryFile).SaveFile(),
+                            File = new FilePathEmbedded(EmailFileType.Attachment, fileName, a.File.BinaryFile),
                             Type = a.Type,
                             ContentId = a.ContentId,
                         }
