@@ -26,7 +26,9 @@ export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<ImportRoute path="~/userQuery/:userQueryId/:entity?" onImportModule={() => import("./Templates/UserQueryPage")} />);
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
-        if (!ctx.searchControl.props.showBarExtension || !AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
+        if (!ctx.searchControl.props.showBarExtension ||
+            !AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery) ||
+            (ctx.searchControl.props.showBarExtensionOption && ctx.searchControl.props.showBarExtensionOption.showUserQuery == false))
             return undefined;
 
         return <UserQueryMenu searchControl={ctx.searchControl}/>;
@@ -35,8 +37,12 @@ export function start(options: { routes: JSX.Element[] }) {
     QuickLinks.registerGlobalQuickLink(ctx => {
         if (!AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
             return undefined;
+        
+        var promise = ctx.widgetContext ?
+            Promise.resolve(ctx.widgetContext.pack.userQueries || []) :
+            API.forEntityType(ctx.lite.EntityType);
 
-        return API.forEntityType(ctx.lite.EntityType).then(uqs =>
+        return promise.then(uqs =>
             uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), uq.toStr || "", e => {
                 window.open(Navigator.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
             }, { icon: "glyphicon glyphicon-list-alt", iconColor: "dodgerblue" })));
@@ -150,5 +156,19 @@ export module API {
 
     export function fromQueryRequest(request: { queryRequest: QueryRequest; defaultPagination: Pagination}): Promise<UserQueryEntity> {
         return ajaxPost<UserQueryEntity>({ url: "~/api/userQueries/fromQueryRequest/" }, request);
+    }
+}
+
+declare module '../../../Framework/Signum.React/Scripts/Signum.Entities' {
+
+    export interface EntityPack<T extends ModifiableEntity> {
+        userQueries?: Array<Lite<UserQueryEntity>>;
+    }
+}
+
+declare module '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded' {
+
+    export interface ShowBarExtensionOption {
+        showUserQuery?: boolean;
     }
 }

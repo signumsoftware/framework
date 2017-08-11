@@ -61,7 +61,7 @@ export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelRe
     }
 
     render() {
-        const label = <span><i className="fa fa-file-excel-o"></i> &nbsp; {ExcelMessage.ExcelReport.niceToString()}</span>;
+        const label = <span><i className="fa fa-file-excel-o"></i>&nbsp;{this.props.searchControl.props.largeToolbarButtons == true ? " " + ExcelMessage.ExcelReport.niceToString() : undefined}</span>;
 
         if (this.props.plainExcel && !this.props.excelReport)
             return <button className={"sf-query-button sf-search btn btn-default"} onClick={this.handlePlainExcel}>{label} </button>;

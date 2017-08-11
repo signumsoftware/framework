@@ -339,7 +339,7 @@ namespace Signum.Engine.Help
 
         public override string IsAllowed()
         {
-            return DynamicQueryManager.Current.QueryAllowed(this.QueryName) ? null :
+            return DynamicQueryManager.Current.QueryAllowed(this.QueryName, false) ? null :
                 "Access to query {0} not allowed".FormatWith(QueryUtils.GetKey(this.QueryName)); 
         }
     }

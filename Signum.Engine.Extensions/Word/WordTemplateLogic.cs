@@ -30,6 +30,7 @@ using System.Data;
 using Signum.Entities.Chart;
 using Signum.Entities.Reflection;
 using Signum.Entities.Templating;
+using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Word
 {
@@ -47,6 +48,7 @@ namespace Signum.Engine.Word
         public static ResetLazy<Dictionary<Lite<WordTemplateEntity>, WordTemplateEntity>> WordTemplatesLazy;
 
         public static ResetLazy<Dictionary<object, List<WordTemplateEntity>>> TemplatesByQueryName;
+        public static ResetLazy<Dictionary<Type, List<WordTemplateEntity>>> TemplatesByEntityType;
 
         public static Dictionary<WordTransformerSymbol, Action<WordContext, OpenXmlPackage>> Transformers = new Dictionary<WordTransformerSymbol, Action<WordContext, OpenXmlPackage>>();
         public static Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>> Converters = new Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>>();
@@ -78,6 +80,8 @@ namespace Signum.Engine.Word
                         e.Culture,
                         e.Template.Entity.FileName
                     });
+
+                PermissionAuthLogic.RegisterPermissions(WordTemplatePermission.GenerateReport);
 
                 SystemWordTemplateLogic.Start(sb, dqm);
 
@@ -121,13 +125,23 @@ namespace Signum.Engine.Word
                     }
                 }.Register();
 
+                WordTemplatesLazy = sb.GlobalLazy(() => Database.Query<WordTemplateEntity>()
+                   .ToDictionary(et => et.ToLite()), new InvalidateWith(typeof(WordTemplateEntity)));
+
                 TemplatesByQueryName = sb.GlobalLazy(() =>
                 {
                     return WordTemplatesLazy.Value.Values.GroupToDictionary(a => a.Query.ToQueryName());
                 }, new InvalidateWith(typeof(WordTemplateEntity)));
 
-                WordTemplatesLazy = sb.GlobalLazy(() => Database.Query<WordTemplateEntity>()
-                   .ToDictionary(et => et.ToLite()), new InvalidateWith(typeof(WordTemplateEntity)));
+                TemplatesByEntityType = sb.GlobalLazy(() =>
+                {
+                    return (from wr in WordTemplatesLazy.Value.Values
+                            let imp = DynamicQueryManager.Current.GetEntityImplementations(wr.Query.ToQueryName())
+                            where !imp.IsByAll
+                            from t in imp.Types
+                            select KVP.Create(t, wr))
+                            .GroupToDictionary(a => a.Key, a => a.Value);
+                }, new InvalidateWith(typeof(WordTemplateEntity)));
 
                 Schema.Current.Synchronizing += Schema_Synchronize_Tokens;
 
@@ -229,6 +243,8 @@ namespace Signum.Engine.Word
 
         public static byte[] CreateReport(this WordTemplateEntity template, ModifiableEntity model = null, ISystemWordTemplate systemWordTemplate = null, bool avoidConversion = false)
         {
+            WordTemplatePermission.GenerateReport.AssertAuthorized();
+
             Entity entity = null;
             if (template.SystemWordTemplate != null)
             {

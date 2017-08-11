@@ -23,120 +23,70 @@ namespace Signum.React.Tree
 {
     public class TreeController : ApiController
     {
-        [Route("api/tree/children/{typeName}/{id}"), HttpGet]
-        public List<TreeNode> GetChildren(string typeName, string id) {
-            Type type = TypeLogic.GetType(typeName);
-
-            var lite = (Lite<TreeEntity>)Lite.ParsePrimaryKey(type, id);
-
-            return giGetChildrenGeneric.GetInvoker(type)(lite)
-                .OrderBy(a => a.route)
-                .Select(a => new TreeNode
-                {
-                    lite = a.lite,
-                    level = a.level,
-                    disabled = a.disabled,
-                    childrenCount = a.childrenCount,
-                    loadedChildren = new List<TreeNode>()
-                }).ToList();
-        }
-
-        [Route("api/tree/roots/{typeName}"), HttpGet]
-        public List<TreeNode> GetRoots(string typeName)
-        {
-            Type type = TypeLogic.GetType(typeName);
-            
-            return ToTreeNodes(giGetChildrenGeneric.GetInvoker(type)(null));
-        }
-
-        static GenericInvoker<Func<Lite<TreeEntity>, List<TreeInfo>>> giGetChildrenGeneric =
-            new GenericInvoker<Func<Lite<TreeEntity>, List<TreeInfo>>>(lite => GetChildrenGeneric<TreeEntity>(lite));
-        static List<TreeInfo> GetChildrenGeneric<T>(Lite<T> lite) 
-            where T: TreeEntity
-        {
-            var parentRoute = lite == null ? SqlHierarchyId.GetRoot() : lite.InDB(a => a.Route);
-            //var parentRoute = lite == null ? SqlHierarchyId.GetRoot() : (lite.Id.ToString() == "6" ? SqlHierarchyId.Parse("/1/") : SqlHierarchyId.Parse("/1/1/"));
-            var disabledMixin = MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin));
-            return Database.Query<T>()
-                .Where(t => (bool)(t.Route.GetAncestor(1) == parentRoute))
-                .Select(t => new TreeInfo
-                {
-                    route = t.Route,
-                    lite = t.ToLite(),
-                    level = t.Level(),
-                    disabled = disabledMixin && t.Mixin<DisabledMixin>().IsDisabled,
-                    childrenCount = t.Children().Count(),
-                })
-                .ToList();
-        }
-
         [Route("api/tree/findNodes/{typeName}"), HttpPost]
         public List<TreeNode> FindNodes(string typeName, FindNodesRequest request) {
 
             Type type = TypeLogic.GetType(typeName);
 
-            var list = request.filters.Count == 0 ?
-                giGetChildrenGeneric.GetInvoker(type)(null) : 
-                giFindNodesGeneric.GetInvoker(type)(request.filters);
+            var list =  giFindNodesGeneric.GetInvoker(type)(request);       
 
-            var expanded = giFindExpandedGeneric.GetInvoker(type)(request.expandedNodes);
-
-            return ToTreeNodes(list.Concat(expanded).ToList());
+            return ToTreeNodes(list);
         }
 
         public class FindNodesRequest
         {
-            public List<FilterTS> filters;
+            public List<FilterTS> userFilters;
+            public List<FilterTS> frozenFilters;
             public List<Lite<TreeEntity>> expandedNodes;
         }
 
-        static GenericInvoker<Func<List<FilterTS>, List<TreeInfo>>> giFindNodesGeneric =
-            new GenericInvoker<Func<List<FilterTS>, List<TreeInfo>>>(filters => FindNodesGeneric<TreeEntity>(filters));
-        static List<TreeInfo> FindNodesGeneric<T>(List<FilterTS> filtersTs)
+        static GenericInvoker<Func<FindNodesRequest, List<TreeInfo>>> giFindNodesGeneric =
+            new GenericInvoker<Func<FindNodesRequest, List<TreeInfo>>>(request => FindNodesGeneric<TreeEntity>(request));
+        static List<TreeInfo> FindNodesGeneric<T>(FindNodesRequest request)
             where T : TreeEntity
         {
             var qd = DynamicQueryManager.Current.QueryDescription(typeof(T));
-            var filters = filtersTs.Select(f => f.ToFilter(qd, false)).ToList();
+            var userFilters = request.userFilters.Select(f => f.ToFilter(qd, false)).ToList();
+            var frozenFilters = request.frozenFilters.Select(f => f.ToFilter(qd, false)).ToList();
+
+
+            var frozenQuery = DynamicQueryManager.Current.GetEntities(new QueryEntitiesRequest { QueryName = typeof(T), Filters = frozenFilters, Orders = new List<Order>() })
+                            .Select(a => (T)a.Entity);
+
+            var filteredQuery = DynamicQueryManager.Current.GetEntities(new QueryEntitiesRequest { QueryName = typeof(T), Filters = userFilters.Concat(frozenFilters).ToList(), Orders = new List<Order>() })
+                            .Select(a => (T)a.Entity);
 
             var disabledMixin = MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin));
-            var list = DynamicQueryManager.Current.GetEntities(new QueryEntitiesRequest { QueryName = typeof(T), Filters = filters, Orders = new List<Order>() })
-                            .Select(a => (T)a.Entity)
+            var list = filteredQuery
                             .SelectMany(t => t.Ascendants())
                             .Select(t => new TreeInfo
                             {
                                 route = t.Route,
+                                name = t.Name,
                                 lite = t.ToLite(),
                                 level = t.Level(),
                                 disabled = disabledMixin && t.Mixin<DisabledMixin>().IsDisabled,
-                                childrenCount = t.Children().Count(),
+                                childrenCount = frozenQuery.Count(a => (bool)(a.Route.GetAncestor(1) == t.Route)),
                             }).ToList();
 
-            return list;
+            var expandedChildren = request.expandedNodes.IsNullOrEmpty() ? new List<TreeInfo>() :
+                            frozenQuery
+                           .Where(t => request.expandedNodes.Contains(t.Parent().ToLite()))
+                           .SelectMany(t => t.Ascendants())
+                           .Select(t => new TreeInfo
+                           {
+                               route = t.Route,
+                               name = t.Name,
+                               lite = t.ToLite(),
+                               level = t.Level(),
+                               disabled = disabledMixin && t.Mixin<DisabledMixin>().IsDisabled,
+                               childrenCount = frozenQuery.Count(a => (bool)(a.Route.GetAncestor(1) == t.Route)),
+                           }).ToList();
+
+            return list.Concat(expandedChildren).ToList();
         }
 
-        static GenericInvoker<Func<List<Lite<TreeEntity>>, List<TreeInfo>>> giFindExpandedGeneric =
-             new GenericInvoker<Func<List<Lite<TreeEntity>>, List<TreeInfo>>>(expanded => FindExpandedGeneric<TreeEntity>(expanded));
-        static List<TreeInfo> FindExpandedGeneric<T>(List<Lite<TreeEntity>> expanded)
-            where T : TreeEntity
-        {
-            if (expanded == null || expanded.Count == 0)
-                return new List<TreeInfo>();
-
-            var disabledMixin = MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin));
-            var list = Database.Query<T>()
-                .Where(t => expanded.Contains(t.Parent().ToLite()))
-                            .Select(t => new TreeInfo
-                            {
-                                route = t.Route,
-                                lite = t.ToLite(),
-                                level = t.Level(),
-                                disabled = disabledMixin && t.Mixin<DisabledMixin>().IsDisabled,
-                                childrenCount = t.Children().Count(),
-                            }).ToList();
-
-            return list;
-        }
-
+     
         static List<TreeNode> ToTreeNodes(List<TreeInfo> infos)
         {
             var dictionary = infos.Distinct(a => a.route).ToDictionary(a => a.route);
@@ -152,9 +102,10 @@ namespace Signum.React.Tree
 #pragma warning disable IDE1006 // Naming Styles
     class TreeInfo
     {
-        public int childrenCount { get; set; }
+        public string name { get; set; }
         public Lite<TreeEntity> lite { get; set; }
         public bool disabled { get; set; }
+        public int childrenCount { get; set; }
         public SqlHierarchyId route { get; set; }
         public short level { get; set; }
     }
@@ -164,13 +115,15 @@ namespace Signum.React.Tree
         public TreeNode() { }
         internal TreeNode(Node<TreeInfo> node)
         {
+            this.name = node.Value.name;
             this.lite = node.Value.lite;
             this.disabled = node.Value.disabled;
             this.childrenCount = node.Value.childrenCount;
             this.loadedChildren = node.Children.OrderBy(a => a.Value.route).Select(a => new TreeNode(a)).ToList();
             this.level = node.Value.level;
         }
-        
+
+        public string name { set; get; }
         public Lite<TreeEntity> lite { set; get; }
         public bool disabled { get; set; }
         public int childrenCount { set; get; }
