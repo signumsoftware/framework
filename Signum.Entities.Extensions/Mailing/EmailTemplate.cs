@@ -58,7 +58,7 @@ namespace Signum.Entities.Mailing
         public MList<EmailTemplateRecipientEntity> Recipients { get; set; } = new MList<EmailTemplateRecipientEntity>();
 
         [NotNullable, PreserveOrder]
-        [NotNullValidator, NoRepeatValidator, ImplementedBy(), NotifyChildProperty]
+        [NotNullValidator, NoRepeatValidator, ImplementedBy(typeof(ImageAttachmentEntity)), NotifyChildProperty]
         public MList<IAttachmentGeneratorEntity> Attachments { get; set; } = new MList<IAttachmentGeneratorEntity>();
 
         public Lite<EmailMasterTemplateEntity> MasterTemplate { get; set; }
