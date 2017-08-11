@@ -248,8 +248,8 @@ namespace Signum.Entities.Mailing
         TheTemplateIsAlreadyActive,
         [Description("The template is already inactive")]
         TheTemplateIsAlreadyInactive,
-        [Description("SystemEmail should be set to access model {0}")]
-        SystemEmailShouldBeSetToAccessModel0,
+        [Description("Impossible to access {0} because the template has no {1}")]
+        ImpossibleToAccess0BecauseTheTemplateHAsNo1,
         NewCulture,
         TokenOrEmailAddressMustBeSet,
         TokenAndEmailAddressCanNotBeSetAtTheSameTime,

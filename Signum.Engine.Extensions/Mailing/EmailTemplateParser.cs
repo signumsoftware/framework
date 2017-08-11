@@ -20,7 +20,7 @@ using Signum.Engine.Maps;
 using Signum.Utilities.DataStructures;
 using System.Collections.Concurrent;
 using Signum.Engine.Templating;
-
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Mailing
 {
@@ -288,9 +288,11 @@ namespace Signum.Engine.Mailing
 
             public ValueProviderBase TryParseValueProvider(string type, string token, string variable)
             {
-                return ValueProviderBase.TryParse(type, token, variable, this.modelType, this.qd, this.variables, this.AddError);
+                return ValueProviderBase.TryParse(type, token, variable, this.modelType, piSystemEmail, this.qd, this.variables, this.AddError);
             }
         }
+
+        static PropertyInfo piSystemEmail = ReflectionTools.GetPropertyInfo((EmailTemplateEntity e) => e.SystemEmail);
 
         internal static object Parse(string title, object queryDescription, object modelType)
         {
