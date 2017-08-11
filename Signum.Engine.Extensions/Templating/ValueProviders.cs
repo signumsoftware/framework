@@ -118,7 +118,7 @@ namespace Signum.Engine.Templating
             return collection.Cast<object>();
         }
 
-        public static ValueProviderBase TryParse(string type, string token, string variable, Type modelType, QueryDescription qd, ScopedDictionary<string, ValueProviderBase> variables, Action<bool, string> addError)
+        public static ValueProviderBase TryParse(string type, string token, string variable, Type modelType, PropertyInfo modelProperty, QueryDescription qd, ScopedDictionary<string, ValueProviderBase> variables, Action<bool, string> addError)
         {
             switch (type)
             {
@@ -158,7 +158,7 @@ namespace Signum.Engine.Templating
                         return new TranslateInstanceValueProvider(result, true, addError) { Variable = variable };
                     }
                 case "m":
-                    return new ModelValueProvider(token, modelType, addError) { Variable = variable };
+                    return new ModelValueProvider(token, modelType, modelProperty, addError) { Variable = variable };
                 case "g":
                     return new GlobalValueProvider(token, addError) { Variable = variable };
                 case "d":
@@ -498,15 +498,15 @@ namespace Signum.Engine.Templating
         string fieldOrPropertyChain;
         List<MemberInfo> Members;
 
-        public ModelValueProvider(string fieldOrPropertyChain, Type systemEmail, Action<bool, string> addError)
+        public ModelValueProvider(string fieldOrPropertyChain, Type modelType, PropertyInfo modelProperty, Action<bool, string> addError)
         {
-            if (systemEmail == null)
+            if (modelType == null)
             {
-                addError(false, EmailTemplateMessage.SystemEmailShouldBeSetToAccessModel0.NiceToString().FormatWith(fieldOrPropertyChain));
+                addError(false, EmailTemplateMessage.ImpossibleToAccess0BecauseTheTemplateHAsNo1.NiceToString(fieldOrPropertyChain, modelProperty.NiceName()));
                 return;
             }
 
-            this.Members = ParsedModel.GetMembers(systemEmail, fieldOrPropertyChain, addError);
+            this.Members = ParsedModel.GetMembers(modelType, fieldOrPropertyChain, addError);
         }
 
         public override object GetValue(TemplateParameters p)
