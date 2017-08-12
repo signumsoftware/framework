@@ -13,7 +13,7 @@ import { Type, PropertyRoute } from '../../../Framework/Signum.React/Scripts/Ref
 import { EntityFrame, TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { EntityOperationSettings, addSettings } from '../../../Framework/Signum.React/Scripts/Operations'
+import { EntityOperationSettings, addSettings, EntityOperationContext } from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { confirmInNecessary, notifySuccess } from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 
@@ -121,9 +121,9 @@ export function start(options: { routes: JSX.Element[] }) {
     }));
 
     Operations.addSettings(new EntityOperationSettings(CaseOperation.SetTags, { isVisible: ctx => false }));
-    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { hideOnCanExecute: true, style: "primary", onClick: executeWorkflowRegister }));
+    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { hideOnCanExecute: true, style: "primary", onClick: eoc => executeCaseActivity(eoc, e => e.defaultClick()), }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Delete, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
-    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Jump, { onClick: executeWorkflowJump, contextual: { isVisible: ctx => true, onClick: executeWorkflowJumpContextual } }));
+    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Jump, { onClick: eoc => executeCaseActivity(eoc, executeWorkflowJump), contextual: { isVisible: ctx => true, onClick: executeWorkflowJumpContextual } }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Timeout, { isVisible: ctx => false }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.MarkAsUnread, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.ScriptExecute, { isVisible: ctx => false }));
@@ -276,7 +276,7 @@ function caseActivityOperation(operation: ExecuteSymbol<CaseActivityEntity>, sty
     Operations.addSettings(new EntityOperationSettings(operation, {
         hideOnCanExecute: true,
         style: style,
-        onClick: executeAndClose,
+        onClick: eoc => executeCaseActivity(eoc, executeAndClose),
         contextual: { isVisible: ctx => true },
         contextualFromMany: {
             isVisible: ctx => true,
@@ -289,14 +289,16 @@ function hide<T extends Entity>(type: Type<T>) {
     Navigator.addSettings(new EntitySettings(type, undefined, { isNavigable: "Never", isViewable: false, isCreable: "Never" }));
 }
 
-export function executeWorkflowRegister(eoc: Operations.EntityOperationContext<CaseActivityEntity>) {
+export function executeCaseActivity(eoc: Operations.EntityOperationContext<CaseActivityEntity>, defaultOnClick: (eoc: Operations.EntityOperationContext<CaseActivityEntity>) => void) {
     debugger;
-    const cr = canRegisters[eoc.entity.case.mainEntity.Type];
+    const op = customOnClicks[eoc.operationInfo.key];
 
-    if (!cr)
-        eoc.defaultClick();
+    const onClick = op && op[eoc.entity.case.mainEntity.Type];
+
+    if (onClick)
+        onClick(eoc);
     else
-        cr(eoc.entity).then(res => res && eoc.defaultClick());
+        defaultOnClick(eoc);
 }
 
 export function executeWorkflowSave(eoc: Operations.EntityOperationContext<WorkflowEntity>) {
@@ -451,13 +453,12 @@ export function registerActivityView<T extends ICaseMainEntity>(settings: Activi
     tvDic[settings.activityViewName] = settings;
 }
 
-export const canRegisters: { [typeName: string]: (ca: CaseActivityEntity) => Promise<boolean> } = {};
+export const customOnClicks: { [operationKey: string]: { [typeName: string]: (ctx: EntityOperationContext<CaseActivityEntity>) => void } } = {};
 
-export function canRegister<T extends ICaseMainEntity>(type: Type<T>, action: (ca: CaseActivityEntity) => Promise<boolean>) {
-    debugger;
-    canRegisters[type.typeName] = action;
+export function registerOnClick<T extends ICaseMainEntity>(type: Type<T>, operationKey: ExecuteSymbol<CaseActivityEntity>, action: (ctx: EntityOperationContext<CaseActivityEntity>) => void) {
+    var op = customOnClicks[operationKey.key] || (customOnClicks[operationKey.key] = {});
+    op[type.typeName] = action;
 }
-
 
 export function getSettings(typeName: string, activityViewName: string): ActivityViewSettings<ICaseMainEntity> | undefined {
 
