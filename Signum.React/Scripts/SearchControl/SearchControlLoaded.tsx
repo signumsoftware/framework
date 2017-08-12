@@ -3,6 +3,7 @@ import { DropdownButton, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstr
 import { Dic, DomUtils, classes } from '../Globals'
 import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter } from '../Finder'
+import * as OrderUtils from '../Frames/OrderUtils'
 import {
     ResultTable, ResultRow, FindOptionsParsed, FindOptions, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnOptionsMode, ColumnDescription,
     toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest
@@ -48,7 +49,7 @@ export interface SearchControlLoadedProps {
     showBarExtensionOption?: ShowBarExtensionOption;
     largeToolbarButtons?: boolean;
     avoidAutoRefresh?: boolean;
-    extraButtons?: (searchControl: SearchControlLoaded) => React.ReactNode
+    extraButtons?: (searchControl: SearchControlLoaded) => React.ReactElement<any>[];
     onCreate?: () => Promise<void>;
     getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
     maxResultsHeight?: React.CSSWideKeyword | any;
@@ -366,25 +367,37 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     renderToolBar() {
 
         const fo = this.props.findOptions;
-        return (
-            <div className={classes("sf-query-button-bar btn-toolbar", !this.props.largeToolbarButtons && "btn-toolbar-small")}>
-                {fo.showFilterButton && <a
-                    className={"sf-query-button sf-filters-header btn btn-default" + (fo.showFilters ? " active" : "")}
-                    onClick={this.handleToggleFilters}
-                    title={fo.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="glyphicon glyphicon glyphicon-filter"></span></a >}
-                <button className={classes("sf-query-button sf-search btn", fo.pagination.mode == "All" ? "btn-danger" : "btn-primary")} onClick={this.handleSearchClick}>{SearchMessage.Search.niceToString()} </button>
-                {fo.create && <a className="sf-query-button btn btn-default sf-search-button sf-create" title={this.createTitle()} onClick={this.handleCreate}>
-                    <span className="glyphicon glyphicon-plus sf-create"></span>
-                </a>}
-                {this.props.showContextMenu != false && this.renderSelecterButton()}
-                {!this.props.hideButtonBar && Finder.ButtonBarQuery.getButtonBarElements({ findOptions: fo, searchControl: this }).map((a, i) => React.cloneElement(a, { key: i }))}
-                {!this.props.hideFullScreenButton && Finder.isFindable(fo.queryKey, true) &&
-                    <a className="sf-query-button btn btn-default" href="#" onClick={this.handleFullScreenClick} >
-                        <span className="glyphicon glyphicon-new-window"></span>
-                    </a>}
-                {this.props.extraButtons && this.props.extraButtons(this)}
-            </div>
-        );
+
+        var buttons = [
+
+            fo.showFilterButton && OrderUtils.setOrder(-4, <a
+                className={"sf-query-button sf-filters-header btn btn-default" + (fo.showFilters ? " active" : "")}
+                onClick={this.handleToggleFilters}
+                title={fo.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="glyphicon glyphicon glyphicon-filter"></span></a >),
+
+            OrderUtils.setOrder(-3, <button className={classes("sf-query-button sf-search btn", fo.pagination.mode == "All" ? "btn-danger" : "btn-primary")} onClick={this.handleSearchClick}>{SearchMessage.Search.niceToString()} </button>),
+
+            fo.create && OrderUtils.setOrder(-2, <a className="sf-query-button btn btn-default sf-search-button sf-create" title={this.createTitle()} onClick={this.handleCreate}>
+                <span className="glyphicon glyphicon-plus sf-create"></span>
+            </a>),
+
+            this.props.showContextMenu != false && this.renderSelecterButton(),
+
+            ...(this.props.hideButtonBar ? [] : Finder.ButtonBarQuery.getButtonBarElements({ findOptions: fo, searchControl: this })),
+
+            ...(this.props.extraButtons ? this.props.extraButtons(this) : []),
+
+            !this.props.hideFullScreenButton && Finder.isFindable(fo.queryKey, true) &&
+            <a className="sf-query-button btn btn-default" href="#" onClick={this.handleFullScreenClick} >
+                <span className="glyphicon glyphicon-new-window"></span>
+            </a>
+        ]
+            .filter(a => a)
+            .map(a => a as React.ReactElement<any>)
+            .orderBy(a => OrderUtils.getOrder(a))
+            .map(a => OrderUtils.cloneElementWithoutOrder(a!));
+
+        return React.cloneElement(<div className={classes("sf-query-button-bar btn-toolbar", !this.props.largeToolbarButtons && "btn-toolbar-small")} />, undefined, ...buttons);
     }
 
 
@@ -500,7 +513,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         const title = JavascriptMessage.Selected.niceToString() + " (" + this.state.selectedRows!.length + ")";
 
-        return (
+        return OrderUtils.setOrder(-1,
             <DropdownButton id="selectedButton" className="sf-query-button sf-tm-selected" title={title}
                 onToggle={this.handleSelectedToggle}
                 disabled={this.state.selectedRows!.length == 0}>

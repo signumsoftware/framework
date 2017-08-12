@@ -48,7 +48,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     largeToolbarButtons?: boolean; 
     avoidAutoRefresh?: boolean;
     throwIfNotFindable?: boolean;
-    extraButtons?: (searchControl: SearchControlLoaded) => React.ReactNode
+    extraButtons?: (searchControl: SearchControlLoaded) => React.ReactElement<any>[];
     onCreate?: () => Promise<void>;
     getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
     maxResultsHeight?: React.CSSWideKeyword | any;
