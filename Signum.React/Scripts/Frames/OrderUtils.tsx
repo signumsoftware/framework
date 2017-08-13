@@ -2,7 +2,7 @@
 import { Dic  } from '../Globals'
 
 export function setOrder(order: number, element: React.ReactElement<any>) {
-    return React.cloneElement(element, { order });
+    return element && React.cloneElement(element, { order });
 }
 
 export function getOrder(element: React.ReactElement<any>): number | undefined {
@@ -10,6 +10,10 @@ export function getOrder(element: React.ReactElement<any>): number | undefined {
 }
 
 export function cloneElementWithoutOrder(element: React.ReactElement<any>, extraProps?: any) {
+
+    if (element == null)
+        return null;
+
     var { order, children, ...props } = element.props;
 
     if (extraProps != undefined)
