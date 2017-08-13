@@ -42,8 +42,12 @@ namespace Signum.React.Word
                     return;
 
                 var wordTemplates = WordTemplateLogic.TemplatesByEntityType.Value.TryGetC(ep.entity.GetType());
-                if (wordTemplates.HasItems())
-                    ep.Extension.Add("wordTemplates", wordTemplates.Select(a => a.ToLite()).ToList());
+                if (wordTemplates != null)
+                {
+                    var applicable = wordTemplates.Where(a => a.IsApplicable(ep.entity));
+                    if (applicable.HasItems())
+                        ep.Extension.Add("wordTemplates", applicable.Select(a => a.ToLite()).ToList());
+                }
             };
         }
 
