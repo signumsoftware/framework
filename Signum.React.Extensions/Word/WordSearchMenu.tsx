@@ -75,5 +75,12 @@ export default class WordSearchMenu extends React.Component<WordSearchMenuProps,
  
 }
 
+declare module '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded' {
+
+    export interface ShowBarExtensionOption {
+        showWordReport?: boolean;
+    }
+}
+
 
 

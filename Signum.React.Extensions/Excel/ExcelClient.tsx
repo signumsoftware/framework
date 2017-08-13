@@ -75,3 +75,10 @@ export namespace API {
             .done();
     }
 }
+
+declare module '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded' {
+
+    export interface ShowBarExtensionOption {
+        showExcelMenu?: boolean;
+    }
+}

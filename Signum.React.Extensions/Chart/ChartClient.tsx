@@ -463,3 +463,10 @@ export interface ChartColumn {
     type?: string;
 }
 
+declare module '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded' {
+
+    export interface ShowBarExtensionOption {
+        showChartButton?: boolean;
+    }
+}
+
