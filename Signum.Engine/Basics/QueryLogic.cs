@@ -34,6 +34,8 @@ namespace Signum.Engine.Basics
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                QueryEntity.GetEntityImplementations = query => dqm.GetEntityImplementations(query.ToQueryName());
+                
                 // QueryManagers = queryManagers;
                 sb.Schema.Initializing += () =>
                 {
