@@ -290,7 +290,6 @@ function hide<T extends Entity>(type: Type<T>) {
 }
 
 export function executeCaseActivity(eoc: Operations.EntityOperationContext<CaseActivityEntity>, defaultOnClick: (eoc: Operations.EntityOperationContext<CaseActivityEntity>) => void) {
-    debugger;
     const op = customOnClicks[eoc.operationInfo.key];
 
     const onClick = op && op[eoc.entity.case.mainEntity.Type];
