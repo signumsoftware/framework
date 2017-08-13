@@ -143,7 +143,6 @@ export interface DynamicValidationEntity extends Entities.Entity {
     name?: string | null;
     entityType?: Basics.TypeEntity | null;
     propertyRoute?: Basics.PropertyRouteEntity | null;
-    isGlobalyEnabled?: boolean;
     eval: DynamicValidationEval;
 }
 

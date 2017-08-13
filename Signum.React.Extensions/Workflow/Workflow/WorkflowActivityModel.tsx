@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import {
-    WorkflowActivityEntity, WorkflowActivityModel, WorkflowActivityValidationEmbedded, WorkflowMessage, WorkflowActivityMessage, WorkflowConditionEntity, WorkflowActionEntity,
+    WorkflowActivityEntity, WorkflowActivityModel, WorkflowMessage, WorkflowActivityMessage, WorkflowConditionEntity, WorkflowActionEntity,
     WorkflowJumpEmbedded, WorkflowTimeoutEmbedded, IWorkflowNodeEntity, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowScriptEval, WorkflowEntity
 } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
@@ -97,7 +97,6 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
             wa.viewName = null;
             wa.requiresOpen = false;
             wa.reject = null;
-            wa.validationRules = [];
         }
         else {
             wa.subWorkflow = null;
@@ -135,32 +134,6 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
 
 
                         <ValueLine ctx={ctx.subCtx(a => a.requiresOpen)} />
-                        {ctx.value.mainEntityType ?
-                            <EntityTable ctx={ctx.subCtx(d => d.validationRules)} columns={EntityTable.typedColumns<WorkflowActivityValidationEmbedded>([
-                            {
-                                property: wav => wav.rule,
-                                headerHtmlAttributes: { style: { width: "100%" } },
-                                template: ctx => <EntityLine ctx={ctx.subCtx(wav => wav.rule)} findOptions={{
-                                    queryName: DynamicValidationEntity,
-                                    filterOptions: [
-                                        { columnName: "Entity.EntityType", value: mainEntityType },
-                                        { columnName: "Entity.IsGlobalyEnabled", value: false },
-                                    ]
-                                }} />
-                            },
-                            ctx.value.type == "Decision" ? {
-                                property: wav => wav.onAccept,
-                                cellHtmlAttributes: ctx => ({ style: { verticalAlign: "middle" } }),
-                                template: ctx => <ValueLine ctx={ctx.subCtx(wav => wav.onAccept)} formGroupStyle="None" valueHtmlAttributes={{ style: { margin: "0 auto" } }} />,
-                            } : null,
-                            ctx.value.type == "Decision" ? {
-                                property: wav => wav.onDecline,
-                                cellHtmlAttributes: ctx => ({ style: { verticalAlign: "middle" } }),
-                                template: ctx => <ValueLine ctx={ctx.subCtx(wav => wav.onDecline)} formGroupStyle="None" valueHtmlAttributes={{ style: { margin: "0 auto" } }} />,
-                            } : null,
-                        ])} />
-                            : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.validationRules), ctx.niceName(e => e.mainEntityType))}</div>}
-
                         <EntityDetail ctx={ctx.subCtx(a => a.reject)} />
 
                         {ctx.value.type == "Task" ? ctx.value.workflow ?
