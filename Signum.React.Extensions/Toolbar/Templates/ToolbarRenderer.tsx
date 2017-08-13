@@ -74,10 +74,14 @@ export default class ToolbarRenderer extends React.Component<{ location?: Toolba
         if (isOpen)
             this.state.expanded.push(res);
         else
-            this.state.expanded.remove(res);
+            this.state.expanded.clear();
 
         this.forceUpdate();
     }
+
+
+    
+    
 
     renderNavItem(res: ToolbarClient.ToolbarResponse<any>, index: number) {
 
@@ -135,14 +139,21 @@ export default class ToolbarRenderer extends React.Component<{ location?: Toolba
         }
     }
 
+
+
     handleClick = (e: React.MouseEvent<any>, res: ToolbarClient.ToolbarResponse<any>, topRes: ToolbarClient.ToolbarResponse<any>) => {
 
         this.state.avoidCollapse.push(topRes);
 
+        var path = findPath(res, [topRes]);
+
+        if (!path)
+            throw new Error("Path not found");
+
         if (this.state.expanded.contains(res))
-            this.state.expanded.remove(res);
-        else
-            this.state.expanded.push(res);
+            path.pop();
+
+        this.state.expanded = path;
 
         this.forceUpdate();
     }
@@ -213,3 +224,27 @@ function withKey(e: React.ReactElement<any>, index: number) {
     return React.cloneElement(e, { key: index });
 }
 
+function findPath(target: ToolbarClient.ToolbarResponse<any>, list: ToolbarClient.ToolbarResponse<any>[]): ToolbarClient.ToolbarResponse<any>[] | null {
+
+    const last = list.last();
+
+    if (last.elements) {
+        for (let i = 0; i < last.elements.length; i++) {
+            const elem = last.elements[i];
+
+            list.push(elem);
+
+            if (elem == target)
+                return list;
+
+            var result = findPath(target, list);
+
+            if (result)
+                return result;
+
+            list.pop();
+        }
+    }
+
+    return null;
+}
