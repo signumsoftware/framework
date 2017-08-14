@@ -13,6 +13,19 @@ namespace Signum.Entities
 {
     public static class Validator
     {
+        static readonly ThreadVariable<bool> inModelBinderVariable = Statics.ThreadVariable<bool>("inModelBinder");
+        public static bool InModelBinder
+        {
+            get { return inModelBinderVariable.Value; }
+        }
+
+        internal static IDisposable ModelBinderScope()
+        {
+            var old = inModelBinderVariable.Value;
+            inModelBinderVariable.Value = true;
+            return new Disposable(() => inModelBinderVariable.Value = false);
+        }
+
         public static Func<ModifiableEntity, PropertyInfo, string> GlobalValidation { get; set; }
 
         static Polymorphic<Dictionary<string, IPropertyValidator>> validators =
@@ -40,6 +53,8 @@ namespace Signum.Entities
 
             validators.SetDefinition(typeof(T), dic);
         }
+
+  
 
         public static PropertyValidator<T> OverridePropertyValidator<T>(Expression<Func<T, object>> property) where T : ModifiableEntity
         {

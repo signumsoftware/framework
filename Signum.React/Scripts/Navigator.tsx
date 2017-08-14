@@ -310,7 +310,7 @@ export function isFindable(type: PseudoType, isSearch?: boolean) {
 
     const baseIsReadOnly = typeIsFindable(typeName);
 
-    return baseIsReadOnly && Finder.isFindable(typeName);
+    return baseIsReadOnly && Finder.isFindable(typeName, true);
 }
 
 function typeIsFindable(typeName: string) {
@@ -671,7 +671,7 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
     isNavigable?: EntityWhen;
     isReadOnly?: boolean;
     avoidPopup?: boolean;
-    autocomplete?: AutocompleteConfig<T>;
+    autocomplete?: AutocompleteConfig<any>;
     autocompleteDelay?: number;
     getViewPromise?: (entity: T) => ViewPromise<T>;
     onNavigateRoute?: (typeName: string, id: string | number) => string;
@@ -695,7 +695,7 @@ export class EntitySettings<T extends ModifiableEntity> {
     isViewable: boolean;
     isNavigable: EntityWhen;
     isReadOnly: boolean;
-    autocomplete?: AutocompleteConfig<T>;
+    autocomplete?: AutocompleteConfig<any>;
     autocompleteDelay?: number;
     findOptions?: FindOptions;
     onNavigate?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, navigateOptions?: NavigateOptions) => Promise<void>;

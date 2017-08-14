@@ -281,7 +281,7 @@ export class QuickLinkExplore extends QuickLink {
 
     constructor(findOptions: FindOptions, options?: QuickLinkOptions) {
         super(getQueryKey(findOptions.queryName), {
-            isVisible: Finder.isFindable(findOptions.queryName),
+            isVisible: Finder.isFindable(findOptions.queryName, false),
             text: getQueryNiceName(findOptions.queryName),
             ...options
         });

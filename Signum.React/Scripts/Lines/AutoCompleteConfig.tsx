@@ -23,10 +23,10 @@ export interface AutocompleteConfig<T> {
     abort(): void;
 }
 
-export class LiteAutocompleteConfig implements AutocompleteConfig<Lite<Entity>>{
+export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteConfig<Lite<T>>{
 
     constructor(
-        public getItemsFunction: (abortController: FetchAbortController, subStr: string) => Promise<Lite<Entity>[]>,
+        public getItemsFunction: (abortController: FetchAbortController, subStr: string) => Promise<Lite<T>[]>,
         public withCustomToString: boolean) {
     }
 
@@ -40,15 +40,15 @@ export class LiteAutocompleteConfig implements AutocompleteConfig<Lite<Entity>>{
         return this.abortableRequest.getData(subStr);
     }
 
-    renderItem(item: Lite<Entity>, subStr: string) {
+    renderItem(item: Lite<T>, subStr: string) {
         return Typeahead.highlightedText(item.toStr || "", subStr)
     }
 
-    getEntityFromItem(item: Lite<Entity>) {
+    getEntityFromItem(item: Lite<T>) {
         return item;
     }
 
-    getItemFromEntity(entity: Lite<Entity> | ModifiableEntity): Promise<Lite<Entity>> {
+    getItemFromEntity(entity: Lite<Entity> | ModifiableEntity): Promise<Lite<T>> {
 
         var lite = this.convertToLite(entity);;
 
@@ -69,13 +69,13 @@ export class LiteAutocompleteConfig implements AutocompleteConfig<Lite<Entity>>{
         });
     }
 
-    convertToLite(entity: Lite<Entity> | ModifiableEntity) {
+    convertToLite(entity: Lite<Entity> | ModifiableEntity) : Lite<T> {
         
         if (isLite(entity))
-            return entity;
+            return entity as Lite<T>;
 
         if (isEntity(entity))
-            return toLite(entity, entity.isNew);
+            return toLite(entity, entity.isNew) as Lite<T>;
 
         throw new Error("Impossible to convert to Lite");
     }

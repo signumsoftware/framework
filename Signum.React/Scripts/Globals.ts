@@ -241,7 +241,7 @@ Array.prototype.sum = function (this: any[], selector?: (element: any, index: nu
     if (this.length == 0)
         return 0;
 
-    var result = this[0];
+    var result = selector ? selector(this[0], 0, this) : this[0];
     for (var i = 1; i < this.length; i++) {
         result += selector ? selector(this[i], i, this) : this[i];
     }

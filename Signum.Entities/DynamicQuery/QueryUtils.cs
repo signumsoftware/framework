@@ -165,9 +165,13 @@ namespace Signum.Entities.DynamicQuery
                 FilterType.Enum, new List<FilterOperation>
                 {
                     FilterOperation.EqualTo,
-                    FilterOperation.DistinctTo, 
+                    FilterOperation.DistinctTo,
                     FilterOperation.IsIn,
                     FilterOperation.IsNotIn,
+                    FilterOperation.GreaterThan,
+                    FilterOperation.GreaterThanOrEqual,
+                    FilterOperation.LessThan,
+                    FilterOperation.LessThanOrEqual,
                 }
             },
             { 
@@ -472,10 +476,10 @@ namespace Signum.Entities.DynamicQuery
                         var mi = t.IsValueType ? miDistinctNullable : miDistinct;
                         return Expression.Call(mi.MakeGenericMethod(t), left.Nullify(), right.Nullify());
                     }
-                case FilterOperation.GreaterThan: return Expression.GreaterThan(left, right);
-                case FilterOperation.GreaterThanOrEqual: return Expression.GreaterThanOrEqual(left, right);
-                case FilterOperation.LessThan: return Expression.LessThan(left, right);
-                case FilterOperation.LessThanOrEqual: return Expression.LessThanOrEqual(left, right);
+                case FilterOperation.GreaterThan: return Expression.GreaterThan(CastNumber(left), CastNumber(right));
+                case FilterOperation.GreaterThanOrEqual: return Expression.GreaterThanOrEqual(CastNumber(left), CastNumber(right));
+                case FilterOperation.LessThan: return Expression.LessThan(CastNumber(left), CastNumber(right));
+                case FilterOperation.LessThanOrEqual: return Expression.LessThanOrEqual(CastNumber(left), CastNumber(right));
                 case FilterOperation.Contains: return Expression.Call(Fix(left, inMemory), miContains, right);
                 case FilterOperation.StartsWith: return Expression.Call(Fix(left, inMemory), miStartsWith, right);
                 case FilterOperation.EndsWith: return Expression.Call(Fix(left, inMemory), miEndsWith, right);
@@ -487,6 +491,20 @@ namespace Signum.Entities.DynamicQuery
                 default:
                     throw new InvalidOperationException("Unknown operation {0}".FormatWith(operation));
             }
+        }
+
+        static Expression CastNumber(Expression expression)
+        {
+            var type = expression.Type.UnNullify();
+            if (!type.IsEnum)
+                return expression;
+
+            var uType = Enum.GetUnderlyingType(type);
+
+            if(expression.Type.IsNullable())
+                uType = uType.Nullify();
+
+            return Expression.Convert(expression, uType);
         }
 
         private static Expression Fix(Expression left, bool inMemory)

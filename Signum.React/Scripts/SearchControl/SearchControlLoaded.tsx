@@ -24,6 +24,8 @@ import { ISimpleFilterBuilder } from './SearchControl'
 
 import "./Search.css"
 
+export interface ShowBarExtensionOption {}
+
 export interface SearchControlLoadedProps {
     allowSelection?: boolean;
     findOptions: FindOptionsParsed;
@@ -43,12 +45,14 @@ export interface SearchControlLoadedProps {
     hideButtonBar?: boolean;
     hideFullScreenButton?: boolean;
     showBarExtension?: boolean;
+    showBarExtensionOption?: ShowBarExtensionOption;
     largeToolbarButtons?: boolean;
     avoidAutoRefresh?: boolean;
     extraButtons?: (searchControl: SearchControlLoaded) => React.ReactNode
     onCreate?: () => Promise<void>;
     getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
     maxResultsHeight?: React.CSSWideKeyword | any;
+    tag?: string | {};
 }
 
 export interface SearchControlLoadedState {
@@ -374,7 +378,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 </a>}
                 {this.props.showContextMenu != false && this.renderSelecterButton()}
                 {!this.props.hideButtonBar && Finder.ButtonBarQuery.getButtonBarElements({ findOptions: fo, searchControl: this }).map((a, i) => React.cloneElement(a, { key: i }))}
-                {!this.props.hideFullScreenButton &&
+                {!this.props.hideFullScreenButton && Finder.isFindable(fo.queryKey, true) &&
                     <a className="sf-query-button btn btn-default" href="#" onClick={this.handleFullScreenClick} >
                         <span className="glyphicon glyphicon-new-window"></span>
                     </a>}

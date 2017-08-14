@@ -62,13 +62,13 @@ namespace Signum.Engine.DynamicQuery
 
         public DynamicQueryBucket TryGetQuery(object queryName)
         {
-            AssertQueryAllowed(queryName); 
+            AssertQueryAllowed(queryName, false); 
             return queries.TryGetC(queryName);
         }
 
         public DynamicQueryBucket GetQuery(object queryName)
         {
-            AssertQueryAllowed(queryName);
+            AssertQueryAllowed(queryName, false);
             return queries.GetOrThrow(queryName);
         }
 
@@ -184,13 +184,13 @@ namespace Signum.Engine.DynamicQuery
             return Execute(ExecuteType.GetEntities, request.QueryName, null, dqb => dqb.Core.Value.GetEntities(request));
         }
 
-        public event Func<object, bool> AllowQuery;
+        public event Func<object, bool, bool> AllowQuery;
 
-        public bool QueryAllowed(object queryName)
+        public bool QueryAllowed(object queryName, bool fullScreen)
         {
             foreach (var f in AllowQuery.GetInvocationListTyped())
             {
-                if (!f(queryName))
+                if (!f(queryName, fullScreen))
                     return false;
             }
 
@@ -202,20 +202,20 @@ namespace Signum.Engine.DynamicQuery
             return this.queries.ContainsKey(queryName);
         }
 
-        public bool QueryDefinedAndAllowed(object queryName)
+        public bool QueryDefinedAndAllowed(object queryName, bool fullScreen)
         {
-            return QueryDefined(queryName) && QueryAllowed(queryName);
+            return QueryDefined(queryName) && QueryAllowed(queryName, fullScreen);
         }
 
-        public void AssertQueryAllowed(object queryName)
+        public void AssertQueryAllowed(object queryName, bool fullScreen)
         {
-            if(!QueryAllowed(queryName))
-                throw new UnauthorizedAccessException("Access to query {0} not allowed".FormatWith(queryName));
+            if (!QueryAllowed(queryName, fullScreen))
+                throw new UnauthorizedAccessException("Access to query {0} not allowed {1}".FormatWith(queryName, QueryAllowed(queryName, false) ? " for full screen" : ""));
         }
 
-        public List<object> GetAllowedQueryNames()
+        public List<object> GetAllowedQueryNames(bool fullScreen)
         {
-            return queries.Keys.Where(QueryAllowed).ToList();
+            return queries.Keys.Where(qn => QueryAllowed(qn, fullScreen)).ToList();
         }
 
         public Dictionary<object, DynamicQueryBucket> GetTypeQueries(Type entityType)

@@ -70,7 +70,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
 
         var fo = this.getFindOptions(this.props);
 
-        if (!Finder.isFindable(fo.queryName))
+        if (!Finder.isFindable(fo.queryName, false))
             return null;
 
         var token = this.valueSearchControl && this.valueSearchControl.state.token;
