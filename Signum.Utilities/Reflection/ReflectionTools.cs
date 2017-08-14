@@ -323,7 +323,11 @@ namespace Signum.Utilities.Reflection
 
         public static bool IsNumber(Type type)
         {
-            switch (Type.GetTypeCode(type.UnNullify()))
+            type = type.UnNullify();
+            if (type.IsEnum)
+                return false;
+
+            switch (Type.GetTypeCode(type))
             {
                 case TypeCode.Single:
                 case TypeCode.Double:
@@ -339,6 +343,22 @@ namespace Signum.Utilities.Reflection
                 case TypeCode.UInt64: return true;
             }
 
+            return false;
+        }
+
+        public static bool IsDecimalNumber(Type type)
+        {
+            type = type.UnNullify();
+            if (type.IsEnum)
+                return false;
+
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Decimal:
+                case TypeCode.Double:
+                case TypeCode.Single:
+                    return true;
+            }
             return false;
         }
 
