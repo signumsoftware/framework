@@ -3,15 +3,19 @@ import { Panel, PanelGroup } from "react-bootstrap";
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { BsStyle } from "../../../../Framework/Signum.React/Scripts/Operations";
 
+export interface AccordionPanelProps {
+    activeIndex?: number;
+}
+
 export interface AccordionPanelState {
     activeIndex?: number;
 }
 
-export default class AccordionPanel extends React.Component<{}, AccordionPanelState> {
+export default class AccordionPanel extends React.Component<AccordionPanelProps, AccordionPanelState> {
 
     constructor(props: any) {
         super(props);
-        this.state = { activeIndex: 0 };
+        this.state = { activeIndex: this.props.activeIndex };
     }
 
     handleSelect = (activeIndex: number) => {
