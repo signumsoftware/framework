@@ -547,3 +547,12 @@ ul.dropdown-menu > li > a.disabled {
 .item-group{
     white-space: nowrap;
 }
+
+table.sf-multi-value {
+    margin-bottom: 0px;
+    width: 100%;
+}
+
+table.sf-multi-value > tbody > tr > td{
+    padding-bottom: 4px;
+}
