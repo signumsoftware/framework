@@ -272,4 +272,9 @@ export class Gradient {
 
         return prev.color.lerp(value - prev.value / next.value - prev.value, next.color);
     }
+
+    cache: { [num: number]: string } = {};
+    getCachedColor(value: number) {
+        return this.cache[value] || (this.cache[value] = this.getColor(value));
+    }
 }
