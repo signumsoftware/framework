@@ -196,11 +196,11 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                                                 autoComplete={new LiteAutocompleteConfig((ac, str) => API.findNode({ workflowId: ctx.value.workflow!.id, subString: str, count: 5, excludes: this.getCurrentJumpsTo() }, ac), false)}
                                                 find={false} />
                                         },
-                                        headerHtmlAttributes: { width: "40%" }
+                                        headerHtmlAttributes: { style: { width: "40%" } }
                                     },
                                     {
                                         property: wj => wj.action,
-                                        headerHtmlAttributes: { width: "30%" },
+                                        headerHtmlAttributes: { style: { width: "30%" }},
                                         template: (jctx, row, state) => {
                                             return <EntityLine ctx={jctx.subCtx(wj => wj.action)} findOptions={{
                                                 queryName: WorkflowActionEntity,
@@ -211,7 +211,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                                     },
                                     {
                                         property: wj => wj.condition,
-                                        headerHtmlAttributes: { width: "20%" },
+                                        headerHtmlAttributes: { style: { width: "20%" } },
                                         template: (jctx, row, state) => {
                                             return <EntityLine ctx={jctx.subCtx(wj => wj.condition)} findOptions={{
                                                 queryName: WorkflowConditionEntity,
