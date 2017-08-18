@@ -23,7 +23,7 @@ namespace Signum.Engine.MachineLearning
             {
                 sb.Include<PredictorEntity>()
                     .WithSave(PredictorOperation.Save)
-                    .WithQuery(dqm, e => new
+                    .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
                         e.Id,

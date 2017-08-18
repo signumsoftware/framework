@@ -33,7 +33,7 @@ export interface PredictorEntity extends Entities.Entity {
     Type: "Predictor";
     query?: Basics.QueryEntity | null;
     name?: string | null;
-    filters: Entities.MList<UserQueries.QueryFilterEntity>;
+    filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
     inputs: Entities.MList<PredictorInputEntity>;
     output: Entities.MList<PredictorOutputEntity>;
 }
@@ -41,7 +41,7 @@ export interface PredictorEntity extends Entities.Entity {
 export const PredictorInputEntity = new Type<PredictorInputEntity>("PredictorInputEntity");
 export interface PredictorInputEntity extends Entities.EmbeddedEntity {
     Type: "PredictorInputEntity";
-    token?: UserAssets.QueryTokenEntity | null;
+    token?: UserAssets.QueryTokenEmbedded | null;
 }
 
 export module PredictorOperation {
@@ -51,7 +51,7 @@ export module PredictorOperation {
 export const PredictorOutputEntity = new Type<PredictorOutputEntity>("PredictorOutputEntity");
 export interface PredictorOutputEntity extends Entities.EmbeddedEntity {
     Type: "PredictorOutputEntity";
-    token?: UserAssets.QueryTokenEntity | null;
+    token?: UserAssets.QueryTokenEmbedded | null;
 }
 
 export const Regularization = new EnumType<Regularization>("Regularization");

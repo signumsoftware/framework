@@ -22,7 +22,8 @@ import { ChartRequest  } from '../../../Extensions/Signum.React.Extensions/Chart
 
 export function start(options: { routes: JSX.Element[] }) {
 
-    Navigator.addSettings(new EntitySettings(PredictorEntity, e => new ViewPromise(resolve => require(['./Templates/Predictor'], resolve))));
+    Navigator.addSettings(new EntitySettings(PredictorEntity, e => import('./Templates/Predictor')));
+
 }
 
 export namespace API {

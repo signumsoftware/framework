@@ -8,10 +8,10 @@ import { PredictorEntity, PredictorInputEntity, PredictorOutputEntity } from '..
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
-import { QueryFilterEntity } from '../../UserQueries/Signum.Entities.UserQueries'
+import { QueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 
-export default class Predictor extends React.Component<{ ctx: TypeContext<PredictorEntity> }, void> {
+export default class Predictor extends React.Component<{ ctx: TypeContext<PredictorEntity> }> {
 
     handleOnChange = () => {
         const e = this.props.ctx.value;
@@ -33,7 +33,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                 <EntityLine ctx={ctx.subCtx(f => f.query)} remove={ctx.value.isNew} onChange={this.handleOnChange} />
                 {queryKey && <div>
                     {
-                        Finder.isFindable(queryKey) ?
+                        Finder.isFindable(queryKey, false) ?
                             <a className="form-control-static" href={Finder.findOptionsPath({ queryName: queryKey })}>{getQueryNiceName(queryKey)}</a> :
                             <span>{getQueryNiceName(queryKey)}</span>
                     }
@@ -58,7 +58,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
         );
     }
 
-    renderFilter = (ctx: TypeContext<QueryFilterEntity>) => {
+    renderFilter = (ctx: TypeContext<QueryFilterEmbedded>) => {
         const ctx2 = ctx.subCtx({ formGroupStyle: "None" });
         return (
             <div>
@@ -69,7 +69,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                 <span style={{ margin: "0px 10px" }}>
                     <ValueLine ctx={ctx2.subCtx(e => e.operation)} />
                 </span>
-                <ValueLine ctx={ctx2.subCtx(e => e.valueString)} valueHtmlProps={{ size: 50 }} />
+                <ValueLine ctx={ctx2.subCtx(e => e.valueString)} valueHtmlAttributes={{ size: 50 }} />
             </div>
         );
     }

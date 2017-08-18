@@ -26,7 +26,7 @@ namespace Signum.Entities.MachineLearning
         public string Name { get; set; }
 
         [NotNullable, PreserveOrder]
-        public MList<QueryFilterEntity> Filters { get; set; } = new MList<QueryFilterEntity>();
+        public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
         [NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
@@ -42,13 +42,13 @@ namespace Signum.Entities.MachineLearning
     [Serializable]
     public class PredictorInputEntity : EmbeddedEntity
     {
-        public QueryTokenEntity Token { get; set; }
+        public QueryTokenEmbedded Token { get; set; }
     }
 
     [Serializable]
     public class PredictorOutputEntity : EmbeddedEntity
     {
-        public QueryTokenEntity Token { get; set; }
+        public QueryTokenEmbedded Token { get; set; }
     }
 
     [Serializable]
