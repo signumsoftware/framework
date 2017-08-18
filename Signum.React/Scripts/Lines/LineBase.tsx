@@ -99,7 +99,7 @@ export interface LineBaseProps extends StyleOptions {
     hideIfNull?: boolean;
     onChange?: (e: ChangeEvent) => void;
     onValidate?: (val: any) => string;
-    labelHtmlAttributes?: React.HTMLAttributes<HTMLLabelElement>;
+    labelHtmlAttributes?: React.LabelHTMLAttributes<HTMLLabelElement>;
     formGroupHtmlAttributes?: React.HTMLAttributes<any>;
     helpBlock?: React.ReactChild;
 }

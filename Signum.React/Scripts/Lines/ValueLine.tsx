@@ -20,7 +20,7 @@ export interface ValueLineProps extends LineBaseProps, React.Props<ValueLine> {
     inlineCheckbox?: boolean | "block";
     comboBoxItems?: (OptionItem | MemberInfo | string)[];
     onTextboxBlur?: (val: any) => void;
-    valueHtmlAttributes?: React.HTMLAttributes<any>;
+    valueHtmlAttributes?: React.AllHTMLAttributes<any>;
     extraButtons?: (vl: ValueLine) => React.ReactNode;
     initiallyFocused?: boolean;
 }
