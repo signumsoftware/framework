@@ -170,11 +170,9 @@
     <Compile Include="Files\FilesController.cs" />
     <Compile Include="Files\FilesServer.cs" />
     <Compile Include="Isolation\IsolationServer.cs" />
-    <Compile Include="RestLog\RestLogFilter.cs" />
     <Compile Include="Printing\PrintController.cs" />
     <Compile Include="Printing\PrintServer.cs" />
     <Compile Include="MachineLearning\ExcelController.cs" />
-    <Compile Include="RestLog\RestLogFilter.cs" />
     <Compile Include="Mailing\MailingController.cs" />
     <Compile Include="Mailing\MailingServer.cs" />
     <Compile Include="Rest\RestApiKeyController.cs" />
