@@ -117,8 +117,8 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
 
     render() {
-        
-        if (Navigator.Expander.getExpanded && !Navigator.Expander.getExpanded())
+
+        if (Navigator.Expander.onGetExpanded && !Navigator.Expander.onGetExpanded())
             return null;
 
         const s = this.state;
