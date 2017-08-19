@@ -51,8 +51,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
             const oldFindOptions =sc.props.findOptions;
             UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, undefined)
                 .then(newFindOptions => {
-                    newFindOptions.showFilters = true;
-                   sc.forceUpdate();
+                    sc.setState({ showFilters: true });
                     this.setState({ currentUserQuery: uq });
                     if (sc.props.findOptions.pagination.mode != "All")
                     {

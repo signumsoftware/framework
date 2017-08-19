@@ -860,6 +860,17 @@ NodeUtils.register<EntityTableColumnNode>({
 export interface SearchControlNode extends BaseNode {
     kind: "SearchControl",
     findOptions?: FindOptionsExpr;
+
+    searchOnLoad?: ExpressionOrValue<boolean>;
+    showHeader?: ExpressionOrValue<boolean>;
+    showFilters?: ExpressionOrValue<boolean>;
+    showFilterButton?: ExpressionOrValue<boolean>;
+    showFooter?: ExpressionOrValue<boolean>;
+    allowChangeColumns?: ExpressionOrValue<boolean>;
+    create?: ExpressionOrValue<boolean>;
+    navigate?: ExpressionOrValue<boolean>;
+
+  
 }
 
 NodeUtils.register<SearchControlNode>({
@@ -871,9 +882,26 @@ NodeUtils.register<SearchControlNode>({
     renderCode: (node, cc) => cc.elementCode("SearchControl", {
         findOptions: node.findOptions
     }),
-    render: (dn, ctx) => <SearchControl findOptions={toFindOptions(ctx, dn.node.findOptions!)} />,
+    render: (dn, ctx) => <SearchControl
+        findOptions={toFindOptions(ctx, dn.node.findOptions!)}
+        searchOnLoad={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.searchOnLoad, NodeUtils.isBooleanOrNull)}
+        showFilters={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showFilters, NodeUtils.isBooleanOrNull)}
+        showFilterButton={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showFilterButton, NodeUtils.isBooleanOrNull)}
+        showFooter={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.showFooter, NodeUtils.isBooleanOrNull)}
+        allowChangeColumns={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.allowChangeColumns, NodeUtils.isBooleanOrNull)}
+        create={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.create, NodeUtils.isBooleanOrNull)}
+        navigate={NodeUtils.evaluateAndValidate(ctx, dn.node, f => f.navigate, NodeUtils.isBooleanOrNull)}
+    />,
     renderDesigner: dn => <div>
         <FindOptionsLine dn={dn} binding={Binding.create(dn.node, a => a.findOptions)} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.searchOnLoad)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showHeader)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showFilters)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showFilterButton)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.showFooter)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.allowChangeColumns)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.create)} type="boolean" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, f => f.navigate)} type="boolean" defaultValue={null} />
     </div>
 });
 
