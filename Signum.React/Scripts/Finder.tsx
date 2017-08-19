@@ -118,14 +118,6 @@ export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
 
     const query = {
         columnMode: !fo.columnOptionsMode || fo.columnOptionsMode == "Add" as ColumnOptionsMode ? undefined : fo.columnOptionsMode,
-        create: fo.create,
-        navigate: fo.navigate,
-        searchOnLoad: fo.searchOnLoad,
-        showFilterButton: fo.showFilterButton,
-        showFilters: fo.showFilters == true ? undefined : fo.showFilters,
-        showFooter: fo.showFooter,
-        showHeader: fo.showHeader,
-        allowChangeColumns: fo.allowChangeColumns,
         paginationMode: fo.pagination && fo.pagination.mode,
         elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,
         currentPage: fo.pagination && fo.pagination.currentPage,
@@ -333,11 +325,6 @@ export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription): Find
         columnOptions: pair.columns,
         columnOptionsMode: pair.mode,
         pagination: fo.pagination && !equalsPagination(fo.pagination, defPagination) ? fo.pagination : undefined,
-        allowChangeColumns: fo.allowChangeColumns == false ? false : undefined,
-        showFilters: fo.showFilters == false ? false : undefined,
-        showFilterButton: fo.showFilterButton == false ? false : undefined,
-        showFooter: fo.showFooter == false ? false: undefined, 
-        showHeader: fo.showHeader == false ? false : undefined,
     } as FindOptions;
 
     if (findOptions.orderOptions && findOptions.orderOptions.length == 1) {
@@ -406,16 +393,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
 
         var result: FindOptionsParsed = {
             queryKey: qd.queryKey,
-            searchOnLoad: fo.searchOnLoad != null ? fo.searchOnLoad : true,
-            showHeader: fo.showHeader != null ? fo.showHeader : true,
-            showFilters: fo.showFilters != null ? fo.showFilters : false,
-            showFilterButton: fo.showFilterButton != null ? fo.showFilterButton : true,
-            showFooter: fo.showFooter != null ? fo.showFooter : true,
-            allowChangeColumns: fo.allowChangeColumns != null ? fo.allowChangeColumns : true,
-            create: fo.create != null ? fo.create : tis.some(ti => Navigator.isCreable(ti, false, true)),
-            navigate: fo.navigate != null ? fo.navigate : tis.some(ti => Navigator.isNavigable(ti, undefined, true)),
             pagination: fo.pagination != null ? fo.pagination : qs && qs.pagination || defaultPagination,
-            contextMenu: fo.contextMenu != null ? fo.contextMenu : true,
 
             columnOptions: (fo.columnOptions || []).map(co => ({
                 token: completer.get(co.columnName),
@@ -511,10 +489,7 @@ export function expandParentColumn(fo: FindOptions): FindOptions {
 
         fo.columnOptionsMode = "Remove";
     }
-
-    if (fo.searchOnLoad == undefined)
-        fo.searchOnLoad = true;
-
+    
     fo.parentColumn = undefined;
     fo.parentValue = undefined;
 

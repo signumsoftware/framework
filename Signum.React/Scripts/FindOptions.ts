@@ -30,16 +30,6 @@ export interface FindOptions {
     columnOptionsMode?: ColumnOptionsMode;
     columnOptions?: ColumnOption[];
     pagination?: Pagination,
-
-    searchOnLoad?: boolean;
-    showHeader?: boolean;
-    showFilters?: boolean;
-    showFilterButton?: boolean;
-    showFooter?: boolean;
-    allowChangeColumns?: boolean;
-    create?: boolean;
-    navigate?: boolean;
-    contextMenu?: boolean;
 }
 
 export interface FindOptionsParsed {
@@ -48,15 +38,7 @@ export interface FindOptionsParsed {
     orderOptions: OrderOptionParsed[];
     columnOptions: ColumnOptionParsed[];
     pagination: Pagination;
-    searchOnLoad: boolean;
-    showHeader: boolean;
-    showFilters: boolean;
-    showFilterButton: boolean;
-    showFooter: boolean;
-    allowChangeColumns: boolean;
-    create: boolean;
-    navigate: boolean;
-    contextMenu: boolean;
+   
 }
 
 
