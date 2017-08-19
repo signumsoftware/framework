@@ -416,7 +416,7 @@ namespace Signum.Entities.Reflection
                     return stringCase.TextCase == StringCase.Lowercase ? "L" : "U";
             }
 
-            if (route.IsId() && IsNumber(PrimaryKey.Type(route.RootType)))
+            if (route.IsId() && ReflectionTools.IsNumber(PrimaryKey.Type(route.RootType)))
                 return "D";
 
             return FormatString(route.Type);
@@ -449,45 +449,8 @@ namespace Signum.Entities.Reflection
             return null;
         }
 
-        public static bool IsNumber(Type type)
-        {
-            type = type.UnNullify();
-            if (type.IsEnum)
-                return false;
-
-            switch (Type.GetTypeCode(type))
-            {
-                case TypeCode.Byte:
-                case TypeCode.Decimal:
-                case TypeCode.Double:
-                case TypeCode.Int16:
-                case TypeCode.Int32:
-                case TypeCode.Int64:
-                case TypeCode.SByte:
-                case TypeCode.Single:
-                case TypeCode.UInt16:
-                case TypeCode.UInt32:
-                case TypeCode.UInt64:
-                    return true;
-            }
-            return false;
-        }
-
-        public static bool IsDecimalNumber(Type type)
-        {
-            type = type.UnNullify();
-            if (type.IsEnum)
-                return false;
-
-            switch (Type.GetTypeCode(type))
-            {
-                case TypeCode.Decimal:
-                case TypeCode.Double:
-                case TypeCode.Single:
-                    return true;
-            }
-            return false;
-        }
+     
+       
 
  
         public static PropertyInfo PropertyInfo<T>(this T entity, Expression<Func<T, object>> property) where T : ModifiableEntity

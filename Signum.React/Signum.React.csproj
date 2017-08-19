@@ -219,6 +219,7 @@
     <TypeScriptCompile Include="Scripts\Lines\AutocompleteConfig.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityTable.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EnumCheckboxList.tsx" />
+    <TypeScriptCompile Include="Scripts\Lines\MultiValueLine.tsx" />
     <TypeScriptCompile Include="Scripts\Modals\MessageModal.tsx" />
     <TypeScriptCompile Include="Scripts\Search.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityBase.tsx" />

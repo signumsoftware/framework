@@ -25,8 +25,8 @@ export interface EntityTableProps extends EntityListBaseProps {
 export interface EntityTableColumn<T, RS> {
     property?: ((a: T) => any) | string;
     header?: React.ReactNode | null;
-    headerHtmlAttributes?: React.HTMLAttributes<any>;
-    cellHtmlAttributes?: (ctx: TypeContext<T>, row: EntityTableRow, rowState: RS) => React.HTMLAttributes<any> | null | undefined;
+    headerHtmlAttributes?: React.ThHTMLAttributes<any>;
+    cellHtmlAttributes?: (ctx: TypeContext<T>, row: EntityTableRow, rowState: RS) => React.TdHTMLAttributes<any> | null | undefined;
     template?: (ctx: TypeContext<T>, row: EntityTableRow, rowState: RS) => React.ReactChild | null | undefined;
 }
 

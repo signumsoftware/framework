@@ -12,50 +12,39 @@ import { ViewReplacer } from  './Frames/ReactVisitor'
 export { PropertyRoute };
 
 import { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, LineBase, LineBaseProps, tasks, ChangeEvent } from './Lines/LineBase'
-export { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, LineBase, LineBaseProps, tasks, ChangeEvent };
+export { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, LineBase, LineBaseProps, tasks, ChangeEvent }
 
 import { ValueLine, ValueLineType, ValueLineProps, OptionItem } from './Lines/ValueLine'
-export { ValueLine, ValueLineType, ValueLineProps, OptionItem};
+export { ValueLine, ValueLineType, ValueLineProps, OptionItem }
 
-import { RenderEntity } from  './Lines/RenderEntity'
-export { RenderEntity };
+export { RenderEntity } from  './Lines/RenderEntity'
 
 import { EntityBase } from  './Lines/EntityBase'
-export { EntityBase };
+export { EntityBase }
 
-import { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './Lines/AutocompleteConfig'
-export { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig };
+export { AutocompleteConfig, FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './Lines/AutocompleteConfig'
 
-import { EntityLine } from './Lines/EntityLine'
-export { EntityLine };
+export { EntityLine } from './Lines/EntityLine'
 
-import { EntityCombo } from  './Lines/EntityCombo'
-export { EntityCombo };
+export { EntityCombo } from  './Lines/EntityCombo'
 
-
-import { EntityDetail } from  './Lines/EntityDetail'
-export { EntityDetail };
+export { EntityDetail } from  './Lines/EntityDetail'
 
 import { EntityListBase, EntityListBaseProps } from  './Lines/EntityListBase'
-export { EntityListBase };
+export { EntityListBase, EntityListBaseProps }
 
-import { EntityList } from  './Lines/EntityList'
-export { EntityList };
+export { EntityList } from  './Lines/EntityList'
 
-import { EntityRepeater } from  './Lines/EntityRepeater'
-export { EntityRepeater };
+export { EntityRepeater } from  './Lines/EntityRepeater'
 
-import { EntityTabRepeater } from  './Lines/EntityTabRepeater'
-export { EntityTabRepeater };
+export { EntityTabRepeater } from  './Lines/EntityTabRepeater'
 
-import { EntityStrip } from  './Lines/EntityStrip'
-export { EntityStrip };
+export { EntityStrip } from  './Lines/EntityStrip'
 
-import { EntityCheckboxList } from  './Lines/EntityCheckboxList'
-export { EntityCheckboxList };
+export { EntityCheckboxList } from  './Lines/EntityCheckboxList'
 
-import { EnumCheckboxList } from  './Lines/EnumCheckboxList'
-export { EnumCheckboxList };
+export { EnumCheckboxList } from  './Lines/EnumCheckboxList'
+export { MultiValueLine } from  './Lines/MultiValueLine'
 
 
 import { EntityTable, EntityTableColumn, EntityTableRow } from './Lines/EntityTable'
