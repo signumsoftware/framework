@@ -46,13 +46,7 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
     componentWillMount() {
 
-        if (Navigator.Expander.setExpanded) {
-            if (Navigator.Expander.getExpanded) {
-                this.wasExpanded = Navigator.Expander.getExpanded();
-            }
-
-            Navigator.Expander.setExpanded(true);
-        }
+        this.wasExpanded = Navigator.Expander.setExpanded(true);
 
         MapClient.API.types()
             .then(smi => {
@@ -80,9 +74,7 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
 
     componentWillUnmount(){
-        if (Navigator.Expander.setExpanded && this.wasExpanded != null){
-            Navigator.Expander.setExpanded(this.wasExpanded);
-        }
+        Navigator.Expander.setExpanded(this.wasExpanded);
     }
 
 
@@ -125,8 +117,8 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
 
     render() {
-        
-        if (Navigator.Expander.getExpanded && !Navigator.Expander.getExpanded())
+
+        if (Navigator.Expander.onGetExpanded && !Navigator.Expander.onGetExpanded())
             return null;
 
         const s = this.state;

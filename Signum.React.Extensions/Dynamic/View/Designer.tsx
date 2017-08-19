@@ -190,7 +190,6 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
 
             if (this.props.type == "textArea") {
                 return (<textarea className="form-control" style={style}
-                    type="text"
                     value={val == null ? "" : val.toString()}
                     onChange={this.handleChangeSelectOrInput} />);
             }

@@ -69,9 +69,9 @@ namespace Signum.React.Excel
         }
 
         [Route("api/excel/excelReport"), HttpPost]
-        public async Task<HttpResponseMessage> GenerateExcelReport(ExcelReportRequest request, CancellationToken token)
+        public HttpResponseMessage GenerateExcelReport(ExcelReportRequest request)
         {
-            byte[] file = await ExcelLogic.ExecuteExcelReport(request.excelReport, request.queryRequest.ToQueryRequest(), token);
+            byte[] file = ExcelLogic.ExecuteExcelReport(request.excelReport, request.queryRequest.ToQueryRequest());
 
             var fileName = request.excelReport.ToString() + "-" + TimeZoneManager.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx";
 

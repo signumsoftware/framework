@@ -45,10 +45,10 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
                                         ctx={ctx.subCtx(a => a.token, { formGroupStyle: "None" })}
                                         queryKey={this.props.ctx.value.query!.key}
                                         subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />,
-                                    headerHtmlAttributes: { width: "40%" },
+                                    headerHtmlAttributes: { style: { width: "40%" } },
                                 },
                                 { property: a => a.operation },
-                                { property: a => a.valueString, headerHtmlAttributes: { width: "40%" } }
+                                { property: a => a.valueString, headerHtmlAttributes: { style: { width: "40%" } } }
                             ])} />
                             <ValueLine ctx={ctx.subCtx(e => e.columnsMode)} />
                             <EntityTable ctx={ctx.subCtx(e => e.columns)} columns={EntityTable.typedColumns<QueryColumnEmbedded>([

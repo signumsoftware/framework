@@ -47,7 +47,7 @@ namespace Signum.Engine.Excel
 
             EmailTemplateLogic.GenerateAttachment.Register((ExcelAttachmentEntity ea, EmailTemplateLogic.GenerateAttachmentContext ctx) =>
             {
-                var finalEntity = ea.Related?.Retrieve() ?? (Entity)ctx.Entity;
+                var finalEntity = ea.Related?.Retrieve() ?? (Entity)ctx.Entity ?? ctx.SystemEmail.UntypedEntity as Entity;
 
                 using (finalEntity == null ? null : CurrentEntityConverter.SetCurrentEntity(finalEntity))
                 using (CultureInfoUtils.ChangeBothCultures(ctx.Culture))
@@ -57,7 +57,7 @@ namespace Signum.Engine.Excel
                     var title = GetTemplateString(ea.Title, ref ea.TitleNode, ctx);
                     var fileName = GetTemplateString(ea.FileName, ref ea.FileNameNode, ctx);
 
-                    var bytes = ExcelLogic.ExecutePlainExcel(request, title, CancellationToken.None).Result;
+                    var bytes = ExcelLogic.ExecutePlainExcel(request, title);
 
                     return new List<EmailAttachmentEmbedded>
                     {
