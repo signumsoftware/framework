@@ -215,7 +215,9 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
 
         const ctx = new TypeContext<ICaseMainEntity>(undefined, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(mainEntity, ""));
 
-        var mainPack = { entity: mainEntity, canExecute: pack.canExecuteMainEntity };
+        var { activity, canExecuteActivity, canExecuteMainEntity, ...extension } = this.state.pack!;
+
+        var mainPack = { entity: mainEntity, canExecute: pack.canExecuteMainEntity, ...extension };
 
         const wc: WidgetContext<ICaseMainEntity> = {
             ctx: ctx,
