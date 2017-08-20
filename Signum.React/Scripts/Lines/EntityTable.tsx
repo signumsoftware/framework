@@ -103,7 +103,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
 
     renderTable(ctx: TypeContext<MListElement<ModifiableEntity>[]>) {
 
-        const readOnly = this.state.ctx.readOnly;
+        const readOnly = ctx.readOnly;
         const elementPr = ctx.propertyRoute.add(a => a[0].element);
 
         return (
