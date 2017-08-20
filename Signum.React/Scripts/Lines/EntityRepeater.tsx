@@ -55,7 +55,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
                                 ctx={mlec}
                                 draggable={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "v") : undefined}
                                 getComponent={this.props.getComponent}
-                                viewPromise={this.props.viewPromise} />))
+                                getViewPromise={this.props.getViewPromise} />))
                     }
                     {
                         this.state.createAsLink && this.state.create && !readOnly &&
@@ -76,7 +76,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
 export interface EntityRepeaterElementProps {
     ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
-    viewPromise?: (typeName: string) => Navigator.ViewPromise<ModifiableEntity>;
+    getViewPromise?: (entity: ModifiableEntity) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
     onRemove?: (event: React.MouseEvent<any>) => void;
     draggable?: DragConfig;
 
@@ -112,7 +112,7 @@ export class EntityRepeaterElement extends React.Component<EntityRepeaterElement
                         </div>
                     </legend>
                     <div className="sf-line-entity">
-                        <RenderEntity ctx={this.props.ctx} getComponent={this.props.getComponent} viewPromise={this.props.viewPromise} />
+                        <RenderEntity ctx={this.props.ctx} getComponent={this.props.getComponent} getViewPromise={this.props.getViewPromise} />
                     </div>
                 </fieldset>
             </div>

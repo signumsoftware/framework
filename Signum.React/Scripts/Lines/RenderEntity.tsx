@@ -10,21 +10,23 @@ import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, isEntity, isLite, isModifiableEntity, liteKey, getToString } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
 import { EntityBase, EntityBaseProps} from './EntityBase'
+import { ViewPromise } from "../Navigator";
 
 
 
 export interface RenderEntityProps {
     ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
-    viewPromise?: (typeName: string) => Navigator.ViewPromise<ModifiableEntity>;
+    getViewPromise?: (e: ModifiableEntity) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
 }
 
 export interface RenderEntityState {
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
     lastLoadedType?: string;
+    lastLoadedViewName?: string;
 }
 
-const FromProps = "__FromProps__";
+const Anonymous = "__Anonymous__";
 
 export class RenderEntity extends React.Component<RenderEntityProps, RenderEntityState> {
 
@@ -87,27 +89,29 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
             return Promise.resolve(undefined);
 
         if (e == undefined) {
-            if (this.state.getComponent != undefined || this.state.lastLoadedType != undefined)
-                this.setState({ getComponent: undefined, lastLoadedType: undefined });
+            if (this.state.getComponent != undefined || this.state.lastLoadedType != undefined || this.state.lastLoadedViewName != undefined)
+                this.setState({ getComponent: undefined, lastLoadedType: undefined, lastLoadedViewName: undefined });
             return Promise.resolve(undefined);
         }
-        if (this.state.lastLoadedType == (nextProps.viewPromise ? FromProps: e.Type))
+
+        var result = nextProps.getViewPromise && nextProps.getViewPromise(e);
+
+        if (this.state.lastLoadedType == e.Type && this.state.lastLoadedViewName == RenderEntity.toViewName(result))
             return Promise.resolve(undefined);
+        
+        var viewPromise = result == undefined || typeof result == "string" ? Navigator.getViewPromise(e, result) : result;
 
-        if (nextProps.viewPromise)
-            return nextProps.viewPromise(e.Type).promise.then(c => {
-                this.setState({
-                    getComponent: c,
-                    lastLoadedType: FromProps
-                });
-            });
-
-        return Navigator.getViewPromise(e).promise.then(c => {
+        return viewPromise.promise.then(c => {
             this.setState({
                 getComponent: c,
-                lastLoadedType: e.Type
+                lastLoadedType: e.Type,
+                lastLoadedViewName: RenderEntity.toViewName(result)
             });
         });
+    }
+
+    static toViewName(result: undefined | string | Navigator.ViewPromise<ModifiableEntity>)  : string | undefined{
+        return (result instanceof ViewPromise ? Anonymous : result);
     }
 
     entityComponent: React.Component<any, any>;
@@ -128,15 +132,18 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
         let getComponent = this.props.getComponent;
 
         if (getComponent == undefined) {
-            if (this.state.lastLoadedType != (this.props.viewPromise ? FromProps : entity.Type))
+            if (this.state.lastLoadedType != entity.Type)
                 return null;
+
+            var result = this.props.getViewPromise && this.props.getViewPromise(entity);
+            if (this.state.lastLoadedViewName != RenderEntity.toViewName(result))
+                return null
 
             getComponent = this.state.getComponent;
 
             if (getComponent == undefined)
                 return null;
         }
-
        
         const ti = getTypeInfo(entity.Type);
 
