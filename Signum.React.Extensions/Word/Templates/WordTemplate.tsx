@@ -7,10 +7,11 @@ import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search
 import { getToString, getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { WordTemplateEntity } from '../Signum.Entities.Word'
-import { TemplateTokenMessage } from '../../Templating/Signum.Entities.Templating'
+import { TemplateTokenMessage, TemplateApplicableEval } from '../../Templating/Signum.Entities.Templating'
 import FileLine from '../../Files/FileLine'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import TemplateControls from '../../Templating/TemplateControls'
+import TemplateApplicable from '../../Templating/Templates/TemplateApplicable'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
 export default class WordTemplate extends React.Component<{ ctx: TypeContext<WordTemplateEntity> }> {
@@ -28,35 +29,18 @@ export default class WordTemplate extends React.Component<{ ctx: TypeContext<Wor
     render() {
 
         const ctx = this.props.ctx;
-
-        const ec = ctx.subCtx({ labelColumns: { sm: 4 } });
-        const sc = ec.subCtx({ formGroupStyle: "Basic" });
-
+        const sc = ctx.subCtx({ formGroupStyle: "Basic" });
 
         return (
             <div>
-                <div className="row">
-                    <div className="col-sm-8">
-                        <ValueLine ctx={ec.subCtx(f => f.name)} />
-                        <EntityLine ctx={ec.subCtx(f => f.query)} />
-                        <EntityCombo ctx={ec.subCtx(f => f.systemWordTemplate)} />
-                        <EntityCombo ctx={ec.subCtx(f => f.culture)} />
-                        <EntityCombo ctx={ec.subCtx(f => f.wordTransformer)} />
-                        <EntityCombo ctx={ec.subCtx(f => f.wordConverter)} />
-                        <ValueLine ctx={ec.subCtx(f => f.fileName)} />
-                        <ValueLine ctx={ec.subCtx(f => f.disableAuthorization)} />
-                    </div>
-                    {!ec.value.isNew &&
-                        <div className="col-sm-4 form-vertical">
-                            <fieldset style={{ marginTop: "-25px" }}>
-                                <legend>Active</legend>
-                                <ValueLine ctx={sc.subCtx(e => e.active)} inlineCheckbox={true} />
-                                <ValueLine ctx={sc.subCtx(e => e.startDate)} />
-                                <ValueLine ctx={sc.subCtx(e => e.endDate)} />
-                            </fieldset>
-                        </div>
-                    }
-                </div>
+                <ValueLine ctx={ctx.subCtx(f => f.name)} />
+                <EntityLine ctx={ctx.subCtx(f => f.query)} />
+                <EntityCombo ctx={ctx.subCtx(f => f.systemWordTemplate)} />
+                <EntityCombo ctx={ctx.subCtx(f => f.culture)} />
+                <EntityCombo ctx={ctx.subCtx(f => f.wordTransformer)} />
+                <EntityCombo ctx={ctx.subCtx(f => f.wordConverter)} />
+                <ValueLine ctx={ctx.subCtx(f => f.fileName)} />
+                <ValueLine ctx={ctx.subCtx(f => f.disableAuthorization)} />
 
                 {sc.value.query &&
                     <div>
@@ -67,6 +51,8 @@ export default class WordTemplate extends React.Component<{ ctx: TypeContext<Wor
                                 </div>
                             </div>
                             <FileLine ctx={ctx.subCtx(e => e.template)} />
+                            <EntityDetail ctx={ctx.subCtx(e => e.applicable)}
+                                getComponent={(ctx2: TypeContext<TemplateApplicableEval>) => <TemplateApplicable ctx={ctx2} query={sc.value.query!} />} />
                         </div>
                     </div>
                 }

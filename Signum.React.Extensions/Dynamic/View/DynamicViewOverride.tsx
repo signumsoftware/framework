@@ -3,7 +3,7 @@ import { MenuItem } from 'react-bootstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
 import { DynamicViewOverrideEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
-import { EntityLine, TypeContext, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { EntityLine, TypeContext, ValueLineType, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { Entity, JavascriptMessage, NormalWindowMessage, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { getTypeInfo, Binding, PropertyRoute, ReadonlyBinding, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
@@ -138,6 +138,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
         return (
             <div>
                 <EntityLine ctx={ctx.subCtx(a => a.entityType)} onChange={this.handleTypeChange} onRemove={this.handleTypeRemove} />
+                <ValueLine ctx={ctx.subCtx(a => a.viewName)} />
 
                 {ctx.value.entityType &&
                     <div>
@@ -214,13 +215,15 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
             if (!settings || !settings.getViewPromise)
                 this.setState({ componentClass: null });
 
-            else
-                settings.getViewPromise(entity).applyViewOverrides(settings).promise.then(func => {
+            else {
+                const ctx = this.props.ctx;
+                return settings.getViewPromise(entity).applyViewOverrides(ctx.value.entityType!.cleanName, ctx.value.viewName || undefined).promise.then(func => {
                     var tempCtx = new TypeContext(undefined, undefined, PropertyRoute.root(entity.Type), new ReadonlyBinding(entity, "example"));
                     var re = func(tempCtx);
                     this.setState({ componentClass: re.type as React.ComponentClass<{ ctx: TypeContext<Entity> }> });
                     this.compileFunction();
                 });
+            }
         }
     }
 

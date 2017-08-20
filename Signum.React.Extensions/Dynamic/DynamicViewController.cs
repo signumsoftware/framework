@@ -25,7 +25,7 @@ namespace Signum.React.Dynamic
         public DynamicViewEntity GetDynamicView(string typeName, string viewName)
         {
             Type type = TypeLogic.GetType(typeName);
-            var res = DynamicViewLogic.DynamicViews.Value.TryGetC(type)?.Single(a => a.ViewName == viewName);
+            var res = DynamicViewLogic.DynamicViews.Value.GetOrThrow(type).GetOrThrow(viewName);
             return res;
         }
 
@@ -33,7 +33,7 @@ namespace Signum.React.Dynamic
         public List<string> GetDynamicViewNames(string typeName)
         {
             Type type = TypeLogic.GetType(typeName);
-            var res = DynamicViewLogic.DynamicViews.Value.TryGetC(type).EmptyIfNull().Select(a => a.ViewName).ToList();
+            var res = DynamicViewLogic.DynamicViews.Value.TryGetC(type).EmptyIfNull().Select(a => a.Key).ToList();
             return res;
         }
 
@@ -53,10 +53,10 @@ namespace Signum.React.Dynamic
         }
 
         [Route("api/dynamic/override/{typeName}"), HttpGet]
-        public DynamicViewOverrideEntity GetDynamicViewOverride(string typeName)
+        public List<DynamicViewOverrideEntity> GetDynamicViewOverride(string typeName)
         {
             Type type = TypeLogic.GetType(typeName);
-            return DynamicViewLogic.DynamicViewOverrides.Value.TryGetC(type);
+            return DynamicViewLogic.DynamicViewOverrides.Value.TryGetC(type) ?? new List<DynamicViewOverrideEntity>();
         }
     }
 }

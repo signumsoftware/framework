@@ -10,7 +10,7 @@ import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString,
 import { API, PrintStat } from './PrintClient'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import { PrintPackageEntity, PrintLineState, PrintLineEntity, PrintPackageProcess,  } from './Signum.Entities.Printing'
+import { PrintPackageEntity, PrintLineState, PrintLineEntity, PrintPackageProcess, } from './Signum.Entities.Printing'
 import { FileTypeSymbol } from '../Files/Signum.Entities.Files'
 import { ProcessEntity } from '../Processes/Signum.Entities.Processes'
 import { Type } from '../../../Framework/Signum.React/Scripts/Reflection'
@@ -38,7 +38,7 @@ export default class PrintPanelPage extends React.Component<{}, PrintPanelPageSt
     render() {
         var ctx = new StyleContext(undefined, undefined);
         return (
-         
+
             <div>
                 <h2>PrintPanel</h2>
 
@@ -46,35 +46,32 @@ export default class PrintPanelPage extends React.Component<{}, PrintPanelPageSt
                     <fieldset>
                         <legend>Ready To Print</legend>
                         {this.state.stats.map((s, i) =>
-                            <ValueSearchControlLine ctx={ctx}  key={i} initialValue={s.count}
+                            <ValueSearchControlLine ctx={ctx} key={i} initialValue={s.count}
                                 labelText={s.fileType.toStr.after(".")}
                                 extraButtons={vsc => this.renderStateButton(vsc, s.fileType)}
                                 findOptions={{
-                                queryName: PrintLineEntity,
-                                searchOnLoad: true,
-                                showFilters: true,
-                                showFilterButton: true,
-                                filterOptions: [
-                                    { columnName: "State", value: "ReadyToPrint" as PrintLineState },
-                                    { columnName: "File.FileType", value: s.fileType }, 
-                                ]}} />)
-                        }               
+                                    queryName: PrintLineEntity,
+                                    filterOptions: [
+                                        { columnName: "State", value: "ReadyToPrint" as PrintLineState },
+                                        { columnName: "File.FileType", value: s.fileType },
+                                    ]
+                                }} />)
+                        }
                     </fieldset>
                 </div>
 
                 <h3>{ProcessEntity.nicePluralName()}</h3>
                 <SearchControl findOptions={{
-                    queryName: ProcessEntity,
-                    filterOptions: [{ columnName: "Entity.Data.(PrintPackage)", operation: "DistinctTo", value: undefined }],
-                    pagination: { elementsPerPage: 10, mode: "Paginate", currentPage: 1},
-                    searchOnLoad: true,
-                    showFilters: false
-                }} />               
+                        queryName: ProcessEntity,
+                        filterOptions: [{ columnName: "Entity.Data.(PrintPackage)", operation: "DistinctTo", value: undefined }],
+                        pagination: { elementsPerPage: 10, mode: "Paginate", currentPage: 1 },
+                    }}
+                />
             </div>
         );
     }
 
-    renderStateButton(vsc: ValueSearchControl, fileType : FileTypeSymbol) {
+    renderStateButton(vsc: ValueSearchControl, fileType: FileTypeSymbol) {
         if (vsc.state.value == undefined || vsc.state.value == 0)
             return undefined;
 
@@ -91,5 +88,5 @@ export default class PrintPanelPage extends React.Component<{}, PrintPanelPageSt
             .then(p => vsc.refreshValue())
             .done();
     }
-   
+
 }
