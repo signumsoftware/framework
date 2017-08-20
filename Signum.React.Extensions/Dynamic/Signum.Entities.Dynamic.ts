@@ -192,6 +192,7 @@ export const DynamicViewOverrideEntity = new Type<DynamicViewOverrideEntity>("Dy
 export interface DynamicViewOverrideEntity extends Entities.Entity {
     Type: "DynamicViewOverride";
     entityType?: Basics.TypeEntity | null;
+    viewName?: string | null;
     script?: string | null;
 }
 

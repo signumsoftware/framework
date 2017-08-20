@@ -25,7 +25,7 @@ import { FindOptionsLine, QueryTokenLine } from './FindOptionsComponent'
 import { HtmlAttributesLine } from './HtmlAttributesComponent'
 import { StyleOptionsLine } from './StyleOptionsComponent'
 import * as NodeUtils from './NodeUtils'
-import { getDynamicViewPromise, registeredCustomContexts } from '../DynamicViewClient'
+import { registeredCustomContexts } from '../DynamicViewClient'
 import { toFindOptions, FindOptionsExpr } from './FindOptionsExpression'
 import { toHtmlAttributes, HtmlAttributesExpression, withClassName } from './HtmlAttributesExpression'
 import { toStyleOptions, subCtx, StyleOptionsExpression } from './StyleOptionsExpression'
@@ -287,9 +287,10 @@ NodeUtils.register<TextNode>({
 export interface RenderEntityNode extends ContainerNode {
     kind: "RenderEntity";
     field: string;
-    viewName?: string;
+    getViewName?: Expression<(e : ModifiableEntity) => string>;
     styleOptions?: StyleOptionsExpression;
 }
+
 
 NodeUtils.register<RenderEntityNode>({
     kind: "RenderEntity",
@@ -302,7 +303,7 @@ NodeUtils.register<RenderEntityNode>({
     renderCode: (node, cc) => cc.elementCode("RenderEntity", {
         ctx: cc.subCtxCode(node.field, node.styleOptions),
         getComponent: cc.getGetComponentEx(node, true),
-        viewPromise: node.viewName && { __code__: `(typeName: string) => DynamicViewClient.getDynamicViewPromise(typeName, "${node.viewName}")` },
+        getViewName: node.getViewName,
     }),
     render: (dn, ctx) => {
         var sctx = ctx.subCtx(dn.node.field, toStyleOptions(ctx, dn.node.styleOptions));
@@ -310,14 +311,14 @@ NodeUtils.register<RenderEntityNode>({
             <RenderEntity
                 ctx={sctx}
                 getComponent={NodeUtils.getGetComponent(dn)}
-                viewPromise={!dn.node.viewName ? undefined : typeName => getDynamicViewPromise(typeName, dn.node.viewName!)}
+                getViewPromise={NodeUtils.evaluateAndValidate(sctx, dn.node, n => n.getViewName, NodeUtils.isFunctionOrNull)}
             />
         );
     },
     renderDesigner: dn => <div>
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
         <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
-        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.viewName)} type="string" defaultValue={null} allowsExpression={false} />     
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.getViewName)} type={null} defaultValue={false} exampleExpression={"e => \"MyStaticOrDynamicViewName\""} />  
     </div>,
 });
 

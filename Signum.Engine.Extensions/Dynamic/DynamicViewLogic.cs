@@ -19,9 +19,9 @@ namespace Signum.Engine.Dynamic
 {
     public static class DynamicViewLogic
     {
-        public static ResetLazy<Dictionary<Type, List<DynamicViewEntity>>> DynamicViews;
+        public static ResetLazy<Dictionary<Type, Dictionary<string,  DynamicViewEntity>>> DynamicViews;
         public static ResetLazy<Dictionary<Type, DynamicViewSelectorEntity>> DynamicViewSelectors;
-        public static ResetLazy<Dictionary<Type, DynamicViewOverrideEntity>> DynamicViewOverrides;
+        public static ResetLazy<Dictionary<Type, List<DynamicViewOverrideEntity>>> DynamicViewOverrides;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -56,7 +56,7 @@ namespace Signum.Engine.Dynamic
                 }.Register();
 
                 DynamicViews = sb.GlobalLazy(() =>
-                    Database.Query<DynamicViewEntity>().GroupToDictionary(a => a.EntityType.ToType()),
+                    Database.Query<DynamicViewEntity>().AgGroupToDictionary(a => a.EntityType.ToType(), gr => gr.ToDictionaryEx(a=>a.ViewName)),
                     new InvalidateWith(typeof(DynamicViewEntity)));
 
                 sb.Include<DynamicViewSelectorEntity>()
@@ -81,10 +81,11 @@ namespace Signum.Engine.Dynamic
                        Entity = e,
                        e.Id,
                        e.EntityType,
+                       e.ViewName,
                    });
 
                 DynamicViewOverrides = sb.GlobalLazy(() =>
-                 Database.Query<DynamicViewOverrideEntity>().ToDictionary(a => a.EntityType.ToType()),
+                 Database.Query<DynamicViewOverrideEntity>().GroupToDictionary(a => a.EntityType.ToType()),
                  new InvalidateWith(typeof(DynamicViewOverrideEntity)));
 
                 sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicViewEntity>().Where(dv => dv.EntityType == type));

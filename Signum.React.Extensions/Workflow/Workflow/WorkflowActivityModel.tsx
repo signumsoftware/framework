@@ -15,6 +15,7 @@ import CSharpCodeMirror from '../../../../Extensions/Signum.React.Extensions/Cod
 import TypeHelpComponent from '../../Dynamic/Help/TypeHelpComponent'
 import HtmlEditor from '../../../../Extensions/Signum.React.Extensions/HtmlEditor/HtmlEditor'
 import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
+import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { API } from '../WorkflowClient'
 
 interface WorkflowActivityModelComponentProps {
@@ -22,8 +23,7 @@ interface WorkflowActivityModelComponentProps {
 }
 
 interface WorkflowActivityModelComponentState {
-    viewInfo: { [name: string]: "Static" | "Dynamic" };
-
+    viewNames?: string[];
 }
 
 export default class WorkflowActivityModelComponent extends React.Component<WorkflowActivityModelComponentProps, WorkflowActivityModelComponentState> {
@@ -31,7 +31,7 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
     constructor(props: WorkflowActivityModelComponentProps) {
         super(props);
 
-        this.state = { viewInfo: {} };
+        this.state = { };
     }
 
     componentWillMount() {
@@ -40,30 +40,12 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
 
             const typeName = this.props.ctx.value.mainEntityType.cleanName;
 
-            const registeredViews = WorkflowClient.getViewNames(typeName).toObject(k => k, v => "Static") as { [name: string]: "Static" | "Dynamic" };
-
-            DynamicViewClient.API.getDynamicViewNames(typeName)
-                .then(dynamicViews => {
-                    dynamicViews.forEach(dv => {
-                        if (registeredViews[dv])
-                            throw Error(WorkflowActivityMessage.DuplicateViewNameFound0.niceToString(`"${dv}"`));
-                        else
-                            registeredViews[dv] = "Dynamic";
-                    });
-
-                    this.setState({ viewInfo: registeredViews });
-                }).done();
+            Navigator.viewDispatcher.getViewNames(typeName)
+                .then(vn => this.setState({ viewNames: vn }))
+                .done();
         }
 
         this.handleTypeChange();
-    }
-
-    getViewNameColor(viewName: string) {
-
-        if (this.state.viewInfo[viewName] == "Dynamic")
-            return { color: "blue" };
-
-        return { color: "black" };
     }
 
     handleViewNameChange = (e: React.SyntheticEvent<HTMLSelectElement>) => {
@@ -124,9 +106,9 @@ export default class WorkflowActivityModelComponent extends React.Component<Work
                     {ctx.value.mainEntityType ?
                         <FormGroup ctx={ctx.subCtx(d => d.viewName)} labelText={ctx.niceName(d => d.viewName)}>
                             {
-                                <select value={ctx.value.viewName ? ctx.value.viewName : ""} className="form-control" onChange={this.handleViewNameChange} style={this.getViewNameColor(ctx.value.viewName || "")} >
-                                    {!ctx.value.viewName && <option value="">{" - "}</option>}
-                                    {Dic.getKeys(this.state.viewInfo).map((v, i) => <option key={i} value={v} style={this.getViewNameColor(v)}>{v}</option>)}
+                                <select value={ctx.value.viewName ? ctx.value.viewName : ""} className="form-control" onChange={this.handleViewNameChange}>
+                                    <option value="">{" - "}</option>
+                                    {(this.state.viewNames || []).map((v, i) => <option key={i} value={v}>{v}</option>)}
                                 </select>
                             }
                         </FormGroup>

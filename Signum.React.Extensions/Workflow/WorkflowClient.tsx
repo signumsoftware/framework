@@ -420,70 +420,11 @@ export function toEntityPackWorkflow(entityOrEntityPack: Lite<CaseActivityEntity
     return API.fetchActivityForViewing(lite);
 }
 
-
-interface TypeViewDictionary {
-    [activityViewName: string]: ActivityViewSettings<ICaseMainEntity>
-}
-
-interface ActivityViewSettingsOptions<T extends ICaseMainEntity> {
-    getViewPromise?: (entity: T) => ViewPromise<T>;
-}
-
-export class ActivityViewSettings<T extends ICaseMainEntity> {
-    type: Type<T>
-
-    activityViewName: string;
-
-    getViewPromise?: (entity: T) => ViewPromise<T>;
-
-    constructor(type: Type<T>, activityViewName: string, getViewModule?: (entity: T) => Promise<ViewModule<T>>, options?: ActivityViewSettingsOptions<T>) {
-        this.type = type;
-        this.activityViewName = activityViewName;
-        this.getViewPromise = getViewModule && (entity => new ViewPromise(getViewModule(entity)).withProps({ inWorkflow: true }));
-        Dic.assign(this, options)
-    }
-}
-
-export const registeredActivityViews: { [typeName: string]: TypeViewDictionary } = {};
-
-export function registerActivityView<T extends ICaseMainEntity>(settings: ActivityViewSettings<T>) {
-    const tvDic = registeredActivityViews[settings.type.typeName] || (registeredActivityViews[settings.type.typeName] = {});
-
-    tvDic[settings.activityViewName] = settings;
-}
-
 export const customOnClicks: { [operationKey: string]: { [typeName: string]: (ctx: EntityOperationContext<CaseActivityEntity>) => void } } = {};
 
 export function registerOnClick<T extends ICaseMainEntity>(type: Type<T>, operationKey: ExecuteSymbol<CaseActivityEntity>, action: (ctx: EntityOperationContext<CaseActivityEntity>) => void) {
     var op = customOnClicks[operationKey.key] || (customOnClicks[operationKey.key] = {});
     op[type.typeName] = action;
-}
-
-export function getSettings(typeName: string, activityViewName: string): ActivityViewSettings<ICaseMainEntity> | undefined {
-
-    const dict = registeredActivityViews[typeName];
-
-    if (!dict)
-        return undefined;
-
-    return dict[activityViewName];
-}
-
-export function getViewPromise<T extends ICaseMainEntity>(entity: T, activityViewName: string | undefined | null): ViewPromise<T> {
-
-    var settings = activityViewName && getSettings(entity.Type, activityViewName);
-    if (settings && settings.getViewPromise)
-        return settings.getViewPromise(entity);
-
-    const promise = activityViewName == undefined ?
-        DynamicViewClient.createDefaultDynamicView(entity.Type) :
-        DynamicViewClient.API.getDynamicView(entity.Type, activityViewName);
-
-    return ViewPromise.flat(promise.then(dv => new ViewPromise(import('../../../Extensions/Signum.React.Extensions/Dynamic/View/DynamicViewComponent')).withProps({ initialDynamicView: dv })));
-}
-
-export function getViewNames(typeName: string) {
-    return Dic.getKeys(registeredActivityViews[typeName] || {});
 }
 
 export namespace API {
