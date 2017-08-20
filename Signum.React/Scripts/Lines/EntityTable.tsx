@@ -64,6 +64,33 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
 
     renderInternal() {
 
+        if (this.state.type!.isLite)
+            throw new Error("Lite not supported");
+
+        let ctx = (this.state.ctx as TypeContext<MList<ModifiableEntity>>).subCtx({ formGroupStyle: "SrOnly" });
+
+        if (this.props.avoidFieldSet == true)
+            return (
+                <div className={classes("SF-table-field SF-control-container", ctx.errorClass)} {...this.baseHtmlAttributes() } {...this.state.formGroupHtmlAttributes}>
+                    {this.renderButtons()}
+                    {this.renderTable(ctx)}
+                </div>
+            );
+
+        return (
+            <fieldset className={classes("SF-table-field SF-control-container", ctx.errorClass)} {...this.baseHtmlAttributes() } {...this.state.formGroupHtmlAttributes}>
+                <legend>
+                    <div>
+                        <span>{this.state.labelText}</span>
+                        {this.renderButtons()}
+                    </div>
+                </legend>
+                {this.renderTable(ctx)}
+            </fieldset>
+        );
+    }
+
+    renderButtons() {
         const buttons = (
             <span className="pull-right">
                 {this.state.createAsLink == false && this.renderCreateButton(false)}
@@ -71,16 +98,15 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
             </span>
         );
 
-        if (this.state.type!.isLite)
-            throw new Error("Lite not supported");
+        return ( EntityBase.hasChildrens(buttons) ? buttons : undefined );
+    }
 
-        let ctx = (this.state.ctx as TypeContext<MList<ModifiableEntity>>).subCtx({ formGroupStyle: "SrOnly" });
+    renderTable(ctx: TypeContext<MListElement<ModifiableEntity>[]>) {
 
         const readOnly = this.state.ctx.readOnly;
-
         const elementPr = ctx.propertyRoute.add(a => a[0].element);
 
-        const table = (
+        return (
             <table className="table table-condensed form-vertical sf-table">
                 <thead>
                     <tr>
@@ -118,26 +144,6 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                     }
                 </tbody>
             </table>);
-
-        if (this.props.avoidFieldSet == true)
-            return (
-                <div className={classes("SF-table-field SF-control-container", ctx.errorClass)} {...this.baseHtmlAttributes() } {...this.state.formGroupHtmlAttributes}>
-                    {EntityBase.hasChildrens(buttons) ? buttons : undefined}
-                    {table}
-                </div>
-            );
-
-        return (
-            <fieldset className={classes("SF-table-field SF-control-container", ctx.errorClass)} {...this.baseHtmlAttributes() } {...this.state.formGroupHtmlAttributes}>
-                <legend>
-                    <div>
-                        <span>{this.state.labelText}</span>
-                        {EntityBase.hasChildrens(buttons) ? buttons : undefined}
-                    </div>
-                </legend>
-                {table}
-            </fieldset>
-        );
     }
 }
 
