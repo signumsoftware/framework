@@ -28,7 +28,7 @@ export interface EntityBaseProps extends LineBaseProps {
     findOptions?: FindOptions;
 
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
-    viewPromise?: (typeName: string) => Navigator.ViewPromise<ModifiableEntity>;
+    getViewPromise?: (entity: ModifiableEntity) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
 }
 
 export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBaseProps> extends LineBase<T, S>
@@ -60,8 +60,8 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
         const type = state.type!;
 
-        state.create = EntityBase.defaultIsCreable(type, !!this.props.getComponent || !!this.props.viewPromise);
-        state.view = EntityBase.defaultIsViewable(type, !!this.props.getComponent || !!this.props.viewPromise);
+        state.create = EntityBase.defaultIsCreable(type, !!this.props.getComponent || !!this.props.getViewPromise);
+        state.view = EntityBase.defaultIsViewable(type, !!this.props.getComponent || !!this.props.getViewPromise);
         state.find = EntityBase.defaultIsFindable(type);
         state.findOptions = Navigator.defaultFindOptions(type);
 
@@ -102,14 +102,24 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     }
 
 
-    defaultView(value: ModifiableEntity | Lite<Entity>, propertyRoute: PropertyRoute): Promise<ModifiableEntity | undefined> {
+    defaultView(value: ModifiableEntity | Lite<Entity>, propertyRoute: PropertyRoute): Promise<ModifiableEntity | undefined> {        
         return Navigator.view(value, {
             propertyRoute: propertyRoute,
-            viewPromise: this.props.getComponent ? Navigator.ViewPromise.resolve(this.props.getComponent) :
-                this.props.viewPromise ? this.props.viewPromise(isLite(value) ? value.EntityType : value.Type) : undefined
+            getViewPromise: this.getGetViewPromise(value) 
         });
     }
 
+    getGetViewPromise(value: ModifiableEntity | Lite<Entity>): undefined | ((entity: ModifiableEntity) => undefined | string | Navigator.ViewPromise<ModifiableEntity>) {
+        var getComponent = this.props.getComponent;
+        if (getComponent)
+            return e => Navigator.ViewPromise.resolve(getComponent!);
+
+        var getViewPromise = this.props.getViewPromise;
+        if (getViewPromise)
+            return e => getViewPromise!(e);
+
+        return undefined;
+    }
 
     handleViewClick = (event: React.MouseEvent<any>) => {
 
@@ -173,7 +183,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
     defaultCreate(): Promise<ModifiableEntity | Lite<Entity> | undefined> {
 
-        return this.chooseType(t => this.props.create /*Hack?*/ || Navigator.isCreable(t, !!this.props.getComponent || !!this.props.viewPromise, false))
+        return this.chooseType(t => this.props.create /*Hack?*/ || Navigator.isCreable(t, !!this.props.getComponent || !!this.props.getViewPromise, false))
             .then(typeName => typeName ? Constructor.construct(typeName) : undefined)
             .then(e => {
                 if (!e)

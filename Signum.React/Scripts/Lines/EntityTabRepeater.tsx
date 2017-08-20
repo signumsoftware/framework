@@ -79,7 +79,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                                         </span>}
                                     </div> as any
                                 }>
-                                <RenderEntity ctx={mlec} getComponent={this.props.getComponent} viewPromise={this.props.viewPromise} />
+                                <RenderEntity ctx={mlec} getComponent={this.props.getComponent} getViewPromise={this.props.getViewPromise} />
                             </Tab>
                         })
 

@@ -6,7 +6,7 @@ import * as Navigator from '../Navigator'
 import { ViewReplacer } from '../Frames/ReactVisitor'
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, TypeContext, EntityCheckboxList, EnumCheckboxList, EntityTable } from '../Lines'
 
-export default class DynamicComponent extends React.Component<{ ctx: TypeContext<ModifiableEntity> }> {
+export default class DynamicComponent extends React.Component<{ ctx: TypeContext<ModifiableEntity>, viewName?: string }> {
 
     render() {
 
@@ -17,10 +17,12 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
         const result = React.createElement("div", undefined, ...components);
 
         const es = Navigator.getSettings(this.props.ctx.value.Type);
-        
-        if (es && es.viewOverrides && es.viewOverrides.length) {
+
+        var vos = es && es.viewOverrides && es.viewOverrides.filter(a => a.viewName == this.props.viewName); //Should user viewDispatcher.getViewOverrides promise instead
+
+        if (vos && vos.length) {
             const replacer = new ViewReplacer(result, this.props.ctx);
-            es.viewOverrides.forEach(vo => vo(replacer));
+            vos.forEach(vo => vo.override(replacer));
             return replacer.result;
         } else {
             return result;
@@ -115,3 +117,6 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
     }
 
 }
+
+
+(DynamicComponent.prototype.render as any).withViewOverrides = true;

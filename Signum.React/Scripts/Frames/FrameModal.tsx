@@ -17,6 +17,7 @@ import { needsCanExecute } from '../Operations/EntityOperations'
 import { EntityOperationContext } from '../Operations'
 
 import "./Frames.css"
+import { ViewPromise } from "../Navigator";
 
 interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
     title?: string;
@@ -27,8 +28,7 @@ interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
     requiresSaveOperation?: boolean;
     avoidPromptLooseChange?: boolean;
     extraComponentProps?: {}
-    viewPromise?: Navigator.ViewPromise<ModifiableEntity>;
-    getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
+    getViewPromise?: (e: ModifiableEntity) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
     isNavigate?: boolean;
     readOnly?: boolean;
     modalSize?: Sizes;
@@ -48,7 +48,6 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
     static defaultProps: FrameModalProps = {
         isOperationVisible: undefined,
-        viewPromise: undefined,
         entityOrPack: null as any
     }
 
@@ -111,9 +110,9 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
 
     loadComponent() {
 
-        var viewPromise = this.props.viewPromise ||
-            this.props.getViewPromise && this.props.getViewPromise(this.state.pack!.entity) ||
-            Navigator.getViewPromise(this.state.pack!.entity);
+        const result = this.props.getViewPromise && this.props.getViewPromise(this.state.pack!.entity);
+
+        var viewPromise = result instanceof ViewPromise ? result : Navigator.getViewPromise(this.state.pack!.entity, result);
 
         if (this.props.extraComponentProps)
             viewPromise = viewPromise.withProps(this.props.extraComponentProps);
@@ -305,7 +304,6 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
             readOnly={options.readOnly}
             modalSize={options.modalSize}
             propertyRoute={options.propertyRoute}
-            viewPromise={options.viewPromise}
             getViewPromise={options.getViewPromise}
             isOperationVisible={options.isOperationVisible}
             requiresSaveOperation={options.requiresSaveOperation}
@@ -330,7 +328,6 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
             readOnly={options.readOnly}
             modalSize={options.modalSize}
             propertyRoute={undefined}
-            viewPromise={options.viewPromise}
             getViewPromise={options.getViewPromise}
             requiresSaveOperation={undefined}
             avoidPromptLooseChange={options.avoidPromptLooseChange}

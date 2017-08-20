@@ -9,6 +9,7 @@ import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeIn
 import { classes, ifError } from '../Globals';
 import { ButtonsContext, IOperationVisible } from '../TypeContext';
 import * as Navigator from '../Navigator';
+import * as OrderUtils from '../Frames/OrderUtils';
 import Notify from '../Frames/Notify';
 import MessageModal from '../Modals/MessageModal'
 import { ajaxPost, ValidationError } from '../Services';
@@ -91,7 +92,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
         }
     });
 
-    return result.orderBy(a => a.order).map(a => a.button);
+    return result.map(a => OrderUtils.setOrder(a.order, a.button));
 }
 
 function getGroup(eoc: EntityOperationContext<Entity>) {

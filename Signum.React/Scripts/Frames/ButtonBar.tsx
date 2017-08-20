@@ -2,6 +2,7 @@
 import { Dic, classes } from '../Globals'
 import * as Navigator from '../Navigator'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'
+import * as OrderUtils from '../Frames/OrderUtils'
 import { Entity, Lite, is, toLite, LiteMessage, getToString, EntityPack, ModelState, ModifiableEntity } from '../Signum.Entities'
 import { TypeContext, StyleOptions, EntityFrame, IRenderButtons, ButtonsContext } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos } from '../Reflection'
@@ -23,7 +24,8 @@ export default class ButtonBar extends React.Component<ButtonBarProps>{
         const buttons = ButtonBar.onButtonBarRender.flatMap(func => func(this.props) || [])
             .concat(rb && rb.renderButtons ? rb.renderButtons(ctx) : [])
             .filter(a => a != null)
-            .map((a, i) => React.cloneElement(a!, { key: i }));
+            .orderBy(a => OrderUtils.getOrder(a!))
+            .map((a, i) => OrderUtils.cloneElementWithoutOrder(a!, { key: i }));
 
         return (
             <div className={classes("btn-toolbar", "sf-button-bar", this.props.align == "right" ? "right" : undefined) } >

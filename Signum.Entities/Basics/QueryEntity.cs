@@ -18,6 +18,8 @@ namespace Signum.Entities.Basics
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Key { get; set; }
 
+        public static Func<QueryEntity, Implementations> GetEntityImplementations;
+
         static Expression<Func<QueryEntity, string>> ToStringExpression = e => e.Key;
         [ExpressionField]
         public override string ToString()
