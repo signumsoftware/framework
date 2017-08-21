@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { DropdownButton, MenuItem, } from 'react-bootstrap'
+import { ButtonDropdown, MenuItem, } from 'reactstrap'
 import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { Lite, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'

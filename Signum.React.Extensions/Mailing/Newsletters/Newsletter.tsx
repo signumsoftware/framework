@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Tab, Tabs}  from 'react-bootstrap'
+import { TabPane, TabContent } from 'reactstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityDetail} from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl, ValueSearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
@@ -19,8 +19,8 @@ export default class Newsletter extends React.Component<{ ctx: TypeContext<Newsl
 
         return (
             <div>
-                <Tabs id="newsletterTabs">
-                    <Tab eventKey={0}>
+                <TabContent id="newsletterTabs">
+                    <TabPane eventKey={0}>
                         <ValueLine ctx={nc.subCtx(n => n.name)}  />
                         <ValueLine ctx={nc.subCtx(n => n.state)} readOnly={true} />
 
@@ -31,16 +31,13 @@ export default class Newsletter extends React.Component<{ ctx: TypeContext<Newsl
 
                         { nc.value.state == "Sent"?  this.renderIFrame(): this.renderEditor() }
                         
-                    </Tab>
-                    <Tab>
+                    </TabPane>
+                    <TabPane>
                               
                         <ValueLine ctx={nc.subCtx(n => n.subject)}  />
                         <ValueLine ctx={nc.subCtx(n => n.text)} valueLineType="TextArea" valueHtmlAttributes={{ style: {width: "100%", height: "180px"} }} />
-                    </Tab>
-                    <Tab>
-                    
-                        </Tab>
-                </Tabs>
+                    </TabPane>
+                </TabContent>
             </div>
         );
     }

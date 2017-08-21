@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
 import { RouteComponentProps } from 'react-router'
-import { Tabs, Tab } from 'react-bootstrap'
+import { TabContent, TabPane } from 'reactstrap'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
@@ -112,8 +112,8 @@ export default class WorkflowScriptRunnerPanelPage extends React.Component<Workf
                     showFilters: false,
                     pagination: { elementsPerPage: 10, mode: "Firsts" }
                 }} />
-                <Tabs unmountOnExit={true} id="tabs" defaultActiveKey="logs">
-                    <Tab title="Last operation logs" eventKey="logs">
+                <TabContent unmountOnExit={true} id="tabs" defaultActiveKey="logs">
+                    <TabPane title="Last operation logs" eventKey="logs">
                         <SearchControl findOptions={{
                             queryName: OperationLogEntity,
                             filterOptions: [
@@ -129,8 +129,8 @@ export default class WorkflowScriptRunnerPanelPage extends React.Component<Workf
                             showFilters: false,
                             pagination: { elementsPerPage: 10, mode: "Firsts" }
                         }} />
-                    </Tab>
-                    <Tab title="Last executed activities" eventKey="lastActivities">
+                    </TabPane>
+                    <TabPane title="Last executed activities" eventKey="lastActivities">
                         <SearchControl findOptions={{
                             queryName: CaseActivityEntity,
                             filterOptions: [
@@ -156,8 +156,8 @@ export default class WorkflowScriptRunnerPanelPage extends React.Component<Workf
                             showFilters: false,
                             pagination: { elementsPerPage: 10, mode: "Firsts" }
                         }} />
-                    </Tab>
-                </Tabs>
+                    </TabPane>
+                </TabContent>
            </div>
         );
     }

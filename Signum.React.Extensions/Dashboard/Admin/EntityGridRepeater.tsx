@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Tab, Tabs } from 'react-bootstrap'
+import { TabPane, TabContent } from 'reactstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'

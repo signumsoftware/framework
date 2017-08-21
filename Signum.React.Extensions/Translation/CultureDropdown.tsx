@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { NavDropdown, MenuItem }  from 'react-bootstrap'
+import { NavDropdown, MenuItem }  from 'reactstrap'
 import { Route } from 'react-router'
 import { Dic } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';

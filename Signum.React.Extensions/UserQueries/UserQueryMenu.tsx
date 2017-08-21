@@ -1,7 +1,7 @@
 ﻿
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
-import { DropdownButton, MenuItem, } from 'react-bootstrap'
+import { ButtonDropdown, MenuItem, } from 'reactstrap'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
@@ -90,7 +90,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
         const label = <span><i className="glyphicon glyphicon-list-alt"></i>&nbsp;{this.props.searchControl.props.largeToolbarButtons == true ? " " + UserQueryMessage.UserQueries_UserQueries.niceToString() : undefined}</span>;
         const userQueries = this.state.userQueries;
         return (
-            <DropdownButton title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown"
+            <ButtonDropdown title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown"
                 onToggle={this.handleSelectedToggle}>
                 {
                     userQueries && userQueries.map((uq, i) =>
@@ -103,7 +103,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
                 { userQueries && userQueries.length > 0 && <MenuItem divider/> }
                 { this.state.currentUserQuery && <MenuItem onSelect={this.handleEdit} >{UserQueryMessage.UserQueries_Edit.niceToString() }</MenuItem> }
                 <MenuItem onSelect={this.handleCreate}>{UserQueryMessage.UserQueries_CreateNew.niceToString() }</MenuItem>
-            </DropdownButton>
+            </ButtonDropdown>
         );
     }
  

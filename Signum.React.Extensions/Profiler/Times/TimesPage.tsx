@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Tabs, Tab } from 'react-bootstrap'
+import { TabPane, TabContent } from 'reactstrap'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
@@ -57,15 +57,15 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
                 <button onClick={() => this.loadState()} className="btn btn-default">Reload</button>
                 <button onClick={this.handleClear} className="btn btn-warning">Clear</button>
                     </div>
-                <br/>
-                <Tabs id="timesTabs">
-                    <Tab eventKey="bars" title="Bars">
+                <br />
+                <TabContent id="timesTabs">
+                    <TabPane eventKey="bars" title="Bars">
                         {this.renderBars()}
-                    </Tab>
-                    <Tab eventKey="table" title="Table">
+                    </TabPane>
+                    <TabPane eventKey="table" title="Table">
                         {this.renderTable()}
-                    </Tab>
-                </Tabs>
+                    </TabPane>
+                </TabContent>
             </div>
         );
     }

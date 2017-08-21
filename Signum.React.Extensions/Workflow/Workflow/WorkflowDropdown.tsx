@@ -13,7 +13,7 @@ import ButtonBar from '../../../../Framework/Signum.React/Scripts/Frames/ButtonB
 import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperation, CaseActivityQuery, WorkflowMainEntityStrategy } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 
-import { Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap'
+import { Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'reactstrap'
 import { LinkContainer, IndexLinkContainer } from 'react-router-bootstrap'
 
 export default class WorkflowDropdown extends React.Component<{}, { starts: Array<WorkflowEntity> }>

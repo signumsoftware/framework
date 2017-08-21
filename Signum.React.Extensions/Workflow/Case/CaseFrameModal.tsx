@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { Modal, ModalProps, ModalClass, ButtonToolbar, Button } from 'react-bootstrap'
+import { Modal, ModalHeader, ModalBody, ModalFooter, ButtonToolbar, Button } from 'reactstrap'
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals'
 import { TypeContext, StyleOptions, EntityFrame  } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { TypeInfo, getTypeInfo, parseId, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -159,14 +159,14 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         var pack = this.state.pack;
 
         return (
-            <Modal bsSize="lg" onHide= { this.handleCloseClicked } show= { this.state.show } onExited= { this.handleOnExited } className= "sf-popup-control" >
-                <Modal.Header closeButton={this.props.isNavigate}>
+            <Modal bsSize="lg" onHide={this.handleCloseClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-popup-control" >
+                <ModalHeader closeButton={this.props.isNavigate}>
                     {!this.props.isNavigate && <ButtonToolbar className="pull-right flip">
                         <Button className="sf-entity-button sf-close-button sf-ok-button" bsStyle="primary" disabled={!pack} onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString()}</Button>
                         <Button className="sf-entity-button sf-close-button sf-cancel-button" bsStyle="default" disabled={!pack} onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString()}</Button>
                     </ButtonToolbar>}
                     {this.renderTitle() }
-                </Modal.Header>
+                </ModalHeader>
                 {pack && this.renderBody() }
             </Modal>
         );
@@ -203,14 +203,14 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         var activityPack = { entity: pack.activity, canExecute: pack.canExecuteActivity };
         
         return (
-            <Modal.Body>
+            <ModalBody>
                 <CaseFromSenderInfo current={pack.activity} />
                 {!pack.activity.case.isNew && <div className="inline-tags"> <InlineCaseTags case={toLite(pack.activity.case)} /></div>}
                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-activity-entity={entityInfo(pack.activity) }>
                     { this.renderMainEntity() }
                 </div>
                 {this.entityComponent && <CaseButtonBar frame={activityFrame} pack={activityPack} />}
-            </Modal.Body>
+            </ModalBody>
         );
     }
 

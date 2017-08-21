@@ -1,7 +1,7 @@
 ﻿import * as moment from 'moment'
 import * as numbro from 'numbro'
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar, Tabs, Tab } from 'react-bootstrap'
+import { Modal, ModalHeader, ModalBody, ModalFooter, ButtonToolbar, TabContent, TabPane } from 'reactstrap'
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder';
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator';
@@ -45,36 +45,36 @@ export default class CaseActivityStatsModal extends React.Component<CaseActivity
         var caseActivityStats = this.props.caseActivityStats;
         return <Modal bsSize="lg" onHide={this.handleCloseClicked} show={this.state.show} onExited={this.handleOnExited}>
 
-            <Modal.Header closeButton={true}>
+            <ModalHeader closeButton={true}>
                 <h4 className="modal-title">
                     {caseActivityStats.first().WorkflowActivity.toStr} ({caseActivityStats.length} {caseActivityStats.length == 1 ? CaseActivityEntity.niceName() : CaseActivityEntity.nicePluralName()})
                 </h4>
-            </Modal.Header>
+            </ModalHeader>
 
-            <Modal.Body>
+            <ModalBody>
                 {
                     <div>
                         {caseActivityStats.length == 1 ? <CaseActivityStatsComponent stats={caseActivityStats.first()} caseEntity={this.props.case} /> :
-                            <Tabs id="statsTabs">
+                            <TabContent id="statsTabs">
                                 {
                                     caseActivityStats.map(a =>
-                                        <Tab key={a.CaseActivity.id} eventKey={a.CaseActivity.id} title={
+                                        <TabPane key={a.CaseActivity.id} eventKey={a.CaseActivity.id} title={
                                             a.DoneDate == null ? CaseActivityMessage.Pending.niceToString() :
                                                 <span>{a.DoneBy.toStr} {DoneType.niceName(a.DoneType)} <mark>({moment(a.DoneDate).fromNow()})</mark></span> as any}>
                                             <CaseActivityStatsComponent stats={a} caseEntity={this.props.case} />
-                                        </Tab>)
+                                        </TabPane>)
                                 }
-                            </Tabs>
+                            </TabContent>
                         }
                     </div>
                 }
 
-            </Modal.Body>
-            <Modal.Footer>
+            </ModalBody>
+            <ModalFooter>
                 <button className="btn btn-primary sf-entity-button sf-ok-button" onClick={this.handleCloseClicked}>
                     {JavascriptMessage.ok.niceToString()}
                 </button>
-            </Modal.Footer>
+            </ModalFooter>
         </Modal>;
     }
 

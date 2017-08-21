@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Panel, PanelGroup } from "react-bootstrap";
+import { Panel, PanelGroup } from "reactstrap";
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { BsStyle } from "../../../../Framework/Signum.React/Scripts/Operations";
 

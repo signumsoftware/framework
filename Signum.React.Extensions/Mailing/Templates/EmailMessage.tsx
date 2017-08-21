@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Tab, Tabs } from 'react-bootstrap'
+import { TabPane, TabContent } from 'reactstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
@@ -29,8 +29,8 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
         const sc1 = e.subCtx({ labelColumns: { sm: 1 } });
 
         return (
-            <Tabs id="newsletterTabs">
-                <Tab title={EmailMessageEntity.niceName()}>
+            <TabContent id="newsletterTabs">
+                <TabPane title={EmailMessageEntity.niceName()}>
                     <fieldset>
                         <legend>Properties</legend>
                         <div className="row">
@@ -64,9 +64,9 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
                             </div>
                     }
                     <EmailMessageComponent ctx={e} invalidate={() => this.forceUpdate()} />
-                </Tab>
+                </TabPane>
                 {this.renderEmailReceptionMixin()}
-            </Tabs>
+            </TabContent>
         );
     }
 
@@ -79,7 +79,7 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
 
         const ri = this.props.ctx.subCtx(EmailReceptionMixin).subCtx(a => a.receptionInfo!);
 
-        return <Tab title={EmailReceptionMixin.niceName()}>
+        return <TabPane title={EmailReceptionMixin.niceName()}>
             <fieldset>
                 <legend>Properties</legend>
 
@@ -92,7 +92,7 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
             </fieldset>
 
             <pre>{ri.value.rawContent}</pre>
-        </Tab>;
+        </TabPane>;
     };
 
 

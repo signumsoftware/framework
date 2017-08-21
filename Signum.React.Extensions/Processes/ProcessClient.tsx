@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
-import { Button, OverlayTrigger, Tooltip, MenuItem } from "react-bootstrap"
+import { Button, OverlayTrigger, Tooltip, MenuItem } from "reactstrap"
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -108,7 +108,7 @@ function monkeyPatchCreateContextualMenuItem(){
         if (!coc.canExecute)
             return menuItem;
 
-        const tooltip = <Tooltip id={"tooltip_" + coc.operationInfo.key.replace(".", "_") }>{coc.canExecute}</Tooltip>;
+        const tooltip = <Tooltip target={"tooltip_" + coc.operationInfo.key.replace(".", "_")}>{coc.canExecute}</Tooltip>;
 
         return <OverlayTrigger placement="right" overlay={tooltip} >{menuItem}</OverlayTrigger>;
     };

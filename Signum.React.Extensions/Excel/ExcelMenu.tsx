@@ -1,7 +1,7 @@
 ﻿
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
-import { DropdownButton, MenuItem } from 'react-bootstrap'
+import { ButtonDropdown, MenuItem } from 'reactstrap'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
@@ -68,7 +68,7 @@ export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelRe
 
         const excelReports = this.state.excelReport;
         return (
-            <DropdownButton title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown"
+            <ButtonDropdown title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown"
                 onToggle={this.handleSelectedToggle}>
                 { this.props.plainExcel && <MenuItem onSelect={this.handlePlainExcel} >{label }</MenuItem> }
                 { this.props.plainExcel && excelReports && excelReports.length > 0 && <MenuItem divider/> }
@@ -82,7 +82,7 @@ export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelRe
                 {  (this.props.plainExcel || excelReports && excelReports.length > 0) && <MenuItem divider/> }
                 <MenuItem onSelect={this.handleAdmnister}>{ExcelMessage.Administer.niceToString() }</MenuItem>
                 <MenuItem onSelect={this.handleCreate}>{ExcelMessage.CreateNew.niceToString() }</MenuItem>
-            </DropdownButton>
+            </ButtonDropdown>
         );
     }
  

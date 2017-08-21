@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Tabs, Tab } from 'react-bootstrap'
+import { TabContent, TabPane } from 'reactstrap'
 import { LinkContainer } from 'react-router-bootstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
@@ -73,7 +73,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
         const result = this.state.result;
         const target = this.props.ctx.value.target;
         return (
-            <Tabs id="diffTabs" defaultActiveKey="diff">
+            <TabContent id="diffTabs" activeTab="diff">
                 {result && result.prev && this.renderPrev(result.prev)}
                 {result && result.diffPrev && this.renderPrevDiff(result.diffPrev)}
                 {this.renderInitialState() }
@@ -81,13 +81,13 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
                 {this.renderFinalState()}
                 {result && result.diffNext && this.renderNextDiff(result.diffNext)}
                 {result && (result.next ? this.renderNext(result.next) : target && this.renderCurrentEntity(target))}            
-            </Tabs>
+            </TabContent>
         );
     }
 
     renderPrev(prev: Lite<OperationLogEntity>) {
         return (
-            <Tab eventKey="prev" className="linkTab" title={
+            <TabPane tabId="prev" className="linkTab" title={
                 <LinkContainer to={Navigator.navigateRoute(prev) }>
                     <span title={DiffLogMessage.NavigatesToThePreviousOperationLog.niceToString() }>
                         {DiffLogMessage.PreviousLog.niceToString() }
@@ -96,7 +96,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
                     </span>
                 </LinkContainer> as any
             }>
-            </Tab>
+            </TabPane>
         );
     }
 
@@ -112,24 +112,24 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
         );
 
         return (
-            <Tab eventKey="prevDiff" title={title as any}>
+            <TabPane tabId="prevDiff" title={title as any}>
                 {renderDiffDocument(diffPrev) }
-            </Tab>
+            </TabPane>
         );
     }
 
     renderInitialState() {
         return (
-            <Tab eventKey="initialState" title={this.mctx().niceName(d => d.initialState) }>
+            <TabPane tabId="initialState" title={this.mctx().niceName(d => d.initialState)}>
                 <pre><code>{this.mctx().value.initialState}</code></pre>
-            </Tab>
+            </TabPane>
         );
     }
 
     renderDiff() {
 
         if (!this.state.result) {
-            return <Tab eventKey="diff" title={JavascriptMessage.loading.niceToString() } />
+            return <TabPane tabId="diff" title={JavascriptMessage.loading.niceToString() } />
         }
 
         const eq = !this.state.result.diff || isEqual(this.state.result.diff);
@@ -142,17 +142,17 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
         );
 
         return (
-            <Tab eventKey="diff" title={title as any}>
+            <TabPane tabId="diff" title={title as any}>
                 {this.state.result.diff && renderDiffDocument(this.state.result.diff) }
-            </Tab>
+            </TabPane>
         );
     }
 
     renderFinalState() {
         return (
-            <Tab eventKey="finalState" title={this.mctx().niceName(d => d.finalState) }>
+            <TabPane tabId="finalState" title={this.mctx().niceName(d => d.finalState) }>
                 <pre><code>{this.mctx().value.finalState}</code></pre>
-            </Tab>
+            </TabPane>
         );
     }
 
@@ -168,15 +168,15 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
         );
 
         return (
-            <Tab eventKey="nextDiff" title={title as any}>
+            <TabPane tabId="nextDiff" title={title as any}>
                 {renderDiffDocument(diffNext)}
-            </Tab>
+            </TabPane>
         );
     }
 
     renderNext(next: Lite<OperationLogEntity>) {
         return (
-            <Tab eventKey="next" className="linkTab" title={
+            <TabPane tabId="next" className="linkTab" title={
                 <LinkContainer to={Navigator.navigateRoute(next) }>
                     <span title={DiffLogMessage.NavigatesToTheNextOperationLog.niceToString() }>
                         {DiffLogMessage.NextLog.niceToString() }
@@ -184,13 +184,13 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
                         <span className="glyphicon glyphicon-new-window"></span>
                     </span>
                 </LinkContainer> as any}>
-            </Tab>
+            </TabPane>
         ); 
     }
 
     renderCurrentEntity(target: Lite<Entity>) {
         return (
-            <Tab eventKey="next" className="linkTab" title={
+            <TabPane tabId="next" className="linkTab" title={
                 <LinkContainer to={Navigator.navigateRoute(target) }>
                     <span title={DiffLogMessage.NavigatesToTheCurrentEntity.niceToString() }>
                         {DiffLogMessage.CurrentEntity.niceToString() }
@@ -198,7 +198,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
                         <span className="glyphicon glyphicon-new-window"></span>
                     </span>
                 </LinkContainer> as any}>
-            </Tab>
+            </TabPane>
         );
     }
 }

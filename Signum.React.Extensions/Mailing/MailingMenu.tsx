@@ -1,7 +1,7 @@
 ﻿
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
-import { DropdownButton, MenuItem } from 'react-bootstrap'
+import { ButtonDropdown, MenuItem } from 'reactstrap'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
@@ -59,7 +59,7 @@ export default class MailingMenu extends React.Component<MailingMenuProps, { wor
         const label = <span><i className="fa fa-file-word-o"></i> &nbsp; {EmailMessageEntity.nicePluralName()}</span>;
 
         return (
-            <DropdownButton title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown">
+            <ButtonDropdown title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown">
                 {
                     this.state.wordReports.map((wt, i) =>
                         <MenuItem key={i}
@@ -67,7 +67,7 @@ export default class MailingMenu extends React.Component<MailingMenuProps, { wor
                             { wt.toStr }
                         </MenuItem>)
                 }
-            </DropdownButton>
+            </ButtonDropdown>
         );
     }
  

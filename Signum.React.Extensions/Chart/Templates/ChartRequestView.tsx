@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { DropdownButton, MenuItem, Tabs, Tab} from 'react-bootstrap'
+import { ButtonDropdown, MenuItem, TabContent, TabPane } from 'reactstrap'
 import { Dic, classes, ifError } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { ValidationError, AbortableRequest } from '../../../../Framework/Signum.React/Scripts/Services'
@@ -163,15 +163,15 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                     <div className="sf-search-results-container" >
                         {!s.chartResult || !s.lastChartRequest ? JavascriptMessage.searchForResults.niceToString() :
 
-                            <Tabs id="chartResultTabs" animation={false} unmountOnExit={true}>
-                                <Tab eventKey="chart" title={ChartMessage.Chart.niceToString()}>
+                            <TabContent id="chartResultTabs" animation={false} unmountOnExit={true}>
+                                <TabPane eventKey="chart" title={ChartMessage.Chart.niceToString()}>
                                     <ChartRenderer chartRequest={cr} lastChartRequest={s.lastChartRequest} data={s.chartResult.chartTable} />
-                                </Tab>
+                                </TabPane>
 
-                                <Tab eventKey="data" title={ChartMessage.Data.niceToString() }>
+                                <TabPane eventKey="data" title={ChartMessage.Data.niceToString() }>
                                     <ChartTable chartRequest={cr} lastChartRequest={s.lastChartRequest} resultTable={s.chartResult.resultTable} onRedraw={this.handleOnDrawClick} />
-                                </Tab>
-                            </Tabs>
+                                </TabPane>
+                            </TabContent>
                         }
                     </div>
                 </div>
