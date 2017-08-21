@@ -19,7 +19,7 @@ export interface CountOptionsParsed {
 export interface ModalFindOptions {
     title?: string;
     useDefaultBehaviour?: boolean;
-    searchControlProps: Partial<SearchControlProps>;
+    searchControlProps?: Partial<SearchControlProps>;
 }
 
 export interface FindOptions {
