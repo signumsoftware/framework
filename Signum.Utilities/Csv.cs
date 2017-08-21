@@ -19,31 +19,31 @@ namespace Signum.Utilities
         public static CultureInfo DefaultCulture = null;
 
         public static string ToCsvFile<T>(this IEnumerable<T> collection, string fileName, Encoding encoding = null, CultureInfo culture = null, bool writeHeaders = true, bool autoFlush = false, bool append = false,
-            Func<CsvColumnInfo<T>, CultureInfo, Func<object, string>> toStringFactory = null)
+            Func<CsvColumnInfo<T>, CultureInfo, Func<object, string>> toStringFactory = null, string separator = null)
         {
             using (FileStream fs = append ? new FileStream(fileName, FileMode.Append, FileAccess.Write) : File.Create(fileName))
-                ToCsv<T>(collection, fs, encoding, culture, writeHeaders, autoFlush, toStringFactory);
+                ToCsv<T>(collection, fs, encoding, culture, writeHeaders, autoFlush, toStringFactory, separator);
 
             return fileName;
         }
 
         public static byte[] ToCsvBytes<T>(this IEnumerable<T> collection, Encoding encoding = null, CultureInfo culture = null, bool writeHeaders = true, bool autoFlush = false,
-            Func<CsvColumnInfo<T>, CultureInfo, Func<object, string>> toStringFactory = null)
+            Func<CsvColumnInfo<T>, CultureInfo, Func<object, string>> toStringFactory = null, string separator = null)
         {
             using (MemoryStream ms = new MemoryStream())
             {
-                collection.ToCsv(ms, encoding, culture, writeHeaders, autoFlush, toStringFactory);
+                collection.ToCsv(ms, encoding, culture, writeHeaders, autoFlush, toStringFactory, separator);
                 return ms.ToArray();
             }
         }
 
         public static void ToCsv<T>(this IEnumerable<T> collection, Stream stream, Encoding encoding = null, CultureInfo culture = null, bool writeHeaders = true, bool autoFlush = false,
-            Func<CsvColumnInfo<T>, CultureInfo, Func<object, string>> toStringFactory = null)
+            Func<CsvColumnInfo<T>, CultureInfo, Func<object, string>> toStringFactory = null, string separator = null)
         {
             encoding = encoding ?? DefaultEncoding;
             culture = culture ?? DefaultCulture ?? CultureInfo.CurrentCulture;
 
-            string separator = culture.TextInfo.ListSeparator;
+            separator = separator ?? culture.TextInfo.ListSeparator;
 
             if (typeof(IList).IsAssignableFrom(typeof(T)))
             {
