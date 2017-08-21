@@ -2,6 +2,7 @@
 import { Dic } from './Globals';
 import { Lite, Entity } from './Signum.Entities';
 import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType } from './Signum.Entities.DynamicQuery';
+import { SearchControlProps } from "./Search";
 
 export { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType };
 
@@ -18,6 +19,7 @@ export interface CountOptionsParsed {
 export interface ModalFindOptions {
     title?: string;
     useDefaultBehaviour?: boolean;
+    searchControlProps?: Partial<SearchControlProps>;
 }
 
 export interface FindOptions {
