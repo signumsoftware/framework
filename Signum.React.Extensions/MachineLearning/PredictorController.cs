@@ -28,17 +28,35 @@ using Signum.Engine.DynamicQuery;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Chart;
 using Signum.Engine.Chart;
+using Signum.Entities.MachineLearning;
+using Signum.Engine.MachineLearning;
 
 namespace Signum.React.MachineLearning
 {
     public class PredictorController : ApiController
     {
+        [Route("api/predictor/csv/"), HttpPost]
+        public HttpResponseMessage DownloadCsv(PredictorEntity predictor)
+        {
+            byte[] file = predictor.GetCsv();
 
-        //[Route("api/excel/reportsFor/{queryKey}"), HttpGet]
-        //public IEnumerable<Lite<ExcelReportEntity>> GetExcelReports(string queryKey)
-        //{
-        //    return ExcelLogic.GetExcelReports(QueryLogic.ToQueryName(queryKey));
-        //}
+            return FilesController.GetHttpReponseMessage(new MemoryStream(file), $"{predictor.Name}.csv");
+        }
 
+        [Route("api/predictor/tsv/"), HttpPost]
+        public HttpResponseMessage DownloadTsv(PredictorEntity predictor)
+        {
+            byte[] file = predictor.GetCsv(separator: "\t");
+
+            return FilesController.GetHttpReponseMessage(new MemoryStream(file), $"{predictor.Name}.tsv");
+        }
+
+        [Route("api/predictor/tsv/metadata"), HttpPost]
+        public HttpResponseMessage DownloadTsvMetadata(PredictorEntity predictor)
+        {
+            byte[] file = new byte[0]; //ExcelLogic.ExecuteExcelReport(request.excelReport, request.queryRequest.ToQueryRequest());
+
+            return FilesController.GetHttpReponseMessage(new MemoryStream(file), $"{predictor.Name}.metadata.tsv");
+        }
     }
 }

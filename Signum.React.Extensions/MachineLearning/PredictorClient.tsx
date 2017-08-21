@@ -27,9 +27,23 @@ export function start(options: { routes: JSX.Element[] }) {
 }
 
 export namespace API {
-    
-    //export function forQuery(queryKey: string): Promise<Lite<ExcelReportEntity>[]> {
-    //    return ajaxGet<Lite<ExcelReportEntity>[]>({ url: "~/api/excel/reportsFor/" + queryKey });
-    //}
-    
+
+    export function downloadCsv(predictor: PredictorEntity): void {
+        ajaxPostRaw({ url: "~/api/predictor/csv/" }, predictor)
+            .then(response => saveFile(response))
+            .done();
+    }
+
+    export function downloadTsv(predictor: PredictorEntity): void {
+        ajaxPostRaw({ url: "~/api/predictor/tsv/" }, predictor)
+            .then(response => saveFile(response))
+            .done();
+    }
+
+    export function downloadTsvMetadata(predictor: PredictorEntity): void {
+        ajaxPostRaw({ url: "~/api/predictor/tsv/metadata" }, predictor)
+            .then(response => saveFile(response))
+            .done();
+    }
+
 }
