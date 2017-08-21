@@ -51,8 +51,8 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
                         <span>{this.state.labelText}</span>
                         {this.renderButtons()}
                     </div>
-                    {this.renderCheckboxList()}
                 </legend>
+                {this.renderCheckboxList()}
             </fieldset>
         );
     }
