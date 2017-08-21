@@ -47,8 +47,8 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
                         <span>{this.state.labelText}</span>
                         {this.renderButtons()}
                     </div>
-                    {this.renderElements()}
                 </legend>
+                {this.renderElements()}
             </fieldset>
         );
     }

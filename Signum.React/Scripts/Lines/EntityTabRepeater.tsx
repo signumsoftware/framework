@@ -46,8 +46,8 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                         <span>{this.state.labelText}</span>
                         {this.renderButtons()}
                     </div>
-                    {this.renderTabs()}
                 </legend>
+                {this.renderTabs()}
             </fieldset>
         );
     }
