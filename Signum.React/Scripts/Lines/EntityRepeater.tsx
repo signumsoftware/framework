@@ -15,6 +15,7 @@ import { RenderEntity } from './RenderEntity'
 
 export interface EntityRepeaterProps extends EntityListBaseProps {
     createAsLink?: boolean | ((er: EntityRepeater) => React.ReactElement<any>);
+    avoidFieldSet?: boolean;
 }
 
 export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRepeaterProps> {
@@ -27,16 +28,16 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
 
     renderInternal() {
 
-        const buttons = (
-            <span className="pull-right">
-                {this.state.createAsLink == false && this.renderCreateButton(false) }
-                {this.renderFindButton(false) }
-            </span>
-        );
-
         let ctx = this.state.ctx;
 
-        const readOnly = this.state.ctx.readOnly;
+        if (this.props.avoidFieldSet == true)
+            return (
+                <div className={classes("SF-repeater-field SF-control-container", ctx.errorClass)}
+                    {...{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes }}>
+                    {this.renderButtons()}
+                    {this.renderElements()}
+                </div>
+            );
 
         return (
             <fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass)}
@@ -44,30 +45,49 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>
-                        {EntityBase.hasChildrens(buttons) ? buttons : undefined}
+                        {this.renderButtons()}
                     </div>
+                    {this.renderElements()}
                 </legend>
-                <div className="sf-repater-elements">
-                    {
-                        mlistItemContext(ctx).map((mlec, i) =>
-                            (<EntityRepeaterElement key={i}
-                                onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
-                                ctx={mlec}
-                                draggable={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "v") : undefined}
-                                getComponent={this.props.getComponent}
-                                getViewPromise={this.props.getViewPromise} />))
-                    }
-                    {
-                        this.state.createAsLink && this.state.create && !readOnly &&
-                            (typeof this.state.createAsLink == "function" ? this.state.createAsLink(this) :
-                            <a title={EntityControlMessage.Create.niceToString()}
-                                className="sf-line-button sf-create"
-                                onClick={this.handleCreateClick}>
-                                <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
-                            </a> )
-                    }
-                </div>
             </fieldset>
+        );
+    }
+
+    renderButtons() {
+        const buttons = (
+            <span className="pull-right">
+                {this.state.createAsLink == false && this.renderCreateButton(false)}
+                {this.renderFindButton(false)}
+            </span>
+        );
+
+        return EntityBase.hasChildrens(buttons) ? buttons : undefined;
+    }
+
+    renderElements() {
+        const ctx = this.state.ctx;
+        const readOnly = ctx.readOnly;
+        return (
+            <div className="sf-repater-elements">
+                {
+                    mlistItemContext(ctx).map((mlec, i) =>
+                        (<EntityRepeaterElement key={i}
+                            onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
+                            ctx={mlec}
+                            draggable={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "v") : undefined}
+                            getComponent={this.props.getComponent}
+                            getViewPromise={this.props.getViewPromise} />))
+                }
+                {
+                    this.state.createAsLink && this.state.create && !readOnly &&
+                    (typeof this.state.createAsLink == "function" ? this.state.createAsLink(this) :
+                        <a title={EntityControlMessage.Create.niceToString()}
+                            className="sf-line-button sf-create"
+                            onClick={this.handleCreateClick}>
+                            <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
+                        </a>)
+                }
+            </div>
         );
     }
 }
