@@ -49,10 +49,11 @@ namespace Signum.Engine.MachineLearning
             return new byte[0];
         }
 
-        public static byte[] GetCsv(this PredictorEntity predictor, string separator = null)
+        public static byte[] GetCsv(this PredictorEntity predictor, string separator = ",")
         {
             ResultTable result = DynamicQueryManager.Current.ExecuteQuery(predictor.ToQueryRequest());
 
+            /** convert the data table into a list structure, so that we can pass it to the CSV serializer */
             var matrix = result.Rows.Select(r => result.Columns.Select(c => r[c]).ToList()).ToList();
 
             return Csv.ToCsvBytes(matrix, separator: separator);

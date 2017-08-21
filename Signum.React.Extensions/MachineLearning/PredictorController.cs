@@ -17,25 +17,25 @@ namespace Signum.React.MachineLearning
         [Route("api/predictor/csv/"), HttpPost]
         public HttpResponseMessage DownloadCsv(PredictorEntity predictor)
         {
-            byte[] file = predictor.GetCsv();
+            byte[] content = predictor.GetCsv();
 
-            return FilesController.GetHttpReponseMessage(new MemoryStream(file), $"{predictor.Name}.csv");
+            return FilesController.GetHttpReponseMessage(new MemoryStream(content), $"{predictor.Name}.csv");
         }
 
         [Route("api/predictor/tsv/"), HttpPost]
         public HttpResponseMessage DownloadTsv(PredictorEntity predictor)
         {
-            byte[] file = predictor.GetCsv(separator: "\t");
+            byte[] content = predictor.GetTsv();
 
-            return FilesController.GetHttpReponseMessage(new MemoryStream(file), $"{predictor.Name}.tsv");
+            return FilesController.GetHttpReponseMessage(new MemoryStream(content), $"{predictor.Name}.tsv");
         }
 
         [Route("api/predictor/tsv/metadata"), HttpPost]
         public HttpResponseMessage DownloadTsvMetadata(PredictorEntity predictor)
         {
-            byte[] file = predictor.GetTsvMetadata();
+            byte[] content = predictor.GetTsvMetadata();
 
-            return FilesController.GetHttpReponseMessage(new MemoryStream(file), $"{predictor.Name}.metadata.tsv");
+            return FilesController.GetHttpReponseMessage(new MemoryStream(content), $"{predictor.Name}.metadata.tsv");
         }
     }
 }
