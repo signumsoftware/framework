@@ -1,0 +1,40 @@
+﻿using Signum.Entities.UserAssets;
+using Signum.React.Json;
+using Signum.Utilities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Web;
+using System.Web.Http;
+using Newtonsoft.Json;
+using Signum.Engine.DynamicQuery;
+using Signum.Entities.UserQueries;
+using Signum.Engine.Basics;
+using Signum.React.UserAssets;
+using Signum.React.Facades;
+using Signum.Engine.UserQueries;
+using Signum.Engine.Authorization;
+using Signum.Entities.MachineLearning;
+
+namespace Signum.React.MachineLearning
+{
+    public static class PredictorServer
+    {
+        public static void Start(HttpConfiguration config)
+        {
+            UserAssetServer.Start(config);
+
+            SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+
+            EntityJsonConverter.AfterDeserilization.Register((PredictorEntity uq) =>
+            {
+                if (uq.Query != null)
+                {
+                    var qd = DynamicQueryManager.Current.QueryDescription(uq.Query.ToQueryName());
+                    uq.ParseData(qd);
+                }
+            });
+        }
+    }
+}

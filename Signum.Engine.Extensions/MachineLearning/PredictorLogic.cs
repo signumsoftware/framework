@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 
 namespace Signum.Engine.MachineLearning
 {
-
     public static class PredictorLogic
     {
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)

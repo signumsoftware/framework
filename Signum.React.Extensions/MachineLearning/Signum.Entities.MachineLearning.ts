@@ -28,30 +28,29 @@ export interface NeuronalNetworkSettingsEntity extends Entities.EmbeddedEntity {
     neuronalNetworkDescription?: string | null;
 }
 
+export const PredictorColumnEmbedded = new Type<PredictorColumnEmbedded>("PredictorColumnEmbedded");
+export interface PredictorColumnEmbedded extends Entities.EmbeddedEntity {
+    Type: "PredictorColumnEmbedded";
+    type?: PredictorColumnType;
+    token?: UserAssets.QueryTokenEmbedded | null;
+}
+
+export const PredictorColumnType = new EnumType<PredictorColumnType>("PredictorColumnType");
+export type PredictorColumnType =
+    "Input" |
+    "Output";
+
 export const PredictorEntity = new Type<PredictorEntity>("Predictor");
 export interface PredictorEntity extends Entities.Entity {
     Type: "Predictor";
     query?: Basics.QueryEntity | null;
     name?: string | null;
     filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
-    inputs: Entities.MList<PredictorInputEntity>;
-    output: Entities.MList<PredictorOutputEntity>;
-}
-
-export const PredictorInputEntity = new Type<PredictorInputEntity>("PredictorInputEntity");
-export interface PredictorInputEntity extends Entities.EmbeddedEntity {
-    Type: "PredictorInputEntity";
-    token?: UserAssets.QueryTokenEmbedded | null;
+    columns: Entities.MList<PredictorColumnEmbedded>;
 }
 
 export module PredictorOperation {
     export const Save : Entities.ExecuteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Save");
-}
-
-export const PredictorOutputEntity = new Type<PredictorOutputEntity>("PredictorOutputEntity");
-export interface PredictorOutputEntity extends Entities.EmbeddedEntity {
-    Type: "PredictorOutputEntity";
-    token?: UserAssets.QueryTokenEmbedded | null;
 }
 
 export const Regularization = new EnumType<Regularization>("Regularization");
