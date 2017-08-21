@@ -2,7 +2,7 @@
 import * as React from 'react'
 import * as moment from 'moment'
 import { classes, Dic, addClass } from '../Globals'
-import { Tab } from 'react-bootstrap'
+import { TabPane } from 'reactstrap'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
 import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference } from '../Reflection'
 import { ValidationMessage } from '../Signum.Entities'

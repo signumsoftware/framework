@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Dropdown, MenuItem } from 'react-bootstrap'
+import { Dropdown, DropdownItem, DropdownMenu } from 'reactstrap'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from './TypeContext'
 import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, getQueryNiceName, getQueryKey, PseudoType, getTypeName, Type } from './Reflection'
 import { classes, Dic } from './Globals'
@@ -92,7 +92,7 @@ export function getQuickLinkContextMenus(ctx: ContextualItemsContext<Entity>): P
 
         return {
             header: QuickLinkMessage.Quicklinks.niceToString(),
-            menuItems: links.map(ql => ql.toMenuItem())
+            menuItems: links.map(ql => ql.toDropDownItem())
         } as MenuItemBlock;
     });
 }
@@ -155,11 +155,11 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
         );
 
         return (
-            <Dropdown id="quickLinksWidget" pullRight>
+            <Dropdown id="quickLinksWidget">
                 <QuickLinkToggle bsRole="toggle" links={links} />
-                <Dropdown.Menu>
-                    {links && links.orderBy(a => a.order).map((a, i) => React.cloneElement(a.toMenuItem(), { key: i }))}
-                </Dropdown.Menu>
+                <DropdownMenu>
+                    {links && links.orderBy(a => a.order).map((a, i) => React.cloneElement(a.toDropDownItem(), { key: i }))}
+                </DropdownMenu>
             </Dropdown>
 
         );
@@ -214,7 +214,7 @@ export abstract class QuickLink {
         Dic.assign(this, { isVisible: true, text: "", order: 0, ...options });
     }
 
-    abstract toMenuItem(): React.ReactElement<any>;
+    abstract toDropDownItem(): React.ReactElement<any>;
 
     renderIcon() {
         if (this.icon == undefined)
@@ -241,13 +241,13 @@ export class QuickLinkAction extends QuickLink {
         this.action = action;
     }
 
-    toMenuItem() {
+    toDropDownItem() {
 
         return (
-            <MenuItem data-name={this.name} className="sf-quick-link" onMouseUp={this.action}>
+            <DropdownItem data-name={this.name} className="sf-quick-link" onMouseUp={this.action}>
                 {this.renderIcon()}
                 {this.text}
-            </MenuItem>
+            </DropdownItem>
         );
     }
 }
@@ -261,13 +261,13 @@ export class QuickLinkLink extends QuickLink {
         this.url = url;
     }
 
-    toMenuItem() {
+    toDropDownItem() {
 
         return (
-            <MenuItem data-name={this.name} className="sf-quick-link" onMouseUp={this.handleClick}>
+            <DropdownItem data-name={this.name} className="sf-quick-link" onMouseUp={this.handleClick}>
                 {this.renderIcon()}
                 {this.text}
-            </MenuItem>
+            </DropdownItem>
         );
     }
 
@@ -289,12 +289,12 @@ export class QuickLinkExplore extends QuickLink {
         this.findOptions = findOptions;
     }
 
-    toMenuItem() {
+    toDropDownItem() {
         return (
-            <MenuItem data-name={this.name} className="sf-quick-link" onMouseUp={this.exploreOrPopup}>
+            <DropdownItem data-name={this.name} className="sf-quick-link" onMouseUp={this.exploreOrPopup}>
                 {this.renderIcon()}
                 {this.text}
-            </MenuItem>
+            </DropdownItem>
         );
     }
 
@@ -320,12 +320,12 @@ export class QuickLinkNavigate extends QuickLink {
         this.lite = lite;
     }
 
-    toMenuItem() {
+    toDropDownItem() {
         return (
-            <MenuItem data-name={this.name} className="sf-quick-link" onMouseUp={this.navigateOrPopup}>
+            <DropdownItem data-name={this.name} className="sf-quick-link" onMouseUp={this.navigateOrPopup}>
                 {this.renderIcon()}
                 {this.text}
-            </MenuItem>
+            </DropdownItem>
         );
     }
 

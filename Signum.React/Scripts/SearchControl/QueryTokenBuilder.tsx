@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
+import { Modal, ModalHeader, ButtonToolbar } from 'reactstrap'
 import { DropdownList } from 'react-widgets';
 import 'react-widgets/dist/css/react-widgets.css';
 import { areEqual, classes } from '../Globals'

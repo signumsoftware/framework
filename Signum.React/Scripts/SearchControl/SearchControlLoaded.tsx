@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { DropdownButton, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { Dropdown, DropdownItem, Tooltip } from 'reactstrap'
 import { Dic, DomUtils, classes } from '../Globals'
 import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter } from '../Finder'
@@ -60,7 +60,7 @@ export interface SearchControlLoadedState {
     simpleFilterBuilder?: React.ReactElement<any>;
     selectedRows?: ResultRow[];
     markedRows?: MarkedRowsDictionary;
-
+    isSelectOpen: boolean;
     searchCount?: number;
     dragColumnIndex?: number,
     dropBorderIndex?: number,
@@ -83,7 +83,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     constructor(props: SearchControlLoadedProps) {
         super(props);
-        this.state = {};
+        this.state = { isSelectOpen:false };
     }
 
     componentWillMount() {
@@ -462,10 +462,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     // SELECT BUTTON
 
-    handleSelectedToggle = (isOpen: boolean) => {
-
-        if (isOpen && this.state.currentMenuItems == undefined)
-            this.loadMenuItems();
+    handleSelectedToggle = () => {
+        this.setState({ isSelectOpen: !this.state.isSelectOpen }, () => {
+            if (this.state.isSelectOpen && this.state.currentMenuItems == undefined)
+                this.loadMenuItems();
+        });
     }
 
     loadMenuItems() {
@@ -501,13 +502,13 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         const title = JavascriptMessage.Selected.niceToString() + " (" + this.state.selectedRows!.length + ")";
 
         return (
-            <DropdownButton id="selectedButton" className="sf-query-button sf-tm-selected" title={title}
-                onToggle={this.handleSelectedToggle}
+            <Dropdown id="selectedButton" className="sf-query-button sf-tm-selected" title={title}
+                toggle={this.handleSelectedToggle}
                 disabled={this.state.selectedRows!.length == 0}>
-                {this.state.currentMenuItems == undefined ? <MenuItem className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</MenuItem> :
-                    this.state.currentMenuItems.length == 0 ? <MenuItem className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</MenuItem> :
+                {this.state.currentMenuItems == undefined ? <DropdownItem className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</DropdownItem> :
+                    this.state.currentMenuItems.length == 0 ? <DropdownItem className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</DropdownItem> :
                         this.state.currentMenuItems.map((e, i) => React.cloneElement(e, { key: i }))}
-            </DropdownButton>
+            </Dropdown>
         );
     }
 
@@ -587,25 +588,25 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         const menuItems: React.ReactElement<any>[] = [];
         if (this.canFilter() && cm.columnIndex != undefined)
-            menuItems.push(<MenuItem className="sf-quickfilter-header" onClick={this.handleQuickFilter}>{JavascriptMessage.addFilter.niceToString()}</MenuItem>);
+            menuItems.push(<DropdownItem className="sf-quickfilter-header" onClick={this.handleQuickFilter}>{JavascriptMessage.addFilter.niceToString()}</DropdownItem>);
 
         if (cm.rowIndex == undefined && fo.allowChangeColumns) {
 
             if (menuItems.length)
-                menuItems.push(<MenuItem divider />);
+                menuItems.push(<DropdownItem divider />);
 
-            menuItems.push(<MenuItem className="sf-insert-header" onClick={this.handleInsertColumn}>{JavascriptMessage.insertColumn.niceToString()}</MenuItem>);
-            menuItems.push(<MenuItem className="sf-edit-header" onClick={this.handleEditColumn}>{JavascriptMessage.editColumn.niceToString()}</MenuItem>);
-            menuItems.push(<MenuItem className="sf-remove-header" onClick={this.handleRemoveColumn}>{JavascriptMessage.removeColumn.niceToString()}</MenuItem>);
+            menuItems.push(<DropdownItem className="sf-insert-header" onClick={this.handleInsertColumn}>{JavascriptMessage.insertColumn.niceToString()}</DropdownItem>);
+            menuItems.push(<DropdownItem className="sf-edit-header" onClick={this.handleEditColumn}>{JavascriptMessage.editColumn.niceToString()}</DropdownItem>);
+            menuItems.push(<DropdownItem className="sf-remove-header" onClick={this.handleRemoveColumn}>{JavascriptMessage.removeColumn.niceToString()}</DropdownItem>);
         }
 
         if (cm.rowIndex != undefined) {
 
             if (this.state.currentMenuItems == undefined) {
-                menuItems.push(<MenuItem header>{JavascriptMessage.loading.niceToString()}</MenuItem>);
+                menuItems.push(<DropdownItem header>{JavascriptMessage.loading.niceToString()}</DropdownItem>);
             } else {
                 if (menuItems.length && this.state.currentMenuItems.length)
-                    menuItems.push(<MenuItem divider />);
+                    menuItems.push(<DropdownItem divider />);
 
                 menuItems.splice(menuItems.length, 0, ...this.state.currentMenuItems);
             }
@@ -952,7 +953,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         if (!mark || !mark.message)
             return tr;
 
-        const tooltip = <Tooltip id={"mark_" + index} className="error-tooltip">
+        const tooltip = <Tooltip id={"mark_" + index} target="error-tooltip">
             {mark.message.split("\n").map((s, i) => <p key={i}>{s}</p>)}
         </Tooltip>;
 

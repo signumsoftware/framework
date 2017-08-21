@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
+import { Modal, ModalHeader, ModalBody, ModalFooter , ButtonToolbar } from 'reactstrap'
 import * as Finder from '../Finder'
 import { openModal, IModalProps } from '../Modals';
 import { ResultTable, FindOptions, FindMode, FilterOption, QueryDescription, ResultRow, ModalFindOptions } from '../FindOptions'
@@ -60,8 +60,8 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
         const okEnabled = this.props.isMany ? this.selectedEntites.length > 0 : this.selectedEntites.length == 1;
 
         return (
-            <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited}>
-                <Modal.Header closeButton={this.props.findMode == "Explore"}>
+            <Modal size="lg" isOpen={this.state.show} onExit={this.handleOnExited}>
+                <ModalHeader>
                     { this.props.findMode == "Find" &&
                         <div className="btn-toolbar pull-right flip">
                             <button className ="btn btn-primary sf-entity-button sf-close-button sf-ok-button" disabled={!okEnabled} onClick={this.handleOkClicked}>
@@ -76,9 +76,9 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
                             <span className="glyphicon glyphicon-new-window"></span>
                         </a>
                     </h4>
-                </Modal.Header>
+                </ModalHeader>
 
-                <Modal.Body>
+                <ModalBody>
                     <SearchControl hideFullScreenButton={true} throwIfNotFindable={true}
                         ref={(e: SearchControl) => this.searchControl = e}
                         findOptions={this.props.findOptions}
@@ -86,7 +86,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
                         largeToolbarButtons={true}
                         onDoubleClick={this.props.findMode == "Find" ? this.handleDoubleClick : undefined}
                         />
-                </Modal.Body>
+                </ModalBody>
             </Modal>
         );
     }

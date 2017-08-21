@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar, Sizes } from 'react-bootstrap'
+import { Modal, ModalHeader, ModalBody, ModalFooter, ButtonToolbar} from 'reactstrap'
 import { openModal, IModalProps } from './Modals';
 import { SelectorMessage } from './Signum.Entities'
 import { TypeInfo } from './Reflection'
@@ -10,7 +10,7 @@ interface SelectorModalProps extends React.Props<SelectorModal>, IModalProps {
     options: { value: any; displayName: React.ReactChild; name: string; htmlAttributes?: React.HTMLAttributes<HTMLButtonElement> }[];
     title: React.ReactChild;
     message: React.ReactChild;
-    size?: Sizes;
+    size?: string;
     dialogClassName?: string;
 }
 
@@ -40,16 +40,16 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
 
 
     render() {
-        return <Modal bsSize={this.props.size ? this.props.size : "sm"} onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-selector-modal" dialogClassName={this.props.dialogClassName}>
-            <Modal.Header closeButton={true}>
+        return <Modal size={this.props.size ? this.props.size : "sm"} isOpen={this.state.show} onExit={this.handleOnExited} className="sf-selector-modal" modalClassName={this.props.dialogClassName}>
+            <ModalHeader>
                 {this.props.title &&
                     <h4 className="modal-title">
                         {this.props.title}
                     </h4>
                 }
-            </Modal.Header>
+            </ModalHeader>
 
-            <Modal.Body>
+            <ModalBody>
                 <div>
                     {this.props.message &&
                         <p>
@@ -62,7 +62,7 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
                             {o.displayName}
                         </button>)}
                 </div>
-            </Modal.Body>
+            </ModalBody>
         </Modal>;
     }
 
@@ -108,7 +108,7 @@ export interface SelectorConfig<T> {
     buttonHtmlAttributes?: (val: T) => React.HTMLAttributes<HTMLButtonElement>; //For testing
     title?: React.ReactChild;
     message?: React.ReactChild;
-    size?: Sizes;
+    size?: string;
     dialogClassName?: string;
     forceShow?: boolean;
 }

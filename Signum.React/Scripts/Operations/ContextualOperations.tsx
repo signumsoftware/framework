@@ -1,6 +1,6 @@
 ﻿import * as React from "react"
 import { Router, Route, Redirect } from "react-router"
-import { Button, OverlayTrigger, Tooltip, MenuItem } from "react-bootstrap"
+import { Button, Tooltip, DropdownItem } from "reactstrap"
 import {
     Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, toLite, JavascriptMessage,
     OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, OperationMessage, getToString, SearchMessage
@@ -215,14 +215,14 @@ export namespace MenuItemConstructor { //To allow monkey patching
             coc.settings && coc.settings.onClick ? coc.settings!.onClick!(coc) : defaultClick(coc)
         }
 
-        const menuItem = <MenuItem
+        const menuItem = <DropdownItem
             className={disabled ? "disabled" : undefined}
             onClick={disabled ? undefined : onClick}
             data-operation={coc.operationInfo.key}>
             {icon ? <span className={classes("icon", icon)} style={{ color: coc.settings && coc.settings.iconColor }}></span> :
                 bsStyle ? <span className={classes("icon", "empty-icon", "btn-" + bsStyle)}></span> : undefined}
             {text}
-        </MenuItem>;
+        </DropdownItem>;
 
         if (!coc.canExecute)
             return menuItem;

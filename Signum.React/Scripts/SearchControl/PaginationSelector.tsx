@@ -5,7 +5,7 @@ import { ResultTable, Pagination, PaginationMode, PaginateMath} from '../FindOpt
 import { SearchMessage, JavascriptMessage, Lite, liteKey } from '../Signum.Entities'
 import { getEnumInfo } from '../Reflection'
 import * as Navigator from '../Navigator'
-import { Pagination as BPagination } from 'react-bootstrap'
+import { Pagination as BPagination } from 'reactstrap'
 
 
 
@@ -121,15 +121,16 @@ export default class PaginationSelector extends React.Component<PaginationSelect
 
         const totalPages = PaginateMath.totalPages(resultTable.pagination, resultTable.totalElements);
 
-        return (
-            <BPagination
-                activePage={resultTable.pagination.currentPage}
-                items={totalPages}
-                ellipsis={true}
-                maxButtons={8}
-                first={true}
-                last={true}
-                onSelect={this.handlePageClick as any} />
-        );
+        return <span>Not Implemented</span>
+        //return (
+        //    <Pagination
+        //        activePage={resultTable.pagination.currentPage}
+        //        items={totalPages}
+        //        ellipsis={true}
+        //        maxButtons={8}
+        //        first={true}
+        //        last={true}
+        //        onSelect={this.handlePageClick as any} />
+        //);
     }
 }

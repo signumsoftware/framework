@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
+import { Modal, ModalBody, ModalHeader, ModalFooter, ButtonToolbar } from 'reactstrap'
 import { openModal, IModalProps } from './Modals';
 import { Dic } from './Globals';
 import { SelectorMessage, JavascriptMessage } from './Signum.Entities'
@@ -54,29 +54,29 @@ export default class ValueLineModal extends React.Component<ValueLineModalProps,
             valueLineType: valueLineProps.valueLineType,
         };
 
-        return <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited}>
+        return <Modal size="lg" isOpen={this.state.show} onExit={this.handleOnExited}>
 
-            <Modal.Header closeButton={true}>
+            <ModalHeader>
                 <h4 className="modal-title">
                     {title === undefined ? SelectorMessage.ChooseAValue.niceToString() : title}
                 </h4>
-            </Modal.Header>
+            </ModalHeader>
 
-            <Modal.Body>
+            <ModalBody>
                 <p>
                     {message === undefined ? SelectorMessage.PleaseChooseAValueToContinue.niceToString() : message}
                 </p>
                 <ValueLine ctx={ctx}
                     formGroupStyle={valueLineProps.labelText ? "Basic" : "SrOnly"} {...vlp} />
-            </Modal.Body>
-            <Modal.Footer>
+            </ModalBody>
+            <ModalFooter>
                 <button className="btn btn-primary sf-entity-button sf-ok-button" onClick={this.handleOkClick}>
                     {JavascriptMessage.ok.niceToString()}
                 </button>
                 <button className="btn btn-default sf-entity-button sf-close-button" onClick={this.handleCancelClicked}>
                     {JavascriptMessage.cancel.niceToString()}
                 </button>
-            </Modal.Footer>
+            </ModalFooter>
         </Modal>;
     }
 

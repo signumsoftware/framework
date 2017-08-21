@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
-import { Tabs, Tab } from 'react-bootstrap'
+import { TabContent, TabPane } from 'reactstrap'
 import { ExceptionEntity } from '../Signum.Entities.Basics'
 import { ValueLine, ValueLineType, EntityLine, TypeContext } from '../Lines'
 
@@ -32,13 +32,13 @@ export default class Exception extends React.Component<{ ctx: TypeContext<Except
                 <ValueLine ctx={ctx.subCtx(f => f.urlReferer)} />
                 <h3 style={{ color: "rgb(139, 0, 0)" }}>{ctx.value.exceptionType}</h3>
                 <pre><code>{ctx.value.exceptionMessage}</code></pre>
-                <Tabs id="exceptionTabs">
+                <TabContent id="exceptionTabs">
                     {this.codeTab(0, a => a.stackTrace)}
                     {this.codeTab(1, a => a.data)}
                     {this.codeTab(2, a => a.queryString)}
                     {this.codeTab(3, a => a.form)}
                     {this.codeTab(4, a => a.session)}
-                </Tabs>
+                </TabContent>
             </div>
         );
     }
@@ -49,10 +49,10 @@ export default class Exception extends React.Component<{ ctx: TypeContext<Except
         if (!tc.value || tc.value == "")
             return undefined;
 
-        return <Tab title={tc.propertyRoute.member!.niceName} eventKey={eventKey}>
+        return <TabPane title={tc.propertyRoute.member!.niceName} key={eventKey}>
             <pre>
                 <code>{tc.value}</code>
             </pre>
-        </Tab>;
+        </TabPane>;
     }
 }

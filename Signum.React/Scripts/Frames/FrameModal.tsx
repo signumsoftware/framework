@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar, Button, Sizes } from 'react-bootstrap'
+import { Modal, ModalHeader, ModalBody, ModalFooter, ButtonToolbar, Button} from 'reactstrap'
 import { openModal, IModalProps } from '../Modals'
 import MessageModal from '../Modals/MessageModal'
 import * as Navigator from '../Navigator'
@@ -31,7 +31,7 @@ interface FrameModalProps extends React.Props<FrameModal>, IModalProps {
     getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
     isNavigate?: boolean;
     readOnly?: boolean;
-    modalSize?: Sizes;
+    modalSize?: string;
 }
 
 interface FrameModalState {
@@ -197,14 +197,14 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         const pack = this.state.pack;
 
         return (
-            <Modal bsSize={this.props.modalSize || "lg"} onHide= { this.handleCancelClicked } show= { this.state.show } onExited= { this.handleOnExited } className= "sf-popup-control" >
-                <Modal.Header closeButton={this.props.isNavigate}>
+            <Modal size={this.props.modalSize || "lg"} isOpen={this.state.show} onExit={this.handleOnExited} className="sf-popup-control" >
+                <ModalHeader>
                     {!this.props.isNavigate && <ButtonToolbar className="pull-right flip">
-                        <Button className="sf-entity-button sf-close-button sf-ok-button" bsStyle="primary" disabled={!pack} onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString()}</Button>
-                        <Button className="sf-entity-button sf-close-button sf-cancel-button" bsStyle="default" disabled={!pack} onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString()}</Button>
+                        <Button className="sf-entity-button sf-close-button sf-ok-button" color="primary" disabled={!pack} onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString()}</Button>
+                        <Button className="sf-entity-button sf-close-button sf-cancel-button" color="default" disabled={!pack} onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString()}</Button>
                     </ButtonToolbar>}
                     {this.renderTitle()}
-                </Modal.Header>
+                </ModalHeader>
                 {pack && this.renderBody()}
             </Modal>
         );
@@ -243,14 +243,14 @@ export default class FrameModal extends React.Component<FrameModalProps, FrameMo
         const ctx = new TypeContext(undefined, styleOptions, this.state.propertyRoute!, new ReadonlyBinding(pack.entity, this.prefix!));
 
         return (
-            <Modal.Body>
+            <ModalBody>
                 {renderWidgets({ ctx: ctx, pack: pack })}
                 {this.entityComponent && <ButtonBar frame={frame} pack={pack} isOperationVisible={this.props.isOperationVisible} />}
                 <ValidationErrors entity={pack.entity} ref={ve => this.validationErrors = ve} />
                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf()} data-main-entity={entityInfo(ctx.value)}>
                     {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any>) => this.setComponent(c) })}
                 </div>
-            </Modal.Body>
+            </ModalBody>
         );
     }
 

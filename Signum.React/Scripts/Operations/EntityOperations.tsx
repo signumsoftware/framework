@@ -1,6 +1,6 @@
 ﻿import * as React from "react"
 import { Router, Route, Redirect } from "react-router"
-import { Button, OverlayTrigger, Tooltip, MenuItem, DropdownButton } from "react-bootstrap"
+import { Button, UncontrolledTooltip, DropdownItem, ButtonDropdown, Tooltip } from "reactstrap"
 import {
     Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, toLite, JavascriptMessage,
     OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, OperationMessage, getToString, NormalControlMessage, NormalWindowMessage
@@ -80,12 +80,12 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
             return [{
                 order: group.order != undefined ? group.order : 100,
                 button: (
-                    <DropdownButton title={group.text()} data-key={group.key} key={i} id={group.key}>
+                    <ButtonDropdown title={group.text()} data-key={group.key} key={i} id={group.key}>
                         {gr.elements
                             .orderBy(a => a.settings && a.settings.order)
                             .map((eoc, j) => createDefaultButton(eoc, group, true, j))
                         }
-                    </DropdownButton>
+                    </ButtonDropdown>
                 )
             }];
         }
@@ -114,7 +114,7 @@ function getWithClose(eoc: EntityOperationContext<Entity>) {
     return isSave(eoc.operationInfo);
 }
 
-function createDefaultButton(eoc: EntityOperationContext<Entity>, group: EntityOperationGroup | undefined, asMenuItem: boolean, key: any) {
+function createDefaultButton(eoc: EntityOperationContext<Entity>, group: EntityOperationGroup | undefined, asDropDownItem: boolean, key: any) {
 
     const text = eoc.settings && eoc.settings.text ? eoc.settings.text() :
         group && group.simplifyName ? group.simplifyName(eoc.operationInfo.niceName) :
@@ -125,27 +125,29 @@ function createDefaultButton(eoc: EntityOperationContext<Entity>, group: EntityO
     const bsStyle = eoc.settings && eoc.settings.style || autoStyleFunction(eoc.operationInfo);
 
     const disabled = !!eoc.canExecute;
-
-    const btn = asMenuItem ? <MenuItem className={classes("btn-" + bsStyle, disabled ? "disabled" : undefined)} onClick={disabled ? undefined : e => onClick(eoc, e)} data-operation={eoc.operationInfo.key} key={key} > {text}</MenuItem> :
+    const btn = asDropDownItem ? <DropdownItem className={classes("btn-" + bsStyle, disabled ? "disabled" : undefined)} onClick={disabled ? undefined : e => onClick(eoc, e)} data-operation={eoc.operationInfo.key} key={key} > {text}</DropdownItem> :
         withClose ?
             <div className="btn-group" key={key}>
-                <Button bsStyle={bsStyle} className={disabled ? "disabled" : undefined} onClick={disabled ? undefined : e => onClick(eoc, e)} data-operation={eoc.operationInfo.key}>{text}</Button>
-                <Button bsStyle={bsStyle} className={classes("dropdown-toggle dropdown-toggle-split", disabled ? "disabled" : undefined)} onClick={disabled ? undefined : e => { eoc.closeRequested = true; onClick(eoc, e); }}
+                <Button color={bsStyle} className={disabled ? "disabled" : undefined} onClick={disabled ? undefined : e => onClick(eoc, e)} data-operation={eoc.operationInfo.key}>{text}</Button>
+                <Button color={bsStyle} className={classes("dropdown-toggle dropdown-toggle-split", disabled ? "disabled" : undefined)} onClick={disabled ? undefined : e => { eoc.closeRequested = true; onClick(eoc, e); }}
                     title={NormalWindowMessage._0AndClose.niceToString(eoc.operationInfo.niceName)}>
                     <span>&times;</span>
                 </Button>
 
             </div>
             :
-            <Button bsStyle={bsStyle} className={disabled ? "disabled" : undefined} onClick={disabled ? undefined : e => onClick(eoc, e)} data-operation={eoc.operationInfo.key} key={key}>{text}</Button>
+            <Button color={bsStyle} className={disabled ? "disabled" : undefined} onClick={disabled ? undefined : e => onClick(eoc, e)} data-operation={eoc.operationInfo.key} key={key}>{text}</Button>
 
 
     if (!eoc.canExecute)
         return btn;
 
-    const tooltip = <Tooltip id={"tooltip_" + eoc.operationInfo.key.replace(".", "_")}>{eoc.canExecute}</Tooltip>;
+    const id = "tooltipContainer_" + eoc.operationInfo.key.replace(".", "_");
 
-    return <OverlayTrigger placement="bottom" overlay={tooltip} key={key}>{btn}</OverlayTrigger>;
+    return <span key={key}>
+        {React.cloneElement(btn, { id })}
+        <Tooltip placement="bottom" target={id}>{eoc.canExecute}</Tooltip>
+    </span>;
 }
 
 function onClick(eoc: EntityOperationContext<Entity>, event: React.MouseEvent<any>): void {

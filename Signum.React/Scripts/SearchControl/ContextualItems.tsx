@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { MenuItem, Overlay } from 'react-bootstrap'
+import { DropdownItem} from 'reactstrap'
 import { Dic, classes, combineFunction } from '../Globals'
 import { QueryDescription, } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
@@ -44,10 +44,10 @@ export function renderContextualItems(ctx: ContextualItemsContext<Entity>): Prom
                 return;
 
             if (result.length)
-                result.push(<MenuItem divider/>);
+                result.push(<DropdownItem divider/>);
 
             if (block.header)
-                result.push(<MenuItem header>{block.header}</MenuItem>);
+                result.push(<DropdownItem header>{block.header}</DropdownItem>);
 
             if (block.header)
                 result.splice(result.length, 0, ...block.menuItems);

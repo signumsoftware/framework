@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
-import { DropdownButton, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { ButtonDropdown, DropdownItem, Tooltip } from 'reactstrap'
 import { Dic, DomUtils, classes } from '../Globals'
 import * as Finder from '../Finder'
 import {

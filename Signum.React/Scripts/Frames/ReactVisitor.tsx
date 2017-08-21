@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Tab } from 'react-bootstrap'
+import { TabPane } from 'reactstrap'
 import { Dic } from '../Globals'
 import * as Navigator from '../Navigator'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'
@@ -154,25 +154,25 @@ export class ViewReplacer<T> {
 
     removeTab(eventKey: string): this {
         this.result = new ReplaceVisitor(
-            e => e.type == Tab && e.props.eventKey == eventKey,
+            e => e.type == TabPane && e.props.eventKey == eventKey,
             e => [])
             .visit(this.result);
 
         return this;
     }
 
-    insertTabAfter(eventKey: string, ...newTabs: Tab[]): this {
+    insertTabAfter(eventKey: string, ...newTabs: TabPane[]): this {
         this.result = new ReplaceVisitor(
-            e => e.type == Tab && e.props.eventKey == eventKey,
+            e => e.type == TabPane && e.props.eventKey == eventKey,
             e => [e, ...newTabs])
             .visit(this.result);
 
         return this;
     }
 
-    insertTabBefore(eventKey: string, ...newTabs: Tab[]): this {
+    insertTabBefore(eventKey: string, ...newTabs: TabPane[]): this {
         this.result = new ReplaceVisitor(
-            e => e.type == Tab && e.props.eventKey == eventKey,
+            e => e.type == TabPane && e.props.eventKey == eventKey,
             e => [...newTabs, e])
             .visit(this.result);
 

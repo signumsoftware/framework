@@ -1,6 +1,6 @@
 ﻿import * as React from "react"
 import { Router, Route, Redirect } from "react-router"
-import { Button, OverlayTrigger, Tooltip, MenuItem, DropdownButton } from "react-bootstrap"
+import { Button, Tooltip, DropdownItem, ButtonDropdown } from "reactstrap"
 import { Dic } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';

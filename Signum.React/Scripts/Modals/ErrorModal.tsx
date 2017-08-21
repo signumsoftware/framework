@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
+import { Modal, ModalHeader, ModalBody, ModalFooter, ButtonToolbar } from 'reactstrap'
 import * as Finder from '../Finder'
 import { openModal, IModalProps } from '../Modals';
 import * as Navigator from '../Navigator';
@@ -47,14 +47,14 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
         const ve = e instanceof ValidationError ? (e as ValidationError) : undefined;
 
         return (
-            <Modal onHide={this.handleCloseClicked} show={this.state.show} onExited={this.handleOnExited}>
-                <Modal.Header closeButton={true} className="dialog-header-error">
+            <Modal isOpen={this.state.show} onExit={this.handleOnExited}>
+                <ModalHeader className="dialog-header-error">
                     {se ? this.renderServiceTitle(se) :
                         ve ? this.renderValidationTitle(ve) :
                             this.renderTitle(e)}
-                </Modal.Header>
+                </ModalHeader>
 
-                <Modal.Body>
+                <ModalBody>
                     {se ? this.renderServiceMessage(se) :
                         ve ? this.renderValidationeMessage(ve) :
                             this.renderMessage(e)}
@@ -66,12 +66,12 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
                             {this.state.showDetails && <pre>{se.httpError.StackTrace}</pre>}
                         </div>
                     }
-                </Modal.Body>
+                </ModalBody>
 
-                <Modal.Footer>
+                <ModalFooter>
                     <button className ="btn btn-primary sf-close-button sf-ok-button" onClick={this.handleCloseClicked}>
                         {JavascriptMessage.ok.niceToString() }</button>
-                </Modal.Footer>
+                </ModalFooter>
             </Modal>
         );
     }

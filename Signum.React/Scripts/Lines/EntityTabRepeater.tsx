@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Tab, Tabs } from 'react-bootstrap'
+import { TabPane, TabContent } from 'reactstrap'
 import { classes, Dic } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
@@ -46,12 +46,12 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                         {React.Children.count(buttons) ? buttons : undefined}
                     </div>
                 </legend>
-                <Tabs id={ctx.compose("tabs")} unmountOnExit={true}>
+                <TabContent id={ctx.compose("tabs")}>
                     {
                         mlistItemContext(ctx).map((mlec, i) => {
                             const drag = this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "h") : undefined;
 
-                            return <Tab  eventKey={i} key={i}
+                            return <TabPane tabId={i} key={i}
                                 {...EntityListBase.entityHtmlAttributes(mlec.value) }
                                 className="sf-repeater-element"
                                 title={
@@ -80,12 +80,11 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                                     </div> as any
                                 }>
                                 <RenderEntity ctx={mlec} getComponent={this.props.getComponent} viewPromise={this.props.viewPromise} />
-                            </Tab>
+                            </TabPane>
                         })
 
                     }
-                    <Tab eventKey={"x"} disabled></Tab> {/*Temporal hack*/}
-                </Tabs>
+                </TabContent>
             </fieldset>
         );
     }

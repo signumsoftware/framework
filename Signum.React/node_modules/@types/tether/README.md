@@ -1,0 +1,16 @@
+# Installation
+> `npm install --save @types/tether`
+
+# Summary
+This package contains type definitions for Tether (http://github.hubspot.com/tether/).
+
+# Details
+Files were exported from https://www.github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/tether
+
+Additional Details
+ * Last updated: Thu, 15 Jun 2017 20:23:46 GMT
+ * Dependencies: none
+ * Global values: Tether
+
+# Credits
+These definitions were written by Adi Dahiya <https://github.com/adidahiya>.

@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar, Sizes } from 'react-bootstrap'
+import { Modal, ModalBody, ModalHeader, ModalFooter, ButtonToolbar } from 'reactstrap'
 import * as Finder from '../Finder'
 import { openModal, IModalProps } from '../Modals';
 import * as Navigator from '../Navigator';
@@ -158,16 +158,16 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
 
     render() {
         return (
-            <Modal onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="message-modal">
-                <Modal.Header closeButton={true} className={dialogHeaderClass(this.props.style)}>
+            <Modal isOpen={this.state.show} onExit={this.handleOnExited} className="message-modal">
+                <ModalHeader className={dialogHeaderClass(this.props.style)}>
                     {this.renderTitle()}
-                </Modal.Header>
-                <Modal.Body>
+                </ModalHeader>
+                <ModalBody>
                     {renderText(this.props.message, this.props.style)}
-                </Modal.Body>
-                <Modal.Footer>
+                </ModalBody>
+                <ModalFooter>
                     {this.renderButtons(this.props.buttons)}
-                </Modal.Footer>
+                </ModalFooter>
             </Modal>
         );
     }
