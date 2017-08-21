@@ -101,7 +101,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
         return ( EntityBase.hasChildrens(buttons) ? buttons : undefined );
     }
 
-    renderTable(ctx: TypeContext<MListElement<ModifiableEntity>[]>) {
+    renderTable(ctx: TypeContext<MList<ModifiableEntity>>) {
 
         const readOnly = ctx.readOnly;
         const elementPr = ctx.propertyRoute.add(a => a[0].element);
