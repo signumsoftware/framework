@@ -52,8 +52,16 @@ export function setResetUI(reset: () => void) {
 }
 
 export namespace Expander {
-    export let getExpanded: () => boolean;
-    export let setExpanded: (isExpanded: boolean) => void;
+    export let onGetExpanded: () => boolean;
+    export let onSetExpanded: (isExpanded: boolean) => void;
+
+    export function setExpanded(expanded: boolean): boolean {
+        let wasExpanded = onGetExpanded != null &&onGetExpanded();;
+        if (onSetExpanded)
+            onSetExpanded(expanded);
+
+        return wasExpanded;
+    }
 }
 
 export function start(options: { routes: JSX.Element[] }) {
