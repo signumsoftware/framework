@@ -636,6 +636,7 @@ export interface EnumCheckboxListNode extends LineBaseNode {
     kind: "EnumCheckboxList",
     columnCount?: ExpressionOrValue<number>;
     columnWidth?: ExpressionOrValue<number>;
+    avoidFieldSet?: ExpressionOrValue<boolean>;
 }
 
 NodeUtils.register<EnumCheckboxListNode>({
@@ -648,6 +649,7 @@ NodeUtils.register<EnumCheckboxListNode>({
     renderCode: (node, cc) => cc.elementCode("EnumCheckboxList", {
         ctx: cc.subCtxCode(node.field, node.styleOptions),
         labelText: node.labelText,
+        avoidFieldSet: node.avoidFieldSet,
         readOnly: node.readOnly,
         columnCount: node.columnCount,
         columnWidth: node.columnWidth,
@@ -656,6 +658,7 @@ NodeUtils.register<EnumCheckboxListNode>({
     render: (dn, ctx) => (<EnumCheckboxList
         ctx={ctx.subCtx(dn.node.field, toStyleOptions(ctx, dn.node.styleOptions))}
         labelText={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.labelText, NodeUtils.isStringOrNull)}
+        avoidFieldSet={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)}
         readOnly={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
         columnCount={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.columnCount, NodeUtils.isNumberOrNull)}
         columnWidth={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.columnWidth, NodeUtils.isNumberOrNull)}
@@ -666,6 +669,7 @@ NodeUtils.register<EnumCheckboxListNode>({
         return (<div>
             <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.labelText)} type="string" defaultValue={m && m.niceName || ""} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false} allowsExpression={false} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.columnCount)} type="number" defaultValue={null} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.columnWidth)} type="number" defaultValue={200} />
@@ -682,6 +686,7 @@ export interface EntityCheckboxListNode extends EntityListBaseNode {
     kind: "EntityCheckboxList",
     columnCount?: ExpressionOrValue<number>;
     columnWidth?: ExpressionOrValue<number>;
+    avoidFieldSet?: ExpressionOrValue<boolean>;
 }
 
 NodeUtils.register<EntityCheckboxListNode>({
@@ -695,15 +700,18 @@ NodeUtils.register<EntityCheckboxListNode>({
     renderCode: (node, cc) => cc.elementCode("EntityCheckboxList", {...cc.getEntityBasePropsEx(node, { showMove: false }),
         columnCount: node.columnCount,
         columnWidth: node.columnWidth,
+        avoidFieldSet: node.avoidFieldSet,
     }),
     render: (dn, ctx) => (<EntityCheckboxList {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: false }) }
         columnCount={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.columnCount, NodeUtils.isNumberOrNull)}
         columnWidth={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.columnWidth, NodeUtils.isNumberOrNull)}
+        avoidFieldSet={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)}
         />),
     renderDesigner: dn => <div>
         {NodeUtils.designEntityBase(dn, { isCreable: false, isFindable: false, isViewable: false, showAutoComplete: false, showMove: false })}
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.columnCount)} type="number" defaultValue={null} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.columnWidth)} type="number" defaultValue={200} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false} allowsExpression={false} />
     </div>
 });
 
@@ -758,6 +766,7 @@ NodeUtils.register<EntityStripNode>({
 
 export interface EntityRepeaterNode extends EntityListBaseNode {
     kind: "EntityRepeater",
+    avoidFieldSet?: ExpressionOrValue<boolean>;
 }
 
 NodeUtils.register<EntityRepeaterNode>({
@@ -769,13 +778,21 @@ NodeUtils.register<EntityRepeaterNode>({
     hasCollection: true,
     validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
     renderTreeNode: NodeUtils.treeNodeKindField,
-    renderCode: (node, cc) => cc.elementCode("EntityRepeater",cc.getEntityBasePropsEx(node, { showMove: true })),
-    render: (dn, ctx) => (<EntityRepeater {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: true }) } />),
-    renderDesigner: dn => NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: false, showAutoComplete: false, showMove: true })
+    renderCode: (node, cc) => cc.elementCode("EntityRepeater", { ...cc.getEntityBasePropsEx(node, { showMove: true }), avoidFieldSet: node.avoidFieldSet }),
+    render: (dn, ctx) => (<EntityRepeater
+        {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: true }) }
+        avoidFieldSet={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)}
+    />),
+    renderDesigner: dn =>
+        <div>
+            {NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: false, showAutoComplete: false, showMove: true })}
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false} allowsExpression={false} />
+        </div>
 });
 
 export interface EntityTabRepeaterNode extends EntityListBaseNode {
     kind: "EntityTabRepeater",
+    avoidFieldSet?: ExpressionOrValue<boolean>;
 }
 
 NodeUtils.register<EntityTabRepeaterNode>({
@@ -787,13 +804,20 @@ NodeUtils.register<EntityTabRepeaterNode>({
     hasCollection: true,
     validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
     renderTreeNode: NodeUtils.treeNodeKindField,
-    renderCode: (node, cc) => cc.elementCode("EntityTabRepeater", cc.getEntityBasePropsEx(node, { showMove: true })),
-    render: (dn, ctx) => (<EntityTabRepeater {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: true }) } />),
-    renderDesigner: dn => NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: false, showAutoComplete: false, showMove: true })
+    renderCode: (node, cc) => cc.elementCode("EntityTabRepeater", { ...cc.getEntityBasePropsEx(node, { showMove: true }), avoidFieldSet: node.avoidFieldSet }),
+    render: (dn, ctx) => (<EntityTabRepeater
+        {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: true }) }
+        avoidFieldSet={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)} />),
+    renderDesigner: dn =>
+        <div>
+            {NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: false, showAutoComplete: false, showMove: true })}
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false} allowsExpression={false} />
+        </div>
 });
 
 export interface EntityTableNode extends EntityListBaseNode {
     kind: "EntityTable",
+    avoidFieldSet?: ExpressionOrValue<boolean>;
 }
 
 NodeUtils.register<EntityTableNode>({
@@ -808,15 +832,19 @@ NodeUtils.register<EntityTableNode>({
     renderTreeNode: NodeUtils.treeNodeKindField,
     renderCode: (node, cc) => cc.elementCode("EntityTable", {
         ...cc.getEntityBasePropsEx(node, { showMove: true, avoidGetComponent: true }),
+        avoidFieldSet: node.avoidFieldSet,
         columns: ({ __code__: "EntityTable.typedColumns<YourEntityHere>(" + cc.stringifyObject(node.children.map((col: EntityTableColumnNode) => ({ __code__: NodeUtils.renderCode(col, cc) }))) + ")" })
     }),
     render: (dn, ctx) => (<EntityTable
         columns={dn.node.children.length == 0 ? undefined : dn.node.children.filter(c => NodeUtils.validate(dn.createChild(c), ctx) == null).map((col: EntityTableColumnNode) => NodeUtils.render(dn.createChild(col), ctx) as any)}
-        {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: true, avoidGetComponent: true }) } />),
+        {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: true, avoidGetComponent: true }) }
+        avoidFieldSet={NodeUtils.evaluateAndValidate(ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)} />),
 
-    renderDesigner: dn => <div>
-        {NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: false, showAutoComplete: false, showMove: true })}
-    </div>
+    renderDesigner: dn =>
+        <div>
+            {NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: false, showAutoComplete: false, showMove: true })}
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.avoidFieldSet)} type="boolean" defaultValue={false} allowsExpression={false} />
+        </div>
 });
 
 export interface EntityTableColumnNode extends ContainerNode {
@@ -861,7 +889,6 @@ NodeUtils.register<EntityTableColumnNode>({
 export interface SearchControlNode extends BaseNode {
     kind: "SearchControl",
     findOptions?: FindOptionsExpr;
-
     searchOnLoad?: ExpressionOrValue<boolean>;
     showHeader?: ExpressionOrValue<boolean>;
     showFilters?: ExpressionOrValue<boolean>;
@@ -870,8 +897,6 @@ export interface SearchControlNode extends BaseNode {
     allowChangeColumns?: ExpressionOrValue<boolean>;
     create?: ExpressionOrValue<boolean>;
     navigate?: ExpressionOrValue<boolean>;
-
-  
 }
 
 NodeUtils.register<SearchControlNode>({
