@@ -39,7 +39,17 @@ namespace Signum.Engine.MachineLearning
             }
         }
 
-        public static byte[] GetCsv(this PredictorEntity predictor, string separator = ";")
+        public static byte[] GetTsv(this PredictorEntity predictor)
+        {
+            return predictor.GetCsv(separator: "\t");
+        }
+
+        public static byte[] GetTsvMetadata(this PredictorEntity predictor)
+        {
+            return new byte[0];
+        }
+
+        public static byte[] GetCsv(this PredictorEntity predictor, string separator = null)
         {
             ResultTable result = DynamicQueryManager.Current.ExecuteQuery(predictor.ToQueryRequest());
 
@@ -56,7 +66,7 @@ namespace Signum.Engine.MachineLearning
                 Filters = predictor.Filters.Select(f => new Filter(f.Token.Token, f.Operation, FilterValueConverter.Parse(f.ValueString, f.Token.Token.Type, f.Operation.IsList()))).ToList(),
                 Columns = predictor.Columns.Select(c => new Column(c.Token.Token, null)).ToList(),
                 Pagination = new Pagination.All(),
-                Orders = new Order[0].ToList(),
+                Orders = Enumerable.Empty<Order>().ToList(),
             };
         }
 
