@@ -66,6 +66,7 @@ namespace Signum.Entities.Dynamic
 
         static ConcurrentDictionary<string, CompilationResult> resultCache = new ConcurrentDictionary<string, CompilationResult>();
 
+
         public static CompilationResult Compile(IEnumerable<string> assemblies, string code)
         {
             return resultCache.GetOrAdd(code, _ =>
@@ -99,6 +100,19 @@ namespace Signum.Entities.Dynamic
                             {
                                 CompilationErrors = errors.Count() + " Errors:\r\n" + errors.ToString(e => "Line {0}: {1}".FormatWith(e.Line, e.ErrorText) + "\r\n" + lines[e.Line - 1], "\r\n\r\n")
                             };
+                        }
+
+                        if (DynamicCode.GetCustomErrors != null)
+                        {
+                            var allCustomErrors = DynamicCode.GetCustomErrors.GetInvocationListTyped().SelectMany(a => a(code) ?? new List<CompilerError>()).ToList();
+                            if (allCustomErrors.Any())
+                            {
+                                var lines = code.Split('\n');
+                                return new CompilationResult
+                                {
+                                    CompilationErrors = allCustomErrors.Count() + " Errors:\r\n" + allCustomErrors.ToString(e => "Line {0}: {1}".FormatWith(e.Line, e.ErrorText) + "\r\n" + lines[e.Line - 1], "\r\n\r\n")
+                                };
+                            }
                         }
 
                         Assembly assembly = compiled.CompiledAssembly;

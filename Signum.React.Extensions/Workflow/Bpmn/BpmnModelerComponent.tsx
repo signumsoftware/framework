@@ -64,7 +64,6 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                 result = true;
 
             if (BpmnUtils.isTaskAnyKind(e.type) && (
-                ((model as WorkflowActivityModel).validationRules.length > 0) ||
                 (model as WorkflowActivityModel).script != null ||
                 ((model as WorkflowActivityModel).timeout != null && (model as WorkflowActivityModel).timeout!.action != null) ||
                 ((model as WorkflowActivityModel).jumps.length > 0 && (model as WorkflowActivityModel).jumps!.filter(j => j.element.action != null || j.element.condition != null).length > 0)))
@@ -293,9 +292,6 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
                 var clone: ModelEntity = JSON.parse(JSON.stringify(model));
                 if (WorkflowLaneModel.isInstance(clone))
                     clone.actors.forEach(a => a.rowId = null);
-
-                if (WorkflowActivityModel.isInstance(clone))
-                    clone.validationRules.forEach(a => a.rowId = null);
 
                 this.props.entities[obj.element.id] = clone ;
             }

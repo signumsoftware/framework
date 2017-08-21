@@ -509,7 +509,7 @@ namespace Signum.Engine.Word
 
         public static void GenerateDefaultTemplates()
         {
-            var systemWordTemplates = Database.Query<SystemWordTemplateEntity>().Where(se => !se.WordTemplates().Any(a => a.Active)).ToList();
+            var systemWordTemplates = Database.Query<SystemWordTemplateEntity>().Where(se => !se.WordTemplates().Any()).ToList();
 
             List<string> exceptions = new List<string>();
 

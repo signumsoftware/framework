@@ -414,7 +414,6 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         var path = Finder.findOptionsPath({
             queryName: this.props.typeName,
             filterOptions: Finder.toFilterOptions(this.state.filterOptions),
-            showFilters: this.state.filterOptions.length > 0
         });
 
         Navigator.pushOrOpenInTab(path, e);

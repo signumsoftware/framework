@@ -55,38 +55,36 @@ export default class AsyncEmailSenderPage extends React.Component<AsyncEmailSend
             <div>
                 <h2>AsyncEmailSender State</h2>
                 <div className="btn-toolbar">
-                    {s.Running && <a href="" className="sf-button btn btn-default active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a> }
-                    {!s.Running && <a href="" className="sf-button btn btn-default" style={{ color: "green" }} onClick={this.handleStart}>Start</a> }
+                    {s.Running && <a href="" className="sf-button btn btn-default active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a>}
+                    {!s.Running && <a href="" className="sf-button btn btn-default" style={{ color: "green" }} onClick={this.handleStart}>Start</a>}
                 </div >
 
                 <div>
                     <br />
-                        State: <strong>
-                            {s.Running ?
-                                <span style={{ color: "Green" }}> RUNNING </span> :
-                                <span style={{ color: "Red" }}> STOPPED </span>
-                            }</strong>
+                    State: <strong>
+                        {s.Running ?
+                            <span style={{ color: "Green" }}> RUNNING </span> :
+                            <span style={{ color: "Red" }}> STOPPED </span>
+                        }</strong>
                     <br />
-                    CurrentProcessIdentifier: { s.CurrentProcessIdentifier }
+                    CurrentProcessIdentifier: {s.CurrentProcessIdentifier}
                     <br />
-                    AsyncSenderPeriod: { s.AsyncSenderPeriod} sec
+                    AsyncSenderPeriod: {s.AsyncSenderPeriod} sec
                     <br />
                     NextPlannedExecution: {s.NextPlannedExecution} ({s.NextPlannedExecution == undefined ? "-None-" : moment(s.NextPlannedExecution).fromNow()})
                     <br />
-                    IsCancelationRequested: { s.IsCancelationRequested }
+                    IsCancelationRequested: {s.IsCancelationRequested}
                     <br />
-                    QueuedItems: { s.QueuedItems }
+                    QueuedItems: {s.QueuedItems}
                 </div>
                 <br />
-                <h2>{EmailMessageEntity.niceName() }</h2>
+                <h2>{EmailMessageEntity.niceName()}</h2>
                 <SearchControl findOptions={{
                     queryName: EmailMessageEntity,
                     orderOptions: [{ columnName: "Entity.CreationDate", orderType: "Descending" }],
-                    searchOnLoad: true,
-                    showFilters: false,
                     pagination: { elementsPerPage: 10, mode: "Firsts" }
-                }}/>
-           </div>
+                }} />
+            </div>
         );
     }
 }

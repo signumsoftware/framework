@@ -30,16 +30,6 @@ export interface FindOptionsExpr {
     paginationMode?: PaginationMode;
     elementsPerPage?: ExpressionOrValue<number>;
     currentPage?: ExpressionOrValue<number>;
-
-    searchOnLoad?: ExpressionOrValue<boolean>;
-    showHeader?: ExpressionOrValue<boolean>;
-    showFilters?: ExpressionOrValue<boolean>;
-    showFilterButton?: ExpressionOrValue<boolean>;
-    showFooter?: ExpressionOrValue<boolean>;
-    allowChangeColumns?: ExpressionOrValue<boolean>;
-    create?: ExpressionOrValue<boolean>;
-    navigate?: ExpressionOrValue<boolean>;
-    contextMenu?: ExpressionOrValue<boolean>;
 }
 
 export interface FilterOptionExpr {
@@ -103,15 +93,6 @@ export function toFindOptions(ctx: TypeContext<ModifiableEntity>, foe: FindOptio
             mode: NodeUtils.evaluateAndValidate(ctx, foe, f => f.paginationMode, v => NodeUtils.isEnumOrNull(v, PaginationMode)),
             currentPage: NodeUtils.evaluateAndValidate(ctx, foe, f => f.currentPage, NodeUtils.isNumberOrNull),
             elementsPerPage: NodeUtils.evaluateAndValidate(ctx, foe, f => f.elementsPerPage, NodeUtils.isNumberOrNull)
-        } as Pagination) : undefined,
-
-        searchOnLoad: NodeUtils.evaluateAndValidate(ctx, foe, f => f.searchOnLoad, NodeUtils.isBooleanOrNull),
-        showFilters: NodeUtils.evaluateAndValidate(ctx, foe, f => f.showFilters, NodeUtils.isBooleanOrNull),
-        showFilterButton: NodeUtils.evaluateAndValidate(ctx, foe, f => f.showFilterButton, NodeUtils.isBooleanOrNull),
-        showFooter: NodeUtils.evaluateAndValidate(ctx, foe, f => f.showFooter, NodeUtils.isBooleanOrNull),
-        allowChangeColumns: NodeUtils.evaluateAndValidate(ctx, foe, f => f.allowChangeColumns, NodeUtils.isBooleanOrNull),
-        create: NodeUtils.evaluateAndValidate(ctx, foe, f => f.create, NodeUtils.isBooleanOrNull),
-        navigate: NodeUtils.evaluateAndValidate(ctx, foe, f => f.navigate, NodeUtils.isBooleanOrNull),
-        contextMenu: NodeUtils.evaluateAndValidate(ctx, foe, f => f.contextMenu, NodeUtils.isBooleanOrNull),
+        } as Pagination) : undefined,     
     }
 }

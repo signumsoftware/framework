@@ -81,9 +81,6 @@ export default class DynamicQueryOmniboxProvider extends OmniboxProvider<Dynamic
             });
         });
 
-        if (fo.filterOptions!.length)
-            fo.searchOnLoad = true;
-
         return Promise.resolve(Finder.findOptionsPath(fo));
     }
 
