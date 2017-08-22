@@ -2,7 +2,7 @@
 import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
 import { Button, OverlayTrigger, Tooltip, MenuItem } from "react-bootstrap"
-import { ajaxPost, ajaxPostRaw, ajaxGet, saveFile } from '../../../Framework/Signum.React/Scripts/Services';
+import { ajaxPost, ajaxPostRaw, ajaxGet, saveFile, ajaxGetRaw } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
@@ -24,12 +24,58 @@ export function start(options: { routes: JSX.Element[] }) {
 
     Navigator.addSettings(new EntitySettings(PredictorEntity, e => import('./Templates/Predictor')));
 
+    QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
+        "Export CSV",
+        "Export CSV",
+        e => API.downloadCsvById(ctx.lite)));
+
+    QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
+        "Export TSV",
+        "Export TSV",
+        e => API.downloadTsvById(ctx.lite)));
+
+    QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
+        "Export TSV Metafile",
+        "Export TSV Metafile",
+        e => API.downloadTsvMetadataById(ctx.lite)));
 }
 
 export namespace API {
-    
-    //export function forQuery(queryKey: string): Promise<Lite<ExcelReportEntity>[]> {
-    //    return ajaxGet<Lite<ExcelReportEntity>[]>({ url: "~/api/excel/reportsFor/" + queryKey });
-    //}
-    
+
+    export function downloadCsv(predictor: PredictorEntity): void {
+        ajaxPostRaw({ url: "~/api/predictor/csv/" }, predictor)
+            .then(response => saveFile(response))
+            .done();
+    }
+
+    export function downloadTsv(predictor: PredictorEntity): void {
+        ajaxPostRaw({ url: "~/api/predictor/tsv/" }, predictor)
+            .then(response => saveFile(response))
+            .done();
+    }
+
+    export function downloadTsvMetadata(predictor: PredictorEntity): void {
+        ajaxPostRaw({ url: "~/api/predictor/tsv/metadata" }, predictor)
+            .then(response => saveFile(response))
+            .done();
+    }
+
+    export function downloadCsvById(lite: Lite<PredictorEntity>): void {
+        ajaxGetRaw({ url: `~/api/predictor/csv/${lite.id}` })
+            .then(response => saveFile(response))
+            .done();
+    }
+
+    export function downloadTsvById(lite: Lite<PredictorEntity>): void {
+        ajaxGetRaw({ url: `~/api/predictor/tsv/${lite.id}` })
+            .then(response => saveFile(response))
+            .done();
+    }
+
+    export function downloadTsvMetadataById(lite: Lite<PredictorEntity>): void {
+        ajaxGetRaw({ url: `~/api/predictor/tsv/${lite.id}/metadata` })
+            .then(response => saveFile(response))
+            .done();
+    }
+
 }

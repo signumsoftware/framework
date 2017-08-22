@@ -10,6 +10,7 @@ import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Ref
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import { QueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
+import { API } from '../PredictorClient';
 
 export default class Predictor extends React.Component<{ ctx: TypeContext<PredictorEntity> }> {
 
@@ -18,6 +19,18 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
         e.filters = [];
         e.columns = [];
         this.forceUpdate();
+    }
+
+    handleCsv = () => {
+        API.downloadCsv(this.props.ctx.value);
+    }
+
+    handleTsv = () => {
+        API.downloadTsv(this.props.ctx.value);
+    }
+
+    handleTsvMetadata = () => {
+        API.downloadTsvMetadata(this.props.ctx.value);
     }
 
     render() {
@@ -57,8 +70,13 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                     ])} />
 
                 </div>}
+                <div className="btn-group" role="group" aria-label="...">
+                    <button type="button" className="btn btn-default" onClick={this.handleCsv}>CSV</button>
+                    <button type="button" className="btn btn-default" onClick={this.handleTsv}>TSV</button>
+                    <button type="button" className="btn btn-default" onClick={this.handleTsvMetadata}>TSV Metadata</button>
+                    <button type="button" className="btn btn-default" onClick={() => window.open("http://projector.tensorflow.org/", "_blank")}>Tensorflow Projector</button>
+                </div>
             </div>
         );
     }
 }
-
