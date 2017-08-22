@@ -5,8 +5,8 @@ export function setOrder(order: number, element: React.ReactElement<any>) {
     return element && React.cloneElement(element, { order });
 }
 
-export function getOrder(element: React.ReactElement<any>): number | undefined {
-    return element.props.order;
+export function getOrder(element: React.ReactElement<any>): number {
+    return element.props.order || 0;
 }
 
 export function cloneElementWithoutOrder(element: React.ReactElement<any>, extraProps?: any) {
