@@ -42,7 +42,7 @@ export default class UserQueryPage extends React.Component<UserQueryPageProps, {
 
         const lite = entity == undefined ? undefined : parseLite(entity);
 
-        Navigator.API.fillToStrings(lite ? [lite] : [])
+        Navigator.API.fillToStrings(lite)
             .then(() => Navigator.API.fetchEntity(UserQueryEntity, userQueryId))
             .then(uc => {
                 this.setState({ userQuery: uc });

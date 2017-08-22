@@ -44,7 +44,7 @@ export default class UserChartPage extends React.Component<UserChartPageProps, {
 
         const lite = entity == undefined ? undefined : parseLite(entity);
 
-        Navigator.API.fillToStrings(lite ? [lite]: [])
+        Navigator.API.fillToStrings(lite)
             .then(()=> Navigator.API.fetchEntity(UserChartEntity, userChartId))
             .then(uc => {
                 this.setState({ userChart : uc });
