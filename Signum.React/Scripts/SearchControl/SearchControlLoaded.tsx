@@ -408,7 +408,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         ]
             .filter(a => a)
             .map(a => a as React.ReactElement<any>)
-            .orderBy(a => OrderUtils.getOrder(a) || 0)
+            .orderBy(a => OrderUtils.getOrder(a))
             .map(a => OrderUtils.cloneElementWithoutOrder(a!));
 
         return React.cloneElement(<div className={classes("sf-query-button-bar btn-toolbar", !this.props.largeToolbarButtons && "btn-toolbar-small")} />, undefined, ...buttons);
