@@ -21,7 +21,7 @@ interface CaseFlowButtonProps {
     caseActivity: CaseActivityEntity;
 }
 
-export default class CaseFlowButton extends React.Component < CaseFlowButtonProps>{
+export default class CaseFlowButton extends React.Component <CaseFlowButtonProps>{
 
     handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
