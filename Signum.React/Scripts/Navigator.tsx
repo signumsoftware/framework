@@ -647,7 +647,11 @@ function cloneEntity(obj: any) {
 
 export module API {
 
-    export function fillToStrings<T extends Entity>(lites: Lite<T>[]): Promise<void> {
+    export function fillToStrings(...lites: (Lite<Entity> | null | undefined)[]) : Promise < void> {
+        return fillToStringsArray(lites.filter(l => l != null) as Lite<Entity>[]);
+    }
+
+    export function fillToStringsArray(lites: Lite<Entity>[]): Promise<void> {
 
         const realLites = lites.filter(a => a.toStr == undefined && a.entity == undefined);
 

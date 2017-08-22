@@ -584,7 +584,7 @@ export function parseFilterValues(filterOptions: FilterOptionParsed[]): Promise<
     if (needToStr.length == 0)
         return Promise.resolve(undefined);
 
-    return Navigator.API.fillToStrings(needToStr)
+    return Navigator.API.fillToStringsArray(needToStr)
 }
 
 
