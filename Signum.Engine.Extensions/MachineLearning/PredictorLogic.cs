@@ -56,7 +56,7 @@ namespace Signum.Engine.MachineLearning
             /** convert the data table into a list structure, so that we can pass it to the CSV serializer */
             var matrix = result.Rows.Select(r => result.Columns.Select(c => r[c]).ToList()).ToList();
 
-            return Csv.ToCsvBytes(matrix, separator: separator);
+            return Csv.ToCsvBytes(matrix);
         }
 
         public static QueryRequest ToQueryRequest(this PredictorEntity predictor)
