@@ -71,7 +71,7 @@ namespace Signum.Engine.Extensions.Basics
                 {
                     ident.FieldInfo = lazy.Value.GetOrThrow(ident.Key).FieldInfo;
                 }
-                catch (Exception e) when(StartParameters.IgnoredDatabaseMismatches != null)
+                catch (Exception e) when (StartParameters.IgnoredDatabaseMismatches != null)
                 {
                     //Could happen when not 100% synchronized
                     StartParameters.IgnoredDatabaseMismatches.Add(e);
