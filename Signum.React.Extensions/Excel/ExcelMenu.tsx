@@ -1,7 +1,7 @@
 ﻿
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
-import { ButtonDropdown, MenuItem } from 'reactstrap'
+import { ButtonDropdown, DropdownItem } from 'reactstrap'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
@@ -18,16 +18,16 @@ export interface ExcelMenuProps {
     excelReport: boolean;
 }
 
-export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelReport?: Lite<ExcelReportEntity>[] }> {
+export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelReport?: Lite<ExcelReportEntity>[]; dropdownOpen: boolean; }> {
 
     constructor(props: ExcelMenuProps) {
         super(props);
-        this.state = { };
+        this.state = { dropdownOpen: false };
     }
 
-    handleSelectedToggle = (isOpen: boolean) => {
+    handleSelectedToggle = () => {
 
-        if (isOpen && this.state.excelReport == undefined)
+        if (this.state.dropdownOpen && this.state.excelReport == undefined)
             this.reloadList().done();
     }
 
@@ -69,19 +69,19 @@ export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelRe
         const excelReports = this.state.excelReport;
         return (
             <ButtonDropdown title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown"
-                onToggle={this.handleSelectedToggle}>
-                { this.props.plainExcel && <MenuItem onSelect={this.handlePlainExcel} >{label }</MenuItem> }
-                { this.props.plainExcel && excelReports && excelReports.length > 0 && <MenuItem divider/> }
+                toggle={this.handleSelectedToggle}>
+                {this.props.plainExcel && <DropdownItem onSelect={this.handlePlainExcel} >{label}</DropdownItem> }
+                {this.props.plainExcel && excelReports && excelReports.length > 0 && <DropdownItem divider/> }
                 {
                     excelReports && excelReports.map((uq, i) =>
-                        <MenuItem key={i}
+                        <DropdownItem key={i}
                             onSelect={() => this.handleSelect(uq) }>
                             { uq.toStr }
-                        </MenuItem>)
+                        </DropdownItem>)
                 }
-                {  (this.props.plainExcel || excelReports && excelReports.length > 0) && <MenuItem divider/> }
-                <MenuItem onSelect={this.handleAdmnister}>{ExcelMessage.Administer.niceToString() }</MenuItem>
-                <MenuItem onSelect={this.handleCreate}>{ExcelMessage.CreateNew.niceToString() }</MenuItem>
+                {(this.props.plainExcel || excelReports && excelReports.length > 0) && <DropdownItem divider/> }
+                <DropdownItem onSelect={this.handleAdmnister}>{ExcelMessage.Administer.niceToString()}</DropdownItem>
+                <DropdownItem onSelect={this.handleCreate}>{ExcelMessage.CreateNew.niceToString()}</DropdownItem>
             </ButtonDropdown>
         );
     }

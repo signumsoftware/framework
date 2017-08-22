@@ -1,7 +1,7 @@
 
 import * as React from 'react'
 import { Route } from 'react-router'
-import { Tab } from 'react-bootstrap'
+import { TabPane } from 'reactstrap'
 import { ifError } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '../../../Framework/Signum.React/Scripts/Services';
 import { SearchControl, ValueSearchControlLine } from '../../../Framework/Signum.React/Scripts/Search'
@@ -63,12 +63,12 @@ export function start(options: { routes: JSX.Element[] }) {
     DynamicClient.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
     DynamicClient.Options.onGetDynamicLineForPanel.push(ctx => <ValueSearchControlLine ctx={ctx} findOptions={{ queryName: DynamicMixinConnectionEntity }} />);
     DynamicClient.Options.getDynaicMigrationsStep = () =>
-        <Tab eventKey="migrations" title="Migrations" >
+        <TabPane tabId="migrations" title="Migrations" >
             <h3>{DynamicSqlMigrationEntity.nicePluralName()}</h3>
             <SearchControl findOptions={{ queryName: DynamicSqlMigrationEntity }} />
             <h3>{DynamicRenameEntity.nicePluralName()}</h3>
             <SearchControl findOptions={{ queryName: DynamicRenameEntity }} />
-        </Tab>;
+        </TabPane>;
 }
 
 export namespace API {

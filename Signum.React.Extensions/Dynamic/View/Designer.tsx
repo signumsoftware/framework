@@ -13,7 +13,7 @@ import { BaseNode, LineBaseNode } from './Nodes'
 import * as NodeUtils from './NodeUtils'
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
-import { Modal, ModalProps, ModalClass, ButtonToolbar, Button } from 'react-bootstrap'
+import { Modal, ModalHeader, ModalBody, ModalFooter, ButtonToolbar, Button } from 'reactstrap'
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
 import TypeHelpComponent from '../Help/TypeHelpComponent'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
@@ -420,20 +420,20 @@ export class DesignerModal extends React.Component<DesignerModalProps, { show: b
     }
 
     render() {
-        return <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-selector-modal">
-            <Modal.Header closeButton={true}>
+        return <Modal size="lg" isOpen={this.state.show} onExit={this.handleOnExited} className="sf-selector-modal">
+            <ModalHeader>
                 <h4 className="modal-title">
                     {this.props.title}
                 </h4>
                 <ButtonToolbar>
-                    <Button className="sf-entity-button sf-close-button sf-ok-button" bsStyle="primary" onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString()}</Button>
-                    <Button className="sf-entity-button sf-close-button sf-cancel-button" bsStyle="default" onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString()}</Button>
+                    <Button className="sf-entity-button sf-close-button sf-ok-button" color="primary" onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString()}</Button>
+                    <Button className="sf-entity-button sf-close-button sf-cancel-button" color="default" onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString()}</Button>
                 </ButtonToolbar>
-            </Modal.Header>
+            </ModalHeader>
 
-            <Modal.Body>
+            <ModalBody>
                 {this.props.mainComponent()}
-            </Modal.Body>
+            </ModalBody>
         </Modal>;
     }
 

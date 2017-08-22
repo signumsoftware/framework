@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
+import { Modal, ModalHeader, ModalBody, ButtonToolbar } from 'reactstrap'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { openModal, IModalProps } from '../../../Framework/Signum.React/Scripts/Modals';
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -64,8 +64,8 @@ export default class TreeModal extends React.Component<TreeModalProps, { show: b
         const okEnabled = this.selectedNode != null;
 
         return (
-            <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited}>
-                <Modal.Header>
+            <Modal size="lg" isOpen={this.state.show} onExit={this.handleOnExited}>
+                <ModalHeader>
                     <div className="btn-toolbar" style={{ float: "right" }}>
                         <button className="btn btn-primary sf-entity-button sf-close-button sf-ok-button" disabled={!okEnabled} onClick={this.handleOkClicked}>
                             {JavascriptMessage.ok.niceToString()}
@@ -80,9 +80,9 @@ export default class TreeModal extends React.Component<TreeModalProps, { show: b
                             <span className="glyphicon glyphicon-new-window"></span>
                         </a>
                     </h4>
-                </Modal.Header>
+                </ModalHeader>
 
-                <Modal.Body>
+                <ModalBody>
                     <TreeViewer
                         filterOptions={this.props.filterOptions}
                         typeName={this.props.typeName}
@@ -90,7 +90,7 @@ export default class TreeModal extends React.Component<TreeModalProps, { show: b
                         onDoubleClick={this.handleDoubleClick}
                         ref={tv => this.treeView = tv!}
                     />
-                </Modal.Body>
+                </ModalBody>
             </Modal>
         );
     }

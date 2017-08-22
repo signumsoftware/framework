@@ -1,7 +1,7 @@
 
 import * as React from 'react'
 import { Route } from 'react-router'
-import * as ReactBootstrap from 'react-bootstrap'
+import * as Reactstrap from 'reactstrap'
 import * as ReactRouterBootstrap from 'react-router-bootstrap'
 import * as QueryString from 'query-string'
 import { globalModules} from './View/GlobalModules'
@@ -315,31 +315,23 @@ export function asOverrideFunction(dvr: DynamicViewOverrideEntity): (vr: ViewRep
     var FileLine = FileLineModule.default;
 
     // Search
+    var SearchControl = Search.SearchControl;
+    var ValueSearchControl = Search.ValueSearchControl;
     var ValueSearchControlLine = Search.ValueSearchControlLine;
 
-    // ReactBootstrap
-    var Accordion = ReactBootstrap.Accordion;
-    var Badge = ReactBootstrap.Badge;
-    var Button = ReactBootstrap.Button;
-    var ButtonGroup = ReactBootstrap.ButtonGroup;
-    var ButtonToolbar = ReactBootstrap.ButtonToolbar;
-    var Carousel = ReactBootstrap.Carousel;
-    var Checkbox = ReactBootstrap.Checkbox;
-    var Collapse = ReactBootstrap.Collapse;
-    var Dropdown = ReactBootstrap.Dropdown;
-    var DropdownButton = ReactBootstrap.DropdownButton;
-    var Image = ReactBootstrap.Image;
-    var Label = ReactBootstrap.Label;
-    var ListGroup = ReactBootstrap.ListGroup;
-    var MenuItem = ReactBootstrap.MenuItem;
-    var Nav = ReactBootstrap.Nav;
-    var NavbarBrand = ReactBootstrap.NavbarBrand;
-    var NavDropdown = ReactBootstrap.NavDropdown;
-    var Overlay = ReactBootstrap.Overlay;
-    var Tabs = ReactBootstrap.Tabs;
-    var Tab = ReactBootstrap.Tab;
-    var Tooltip = ReactBootstrap.Tooltip;
-    var ProgressBar = ReactBootstrap.ProgressBar;
+    // Reactstrap
+    var Badge = Reactstrap.Badge;
+    var Button = Reactstrap.Button;
+    var ButtonGroup = Reactstrap.ButtonGroup;
+    var ButtonToolbar = Reactstrap.ButtonToolbar;
+    var Collapse = Reactstrap.Collapse;
+    var Dropdown = Reactstrap.Dropdown;
+    var Label = Reactstrap.Label;
+    var ListGroup = Reactstrap.ListGroup;
+    var Nav = Reactstrap.Nav;
+    var NavbarBrand = Reactstrap.NavbarBrand;
+    var NavDropdown = Reactstrap.NavDropdown;
+    var Tooltip = Reactstrap.Tooltip;
 
     // ReactRouterBootstrap
     var LinkContainer = ReactRouterBootstrap.LinkContainer;

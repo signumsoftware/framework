@@ -1,7 +1,7 @@
 ﻿
 import * as React from 'react'
 import { Link, RouteComponentProps } from 'react-router-dom'
-import { Tabs, Tab } from 'react-bootstrap'
+import { TabContent, TabPane } from 'reactstrap'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../Framework/Signum.React/Scripts/Reflection'
@@ -62,17 +62,17 @@ export default class CacheStatisticsPage extends React.Component<CacheStatistics
                     {this.state.isEnabled == false && <a href="#" onClick={this.handleEnabled} className="sf-button btn btn-default" style={{ color: "green" }}>Enabled</a>}
                     {<a href="#" onClick={this.handleClear} className="sf-button btn btn-default" style={{ color: "blue" }}>Clear</a>}
                 </div >
-                <Tabs id="tabs" justified={true}>
+                <TabContent id="tabs">
                     {this.state.tables &&
-                        <Tab title="Tables" eventKey="table">
+                        <TabPane title="Tables" tabId="table">
                             {this.renderTables()}
-                        </Tab>}
+                    </TabPane>}
                     {this.state.lazies &&
-                        <Tab title="Lazies" eventKey="lazy">
+                        <TabPane title="Lazies" tabId="lazy">
                             {this.renderLazies()}
-                        </Tab>
+                    </TabPane>
                     }
-                </Tabs>
+                </TabContent>
 
 
             </div>

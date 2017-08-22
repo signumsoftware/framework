@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
-import { Button, OverlayTrigger, Tooltip, MenuItem } from "reactstrap"
+import { Button, Tooltip, DropdownItem } from "reactstrap"
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -95,7 +95,7 @@ function monkeyPatchCreateContextualMenuItem(){
             processSettings && processSettings.onClick ? processSettings.onClick!(coc) : defaultConstructProcessFromMany(coc)
         }
 
-        const menuItem = <MenuItem
+        const menuItem = <DropdownItem
             className={disabled ? "disabled" : undefined}
             onClick={disabled ? undefined : onClick}
             data-operation={coc.operationInfo.key}
@@ -103,14 +103,17 @@ function monkeyPatchCreateContextualMenuItem(){
             {bsStyle && <span className={"icon empty-icon btn-" + bsStyle}></span>}
             {text}
             <span className="glyphicon glyphicon-cog process-contextual-icon" aria-hidden={true} onClick={processOnClick}></span>
-            </MenuItem>;
+        </DropdownItem>;
 
         if (!coc.canExecute)
             return menuItem;
 
-        const tooltip = <Tooltip target={"tooltip_" + coc.operationInfo.key.replace(".", "_")}>{coc.canExecute}</Tooltip>;
+        const id = "tooltipContainer_" + coc.operationInfo.key.replace(".", "_");
 
-        return <OverlayTrigger placement="right" overlay={tooltip} >{menuItem}</OverlayTrigger>;
+        return <span key={coc.operationInfo.key}>
+            {React.cloneElement(menuItem, { id })}
+            <Tooltip placement="bottom" target={id}>{coc.canExecute}</Tooltip>
+        </span>;
     };
 }
 

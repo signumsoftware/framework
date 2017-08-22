@@ -13,7 +13,7 @@ import ButtonBar from '../../../../Framework/Signum.React/Scripts/Frames/ButtonB
 import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperation, CaseActivityQuery, WorkflowMainEntityStrategy } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 
-import { Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'reactstrap'
+import { Navbar, Nav, NavItem, NavDropdown, DropdownItem } from 'reactstrap'
 import { LinkContainer, IndexLinkContainer } from 'react-router-bootstrap'
 
 export default class WorkflowDropdown extends React.Component<{}, { starts: Array<WorkflowEntity> }>
@@ -35,12 +35,12 @@ export default class WorkflowDropdown extends React.Component<{}, { starts: Arra
         
         return (
             <NavDropdown title={WorkflowEntity.nicePluralName()} id="workflow-dropdown" >
-                <IndexLinkContainer to={inboxUrl}><MenuItem>{CaseActivityQuery.Inbox.niceName()}</MenuItem></IndexLinkContainer>
-                {this.state.starts.length > 0 && <MenuItem divider />}
-                {this.state.starts.length > 0 && <MenuItem disabled>{JavascriptMessage.create.niceToString()}</MenuItem>}
+                <IndexLinkContainer to={inboxUrl}><DropdownItem>{CaseActivityQuery.Inbox.niceName()}</DropdownItem></IndexLinkContainer>
+                {this.state.starts.length > 0 && <DropdownItem divider />}
+                {this.state.starts.length > 0 && <DropdownItem disabled>{JavascriptMessage.create.niceToString()}</DropdownItem>}
                 {this.getStarts().map((val, i) =>
                     <LinkContainer key={i} to={`~/workflow/new/${val.workflow.id}/${val.mainEntityStrategy}`}>
-                        <MenuItem>{val.workflow.toStr}{val.mainEntityStrategy == "SelectByUser" ? `(${WorkflowMainEntityStrategy.niceName(val.mainEntityStrategy)})` : ""}</MenuItem></LinkContainer>
+                        <DropdownItem>{val.workflow.toStr}{val.mainEntityStrategy == "SelectByUser" ? `(${WorkflowMainEntityStrategy.niceName(val.mainEntityStrategy)})` : ""}</DropdownItem></LinkContainer>
                     )}
             </NavDropdown>
         );

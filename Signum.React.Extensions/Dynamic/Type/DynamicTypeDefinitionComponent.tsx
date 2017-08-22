@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { Combobox } from 'react-widgets'
-import { PanelGroup, Panel, Tabs, Tab, MenuItem } from 'react-bootstrap'
+import { TabContent, TabPane, DropdownItem, Card, CardTitle, CardText, Collapse } from 'reactstrap'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
@@ -214,10 +214,10 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                     </div>
                 }
 
-                <Tabs unmountOnExit={true} defaultActiveKey="properties" id="DynamicTypeTabs" onSelect={this.handleTabSelect}>
-                    <Tab eventKey="properties" title="Properties">
+                <TabContent activeTab="properties" id="DynamicTypeTabs" onSelect={this.handleTabSelect}>
+                    <TabPane tabId="properties" title="Properties">
                         <PropertyRepeaterComponent dc={this.props.dc} properties={def.properties} onRemove={this.handlePropertyRemoved} showDatabaseMapping={this.props.showDatabaseMapping} />
-                        <br/>
+                        <br />
                         {dt.baseType == "Entity" &&
                             <MultiColumnUniqueIndexFieldsetComponent
                                 binding={Binding.create(def, d => d.multiColumnUniqueIndex)}
@@ -240,16 +240,16 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                             <legend>ToString expression</legend>
                             <CSharpExpressionCodeMirror binding={Binding.create(def, d => d.toStringExpression)} signature={"(" + (dt.typeName || "") + dt.baseType + " e) =>"} />
                         </fieldset>
-                    </Tab>
+                    </TabPane>
 
                     {dt.baseType == "Entity" &&
-                        <Tab eventKey="query" title="Query">
+                        <TabPane tabId="query" title="Query">
                             <ComboBoxRepeaterComponent options={["e.Id"].concat(propNames).concat(expressionNames)} list={def.queryFields} />
-                        </Tab>
+                        </TabPane>
                     }
 
                     {dt.baseType == "Entity" &&
-                        <Tab unmountOnExit={true} eventKey="operations" title="Operations">
+                        <TabPane tabId="operations" title="Operations">
                             <div className="row">
                                 <div className="col-sm-7">
                                     <CreateOperationFieldsetComponent
@@ -291,25 +291,25 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                                     }
                                 </div>
                             </div>
-                        </Tab>
+                        </TabPane>
                     }
 
-                    <Tab unmountOnExit={true} eventKey="customCode" title="Custom Code">
+                    <TabPane tabId="customCode" title="Custom Code">
                         <CustomCodeTab definition={def} dynamicType={dt} />
-                    </Tab>
+                    </TabPane>
 
                     {!dt.isNew && dt.baseType == "MixinEntity" &&
-                        <Tab eventKey="connections" title="Apply To">
+                        <TabPane tabId="connections" title="Apply To">
                             <SearchControl findOptions={{
                                 queryName: DynamicMixinConnectionEntity,
                                 parentColumn: "DynamicMixin",
                                 parentValue: dt
                             }} />
-                        </Tab>
+                        </TabPane>
                     }
 
                     {!dt.isNew && dt.baseType == "Entity" && this.state.typeEntity != null &&
-                        <Tab eventKey="connections" title="Mixins">
+                        <TabPane tabId="connections" title="Mixins">
                             {this.state.typeEntity == false ? <p className="alert alert-warning">{DynamicTypeMessage.TheEntityShouldBeSynchronizedToApplyMixins.niceToString()}</p> :
                                 <SearchControl findOptions={{
                                     queryName: DynamicMixinConnectionEntity,
@@ -317,15 +317,15 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                                     parentValue: this.state.typeEntity
                                 }} />
                             }
-                        </Tab>
+                        </TabPane>
                     }
 
                     {!dt.isNew && dt.baseType == "Entity" &&
-                        <Tab eventKey="other" title="Other">
+                        <TabPane tabId="other" title="Other">
                             {this.renderOthers()}
-                        </Tab>
+                        </TabPane>
                     }
-                </Tabs>
+                </TabContent>
             </div>
         );
     }
@@ -741,7 +741,7 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
     }
 
     handleSelect = (activeIndex: number) => {
-        this.setState({ activeIndex });
+        this.setState({ activeIndex: this.state.activeIndex == activeIndex ? undefined : activeIndex });
     }
 
     handleOnRemove = (event: React.MouseEvent<any>, index: number) => {
@@ -815,14 +815,17 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
     render() {
         return (
             <div className="properties">
-                <PanelGroup activeKey={this.state.activeIndex} onSelect={this.handleSelect as any} accordion>
+                <div>
                     {
                         this.props.properties.map((p, i) =>
-                            <Panel header={this.renderPropertyHeader(p, i)} eventKey={i} key={i} bsStyle="info">
-                                <PropertyComponent property={p} dc={this.props.dc} showDatabaseMapping={this.props.showDatabaseMapping} />
-                            </Panel>)
+                            <Collapse isOpen={this.state.activeIndex == i}>
+                                <Card key={i} color="info">
+                                    <CardTitle onClick={() => this.handleSelect(i)}>{this.renderPropertyHeader(p, i)}</CardTitle>
+                                    <CardText><PropertyComponent property={p} dc={this.props.dc} showDatabaseMapping={this.props.showDatabaseMapping} /></CardText>
+                                </Card>
+                            </Collapse>)
                     }
-                </PanelGroup>
+                </div>
                 <a title="Create Property"
                     className="sf-line-button sf-create"
                     onClick={this.handleCreateClick}>
@@ -1178,9 +1181,10 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
                 <div className="panel-group">
                     {
                         (this.props.property.validators || []).map((val, i) =>
-                            <Panel header={this.renderHeader(val, i)} eventKey={i} key={i} bsStyle="warning">
+                            <Card key={i} color="warning">
+                                <CardTitle>{this.renderHeader(val, i)}</CardTitle>
                                 {registeredValidators[val.type].render && registeredValidators[val.type].render!(val, this.props.dc)}
-                            </Panel>)
+                            </Card>)
                     }
                 </div>
                 <a title="Create Validator"

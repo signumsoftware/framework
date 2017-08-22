@@ -33,7 +33,7 @@ export default class PropertyRulesPackControl extends React.Component<{ ctx: Typ
 
     renderButtons(bc: ButtonsContext) {
         return [
-            <Button bsStyle="primary" onClick={() => this.handleSaveClick(bc) }>{AuthMessage.Save.niceToString() }</Button>
+            <Button color="primary" onClick={() => this.handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button>
         ];
     }
 

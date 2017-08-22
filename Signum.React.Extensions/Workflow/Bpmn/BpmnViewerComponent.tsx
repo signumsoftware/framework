@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { DropdownButton, MenuItem, Button } from 'react-bootstrap'
+import { ButtonDropdown, DropdownItem, Button } from 'reactstrap'
 import {
     WorkflowEntitiesDictionary, WorkflowActivityModel, WorkflowActivityType, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity,
     IWorkflowNodeEntity, CaseFlowColor, CaseActivityEntity, CaseEntity, WorkflowMessage
@@ -144,12 +144,12 @@ export default class BpmnViewerComponent extends React.Component<BpmnViewerCompo
         });
     }
 
-    handleSearchClick = (e: React.MouseEvent<Button>) => {
+    handleSearchClick = (e: React.MouseEvent<any>) => {
         var searchPad = this.viewer.get<any>("searchPad");
         searchPad.toggle();
     }
 
-    handleZoomClick = (e: React.MouseEvent<Button>) => {
+    handleZoomClick = (e: React.MouseEvent<any>) => {
         var zoomScroll = this.viewer.get<any>("zoomScroll");
         zoomScroll.reset();
     }
@@ -158,11 +158,11 @@ export default class BpmnViewerComponent extends React.Component<BpmnViewerCompo
         return (
             <div>
                 <Button style={{ marginLeft: "20px" }} onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>{" "}
-                <DropdownButton title={"Color: " + CaseFlowColor.niceName(this.state.caseFlowColor)} id="colorMenu" onSelect={this.handleChangeColor}>
+                <ButtonDropdown title={"Color: " + CaseFlowColor.niceName(this.state.caseFlowColor)} id="colorMenu" onSelect={this.handleChangeColor}>
                     {this.menuItem("CaseMaxDuration")}
                     {this.menuItem("AverageDuration")}
                     {this.menuItem("EstimatedDuration")}
-                </DropdownButton>{" "}
+                </ButtonDropdown>{" "}
                 <Button onClick={this.handleSearchClick}>{JavascriptMessage.search.niceToString()}</Button>
                 <div ref={de => this.divArea = de!} />
             </div>
@@ -171,6 +171,6 @@ export default class BpmnViewerComponent extends React.Component<BpmnViewerCompo
 
 
     menuItem(color: CaseFlowColor) {
-        return <MenuItem eventKey={color} selected={this.state.caseFlowColor == color}>{CaseFlowColor.niceName(color)}</MenuItem>
+        return <DropdownItem itemID={color} defaultChecked={this.state.caseFlowColor == color}>{CaseFlowColor.niceName(color)}</DropdownItem>
     }
 }

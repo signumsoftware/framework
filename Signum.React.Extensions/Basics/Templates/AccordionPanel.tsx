@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
-import { Panel, PanelGroup } from "reactstrap";
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { BsStyle } from "../../../../Framework/Signum.React/Scripts/Operations";
+import { Collapse } from "../../../../Framework/Signum.React/node_modules/@types/reactstrap";
 
 export interface AccordionPanelState {
     activeIndex?: number;
@@ -15,18 +15,18 @@ export default class AccordionPanel extends React.Component<{}, AccordionPanelSt
     }
 
     handleSelect = (activeIndex: number) => {
-        this.setState({ activeIndex });
+        this.setState({ activeIndex: this.state.activeIndex == activeIndex ? undefined : activeIndex });
     }
 
     render() {
         return (
             <div>
-                <PanelGroup activeKey={this.state.activeIndex} onSelect={this.handleSelect as any} accordion>
-                    {
-                        React.Children.map(this.props.children,
-                            (p, i) => React.cloneElement((p as React.ReactElement<any>), { eventKey: i, key: i }))
-                    }
-                </PanelGroup>
+                {
+                    React.Children.map(this.props.children,
+                        (p, i) => <Collapse isOpen={this.state.activeIndex == i} key={i} >
+                            {p}
+                        </Collapse>)
+                }
             </div>);
     }
 }

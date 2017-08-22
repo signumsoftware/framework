@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
+import { Modal, ModalHeader, ModalBody, ButtonToolbar } from 'reactstrap'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
 import { SelectorMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -48,15 +48,15 @@ export default class NodeSelectorModal extends React.Component<NodeSelectorModal
             .groupBy(n => n.group!)
             .groupsOf(nodes.length / 3, g => g.elements.length);
 
-        return <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-selector-modal">
-            <Modal.Header closeButton={true}>
+        return <Modal size="lg" isOpen={this.state.show} onExit={this.handleOnExited} className="sf-selector-modal">
+            <ModalHeader>
                 
                 <h4 className="modal-title">
                     {DynamicViewMessage.SelectATypeOfComponent.niceToString()}
                     </h4>
-            </Modal.Header>
+            </ModalHeader>
 
-            <Modal.Body>
+            <ModalBody>
                 <div className="row">
                     {
                         columns.map((c, i) =>
@@ -76,7 +76,7 @@ export default class NodeSelectorModal extends React.Component<NodeSelectorModal
                             </div>)
                     }
                 </div>
-            </Modal.Body>
+            </ModalBody>
         </Modal>;
     }
 

@@ -112,8 +112,8 @@ export default class WorkflowScriptRunnerPanelPage extends React.Component<Workf
                     showFilters: false,
                     pagination: { elementsPerPage: 10, mode: "Firsts" }
                 }} />
-                <TabContent unmountOnExit={true} id="tabs" defaultActiveKey="logs">
-                    <TabPane title="Last operation logs" eventKey="logs">
+                <TabContent id="tabs" activeTab="logs">
+                    <TabPane title="Last operation logs" tabId="logs">
                         <SearchControl findOptions={{
                             queryName: OperationLogEntity,
                             filterOptions: [
@@ -130,7 +130,7 @@ export default class WorkflowScriptRunnerPanelPage extends React.Component<Workf
                             pagination: { elementsPerPage: 10, mode: "Firsts" }
                         }} />
                     </TabPane>
-                    <TabPane title="Last executed activities" eventKey="lastActivities">
+                    <TabPane title="Last executed activities" tabId="lastActivities">
                         <SearchControl findOptions={{
                             queryName: CaseActivityEntity,
                             filterOptions: [

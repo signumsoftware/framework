@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
-import { Button, Panel } from "react-bootstrap"
+import { Button } from "reactstrap"
 import { Binding, LambdaMemberType } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { newMListElement } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -49,7 +49,7 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
                                 <ValueLine ctx={ctx4.subCtx(o => o.toDate)} />
                             </div>
                             <div className="col-sm-1">
-                                <Button bsStyle="warning" className="btn" onClick={this.handleOnClearFiltersClick}>{InboxMessage.Clear.niceToString()}</Button>
+                                <Button color="warning" className="btn" onClick={this.handleOnClearFiltersClick}>{InboxMessage.Clear.niceToString()}</Button>
                             </div>
                         </div>
                     </div>}

@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Button } from 'react-bootstrap'
+import { Button } from 'reactstrap'
 import * as numbro from 'numbro'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
@@ -33,7 +33,7 @@ export default class QueryRulesPackControl extends React.Component<{ ctx: TypeCo
 
     renderButtons(bc: ButtonsContext) {
         return [
-            <Button bsStyle="primary" onClick={() => this.handleSaveClick(bc) }>{AuthMessage.Save.niceToString() }</Button>
+            <Button color="primary" onClick={() => this.handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button>
         ];
     }
 

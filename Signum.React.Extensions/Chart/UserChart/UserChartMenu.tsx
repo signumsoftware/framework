@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { ButtonDropdown, MenuItem, } from 'reactstrap'
+import { ButtonDropdown, DropdownItem } from 'reactstrap'
 import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { Lite, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -16,17 +16,17 @@ export interface UserChartMenuProps {
     chartRequestView: ChartRequestView;
 }
 
-export default class UserChartMenu extends React.Component<UserChartMenuProps, { currentUserChart?: UserChartEntity, userCharts?: Lite<UserChartEntity>[] }> {
+export default class UserChartMenu extends React.Component<UserChartMenuProps, { currentUserChart?: UserChartEntity, userCharts?: Lite<UserChartEntity>[], dropdownOpen: boolean; }> {
 
     constructor(props: UserChartMenuProps) {
         super(props);
-        this.state = { currentUserChart: props.chartRequestView.props.userChart };
+        this.state = { currentUserChart: props.chartRequestView.props.userChart, dropdownOpen: false };
     }
 
 
-    handleSelectedToggle = (isOpen: boolean) => {
+    handleSelectedToggle = () => {
 
-        if (isOpen && this.state.userCharts == undefined)
+        if (this.state.dropdownOpen && this.state.userCharts == undefined)
             this.reloadList().done();
     }
 
@@ -74,20 +74,20 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, {
         const label = <span><i className="glyphicon glyphicon-stats"></i> &nbsp; {UserChartEntity.nicePluralName()}</span>;
         const userCharts = this.state.userCharts;
         return (
-            <DropdownButton title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown"
-                onToggle={this.handleSelectedToggle}>
+            <ButtonDropdown title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown"
+                toggle={this.handleSelectedToggle}>
                 {
                     userCharts && userCharts.map((uc, i) =>
-                        <MenuItem key={i}
+                        <DropdownItem key={i}
                             className={classes("sf-userquery", is(uc, this.state.currentUserChart) && "active") }
                             onSelect={() => this.handleSelect(uc) }>
                             { uc.toStr }
-                        </MenuItem>)
+                        </DropdownItem>)
                 }
-                { userCharts && userCharts.length > 0 && <MenuItem divider/> }
-                { this.state.currentUserChart && <MenuItem onSelect={this.handleEdit} >{ChartMessage.EditUserChart.niceToString() }</MenuItem> }
-                <MenuItem onSelect={this.handleCreate}>{ChartMessage.CreateNew.niceToString() }</MenuItem>
-            </DropdownButton>
+                {userCharts && userCharts.length > 0 && <DropdownItem divider/> }
+                {this.state.currentUserChart && <DropdownItem onSelect={this.handleEdit} >{ChartMessage.EditUserChart.niceToString()}</DropdownItem> }
+                <DropdownItem onSelect={this.handleCreate}>{ChartMessage.CreateNew.niceToString()}</DropdownItem>
+            </ButtonDropdown>
         );
     }
  

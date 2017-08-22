@@ -1,7 +1,7 @@
 ﻿
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
-import { ButtonDropdown, MenuItem } from 'reactstrap'
+import { ButtonDropdown, DropdownItem } from 'reactstrap'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
@@ -62,10 +62,10 @@ export default class MailingMenu extends React.Component<MailingMenuProps, { wor
             <ButtonDropdown title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown">
                 {
                     this.state.wordReports.map((wt, i) =>
-                        <MenuItem key={i}
+                        <DropdownItem key={i}
                             onSelect={() => this.handleSelect(wt) }>
                             { wt.toStr }
-                        </MenuItem>)
+                        </DropdownItem>)
                 }
             </ButtonDropdown>
         );

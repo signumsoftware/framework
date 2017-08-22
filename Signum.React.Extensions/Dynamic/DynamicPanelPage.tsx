@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Tabs, Tab } from 'react-bootstrap'
+import { TabContent, TabPane } from 'reactstrap'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
 import { classes } from '../../../Framework/Signum.React/Scripts/Globals'
@@ -68,27 +68,27 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
                         </p>
                     </div>
                 }
-                <Tabs activeKey={step || "compile"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} onSelect={this.handleSelect}>
-                    <Tab eventKey="compile" title="1. Edit and Compile">
+                <TabContent activeTab={step || "compile"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} onSelect={this.handleSelect}>
+                    <TabPane tabId="compile" title="1. Edit and Compile">
                         <CompileStep />
-                    </Tab>
+                    </TabPane>
 
-                    <Tab eventKey="restartServer" title="2. Restart Server">
+                    <TabPane tabId="restartServer" title="2. Restart Server">
                         <RestartServerStep
                             startErrors={this.state.startErrors}
                             setStartErrors={errors => this.setState({ startErrors: errors })} />
-                    </Tab>
+                    </TabPane>
 
                     {Options.getDynaicMigrationsStep &&
 
-                        <Tab eventKey="migrations" title="3. Sql Migrations">
+                        <TabPane tabId="migrations" title="3. Sql Migrations">
                             {Options.getDynaicMigrationsStep()}
-                        </Tab>
+                    </TabPane>
                     }
-                    <Tab eventKey="refreshClients" title={(Options.getDynaicMigrationsStep ? "4." : "3.") + " Refresh Clients"}>
+                    <TabPane tabId="refreshClients" title={(Options.getDynaicMigrationsStep ? "4." : "3.") + " Refresh Clients"}>
                         <RefreshClientsStep />
-                    </Tab>
-                </Tabs>
+                    </TabPane>
+                </TabContent>
             </div>
         );
     }

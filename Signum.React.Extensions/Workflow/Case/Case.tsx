@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Tabs, Tab } from "react-bootstrap";
+import { TabContent, TabPane } from "reactstrap";
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { getMixin, toLite, JavascriptMessage, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { ColorTypeaheadLine } from '../../Basics/Templates/ColorTypeahead'
@@ -77,8 +77,8 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
                     </div>
                 </div>
 
-                <Tabs id="caseTabs">
-                    <Tab eventKey="CaseFlow" title={WorkflowActivityMessage.CaseFlow.niceToString()}>
+                <TabContent id="caseTabs">
+                    <TabPane tabId="CaseFlow" title={WorkflowActivityMessage.CaseFlow.niceToString()}>
                         {this.state.initialXmlDiagram && this.state.entities && this.state.caseFlow ?
                             <div className="code-container">
                                 <BpmnViewerComponent ref={m => this.bpmnViewerComponent = m}
@@ -89,8 +89,8 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
                                     caseActivity={this.props.caseActivity}
                                 /></div> :
                             <h3>{JavascriptMessage.loading.niceToString()}</h3>}
-                    </Tab>
-                    <Tab eventKey="CaseActivities" title={WorkflowActivityEntity.nicePluralName()}>
+                    </TabPane>
+                    <TabPane tabId="CaseActivities" title={WorkflowActivityEntity.nicePluralName()}>
                         <SearchControl findOptions={{
                             queryName: CaseActivityEntity,
                             parentColumn: "Case",
@@ -100,8 +100,8 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
                                 orderType: "Ascending",
                             }]
                         }} />
-                    </Tab>
-                </Tabs>
+                    </TabPane>
+                </TabContent>
             </div>
         );
     }

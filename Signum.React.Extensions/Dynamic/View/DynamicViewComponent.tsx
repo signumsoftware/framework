@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { DropdownButton, MenuItem } from 'react-bootstrap'
+import { ButtonDropdown, DropdownItem } from 'reactstrap'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ModifiableEntity, OperationSymbol, JavascriptMessage, NormalWindowMessage, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
@@ -44,7 +44,7 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
             dynamicView: props.initialDynamicView,
             isDesignerOpen: false,
             rootNode: rootNode,
-            selectedNode: this.getZeroNode().createChild(rootNode)
+            selectedNode: this.getZeroNode().createChild(rootNode),
         };
     }
 
@@ -124,14 +124,15 @@ interface DynamicViewDesignerProps {
     onLoseChanges: () => Promise<boolean>;
     onReload: (dynamicView: DynamicViewEntity) => void;
     typeName: string;
+    
 }
 
 
-class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { viewNames?: string[]; }>{
+class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { viewNames?: string[]; dropdownOpen: boolean; }>{
 
     constructor(props: DynamicViewDesignerProps) {
         super(props);
-        this.state = {};
+        this.state = { dropdownOpen: false };
     }
 
     render() {
@@ -210,11 +211,16 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { vi
         }).done();
     }
 
-    handleOnToggle = (isOpen: boolean) => {
-        if (isOpen && !this.state.viewNames)
-            DynamicViewClient.API.getDynamicViewNames(this.props.typeName)
-                .then(viewNames => this.setState({ viewNames: viewNames }))
-                .done();
+    handleToggle = () => {
+
+        this.setState({
+            dropdownOpen: !this.state.dropdownOpen
+        }, () => {
+            if (this.state.dropdownOpen && !this.state.viewNames)
+                DynamicViewClient.API.getDynamicViewNames(this.props.typeName)
+                    .then(viewNames => this.setState({ viewNames: viewNames }))
+                    .done();
+        });
     }
 
     handleShowCode = () => {
@@ -230,17 +236,17 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { vi
             <div className="btn-group btn-group-sm" role="group" style={{ marginBottom: "5px" }}>
                 {operations[DynamicViewOperation.Save.key] && <button type="button" className="btn btn-primary" onClick={this.handleSave}>{operations[DynamicViewOperation.Save.key].niceName}</button>}
                 <button type="button" className="btn btn-success" onClick={this.handleShowCode}>Show code</button>
-                <DropdownButton title=" … " id="bg-nested-dropdown" onToggle={this.handleOnToggle} bsSize="sm">
-                    {operations[DynamicViewOperation.Create.key] && <MenuItem eventKey="create" onSelect={this.handleCreate}>{operations[DynamicViewOperation.Create.key].niceName}</MenuItem>}
-                    {operations[DynamicViewOperation.Clone.key] && !this.props.dynamicView.isNew && <MenuItem eventKey="clone" onSelect={this.handleClone}>{operations[DynamicViewOperation.Clone.key].niceName}</MenuItem>}
-                    {this.state.viewNames && this.state.viewNames.length > 0 && <MenuItem divider={true} />}
-                    {this.state.viewNames && this.state.viewNames.map(vn => <MenuItem key={vn}
-                        eventKey={"view-" + vn}
+                <ButtonDropdown title=" … " id="bg-nested-dropdown" toggle={this.handleToggle} isOpen={this.state.dropdownOpen} size="sm">
+                    {operations[DynamicViewOperation.Create.key] && <DropdownItem id="create" onSelect={this.handleCreate}>{operations[DynamicViewOperation.Create.key].niceName}</DropdownItem>}
+                    {operations[DynamicViewOperation.Clone.key] && !this.props.dynamicView.isNew && <DropdownItem id="clone" onSelect={this.handleClone}>{operations[DynamicViewOperation.Clone.key].niceName}</DropdownItem>}
+                    {this.state.viewNames && this.state.viewNames.length > 0 && <DropdownItem divider={true} />}
+                    {this.state.viewNames && this.state.viewNames.map(vn => <DropdownItem key={vn}
+                        id={"view-" + vn}
                         className={classes("sf-dynamic-view", vn == this.props.dynamicView.viewName && "active")}
                         onSelect={() => this.handleChangeView(vn)}>
                         {vn}
-                    </MenuItem>)}
-                </DropdownButton>
+                    </DropdownItem>)}
+                </ButtonDropdown>
             </div >);
     }
 }

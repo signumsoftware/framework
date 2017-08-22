@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Tabs, Tab } from 'react-bootstrap'
+import { TabContent, TabPane } from 'reactstrap'
 import {
     FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityTable,
     EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip, RenderEntity
@@ -155,9 +155,9 @@ NodeUtils.register<TabsNode>({
         defaultActiveKey: node.defaultActiveKey
     }, node),
     render: (dn, parentCtx) => {
-        return NodeUtils.withChildrensSubCtx(dn, parentCtx, <Tabs
-            id={parentCtx.compose(NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.id, NodeUtils.isString) !)}
-            defaultActiveKey={dn.node.defaultActiveKey} />);
+        return NodeUtils.withChildrensSubCtx(dn, parentCtx, <TabContent
+            id={parentCtx.compose(NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.id, NodeUtils.isString)!)}
+            activeTab={dn.node.defaultActiveKey} />);
     },
     renderDesigner: (dn) => (<div>
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
@@ -197,9 +197,9 @@ NodeUtils.register<TabNode>({
         eventKey: node.eventKey
     }, node),
     render: (dn, parentCtx) => {
-        return NodeUtils.withChildrensSubCtx(dn, parentCtx, <Tab
+        return NodeUtils.withChildrensSubCtx(dn, parentCtx, <TabPane
             title={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.title, NodeUtils.isString)}
-            eventKey={dn.node.eventKey} />);
+            tabId={dn.node.eventKey} />);
     },
     renderDesigner: (dn) => (<div>
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />

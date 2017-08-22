@@ -59,10 +59,10 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
                     </div>
                 <br />
                 <TabContent id="timesTabs">
-                    <TabPane eventKey="bars" title="Bars">
+                    <TabPane tabId="bars" title="Bars">
                         {this.renderBars()}
                     </TabPane>
-                    <TabPane eventKey="table" title="Table">
+                    <TabPane tabId="table" title="Table">
                         {this.renderTable()}
                     </TabPane>
                 </TabContent>

@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { MenuItem } from 'react-bootstrap'
+import { DropdownItem } from 'reactstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
 import { DynamicViewOverrideEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
@@ -101,13 +101,13 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
     handleRenderContextualMenu = (pr: PropertyRoute) => {
         const lambda = "e => " + TypeHelpComponent.getExpression("e", pr, "Typescript");
         return (
-            <MenuItem>
-                <MenuItem header>{pr.propertyPath()}</MenuItem>
-                <MenuItem divider />
-                <MenuItem onClick={() => this.handleRemoveClick(lambda)}><i className="fa fa-trash" aria-hidden="true" />&nbsp; Remove</MenuItem>
-                <MenuItem onClick={() => this.handleInsertBeforeClick(lambda)}><i className="glyphicon glyphicon-menu-left" aria-hidden="true" />&nbsp; Insert Before</MenuItem>
-                <MenuItem onClick={() => this.handleInsertAfterClick(lambda)}><i className="glyphicon glyphicon-menu-right" aria-hidden="true" />&nbsp; Insert After</MenuItem>
-            </MenuItem>
+            <DropdownItem>
+                <DropdownItem header>{pr.propertyPath()}</DropdownItem>
+                <DropdownItem divider />
+                <DropdownItem onClick={() => this.handleRemoveClick(lambda)}><i className="fa fa-trash" aria-hidden="true" />&nbsp; Remove</DropdownItem>
+                <DropdownItem onClick={() => this.handleInsertBeforeClick(lambda)}><i className="glyphicon glyphicon-menu-left" aria-hidden="true" />&nbsp; Insert Before</DropdownItem>
+                <DropdownItem onClick={() => this.handleInsertAfterClick(lambda)}><i className="glyphicon glyphicon-menu-right" aria-hidden="true" />&nbsp; Insert After</DropdownItem>
+            </DropdownItem>
         );
     }
 

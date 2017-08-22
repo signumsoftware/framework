@@ -159,11 +159,11 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         var pack = this.state.pack;
 
         return (
-            <Modal bsSize="lg" onHide={this.handleCloseClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-popup-control" >
-                <ModalHeader closeButton={this.props.isNavigate}>
+            <Modal size="lg" isOpen={this.state.show} onExit={this.handleOnExited} className="sf-popup-control" >
+                <ModalHeader>
                     {!this.props.isNavigate && <ButtonToolbar className="pull-right flip">
-                        <Button className="sf-entity-button sf-close-button sf-ok-button" bsStyle="primary" disabled={!pack} onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString()}</Button>
-                        <Button className="sf-entity-button sf-close-button sf-cancel-button" bsStyle="default" disabled={!pack} onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString()}</Button>
+                        <Button className="sf-entity-button sf-close-button sf-ok-button" color="primary" disabled={!pack} onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString()}</Button>
+                        <Button className="sf-entity-button sf-close-button sf-cancel-button" color="default" disabled={!pack} onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString()}</Button>
                     </ButtonToolbar>}
                     {this.renderTitle() }
                 </ModalHeader>

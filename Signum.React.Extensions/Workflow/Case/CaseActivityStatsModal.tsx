@@ -43,9 +43,9 @@ export default class CaseActivityStatsModal extends React.Component<CaseActivity
     render() {
 
         var caseActivityStats = this.props.caseActivityStats;
-        return <Modal bsSize="lg" onHide={this.handleCloseClicked} show={this.state.show} onExited={this.handleOnExited}>
+        return <Modal size="lg" isOpen={this.state.show} onExit={this.handleOnExited}>
 
-            <ModalHeader closeButton={true}>
+            <ModalHeader>
                 <h4 className="modal-title">
                     {caseActivityStats.first().WorkflowActivity.toStr} ({caseActivityStats.length} {caseActivityStats.length == 1 ? CaseActivityEntity.niceName() : CaseActivityEntity.nicePluralName()})
                 </h4>
@@ -58,7 +58,7 @@ export default class CaseActivityStatsModal extends React.Component<CaseActivity
                             <TabContent id="statsTabs">
                                 {
                                     caseActivityStats.map(a =>
-                                        <TabPane key={a.CaseActivity.id} eventKey={a.CaseActivity.id} title={
+                                        <TabPane key={a.CaseActivity.id} tabId={a.CaseActivity.id} title={
                                             a.DoneDate == null ? CaseActivityMessage.Pending.niceToString() :
                                                 <span>{a.DoneBy.toStr} {DoneType.niceName(a.DoneType)} <mark>({moment(a.DoneDate).fromNow()})</mark></span> as any}>
                                             <CaseActivityStatsComponent stats={a} caseEntity={this.props.case} />
