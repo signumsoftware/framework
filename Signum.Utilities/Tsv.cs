@@ -53,7 +53,7 @@ namespace Signum.Utilities
                         {
                             var obj = row[i];
 
-                            var str = EncodeTsv(ConvertToString(obj));
+                            var str = ConvertToString(obj);
 
                             sw.Write(str);
                             if (i < row.Count - 1)
@@ -81,7 +81,7 @@ namespace Signum.Utilities
                         {
                             var obj = members[i].Getter(item);
 
-                            var str = EncodeTsv(toString[i](obj));
+                            var str = toString[i](obj);
 
                             sw.Write(str);
                             if (i < members.Count - 1)
@@ -92,14 +92,6 @@ namespace Signum.Utilities
                     }
                 }
             }
-        }
-
-
-        static string EncodeTsv(string p)
-        {
-            if (p != null && p.Contains('\t'))
-                throw new InvalidDataException("TSV fields can't contain the tab character, found one in value: " + p);
-            return p;
         }
 
         private static Func<object, string> GetToString<T>(TsvColumnInfo<T> column, Func<TsvColumnInfo<T>, Func<object, string>> toStringFactory)
@@ -123,7 +115,12 @@ namespace Signum.Utilities
             if (obj is IFormattable f)
                 return f.ToString(null, Culture);
             else
-                return obj.ToString();
+            {
+                var p = obj.ToString();
+                if (p != null && p.Contains(tab))
+                    throw new InvalidDataException("TSV fields can't contain the tab character, found one in value: " + p);
+                return p;
+            }
         }
 
         static string HandleSpaces(string p)
@@ -155,70 +152,35 @@ namespace Signum.Utilities
             var members = columns.Select(c => c.MemberEntry).ToList();
             var parsers = columns.Select(c => GetParser(c, options.ParserFactory)).ToList();
 
-            if (options.AsumeSingleLine)
+
+            using (StreamReader sr = new StreamReader(stream, encoding))
             {
-                using (StreamReader sr = new StreamReader(stream, encoding))
+                for (int i = 0; i < skipLines; i++)
+                    sr.ReadLine();
+
+                var line = skipLines;
+                while (true)
                 {
-                    for (int i = 0; i < skipLines; i++)
-                        sr.ReadLine();
+                    string tsvLine = sr.ReadLine();
 
-                    var line = skipLines;
-                    while (true)
+                    if (tsvLine == null)
+                        yield break;
+
+                    T t = null;
+                    try
                     {
-                        string tsvLine = sr.ReadLine();
-
-                        if (tsvLine == null)
-                            yield break;
-
-                        T t = null;
-                        try
-                        {
-                            t = ReadObject<T>(tsvLine, members, parsers);
-                        }
-                        catch (Exception e)
-                        {
-                            e.Data["row"] = line;
-
-                            if (options.SkipError == null || !options.SkipError(e, tsvLine))
-                                throw new ParseCsvException(e);
-                        }
-
-                        if (t != null)
-                            yield return t;
+                        t = ReadObject<T>(tsvLine, members, parsers);
                     }
-                }
-            }
-            else
-            {
-                using (StreamReader sr = new StreamReader(stream, encoding))
-                {
-                    var lines = sr.ReadToEnd().Split(new []{ Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries);
-
-                    if (skipLines > 0)
-                        lines = lines.Skip(skipLines).ToArray();
-
-                    int lineNumber = skipLines;
-                    foreach (var line in lines)
+                    catch (Exception e)
                     {
-                        if (line.Length > 0)
-                        {
-                            T t = null;
-                            try
-                            {
-                                t = ReadObject<T>(line, members, parsers);
-                            }
-                            catch (Exception e)
-                            {
-                                e.Data["row"] = lineNumber;
+                        e.Data["row"] = line;
 
-                                if (options.SkipError == null || !options.SkipError(e, line))
-                                    throw new ParseCsvException(e);
-                            }
-                            if (t != null)
-                                yield return t;
-                        }
-                        lineNumber++;
+                        if (options.SkipError == null || !options.SkipError(e, tsvLine))
+                            throw new ParseCsvException(e);
                     }
+
+                    if (t != null)
+                        yield return t;
                 }
             }
         }
@@ -278,9 +240,7 @@ namespace Signum.Utilities
 
 
 
-        static ConcurrentDictionary<char, Regex> regexCache = new ConcurrentDictionary<char, Regex>();
-
-
+        
         static class ColumnInfoCache<T>
         {
             public static List<TsvColumnInfo<T>> Columns = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties | MemberOptions.Typed | MemberOptions.Setters | MemberOptions.Getter)
@@ -314,9 +274,7 @@ namespace Signum.Utilities
     public class TsvReadOptions<T> where T : class
     {
         public Func<TsvColumnInfo<T>, Func<string, object>> ParserFactory;
-        public bool AsumeSingleLine = false;
         public Func<Exception, string, bool> SkipError;
-        public TimeSpan RegexTimeout = Regex.InfiniteMatchTimeout;
     }
 
 
