@@ -166,7 +166,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
 
         return (
             <h3>
-                <CaseFlowButton caseActivity={this.state.pack.activity} />
+                {!activity.case.isNew && <CaseFlowButton caseActivity={this.state.pack.activity} />}
                 <span className="sf-entity-title">{ getToString(activity) }</span>
                 <br/>
                 <small className="sf-type-nice-name">{Navigator.getTypeTitle(activity, undefined)}</small>
