@@ -36,12 +36,13 @@ namespace Signum.Engine.MachineLearning
                     });
 
                 sb.Schema.EntityEvents<PredictorEntity>().Retrieved += PredictorLogic_Retrieved;
+
             }
         }
 
         public static byte[] GetTsv(this PredictorEntity predictor)
         {
-            return predictor.GetCsv(separator: "\t");
+            return predictor.GetCsv();
         }
 
         public static byte[] GetTsvMetadata(this PredictorEntity predictor)
@@ -49,26 +50,59 @@ namespace Signum.Engine.MachineLearning
             return new byte[0];
         }
 
-        public static byte[] GetCsv(this PredictorEntity predictor, string separator = ",")
+        public static byte[] GetCsv(this PredictorEntity predictor)
         {
-            ResultTable result = DynamicQueryManager.Current.ExecuteQuery(predictor.ToQueryRequest());
+            ResultTable result = DynamicQueryManager.Current.ExecuteQuery(predictor.ToQueryRequest().QueryRequest);
 
             /** convert the data table into a list structure, so that we can pass it to the CSV serializer */
             var matrix = result.Rows.Select(r => result.Columns.Select(c => r[c]).ToList()).ToList();
 
-            return Csv.ToCsvBytes(matrix, separator: separator);
+            return Csv.ToCsvBytes(matrix);
         }
 
-        public static QueryRequest ToQueryRequest(this PredictorEntity predictor)
+        public static PartialQuery ToQueryRequest(this PredictorEntity predictor)
         {
-            return new QueryRequest()
+            var columns = predictor.Columns.Where(c => !c.Token.Token.HasAllOrAny()).ToList();
+
+            return new PartialQuery
             {
-                QueryName = predictor.Query.ToQueryName(),
-                Filters = predictor.Filters.Select(f => new Filter(f.Token.Token, f.Operation, FilterValueConverter.Parse(f.ValueString, f.Token.Token.Type, f.Operation.IsList()))).ToList(),
-                Columns = predictor.Columns.Select(c => new Column(c.Token.Token, null)).ToList(),
-                Pagination = new Pagination.All(),
-                Orders = Enumerable.Empty<Order>().ToList(),
+                IsMList = false,
+                Columns = columns,
+                QueryRequest = new QueryRequest()
+                {
+                    QueryName = predictor.Query.ToQueryName(),
+                    Filters = predictor.Filters.Select(f => new Filter(f.Token.Token, f.Operation, FilterValueConverter.Parse(f.ValueString, f.Token.Token.Type, f.Operation.IsList()))).ToList(),
+                    Columns = columns.Select(c => new Column(c.Token.Token, null)).ToList(),
+                    Pagination = new Pagination.All(),
+                    Orders = Enumerable.Empty<Order>().ToList(),
+                },
             };
+        }
+
+        public static PartialQuery ToQueryRequest<T>(this MList<T> list)
+        {
+            return null;
+        }
+
+        public static List<PartialQuery> ToQueryRequests(this PredictorEntity predictor)
+        {
+            //var simpleColumns = predictor.Columns.Where(c => !c.Token.Token.HasMListPredecessor()).ToList();
+            //var listColumns = predictor.Columns.Where(c => c.Token.Token.HasMListPredecessor()).ToList();
+
+            return null;
+        }
+
+        public static object[][] AssembleResults(List<PartialQuery> queries)
+        {
+            return null;
+        }
+
+        public class PartialQuery {
+            public bool IsMList;
+            public List<PredictorColumnEmbedded> Columns;
+            public QueryRequest QueryRequest;
+            public ResultTable ResultTable;
+            object[][] Data;
         }
 
         static void PredictorLogic_Retrieved(PredictorEntity predictor)

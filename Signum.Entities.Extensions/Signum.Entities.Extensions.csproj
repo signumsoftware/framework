@@ -123,6 +123,7 @@
     <Compile Include="Dynamic\DynamicCode.cs" />
     <Compile Include="Dynamic\Dynamic.cs" />
     <Compile Include="Dynamic\DynamicMixinConnection.cs" />
+    <Compile Include="MachineLearning\PredictorMessage.cs" />
     <Compile Include="Mailing\ImageAttachmentEntity.cs" />
     <Compile Include="Migrations\ExecutedLoadProcess.cs" />
     <Compile Include="Templating\TemplateApplicable.cs" />

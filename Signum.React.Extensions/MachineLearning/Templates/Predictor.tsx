@@ -21,16 +21,13 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
         this.forceUpdate();
     }
 
-    handleCsv = () => {
-        API.downloadCsv(this.props.ctx.value);
-    }
+    handleChange = (column: PredictorColumnEmbedded) => {
+        if (column.type == "SimpleColumn")
+            column.multiColumn = null;
+        else
+            column.token = null;
 
-    handleTsv = () => {
-        API.downloadTsv(this.props.ctx.value);
-    }
-
-    handleTsvMetadata = () => {
-        API.downloadTsvMetadata(this.props.ctx.value);
+        this.forceUpdate();
     }
 
     render() {
@@ -58,24 +55,22 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                     ])} />
 
                     <EntityTable ctx={ctxxs.subCtx(e => e.columns)} columns={EntityTable.typedColumns<PredictorColumnEmbedded>([
+                        { property: a => a.usage },
+                        { property: a => a.type, template: ctx => <ValueLine ctx={ctx.subCtx(a => a.type)} onChange={() => this.handleChange(ctx.value)} /> },
                         {
                             property: a => a.token,
-                            template: ctx => <QueryTokenEntityBuilder
-                                ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
-                                queryKey={this.props.ctx.value.query!.key}
-                                subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />,
+                            template: ctx => ctx.value.type == "SimpleColumn" ?
+                                <QueryTokenEntityBuilder
+                                    ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
+                                    queryKey={this.props.ctx.value.query!.key}
+                                    subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} /> :
+                                <EntityLine ctx={ctx.subCtx(a => a.multiColumn)} />,
                             headerHtmlAttributes: { style: { width: "40%" } },
                         },
-                        { property: a => a.type },
+
                     ])} />
 
                 </div>}
-                <div className="btn-group" role="group" aria-label="...">
-                    <button type="button" className="btn btn-default" onClick={this.handleCsv}>CSV</button>
-                    <button type="button" className="btn btn-default" onClick={this.handleTsv}>TSV</button>
-                    <button type="button" className="btn btn-default" onClick={this.handleTsvMetadata}>TSV Metadata</button>
-                    <button type="button" className="btn btn-default" onClick={() => window.open("http://projector.tensorflow.org/", "_blank")}>Tensorflow Projector</button>
-                </div>
             </div>
         );
     }

@@ -12,7 +12,7 @@ import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
-import { PredictorEntity } from './Signum.Entities.MachineLearning'
+import { PredictorEntity, PredictorMessage } from './Signum.Entities.MachineLearning'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as ChartClient from '../Chart/ChartClient'
@@ -25,40 +25,28 @@ export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(PredictorEntity, e => import('./Templates/Predictor')));
 
     QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
-        "Export CSV",
-        "Export CSV",
+        PredictorMessage.DownloadCsv.niceToString(),
+        PredictorMessage.DownloadCsv.niceToString(),
         e => API.downloadCsvById(ctx.lite)));
 
     QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
-        "Export TSV",
-        "Export TSV",
+        PredictorMessage.DownloadTsv.niceToString(),
+        PredictorMessage.DownloadTsv.niceToString(),
         e => API.downloadTsvById(ctx.lite)));
 
     QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
-        "Export TSV Metafile",
-        "Export TSV Metafile",
+        PredictorMessage.DownloadTsvMetadata.niceToString(),
+        PredictorMessage.DownloadTsvMetadata.niceToString(),
         e => API.downloadTsvMetadataById(ctx.lite)));
+
+    QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
+        PredictorMessage.OpenTensorflowProjector.niceToString(),
+        PredictorMessage.OpenTensorflowProjector.niceToString(),
+        e => window.open("http://projector.tensorflow.org/", "_blank")));
+
 }
 
 export namespace API {
-
-    export function downloadCsv(predictor: PredictorEntity): void {
-        ajaxPostRaw({ url: "~/api/predictor/csv/" }, predictor)
-            .then(response => saveFile(response))
-            .done();
-    }
-
-    export function downloadTsv(predictor: PredictorEntity): void {
-        ajaxPostRaw({ url: "~/api/predictor/tsv/" }, predictor)
-            .then(response => saveFile(response))
-            .done();
-    }
-
-    export function downloadTsvMetadata(predictor: PredictorEntity): void {
-        ajaxPostRaw({ url: "~/api/predictor/tsv/metadata" }, predictor)
-            .then(response => saveFile(response))
-            .done();
-    }
 
     export function downloadCsvById(lite: Lite<PredictorEntity>): void {
         ajaxGetRaw({ url: `~/api/predictor/csv/${lite.id}` })

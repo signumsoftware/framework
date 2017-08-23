@@ -32,11 +32,18 @@ export const PredictorColumnEmbedded = new Type<PredictorColumnEmbedded>("Predic
 export interface PredictorColumnEmbedded extends Entities.EmbeddedEntity {
     Type: "PredictorColumnEmbedded";
     type?: PredictorColumnType;
+    usage?: PredictorColumnUsage;
     token?: UserAssets.QueryTokenEmbedded | null;
+    multiColumn?: PredictorMultiColumnEntity | null;
 }
 
 export const PredictorColumnType = new EnumType<PredictorColumnType>("PredictorColumnType");
 export type PredictorColumnType =
+    "SimpleColumn" |
+    "MultiColumn";
+
+export const PredictorColumnUsage = new EnumType<PredictorColumnUsage>("PredictorColumnUsage");
+export type PredictorColumnUsage =
     "Input" |
     "Output";
 
@@ -47,6 +54,22 @@ export interface PredictorEntity extends Entities.Entity {
     name?: string | null;
     filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
     columns: Entities.MList<PredictorColumnEmbedded>;
+}
+
+export module PredictorMessage {
+    export const DownloadCsv = new MessageKey("PredictorMessage", "DownloadCsv");
+    export const DownloadTsv = new MessageKey("PredictorMessage", "DownloadTsv");
+    export const DownloadTsvMetadata = new MessageKey("PredictorMessage", "DownloadTsvMetadata");
+    export const OpenTensorflowProjector = new MessageKey("PredictorMessage", "OpenTensorflowProjector");
+}
+
+export const PredictorMultiColumnEntity = new Type<PredictorMultiColumnEntity>("PredictorMultiColumn");
+export interface PredictorMultiColumnEntity extends Entities.Entity {
+    Type: "PredictorMultiColumn";
+    query?: Basics.QueryEntity | null;
+    filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
+    groupKeys: Entities.MList<UserAssets.QueryTokenEmbedded>;
+    aggregates: Entities.MList<UserAssets.QueryTokenEmbedded>;
 }
 
 export module PredictorOperation {

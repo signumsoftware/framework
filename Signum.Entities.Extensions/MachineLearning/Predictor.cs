@@ -10,6 +10,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Signum.Entities.DynamicQuery;
+using System.Reflection;
 
 namespace Signum.Entities.MachineLearning
 {
@@ -35,7 +36,6 @@ namespace Signum.Entities.MachineLearning
 
         internal void ParseData(QueryDescription qd)
         {
-
             if (Filters != null)
                 foreach (var f in Filters)
                     f.ParseData(this, qd, SubTokensOptions.CanAnyAll);
@@ -51,13 +51,60 @@ namespace Signum.Entities.MachineLearning
     {
         public PredictorColumnType Type { get; set; }
 
-        [NotNullable]
-        [NotNullValidator]
+        public PredictorColumnUsage Usage { get; set; }
+
         public QueryTokenEmbedded Token { get; set; }
-        
+
+        public PredictorMultiColumnEntity MultiColumn { get; set; }
+
         public void ParseData(Entity context, QueryDescription description, SubTokensOptions options)
         {
             Token.ParseData(context, description, options);
+        }
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            return base.PropertyValidation(pi) ?? StateValidator.Validate(this, pi);
+        }
+
+        static readonly StateValidator<PredictorColumnEmbedded, PredictorColumnType> StateValidator = new StateValidator<PredictorColumnEmbedded, PredictorColumnType>
+            (p => p.Type, p => p.Token, p => p.MultiColumn)
+        {
+            { PredictorColumnType.SimpleColumn, true, false },
+            { PredictorColumnType.MultiColumn, false, true},
+        };
+    }
+
+    [Serializable, EntityKind(EntityKind.Part, EntityData.Transactional)]
+    public class PredictorMultiColumnEntity : Entity
+    {
+        [NotNullable, NotNullValidator]
+        public QueryEntity Query { get; set; }
+
+        [NotNullable, PreserveOrder]
+        public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
+
+        [NotNullable, PreserveOrder]
+        [NotNullValidator, NoRepeatValidator]
+        public MList<QueryTokenEmbedded> GroupKeys { get; set; } = new MList<QueryTokenEmbedded>();
+
+        [NotNullable, PreserveOrder]
+        [NotNullValidator, NoRepeatValidator]
+        public MList<QueryTokenEmbedded> Aggregates { get; set; } = new MList<QueryTokenEmbedded>();
+
+        public void ParseData(QueryDescription description)
+        {
+            if (Filters != null)
+                foreach (var f in Filters)
+                    f.ParseData(this, description, SubTokensOptions.CanAnyAll);
+
+            if (GroupKeys != null)
+                foreach (var k in GroupKeys)
+                    k.ParseData(this, description, SubTokensOptions.CanElement);
+
+            if (Aggregates != null)
+                foreach (var a in Aggregates)
+                    a.ParseData(this, description, SubTokensOptions.CanElement);
         }
     }
 
@@ -93,6 +140,12 @@ namespace Signum.Entities.MachineLearning
     }
 
     public enum PredictorColumnType
+    {
+        SimpleColumn,
+        MultiColumn,
+    }
+
+    public enum PredictorColumnUsage
     {
         Input,
         Output
