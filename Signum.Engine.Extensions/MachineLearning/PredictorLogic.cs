@@ -47,7 +47,7 @@ namespace Signum.Engine.MachineLearning
 
         public static byte[] GetTsv(this PredictorEntity predictor)
         {
-            ResultTable result = DynamicQueryManager.Current.ExecuteQuery(predictor.ToQueryRequest());
+            ResultTable result = DynamicQueryManager.Current.ExecuteQuery(predictor.ToQueryRequest().QueryRequest);
 
             /** convert the data table into a list structure, so that we can pass it to the CSV serializer */
             var matrix = result.Rows.Select(r => result.Columns.Select(c => r[c]).ToList()).ToList();
