@@ -275,7 +275,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
                 <span className="sf-entity-title">{this.props.title || getToString(activity) }</span>&nbsp;
                 {this.renderExpandLink() }
                 <br />
-                <CaseFlowButton caseActivity={this.state.pack.activity} />
+                {!activity.case.isNew && <CaseFlowButton caseActivity={this.state.pack.activity} />}
                 <small> {Navigator.getTypeTitle(activity, undefined)}</small>
             </h4>
         );
