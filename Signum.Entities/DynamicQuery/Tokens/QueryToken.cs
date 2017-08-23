@@ -285,6 +285,11 @@ namespace Signum.Entities.DynamicQuery
             return Parent != null && Parent.HasAllOrAny(); 
         }
 
+        public virtual bool HasElement()
+        {
+            return Parent != null && Parent.HasElement();
+        }
+
         IEnumerable<QueryToken> EntityProperties(Type type)
         {
             var result = from p in Reflector.PublicInstancePropertiesInOrder(type)
