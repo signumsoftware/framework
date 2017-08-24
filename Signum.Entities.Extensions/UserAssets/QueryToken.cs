@@ -115,7 +115,7 @@ namespace Signum.Entities.UserAssets
 
         public override int GetHashCode()
         {
-            return this.Token.GetHashCode();
+            return this.GetTokenString().GetHashCode();
         }
     }
 

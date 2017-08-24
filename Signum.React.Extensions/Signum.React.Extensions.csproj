@@ -181,6 +181,7 @@
     <Compile Include="Rest\RestServer.cs" />
     <TypeScriptCompile Include="Basics\Templates\AccordionPanel.tsx" />
     <TypeScriptCompile Include="Basics\Templates\CollapsablePanel.tsx" />
+    <TypeScriptCompile Include="MachineLearning\Templates\PredictorMultiColumn.tsx" />
     <TypeScriptCompile Include="Templating\Templates\TemplateApplicable.tsx" />
     <TypeScriptCompile Include="Toolbar\SidebarContainer.tsx" />
     <Compile Include="Toolbar\ToolbarController.cs" />

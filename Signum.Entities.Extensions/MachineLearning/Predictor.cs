@@ -59,7 +59,8 @@ namespace Signum.Entities.MachineLearning
 
         public void ParseData(Entity context, QueryDescription description, SubTokensOptions options)
         {
-            Token.ParseData(context, description, options);
+            if (Token != null)
+                Token.ParseData(context, description, options);
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
@@ -82,7 +83,7 @@ namespace Signum.Entities.MachineLearning
         public QueryEntity Query { get; set; }
 
         [NotNullable, PreserveOrder]
-        public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
+        public MList<QueryFilterEmbedded> AdditionalFilters { get; set; } = new MList<QueryFilterEmbedded>();
 
         [NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
@@ -94,9 +95,9 @@ namespace Signum.Entities.MachineLearning
 
         public void ParseData(QueryDescription description)
         {
-            if (Filters != null)
-                foreach (var f in Filters)
-                    f.ParseData(this, description, SubTokensOptions.CanAnyAll);
+            if (AdditionalFilters != null)
+                foreach (var f in AdditionalFilters)
+                    f.ParseData(this, description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate);
 
             if (GroupKeys != null)
                 foreach (var k in GroupKeys)
@@ -104,7 +105,7 @@ namespace Signum.Entities.MachineLearning
 
             if (Aggregates != null)
                 foreach (var a in Aggregates)
-                    a.ParseData(this, description, SubTokensOptions.CanElement);
+                    a.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate);
         }
     }
 

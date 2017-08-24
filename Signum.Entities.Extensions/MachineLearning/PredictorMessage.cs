@@ -8,6 +8,10 @@ namespace Signum.Entities.MachineLearning
 {
     public enum PredictorMessage
     {
+        Csv,
+        Tsv,
+        TsvMetadata,
+        TensorflowProjector,
         DownloadCsv,
         DownloadTsv,
         DownloadTsvMetadata,

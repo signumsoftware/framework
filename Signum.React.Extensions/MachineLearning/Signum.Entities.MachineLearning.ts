@@ -57,6 +57,10 @@ export interface PredictorEntity extends Entities.Entity {
 }
 
 export module PredictorMessage {
+    export const Csv = new MessageKey("PredictorMessage", "Csv");
+    export const Tsv = new MessageKey("PredictorMessage", "Tsv");
+    export const TsvMetadata = new MessageKey("PredictorMessage", "TsvMetadata");
+    export const TensorflowProjector = new MessageKey("PredictorMessage", "TensorflowProjector");
     export const DownloadCsv = new MessageKey("PredictorMessage", "DownloadCsv");
     export const DownloadTsv = new MessageKey("PredictorMessage", "DownloadTsv");
     export const DownloadTsvMetadata = new MessageKey("PredictorMessage", "DownloadTsvMetadata");
@@ -67,7 +71,7 @@ export const PredictorMultiColumnEntity = new Type<PredictorMultiColumnEntity>("
 export interface PredictorMultiColumnEntity extends Entities.Entity {
     Type: "PredictorMultiColumn";
     query?: Basics.QueryEntity | null;
-    filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
+    additionalFilters: Entities.MList<UserQueries.QueryFilterEmbedded>;
     groupKeys: Entities.MList<UserAssets.QueryTokenEmbedded>;
     aggregates: Entities.MList<UserAssets.QueryTokenEmbedded>;
 }

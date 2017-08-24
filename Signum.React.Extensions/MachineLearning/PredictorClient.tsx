@@ -12,7 +12,7 @@ import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
-import { PredictorEntity, PredictorMessage } from './Signum.Entities.MachineLearning'
+import { PredictorEntity, PredictorMultiColumnEntity, PredictorMessage } from './Signum.Entities.MachineLearning'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as ChartClient from '../Chart/ChartClient'
@@ -23,6 +23,7 @@ import { ChartRequest  } from '../../../Extensions/Signum.React.Extensions/Chart
 export function start(options: { routes: JSX.Element[] }) {
 
     Navigator.addSettings(new EntitySettings(PredictorEntity, e => import('./Templates/Predictor')));
+    Navigator.addSettings(new EntitySettings(PredictorMultiColumnEntity, e => import('./Templates/PredictorMultiColumn')));
 
     QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
         PredictorMessage.DownloadCsv.niceToString(),

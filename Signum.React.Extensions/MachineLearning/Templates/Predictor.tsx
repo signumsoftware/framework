@@ -1,18 +1,42 @@
 ﻿import * as React from 'react'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTable } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTable, IRenderButtons } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
-import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { TypeContext, FormGroupStyle, ButtonsContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import FileLine from '../../../../Extensions/Signum.React.Extensions/Files/FileLine'
-import { PredictorEntity, PredictorColumnEmbedded } from '../Signum.Entities.MachineLearning'
+import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorMultiColumnEntity } from '../Signum.Entities.MachineLearning'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import { QueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { API } from '../PredictorClient';
+import { toLite } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
 
-export default class Predictor extends React.Component<{ ctx: TypeContext<PredictorEntity> }> {
+export default class Predictor extends React.Component<{ ctx: TypeContext<PredictorEntity> }> implements IRenderButtons {
+
+    renderButtons(ctx: ButtonsContext): (React.ReactElement<any> | undefined)[] {
+        return ([
+            <div className="btn-group pull-right">
+                <button type="button" className="btn btn-default" onClick={this.handleCsv}>{PredictorMessage.Csv.niceToString()}</button>
+                <button type="button" className="btn btn-default" onClick={this.handleTsv}>{PredictorMessage.Tsv.niceToString()}</button>
+                <button type="button" className="btn btn-default" onClick={this.handleTsvMetadata}>{PredictorMessage.TsvMetadata.niceToString()}</button>
+                <button type="button" className="btn btn-default" onClick={() => window.open("http://projector.tensorflow.org/", "_blank")}>{PredictorMessage.TensorflowProjector.niceToString()}</button>
+            </div>
+        ]);
+    }
+
+    handleCsv = () => {
+        API.downloadCsvById(toLite(this.props.ctx.value));
+    }
+
+    handleTsv = () => {
+        API.downloadTsvById(toLite(this.props.ctx.value));
+    }
+
+    handleTsvMetadata = () => {
+        API.downloadTsvMetadataById(toLite(this.props.ctx.value));
+    }
 
     handleOnChange = () => {
         const e = this.props.ctx.value;
@@ -28,6 +52,12 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
             column.token = null;
 
         this.forceUpdate();
+    }
+
+    handleCreate = () => {
+        return Promise.resolve(PredictorMultiColumnEntity.New(
+            { query: this.props.ctx.value.query }
+        ))
     }
 
     render() {
@@ -61,10 +91,10 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                             property: a => a.token,
                             template: ctx => ctx.value.type == "SimpleColumn" ?
                                 <QueryTokenEntityBuilder
-                                    ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
+                                    ctx={ctx.subCtx(a => a.token)}
                                     queryKey={this.props.ctx.value.query!.key}
                                     subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} /> :
-                                <EntityLine ctx={ctx.subCtx(a => a.multiColumn)} />,
+                                <EntityLine ctx={ctx.subCtx(a => a.multiColumn)} onCreate={this.handleCreate} />,
                             headerHtmlAttributes: { style: { width: "40%" } },
                         },
 

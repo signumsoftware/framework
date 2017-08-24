@@ -27,12 +27,21 @@ namespace Signum.React.MachineLearning
 
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
-            EntityJsonConverter.AfterDeserilization.Register((PredictorEntity uq) =>
+            EntityJsonConverter.AfterDeserilization.Register((PredictorEntity p) =>
             {
-                if (uq.Query != null)
+                if (p.Query != null)
                 {
-                    var qd = DynamicQueryManager.Current.QueryDescription(uq.Query.ToQueryName());
-                    uq.ParseData(qd);
+                    var qd = DynamicQueryManager.Current.QueryDescription(p.Query.ToQueryName());
+                    p.ParseData(qd);
+                }
+            });
+
+            EntityJsonConverter.AfterDeserilization.Register((PredictorMultiColumnEntity mc) =>
+            {
+                if (mc.Query != null)
+                {
+                    var qd = DynamicQueryManager.Current.QueryDescription(mc.Query.ToQueryName());
+                    mc.ParseData(qd);
                 }
             });
         }
