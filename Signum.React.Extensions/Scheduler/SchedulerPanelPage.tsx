@@ -84,25 +84,23 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
 
                     <h3>Available Tasks</h3>
                     <div className="form-horizontal">
-                        {getTypeInfos(ScheduledTaskEntity.memberInfo(a => a.task).type).map(t => <ValueSearchControlLine key={t.name} ctx={ctx} findOptions={{ queryName: t.name }} onExplored={() => this.loadState().done()} />)}
+                        {getTypeInfos(ScheduledTaskEntity.memberInfo(a => a.task).type).map(t =>
+                            <ValueSearchControlLine key={t.name} ctx={ctx} findOptions={{ queryName: t.name }} onExplored={() => this.loadState().done()} />)}
                     </div>
                     <h3>{ScheduledTaskEntity.niceName()}</h3>
-                    <SearchControl findOptions={{
-                        queryName: ScheduledTaskEntity,
-                        searchOnLoad: true,
-                        showFilters: false,
-                        pagination: { elementsPerPage: 10, mode: "Firsts" }
-                    }} />
+                    <SearchControl
+                        findOptions={{
+                            queryName: ScheduledTaskEntity,
+                            pagination: { elementsPerPage: 10, mode: "Firsts" }
+                        }} />
 
                     <h3>{ScheduledTaskLogEntity.niceName()}</h3>
-                    <SearchControl findOptions={{
-                        queryName: ScheduledTaskLogEntity,
-                        orderOptions: [{ columnName: "StartTime", orderType: "Descending" }],
-                        searchOnLoad: true,
-                        showFilters: false,
-                        pagination: { elementsPerPage: 10, mode: "Firsts" }
-                    }} />
-
+                    <SearchControl 
+                        findOptions={{
+                            queryName: ScheduledTaskLogEntity,
+                            orderOptions: [{ columnName: "StartTime", orderType: "Descending" }],
+                            pagination: { elementsPerPage: 10, mode: "Firsts" }
+                        }}/>
                 </div>
             </div>
         );

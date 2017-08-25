@@ -109,7 +109,6 @@ export default class ValueComponent extends React.Component<ValueComponentProps>
 
             if (this.props.type == "textArea") {
                 return (<textarea className="form-control" style={style} onBlur={this.props.onBlur}
-                    type="text"
                     value={val == null ? "" : val.toString()}
                     onChange={this.handleChangeSelectOrInput} />);
             }

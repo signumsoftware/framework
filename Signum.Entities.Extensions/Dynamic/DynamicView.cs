@@ -70,8 +70,12 @@ namespace Signum.Entities.Dynamic
     public class DynamicViewOverrideEntity : Entity
     {
         [NotNullable]
-        [NotNullValidator, UniqueIndex]
+        [NotNullValidator]
         public TypeEntity EntityType { get; set; }
+
+        [SqlDbType(Size = 100)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
+        public string ViewName { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]

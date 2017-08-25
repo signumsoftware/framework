@@ -746,10 +746,7 @@ namespace Signum.Engine.Workflow
     
             private static void ExecuteStep(CaseActivityEntity ca, DecisionResult? decisionResult, IWorkflowTransition transition)
             {
-                using (DynamicValidationLogic.EnabledRulesExplicitely(ca.WorkflowActivity.ValidationRules
-                            .Where(a => decisionResult == null || (decisionResult == DecisionResult.Approve ? a.OnAccept : a.OnDecline))
-                            .Select(a => a.Rule)
-                            .ToHashSet()))
+                using (WorkflowActivityInfo.Scope(new WorkflowActivityInfo { CaseActivity = ca, WorkflowActivity = ca.WorkflowActivity, DecissionResult = decisionResult, Transition = transition }))
                 {
                     SaveEntity(ca.Case.MainEntity);
 

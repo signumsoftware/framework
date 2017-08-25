@@ -28,7 +28,7 @@ export default class WordSearchMenu extends React.Component<WordSearchMenuProps,
     }
 
     reloadList(): Promise<void> {
-        return WordClient.API.getWordTemplates(this.props.searchControl.props.findOptions.queryKey, "Query")
+        return WordClient.API.getWordTemplates(this.props.searchControl.props.findOptions.queryKey, "Query", null)
             .then(list => this.setState({ wordReports: list }));
     }
 

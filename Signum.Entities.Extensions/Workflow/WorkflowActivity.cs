@@ -12,6 +12,8 @@ using System.Xml.Linq;
 using System.ComponentModel;
 using Signum.Entities.Workflow;
 using System.Reflection;
+using System.CodeDom.Compiler;
+using System.Text.RegularExpressions;
 
 namespace Signum.Entities.Workflow
 {
@@ -47,11 +49,7 @@ namespace Signum.Entities.Workflow
 
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 255)]
         public string ViewName { get; set; }
-
-        [NotNullable]
-        [NotNullValidator, NoRepeatValidator]
-        public MList<WorkflowActivityValidationEmbedded> ValidationRules { get; set; } = new MList<WorkflowActivityValidationEmbedded>();
-
+        
         [NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
         public MList<WorkflowJumpEmbedded> Jumps { get; set; } = new MList<WorkflowJumpEmbedded>();
@@ -76,6 +74,8 @@ namespace Signum.Entities.Workflow
         {
             return ToStringExpression.Evaluate(this);
         }
+
+
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
@@ -115,7 +115,6 @@ namespace Signum.Entities.Workflow
             model.Reject = this.Reject;
             model.Timeout = this.Timeout;
             model.EstimatedDuration = this.EstimatedDuration;
-            model.ValidationRules.AssignMList(this.ValidationRules);
             model.Jumps.AssignMList(this.Jumps);
             model.Script = this.Script;
             model.ViewName = this.ViewName;
@@ -134,7 +133,6 @@ namespace Signum.Entities.Workflow
             this.Reject = wModel.Reject;
             this.Timeout = wModel.Timeout;
             this.EstimatedDuration = wModel.EstimatedDuration;
-            this.ValidationRules.AssignMList(wModel.ValidationRules);
             this.Jumps.AssignMList(wModel.Jumps);
             this.Script = wModel.Script;
             this.ViewName = wModel.ViewName;
@@ -142,6 +140,34 @@ namespace Signum.Entities.Workflow
             this.Comments = wModel.Comments;
             this.SubWorkflow = wModel.SubWorkflow;
         }
+    }
+
+    public class WorkflowActivityInfo
+    {
+        static readonly WorkflowActivityInfo Empty = new WorkflowActivityInfo();
+
+        public static readonly ThreadVariable<WorkflowActivityInfo> CurrentVariable = Statics.ThreadVariable<WorkflowActivityInfo>("CurrentWorkflowActivity");
+        public static WorkflowActivityInfo Current => CurrentVariable.Value ?? Empty;
+
+        public static IDisposable Scope(WorkflowActivityInfo wa)
+        {
+            var old = Current;
+            CurrentVariable.Value = wa;
+            return new Disposable(() => CurrentVariable.Value = old);
+        }
+
+        public WorkflowActivityEntity WorkflowActivity { get; internal set; }
+        public CaseActivityEntity CaseActivity { get; internal set; }
+        public DecisionResult? DecissionResult { get; internal set; }
+        public IWorkflowTransition Transition { get; internal set; }
+
+        public bool Is(string workflowName, string activityName)
+        {
+            return this.WorkflowActivity != null && this.WorkflowActivity.Name == activityName && this.WorkflowActivity.Lane.Pool.Workflow.Name == workflowName;
+        }
+
+
+       
     }
     
     [Serializable]
@@ -232,28 +258,7 @@ namespace Signum.Entities.Workflow
         public static readonly ExecuteSymbol<WorkflowActivityEntity> Save;
         public static readonly DeleteSymbol<WorkflowActivityEntity> Delete;
     }
-
-    [Serializable]
-    public class WorkflowActivityValidationEmbedded : EmbeddedEntity
-    {
-        [NotNullable]
-        [NotNullValidator]
-        public Lite<DynamicValidationEntity> Rule { get; set; }
-
-        public bool OnAccept { get; set; }
-        public bool OnDecline { get; set; }
-
-        public WorkflowActivityValidationEmbedded Clone()
-        {
-            return new WorkflowActivityValidationEmbedded
-            {
-                Rule = this.Rule,
-                OnAccept = this.OnAccept,
-                OnDecline = this.OnDecline
-            };
-        }
-    }
-
+    
     [Serializable]
     public class SubWorkflowEmbedded : EmbeddedEntity
     {
@@ -347,10 +352,6 @@ namespace Signum.Entities.Workflow
 
         [Unit("min")]
         public double? EstimatedDuration { get; set; }
-
-        [NotNullable]
-        [NotNullValidator, NoRepeatValidator]
-        public MList<WorkflowActivityValidationEmbedded> ValidationRules { get; set; } = new MList<WorkflowActivityValidationEmbedded>();
 
         [NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]

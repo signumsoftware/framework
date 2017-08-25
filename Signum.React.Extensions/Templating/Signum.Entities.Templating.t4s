@@ -8,3 +8,5 @@ export interface QueryModel {
     orders: OrderRequest[];
     pagination: Pagination;
 }
+
+export interface ITemplateApplicable {}

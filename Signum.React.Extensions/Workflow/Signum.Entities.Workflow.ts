@@ -287,7 +287,6 @@ export interface WorkflowActivityEntity extends Entities.Entity, IWorkflowNodeEn
     timeout?: WorkflowTimeoutEmbedded | null;
     estimatedDuration?: number | null;
     viewName?: string | null;
-    validationRules: Entities.MList<WorkflowActivityValidationEmbedded>;
     jumps: Entities.MList<WorkflowJumpEmbedded>;
     script?: WorkflowScriptPartEmbedded | null;
     xml?: WorkflowXmlEmbedded | null;
@@ -314,7 +313,6 @@ export interface WorkflowActivityModel extends Entities.ModelEntity {
     reject?: WorkflowRejectEmbedded | null;
     timeout?: WorkflowTimeoutEmbedded | null;
     estimatedDuration?: number | null;
-    validationRules: Entities.MList<WorkflowActivityValidationEmbedded>;
     jumps: Entities.MList<WorkflowJumpEmbedded>;
     script?: WorkflowScriptPartEmbedded | null;
     viewName?: string | null;
@@ -335,14 +333,6 @@ export type WorkflowActivityType =
     "DecompositionWorkflow" |
     "CallWorkflow" |
     "Script";
-
-export const WorkflowActivityValidationEmbedded = new Type<WorkflowActivityValidationEmbedded>("WorkflowActivityValidationEmbedded");
-export interface WorkflowActivityValidationEmbedded extends Entities.EmbeddedEntity {
-    Type: "WorkflowActivityValidationEmbedded";
-    rule?: Entities.Lite<Dynamic.DynamicValidationEntity> | null;
-    onAccept?: boolean;
-    onDecline?: boolean;
-}
 
 export const WorkflowConditionEntity = new Type<WorkflowConditionEntity>("WorkflowCondition");
 export interface WorkflowConditionEntity extends Entities.Entity {
