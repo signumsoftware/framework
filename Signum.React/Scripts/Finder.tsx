@@ -344,14 +344,13 @@ export function getDefaultOrder(qd: QueryDescription, qs: QuerySettings): OrderO
     const defaultOrder = qs && qs.defaultOrderColumn || defaultOrderColumn;
     const tis = getTypeInfos(qd.columns["Entity"].type);
 
-    if (!qd.columns[defaultOrder])
+    if (defaultOrder == defaultOrderColumn && !qd.columns[defaultOrderColumn])
         return undefined;
 
     return {
         columnName: defaultOrder,
         orderType: qs && qs.defaultOrderType || (tis.some(a => a.entityData == "Transactional") ? "Descending" as OrderType : "Ascending" as OrderType)
     } as OrderOption;
-
 }
 
 export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]) {
