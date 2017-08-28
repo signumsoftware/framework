@@ -33,12 +33,13 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
     handleAddValue = () => {
         const list = this.state.ctx.value;
         const newValuePromise = this.state.onCreate == null ? this.defaultCreate() : this.state.onCreate();
+
         newValuePromise.then(v => {
             if (v === undefined)
-                return undefined;
+                return;
 
             list.push(newMListElement(v));
-            this.setValue(list);
+            this.setValue(list);  
         }).done();
     }
 
