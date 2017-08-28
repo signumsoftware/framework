@@ -3,6 +3,7 @@ import * as numbro from 'numbro';
 import { Dic } from './Globals';
 import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities';
 import {ajaxPost, ajaxGet} from './Services';
+import { MList } from "./Signum.Entities";
 
 
 export function getEnumInfo(enumTypeName: string, enumId: number) {
@@ -477,9 +478,9 @@ export class Binding<T> implements IBinding<T> {
     initialValue: T; // For deep compare
 
     constructor(
-        public parentValue: any,
+        public parentObject: any,
         public member: string | number) {
-        this.initialValue = this.parentValue[member];
+        this.initialValue = this.parentObject[member];
     }
 
     static create<F, T>(parentValue: F, fieldAccessor: (from: F) => T) {
@@ -504,46 +505,43 @@ export class Binding<T> implements IBinding<T> {
 
     getValue(): T {
 
-        if (!this.parentValue)
-            throw new Error(`Impossible to get '${this.member}' from '${this.parentValue}'`); 
+        if (!this.parentObject)
+            throw new Error(`Impossible to get '${this.member}' from '${this.parentObject}'`);
 
-        return this.parentValue[this.member];
+        return this.parentObject[this.member];
     }
     setValue(val: T) {
 
-        if (!this.parentValue)
-            throw new Error(`Impossible to set '${this.member}' from '${this.parentValue}'`);
+        if (!this.parentObject)
+            throw new Error(`Impossible to set '${this.member}' from '${this.parentObject}'`);
 
-        const oldVal = this.parentValue[this.member];
-        this.parentValue[this.member] = val;
+        const oldVal = this.parentObject[this.member];
+        this.parentObject[this.member] = val;
 
-        if ((this.parentValue as ModifiableEntity).Type) {
+        if ((this.parentObject as ModifiableEntity).Type) {
             if (oldVal !== val || Array.isArray(oldVal))
-            (this.parentValue as ModifiableEntity).modified = true;
+                (this.parentObject as ModifiableEntity).modified = true;
         }
     }
 
     deleteValue() {
-        if (!this.parentValue)
-            throw new Error(`Impossible to delete '${this.member}' from '${this.parentValue}'`);
+        if (!this.parentObject)
+            throw new Error(`Impossible to delete '${this.member}' from '${this.parentObject}'`);
 
-        delete this.parentValue[this.member];
+        delete this.parentObject[this.member];
     }
 
     getError(): string | undefined {
-        const parentErrors = (this.parentValue as ModifiableEntity).error;
+        const parentErrors = (this.parentObject as ModifiableEntity).error;
         return parentErrors && parentErrors[this.member];
     }
 
     setError(value: string | undefined) {
-        const parent = this.parentValue as ModifiableEntity;
+        const parent = this.parentObject as ModifiableEntity;
 
         if (!value) {
-
             if (parent.error)
                 delete parent.error[this.member];
-
-
         } else {
             if (!parent.Type)
                 return;
@@ -552,7 +550,6 @@ export class Binding<T> implements IBinding<T> {
                 parent.error = {};
 
             parent.error[this.member] = value;
-
         }
     }
 }
@@ -575,6 +572,34 @@ export class ReadonlyBinding<T> implements IBinding<T> {
     }
 
     setError(name: string | undefined): void {        
+    }
+}
+
+export class MListElementBinding<T> implements IBinding<T>{
+
+    suffix: string;
+    constructor(
+        public mListBinding: IBinding<MList<T>>,
+        public index: number) {
+        this.suffix = this.index.toString();
+    }
+
+    getValue() {
+        return this.mListBinding.getValue()[this.index].element;
+    }
+    setValue(val: T) {
+        var mlist = this.mListBinding.getValue()
+        const mle = mlist[this.index];
+        mle.rowId = null;
+        mle.element = val;
+        this.mListBinding.setValue(mlist);
+    }
+
+    getError(): string | undefined {
+        return undefined;
+    }
+
+    setError(name: string | undefined): void {
     }
 }
 
