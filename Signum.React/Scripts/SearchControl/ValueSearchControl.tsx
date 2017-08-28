@@ -14,6 +14,7 @@ import * as Navigator from '../Navigator'
 import { StyleContext } from '../Typecontext'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
 import { AbortableRequest } from "../Services";
+import { SearchControlProps } from "./SearchControl";
 
 
 
@@ -32,6 +33,7 @@ export interface ValueSearchControlProps extends React.Props<ValueSearchControl>
     customStyle?: React.CSSProperties;
     format?: string;
     avoidNotifyPendingRequest?: boolean;
+    searchControlProps?: Partial<SearchControlProps>;
 }
 
 export interface ValueSearchControlState {
@@ -198,7 +200,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
         if (e.ctrlKey || e.button == 1)
             window.open(Finder.findOptionsPath(this.props.findOptions));
         else
-            Finder.explore(this.props.findOptions).then(() => {
+            Finder.explore(this.props.findOptions, { searchControlProps: this.props.searchControlProps }).then(() => {
                 if (!this.props.avoidAutoRefresh)
                     this.refreshValue(this.props);
 
