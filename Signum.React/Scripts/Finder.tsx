@@ -58,7 +58,7 @@ export function isFindable(queryName: PseudoType | QueryKey, fullScreen: boolean
     return isFindableEvent.every(f => f(queryKey, fullScreen));
 }
 
-export function find(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<Entity> | undefined>;
+export function find<T extends Entity = Entity>(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<T> | undefined>;
 export function find<T extends Entity>(type: Type<T>, modalOptions?: ModalFindOptions): Promise<Lite<T> | undefined>;
 export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptions): Promise<Lite<Entity> | undefined> {
 
@@ -73,7 +73,7 @@ export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptio
         .then(a => a.default.open(fo, modalOptions));
 }
 
-export function findMany(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<Entity>[] | undefined>;
+export function findMany<T extends Entity = Entity>(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<T>[] | undefined>;
 export function findMany<T extends Entity>(type: Type<T>, modalOptions?: ModalFindOptions): Promise<Lite<T>[] | undefined>;
 export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: ModalFindOptions): Promise<Lite<Entity>[] | undefined> {
 
