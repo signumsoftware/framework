@@ -684,6 +684,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                 fo.orderOptions = [newOrder];
         }
 
+        this.forceUpdate();
 
         if (fo.pagination.mode != "All")
             this.doSearchPage1();
