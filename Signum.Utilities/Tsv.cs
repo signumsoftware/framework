@@ -17,7 +17,7 @@ namespace Signum.Utilities
         public static Encoding DefaultEncoding = Encoding.GetEncoding(1252);
         public static CultureInfo Culture = CultureInfo.InvariantCulture;
 
-        public static string ToTsvFile<T>(T[,] collection, string fileName, Encoding encoding = null, bool writeHeaders = true, bool autoFlush = false, bool append = false,
+        public static string ToTsvFile<T>(T[,] collection, string fileName, Encoding encoding = null, bool autoFlush = false, bool append = false,
             Func<TsvColumnInfo<T>, Func<object, string>> toStringFactory = null)
         {
             encoding = encoding ?? DefaultEncoding;
