@@ -66,6 +66,7 @@ namespace Signum.Entities.Joyride
             Text = element.Element("Text").Value;
             Style = element.Element("Style")?.Value.Let(a => (JoyrideStepStyleEntity)ctx.GetEntity(Guid.Parse(a)));
             Position = element.Element("Position").Value.ToEnum<JoyrideStepPosition>();
+            Selector = element.Element("Selector").Value;
             Type = element.Element("Type").Value.ToEnum<JoyrideStepType>();
             AllowClicksThruHole = Boolean.Parse(element.Element("AllowClicksThruHole").Value);
             IsFixed = Boolean.Parse(element.Element("IsFixed").Value);
