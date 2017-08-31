@@ -1307,24 +1307,24 @@ Consider Synchronize.");
             }
         }
 
-        public static IEnumerable<T> Duplicates<T, K>(this IEnumerable<T> source, Func<T, K> selector, IEqualityComparer<K> comparer)
+        public static List<T> Duplicates<T, K>(this IEnumerable<T> source, Func<T, K> selector, IEqualityComparer<K> comparer)
         {
             var hash = new HashSet<K>(comparer);
-            return source.Where(item => !hash.Add(selector(item)));
+            return source.Where(item => !hash.Add(selector(item))).ToList();
         }
 
-        public static IEnumerable<T> Duplicates<T, K>(this IEnumerable<T> source, Func<T, K> selector)
+        public static List<T> Duplicates<T, K>(this IEnumerable<T> source, Func<T, K> selector)
         {
             return source.Duplicates(selector, null);
         }
 
-        public static IEnumerable<T> Duplicates<T>(this IEnumerable<T> source, IEqualityComparer<T> comparer)
+        public static List<T> Duplicates<T>(this IEnumerable<T> source, IEqualityComparer<T> comparer)
         {
             var hash = new HashSet<T>(comparer);
-            return source.Where(item => !hash.Add(item));
+            return source.Where(item => !hash.Add(item)).ToList();
         }
 
-        public static IEnumerable<T> Duplicates<T>(this IEnumerable<T> source)
+        public static List<T> Duplicates<T>(this IEnumerable<T> source)
         {
             return source.Duplicates(EqualityComparer<T>.Default);
         }
