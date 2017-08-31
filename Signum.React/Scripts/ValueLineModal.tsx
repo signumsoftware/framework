@@ -7,6 +7,7 @@ import { TypeInfo, TypeReference, Binding } from './Reflection'
 import { FormGroupStyle, TypeContext } from './TypeContext'
 import { ValueLineType, ValueLine } from './Lines/ValueLine'
 import { ValueLineProps } from "./Lines";
+import { ValidationMessage } from "./Signum.Entities";
 
 
 interface ValueLineModalProps extends React.Props<ValueLineModal>, IModalProps {
@@ -54,6 +55,9 @@ export default class ValueLineModal extends React.Component<ValueLineModalProps,
             valueLineType: valueLineProps.valueLineType,
         };
 
+        const disabled = this.props.options.allowEmptyValue == false ? (ctx.value as string).trim() ? false : true : undefined;
+        const valueOnChanged = this.props.options.allowEmptyValue == false ? () => this.forceUpdate() : undefined;
+
         return <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited}>
 
             <Modal.Header closeButton={true}>
@@ -67,10 +71,10 @@ export default class ValueLineModal extends React.Component<ValueLineModalProps,
                     {message === undefined ? SelectorMessage.PleaseChooseAValueToContinue.niceToString() : message}
                 </p>
                 <ValueLine ctx={ctx}
-                    formGroupStyle={valueLineProps.labelText ? "Basic" : "SrOnly"} {...vlp} />
+                    formGroupStyle={valueLineProps.labelText ? "Basic" : "SrOnly"} {...vlp} onChange={valueOnChanged} />
             </Modal.Body>
             <Modal.Footer>
-                <button className="btn btn-primary sf-entity-button sf-ok-button" onClick={this.handleOkClick}>
+                <button disabled={disabled} className="btn btn-primary sf-entity-button sf-ok-button" onClick={this.handleOkClick}>
                     {JavascriptMessage.ok.niceToString()}
                 </button>
                 <button className="btn btn-default sf-entity-button sf-close-button" onClick={this.handleCancelClicked}>
@@ -96,6 +100,7 @@ export interface ValueLineModalOptions {
     unitText?: string;
     initiallyFocused?: boolean;
     valueHtmlAttributes?: React.HTMLAttributes<any>;
+    allowEmptyValue?: boolean;
 }
 
 
