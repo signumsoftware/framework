@@ -179,6 +179,13 @@
     <Compile Include="Rest\RestServer.cs" />
     <TypeScriptCompile Include="Basics\Templates\AccordionPanel.tsx" />
     <TypeScriptCompile Include="Basics\Templates\CollapsablePanel.tsx" />
+    <Content Include="Joyride\joyride.d.ts" />
+    <TypeScriptCompile Include="Joyride\JoyrideClient.tsx" />
+    <TypeScriptCompile Include="Joyride\JoyrideComponent.tsx" />
+    <Content Include="Joyride\JoyrideNavItem.tsx" />
+    <TypeScriptCompile Include="Joyride\Templates\Joyride.tsx" />
+    <TypeScriptCompile Include="Joyride\Templates\JoyrideStepStyle.tsx" />
+    <TypeScriptCompile Include="Joyride\Templates\JoyrideStep.tsx" />
     <TypeScriptCompile Include="Toolbar\SidebarContainer.tsx" />
     <Compile Include="Toolbar\ToolbarController.cs" />
     <Compile Include="Toolbar\ToolbarServer.cs" />
@@ -676,6 +683,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Rest\Signum.Entities.Rest.t4s" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Joyride\Signum.Entities.Joyride.t4s" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
