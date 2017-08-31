@@ -43,12 +43,7 @@ export default class UserQueryPart extends React.Component<UserQueryPartProps, {
     loadFindOptions(props: UserQueryPartProps) {
 
         UserQueryClient.Converter.toFindOptions(props.part.userQuery!,  props.entity)
-            .then(fo => {
-                fo.showHeader = false;
-                fo.showFooter = false;
-                fo.searchOnLoad = true;
-                this.setState({fo: fo })
-            })
+            .then(fo => this.setState({fo: fo }))
             .done();
     }
 
@@ -58,7 +53,11 @@ export default class UserQueryPart extends React.Component<UserQueryPartProps, {
             return <span>{ JavascriptMessage.loading.niceToString() }</span>;
 
         return (
-            <SearchControl findOptions={this.state.fo} allowSelection={this.props.part.allowSelection} />
+            <SearchControl
+                findOptions={this.state.fo}
+                showHeader={false}
+                showFooter={false}
+                allowSelection={this.props.part.allowSelection} />
         );
     }   
 } 

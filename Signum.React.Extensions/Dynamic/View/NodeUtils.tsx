@@ -24,7 +24,7 @@ import { toStyleOptions, StyleOptionsExpression, subCtx } from './StyleOptionsEx
 import { HtmlAttributesLine } from './HtmlAttributesComponent'
 import { StyleOptionsLine } from './StyleOptionsComponent'
 import TypeHelpComponent from '../Help/TypeHelpComponent'
-import { getDynamicViewPromise, registeredCustomContexts } from '../DynamicViewClient'
+import { registeredCustomContexts } from '../DynamicViewClient'
 
 
 export type ExpressionOrValue<T> = T | Expression<T>;
@@ -311,16 +311,16 @@ export function treeNodeTableColumnProperty(dn: DesignerNode<EntityTableColumnNo
 }
 
 
-export function renderWithViewOverrides(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>) {
+export function renderWithViewOverrides(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>, vos : Navigator.ViewOverride<ModifiableEntity>[]) {
     
     var result = render(dn, parentCtx);
     if (result == null)
         return null;
 
     const es = Navigator.getSettings(parentCtx.propertyRoute.typeReference().name);
-    if (es && es.viewOverrides && es.viewOverrides.length) {
+    if (vos.length) {
         const replacer = new ViewReplacer(result, parentCtx);
-        es.viewOverrides.forEach(vo => vo(replacer));
+        vos.forEach(vo => vo.override(replacer));
         return replacer.result;
     } else {
         return result;

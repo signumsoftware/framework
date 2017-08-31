@@ -176,8 +176,6 @@
       
       var labelMargin = 10;
       var size = yRule.size('content');
-      console.log(stackedSeries);
-      console.log(pivot.rows);
       
       chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content'), yRule.end('content')))
         .enterData(pivot.rows, 'text', 'x-label')

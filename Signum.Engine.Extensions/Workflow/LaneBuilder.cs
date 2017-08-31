@@ -372,7 +372,6 @@ namespace Signum.Engine.Workflow
                     Type = a.Type,
                     ViewName = a.ViewName,
                     RequiresOpen = a.RequiresOpen,
-                    ValidationRules = a.ValidationRules.Select(vr => vr.Clone()).ToMList(),
                     Reject = a.Reject,
                     Timeout = a.Timeout,
                     EstimatedDuration = a.EstimatedDuration,

@@ -37,10 +37,14 @@ namespace Signum.Engine.Printing
             return LinesExpression.Evaluate(e);
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static FileTypeSymbol TestFileType; 
+
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, FileTypeSymbol testFileType = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                TestFileType = testFileType;
+
                 sb.Include<PrintLineEntity>()
                     .WithQuery(dqm, () => p => new
                     {
@@ -199,6 +203,25 @@ namespace Signum.Engine.Printing
         public static void Register()
         {
             GetState = e => e.State;
+
+            new Construct(PrintLineOperation.CreateTest)
+            {
+                ToStates = { PrintLineState.NewTest },
+                Construct = (args) => new PrintLineEntity
+                {
+                    State = PrintLineState.NewTest,
+                    TestFileType = PrintingLogic.TestFileType,
+                }
+            }.Register();
+
+            new Execute(PrintLineOperation.SaveTest)
+            {
+                AllowsNew = true,
+                Lite = false,
+                FromStates = { PrintLineState.NewTest },
+                ToStates = { PrintLineState.ReadyToPrint },
+                Execute = (e, _) => { e.State = PrintLineState.ReadyToPrint; }
+            }.Register();
 
             new Execute(PrintLineOperation.Print)
             {

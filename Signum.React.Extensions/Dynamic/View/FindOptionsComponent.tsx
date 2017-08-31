@@ -248,15 +248,7 @@ export class FindOptionsComponent extends React.Component<FindOptionsComponentPr
                         <OrderOptionsComponent dn={dn} binding={Binding.create(fo, f => f.orderOptions)} queryKey={fo.queryName} refreshView={() => this.forceUpdate()} />
                         <PaginationComponent dn={dn} findOptions={fo} refreshView={() => this.forceUpdate()} />
 
-                        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(fo, f => f.searchOnLoad)} type="boolean" defaultValue={null} />
-                        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(fo, f => f.showHeader)} type="boolean" defaultValue={null} />
-                        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(fo, f => f.showFilters)} type="boolean" defaultValue={null} />
-                        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(fo, f => f.showFilterButton)} type="boolean" defaultValue={null} />
-                        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(fo, f => f.showFooter)} type="boolean" defaultValue={null} />
-                        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(fo, f => f.allowChangeColumns)} type="boolean" defaultValue={null} />
-                        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(fo, f => f.create)} type="boolean" defaultValue={null} />
-                        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(fo, f => f.navigate)} type="boolean" defaultValue={null} />
-                        <ExpressionOrValueComponent dn={dn} refreshView={() => this.forceUpdate()} binding={Binding.create(fo, f => f.contextMenu)} type="boolean" defaultValue={null} />
+                     
                     </div>
                 }
             </div>
