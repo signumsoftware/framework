@@ -12,6 +12,7 @@ export interface CollapsablePanelProps {
 
 export interface CollapsablePanelState {
     open: boolean,
+    loaded: boolean;
     isRTL: boolean;
 }
 
@@ -19,11 +20,18 @@ export default class CollapsablePanel extends React.Component<CollapsablePanelPr
 
     constructor(props: CollapsablePanelProps) {
         super(props);
-        this.state = { open: this.props.defaultOpen == true, isRTL: document.body.classList.contains("rtl-mode") };
+        this.state = {
+            open: this.props.defaultOpen == true,
+            isRTL: document.body.classList.contains("rtl-mode"),
+            loaded: this.props.defaultOpen == true,
+        };
     }
 
     changeState = () => {
-        this.setState({ open: !this.state.open });
+        this.setState({
+            open: !this.state.open,
+            loaded: true,
+        });
     }
 
     render() {
@@ -38,10 +46,10 @@ export default class CollapsablePanel extends React.Component<CollapsablePanelPr
                             onClick={this.changeState}>
                         </span>}
                 </div>
-                {this.state.open &&
-                    <div className="panel-body">
+                {this.state.loaded ?
+                    <div className="panel-body" style={{ display: this.state.open ? "block" : "none" }}>
                         {this.props.body}
-                    </div>}
+                    </div> : undefined}
             </div>
         );
     }
