@@ -410,7 +410,7 @@ function isActive(allowed: TypeAllowed | null, basicAllowed: TypeAllowedBasic) {
 
 
 function select(current: TypeAllowed | null, basicAllowed: TypeAllowedBasic, e: React.MouseEvent<any>) {
-    if (!e.shiftKey || current == null)
+    if (!(e.shiftKey || e.ctrlKey) || current == null)
         return basicAllowed as TypeAllowedBasic;
 
     let db = getDB(current);
