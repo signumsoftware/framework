@@ -30,7 +30,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Type Type
         {
-            get { return elementType.BuildLiteNulifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute() }); }
+            get { return elementType.BuildLiteNullifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute() }); }
         }
 
         public override string ToString()

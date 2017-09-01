@@ -406,7 +406,7 @@ namespace Signum.Entities.DynamicQuery
             return nullify;
         }
 
-        internal static Type BuildLiteNulifyUnwrapPrimaryKey(this Type type, PropertyRoute[] routes)
+        internal static Type BuildLiteNullifyUnwrapPrimaryKey(this Type type, PropertyRoute[] routes)
         {
             var buildLite = BuildLite(type);
 

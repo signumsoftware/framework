@@ -69,9 +69,9 @@ namespace Signum.Entities.DynamicQuery
                 return false;
             }
         }
+
         protected abstract List<QueryToken> SubTokensOverride(SubTokensOptions options);
-
-
+        
         public virtual object QueryName
         {
             get { return this.parent.QueryName; }
