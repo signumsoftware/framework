@@ -365,7 +365,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             this.simpleFilterBuilderInstance = undefined;
             this.setState({
                 simpleFilterBuilder: undefined,
-                showFilters: !this.props.showFilters
+                showFilters: !this.state.showFilters
             }, () => this.handleHeightChanged());
         }).done();
     }
@@ -381,13 +381,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     renderToolBar() {
 
         const p = this.props;
+        const s = this.state;
 
         var buttons = [
 
             p.showFilterButton && OrderUtils.setOrder(-4, <a
-                className={"sf-query-button sf-filters-header btn btn-default" + (p.showFilters ? " active" : "")}
+                className={"sf-query-button sf-filters-header btn btn-default" + (s.showFilters ? " active" : "")}
                 onClick={this.handleToggleFilters}
-                title={p.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="glyphicon glyphicon glyphicon-filter"></span></a >),
+                title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="glyphicon glyphicon glyphicon-filter"></span></a >),
 
             OrderUtils.setOrder(-3, <button className={classes("sf-query-button sf-search btn", p.findOptions.pagination.mode == "All" ? "btn-danger" : "btn-primary")} onClick={this.handleSearchClick}>{SearchMessage.Search.niceToString()} </button>),
 
