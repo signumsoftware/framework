@@ -13,6 +13,7 @@ using Signum.Utilities.ExpressionTrees;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
@@ -74,7 +75,7 @@ namespace Signum.Entities.Dynamic
 
                 return new DynamicExpressionTestResponse
                 {
-                    validationResult = Dump(result)
+                    validationResult = Dump(result, request.dynamicExpression.Format) + (request.dynamicExpression.Unit != null ? (" " + request.dynamicExpression.Unit) : "")
                 };
             }
             catch (Exception e)
@@ -86,13 +87,13 @@ namespace Signum.Entities.Dynamic
             }
         }
 
-        private string Dump(object result)
+        private string Dump(object result, string format)
         {
             if (result == null)
                 return "null";
 
-            if (result.GetType() == typeof(string))
-                return "\"" + result + "\"";
+            if (result is IFormattable f)
+                return f.ToString(format, CultureInfo.CurrentCulture);
 
             return result.ToString();
         }
