@@ -55,6 +55,7 @@ namespace Signum.React.Facades
             config.Services.Replace(typeof(IBodyModelValidator), new SignumBodyModelValidator());
 
             config.Filters.Add(new SignumAuthenticationAndProfilerAttribute());
+            config.Filters.Add(new SignumAuthorizationAttribute());
             config.Filters.Add(new SignumExceptionFilterAttribute());
             
             ReflectionServer.Start();

@@ -1,4 +1,5 @@
 ﻿using Signum.Engine;
+using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ using System.Web.Http.Routing;
 
 namespace Signum.React.Filters
 {
-    public class SignumAuthenticationAndProfilerAttribute : FilterAttribute, IAuthorizationFilter
+    public class SignumAuthenticationAndProfilerAttribute : Attribute, IAuthenticationFilter
     {
         public const string SavedRequestKey = "SAVED_REQUEST";
 
@@ -23,44 +24,45 @@ namespace Signum.React.Filters
 
         public static readonly IList<Func<HttpActionContext, IDisposable>> Authenticators = new List<Func<HttpActionContext, IDisposable>>();
 
-        public async Task<HttpResponseMessage> ExecuteAuthorizationFilterAsync(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
+        public bool AllowMultiple => false;
+
+
+        public async Task AuthenticateAsync(HttpAuthenticationContext context, CancellationToken cancellationToken)
         {
+            var actionContext = context.ActionContext;
+
             string action = ProfilerActionSplitterAttribute.GetActionDescription(actionContext);
 
-            try
+            context.Request.Properties["timeTracker"] = TimeTracker.Start(action);
+            context.Request.Properties["heavyProfiler"] = HeavyProfiler.Log("Web.API " + actionContext.Request.Method, () => actionContext.Request.RequestUri.ToString());
+            context.Request.Properties[SavedRequestKey] = await actionContext.Request.Content.ReadAsStringAsync();
+            context.Request.Properties["authenticate"] = Authenticate(actionContext);
+            context.Request.Properties["culture"] = GetCurrentCultures?.Invoke(actionContext);
+            
+        }
+
+        public Task ChallengeAsync(HttpAuthenticationChallengeContext context, CancellationToken cancellationToken)
+        {
+            Dispose(context.ActionContext, "culture");
+            Dispose(context.ActionContext, "authenticate");
+            Dispose(context.ActionContext, "heavyProfiler");
+            Dispose(context.ActionContext, "timeTracker");
+            Statics.CleanThreadContextAndAssert();
+
+            return Task.CompletedTask;
+        }
+
+        private void Dispose(HttpActionContext context, string key)
+        {
+            object result;
+            if (context.Request.Properties.TryGetValue(key, out result))
             {
-                using (TimeTracker.Start(action))
-                {
-                    using (HeavyProfiler.Log("Web.API " + actionContext.Request.Method, () => actionContext.Request.RequestUri.ToString()))
-                    {
-                        //if (ProfilerLogic.SessionTimeout != null)
-                        //{
-                        //    IDisposable sessionTimeout = Connector.CommandTimeoutScope(ProfilerLogic.SessionTimeout.Value);
-                        //    if (sessionTimeout != null)
-                        //        actionContext.Request.RegisterForDispose(sessionTimeout);
-                        //}
-
-                        actionContext.Request.Properties[SavedRequestKey] = await actionContext.Request.Content.ReadAsStringAsync();
-
-                        using (Authenticate(actionContext))
-                        {
-                            using (GetCurrentCultures?.Invoke(actionContext))
-                            {
-                                if (actionContext.Response != null)
-                                    return actionContext.Response;
-
-                                return await continuation();
-                            }
-                        }
-                    }
-                }
-            }
-            finally
-            {
-                Statics.CleanThreadContextAndAssert();
+                if (result != null)
+                    ((IDisposable)result).Dispose();
             }
         }
 
+       
         private static IDisposable Authenticate(HttpActionContext actionContext)
         {
             foreach (var item in Authenticators)
@@ -68,10 +70,23 @@ namespace Signum.React.Filters
                 var disposable = item(actionContext);
                 if (disposable != null)
                     return disposable;
-
             }
 
             return null;
+        }       
+    }
+
+    public class SignumAuthorizationAttribute : FilterAttribute, IAuthorizationFilter
+    {
+        public async Task<HttpResponseMessage> ExecuteAuthorizationFilterAsync(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
+        {
+            var userOne = UserHolder.Current;
+
+            var result = await continuation();
+
+            var userTwo = UserHolder.Current;
+
+            return result;
         }
     }
 }
