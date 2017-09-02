@@ -417,6 +417,34 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
     });
 }
 
+export function validateNewEntities(fo: FindOptions): string | undefined {
+
+    var types = [fo.parentValue, ...(fo.filterOptions || []).map(a => a.value)].flatMap(a => getTypeIfNew(a));
+
+    if (types.length == 0)
+        return undefined;
+
+    return `Filtering by new ${types.joinComma(" and ")}. Consider hiding the control for new entities.`;
+}
+
+function getTypeIfNew(val: any): string[] {
+    if (!val)
+        return [];
+
+    if (isEntity(val) && val.isNew)
+        return [val.Type];
+
+    if (isLite(val) && val.id == null)
+        return [val.EntityType];
+
+    if (Array.isArray(val))
+        return val.flatMap(v => getTypeIfNew(v));
+
+    return [];
+}
+
+
+
 export function exploreOrNavigate(findOptions: FindOptions): Promise<void> {
     return fetchEntitiesWithFilters(findOptions.queryName, findOptions.filterOptions || [], [], 2).then(list => {
         if (list.length == 1)
@@ -755,11 +783,11 @@ export module Encoder {
         if (Array.isArray(value))
             return (value as any[]).map(a => stringValue(a)).join("~");
 
-        if (value.Type)
-            value = toLite(value as Entity);
+        if (isEntity(value))
+            value = toLite(value, value.isNew);
 
-        if (value.EntityType)
-            return liteKey(value as Lite<Entity>);
+        if (isLite(value))
+            return liteKey(value);
 
         return scapeTilde(value.toString());
     }

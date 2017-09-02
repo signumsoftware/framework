@@ -111,6 +111,9 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
         if (!Finder.isFindable(fo.queryName, false))
             return;
 
+        if (Finder.validateNewEntities(fo))
+            return;
+
         Finder.getQueryDescription(fo.queryName)
             .then(qd => Finder.parseFindOptions(fo, qd))
             .then(fo => this.abortableQuery.getData({ request: this.getQueryRequest(fo), avoidNotify: props!.avoidNotifyPendingRequest }))
@@ -130,8 +133,20 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
 
         const p = this.props;
 
-        if (!Finder.isFindable(p.findOptions.queryName, false))
+        const fo = p.findOptions;
+
+        if (!Finder.isFindable(fo.queryName, false))
             return null;
+
+        var errorMessage = Finder.validateNewEntities(fo);
+        if (errorMessage) {
+            return (
+                <div className="alert alert-danger" role="alert">
+                    <strong>Error in ValueSearchControl ({getQueryKey(fo.queryName)}): </strong>
+                    {errorMessage}
+                </div>
+            );
+        }
 
         let className = classes(
            p.valueToken == undefined && "count-search",

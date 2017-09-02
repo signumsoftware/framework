@@ -111,23 +111,26 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         this.searchControlLoaded && this.searchControlLoaded.doSearchPage1(avoidOnSearchEvent);
     }
 
-    initialLoad(propsFindOptions: FindOptions) {
+    initialLoad(fo: FindOptions) {
 
-        if (!Finder.isFindable(propsFindOptions.queryName, false))
+        if (!Finder.isFindable(fo.queryName, false))
         {
             if (this.props.throwIfNotFindable)
-                throw Error(`Query ${propsFindOptions.queryName} not allowed`);
+                throw Error(`Query ${fo.queryName} not allowed`);
 
             return;
         }
 
-        Finder.getQueryDescription(propsFindOptions.queryName).then(qd => {
-            Finder.parseFindOptions(propsFindOptions, qd).then(fop => {
-                this.setState({
-                    queryDescription: qd,
-                    findOptions: fop,
-                });
-            }).done();
+        Finder.getQueryDescription(fo.queryName).then(qd => {
+
+            this.setState({ queryDescription: qd });
+
+            if (Finder.validateNewEntities(fo))
+                this.setState({ findOptions: undefined });
+            else
+                Finder.parseFindOptions(fo, qd).then(fop => {
+                    this.setState({ findOptions: fop, });
+                }).done();
         }).done();
     }
 
@@ -138,6 +141,16 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     }
 
     render() {
+        
+        var errorMessage = Finder.validateNewEntities(this.props.findOptions);
+        if (errorMessage) {
+            return (
+                <div className="alert alert-danger" role="alert">
+                    <strong>Error in SearchControl ({getQueryKey(this.props.findOptions.queryName)}): </strong>
+                    {errorMessage}
+                </div>
+            );
+        }
 
         const fo = this.state.findOptions;
         if (!fo)
@@ -145,6 +158,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
         if (!Finder.isFindable(fo.queryKey, false))
             return null;
+        
 
         const p = this.props;
 
