@@ -123,10 +123,12 @@
     <Compile Include="Dynamic\DynamicCode.cs" />
     <Compile Include="Dynamic\Dynamic.cs" />
     <Compile Include="Dynamic\DynamicMixinConnection.cs" />
+    <Compile Include="MachineLearning\PredictorMessage.cs" />
     <Compile Include="Mailing\ImageAttachmentEntity.cs" />
     <Compile Include="Migrations\ExecutedLoadProcess.cs" />
     <Compile Include="Templating\TemplateApplicable.cs" />
     <Compile Include="Templating\TemplatingModelConverterSymbole.cs" />
+    <Compile Include="MachineLearning\Predictor.cs" />
     <Compile Include="Toolbar\Toolbar.cs" />
     <Compile Include="Dynamic\DynamicSqlMigration.cs" />
     <Compile Include="Dynamic\DynamicType.cs" />

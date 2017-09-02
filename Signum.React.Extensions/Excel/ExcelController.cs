@@ -34,7 +34,7 @@ using System.Threading.Tasks;
 
 namespace Signum.React.Excel
 {
-    public class ExcelController : ApiController
+    public class MachineLearningController : ApiController
     {
         [Route("api/excel/plain"), HttpPost]
         public async Task<HttpResponseMessage> ToPlainExcel(QueryRequestTS request, CancellationToken token)

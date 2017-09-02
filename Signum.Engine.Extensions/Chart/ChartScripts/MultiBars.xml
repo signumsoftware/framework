@@ -53,7 +53,6 @@
     return pivot.columns.map(function(c){ return r.values[c.key] && r.values[c.key].value; }); 
   });
   
-  console.log(allValues)
   
   var x = scaleFor(data.columns.c2, allValues, 0, xRule.size('content'), data.parameters["Scale"]);
   
