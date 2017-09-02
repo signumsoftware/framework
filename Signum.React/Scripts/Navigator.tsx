@@ -18,6 +18,7 @@ import { FindOptions } from './FindOptions'
 import { ImportRoute } from "./AsyncImport";
 import * as AppRelativeRoutes from "./AppRelativeRoutes";
 import { Sizes } from "react-bootstrap";
+import { NormalWindowMessage } from "./Signum.Entities";
 
 
 Dic.skipClasses.push(React.Component);
@@ -89,9 +90,9 @@ export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undef
         const typeInfo = getTypeInfo(entity.Type);
 
         if (entity.isNew)
-            return LiteMessage.New_G.niceToString().forGenderAndNumber(typeInfo.gender) + " " + typeInfo.niceName;
+            return NormalWindowMessage.New0_G.niceToString().forGenderAndNumber(typeInfo.gender).formatWith(typeInfo.niceName);
 
-        return typeInfo.niceName + " " + (entity as Entity).id;
+        return NormalWindowMessage.Type0Id1.niceToString().formatWith(typeInfo.niceName, (entity as Entity).id);
     }
 }
 
