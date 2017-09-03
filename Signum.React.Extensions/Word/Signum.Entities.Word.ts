@@ -39,9 +39,7 @@ export interface WordTemplateEntity extends Entities.Entity {
     query?: Basics.QueryEntity | null;
     systemWordTemplate?: SystemWordTemplateEntity | null;
     culture?: Signum.CultureInfoEntity | null;
-    active?: boolean;
-    startDate?: string | null;
-    endDate?: string | null;
+    applicable?: Templating.TemplateApplicableEval | null;
     disableAuthorization?: boolean;
     template?: Entities.Lite<Files.FileEntity> | null;
     fileName?: string | null;

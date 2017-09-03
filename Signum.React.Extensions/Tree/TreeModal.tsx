@@ -85,6 +85,7 @@ export default class TreeModal extends React.Component<TreeModalProps, { show: b
                 <Modal.Body>
                     <TreeViewer
                         filterOptions={this.props.filterOptions}
+                        avoidChangeUrl={true}
                         typeName={this.props.typeName}
                         onSelectedNode={this.handleSelectedNode}
                         onDoubleClick={this.handleDoubleClick}

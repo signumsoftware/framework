@@ -260,7 +260,7 @@ export class Gradient {
 
     }
 
-    getColor(value: number) {
+    getColor(value: number): Color {
         var prev = this.list.filter(a => a.value <= value).withMax(a => a.value);
         var next = this.list.filter(a => a.value > value).withMin(a => a.value);
         
@@ -271,5 +271,10 @@ export class Gradient {
             return prev!.color;
 
         return prev.color.lerp(value - prev.value / next.value - prev.value, next.color);
+    }
+
+    cache: { [num: number]: Color } = {};
+    getCachedColor(value: number): Color {
+        return this.cache[value] || (this.cache[value] = this.getColor(value));
     }
 }

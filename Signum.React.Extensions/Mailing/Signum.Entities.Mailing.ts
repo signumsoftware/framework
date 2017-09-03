@@ -5,12 +5,12 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Signum from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import * as Files from '../Files/Signum.Entities.Files'
 import * as Basics from '../Basics/Signum.Entities.Basics'
 import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler'
 import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as Templating from '../Templating/Signum.Entities.Templating'
 import * as Processes from '../Processes/Signum.Entities.Processes'
-import * as Files from '../Files/Signum.Entities.Files'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
@@ -213,9 +213,7 @@ export interface EmailTemplateEntity extends Entities.Entity {
     masterTemplate?: Entities.Lite<EmailMasterTemplateEntity> | null;
     isBodyHtml?: boolean;
     messages: Entities.MList<EmailTemplateMessageEmbedded>;
-    active?: boolean;
-    startDate?: string | null;
-    endDate?: string | null;
+    applicable?: Templating.TemplateApplicableEval | null;
 }
 
 export module EmailTemplateMessage {
@@ -224,9 +222,7 @@ export module EmailTemplateMessage {
     export const ThereMustBeAMessageFor0 = new MessageKey("EmailTemplateMessage", "ThereMustBeAMessageFor0");
     export const TheresMoreThanOneMessageForTheSameLanguage = new MessageKey("EmailTemplateMessage", "TheresMoreThanOneMessageForTheSameLanguage");
     export const TheTextMustContain0IndicatingReplacementPoint = new MessageKey("EmailTemplateMessage", "TheTextMustContain0IndicatingReplacementPoint");
-    export const TheTemplateIsAlreadyActive = new MessageKey("EmailTemplateMessage", "TheTemplateIsAlreadyActive");
-    export const TheTemplateIsAlreadyInactive = new MessageKey("EmailTemplateMessage", "TheTemplateIsAlreadyInactive");
-    export const SystemEmailShouldBeSetToAccessModel0 = new MessageKey("EmailTemplateMessage", "SystemEmailShouldBeSetToAccessModel0");
+    export const ImpossibleToAccess0BecauseTheTemplateHAsNo1 = new MessageKey("EmailTemplateMessage", "ImpossibleToAccess0BecauseTheTemplateHAsNo1");
     export const NewCulture = new MessageKey("EmailTemplateMessage", "NewCulture");
     export const TokenOrEmailAddressMustBeSet = new MessageKey("EmailTemplateMessage", "TokenOrEmailAddressMustBeSet");
     export const TokenAndEmailAddressCanNotBeSetAtTheSameTime = new MessageKey("EmailTemplateMessage", "TokenAndEmailAddressCanNotBeSetAtTheSameTime");
@@ -247,8 +243,6 @@ export module EmailTemplateOperation {
     export const CreateEmailTemplateFromSystemEmail : Entities.ConstructSymbol_From<EmailTemplateEntity, SystemEmailEntity> = registerSymbol("Operation", "EmailTemplateOperation.CreateEmailTemplateFromSystemEmail");
     export const Create : Entities.ConstructSymbol_Simple<EmailTemplateEntity> = registerSymbol("Operation", "EmailTemplateOperation.Create");
     export const Save : Entities.ExecuteSymbol<EmailTemplateEntity> = registerSymbol("Operation", "EmailTemplateOperation.Save");
-    export const Enable : Entities.ExecuteSymbol<EmailTemplateEntity> = registerSymbol("Operation", "EmailTemplateOperation.Enable");
-    export const Disable : Entities.ExecuteSymbol<EmailTemplateEntity> = registerSymbol("Operation", "EmailTemplateOperation.Disable");
     export const Delete : Entities.DeleteSymbol<EmailTemplateEntity> = registerSymbol("Operation", "EmailTemplateOperation.Delete");
 }
 
@@ -273,6 +267,15 @@ export interface IAttachmentGeneratorEntity extends Entities.Entity {
 }
 
 export interface IEmailOwnerEntity extends Entities.Entity {
+}
+
+export const ImageAttachmentEntity = new Type<ImageAttachmentEntity>("ImageAttachment");
+export interface ImageAttachmentEntity extends Entities.Entity, IAttachmentGeneratorEntity {
+    Type: "ImageAttachment";
+    fileName?: string | null;
+    contentId?: string | null;
+    type?: EmailAttachmentType;
+    file?: Files.FileEmbedded | null;
 }
 
 export const NewsletterDeliveryEntity = new Type<NewsletterDeliveryEntity>("NewsletterDelivery");

@@ -286,20 +286,7 @@ namespace Signum.Engine.Workflow
             }
         }
 
-      
-
-#pragma warning disable IDE1006 // Naming Styles
-        public class ActivityWithRemarks : IQueryTokenBag
-        {
-            public Lite<WorkflowActivityEntity> workflowActivity { get; set; }
-            public Lite<CaseEntity> @case { get; set; }
-            public Lite<CaseActivityEntity> caseActivity { get; set; }
-            public Lite<CaseNotificationEntity> notification { get; set; }
-            public string remarks { get; set; }
-            public int alerts { get; set; }
-            public List<CaseTagTypeEntity> tags { get; set; }
-        }
-#pragma warning restore IDE1006 // Naming Styles
+     
 
         static readonly GenericInvoker<Action> giFixCaseDescriptions = new GenericInvoker<Action>(() => FixCaseDescriptions<Entity>());
         public static void FixCaseDescriptions<T>() where T : Entity
@@ -746,10 +733,7 @@ namespace Signum.Engine.Workflow
     
             private static void ExecuteStep(CaseActivityEntity ca, DecisionResult? decisionResult, IWorkflowTransition transition)
             {
-                using (DynamicValidationLogic.EnabledRulesExplicitely(ca.WorkflowActivity.ValidationRules
-                            .Where(a => decisionResult == null || (decisionResult == DecisionResult.Approve ? a.OnAccept : a.OnDecline))
-                            .Select(a => a.Rule)
-                            .ToHashSet()))
+                using (WorkflowActivityInfo.Scope(new WorkflowActivityInfo { CaseActivity = ca, WorkflowActivity = ca.WorkflowActivity, DecissionResult = decisionResult, Transition = transition }))
                 {
                     SaveEntity(ca.Case.MainEntity);
 

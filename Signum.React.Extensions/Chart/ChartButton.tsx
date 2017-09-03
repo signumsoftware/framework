@@ -28,7 +28,10 @@ export default class ChartButton extends React.Component<ChartButtonProps> {
             filterOptions : fo.filterOptions
         }));
 
-        Navigator.pushOrOpenInTab(path, e);
+        if (this.props.searchControl.props.avoidChangeUrl)
+            window.open(Navigator.toAbsoluteUrl(path));
+        else
+            Navigator.pushOrOpenInTab(path, e);
     }
     
     render() {

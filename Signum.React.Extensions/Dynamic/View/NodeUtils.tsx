@@ -24,7 +24,7 @@ import { toStyleOptions, StyleOptionsExpression, subCtx } from './StyleOptionsEx
 import { HtmlAttributesLine } from './HtmlAttributesComponent'
 import { StyleOptionsLine } from './StyleOptionsComponent'
 import TypeHelpComponent from '../Help/TypeHelpComponent'
-import { getDynamicViewPromise, registeredCustomContexts } from '../DynamicViewClient'
+import { registeredCustomContexts } from '../DynamicViewClient'
 
 
 export type ExpressionOrValue<T> = T | Expression<T>;
@@ -311,16 +311,16 @@ export function treeNodeTableColumnProperty(dn: DesignerNode<EntityTableColumnNo
 }
 
 
-export function renderWithViewOverrides(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>) {
+export function renderWithViewOverrides(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>, vos : Navigator.ViewOverride<ModifiableEntity>[]) {
     
     var result = render(dn, parentCtx);
     if (result == null)
         return null;
 
     const es = Navigator.getSettings(parentCtx.propertyRoute.typeReference().name);
-    if (es && es.viewOverrides && es.viewOverrides.length) {
+    if (vos.length) {
         const replacer = new ViewReplacer(result, parentCtx);
-        es.viewOverrides.forEach(vo => vo(replacer));
+        vos.forEach(vo => vo.override(replacer));
         return replacer.result;
     } else {
         return result;
@@ -604,29 +604,9 @@ export function validateFindOptions(foe: FindOptionsExpr, parentCtx: TypeContext
     if (!foe.queryName)
         return DynamicViewValidationMessage._0RequiresA1.niceToString("findOptions", "queryKey");
 
-    if (parentCtx) {
-        let list = [
-            getTypeIfNew(parentCtx, foe.parentValue),
-            ...(foe.filterOptions || []).map(a => getTypeIfNew(parentCtx, a.value))
-        ].filter(a => !!a);
-
-        if (list.length)
-            return DynamicViewValidationMessage.FilteringWithNew0ConsiderChangingVisibility.niceToString(list.joinComma(External.CollectionMessage.And.niceToString()));
-    }
-
     return undefined;
 }
 
-export function validateCtxNotNew(ctx: TypeContext<ModifiableEntity> | undefined) {
-
-    if (ctx == undefined)
-        return undefined;
-
-    if (ctx.value.isNew)
-        return DynamicViewValidationMessage.FilteringWithNew0ConsiderChangingVisibility.niceToString(ctx.value.Type);
-
-    return undefined;
-}
 
 let aggregates = ["Count", "Average", "Min", "Max", "Sum"];
 
@@ -635,22 +615,6 @@ export function validateAggregate(token: string) {
 
     if (!aggregates.contains(lastPart))
         return DynamicViewValidationMessage.AggregateIsMandatoryFor01.niceToString("valueToken", aggregates.joinComma(External.CollectionMessage.Or.niceToString()));
-
-    return undefined;
-}
-
-export function getTypeIfNew(parentCtx: TypeContext<ModifiableEntity>, value: ExpressionOrValue<any> | undefined) {
-    
-    var v = evaluateUntyped(parentCtx, value, ()=>"value");
-
-    if (v == undefined)
-        return undefined;
-
-    if (isEntity(v) && v.isNew)
-        return v.Type;
-
-    if (isLite(v) && v.id == null)
-        return v.EntityType;
 
     return undefined;
 }

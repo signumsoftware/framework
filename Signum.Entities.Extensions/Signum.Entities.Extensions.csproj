@@ -123,8 +123,12 @@
     <Compile Include="Dynamic\DynamicCode.cs" />
     <Compile Include="Dynamic\Dynamic.cs" />
     <Compile Include="Dynamic\DynamicMixinConnection.cs" />
+    <Compile Include="MachineLearning\PredictorMessage.cs" />
+    <Compile Include="Mailing\ImageAttachmentEntity.cs" />
     <Compile Include="Migrations\ExecutedLoadProcess.cs" />
+    <Compile Include="Templating\TemplateApplicable.cs" />
     <Compile Include="Templating\TemplatingModelConverterSymbole.cs" />
+    <Compile Include="MachineLearning\Predictor.cs" />
     <Compile Include="Toolbar\Toolbar.cs" />
     <Compile Include="Dynamic\DynamicSqlMigration.cs" />
     <Compile Include="Dynamic\DynamicType.cs" />
@@ -133,7 +137,7 @@
     <Compile Include="Dynamic\DynamicTypeCondition.cs" />
     <Compile Include="Dynamic\DynamicView.cs" />
     <Compile Include="Dynamic\DynamicValidation.cs" />
-    <Compile Include="Dynamic\EvalEntity.cs" />
+    <Compile Include="Dynamic\EvalEmbedded.cs" />
     <Compile Include="Excel\ExcelAttachmentEntity.cs" />
     <Compile Include="Excel\ExcelReportEntity.cs" />
     <Compile Include="Excel\IExcelReportServer.cs" />

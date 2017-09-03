@@ -14,6 +14,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Signum.Entities.Word;
+using System.Reflection;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Word
 {
@@ -386,10 +388,11 @@ namespace Signum.Engine.Word
 
         public ValueProviderBase TryParseValueProvider(string type, string token, string variable)
         {
-            return ValueProviderBase.TryParse(type, token, variable, this.SystemWordTemplateType, this.queryDescription, this.variables, this.AddError);
+            return ValueProviderBase.TryParse(type, token, variable, this.SystemWordTemplateType, piSystemWordTemplate, this.queryDescription, this.variables, this.AddError);
         }
 
-
+        static PropertyInfo piSystemWordTemplate = ReflectionTools.GetPropertyInfo((WordTemplateEntity e) => e.SystemWordTemplate);
+        
         internal void AddError(bool fatal, string message)
         {
             this.Errors.Add(new TemplateError(fatal, message));

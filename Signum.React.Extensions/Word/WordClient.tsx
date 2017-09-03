@@ -107,9 +107,10 @@ export function start(options: { routes: JSX.Element[], contextual: boolean, que
 
 export function getEntityWordButtons(ctx: ButtonsContext): Array<React.ReactElement<any> | undefined> | undefined {
 
-    if (ctx.pack.wordTemplates && ctx.pack.wordTemplates.length > 0) {
+    if (ctx.pack.wordTemplates && ctx.pack.wordTemplates.length > 0)
         return [<WordEntityMenu entityPack={ctx.pack as EntityPack<Entity>} />]
-    }
+
+    return undefined;
 }
 
 export interface WordModelSettings<T extends ModelEntity> {
@@ -129,8 +130,8 @@ export function getWordTemplates(ctx: ContextualItemsContext<Entity>): Promise<M
 
     if (ctx.lites.length == 0)
         return undefined;
-    
-    return API.getWordTemplates(ctx.queryDescription.queryKey, ctx.lites.length > 1 ? "Multiple" : "Single")
+
+    return API.getWordTemplates(ctx.queryDescription.queryKey, ctx.lites.length > 1 ? "Multiple" : "Single", ctx.lites.length == 1 ? ctx.lites[0] : null)
         .then(wts => {
             if (!wts.length)
                 return undefined;
@@ -185,14 +186,21 @@ export namespace API {
         return ajaxPost<string>({ url: "~/api/word/constructorType" }, systemWordTemplate);
     }
 
-    export function getWordTemplates(queryKey: string, visibleOn: WordTemplateVisibleOn): Promise<Lite<WordTemplateEntity>[]> {
-        return ajaxGet<Lite<WordTemplateEntity>[]>({ url: `~/api/word/wordTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` });
+    export function getWordTemplates(queryKey: string, visibleOn: WordTemplateVisibleOn, lite: Lite<Entity> | null): Promise<Lite<WordTemplateEntity>[]> {
+        return ajaxPost<Lite<WordTemplateEntity>[]>({ url: `~/api/word/wordTemplates?queryKey=${queryKey}&visibleOn=${visibleOn}` }, lite);
     }
 }
 
 declare module '../../../Framework/Signum.React/Scripts/Signum.Entities' {
 
     export interface EntityPack<T extends ModifiableEntity> {
+        wordTemplates?: Array<Lite<WordTemplateEntity>>;
+    }
+}
+
+declare module '../../../Framework/Signum.React/Scripts/FindOptions' {
+
+    export interface QueryDescription {
         wordTemplates?: Array<Lite<WordTemplateEntity>>;
     }
 }

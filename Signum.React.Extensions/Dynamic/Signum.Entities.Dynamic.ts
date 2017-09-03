@@ -23,6 +23,8 @@ export interface DynamicExpressionEntity extends Entities.Entity {
     fromType?: string | null;
     returnType?: string | null;
     body?: string | null;
+    format?: string | null;
+    unit?: string | null;
     translation?: DynamicExpressionTranslation;
 }
 
@@ -143,7 +145,6 @@ export interface DynamicValidationEntity extends Entities.Entity {
     name?: string | null;
     entityType?: Basics.TypeEntity | null;
     propertyRoute?: Basics.PropertyRouteEntity | null;
-    isGlobalyEnabled?: boolean;
     eval: DynamicValidationEval;
 }
 
@@ -193,6 +194,7 @@ export const DynamicViewOverrideEntity = new Type<DynamicViewOverrideEntity>("Dy
 export interface DynamicViewOverrideEntity extends Entities.Entity {
     Type: "DynamicViewOverride";
     entityType?: Basics.TypeEntity | null;
+    viewName?: string | null;
     script?: string | null;
 }
 

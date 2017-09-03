@@ -36,14 +36,27 @@ namespace Signum.React.Word
 
             CustomizeFiltersModel();
 
-            SignumServer.AddEntityPackExtension += ep =>
+            EntityPackTS.AddExtension += ep =>
             {
                 if (ep.entity.IsNew || !WordTemplatePermission.GenerateReport.IsAuthorized())
                     return;
 
                 var wordTemplates = WordTemplateLogic.TemplatesByEntityType.Value.TryGetC(ep.entity.GetType());
-                if (wordTemplates.HasItems())
-                    ep.Extension.Add("wordTemplates", wordTemplates.Select(a => a.ToLite()).ToList());
+                if (wordTemplates != null)
+                {
+                    var applicable = wordTemplates.Where(a => a.IsApplicable(ep.entity));
+                    if (applicable.HasItems())
+                        ep.Extension.Add("wordTemplates", applicable.Select(a => a.ToLite()).ToList());
+                }
+            };
+
+            QueryDescriptionTS.AddExtension += qd =>
+            {
+                object type = QueryLogic.ToQueryName(qd.queryKey);
+                var templates = WordTemplateLogic.GetApplicableWordTemplates(type, null, WordTemplateVisibleOn.Query);
+
+                if (templates.HasItems())
+                    qd.Extension.Add("wordTemplates", templates);
             };
         }
 

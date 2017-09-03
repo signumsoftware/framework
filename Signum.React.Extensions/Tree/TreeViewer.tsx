@@ -29,6 +29,7 @@ interface TreeViewerProps {
     typeName: string;
     showContextMenu?: boolean | "Basic";
     allowMove?: boolean;
+    avoidChangeUrl?: boolean;
     onDoubleClick?: (selectedNode: TreeNode, e: React.MouseEvent<any>) => void;
     onSelectedNode?: (selectedNode: TreeNode | undefined) => void;
     onSearch?: () => void;
@@ -414,10 +415,12 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         var path = Finder.findOptionsPath({
             queryName: this.props.typeName,
             filterOptions: Finder.toFilterOptions(this.state.filterOptions),
-            showFilters: this.state.filterOptions.length > 0
         });
 
-        Navigator.pushOrOpenInTab(path, e);
+        if (this.props.avoidChangeUrl)
+            window.open(Navigator.toAbsoluteUrl(path));
+        else
+            Navigator.pushOrOpenInTab(path, e);
     }
 
     handleToggleFilters = () => {

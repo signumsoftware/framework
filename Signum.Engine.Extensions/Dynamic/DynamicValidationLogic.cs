@@ -18,19 +18,6 @@ namespace Signum.Engine.Dynamic
 {
     public static class DynamicValidationLogic
     {
-        static readonly ThreadVariable<HashSet<Lite<DynamicValidationEntity>>> explicityleEnabled = Statics.ThreadVariable<HashSet<Lite<DynamicValidationEntity>>>("explicityleEnabled");
-        public static HashSet<Lite<DynamicValidationEntity>> ExplicitelyEnabled
-        {
-            get { return explicityleEnabled.Value; }
-        }
-
-        public static IDisposable EnabledRulesExplicitely(HashSet<Lite<DynamicValidationEntity>> rules)
-        {
-            var oldValue = explicityleEnabled.Value;
-            explicityleEnabled.Value = rules;
-            return new Disposable(() => explicityleEnabled.Value = oldValue);
-        }
-
         class DynamicValidationPair
         {
             public PropertyRoute PropertyRoute;
@@ -85,21 +72,18 @@ namespace Signum.Engine.Dynamic
                 {
                     var val = pair.Validation;
 
-                    if (val.IsGlobalyEnabled || (ExplicitelyEnabled != null && ExplicitelyEnabled.Contains(val.ToLite())))
+                    using (HeavyProfiler.LogNoStackTrace("DynamicValidation", () => val.Name))
                     {
-                        using (HeavyProfiler.LogNoStackTrace("DynamicValidation", () => val.Name))
+                        try
                         {
-                            try
-                            {
-                                string result = val.Eval.Algorithm.EvaluateUntyped(mod, pi);
-                                if (result != null)
-                                    return result;
-                            }
-                            catch (Exception e)
-                            {
-                                e.Data["DynamicValidation"] = val.Name;
-                                throw e;
-                            }
+                            string result = val.Eval.Algorithm.EvaluateUntyped(mod, pi);
+                            if (result != null)
+                                return result;
+                        }
+                        catch (Exception e)
+                        {
+                            e.Data["DynamicValidation"] = val.Name;
+                            throw e;
                         }
                     }
                 }

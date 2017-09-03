@@ -16,6 +16,8 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Entities;
 using Signum.Entities.UserQueries;
 using Signum.Entities.Chart;
+using Signum.Entities.Dynamic;
+using Signum.Entities.Templating;
 
 namespace Signum.Entities.Word
 {
@@ -36,23 +38,11 @@ namespace Signum.Entities.Word
         [NotNullValidator]
         public CultureInfoEntity Culture { get; set; }
 
-        public bool Active { get; set; }
-
-        [MinutesPrecissionValidator]
-        public DateTime? StartDate { get; set; }
-
-        [MinutesPrecissionValidator]
-        public DateTime? EndDate { get; set; }
+        [NotifyChildProperty]
+        public TemplateApplicableEval Applicable { get; set; }
 
         public bool DisableAuthorization { get; set; }
 
-        static Expression<Func<WordTemplateEntity, bool>> IsActiveNowExpression =
-            (mt) => mt.Active && TimeZoneManager.Now.IsInInterval(mt.StartDate, mt.EndDate);
-        [ExpressionField]
-        public bool IsActiveNow()
-        {
-            return IsActiveNowExpression.Evaluate(this);
-        }
 
         public Lite<FileEntity> Template { get; set; }
 
@@ -71,16 +61,23 @@ namespace Signum.Entities.Word
             return ToStringExpression.Evaluate(this);
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
+        public bool IsApplicable(Entity entity)
         {
-            if (pi.Name == nameof(Template) && Template == null && Active)
-                return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+            if (Applicable == null)
+                return true;
 
-            return base.PropertyValidation(pi);
+            try
+            {
+                return Applicable.Algorithm.ApplicableUntyped(entity);
+            }
+            catch (Exception e)
+            {
+                throw new ApplicationException($"Error evaluating Applicable for WordTemplate '{Name}' with entity '{entity}': " + e.Message, e);
+            }
         }
     }
 
-    
+
     [AutoInit]
     public static class WordTemplateOperation
     {
@@ -143,4 +140,6 @@ namespace Signum.Entities.Word
         Multiple = 2,
         Query = 4
     }
+
+    
 }

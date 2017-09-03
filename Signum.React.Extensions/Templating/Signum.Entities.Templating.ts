@@ -4,6 +4,7 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Dynamic from '../Dynamic/Signum.Entities.Dynamic'
 
 import { FilterOptionParsed, OrderOptionParsed, FilterRequest, OrderRequest, Pagination } from '../../../Framework/Signum.React/Scripts/FindOptions' 
 
@@ -15,6 +16,8 @@ export interface QueryModel {
     orders: OrderRequest[];
     pagination: Pagination;
 }
+
+export interface ITemplateApplicable {}
 export const ModelConverterSymbol = new Type<ModelConverterSymbol>("ModelConverter");
 export interface ModelConverterSymbol extends Entities.Symbol {
     Type: "ModelConverter";
@@ -33,6 +36,11 @@ export interface QueryModel extends Entities.ModelEntity {
 
 export module QueryModelMessage {
     export const ConfigureYourQueryAndPressSearchBeforeOk = new MessageKey("QueryModelMessage", "ConfigureYourQueryAndPressSearchBeforeOk");
+}
+
+export const TemplateApplicableEval = new Type<TemplateApplicableEval>("TemplateApplicableEval");
+export interface TemplateApplicableEval extends Dynamic.EvalEmbedded<ITemplateApplicable> {
+    Type: "TemplateApplicableEval";
 }
 
 export module TemplateTokenMessage {

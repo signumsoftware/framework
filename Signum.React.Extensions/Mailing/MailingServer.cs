@@ -22,6 +22,7 @@ using Signum.Engine.Authorization;
 using Signum.Engine.Maps;
 using Signum.Entities.Mailing;
 using Signum.Entities.Templating;
+using Signum.Engine.Mailing;
 
 namespace Signum.React.Mailing
 {
@@ -41,6 +42,15 @@ namespace Signum.React.Mailing
                     et.ParseData(qd);
                 }
             });
+
+            QueryDescriptionTS.AddExtension += qd =>
+            {
+                object type = QueryLogic.ToQueryName(qd.queryKey);
+                var templates = EmailTemplateLogic.GetApplicableEmailTemplates(type, null,  EmailTemplateVisibleOn.Query);
+
+                if (templates.HasItems())
+                    qd.Extension.Add("emailTemplates", templates);
+            };
         }
     }
 }

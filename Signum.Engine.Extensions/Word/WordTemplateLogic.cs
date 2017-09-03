@@ -173,7 +173,16 @@ namespace Signum.Engine.Word
 
             return ((should & visibleOn) != 0);
         }
-        
+
+        public static List<Lite<WordTemplateEntity>> GetApplicableWordTemplates(object queryName, Entity entity, WordTemplateVisibleOn visibleOn)
+        {
+            var isAllowed = Schema.Current.GetInMemoryFilter<WordTemplateEntity>(userInterface: true);
+            return TemplatesByQueryName.Value.TryGetC(queryName).EmptyIfNull()
+                .Where(a => isAllowed(a) && IsVisible(a, visibleOn))
+                .Where(a => a.IsApplicable(entity))
+                .Select(a => a.ToLite())
+                .ToList();
+        }
 
         public static void RegisterTransformer(WordTransformerSymbol transformerSymbol, Action<WordContext, OpenXmlPackage> transformer)
         {
@@ -509,7 +518,7 @@ namespace Signum.Engine.Word
 
         public static void GenerateDefaultTemplates()
         {
-            var systemWordTemplates = Database.Query<SystemWordTemplateEntity>().Where(se => !se.WordTemplates().Any(a => a.Active)).ToList();
+            var systemWordTemplates = Database.Query<SystemWordTemplateEntity>().Where(se => !se.WordTemplates().Any()).ToList();
 
             List<string> exceptions = new List<string>();
 

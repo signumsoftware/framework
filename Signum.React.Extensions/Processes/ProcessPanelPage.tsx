@@ -114,12 +114,12 @@ export default class ProcessPanelPage extends React.Component<ProcessPanelProps,
 
                     <br />
                     <h2>Latest Processes</h2>
-                     <SearchControl findOptions={{ 
-                        queryName: ProcessEntity, 
-                        orderOptions: [{ columnName: "CreationDate", orderType: "Descending" }], 
-                        searchOnLoad: true, 
-                        showFilters: false, 
-                        pagination: { elementsPerPage: 10, mode: "Firsts"}}}/>
+                    <SearchControl findOptions={{
+                            queryName: ProcessEntity,
+                            orderOptions: [{ columnName: "CreationDate", orderType: "Descending" }],
+                            pagination: { elementsPerPage: 10, mode: "Firsts" }
+                        }}
+                    />
                 </div>
             </div>
         );

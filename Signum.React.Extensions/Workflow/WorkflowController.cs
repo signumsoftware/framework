@@ -16,6 +16,7 @@ using Signum.Entities.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
 using Signum.Engine.Authorization;
+using Newtonsoft.Json;
 
 namespace Signum.React.Workflow
 {
@@ -27,13 +28,18 @@ namespace Signum.React.Workflow
             var lite = Lite.ParsePrimaryKey<CaseActivityEntity>(caseActivityId);
 
             var activity = CaseActivityLogic.RetrieveForViewing(lite);
-
-            return new EntityPackWorkflow
+            using (WorkflowActivityInfo.Scope(new WorkflowActivityInfo { CaseActivity = activity, WorkflowActivity = activity.WorkflowActivity }))
             {
-                activity = activity,
-                canExecuteActivity = OperationLogic.ServiceCanExecute(activity).ToDictionary(a => a.Key.Key, a => a.Value),
-                canExecuteMainEntity = OperationLogic.ServiceCanExecute((Entity)activity.Case.MainEntity).ToDictionary(a => a.Key.Key, a => a.Value),
-            };
+                var ep = SignumServer.GetEntityPack((Entity)activity.Case.MainEntity);
+
+                return new EntityPackWorkflow
+                {
+                    activity = activity,
+                    canExecuteActivity = OperationLogic.ServiceCanExecute(activity).ToDictionary(a => a.Key.Key, a => a.Value),
+                    canExecuteMainEntity = ep.canExecute,
+                    Extension = ep.Extension,
+                };
+            }
         }
 
         [Route("api/workflow/tags/{caseId}"), HttpGet]
@@ -46,9 +52,12 @@ namespace Signum.React.Workflow
 
         public class EntityPackWorkflow
         {
-            public Entity activity { get; set; }
+            public CaseActivityEntity activity { get; set; }
             public Dictionary<string, string> canExecuteActivity { get; set; }
             public Dictionary<string, string> canExecuteMainEntity { get; set; }
+
+            [JsonExtensionData]
+            public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
         }
 
         [Route("api/workflow/starts"), HttpGet]

@@ -95,7 +95,6 @@ namespace Signum.Engine.Mailing
                         Entity = t,
                         t.Id,
                         t.Name,
-                        Active = t.IsActiveNow(),
                         t.IsBodyHtml
                     });       
 
@@ -133,7 +132,7 @@ namespace Signum.Engine.Mailing
 
                 Validator.PropertyValidator<EmailTemplateEntity>(et => et.Messages).StaticPropertyValidation += (et, pi) =>
                 {
-                    if (et.Active && !et.Messages.Any(m => m.CultureInfo.Is(EmailLogic.Configuration.DefaultCulture)))
+                    if (!et.Messages.Any(m => m.CultureInfo.Is(EmailLogic.Configuration.DefaultCulture)))
                         return EmailTemplateMessage.ThereMustBeAMessageFor0.NiceToString().FormatWith(EmailLogic.Configuration.DefaultCulture.EnglishName);
 
                     return null;
@@ -284,21 +283,8 @@ namespace Signum.Engine.Mailing
                     Execute = (t, _) => { }
                 }.Register();
 
-                new Execute(EmailTemplateOperation.Enable) 
-                {
-                    CanExecute = t => t.Active ? EmailTemplateMessage.TheTemplateIsAlreadyActive.NiceToString() : null,
-                    Execute = (t, _) => t.Active = true
-                }.Register();
-
-                new Execute(EmailTemplateOperation.Disable) 
-                {
-                    CanExecute = t => !t.Active ? EmailTemplateMessage.TheTemplateIsAlreadyInactive.NiceToString() : null,
-                    Execute = (t, _) => t.Active = false
-                }.Register();
-
                 new Delete(EmailTemplateOperation.Delete)
                 {
-                    CanDelete = t => !t.Active ? EmailTemplateMessage.TheTemplateIsAlreadyInactive.NiceToString() : null,
                     Delete = (t, _) => t.Delete()
                 }.Register();
 
@@ -329,7 +315,7 @@ namespace Signum.Engine.Mailing
 
             var table = Schema.Current.Table(typeof(EmailTemplateEntity));
 
-            var systemEmails = Database.Query<SystemEmailEntity>().Where(se => !se.EmailTemplates().Any(a => a.Active)).ToList();
+            var systemEmails = Database.Query<SystemEmailEntity>().Where(se => !se.EmailTemplates().Any()).ToList();
 
             string cis = Database.Query<CultureInfoEntity>().Select(a => a.Name).ToString(", ").Etc(60);
 
@@ -362,7 +348,7 @@ namespace Signum.Engine.Mailing
 
         public static void GenerateDefaultTemplates()
         {
-            var systemEmails = Database.Query<SystemEmailEntity>().Where(se => !se.EmailTemplates().Any(a => a.Active)).ToList();
+            var systemEmails = Database.Query<SystemEmailEntity>().Where(se => !se.EmailTemplates().Any()).ToList();
 
             List<string> exceptions = new List<string>();
 
@@ -415,6 +401,17 @@ namespace Signum.Engine.Mailing
             var should = VisibleOnDictionary.TryGet(entityType, EmailTemplateVisibleOn.Single);
 
             return ((should & visibleOn) != 0);
+        }
+
+
+        public static List<Lite<EmailTemplateEntity>> GetApplicableEmailTemplates(object queryName, Entity entity, EmailTemplateVisibleOn visibleOn)
+        {
+            var isAllowed = Schema.Current.GetInMemoryFilter<EmailTemplateEntity>(userInterface: true);
+            return TemplatesByQueryName.Value.TryGetC(queryName).EmptyIfNull()
+                .Where(a => isAllowed(a) && IsVisible(a, visibleOn))
+                .Where(a => a.IsApplicable(entity))
+                .Select(a => a.ToLite())
+                .ToList();
         }
 
     }
