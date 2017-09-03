@@ -68,7 +68,7 @@ table.sf-search-results > tbody > tr > td {
 }
 
 .sf-search-results > thead > tr > th.noOrder{
-    cursor:not-allowed;
+    cursor:default;
 }
 
     .sf-search-results > thead > tr > th > span {
