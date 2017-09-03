@@ -20,6 +20,7 @@ namespace Signum.React.Filters
     public class SignumAuthenticationResult
     {
         public IUserEntity User { get; set; }
+        public IHttpActionResult ErrorResult { get; set; }
     }
 
     public class SignumAuthenticationFilterAttribute : Attribute, IAuthenticationFilter
@@ -42,7 +43,12 @@ namespace Signum.React.Filters
             var actionContext = context.ActionContext;
           
             context.Request.Properties[SavedRequestKey] = await actionContext.Request.Content.ReadAsStringAsync();
-            context.Request.Properties[UserKey] = Authenticate(actionContext);
+            var result = Authenticate(actionContext);
+            if(result != null)
+            {
+                context.ErrorResult = result.ErrorResult;
+                context.Request.Properties[UserKey] = result.User;
+            }
             context.Request.Properties[CultureKey] = GetCurrentCultures?.Invoke(actionContext);
             
         }
@@ -63,13 +69,13 @@ namespace Signum.React.Filters
         }
 
        
-        private static IUserEntity Authenticate(HttpActionContext actionContext)
+        private static SignumAuthenticationResult Authenticate(HttpActionContext actionContext)
         {
             foreach (var item in Authenticators)
             {
                 var result = item(actionContext);
                 if (result != null)
-                    return result.User;
+                    return result;
             }
 
             return null;
