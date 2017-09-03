@@ -16,22 +16,8 @@ export interface MailingMenuProps {
     searchControl: SearchControlLoaded;
 }
 
-export default class MailingMenu extends React.Component<MailingMenuProps, { wordReports?: Lite<EmailTemplateEntity>[] }> {
-
-    constructor(props: MailingMenuProps) {
-        super(props);
-        this.state = { };
-    }
-
-    componentWillMount() {
-        this.reloadList().done();
-    }
-
-    reloadList(): Promise<void> {
-        return MailingClient.API.getEmailTemplates(this.props.searchControl.props.findOptions.queryKey, "Query")
-            .then(list => this.setState({ wordReports: list }));
-    }
-
+export default class MailingMenu extends React.Component<MailingMenuProps> {
+    
     handleSelect = (et: Lite<EmailTemplateEntity>) => {
 
         Navigator.API.fetchAndForget(et)
@@ -53,15 +39,17 @@ export default class MailingMenu extends React.Component<MailingMenuProps, { wor
 
     render() {
 
-        if (!this.state.wordReports || !this.state.wordReports.length)
+        const emailTemplates = this.props.searchControl.props.queryDescription.emailTemplates;
+
+        if (!emailTemplates || !emailTemplates.length)
             return null;
 
-        const label = <span><i className="fa fa-file-word-o"></i> &nbsp; {EmailMessageEntity.nicePluralName()}</span>;
+        const label = <span><i className="fa fa-envelope-o"></i> &nbsp; {EmailMessageEntity.nicePluralName()}</span>;
 
         return (
-            <DropdownButton title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown">
+            <DropdownButton title={label as any} id="mailingDropDown" className="sf-mailing-dropdown">
                 {
-                    this.state.wordReports.map((wt, i) =>
+                    emailTemplates.map((wt, i) =>
                         <MenuItem key={i}
                             onSelect={() => this.handleSelect(wt) }>
                             { wt.toStr }

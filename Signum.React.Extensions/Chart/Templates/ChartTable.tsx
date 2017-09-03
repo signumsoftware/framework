@@ -17,7 +17,7 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
         const prev = cr.orderOptions.filter(a => a.token.fullKey == tokenStr).firstOrNull();
 
         if (prev != undefined) {
-            prev.orderType = prev.orderType == "Ascending" as OrderType ? "Descending" : "Ascending";
+            prev.orderType = (prev.orderType == "Ascending" as OrderType) ? "Descending" : "Ascending";
             if (!e.shiftKey)
                 cr.orderOptions = [prev];
 
@@ -153,7 +153,7 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
         if (o == undefined)
             return "";
 
-        let asc = (o.orderType == "Ascending" as OrderType ? "asc" : "desc");
+        let asc = (o.orderType == "Ascending" as OrderType) ? "asc" : "desc";
 
         if (orders.indexOf(o))
             asc += " l" + orders.indexOf(o);

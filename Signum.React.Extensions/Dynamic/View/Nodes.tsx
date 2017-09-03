@@ -951,7 +951,7 @@ NodeUtils.register<ValueSearchControlLineNode>({
     order: 1,
     validate: (dn, ctx) =>
         (!dn.node.findOptions && !dn.node.valueToken && DynamicViewValidationMessage.Member0IsMandatoryFor1.niceToString("findOptions (or valueToken)", dn.node.kind)) ||
-        (dn.node.findOptions ? NodeUtils.validateFindOptions(dn.node.findOptions, ctx) : NodeUtils.validateCtxNotNew(ctx)) ||
+        (dn.node.findOptions ? NodeUtils.validateFindOptions(dn.node.findOptions, ctx) : undefined) ||
         (dn.node.findOptions && dn.node.valueToken && NodeUtils.validateAggregate(dn.node.valueToken))
         ,
     renderTreeNode: dn => <span><small>ValueSearchControlLine:</small> <strong>{

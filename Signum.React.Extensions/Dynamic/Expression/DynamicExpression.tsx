@@ -26,7 +26,7 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
         super(props);
         this.state = {};
     }
-    
+
     handleCodeChange = (newScript: string) => {
         const entity = this.props.ctx.value;
         entity.body = newScript;
@@ -62,6 +62,15 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
         return (
             <div>
                 <ValueLine ctx={ctx.subCtx(dt => dt.translation)} />
+                <div className="row">
+                    <div className="col-sm-6">
+                        <ValueLine ctx={ctx.subCtx(dt => dt.format)} labelColumns={4}
+                            helpBlock={<span>See <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/formatting-types" target="_blank">formatting types</a></span>} />
+                    </div>
+                    <div className="col-sm-6">
+                        <ValueLine ctx={ctx.subCtx(dt => dt.unit)} labelColumns={4} />
+                    </div>
+                </div>
                 <br />
                 <div className="row">
                     <div className="col-sm-7">
@@ -89,16 +98,15 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
     renderTypeAutocomplete(ctx: TypeContext<string | null | undefined>) {
         return (
             <span style={{ position: "relative" }}>
-                    <Typeahead
-                        inputAttrs={{
-                            className: "input-code",
-                            placeholder: ctx.niceName(),
-                            size: ctx.value ? ctx.value.length : ctx.niceName().length
-                        }}
-                        getItems={this.handleGetItems}
-                        value={ctx.value || undefined}
-                        onChange={txt => { ctx.value = txt; this.forceUpdate(); } } />
-              
+                <Typeahead
+                    inputAttrs={{
+                        className: "input-code",
+                        placeholder: ctx.niceName(),
+                        size: ctx.value ? ctx.value.length : ctx.niceName().length
+                    }}
+                    getItems={this.handleGetItems}
+                    value={ctx.value || undefined}
+                    onChange={txt => { ctx.value = txt; this.forceUpdate(); }} />
             </span>
         );
     }
@@ -113,7 +121,7 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
                 onChange={e => {
                     ctx.value = (e.currentTarget as HTMLInputElement).value;
                     this.forceUpdate();
-                } } />
+                }} />
         );
     }
 
@@ -151,7 +159,7 @@ export default class DynamicExpressionComponent extends React.Component<DynamicE
                 type={{ name: typeName }} labelText="Example Entity" />
         );
     }
-    
+
     handleOnView = (exampleEntity: Entity) => {
         return Navigator.view(exampleEntity, { requiresSaveOperation: false });
     }

@@ -82,7 +82,7 @@ namespace Signum.React.Chart
                 query => QueryLogic.ToQueryName(query.Key),
                 queryName => QueryLogic.GetQueryEntity(queryName));
 
-            SignumServer.AddEntityPackExtension += ep =>
+            EntityPackTS.AddExtension += ep =>
             {
                 if (ep.entity.IsNew || !ChartPermission.ViewCharting.IsAuthorized())
                     return;

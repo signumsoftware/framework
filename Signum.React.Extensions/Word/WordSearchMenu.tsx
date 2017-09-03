@@ -16,21 +16,7 @@ export interface WordSearchMenuProps {
     searchControl: SearchControlLoaded;
 }
 
-export default class WordSearchMenu extends React.Component<WordSearchMenuProps, { wordReports?: Lite<WordTemplateEntity>[] }> {
-
-    constructor(props: WordSearchMenuProps) {
-        super(props);
-        this.state = { };
-    }
-
-    componentWillMount() {
-        this.reloadList().done();
-    }
-
-    reloadList(): Promise<void> {
-        return WordClient.API.getWordTemplates(this.props.searchControl.props.findOptions.queryKey, "Query", null)
-            .then(list => this.setState({ wordReports: list }));
-    }
+export default class WordSearchMenu extends React.Component<WordSearchMenuProps> {
 
     handleSelect = (wt: Lite<WordTemplateEntity>) => {
 
@@ -54,16 +40,18 @@ export default class WordSearchMenu extends React.Component<WordSearchMenuProps,
 
     render() {
 
-        if (!this.state.wordReports || !this.state.wordReports.length ||
+        var wordReports = this.props.searchControl.props.queryDescription.wordTemplates;
+
+        if (!wordReports || !wordReports.length ||
             (this.props.searchControl.props.showBarExtensionOption && this.props.searchControl.props.showBarExtensionOption.showWordReport == false))
             return null;
 
         const label = <span><i className="fa fa-file-word-o"></i>&nbsp;{this.props.searchControl.props.largeToolbarButtons == true ? " " + WordTemplateMessage.WordReport.niceToString() : undefined}</span>;
 
         return (
-            <DropdownButton title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown">
+            <DropdownButton title={label as any} id="wordTemplateDropDown" className="sf-word-dropdown">
                 {
-                    this.state.wordReports.map((wt, i) =>
+                    wordReports.map((wt, i) =>
                         <MenuItem key={i}
                             onSelect={() => this.handleSelect(wt) }>
                             { wt.toStr }
