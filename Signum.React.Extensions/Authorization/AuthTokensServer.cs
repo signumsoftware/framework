@@ -17,6 +17,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Web.Http;
 using System.Web.Http.Controllers;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Net.Http.Formatting;
 
 namespace Signum.React.Authorization
 {
@@ -65,12 +68,32 @@ namespace Signum.React.Authorization
 
             if (requiresRefresh)
             {
-                ctx.Response = ctx.Request.CreateResponse<HttpError>(HttpStatusCode.UpgradeRequired,
-                    new HttpError(new NewTokenRequiredException("Please upgrade the token to continue using the service"), includeErrorDetail: true)); //Avoid annoying exception
-                return new SignumAuthenticationResult();
+                return new SignumAuthenticationResult { ErrorResult = new UpgradeTokenResult(ctx.RequestContext.Configuration.Formatters.JsonFormatter) };
             }
 
             return new SignumAuthenticationResult { User = token.User };
+        }
+
+        internal class UpgradeTokenResult : IHttpActionResult
+        {
+            private JsonMediaTypeFormatter jsonFormatter;
+
+            public UpgradeTokenResult(JsonMediaTypeFormatter jsonFormatter)
+            {
+                this.jsonFormatter = jsonFormatter;
+            }
+
+            public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
+            {
+                var error = new HttpError(new NewTokenRequiredException("Please upgrade the token to continue using the service"), includeErrorDetail: true); //Avoid annoying exception
+                
+                var message = new HttpResponseMessage(HttpStatusCode.UpgradeRequired)
+                {
+                    Content = new ObjectContent<HttpError>(error, jsonFormatter),
+                };
+
+                return Task.FromResult(message); 
+            }
         }
 
         public static string RefreshToken(string oldToken, out UserEntity newUser)
