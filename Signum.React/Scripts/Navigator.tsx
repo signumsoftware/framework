@@ -560,10 +560,13 @@ export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.Mouse
 }
 
 export function pushOrOpenInTab(path: string, e: React.MouseEvent<any> | React.KeyboardEvent<any>) {
+    if ((e as React.MouseEvent<any>).button == 2)
+        return;
+
     e.preventDefault();
     if (e.ctrlKey || (e as React.MouseEvent<any>).button == 1)
         window.open(toAbsoluteUrl(path));
-    else
+    else 
         history.push(path);
 }
 
