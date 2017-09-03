@@ -286,20 +286,7 @@ namespace Signum.Engine.Workflow
             }
         }
 
-      
-
-#pragma warning disable IDE1006 // Naming Styles
-        public class ActivityWithRemarks : IQueryTokenBag
-        {
-            public Lite<WorkflowActivityEntity> workflowActivity { get; set; }
-            public Lite<CaseEntity> @case { get; set; }
-            public Lite<CaseActivityEntity> caseActivity { get; set; }
-            public Lite<CaseNotificationEntity> notification { get; set; }
-            public string remarks { get; set; }
-            public int alerts { get; set; }
-            public List<CaseTagTypeEntity> tags { get; set; }
-        }
-#pragma warning restore IDE1006 // Naming Styles
+     
 
         static readonly GenericInvoker<Action> giFixCaseDescriptions = new GenericInvoker<Action>(() => FixCaseDescriptions<Entity>());
         public static void FixCaseDescriptions<T>() where T : Entity
