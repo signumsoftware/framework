@@ -180,12 +180,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     currentMenuItems: undefined,
                     markedRows: undefined,
                     searchCount: (this.state.searchCount || 0) + 1
+                }, () => {
+                    if (this.props.onResult)
+                        this.props.onResult(rt);
+                    this.notifySelectedRowsChanged();
                 });
-                if (this.props.onResult)
-                    this.props.onResult(rt);
-
-                this.notifySelectedRowsChanged();
-                this.forceUpdate();
             });
         });
     }
