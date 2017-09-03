@@ -82,7 +82,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
 
                 <Modal.Body>
                     <SearchControl
-                        {...this.props.searchControlProps}
+                        avoidChangeUrl={true}
                         hideFullScreenButton={true}
                         throwIfNotFindable={true}
                         ref={(e: SearchControl) => this.searchControl = e}
@@ -90,6 +90,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
                         onSelectionChanged={this.handleSelectionChanged}
                         largeToolbarButtons={true}
                         onDoubleClick={this.props.findMode == "Find" ? this.handleDoubleClick : undefined}
+                        {...this.props.searchControlProps}
                         />
                 </Modal.Body>
             </Modal>

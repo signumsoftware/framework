@@ -57,6 +57,7 @@ export interface SearchControlLoadedProps {
     navigate: boolean;
     largeToolbarButtons: boolean;
     avoidAutoRefresh: boolean;
+    avoidChangeUrl: boolean;
     
     onCreate?: () => Promise<void>;
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;

@@ -55,6 +55,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     navigate?: boolean;
     largeToolbarButtons?: boolean;
     avoidAutoRefresh?: boolean;
+    avoidChangeUrl?: boolean;
     throwIfNotFindable?: boolean;
 
     onNavigated?: (lite: Lite<Entity>) => void;
@@ -198,7 +199,8 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             showBarExtension={p.showBarExtension != null ? p.showBarExtension : true}
             showBarExtensionOption={p.showBarExtensionOption}
             largeToolbarButtons={p.largeToolbarButtons != null ? p.largeToolbarButtons : false}
-            avoidAutoRefresh={p.avoidAutoRefresh != null ? p.avoidAutoRefresh : false }
+            avoidAutoRefresh={p.avoidAutoRefresh != null ? p.avoidAutoRefresh : false}
+            avoidChangeUrl={p.avoidChangeUrl != null ? p.avoidChangeUrl : false}
 
             onCreate={p.onCreate}
             onNavigated={p.onNavigated}
