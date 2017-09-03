@@ -35,8 +35,8 @@ namespace Signum.React.RestLog
                 Controller = actionContext.ControllerContext.Controller.ToString(),
                 Action = actionContext.ActionDescriptor.ActionName,
                 StartDate = TimeZoneManager.Now,
-                RequestBody = (string)(actionContext.Request.Properties.ContainsKey(SignumAuthenticationAndProfilerAttribute.SavedRequestKey) ?
-                    actionContext.Request.Properties[SignumAuthenticationAndProfilerAttribute.SavedRequestKey] : null)
+                RequestBody = (string)(actionContext.Request.Properties.ContainsKey(SignumAuthenticationFilterAttribute.SavedRequestKey) ?
+                    actionContext.Request.Properties[SignumAuthenticationFilterAttribute.SavedRequestKey] : null)
             };
 
             actionContext.ControllerContext.RouteData.Values.Add(typeof(RestLogEntity).FullName, request);
