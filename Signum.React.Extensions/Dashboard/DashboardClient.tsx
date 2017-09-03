@@ -33,11 +33,16 @@ export interface PanelPartContentProps<T extends IPartEntity> {
     entity?: Lite<Entity>;
 }
 
+interface IconColor {
+    iconName: string;
+    iconColor: string;
+}
+
 export interface PartRenderer<T extends IPartEntity>{
     component: () => Promise<React.ComponentClass<PanelPartContentProps<T>>>;
-    defaultIcon: (element: T) => string;
+    defaultIcon: (element: T) => IconColor;
     handleTitleClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent<any>) => void;
-    handleFullScreenClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent<any>) => void;
+    handleEditClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent<any>) => void;
 }
 
 
@@ -61,20 +66,20 @@ export function start(options: { routes: JSX.Element[] }) {
 
     registerRenderer(ValueUserQueryListPartEntity, {
         component: () => import('./View/ValueUserQueryListPart').then(a => a.default),
-        defaultIcon: () => "fa fa-list"
+        defaultIcon: () => ({ iconName: "fa fa-list", iconColor: "lightblue" })
     });
     registerRenderer(LinkListPartEntity, {
         component: () => import('./View/LinkListPart').then(a => a.default),
-        defaultIcon: () => "fa fa-list"
+        defaultIcon: () => ({ iconName: "fa fa-list", iconColor: "forestgreen" })
     });
     registerRenderer(UserChartPartEntity, {
         component: () => import('./View/UserChartPart').then(a => a.default),
-        defaultIcon: () =>"glyphicon glyphicon-stats",
-        handleTitleClick: (p, e, ev) => {
+        defaultIcon: () => ({ iconName: "glyphicon glyphicon-stats", iconColor: "violet" }),
+        handleEditClick: (p, e, ev) => {
             ev.preventDefault();
             Navigator.pushOrOpenInTab(Navigator.navigateRoute(p.userChart!), ev);
         },
-        handleFullScreenClick: (p, e, ev) => {
+        handleTitleClick: (p, e, ev) => {
             ev.preventDefault();
             ev.persist();
             UserChartClient.Converter.toChartRequest(p.userChart!, e)
@@ -86,12 +91,12 @@ export function start(options: { routes: JSX.Element[] }) {
     
     registerRenderer(UserQueryPartEntity, {
         component: () => import('./View/UserQueryPart').then((a: any) => a.default),
-        defaultIcon: () => "glyphicon glyphicon-list-alt",
-        handleTitleClick: (p, e, ev) => {
+        defaultIcon: () => ({ iconName: "glyphicon glyphicon-list-alt", iconColor: "dodgerblue" }),
+        handleEditClick: (p, e, ev) => {
             ev.preventDefault();
             Navigator.pushOrOpenInTab(Navigator.navigateRoute(p.userQuery!), ev);
         },
-        handleFullScreenClick: (p, e, ev) => {
+        handleTitleClick: (p, e, ev) => {
             ev.preventDefault();
             ev.persist();
             UserQueryClient.Converter.toFindOptions(p.userQuery!, e)

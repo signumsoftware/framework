@@ -26,6 +26,7 @@ export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetE
     dashboardPriority?: number | null;
     autoRefreshPeriod?: number | null;
     displayName?: string | null;
+    combineSimilarRows?: boolean;
     parts: Entities.MList<PanelPartEmbedded>;
     guid?: string;
     forNavbar?: boolean;

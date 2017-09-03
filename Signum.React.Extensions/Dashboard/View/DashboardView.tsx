@@ -22,9 +22,16 @@ import "../Dashboard.css"
 export default class DashboardView extends React.Component<{ dashboard: DashboardEntity, entity?: Entity }> {
 
     render() {
+        if (this.props.dashboard.combineSimilarRows)
+            return this.renderCombinedRows();
+        else
+            return this.renderBasic();
 
+    }
+
+
+    renderBasic() {
         const db = this.props.dashboard;
-        const entity = this.props.entity;
 
         const ctx = TypeContext.root(db);
 
@@ -38,9 +45,9 @@ export default class DashboardView extends React.Component<{ dashboard: Dashboar
                             <div className="row row-control-panel" key={"row" + gr.key}>
                                 {gr.elements.orderBy(ctx => ctx.value.startColumn).map((c, j, list) => {
 
-                                    const last = j == 0 ? undefined : list[j - 1].value;
+                                    const prev = j == 0 ? undefined : list[j - 1].value;
 
-                                    const offset = c.value.startColumn! - (last ? (last.startColumn! + last.columns!) : 0);
+                                    const offset = c.value.startColumn! - (prev ? (prev.startColumn! + prev.columns!) : 0);
 
                                     return (
                                         <div key={j} className={`col-sm-${c.value.columns} col-sm-offset-${offset}`}>
@@ -53,6 +60,117 @@ export default class DashboardView extends React.Component<{ dashboard: Dashboar
             </div>
         );
     }
+
+
+    renderCombinedRows() {
+        const db = this.props.dashboard;
+        const ctx = TypeContext.root(db);
+
+        var rows = mlistItemContext(ctx.subCtx(a => a.parts))
+            .groupBy(c => c.value.row!.toString())
+            .orderBy(g => g.key)
+            .map(g => ({
+                columns: g.elements.orderBy(a => a.value.startColumn).map(p => ({
+                    startColumn: p.value.startColumn,
+                    columnWidth: p.value.columns,
+                    parts: [undefined as any as TypeContext<PanelPartEmbedded>]//[p]// ,
+                }) as CombinedColumn)
+            }) as CombinedRow);
+
+        debugger;
+
+        var combinedRows = combineRows(rows);
+
+        return (
+            <div>
+                {rows.map((r, i) =>
+                    <div className="row row-control-panel" key={"row" + i}>
+                        {r.columns.orderBy(ctx => ctx.startColumn).map((c, j, list) => {
+
+                            const last = j == 0 ? undefined : list[j - 1];
+
+                            const offset = c.startColumn! - (last ? (last.startColumn! + last.columnWidth!) : 0);
+
+                            return (
+                                <div key={j} className={`col-sm-${c.columnWidth} col-sm-offset-${offset}`}>
+                                    {c.parts.map(p => <PanelPart ctx={p} entity={this.props.entity} />)}
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+        );
+    }
+}
+
+function combineRows(rows: CombinedRow[]): CombinedRow[] {
+
+    const newRows: CombinedRow[] = [];
+
+    for (let i = 0; i < rows.length; i++) {
+
+        const row = {
+            columns: rows[i].columns.map(c =>
+                ({
+                    startColumn: c.startColumn,
+                    columnWidth: c.columnWidth,
+                    parts: [...c.parts]
+                }) as CombinedColumn)
+        } as CombinedRow;
+
+        newRows.push(row);
+
+        for (let j = 1; i + j < rows.length; j++) {
+
+            if (!tryCombine(row, rows[i + j])) {
+                i = i + j - 1;
+                break;
+            }
+
+        }
+    }
+
+    return newRows;
+}
+
+function tryCombine(row: CombinedRow, newRow: CombinedRow): boolean {
+    if (!row.columns.every(c => newRow.columns.some(c2 => c.startColumn == c2.startColumn && c.columnWidth == c2.columnWidth)))
+        return false;
+
+    row.columns.forEach(c => {
+        var c2 = newRow.columns.filter(c2 => c.startColumn == c2.startColumn && c.columnWidth == c2.columnWidth).single();
+
+        c.parts.push(...c2.parts);
+    });
+
+    return true;
+}
+
+export function identical(col1: CombinedColumn, col2: CombinedColumn): boolean {
+    return col1.startColumn == col2.startColumn && col1.columnWidth == col2.columnWidth;
+}
+
+export function overlaps(col1: CombinedColumn, col2: CombinedColumn): boolean {
+
+    var columnEnd1 = col1.startColumn + col1.columnWidth;
+    var columnEnd2 = col2.startColumn + col2.columnWidth;
+
+
+    return !(columnEnd1 <= col2.startColumn || columnEnd2 <= col1.startColumn);
+
+}
+
+
+interface CombinedRow {
+    columns: CombinedColumn[];
+}
+
+interface CombinedColumn {
+    startColumn: number;
+    columnWidth: number;
+
+    parts: TypeContext<PanelPartEmbedded>[];
 }
 
 export interface PanelPartProps {
@@ -99,20 +217,21 @@ export class PanelPart extends React.Component<PanelPartProps, PanelPartState>{
 
         const renderer = DashboardClient.partRenderers[content.Type];
 
-
         const lite = this.props.entity ? toLite(this.props.entity) : undefined
 
-        const title = p.title || getToString(content);
+        const title = p.iconName ? <span><span className={p.iconName || undefined} style={{ color: p.iconColor || undefined }} />&nbsp;{p.title || getToString(content)}</span > :
+            (p.title || getToString(content));
 
         return (
             <div className={classes("panel", "panel-" + (p.style == undefined ? "default" : p.style.firstLower()))}>
-                <div className="panel-heading">
-                    {renderer.handleTitleClick == undefined ? title : <a className="sf-pointer" onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>}
-                    &nbsp;
-                    {renderer.handleFullScreenClick &&
-                        <a className="sf-ftbl-header-fullscreen sf-pointer" onMouseUp={e => renderer.handleFullScreenClick!(content, lite, e)}>
-                            <span className="glyphicon glyphicon-new-window"></span>
+                <div className="panel-heading sf-show-hover">
+                    {renderer.handleEditClick &&
+                        <a className="sf-pointer pull-right sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e)}>
+                            <span className="glyphicon glyphicon-edit"></span>&nbsp;Edit
                         </a>}
+                    &nbsp;
+                    {renderer.handleTitleClick == undefined ? title : <a className="sf-pointer" onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>}
+
                 </div>
                 <div className="panel-body">
                     {

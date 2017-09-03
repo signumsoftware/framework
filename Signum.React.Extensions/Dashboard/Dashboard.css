@@ -17,11 +17,6 @@
     overflow-x:hidden;
 }
 
-.sf-grid-element .panel-heading .form-control
-{
-    width: auto;
-}
-
 .sf-grid-element .panel-heading
 {
     cursor:move;
@@ -79,4 +74,11 @@ fieldset.SF-grid-repeater-field
 
 div.row-control-panel {
     margin-bottom: 30px;
+}
+
+/*.sf-hide{
+}*/
+
+.sf-show-hover:not(:hover) .sf-hide {
+    color: #aaa;
 }
