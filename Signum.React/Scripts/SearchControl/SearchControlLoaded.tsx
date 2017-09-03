@@ -52,6 +52,7 @@ export interface SearchControlLoadedProps {
     showFilterButton: boolean;
     showFooter: boolean;
     allowChangeColumns: boolean;
+    allowChangeOrder: boolean;
     create: boolean;
     navigate: boolean;
     largeToolbarButtons: boolean;
@@ -797,7 +798,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     canOrder(column: ColumnOptionParsed) {
-        if (!column.token)
+        if (!column.token || !this.props.allowChangeOrder)
             return false;
 
         const t = column.token; 

@@ -50,6 +50,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     showFilterButton?: boolean;
     showFooter?: boolean;
     allowChangeColumns?: boolean;
+    allowChangeOrder?: boolean;
     create?: boolean;
     navigate?: boolean;
     largeToolbarButtons?: boolean;
@@ -186,6 +187,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             showFilterButton={ p.showFilterButton != null ? p.showFilterButton : true}
             showFooter={ p.showFooter != null ? p.showFooter : true}
             allowChangeColumns={p.allowChangeColumns != null ? p.allowChangeColumns : true}
+            allowChangeOrder={p.allowChangeOrder != null ? p.allowChangeOrder : true}
             create={p.create != null ? p.create : tis.some(ti => Navigator.isCreable(ti, false, true))}
             navigate={p.navigate != null ? p.navigate : tis.some(ti => Navigator.isNavigable(ti, undefined, true))}
 
