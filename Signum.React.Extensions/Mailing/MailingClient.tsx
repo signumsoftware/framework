@@ -211,3 +211,10 @@ export interface AsyncEmailSenderState {
     QueuedItems: number;
     CurrentProcessIdentifier: string;
 }
+
+declare module '../../../Framework/Signum.React/Scripts/FindOptions' {
+
+    export interface QueryDescription {
+        emailTemplates?: Array<Lite<EmailTemplateEntity>>;
+    }
+}

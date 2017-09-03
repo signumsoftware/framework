@@ -68,12 +68,9 @@ namespace Signum.React.Word
 
             var entity = lite?.RetrieveAndForget();
 
-            var isAllowed = Schema.Current.GetInMemoryFilter<WordTemplateEntity>(userInterface: true);
-            return WordTemplateLogic.TemplatesByQueryName.Value.TryGetC(type).EmptyIfNull()
-                .Where(a => isAllowed(a) && WordTemplateLogic.IsVisible(a, visibleOn))
-                .Where(a => a.IsApplicable(entity))
-                .Select(a => a.ToLite())
-                .ToList();
+            return WordTemplateLogic.GetApplicableWordTemplates(type, entity, visibleOn);
         }
+
+    
     }
 }
