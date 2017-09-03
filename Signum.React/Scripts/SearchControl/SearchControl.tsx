@@ -33,7 +33,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     formatters?: { [columnName: string]: CellFormatter };
     rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
     entityFormatter?: EntityFormatter;
-    extraButtons?: (searchControl: SearchControlLoaded) => React.ReactElement<any>[];
+    extraButtons?: (searchControl: SearchControlLoaded) => (React.ReactElement<any> | null | undefined | false)[];
     getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
     maxResultsHeight?: React.CSSWideKeyword | any;
     tag?: string | {};
@@ -50,10 +50,12 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     showFilterButton?: boolean;
     showFooter?: boolean;
     allowChangeColumns?: boolean;
+    allowChangeOrder?: boolean;
     create?: boolean;
     navigate?: boolean;
     largeToolbarButtons?: boolean;
     avoidAutoRefresh?: boolean;
+    avoidChangeUrl?: boolean;
     throwIfNotFindable?: boolean;
 
     onNavigated?: (lite: Lite<Entity>) => void;
@@ -111,23 +113,26 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         this.searchControlLoaded && this.searchControlLoaded.doSearchPage1(avoidOnSearchEvent);
     }
 
-    initialLoad(propsFindOptions: FindOptions) {
+    initialLoad(fo: FindOptions) {
 
-        if (!Finder.isFindable(propsFindOptions.queryName, false))
+        if (!Finder.isFindable(fo.queryName, false))
         {
             if (this.props.throwIfNotFindable)
-                throw Error(`Query ${propsFindOptions.queryName} not allowed`);
+                throw Error(`Query ${fo.queryName} not allowed`);
 
             return;
         }
 
-        Finder.getQueryDescription(propsFindOptions.queryName).then(qd => {
-            Finder.parseFindOptions(propsFindOptions, qd).then(fop => {
-                this.setState({
-                    queryDescription: qd,
-                    findOptions: fop,
-                });
-            }).done();
+        Finder.getQueryDescription(fo.queryName).then(qd => {
+
+            this.setState({ queryDescription: qd });
+
+            if (Finder.validateNewEntities(fo))
+                this.setState({ findOptions: undefined });
+            else
+                Finder.parseFindOptions(fo, qd).then(fop => {
+                    this.setState({ findOptions: fop, });
+                }).done();
         }).done();
     }
 
@@ -138,6 +143,16 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     }
 
     render() {
+        
+        var errorMessage = Finder.validateNewEntities(this.props.findOptions);
+        if (errorMessage) {
+            return (
+                <div className="alert alert-danger" role="alert">
+                    <strong>Error in SearchControl ({getQueryKey(this.props.findOptions.queryName)}): </strong>
+                    {errorMessage}
+                </div>
+            );
+        }
 
         const fo = this.state.findOptions;
         if (!fo)
@@ -145,6 +160,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
         if (!Finder.isFindable(fo.queryKey, false))
             return null;
+        
 
         const p = this.props;
 
@@ -172,6 +188,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             showFilterButton={ p.showFilterButton != null ? p.showFilterButton : true}
             showFooter={ p.showFooter != null ? p.showFooter : true}
             allowChangeColumns={p.allowChangeColumns != null ? p.allowChangeColumns : true}
+            allowChangeOrder={p.allowChangeOrder != null ? p.allowChangeOrder : true}
             create={p.create != null ? p.create : tis.some(ti => Navigator.isCreable(ti, false, true))}
             navigate={p.navigate != null ? p.navigate : tis.some(ti => Navigator.isNavigable(ti, undefined, true))}
 
@@ -182,7 +199,8 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             showBarExtension={p.showBarExtension != null ? p.showBarExtension : true}
             showBarExtensionOption={p.showBarExtensionOption}
             largeToolbarButtons={p.largeToolbarButtons != null ? p.largeToolbarButtons : false}
-            avoidAutoRefresh={p.avoidAutoRefresh != null ? p.avoidAutoRefresh : false }
+            avoidAutoRefresh={p.avoidAutoRefresh != null ? p.avoidAutoRefresh : false}
+            avoidChangeUrl={p.avoidChangeUrl != null ? p.avoidChangeUrl : false}
 
             onCreate={p.onCreate}
             onNavigated={p.onNavigated}

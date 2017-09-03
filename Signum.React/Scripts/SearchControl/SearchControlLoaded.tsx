@@ -35,7 +35,7 @@ export interface SearchControlLoadedProps {
     formatters?: { [columnName: string]: CellFormatter };
     rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
     entityFormatter?: EntityFormatter;
-    extraButtons?: (searchControl: SearchControlLoaded) => React.ReactElement<any>[];
+    extraButtons?: (searchControl: SearchControlLoaded) => (React.ReactElement<any> | null | undefined | false)[];
     getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
     maxResultsHeight?: React.CSSWideKeyword | any;
     tag?: string | {};
@@ -52,10 +52,12 @@ export interface SearchControlLoadedProps {
     showFilterButton: boolean;
     showFooter: boolean;
     allowChangeColumns: boolean;
+    allowChangeOrder: boolean;
     create: boolean;
     navigate: boolean;
     largeToolbarButtons: boolean;
     avoidAutoRefresh: boolean;
+    avoidChangeUrl: boolean;
     
     onCreate?: () => Promise<void>;
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
@@ -178,12 +180,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     currentMenuItems: undefined,
                     markedRows: undefined,
                     searchCount: (this.state.searchCount || 0) + 1
+                }, () => {
+                    if (this.props.onResult)
+                        this.props.onResult(rt);
+                    this.notifySelectedRowsChanged();
                 });
-                if (this.props.onResult)
-                    this.props.onResult(rt);
-
-                this.notifySelectedRowsChanged();
-                this.forceUpdate();
             });
         });
     }
@@ -797,7 +798,18 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     canOrder(column: ColumnOptionParsed) {
-        return column.token && !column.token.type.isCollection && !column.token.type.isEmbedded && !isTypeModel(column.token.type.name);
+        if (!column.token || !this.props.allowChangeOrder)
+            return false;
+
+        const t = column.token; 
+
+        if (t.type.isCollection)
+            return false;
+
+        if (t.type.isEmbedded || isTypeModel(t.type.name))
+            return t.hasOrderAdapter == true;
+
+        return true;
     }
 
     orderClassName(column: ColumnOptionParsed) {

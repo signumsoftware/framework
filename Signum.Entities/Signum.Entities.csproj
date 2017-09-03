@@ -96,7 +96,6 @@
     <Compile Include="Basics\SemiSymbol.cs" />
     <Compile Include="DynamicQuery\Tokens\AggregateToken.cs" />
     <Compile Include="DynamicQuery\Tokens\HasValueToken.cs" />
-    <Compile Include="DynamicQuery\Tokens\BagPropertyToken.cs" />
     <Compile Include="DynamicQuery\Tokens\DecimalSpecialTokens.cs" />
     <Compile Include="DynamicQuery\Tokens\EntityToStringToken.cs" />
     <Compile Include="DynamicQuery\Tokens\CountToken.cs" />

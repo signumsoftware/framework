@@ -75,6 +75,16 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
         if (!Finder.isFindable(fo.queryName, false))
             return null;
 
+        var errorMessage = Finder.validateNewEntities(fo);
+        if (errorMessage) {
+            return (
+                <div className="alert alert-danger" role="alert">
+                    <strong>Error in ValueSearchControlLine ({getQueryKey(fo.queryName)}): </strong>
+                    {errorMessage}
+                </div>
+            );
+        }
+
         var token = this.valueSearchControl && this.valueSearchControl.state.token;
 
         let isQuery = this.props.valueToken == undefined || token && token.queryTokenType == "Aggregate";
