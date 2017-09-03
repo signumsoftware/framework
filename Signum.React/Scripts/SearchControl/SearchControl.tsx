@@ -33,7 +33,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     formatters?: { [columnName: string]: CellFormatter };
     rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
     entityFormatter?: EntityFormatter;
-    extraButtons?: (searchControl: SearchControlLoaded) => React.ReactElement<any>[];
+    extraButtons?: (searchControl: SearchControlLoaded) => (React.ReactElement<any> | null | undefined | false)[];
     getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
     maxResultsHeight?: React.CSSWideKeyword | any;
     tag?: string | {};
