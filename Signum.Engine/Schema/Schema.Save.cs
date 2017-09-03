@@ -17,6 +17,7 @@ using Signum.Utilities.DataStructures;
 using System.Data.Common;
 using System.Collections.Concurrent;
 using Signum.Engine.Basics;
+using System.Globalization;
 
 namespace Signum.Engine.Maps
 {
@@ -227,7 +228,7 @@ namespace Signum.Engine.Maps
             Action<List<Entity>, DirectedGraph<Entity>> GetInsertMultiIdentity(int num)
             {
                 string sqlMulti = new StringBuilder()
-                    .AppendLine("DECLARE @MyTable TABLE (Id " + this.table.PrimaryKey.SqlDbType.ToString().ToUpper() + ");")
+                    .AppendLine("DECLARE @MyTable TABLE (Id " + this.table.PrimaryKey.SqlDbType.ToString().ToUpperInvariant() + ");")
                     .AppendLines(Enumerable.Range(0, num).Select(i => SqlInsertPattern(i.ToString(), true)))
                     .AppendLine("SELECT Id from @MyTable").ToString();
 
@@ -426,7 +427,7 @@ namespace Signum.Engine.Maps
             Action<List<Entity>, DirectedGraph<Entity>> GetUpdateMultiple(int num)
             {
                 string sqlMulti = new StringBuilder()
-                      .AppendLine("DECLARE @NotFound TABLE (Id " + this.table.PrimaryKey.SqlDbType.ToString().ToUpper() + ");")
+                      .AppendLine("DECLARE @NotFound TABLE (Id " + this.table.PrimaryKey.SqlDbType.ToString().ToUpperInvariant() + ");")
                       .AppendLines(Enumerable.Range(0, num).Select(i => SqlUpdatePattern(i.ToString(), true)))
                       .AppendLine("SELECT Id from @NotFound").ToString();
 
@@ -839,7 +840,7 @@ namespace Signum.Engine.Maps
                 return insertCache.GetOrAdd(numElements, num =>
                 {
                     string sqlMulti = new StringBuilder()
-                          .AppendLine("DECLARE @MyTable TABLE (Id " + this.table.PrimaryKey.SqlDbType.ToString().ToUpper() + ");")
+                          .AppendLine("DECLARE @MyTable TABLE (Id " + this.table.PrimaryKey.SqlDbType.ToString().ToUpperInvariant() + ");")
                           .AppendLines(Enumerable.Range(0, num).Select(i => sqlInsert(i.ToString(), true)))
                           .AppendLine("SELECT Id from @MyTable").ToString();
 

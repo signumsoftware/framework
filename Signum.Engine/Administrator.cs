@@ -1,4 +1,5 @@
-﻿using Signum.Engine.Linq;
+﻿using Signum.Engine;
+using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Engine.SchemaInfoTables;
 using Signum.Entities;
@@ -110,11 +111,7 @@ namespace Signum.Engine
                 return new List<Entity>();
             }
         }
-
-       
-
-
-
+        
         public static IDisposable DisableIdentity<T>()
             where T : Entity
         {
@@ -387,17 +384,27 @@ namespace Signum.Engine
         }
 
 
-
-        public static SqlPreCommand MoveAllForeignKeysScript<T>(Lite<T> oldEntity, Lite<T> newEntity)
+        public static void MoveAllForeignKeys<T>(Lite<T> fromEntity, Lite<T> toEntity)
         where T : Entity
         {
-            return MoveAllForeignKeysPrivate<T>(oldEntity, newEntity).Select(a => a.UpdateScript).Combine(Spacing.Double);
+            using (Transaction tr = new Transaction())
+            {
+                MoveAllForeignKeysPrivate<T>(fromEntity, toEntity).Select(a => a.UpdateScript).Combine(Spacing.Double).ExecuteLeaves();
+                tr.Commit();
+            }
+
         }
 
-        public static void MoveAllForeignKeysConsole<T>(Lite<T> oldEntity, Lite<T> newEntity)
+        public static SqlPreCommand MoveAllForeignKeysScript<T>(Lite<T> fromEntity, Lite<T> toEntity)
+        where T : Entity
+        {
+            return MoveAllForeignKeysPrivate<T>(fromEntity, toEntity).Select(a => a.UpdateScript).Combine(Spacing.Double);
+        }
+
+        public static void MoveAllForeignKeysConsole<T>(Lite<T> fromEntity, Lite<T> toEntity)
             where T : Entity
         {
-            var tuples = MoveAllForeignKeysPrivate<T>(oldEntity, newEntity);
+            var tuples = MoveAllForeignKeysPrivate<T>(fromEntity, toEntity);
 
             foreach (var t in tuples)
             {
@@ -411,14 +418,14 @@ namespace Signum.Engine
             public SqlPreCommandSimple UpdateScript;
         }
 
-        static List<ColumnTableScript> MoveAllForeignKeysPrivate<T>(Lite<T> oldEntity, Lite<T> newEntity)
+        static List<ColumnTableScript> MoveAllForeignKeysPrivate<T>(Lite<T> fromEntity, Lite<T> toEntity)
         where T : Entity
         {
-            if (oldEntity.GetType() != newEntity.GetType())
-                throw new ArgumentException("oldEntity and newEntity should have the same type");
+            if (fromEntity.GetType() != toEntity.GetType())
+                throw new ArgumentException("fromEntity and toEntity should have the same type");
 
-            if (oldEntity.Is(newEntity))
-                throw new ArgumentException("oldEntity and newEntity should not be the same ");
+            if (fromEntity.Is(toEntity))
+                throw new ArgumentException("fromEntity and toEntity should not be the same ");
 
             Schema s = Schema.Current;
 
@@ -431,10 +438,10 @@ namespace Signum.Engine
             return columns.Select(ct => new ColumnTableScript
             {
                 ColumnTable = ct,
-                UpdateScript = new SqlPreCommandSimple("UPDATE {0}\r\nSET {1} = @newEntity\r\nWHERE {1} = @oldEntity".FormatWith(ct.Table.Name, ct.Column.Name.SqlEscape()), new List<DbParameter>
+                UpdateScript = new SqlPreCommandSimple("UPDATE {0}\r\nSET {1} = @toEntity\r\nWHERE {1} = @fromEntity".FormatWith(ct.Table.Name, ct.Column.Name.SqlEscape()), new List<DbParameter>
                 {
-                    pb.CreateReferenceParameter("@oldEntity", oldEntity.Id, ct.Column),
-                    pb.CreateReferenceParameter("@newEntity", newEntity.Id, ct.Column),
+                    pb.CreateReferenceParameter("@fromEntity", fromEntity.Id, ct.Column),
+                    pb.CreateReferenceParameter("@toEntity", toEntity.Id, ct.Column),
                 })
             }).ToList();
         }

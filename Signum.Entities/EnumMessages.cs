@@ -95,6 +95,10 @@ Lose changes?")]
         Message,
         [Description(@"{0} and Close")]
         _0AndClose,
+        [Description("New {0}")]
+        New0_G,
+        [Description("{0} {1}")]
+        Type0Id1
     }
 
     public enum EntityControlMessage

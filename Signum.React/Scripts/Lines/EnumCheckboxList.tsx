@@ -15,6 +15,7 @@ export interface EnumCheckboxListProps extends LineBaseProps {
     ctx: TypeContext<MList<string>>;
     columnCount?: number;
     columnWidth?: number;
+    avoidFieldSet?: boolean;
 }
 
 export class EnumCheckboxList extends LineBase<EnumCheckboxListProps, EnumCheckboxListProps> {
@@ -71,6 +72,13 @@ export class EnumCheckboxList extends LineBase<EnumCheckboxListProps, EnumCheckb
     
 
     renderInternal() {
+
+        if (this.props.avoidFieldSet == true)
+            return (
+                <div className={classes("SF-checkbox-list", this.state.ctx.errorClass)} {...this.baseHtmlAttributes() } {...this.state.formGroupHtmlAttributes}>
+                    {this.renderContent()}
+                </div>
+            );
        
         return (
             <fieldset className={classes("SF-checkbox-list", this.state.ctx.errorClass)} {...this.baseHtmlAttributes() } {...this.state.formGroupHtmlAttributes}>
@@ -79,18 +87,15 @@ export class EnumCheckboxList extends LineBase<EnumCheckboxListProps, EnumCheckb
                         <span>{this.state.labelText}</span>
                     </div>
                 </legend>
-                <div className="sf-checkbox-elements" style={this.getColumnStyle() }>
-                    { this.renderContent() }
-                </div>
+                {this.renderContent()}
             </fieldset>
         );
     }
 
-
     renderContent() {
         if (this.state.data == null)
             return null;
-        
+
         var data = [...this.state.data];
 
         this.state.ctx.value.forEach(mle => {
@@ -100,16 +105,19 @@ export class EnumCheckboxList extends LineBase<EnumCheckboxListProps, EnumCheckb
 
         const ti = getTypeInfo(this.state.type!.name);
 
-        return data.map((val, i) =>
-            <label className="sf-checkbox-element" key={i}>
-                <input type="checkbox"
-                    checked={this.state.ctx.value.some(mle => mle.element  == val) }
-                    disabled={this.state.ctx.readOnly}
-                    name={ val }
-                    onChange={e => this.handleOnChange(e, val) }  />
-                &nbsp;
-                <span className="sf-entitStrip-link">{ ti.members[val].niceName}</span>
-            </label>);
-
+        return (
+            <div className="sf-checkbox-elements" style={this.getColumnStyle()}>
+                {data.map((val, i) =>
+                    <label className="sf-checkbox-element" key={i}>
+                        <input type="checkbox"
+                            checked={this.state.ctx.value.some(mle => mle.element == val)}
+                            disabled={this.state.ctx.readOnly}
+                            name={val}
+                            onChange={e => this.handleOnChange(e, val)} />
+                        &nbsp;
+                        <span className="sf-entitStrip-link">{ti.members[val].niceName}</span>
+                    </label>)}
+            </div>
+        );
     }
 }

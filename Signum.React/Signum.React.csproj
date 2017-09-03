@@ -28,7 +28,8 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <TypeScriptToolsVersion>2.4</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>2.5</TypeScriptToolsVersion>
+    <Use64BitIISExpress />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -209,6 +210,7 @@
     <Content Include="Scripts\fetchWithAbort.js" />
     <TypeScriptCompile Include="Scripts\Frames\ContainerToggle.tsx" />
     <TypeScriptCompile Include="Scripts\Frames\Notify.tsx" />
+    <TypeScriptCompile Include="Scripts\Frames\OrderUtils.tsx" />
     <TypeScriptCompile Include="Scripts\Frames\ValidationErrors.tsx" />
     <TypeScriptCompile Include="Scripts\Frames\ReactVisitor.tsx" />
     <TypeScriptCompile Include="Scripts\Frames\Widgets.tsx" />
@@ -218,6 +220,7 @@
     <TypeScriptCompile Include="Scripts\Lines\AutocompleteConfig.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityTable.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EnumCheckboxList.tsx" />
+    <TypeScriptCompile Include="Scripts\Lines\MultiValueLine.tsx" />
     <TypeScriptCompile Include="Scripts\Modals\MessageModal.tsx" />
     <TypeScriptCompile Include="Scripts\Search.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityBase.tsx" />

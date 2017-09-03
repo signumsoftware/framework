@@ -20,13 +20,14 @@ export interface EntityTableProps extends EntityListBaseProps {
     columns?: EntityTableColumn<ModifiableEntity, any>[],
     fetchRowState?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow) => Promise<any>;
     onRowHtmlAttributes?: (ctx: TypeContext<ModifiableEntity>, row: EntityTableRow, rowState: any) => React.HTMLAttributes<any> | null | undefined;
+    avoidFieldSet?: boolean;
 }
 
 export interface EntityTableColumn<T, RS> {
     property?: ((a: T) => any) | string;
     header?: React.ReactNode | null;
-    headerHtmlAttributes?: React.HTMLAttributes<any>;
-    cellHtmlAttributes?: (ctx: TypeContext<T>, row: EntityTableRow, rowState: RS) => React.HTMLAttributes<any> | null | undefined;
+    headerHtmlAttributes?: React.ThHTMLAttributes<any>;
+    cellHtmlAttributes?: (ctx: TypeContext<T>, row: EntityTableRow, rowState: RS) => React.TdHTMLAttributes<any> | null | undefined;
     template?: (ctx: TypeContext<T>, row: EntityTableRow, rowState: RS) => React.ReactChild | null | undefined;
 }
 
@@ -63,6 +64,33 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
 
     renderInternal() {
 
+        if (this.state.type!.isLite)
+            throw new Error("Lite not supported");
+
+        let ctx = (this.state.ctx as TypeContext<MList<ModifiableEntity>>).subCtx({ formGroupStyle: "SrOnly" });
+
+        if (this.props.avoidFieldSet == true)
+            return (
+                <div className={classes("SF-table-field SF-control-container", ctx.errorClass)} {...this.baseHtmlAttributes() } {...this.state.formGroupHtmlAttributes}>
+                    {this.renderButtons()}
+                    {this.renderTable(ctx)}
+                </div>
+            );
+
+        return (
+            <fieldset className={classes("SF-table-field SF-control-container", ctx.errorClass)} {...this.baseHtmlAttributes() } {...this.state.formGroupHtmlAttributes}>
+                <legend>
+                    <div>
+                        <span>{this.state.labelText}</span>
+                        {this.renderButtons()}
+                    </div>
+                </legend>
+                {this.renderTable(ctx)}
+            </fieldset>
+        );
+    }
+
+    renderButtons() {
         const buttons = (
             <span className="pull-right">
                 {this.state.createAsLink == false && this.renderCreateButton(false)}
@@ -70,62 +98,52 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
             </span>
         );
 
-        if (this.state.type!.isLite)
-            throw new Error("Lite not supported");
+        return ( EntityBase.hasChildrens(buttons) ? buttons : undefined );
+    }
 
-        let ctx = (this.state.ctx as TypeContext<MList<ModifiableEntity>>).subCtx({ formGroupStyle: "SrOnly" });
+    renderTable(ctx: TypeContext<MList<ModifiableEntity>>) {
 
-        const readOnly = this.state.ctx.readOnly;
-
+        const readOnly = ctx.readOnly;
         const elementPr = ctx.propertyRoute.add(a => a[0].element);
 
         return (
-            <fieldset className={classes("SF-table-field SF-control-container", ctx.errorClass)} {...this.baseHtmlAttributes() } {...this.state.formGroupHtmlAttributes}>
-                <legend>
-                    <div>
-                        <span>{this.state.labelText}</span>
-                        {EntityBase.hasChildrens(buttons) ? buttons : undefined}
-                    </div>
-                </legend>
-                <table className="table table-condensed form-vertical sf-table">
-                    <thead>
+            <table className="table table-condensed form-vertical sf-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        {
+                            this.state.columns!.map((c, i) => <th key={i} {...c.headerHtmlAttributes}>
+                                {c.header === undefined && c.property ? elementPr.add(c.property).member!.niceName : c.header}
+                            </th>)
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    {
+                        mlistItemContext(ctx).map((mlec, i) =>
+                            (<EntityTableRow key={i}
+                                onRowHtmlAttributes={this.props.onRowHtmlAttributes}
+                                fetchRowState={this.props.fetchRowState}
+                                onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
+                                draggable={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "v") : undefined}
+                                columns={this.state.columns!}
+                                ctx={mlec} />))
+                    }
+                    {
+                        this.state.createAsLink && this.state.create && !readOnly &&
                         <tr>
-                            <th></th>
-                            {
-                                this.state.columns!.map((c, i) => <th key={i} {...c.headerHtmlAttributes}>
-                                    {c.header === undefined && c.property ? elementPr.add(c.property).member!.niceName : c.header}
-                                </th>)
-                            }
+                            <td colSpan={1 + this.state.columns!.length}>
+                                {typeof this.state.createAsLink == "function" ? this.state.createAsLink(this) :
+                                    <a title={EntityControlMessage.Create.niceToString()}
+                                        className="sf-line-button sf-create"
+                                        onClick={this.handleCreateClick}>
+                                        <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
+                                    </a>}
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        {
-                            mlistItemContext(ctx).map((mlec, i) =>
-                                (<EntityTableRow key={i} 
-                                    onRowHtmlAttributes={this.props.onRowHtmlAttributes}
-                                    fetchRowState={this.props.fetchRowState}
-                                    onRemove={this.canRemove(mlec.value) && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
-                                    draggable={this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "v") : undefined}
-                                    columns={this.state.columns!}
-                                    ctx={mlec} />))
-                        }
-                        {
-                            this.state.createAsLink && this.state.create && !readOnly &&
-                            <tr>
-                                <td colSpan={1 + this.state.columns!.length}>
-                                    {typeof this.state.createAsLink == "function" ? this.state.createAsLink(this) :
-                                        <a title={EntityControlMessage.Create.niceToString()}
-                                            className="sf-line-button sf-create"
-                                            onClick={this.handleCreateClick}>
-                                            <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
-                                        </a>}
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </fieldset>
-        );
+                    }
+                </tbody>
+            </table>);
     }
 }
 

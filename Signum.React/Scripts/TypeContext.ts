@@ -2,6 +2,7 @@
 import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, LambdaMemberType, Type, PseudoType, getTypeName, Binding, getFieldMembers, LambdaMember, IType, isType } from './Reflection'
 import { ModelState, MList, ModifiableEntity, EntityPack, Entity, MixinEntity } from './Signum.Entities'
 import { EntityOperationContext } from './Operations'
+import { MListElementBinding } from "./Reflection";
 
 export type FormGroupStyle =
     "None" |  /// Unaffected by FormGroupSize     
@@ -339,7 +340,7 @@ export function mlistItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[
     return ctx.value!.map((mle, i) =>
         new TypeContext<T>(ctx, undefined,
             ctx.propertyRoute.addLambdaMember({ name: "", type: "Indexer" }),
-            new ReadonlyBinding(mle.element, i.toString())));
+            new MListElementBinding<T>(ctx.binding, i)));
 }
 
 

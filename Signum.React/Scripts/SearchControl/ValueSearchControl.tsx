@@ -14,6 +14,7 @@ import * as Navigator from '../Navigator'
 import { StyleContext } from '../Typecontext'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
 import { AbortableRequest } from "../Services";
+import { SearchControlProps } from "./SearchControl";
 
 
 
@@ -32,6 +33,7 @@ export interface ValueSearchControlProps extends React.Props<ValueSearchControl>
     customStyle?: React.CSSProperties;
     format?: string;
     avoidNotifyPendingRequest?: boolean;
+    searchControlProps?: Partial<SearchControlProps>;
 }
 
 export interface ValueSearchControlState {
@@ -109,6 +111,9 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
         if (!Finder.isFindable(fo.queryName, false))
             return;
 
+        if (Finder.validateNewEntities(fo))
+            return;
+
         Finder.getQueryDescription(fo.queryName)
             .then(qd => Finder.parseFindOptions(fo, qd))
             .then(fo => this.abortableQuery.getData({ request: this.getQueryRequest(fo), avoidNotify: props!.avoidNotifyPendingRequest }))
@@ -128,8 +133,20 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
 
         const p = this.props;
 
-        if (!Finder.isFindable(p.findOptions.queryName, false))
+        const fo = p.findOptions;
+
+        if (!Finder.isFindable(fo.queryName, false))
             return null;
+
+        var errorMessage = Finder.validateNewEntities(fo);
+        if (errorMessage) {
+            return (
+                <div className="alert alert-danger" role="alert">
+                    <strong>Error in ValueSearchControl ({getQueryKey(fo.queryName)}): </strong>
+                    {errorMessage}
+                </div>
+            );
+        }
 
         let className = classes(
            p.valueToken == undefined && "count-search",
@@ -198,7 +215,7 @@ export default class ValueSearchControl extends React.Component<ValueSearchContr
         if (e.ctrlKey || e.button == 1)
             window.open(Finder.findOptionsPath(this.props.findOptions));
         else
-            Finder.explore(this.props.findOptions).then(() => {
+            Finder.explore(this.props.findOptions, { searchControlProps: this.props.searchControlProps }).then(() => {
                 if (!this.props.avoidAutoRefresh)
                     this.refreshValue(this.props);
 

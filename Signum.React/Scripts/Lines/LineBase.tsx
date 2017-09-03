@@ -33,7 +33,7 @@ export class FormGroup extends React.Component<FormGroupProps> {
             const c = this.props.children as React.ReactElement<any>;
 
             return (
-                <span {...this.props.htmlAttributes} className={errorClass}>
+                <span {...this.props.htmlAttributes} className={classes(this.props.ctx.formGroupSizeCss, errorClass)}>
                     {c}
                 </span>
             );
@@ -99,7 +99,7 @@ export interface LineBaseProps extends StyleOptions {
     hideIfNull?: boolean;
     onChange?: (e: ChangeEvent) => void;
     onValidate?: (val: any) => string;
-    labelHtmlAttributes?: React.HTMLAttributes<HTMLLabelElement>;
+    labelHtmlAttributes?: React.LabelHTMLAttributes<HTMLLabelElement>;
     formGroupHtmlAttributes?: React.HTMLAttributes<any>;
     helpBlock?: React.ReactChild;
 }

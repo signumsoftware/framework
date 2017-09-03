@@ -9,7 +9,7 @@ import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../Lines/LineBase'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
-import { EntityBase, EntityBaseProps} from './EntityBase'
+import { EntityBase, EntityBaseProps } from './EntityBase'
 import { RenderEntity } from './RenderEntity'
 
 export interface EntityDetailProps extends EntityBaseProps {
@@ -21,6 +21,7 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
     calculateDefaultState(state: EntityDetailProps) {
         super.calculateDefaultState(state);
         state.viewOnCreate = false;
+        state.view = false;
     }
 
     renderInternal() {
@@ -31,22 +32,23 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
 
         const buttons = (
             <span className="pull-right">
-                {!hasValue && this.renderCreateButton(false) }
+                {!hasValue && this.renderCreateButton(false)}
                 {!hasValue && this.renderFindButton(false)}
+                {hasValue && this.renderViewButton(false, s.ctx.value!)}
                 {hasValue && this.renderRemoveButton(false, s.ctx.value!)}
             </span>
         );
 
         return (
-            <fieldset className={classes("sf-entity-line-details", s.ctx.errorClass) }
-                {...{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes}}>
+            <fieldset className={classes("sf-entity-line-details", s.ctx.errorClass)}
+                {...{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes }}>
                 <legend>
                     <div>
                         <span>{s.labelText}</span>
                         {EntityBase.hasChildrens(buttons) ? buttons : undefined}
                     </div>
                 </legend>
-                <RenderEntity ctx={s.ctx} getComponent={this.props.getComponent} viewPromise={this.props.viewPromise} />
+                <RenderEntity ctx={s.ctx} getComponent={this.props.getComponent} getViewPromise={this.props.getViewPromise} />
             </fieldset>
         );
     }

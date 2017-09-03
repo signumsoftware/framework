@@ -15,8 +15,8 @@ export interface TypeaheadProps {
     onSelect?: (item: any, e: React.KeyboardEvent<any> | React.MouseEvent<any>) => string | null;
     scrollHeight?: number;
     spanAttrs?: React.HTMLAttributes<HTMLSpanElement>;
-    inputAttrs?: React.HTMLAttributes<HTMLInputElement>;
-    liAttrs?: (item: any) => React.HTMLAttributes<HTMLLIElement>;
+    inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
+    liAttrs?: (item: any) => React.LiHTMLAttributes<HTMLLIElement>;
     loadingMessage?: string;
     noResultsMessage?: string;
 }

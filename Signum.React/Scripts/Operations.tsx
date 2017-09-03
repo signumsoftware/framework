@@ -170,11 +170,12 @@ export class EntityOperationContext<T extends Entity> {
         result.canExecute = undefined;
         return result;
     }
+
     frame: EntityFrame<T>;
     tag?: string;
     entity: T;
     operationInfo: OperationInfo;
-    settings: EntityOperationSettings<T>;
+    settings?: EntityOperationSettings<T>;
     canExecute?: string;
     closeRequested?: boolean;
     event?: React.MouseEvent<any>;
@@ -184,6 +185,10 @@ export class EntityOperationContext<T extends Entity> {
 
     defaultClick(...args: any[]) {
         defaultOnClick(this, ...args);
+    }
+
+    isAllowed() {
+        return isOperationAllowed(this.operationInfo);
     }
 }
 

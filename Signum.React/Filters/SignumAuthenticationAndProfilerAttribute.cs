@@ -1,7 +1,9 @@
 ﻿using Signum.Engine;
+using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -15,41 +17,91 @@ using System.Web.Http.Routing;
 
 namespace Signum.React.Filters
 {
-    public class SignumAuthenticationAndProfilerAttribute : FilterAttribute, IAuthorizationFilter
+    public class SignumAuthenticationResult
+    {
+        public IUserEntity User { get; set; }
+        public IHttpActionResult ErrorResult { get; set; }
+    }
+
+    public class SignumAuthenticationFilterAttribute : Attribute, IAuthenticationFilter
     {
         public const string SavedRequestKey = "SAVED_REQUEST";
+        public const string UserKey = "USER";
+        public const string CultureKey = "CULTURE";
 
-        public static Func<HttpActionContext, IDisposable> GetCurrentCultures;
+        public static Func<HttpActionContext, CultureInfo> GetCurrentCultures;
 
-        public static readonly IList<Func<HttpActionContext, IDisposable>> Authenticators = new List<Func<HttpActionContext, IDisposable>>();
+      
 
+        public static readonly IList<Func<HttpActionContext, SignumAuthenticationResult>> Authenticators = new List<Func<HttpActionContext, SignumAuthenticationResult>>();
+
+        public bool AllowMultiple => false;
+
+
+        public async Task AuthenticateAsync(HttpAuthenticationContext context, CancellationToken cancellationToken)
+        {
+            var actionContext = context.ActionContext;
+          
+            context.Request.Properties[SavedRequestKey] = await actionContext.Request.Content.ReadAsStringAsync();
+            var result = Authenticate(actionContext);
+            if(result != null)
+            {
+                context.ErrorResult = result.ErrorResult;
+                context.Request.Properties[UserKey] = result.User;
+            }
+            context.Request.Properties[CultureKey] = GetCurrentCultures?.Invoke(actionContext);
+            
+        }
+
+        public Task ChallengeAsync(HttpAuthenticationChallengeContext context, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        private void Dispose(HttpActionContext context, string key)
+        {
+            object result;
+            if (context.Request.Properties.TryGetValue(key, out result))
+            {
+                if (result != null)
+                    ((IDisposable)result).Dispose();
+            }
+        }
+
+       
+        private static SignumAuthenticationResult Authenticate(HttpActionContext actionContext)
+        {
+            foreach (var item in Authenticators)
+            {
+                var result = item(actionContext);
+                if (result != null)
+                    return result;
+            }
+
+            return null;
+        }       
+    }
+
+    public class SignumAuthorizationFilterAttribute : FilterAttribute, IAuthorizationFilter
+    {
         public async Task<HttpResponseMessage> ExecuteAuthorizationFilterAsync(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
         {
-            string action = ProfilerActionSplitterAttribute.GetActionDescription(actionContext);
 
+            string action = ProfilerActionSplitterAttribute.GetActionDescription(actionContext);
             try
             {
                 using (TimeTracker.Start(action))
                 {
                     using (HeavyProfiler.Log("Web.API " + actionContext.Request.Method, () => actionContext.Request.RequestUri.ToString()))
                     {
-                        //if (ProfilerLogic.SessionTimeout != null)
-                        //{
-                        //    IDisposable sessionTimeout = Connector.CommandTimeoutScope(ProfilerLogic.SessionTimeout.Value);
-                        //    if (sessionTimeout != null)
-                        //        actionContext.Request.RegisterForDispose(sessionTimeout);
-                        //}
-
-                        actionContext.Request.Properties[SavedRequestKey] = await actionContext.Request.Content.ReadAsStringAsync();
-
-                        using (Authenticate(actionContext))
+                        var user = (IUserEntity)GetProp(actionContext, SignumAuthenticationFilterAttribute.UserKey);
+                        using (user != null ? UserHolder.UserSession(user) : null)
                         {
-                            using (GetCurrentCultures?.Invoke(actionContext))
+                            var culture = (CultureInfo)GetProp(actionContext, SignumAuthenticationFilterAttribute.CultureKey);
+                            using (culture != null ? CultureInfoUtils.ChangeBothCultures(culture) : null)
                             {
-                                if (actionContext.Response != null)
-                                    return actionContext.Response;
-
-                                return await continuation();
+                                var result =  await continuation();
+                                return result;
                             }
                         }
                     }
@@ -61,17 +113,11 @@ namespace Signum.React.Filters
             }
         }
 
-        private static IDisposable Authenticate(HttpActionContext actionContext)
+        private object GetProp(HttpActionContext actionContext, string key)
         {
-            foreach (var item in Authenticators)
-            {
-                var disposable = item(actionContext);
-                if (disposable != null)
-                    return disposable;
-
-            }
-
-            return null;
+            object result = null;
+            actionContext.Request.Properties.TryGetValue(key, out result);
+            return result;
         }
     }
 }

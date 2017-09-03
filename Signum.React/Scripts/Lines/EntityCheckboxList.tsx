@@ -15,6 +15,7 @@ export interface EntityCheckboxListProps extends EntityListBaseProps {
     data?: Lite<Entity>[];
     columnCount?: number;
     columnWidth?: number;
+    avoidFieldSet?: boolean;
 }
 
 export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, EntityCheckboxListProps> {
@@ -34,26 +35,48 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
 
     renderInternal() {
         const s = this.state;
+
+        if (this.props.avoidFieldSet == true)
+            return (
+                <div className={classes("SF-checkbox-list", s.ctx.errorClass)} {...{ ...this.baseHtmlAttributes(), ...s.formGroupHtmlAttributes } }>
+                    {this.renderButtons()}
+                    {this.renderCheckboxList()}
+                </div>
+            );
+
         return (
-            <fieldset className={classes("SF-checkbox-list", this.state.ctx.errorClass)} {...{ ...this.baseHtmlAttributes(), ...this.state.formGroupHtmlAttributes } }>
+            <fieldset className={classes("SF-checkbox-list", s.ctx.errorClass)} {...{ ...this.baseHtmlAttributes(), ...s.formGroupHtmlAttributes } }>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>
-                        <span className="pull-right">
-                            {this.renderCreateButton(false)}
-                            {this.renderFindButton(false)}
-                        </span>
+                        {this.renderButtons()}
                     </div>
                 </legend>
-                <EntityCheckboxListSelect
-                    ctx={s.ctx}
-                    onChange={this.handleOnChange}
-                    type={s.type!}
-                    data={s.data}
-                    findOptions={s.findOptions}
-                    columnCount={s.columnCount}
-                    columnWidth={s.columnWidth} />
+                {this.renderCheckboxList()}
             </fieldset>
+        );
+    }
+
+    renderButtons() {
+        return (
+            <span className="pull-right">
+                {this.renderCreateButton(false)}
+                {this.renderFindButton(false)}
+            </span>
+        );
+    }
+
+    renderCheckboxList() {
+        const s = this.state;
+        return (
+            <EntityCheckboxListSelect
+                ctx={s.ctx}
+                onChange={this.handleOnChange}
+                type={s.type!}
+                data={s.data}
+                findOptions={s.findOptions}
+                columnCount={s.columnCount}
+                columnWidth={s.columnWidth} />
         );
     }
 

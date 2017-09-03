@@ -362,16 +362,31 @@ namespace Signum.Entities.DynamicQuery
             return null; 
         }
 
+        public static Dictionary<Type, Func<Expression, Expression>> OrderAdapters = new Dictionary<Type, Func<Expression, Expression>>();
+
+        public static LambdaExpression CreateOrderLambda(QueryToken token, BuildExpressionContext ctx)
+        {
+            var body = token.BuildExpression(ctx);
+            var adapter = QueryUtils.OrderAdapters.TryGetC(token.Type);
+            if (adapter != null)
+                body = adapter(body);
+
+            return Expression.Lambda(body, ctx.Parameter);
+        }
+
         public static string CanOrder(QueryToken token)
         {
             if (token == null)
                 return "No column selected"; 
 
-            if (token.Type.IsEmbeddedEntity())
+            if (token.Type.IsEmbeddedEntity() && !OrderAdapters.ContainsKey(token.Type))
                 return "{0} can not be ordered".FormatWith(token.Type.NicePluralName());
 
+            if (QueryToken.IsCollection(token.Type))
+                return "Collections can not be ordered";
+
             if (token.HasAllOrAny())
-                return "Columns can not contain '{0}', '{1}', {2} or {3}".FormatWith(
+                return "'{0}', '{1}', '{2}' or '{3}' can not be ordered".FormatWith(
                     CollectionElementType.All.NiceToString(),
                     CollectionElementType.Any.NiceToString(),
                     CollectionElementType.NoOne.NiceToString(),
@@ -406,7 +421,7 @@ namespace Signum.Entities.DynamicQuery
             return nullify;
         }
 
-        internal static Type BuildLiteNulifyUnwrapPrimaryKey(this Type type, PropertyRoute[] routes)
+        internal static Type BuildLiteNullifyUnwrapPrimaryKey(this Type type, PropertyRoute[] routes)
         {
             var buildLite = BuildLite(type);
 
