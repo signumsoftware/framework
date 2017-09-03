@@ -147,11 +147,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
         const bsStyle = eoc.settings && eoc.settings.style || autoStyleFunction(eoc.operationInfo);
 
         const disabled = !!canExecute;
-
-        const text = eoc.settings && eoc.settings.text ? eoc.settings.text() :
-            group && group.simplifyName ? group.simplifyName(eoc.operationInfo.niceName) :
-                eoc.operationInfo.niceName;
-
+        
         const withClose = getWithClose(eoc);
 
         if (group) {
@@ -162,7 +158,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
                     onClick={disabled ? undefined : this.handleOnClick}
                     data-operation={eoc.operationInfo.key}
                 >
-                    {text}
+                    {this.renderChildren()}
                 </MenuItem>
             );
         }
@@ -172,9 +168,8 @@ export class OperationButton extends React.Component<OperationButtonProps> {
                 {...props}
                 className={classes(disabled ? "disabled" : undefined, props && props.className)}
                 onClick={disabled ? undefined : this.handleOnClick}
-                data-operation={eoc.operationInfo.key}
-            >
-                {text}
+                data-operation={eoc.operationInfo.key}>
+                {this.renderChildren()}
             </Button>
         );
 
@@ -192,6 +187,21 @@ export class OperationButton extends React.Component<OperationButtonProps> {
                 </Button>
             </div>
         );
+    }
+
+    renderChildren() {
+        if (this.props.children)
+            return this.props.children;
+
+        const eoc = this.props.eoc;
+        if (eoc.settings && eoc.settings.text)
+            return eoc.settings.text();
+
+        const group = this.props.group;
+        if (group && group.simplifyName)
+            return group.simplifyName(eoc.operationInfo.niceName);
+
+        return eoc.operationInfo.niceName;
     }
 
     handleOnClick = (event: React.MouseEvent<any>) => {
