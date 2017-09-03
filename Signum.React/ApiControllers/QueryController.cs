@@ -302,7 +302,17 @@ namespace Signum.React.ApiControllers
         {
             this.queryKey = QueryUtils.GetKey(queryDescription.QueryName);
             this.columns = queryDescription.Columns.ToDictionary(a => a.Name, a => new ColumnDescriptionTS(a, queryDescription.QueryName));
+
+            foreach (var action in AddExtension.GetInvocationListTyped())
+            {
+                action(this);
+            }
         }
+
+        [JsonExtensionData]
+        public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
+
+        public static Action<QueryDescriptionTS> AddExtension;
     }
 
     public class ColumnDescriptionTS

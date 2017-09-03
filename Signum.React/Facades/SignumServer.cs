@@ -61,7 +61,7 @@ namespace Signum.React.Facades
             ReflectionServer.Start();
         }
 
-        public static Action<EntityPackTS> AddEntityPackExtension;
+        
         public static EntityPackTS GetEntityPack(Entity entity)
         {
             var canExecutes = OperationLogic.ServiceCanExecute(entity);
@@ -72,7 +72,7 @@ namespace Signum.React.Facades
                 canExecute = canExecutes.ToDictionary(a => a.Key.Key, a => a.Value)
             };
 
-            foreach (var action in AddEntityPackExtension.GetInvocationListTyped())
+            foreach (var action in EntityPackTS.AddExtension.GetInvocationListTyped())
             {
                 action(result);
             }
@@ -88,5 +88,7 @@ namespace Signum.React.Facades
 
         [JsonExtensionData]
         public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
+
+        public static Action<EntityPackTS> AddExtension;
     }
 }
