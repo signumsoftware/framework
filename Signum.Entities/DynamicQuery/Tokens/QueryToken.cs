@@ -200,11 +200,6 @@ namespace Signum.Entities.DynamicQuery
                 return CollectionProperties(this, options);
             }
 
-            if (typeof(IQueryTokenBag).IsAssignableFrom(type))
-            {
-                return BagProperties(type).OrderBy(a => a.ToString()).ToList().AndHasValue(this);
-            }
-
             return new List<QueryToken>();
         }
 
@@ -307,12 +302,6 @@ namespace Signum.Entities.DynamicQuery
             return result.Concat(mixinProperties);
         }
 
-        IEnumerable<QueryToken> BagProperties(Type type)
-        {
-            return Reflector.PublicInstancePropertiesInOrder(type)
-                  .Select(p => (QueryToken)new BagPropertyToken(this, p));
-        }
-
         public string FullKey()
         {
             if (Parent == null)
@@ -383,7 +372,7 @@ namespace Signum.Entities.DynamicQuery
             return null;
         }
 
-        public bool IsCollection(Type type)
+        public static bool IsCollection(Type type)
         {
             return type != typeof(string) && type != typeof(byte[]) && type.ElementType() != null;
         }

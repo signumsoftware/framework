@@ -502,25 +502,13 @@ namespace Signum.Engine.DynamicQuery
             if (str == null)
                 throw new ApplicationException(str);
 
-            var pairs = orders.Select(o => (
-            lambda: Expression.Lambda(OnAddaptForOrderBy(o.Token.BuildExpression(query.Context)), query.Context.Parameter),
-            orderType: o.OrderType)
-            ).ToList();
+            var pairs = orders.Select(o =>(
+                lambda: QueryUtils.CreateOrderLambda(o.Token, query.Context), 
+                orderType: o.OrderType
+            )).ToList();
 
             return new DQueryable<T>(query.Query.OrderBy(pairs), query.Context);
         }
-
-        static Expression OnAddaptForOrderBy(Expression exp)
-        {
-            foreach (var item in AddaptForOrderBy.GetInvocationListTyped())
-            {
-                exp = item(exp);
-            }
-
-            return exp;
-        }
-
-        public static Func<Expression, Expression> AddaptForOrderBy = e => e; 
 
         public static IQueryable<object> OrderBy(this IQueryable<object> query, List<(LambdaExpression lambda, OrderType orderType)> orders)
         {
@@ -559,8 +547,8 @@ namespace Signum.Engine.DynamicQuery
         public static DEnumerable<T> OrderBy<T>(this DEnumerable<T> collection, List<Order> orders)
         {
             var pairs = orders.Select(o => (
-            lambda: Expression.Lambda(OnAddaptForOrderBy(o.Token.BuildExpression(collection.Context)), collection.Context.Parameter),
-            orderType: o.OrderType
+              lambda: QueryUtils.CreateOrderLambda(o.Token, collection.Context),
+              orderType: o.OrderType
             )).ToList();
 
 
@@ -570,9 +558,9 @@ namespace Signum.Engine.DynamicQuery
         public static DEnumerableCount<T> OrderBy<T>(this DEnumerableCount<T> collection, List<Order> orders)
         {
             var pairs = orders.Select(o => (
-                lambda: Expression.Lambda(OnAddaptForOrderBy(o.Token.BuildExpression(collection.Context)), collection.Context.Parameter),
-                orderType: o.OrderType))
-            .ToList();
+              lambda: QueryUtils.CreateOrderLambda(o.Token, collection.Context),
+              orderType: o.OrderType
+            )).ToList();
 
             return new DEnumerableCount<T>(collection.Collection.OrderBy(pairs), collection.Context, collection.TotalElements);
         }

@@ -797,7 +797,18 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     canOrder(column: ColumnOptionParsed) {
-        return column.token && !column.token.type.isCollection && !column.token.type.isEmbedded && !isTypeModel(column.token.type.name);
+        if (!column.token)
+            return false;
+
+        const t = column.token; 
+
+        if (t.type.isCollection)
+            return false;
+
+        if (t.type.isEmbedded || isTypeModel(t.type.name))
+            return t.hasOrderAdapter == true;
+
+        return true;
     }
 
     orderClassName(column: ColumnOptionParsed) {

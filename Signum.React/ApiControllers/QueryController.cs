@@ -316,6 +316,8 @@ namespace Signum.React.ApiControllers
         public string format;
         public string displayName;
         public bool isGroupable;
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public bool hasOrderAdapter;
         public string propertyRoute;
 
         public ColumnDescriptionTS(ColumnDescription a, object queryName)
@@ -328,6 +330,7 @@ namespace Signum.React.ApiControllers
             this.typeColor = token.TypeColor;
             this.niceTypeName = token.NiceTypeName;
             this.isGroupable = token.IsGroupable;
+            this.hasOrderAdapter = QueryUtils.OrderAdapters.ContainsKey(token.Type);
             this.unit = a.Unit;
             this.format = a.Format;
             this.displayName = a.DisplayName;
@@ -351,6 +354,7 @@ namespace Signum.React.ApiControllers
             this.niceTypeName = qt.NiceTypeName;
             this.queryTokenType = GetQueryTokenType(qt);
             this.isGroupable = qt.IsGroupable;
+            this.hasOrderAdapter = QueryUtils.OrderAdapters.ContainsKey(qt.Type);
             this.propertyRoute = qt.GetPropertyRoute()?.ToString();
             if (recursive && qt.Parent != null)
                 this.parent = new QueryTokenTS(qt.Parent, recursive);
@@ -389,6 +393,8 @@ namespace Signum.React.ApiControllers
         public string format;
         public string unit;
         public bool isGroupable;
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public bool hasOrderAdapter;
         public QueryTokenTS parent;
         private string propertyRoute;
     }
