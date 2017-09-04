@@ -56,8 +56,6 @@ namespace Signum.React.Files
         }
 
         
-        /// <summary>
-        /// </summary>
         /// <param name="stream">No need to close</param
         public static HttpResponseMessage GetHttpReponseMessage(Stream stream, string fileName, bool forDownload = true)
         {
