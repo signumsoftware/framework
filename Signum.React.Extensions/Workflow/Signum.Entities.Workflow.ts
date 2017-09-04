@@ -24,6 +24,18 @@ export interface WorkflowEntitiesDictionary {
     [bpmnElementId: string]: Entities.ModelEntity
 }
 
+export const ActivityWithRemarks = new Type<ActivityWithRemarks>("ActivityWithRemarks");
+export interface ActivityWithRemarks extends Entities.ModelEntity {
+    Type: "ActivityWithRemarks";
+    workflowActivity?: Entities.Lite<WorkflowActivityEntity> | null;
+    case?: Entities.Lite<CaseEntity> | null;
+    caseActivity?: Entities.Lite<CaseActivityEntity> | null;
+    notification?: Entities.Lite<CaseNotificationEntity> | null;
+    remarks?: string | null;
+    alerts?: number;
+    tags: Array<CaseTagTypeEntity>;
+}
+
 export const BpmnEntityPairEmbedded = new Type<BpmnEntityPairEmbedded>("BpmnEntityPairEmbedded");
 export interface BpmnEntityPairEmbedded extends Entities.EmbeddedEntity {
     Type: "BpmnEntityPairEmbedded";

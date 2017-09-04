@@ -23,6 +23,8 @@ export interface DynamicExpressionEntity extends Entities.Entity {
     fromType?: string | null;
     returnType?: string | null;
     body?: string | null;
+    format?: string | null;
+    unit?: string | null;
     translation?: DynamicExpressionTranslation;
 }
 

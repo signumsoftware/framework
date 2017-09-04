@@ -197,3 +197,10 @@ declare module '../../../Framework/Signum.React/Scripts/Signum.Entities' {
         wordTemplates?: Array<Lite<WordTemplateEntity>>;
     }
 }
+
+declare module '../../../Framework/Signum.React/Scripts/FindOptions' {
+
+    export interface QueryDescription {
+        wordTemplates?: Array<Lite<WordTemplateEntity>>;
+    }
+}

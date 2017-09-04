@@ -29,7 +29,15 @@ namespace Signum.Entities.Dynamic
         [NotNullable, SqlDbType(Size = int.MaxValue)]
         [StringLengthValidator(AllowNulls = false, Min = 1, MultiLine = true)]
         public string Body { get; set; }
-        
+
+        [SqlDbType(Size = 100)]
+        [StringLengthValidator(AllowNulls = true, Min = 1, Max = 100)]
+        public string Format { get; set; }
+
+        [SqlDbType(Size = 100)]
+        [StringLengthValidator(AllowNulls = true, Min = 1, Max = 100)]
+        public string Unit { get; set; }
+
         public DynamicExpressionTranslation Translation { get; set; }
 
         static Expression<Func<DynamicExpressionEntity, string>> ToStringExpression = @this => @this.ReturnType + " " + @this.Name + "(" + @this.FromType + " e)";

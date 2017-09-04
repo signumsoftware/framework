@@ -35,7 +35,7 @@ namespace Signum.React.UserQueries
                 }
             });
 
-            SignumServer.AddEntityPackExtension += ep =>
+            EntityPackTS.AddExtension += ep =>
             {
                 if (ep.entity.IsNew || !UserQueryPermission.ViewUserQuery.IsAuthorized())
                     return;

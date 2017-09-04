@@ -7,57 +7,47 @@ import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search
 import { getToString, getMixin } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { EmailTemplateEntity, EmailTemplateContactEmbedded, EmailTemplateRecipientEntity, EmailTemplateMessageEmbedded, EmailTemplateViewMessage, EmailTemplateMessage } from '../Signum.Entities.Mailing'
-import { TemplateTokenMessage } from '../../Templating/Signum.Entities.Templating'
+import { TemplateTokenMessage, TemplateApplicableEval } from '../../Templating/Signum.Entities.Templating'
 import FileLine from '../../Files/FileLine'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import TemplateControls from '../../Templating/TemplateControls'
 import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
 import IFrameRenderer from './IFrameRenderer'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
+import TemplateApplicable from '../../Templating/Templates/TemplateApplicable';
 
 
 export default class EmailTemplate extends React.Component<{ ctx: TypeContext<EmailTemplateEntity> }> {
 
     render() {
 
-        const e = this.props.ctx;
-
-        const ec = e.subCtx({ labelColumns: { sm: 3 } });
-        const sc = e.subCtx({ formGroupStyle: "Basic" });
-
+        const ctx = this.props.ctx;
+        const ctx3 = ctx.subCtx({ labelColumns: { sm: 3 } });
 
         return (
             <div>
+
+                <ValueLine ctx={ctx3.subCtx(e => e.name)} />
+                <EntityCombo ctx={ctx3.subCtx(e => e.systemEmail)} />
+                <EntityLine ctx={ctx3.subCtx(e => e.query)} onChange={() => this.forceUpdate()}
+                    remove={ctx.value.from == undefined &&
+                        (ctx.value.recipients == null || ctx.value.recipients.length == 0) &&
+                        (ctx.value.messages == null || ctx.value.messages.length == 0)} />
                 <div className="row">
-                    <div className="col-sm-8">
-                        <ValueLine ctx={ec.subCtx(e => e.name)} />
-                        <EntityCombo ctx={ec.subCtx(e => e.systemEmail)} />
-                        <EntityLine ctx={ec.subCtx(e => e.query)} onChange={() => this.forceUpdate()}
-                            remove={e.value.from == undefined &&
-                                (e.value.recipients == null || e.value.recipients.length == 0) &&
-                                (e.value.messages == null || e.value.messages.length == 0)} />
-                        <div className="row">
-                            <div className="col-sm-4">
-                                <ValueLine ctx={ec.subCtx(e => e.editableMessage)} inlineCheckbox={true} />
-                            </div>
-                            <div className="col-sm-4">
-                                <ValueLine ctx={ec.subCtx(e => e.disableAuthorization)} inlineCheckbox={true} />
-                            </div>
-                            <div className="col-sm-4">
-                                <ValueLine ctx={ec.subCtx(e => e.sendDifferentMessages)} inlineCheckbox={true} />
-                            </div>
-                        </div>
+                    <div className="col-sm-4">
+                        <ValueLine ctx={ctx3.subCtx(e => e.editableMessage)} inlineCheckbox={true} />
                     </div>
-                    <div className="col-sm-4 form-vertical" style={{ marginTop: "-12px" }}>
-                        <fieldset>
-                            <legend>Active</legend>
-                            <ValueLine ctx={sc.subCtx(e => e.active)} inlineCheckbox={true} />
-                            <ValueLine ctx={sc.subCtx(e => e.startDate)} />
-                            <ValueLine ctx={sc.subCtx(e => e.endDate)} />
-                        </fieldset>
+                    <div className="col-sm-4">
+                        <ValueLine ctx={ctx3.subCtx(e => e.disableAuthorization)} inlineCheckbox={true} />
+                    </div>
+                    <div className="col-sm-4">
+                        <ValueLine ctx={ctx3.subCtx(e => e.sendDifferentMessages)} inlineCheckbox={true} />
                     </div>
                 </div>
-                {ec.value.query && this.renderQueryPart()}
+                <EntityDetail ctx={ctx3.subCtx(e => e.applicable)}
+                    getComponent={(ec2: TypeContext<TemplateApplicableEval>) => <TemplateApplicable ctx={ec2} query={ctx.value.query!} />} />
+
+                {ctx3.value.query && this.renderQueryPart()}
             </div>
         );
     }

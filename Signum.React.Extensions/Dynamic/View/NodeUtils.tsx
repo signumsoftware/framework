@@ -604,29 +604,9 @@ export function validateFindOptions(foe: FindOptionsExpr, parentCtx: TypeContext
     if (!foe.queryName)
         return DynamicViewValidationMessage._0RequiresA1.niceToString("findOptions", "queryKey");
 
-    if (parentCtx) {
-        let list = [
-            getTypeIfNew(parentCtx, foe.parentValue),
-            ...(foe.filterOptions || []).map(a => getTypeIfNew(parentCtx, a.value))
-        ].filter(a => !!a);
-
-        if (list.length)
-            return DynamicViewValidationMessage.FilteringWithNew0ConsiderChangingVisibility.niceToString(list.joinComma(External.CollectionMessage.And.niceToString()));
-    }
-
     return undefined;
 }
 
-export function validateCtxNotNew(ctx: TypeContext<ModifiableEntity> | undefined) {
-
-    if (ctx == undefined)
-        return undefined;
-
-    if (ctx.value.isNew)
-        return DynamicViewValidationMessage.FilteringWithNew0ConsiderChangingVisibility.niceToString(ctx.value.Type);
-
-    return undefined;
-}
 
 let aggregates = ["Count", "Average", "Min", "Max", "Sum"];
 
@@ -635,22 +615,6 @@ export function validateAggregate(token: string) {
 
     if (!aggregates.contains(lastPart))
         return DynamicViewValidationMessage.AggregateIsMandatoryFor01.niceToString("valueToken", aggregates.joinComma(External.CollectionMessage.Or.niceToString()));
-
-    return undefined;
-}
-
-export function getTypeIfNew(parentCtx: TypeContext<ModifiableEntity>, value: ExpressionOrValue<any> | undefined) {
-    
-    var v = evaluateUntyped(parentCtx, value, ()=>"value");
-
-    if (v == undefined)
-        return undefined;
-
-    if (isEntity(v) && v.isNew)
-        return v.Type;
-
-    if (isLite(v) && v.id == null)
-        return v.EntityType;
 
     return undefined;
 }

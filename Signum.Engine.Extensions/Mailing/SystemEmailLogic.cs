@@ -160,7 +160,6 @@ namespace Signum.Engine.Mailing
                 SystemEmailsToEmailTemplates = sb.GlobalLazy(() => (
                     from et in Database.Query<EmailTemplateEntity>()
                     where et.SystemEmail != null
-                        && (et.Active && (et.EndDate == null || et.EndDate > TimeZoneManager.Now))
                     select new { se = et.SystemEmail, et })
                     .GroupToDictionary(pair => pair.se.ToLite(), pair => pair.et),
                     new InvalidateWith(typeof(SystemEmailEntity), typeof(EmailTemplateEntity)));
@@ -289,7 +288,7 @@ namespace Signum.Engine.Mailing
             using (IsolationEntity.Override((systemEmail.UntypedEntity as Entity)?.TryIsolation()))
             {
                 var systemEmailEntity = ToSystemEmailEntity(systemEmail.GetType());
-                var template = GetDefaultTemplate(systemEmailEntity);
+                var template = GetDefaultTemplate(systemEmailEntity, systemEmail.UntypedEntity as Entity);
 
                 return EmailTemplateLogic.CreateEmailMessage(template.ToLite(), systemEmail: systemEmail);
             }
@@ -297,14 +296,12 @@ namespace Signum.Engine.Mailing
 
   
 
-        private static EmailTemplateEntity GetDefaultTemplate(SystemEmailEntity systemEmailEntity)
+        private static EmailTemplateEntity GetDefaultTemplate(SystemEmailEntity systemEmailEntity, Entity entity)
         {
             var isAllowed = Schema.Current.GetInMemoryFilter<EmailTemplateEntity>(userInterface: false);
 
             var templates = SystemEmailsToEmailTemplates.Value.TryGetC(systemEmailEntity.ToLite()).EmptyIfNull();
-
-            templates = templates.Where(isAllowed);
-
+            
             if (templates.IsNullOrEmpty())
             {
                 using (ExecutionMode.Global())
@@ -319,7 +316,8 @@ namespace Signum.Engine.Mailing
                 }
             }
 
-            return templates.Where(t => t.IsActiveNow()).SingleEx(() => "Active EmailTemplates for SystemEmail {0}".FormatWith(systemEmailEntity));
+            templates = templates.Where(isAllowed);
+            return templates.Where(t => t.IsApplicable(entity)).SingleEx(() => "Active EmailTemplates for SystemEmail {0}".FormatWith(systemEmailEntity));
         }
 
         internal static EmailTemplateEntity CreateDefaultTemplate(SystemEmailEntity systemEmail)
@@ -334,7 +332,6 @@ namespace Signum.Engine.Mailing
                 template.Name = systemEmail.FullClassName;
 
             template.SystemEmail = systemEmail;
-            template.Active = true;
             template.Query = QueryLogic.GetQueryEntity(info.QueryName);
 
             template.ParseData(DynamicQueryManager.Current.QueryDescription(info.QueryName));
@@ -349,7 +346,6 @@ namespace Signum.Engine.Mailing
                 var systemEmailEntity = ToSystemEmailEntity(systemEmail);
 
                 var template = Database.Query<EmailTemplateEntity>().SingleOrDefaultEx(t =>
-                    t.IsActiveNow() == true &&
                     t.SystemEmail == systemEmailEntity);
 
                 if (template == null)

@@ -141,7 +141,12 @@ namespace Signum.Engine.Dynamic
 
                             string title = e.CreationDate + (e.Comment.HasText() ? " ({0})".FormatWith(e.Comment) : null);
 
-                            SqlMigrationRunner.ExecuteScript(title, e.Script);
+                            using (Transaction tr = Transaction.ForceNew(System.Data.IsolationLevel.Unspecified))
+                            {
+                                SqlMigrationRunner.ExecuteScript(title, e.Script);
+                                tr.Commit();
+                            }
+
                         }
                         finally
                         {
