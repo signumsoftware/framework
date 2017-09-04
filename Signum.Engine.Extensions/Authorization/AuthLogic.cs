@@ -203,7 +203,7 @@ namespace Signum.Engine.Authorization
             return UserHolder.UserSession(user);
         }
 
-        public static Func<string, UserEntity> RetrieveUserByUsername = (username) =>Database.Query<UserEntity>().Where(u => u.UserName == username).SingleOrDefaultEx();
+        public static Func<string, UserEntity> RetrieveUserByUsername = (username) => Database.Query<UserEntity>().Where(u => u.UserName == username).SingleOrDefaultEx();
 
         public static UserEntity RetrieveUser(string username)
         {
