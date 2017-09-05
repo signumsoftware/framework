@@ -1,0 +1,81 @@
+﻿using Signum.Entities.Basics;
+using Signum.Entities.UserAssets;
+using Signum.Utilities;
+using System;
+using System.Linq.Expressions;
+using System.Xml.Linq;
+
+namespace Signum.Entities.Joyride
+{
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    public class JoyrideStepStyleEntity : Entity, IUserAssetEntity
+    {
+        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        public string Name { get; set; }
+
+        [SqlDbType(Size = 50)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 50)]
+        public string BackgroundColor { get; set; }
+
+        [SqlDbType(Size = 50)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 50)]
+        public string Color { get; set; }
+
+        [SqlDbType(Size = 50)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 50)]
+        public string MainColor { get; set; }
+
+        [SqlDbType(Size = 50)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 50)]
+        public string BorderRadius { get; set; }
+
+        [SqlDbType(Size = 50)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 50)]
+        public string TextAlign { get; set; }
+
+        [SqlDbType(Size = 50)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 50)]
+        public string Width { get; set; }
+
+        [UniqueIndex]
+        public Guid Guid { get; set; } = Guid.NewGuid();
+
+        static Expression<Func<JoyrideStepStyleEntity, string>> ToStringExpression = e => e.Name.ToString();
+        [ExpressionField]
+        public override string ToString()
+        {
+            return ToStringExpression.Evaluate(this);
+        }
+
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("JoyrideStepStyle",
+                new XAttribute("Guid", Guid),
+                new XElement("Name", Name),
+                BackgroundColor.IsNullOrEmpty() ? null : new XElement("BackgroundColor", BackgroundColor),
+                MainColor.IsNullOrEmpty() ? null : new XElement("MainColor", MainColor),
+                Color.IsNullOrEmpty() ? null : new XElement("Color", Color),
+                BorderRadius.IsNullOrEmpty() ? null : new XElement("BorderRadius", BorderRadius),
+                TextAlign.IsNullOrEmpty() ? null : new XElement("TextAlign", TextAlign),
+                Width.IsNullOrEmpty() ? null : new XElement("Width", Width));
+        }
+
+        public void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            Name = element.Element("Name").Value;
+            BackgroundColor = element.Element("BackgroundColor")?.Value;
+            MainColor = element.Element("MainColor")?.Value;
+            Color = element.Element("Color")?.Value;
+            BorderRadius = element.Element("BorderRadius")?.Value;
+            TextAlign = element.Element("TextAlign")?.Value;
+            Width = element.Element("Width")?.Value;
+        }
+    }
+
+    [AutoInit]
+    public static class JoyrideStepStyleOperation
+    {
+        public static readonly ExecuteSymbol<JoyrideStepStyleEntity> Save;
+    }
+}

@@ -142,6 +142,7 @@
     <Compile Include="Disconnected\ExportManager.cs" />
     <Compile Include="Dynamic\DynamicLogic.cs" />
     <Compile Include="Dynamic\DynamicMixinConnectionLogic.cs" />
+    <Compile Include="Joyride\JoyrideLogic.cs" />
     <Compile Include="Mailing\ImageAttachmentLogic.cs" />
     <Compile Include="Rest\RestApiKeyLogic.cs" />
     <Compile Include="Files\FilePathEmbeddedLogic.cs" />

@@ -123,6 +123,10 @@
     <Compile Include="Dynamic\DynamicCode.cs" />
     <Compile Include="Dynamic\Dynamic.cs" />
     <Compile Include="Dynamic\DynamicMixinConnection.cs" />
+    <Compile Include="Joyride\Joyride.cs" />
+    <Compile Include="Joyride\JoyrideMessage.cs" />
+    <Compile Include="Joyride\JoyrideStepStyle.cs" />
+    <Compile Include="Joyride\JoyrideStep.cs" />
     <Compile Include="MachineLearning\PredictorMessage.cs" />
     <Compile Include="Mailing\ImageAttachmentEntity.cs" />
     <Compile Include="Migrations\ExecutedLoadProcess.cs" />

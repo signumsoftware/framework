@@ -10,6 +10,7 @@ using Signum.Utilities;
 using System.Security.Cryptography;
 using Signum.Entities;
 using Signum.Entities.Authorization;
+using System.Web;
 
 namespace Signum.Engine.Rest
 {
@@ -54,7 +55,7 @@ namespace Signum.Engine.Rest
             {
                 byte[] tokenData = new byte[32];
                 rng.GetBytes(tokenData);
-                return Convert.ToBase64String(tokenData);
+                return HttpServerUtility.UrlTokenEncode(tokenData);
             }
         }
     }

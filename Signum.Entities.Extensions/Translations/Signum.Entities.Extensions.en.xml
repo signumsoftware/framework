@@ -11,7 +11,6 @@
   <Type Name="AllowedRuleCoerced`2" />
   <Type Name="AppendixHelpEntity" />
   <Type Name="AppendixHelpOperation" />
-  <Type Name="ApplicationEventLogEntity" />
   <Type Name="AsyncEmailSenderPermission" />
   <Type Name="AuthAdminMessage" />
   <Type Name="AuthEmailMessage" />
@@ -72,6 +71,9 @@
   <Type Name="DelayOption" />
   <Type Name="DiffLogMessage" />
   <Type Name="DiffLogMixin" />
+  <Type Name="DisabledMessage" />
+  <Type Name="DisabledMixin" />
+  <Type Name="DisableOperation" />
   <Type Name="DisconnectedCreatedMixin" />
   <Type Name="DisconnectedExportEntity" />
   <Type Name="DisconnectedExportState" />
@@ -170,8 +172,10 @@
   <Type Name="IAttachmentGeneratorEntity" />
   <Type Name="ICaseMainEntity" />
   <Type Name="IEmailOwnerEntity" />
+  <Type Name="ImageAttachmentEntity" />
   <Type Name="InboxFilterModel" />
   <Type Name="InboxMessage" />
+  <Type Name="InsertPlace" />
   <Type Name="IPartEntity" />
   <Type Name="IProcessDataEntity" />
   <Type Name="IProcessLineDataEntity" />
@@ -186,6 +190,16 @@
   <Type Name="IUserAssetEntity" />
   <Type Name="IWorkflowNodeEntity" />
   <Type Name="IWorkflowObjectEntity" />
+  <Type Name="JoyrideEntity" />
+  <Type Name="JoyrideMessage" />
+  <Type Name="JoyrideOperation" />
+  <Type Name="JoyrideStepEntity" />
+  <Type Name="JoyrideStepOperation" />
+  <Type Name="JoyrideStepPosition" />
+  <Type Name="JoyrideStepStyleEntity" />
+  <Type Name="JoyrideStepStyleOperation" />
+  <Type Name="JoyrideStepType" />
+  <Type Name="JoyrideType" />
   <Type Name="LastAuthRulesImportEntity" />
   <Type Name="LinkElementEmbedded" />
   <Type Name="LinkListPartEntity" />
@@ -194,6 +208,8 @@
   <Type Name="MapPermission" />
   <Type Name="MergeStrategy" />
   <Type Name="MessageLengthExceeded" />
+  <Type Name="ModelConverterSymbol" />
+  <Type Name="MoveTreeModel" />
   <Type Name="MultiEntityModel" />
   <Type Name="MultipleSMSModel" />
   <Type Name="NamespaceHelpEntity" />
@@ -249,6 +265,7 @@
   <Type Name="PropertyAllowedRule" />
   <Type Name="PropertyRouteHelpEmbedded" />
   <Type Name="PropertyRulePack" />
+  <Type Name="QueryAllowed" />
   <Type Name="QueryAllowedRule" />
   <Type Name="QueryColumnEmbedded" />
   <Type Name="QueryColumnHelpEmbedded" />
@@ -310,12 +327,14 @@
   <Type Name="SubEntitiesEval" />
   <Type Name="SubWorkflowEmbedded" />
   <Type Name="SystemEmailEntity" />
+  <Type Name="SystemEventLogEntity" />
   <Type Name="SystemWordTemplateEntity" />
   <Type Name="TemplateTokenMessage" />
   <Type Name="TimeSpanEmbedded" />
   <Type Name="ToolbarElementEmbedded" />
   <Type Name="ToolbarElementType" />
   <Type Name="ToolbarEntity" />
+  <Type Name="ToolbarLocation" />
   <Type Name="ToolbarMenuEntity" />
   <Type Name="ToolbarMenuOperation" />
   <Type Name="ToolbarOperation" />
@@ -340,7 +359,6 @@
   <Type Name="TypeAllowedRule" />
   <Type Name="TypeConditionRuleEmbedded" />
   <Type Name="TypeConditionSymbol" />
-  <Type Name="TypeEvent" />
   <Type Name="TypeRulePack" />
   <Type Name="TypeSearchResult" />
   <Type Name="UserAssetMessage" />
@@ -365,6 +383,7 @@
   <Type Name="ViewLogMessage" />
   <Type Name="WebDownload" />
   <Type Name="WebImage" />
+  <Type Name="WordAttachmentEntity" />
   <Type Name="WordConverterSymbol" />
   <Type Name="WordTemplateEntity" />
   <Type Name="WordTemplateMessage" />
