@@ -73,7 +73,7 @@ export default class DashboardView extends React.Component<{ dashboard: Dashboar
                 columns: g.elements.orderBy(a => a.value.startColumn).map(p => ({
                     startColumn: p.value.startColumn,
                     columnWidth: p.value.columns,
-                    parts: [undefined as any as TypeContext<PanelPartEmbedded>]//[p]// ,
+                    parts: [p],
                 }) as CombinedColumn)
             }) as CombinedRow);
 
@@ -83,7 +83,7 @@ export default class DashboardView extends React.Component<{ dashboard: Dashboar
 
         return (
             <div>
-                {rows.map((r, i) =>
+                {combinedRows.map((r, i) =>
                     <div className="row row-control-panel" key={"row" + i}>
                         {r.columns.orderBy(ctx => ctx.startColumn).map((c, j, list) => {
 
@@ -135,13 +135,18 @@ function combineRows(rows: CombinedRow[]): CombinedRow[] {
 }
 
 function tryCombine(row: CombinedRow, newRow: CombinedRow): boolean {
-    if (!row.columns.every(c => newRow.columns.some(c2 => c.startColumn == c2.startColumn && c.columnWidth == c2.columnWidth)))
+    if (!newRow.columns.every(nc =>
+        row.columns.some(c => identical(nc, c)) ||
+        !row.columns.some(c => overlaps(nc, c))))
         return false;
 
-    row.columns.forEach(c => {
-        var c2 = newRow.columns.filter(c2 => c.startColumn == c2.startColumn && c.columnWidth == c2.columnWidth).single();
+    newRow.columns.forEach(nc => {
+        var c = row.columns.singleOrNull(c => identical(c, nc));
 
-        c.parts.push(...c2.parts);
+        if (c)
+            c.parts.push(...nc.parts);
+        else
+            row.columns.push(nc);
     });
 
     return true;
