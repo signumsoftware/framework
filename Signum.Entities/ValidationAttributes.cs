@@ -1062,6 +1062,12 @@ namespace Signum.Entities
         BeInThePast,
         [Description("{0} should be greater than {1}")]
         _0ShouldBeGreaterThan1,
+        [Description("{0} should be greater than or equal {1}")]
+        _0ShouldBeGreaterThanOrEqual1,
+        [Description("{0} should be less than {1}")]
+        _0ShouldBeLessThan1,
+        [Description("{0} should be less than or equal {1}")]
+        _0ShouldBeLessThanOrEqual1,
         [Description("{0} has a precission of {1} instead of {2}")]
         _0HasAPrecissionOf1InsteadOf2,
         [Description("{0} should be of type {1}")]
