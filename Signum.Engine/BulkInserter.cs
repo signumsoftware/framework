@@ -18,8 +18,8 @@ namespace Signum.Engine
     {
         public static int BulkInsert<T>(this IEnumerable<T> entities,
             SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
-            bool preSaving = false,
-            bool validateFirst = false,
+            bool preSaving = true,
+            bool validateFirst = true,
             bool disableIdentity = false,
             int? timeout = null,
             string message = null)
@@ -49,8 +49,8 @@ namespace Signum.Engine
             Expression<Func<T, K>> keySelector,
             Expression<Func<T, bool>> isNewPredicate = null,
             SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
-            bool preSaving = false,
-            bool validateFirst = false,
+            bool preSaving = true,
+            bool validateFirst = true,
             int? timeout = null,
             string message = null)
             where T : Entity
@@ -108,8 +108,8 @@ namespace Signum.Engine
 
         public static int BulkInsertTable<T>(IEnumerable<T> entities,
             SqlBulkCopyOptions copyOptions = SqlBulkCopyOptions.Default,
-            bool preSaving = false,
-            bool validateFirst = false,
+            bool preSaving = true,
+            bool validateFirst = true,
             bool disableIdentity = false,
             int? timeout = null,
             string message = null)
