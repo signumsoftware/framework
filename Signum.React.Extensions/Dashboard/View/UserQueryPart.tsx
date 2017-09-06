@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity} from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions, FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -11,29 +11,29 @@ import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search
 import { TypeContext, FormGroupStyle, mlistItemContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import * as UserQueryClient from '../../UserQueries/UserQueryClient'
-import { UserQueryPartEntity} from '../Signum.Entities.Dashboard'
+import { UserQueryPartEntity } from '../Signum.Entities.Dashboard'
 
 
 export interface UserQueryPartProps {
     part: UserQueryPartEntity
-    entity?: Lite<Entity>; 
+    entity?: Lite<Entity>;
 }
 
-export default class UserQueryPart extends React.Component<UserQueryPartProps, {fo?: FindOptions }> {
+export default class UserQueryPart extends React.Component<UserQueryPartProps, { fo?: FindOptions }> {
 
     constructor(props: any) {
         super(props);
         this.state = { fo: undefined };
     }
 
-    
-    componentWillMount(){
+
+    componentWillMount() {
         this.loadFindOptions(this.props);
     }
 
-    componentWillReceiveProps(newProps : UserQueryPartProps ){
+    componentWillReceiveProps(newProps: UserQueryPartProps) {
 
-        if (is(this.props.part.userQuery, newProps.part.userQuery) && 
+        if (is(this.props.part.userQuery, newProps.part.userQuery) &&
             is(this.props.entity, newProps.entity))
             return;
 
@@ -42,25 +42,25 @@ export default class UserQueryPart extends React.Component<UserQueryPartProps, {
 
     loadFindOptions(props: UserQueryPartProps) {
 
-        UserQueryClient.Converter.toFindOptions(props.part.userQuery!,  props.entity)
-            .then(fo => this.setState({fo: fo }))
+        UserQueryClient.Converter.toFindOptions(props.part.userQuery!, props.entity)
+            .then(fo => this.setState({ fo: fo }))
             .done();
     }
 
-    render(){
-        
+    render() {
+
         if (!this.state.fo)
-            return <span>{ JavascriptMessage.loading.niceToString() }</span>;
+            return <span>{JavascriptMessage.loading.niceToString()}</span>;
 
         return (
             <SearchControl
                 findOptions={this.state.fo}
                 showHeader={false}
                 showFooter={false}
-                allowSelection={this.props.part.allowSelection} />
+                allowSelection={this.props.part.renderMode == "SearchControl"} />
         );
-    }   
-} 
+    }
+}
 
 
 

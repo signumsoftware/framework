@@ -222,10 +222,22 @@ export class PanelPart extends React.Component<PanelPartProps, PanelPartState>{
 
         const renderer = DashboardClient.partRenderers[content.Type];
 
-        const lite = this.props.entity ? toLite(this.props.entity) : undefined
+        const lite = this.props.entity ? toLite(this.props.entity) : undefined;
 
-        const title = p.iconName ? <span><span className={p.iconName || undefined} style={{ color: p.iconColor || undefined }} />&nbsp;{p.title || getToString(content)}</span > :
-            (p.title || getToString(content));
+        if (renderer.withPanel && !renderer.withPanel(content))
+        {   
+            return React.createElement(this.state.component, {
+                part: content,
+                entity: lite,
+            } as DashboardClient.PanelPartContentProps<IPartEntity>);
+        }
+
+        const titleText = p.title || getToString(content); 
+        
+        const title = !p.iconName ? titleText :
+            <span>
+                <span className={p.iconName} style={{ color: p.iconColor || undefined }} />&nbsp;{titleText}
+            </span>;
 
         return (
             <div className={classes("panel", "panel-" + (p.style == undefined ? "default" : p.style.firstLower()))}>
@@ -235,7 +247,8 @@ export class PanelPart extends React.Component<PanelPartProps, PanelPartState>{
                             <span className="glyphicon glyphicon-edit"></span>&nbsp;Edit
                         </a>}
                     &nbsp;
-                    {renderer.handleTitleClick == undefined ? title : <a className="sf-pointer" onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>}
+                    {renderer.handleTitleClick == undefined ? title :
+                        <a className="sf-pointer" onMouseUp={e => renderer.handleTitleClick!(content, lite, e)}>{title}</a>}
 
                 </div>
                 <div className="panel-body">

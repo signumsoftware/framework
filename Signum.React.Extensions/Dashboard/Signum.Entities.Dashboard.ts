@@ -106,9 +106,15 @@ export const UserQueryPartEntity = new Type<UserQueryPartEntity>("UserQueryPart"
 export interface UserQueryPartEntity extends Entities.Entity, IPartEntity {
     Type: "UserQueryPart";
     userQuery?: UserQueries.UserQueryEntity | null;
-    allowSelection?: boolean;
+    renderMode?: UserQueryPartRenderMode;
     requiresTitle?: boolean;
 }
+
+export const UserQueryPartRenderMode = new EnumType<UserQueryPartRenderMode>("UserQueryPartRenderMode");
+export type UserQueryPartRenderMode =
+    "SearchControl" |
+    "SearchControlWithoutSelection" |
+    "ValueBadge";
 
 export const ValueUserQueryElementEmbedded = new Type<ValueUserQueryElementEmbedded>("ValueUserQueryElementEmbedded");
 export interface ValueUserQueryElementEmbedded extends Entities.EmbeddedEntity {

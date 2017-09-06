@@ -41,6 +41,7 @@ interface IconColor {
 export interface PartRenderer<T extends IPartEntity>{
     component: () => Promise<React.ComponentClass<PanelPartContentProps<T>>>;
     defaultIcon: (element: T) => IconColor;
+    withPanel?: (element: T) => boolean;
     handleTitleClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent<any>) => void;
     handleEditClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent<any>) => void;
 }
