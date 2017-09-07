@@ -17,6 +17,7 @@ using Signum.Entities.Reflection;
 using Signum.Utilities;
 using System.Collections;
 using System.Collections.ObjectModel;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Windows
 {
@@ -233,7 +234,7 @@ namespace Signum.Windows
                     NotifyOnValidationError = true,
                     ValidatesOnDataErrors = true,
                     ValidatesOnExceptions = true,
-                    Converter = Reflector.IsNumber(type) ? Converters.Identity : null,
+                    Converter = ReflectionTools.IsNumber(type) ? Converters.Identity : null,
                 });
 
                 return vl;

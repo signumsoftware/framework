@@ -11,6 +11,7 @@ using Signum.Entities.Reflection;
 using System.Linq.Expressions;
 using System.Web.Mvc.Html;
 using System.Globalization;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Web
 {
@@ -83,12 +84,12 @@ namespace Signum.Web
                     return o != null ? ((TimeSpan)o).ToString(c.Format).EncodeHtml() : MvcHtmlString.Empty;
                 }){ WriteData = false, TextAlign = "right" }),
 
-                new FormatterRule("Number", c=> Reflector.IsNumber(c.Type) && c.Unit == null, c => new CellFormatter((h,o) => 
+                new FormatterRule("Number", c=> ReflectionTools.IsNumber(c.Type) && c.Unit == null, c => new CellFormatter((h,o) => 
                 {
                     return o != null? ((IFormattable)o).ToString(c.Format, CultureInfo.CurrentCulture).EncodeHtml(): MvcHtmlString.Empty;
                 }){ WriteData = false, TextAlign = "right" }),
 
-                new FormatterRule("Number with Unit", c=> Reflector.IsNumber(c.Type) && c.Unit.HasText(), c => new CellFormatter((h,o) => 
+                new FormatterRule("Number with Unit", c=> ReflectionTools.IsNumber(c.Type) && c.Unit.HasText(), c => new CellFormatter((h,o) => 
                 {
                     if (o != null)
                     {

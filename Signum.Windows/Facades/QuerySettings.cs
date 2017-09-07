@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Globalization;
 using System.Windows.Media;
 using System.Linq.Expressions;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Windows
 {
@@ -50,13 +51,13 @@ namespace Signum.Windows
                 new FormatterRule("Checkbox", c=>c.Type.UnNullify() == typeof(bool), c=> b => FormatTools.CheckBoxTemplate(b, c.Format == null ? null : ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format, null)))),
 
                 new FormatterRule("Enum", c=>c.Type.UnNullify().IsEnum, c=> b => FormatTools.TextBlockTemplate(b, TextAlignment.Left, LocalizedAssembly.GetDescriptionOptions(c.Type.UnNullify()).IsSet(DescriptionOptions.Members) ? Converters.EnumDescription: null)),
-                new FormatterRule("Number", c=> Reflector.IsNumber(c.Type), c => b => FormatTools.TextBlockTemplate(b, TextAlignment.Right, c.Format == null ? null : ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format, null)))),
+                new FormatterRule("Number", c=> ReflectionTools.IsNumber(c.Type), c => b => FormatTools.TextBlockTemplate(b, TextAlignment.Right, c.Format == null ? null : ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format, null)))),
                 new FormatterRule("DateTime", c=>c.Type.UnNullify() == typeof(DateTime), c => b => FormatTools.TextBlockTemplate(b, TextAlignment.Right, c.Format == null ? null : ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format, null)))),    
                 new FormatterRule("TimeSpan", c=>c.Type.UnNullify() == typeof(TimeSpan), c => b => FormatTools.TextBlockTemplate(b, TextAlignment.Right, c.Format == null ? null : ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format, null)))),
                 new FormatterRule("Lite", c=>c.Type.IsLite(), //Not on entities! 
                     c=> b=> FormatTools.LightEntityLineTemplate(b)),
 
-                new FormatterRule("NumberUnit", c=> Reflector.IsNumber(c.Type) && c.Unit != null, c => b => FormatTools.TextBlockTemplate(b, TextAlignment.Right, ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format,c.Unit))))
+                new FormatterRule("NumberUnit", c=> ReflectionTools.IsNumber(c.Type) && c.Unit != null, c => b => FormatTools.TextBlockTemplate(b, TextAlignment.Right, ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format,c.Unit))))
             };
 
             PropertyFormatters = new Dictionary<PropertyRoute, Func<Binding, DataTemplate>>();
