@@ -77,8 +77,6 @@ export default class DashboardView extends React.Component<{ dashboard: Dashboar
                 }) as CombinedColumn)
             }) as CombinedRow);
 
-        debugger;
-
         var combinedRows = combineRows(rows);
 
         return (

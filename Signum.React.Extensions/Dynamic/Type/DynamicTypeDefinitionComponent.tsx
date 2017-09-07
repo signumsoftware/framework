@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Combobox } from 'react-widgets'
+import Combobox from 'react-widgets/lib/Combobox'
 import { PanelGroup, Panel, Tabs, Tab, MenuItem } from 'react-bootstrap'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
