@@ -26,9 +26,7 @@ export default class DashboardView extends React.Component<{ dashboard: Dashboar
             return this.renderCombinedRows();
         else
             return this.renderBasic();
-
     }
-
 
     renderBasic() {
         const db = this.props.dashboard;
@@ -227,16 +225,20 @@ export class PanelPart extends React.Component<PanelPartProps, PanelPartState>{
         if (renderer.withPanel && !renderer.withPanel(content))
         {   
             return React.createElement(this.state.component, {
+                partEmbedded: p,
                 part: content,
                 entity: lite,
             } as DashboardClient.PanelPartContentProps<IPartEntity>);
         }
 
-        const titleText = p.title || getToString(content); 
+        const titleText = p.title || getToString(content);
+        const iconColor = renderer.defaultIcon(content);
+        const icon = p.iconName || iconColor && iconColor.iconName;
+        const color = p.iconName || iconColor && iconColor.iconColor;
         
-        const title = !p.iconName ? titleText :
+        const title = !icon ? titleText :
             <span>
-                <span className={p.iconName} style={{ color: p.iconColor || undefined }} />&nbsp;{titleText}
+                <span className={icon} style={{ color: color }} />&nbsp;{titleText}
             </span>;
 
         return (
@@ -254,6 +256,7 @@ export class PanelPart extends React.Component<PanelPartProps, PanelPartState>{
                 <div className="panel-body">
                     {
                         React.createElement(this.state.component, {
+                            partEmbedded: p,
                             part: content,
                             entity: lite,
                         } as DashboardClient.PanelPartContentProps<IPartEntity>)
