@@ -649,7 +649,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string GetFieldName(DiffTable table, DiffColumn col)
         {
-            string name = col.Name.Contains(' ') ? col.Name.ToPascal(false) : col.Name;
+            string name = col.Name.Contains(' ') ? col.Name.ToPascal(false, false) : col.Name;
 
             if (this.GetRelatedEntity(table, col) != null)
             {
