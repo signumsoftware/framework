@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Calendar } from 'react-widgets'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { ModelState } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'

@@ -61,7 +61,8 @@ namespace Signum.React.RestLog
                 request.Exception = actionExecutedContext.Exception.LogException()?.ToLite();
             }
 
-            request.Save();
+            using (ExecutionMode.Global())
+                request.Save();
 
             return base.OnActionExecutedAsync(actionExecutedContext, cancellationToken);
         }

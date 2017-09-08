@@ -25,24 +25,6 @@
                 </div>
             </div>
         </div>
-
-        @if (!ec.Value.IsNew)
-        {
-
-            using (var sc = ec.SubContext())
-            {
-                sc.FormGroupStyle = FormGroupStyle.Basic;
-
-                <div class="col-sm-4 form-vertical" style="margin-top:-12px">
-                    <fieldset>
-                        <legend>Active</legend>
-                        @Html.ValueLine(sc, e => e.Active, vl => vl.InlineCheckbox = true)
-                        @Html.ValueLine(sc, e => e.StartDate)
-                        @Html.ValueLine(sc, e => e.EndDate)
-                    </fieldset>
-                </div>
-            }
-        }
     </div>
     ec.LabelColumns = new BsColumn(2);
     if (ec.Value.Query != null)
@@ -64,7 +46,6 @@
        {
            er.PreserveViewData = true;
        })
-
         </div>
     }
 }

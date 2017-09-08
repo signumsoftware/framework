@@ -59,8 +59,8 @@ namespace Signum.Web.AuthAdmin
                 {
                     QueryClient.Start();
 
-                    Register<QueryRulePack, QueryAllowedRule, QueryEntity, bool, string>("queries", a => a.Resource.Key,
-                        Mapping.New<bool>(), true);
+                    Register<QueryRulePack, QueryAllowedRule, QueryEntity, QueryAllowed, string>("queries", a => a.Resource.Key,
+                        Mapping.New<QueryAllowed>(), true);
                 }
 
                 if (operations)
