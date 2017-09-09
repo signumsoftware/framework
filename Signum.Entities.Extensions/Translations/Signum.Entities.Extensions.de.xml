@@ -67,11 +67,6 @@
   <Type Name="AppendixHelpOperation">
     <Member Name="Save" Description="Speichern" />
   </Type>
-  <Type Name="ApplicationEventLogEntity" Description="Anwendungsereignisprotokoll" PluralDescription="Anwendungsereignisprotokolle">
-    <Member Name="Date" Description="Datum" />
-    <Member Name="GlobalEvent" Description="Globales Ereignis" />
-    <Member Name="MachineName" Description="Computername" />
-  </Type>
   <Type Name="AsyncEmailSenderPermission">
     <Member Name="ViewAsyncEmailSenderPanel" Description="E-Mail-Absender Ansichtsbereich async" />
   </Type>
@@ -519,6 +514,9 @@
     <Member Name="FinalState" Description="Endstatus" />
     <Member Name="InitialState" Description="Ausgangsstatus" />
   </Type>
+  <Type Name="DisabledMessage" />
+  <Type Name="DisabledMixin" />
+  <Type Name="DisableOperation" />
   <Type Name="DisconnectedCreatedMixin">
     <Member Name="DisconnectedCreated" Description="Getrennt erstellt" />
   </Type>
@@ -843,7 +841,6 @@
   </Type>
   <Type Name="EmailMessageOperation">
     <Member Name="CreateMail" Description="Mail erstellen" />
-    <Member Name="CreateMailFromTemplate" Description="E-Mail aus Vorlage erstellen" />
     <Member Name="Delete" Description="Löschen" />
     <Member Name="ReadyToSend" Description="Zum Senden bereit" />
     <Member Name="ReSend" Description="Nochmal senden" />
@@ -914,7 +911,6 @@
     <Member Name="HidePreview" Description="Vorschau verstecken" />
     <Member Name="NewCulture" Description="Neue Kultur" />
     <Member Name="ShowPreview" Description="Vorschau anzeigen" />
-    <Member Name="SystemEmailShouldBeSetToAccessModel0" Description="SystemEmail sollte festgesetzt werden, um auf Modell {0} zuzugreifen" />
     <Member Name="ThereAreNoMessagesForTheTemplate" Description="Es gibt keine Nachrichten für die Vorlage" />
     <Member Name="ThereMustBeAMessageFor0" Description="Es muss eine Nachricht für {0} geben" />
     <Member Name="TheresMoreThanOneMessageForTheSameLanguage" Description="Es gibt mehr als eine Nachricht für die gleiche Sprache" />
@@ -1150,6 +1146,7 @@
   <Type Name="IEmailOwnerEntity">
     <Member Name="EmailOwnerData" Description="E-Mailbesitzerdaten" />
   </Type>
+  <Type Name="ImageAttachmentEntity" />
   <Type Name="InboxFilterModel" Description="Posteingangs-filter">
     <Member Name="FromDate" Description="Vom Datum" />
     <Member Name="Range" Description="Bereich" />
@@ -1162,6 +1159,7 @@
     <Member Name="Sender" Description="Sender" />
     <Member Name="SenderNote" Description="Sender Notiz" />
   </Type>
+  <Type Name="InsertPlace" />
   <Type Name="IPartEntity">
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
   </Type>
@@ -1200,6 +1198,71 @@
     <Member Name="Name" Description="Name" />
     <Member Name="Xml" Description="XML" />
   </Type>
+  <Type Name="JoyrideEntity" Description="Spritztour">
+    <Member Name="Culture" Description="Kultur" />
+    <Member Name="Debug" Description="Debug" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="KeyboardNavigation" Description="Tastaturnavigation zulassen" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="ShowSkipButton" Description="Schaltfläche &quot;Abbrechen&quot; anzeigen" />
+    <Member Name="ShowStepsProgress" Description="Fortschritt anzeigen" />
+    <Member Name="Steps" Description="Schritte" />
+    <Member Name="Type" Description="Typ" />
+  </Type>
+  <Type Name="JoyrideMessage">
+    <Member Name="Back" Description="Zurück" />
+    <Member Name="Close" Description="Schließen" />
+    <Member Name="Last" Description="Beenden" />
+    <Member Name="Next" Description="Weiter" />
+    <Member Name="Skip" Description="Abbrechen" />
+  </Type>
+  <Type Name="JoyrideOperation">
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="JoyrideStepEntity" Description="Spritztour Schritt" PluralDescription="Spritztour Schritte" Gender="m">
+    <Member Name="AllowClicksThruHole" Description="Klicken in den Bereich zulassen" />
+    <Member Name="Culture" Description="Kultur" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="IsFixed" Description="Ist fixiert" />
+    <Member Name="Position" Description="Position" />
+    <Member Name="Selector" Description="Selektor" />
+    <Member Name="Style" Description="Stil" />
+    <Member Name="Text" Description="Text" />
+    <Member Name="Title" Description="Titel" />
+    <Member Name="Type" Description="Typ" />
+  </Type>
+  <Type Name="JoyrideStepOperation">
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="JoyrideStepPosition" Description="Position">
+    <Member Name="Bottom" Description="Unten" />
+    <Member Name="BottomLeft" Description="Unten links" />
+    <Member Name="BottomRight" Description="Unten rechts" />
+    <Member Name="Top" Description="Oben" />
+    <Member Name="TopLeft" Description="Oben links" />
+    <Member Name="TopRight" Description="Oben rechts" />
+  </Type>
+  <Type Name="JoyrideStepStyleEntity" Description="Spritztour Stil" PluralDescription="Spritztour Stile" Gender="m">
+    <Member Name="BackgroundColor" Description="Hintergrundfarbe" />
+    <Member Name="BorderRadius" Description="Randradius" />
+    <Member Name="Color" Description="Farbe" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="MainColor" Description="Hauptfarbe" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="TextAlign" Description="Textausrichtung" />
+    <Member Name="Width" Description="Breite" />
+  </Type>
+  <Type Name="JoyrideStepStyleOperation">
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="JoyrideStepType" Description="Typ">
+    <Member Name="Click" Description="Klicken" />
+    <Member Name="Hover" Description="Hover" />
+  </Type>
+  <Type Name="JoyrideType" Description="Spritztour-Typ">
+    <Member Name="Continuous" Description="Kontinuierlich" />
+    <Member Name="Single" Description="Einzeln" />
+  </Type>
   <Type Name="LastAuthRulesImportEntity" Description="Letzte Authregeln importieren" Gender="f">
     <Member Name="Date" Description="Datum" />
   </Type>
@@ -1237,6 +1300,8 @@
     <Member Name="NotAllowed" Description="Nicht erlaubt" />
     <Member Name="TextPruning" Description="Text beschneiden" />
   </Type>
+  <Type Name="ModelConverterSymbol" />
+  <Type Name="MoveTreeModel" />
   <Type Name="MultiEntityModel" />
   <Type Name="MultipleSMSModel" Description="Mehrere SMS">
     <Member Name="Certified" Description="Zertifiziert" />
@@ -1519,6 +1584,7 @@
   <Type Name="PropertyRulePack" Description="Eigenschaftsregelpack">
     <Member Name="Type" Description="Typ" />
   </Type>
+  <Type Name="QueryAllowed" />
   <Type Name="QueryAllowedRule" Description="Erlaubte Abfrageregel" />
   <Type Name="QueryColumnEmbedded" Description="Abfrage-Spalte">
     <Member Name="DisplayName" Description="Angezeigter Name" />
@@ -1833,6 +1899,7 @@
   <Type Name="SystemEmailEntity" Description="System-E-Mail" PluralDescription="System-E-Mails">
     <Member Name="FullClassName" Description="Vollständiger class name" />
   </Type>
+  <Type Name="SystemEventLogEntity" />
   <Type Name="SystemWordTemplateEntity" Description="System-Word-Vorlage">
     <Member Name="FullClassName" Description="Vollständiger Klassenname" />
   </Type>
@@ -1859,6 +1926,7 @@
     <Member Name="Owner" Description="Eigentümer" />
     <Member Name="Priority" Description="Priorität" />
   </Type>
+  <Type Name="ToolbarLocation" />
   <Type Name="ToolbarMenuEntity" Description="Toolbar-Menü">
     <Member Name="Elements" Description="Elemente" />
     <Member Name="Guid" Description="Guid" />
@@ -1974,10 +2042,6 @@
   </Type>
   <Type Name="TypeConditionRuleEmbedded" />
   <Type Name="TypeConditionSymbol" Description="Typbedingung" />
-  <Type Name="TypeEvent" Description="Ereignistyp">
-    <Member Name="Start" Description="Start" />
-    <Member Name="Stop" Description="Stop" />
-  </Type>
   <Type Name="TypeRulePack" Description="Typregelpack" />
   <Type Name="TypeSearchResult">
     <Member Name="Appendix" Description="Anlage" />
@@ -2126,6 +2190,7 @@
   <Type Name="WebImage" Description="Webbild">
     <Member Name="FullWebPath" Description="Vollständiger Web-Pfad" />
   </Type>
+  <Type Name="WordAttachmentEntity" />
   <Type Name="WordConverterSymbol" Description="Word-Konverter" Gender="m" />
   <Type Name="WordTemplateEntity" Description="Word-Vorlage">
     <Member Name="Active" Description="Aktiv" />

@@ -20,21 +20,6 @@
             @Html.ValueLine(ec, f => f.FileName)
             @Html.ValueLine(ec, f => f.DisableAuthorization)
         </div>
-        @if (!ec.Value.IsNew)
-        {
-            using (var sc = ec.SubContext())
-            {
-                sc.FormGroupStyle = FormGroupStyle.Basic;
-                <div class="col-sm-4 form-vertical">
-                    <fieldset style="margin-top: -25px">
-                        <legend>Active</legend>
-                        @Html.ValueLine(sc, e => e.Active, vl => vl.InlineCheckbox = true)
-                        @Html.ValueLine(sc, e => e.StartDate)
-                        @Html.ValueLine(sc, e => e.EndDate)
-                    </fieldset>
-                </div>
-            }
-        }
     </div>
 
     if (ec.Value.Query != null)

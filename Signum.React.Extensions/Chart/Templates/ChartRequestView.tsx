@@ -186,7 +186,6 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
         var path = Finder.findOptionsPath({
             queryName: cr.queryKey,
             filterOptions: Finder.toFilterOptions(cr.filterOptions),
-            showFilters: cr.filterOptions.length > 0
         });
 
         Navigator.pushOrOpenInTab(path, e);

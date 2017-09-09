@@ -39,13 +39,7 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
 
     componentWillMount() {
 
-        if (Navigator.Expander.setExpanded) {
-            if (Navigator.Expander.getExpanded) {
-                this.wasExpanded = Navigator.Expander.getExpanded();
-            }
-
-            Navigator.Expander.setExpanded(true);
-        }
+        this.wasExpanded = Navigator.Expander.setExpanded(true);
 
         MapClient.API.operations(this.props.match.params.type)
             .then(omi => {
@@ -60,10 +54,8 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
     }
 
 
-    componentWillUnmount(){
-        if (Navigator.Expander.setExpanded && this.wasExpanded != null){
-            Navigator.Expander.setExpanded(this.wasExpanded);
-        }
+    componentWillUnmount() {
+        Navigator.Expander.setExpanded(this.wasExpanded);
     }
 
 
@@ -105,7 +97,7 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
 
     render() {
 
-        if (Navigator.Expander.getExpanded && !Navigator.Expander.getExpanded())
+        if (Navigator.Expander.onGetExpanded && !Navigator.Expander.onGetExpanded())
             return null;
 
         const s = this.state;
@@ -251,7 +243,7 @@ export class OperationMapRenderer extends React.Component<OperationMapRendererPr
     render() {
 
         return (
-            <div id="map" style={{ backgroundColor: "white", width: "100%", height: this.props.height + "px" }}>
+            <div id="map" style={{ backgroundColor: "transparent", width: "100%", height: this.props.height + "px" }}>
                 <svg id="svgMap" ref={svg => this.svg = svg!}>
                     <defs>
                         <marker id="normal_arrow" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="10" markerHeight="10" orient="auto">

@@ -33,18 +33,26 @@
                     @Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase)
                 </td>
                 <td>
-                    @if (!item.Value.CoercedValues.Contains(true))
+                    @if (!item.Value.CoercedValues.Contains(QueryAllowed.Allow))
                     {
                         <a class="sf-auth-chooser sf-auth-allowed">
-                            @Html.RadioButton(item.Compose("Allowed"), "True", item.Value.Allowed)
+                            @Html.RadioButton(item.Compose("Allowed"), "Allow", item.Value.Allowed == QueryAllowed.Allow)
                         </a>
                     }
                 </td>
                 <td>
-                    @if (!item.Value.CoercedValues.Contains(false))
+                    @if (!item.Value.CoercedValues.Contains(QueryAllowed.EmbeddedOnly))
+                    {
+                        <a class="sf-auth-chooser sf-auth-allowed">
+                            @Html.RadioButton(item.Compose("Allowed"), "EmbeddedOnly", item.Value.Allowed == QueryAllowed.EmbeddedOnly)
+                        </a>
+                    }
+                </td>
+                <td>
+                    @if (!item.Value.CoercedValues.Contains(QueryAllowed.None))
                     {
                         <a class="sf-auth-chooser sf-auth-not-allowed">
-                            @Html.RadioButton(item.Compose("Allowed"), "False", !item.Value.Allowed)
+                            @Html.RadioButton(item.Compose("Allowed"), "None", item.Value.Allowed == QueryAllowed.None)
                         </a> 
                     }
                 </td>

@@ -179,4 +179,16 @@ namespace Signum.Entities.Workflow
     {
         Inbox
     }
+
+    [Serializable]
+    public class ActivityWithRemarks : ModelEntity
+    {
+        public Lite<WorkflowActivityEntity> workflowActivity { get; set; }
+        public Lite<CaseEntity> @case { get; set; }
+        public Lite<CaseActivityEntity> caseActivity { get; set; }
+        public Lite<CaseNotificationEntity> notification { get; set; }
+        public string remarks { get; set; }
+        public int alerts { get; set; }
+        public List<CaseTagTypeEntity> tags { get; set; }
+    }
 }

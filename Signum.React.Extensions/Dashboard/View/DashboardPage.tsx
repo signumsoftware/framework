@@ -28,7 +28,7 @@ interface DashboardPageState {
     entity?: Entity;
 }
 
-function getQueryEntity(props: DashboardPageProps): string{
+function getQueryEntity(props: DashboardPageProps): string {
     return QueryString.parse(props.location.search).entity as string;
 }
 
@@ -89,13 +89,13 @@ export default class DashboardPage extends React.Component<DashboardPageProps, D
                     </div>}
 
                 {!dashboard ? <h2>{JavascriptMessage.loading.niceToString()}</h2> :
-                    <h2>
-                        {Navigator.isNavigable({ entity: dashboard, canExecute: {} } as EntityPack<Entity>) ?
-                            <Link to={Navigator.navigateRoute(dashboard)}>{getToString(dashboard)}</Link> :
-                            <span>{getToString(dashboard)}</span>
+                    <div className="sf-show-hover">
+                        {Navigator.isNavigable({ entity: dashboard, canExecute: {} } as EntityPack<Entity>) &&
+                            <Link className="sf-hide pull-right" to={Navigator.navigateRoute(dashboard)}><span className="glyphicon glyphicon-edit"></span>&nbsp;Edit</Link>
                         }
-                    </h2>}
-                {dashboard && (!entityKey || entity) && <DashboardView dashboard={dashboard} entity={entity}/>}
+                        <h2>{getToString(dashboard)}</h2>
+                    </div>}
+                {dashboard && (!entityKey || entity) && <DashboardView dashboard={dashboard} entity={entity} />}
             </div>
         );
     }

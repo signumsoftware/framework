@@ -79,15 +79,13 @@ namespace Signum.React.Mailing
         }
 
         [Route("api/email/emailTemplates"), HttpGet]
-        public List<Lite<EmailTemplateEntity>> GetWordTemplates(string queryKey, EmailTemplateVisibleOn visibleOn)
+        public List<Lite<EmailTemplateEntity>> GetWordTemplates(string queryKey, EmailTemplateVisibleOn visibleOn, Lite<Entity> lite)
         {
-            object type = QueryLogic.ToQueryName(queryKey);
+            object queryName = QueryLogic.ToQueryName(queryKey);
 
-            var isAllowed = Schema.Current.GetInMemoryFilter<EmailTemplateEntity>(userInterface: true);
-            return EmailTemplateLogic.TemplatesByQueryName.Value.TryGetC(type).EmptyIfNull()
-                .Where(a => isAllowed(a) && EmailTemplateLogic.IsVisible(a, visibleOn))
-                .Select(a => a.ToLite())
-                .ToList();
+            var entity = lite?.RetrieveAndForget();
+
+            return EmailTemplateLogic.GetApplicableEmailTemplates(queryName, entity, visibleOn);
         }
     }
 }

@@ -172,6 +172,7 @@ export class TranslationTypeTable extends React.Component<{ type: LocalizableTyp
 }
 
 export class TranslationMember extends React.Component<{ type: LocalizableType, loc: LocalizedType; member: LocalizedMember; edit: boolean }, { avoidCombo?: boolean }>{
+    
 
     constructor(props: any) {
         super(props);
@@ -200,17 +201,23 @@ export class TranslationMember extends React.Component<{ type: LocalizableType, 
         e.preventDefault();
         this.setState({ avoidCombo: true });
     }
+    handleKeyDown = (e: React.KeyboardEvent<any>) => {
+        if (e.keyCode == 32 || e.keyCode == 113) { //SPACE OR F2
+            e.preventDefault();
+            this.setState({ avoidCombo: true });
+        }
+    }
 
     renderEdit() {
         const { member } = this.props;
 
         const translatedMembers = Dic.getValues(this.props.type.cultures).map(lt => ({ culture: lt.culture, member: lt.members[member.name] })).filter(a => !!a.member.translatedDescription);
         if (!translatedMembers.length || this.state.avoidCombo)
-            return (<textarea style={{ height: "24px", width: "90%" }} value={member.description || ""} onChange={this.handleOnChange} />);
+            return (<textarea style={{ height: "24px", width: "90%" }} value={member.description || ""} onChange={this.handleOnChange} ref={(ta) => ta && ta.focus()}/>);
 
         return (
             <span>
-                <select value={member.description || ""} onChange={this.handleOnChange}>
+                <select value={member.description || ""} onChange={this.handleOnChange} onKeyDown={this.handleKeyDown}>
                     { initialElementIf(member.description == undefined).concat(
                         translatedMembers.map(a => <option key={a.culture} value={a.member.translatedDescription}>{a.member.translatedDescription}</option>)) }
                 </select>
@@ -297,6 +304,12 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
         e.preventDefault();
         this.setState({ avoidCombo: true });
     }
+    handleKeyDown = (e: React.KeyboardEvent<any>) => {
+        if (e.keyCode == 32 || e.keyCode == 113) { //SPACE OR F2
+            e.preventDefault();
+            this.setState({ avoidCombo: true });
+        }
+    }
 
     renderEdit() {
         const { loc } = this.props;
@@ -304,11 +317,11 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
 
         const translatedTypes = Dic.getValues(this.props.type.cultures).filter(a => !!a.typeDescription!.translatedDescription);
         if (!translatedTypes.length || this.state.avoidCombo)
-            return (<textarea style={{ height: "24px", width: "90%" }} value={td.description || ""} onChange={this.handleOnChange} />);
+            return (<textarea style={{ height: "24px", width: "90%" }} value={td.description || ""} onChange={this.handleOnChange} ref={(ta) => ta && ta.focus()} />);
 
         return (
             <span>
-                <select value={td.description || ""} onChange={this.handleOnChange}>
+                <select value={td.description || ""} onChange={this.handleOnChange} onKeyDown={this.handleKeyDown}>
                     {  initialElementIf(td.description == undefined).concat(
                         translatedTypes.map(a => <option key={a.culture} value={a.typeDescription!.translatedDescription}>{a.typeDescription!.translatedDescription}</option>)) }
                 </select>

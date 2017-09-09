@@ -70,22 +70,21 @@ export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelRe
         return (
             <ButtonDropdown title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown"
                 onToggle={this.handleSelectedToggle}>
-                { this.props.plainExcel && <MenuItem onSelect={this.handlePlainExcel} >{label }</MenuItem> }
-                { this.props.plainExcel && excelReports && excelReports.length > 0 && <MenuItem divider/> }
+                {this.props.plainExcel && <MenuItem onSelect={this.handlePlainExcel} ><span><i className="fa fa-file-excel-o"></i>&nbsp; {ExcelMessage.ExcelReport.niceToString()}</span></MenuItem>}
+                {this.props.plainExcel && excelReports && excelReports.length > 0 && <MenuItem divider />}
                 {
                     excelReports && excelReports.map((uq, i) =>
                         <MenuItem key={i}
-                            onSelect={() => this.handleSelect(uq) }>
-                            { uq.toStr }
+                            onSelect={() => this.handleSelect(uq)}>
+                            {uq.toStr}
                         </MenuItem>)
                 }
-                {  (this.props.plainExcel || excelReports && excelReports.length > 0) && <MenuItem divider/> }
-                <MenuItem onSelect={this.handleAdmnister}>{ExcelMessage.Administer.niceToString() }</MenuItem>
-                <MenuItem onSelect={this.handleCreate}>{ExcelMessage.CreateNew.niceToString() }</MenuItem>
+                {(this.props.plainExcel || excelReports && excelReports.length > 0) && <MenuItem divider />}
+                <MenuItem onSelect={this.handleAdmnister}>{ExcelMessage.Administer.niceToString()}</MenuItem>
+                <MenuItem onSelect={this.handleCreate}>{ExcelMessage.CreateNew.niceToString()}</MenuItem>
             </ButtonDropdown>
         );
     }
- 
 }
 
 

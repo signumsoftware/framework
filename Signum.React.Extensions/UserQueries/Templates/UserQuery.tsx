@@ -14,6 +14,7 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
 
         const query = this.props.ctx.value.query;
         const ctx = this.props.ctx;
+        const ctxxs = ctx.subCtx({ formGroupSize: "ExtraSmall" });
 
         return (
             <div>
@@ -29,7 +30,7 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
                 </FormGroup>
 
                 {query &&
-                    <div>
+                    (<div>
                         <EntityLine ctx={ctx.subCtx(e => e.entityType)} onChange={() => this.forceUpdate()} />
                         {
                             this.props.ctx.value.entityType &&
@@ -38,11 +39,12 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
                             </p>
                         }
                         <ValueLine ctx={ctx.subCtx(e => e.withoutFilters)} />
-                        <div className="form-xs">
-                            <EntityTable ctx={ctx.subCtx(e => e.filters)} columns={EntityTable.typedColumns<QueryFilterEmbedded>([
+                        <div>
+                            <EntityTable ctx={ctxxs.subCtx(e => e.filters)} columns={EntityTable.typedColumns<QueryFilterEmbedded>([
                                 {
-                                    property: a => a.token, template: ctx => <QueryTokenEntityBuilder
-                                        ctx={ctx.subCtx(a => a.token, { formGroupStyle: "None" })}
+                                    property: a => a.token,
+                                    template: ctx => <QueryTokenEntityBuilder
+                                        ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
                                         queryKey={this.props.ctx.value.query!.key}
                                         subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />,
                                     headerHtmlAttributes: { style: { width: "40%" } },
@@ -50,20 +52,22 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
                                 { property: a => a.operation },
                                 { property: a => a.valueString, headerHtmlAttributes: { style: { width: "40%" } } }
                             ])} />
-                            <ValueLine ctx={ctx.subCtx(e => e.columnsMode)} />
-                            <EntityTable ctx={ctx.subCtx(e => e.columns)} columns={EntityTable.typedColumns<QueryColumnEmbedded>([
+                            <ValueLine ctx={ctxxs.subCtx(e => e.columnsMode)} />
+                            <EntityTable ctx={ctxxs.subCtx(e => e.columns)} columns={EntityTable.typedColumns<QueryColumnEmbedded>([
                                 {
-                                    property: a => a.token, template: ctx => <QueryTokenEntityBuilder
-                                        ctx={ctx.subCtx(a => a.token, { formGroupStyle: "None" })}
+                                    property: a => a.token,
+                                    template: ctx => <QueryTokenEntityBuilder
+                                        ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
                                         queryKey={this.props.ctx.value.query!.key}
                                         subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />
                                 },
                                 { property: a => a.displayName }
                             ])} />
-                            <EntityTable ctx={ctx.subCtx(e => e.orders)} columns={EntityTable.typedColumns<QueryOrderEmbedded>([
+                            <EntityTable ctx={ctxxs.subCtx(e => e.orders)} columns={EntityTable.typedColumns<QueryOrderEmbedded>([
                                 {
-                                    property: a => a.token, template: ctx => <QueryTokenEntityBuilder
-                                        ctx={ctx.subCtx(a => a.token, { formGroupStyle: "None" })}
+                                    property: a => a.token,
+                                    template: ctx => <QueryTokenEntityBuilder
+                                        ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
                                         queryKey={this.props.ctx.value.query!.key}
                                         subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />
                                 },
@@ -72,13 +76,13 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
                         </div>
                         <div className="row">
                             <div className="col-sm-6">
-                                <ValueLine ctx={ctx.subCtx(e => e.paginationMode, { labelColumns: { sm: 4 } })} />
+                                <ValueLine ctx={ctxxs.subCtx(e => e.paginationMode, { labelColumns: { sm: 4 } })} />
                             </div>
                             <div className="col-sm-6">
-                                <ValueLine ctx={ctx.subCtx(e => e.elementsPerPage, { labelColumns: { sm: 4 } })} />
+                                <ValueLine ctx={ctxxs.subCtx(e => e.elementsPerPage, { labelColumns: { sm: 4 } })} />
                             </div>
                         </div>
-                    </div>
+                    </div>)
                 }
             </div>
         );

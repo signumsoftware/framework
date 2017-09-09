@@ -108,8 +108,6 @@ export default class WorkflowScriptRunnerPanelPage extends React.Component<Workf
                     orderOptions: [
                         { columnName: "Entity.ScriptExecution.NextExecution", orderType: "Ascending" }
                     ],
-                    searchOnLoad: true,
-                    showFilters: false,
                     pagination: { elementsPerPage: 10, mode: "Firsts" }
                 }} />
                 <TabContent unmountOnExit={true} id="tabs" defaultActiveKey="logs">
@@ -125,8 +123,6 @@ export default class WorkflowScriptRunnerPanelPage extends React.Component<Workf
                                     ]
                                 },
                             ],
-                            searchOnLoad: true,
-                            showFilters: false,
                             pagination: { elementsPerPage: 10, mode: "Firsts" }
                         }} />
                     </TabPane>
@@ -152,8 +148,6 @@ export default class WorkflowScriptRunnerPanelPage extends React.Component<Workf
                             orderOptions: [
                                 { columnName: "Entity.DoneDate", orderType: "Descending" }
                             ],
-                            searchOnLoad: true,
-                            showFilters: false,
                             pagination: { elementsPerPage: 10, mode: "Firsts" }
                         }} />
                     </TabPane>

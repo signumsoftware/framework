@@ -10,7 +10,6 @@ import { ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
 import { EntityPack, Entity, Lite, JavascriptMessage, NormalWindowMessage, entityInfo, getToString, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from '../../../../Framework/Signum.React/Scripts/Frames/Widgets'
 import ValidationErrors from '../../../../Framework/Signum.React/Scripts/Frames/ValidationErrors'
 import ButtonBar from '../../../../Framework/Signum.React/Scripts/Frames/ButtonBar'
 import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperation, CaseActivityMessage, WorkflowActivityEntity, WorkflowActivityMessage } from '../Signum.Entities.Workflow'
@@ -22,7 +21,7 @@ interface CaseFlowButtonProps {
     caseActivity: CaseActivityEntity;
 }
 
-export default class CaseFlowButton extends React.Component < CaseFlowButtonProps>{
+export default class CaseFlowButton extends React.Component <CaseFlowButtonProps>{
 
     handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();

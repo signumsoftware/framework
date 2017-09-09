@@ -314,7 +314,7 @@ export class EntityGridItem extends React.Component<EntityGridItemProps>{
 
         return (
             <div className={"panel panel-" + (this.props.bsStyle ? this.props.bsStyle.toLowerCase() : "default") }>
-                <div className="panel-heading form-inline" draggable={!!this.props.onTitleDragStart}
+                <div className="panel-heading" draggable={!!this.props.onTitleDragStart}
                     onDragStart={this.props.onTitleDragStart} >
                     {this.props.onRemove &&
                         <a className="sf-line-button sf-remove pull-right" onClick={this.props.onRemove}

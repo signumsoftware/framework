@@ -29,6 +29,7 @@ interface DynamicViewEntityComponentState {
     exampleEntity?: Entity;
     rootNode?: BaseNode;
     selectedNode?: DesignerNode<BaseNode>;
+    viewOverrides?: Navigator.ViewOverride<ModifiableEntity>[];
 }
 
 export default class DynamicViewEntityComponent extends React.Component<DynamicViewEntityComponentProps, DynamicViewEntityComponentState> implements IRenderButtons {
@@ -50,6 +51,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
 
     componentWillMount() {
         this.updateRoot();
+      
     }
 
     updateStateSelectedNode(newNode: DesignerNode<BaseNode>) {
@@ -80,6 +82,13 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
                 selectedNode: this.getZeroNode().createChild(rootNode)
             });
         }
+
+        if (ctx.value.entityType)
+            Navigator.viewDispatcher.getViewOverrides(ctx.value.entityType.cleanName)
+                .then(vos => this.setState({ viewOverrides: vos }))
+                .done();
+        else
+            this.setState({ viewOverrides: undefined });
 
         ctx.frame!.frameComponent.forceUpdate();
     }
@@ -155,7 +164,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
                     </div>
                 </div>
                 <div className="design-content open">
-                    {this.state.exampleEntity && NodeUtils.renderWithViewOverrides(root, exampleCtx as TypeContext<Entity>)}
+                    {this.state.exampleEntity && this.state.viewOverrides && NodeUtils.renderWithViewOverrides(root, exampleCtx as TypeContext<Entity>, this.state.viewOverrides.filter(a => a.viewName == ctx.value.viewName))}
                 </div>
             </div>);
     }

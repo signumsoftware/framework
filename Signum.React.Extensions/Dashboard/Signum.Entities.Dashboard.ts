@@ -26,6 +26,7 @@ export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetE
     dashboardPriority?: number | null;
     autoRefreshPeriod?: number | null;
     displayName?: string | null;
+    combineSimilarRows?: boolean;
     parts: Entities.MList<PanelPartEmbedded>;
     guid?: string;
     forNavbar?: boolean;
@@ -74,6 +75,8 @@ export const PanelPartEmbedded = new Type<PanelPartEmbedded>("PanelPartEmbedded"
 export interface PanelPartEmbedded extends Entities.EmbeddedEntity {
     Type: "PanelPartEmbedded";
     title?: string | null;
+    iconName?: string | null;
+    iconColor?: string | null;
     row?: number;
     startColumn?: number;
     columns?: number;
@@ -103,9 +106,15 @@ export const UserQueryPartEntity = new Type<UserQueryPartEntity>("UserQueryPart"
 export interface UserQueryPartEntity extends Entities.Entity, IPartEntity {
     Type: "UserQueryPart";
     userQuery?: UserQueries.UserQueryEntity | null;
-    allowSelection?: boolean;
+    renderMode?: UserQueryPartRenderMode;
     requiresTitle?: boolean;
 }
+
+export const UserQueryPartRenderMode = new EnumType<UserQueryPartRenderMode>("UserQueryPartRenderMode");
+export type UserQueryPartRenderMode =
+    "SearchControl" |
+    "SearchControlWithoutSelection" |
+    "BigValue";
 
 export const ValueUserQueryElementEmbedded = new Type<ValueUserQueryElementEmbedded>("ValueUserQueryElementEmbedded");
 export interface ValueUserQueryElementEmbedded extends Entities.EmbeddedEntity {

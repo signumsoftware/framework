@@ -8,7 +8,7 @@ import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../
 import { SearchMessage, JavascriptMessage, parseLite, is, Lite, toLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import SearchControlLoaded from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded'
-import { UserQueryEntity, UserQueryMessage  } from './Signum.Entities.UserQueries'
+import { UserQueryEntity, UserQueryMessage } from './Signum.Entities.UserQueries'
 import * as UserQueryClient from './UserQueryClient'
 
 export interface UserQueryMenuProps {
@@ -19,14 +19,14 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
 
     constructor(props: UserQueryMenuProps) {
         super(props);
-        this.state = { };
+        this.state = {};
     }
 
     componentWillMount() {
         const userQuery = window.location.search.tryAfter("userQuery=");
         if (userQuery) {
             const uq = parseLite(decodeURIComponent(userQuery.tryBefore("&") || userQuery)) as Lite<UserQueryEntity>;
-            Navigator.API.fillToStrings([uq])
+            Navigator.API.fillToStrings(uq)
                 .then(() => this.setState({ currentUserQuery: uq }))
                 .done();
         }
@@ -48,14 +48,12 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
 
         Navigator.API.fetchAndForget(uq).then(userQuery => {
             const sc = this.props.searchControl
-            const oldFindOptions =sc.props.findOptions;
+            const oldFindOptions = sc.props.findOptions;
             UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, undefined)
                 .then(newFindOptions => {
-                    newFindOptions.showFilters = true;
-                   sc.forceUpdate();
+                    sc.setState({ showFilters: true });
                     this.setState({ currentUserQuery: uq });
-                    if (sc.props.findOptions.pagination.mode != "All")
-                    {
+                    if (sc.props.findOptions.pagination.mode != "All") {
                         sc.doSearchPage1();
                     }
                 })
@@ -95,18 +93,18 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
                 {
                     userQueries && userQueries.map((uq, i) =>
                         <MenuItem key={i}
-                            className={classes("sf-userquery", is(uq, this.state.currentUserQuery) && "active") }
-                            onSelect={() => this.handleSelect(uq) }>
-                            { uq.toStr }
+                            className={classes("sf-userquery", is(uq, this.state.currentUserQuery) && "active")}
+                            onSelect={() => this.handleSelect(uq)}>
+                            {uq.toStr}
                         </MenuItem>)
                 }
-                { userQueries && userQueries.length > 0 && <MenuItem divider/> }
-                { this.state.currentUserQuery && <MenuItem onSelect={this.handleEdit} >{UserQueryMessage.UserQueries_Edit.niceToString() }</MenuItem> }
-                <MenuItem onSelect={this.handleCreate}>{UserQueryMessage.UserQueries_CreateNew.niceToString() }</MenuItem>
+                {userQueries && userQueries.length > 0 && <MenuItem divider />}
+                {this.state.currentUserQuery && <MenuItem onSelect={this.handleEdit} >{UserQueryMessage.UserQueries_Edit.niceToString()}</MenuItem>}
+                <MenuItem onSelect={this.handleCreate}>{UserQueryMessage.UserQueries_CreateNew.niceToString()}</MenuItem>
             </ButtonDropdown>
         );
     }
- 
+
 }
 
 

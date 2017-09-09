@@ -40,10 +40,10 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
                 body={
                     <div className="sf-main-control form-horizontal">
                         <div className="row">
-                            <div className="col-sm-2">
-                                <EnumCheckboxList ctx={ctx.subCtx(o => o.states)} columnCount={2} columnWidth={75} formGroupHtmlAttributes={{ style: { marginTop: -15, marginBottom: -15 } }} />
+                            <div className="col-sm-3">
+                                <EnumCheckboxList ctx={ctx.subCtx(o => o.states)} columnCount={2} formGroupHtmlAttributes={{ style: { marginTop: -15, marginBottom: -15 } }} />
                             </div>
-                            <div className="col-sm-2">
+                            <div className="col-sm-3">
                                 <ValueLine ctx={ctx4.subCtx(o => o.range)} />
                                 <ValueLine ctx={ctx4.subCtx(o => o.fromDate)} />
                                 <ValueLine ctx={ctx4.subCtx(o => o.toDate)} />

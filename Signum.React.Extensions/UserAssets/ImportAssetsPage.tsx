@@ -114,6 +114,7 @@ export default class ImportAssetsPage extends React.Component<ImportAssetsPagePr
                                             <input type="checkbox" checked={mle.element.overrideEntity} onChange={e => {
                                                 mle.element.overrideEntity = (e.currentTarget as HTMLInputElement).checked;
                                                 mle.element.modified = true;
+                                                this.forceUpdate();
                                             } }></input>
                                         }
                                     </td>

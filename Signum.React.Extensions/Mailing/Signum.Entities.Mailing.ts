@@ -213,9 +213,7 @@ export interface EmailTemplateEntity extends Entities.Entity {
     masterTemplate?: Entities.Lite<EmailMasterTemplateEntity> | null;
     isBodyHtml?: boolean;
     messages: Entities.MList<EmailTemplateMessageEmbedded>;
-    active?: boolean;
-    startDate?: string | null;
-    endDate?: string | null;
+    applicable?: Templating.TemplateApplicableEval | null;
 }
 
 export module EmailTemplateMessage {
@@ -224,8 +222,6 @@ export module EmailTemplateMessage {
     export const ThereMustBeAMessageFor0 = new MessageKey("EmailTemplateMessage", "ThereMustBeAMessageFor0");
     export const TheresMoreThanOneMessageForTheSameLanguage = new MessageKey("EmailTemplateMessage", "TheresMoreThanOneMessageForTheSameLanguage");
     export const TheTextMustContain0IndicatingReplacementPoint = new MessageKey("EmailTemplateMessage", "TheTextMustContain0IndicatingReplacementPoint");
-    export const TheTemplateIsAlreadyActive = new MessageKey("EmailTemplateMessage", "TheTemplateIsAlreadyActive");
-    export const TheTemplateIsAlreadyInactive = new MessageKey("EmailTemplateMessage", "TheTemplateIsAlreadyInactive");
     export const ImpossibleToAccess0BecauseTheTemplateHAsNo1 = new MessageKey("EmailTemplateMessage", "ImpossibleToAccess0BecauseTheTemplateHAsNo1");
     export const NewCulture = new MessageKey("EmailTemplateMessage", "NewCulture");
     export const TokenOrEmailAddressMustBeSet = new MessageKey("EmailTemplateMessage", "TokenOrEmailAddressMustBeSet");
@@ -247,8 +243,6 @@ export module EmailTemplateOperation {
     export const CreateEmailTemplateFromSystemEmail : Entities.ConstructSymbol_From<EmailTemplateEntity, SystemEmailEntity> = registerSymbol("Operation", "EmailTemplateOperation.CreateEmailTemplateFromSystemEmail");
     export const Create : Entities.ConstructSymbol_Simple<EmailTemplateEntity> = registerSymbol("Operation", "EmailTemplateOperation.Create");
     export const Save : Entities.ExecuteSymbol<EmailTemplateEntity> = registerSymbol("Operation", "EmailTemplateOperation.Save");
-    export const Enable : Entities.ExecuteSymbol<EmailTemplateEntity> = registerSymbol("Operation", "EmailTemplateOperation.Enable");
-    export const Disable : Entities.ExecuteSymbol<EmailTemplateEntity> = registerSymbol("Operation", "EmailTemplateOperation.Disable");
     export const Delete : Entities.DeleteSymbol<EmailTemplateEntity> = registerSymbol("Operation", "EmailTemplateOperation.Delete");
 }
 

@@ -26,7 +26,7 @@ namespace Signum.React.Dashboard
 
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
-            SignumServer.AddEntityPackExtension += ep =>
+            EntityPackTS.AddExtension += ep =>
             {
                 if (ep.entity.IsNew || !DashboardPermission.ViewDashboard.IsAuthorized())
                     return;

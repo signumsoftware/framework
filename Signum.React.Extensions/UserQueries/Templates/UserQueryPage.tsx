@@ -42,14 +42,14 @@ export default class UserQueryPage extends React.Component<UserQueryPageProps, {
 
         const lite = entity == undefined ? undefined : parseLite(entity);
 
-        Navigator.API.fillToStrings(lite ? [lite] : [])
+        Navigator.API.fillToStrings(lite)
             .then(() => Navigator.API.fetchEntity(UserQueryEntity, userQueryId))
             .then(uc => {
                 this.setState({ userQuery: uc });
                 return UserQueryClient.Converter.toFindOptions(uc, lite)
             })
             .then(fo => {
-                this.setState({ findOptions: { showFilters: true, ...fo } });
+                this.setState({ findOptions: fo })
             })
             .done();
     }
@@ -71,6 +71,7 @@ export default class UserQueryPage extends React.Component<UserQueryPageProps, {
                     </a>
                 </h2>
                 <SearchControl ref={(e: SearchControl) => this.searchControl = e}
+                    showFilters={true}
                     hideFullScreenButton={true}
                     showBarExtension={true}
                     findOptions={fo} />

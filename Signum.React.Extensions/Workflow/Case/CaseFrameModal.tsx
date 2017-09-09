@@ -74,14 +74,9 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
     loadComponent(): Promise<void> {
         const a = this.state.pack!.activity;
-        if (a.workflowActivity) {
-            return WorkflowClient.getViewPromise(a.case.mainEntity, a.workflowActivity.viewName).promise
-                .then(c => this.setState({ getComponent: c }));
-        }
-        else {
-            return Navigator.getViewPromise(a.case.mainEntity).promise
-                .then(c => this.setState({ getComponent: c }));
-        }
+
+        return Navigator.viewDispatcher.getViewPromise(a.case.mainEntity, a.workflowActivity!.viewName || undefined).promise
+            .then(c => this.setState({ getComponent: c }));
     }
 
     handleCloseClicked = () => {
@@ -249,7 +244,9 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
         const ctx = new TypeContext<ICaseMainEntity>(undefined, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(mainEntity, this.prefix));
 
-        var mainPack = { entity: mainEntity, canExecute: pack.canExecuteMainEntity };
+        var { activity, canExecuteActivity, canExecuteMainEntity, ...extension } = this.state.pack!;
+
+        var mainPack = { entity: mainEntity, canExecute: pack.canExecuteMainEntity, ...extension };
 
         const wc: WidgetContext<ICaseMainEntity> = {
             ctx: ctx,
@@ -278,7 +275,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
                 <span className="sf-entity-title">{this.props.title || getToString(activity) }</span>&nbsp;
                 {this.renderExpandLink() }
                 <br />
-                <CaseFlowButton caseActivity={this.state.pack.activity} />
+                {!activity.case.isNew && <CaseFlowButton caseActivity={this.state.pack.activity} />}
                 <small> {Navigator.getTypeTitle(activity, undefined)}</small>
             </h4>
         );
