@@ -14,6 +14,8 @@ interface SearchModalProps extends React.Props<SearchModal>, IModalProps {
     findMode: FindMode;
     isMany: boolean;
     title?: string;
+
+    searchControlProps?: Partial<SearchControlProps>;
 }
 
 export default class SearchModal extends React.Component<SearchModalProps, { show: boolean; }>  {
@@ -79,12 +81,16 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
                 </ModalHeader>
 
                 <ModalBody>
-                    <SearchControl hideFullScreenButton={true} throwIfNotFindable={true}
+                    <SearchControl
+                        avoidChangeUrl={true}
+                        hideFullScreenButton={true}
+                        throwIfNotFindable={true}
                         ref={(e: SearchControl) => this.searchControl = e}
                         findOptions={this.props.findOptions}
                         onSelectionChanged={this.handleSelectionChanged}
                         largeToolbarButtons={true}
                         onDoubleClick={this.props.findMode == "Find" ? this.handleDoubleClick : undefined}
+                        {...this.props.searchControlProps}
                         />
                 </ModalBody>
             </Modal>
@@ -97,7 +103,9 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
             findOptions={findOptions}
             findMode={"Find"}
             isMany={false}
-            title={modalOptions && modalOptions.title || getQueryNiceName(findOptions.queryName)} />)
+            title={modalOptions && modalOptions.title || getQueryNiceName(findOptions.queryName)}
+            searchControlProps={modalOptions && modalOptions.searchControlProps}
+        />)
             .then(a => a ? a[0] : undefined);
     }
 
@@ -106,7 +114,9 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
         return openModal<Lite<Entity>[]>(<SearchModal findOptions={findOptions}
             findMode={"Find"}
             isMany={true}
-            title={modalOptions && modalOptions.title || getQueryNiceName(findOptions.queryName) } />);
+            title={modalOptions && modalOptions.title || getQueryNiceName(findOptions.queryName)}
+            searchControlProps={modalOptions && modalOptions.searchControlProps}
+        />);
     }
 
     static explore(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<void> {

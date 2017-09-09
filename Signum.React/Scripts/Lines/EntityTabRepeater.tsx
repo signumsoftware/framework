@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { TabPane, TabContent } from 'reactstrap'
+import { Tab, Tabs } from 'react-bootstrap'
 import { classes, Dic } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
@@ -15,6 +15,7 @@ import { RenderEntity } from './RenderEntity'
 
 export interface EntityTabRepeaterProps extends EntityListBaseProps {
     createAsLink?: boolean;
+    avoidFieldSet?: boolean;
 }
 
 export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, EntityTabRepeaterProps> {
@@ -26,16 +27,16 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
 
     renderInternal() {
 
-        const buttons = (
-            <span className="pull-right">
-                {this.renderCreateButton(false)}
-                {this.renderFindButton(false)}
-            </span>
-        );
-
         var ctx = this.state.ctx!;
 
-        const readOnly = this.state.ctx.readOnly;
+        if (this.props.avoidFieldSet == true)
+            return (
+                <div className={classes("SF-repeater-field SF-control-container", ctx.errorClass)}
+                    {...this.baseHtmlAttributes() } {...this.state.formGroupHtmlAttributes}>
+                    {this.renderButtons()}
+                    {this.renderTabs()}
+                </div>
+            );
 
         return (
             <fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass)}
@@ -43,15 +44,36 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>
-                        {React.Children.count(buttons) ? buttons : undefined}
+                        {this.renderButtons()}
                     </div>
                 </legend>
-                <TabContent id={ctx.compose("tabs")}>
+                {this.renderTabs()}
+            </fieldset>
+        );
+    }
+
+    renderButtons() {
+        const buttons = (
+            <span className="pull-right">
+                {this.renderCreateButton(false)}
+                {this.renderFindButton(false)}
+            </span>
+        );
+
+        return React.Children.count(buttons) ? buttons : undefined;
+    }
+
+    renderTabs() {
+        const ctx = this.state.ctx!;
+        const readOnly = ctx.readOnly;
+
+        return (
+            <Tabs id={ctx.compose("tabs")} unmountOnExit={true}>
                     {
                         mlistItemContext(ctx).map((mlec, i) => {
                             const drag = this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "h") : undefined;
 
-                            return <TabPane tabId={i} key={i}
+                            return <Tab  eventKey={i} key={i}
                                 {...EntityListBase.entityHtmlAttributes(mlec.value) }
                                 className="sf-repeater-element"
                                 title={
@@ -79,13 +101,13 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                                         </span>}
                                     </div> as any
                                 }>
-                                <RenderEntity ctx={mlec} getComponent={this.props.getComponent} viewPromise={this.props.viewPromise} />
-                            </TabPane>
+                            <RenderEntity ctx={mlec} getComponent={this.props.getComponent} getViewPromise={this.props.getViewPromise} />
+                            </Tab>
                         })
 
                     }
-                </TabContent>
-            </fieldset>
+                <Tab eventKey={"x"} disabled></Tab> {/*Temporal hack*/}
+            </Tabs>
         );
     }
 }

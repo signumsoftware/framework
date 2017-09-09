@@ -47,7 +47,7 @@ Consider using dqm.RegisterExpression(({2} e) => e.{0}).ForceImplementations = I
         }
 
         Type type;
-        public override Type Type { get { return type.BuildLiteNulifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute() }); } }
+        public override Type Type { get { return type.BuildLiteNullifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute() }); } }
 
         string key;
         public override string Key { get { return key; } }

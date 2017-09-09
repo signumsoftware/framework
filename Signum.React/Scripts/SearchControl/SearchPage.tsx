@@ -66,7 +66,6 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
 
         return {
             findOptions: {
-                showFilters: true,
                 ...Finder.parseFindOptionsPath(props.match.params.queryName, QueryString.parse(props.location.search))
             },
         };
@@ -108,14 +107,18 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
                     </a>
                 </h2>
                 <SearchControl ref={(e: SearchControl) => this.searchControl = e}
-                    onHeighChanged={this.onResize}
+                    findOptions={fo}
+                    tag="SearchPage"
+
                     throwIfNotFindable={true}
                     showBarExtension={true}
                     hideFullScreenButton={true}
                     largeToolbarButtons={true}
-                    findOptions={fo}
+                    showFilters={true}
+
+                    onHeighChanged={this.onResize}
                     onSearch={result => this.changeUrl()}
-                    tag="SearchPage" />
+                />
             </div>
         );
     }

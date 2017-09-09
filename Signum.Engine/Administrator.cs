@@ -1,4 +1,5 @@
-﻿using Signum.Engine.Linq;
+﻿using Signum.Engine;
+using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Engine.SchemaInfoTables;
 using Signum.Entities;
@@ -110,11 +111,7 @@ namespace Signum.Engine
                 return new List<Entity>();
             }
         }
-
-       
-
-
-
+        
         public static IDisposable DisableIdentity<T>()
             where T : Entity
         {
@@ -387,6 +384,16 @@ namespace Signum.Engine
         }
 
 
+        public static void MoveAllForeignKeys<T>(Lite<T> fromEntity, Lite<T> toEntity)
+        where T : Entity
+        {
+            using (Transaction tr = new Transaction())
+            {
+                MoveAllForeignKeysPrivate<T>(fromEntity, toEntity).Select(a => a.UpdateScript).Combine(Spacing.Double).ExecuteLeaves();
+                tr.Commit();
+            }
+
+        }
 
         public static SqlPreCommand MoveAllForeignKeysScript<T>(Lite<T> fromEntity, Lite<T> toEntity)
         where T : Entity

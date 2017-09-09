@@ -28,31 +28,44 @@ export interface SimpleFilterBuilderProps {
 }
 
 export interface SearchControlProps extends React.Props<SearchControl> {
-    allowSelection?: boolean
     findOptions: FindOptions;
-    onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
-    onNavigated?: (lite: Lite<Entity>) => void;
+
     formatters?: { [columnName: string]: CellFormatter };
     rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
     entityFormatter?: EntityFormatter;
+    extraButtons?: (searchControl: SearchControlLoaded) => (React.ReactElement<any> | null | undefined | false)[];
+    getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
+    maxResultsHeight?: React.CSSWideKeyword | any;
+    tag?: string | {};
+
+    searchOnLoad?: boolean;
+    allowSelection?: boolean
     showContextMenu?: boolean | "Basic";
+    hideButtonBar?: boolean;
+    hideFullScreenButton?: boolean;
+    showHeader?: boolean;
+    showBarExtension?: boolean;
+    showBarExtensionOption?: ShowBarExtensionOption;
+    showFilters?: boolean;
+    showFilterButton?: boolean;
+    showFooter?: boolean;
+    allowChangeColumns?: boolean;
+    allowChangeOrder?: boolean;
+    create?: boolean;
+    navigate?: boolean;
+    largeToolbarButtons?: boolean;
+    avoidAutoRefresh?: boolean;
+    avoidChangeUrl?: boolean;
+    throwIfNotFindable?: boolean;
+
+    onNavigated?: (lite: Lite<Entity>) => void;
+    onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
     onSelectionChanged?: (entity: Lite<Entity>[]) => void;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
     onHeighChanged?: () => void;
     onResult?: (table: ResultTable) => void;
     onSearch?: (fo: FindOptionsParsed) => void;
-    hideButtonBar?: boolean;
-    hideFullScreenButton?: boolean;
-    showBarExtension?: boolean;
-    showBarExtensionOption?: ShowBarExtensionOption;
-    largeToolbarButtons?: boolean; 
-    avoidAutoRefresh?: boolean;
-    throwIfNotFindable?: boolean;
-    extraButtons?: (searchControl: SearchControlLoaded) => React.ReactNode
     onCreate?: () => Promise<void>;
-    getViewPromise?: (e: ModifiableEntity) => Navigator.ViewPromise<ModifiableEntity>;
-    maxResultsHeight?: React.CSSWideKeyword | any;
-    tag?: string | {};
 }
 
 export interface SearchControlState {
@@ -100,23 +113,26 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         this.searchControlLoaded && this.searchControlLoaded.doSearchPage1(avoidOnSearchEvent);
     }
 
-    initialLoad(propsFindOptions: FindOptions) {
+    initialLoad(fo: FindOptions) {
 
-        if (!Finder.isFindable(propsFindOptions.queryName, false))
+        if (!Finder.isFindable(fo.queryName, false))
         {
             if (this.props.throwIfNotFindable)
-                throw Error(`Query ${propsFindOptions.queryName} not allowed`);
+                throw Error(`Query ${fo.queryName} not allowed`);
 
             return;
         }
 
-        Finder.getQueryDescription(propsFindOptions.queryName).then(qd => {
-            Finder.parseFindOptions(propsFindOptions, qd).then(fop => {
-                this.setState({
-                    queryDescription: qd,
-                    findOptions: fop,
-                });
-            }).done();
+        Finder.getQueryDescription(fo.queryName).then(qd => {
+
+            this.setState({ queryDescription: qd });
+
+            if (Finder.validateNewEntities(fo))
+                this.setState({ findOptions: undefined });
+            else
+                Finder.parseFindOptions(fo, qd).then(fop => {
+                    this.setState({ findOptions: fop, });
+                }).done();
         }).done();
     }
 
@@ -127,6 +143,16 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     }
 
     render() {
+        
+        var errorMessage = Finder.validateNewEntities(this.props.findOptions);
+        if (errorMessage) {
+            return (
+                <div className="alert alert-danger" role="alert">
+                    <strong>Error in SearchControl ({getQueryKey(this.props.findOptions.queryName)}): </strong>
+                    {errorMessage}
+                </div>
+            );
+        }
 
         const fo = this.state.findOptions;
         if (!fo)
@@ -134,34 +160,56 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
         if (!Finder.isFindable(fo.queryKey, false))
             return null;
+        
+
+        const p = this.props;
+
+        const qs = Finder.getSettings(fo.queryKey);
+        const qd = this.state.queryDescription!;
+
+        const tis = getTypeInfos(qd.columns["Entity"].type);
 
         return <SearchControlLoaded ref={(lo: SearchControlLoaded) => this.searchControlLoaded = lo}
-            allowSelection={this.props.allowSelection}
-            onDoubleClick={this.props.onDoubleClick}
-            onNavigated={this.props.onNavigated}
-            formatters={this.props.formatters}
-            rowAttributes={this.props.rowAttributes}
-            entityFormatter={this.props.entityFormatter}
-            showContextMenu={this.props.showContextMenu}
-            onSelectionChanged={this.props.onSelectionChanged}
-            onFiltersChanged={this.props.onFiltersChanged}
-            onHeighChanged={this.props.onHeighChanged}
-            onSearch={this.props.onSearch}
-            onResult={this.props.onResult}
-            hideButtonBar={this.props.hideButtonBar}
-            hideFullScreenButton={this.props.hideFullScreenButton}
-            showBarExtension={this.props.showBarExtension}
-            showBarExtensionOption={this.props.showBarExtensionOption}
-            extraButtons={this.props.extraButtons}
-            largeToolbarButtons={this.props.largeToolbarButtons}
-            avoidAutoRefresh={this.props.avoidAutoRefresh}
             findOptions={fo}
-            queryDescription={this.state.queryDescription!}
-            querySettings={Finder.getSettings(fo.queryKey)}
-            onCreate={this.props.onCreate}
-            getViewPromise={this.props.getViewPromise}
-            maxResultsHeight={this.props.maxResultsHeight}
-            tag={this.props.tag}
+            queryDescription={qd}
+            querySettings={qs}
+
+            formatters={p.formatters}
+            rowAttributes={p.rowAttributes}
+            entityFormatter={p.entityFormatter}
+            extraButtons={p.extraButtons}
+            getViewPromise={p.getViewPromise}
+            maxResultsHeight={p.maxResultsHeight}
+            tag={p.tag}
+
+            searchOnLoad={p.searchOnLoad != null ? p.searchOnLoad : true}
+            showHeader={p.showHeader != null ? p.showHeader : true}
+            showFilters={p.showFilters != null ? p.showFilters : false}
+            showFilterButton={ p.showFilterButton != null ? p.showFilterButton : true}
+            showFooter={ p.showFooter != null ? p.showFooter : true}
+            allowChangeColumns={p.allowChangeColumns != null ? p.allowChangeColumns : true}
+            allowChangeOrder={p.allowChangeOrder != null ? p.allowChangeOrder : true}
+            create={p.create != null ? p.create : tis.some(ti => Navigator.isCreable(ti, false, true))}
+            navigate={p.navigate != null ? p.navigate : tis.some(ti => Navigator.isNavigable(ti, undefined, true))}
+
+            allowSelection={p.allowSelection != null ? p.allowSelection : true}
+            showContextMenu={p.showContextMenu != null ? p.showContextMenu : true}
+            hideButtonBar={p.hideButtonBar != null ? p.hideButtonBar : false}
+            hideFullScreenButton={p.hideFullScreenButton != null ? p.hideFullScreenButton : false}
+            showBarExtension={p.showBarExtension != null ? p.showBarExtension : true}
+            showBarExtensionOption={p.showBarExtensionOption}
+            largeToolbarButtons={p.largeToolbarButtons != null ? p.largeToolbarButtons : false}
+            avoidAutoRefresh={p.avoidAutoRefresh != null ? p.avoidAutoRefresh : false}
+            avoidChangeUrl={p.avoidChangeUrl != null ? p.avoidChangeUrl : false}
+
+            onCreate={p.onCreate}
+            onNavigated={p.onNavigated}
+            onSearch={p.onSearch}
+            onDoubleClick={p.onDoubleClick}
+            onSelectionChanged={p.onSelectionChanged}
+            onFiltersChanged={p.onFiltersChanged}
+            onHeighChanged={p.onHeighChanged}
+            onResult={p.onResult}
             />
     }
 }

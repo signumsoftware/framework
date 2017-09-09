@@ -11,7 +11,7 @@ using Signum.Entities;
 using System.Globalization;
 using Signum.Entities.Basics;
 using System.Reflection;
-
+using Signum.Utilities.Reflection;
 
 namespace Signum.Web
 {
@@ -190,7 +190,7 @@ namespace Signum.Web
         public static MvcHtmlString NumericTextbox(this HtmlHelper helper, ValueLine valueLine)
         {
             if (!valueLine.ReadOnly)
-                valueLine.ValueHtmlProps.Add("onkeydown", Reflector.IsDecimalNumber(valueLine.Type) ?
+                valueLine.ValueHtmlProps.Add("onkeydown", ReflectionTools.IsDecimalNumber(valueLine.Type) ?
                     "return SF.InputValidator.isDecimal(event);" :
                     "return SF.InputValidator.isNumber(event);");
 

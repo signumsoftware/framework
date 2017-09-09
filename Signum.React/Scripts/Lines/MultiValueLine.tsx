@@ -8,9 +8,9 @@ import { mlistItemContext } from "../TypeContext";
 
 
 interface MultiValueLineProps extends LineBaseProps {
-    ctx: TypeContext<MList<any>>;    
+    ctx: TypeContext<MList<any>>;
     onRenderItem: (ctx: TypeContext<any>) => React.ReactElement<any>;
-    onCreate?: () => Promise<any>;
+    onCreate?: () => Promise<any[] | any | undefined>;
     addValueText?: string;
 }
 
@@ -33,11 +33,18 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
     handleAddValue = () => {
         const list = this.state.ctx.value;
         const newValuePromise = this.state.onCreate == null ? this.defaultCreate() : this.state.onCreate();
+
         newValuePromise.then(v => {
             if (v === undefined)
-                return undefined;
+                return;
 
-            list.push(newMListElement(v));
+            if (Array.isArray(v)) {
+                list.push(...v.map(e=>newMListElement(e)));
+            }
+            else {
+                list.push(newMListElement(v));
+            }
+
             this.setValue(list);
         }).done();
     }
@@ -49,7 +56,7 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
     renderInternal() {
 
         const s = this.state;
-        const list = this.state.ctx.value!;        
+        const list = this.state.ctx.value!;
 
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText}
@@ -70,7 +77,7 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
                                             </a>}
                                     </td>
                                     <td>
-                                        { this.props.onRenderItem(mlec) }
+                                        {this.props.onRenderItem(mlec)}
                                     </td>
                                 </tr>)
                         }
@@ -80,7 +87,7 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
                                     <a title={this.props.addValueText || SearchMessage.AddValue.niceToString()}
                                         className="sf-line-button sf-create"
                                         onClick={this.handleAddValue}>
-                                    <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{this.props.addValueText || SearchMessage.AddValue.niceToString()}
+                                        <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{this.props.addValueText || SearchMessage.AddValue.niceToString()}
                                     </a>}
                             </td>
                         </tr>

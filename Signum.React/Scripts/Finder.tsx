@@ -58,7 +58,7 @@ export function isFindable(queryName: PseudoType | QueryKey, fullScreen: boolean
     return isFindableEvent.every(f => f(queryKey, fullScreen));
 }
 
-export function find(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<Entity> | undefined>;
+export function find<T extends Entity = Entity>(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<T> | undefined>;
 export function find<T extends Entity>(type: Type<T>, modalOptions?: ModalFindOptions): Promise<Lite<T> | undefined>;
 export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptions): Promise<Lite<Entity> | undefined> {
 
@@ -73,7 +73,7 @@ export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptio
         .then(a => a.default.open(fo, modalOptions));
 }
 
-export function findMany(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<Entity>[] | undefined>;
+export function findMany<T extends Entity = Entity>(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<T>[] | undefined>;
 export function findMany<T extends Entity>(type: Type<T>, modalOptions?: ModalFindOptions): Promise<Lite<T>[] | undefined>;
 export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: ModalFindOptions): Promise<Lite<Entity>[] | undefined> {
 
@@ -117,15 +117,7 @@ export function findOptionsPathQuery(fo: FindOptions, extra?: any): any {
     fo = expandParentColumn(fo);
 
     const query = {
-        columnMode: !fo.columnOptionsMode || fo.columnOptionsMode == "Add" as ColumnOptionsMode ? undefined : fo.columnOptionsMode,
-        create: fo.create,
-        navigate: fo.navigate,
-        searchOnLoad: fo.searchOnLoad,
-        showFilterButton: fo.showFilterButton,
-        showFilters: fo.showFilters == true ? undefined : fo.showFilters,
-        showFooter: fo.showFooter,
-        showHeader: fo.showHeader,
-        allowChangeColumns: fo.allowChangeColumns,
+        columnMode: (!fo.columnOptionsMode || fo.columnOptionsMode == "Add" as ColumnOptionsMode) ? undefined : fo.columnOptionsMode,
         paginationMode: fo.pagination && fo.pagination.mode,
         elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,
         currentPage: fo.pagination && fo.pagination.currentPage,
@@ -333,11 +325,6 @@ export function toFindOptions(fo: FindOptionsParsed, qd: QueryDescription): Find
         columnOptions: pair.columns,
         columnOptionsMode: pair.mode,
         pagination: fo.pagination && !equalsPagination(fo.pagination, defPagination) ? fo.pagination : undefined,
-        allowChangeColumns: fo.allowChangeColumns == false ? false : undefined,
-        showFilters: fo.showFilters == false ? false : undefined,
-        showFilterButton: fo.showFilterButton == false ? false : undefined,
-        showFooter: fo.showFooter == false ? false: undefined, 
-        showHeader: fo.showHeader == false ? false : undefined,
     } as FindOptions;
 
     if (findOptions.orderOptions && findOptions.orderOptions.length == 1) {
@@ -357,14 +344,13 @@ export function getDefaultOrder(qd: QueryDescription, qs: QuerySettings): OrderO
     const defaultOrder = qs && qs.defaultOrderColumn || defaultOrderColumn;
     const tis = getTypeInfos(qd.columns["Entity"].type);
 
-    if (!qd.columns[defaultOrder])
+    if (defaultOrder == defaultOrderColumn && !qd.columns[defaultOrderColumn])
         return undefined;
 
     return {
         columnName: defaultOrder,
         orderType: qs && qs.defaultOrderType || (tis.some(a => a.entityData == "Transactional") ? "Descending" as OrderType : "Ascending" as OrderType)
     } as OrderOption;
-
 }
 
 export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]) {
@@ -406,16 +392,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
 
         var result: FindOptionsParsed = {
             queryKey: qd.queryKey,
-            searchOnLoad: fo.searchOnLoad != null ? fo.searchOnLoad : true,
-            showHeader: fo.showHeader != null ? fo.showHeader : true,
-            showFilters: fo.showFilters != null ? fo.showFilters : false,
-            showFilterButton: fo.showFilterButton != null ? fo.showFilterButton : true,
-            showFooter: fo.showFooter != null ? fo.showFooter : true,
-            allowChangeColumns: fo.allowChangeColumns != null ? fo.allowChangeColumns : true,
-            create: fo.create != null ? fo.create : tis.some(ti => Navigator.isCreable(ti, false, true)),
-            navigate: fo.navigate != null ? fo.navigate : tis.some(ti => Navigator.isNavigable(ti, undefined, true)),
             pagination: fo.pagination != null ? fo.pagination : qs && qs.pagination || defaultPagination,
-            contextMenu: fo.contextMenu != null ? fo.contextMenu : true,
 
             columnOptions: (fo.columnOptions || []).map(co => ({
                 token: completer.get(co.columnName),
@@ -439,6 +416,34 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
             .then(() => result)
     });
 }
+
+export function validateNewEntities(fo: FindOptions): string | undefined {
+
+    var types = [fo.parentValue, ...(fo.filterOptions || []).map(a => a.value)].flatMap(a => getTypeIfNew(a));
+
+    if (types.length == 0)
+        return undefined;
+
+    return `Filtering by new ${types.joinComma(" and ")}. Consider hiding the control for new entities.`;
+}
+
+function getTypeIfNew(val: any): string[] {
+    if (!val)
+        return [];
+
+    if (isEntity(val) && val.isNew)
+        return [val.Type];
+
+    if (isLite(val) && val.id == null)
+        return [val.EntityType];
+
+    if (Array.isArray(val))
+        return val.flatMap(v => getTypeIfNew(v));
+
+    return [];
+}
+
+
 
 export function exploreOrNavigate(findOptions: FindOptions): Promise<void> {
     return fetchEntitiesWithFilters(findOptions.queryName, findOptions.filterOptions || [], [], 2).then(list => {
@@ -511,10 +516,7 @@ export function expandParentColumn(fo: FindOptions): FindOptions {
 
         fo.columnOptionsMode = "Remove";
     }
-
-    if (fo.searchOnLoad == undefined)
-        fo.searchOnLoad = true;
-
+    
     fo.parentColumn = undefined;
     fo.parentValue = undefined;
 
@@ -609,7 +611,7 @@ export function parseFilterValues(filterOptions: FilterOptionParsed[]): Promise<
     if (needToStr.length == 0)
         return Promise.resolve(undefined);
 
-    return Navigator.API.fillToStrings(needToStr)
+    return Navigator.API.fillToStringsArray(needToStr)
 }
 
 
@@ -781,11 +783,11 @@ export module Encoder {
         if (Array.isArray(value))
             return (value as any[]).map(a => stringValue(a)).join("~");
 
-        if (value.Type)
-            value = toLite(value as Entity);
+        if (isEntity(value))
+            value = toLite(value, value.isNew);
 
-        if (value.EntityType)
-            return liteKey(value as Lite<Entity>);
+        if (isLite(value))
+            return liteKey(value);
 
         return scapeTilde(value.toString());
     }

@@ -1460,6 +1460,30 @@ namespace Signum.Engine
 
         #endregion
 
+        public static void Merge<E, A>(string title, IQueryable<E> should, IQueryable<E> current, Expression<Func<E, A>> getKey)
+            where E : Entity
+            where A : class
+        {
+            if (title != null)
+                SafeConsole.WriteLineColor(ConsoleColor.DarkMagenta, title);
+
+            current.Where(c => !should.Any(s => getKey.Evaluate(c) == getKey.Evaluate(s))).UnsafeDelete(title != null ? "auto" : null);
+
+            should.Where(s => !current.Any(c => getKey.Evaluate(c) == getKey.Evaluate(s))).UnsafeInsert(p => p, title != null ? "auto" : null);
+        }
+
+        public static void MergeMList<E, V, A>(string title, IQueryable<MListElement<E, V>> should, IQueryable<MListElement<E, V>> current, Expression<Func<MListElement<E, V>, A>> getKey, Expression<Func<E, MList<V>>> mList)
+            where E : Entity
+            where A : class
+        {
+            if (title != null)
+                SafeConsole.WriteLineColor(ConsoleColor.DarkMagenta, title);
+
+            current.Where(c => !should.Any(s => getKey.Evaluate(c) == getKey.Evaluate(s))).UnsafeDeleteMList(title != null ? "auto" : null);
+
+            should.Where(s => !current.Any(c => getKey.Evaluate(c) == getKey.Evaluate(s))).UnsafeInsertMList(mList, p => p, title != null ? "auto" : null);
+        }
+
         public static List<T> ToListWait<T>(this IQueryable<T> query, string message)
         {
             message = message == "auto" ? typeof(T).TypeName() : message;

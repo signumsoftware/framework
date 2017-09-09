@@ -183,10 +183,10 @@ namespace Signum.Utilities
 
         public static string ToPascal(this string str)
         {
-            return str.ToPascal(true);
+            return str.ToPascal(true, false);
         }
 
-        public static string ToPascal(this string str, bool firstUpper)
+        public static string ToPascal(this string str, bool firstUpper, bool keepUppercase)
         {
             str = str.RemoveDiacritics();
 
@@ -200,7 +200,8 @@ namespace Signum.Utilities
                     upper = true;
                 else
                 {
-                    sb.Append(upper ? char.ToUpper(c) : char.ToLower(c));
+                    sb.Append(upper ? char.ToUpper(c) :
+                        keepUppercase ? c : char.ToLower(c));
 
                     if (char.IsLetter(c))
                         upper = false;

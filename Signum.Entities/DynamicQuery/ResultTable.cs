@@ -460,6 +460,16 @@ namespace Signum.Entities.DynamicQuery
             return (T)this[column];
         }
 
+        public object[] GetValues(ResultColumn[] columnArray)
+        {
+            var result = new object[columnArray.Length];
+            for (int i = 0; i < columnArray.Length; i++)
+            {
+                result[i] = this[columnArray[i]];
+            }
+            return result;
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
     }
 }

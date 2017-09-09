@@ -42,8 +42,9 @@ namespace Signum.React.Filters
                     e.UrlReferer = req.Headers.Referrer?.ToString();
                     e.UserHostAddress = GetClientIp(req);
                     e.UserHostName = GetClientName(req);
+                    e.User = (UserHolder.Current ?? (IUserEntity)GetProp(req, SignumAuthenticationFilterAttribute.UserKey))?.ToLite();
                     e.QueryString = ExceptionEntity.Dump(req.RequestUri.ParseQueryString());
-                    e.Form = (string)(req.Properties.ContainsKey(SignumAuthenticationAndProfilerAttribute.SavedRequestKey) ? req.Properties[SignumAuthenticationAndProfilerAttribute.SavedRequestKey] : null);
+                    e.Form =  (string)GetProp(req, SignumAuthenticationFilterAttribute.SavedRequestKey);
                     e.Session = GetSession(req);
                 });
 
@@ -53,6 +54,15 @@ namespace Signum.React.Filters
             }
 
             base.OnException(ctx);
+        }
+
+     
+
+        private object GetProp(HttpRequestMessage req, string key)
+        {
+            object result = null;
+            req.Properties.TryGetValue(key, out result);
+            return result;
         }
 
         private HttpStatusCode GetStatus(Type type)

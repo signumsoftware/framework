@@ -37,7 +37,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Type Type
         {
-            get { return PropertyInfo.PropertyType.BuildLiteNulifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute() }); }
+            get { return PropertyInfo.PropertyType.BuildLiteNullifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute() }); }
         }
 
         public override string ToString()
@@ -76,7 +76,9 @@ namespace Signum.Entities.DynamicQuery
 
         protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
         {
-            if (PropertyInfo.PropertyType.UnNullify() == typeof(DateTime))
+            var type = this.Type;
+
+            if (type.UnNullify() == typeof(DateTime))
             {
                 PropertyRoute route = this.GetPropertyRoute();
 
@@ -91,9 +93,9 @@ namespace Signum.Entities.DynamicQuery
                 }
             }
 
-            if (PropertyInfo.PropertyType.UnNullify() == typeof(double) ||
-                PropertyInfo.PropertyType.UnNullify() == typeof(float) ||
-                PropertyInfo.PropertyType.UnNullify() == typeof(decimal))
+            if (type.UnNullify() == typeof(double) ||
+                type.UnNullify() == typeof(float) ||
+                type.UnNullify() == typeof(decimal))
             {
                 PropertyRoute route = this.GetPropertyRoute();
 
@@ -112,7 +114,7 @@ namespace Signum.Entities.DynamicQuery
                 }
             }
 
-            return SubTokensBase(PropertyInfo.PropertyType, options, GetImplementations());
+            return SubTokensBase(this.Type, options, GetImplementations());
         }
 
         public override Implementations? GetImplementations()

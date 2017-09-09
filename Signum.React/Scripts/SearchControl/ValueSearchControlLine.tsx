@@ -12,6 +12,7 @@ import * as Navigator from '../Navigator'
 import { StyleContext, TypeContext } from '../Typecontext'
 import ValueSearchControl from './ValueSearchControl'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
+import { SearchControlProps } from "./SearchControl";
 
 export interface ValueSearchControlLineProps extends React.Props<ValueSearchControlLine> {
     ctx: StyleContext;
@@ -29,7 +30,8 @@ export interface ValueSearchControlLineProps extends React.Props<ValueSearchCont
     onExplored?: () => void;
     viewEntityButton?: boolean;
     avoidAutoRefresh?: boolean;
-    extraButtons?: (valueSearchControl: ValueSearchControl) => React.ReactNode | undefined
+    extraButtons?: (valueSearchControl: ValueSearchControl) => React.ReactNode | undefined;
+    searchControlProps?: Partial<SearchControlProps>;
 }
 
 
@@ -72,6 +74,16 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
 
         if (!Finder.isFindable(fo.queryName, false))
             return null;
+
+        var errorMessage = Finder.validateNewEntities(fo);
+        if (errorMessage) {
+            return (
+                <div className="alert alert-danger" role="alert">
+                    <strong>Error in ValueSearchControlLine ({getQueryKey(fo.queryName)}): </strong>
+                    {errorMessage}
+                </div>
+            );
+        }
 
         var token = this.valueSearchControl && this.valueSearchControl.state.token;
 
@@ -118,6 +130,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
                         onValueChange={() => this.forceUpdate()}
                         onTokenLoaded={() => this.forceUpdate()}
                         onExplored={this.props.onExplored}
+                        searchControlProps={this.props.searchControlProps}
                         />
                     {unit}
                     {(view || extra || find) && (isFormControl ?

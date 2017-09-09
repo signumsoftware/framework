@@ -2,6 +2,7 @@
 import { Dic } from './Globals';
 import { Lite, Entity } from './Signum.Entities';
 import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType } from './Signum.Entities.DynamicQuery';
+import { SearchControlProps } from "./Search";
 
 export { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType };
 
@@ -18,6 +19,7 @@ export interface CountOptionsParsed {
 export interface ModalFindOptions {
     title?: string;
     useDefaultBehaviour?: boolean;
+    searchControlProps?: Partial<SearchControlProps>;
 }
 
 export interface FindOptions {
@@ -30,16 +32,6 @@ export interface FindOptions {
     columnOptionsMode?: ColumnOptionsMode;
     columnOptions?: ColumnOption[];
     pagination?: Pagination,
-
-    searchOnLoad?: boolean;
-    showHeader?: boolean;
-    showFilters?: boolean;
-    showFilterButton?: boolean;
-    showFooter?: boolean;
-    allowChangeColumns?: boolean;
-    create?: boolean;
-    navigate?: boolean;
-    contextMenu?: boolean;
 }
 
 export interface FindOptionsParsed {
@@ -48,15 +40,7 @@ export interface FindOptionsParsed {
     orderOptions: OrderOptionParsed[];
     columnOptions: ColumnOptionParsed[];
     pagination: Pagination;
-    searchOnLoad: boolean;
-    showHeader: boolean;
-    showFilters: boolean;
-    showFilterButton: boolean;
-    showFooter: boolean;
-    allowChangeColumns: boolean;
-    create: boolean;
-    navigate: boolean;
-    contextMenu: boolean;
+   
 }
 
 
@@ -119,6 +103,7 @@ export interface QueryToken {
     typeColor: string;
     niceTypeName: string;
     isGroupable: boolean;
+    hasOrderAdapter?: boolean;
     filterType?: FilterType;
     fullKey: string;
     queryTokenType?: QueryTokenType;
@@ -170,6 +155,7 @@ export function toQueryToken(cd: ColumnDescription): QueryToken {
         niceTypeName: cd.niceTypeName,
         filterType: cd.filterType,
         isGroupable: cd.isGroupable,
+        hasOrderAdapter: cd.hasOrderAdapter,
         propertyRoute: cd.propertyRoute
     };
 }
@@ -276,6 +262,7 @@ export interface ColumnDescription {
     format?: string;
     displayName: string;
     isGroupable: boolean;
+    hasOrderAdapter?: boolean;
     propertyRoute?: string;
 }
 

@@ -30,7 +30,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Type Type
         {
-            get { return elementType.BuildLiteNulifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute() }); }
+            get { return elementType.BuildLiteNullifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute() }); }
         }
 
         public override string ToString()
@@ -84,10 +84,18 @@ namespace Signum.Entities.DynamicQuery
 
         public override bool HasAllOrAny()
         {
-            return
+            return 
                 CollectionElementType != CollectionElementType.Element &&
                 CollectionElementType != CollectionElementType.Element2 &&
                 CollectionElementType != CollectionElementType.Element3;
+        }
+
+        public override bool HasElement()
+        {
+            return base.HasElement() ||
+                CollectionElementType == CollectionElementType.Element ||
+                CollectionElementType == CollectionElementType.Element2 ||
+                CollectionElementType == CollectionElementType.Element3;
         }
 
         public override PropertyRoute GetPropertyRoute()
