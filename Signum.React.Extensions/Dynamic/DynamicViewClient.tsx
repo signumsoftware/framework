@@ -154,7 +154,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
         var namedView = es && es.namedViews && es.namedViews[viewName];
 
         if (namedView)
-            return namedView.getViewPromise(entity);
+            return namedView.getViewPromise(entity).applyViewOverrides(entity.Type, viewName);
 
         return ViewPromise.flat(API.getDynamicView(entity.Type, viewName).then(dve => dynamicViewComponent(dve)));
     }
