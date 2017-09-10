@@ -232,12 +232,12 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
             const entity = this.state.exampleEntity;
             const settings = Navigator.getSettings(entity.Type);
 
-            if (!settings || !settings.getViewPromise)
+            if (!settings)
                 this.setState({ componentClass: null });
 
             else {
                 const ctx = this.props.ctx;
-                return settings.getViewPromise(entity).applyViewOverrides(ctx.value.entityType!.cleanName, ctx.value.viewName || undefined).promise.then(func => {
+                return Navigator.viewDispatcher.getViewPromise(entity, ctx.value.viewName || undefined).promise.then(func => {
                     var tempCtx = new TypeContext(undefined, undefined, PropertyRoute.root(entity.Type), new ReadonlyBinding(entity, "example"));
                     var re = func(tempCtx);
                     this.setState({ componentClass: re.type as React.ComponentClass<{ ctx: TypeContext<Entity> }> });
