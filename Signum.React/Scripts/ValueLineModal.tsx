@@ -53,6 +53,8 @@ export default class ValueLineModal extends React.Component<ValueLineModalProps,
             labelText: valueLineProps.labelText,
             type: valueLineProps.type,
             valueLineType: valueLineProps.valueLineType,
+            valueHtmlAttributes: valueLineProps.valueHtmlAttributes,
+            initiallyFocused: valueLineProps.initiallyFocused,
         };
 
         const disabled = this.props.options.allowEmptyValue == false ? (ctx.value as string).trim() ? false : true : undefined;

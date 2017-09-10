@@ -6,6 +6,7 @@ import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../Fin
 import { Entity, Lite, is, toLite, LiteMessage, getToString, EntityPack, ModelState, ModifiableEntity } from '../Signum.Entities'
 import { TypeContext, StyleOptions, EntityFrame } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos } from '../Reflection'
+import { ColumnOption, OrderOption, Pagination } from '../Search';
 
 
 export class ReactVisitor {
@@ -106,7 +107,7 @@ export class ReactValidator extends ReactVisitor {
 
 }
 
-export class ViewReplacer<T> {
+export class ViewReplacer<T extends ModifiableEntity> {
 
     constructor(
         public result: React.ReactElement<any>,
@@ -114,43 +115,117 @@ export class ViewReplacer<T> {
     ) {
     }
 
+    removeElement(filter: (e: React.ReactElement<any>) => boolean): this {
 
-    remove(propertyRoute: (entity: T) => any): this {
+        this.result = new ReplaceVisitor(
+            e => filter(e),
+            e => []
+        ).visit(this.result);
+
+        return this;
+    }
+
+    insertAfterElement(filter: (e: React.ReactElement<any>) => boolean, newElements: (e: React.ReactElement<any>) => (React.ReactElement<any> | undefined)[]): this {
+
+        this.result = new ReplaceVisitor(
+            e => filter(e),
+            e => [e, ...newElements(e)]
+        ).visit(this.result);
+
+        return this;
+    }
+
+    insertBeforeElement(filter: (e: React.ReactElement<any>) => boolean, newElements: (e: React.ReactElement<any>) => (React.ReactElement<any> | undefined)[]): this {
+
+        this.result = new ReplaceVisitor(
+            e => filter(e),
+            e => [...newElements(e), e]
+        ).visit(this.result);
+
+        return this;
+    }
+
+    replaceElement(filter: (e: React.ReactElement<any>) => boolean, newElements: (e: React.ReactElement<any>) => (React.ReactElement<any> | undefined)[]): this {
+
+        this.result = new ReplaceVisitor(
+            e => filter(e),
+            e => [...newElements(e)]
+        ).visit(this.result);
+
+        return this;
+    }
+
+    removeLine(propertyRoute: (entity: T) => any): this {
 
         var pr = this.ctx.propertyRoute.add(propertyRoute);
 
         this.result = new ReplaceVisitor(
             e => hasPropertyRoute(e, pr),
-            e => [])
-            .visit(this.result);
+            e => []
+        ).visit(this.result);
 
         return this;
     }
 
-    insertAfter(propertyRoute: (entity: T) => any, ...newElements: (React.ReactElement<any> | undefined)[]): this {
+    replaceFindOptions(filter: (findOptions: FindOptions) => boolean, modifier: (clone: FindOptions) => void) {
+        this.result = new ReplaceVisitor(
+            e => e.props.findOptions && filter(e.props.findOptions),
+            e => {
+                var clone = cloneFindOptions(e.props.findOptions);
+                modifier(clone);
+                return React.cloneElement(e, { findOptions: clone });
+            }
+        ).visit(this.result);
+
+        return this;
+    }
+
+
+
+    insertAfterLine(propertyRoute: (entity: T) => any, newElements: (ctx: TypeContext<T>) => (React.ReactElement<any> | undefined)[]): this {
 
         var pr = this.ctx.propertyRoute.add(propertyRoute);
 
         this.result = new ReplaceVisitor(
             e => hasPropertyRoute(e, pr),
-            e => [e, ...newElements])
-            .visit(this.result);
+            e => [e, ...newElements(this.previousTypeContext(e))]
+        ).visit(this.result);
 
         return this;
     }
 
-    insertBefore(propertyRoute: (entity: T) => any, ...newElements: React.ReactElement<any>[]): this {
+    insertBeforeLine(propertyRoute: (entity: T) => any, newElements: (ctx: TypeContext<T>) => (React.ReactElement<any> | undefined)[]): this {
 
         var pr = this.ctx.propertyRoute.add(propertyRoute);
 
         this.result = new ReplaceVisitor(
             e => hasPropertyRoute(e, pr),
-            e => [...newElements, e])
-            .visit(this.result);
+            e => [...newElements(this.previousTypeContext(e)), e]
+        ).visit(this.result);
 
         return this;
     }
 
+    previousTypeContext(e: React.ReactElement<any>) {
+        var ctx = e.props.ctx as TypeContext<any>;
+
+        var parentCtx = ctx.findParentCtx(this.ctx.value.Type);
+
+        return parentCtx as TypeContext<T>;
+    }
+
+    replaceLine(propertyRoute: (entity: T) => any, newElements: (e: React.ReactElement<any>) => (React.ReactElement<any> | undefined)[]) {
+        var pr = this.ctx.propertyRoute.add(propertyRoute);
+
+        this.result = new ReplaceVisitor(
+            e => hasPropertyRoute(e, pr),
+            e => newElements(e),
+        ).visit(this.result);
+
+        return this;
+    }
+
+    
 
     removeTab(eventKey: string): this {
         this.result = new ReplaceVisitor(
@@ -180,10 +255,28 @@ export class ViewReplacer<T> {
     }
 }
 
+export function cloneFindOptions(fo: FindOptions): FindOptions{
+
+    const pa = fo.pagination;
+    return {
+        queryName: fo.queryName,
+        parentColumn: fo.parentColumn,
+        parentValue: fo.parentValue,
+        filterOptions: fo.filterOptions && fo.filterOptions.map(f => ({ columnName: f.columnName, operation: f.operation, value: f.value, frozen: f.frozen } as FilterOption)),
+        orderOptions: fo.orderOptions && fo.orderOptions.map(o => ({ columnName: o.columnName, orderType: o.orderType } as OrderOption)),
+        columnOptions: fo.columnOptions && fo.columnOptions.map(m => ({ columnName: m.columnName, displayName: m.displayName } as ColumnOption)),
+        columnOptionsMode: fo.columnOptionsMode,
+        pagination: pa && { mode: pa.mode, elementsPerPage: pa.elementsPerPage, currentPage: pa.currentPage, } as Pagination,
+    };
+}
+
 export function hasPropertyRoute(e: React.ReactElement<any>, pr: PropertyRoute) {
     const tc = e.props.ctx as TypeContext<any>;
 
-    return tc && tc.propertyRoute && tc.propertyRoute.toString() == pr.toString();
+    if (!tc)
+        return false;
+
+    return tc.propertyRoute && tc.propertyRoute.toString() == pr.toString();
 }
 
 
