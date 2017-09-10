@@ -311,6 +311,7 @@ export module WorkflowActivityMessage {
     export const ChooseADestinationForWorkflowJumping = new MessageKey("WorkflowActivityMessage", "ChooseADestinationForWorkflowJumping");
     export const CaseFlow = new MessageKey("WorkflowActivityMessage", "CaseFlow");
     export const AverageDuration = new MessageKey("WorkflowActivityMessage", "AverageDuration");
+    export const ActivityIs = new MessageKey("WorkflowActivityMessage", "ActivityIs");
 }
 
 export const WorkflowActivityModel = new Type<WorkflowActivityModel>("WorkflowActivityModel");

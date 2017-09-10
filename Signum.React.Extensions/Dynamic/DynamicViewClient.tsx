@@ -154,7 +154,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
         var namedView = es && es.namedViews && es.namedViews[viewName];
 
         if (namedView)
-            return namedView.getViewPromise(entity);
+            return namedView.getViewPromise(entity).applyViewOverrides(entity.Type, viewName);
 
         return ViewPromise.flat(API.getDynamicView(entity.Type, viewName).then(dve => dynamicViewComponent(dve)));
     }
@@ -334,6 +334,9 @@ export function asOverrideFunction(dvo: DynamicViewOverrideEntity): (vr: ViewRep
     var FileLine = FileLineModule.default;
 
     // Search
+    var SearchControl = Search.SearchControl;
+    var SearchControlLoaded = Search.SearchControlLoaded;
+    var ValueSearchControl = Search.ValueSearchControl;
     var ValueSearchControlLine = Search.ValueSearchControlLine;
 
     // ReactBootstrap

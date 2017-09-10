@@ -70,7 +70,7 @@ export namespace API {
     }
 }
 
-export type TypeHelpMode = "Typescript" | "CSharp";
+export type TypeHelpMode = "TypeScript" | "CSharp";
 
 export interface AutocompleteTypeRequest {
     query: string;

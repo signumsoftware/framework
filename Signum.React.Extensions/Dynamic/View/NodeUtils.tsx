@@ -146,7 +146,7 @@ ${childrenString}
         if (!field && !options)
             return { __code__: "ctx" };
 
-        var propStr = field && "e => " + TypeHelpComponent.getExpression("e", field, "Typescript", { stronglyTypedMixinTS: true });
+        var propStr = field && "e => " + TypeHelpComponent.getExpression("e", field, "TypeScript", { stronglyTypedMixinTS: true });
         var optionsStr = options && this.stringifyObject(options);
 
         return { __code__: this.ctxName + ".subCtx(" + (propStr || "") + (propStr && optionsStr ? ", " : "") + (optionsStr || "") + ")" };
@@ -403,7 +403,7 @@ export function evalWithScope(code: string, modules: any) {
 }
 
 export function asFieldFunction(field: string): (e: ModifiableEntity) => any {
-    const fixedRoute = TypeHelpComponent.getExpression("e", field, "Typescript");
+    const fixedRoute = TypeHelpComponent.getExpression("e", field, "TypeScript");
 
     const code = "(function(e){ return " + fixedRoute + ";})";
 
