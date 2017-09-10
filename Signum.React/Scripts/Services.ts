@@ -314,6 +314,9 @@ export class AbortableRequest<Q, A> {
 
         return this.makeCall(this.abortController, query).then(result => {
 
+            if (this.abortController == undefined)
+                return new Promise<A>(resolve => { /*never*/ });
+
             if (myIndex != this.requestIndex) //request is too old
                 return new Promise<A>(resolve => { /*never*/ });
 
