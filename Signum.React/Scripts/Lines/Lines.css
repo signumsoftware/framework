@@ -62,7 +62,7 @@ label > input[type=checkbox] {
     overflow: hidden;
 }
 
-.sf-table{
+.sf-table {
     margin-bottom: 0;
 }
 
@@ -229,12 +229,14 @@ ul.nav-tabs {
 
 .sf-move:hover {
     color: #9900E0;
-    cursor: move; 
+    cursor: move;
 }
 
 /*has-error*/
 
-.has-error {
+.has-error,
+.has-error div.rw-widget-picker.rw-widget-container
+/*bootstrap has his own rules*/ {
     border-color: #a94442;
 }
 
@@ -544,7 +546,7 @@ ul.dropdown-menu > li > a.disabled {
 }
 
 
-.item-group{
+.item-group {
     white-space: nowrap;
 }
 
@@ -553,6 +555,6 @@ table.sf-multi-value {
     width: 100%;
 }
 
-table.sf-multi-value > tbody > tr > td{
-    padding-bottom: 4px;
-}
+    table.sf-multi-value > tbody > tr > td {
+        padding-bottom: 4px;
+    }

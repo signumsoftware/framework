@@ -1292,7 +1292,7 @@ export class GraphExplorer {
                     const propertyPrefix = dot(modelStatePrefix, p);
 
                     if (mod.error[p])
-                        this.modelState[dot(modelStatePrefix, p)] = mod.error[p];
+                        this.modelState[dot(modelStatePrefix, p)] = [mod.error[p]];
                 }
             }
         }
@@ -1307,7 +1307,7 @@ export class GraphExplorer {
                     if (mod.error == undefined)
                         mod.error = {};
 
-                    mod.error[propName] = this.modelState[key];
+                    mod.error[propName] = this.modelState[key].join("\n");
 
                     delete this.modelState[key];
                 }

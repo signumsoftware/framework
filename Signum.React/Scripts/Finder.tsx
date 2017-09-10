@@ -962,7 +962,7 @@ export const formatRules: FormatRule[] = [
         isApplicable: col => col.token!.filterType == "DateTime",
         formatter: col => {
             const momentFormat = toMomentFormat(col.token!.format);
-            return new CellFormatter((cell: string) => cell == undefined || cell == "" ? "" : <span>{moment(cell).format(momentFormat)}</span>)
+            return new CellFormatter((cell: string) => cell == undefined || cell == "" ? "" : <bdi>{moment(cell).format(momentFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures 
         }
     },
     {
