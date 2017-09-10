@@ -334,6 +334,9 @@ export function asOverrideFunction(dvo: DynamicViewOverrideEntity): (vr: ViewRep
     var FileLine = FileLineModule.default;
 
     // Search
+    var SearchControl = Search.SearchControl;
+    var SearchControlLoaded = Search.SearchControlLoaded;
+    var ValueSearchControl = Search.ValueSearchControl;
     var ValueSearchControlLine = Search.ValueSearchControlLine;
 
     // ReactBootstrap
