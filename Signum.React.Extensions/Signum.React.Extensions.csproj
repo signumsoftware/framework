@@ -166,6 +166,7 @@
     <Compile Include="Dynamic\DynamicTypeController.cs" />
     <Compile Include="Dynamic\DynamicViewController.cs" />
     <Compile Include="Dynamic\DynamicServer.cs" />
+    <TypeScriptCompile Include="Dynamic\Help\TypeHelpButtonBarComponent.tsx" />
     <Compile Include="Excel\ExcelController.cs" />
     <Compile Include="Excel\ExcelServer.cs" />
     <Compile Include="Files\FilesController.cs" />
@@ -340,6 +341,7 @@
     <TypeScriptCompile Include="Workflow\Bpmn\CustomRenderer.ts" />
     <TypeScriptCompile Include="Workflow\Bpmn\ConnectionIcons.ts" />
     <TypeScriptCompile Include="Workflow\Case\InboxFilter.tsx" />
+    <TypeScriptCompile Include="Workflow\Workflow\WorkflowHelpComponent.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowEventTask.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowEventModel.tsx" />
     <TypeScriptCompile Include="Workflow\Workflow\WorkflowEventTaskActionComponent.tsx" />

@@ -99,7 +99,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
     }
 
     handleRenderContextualMenu = (pr: PropertyRoute) => {
-        const lambda = "e => " + TypeHelpComponent.getExpression("e", pr, "Typescript");
+        const lambda = "e => " + TypeHelpComponent.getExpression("e", pr, "TypeScript");
         return (
             <MenuItem>
                 <MenuItem header>{pr.propertyPath()}</MenuItem>
@@ -119,7 +119,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
         if (!node)
             return;
 
-        const expression = TypeHelpComponent.getExpression("o", pr, "Typescript");
+        const expression = TypeHelpComponent.getExpression("o", pr, "TypeScript");
         const text = `React.createElement(${node.kind}, { ctx: vr.ctx.subCtx(o => ${expression}) })`;
 
         ValueLineModal.show({
@@ -151,7 +151,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
                             <div className="col-sm-5">
                             <TypeHelpComponent
                                 initialType={ctx.value.entityType.cleanName}
-                                mode="Typescript"
+                                mode="TypeScript"
                                 renderContextMenu={this.handleRenderContextualMenu}
                                 onMemberClick={this.handleTypeHelpClick} />
                                 <br />
@@ -257,6 +257,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
                 {this.allViewNames().length > 0 && this.renderViewNameButtons()}
                 {this.allExpressions().length > 0 && <br />}
                 {this.allExpressions().length > 0 && this.renderExpressionsButtons()}
+                <TypeHelpButtonBarComponent typeName={ctx.value.entityType!.cleanName} mode="TypeScript" ctx={ctx} />
                 <pre style={{ border: "0px", margin: "0px" }}>{`(vr: ViewReplacer<${ctx.value.entityType!.className}>, modules) =>`}</pre>
                 <JavascriptCodeMirror code={ctx.value.script || ""} onChange={this.handleCodeChange} />
                 {this.state.syntaxError && <div className="alert alert-danger">{this.state.syntaxError}</div>}

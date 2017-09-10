@@ -61,7 +61,7 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
                         `${prev}.mixins["${mixin}"]`;
             }
             else
-                return mode == "Typescript" ?
+                return mode == "TypeScript" ?
                     `${prev}.${curr.firstLower()}` :
                     `${prev}.${curr}`;
         }, initial);
@@ -288,8 +288,8 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
             return (
                 <span>
                     {this.renderType(type.substr(0, type.length - 1), cleanType)}
-                    {this.props.mode == "Typescript"? " | " : "?"}
-                    {this.props.mode == "Typescript" && <span className="sf-dynamic-member-primitive">null</span> }
+                    {this.props.mode == "TypeScript"? " | " : "?"}
+                    {this.props.mode == "TypeScript" && <span className="sf-dynamic-member-primitive">null</span> }
                 </span>
             );
         }
