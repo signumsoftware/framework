@@ -221,7 +221,7 @@ export class ServiceError {
 
 export interface WebApiHttpError {
     Message: string;
-    ModelState?: { [member: string]: string }
+    ModelState?: { [member: string]: string[] }
     ExceptionMessage?: string;
     ExceptionType: string;
     StackTrace?: string;

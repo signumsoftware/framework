@@ -61,7 +61,7 @@ export interface Lite<T extends Entity> {
 }
 
 export interface ModelState {
-    [field: string]: string;
+    [field: string]: string[];
 }
 
 export interface EntityPack<T extends ModifiableEntity> {
