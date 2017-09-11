@@ -114,7 +114,7 @@ export const UserQueryPartRenderMode = new EnumType<UserQueryPartRenderMode>("Us
 export type UserQueryPartRenderMode =
     "SearchControl" |
     "SearchControlWithoutSelection" |
-    "ValueBadge";
+    "BigValue";
 
 export const ValueUserQueryElementEmbedded = new Type<ValueUserQueryElementEmbedded>("ValueUserQueryElementEmbedded");
 export interface ValueUserQueryElementEmbedded extends Entities.EmbeddedEntity {

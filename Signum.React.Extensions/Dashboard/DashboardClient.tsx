@@ -93,6 +93,7 @@ export function start(options: { routes: JSX.Element[] }) {
     registerRenderer(UserQueryPartEntity, {
         component: () => import('./View/UserQueryPart').then((a: any) => a.default),
         defaultIcon: () => ({ iconName: "glyphicon glyphicon-list-alt", iconColor: "dodgerblue" }),
+        withPanel: p => p.renderMode != "BigValue",
         handleEditClick: (p, e, ev) => {
             ev.preventDefault();
             Navigator.pushOrOpenInTab(Navigator.navigateRoute(p.userQuery!), ev);

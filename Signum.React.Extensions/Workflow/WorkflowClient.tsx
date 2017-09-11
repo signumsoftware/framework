@@ -24,6 +24,7 @@ import { UserEntity } from '../../../Extensions/Signum.React.Extensions/Authoriz
 import * as DynamicViewClient from '../../../Extensions/Signum.React.Extensions/Dynamic/DynamicViewClient'
 import { CodeContext } from '../../../Extensions/Signum.React.Extensions/Dynamic/View/NodeUtils'
 import { TimeSpanEmbedded } from '../../../Extensions/Signum.React.Extensions/Basics/Signum.Entities.Basics'
+import TypeHelpButtonBarComponent from '../../../Extensions/Signum.React.Extensions/Dynamic/Help/TypeHelpButtonBarComponent'
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import { WorkflowConditionEval, WorkflowActionEval, WorkflowJumpEmbedded, DecisionResult } from './Signum.Entities.Workflow'
@@ -55,6 +56,8 @@ import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport
 
 import { SearchControl } from "../../../Framework/Signum.React/Scripts/Search";
 import { getTypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection";
+import WorkflowHelpComponent from './Workflow/WorkflowHelpComponent';
+import { globalModules } from '../Dynamic/View/GlobalModules';
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -165,6 +168,11 @@ export function start(options: { routes: JSX.Element[] }) {
     Constructor.registerConstructor(WorkflowTimeoutEmbedded, () => Constructor.construct(TimeSpanEmbedded).then(ep => ep && WorkflowTimeoutEmbedded.New({ timeout: ep.entity })));
 
     registerCustomContexts();
+
+    TypeHelpButtonBarComponent.getTypeHelpButtons.push(props => [({
+        element: <WorkflowHelpComponent typeName={props.typeName} mode={props.mode} />,
+        order: 0,
+    })]);
 }
 
 function registerCustomContexts() {
@@ -424,6 +432,21 @@ export const customOnClicks: { [operationKey: string]: { [typeName: string]: (ct
 export function registerOnClick<T extends ICaseMainEntity>(type: Type<T>, operationKey: ExecuteSymbol<CaseActivityEntity>, action: (ctx: EntityOperationContext<CaseActivityEntity>) => void) {
     var op = customOnClicks[operationKey.key] || (customOnClicks[operationKey.key] = {});
     op[type.typeName] = action;
+}
+
+export interface IHasCaseActivity {
+    getCaseActivity(): CaseActivityEntity | undefined;
+}
+
+export function inWorkflow(ctx: TypeContext<any>, workflowName: string, activityName: string): boolean {
+    var f = ctx.frame && ctx.frame.frameComponent as any as IHasCaseActivity;
+
+    var ca = f && f.getCaseActivity && f.getCaseActivity();
+
+    if (!ca)
+        return false;
+
+    return ca.workflowActivity.lane!.pool!.workflow!.name == workflowName && ca.workflowActivity.name == activityName;
 }
 
 export namespace API {

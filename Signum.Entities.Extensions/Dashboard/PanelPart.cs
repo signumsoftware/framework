@@ -181,7 +181,7 @@ namespace Signum.Entities.Dashboard
     {
         SearchControl,
         SearchControlWithoutSelection,
-        ValueBadge,
+        BigValue,
     }
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]

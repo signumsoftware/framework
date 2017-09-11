@@ -74,7 +74,7 @@ export class UserHelpComponent extends React.Component<UserHelpProps, { open: bo
                         DynamicViewMessage.ShowHelp.niceToString()}
                 </a>
                 {this.state.open &&
-                    <HtmlEditor binding={new ReadonlyBinding(this.props.activity.userHelp, "")} readonly={true} />}
+                    <div dangerouslySetInnerHTML={{ __html: this.props.activity.userHelp! }} />}
             </div>
         );
     }
