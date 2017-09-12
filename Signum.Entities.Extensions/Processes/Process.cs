@@ -39,6 +39,7 @@ namespace Signum.Entities.Processes
             this.algorithm = process;
         }
 
+        [NotNullable]
         ProcessAlgorithmSymbol algorithm;
         [NotNullValidator]
         public ProcessAlgorithmSymbol Algorithm

@@ -150,7 +150,7 @@ namespace Signum.Entities.Omnibox
         {
             return this.Text.ZipStrict(BoldMask)
                 .GroupWhenChange(a => a.second == '#')
-                .Select(gr => (span: new string(gr.Select(a => a.Item1).ToArray()), isBold: gr.Key));
+                .Select(gr => (span: new string(gr.Select(a => a.first).ToArray()), isBold: gr.Key));
         }
     }
 

@@ -132,7 +132,7 @@ namespace Signum.React.Authorization
             try
             {
 
-                using (HeavyProfiler.LogNoStackTrace("DeserializeToken"))
+                //using (HeavyProfiler.LogNoStackTrace("DeserializeToken"))
                 {
                     var array = Convert.FromBase64String(authHeader);
 
