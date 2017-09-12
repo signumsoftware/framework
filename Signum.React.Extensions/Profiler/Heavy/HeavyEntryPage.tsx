@@ -7,7 +7,7 @@ import { } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
-import {ValueSearchControl, SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
+import { ValueSearchControl, SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -16,7 +16,7 @@ import { RouteComponentProps } from "react-router";
 
 import "./Profiler.css"
 
-interface HeavyEntryProps extends RouteComponentProps<{selectedIndex : string }> {
+interface HeavyEntryProps extends RouteComponentProps<{ selectedIndex: string }> {
 
 }
 
@@ -28,14 +28,14 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
     }
 
     componentWillMount() {
-      
+
         this.loadEntries(this.props);
 
         this.loadStackTrace(this.props);
     }
 
-    componentWillReceiveProps(newProps: HeavyEntryProps){
-        if(this.state.entries == undefined || !this.state.entries.some(a=>a.FullIndex == newProps.match.params.selectedIndex))
+    componentWillReceiveProps(newProps: HeavyEntryProps) {
+        if (this.state.entries == undefined || !this.state.entries.some(a => a.FullIndex == newProps.match.params.selectedIndex))
             this.loadEntries(newProps);
 
         this.loadStackTrace(newProps);
@@ -46,22 +46,26 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
         let selectedIndex = props.match.params.selectedIndex;
 
         return API.Heavy.details(selectedIndex.tryBefore(".") || selectedIndex)
-            .then(entries => this.setState({entries}))
+            .then(entries => this.setState({ entries }))
             .done();
     }
 
 
-    loadStackTrace(props: HeavyEntryProps){
+    loadStackTrace(props: HeavyEntryProps) {
         return API.Heavy.stackTrace(props.match.params.selectedIndex)
-            .then(stackTrace => this.setState({stackTrace}))
+            .then(stackTrace => this.setState({ stackTrace }))
             .done();
     }
-    
+
     handleDownload = () => {
 
         let selectedIndex = this.props.match.params.selectedIndex;
 
         API.Heavy.download(selectedIndex.tryBefore(".") || selectedIndex);
+    }
+
+    handleUpdate = () => {
+        this.loadEntries(this.props);
     }
 
 
@@ -91,7 +95,12 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
                             <td>{current.Elapsed}</td>
                         </tr>
                         <tr>
-                            <td colSpan={2}><button onClick={this.handleDownload} className="btn btn-info">Download</button></td>
+                            <td colSpan={2}>
+                                <div className="btn-toolbar">
+                                    <button onClick={this.handleDownload} className="btn btn-info">Download</button>
+                                    {!current.IsFinished && <button onClick={this.handleUpdate} className="btn btn-default">Update</button>}
+                                </div>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -103,8 +112,8 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
                 <br />
                 <h3>StackTrace</h3>
                 {
-                    this.state.stackTrace == undefined ? <span>No Stacktrace</span> : 
-                        <StackFrameTable stackTrace={this.state.stackTrace}/>
+                    this.state.stackTrace == undefined ? <span>No Stacktrace</span> :
+                        <StackFrameTable stackTrace={this.state.stackTrace} />
                 }
             </div>
         );
@@ -114,21 +123,21 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
 
     chartContainer: HTMLDivElement;
 
-   
+
 }
 
 
-export class StackFrameTable extends React.Component<{stackTrace : StackTraceTS[]}>{
+export class StackFrameTable extends React.Component<{ stackTrace: StackTraceTS[] }>{
 
-    render(){
-        if(this.props.stackTrace == undefined)
+    render() {
+        if (this.props.stackTrace == undefined)
             return <span>No StackTrace</span>;
 
         return (
             <table className="table table-condensed">
                 <thead>
                     <tr>
-                         <th>Namespace
+                        <th>Namespace
                         </th>
                         <th>Type
                         </th>
@@ -139,13 +148,13 @@ export class StackFrameTable extends React.Component<{stackTrace : StackTraceTS[
                     </tr>
                 </thead>
                 <tbody>
-                    { this.props.stackTrace.map((sf, i)=> 
+                    {this.props.stackTrace.map((sf, i) =>
                         <tr key={i}>
-                             <td>
-                                {sf.Namespace && <span style={{color:sf.Color}}>{sf.Namespace}</span> }
+                            <td>
+                                {sf.Namespace && <span style={{ color: sf.Color }}>{sf.Namespace}</span>}
                             </td>
                             <td>
-                                {sf.Type && <span style={{color:sf.Color}}>{sf.Type}</span> }
+                                {sf.Type && <span style={{ color: sf.Color }}>{sf.Type}</span>}
                             </td>
                             <td>
                                 {sf.Method}
@@ -163,14 +172,14 @@ export class StackFrameTable extends React.Component<{stackTrace : StackTraceTS[
 
 
 function lerp(min: number, ratio: number, max: number) {
-    return min * (1-ratio) + max * ratio;
+    return min * (1 - ratio) + max * ratio;
 }
 
 
 interface HeavyProfilerDetailsD3Props {
     entries: HeavyProfilerEntry[];
     selected: HeavyProfilerEntry;
-    asyncDepth: boolean; 
+    asyncDepth: boolean;
 }
 
 
@@ -199,8 +208,13 @@ export class HeavyProfilerDetailsD3 extends React.Component<HeavyProfilerDetails
     }
 
     componentWillReceiveProps(newProps: HeavyProfilerDetailsD3Props) {
-        if (newProps.asyncDepth != this.props.asyncDepth)
+        if (newProps.asyncDepth != this.props.asyncDepth) {
             this.mountChart(newProps);
+        }
+        else if (newProps.selected != this.props.selected) {
+            this.resetZoom(newProps.selected);
+            this.mountChart(newProps);
+        }
     }
 
     componentDidUpdate() {
