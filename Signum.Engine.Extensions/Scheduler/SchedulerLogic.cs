@@ -405,7 +405,7 @@ namespace Signum.Engine.Scheduler
 
                 try
                 {
-                    var ctx = new ScheduledTaskContext();
+                    var ctx = new ScheduledTaskContext { Log = stl }
                     RunningTasks.TryAdd(stl, ctx);
 
                     using (UserHolder.UserSession(entityIUser))
@@ -506,10 +506,44 @@ namespace Signum.Engine.Scheduler
 
     public class ScheduledTaskContext
     {
-        public StringBuilder StringBuilder = new StringBuilder();
-        internal CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
+        public ScheduledTaskLogEntity Log { internal get; set; }
+
+        public StringBuilder StringBuilder { get; } = new StringBuilder();
+        internal CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();
 
         public CancellationToken CancellationToken => CancellationTokenSource.Token;
+
+
+        public static void Foreach<T>(this IEnumerable<T> collection, Func<T, string> elementID, Action<T> action)
+        {
+            var enumerator = collection.ToProgressEnumerator(out IProgressInfo pi);
+
+            foreach (var item in enumerator)
+            {
+                using (HeavyProfiler.Log("ProgressForeach", () => elementID(item)))
+                    try
+                    {
+                        using (Transaction tr = Transaction.ForceNew())
+                        {
+                            action(item);
+                            tr.Commit();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
+                        writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
+
+                        if (StopOnException != null && StopOnException(elementID(item), null, e))
+                            throw;
+                    }
+
+                if (!Console.IsOutputRedirected)
+                    SafeConsole.WriteSameLine(pi.ToString());
+            }
+            if (!Console.IsOutputRedirected)
+                SafeConsole.ClearSameLine();
+        }
     }
     
 }
