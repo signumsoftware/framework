@@ -54,6 +54,15 @@ namespace Signum.Engine.Scheduler
             return ExecutionsSTExpression.Evaluate(e);
         }
 
+
+        static Expression<Func<ScheduledTaskLogEntity, IQueryable<SchedulerTaskExceptionLineEntity>>> ExceptionLinesExpression =
+        e => Database.Query<SchedulerTaskExceptionLineEntity>().Where(a => a.SchedulerTaskLog.RefersTo(e));
+        [ExpressionField]
+        public static IQueryable<SchedulerTaskExceptionLineEntity> ExceptionLines(this ScheduledTaskLogEntity e)
+        {
+            return ExceptionLinesExpression.Evaluate(e);
+        }
+
         public static Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>>> ExecuteTask = new Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>>>();
 
         public class ScheduledTaskPair
@@ -120,6 +129,16 @@ namespace Signum.Engine.Scheduler
 
                     });
 
+                sb.Include<SchedulerTaskExceptionLineEntity>()
+                    .WithQuery(dqm, () => cte => new
+                    {
+                        Entity = cte,
+                        cte.Id,
+                        cte.ElementInfo,
+                        cte.Exception,
+                        cte.SchedulerTaskLog,
+                    });
+
                 new Graph<ScheduledTaskLogEntity>.Execute(ScheduledTaskLogOperation.CancelRunningTask)
                 {
                     CanExecute = e => RunningTasks.ContainsKey(e) ? null : SchedulerMessage.TaskIsNotRunning.NiceToString(),
@@ -138,6 +157,7 @@ namespace Signum.Engine.Scheduler
                 dqm.RegisterExpression((ITaskEntity ct) => ct.Executions(), () => ITaskMessage.Executions.NiceToString());
                 dqm.RegisterExpression((ITaskEntity ct) => ct.LastExecution(), () => ITaskMessage.LastExecution.NiceToString());
                 dqm.RegisterExpression((ScheduledTaskEntity ct) => ct.Executions(), () => ITaskMessage.Executions.NiceToString());
+                dqm.RegisterExpression((ScheduledTaskLogEntity ct) => ct.ExceptionLines(), () => ITaskMessage.ExceptionLines.NiceToString());
 
                 new Graph<HolidayCalendarEntity>.Execute(HolidayCalendarOperation.Save)
                 {
@@ -184,6 +204,8 @@ namespace Signum.Engine.Scheduler
                     new InvalidateWith(typeof(ScheduledTaskEntity)));
 
                 ScheduledTasksLazy.OnReset += ScheduledTasksLazy_OnReset;
+
+                sb.Schema.EntityEvents<ScheduledTaskLogEntity>().PreUnsafeDelete += query => query.SelectMany(e => e.ExceptionLines()).UnsafeDelete();
 
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }
@@ -405,7 +427,7 @@ namespace Signum.Engine.Scheduler
 
                 try
                 {
-                    var ctx = new ScheduledTaskContext { Log = stl }
+                    var ctx = new ScheduledTaskContext { Log = stl };
                     RunningTasks.TryAdd(stl, ctx);
 
                     using (UserHolder.UserSession(entityIUser))
@@ -512,15 +534,15 @@ namespace Signum.Engine.Scheduler
         internal CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();
 
         public CancellationToken CancellationToken => CancellationTokenSource.Token;
-
-
-        public static void Foreach<T>(this IEnumerable<T> collection, Func<T, string> elementID, Action<T> action)
+        
+        public void Foreach<T>(IEnumerable<T> collection, Func<T, string> elementID, Action<T> action)
         {
-            var enumerator = collection.ToProgressEnumerator(out IProgressInfo pi);
-
-            foreach (var item in enumerator)
+            foreach (var item in collection)
             {
-                using (HeavyProfiler.Log("ProgressForeach", () => elementID(item)))
+                this.CancellationToken.ThrowIfCancellationRequested();
+
+                using (HeavyProfiler.Log("Foreach", () => elementID(item)))
+                {
                     try
                     {
                         using (Transaction tr = Transaction.ForceNew())
@@ -529,21 +551,38 @@ namespace Signum.Engine.Scheduler
                             tr.Commit();
                         }
                     }
+                    catch(OperationCanceledException e)
+                    {
+                        throw;
+                    }
                     catch (Exception e)
                     {
-                        writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
-                        writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
+                        var ex = e.LogException();
+                        using (ExecutionMode.Global())
+                        using (Transaction tr = Transaction.ForceNew())
+                        {
+                            new SchedulerTaskExceptionLineEntity
+                            {
+                                Exception = ex.ToLite(),
+                                SchedulerTaskLog = this.Log.ToLite(),
+                                ElementInfo = elementID(item)
+                            }.Save();
 
-                        if (StopOnException != null && StopOnException(elementID(item), null, e))
-                            throw;
+                            tr.Commit();
+                        }
                     }
-
-                if (!Console.IsOutputRedirected)
-                    SafeConsole.WriteSameLine(pi.ToString());
+                }
             }
-            if (!Console.IsOutputRedirected)
-                SafeConsole.ClearSameLine();
+        }
+
+
+        public void ForeachWriting<T>(IEnumerable<T> collection, Func<T, string> elementID, Action<T> action)
+        {
+            this.Foreach(collection, elementID, e =>
+            {
+                this.StringBuilder.Append(elementID(e));
+                action(e);
+            });
         }
     }
-    
 }
