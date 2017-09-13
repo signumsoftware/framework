@@ -14,6 +14,7 @@ import { RenderEntity } from './RenderEntity'
 
 export interface EntityDetailProps extends EntityBaseProps {
     ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;
+    avoidFieldSet?: boolean;
 }
 
 export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProps> {
@@ -28,6 +29,31 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
 
         const s = this.state;
 
+        if (this.props.avoidFieldSet == true)
+            return (
+                <div className={classes("sf-entity-line-details", s.ctx.errorClass)}
+                    {...{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes }}>
+                    {this.renderButtons()}
+                    {this.renderElements()}
+                </div>
+            );
+
+        return (
+            <fieldset className={classes("sf-entity-line-details", s.ctx.errorClass)}
+                {...{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes }}>
+                <legend>
+                    <div>
+                        <span>{s.labelText}</span>
+                        {this.renderButtons()}
+                    </div>
+                </legend>
+                {this.renderElements()}
+            </fieldset>
+        );
+    }
+
+    renderButtons() {
+        const s = this.state;
         const hasValue = !!s.ctx.value;
 
         const buttons = (
@@ -39,17 +65,13 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
             </span>
         );
 
+        return EntityBase.hasChildrens(buttons) ? buttons : undefined;
+    }
+
+    renderElements() {
+        const s = this.state;
         return (
-            <fieldset className={classes("sf-entity-line-details", s.ctx.errorClass)}
-                {...{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes }}>
-                <legend>
-                    <div>
-                        <span>{s.labelText}</span>
-                        {EntityBase.hasChildrens(buttons) ? buttons : undefined}
-                    </div>
-                </legend>
-                <RenderEntity ctx={s.ctx} getComponent={this.props.getComponent} getViewPromise={this.props.getViewPromise} />
-            </fieldset>
+            <RenderEntity ctx={s.ctx} getComponent={this.props.getComponent} getViewPromise={this.props.getViewPromise} />
         );
     }
 }
