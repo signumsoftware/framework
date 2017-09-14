@@ -40,7 +40,9 @@ namespace Signum.React.Scheduler
     {
         public void Stop(bool immediate)
         {
-            SchedulerLogic.StopScheduledTasks();
+            if (SchedulerLogic.Running)
+                SchedulerLogic.StopScheduledTasks();
+
             SchedulerLogic.StopRunningTasks();
 
             HostingEnvironment.UnregisterObject(this);
