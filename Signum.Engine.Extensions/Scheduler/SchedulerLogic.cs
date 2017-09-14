@@ -500,6 +500,14 @@ namespace Signum.Engine.Scheduler
                 }).ToList()
             };
         }
+
+        public static void StopRunningTasks()
+        {
+            foreach (var item in RunningTasks.Values)
+            {
+                item.CancellationTokenSource.Cancel();
+            }
+        }
     }
 
     public class SchedulerState
@@ -580,7 +588,7 @@ namespace Signum.Engine.Scheduler
         {
             this.Foreach(collection, elementID, e =>
             {
-                this.StringBuilder.Append(elementID(e));
+                this.StringBuilder.AppendLine(elementID(e));
                 action(e);
             });
         }
