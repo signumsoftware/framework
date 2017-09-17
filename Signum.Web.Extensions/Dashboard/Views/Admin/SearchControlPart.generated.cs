@@ -89,14 +89,14 @@ Write(Html.EntityLine(tc, pp => pp.UserQuery, el => el.Create = false));
             #line hidden
             
             #line 9 "..\..\Dashboard\Views\Admin\SearchControlPart.cshtml"
-Write(Html.ValueLine(tc, pp => pp.AllowSelection));
+Write(Html.ValueLine(tc, pp => pp.RenderMode));
 
             
             #line default
             #line hidden
             
             #line 9 "..\..\Dashboard\Views\Admin\SearchControlPart.cshtml"
-                                                
+                                            
 }
             
             #line default

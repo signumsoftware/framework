@@ -15,6 +15,7 @@ using Signum.Entities.UserAssets;
 using System.Xml.Linq;
 using Signum.Entities.Authorization;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities;
 
 namespace Signum.Entities.Dashboard
 {
@@ -48,6 +49,8 @@ namespace Signum.Entities.Dashboard
 
         [StringLengthValidator(AllowNulls = false, Min = 2)]
         public string DisplayName { get; set; }
+
+        public bool CombineSimilarRows { get; set; } = true;
 
         [NotifyCollectionChanged, NotifyChildProperty, NotNullable]
         [NoRepeatValidator]

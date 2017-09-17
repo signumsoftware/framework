@@ -44,7 +44,7 @@ namespace Signum.Web.Excel
             if (!Finder.IsFindable(request.QueryName))
                 throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().FormatWith(request.QueryName));
 
-            byte[] file = ExcelLogic.ExecuteExcelReport(excelReport, request, CancellationToken.None).Result;
+            byte[] file = ExcelLogic.ExecuteExcelReport(excelReport, request);
 
             return File(file, MimeMapping.GetMimeMapping(".xlsx"), Finder.ResolveWebQueryName(request.QueryName) + "-" + TimeZoneManager.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx");
             //Known Bug in IE: When the file dialog is shown, if Open is chosen the Excel will be broken as a result of IE automatically adding [1] to the name. 

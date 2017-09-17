@@ -243,7 +243,7 @@ export class OperationMapRenderer extends React.Component<OperationMapRendererPr
     render() {
 
         return (
-            <div id="map" style={{ backgroundColor: "white", width: "100%", height: this.props.height + "px" }}>
+            <div id="map" style={{ backgroundColor: "transparent", width: "100%", height: this.props.height + "px" }}>
                 <svg id="svgMap" ref={svg => this.svg = svg!}>
                     <defs>
                         <marker id="normal_arrow" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="10" markerHeight="10" orient="auto">

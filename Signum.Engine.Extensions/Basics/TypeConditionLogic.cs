@@ -37,6 +37,31 @@ namespace Signum.Engine.Basics
     {
         static Dictionary<Type, Dictionary<TypeConditionSymbol, TypeConditionPair>> infos = new Dictionary<Type, Dictionary<TypeConditionSymbol, TypeConditionPair>>();
 
+
+        static readonly Variable<Dictionary<Type, Dictionary<TypeConditionSymbol, LambdaExpression>>> tempConditions =
+            Statics.ThreadVariable<Dictionary<Type, Dictionary<TypeConditionSymbol, LambdaExpression>>>("tempConditions");
+
+        public static IDisposable ReplaceTemporally<T>(TypeConditionSymbol typeAllowed, Expression<Func<T, bool>> condition)
+            where T : Entity
+        {
+            var dic = tempConditions.Value ?? (tempConditions.Value = new Dictionary<Type, Dictionary<TypeConditionSymbol, LambdaExpression>>()); 
+
+            var subDic = dic.GetOrCreate(typeof(T));
+            
+            subDic.Add(typeAllowed, condition);
+
+            return new Disposable(() =>
+            {
+                subDic.Remove(typeAllowed);
+
+                if (subDic.Count == 0)
+                    dic.Remove(typeof(T));
+
+                if (dic.Count == 0)
+                    tempConditions.Value = null;
+            });
+        }
+
         public static IEnumerable<Type> Types
         {
             get { return infos.Keys; }
@@ -131,6 +156,10 @@ namespace Signum.Engine.Basics
 
         public static LambdaExpression GetCondition(Type type, TypeConditionSymbol typeCondition)
         {
+            var tempExpr = tempConditions.Value?.TryGetC(type)?.TryGetC(typeCondition);
+            if (tempExpr != null)
+                return tempExpr;
+
             var pair = infos.GetOrThrow(type, "There's no TypeCondition registered for type {0}").TryGetC(typeCondition);
 
             return pair.Condition;

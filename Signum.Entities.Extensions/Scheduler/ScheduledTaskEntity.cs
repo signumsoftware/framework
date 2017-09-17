@@ -58,7 +58,8 @@ namespace Signum.Entities.Scheduler
     {
         Execute,
         Executions,
-        LastExecution
+        LastExecution,
+        ExceptionLines
     }
 
     [AutoInit]

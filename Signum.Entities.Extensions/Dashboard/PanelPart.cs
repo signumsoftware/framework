@@ -17,7 +17,17 @@ namespace Signum.Entities.Dashboard
     [Serializable]
     public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
     {
+        [SqlDbType(Size = 100)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string Title { get; set; }
+
+        [SqlDbType(Size = 100)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
+        public string IconName { get; set; }
+
+        [SqlDbType(Size = 100)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
+        public string IconColor { get; set; }
 
         [NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
         public int Row { get; set; }
@@ -131,7 +141,7 @@ namespace Signum.Entities.Dashboard
         [NotNullValidator]
         public UserQueryEntity UserQuery { get; set; }
 
-        public bool AllowSelection { get; set; }
+        public UserQueryPartRenderMode RenderMode { get; set; }
 
         public override string ToString()
         {
@@ -148,7 +158,7 @@ namespace Signum.Entities.Dashboard
             return new UserQueryPartEntity
             {
                 UserQuery = this.UserQuery,
-                AllowSelection = this.AllowSelection,
+                RenderMode = this.RenderMode,
 
             };
         }
@@ -157,14 +167,21 @@ namespace Signum.Entities.Dashboard
         {
             return new XElement("UserQueryPart",
                 new XAttribute("UserQuery", ctx.Include(UserQuery)),
-                new XAttribute("AllowSelection", AllowSelection.ToString()));
+                new XAttribute("RenderMode", RenderMode.ToString()));
         }
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
             UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
-            AllowSelection = element.Attribute("AllowSelection")?.Value.ToBool() ?? false;
+            RenderMode = element.Attribute("RenderMode")?.Value.ToEnum<UserQueryPartRenderMode>() ?? UserQueryPartRenderMode.SearchControl;
         }
+    }
+
+    public enum UserQueryPartRenderMode
+    {
+        SearchControl,
+        SearchControlWithoutSelection,
+        BigValue,
     }
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]

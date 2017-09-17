@@ -8,11 +8,14 @@ import { Lite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import { PseudoType, QueryKey } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import { ScheduledTaskLogEntity, ScheduledTaskEntity, ScheduleRuleMinutelyEntity, ScheduleRuleMonthsEntity, 
-    ScheduleRuleWeekDaysEntity, HolidayCalendarEntity, SchedulerPermission } from './Signum.Entities.Scheduler'
+import {
+    ScheduledTaskLogEntity, ScheduledTaskEntity, ScheduleRuleMinutelyEntity, ScheduleRuleMonthsEntity,
+    ScheduleRuleWeekDaysEntity, HolidayCalendarEntity, SchedulerPermission, SchedulerTaskExceptionLineEntity
+} from './Signum.Entities.Scheduler'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
+import { ValueSearchControlLine } from '../../../Framework/Signum.React/Scripts/Search';
 
 
 export function start(options: { routes: JSX.Element[] }) {
@@ -29,6 +32,16 @@ export function start(options: { routes: JSX.Element[] }) {
         key: "SchedulerPanel",
         onClick: () => Promise.resolve("~/scheduler/view")
     });
+
+    var es = new EntitySettings(ScheduledTaskLogEntity, undefined);
+    es.overrideView(vr => vr.insertAfterLine(a => a.exception, ctx => [
+        <ValueSearchControlLine ctx={ctx} findOptions={{
+            queryName: SchedulerTaskExceptionLineEntity,
+            parentColumn: "SchedulerTaskLog",
+            parentValue: ctx.value,
+        }} />
+    ]))
+    Navigator.addSettings(es)
 }
 
 
