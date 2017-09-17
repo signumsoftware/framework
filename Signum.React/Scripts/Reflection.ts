@@ -723,7 +723,11 @@ export function New(type: PseudoType, props?: any): ModifiableEntity {
                 e.mixins[gr.key] = m;
             });
 
-        Dic.getValues(ti.members).filter(a => a.type.isCollection).forEach(m => (result as any)[m.name.firstLower()] = []); //TODO: Collections in Embeddeds...
+        Dic.getValues(ti.members)
+            .filter(a => a.type.isCollection && !a.name.contains("."))
+            .forEach(m => (result as any)[m.name.firstLower()] = []);
+
+        //TODO: Collections in Embeddeds...
     }
 
     if (props)
