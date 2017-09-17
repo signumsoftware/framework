@@ -27,11 +27,8 @@ namespace Signum.React.Filters
     {
         public const string SavedRequestKey = "SAVED_REQUEST";
         public const string UserKey = "USER";
-        public const string CultureKey = "CULTURE";
 
-        public static Func<HttpActionContext, CultureInfo> GetCurrentCultures;
-
-      
+        public static Func<HttpActionContext, CultureInfo> GetCurrentCultures;      
 
         public static readonly IList<Func<HttpActionContext, SignumAuthenticationResult>> Authenticators = new List<Func<HttpActionContext, SignumAuthenticationResult>>();
 
@@ -49,8 +46,6 @@ namespace Signum.React.Filters
                 context.ErrorResult = result.ErrorResult;
                 context.Request.Properties[UserKey] = result.User;
             }
-            context.Request.Properties[CultureKey] = GetCurrentCultures?.Invoke(actionContext);
-            
         }
 
         public Task ChallengeAsync(HttpAuthenticationChallengeContext context, CancellationToken cancellationToken)
@@ -97,7 +92,7 @@ namespace Signum.React.Filters
                         var user = (IUserEntity)GetProp(actionContext, SignumAuthenticationFilterAttribute.UserKey);
                         using (user != null ? UserHolder.UserSession(user) : null)
                         {
-                            var culture = (CultureInfo)GetProp(actionContext, SignumAuthenticationFilterAttribute.CultureKey);
+                            var culture = (CultureInfo)SignumAuthenticationFilterAttribute.GetCurrentCultures?.Invoke(actionContext);
                             using (culture != null ? CultureInfoUtils.ChangeBothCultures(culture) : null)
                             {
                                 var result =  await continuation();

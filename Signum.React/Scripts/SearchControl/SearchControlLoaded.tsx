@@ -640,6 +640,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             }
         }
 
+        if (menuItems.length == 0)
+            return null;
+
         return (
             <ContextMenu position={cm.position} onHide={this.handleContextOnHide}>
                 {menuItems.map((e, i) => React.cloneElement(e, { key: i }))}

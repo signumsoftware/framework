@@ -1,6 +1,7 @@
 ﻿import * as React from 'react'
 import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
-import { DropdownList } from 'react-widgets';
+
+import DropdownList from 'react-widgets/lib/DropdownList'
 import 'react-widgets/dist/css/react-widgets.css';
 import { areEqual, classes } from '../Globals'
 import * as Finder from '../Finder'

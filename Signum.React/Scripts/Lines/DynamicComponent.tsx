@@ -5,6 +5,7 @@ import { ModifiableEntity } from '../Signum.Entities'
 import * as Navigator from '../Navigator'
 import { ViewReplacer } from '../Frames/ReactVisitor'
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, TypeContext, EntityCheckboxList, EnumCheckboxList, EntityTable } from '../Lines'
+import { Type } from '../Reflection';
 
 export default class DynamicComponent extends React.Component<{ ctx: TypeContext<ModifiableEntity>, viewName?: string }> {
 
@@ -39,9 +40,18 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
         return result;
     }
 
-    static specificComponents: {
-        [typeName: string]: (ctx: TypeContext<any>) => React.ReactElement<any> | undefined;
+    static customTypeComponent: {
+        [typeName: string]: (ctx: TypeContext<any>) => React.ReactElement<any> | null | undefined | "continue";
     } = {};
+
+    static customPropertyComponent: {
+        [propertyRoute: string]: (ctx: TypeContext<any>) => React.ReactElement<any> | null | undefined;
+    } = {};
+
+    static registerCustomPropertyComponent<T extends ModifiableEntity, V>(type: Type<T>, property: (e: T) => V, component: (ctx: TypeContext<any>) => React.ReactElement<any> | undefined)
+    {
+        DynamicComponent.customPropertyComponent[type.propertyRoute(property).toString()] = component;
+    }
 
     static getAppropiateComponent(ctx: TypeContext<any>): React.ReactElement<any> | undefined {
         const mi = ctx.propertyRoute.member!;
@@ -49,17 +59,20 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
         if (mi.name == "Id" || mi.notVisible == true)
             return undefined;
 
-        const tr = ctx.propertyRoute.typeReference();        
+        const ccProp = DynamicComponent.customPropertyComponent[ctx.propertyRoute.toString()];
+        if (ccProp) {
+            return ccProp(ctx) || undefined;
+        }
 
-        const sc = DynamicComponent.specificComponents[tr.name];
-        if (sc) {
-            const result = sc(ctx);
-            if (result)
-                return result;
+        const tr = ctx.propertyRoute.typeReference();        
+        const ccType = DynamicComponent.customTypeComponent[tr.name];
+        if (ccType) {
+            var result = ccType(ctx);
+            if (result != "continue")
+                return result || undefined;
         }
         
         let tis = getTypeInfos(tr);
-
         if (tis.length == 1 && tis[0] == undefined)
             tis = []; 
 

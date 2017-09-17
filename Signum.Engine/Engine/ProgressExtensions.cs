@@ -64,10 +64,7 @@ namespace Signum.Engine
         {
             using (StreamWriter log = TryOpenAutoFlush(fileName))
             {
-                if (log != null)
-                    log.AutoFlush = true;
-
-                LogWriter writer = GetLogWriter(log);
+                 LogWriter writer = GetLogWriter(log);
 
 
                 var enumerator = collection.ToProgressEnumerator(out IProgressInfo pi);
@@ -110,11 +107,7 @@ namespace Signum.Engine
         {
             using (StreamWriter log = TryOpenAutoFlush(fileName))
             {
-                if (log != null)
-                    log.AutoFlush = true;
-
                 LogWriter writer = GetLogWriter(log);
-
 
                 var enumerator = collection.ToProgressEnumerator(out IProgressInfo pi);
 

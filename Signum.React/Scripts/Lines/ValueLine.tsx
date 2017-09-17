@@ -4,7 +4,7 @@ import * as moment from 'moment'
 import * as numbro from 'numbro'
 
 import { Dic, addClass } from '../Globals'
-import { DateTimePicker } from 'react-widgets'
+import DateTimePicker from 'react-widgets/lib/DateTimePicker'
 import 'react-widgets/dist/css/react-widgets.css';
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
 import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference, toMomentFormat, toMomentDurationFormat, toNumbroFormat, isTypeEnum } from '../Reflection'
