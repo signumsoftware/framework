@@ -16,7 +16,7 @@ export interface AjaxOptions {
     mode?: string;
     credentials?: string;
     cache?: string;
-    abortController?: { abort?: () => void };
+    abortController?: FetchAbortController;
 }
 
 
