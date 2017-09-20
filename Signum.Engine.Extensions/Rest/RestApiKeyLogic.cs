@@ -19,7 +19,7 @@ namespace Signum.Engine.Rest
         public readonly static string ApiKeyQueryParameter = "apiKey";
         public readonly static string ApiKeyHeaderParameter = "X-ApiKey";
 
-        public static ResetLazy<Dictionary<string, Lite<UserEntity>>> RestApiKeyCache;
+        public static ResetLazy<Dictionary<string, RestApiKeyEntity>> RestApiKeyCache;
         public static Func<string> GenerateRestApiKey = () => DefaultGenerateRestApiKey();
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -44,7 +44,7 @@ namespace Signum.Engine.Rest
 
                 RestApiKeyCache = sb.GlobalLazy(() =>
                 {
-                    return Database.Query<RestApiKeyEntity>().ToDictionary(rak => rak.ApiKey, rak => rak.User);
+                    return Database.Query<RestApiKeyEntity>().ToDictionaryEx(rak => rak.ApiKey);
                 }, new InvalidateWith(typeof(RestApiKeyEntity)));
             }
         }
