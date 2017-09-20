@@ -723,7 +723,11 @@ export function New(type: PseudoType, props?: any): ModifiableEntity {
                 e.mixins[gr.key] = m;
             });
 
-        Dic.getValues(ti.members).filter(a => a.type.isCollection).forEach(m => (result as any)[m.name.firstLower()] = []); //TODO: Collections in Embeddeds...
+        Dic.getValues(ti.members)
+            .filter(a => a.type.isCollection && !a.name.contains("."))
+            .forEach(m => (result as any)[m.name.firstLower()] = []);
+
+        //TODO: Collections in Embeddeds...
     }
 
     if (props)
@@ -1192,7 +1196,15 @@ export class GraphExplorer {
         ge.modelState = modelState == undefined ? {} : { ...modelState };
         ge.isModifiableObject(e, initialPrefix);
         if (Dic.getValues(ge.modelState).length) //Assign remaining
-            e.error = { ...e.error, ...ge.modelState } as any;
+        {
+            if (e.error == undefined)
+                e.error = {};
+
+            for (const key in ge.modelState) {
+                e.error[key] = ge.modelState[key].join("\n");
+                delete ge.modelState[key];
+            }
+        }
     }
 
     static collectModelState(e: ModifiableEntity, initialPrefix: string): ModelState {
