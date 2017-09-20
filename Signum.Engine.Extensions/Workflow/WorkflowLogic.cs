@@ -56,6 +56,14 @@ namespace Signum.Engine.Workflow
             return WorkflowEventsExpression.Evaluate(e);
         }
 
+        static Expression<Func<WorkflowEntity, WorkflowEventEntity>> WorkflowStartEventExpression =
+            e => e.WorkflowEvents().Where(we => we.Type == WorkflowEventType.Start).SingleOrDefault();
+        [ExpressionField]
+        public static WorkflowEventEntity WorkflowStartEvent(this WorkflowEntity e)
+        {
+            return WorkflowStartEventExpression.Evaluate(e);
+        }
+
         public static IEnumerable<WorkflowEventEntity> WorkflowEventsFromCache(this WorkflowEntity e)
         {
             return GetWorkflowNodeGraph(e.ToLite()).NextGraph.OfType<WorkflowEventEntity>();
@@ -256,6 +264,7 @@ namespace Signum.Engine.Workflow
                     });
 
                 WorkflowGraph.Register();
+                dqm.RegisterExpression((WorkflowEntity wf) => wf.WorkflowStartEvent());
 
                 DynamicCode.GetCustomErrors += GetCustomErrors;
 
