@@ -102,6 +102,7 @@ namespace Signum.Engine.Workflow
                     });
 
                 SchedulerLogic.ExecuteTask.Register((WorkflowEventTaskEntity wet, ScheduledTaskContext ctx) => ExecuteTask(wet));
+                sb.AddIndex((WorkflowEventTaskConditionResultEntity e) => e.CreationDate);
 
                 WorkflowEventTaskModel.GetModel = (@event) =>
                 {
