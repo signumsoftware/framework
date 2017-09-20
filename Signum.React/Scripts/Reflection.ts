@@ -740,9 +740,9 @@ export function isType(obj: any): obj is IType {
     return (obj as IType).typeName != undefined;
 }
 
-export function newLite<T extends Entity>(type: Type<T>, id: string | undefined): Lite<T>;
-export function newLite(typeName: string, id: string | undefined): Lite<Entity>;
-export function newLite(type: PseudoType, id: string | undefined): Lite<Entity>{
+export function newLite<T extends Entity>(type: Type<T>, id: number | string | undefined): Lite<T>;
+export function newLite(typeName: string, id: number | string | undefined): Lite<Entity>;
+export function newLite(type: PseudoType, id: number | string | undefined): Lite<Entity>{
     return {
         EntityType: getTypeName(type),
         id: id
@@ -754,6 +754,7 @@ export class Type<T extends ModifiableEntity> implements IType {
     New(props?: Partial<T>): T {
         return New(this.typeName, props) as T;
     }
+    
 
     constructor(
         public typeName: string) { }
