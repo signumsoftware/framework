@@ -21,6 +21,7 @@ import { OperationMessage } from "../../../../Framework/Signum.React/Scripts/Sig
 
 import "../../../../Framework/Signum.React/Scripts/Frames/Frames.css"
 import "./CaseAct.css"
+import { IHasCaseActivity } from '../WorkflowClient';
 
 interface CaseFrameModalProps extends React.Props<CaseFrameModal>, IModalProps {
     title?: string;
@@ -39,7 +40,7 @@ interface CaseFrameModalState {
 
 var modalCount = 0;
 
-export default class CaseFrameModal extends React.Component<CaseFrameModalProps, CaseFrameModalState>  {
+export default class CaseFrameModal extends React.Component<CaseFrameModalProps, CaseFrameModalState> implements IHasCaseActivity {
     prefix = "caseModal" + (modalCount++)
     constructor(props: any) {
         super(props);
@@ -145,7 +146,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
         this.props.onExited!(this.okClicked ? this.getCaseActivity() : undefined);
     }
 
-    getCaseActivity() {
+    getCaseActivity(): CaseActivityEntity | undefined {
         return this.state.pack && this.state.pack.activity;
     }
 

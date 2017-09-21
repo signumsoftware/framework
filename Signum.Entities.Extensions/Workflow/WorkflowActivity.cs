@@ -380,5 +380,7 @@ namespace Signum.Entities.Workflow
         ChooseADestinationForWorkflowJumping,
         CaseFlow,
         AverageDuration,
+        [Description("Activity Is")]
+        ActivityIs,
     }
 }

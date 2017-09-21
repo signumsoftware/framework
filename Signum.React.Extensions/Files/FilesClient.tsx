@@ -43,10 +43,10 @@ export function start(options: { routes: JSX.Element[] }) {
 
 
 function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
-    DynamicComponent.specificComponents[type.typeName] = ctx => {
+    DynamicComponent.customTypeComponent[type.typeName] = ctx => {
         const tr = ctx.propertyRoute.typeReference();
         if (tr.isCollection)
-            return undefined;
+            return "continue";
         return <FileLine ctx={ctx}/>;
     };
 }

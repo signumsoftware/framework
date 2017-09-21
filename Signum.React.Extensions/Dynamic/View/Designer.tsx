@@ -365,7 +365,7 @@ export class CollapsableTypeHelp extends React.Component<{ initialTypeName?: str
 
         ValueLineModal.show({
             type: { name: "string" },
-            initialValue: TypeHelpComponent.getExpression("e", pr, "Typescript"),
+            initialValue: TypeHelpComponent.getExpression("e", pr, "TypeScript"),
             valueLineType: "TextArea",
             title: "Property Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
@@ -384,7 +384,7 @@ export class CollapsableTypeHelp extends React.Component<{ initialTypeName?: str
                 {this.state.open &&
                     <TypeHelpComponent
                         initialType={this.props.initialTypeName}
-                        mode="Typescript"
+                        mode="TypeScript"
                         onMemberClick={this.handleTypeHelpClick} />}
             </div>
         );

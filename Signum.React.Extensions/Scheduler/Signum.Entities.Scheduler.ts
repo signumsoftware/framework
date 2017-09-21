@@ -38,6 +38,7 @@ export module ITaskMessage {
     export const Execute = new MessageKey("ITaskMessage", "Execute");
     export const Executions = new MessageKey("ITaskMessage", "Executions");
     export const LastExecution = new MessageKey("ITaskMessage", "LastExecution");
+    export const ExceptionLines = new MessageKey("ITaskMessage", "ExceptionLines");
 }
 
 export module ITaskOperation {
@@ -116,6 +117,14 @@ export module SchedulerMessage {
 
 export module SchedulerPermission {
     export const ViewSchedulerPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "SchedulerPermission.ViewSchedulerPanel");
+}
+
+export const SchedulerTaskExceptionLineEntity = new Type<SchedulerTaskExceptionLineEntity>("SchedulerTaskExceptionLine");
+export interface SchedulerTaskExceptionLineEntity extends Entities.Entity {
+    Type: "SchedulerTaskExceptionLine";
+    elementInfo?: string | null;
+    schedulerTaskLog?: Entities.Lite<ScheduledTaskLogEntity> | null;
+    exception?: Entities.Lite<Basics.ExceptionEntity> | null;
 }
 
 export const ScheduleRuleMinutelyEntity = new Type<ScheduleRuleMinutelyEntity>("ScheduleRuleMinutely");

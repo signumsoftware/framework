@@ -20,6 +20,8 @@ using Signum.Engine.Cache;
 using Signum.Entities.Cache;
 using Signum.Engine.Authorization;
 using Signum.Engine.Maps;
+using System.Web.Hosting;
+using Signum.Engine.Scheduler;
 
 namespace Signum.React.Scheduler
 {
@@ -29,6 +31,21 @@ namespace Signum.React.Scheduler
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
+            HostingEnvironment.RegisterObject(new SchedulerStopper());
+
+        }
+    }
+
+    internal class SchedulerStopper : IRegisteredObject
+    {
+        public void Stop(bool immediate)
+        {
+            if (SchedulerLogic.Running)
+                SchedulerLogic.StopScheduledTasks();
+
+            SchedulerLogic.StopRunningTasks();
+
+            HostingEnvironment.UnregisterObject(this);
         }
     }
 }

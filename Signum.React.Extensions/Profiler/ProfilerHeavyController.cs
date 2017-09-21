@@ -61,8 +61,10 @@ namespace Signum.React.Profiler
         {
             ProfilerPermission.ViewHeavyProfiler.AssertAuthorized();
 
+            var now = PerfCounter.Ticks;
+
             lock (HeavyProfiler.Entries)
-                return HeavyProfiler.Entries.Select(e => new HeavyProfofilerEntryTS(e, false)).ToList();
+                return HeavyProfiler.Entries.Select(e => new HeavyProfofilerEntryTS(e, false, now)).ToList();
         }
 
         [Route("api/profilerHeavy/details/{fullIndex}"), HttpGet]
@@ -74,7 +76,9 @@ namespace Signum.React.Profiler
 
             var result = new List<HeavyProfofilerEntryTS>();
 
-            HeavyProfofilerEntryTS.Fill(result, entry, 0);
+            var now = PerfCounter.Ticks;
+
+            HeavyProfofilerEntryTS.Fill(result, entry, 0, now);
    
             return result;
         }
@@ -172,14 +176,16 @@ namespace Signum.React.Profiler
             public int Depth;
             public int AsyncDepth;
             public string AdditionalData;
-            public string FullIndex; 
+            public string FullIndex;
+            public bool IsFinished; 
 
-            public HeavyProfofilerEntryTS(HeavyProfilerEntry e, bool fullAditionalData)
+            public HeavyProfofilerEntryTS(HeavyProfilerEntry e, bool fullAditionalData, long now)
             {
                 BeforeStart = e.BeforeStart;
                 Start = e.Start;
-                End = e.End;
+                End = e.End ?? now;
                 Elapsed = e.ElapsedToString();
+                IsFinished = e.End.HasValue;
                 Role = e.Role;
                 Color = GetColor(e.Role);
                 Depth = e.Depth;
@@ -187,20 +193,21 @@ namespace Signum.React.Profiler
                 AdditionalData = fullAditionalData ? e.AdditionalData : e.AdditionalDataPreview();
             }
 
-            internal static int Fill(List<HeavyProfofilerEntryTS> result, HeavyProfilerEntry entry, int asyncDepth)
+            internal static int Fill(List<HeavyProfofilerEntryTS> result, HeavyProfilerEntry entry, int asyncDepth, long now)
             {
-                result.Add(new HeavyProfofilerEntryTS(entry, true) { AsyncDepth = asyncDepth });
+                result.Add(new HeavyProfofilerEntryTS(entry, true, now) { AsyncDepth = asyncDepth });
 
                 if (entry.Entries == null)
                     return asyncDepth;
                 
             
                 Dictionary<HeavyProfilerEntry, int> newDepths = new Dictionary<HeavyProfilerEntry, int>();
-                foreach (var e in entry.Entries)
+                for (int i = 0; i < entry.Entries.Count; i++)
                 {
+                    var e = entry.Entries[i];
                     var maxAsyncDepth = newDepths.Where(kvp => kvp.Key.Overlaps(e)).Max(a => (int?)a.Value);
 
-                    var newAsyncDepth = Fill(result, e, maxAsyncDepth.HasValue ? maxAsyncDepth.Value + 1 : asyncDepth + 1);
+                    var newAsyncDepth = Fill(result, e, maxAsyncDepth.HasValue ? maxAsyncDepth.Value + 1 : asyncDepth + 1, now);
                     newDepths.Add(e, newAsyncDepth);
                 }
 

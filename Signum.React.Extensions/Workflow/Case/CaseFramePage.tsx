@@ -19,6 +19,7 @@ import { RouteComponentProps } from "react-router";
 
 import "../../../../Framework/Signum.React/Scripts/Frames/Frames.css"
 import "./CaseAct.css"
+import { IHasCaseActivity } from '../WorkflowClient';
 
 interface CaseFramePageProps extends RouteComponentProps<{ workflowId: string; mainEntityStrategy: string; caseActivityId?: string }> {
 }
@@ -28,7 +29,7 @@ interface CaseFramePageState {
     getComponent?: (ctx: TypeContext<Entity>) => React.ReactElement<any>;
 }
 
-export default class CaseFramePage extends React.Component<CaseFramePageProps, CaseFramePageState> {
+export default class CaseFramePage extends React.Component<CaseFramePageProps, CaseFramePageState> implements IHasCaseActivity {
 
     constructor(props: any) {
         super(props);
@@ -36,7 +37,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
 
     }
 
-    getCaseActivity() {
+    getCaseActivity(): CaseActivityEntity | undefined {
         return this.state.pack && this.state.pack.activity;
     }
 

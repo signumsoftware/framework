@@ -180,8 +180,8 @@
     <Compile Include="Rest\RestApiKeyController.cs" />
     <Compile Include="Rest\RestLogFilter.cs" />
     <Compile Include="Rest\RestServer.cs" />
-    <TypeScriptCompile Include="Basics\Templates\AccordionPanel.tsx" />
-    <TypeScriptCompile Include="Basics\Templates\CollapsablePanel.tsx" />
+    <TypeScriptCompile Include="Basics\Templates\Accordion.tsx" />
+    <TypeScriptCompile Include="Basics\Templates\CollapsableCard.tsx" />
     <Content Include="Joyride\joyride.d.ts" />
     <TypeScriptCompile Include="Joyride\JoyrideClient.tsx" />
     <TypeScriptCompile Include="Joyride\JoyrideComponent.tsx" />
