@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { NavItem } from 'react-bootstrap'
+import { NavItem } from 'reactstrap'
 import JoyrideComponent from "./JoyrideComponent";
 
 export interface JoyrideNavItemProps {

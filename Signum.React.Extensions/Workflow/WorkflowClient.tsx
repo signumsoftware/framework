@@ -13,7 +13,7 @@ import { Type, PropertyRoute } from '../../../Framework/Signum.React/Scripts/Ref
 import { EntityFrame, TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { EntityOperationSettings, addSettings, EntityOperationContext } from '../../../Framework/Signum.React/Scripts/Operations'
+import { EntityOperationSettings, addSettings, EntityOperationContext, BsColor } from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { confirmInNecessary, notifySuccess } from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 
@@ -120,7 +120,7 @@ export function start(options: { routes: JSX.Element[] }) {
     }));
 
     Operations.addSettings(new EntityOperationSettings(CaseOperation.SetTags, { isVisible: ctx => false }));
-    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { hideOnCanExecute: true, style: "primary", onClick: eoc => executeCaseActivity(eoc, e => e.defaultClick()), }));
+    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { hideOnCanExecute: true, color: "primary", onClick: eoc => executeCaseActivity(eoc, e => e.defaultClick()), }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Delete, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Jump, { onClick: eoc => executeCaseActivity(eoc, executeWorkflowJump), contextual: { isVisible: ctx => true, onClick: executeWorkflowJumpContextual } }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Timeout, { isVisible: ctx => false }));
@@ -137,7 +137,7 @@ export function start(options: { routes: JSX.Element[] }) {
     caseActivityOperation(CaseActivityOperation.Undo, "danger");
     caseActivityOperation(CaseActivityOperation.Reject, "default");
 
-    Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { style: "primary", onClick: executeWorkflowSave }));
+    Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { color: "primary", onClick: executeWorkflowSave }));
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Delete, { contextualFromMany: { isVisible: ctx => false } }));
     Navigator.addSettings(new EntitySettings(WorkflowEntity, w => import('./Workflow/Workflow'), { avoidPopup: true }));
 
@@ -271,15 +271,15 @@ public interface IWorkflowTransition
     }).done();
 }
 
-function caseActivityOperation(operation: ExecuteSymbol<CaseActivityEntity>, style: Operations.BsStyle) {
+function caseActivityOperation(operation: ExecuteSymbol<CaseActivityEntity>, color: BsColor) {
     Operations.addSettings(new EntityOperationSettings(operation, {
         hideOnCanExecute: true,
-        style: style,
+        color: color,
         onClick: eoc => executeCaseActivity(eoc, executeAndClose),
         contextual: { isVisible: ctx => true },
         contextualFromMany: {
             isVisible: ctx => true,
-            style: style
+            color: color
         },
     }));
 }

@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import * as ReactBootstrap from 'react-bootstrap'
+import * as Reactstrap from 'reactstrap'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
 import * as Entities from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -15,7 +15,7 @@ export const globalModules: any = {
     numbro,
     moment,
     React,
-    ReactBootstrap,
+    Reactstrap,
     Globals,
     Navigator,
     Finder,

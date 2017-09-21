@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { ButtonDropdown, MenuItem, TabContent, TabPane } from 'reactstrap'
+import { ButtonDropdown, DropdownItem, TabContent, TabPane } from 'reactstrap'
 import { Dic, classes, ifError } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { ValidationError, AbortableRequest } from '../../../../Framework/Signum.React/Scripts/Services'
@@ -24,6 +24,7 @@ import ChartRenderer from './ChartRenderer'
 
 import "../Chart.css"
 import "../../../../Framework/Signum.React/Scripts/SearchControl/Search.css"
+import { Tab, Tabs } from '../../../../Framework/Signum.React/Scripts/Tabs';
 
 
 interface ChartRequestViewProps {
@@ -162,16 +163,15 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                     <br />
                     <div className="sf-search-results-container" >
                         {!s.chartResult || !s.lastChartRequest ? JavascriptMessage.searchForResults.niceToString() :
-
-                            <TabContent id="chartResultTabs" animation={false} unmountOnExit={true}>
-                                <TabPane eventKey="chart" title={ChartMessage.Chart.niceToString()}>
+                            <Tabs id="chartResultTabs" unmountOnExit={true}>
+                                <Tab tabId="chart" title={ChartMessage.Chart.niceToString()}>
                                     <ChartRenderer chartRequest={cr} lastChartRequest={s.lastChartRequest} data={s.chartResult.chartTable} />
-                                </TabPane>
+                                </Tab>
 
-                                <TabPane eventKey="data" title={ChartMessage.Data.niceToString() }>
+                                <Tab tabId="data" title={ChartMessage.Data.niceToString() }>
                                     <ChartTable chartRequest={cr} lastChartRequest={s.lastChartRequest} resultTable={s.chartResult.resultTable} onRedraw={this.handleOnDrawClick} />
-                                </TabPane>
-                            </TabContent>
+                                </Tab>
+                            </Tabs>
                         }
                     </div>
                 </div>

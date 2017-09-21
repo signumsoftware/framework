@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { MenuItem, ButtonDropdown } from 'reactstrap'
+import { DropdownItem, ButtonDropdown } from 'reactstrap'
 import { API, TreeNode, TreeNodeState, fixState } from './TreeClient'
 import { Dic, classes, DomUtils } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -52,6 +52,8 @@ interface TreeViewerState {
     simpleFilterBuilder?: React.ReactElement<any>;
     showFilters?: boolean;
 
+    isSelectOpen: boolean;
+
     draggedNode?: TreeNode;
     draggedKind?: "Move" | "Copy";
     draggedOver?: DraggedOver;
@@ -70,7 +72,8 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         super(props);
         this.state = {
             filterOptions: [],
-            showFilters: props.initialShowFilters
+            showFilters: props.initialShowFilters,
+            isSelectOpen: false
         };
     }
 
@@ -95,7 +98,11 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
                 return;
         }
 
-        this.state = { filterOptions: [], showFilters: newProps.initialShowFilters };
+        this.state = {
+            filterOptions: [],
+            showFilters: newProps.initialShowFilters,
+            isSelectOpen: false,
+        };
         this.forceUpdate();
 
         this.initilize(newProps.typeName, newProps.filterOptions);
@@ -236,16 +243,16 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     renderMenuItems(): React.ReactElement<any>[] {
 
         var menuItems = [
-            Navigator.isNavigable(this.props.typeName, undefined, true) && <MenuItem onClick={this.handleNavigate} bsClass="danger" > <i className="fa fa-arrow-right" aria-hidden="true"></i>&nbsp;{EntityControlMessage.View.niceToString()}</MenuItem >,
-            Operations.isOperationAllowed(TreeOperation.CreateChild) && <MenuItem onClick={this.handleAddChildren}><i className="fa fa-caret-square-o-right" aria-hidden="true"></i>&nbsp;{TreeViewerMessage.AddChild.niceToString()}</MenuItem>,
-            Operations.isOperationAllowed(TreeOperation.CreateNextSibling) && <MenuItem onClick={this.handleAddSibling}><i className="fa fa-caret-square-o-down" aria-hidden="true"></i>&nbsp;{TreeViewerMessage.AddSibling.niceToString()}</MenuItem>,
+            Navigator.isNavigable(this.props.typeName, undefined, true) && <DropdownItem onClick={this.handleNavigate} className="btn-danger"><i className="fa fa-arrow-right" aria-hidden="true"></i>&nbsp;{EntityControlMessage.View.niceToString()}</DropdownItem >,
+            Operations.isOperationAllowed(TreeOperation.CreateChild) && <DropdownItem onClick={this.handleAddChildren}><i className="fa fa-caret-square-o-right" aria-hidden="true"></i>&nbsp;{TreeViewerMessage.AddChild.niceToString()}</DropdownItem>,
+            Operations.isOperationAllowed(TreeOperation.CreateNextSibling) && <DropdownItem onClick={this.handleAddSibling}><i className="fa fa-caret-square-o-down" aria-hidden="true"></i>&nbsp;{TreeViewerMessage.AddSibling.niceToString()}</DropdownItem>,
         ].filter(a => a != false) as React.ReactElement<any>[];
 
         if (this.state.currentMenuItems == undefined) {
-            menuItems.push(<MenuItem header>{JavascriptMessage.loading.niceToString()}</MenuItem>);
+            menuItems.push(<DropdownItem header>{JavascriptMessage.loading.niceToString()}</DropdownItem>);
         } else {
             if (menuItems.length && this.state.currentMenuItems.length)
-                menuItems.push(<MenuItem divider />);
+                menuItems.push(<DropdownItem divider />);
 
             menuItems.splice(menuItems.length, 0, ...this.state.currentMenuItems);
         }
@@ -394,10 +401,10 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
                 <ButtonDropdown id="selectedButton"
                     className="sf-query-button sf-tm-selected"
                     title={`${JavascriptMessage.Selected.niceToString()} (${selected && selected.lite.toStr || TreeViewerMessage.AddRoot.niceToString()})`}
-                    onToggle={this.handleSelectedToggle}
+                    toggle={this.handleSelectedToggle} isOpen={s.isSelectOpen}
                     disabled={selected == undefined}>
-                    {menuItems == undefined ? <MenuItem className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</MenuItem> :
-                        menuItems.length == 0 ? <MenuItem className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</MenuItem> :
+                    {menuItems == undefined ? <DropdownItem className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</DropdownItem> :
+                        menuItems.length == 0 ? <DropdownItem className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</DropdownItem> :
                             menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
                 </ButtonDropdown>
                 <button className="btn btn-default" onClick={this.handleExplore} ><i className="glyphicon glyphicon-search"></i> &nbsp; {SearchMessage.Explore.niceToString()}</button>
@@ -405,10 +412,11 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         );
     }
 
-    handleSelectedToggle = (isOpen: boolean) => {
-
-        if (isOpen && this.state.currentMenuItems == undefined)
+    handleSelectedToggle = () => {
+        if (!this.state.isSelectOpen && this.state.currentMenuItems == undefined)
             this.loadMenuItems();
+
+        this.setState({ isSelectOpen: !this.state.isSelectOpen });
     }
 
     handleExplore = (e: React.MouseEvent<any>) => {

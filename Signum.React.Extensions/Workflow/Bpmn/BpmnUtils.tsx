@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Tabs, Tab } from 'react-bootstrap'
+import { Tabs, Tab } from 'reactstrap'
 
 
  export function isPool(elementType: string): boolean {

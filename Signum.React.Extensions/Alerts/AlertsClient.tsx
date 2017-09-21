@@ -2,7 +2,7 @@
 import { Route } from 'react-router'
 import * as moment from 'moment'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
-import { Button, OverlayTrigger, Tooltip, MenuItem } from "reactstrap"
+import { Button, Tooltip, DropdownItem } from "reactstrap"
 import { ajaxPost, ajaxPostRaw, ajaxGet, saveFile } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -27,7 +27,7 @@ export function start(options: { routes: JSX.Element[], couldHaveAlerts?: (typeN
 
     Operations.addSettings(new EntityOperationSettings(AlertOperation.CreateAlertFromEntity, {
         isVisible: ctx => couldHaveAlerts(ctx.entity.Type),
-        contextual: { icon: "fa fa-bell", iconColor: "darkorange", style: "warning", isVisible: ctx => couldHaveAlerts(ctx.context.lites[0].EntityType), }
+        contextual: { icon: "fa fa-bell", iconColor: "darkorange", color: "warning", isVisible: ctx => couldHaveAlerts(ctx.context.lites[0].EntityType), }
     }));
 
     QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({

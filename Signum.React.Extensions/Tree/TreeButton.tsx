@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { Button, MenuItem, } from 'react-bootstrap'
+import { Button, DropdownItem, } from 'reactstrap'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import { getQueryKey } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'

@@ -1,7 +1,7 @@
 
 import * as React from 'react'
 import { Route } from 'react-router'
-import { Tab } from 'react-bootstrap'
+import { Tab } from 'reactstrap'
 import { ifError } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '../../../Framework/Signum.React/Scripts/Services';
 import { SearchControl, ValueSearchControlLine } from '../../../Framework/Signum.React/Scripts/Search'

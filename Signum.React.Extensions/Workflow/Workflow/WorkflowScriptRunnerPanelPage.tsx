@@ -18,6 +18,7 @@ import {
 import { API, WorkflowScriptRunnerState } from '../WorkflowClient'
 import { CaseActivityEntity, WorkflowActivityType, DoneType, WorkflowScriptRunnerPanelPermission, CaseActivityOperation } from '../Signum.Entities.Workflow'
 import * as AuthClient from '../../Authorization/AuthClient'
+import { Tabs, Tab } from '../../../../Framework/Signum.React/Scripts/Tabs';
 
 
 interface WorkflowScriptRunnerPanelPageProps extends RouteComponentProps<{}> {
@@ -110,8 +111,8 @@ export default class WorkflowScriptRunnerPanelPage extends React.Component<Workf
                     ],
                     pagination: { elementsPerPage: 10, mode: "Firsts" }
                 }} />
-                <TabContent unmountOnExit={true} id="tabs" defaultActiveKey="logs">
-                    <TabPane title="Last operation logs" eventKey="logs">
+                <Tabs unmountOnExit={true}>
+                    <Tab title="Last operation logs" tabId="logs">
                         <SearchControl findOptions={{
                             queryName: OperationLogEntity,
                             filterOptions: [
@@ -125,8 +126,8 @@ export default class WorkflowScriptRunnerPanelPage extends React.Component<Workf
                             ],
                             pagination: { elementsPerPage: 10, mode: "Firsts" }
                         }} />
-                    </TabPane>
-                    <TabPane title="Last executed activities" eventKey="lastActivities">
+                    </Tab>
+                    <Tab title="Last executed activities" tabId="lastActivities">
                         <SearchControl findOptions={{
                             queryName: CaseActivityEntity,
                             filterOptions: [
@@ -150,8 +151,8 @@ export default class WorkflowScriptRunnerPanelPage extends React.Component<Workf
                             ],
                             pagination: { elementsPerPage: 10, mode: "Firsts" }
                         }} />
-                    </TabPane>
-                </TabContent>
+                    </Tab>
+                </Tabs>
            </div>
         );
     }

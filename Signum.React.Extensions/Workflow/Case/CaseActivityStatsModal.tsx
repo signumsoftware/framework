@@ -15,6 +15,7 @@ import { FormGroup, StyleContext } from "../../../../Framework/Signum.React/Scri
 import { CaseActivityEntity, WorkflowActivityEntity, WorkflowActivityMessage, DoneType, CaseNotificationEntity, CaseActivityMessage, WorkflowActivityType, CaseEntity } from "../Signum.Entities.Workflow";
 import { EntityLink, SearchControl } from "../../../../Framework/Signum.React/Scripts/Search";
 import { OperationLogEntity } from "../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics";
+import { Tab, Tabs } from '../../../../Framework/Signum.React/Scripts/Tabs';
 
 
 interface CaseActivityStatsModalProps extends React.Props<CaseActivityStatsModal>, IModalProps {
@@ -43,39 +44,41 @@ export default class CaseActivityStatsModal extends React.Component<CaseActivity
     render() {
 
         var caseActivityStats = this.props.caseActivityStats;
-        return <Modal bsSize="lg" onHide={this.handleCloseClicked} show={this.state.show} onExited={this.handleOnExited}>
+        return (
+            <Modal size="lg" onHide={this.handleCloseClicked} show={this.state.show} onExited={this.handleOnExited}>
 
-            <ModalHeader closeButton={true}>
-                <h4 className="modal-title">
-                    {caseActivityStats.first().WorkflowActivity.toStr} ({caseActivityStats.length} {caseActivityStats.length == 1 ? CaseActivityEntity.niceName() : CaseActivityEntity.nicePluralName()})
+                <ModalHeader closeButton={true}>
+                    <h4 className="modal-title">
+                        {caseActivityStats.first().WorkflowActivity.toStr} ({caseActivityStats.length} {caseActivityStats.length == 1 ? CaseActivityEntity.niceName() : CaseActivityEntity.nicePluralName()})
                 </h4>
-            </ModalHeader>
+                </ModalHeader>
 
-            <ModalBody>
-                {
-                    <div>
-                        {caseActivityStats.length == 1 ? <CaseActivityStatsComponent stats={caseActivityStats.first()} caseEntity={this.props.case} /> :
-                            <TabContent id="statsTabs">
-                                {
-                                    caseActivityStats.map(a =>
-                                        <TabPane key={a.CaseActivity.id} eventKey={a.CaseActivity.id} title={
-                                            a.DoneDate == null ? CaseActivityMessage.Pending.niceToString() :
-                                                <span>{a.DoneBy.toStr} {DoneType.niceName(a.DoneType)} <mark>({moment(a.DoneDate).fromNow()})</mark></span> as any}>
-                                            <CaseActivityStatsComponent stats={a} caseEntity={this.props.case} />
-                                        </TabPane>)
-                                }
-                            </TabContent>
-                        }
-                    </div>
-                }
+                <ModalBody>
+                    {
+                        <div>
+                            {caseActivityStats.length == 1 ? <CaseActivityStatsComponent stats={caseActivityStats.first()} caseEntity={this.props.case} /> :
+                                <Tabs id="statsTabs">
+                                    {
+                                        caseActivityStats.map(a =>
+                                            <Tab key={a.CaseActivity.id!.toString()} tabId={a.CaseActivity.id} eventKey={a.CaseActivity.id} title={
+                                                a.DoneDate == null ? CaseActivityMessage.Pending.niceToString() :
+                                                    <span>{a.DoneBy.toStr} {DoneType.niceName(a.DoneType)} <mark>({moment(a.DoneDate).fromNow()})</mark></span> as any}>
+                                                <CaseActivityStatsComponent stats={a} caseEntity={this.props.case} />
+                                            </Tab>)
+                                    }
+                                </Tabs>
+                            }
+                        </div>
+                    }
 
-            </ModalBody>
-            <ModalFooter>
-                <button className="btn btn-primary sf-entity-button sf-ok-button" onClick={this.handleCloseClicked}>
-                    {JavascriptMessage.ok.niceToString()}
-                </button>
-            </ModalFooter>
-        </Modal>;
+                </ModalBody>
+                <ModalFooter>
+                    <button className="btn btn-primary sf-entity-button sf-ok-button" onClick={this.handleCloseClicked}>
+                        {JavascriptMessage.ok.niceToString()}
+                    </button>
+                </ModalFooter>
+            </Modal>
+        );
     }
 
     static show(caseEntity: CaseEntity, caseActivityStats: CaseActivityStats[]): Promise<any> {
@@ -93,7 +96,7 @@ export class CaseActivityStatsComponent extends React.Component<CaseActivityStat
 
         var ctx = new StyleContext(undefined, { labelColumns: 3 });
         var stats = this.props.stats;
-        
+
         return (
             <div className="form-horizontal" >
                 <FormGroup ctx={ctx} labelText={CaseActivityEntity.niceName()}> <EntityLink lite={stats.CaseActivity} /></FormGroup>

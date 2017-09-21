@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
+import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'reactstrap'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { openModal, IModalProps } from '../../../Framework/Signum.React/Scripts/Modals';
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'

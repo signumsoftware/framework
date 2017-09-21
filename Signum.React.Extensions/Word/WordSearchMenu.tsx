@@ -1,7 +1,7 @@
 ﻿
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
-import { DropdownButton, MenuItem } from 'react-bootstrap'
+import { DropdownButton, DropdownItem } from 'reactstrap'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
@@ -52,10 +52,10 @@ export default class WordSearchMenu extends React.Component<WordSearchMenuProps>
             <DropdownButton title={label as any} id="wordTemplateDropDown" className="sf-word-dropdown">
                 {
                     wordReports.map((wt, i) =>
-                        <MenuItem key={i}
+                        <DropdownItem key={i}
                             onSelect={() => this.handleSelect(wt) }>
                             { wt.toStr }
-                        </MenuItem>)
+                        </DropdownItem>)
                 }
             </DropdownButton>
         );

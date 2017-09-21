@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
+import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'reactstrap'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
 import { SelectorMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'

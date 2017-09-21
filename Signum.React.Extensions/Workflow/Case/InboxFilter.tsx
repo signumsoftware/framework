@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
-import { Button, Panel } from "react-bootstrap"
+import { Button, Panel } from "reactstrap"
 import { Binding, LambdaMemberType } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { newMListElement } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -8,7 +8,7 @@ import { InboxFilterModel, InboxMessage, CaseNotificationState } from '../Signum
 import { TypeContext, ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EnumCheckboxList, FormGroup, FormGroupStyle, FormGroupSize, StyleContext } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl, ValueSearchControl, FilterOperation, OrderType, PaginationMode, ISimpleFilterBuilder, extractFilterValue, FilterOption, FindOptionsParsed } from '../../../../Framework/Signum.React/Scripts/Search'
 import { FilterOptionParsed } from "../../../../Framework/Signum.React/Scripts/FindOptions";
-import CollapsablePanel from "../../Basics/Templates/CollapsablePanel";
+import CollapsableCard from "../../Basics/Templates/CollapsablePanel";
 
 export default class InboxFilter extends React.Component<{ ctx: TypeContext<InboxFilterModel> }> implements ISimpleFilterBuilder {
 
@@ -34,9 +34,9 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
         var ctx4 = this.props.ctx.subCtx({ labelColumns: 4 });
 
         return (
-            <CollapsablePanel
+            <CollapsableCard
                 header={InboxMessage.Filters.niceToString()}
-                type="success"
+                color="success"
                 body={
                     <div className="sf-main-control form-horizontal">
                         <div className="row">

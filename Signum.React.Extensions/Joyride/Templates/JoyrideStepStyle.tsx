@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Tabs, Tab } from 'react-bootstrap'
+import { Tabs, Tab } from 'reactstrap'
 import { JoyrideStepStyleEntity } from '../Signum.Entities.Joyride'
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, TypeContext, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ColorTypeaheadLine } from '../../Basics/Templates/ColorTypeahead';

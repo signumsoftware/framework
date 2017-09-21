@@ -1,7 +1,7 @@
 ﻿
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
-import { ButtonDropdown, MenuItem, } from 'reactstrap'
+import { ButtonDropdown, DropdownItem } from 'reactstrap'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
@@ -15,11 +15,20 @@ export interface UserQueryMenuProps {
     searchControl: SearchControlLoaded;
 }
 
-export default class UserQueryMenu extends React.Component<UserQueryMenuProps, { currentUserQuery?: Lite<UserQueryEntity>, userQueries?: Lite<UserQueryEntity>[] }> {
+
+interface UserQueryMenuState {
+    currentUserQuery?: Lite<UserQueryEntity>;
+    userQueries?: Lite<UserQueryEntity>[];
+    isOpen: boolean;
+}
+
+
+
+export default class UserQueryMenu extends React.Component<UserQueryMenuProps, UserQueryMenuState> {
 
     constructor(props: UserQueryMenuProps) {
         super(props);
-        this.state = {};
+        this.state = { isOpen: false };
     }
 
     componentWillMount() {
@@ -32,10 +41,11 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
         }
     }
 
-    handleSelectedToggle = (isOpen: boolean) => {
-
-        if (isOpen && this.state.userQueries == undefined)
+    handleSelectedToggle = () => {
+        if (!this.state.isOpen && this.state.userQueries == undefined)
             this.reloadList().done();
+
+        this.setState({ isOpen: !this.state.isOpen });
     }
 
     reloadList(): Promise<void> {
@@ -89,18 +99,18 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
         const userQueries = this.state.userQueries;
         return (
             <ButtonDropdown title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown"
-                onToggle={this.handleSelectedToggle}>
+                toggle={this.handleSelectedToggle} isOpen={this.state.isOpen}>
                 {
                     userQueries && userQueries.map((uq, i) =>
-                        <MenuItem key={i}
+                        <DropdownItem key={i}
                             className={classes("sf-userquery", is(uq, this.state.currentUserQuery) && "active")}
                             onSelect={() => this.handleSelect(uq)}>
                             {uq.toStr}
-                        </MenuItem>)
+                        </DropdownItem>)
                 }
-                {userQueries && userQueries.length > 0 && <MenuItem divider />}
-                {this.state.currentUserQuery && <MenuItem onSelect={this.handleEdit} >{UserQueryMessage.UserQueries_Edit.niceToString()}</MenuItem>}
-                <MenuItem onSelect={this.handleCreate}>{UserQueryMessage.UserQueries_CreateNew.niceToString()}</MenuItem>
+                {userQueries && userQueries.length > 0 && <DropdownItem divider />}
+                {this.state.currentUserQuery && <DropdownItem onSelect={this.handleEdit} >{UserQueryMessage.UserQueries_Edit.niceToString()}</DropdownItem>}
+                <DropdownItem onSelect={this.handleCreate}>{UserQueryMessage.UserQueries_CreateNew.niceToString()}</DropdownItem>
             </ButtonDropdown>
         );
     }

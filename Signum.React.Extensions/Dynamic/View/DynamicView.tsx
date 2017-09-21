@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Button } from 'react-bootstrap'
+import { Button } from 'reactstrap'
 import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'

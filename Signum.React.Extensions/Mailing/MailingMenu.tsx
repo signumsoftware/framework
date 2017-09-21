@@ -1,7 +1,7 @@
 ﻿
 import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
-import { ButtonDropdown, MenuItem } from 'reactstrap'
+import { UncontrolledButtonDropdown, DropdownItem } from 'reactstrap'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
@@ -47,15 +47,15 @@ export default class MailingMenu extends React.Component<MailingMenuProps> {
         const label = <span><i className="fa fa-envelope-o"></i> &nbsp; {EmailMessageEntity.nicePluralName()}</span>;
 
         return (
-            <ButtonDropdown title={label as any} id="mailingDropDown" className="sf-mailing-dropdown">
+            <UncontrolledButtonDropdown title={label as any} id="mailingDropDown" className="sf-mailing-dropdown">
                 {
                     emailTemplates.map((wt, i) =>
-                        <MenuItem key={i}
+                        <DropdownItem key={i}
                             onSelect={() => this.handleSelect(wt) }>
                             { wt.toStr }
-                        </MenuItem>)
+                        </DropdownItem>)
                 }
-            </ButtonDropdown>
+            </UncontrolledButtonDropdown>
         );
     }
  

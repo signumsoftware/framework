@@ -1,7 +1,7 @@
 ﻿
 import * as React from 'react'
 import { Link, RouteComponentProps } from 'react-router-dom'
-import { Tabs, Tab } from 'react-bootstrap'
+import { Tabs, Tab } from 'reactstrap'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../Framework/Signum.React/Scripts/Reflection'

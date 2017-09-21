@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { ButtonDropdown, MenuItem, } from 'reactstrap'
+import { ButtonDropdown, DropdownItem, } from 'reactstrap'
 import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { Lite, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -78,15 +78,15 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, {
                 onToggle={this.handleSelectedToggle}>
                 {
                     userCharts && userCharts.map((uc, i) =>
-                        <MenuItem key={i}
+                        <DropdownItem key={i}
                             className={classes("sf-userquery", is(uc, this.state.currentUserChart) && "active") }
                             onSelect={() => this.handleSelect(uc) }>
                             { uc.toStr }
-                        </MenuItem>)
+                        </DropdownItem>)
                 }
-                { userCharts && userCharts.length > 0 && <MenuItem divider/> }
-                { this.state.currentUserChart && <MenuItem onSelect={this.handleEdit} >{ChartMessage.EditUserChart.niceToString() }</MenuItem> }
-                <MenuItem onSelect={this.handleCreate}>{ChartMessage.CreateNew.niceToString() }</MenuItem>
+                { userCharts && userCharts.length > 0 && <DropdownItem divider/> }
+                { this.state.currentUserChart && <DropdownItem onSelect={this.handleEdit} >{ChartMessage.EditUserChart.niceToString() }</DropdownItem> }
+                <DropdownItem onSelect={this.handleCreate}>{ChartMessage.CreateNew.niceToString() }</DropdownItem>
             </DropdownButton>
         );
     }

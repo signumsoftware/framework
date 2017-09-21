@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Tabs, Tab } from 'react-bootstrap'
+import { Tabs, Tab } from 'reactstrap'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
 import { classes } from '../../../Framework/Signum.React/Scripts/Globals'

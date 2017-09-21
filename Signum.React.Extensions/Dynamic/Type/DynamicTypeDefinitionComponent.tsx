@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import Combobox from 'react-widgets/lib/Combobox'
-import { PanelGroup, Panel, Tabs, Tab, MenuItem } from 'react-bootstrap'
+import { PanelGroup, Panel, Tabs, Tab, DropdownItem } from 'reactstrap'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
