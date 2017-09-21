@@ -334,7 +334,7 @@ export default class BpmnModelerComponent extends React.Component<BpmnModelerCom
         }
     }
 
-    handleZoomClick = (e: React.MouseEvent<Button>) => {
+    handleZoomClick = (e: React.MouseEvent<any>) => {
         var zoomScroll = this.modeler.get<any>("zoomScroll");
         zoomScroll.reset();
     }
