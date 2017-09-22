@@ -136,6 +136,13 @@ export function addSettings(...settings: EntitySettings<any>[]) {
     settings.forEach(s => Dic.addOrThrow(entitySettings, s.typeName, s));
 }
 
+export function getOrAddSettings<T extends ModifiableEntity>(type: Type<T>): EntitySettings<T>;
+export function getOrAddSettings(type: PseudoType): EntitySettings<ModifiableEntity>;
+export function getOrAddSettings(type: PseudoType): EntitySettings<ModifiableEntity> {
+    const typeName = getTypeName(type);
+
+    return entitySettings[typeName] || (entitySettings[typeName] = new EntitySettings(typeName));
+}
 
 export function getSettings<T extends ModifiableEntity>(type: Type<T>): EntitySettings<T> | undefined;
 export function getSettings(type: PseudoType): EntitySettings<ModifiableEntity> | undefined;

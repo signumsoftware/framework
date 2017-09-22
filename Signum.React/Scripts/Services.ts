@@ -16,7 +16,7 @@ export interface AjaxOptions {
     mode?: string;
     credentials?: string;
     cache?: string;
-    abortController?: { abort?: () => void };
+    abortController?: FetchAbortController;
 }
 
 
@@ -221,7 +221,7 @@ export class ServiceError {
 
 export interface WebApiHttpError {
     Message: string;
-    ModelState?: { [member: string]: string }
+    ModelState?: { [member: string]: string[] }
     ExceptionMessage?: string;
     ExceptionType: string;
     StackTrace?: string;
@@ -313,6 +313,9 @@ export class AbortableRequest<Q, A> {
         this.abortController = {};
 
         return this.makeCall(this.abortController, query).then(result => {
+
+            if (this.abortController == undefined)
+                return new Promise<A>(resolve => { /*never*/ });
 
             if (myIndex != this.requestIndex) //request is too old
                 return new Promise<A>(resolve => { /*never*/ });

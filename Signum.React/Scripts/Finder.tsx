@@ -731,7 +731,7 @@ export module API {
         return ajaxPost<QueryToken[]>({ url: "~/api/query/parseTokens" }, { queryKey, tokens });
     }
 
-    export function subTokens(queryKey: string, token: QueryToken | undefined, options: SubTokensOptions): Promise<QueryToken[]> {
+    export function getSubTokens(queryKey: string, token: QueryToken | undefined, options: SubTokensOptions): Promise<QueryToken[]> {
         return ajaxPost<QueryToken[]>({ url: "~/api/query/subTokens" }, { queryKey, token: token == undefined ? undefined : token.fullKey, options }).then(list => {
 
             if (token == undefined) {
@@ -962,7 +962,7 @@ export const formatRules: FormatRule[] = [
         isApplicable: col => col.token!.filterType == "DateTime",
         formatter: col => {
             const momentFormat = toMomentFormat(col.token!.format);
-            return new CellFormatter((cell: string) => cell == undefined || cell == "" ? "" : <span>{moment(cell).format(momentFormat)}</span>)
+            return new CellFormatter((cell: string) => cell == undefined || cell == "" ? "" : <bdi>{moment(cell).format(momentFormat)}</bdi>) //To avoid flippig hour and date (L LT) in RTL cultures 
         }
     },
     {

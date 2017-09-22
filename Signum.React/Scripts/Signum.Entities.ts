@@ -61,7 +61,7 @@ export interface Lite<T extends Entity> {
 }
 
 export interface ModelState {
-    [field: string]: string;
+    [field: string]: string[];
 }
 
 export interface EntityPack<T extends ModifiableEntity> {
@@ -503,6 +503,9 @@ export module ValidationMessage {
     export const _0ShouldBeADateInThePast = new MessageKey("ValidationMessage", "_0ShouldBeADateInThePast");
     export const BeInThePast = new MessageKey("ValidationMessage", "BeInThePast");
     export const _0ShouldBeGreaterThan1 = new MessageKey("ValidationMessage", "_0ShouldBeGreaterThan1");
+    export const _0ShouldBeGreaterThanOrEqual1 = new MessageKey("ValidationMessage", "_0ShouldBeGreaterThanOrEqual1");
+    export const _0ShouldBeLessThan1 = new MessageKey("ValidationMessage", "_0ShouldBeLessThan1");
+    export const _0ShouldBeLessThanOrEqual1 = new MessageKey("ValidationMessage", "_0ShouldBeLessThanOrEqual1");
     export const _0HasAPrecissionOf1InsteadOf2 = new MessageKey("ValidationMessage", "_0HasAPrecissionOf1InsteadOf2");
     export const _0ShouldBeOfType1 = new MessageKey("ValidationMessage", "_0ShouldBeOfType1");
     export const _0ShouldNotBeOfType1 = new MessageKey("ValidationMessage", "_0ShouldNotBeOfType1");

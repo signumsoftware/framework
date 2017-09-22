@@ -144,7 +144,8 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
             (c == 109) /*NumPad -*/ ||
             (c == 189) /*-*/ ||
             (e.ctrlKey && c == 86) /*Ctrl + v*/ ||
-            (e.ctrlKey && c == 67) /*Ctrl + v*/);
+            (e.ctrlKey && c == 88) /*Ctrl + x*/ ||
+            (e.ctrlKey && c == 67) /*Ctrl + c*/);
     }
 
     static isDecimal(e: React.KeyboardEvent<any>) {

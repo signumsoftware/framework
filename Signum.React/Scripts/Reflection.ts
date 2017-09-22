@@ -723,7 +723,11 @@ export function New(type: PseudoType, props?: any): ModifiableEntity {
                 e.mixins[gr.key] = m;
             });
 
-        Dic.getValues(ti.members).filter(a => a.type.isCollection).forEach(m => (result as any)[m.name.firstLower()] = []); //TODO: Collections in Embeddeds...
+        Dic.getValues(ti.members)
+            .filter(a => a.type.isCollection && !a.name.contains("."))
+            .forEach(m => (result as any)[m.name.firstLower()] = []);
+
+        //TODO: Collections in Embeddeds...
     }
 
     if (props)
@@ -740,9 +744,9 @@ export function isType(obj: any): obj is IType {
     return (obj as IType).typeName != undefined;
 }
 
-export function newLite<T extends Entity>(type: Type<T>, id: string | undefined): Lite<T>;
-export function newLite(typeName: string, id: string | undefined): Lite<Entity>;
-export function newLite(type: PseudoType, id: string | undefined): Lite<Entity>{
+export function newLite<T extends Entity>(type: Type<T>, id: number | string | undefined): Lite<T>;
+export function newLite(typeName: string, id: number | string | undefined): Lite<Entity>;
+export function newLite(type: PseudoType, id: number | string | undefined): Lite<Entity>{
     return {
         EntityType: getTypeName(type),
         id: id
@@ -754,6 +758,7 @@ export class Type<T extends ModifiableEntity> implements IType {
     New(props?: Partial<T>): T {
         return New(this.typeName, props) as T;
     }
+    
 
     constructor(
         public typeName: string) { }
@@ -1191,7 +1196,15 @@ export class GraphExplorer {
         ge.modelState = modelState == undefined ? {} : { ...modelState };
         ge.isModifiableObject(e, initialPrefix);
         if (Dic.getValues(ge.modelState).length) //Assign remaining
-            e.error = { ...e.error, ...ge.modelState } as any;
+        {
+            if (e.error == undefined)
+                e.error = {};
+
+            for (const key in ge.modelState) {
+                e.error[key] = ge.modelState[key].join("\n");
+                delete ge.modelState[key];
+            }
+        }
     }
 
     static collectModelState(e: ModifiableEntity, initialPrefix: string): ModelState {
@@ -1292,7 +1305,7 @@ export class GraphExplorer {
                     const propertyPrefix = dot(modelStatePrefix, p);
 
                     if (mod.error[p])
-                        this.modelState[dot(modelStatePrefix, p)] = mod.error[p];
+                        this.modelState[dot(modelStatePrefix, p)] = [mod.error[p]];
                 }
             }
         }
@@ -1307,7 +1320,7 @@ export class GraphExplorer {
                     if (mod.error == undefined)
                         mod.error = {};
 
-                    mod.error[propName] = this.modelState[key];
+                    mod.error[propName] = this.modelState[key].join("\n");
 
                     delete this.modelState[key];
                 }

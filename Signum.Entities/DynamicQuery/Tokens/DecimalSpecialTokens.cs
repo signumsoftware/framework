@@ -8,6 +8,7 @@ using Signum.Utilities.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.Reflection;
+using System.Globalization;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -44,7 +45,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string Key
         {
-            get { return "Step" + StepSize.ToString().Replace(".", "_"); }
+            get { return "Step" + StepSize.ToString(CultureInfo.InvariantCulture).Replace(".", "_"); }
         }
 
         protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)

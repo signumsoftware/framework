@@ -465,7 +465,7 @@ namespace Signum.Entities.Reflection
 
         public static int NumDecimals(string format)
         {
-            var str = (0.0).ToString(format).TryAfter('.');
+            var str = (0.0).ToString(format, CultureInfo.InvariantCulture).TryAfter('.');
 
             if (str == null)
                 return 0;

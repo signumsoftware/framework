@@ -136,6 +136,28 @@ namespace Signum.Utilities
 
             newCurrent.Start = PerfCounter.Ticks;
 
+            if (parent == null)
+            {
+                lock (Entries)
+                {
+                    if (newCurrent.Depth != 0)
+                        throw new InvalidOperationException("Invalid depth");
+                    newCurrent.Index = Entries.Count;
+                    Entries.Add(newCurrent);
+                }
+            }
+            else
+            {
+                if (parent.Entries == null)
+                    parent.Entries = new List<HeavyProfilerEntry>();
+
+                if (newCurrent.Depth != parent.Depth + 1)
+                    throw new InvalidOperationException("Invalid depth");
+
+                newCurrent.Index = parent.Entries.Count;
+                parent.Entries.Add(newCurrent);
+            }
+
             return new Tracer { newCurrent = newCurrent };
         }
 
@@ -154,28 +176,7 @@ namespace Signum.Utilities
                 var cur = newCurrent;
                 cur.End = PerfCounter.Ticks;
                 var parent = newCurrent.Parent;
-
-                if (parent == null)
-                {
-                    lock (Entries)
-                    {
-                        if (cur.Depth != 0)
-                            throw new InvalidOperationException("Invalid depth");
-                        cur.Index = Entries.Count;
-                        Entries.Add(cur);
-                    }
-                }
-                else
-                {
-                    if (parent.Entries == null)
-                        parent.Entries = new List<HeavyProfilerEntry>();
-
-                    if (cur.Depth != parent.Depth + 1)
-                        throw new InvalidOperationException("Invalid depth");
-
-                    cur.Index = parent.Entries.Count;
-                    parent.Entries.Add(cur);
-                }
+              
 
                 current.Value = parent;
             }
@@ -327,7 +328,8 @@ namespace Signum.Utilities
 
         public long BeforeStart;
         public long Start;
-        public long End; 
+        public long? End;
+        public long EndOrNow => End ?? PerfCounter.Ticks;
 
         public StackTrace StackTrace;
 
@@ -353,7 +355,7 @@ namespace Signum.Utilities
         {
             get
             {
-                return ((End - Start) - Descendants().Sum(a => a.BeforeStart - a.Start)) / (double)PerfCounter.FrequencyMilliseconds;
+                return ((EndOrNow - Start) - Descendants().Sum(a => a.BeforeStart - a.Start)) / (double)PerfCounter.FrequencyMilliseconds;
             }
         }
 
@@ -375,10 +377,13 @@ namespace Signum.Utilities
         {
             if (Entries != null)
             {
-                foreach (var item in Entries)
+                lock (Entries)
                 {
-                    list.Add(item);
-                    item.FillDescendants(list);
+                    foreach (var item in Entries)
+                    {
+                        list.Add(item);
+                        item.FillDescendants(list);
+                    }
                 }
             }
         }
@@ -451,8 +456,8 @@ namespace Signum.Utilities
 
         public bool Overlaps(HeavyProfilerEntry e)
         {
-            return new Interval<long>(this.BeforeStart, this.End)
-                .Overlaps(new Interval<long>(e.BeforeStart, e.End));
+            return new Interval<long>(this.BeforeStart, this.EndOrNow)
+                .Overlaps(new Interval<long>(e.BeforeStart, e.EndOrNow));
         }
     }
 

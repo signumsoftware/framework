@@ -253,15 +253,15 @@ export class TypeContext<T> extends StyleContext {
         return compose(this.prefix, suffix);
     }
 
-    tryFindParent<S extends ModifiableEntity>(type: Type<S>): S | undefined;
-    tryFindParent(type: PseudoType): ModifiableEntity | undefined;
-    tryFindParent(type: PseudoType): ModifiableEntity | undefined {
+    tryFindParentCtx<S extends ModifiableEntity>(type: Type<S>): TypeContext<S> | undefined;
+    tryFindParentCtx(type: PseudoType): TypeContext<ModifiableEntity> | undefined;
+    tryFindParentCtx(type: PseudoType): TypeContext<ModifiableEntity> | undefined {
         let current: TypeContext<any> = this;
         const typeName = getTypeName(type);
         while (current) {
             const entity = current.value as ModifiableEntity;
             if (entity && entity.Type == typeName)
-                return entity as ModifiableEntity;
+                return current as TypeContext<ModifiableEntity>;
 
             current = current.parent as TypeContext<any>;
         }
@@ -269,10 +269,28 @@ export class TypeContext<T> extends StyleContext {
         return undefined;
     }
 
+    findParentCtx<S extends ModifiableEntity>(type: Type<S>): TypeContext<S>;
+    findParentCtx(type: PseudoType): TypeContext<ModifiableEntity>;
+    findParentCtx(type: PseudoType): TypeContext<ModifiableEntity >{
+        const result = this.tryFindParentCtx(type);
+        if (result == undefined)
+            throw new Error(`No '${getTypeName(type)}' found in the parent chain`);
+
+        return result;
+    }
+
+    tryFindParent<S extends ModifiableEntity>(type: Type<S>): S | undefined;
+    tryFindParent(type: PseudoType): ModifiableEntity | undefined;
+    tryFindParent(type: PseudoType): ModifiableEntity | undefined {
+        var ctx = this.tryFindParentCtx(type);
+        return ctx && ctx.value;
+    }
+
     findParent<S extends ModifiableEntity>(type: Type<S>): S;
     findParent(type: PseudoType): ModifiableEntity;
     findParent(type: PseudoType): ModifiableEntity {
-        const result = this.tryFindParent(type);
+        var ctx = this.tryFindParentCtx(type);
+        const result = ctx && ctx.value;
         if (result == undefined)
             throw new Error(`No '${getTypeName(type)}' found in the parent chain`);
 
