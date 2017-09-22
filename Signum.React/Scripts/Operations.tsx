@@ -1,6 +1,5 @@
 ﻿import * as React from "react"
 import { Router, Route, Redirect } from "react-router"
-import { Button, Tooltip, DropdownItem, ButtonDropdown } from "reactstrap"
 import { Dic } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
@@ -118,7 +117,7 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
     hideOnCanExecute?: boolean;
     confirmMessage?: (ctx: ContextualOperationContext<T>) => string;
     onClick?: (ctx: ContextualOperationContext<T>) => void;
-    style?: BsStyle;
+    color?: BsColor;
     icon?: string;
     iconColor?: string;
     order?: number;
@@ -136,7 +135,7 @@ export interface ContextualOperationOptions<T extends Entity> {
     hideOnCanExecute?: boolean;
     confirmMessage?: (ctx: ContextualOperationContext<T>) => string;
     onClick?: (ctx: ContextualOperationContext<T>) => void;
-    style?: BsStyle;
+    color?: BsColor;
     icon?: string;
     iconColor?: string;
     order?: number;
@@ -203,7 +202,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
     hideOnCanExecute?: boolean;
     group?: EntityOperationGroup | null;
     order?: number;
-    style?: BsStyle;
+    color?: BsColor;
     withClose?: boolean;
 
     constructor(operationSymbol: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>, options: EntityOperationOptions<T>) {
@@ -216,7 +215,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
     }
 }
 
-export type BsStyle = "default" | "primary" | "success" | "info" | "warning" | "danger";
+export type BsColor = "default" | "primary" | "success" | "info" | "warning" | "danger";
 
 export interface EntityOperationOptions<T extends Entity> {
     contextual?: ContextualOperationOptions<T>;
@@ -229,7 +228,7 @@ export interface EntityOperationOptions<T extends Entity> {
     hideOnCanExecute?: boolean;
     group?: EntityOperationGroup | null;
     order?: number;
-    style?: BsStyle;
+    color?: BsColor;
     withClose?: boolean;
 }
 
@@ -261,7 +260,7 @@ export let isSave = (oi: OperationInfo): boolean => {
     return oi.key.endsWith(".Save");
 }
 
-export function autoStyleFunction(oi: OperationInfo): BsStyle {
+export function autoColorFunction(oi: OperationInfo): BsColor {
     return oi.operationType == OperationType.Delete ? "danger" :
         oi.operationType == OperationType.Execute && isSave(oi) ? "primary" : "default";
 }

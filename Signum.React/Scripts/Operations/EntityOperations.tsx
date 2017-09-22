@@ -1,6 +1,6 @@
 ﻿import * as React from "react"
 import { Router, Route, Redirect } from "react-router"
-import { Button, OverlayTrigger, Tooltip, MenuItem, DropdownButton } from "react-bootstrap"
+import { Button, UncontrolledTooltip, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from "reactstrap"
 import {
     Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, toLite, JavascriptMessage,
     OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, OperationMessage, getToString, NormalControlMessage, NormalWindowMessage
@@ -16,7 +16,7 @@ import { ajaxPost, ValidationError } from '../Services';
 import { TypeContext } from '../TypeContext';
 import {
     operationInfos, getSettings, EntityOperationSettings, EntityOperationContext, EntityOperationGroup,
-    CreateGroup, API, isEntityOperation, autoStyleFunction, isSave
+    CreateGroup, API, isEntityOperation, autoColorFunction, isSave
 } from '../Operations'
 
 
@@ -84,12 +84,17 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
             return [{
                 order: group.order != undefined ? group.order : 100,
                 button: (
-                    <DropdownButton title={group.text()} data-key={group.key} key={i} id={group.key}>
+                    <UncontrolledDropdown key={i}>
+                        <DropdownToggle data-key={group.key}>
+                            {group.text()}
+                        </DropdownToggle>
+                        <DropdownMenu>
                         {gr.elements
                             .orderBy(a => a.settings && a.settings.order)
                             .map((eoc, j) => <OperationButton eoc={eoc} key={j} group={group}/>)
                         }
-                    </DropdownButton>
+                        </DropdownMenu>
+                    </UncontrolledDropdown >
                 )
             }];
         }
@@ -131,40 +136,33 @@ export class OperationButton extends React.Component<OperationButtonProps> {
 
         if (canExecute === undefined)
             canExecute = eoc.canExecute;
-
-        var btn = this.renderButton(eoc, group, canExecute, props);
-
-        if (!canExecute)
-            return btn;
-
-        const tooltip = <Tooltip id={"tooltip_" + eoc.operationInfo.key.replace(".", "_")}>{canExecute}</Tooltip>;
-
-        return <OverlayTrigger placement="bottom" overlay={tooltip}>{btn}</OverlayTrigger>;
-    }
-
-    renderButton(eoc: EntityOperationContext<Entity>, group: EntityOperationGroup | undefined, canExecute: string | undefined | null, props: React.HTMLProps<any>) {
         
-        const bsStyle = eoc.settings && eoc.settings.style || autoStyleFunction(eoc.operationInfo);
+        const bsColor = eoc.settings && eoc.settings.color || autoColorFunction(eoc.operationInfo);
 
         const disabled = !!canExecute;
         
         const withClose = getWithClose(eoc);
 
+        const id = canExecute && "button_" + eoc.operationInfo.key.replace(".", "_");
+
+        const tooltip = canExecute && id && (<UncontrolledTooltip placement="bottom" target={id}>
+            {canExecute}
+        </UncontrolledTooltip>);
+
         if (group) {
             return (
-                <MenuItem
+                <DropdownItem
                     {...props}
-                    className={classes("btn-" + bsStyle, disabled ? "disabled" : undefined, props && props.className)}
+                    className={classes("btn-" + bsColor, disabled ? "disabled" : undefined, props && props.className)}
                     onClick={disabled ? undefined : this.handleOnClick}
-                    data-operation={eoc.operationInfo.key}
-                >
+                    data-operation={eoc.operationInfo.key}>
                     {this.renderChildren()}
-                </MenuItem>
+                </DropdownItem>
             );
         }
 
         var button = (
-            <Button bsStyle={bsStyle}
+            <Button color={bsColor}
                 {...props}
                 className={classes(disabled ? "disabled" : undefined, props && props.className)}
                 onClick={disabled ? undefined : this.handleOnClick}
@@ -179,7 +177,7 @@ export class OperationButton extends React.Component<OperationButtonProps> {
         return (
             <div className="btn-group">
                 {button}
-                <Button bsStyle={bsStyle}
+                <Button color={bsColor}
                     className={classes("dropdown-toggle dropdown-toggle-split", disabled ? "disabled" : undefined)}
                     onClick={disabled ? undefined : e => { eoc.closeRequested = true; this.handleOnClick(e); }}
                     title={NormalWindowMessage._0AndClose.niceToString(eoc.operationInfo.niceName)}>

@@ -1,7 +1,6 @@
 ﻿/// <reference path="../globals.d.ts" />
 
 import * as React from 'react'
-import { ButtonDropdown, DropdownItem, Tooltip } from 'reactstrap'
 import { Dic, DomUtils, classes, coalesce } from '../Globals'
 import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter } from '../Finder'

@@ -58,32 +58,31 @@ export default class ValueLineModal extends React.Component<ValueLineModalProps,
         const disabled = this.props.options.allowEmptyValue == false ? (ctx.value as string).trim() ? false : true : undefined;
         const valueOnChanged = this.props.options.allowEmptyValue == false ? () => this.forceUpdate() : undefined;
 
-        return <Modal size="lg" isOpen={this.state.show} onExit={this.handleOnExited}>
+        return (
+            <Modal size="lg" isOpen={this.state.show} onExit={this.handleOnExited} toggle={this.handleCancelClicked}>
+                <ModalHeader toggle={this.handleCancelClicked}>
+                    <h4 className="modal-title">
+                        {title === undefined ? SelectorMessage.ChooseAValue.niceToString() : title}
+                    </h4>
+                </ModalHeader>
 
-        return <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited}>
-
-            <ModalHeader>
-                <h4 className="modal-title">
-                    {title === undefined ? SelectorMessage.ChooseAValue.niceToString() : title}
-                </h4>
-            </ModalHeader>
-
-            <ModalBody>
-                <p>
-                    {message === undefined ? SelectorMessage.PleaseChooseAValueToContinue.niceToString() : message}
-                </p>
-                <ValueLine ctx={ctx}
-                    formGroupStyle={valueLineProps.labelText ? "Basic" : "SrOnly"} {...vlp} onChange={valueOnChanged} />
-            </ModalBody>
-            <ModalFooter>
-                <button disabled={disabled} className="btn btn-primary sf-entity-button sf-ok-button" onClick={this.handleOkClick}>
-                    {JavascriptMessage.ok.niceToString()}
-                </button>
-                <button className="btn btn-default sf-entity-button sf-close-button" onClick={this.handleCancelClicked}>
-                    {JavascriptMessage.cancel.niceToString()}
-                </button>
-            </ModalFooter>
-        </Modal>;
+                <ModalBody>
+                    <p>
+                        {message === undefined ? SelectorMessage.PleaseChooseAValueToContinue.niceToString() : message}
+                    </p>
+                    <ValueLine ctx={ctx}
+                        formGroupStyle={valueLineProps.labelText ? "Basic" : "SrOnly"} {...vlp} onChange={valueOnChanged} />
+                </ModalBody>
+                <ModalFooter>
+                    <button disabled={disabled} className="btn btn-primary sf-entity-button sf-ok-button" onClick={this.handleOkClick}>
+                        {JavascriptMessage.ok.niceToString()}
+                    </button>
+                    <button className="btn btn-default sf-entity-button sf-close-button" onClick={this.handleCancelClicked}>
+                        {JavascriptMessage.cancel.niceToString()}
+                    </button>
+                </ModalFooter>
+            </Modal>
+        );
     }
 
     static show(options: ValueLineModalOptions): Promise<any> {

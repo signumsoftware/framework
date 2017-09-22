@@ -1,6 +1,6 @@
 ﻿import * as React from "react"
 import { Router, Route, Redirect } from "react-router"
-import { Button, Tooltip, DropdownItem } from "reactstrap"
+import { Button, DropdownItem, UncontrolledTooltip } from "reactstrap"
 import {
     Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, toLite, JavascriptMessage,
     OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, OperationMessage, getToString, SearchMessage
@@ -16,7 +16,7 @@ import { Dic } from '../Globals';
 import { ajaxPost, ValidationError } from '../Services';
 import {
     operationInfos, getSettings, ContextualOperationSettings, ContextualOperationContext, EntityOperationSettings, EntityOperationContext,
-    CreateGroup, API, autoStyleFunction, isEntityOperation
+    CreateGroup, API, autoColorFunction, isEntityOperation
 } from '../Operations'
 
 
@@ -205,7 +205,7 @@ export namespace MenuItemConstructor { //To allow monkey patching
             coc.entityOperationSettings && coc.entityOperationSettings.text ? coc.entityOperationSettings.text() :
                 simplifyName(coc.operationInfo.niceName);
 
-        const bsStyle = coc.settings && coc.settings.style || coc.entityOperationSettings && coc.entityOperationSettings.style || autoStyleFunction(coc.operationInfo);
+        const bsStyle = coc.settings && coc.settings.color || coc.entityOperationSettings && coc.entityOperationSettings.color || autoColorFunction(coc.operationInfo);
         const icon = coc.settings && coc.settings.icon;
 
         const disabled = !!coc.canExecute;
@@ -215,21 +215,20 @@ export namespace MenuItemConstructor { //To allow monkey patching
             coc.settings && coc.settings.onClick ? coc.settings!.onClick!(coc) : defaultClick(coc)
         }
 
-        const menuItem = <DropdownItem
-            className={disabled ? "disabled" : undefined}
-            onClick={disabled ? undefined : onClick}
-            data-operation={coc.operationInfo.key}>
-            {icon ? <span className={classes("icon", icon)} style={{ color: coc.settings && coc.settings.iconColor }}></span> :
-                bsStyle ? <span className={classes("icon", "empty-icon", "btn-" + bsStyle)}></span> : undefined}
-            {text}
-        </DropdownItem>;
+        const id = coc.canExecute && "contexual_" + coc.operationInfo.key.replace(".", "_");
 
-        if (!coc.canExecute)
-            return menuItem;
-
-        const tooltip = <Tooltip id={"tooltip_" + coc.operationInfo.key.replace(".", "_")}>{coc.canExecute}</Tooltip>;
-
-        return <OverlayTrigger placement="right" overlay={tooltip} >{menuItem}</OverlayTrigger>;
+        return (
+            <DropdownItem
+                id={id}
+                className={disabled ? "disabled" : undefined}
+                onClick={disabled ? undefined : onClick}
+                data-operation={coc.operationInfo.key}>
+                {icon ? <span className={classes("icon", icon)} style={{ color: coc.settings && coc.settings.iconColor }}></span> :
+                    bsStyle ? <span className={classes("icon", "empty-icon", "btn-" + bsStyle)}></span> : undefined}
+                {text}
+                {coc.canExecute && id && <UncontrolledTooltip placement="right" target={id}>{coc.canExecute}</UncontrolledTooltip>}
+            </DropdownItem>
+        );
     }
 }
 

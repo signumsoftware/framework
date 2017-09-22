@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Tab, Tabs } from 'react-bootstrap'
 import { classes, Dic } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
@@ -12,6 +11,7 @@ import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessa
 import Typeahead from '../Lines/Typeahead'
 import { EntityListBase, EntityListBaseProps } from './EntityListBase'
 import { RenderEntity } from './RenderEntity'
+import { Tab, Tabs } from '../Tabs';
 
 export interface EntityTabRepeaterProps extends EntityListBaseProps {
     createAsLink?: boolean;
@@ -68,45 +68,43 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
         const readOnly = ctx.readOnly;
 
         return (
-            <Tabs id={ctx.compose("tabs")} unmountOnExit={true}>
-                    {
-                        mlistItemContext(ctx).map((mlec, i) => {
-                            const drag = this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "h") : undefined;
+            <Tabs unmountOnExit={true}>
+                {
+                    mlistItemContext(ctx).map((mlec, i) => {
+                        const drag = this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "h") : undefined;
 
-                            return <Tab  eventKey={i} key={i}
-                                {...EntityListBase.entityHtmlAttributes(mlec.value) }
-                                className="sf-repeater-element"
-                                title={
-                                    <div 
-                                        className={classes("item-group", "sf-tab-dropable", drag && drag.dropClass)}
-                                        onDragEnter={drag && drag.onDragOver}
-                                        onDragOver={drag && drag.onDragOver}
-                                        onDrop={drag && drag.onDrop}>
-                                        {getToString(mlec.value)}
-                                        &nbsp;
+                        return <Tab eventKey={i} key={i}
+                            {...EntityListBase.entityHtmlAttributes(mlec.value) }
+                            className="sf-repeater-element"
+                            title={
+                                <div
+                                    className={classes("item-group", "sf-tab-dropable", drag && drag.dropClass)}
+                                    onDragEnter={drag && drag.onDragOver}
+                                    onDragOver={drag && drag.onDragOver}
+                                    onDrop={drag && drag.onDrop}>
+                                    {getToString(mlec.value)}
+                                    &nbsp;
 										{this.canRemove(mlec.value) && !readOnly &&
-                                            <span className={classes("sf-line-button", "sf-create")}
-                                                onClick={e => this.handleRemoveElementClick(e, i)}
-                                                title={EntityControlMessage.Remove.niceToString()}>
-                                                <span className="glyphicon glyphicon-remove" />
-                                            </span>
-                                        }
-                                        &nbsp;
+                                        <span className={classes("sf-line-button", "sf-create")}
+                                            onClick={e => this.handleRemoveElementClick(e, i)}
+                                            title={EntityControlMessage.Remove.niceToString()}>
+                                            <span className="glyphicon glyphicon-remove" />
+                                        </span>
+                                    }
+                                    &nbsp;
                                         {drag && <span className={classes("sf-line-button", "sf-move")}
-                                            draggable={true}
-                                            onDragStart={drag.onDragStart}
-                                            onDragEnd={drag.onDragEnd}
-                                            title={EntityControlMessage.Move.niceToString()}>
-                                            <span className="glyphicon glyphicon-menu-hamburger" />
-                                        </span>}
-                                    </div> as any
-                                }>
+                                        draggable={true}
+                                        onDragStart={drag.onDragStart}
+                                        onDragEnd={drag.onDragEnd}
+                                        title={EntityControlMessage.Move.niceToString()}>
+                                        <span className="glyphicon glyphicon-menu-hamburger" />
+                                    </span>}
+                                </div> as any
+                            }>
                             <RenderEntity ctx={mlec} getComponent={this.props.getComponent} getViewPromise={this.props.getViewPromise} />
-                            </Tab>
-                        })
-
-                    }
-                <Tab eventKey={"x"} disabled></Tab> {/*Temporal hack*/}
+                        </Tab>
+                    })
+                }
             </Tabs>
         );
     }

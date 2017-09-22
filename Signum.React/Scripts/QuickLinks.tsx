@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Dropdown, DropdownItem, DropdownMenu } from 'reactstrap'
+import { UncontrolledDropdown, DropdownItem, DropdownMenu } from 'reactstrap'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from './TypeContext'
 import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, getQueryNiceName, getQueryKey, PseudoType, getTypeName, Type } from './Reflection'
 import { classes, Dic } from './Globals'
@@ -155,12 +155,12 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
         );
 
         return (
-            <Dropdown id="quickLinksWidget">
+            <UncontrolledDropdown id="quickLinksWidget">
                 <QuickLinkToggle bsRole="toggle" links={links} />
                 <DropdownMenu>
                     {links && links.orderBy(a => a.order).map((a, i) => React.cloneElement(a.toDropDownItem(), { key: i }))}
                 </DropdownMenu>
-            </Dropdown>
+            </UncontrolledDropdown>
 
         );
     }
@@ -182,7 +182,6 @@ class QuickLinkToggle extends React.Component<{ bsRole: string, onClick?: (e: Re
                 className={classes("badge", "sf-widgets-active", "sf-quicklinks")}
                 title={QuickLinkMessage.Quicklinks.niceToString()}
                 role="button"
-                data-toggle="dropdown"
                 onClick={this.handleOnClick} >
                 {links && <span className="glyphicon glyphicon-star"></span>}
                 {links ? "\u00A0" + links.length : "…"}

@@ -1,5 +1,4 @@
 import * as React from 'react'
-import { ButtonDropdown, DropdownItem, Tooltip } from 'reactstrap'
 import { Dic, DomUtils, classes } from '../Globals'
 import * as Finder from '../Finder'
 import {

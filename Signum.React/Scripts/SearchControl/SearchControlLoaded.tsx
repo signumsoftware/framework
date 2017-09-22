@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Dropdown, DropdownItem, Tooltip } from 'reactstrap'
+import { Dropdown, DropdownItem, UncontrolledTooltip } from 'reactstrap'
 import { Dic, DomUtils, classes } from '../Globals'
 import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter } from '../Finder'
@@ -99,10 +99,10 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     constructor(props: SearchControlLoadedProps) {
         super(props);
-        this.state = { 
-			isSelectOpen:false, 
-			showFilters: props.showFilters 
-		};
+        this.state = {
+            isSelectOpen: false,
+            showFilters: props.showFilters
+        };
     }
 
     componentWillMount() {
@@ -535,6 +535,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         return OrderUtils.setOrder(-1,
             <Dropdown id="selectedButton" className="sf-query-button sf-tm-selected" title={title}
+                isOpen={this.state.isSelectOpen}
                 toggle={this.handleSelectedToggle}
                 disabled={this.state.selectedRows!.length == 0}>
                 {this.state.currentMenuItems == undefined ? <DropdownItem className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</DropdownItem> :
@@ -937,8 +938,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
             var ra = rowAttributes ? rowAttributes(row, resultTable.columns) : undefined;
 
-            const tr = (
-                <tr key={i} data-row-index={i} data-entity={liteKey(row.entity)} onDoubleClick={e => this.handleDoubleClick(e, row)}
+            const message = mark && mark.message;
+
+            const id = message && "result_row_" + i;
+
+            return (
+                <tr key={i} data-row-index={i} data-entity={liteKey(row.entity)}
+                    onDoubleClick={e => this.handleDoubleClick(e, row)}
+                    id={id}
                     {...ra}
                     className={classes(mark && mark.className, ra && ra.className)}>
                     {this.props.allowSelection &&
@@ -953,14 +960,18 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                         </td>
                     }
 
-                    {columns.map((c, j) =>
-                        <td key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
-                            {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex], ctx)}
-                        </td>)}
+                    {
+                        columns.map((c, j) =>
+                            <td key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
+                                {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex], ctx)}
+                            </td>)
+                    }
+
+                    {message && id && <UncontrolledTooltip placement="bottom" target={id}>
+                        {message.split("\n").map((s, i) => <p key={i}>{s}</p>)}
+                    </UncontrolledTooltip>}
                 </tr>
             );
-
-            return this.wrapError(mark, i, tr);
         });
     }
 
@@ -992,18 +1003,6 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             return m;
         }
     }
-
-    wrapError(mark: MarkedRow | undefined, index: number, tr: React.ReactChild | undefined) {
-        if (!mark || !mark.message)
-            return tr;
-
-        const tooltip = <Tooltip id={"mark_" + index} target="error-tooltip">
-            {mark.message.split("\n").map((s, i) => <p key={i}>{s}</p>)}
-        </Tooltip>;
-
-        return <OverlayTrigger placement="bottom" overlay={tooltip}>{tr}</OverlayTrigger>;
-    }
-
 }
 
 function withoutAllAny(qt: QueryToken | undefined): QueryToken | undefined {
