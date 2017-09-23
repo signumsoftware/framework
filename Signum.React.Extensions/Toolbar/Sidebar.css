@@ -12,12 +12,8 @@
 
 
 @media (min-width: 768px) {
-    body:not(.rtl-mode) .sidebar-container {
+    .sidebar-container {
         flex-direction: row;
-    }
-
-    body.rtl-mode .sidebar-container {
-        flex-direction: row-reverse;
     }
 
     body:not(.rtl-mode) .sidebar {
