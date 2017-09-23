@@ -256,13 +256,13 @@ namespace Signum.React.ApiControllers
     public class ColumnTS
     {
         public string token;
-        public string dispayName;
+        public string displayName;
 
         internal Column ToColumn(QueryDescription qd)
         {
             var queryToken = QueryUtils.Parse(token, qd, SubTokensOptions.CanElement);
 
-            return new Column(queryToken, dispayName ?? queryToken.NiceName());
+            return new Column(queryToken, displayName ?? queryToken.NiceName());
         }
     }
 
