@@ -16,7 +16,7 @@ export interface ValueLineProps extends LineBaseProps, React.Props<ValueLine> {
     valueLineType?: ValueLineType;
     unitText?: React.ReactChild;
     formatText?: string;
-    autoTrim?: boolean;
+    autoFixString?: boolean;
     inlineCheckbox?: boolean | "block";
     comboBoxItems?: (OptionItem | MemberInfo | string)[];
     onTextboxBlur?: (val: any) => void;
@@ -42,6 +42,10 @@ export type ValueLineType =
     "TimeSpan";
 
 export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
+
+    static autoFixString(str: string) : string {
+        return str && str.trim();
+    }
 
     calculateDefaultState(state: ValueLineProps) {
         state.valueLineType = ValueLine.getValueLineType(state.type!);
@@ -290,14 +294,15 @@ ValueLine.renderers["TextBox" as ValueLineType] = (vl) => {
     };
 
     let handleBlur: ((e: React.SyntheticEvent<any>) => void) | undefined = undefined;
-    if (s.autoTrim == undefined || s.autoTrim == true) {
+    if (s.autoFixString == undefined || s.autoFixString == true) {
         handleBlur = (e: React.SyntheticEvent<any>) => {
             const input = e.currentTarget as HTMLInputElement;
-            if (input.value && input.value.trim() != input.value)
-                vl.setValue(input.value.trim());
+            var fixed = ValueLine.autoFixString(input.value);
+            if (fixed != input.value)
+                vl.setValue(fixed);
 
             if (vl.props.onTextboxBlur)
-                vl.props.onTextboxBlur(input.value.trim());
+                vl.props.onTextboxBlur(fixed);
         };
     }
 
@@ -346,14 +351,15 @@ ValueLine.renderers["TextArea" as ValueLineType] = (vl) => {
     };
 
     let handleBlur: ((e: React.SyntheticEvent<any>) => void) | undefined = undefined;
-    if (s.autoTrim == true) {
+    if (s.autoFixString == true) {
         handleBlur = (e: React.SyntheticEvent<any>) => {
             const input = e.currentTarget as HTMLInputElement;
-            if (input.value && input.value.trim() != input.value)
-                vl.setValue(input.value.trim());
+            var fixed = ValueLine.autoFixString(input.value);
+            if (fixed != input.value)
+                vl.setValue(fixed);
 
             if (vl.props.onTextboxBlur)
-                vl.props.onTextboxBlur(input.value.trim());
+                vl.props.onTextboxBlur(fixed);
         };
     }
 

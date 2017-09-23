@@ -95,13 +95,17 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
         //this.setState({ shown: true, items: undefined });
 
-        const query = this.input.value;
+        const query = Typeahead.normalizeString(this.input.value);
         this.props.getItems(query).then(items => this.setState({
             items: items,
             shown: true,
             query: query,
             selectedIndex: 0,
         })).done();
+    }
+
+    static normalizeString(str: string) : string {
+        return str;
     }
 
     select(e: React.KeyboardEvent<any> | React.MouseEvent<any>): boolean {        
