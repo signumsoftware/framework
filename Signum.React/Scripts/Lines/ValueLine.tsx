@@ -16,6 +16,7 @@ export interface ValueLineProps extends LineBaseProps, React.Props<ValueLine> {
     valueLineType?: ValueLineType;
     unitText?: React.ReactChild;
     formatText?: string;
+    autoTrimString?: boolean;
     autoFixString?: boolean;
     inlineCheckbox?: boolean | "block";
     comboBoxItems?: (OptionItem | MemberInfo | string)[];
@@ -43,8 +44,12 @@ export type ValueLineType =
 
 export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
 
-    static autoFixString(str: string) : string {
-        return str && str.trim();
+    static autoFixString(str: string, autoTrim: boolean): string {
+
+        if (autoTrim)
+            return str && str.trim();
+
+        return str;
     }
 
     calculateDefaultState(state: ValueLineProps) {
@@ -294,10 +299,10 @@ ValueLine.renderers["TextBox" as ValueLineType] = (vl) => {
     };
 
     let handleBlur: ((e: React.SyntheticEvent<any>) => void) | undefined = undefined;
-    if (s.autoFixString == undefined || s.autoFixString == true) {
+    if (s.autoFixString != false) {
         handleBlur = (e: React.SyntheticEvent<any>) => {
             const input = e.currentTarget as HTMLInputElement;
-            var fixed = ValueLine.autoFixString(input.value);
+            var fixed = ValueLine.autoFixString(input.value, s.autoTrimString != null ? s.autoTrimString : true);
             if (fixed != input.value)
                 vl.setValue(fixed);
 
@@ -351,10 +356,10 @@ ValueLine.renderers["TextArea" as ValueLineType] = (vl) => {
     };
 
     let handleBlur: ((e: React.SyntheticEvent<any>) => void) | undefined = undefined;
-    if (s.autoFixString == true) {
+    if (s.autoFixString != false) {
         handleBlur = (e: React.SyntheticEvent<any>) => {
             const input = e.currentTarget as HTMLInputElement;
-            var fixed = ValueLine.autoFixString(input.value);
+            var fixed = ValueLine.autoFixString(input.value, s.autoTrimString != null ? s.autoTrimString : false);
             if (fixed != input.value)
                 vl.setValue(fixed);
 
