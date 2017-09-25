@@ -309,6 +309,7 @@
   <Type Name="ScheduledTaskOperation" />
   <Type Name="SchedulerMessage" />
   <Type Name="SchedulerPermission" />
+  <Type Name="SchedulerTaskExceptionLineEntity" />
   <Type Name="ScheduleRuleMinutelyEntity" />
   <Type Name="ScheduleRuleMonthsEntity" />
   <Type Name="ScheduleRuleWeekDaysEntity" />
