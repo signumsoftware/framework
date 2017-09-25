@@ -13,17 +13,19 @@ using System.Threading.Tasks;
 
 namespace Signum.Engine
 {
+    
     public static class VirtualMList
     {
         public static FluentInclude<T> WithVirtualMList<T, L>(this FluentInclude<T> fi,
-         Func<T, MList<L>> getMList,
+         Expression<Func<T, MList<L>>> mListField,
          Expression<Func<L, Lite<T>>> getBackReference,
          ExecuteSymbol<L> saveOperation,
          DeleteSymbol<L> deleteOperation)
             where T : Entity
             where L : Entity
         {
-            return fi.WithVirtualMList(getMList, getBackReference,
+
+            return fi.WithVirtualMList(mListField, getBackReference,
                 onSave: saveOperation == null ? null : new Action<L, T>((line, e) =>
                 {
                     line.Execute(saveOperation);
@@ -35,22 +37,32 @@ namespace Signum.Engine
         }
 
         public static FluentInclude<T> WithVirtualMList<T, L>( this FluentInclude<T> fi, 
-            Func<T, MList<L>> getMList, 
+            Expression<Func<T, MList<L>>> mListField, 
             Expression<Func<L, Lite<T>>> getBackReference, 
             Action<L, T> onSave = null,
             Action<L, T> onRemove = null)
             where T : Entity
             where L : Entity
         {
-            Action<L, Lite<T>> setter = null; 
+            Func<T, MList<L>> getMList = mListField.Compile();
+            Action<L, Lite<T>> setter = null;
+            bool preserveOrder = fi.SchemaBuilder.Settings.FieldAttributes(mListField)
+                .OfType<PreserveOrderAttribute>()
+                .Any();
             var sb = fi.SchemaBuilder;
             sb.Schema.EntityEvents<T>().Retrieved += (T e) =>
             {
                 var mlist = getMList(e);
 
-                var rowIdElements = Database.Query<L>()
+                List<L> list = Database.Query<L>()
                     .Where(line => getBackReference.Evaluate(line) == e.ToLite())
-                    .ToList()
+                    .ToList();
+                if (preserveOrder)
+                {
+                    list = list.OrderBy(le => ((ICanBeOrdered)le).Order).ToList();
+                } 
+
+                var rowIdElements = list
                     .Select(line => new MList<L>.RowIdElement(line, line.Id, null));
 
                 ((IMListPrivate<L>)mlist).InnerList.AddRange(rowIdElements);
@@ -58,7 +70,13 @@ namespace Signum.Engine
 
             sb.Schema.EntityEvents<T>().Saving += (T e) =>
             {
-                if (GraphExplorer.IsGraphModified(getMList(e)))
+                var mlist = getMList(e);
+                if (preserveOrder)
+                {
+                    mlist.ForEach((o,i) => ((ICanBeOrdered) o).Order = i);
+                }
+
+                if (GraphExplorer.IsGraphModified(mlist))
                     e.SetModified();
             };
             sb.Schema.EntityEvents<T>().Saved += (T e, SavedEventArgs args) =>
@@ -81,7 +99,7 @@ namespace Signum.Engine
                 }
 
                 if (setter == null)
-                    setter = CreateGetter(getBackReference);
+                    setter = CreateSetter(getBackReference);
 
                 mlist.ForEach(line => setter(line, e.ToLite()));
                 if (onSave == null)
@@ -123,7 +141,7 @@ namespace Signum.Engine
                     return;
 
                 if (setter == null)
-                    setter = CreateGetter(getBackReference);
+                    setter = CreateSetter(getBackReference);
 
                 mlist.ForEach(line => setter(line, e.ToLite()));
                 if (onSave == null)
@@ -142,7 +160,7 @@ namespace Signum.Engine
             return fi;
         }
 
-        private static Action<L, Lite<T>> CreateGetter<T, L>(Expression<Func<L, Lite<T>>> getBackReference)
+        private static Action<L, Lite<T>> CreateSetter<T, L>(Expression<Func<L, Lite<T>>> getBackReference)
             where T : Entity
             where L : Entity
         {
