@@ -545,6 +545,29 @@ namespace Signum.Engine.Linq
 
                 return PrimaryKey.Parse(id, type);
             }
+
+            protected override Expression VisitNew(NewExpression node)
+            {
+                var expressions =  this.Visit(node.Arguments);
+
+                if (node.Members != null)
+                {
+                    for (int i = 0; i < node.Members.Count; i++)
+                    {
+                        var m = node.Members[i];
+                        var e = expressions[i];
+                        if (m is PropertyInfo pi && !pi.PropertyType.IsAssignableFrom(e.Type))
+                        {
+                            throw  new InvalidOperationException(
+                                $"Impossible to assign a '{e.Type.TypeName()}' to the member '{m.Name}' of type '{pi.PropertyType.TypeName()}'." +
+                                (e.Type.IsInstantiationOf(typeof(IEnumerable<>)) ? "\nConsider adding '.ToList()' at the end of your sub-query" : null)
+                            );
+                        }
+                    }
+                }
+
+                    return (Expression) node.Update(expressions);
+            }
         }
     }
 
