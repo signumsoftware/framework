@@ -88,7 +88,7 @@ WriteLiteral("\r\n");
     {
         ShowHeader = false,
         ShowFooter = false,
-        AllowSelection = tc.Value.AllowSelection,
+        AllowSelection = tc.Value.RenderMode == UserQueryPartRenderMode.SearchControl,
         SearchOnLoad = true,
     };
     

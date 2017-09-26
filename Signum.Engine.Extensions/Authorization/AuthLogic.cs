@@ -24,6 +24,7 @@ using Signum.Engine.Cache;
 using System.IO;
 using Signum.Entities.Mailing;
 using Signum.Engine.Translation;
+using Signum.Engine.Scheduler;
 
 namespace Signum.Engine.Authorization
 {
@@ -202,7 +203,7 @@ namespace Signum.Engine.Authorization
             return UserHolder.UserSession(user);
         }
 
-        public static Func<string, UserEntity> RetrieveUserByUsername = (username) =>Database.Query<UserEntity>().Where(u => u.UserName == username).SingleOrDefaultEx();
+        public static Func<string, UserEntity> RetrieveUserByUsername = (username) => Database.Query<UserEntity>().Where(u => u.UserName == username).SingleOrDefaultEx();
 
         public static UserEntity RetrieveUser(string username)
         {
@@ -349,6 +350,8 @@ namespace Signum.Engine.Authorization
         public static XDocument ExportRules(bool exportAll = false)
         {
             var imported = Database.Query<LastAuthRulesImportEntity>().SingleOrDefault();
+
+            SystemEventLogLogic.Log("Export AuthRules");
 
             return new XDocument(
                 new XDeclaration("1.0", "utf-8", "yes"),
@@ -580,6 +583,8 @@ namespace Signum.Engine.Authorization
                 script.PlainSqlCommand().ExecuteLeaves();
                 tr.Commit();
             }
+
+            SystemEventLogLogic.Log("Import AuthRules");
         }
 
         public static void ImportExportAuthRules()

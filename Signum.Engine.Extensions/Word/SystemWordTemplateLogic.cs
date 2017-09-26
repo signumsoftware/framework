@@ -43,6 +43,8 @@ namespace Signum.Engine.Word
     {
         ModifiableEntity UntypedEntity { get; }
 
+        Entity ApplicableTo { get; }
+        
         List<Filter> GetFilters(QueryDescription qd);
         Pagination GetPagination();
         List<Order> GetOrders(QueryDescription queryDescription);
@@ -57,6 +59,8 @@ namespace Signum.Engine.Word
         }
 
         public T Entity { get; set; }
+
+        public virtual Entity ApplicableTo => this.Entity as Entity;
 
         ModifiableEntity ISystemWordTemplate.UntypedEntity
         {
@@ -163,7 +167,6 @@ namespace Signum.Engine.Word
                 SystemWordTemplateToWordTemplates = sb.GlobalLazy(() => (
                     from et in Database.Query<WordTemplateEntity>()
                     where et.SystemWordTemplate != null
-                        && (et.Active && (et.EndDate == null || et.EndDate > TimeZoneManager.Now))
                     select new { swe = et.SystemWordTemplate, et = et.ToLite() })
                     .GroupToDictionary(pair => pair.swe.ToLite(), pair => pair.et),
                     new InvalidateWith(typeof(SystemWordTemplateEntity), typeof(WordTemplateEntity)));
@@ -207,7 +210,6 @@ namespace Signum.Engine.Word
                 template.Name = systemWordReport.FullClassName;
 
             template.SystemWordTemplate = systemWordReport;
-            template.Active = true;
             template.Query = QueryLogic.GetQueryEntity(info.QueryName);
 
             return template;
@@ -223,7 +225,7 @@ namespace Signum.Engine.Word
         {
             SystemWordTemplateEntity system = GetSystemWordTemplate(systemWordTemplate.GetType());
 
-            template = GetDefaultTemplate(system);
+            template = GetDefaultTemplate(system, systemWordTemplate.UntypedEntity as Entity);
 
             return WordTemplateLogic.CreateReport(template.ToLite(), systemWordTemplate: systemWordTemplate, avoidConversion: avoidConversion); 
         }
@@ -233,7 +235,7 @@ namespace Signum.Engine.Word
             return TypeToSystemWordTemplate.Value.GetOrThrow(type);
         }
 
-        public static WordTemplateEntity GetDefaultTemplate(SystemWordTemplateEntity systemWordTemplate)
+        public static WordTemplateEntity GetDefaultTemplate(SystemWordTemplateEntity systemWordTemplate, Entity entity)
         {
             var templates = SystemWordTemplateToWordTemplates.Value.TryGetC(systemWordTemplate.ToLite()).EmptyIfNull().Select(a => WordTemplateLogic.WordTemplatesLazy.Value.GetOrThrow(a));
             if (templates.IsNullOrEmpty() && HasDefaultTemplateConstructor(systemWordTemplate))
@@ -251,7 +253,7 @@ namespace Signum.Engine.Word
             }
 
             var isAllowed = Schema.Current.GetInMemoryFilter<WordTemplateEntity>(userInterface: false);
-            var candidates = templates.Where(isAllowed).Where(t => t.IsActiveNow());
+            var candidates = templates.Where(isAllowed).Where(t => t.IsApplicable(entity));
             return GetTemplate(candidates, systemWordTemplate, CultureInfo.CurrentCulture) ??
                 GetTemplate(candidates, systemWordTemplate, CultureInfo.CurrentCulture.Parent) ??
                 candidates.Only() ??

@@ -45,6 +45,7 @@ namespace Signum.Entities.Toolbar
             return new XElement("Toolbar",
                 new XAttribute("Guid", Guid),
                 new XAttribute("Name", Name),
+                new XAttribute("Location", Location),
                 Owner == null ? null : new XAttribute("Owner", Owner.Key()),
                 Priority == null ? null : new XAttribute("Priority", Priority.Value.ToString()),
                 new XElement("Elements", Elements.Select(p => p.ToXml(ctx))));
@@ -53,6 +54,7 @@ namespace Signum.Entities.Toolbar
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
             Name = element.Attribute("Name").Value;
+            Location = element.Attribute("Location").Value.ToEnum<ToolbarLocation>();
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse<Entity>(a.Value));
             Priority = element.Attribute("Priority")?.Let(a => int.Parse(a.Value));
             Elements.Synchronize(element.Element("Elements").Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
@@ -119,10 +121,11 @@ namespace Signum.Entities.Toolbar
                 string.IsNullOrEmpty(IconColor) ? null :  new XAttribute("IconColor", IconColor),
                 OpenInPopup ? new XAttribute("OpenInPopup", OpenInPopup) : null,
                 AutoRefreshPeriod == null ? null : new XAttribute("AutoRefreshPeriod", AutoRefreshPeriod),
-                this.Content == null ? null : new XElement("Content", this.Content is Lite<QueryEntity> ? 
-                ctx.QueryToName((Lite<QueryEntity>)this.Content) : 
+                this.Content == null ? null : new XAttribute("Content", 
+                this.Content is Lite<QueryEntity> ?  ctx.QueryToName((Lite<QueryEntity>)this.Content) : 
+                this.Content is Lite<PermissionSymbol> ?  ctx.PermissionToName((Lite<PermissionSymbol>)this.Content) :
                 (object)ctx.Include((Lite<IUserAssetEntity>)this.Content)),
-                string.IsNullOrEmpty(this.Url) ? null : new XElement("Url", this.Url));
+                string.IsNullOrEmpty(this.Url) ? null : new XAttribute("Url", this.Url));
         }
 
         internal void FromXml(XElement x, IFromXmlContext ctx)
@@ -137,8 +140,9 @@ namespace Signum.Entities.Toolbar
             var content = x.Attribute("Content")?.Value;
 
             Content = string.IsNullOrEmpty(content) ? null :
-                Guid.TryParse(content, out Guid guid) ? (Lite<Entity>)ctx.GetEntity(guid).ToLite() :
-                (Lite<Entity>)ctx.GetQuery(content).ToLite();
+                Guid.TryParse(content, out Guid guid) ? (Lite<Entity>)ctx.GetEntity(guid).ToLiteFat() :
+                (Lite<Entity>)ctx.TryGetQuery(content)?.ToLite() ??
+                (Lite<Entity>)ctx.TryPermission(content)?.ToLite();
 
             Url = x.Attribute("Url")?.Value;
         }

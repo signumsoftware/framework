@@ -12,6 +12,9 @@ using Signum.Engine.DynamicQuery;
 using Signum.Entities.UserQueries;
 using Signum.Engine.Basics;
 using Signum.React.UserAssets;
+using Signum.React.Facades;
+using Signum.Engine.UserQueries;
+using Signum.Engine.Authorization;
 
 namespace Signum.React.UserQueries
 {
@@ -31,6 +34,17 @@ namespace Signum.React.UserQueries
                     uq.ParseData(qd);
                 }
             });
+
+            EntityPackTS.AddExtension += ep =>
+            {
+                if (ep.entity.IsNew || !UserQueryPermission.ViewUserQuery.IsAuthorized())
+                    return;
+
+                var userQueries = UserQueryLogic.GetUserQueriesEntity(ep.entity.GetType());
+                if (userQueries.Any())
+                    ep.Extension.Add("userQueries", userQueries);
+            };
+
         }
     }
 }

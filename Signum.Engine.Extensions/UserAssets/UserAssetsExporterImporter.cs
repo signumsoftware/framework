@@ -22,6 +22,7 @@ using Signum.Engine.Maps;
 using Signum.Entities.UserAssets;
 using Signum.Entities.UserQueries;
 using Signum.Engine.Authorization;
+using Signum.Entities.Authorization;
 
 namespace Signum.Engine.UserAssets
 {
@@ -46,11 +47,15 @@ namespace Signum.Engine.UserAssets
             {
                 return TypeLogic.GetCleanName(TypeLogic.EntityToType.GetOrThrow(type.Retrieve()));
             }
-
-
+            
             public string QueryToName(Lite<QueryEntity> query)
             {
                 return query.Retrieve().Key;
+            }
+
+            public string PermissionToName(Lite<PermissionSymbol> symbol)
+            {
+                return symbol.Retrieve().Key;
             }
         }
 
@@ -86,9 +91,19 @@ namespace Signum.Engine.UserAssets
                 elements = doc.Element("Entities").Elements().ToDictionary(a => Guid.Parse(a.Attribute("Guid").Value));
             }
 
-            QueryEntity IFromXmlContext.GetQuery(string queryKey)
+            QueryEntity IFromXmlContext.TryGetQuery(string queryKey)
             {
-                return QueryLogic.GetQueryEntity(QueryLogic.ToQueryName(queryKey));
+                var qn = QueryLogic.TryToQueryName(queryKey);
+
+                if (qn == null)
+                    return null;
+
+                return QueryLogic.GetQueryEntity(qn);
+            }
+            
+            public PermissionSymbol GetPermission(string permissionKey)
+            {
+                return SymbolLogic<PermissionSymbol>.TryToSymbol(permissionKey);
             }
 
             public IUserAssetEntity GetEntity(Guid guid)
@@ -148,6 +163,11 @@ namespace Signum.Engine.UserAssets
             {
                 return DynamicQueryManager.Current.QueryDescription(QueryLogic.QueryNames.GetOrThrow(Query.Key));
             }
+
+            public PermissionSymbol TryPermission(string permissionKey)
+            {
+                return SymbolLogic<PermissionSymbol>.TryToSymbol(permissionKey);
+            }
         }
 
         public static UserAssetPreviewModel Preview(byte[] doc)
@@ -175,9 +195,14 @@ namespace Signum.Engine.UserAssets
                 elements = doc.Element("Entities").Elements().ToDictionary(a => Guid.Parse(a.Attribute("Guid").Value));
             }
 
-            QueryEntity IFromXmlContext.GetQuery(string queryKey)
+            QueryEntity IFromXmlContext.TryGetQuery(string queryKey)
             {
-                return QueryLogic.GetQueryEntity(QueryLogic.ToQueryName(queryKey));
+                var qn = QueryLogic.TryToQueryName(queryKey);
+
+                if (qn == null)
+                    return null;
+
+                return QueryLogic.GetQueryEntity(qn);
             }
 
             public IUserAssetEntity GetEntity(Guid guid)
@@ -233,6 +258,11 @@ namespace Signum.Engine.UserAssets
             public QueryDescription GetQueryDescription(QueryEntity Query)
             {
                 return DynamicQueryManager.Current.QueryDescription(QueryLogic.QueryNames.GetOrThrow(Query.Key));
+            }
+
+            public PermissionSymbol TryPermission(string permissionKey)
+            {
+                return SymbolLogic<PermissionSymbol>.TryToSymbol(permissionKey);
             }
         }
 

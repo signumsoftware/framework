@@ -342,7 +342,7 @@ namespace Signum.Engine.Mailing
                     {
                         Exception = f.Exception.LogException().ToLite(), 
                         Line = f.NewsletterDelivery,
-                        Process = executingProcess.CurrentExecution.ToLite(),
+                        Process = executingProcess.CurrentProcess.ToLite(),
                     }.Save();
                 }
 

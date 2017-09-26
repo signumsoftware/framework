@@ -15,6 +15,9 @@ using Signum.Entities.Chart;
 using Signum.Entities;
 using Signum.React.ApiControllers;
 using Signum.Entities.DynamicQuery;
+using Signum.React.Facades;
+using Signum.Engine.Chart;
+using Signum.Engine.Authorization;
 
 namespace Signum.React.Chart
 {
@@ -78,6 +81,17 @@ namespace Signum.React.Chart
             UserChartEntity.SetConverters(
                 query => QueryLogic.ToQueryName(query.Key),
                 queryName => QueryLogic.GetQueryEntity(queryName));
+
+            EntityPackTS.AddExtension += ep =>
+            {
+                if (ep.entity.IsNew || !ChartPermission.ViewCharting.IsAuthorized())
+                    return;
+
+                var userCharts = UserChartLogic.GetUserChartsEntity(ep.entity.GetType());
+                if (userCharts.Any())
+                    ep.Extension.Add("userCharts", userCharts);
+            };
+
         }
 
         private static void CustomizeChartRequest()

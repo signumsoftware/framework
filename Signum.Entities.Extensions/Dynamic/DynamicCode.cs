@@ -1,5 +1,6 @@
 ﻿using Signum.Utilities;
 using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -109,5 +110,8 @@ namespace Signum.Entities.Dynamic
         {
             return namespaces.ToString(ns => "using {0};\r\n".FormatWith(ns), "");
         }
+
+        public static Func<string, List<CompilerError>> GetCustomErrors;
+
     }
 }

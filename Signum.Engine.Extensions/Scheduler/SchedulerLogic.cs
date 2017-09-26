@@ -54,6 +54,15 @@ namespace Signum.Engine.Scheduler
             return ExecutionsSTExpression.Evaluate(e);
         }
 
+
+        static Expression<Func<ScheduledTaskLogEntity, IQueryable<SchedulerTaskExceptionLineEntity>>> ExceptionLinesExpression =
+        e => Database.Query<SchedulerTaskExceptionLineEntity>().Where(a => a.SchedulerTaskLog.RefersTo(e));
+        [ExpressionField]
+        public static IQueryable<SchedulerTaskExceptionLineEntity> ExceptionLines(this ScheduledTaskLogEntity e)
+        {
+            return ExceptionLinesExpression.Evaluate(e);
+        }
+
         public static Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>>> ExecuteTask = new Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>>>();
 
         public class ScheduledTaskPair
@@ -120,6 +129,16 @@ namespace Signum.Engine.Scheduler
 
                     });
 
+                sb.Include<SchedulerTaskExceptionLineEntity>()
+                    .WithQuery(dqm, () => cte => new
+                    {
+                        Entity = cte,
+                        cte.Id,
+                        cte.ElementInfo,
+                        cte.Exception,
+                        cte.SchedulerTaskLog,
+                    });
+
                 new Graph<ScheduledTaskLogEntity>.Execute(ScheduledTaskLogOperation.CancelRunningTask)
                 {
                     CanExecute = e => RunningTasks.ContainsKey(e) ? null : SchedulerMessage.TaskIsNotRunning.NiceToString(),
@@ -138,6 +157,7 @@ namespace Signum.Engine.Scheduler
                 dqm.RegisterExpression((ITaskEntity ct) => ct.Executions(), () => ITaskMessage.Executions.NiceToString());
                 dqm.RegisterExpression((ITaskEntity ct) => ct.LastExecution(), () => ITaskMessage.LastExecution.NiceToString());
                 dqm.RegisterExpression((ScheduledTaskEntity ct) => ct.Executions(), () => ITaskMessage.Executions.NiceToString());
+                dqm.RegisterExpression((ScheduledTaskLogEntity ct) => ct.ExceptionLines(), () => ITaskMessage.ExceptionLines.NiceToString());
 
                 new Graph<HolidayCalendarEntity>.Execute(HolidayCalendarOperation.Save)
                 {
@@ -185,6 +205,8 @@ namespace Signum.Engine.Scheduler
 
                 ScheduledTasksLazy.OnReset += ScheduledTasksLazy_OnReset;
 
+                sb.Schema.EntityEvents<ScheduledTaskLogEntity>().PreUnsafeDelete += query => query.SelectMany(e => e.ExceptionLines()).UnsafeDelete();
+
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }
         }
@@ -216,6 +238,8 @@ namespace Signum.Engine.Scheduler
             running = true;
 
             ReloadPlan();
+
+            SystemEventLogLogic.Log("Start ScheduledTasks");
         }
 
         public static void StartScheduledTaskAfter(int initialDelayMilliseconds)
@@ -243,6 +267,8 @@ namespace Signum.Engine.Scheduler
                 timer.Change(Timeout.Infinite, Timeout.Infinite);
                 priorityQueue.Clear();
             }
+
+            SystemEventLogLogic.Log("Stop ScheduledTasks");
         }
 
         static void ReloadPlan()
@@ -401,7 +427,7 @@ namespace Signum.Engine.Scheduler
 
                 try
                 {
-                    var ctx = new ScheduledTaskContext();
+                    var ctx = new ScheduledTaskContext { Log = stl };
                     RunningTasks.TryAdd(stl, ctx);
 
                     using (UserHolder.UserSession(entityIUser))
@@ -474,6 +500,14 @@ namespace Signum.Engine.Scheduler
                 }).ToList()
             };
         }
+
+        public static void StopRunningTasks()
+        {
+            foreach (var item in RunningTasks.Values)
+            {
+                item.CancellationTokenSource.Cancel();
+            }
+        }
     }
 
     public class SchedulerState
@@ -502,10 +536,61 @@ namespace Signum.Engine.Scheduler
 
     public class ScheduledTaskContext
     {
-        public StringBuilder StringBuilder = new StringBuilder();
-        internal CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
+        public ScheduledTaskLogEntity Log { internal get; set; }
+
+        public StringBuilder StringBuilder { get; } = new StringBuilder();
+        internal CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();
 
         public CancellationToken CancellationToken => CancellationTokenSource.Token;
+        
+        public void Foreach<T>(IEnumerable<T> collection, Func<T, string> elementID, Action<T> action)
+        {
+            foreach (var item in collection)
+            {
+                this.CancellationToken.ThrowIfCancellationRequested();
+
+                using (HeavyProfiler.Log("Foreach", () => elementID(item)))
+                {
+                    try
+                    {
+                        using (Transaction tr = Transaction.ForceNew())
+                        {
+                            action(item);
+                            tr.Commit();
+                        }
+                    }
+                    catch(OperationCanceledException e)
+                    {
+                        throw;
+                    }
+                    catch (Exception e)
+                    {
+                        var ex = e.LogException();
+                        using (ExecutionMode.Global())
+                        using (Transaction tr = Transaction.ForceNew())
+                        {
+                            new SchedulerTaskExceptionLineEntity
+                            {
+                                Exception = ex.ToLite(),
+                                SchedulerTaskLog = this.Log.ToLite(),
+                                ElementInfo = elementID(item)
+                            }.Save();
+
+                            tr.Commit();
+                        }
+                    }
+                }
+            }
+        }
+
+
+        public void ForeachWriting<T>(IEnumerable<T> collection, Func<T, string> elementID, Action<T> action)
+        {
+            this.Foreach(collection, elementID, e =>
+            {
+                this.StringBuilder.AppendLine(elementID(e));
+                action(e);
+            });
+        }
     }
-    
 }

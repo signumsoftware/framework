@@ -12,7 +12,7 @@ import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { API } from '../AuthClient'
-import { QueryRulePack, QueryAllowedRule, AuthAdminMessage, PermissionSymbol, AuthMessage } from '../Signum.Entities.Authorization'
+import { QueryRulePack, QueryAllowedRule, AuthAdminMessage, PermissionSymbol, AuthMessage, QueryAllowed } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 
 import "./AuthAdmin.css"
@@ -56,10 +56,13 @@ export default class QueryRulesPackControl extends React.Component<{ ctx: TypeCo
                                 { PermissionSymbol.niceName() }
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                {AuthAdminMessage.Allow.niceToString() }
+                                {QueryAllowed.niceName("Allow")}
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                {AuthAdminMessage.Deny.niceToString() }
+                                {QueryAllowed.niceName("EmbeddedOnly")}
+                            </th>
+                            <th style={{ textAlign: "center" }}>
+                                {QueryAllowed.niceName("None")}
                             </th>
                             <th style={{ textAlign: "center" }}>
                                 {AuthAdminMessage.Overriden.niceToString() }
@@ -73,10 +76,13 @@ export default class QueryRulesPackControl extends React.Component<{ ctx: TypeCo
                                     {c.value.resource.toStr}
                                 </td>
                                 <td style={{ textAlign: "center" }}>
-                                    {this.renderRadio(c.value, true, "green") }
+                                    {this.renderRadio(c.value, "Allow", "green")}
                                 </td>
                                 <td style={{ textAlign: "center" }}>
-                                    {this.renderRadio(c.value, false, "red") }
+                                    {this.renderRadio(c.value, "EmbeddedOnly", "#FFAD00")}
+                                </td>
+                                <td style={{ textAlign: "center" }}>
+                                    {this.renderRadio(c.value, "None", "red")}
                                 </td>
                                 <td style={{ textAlign: "center" }}>
                                     <GrayCheckbox checked={c.value.allowed != c.value.allowedBase} onUnchecked={() => {
@@ -95,7 +101,7 @@ export default class QueryRulesPackControl extends React.Component<{ ctx: TypeCo
         );
     }
 
-    renderRadio(c: QueryAllowedRule, allowed: boolean, color: string) {
+    renderRadio(c: QueryAllowedRule, allowed: QueryAllowed, color: string) {
 
         if (c.coercedValues.contains(allowed))
             return;

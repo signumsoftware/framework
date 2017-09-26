@@ -24,7 +24,10 @@ export default class TreeButton extends React.Component<TreeButtonProps> {
 
         const path = TreeClient.treePath(fo.queryKey, Finder.toFilterOptions(fo.filterOptions));
 
-        Navigator.pushOrOpenInTab(path, e);
+        if (this.props.searchControl.props.avoidChangeUrl)
+            window.open(Navigator.toAbsoluteUrl(path));
+        else
+            Navigator.pushOrOpenInTab(path, e);
     }
     
     render() {

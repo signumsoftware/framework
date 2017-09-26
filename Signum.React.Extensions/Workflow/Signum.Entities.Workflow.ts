@@ -24,6 +24,18 @@ export interface WorkflowEntitiesDictionary {
     [bpmnElementId: string]: Entities.ModelEntity
 }
 
+export const ActivityWithRemarks = new Type<ActivityWithRemarks>("ActivityWithRemarks");
+export interface ActivityWithRemarks extends Entities.ModelEntity {
+    Type: "ActivityWithRemarks";
+    workflowActivity?: Entities.Lite<WorkflowActivityEntity> | null;
+    case?: Entities.Lite<CaseEntity> | null;
+    caseActivity?: Entities.Lite<CaseActivityEntity> | null;
+    notification?: Entities.Lite<CaseNotificationEntity> | null;
+    remarks?: string | null;
+    alerts?: number;
+    tags: Array<CaseTagTypeEntity>;
+}
+
 export const BpmnEntityPairEmbedded = new Type<BpmnEntityPairEmbedded>("BpmnEntityPairEmbedded");
 export interface BpmnEntityPairEmbedded extends Entities.EmbeddedEntity {
     Type: "BpmnEntityPairEmbedded";
@@ -216,6 +228,7 @@ export module InboxMessage {
     export const Activity = new MessageKey("InboxMessage", "Activity");
     export const SenderNote = new MessageKey("InboxMessage", "SenderNote");
     export const Sender = new MessageKey("InboxMessage", "Sender");
+    export const Filters = new MessageKey("InboxMessage", "Filters");
 }
 
 export interface IWorkflowNodeEntity extends IWorkflowObjectEntity, Entities.Entity {
@@ -286,7 +299,6 @@ export interface WorkflowActivityEntity extends Entities.Entity, IWorkflowNodeEn
     timeout?: WorkflowTimeoutEmbedded | null;
     estimatedDuration?: number | null;
     viewName?: string | null;
-    validationRules: Entities.MList<WorkflowActivityValidationEmbedded>;
     jumps: Entities.MList<WorkflowJumpEmbedded>;
     script?: WorkflowScriptPartEmbedded | null;
     xml?: WorkflowXmlEmbedded | null;
@@ -299,6 +311,7 @@ export module WorkflowActivityMessage {
     export const ChooseADestinationForWorkflowJumping = new MessageKey("WorkflowActivityMessage", "ChooseADestinationForWorkflowJumping");
     export const CaseFlow = new MessageKey("WorkflowActivityMessage", "CaseFlow");
     export const AverageDuration = new MessageKey("WorkflowActivityMessage", "AverageDuration");
+    export const ActivityIs = new MessageKey("WorkflowActivityMessage", "ActivityIs");
 }
 
 export const WorkflowActivityModel = new Type<WorkflowActivityModel>("WorkflowActivityModel");
@@ -313,7 +326,6 @@ export interface WorkflowActivityModel extends Entities.ModelEntity {
     reject?: WorkflowRejectEmbedded | null;
     timeout?: WorkflowTimeoutEmbedded | null;
     estimatedDuration?: number | null;
-    validationRules: Entities.MList<WorkflowActivityValidationEmbedded>;
     jumps: Entities.MList<WorkflowJumpEmbedded>;
     script?: WorkflowScriptPartEmbedded | null;
     viewName?: string | null;
@@ -334,14 +346,6 @@ export type WorkflowActivityType =
     "DecompositionWorkflow" |
     "CallWorkflow" |
     "Script";
-
-export const WorkflowActivityValidationEmbedded = new Type<WorkflowActivityValidationEmbedded>("WorkflowActivityValidationEmbedded");
-export interface WorkflowActivityValidationEmbedded extends Entities.EmbeddedEntity {
-    Type: "WorkflowActivityValidationEmbedded";
-    rule?: Entities.Lite<Dynamic.DynamicValidationEntity> | null;
-    onAccept?: boolean;
-    onDecline?: boolean;
-}
 
 export const WorkflowConditionEntity = new Type<WorkflowConditionEntity>("WorkflowCondition");
 export interface WorkflowConditionEntity extends Entities.Entity {

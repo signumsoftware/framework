@@ -325,10 +325,10 @@ namespace Signum.Engine.Tree
                          var list = descendants.Select(oldNode =>
                          {
                              var newNode = copy(oldNode, model);
-                             newNode.Name = oldNode.Name;
                              if (hasDisabledMixin)
                                  newNode.Mixin<DisabledMixin>().IsDisabled = oldNode.Mixin<DisabledMixin>().IsDisabled || isParentDisabled;
 
+                             newNode.ParentOrSibling = model.NewParent;
                              newNode.Route = oldNode.Route.GetReparentedValue(t.Route, newRoute);
                              newNode.SetFullName(newNode.Name);
                              return newNode;

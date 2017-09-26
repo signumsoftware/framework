@@ -27,6 +27,7 @@ export interface FileLineProps extends EntityBaseProps {
     fileType?: FileTypeSymbol;
     accept?: string;
     configuration?: FileDownloaderConfiguration<IFile>;
+    helpBlock?: React.ReactChild;
 }
 
 
@@ -56,7 +57,10 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineProps> {
         const hasValue = !!s.ctx.value;
 
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} labelHtmlAttributes={s.labelHtmlAttributes} htmlAttributes={{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes }}>
+            <FormGroup ctx={s.ctx} labelText={s.labelText}
+                labelHtmlAttributes={s.labelHtmlAttributes}
+                htmlAttributes={{ ...this.baseHtmlAttributes(), ...EntityBase.entityHtmlAttributes(s.ctx.value), ...s.formGroupHtmlAttributes }}
+                helpBlock={this.props.helpBlock}>
                 {hasValue ? this.renderFile() : s.ctx.readOnly ? undefined :
                     <FileUploader
                         accept={this.props.accept}
@@ -76,18 +80,24 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineProps> {
 
         const val = this.state.ctx.value!;
 
+        const content = this.state.download == "None" ?
+            <span className="form-control file-control">{val.toStr}</span> :
+            <FileDownloader
+                configuration={this.props.configuration}
+                download={this.props.download}
+                entityOrLite={val}
+                htmlAttributes={{ className: "form-control file-control" }} />;
+
+        const removeButton = this.renderRemoveButton(true, val);
+
+        if (removeButton == null)
+            return content;
+
         return (
             <div className="input-group">
-                {
-                    this.state.download == "None" ? <span className="form-control file-control">{val.toStr}</span> :
-                        <FileDownloader
-                            configuration={this.props.configuration}
-                            download={this.props.download}
-                            entityOrLite={val}
-                            htmlAttributes={{ className: "form-control file-control" }} />
-                }
+                {content}
                 <span className="input-group-btn">
-                    {this.renderRemoveButton(true, val) }
+                    {removeButton }
                 </span>
             </div>
         );

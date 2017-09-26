@@ -16,6 +16,7 @@ using System.Reflection;
 using Signum.Entities.UserAssets;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities;
+using Signum.Entities.Templating;
 
 namespace Signum.Entities.Mailing
 {
@@ -58,7 +59,7 @@ namespace Signum.Entities.Mailing
         public MList<EmailTemplateRecipientEntity> Recipients { get; set; } = new MList<EmailTemplateRecipientEntity>();
 
         [NotNullable, PreserveOrder]
-        [NotNullValidator, NoRepeatValidator, ImplementedBy(), NotifyChildProperty]
+        [NotNullValidator, NoRepeatValidator, ImplementedBy(typeof(ImageAttachmentEntity)), NotifyChildProperty]
         public MList<IAttachmentGeneratorEntity> Attachments { get; set; } = new MList<IAttachmentGeneratorEntity>();
 
         public Lite<EmailMasterTemplateEntity> MasterTemplate { get; set; }
@@ -68,31 +69,12 @@ namespace Signum.Entities.Mailing
         [NotifyCollectionChanged, NotifyChildProperty]
         public MList<EmailTemplateMessageEmbedded> Messages { get; set; } = new MList<EmailTemplateMessageEmbedded>();
 
-        public bool Active { get; set; }
-
-        [MinutesPrecissionValidator]
-        public DateTime? StartDate { get; set; }
-
-        [MinutesPrecissionValidator]
-        public DateTime? EndDate { get; set; }
-
-        static Expression<Func<EmailTemplateEntity, bool>> IsActiveNowExpression =
-            (mt) => mt.Active && TimeZoneManager.Now.IsInInterval(mt.StartDate, mt.EndDate);
-        [ExpressionField]
-        public bool IsActiveNow()
-        {
-            return IsActiveNowExpression.Evaluate(this);
-        }
-
+        [NotifyChildProperty]
+        public TemplateApplicableEval Applicable { get; set; }
+        
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {
-            if (pi.Name == nameof(StartDate) || pi.Name == nameof(EndDate))
-            {
-                if (EndDate != null && EndDate < StartDate)
-                    return EmailTemplateMessage.EndDateMustBeHigherThanStartDate.NiceToString();
-            }
-
-            if (pi.Name == nameof(Messages) && Active)
+            if (pi.Name == nameof(Messages))
             {
                 if (Messages == null || !Messages.Any())
                     return EmailTemplateMessage.ThereAreNoMessagesForTheTemplate.NiceToString();
@@ -119,6 +101,21 @@ namespace Signum.Entities.Mailing
 
             if (From != null && From.Token != null)
                 From.Token.ParseData(this, queryDescription, SubTokensOptions.CanElement);
+        }
+
+        public bool IsApplicable(Entity entity)
+        {
+            if (Applicable == null)
+                return true;
+
+            try
+            {
+                return Applicable.Algorithm.ApplicableUntyped(entity);
+            }
+            catch (Exception e)
+            {
+                throw new ApplicationException($"Error evaluating Applicable for EmailTemplate '{Name}' with entity '{entity}': " + e.Message, e);
+            }
         }
     }
 
@@ -227,8 +224,6 @@ namespace Signum.Entities.Mailing
         public static ConstructSymbol<EmailTemplateEntity>.From<SystemEmailEntity> CreateEmailTemplateFromSystemEmail;
         public static ConstructSymbol<EmailTemplateEntity>.Simple Create;
         public static ExecuteSymbol<EmailTemplateEntity> Save;
-        public static ExecuteSymbol<EmailTemplateEntity> Enable;
-        public static ExecuteSymbol<EmailTemplateEntity> Disable;
         public static DeleteSymbol<EmailTemplateEntity> Delete;
     }
 
@@ -244,12 +239,8 @@ namespace Signum.Entities.Mailing
         TheresMoreThanOneMessageForTheSameLanguage,
         [Description("The text must contain {0} indicating replacement point")]
         TheTextMustContain0IndicatingReplacementPoint,
-        [Description("The template is already active")]
-        TheTemplateIsAlreadyActive,
-        [Description("The template is already inactive")]
-        TheTemplateIsAlreadyInactive,
-        [Description("SystemEmail should be set to access model {0}")]
-        SystemEmailShouldBeSetToAccessModel0,
+        [Description("Impossible to access {0} because the template has no {1}")]
+        ImpossibleToAccess0BecauseTheTemplateHAsNo1,
         NewCulture,
         TokenOrEmailAddressMustBeSet,
         TokenAndEmailAddressCanNotBeSetAtTheSameTime,

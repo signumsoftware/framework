@@ -20,6 +20,9 @@ namespace Signum.Entities.Printing
     {
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
+        [Ignore]
+        public FileTypeSymbol TestFileType { get; set; }
+
         [NotNullable]
         [NotNullValidator]
         public FilePathEmbedded File { get; set; }
@@ -37,6 +40,7 @@ namespace Signum.Entities.Printing
             new StateValidator<PrintLineEntity, PrintLineState>
             (n => n.State, n => n.PrintedOn, n=>n.Package)
             {
+                { PrintLineState.NewTest,           false, false },
                 { PrintLineState.ReadyToPrint,      false, false },
                 { PrintLineState.Enqueued,          false, true  },
                 { PrintLineState.Printed,           true,  null  },
@@ -51,6 +55,7 @@ namespace Signum.Entities.Printing
     }
     public enum PrintLineState
     {
+        NewTest, 
         ReadyToPrint,
         Enqueued,
         Printed,
@@ -62,6 +67,8 @@ namespace Signum.Entities.Printing
     [AutoInit]
     public static class PrintLineOperation
     {
+        public static ConstructSymbol<PrintLineEntity>.Simple CreateTest;
+        public static ExecuteSymbol<PrintLineEntity> SaveTest;
         public static ExecuteSymbol<PrintLineEntity> Print;
         public static ExecuteSymbol<PrintLineEntity> Retry;
         public static ExecuteSymbol<PrintLineEntity> Cancel;

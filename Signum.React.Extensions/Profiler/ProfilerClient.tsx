@@ -8,7 +8,7 @@ import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scr
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import { PseudoType, QueryKey, GraphExplorer, OperationType  } from '../../../Framework/Signum.React/Scripts/Reflection'
+import { PseudoType, QueryKey, GraphExplorer, OperationType } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { ProfilerPermission } from './Signum.Entities.Profiler'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
@@ -28,7 +28,7 @@ export function start(options: { routes: JSX.Element[] }) {
         key: "ProfilerHeavy",
         onClick: () => Promise.resolve("~/profiler/heavy")
     });
-    
+
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(ProfilerPermission.ViewTimeTracker),
         key: "ProfilerTimes",
@@ -46,7 +46,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
 export module API {
 
-    export module  Heavy {
+    export module Heavy {
         export function setEnabled(isEnabled: boolean): Promise<void> {
             return ajaxPost<void>({ url: "~/api/profilerHeavy/setEnabled/" + isEnabled }, undefined);
         }
@@ -108,10 +108,11 @@ export interface HeavyProfilerEntry {
     Start: number;
     End: number;
     Elapsed: string;
+    IsFinished: boolean;
     Role: string;
     Color: string;
-    Depth : number;
-    AsyncDepth : number;
+    Depth: number;
+    AsyncDepth: number;
     AdditionalData: string;
     FullIndex: string;
     StackTrace: string;
@@ -120,16 +121,16 @@ export interface HeavyProfilerEntry {
 
 export interface TimeTrackerEntry {
     key: string;
-    count: number;        
+    count: number;
     averageTime: number;
     totalTime: number;
 
     lastTime: number;
     lastDate: string;
-    
+
     maxTime: number;
     maxDate: string;
-    
+
     minTime: number;
     minDate: string;
 }

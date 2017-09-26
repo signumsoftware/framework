@@ -145,7 +145,7 @@ namespace Signum.Entities.UserQueries
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Query = ctx.GetQuery(element.Attribute("Query").Value);
+            Query = ctx.TryGetQuery(element.Attribute("Query").Value);
             DisplayName = element.Attribute("DisplayName").Value;
             EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value));
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value));

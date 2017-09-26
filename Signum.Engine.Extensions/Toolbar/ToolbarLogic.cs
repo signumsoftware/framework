@@ -213,7 +213,7 @@ namespace Signum.Engine.Toolbar
 
         static Dictionary<Type, Func<Lite<Entity>, bool>> IsAuthorizedDictionary = new Dictionary<Type, Func<Lite<Entity>, bool>>
         {
-            { typeof(QueryEntity), a => DynamicQueryManager.Current.QueryAllowed(QueryLogic.QueryNames.GetOrThrow(a.ToString()))  },
+            { typeof(QueryEntity), a => DynamicQueryManager.Current.QueryAllowed(QueryLogic.QueryNames.GetOrThrow(a.ToString()), true)  },
             { typeof(PermissionSymbol), a => PermissionAuthLogic.IsAuthorized((PermissionSymbol)a.Retrieve()) },
             { typeof(UserQueryEntity), a => InMemoryFilter(UserQueryLogic.UserQueries.Value.GetOrCreate((Lite<UserQueryEntity>)a)) },
             { typeof(UserChartEntity), a => InMemoryFilter(UserChartLogic.UserCharts.Value.GetOrCreate((Lite<UserChartEntity>)a)) },

@@ -6,5 +6,5 @@
 @using (var tc = Html.TypeContext<UserQueryPartEntity>())
 {
     @Html.EntityLine(tc, pp => pp.UserQuery, el => el.Create = false)
-    @Html.ValueLine(tc, pp => pp.AllowSelection)
+    @Html.ValueLine(tc, pp => pp.RenderMode)
 }

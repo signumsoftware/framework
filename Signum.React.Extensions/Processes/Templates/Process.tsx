@@ -20,14 +20,14 @@ export default class Process extends React.Component<{ ctx: TypeContext<ProcessE
 
     reloadIfNecessary(e : ProcessEntity){
         if((e.state == "Executing" || e.state == "Queued") && this.handler == undefined) {
-            this.handler = setTimeout(()=> {
+            this.handler = setTimeout(() => {
                 this.handler = undefined;
                 const lite = toLite(e);
                 this.processExceptionsCounter && this.processExceptionsCounter.refreshValue();
                 Navigator.API.fetchEntityPack(lite)
                     .then(pack => this.props.ctx.frame!.onReload(pack))
-                    .done(); 
-            });
+                    .done();
+            }, 500);
         }
     }
 
@@ -52,7 +52,7 @@ export default class Process extends React.Component<{ ctx: TypeContext<ProcessE
                     </div>
                     <div className="col-sm-6">
                         <ValueLine ctx={ctx5.subCtx(f => f.creationDate) }  />
-                        <ValueLine ctx={ctx5.subCtx(f => f.plannedDate) }  hideIfNull={true} readOnly={true} />
+                        <ValueLine ctx={ctx5.subCtx(f => f.plannedDate) } hideIfNull={true} readOnly={true} />
                         <ValueLine ctx={ctx5.subCtx(f => f.cancelationDate) }  hideIfNull={true} readOnly={true} />
                         <ValueLine ctx={ctx5.subCtx(f => f.queuedDate) }  hideIfNull={true} readOnly={true} />
                         <ValueLine ctx={ctx5.subCtx(f => f.executionStart) }  hideIfNull={true} readOnly={true} />
@@ -62,10 +62,9 @@ export default class Process extends React.Component<{ ctx: TypeContext<ProcessE
                     </div>
                 </div>
 
-                <EntityLine ctx={ctx3.subCtx(f => f.exception) }  hideIfNull={true} readOnly={true} />
+                <EntityLine ctx={ctx3.subCtx(f => f.exception)} hideIfNull={true} readOnly={true} labelColumns={2} />
 
-
-                <h4> { this.props.ctx.niceName(a=>a.progress) }  </h4>           
+                <h4>{ this.props.ctx.niceName(a=>a.progress) }</h4>           
 
                 {this.renderProgress()}
 
@@ -84,7 +83,7 @@ export default class Process extends React.Component<{ ctx: TypeContext<ProcessE
 
         const p = this.props.ctx.value;
 
-        const val = p.progress != undefined ? p.progress * 100 :
+        const val = p.progress != undefined ? (p.progress == 0 && p.status != null ? 100: p.progress * 100) :
             ((p.state == "Queued" || p.state == "Suspended" || p.state == "Finished" || p.state == "Error") ? 100 : 0);
 
         const progressContainerClass =
@@ -98,10 +97,16 @@ export default class Process extends React.Component<{ ctx: TypeContext<ProcessE
                             p.state == "Error" ? "progress-bar-danger" :
                                 "";
 
+        const message =
+            p.state != "Executing" && p.state != "Suspending" ? "" :
+                val == 100 && p.status ? p.status :
+                    p.status ? `${val}% - ${p.status}` :
+                        `${val}%`;
+
         return (
             <div className={classes("progress",  progressContainerClass)}>
-                <div className={classes("progress-bar", progressClass)}  role="progressbar" id="progressBar"  aria-valuenow="@val" aria-valuemin="0" aria-valuemax="100" style={{ width: val + "%"}}>
-                    <span className="sr-only">{val}% Complete</span>
+                <div className={classes("progress-bar", progressClass)} role="progressbar" id="progressBar" aria-valuenow="@val" aria-valuemin="0" aria-valuemax="100" style={{ width: val + "%" }}>
+                    <span>{message}</span>
                 </div>
             </div>
         );

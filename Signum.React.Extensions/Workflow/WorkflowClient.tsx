@@ -13,7 +13,7 @@ import { Type, PropertyRoute } from '../../../Framework/Signum.React/Scripts/Ref
 import { EntityFrame, TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { EntityOperationSettings, addSettings } from '../../../Framework/Signum.React/Scripts/Operations'
+import { EntityOperationSettings, addSettings, EntityOperationContext } from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { confirmInNecessary, notifySuccess } from '../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 
@@ -24,13 +24,13 @@ import { UserEntity } from '../../../Extensions/Signum.React.Extensions/Authoriz
 import * as DynamicViewClient from '../../../Extensions/Signum.React.Extensions/Dynamic/DynamicViewClient'
 import { CodeContext } from '../../../Extensions/Signum.React.Extensions/Dynamic/View/NodeUtils'
 import { TimeSpanEmbedded } from '../../../Extensions/Signum.React.Extensions/Basics/Signum.Entities.Basics'
+import TypeHelpButtonBarComponent from '../../../Extensions/Signum.React.Extensions/Dynamic/Help/TypeHelpButtonBarComponent'
 
 import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '../../../Framework/Signum.React/Scripts/Lines'
 import { WorkflowConditionEval, WorkflowActionEval, WorkflowJumpEmbedded, DecisionResult } from './Signum.Entities.Workflow'
 
 import ActivityWithRemarks from './Case/ActivityWithRemarks'
-import CaseFrameModal from './Case/CaseFrameModal'
-export { CaseFrameModal };
+
 
 
 
@@ -56,6 +56,8 @@ import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport
 
 import { SearchControl } from "../../../Framework/Signum.React/Scripts/Search";
 import { getTypeInfo } from "../../../Framework/Signum.React/Scripts/Reflection";
+import WorkflowHelpComponent from './Workflow/WorkflowHelpComponent';
+import { globalModules } from '../Dynamic/View/GlobalModules';
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -121,11 +123,9 @@ export function start(options: { routes: JSX.Element[] }) {
     }));
 
     Operations.addSettings(new EntityOperationSettings(CaseOperation.SetTags, { isVisible: ctx => false }));
-    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { hideOnCanExecute: true, style: "primary" }));
+    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Register, { hideOnCanExecute: true, style: "primary", onClick: eoc => executeCaseActivity(eoc, e => e.defaultClick()), }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Delete, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
-    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Undo, { hideOnCanExecute: true, style: "danger" }));
-    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Jump, { onClick: executeWorkflowJump, contextual: { isVisible: ctx => true, onClick: executeWorkflowJumpContextual } }));
-    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Reject, { contextual: { isVisible: ctx => true } }));
+    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Jump, { onClick: eoc => executeCaseActivity(eoc, executeWorkflowJump), contextual: { isVisible: ctx => true, onClick: executeWorkflowJumpContextual } }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Timeout, { isVisible: ctx => false }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.MarkAsUnread, { hideOnCanExecute: true, isVisible: ctx => false, contextual: { isVisible: ctx => true } }));
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.ScriptExecute, { isVisible: ctx => false }));
@@ -137,6 +137,8 @@ export function start(options: { routes: JSX.Element[] }) {
     caseActivityOperation(CaseActivityOperation.Next, "primary");
     caseActivityOperation(CaseActivityOperation.Approve, "success");
     caseActivityOperation(CaseActivityOperation.Decline, "warning");
+    caseActivityOperation(CaseActivityOperation.Undo, "danger");
+    caseActivityOperation(CaseActivityOperation.Reject, "default");
 
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { style: "primary", onClick: executeWorkflowSave }));
     Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Delete, { contextualFromMany: { isVisible: ctx => false } }));
@@ -166,6 +168,11 @@ export function start(options: { routes: JSX.Element[] }) {
     Constructor.registerConstructor(WorkflowTimeoutEmbedded, () => Constructor.construct(TimeSpanEmbedded).then(ep => ep && WorkflowTimeoutEmbedded.New({ timeout: ep.entity })));
 
     registerCustomContexts();
+
+    TypeHelpButtonBarComponent.getTypeHelpButtons.push(props => [({
+        element: <WorkflowHelpComponent typeName={props.typeName} mode={props.mode} />,
+        order: 0,
+    })]);
 }
 
 function registerCustomContexts() {
@@ -276,14 +283,28 @@ function caseActivityOperation(operation: ExecuteSymbol<CaseActivityEntity>, sty
     Operations.addSettings(new EntityOperationSettings(operation, {
         hideOnCanExecute: true,
         style: style,
-        onClick: executeAndClose,
+        onClick: eoc => executeCaseActivity(eoc, executeAndClose),
         contextual: { isVisible: ctx => true },
-        contextualFromMany: { isVisible: ctx => true },
+        contextualFromMany: {
+            isVisible: ctx => true,
+            style: style
+        },
     }));
 }
 
 function hide<T extends Entity>(type: Type<T>) {
     Navigator.addSettings(new EntitySettings(type, undefined, { isNavigable: "Never", isViewable: false, isCreable: "Never" }));
+}
+
+export function executeCaseActivity(eoc: Operations.EntityOperationContext<CaseActivityEntity>, defaultOnClick: (eoc: Operations.EntityOperationContext<CaseActivityEntity>) => void) {
+    const op = customOnClicks[eoc.operationInfo.key];
+
+    const onClick = op && op[eoc.entity.case.mainEntity.Type];
+
+    if (onClick)
+        onClick(eoc);
+    else
+        defaultOnClick(eoc);
 }
 
 export function executeWorkflowSave(eoc: Operations.EntityOperationContext<WorkflowEntity>) {
@@ -331,6 +352,7 @@ export function executeWorkflowJumpContextual(coc: Operations.ContextualOperatio
 
 export function executeWorkflowJump(eoc: Operations.EntityOperationContext<CaseActivityEntity>) {
 
+    eoc.closeRequested = true;
     var jumps = eoc.entity.workflowActivity.jumps;
 
     getWorkflowJumpSelector(jumps)
@@ -405,63 +427,26 @@ export function toEntityPackWorkflow(entityOrEntityPack: Lite<CaseActivityEntity
     return API.fetchActivityForViewing(lite);
 }
 
+export const customOnClicks: { [operationKey: string]: { [typeName: string]: (ctx: EntityOperationContext<CaseActivityEntity>) => void } } = {};
 
-interface TypeViewDictionary {
-    [activityViewName: string]: ActivityViewSettings<ICaseMainEntity>
+export function registerOnClick<T extends ICaseMainEntity>(type: Type<T>, operationKey: ExecuteSymbol<CaseActivityEntity>, action: (ctx: EntityOperationContext<CaseActivityEntity>) => void) {
+    var op = customOnClicks[operationKey.key] || (customOnClicks[operationKey.key] = {});
+    op[type.typeName] = action;
 }
 
-interface ActivityViewSettingsOptions<T extends ICaseMainEntity> {
-    getViewPromise?: (entity: T) => ViewPromise<T>;
+export interface IHasCaseActivity {
+    getCaseActivity(): CaseActivityEntity | undefined;
 }
 
-export class ActivityViewSettings<T extends ICaseMainEntity> {
-    type: Type<T>
+export function inWorkflow(ctx: TypeContext<any>, workflowName: string, activityName: string): boolean {
+    var f = ctx.frame && ctx.frame.frameComponent as any as IHasCaseActivity;
 
-    activityViewName: string;
+    var ca = f && f.getCaseActivity && f.getCaseActivity();
 
-    getViewPromise?: (entity: T) => ViewPromise<T>;
+    if (!ca)
+        return false;
 
-    constructor(type: Type<T>, activityViewName: string, getViewModule?: (entity: T) => Promise<ViewModule<T>>, options?: ActivityViewSettingsOptions<T>) {
-        this.type = type;
-        this.activityViewName = activityViewName;
-        this.getViewPromise = getViewModule && (entity => new ViewPromise(getViewModule(entity)).withProps({ inWorkflow: true }));
-        Dic.assign(this, options)
-    }
-}
-
-export const registeredActivityViews: { [typeName: string]: TypeViewDictionary } = {};
-
-export function registerActivityView<T extends ICaseMainEntity>(settings: ActivityViewSettings<T>) {
-    const tvDic = registeredActivityViews[settings.type.typeName] || (registeredActivityViews[settings.type.typeName] = {});
-
-    tvDic[settings.activityViewName] = settings;
-}
-
-export function getSettings(typeName: string, activityViewName: string): ActivityViewSettings<ICaseMainEntity> | undefined {
-
-    const dict = registeredActivityViews[typeName];
-
-    if (!dict)
-        return undefined;
-
-    return dict[activityViewName];
-}
-
-export function getViewPromise<T extends ICaseMainEntity>(entity: T, activityViewName: string | undefined | null): ViewPromise<T> {
-
-    var settings = activityViewName && getSettings(entity.Type, activityViewName);
-    if (settings && settings.getViewPromise)
-        return settings.getViewPromise(entity);
-
-    const promise = activityViewName == undefined ?
-        DynamicViewClient.createDefaultDynamicView(entity.Type) :
-        DynamicViewClient.API.getDynamicView(entity.Type, activityViewName);
-
-    return ViewPromise.flat(promise.then(dv => new ViewPromise(import('../../../Extensions/Signum.React.Extensions/Dynamic/View/DynamicViewComponent')).withProps({ initialDynamicView: dv })));
-}
-
-export function getViewNames(typeName: string) {
-    return Dic.getKeys(registeredActivityViews[typeName] || {});
+    return ca.workflowActivity.lane!.pool!.workflow!.name == workflowName && ca.workflowActivity.name == activityName;
 }
 
 export namespace API {

@@ -19,7 +19,7 @@ namespace Signum.Engine.Cache
     {
         Dictionary<ParameterExpression, Expression> replacements = new Dictionary<ParameterExpression, Expression>(); 
 
-        public static Func<PrimaryKey, string> GetToString<T>(CachedTableConstructor constructor, Expression<Func<T, string>> lambda)
+        public static Expression<Func<PrimaryKey, string>> GetToString<T>(CachedTableConstructor constructor, Expression<Func<T, string>> lambda)
         {
             Table table = (Table)constructor.table;
             
@@ -37,7 +37,7 @@ namespace Signum.Engine.Cache
             
             var result = visitor.Visit(lambda.Body);
 
-            return Expression.Lambda<Func<PrimaryKey, string>>(result, pk).Compile();
+            return Expression.Lambda<Func<PrimaryKey, string>>(result, pk);
         }
 
         protected override Expression VisitMember(MemberExpression node)
@@ -94,9 +94,7 @@ namespace Signum.Engine.Cache
                 if (field is FieldReference)
                 {
                     IColumn column = (IColumn)field;
-
-                    Expression id = CachedTableConstructor.WrapPrimaryKey(constructor.GetTupleProperty(column));
-
+                    
                     return GetEntity(isLite, column, field.FieldType.CleanType(),  constructor);
                 }
 
@@ -106,8 +104,6 @@ namespace Signum.Engine.Cache
                     var call = ib.ImplementationColumns.Aggregate((Expression)nullRef, (acum, kvp) =>
                     {
                         IColumn column = (IColumn)kvp.Value;
-
-                        Expression id = CachedTableConstructor.NewPrimaryKey(constructor.GetTupleProperty(column));
 
                         var entity = GetEntity(isLite, column, kvp.Key, constructor);
 
@@ -142,7 +138,7 @@ namespace Signum.Engine.Cache
         {
             Expression id = constructor.GetTupleProperty(column);
 
-            var pk = CachedTableConstructor.WrapPrimaryKey(id.UnNullify());
+            var pk = CachedTableConstructor.WrapPrimaryKey(id);
 
             CachedTableConstructor typeConstructor = CacheLogic.GetCacheType(entityType) == CacheType.Cached ?
                 CacheLogic.GetCachedTable(entityType).Constructor :

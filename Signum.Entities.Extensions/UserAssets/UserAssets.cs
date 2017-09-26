@@ -34,6 +34,8 @@ namespace Signum.Entities.UserAssets
         {
             get { return Action == EntityAction.Different; }
         }
+
+        public override string ToString() => $"{Type} {Action}";
     }
 
     public enum EntityAction
@@ -67,11 +69,15 @@ namespace Signum.Entities.UserAssets
         string TypeToName(Lite<TypeEntity> type);
 
         string QueryToName(Lite<QueryEntity> query);
+        string PermissionToName(Lite<PermissionSymbol> symbol);
     }
 
     public interface IFromXmlContext
     {
-        QueryEntity GetQuery(string queryKey);
+        QueryEntity TryGetQuery(string queryKey);
+
+        PermissionSymbol TryPermission(string permissionKey);
+
         Lite<TypeEntity> GetType(string cleanName);
 
         ChartScriptEntity ChartScript(string chartScriptName);

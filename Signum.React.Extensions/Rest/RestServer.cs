@@ -17,10 +17,10 @@ namespace Signum.React.Rest
     {
         public static void Start()
         {
-            SignumAuthenticationAndProfilerAttribute.Authenticators.Insert(0, ApiKeyAuthenticator);
+            SignumAuthenticationFilterAttribute.Authenticators.Insert(0, ApiKeyAuthenticator);
         }
 
-        private static IDisposable ApiKeyAuthenticator(HttpActionContext ctx)
+        private static SignumAuthenticationResult ApiKeyAuthenticator(HttpActionContext ctx)
         {
             var nvp = ctx.Request.RequestUri.ParseQueryString();
             IEnumerable<string> queryKeys = ctx.Request.RequestUri
@@ -37,8 +37,8 @@ namespace Signum.React.Rest
             {
                 using (AuthLogic.Disable())
                 {
-                    var user = RestApiKeyLogic.RestApiKeyCache.Value.GetOrThrow(keys.Single(), $"Could not authenticate with the API Key {keys.Single()}.").Retrieve();
-                    return UserHolder.UserSession(user);
+                    var user = RestApiKeyLogic.RestApiKeyCache.Value.GetOrThrow(keys.Single(), $"Could not authenticate with the API Key {keys.Single()}.").User.Retrieve();
+                    return new SignumAuthenticationResult { User = user };
                 }
             }
             else if (keys.Count() > 1)

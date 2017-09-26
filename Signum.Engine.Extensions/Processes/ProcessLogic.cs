@@ -183,18 +183,21 @@ namespace Signum.Engine.Processes
             return Disposable.Combine(ApplySession, f => f(process));
         }
 
-        public static void Register(ProcessAlgorithmSymbol processAlgorithm, IProcessAlgorithm logic)
+
+        public static void Register(ProcessAlgorithmSymbol processAlgorithm, Action<ExecutingProcess> action) =>
+            Register(processAlgorithm, new ActionProcessAlgorithm(action));
+
+        public static void Register(ProcessAlgorithmSymbol processAlgorithm, IProcessAlgorithm algorithm)
         {
             if (processAlgorithm == null)
                 throw AutoInitAttribute.ArgumentNullException(typeof(ProcessAlgorithmSymbol), nameof(processAlgorithm));
 
-            if (logic == null)
-                throw new ArgumentNullException(nameof(logic));
+            if (algorithm == null)
+                throw new ArgumentNullException(nameof(algorithm));
 
-            registeredProcesses.Add(processAlgorithm, logic);
+            registeredProcesses.Add(processAlgorithm, algorithm);
         }
-
-
+        
         public class ProcessGraph : Graph<ProcessEntity, ProcessState>
         {
             public static void Register()
@@ -296,10 +299,10 @@ namespace Signum.Engine.Processes
         public static void ExecuteTest(this ProcessEntity p, bool writeToConsole = false)
         {
             p.QueuedDate = TimeZoneManager.Now;
-            var ep = new ExecutingProcess(
-                GetProcessAlgorithm(p.Algorithm),
-                p
-            ) { WriteToConsole = writeToConsole };
+            var ep = new ExecutingProcess(GetProcessAlgorithm(p.Algorithm), p)
+            {
+                WriteToConsole = writeToConsole
+            };
 
             ep.TakeForThisMachine();
             ep.Execute();
@@ -313,7 +316,7 @@ namespace Signum.Engine.Processes
         public static void ForEachLine<T>(this ExecutingProcess executingProcess, IQueryable<T> remainingLines, Action<T> action, int groupsOf = 100)
             where T : Entity, IProcessLineDataEntity, new()
         {
-            var remainingNotExceptionsLines = remainingLines.Where(li => li.Exception(executingProcess.CurrentExecution) == null);
+            var remainingNotExceptionsLines = remainingLines.Where(li => li.Exception(executingProcess.CurrentProcess) == null);
 
             var totalCount = remainingNotExceptionsLines.Count();
             int j = 0; 
@@ -352,7 +355,7 @@ namespace Signum.Engine.Processes
                                 {
                                     Exception = exLog.ToLite(),
                                     Line = pl.ToLite(),
-                                    Process = executingProcess.CurrentExecution.ToLite()
+                                    Process = executingProcess.CurrentProcess.ToLite()
                                 }.Save();
 
                                 tr.Commit();
@@ -364,10 +367,64 @@ namespace Signum.Engine.Processes
                 }
             }
         }
+
+        public static void ForEach<T>(this ExecutingProcess executingProcess, List<T> collection, Func<T, string> elementInfo,  Action<T> action)
+        {
+            var totalCount = collection.Count;
+            int j = 0;
+            foreach (var item in collection)
+            {
+                executingProcess.CancellationToken.ThrowIfCancellationRequested();
+                using (HeavyProfiler.Log("ProgressForeach", () => elementInfo(item)))
+                {
+                    try
+                    {
+                        using (Transaction tr = Transaction.ForceNew())
+                        {
+                            action(item);
+                            tr.Commit();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        if (Transaction.InTestTransaction)
+                            throw;
+
+                        var exLog = e.LogException();
+
+                        Transaction.ForceNew().EndUsing(tr =>
+                        {
+                            new ProcessExceptionLineEntity
+                            {
+                                Exception = exLog.ToLite(),
+                                ElementInfo = elementInfo(item),
+                                Process = executingProcess.CurrentProcess.ToLite()
+                            }.Save();
+
+                            tr.Commit();
+                        });
+                    }
+
+                    executingProcess.ProgressChanged(j++, totalCount);
+                }
+            }
+        }
     }
 
     public interface IProcessAlgorithm
     {
         void Execute(ExecutingProcess executingProcess);
+    }
+
+    public class ActionProcessAlgorithm : IProcessAlgorithm
+    {
+        Action<ExecutingProcess> Action;
+
+        public ActionProcessAlgorithm(Action<ExecutingProcess> action)
+        {
+            this.Action = action ?? throw new ArgumentNullException(nameof(action));
+        }
+        
+        public void Execute(ExecutingProcess executingProcess) => Action(executingProcess);
     }
 }

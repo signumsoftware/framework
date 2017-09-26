@@ -385,7 +385,6 @@ namespace Signum.Entities.Mailing
     {
         public static readonly ProcessAlgorithmSymbol CreateEmailsSendAsync;
         public static ProcessAlgorithmSymbol SendEmails;
-
     }
 
     [AutoInit]

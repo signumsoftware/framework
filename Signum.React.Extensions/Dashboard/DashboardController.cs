@@ -32,14 +32,6 @@ namespace Signum.React.Dashboard
         {
             return DashboardLogic.GetDashboardsEntity(TypeLogic.GetType(typeName));
         }
-
-        [Route("api/dashboard/embedded/{typeName}/{position}"), HttpGet]
-        public DashboardEntity Embedded(string typeName, DashboardEmbedededInEntity position)
-        {
-            var result = DashboardLogic.GetEmbeddedDashboard(TypeLogic.GetType(typeName));
-            return result == null || result.EmbeddedInEntity != position ? null : result;
-        }
-
         [Route("api/dashboard/home"), HttpGet]
         public Lite<DashboardEntity> Home()
         {

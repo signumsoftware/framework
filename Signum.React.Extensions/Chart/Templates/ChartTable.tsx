@@ -17,7 +17,7 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
         const prev = cr.orderOptions.filter(a => a.token.fullKey == tokenStr).firstOrNull();
 
         if (prev != undefined) {
-            prev.orderType = prev.orderType == "Ascending" as OrderType ? "Descending" : "Ascending";
+            prev.orderType = (prev.orderType == "Ascending" as OrderType) ? "Descending" : "Ascending";
             if (!e.shiftKey)
                 cr.orderOptions = [prev];
 
@@ -45,7 +45,7 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
         const qs = Finder.getSettings(chartRequest.queryKey);
 
         const columns = chartRequest.columns.map(c => c.element).filter(cc => cc.token != undefined)
-            .map(cc => ({ token: cc.token!.token, columnName: cc.displayName } as ColumnOptionParsed))
+            .map(cc => ({ token: cc.token!.token, displayName: cc.displayName } as ColumnOptionParsed))
             .map(co => ({
                 column: co,
                 cellFormatter: (qs && qs.formatters && qs.formatters[co.token!.fullKey]) || Finder.formatRules.filter(a => a.isApplicable(co)).last("FormatRules").formatter(co),
@@ -65,7 +65,7 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
                         { columns.map((col, i) =>
                             <th key={i}  data-column-name={col.column.token!.fullKey}
                                 onClick={this.handleHeaderClick}>
-                                <span className={"sf-header-sort " + this.orderClassName(col.column)}/>
+                                <span className={"sf-header-sort " + this.orderClassName(col.column)} />
                                 <span> {col.column.displayName || col.column.token!.niceName}</span>
                             </th>)}
                     </tr>
@@ -153,7 +153,7 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
         if (o == undefined)
             return "";
 
-        let asc = (o.orderType == "Ascending" as OrderType ? "asc" : "desc");
+        let asc = (o.orderType == "Ascending" as OrderType) ? "asc" : "desc";
 
         if (orders.indexOf(o))
             asc += " l" + orders.indexOf(o);

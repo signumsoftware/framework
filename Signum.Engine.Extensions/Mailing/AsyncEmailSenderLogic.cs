@@ -13,6 +13,8 @@ using Signum.Entities.Mailing;
 using Signum.Engine.Authorization;
 using Signum.Engine.Cache;
 using System.Data.SqlClient;
+using Signum.Engine.Scheduler;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.Mailing
 {
@@ -59,6 +61,8 @@ namespace Signum.Engine.Mailing
             {
                 Task.Factory.StartNew(() =>
                 {
+                    SystemEventLogLogic.Log("Start AsyncEmailSender");
+                    ExceptionEntity exception = null;
                     try
                     {
                         running = true;
@@ -159,7 +163,7 @@ namespace Signum.Engine.Mailing
                     {
                         try
                         {
-                            e.LogException(edn =>
+                            exception = e.LogException(edn =>
                             {
                                 edn.ControllerName = "EmailAsyncSender";
                                 edn.ActionName = "ExecuteProcess";
@@ -169,6 +173,7 @@ namespace Signum.Engine.Mailing
                     }
                     finally
                     {
+                        SystemEventLogLogic.Log("Stop AsyncEmailSender", exception);
                         running = false;
                     }
                 }, TaskCreationOptions.LongRunning);

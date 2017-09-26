@@ -52,8 +52,6 @@
   }, height);
   //yRule.debugY(chart);
   
-  console.log(pivot);
-  
   var x = d3.scaleBand()
       .domain(pivot.rows.map(function (d) { return d.rowValue.key; }))
       .range([0, xRule.size('content')]);

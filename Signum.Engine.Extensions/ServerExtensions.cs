@@ -198,7 +198,7 @@ namespace Signum.Services
         public HashSet<object> AllowedQueries()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-            () => DynamicQueryManager.Current.GetAllowedQueryNames().ToHashSet());
+            () => DynamicQueryManager.Current.GetAllowedQueryNames(false).ToHashSet());
         }
 
         #endregion
@@ -294,13 +294,13 @@ namespace Signum.Services
         public byte[] ExecuteExcelReport(Lite<ExcelReportEntity> excelReport, QueryRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => ExcelLogic.ExecuteExcelReport(excelReport, request, CancellationToken.None).Result);
+                () => ExcelLogic.ExecuteExcelReport(excelReport, request));
         }
 
         public byte[] ExecutePlainExcel(QueryRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => ExcelLogic.ExecutePlainExcel(request, QueryUtils.GetNiceName(request.QueryName), CancellationToken.None).Result);
+                () => ExcelLogic.ExecutePlainExcel(request, QueryUtils.GetNiceName(request.QueryName)));
         }
 
         #endregion

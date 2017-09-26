@@ -190,7 +190,6 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
 
             if (this.props.type == "textArea") {
                 return (<textarea className="form-control" style={style}
-                    type="text"
                     value={val == null ? "" : val.toString()}
                     onChange={this.handleChangeSelectOrInput} />);
             }
@@ -366,7 +365,7 @@ export class CollapsableTypeHelp extends React.Component<{ initialTypeName?: str
 
         ValueLineModal.show({
             type: { name: "string" },
-            initialValue: TypeHelpComponent.getExpression("e", pr, "Typescript"),
+            initialValue: TypeHelpComponent.getExpression("e", pr, "TypeScript"),
             valueLineType: "TextArea",
             title: "Property Template",
             message: "Copy to clipboard: Ctrl+C, ESC",
@@ -385,7 +384,7 @@ export class CollapsableTypeHelp extends React.Component<{ initialTypeName?: str
                 {this.state.open &&
                     <TypeHelpComponent
                         initialType={this.props.initialTypeName}
-                        mode="Typescript"
+                        mode="TypeScript"
                         onMemberClick={this.handleTypeHelpClick} />}
             </div>
         );

@@ -366,7 +366,7 @@ namespace Signum.Entities.Authorization
         }
     }
     [Serializable]
-    public class QueryAllowedRule : AllowedRuleCoerced<QueryEntity, bool> { }
+    public class QueryAllowedRule : AllowedRuleCoerced<QueryEntity, QueryAllowed> { }
 
 
     [Serializable]

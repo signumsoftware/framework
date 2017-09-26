@@ -23,7 +23,7 @@ namespace Signum.Engine.Basics
             if (ci == null)
                 return null;
            
-            return CultureInfoDNToCultureInfo.Value.TryGetC(ci);
+            return EntityToCultureInfo.Value.TryGetC(ci);
         }
 
         internal static void AssertStarted(SchemaBuilder sb)
@@ -34,7 +34,7 @@ namespace Signum.Engine.Basics
         public static Func<CultureInfo, CultureInfo> CultureInfoModifier = ci => ci;
 
         public static ResetLazy<Dictionary<string, CultureInfoEntity>> CultureInfoToEntity;
-        public static ResetLazy<Dictionary<CultureInfoEntity, CultureInfo>> CultureInfoDNToCultureInfo;
+        public static ResetLazy<Dictionary<CultureInfoEntity, CultureInfo>> EntityToCultureInfo;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -55,7 +55,7 @@ namespace Signum.Engine.Basics
                     ci => ci),
                     invalidateWith: new InvalidateWith(typeof(CultureInfoEntity)));
 
-                CultureInfoDNToCultureInfo = sb.GlobalLazy(() => Database.Query<CultureInfoEntity>().ToDictionary(ci => ci, 
+                EntityToCultureInfo = sb.GlobalLazy(() => Database.Query<CultureInfoEntity>().ToDictionary(ci => ci, 
                     ci => CultureInfoModifier(CultureInfo.GetCultureInfo(ci.Name))),
                     invalidateWith: new InvalidateWith(typeof(CultureInfoEntity)));
                 
@@ -87,17 +87,17 @@ namespace Signum.Engine.Basics
         {
             get
             {
-                return CultureInfoDNToCultureInfo.Value.Values;
+                return EntityToCultureInfo.Value.Values;
             }
         }
 
         public static IEnumerable<T> ForEachCulture<T>(Func<CultureInfoEntity, T> func)
         {
-            if (CultureInfoDNToCultureInfo.Value.Count == 0)
+            if (EntityToCultureInfo.Value.Count == 0)
                 throw new InvalidOperationException("No {0} found in the database".FormatWith(typeof(CultureInfoEntity).Name));
 
 
-            foreach (var c in CultureInfoDNToCultureInfo.Value)
+            foreach (var c in EntityToCultureInfo.Value)
             {
                 using (CultureInfoUtils.ChangeBothCultures(c.Value))
                 {

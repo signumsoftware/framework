@@ -25,6 +25,7 @@ import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, Lin
 import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import * as UserAssetClient from '../UserAssets/UserAssetClient'
 import { ImportRoute, ComponentModule } from "../../../Framework/Signum.React/Scripts/AsyncImport";
+import { ModifiableEntity } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
 
 
 export interface PanelPartContentProps<T extends IPartEntity> {
@@ -32,10 +33,17 @@ export interface PanelPartContentProps<T extends IPartEntity> {
     entity?: Lite<Entity>;
 }
 
+interface IconColor {
+    iconName: string;
+    iconColor: string;
+}
+
 export interface PartRenderer<T extends IPartEntity>{
     component: () => Promise<React.ComponentClass<PanelPartContentProps<T>>>;
+    defaultIcon: (element: T) => IconColor;
+    withPanel?: (element: T) => boolean;
     handleTitleClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent<any>) => void;
-    handleFullScreenClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent<any>) => void;
+    handleEditClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent<any>) => void;
 }
 
 
@@ -58,34 +66,39 @@ export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<ImportRoute path="~/dashboard/:dashboardId" onImportModule={() => import("./View/DashboardPage")} />);
 
     registerRenderer(ValueUserQueryListPartEntity, {
-        component: () => import('./View/ValueUserQueryListPart').then(a => a.default)
+        component: () => import('./View/ValueUserQueryListPart').then(a => a.default),
+        defaultIcon: () => ({ iconName: "fa fa-list", iconColor: "lightblue" })
     });
     registerRenderer(LinkListPartEntity, {
-        component: () => import('./View/LinkListPart').then(a => a.default)
+        component: () => import('./View/LinkListPart').then(a => a.default),
+        defaultIcon: () => ({ iconName: "fa fa-list", iconColor: "forestgreen" })
     });
     registerRenderer(UserChartPartEntity, {
         component: () => import('./View/UserChartPart').then(a => a.default),
-        handleTitleClick: (p, e, ev) => {
+        defaultIcon: () => ({ iconName: "glyphicon glyphicon-stats", iconColor: "violet" }),
+        handleEditClick: (p, e, ev) => {
             ev.preventDefault();
             Navigator.pushOrOpenInTab(Navigator.navigateRoute(p.userChart!), ev);
         },
-        handleFullScreenClick: (p, e, ev) => {
+        handleTitleClick: (p, e, ev) => {
             ev.preventDefault();
             ev.persist();
             UserChartClient.Converter.toChartRequest(p.userChart!, e)
                 .then(cr => Navigator.pushOrOpenInTab(ChartClient.Encoder.chartRequestPath(cr, { userChart: liteKey(toLite(p.userChart!)) }), ev))
                 .done();
-        }
+        },
+
     });
-
-
+    
     registerRenderer(UserQueryPartEntity, {
         component: () => import('./View/UserQueryPart').then((a: any) => a.default),
-        handleTitleClick: (p, e, ev) => {
+        defaultIcon: () => ({ iconName: "glyphicon glyphicon-list-alt", iconColor: "dodgerblue" }),
+        withPanel: p => p.renderMode != "BigValue",
+        handleEditClick: (p, e, ev) => {
             ev.preventDefault();
             Navigator.pushOrOpenInTab(Navigator.navigateRoute(p.userQuery!), ev);
         },
-        handleFullScreenClick: (p, e, ev) => {
+        handleTitleClick: (p, e, ev) => {
             ev.preventDefault();
             ev.persist();
             UserQueryClient.Converter.toFindOptions(p.userQuery!, e)
@@ -94,17 +107,21 @@ export function start(options: { routes: JSX.Element[] }) {
         }
     });
 
-    onEmbeddedWidgets.push(ctx => !isTypeEntity(ctx.pack.entity.Type) || ctx.pack.entity.isNew || !AuthClient.isPermissionAuthorized(DashboardPermission.ViewDashboard) ? undefined :
-        { position: "Top", embeddedWidget: <DashboardWidget position="Top" pack={ ctx.pack as EntityPack<Entity> } /> });
-
-    onEmbeddedWidgets.push(ctx => !isTypeEntity(ctx.pack.entity.Type) || ctx.pack.entity.isNew || !AuthClient.isPermissionAuthorized(DashboardPermission.ViewDashboard)? undefined :
-        { position: "Bottom", embeddedWidget: <DashboardWidget position="Bottom" pack={ ctx.pack as EntityPack<Entity> } /> });
+    onEmbeddedWidgets.push(ctx => ctx.pack.embeddedDashboard &&
+    {
+        position: ctx.pack.embeddedDashboard.embeddedInEntity as "Top" | "Bottom",
+        embeddedWidget: <DashboardWidget dashboard={ctx.pack.embeddedDashboard} pack={ctx.pack as EntityPack<Entity>} />
+    });
 
     QuickLinks.registerGlobalQuickLink(ctx => {
         if (!AuthClient.isPermissionAuthorized(DashboardPermission.ViewDashboard))
             return undefined;
 
-        return API.forEntityType(ctx.lite.EntityType).then(das =>
+        var promise = ctx.widgetContext ?
+            Promise.resolve(ctx.widgetContext.pack.dashboards || []) :
+            API.forEntityType(ctx.lite.EntityType);
+
+        return promise.then(das =>
             das.map(d => new QuickLinks.QuickLinkAction(liteKey(d), d.toStr || "", e => {
                 Navigator.pushOrOpenInTab(dashboardUrl(d, ctx.lite), e)
             }, { icon: "glyphicon glyphicon-th-large", iconColor: "darkslateblue" })));
@@ -127,6 +144,10 @@ export function start(options: { routes: JSX.Element[] }) {
             }).done()));
 }
 
+export function defaultIcon<T extends IPartEntity>(part: T) {
+    return partRenderers[part.Type].defaultIcon(part);
+}
+
 export function dashboardUrl(lite: Lite<DashboardEntity>, entity?: Lite<Entity>) {
     return "~/dashboard/" + lite.id + (!entity ? "" : "?entity=" + liteKey(entity)); 
 }
@@ -140,65 +161,51 @@ export module API {
         return ajaxGet<Lite<DashboardEntity>[]>({ url: `~/api/dashboard/forEntityType/${type}` });
     }
 
-    export function embedded(type: string, position: DashboardEmbedededInEntity): Promise<DashboardEntity> {
-        return ajaxGet<DashboardEntity>({ url: `~/api/dashboard/embedded/${type}/${position}` });
-    }
-
     export function home(): Promise<Lite<DashboardEntity> | null> {
         return ajaxGet<Lite<DashboardEntity> | null>({ url: "~/api/dashboard/home" });
     }
 }
 
+declare module '../../../Framework/Signum.React/Scripts/Signum.Entities' {
+
+    export interface EntityPack<T extends ModifiableEntity> {
+        dashboards?: Array<Lite<DashboardEntity>>;
+        embeddedDashboard?: DashboardEntity;
+    }
+}
+
 export interface DashboardWidgetProps {
-    pack: EntityPack<Entity>,
-    position: DashboardEmbedededInEntity;  
+    pack: EntityPack<Entity>;
+    dashboard: DashboardEntity;
 }
 
 export interface DashboardWidgetState {
-    dashboard?: DashboardEntity;
     component?: React.ComponentClass<{ dashboard: DashboardEntity, entity?: Entity}>
 }
 
 export class DashboardWidget extends React.Component<DashboardWidgetProps, DashboardWidgetState> {
 
-    state = { dashboard: undefined } as DashboardWidgetState;
+    state = { component: undefined } as DashboardWidgetState;
     
     componentWillMount() {
         this.load(this.props);
     }
 
-    componentWillReceiveProps(newProps: DashboardWidgetProps) {
-        if (!is(newProps.pack.entity as Entity, this.props.pack.entity as Entity)) {
-            this.load(newProps);
-        }
-    }
 
     load(props: DashboardWidgetProps) {      
 
-        if (props.pack.entity.isNew) {
-            this.setState({ dashboard: undefined });
-
-        } else {
-            this.setState({ dashboard: undefined });
-
-            API.embedded(props.pack.entity.Type, props.position)
-                .then(d => {
-                    this.setState({ dashboard: d });
-                    if (d && !this.state.component)
-                        import("./View/DashboardView")
-                            .then(mod => this.setState({ component: mod.default }))
-                            .done();
-                }).done();
-        }
+        import("./View/DashboardView")
+            .then(mod => this.setState({ component: mod.default }))
+            .done();
     }
 
     render() {
 
-        if (!this.state.dashboard || !this.state.component)
+        if (!this.state.component)
             return null;
 
         return React.createElement(this.state.component, {
-            dashboard: this.state.dashboard,
+            dashboard: this.props.dashboard,
             entity: this.props.pack.entity
         });
     }

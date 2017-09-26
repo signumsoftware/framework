@@ -226,7 +226,7 @@ namespace Signum.Engine.Migrations
             string title = mi.Version + (mi.Comment.HasText() ? " ({0})".FormatWith(mi.Comment) : null);
             string text = File.ReadAllText(mi.FileName);
             
-            using (Transaction tr = new Transaction())
+            using (Transaction tr = Transaction.ForceNew(System.Data.IsolationLevel.Unspecified))
             {
                 ExecuteScript(title, text);
 

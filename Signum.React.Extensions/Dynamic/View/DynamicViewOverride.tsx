@@ -3,7 +3,7 @@ import { MenuItem } from 'react-bootstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
 import { DynamicViewOverrideEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
-import { EntityLine, TypeContext, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { EntityLine, TypeContext, ValueLineType, ValueLine, FormGroup } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { Entity, JavascriptMessage, NormalWindowMessage, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { getTypeInfo, Binding, PropertyRoute, ReadonlyBinding, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
@@ -12,6 +12,7 @@ import * as DynamicClient from '../DynamicClient'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { ViewReplacer } from '../../../../Framework/Signum.React/Scripts/Frames/ReactVisitor';
 import TypeHelpComponent from '../Help/TypeHelpComponent'
+import TypeHelpButtonBarComponent from '../Help/TypeHelpButtonBarComponent'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 import MessageModal from '../../../../Framework/Signum.React/Scripts/Modals/MessageModal'
 import * as Nodes from '../../../../Extensions/Signum.React.Extensions/Dynamic/View/Nodes';
@@ -54,10 +55,13 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
 
     updateViewNames(props: DynamicViewOverrideComponentProps) {
         this.setState({ viewNames: undefined });
-        if (props.ctx.value.entityType)
-            DynamicViewClient.API.getDynamicViewNames(props.ctx.value.entityType!.cleanName)
-                .then(viewNames => this.setState({ viewNames: viewNames }))
+        if (props.ctx.value.entityType) {
+            const typeName = props.ctx.value.entityType.cleanName;
+
+            Navigator.viewDispatcher.getViewNames(typeName)
+                .then(vn => this.setState({ viewNames: vn }))
                 .done();
+        }
     }
 
     updateTypeHelp(props: DynamicViewOverrideComponentProps) {
@@ -99,7 +103,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
     }
 
     handleRenderContextualMenu = (pr: PropertyRoute) => {
-        const lambda = "e => " + TypeHelpComponent.getExpression("e", pr, "Typescript");
+        const lambda = "e => " + TypeHelpComponent.getExpression("e", pr, "TypeScript");
         return (
             <MenuItem>
                 <MenuItem header>{pr.propertyPath()}</MenuItem>
@@ -119,7 +123,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
         if (!node)
             return;
 
-        const expression = TypeHelpComponent.getExpression("o", pr, "Typescript");
+        const expression = TypeHelpComponent.getExpression("o", pr, "TypeScript");
         const text = `React.createElement(${node.kind}, { ctx: vr.ctx.subCtx(o => ${expression}) })`;
 
         ValueLineModal.show({
@@ -138,6 +142,17 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
         return (
             <div>
                 <EntityLine ctx={ctx.subCtx(a => a.entityType)} onChange={this.handleTypeChange} onRemove={this.handleTypeRemove} />
+                {
+                    ctx.value.entityType && this.state.viewNames &&
+                    <FormGroup ctx={ctx.subCtx(d => d.viewName)} labelText={ctx.niceName(d => d.viewName)}>
+                        {
+                            <select value={ctx.value.viewName ? ctx.value.viewName : ""} className="form-control" onChange={this.handleViewNameChange}>
+                                <option value="">{" - "}</option>
+                                {(this.state.viewNames || []).map((v, i) => <option key={i} value={v}>{v}</option>)}
+                            </select>
+                        }
+                    </FormGroup>
+                }
 
                 {ctx.value.entityType &&
                     <div>
@@ -150,7 +165,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
                             <div className="col-sm-5">
                             <TypeHelpComponent
                                 initialType={ctx.value.entityType.cleanName}
-                                mode="Typescript"
+                                mode="TypeScript"
                                 renderContextMenu={this.handleRenderContextualMenu}
                                 onMemberClick={this.handleTypeHelpClick} />
                                 <br />
@@ -163,6 +178,12 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
             </div>
         );
     }
+
+    handleViewNameChange = (e: React.SyntheticEvent<HTMLSelectElement>) => {
+        this.props.ctx.value.viewName = (e.currentTarget as HTMLSelectElement).value;
+        this.props.ctx.value.modified = true;
+        this.forceUpdate();
+    };
 
     renderTest() {
         const ctx = this.props.ctx;
@@ -211,16 +232,18 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
             const entity = this.state.exampleEntity;
             const settings = Navigator.getSettings(entity.Type);
 
-            if (!settings || !settings.getViewPromise)
+            if (!settings)
                 this.setState({ componentClass: null });
 
-            else
-                settings.getViewPromise(entity).applyViewOverrides(settings).promise.then(func => {
+            else {
+                const ctx = this.props.ctx;
+                return Navigator.viewDispatcher.getViewPromise(entity, ctx.value.viewName || undefined).promise.then(func => {
                     var tempCtx = new TypeContext(undefined, undefined, PropertyRoute.root(entity.Type), new ReadonlyBinding(entity, "example"));
                     var re = func(tempCtx);
                     this.setState({ componentClass: re.type as React.ComponentClass<{ ctx: TypeContext<Entity> }> });
                     this.compileFunction();
                 });
+            }
         }
     }
 
@@ -251,18 +274,15 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
         const ctx = this.props.ctx;
         return (
             <div className="code-container">
-                {this.allViewNames().length > 0 && this.renderViewNameButtons()}
+                {this.state.viewNames && this.renderViewNameButtons()}
                 {this.allExpressions().length > 0 && <br />}
                 {this.allExpressions().length > 0 && this.renderExpressionsButtons()}
+                <TypeHelpButtonBarComponent typeName={ctx.value.entityType!.cleanName} mode="TypeScript" ctx={ctx} />
                 <pre style={{ border: "0px", margin: "0px" }}>{`(vr: ViewReplacer<${ctx.value.entityType!.className}>, modules) =>`}</pre>
                 <JavascriptCodeMirror code={ctx.value.script || ""} onChange={this.handleCodeChange} />
                 {this.state.syntaxError && <div className="alert alert-danger">{this.state.syntaxError}</div>}
             </div>
         );
-    }
-
-    allViewNames() {
-        return this.state.viewNames || [];
     }
 
     handleViewNameClick = (viewName: string) => {
@@ -272,7 +292,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
     renderViewNameButtons() {
         return (
             <div className="btn-group" style={{ marginBottom: "3px" }}>
-                {this.allViewNames().map((vn, i) =>
+                {this.state.viewNames!.map((vn, i) =>
                     <input key={i} type="button" className="btn btn-success btn-xs sf-button" value={vn} onClick={() => this.handleViewNameClick(vn)} />)}
             </div>);
     }

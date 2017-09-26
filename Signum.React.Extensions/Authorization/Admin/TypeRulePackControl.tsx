@@ -264,8 +264,8 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                 {queries && <td style={{ textAlign: "center" }}>
                     {this.link("fa fa-search", ctx.value.modified ? "Invalidated" : ctx.value.queries,
                         () => API.fetchQueryRulePack(ctx.value.resource.cleanName, roleId),
-                        m =>  ctx.value.queries = m.rules.every(a => a.element.allowed == false) ? "None" :
-                            m.rules.every(a => a.element.allowed == true) ? "All" : "Mix")}
+                        m => ctx.value.queries = m.rules.every(a => a.element.allowed == "None") ? "None" :
+                            m.rules.every(a => a.element.allowed == "Allow") ? "All" : "Mix")}
                 </td>}
             </tr>
         ].concat(ctx.value.allowed!.conditions!.map(mle => mle.element).map(c => {
@@ -410,7 +410,7 @@ function isActive(allowed: TypeAllowed | null, basicAllowed: TypeAllowedBasic) {
 
 
 function select(current: TypeAllowed | null, basicAllowed: TypeAllowedBasic, e: React.MouseEvent<any>) {
-    if (!e.shiftKey || current == null)
+    if (!(e.shiftKey || e.ctrlKey) || current == null)
         return basicAllowed as TypeAllowedBasic;
 
     let db = getDB(current);

@@ -67,7 +67,7 @@ namespace Signum.Web.Excel
             if (ctx.Prefix.HasText())
                 return null;
             
-            if (ExcelReport && DynamicQueryManager.Current.QueryAllowed(typeof(ExcelReportEntity)))
+            if (ExcelReport && DynamicQueryManager.Current.QueryAllowed(typeof(ExcelReportEntity), false))
 
             {
                 var items = new List<IMenuItem>();

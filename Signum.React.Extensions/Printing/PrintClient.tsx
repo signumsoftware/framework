@@ -9,7 +9,7 @@ import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import { PseudoType, QueryKey, GraphExplorer, OperationType, IType, Type, KindOfType } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import { PrintLineEntity, PrintLineState, PrintPackageEntity, PrintPermission, PrintPackageProcess } from './Signum.Entities.Printing'
+import { PrintLineEntity, PrintLineState, PrintPackageEntity, PrintPermission, PrintPackageProcess, PrintLineOperation } from './Signum.Entities.Printing'
 import { ProcessEntity } from '../Processes/Signum.Entities.Processes'
 import { FileTypeSymbol } from '../Files/Signum.Entities.Files'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
@@ -17,12 +17,13 @@ import * as AuthClient from '../Authorization/AuthClient'
 import { ImportRoute } from "../../../Framework/Signum.React/Scripts/AsyncImport";
 
 export function start(options: { routes: JSX.Element[],}) {
-  
-    Navigator.addSettings(new EntitySettings(PrintLineEntity, e => import('./Templates/PrintLine')));
+
+    Navigator.addSettings(new EntitySettings(PrintLineEntity, e => import('./Templates/PrintLine'), { isCreable: "IsSearch" }));
     Navigator.addSettings(new EntitySettings(PrintPackageEntity, e => import('./Templates/PrintPackage')));
 
     options.routes.push(<ImportRoute path="~/printing/view" onImportModule={() => import("./PrintPanelPage")} />);
 
+    Operations.addSettings(new EntityOperationSettings(PrintLineOperation.SaveTest, { hideOnCanExecute: true }));
     
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(PrintPermission.ViewPrintPanel),

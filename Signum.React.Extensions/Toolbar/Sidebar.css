@@ -1,27 +1,32 @@
 ﻿
 
 .sidebar-container {
-    min-height: 568px;
-    background-color: white;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
 }
 
+    .sidebar-container .container-fluid {
+        flex-grow: 1;
+    }
+
+
 @media (min-width: 768px) {
-    body:not(.rtl-mode) .sidebar-container {
-        position: inherit;
-        margin: 0 0 0 250px;
+    .sidebar-container {
+        flex-direction: row;
+    }
+
+    body:not(.rtl-mode) .sidebar {
+        border-right: 1px solid #e7e7e7;
+    }
+
+    body.rtl-mode .sidebar {
         border-left: 1px solid #e7e7e7;
     }
 
-    body.rtl-mode .sidebar-container {
-        position: inherit;
-        margin: 0 250px 0 0;
-        border-right: 1px solid #e7e7e7;
+    .sidebar{
+        min-width: 251px;
     }
-}
-
-.sidebar .sidebar-nav.navbar-collapse {
-    padding-left: 0;
-    padding-right: 0;
 }
 
 .sidebar ul li {
@@ -34,12 +39,6 @@
 
 
 @media (min-width: 768px) {
-    .sidebar {
-        z-index: 1;
-        position: absolute;
-        width: 250px;
-    }
-
     body:not(.rtl-mode) .navbar-header {
         width: 235px;
         border-right: 1px solid #e7e7e7;

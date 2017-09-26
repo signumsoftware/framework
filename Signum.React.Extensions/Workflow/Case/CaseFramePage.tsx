@@ -19,6 +19,7 @@ import { RouteComponentProps } from "react-router";
 
 import "../../../../Framework/Signum.React/Scripts/Frames/Frames.css"
 import "./CaseAct.css"
+import { IHasCaseActivity } from '../WorkflowClient';
 
 interface CaseFramePageProps extends RouteComponentProps<{ workflowId: string; mainEntityStrategy: string; caseActivityId?: string }> {
 }
@@ -28,7 +29,7 @@ interface CaseFramePageState {
     getComponent?: (ctx: TypeContext<Entity>) => React.ReactElement<any>;
 }
 
-export default class CaseFramePage extends React.Component<CaseFramePageProps, CaseFramePageState> {
+export default class CaseFramePage extends React.Component<CaseFramePageProps, CaseFramePageState> implements IHasCaseActivity {
 
     constructor(props: any) {
         super(props);
@@ -36,7 +37,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
 
     }
 
-    getCaseActivity() {
+    getCaseActivity(): CaseActivityEntity | undefined {
         return this.state.pack && this.state.pack.activity;
     }
 
@@ -91,14 +92,9 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
             return Promise.resolve(undefined);
 
         const a = this.state.pack!.activity;
-        if (a.workflowActivity) {
-            return WorkflowClient.getViewPromise(a.case.mainEntity, a.workflowActivity.viewName).promise
-                .then(c => this.setState({ getComponent: c }));
-        }
-        else {
-            return Navigator.getViewPromise(a.case.mainEntity).promise
-                .then(c => this.setState({ getComponent: c }));
-        }
+
+        return Navigator.viewDispatcher.getViewPromise(a.case.mainEntity, a.workflowActivity!.viewName || undefined).promise
+            .then(c => this.setState({ getComponent: c }));
     }
 
     onClose() {
@@ -171,7 +167,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
 
         return (
             <h3>
-                <CaseFlowButton caseActivity={this.state.pack.activity} />
+                {!activity.case.isNew && <CaseFlowButton caseActivity={this.state.pack.activity} />}
                 <span className="sf-entity-title">{ getToString(activity) }</span>
                 <br/>
                 <small className="sf-type-nice-name">{Navigator.getTypeTitle(activity, undefined)}</small>
@@ -215,7 +211,9 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
 
         const ctx = new TypeContext<ICaseMainEntity>(undefined, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(mainEntity, ""));
 
-        var mainPack = { entity: mainEntity, canExecute: pack.canExecuteMainEntity };
+        var { activity, canExecuteActivity, canExecuteMainEntity, ...extension } = this.state.pack!;
+
+        var mainPack = { entity: mainEntity, canExecute: pack.canExecuteMainEntity, ...extension };
 
         const wc: WidgetContext<ICaseMainEntity> = {
             ctx: ctx,
@@ -225,7 +223,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
         return (
             <div className="sf-main-entity case-main-entity" data-main-entity={entityInfo(mainEntity) }>
                 { renderWidgets(wc) }
-                { this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy && <ButtonBar frame={mainFrame} pack={mainPack} /> }
+                { this.entityComponent && !mainEntity.isNew && !pack.activity.doneBy ? <ButtonBar frame={mainFrame} pack={mainPack} /> : <br /> }
                 <ValidationErrors entity={mainEntity} ref={ve => this.validationErrors = ve}/>
                 {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any, any>) => this.setComponent(c) })}
             </div>

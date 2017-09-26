@@ -73,11 +73,15 @@ export function start(options: { routes: JSX.Element[] }) {
 
 
 function moveModal(lite: Lite<TreeEntity>) {
-    return Navigator.view(MoveTreeModel.New(), {
-        title: TreeMessage.Move0.niceToString(lite.toStr),
-        modalSize: "medium",
-        extraComponentProps: { typeName: lite.EntityType },
-    })
+    const s = settings[lite.EntityType];
+    if (s && s.createMoveModel)
+        return s.createMoveModel(lite, {});
+    else
+        return Navigator.view(MoveTreeModel.New({ insertPlace: "LastNode" }), {
+            title: TreeMessage.Move0.niceToString(lite.toStr),
+            modalSize: "medium",
+            extraComponentProps: { lite },
+        })
 }
 
 function copyModal(lite: Lite<TreeEntity>) {
@@ -85,10 +89,10 @@ function copyModal(lite: Lite<TreeEntity>) {
     if (s && s.createCopyModel)
         return s.createCopyModel(lite, {});
     else
-        return Navigator.view(MoveTreeModel.New(), {
+        return Navigator.view(MoveTreeModel.New({ insertPlace: "LastNode" }), {
             title: TreeMessage.Copy0.niceToString(lite.toStr),
             modalSize: "medium",
-            extraComponentProps: { typeName: lite.EntityType },
+            extraComponentProps: { lite },
         });
 }
 
@@ -163,11 +167,14 @@ export function openTree(type: Type<TreeEntity> | string, filterOptions?: Filter
 
 export interface TreeModalOptions {
     title?: string;
+    excludedNodes?: Array<Lite<TreeEntity>>;
 }
 
 
 export interface TreeSettings<T extends TreeEntity> {
     createCopyModel?: (from: T | Lite<T>, dropConfig: Partial<MoveTreeModel>) => Promise<MoveTreeModel | undefined>;
+    createMoveModel?: (from: T | Lite<T>, dropConfig: Partial<MoveTreeModel>) => Promise<MoveTreeModel | undefined>;
+    dragTargetIsValid?: (draggedNode: TreeNode, targetNode: TreeNode | null) => Promise<boolean>;
 }
 
 export const settings: {
@@ -182,8 +189,8 @@ export function register<T extends TreeEntity>(type: Type<T>, setting: TreeSetti
 export type TreeNodeState = "Collapsed" | "Expanded" | "Filtered" | "Leaf";
 
 export interface TreeNode {
-
     lite: Lite<TreeEntity>;
+    name: string;
     disabled: boolean;
     childrenCount: number;
     level: number;
@@ -207,26 +214,13 @@ function fixNodes(nodes: Array<TreeNode>) {
 
 
 export namespace API {
-
-    export function getChildren(lite: Lite<TreeEntity>): Promise<Array<TreeNode>>;
-    export function getChildren(typeName: string, id: string): Promise<Array<TreeNode>>;
-    export function getChildren(typeNameOrLite: string | Lite<TreeEntity>, id?: string): Promise<Array<TreeNode>> {
-        if (isLite(typeNameOrLite))
-            return ajaxGet<Array<TreeNode>>({ url: `~/api/tree/children/${typeNameOrLite.EntityType}/${typeNameOrLite.id != null ? typeNameOrLite.id : ""}` }).then(ns => fixNodes(ns));
-        else
-            return ajaxGet<Array<TreeNode>>({ url: `~/api/tree/children/${typeNameOrLite}/${id != null ? id : ""}` }).then(ns => fixNodes(ns));
-    }
-
-    export function getRoots(typeName: string): Promise<Array<TreeNode>> {
-        return ajaxGet<Array<TreeNode>>({ url: `~/api/tree/roots/${typeName}` }).then(ns => fixNodes(ns));
-    }
-
     export function findNodes(typeName: string, request: FindNodesRequest): Promise<Array<TreeNode>> {
         return ajaxPost<Array<TreeNode>>({ url: `~/api/tree/findNodes/${typeName}` }, request).then(ns => fixNodes(ns));
     }
 
     export interface FindNodesRequest {
-        filters: Array<FilterRequest>;
+        userFilters: Array<FilterRequest>;
+        frozenFilters: Array<FilterRequest>;
         expandedNodes: Array<Lite<TreeEntity>>;
     }
 }

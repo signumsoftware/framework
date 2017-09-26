@@ -14,6 +14,7 @@ export const PrintLineEntity = new Type<PrintLineEntity>("PrintLine");
 export interface PrintLineEntity extends Entities.Entity, Processes.IProcessLineDataEntity {
     Type: "PrintLine";
     creationDate?: string;
+    testFileType?: Files.FileTypeSymbol | null;
     file?: Files.FilePathEmbedded | null;
     package?: Entities.Lite<PrintPackageEntity> | null;
     printedOn?: string | null;
@@ -22,6 +23,8 @@ export interface PrintLineEntity extends Entities.Entity, Processes.IProcessLine
 }
 
 export module PrintLineOperation {
+    export const CreateTest : Entities.ConstructSymbol_Simple<PrintLineEntity> = registerSymbol("Operation", "PrintLineOperation.CreateTest");
+    export const SaveTest : Entities.ExecuteSymbol<PrintLineEntity> = registerSymbol("Operation", "PrintLineOperation.SaveTest");
     export const Print : Entities.ExecuteSymbol<PrintLineEntity> = registerSymbol("Operation", "PrintLineOperation.Print");
     export const Retry : Entities.ExecuteSymbol<PrintLineEntity> = registerSymbol("Operation", "PrintLineOperation.Retry");
     export const Cancel : Entities.ExecuteSymbol<PrintLineEntity> = registerSymbol("Operation", "PrintLineOperation.Cancel");
@@ -29,6 +32,7 @@ export module PrintLineOperation {
 
 export const PrintLineState = new EnumType<PrintLineState>("PrintLineState");
 export type PrintLineState =
+    "NewTest" |
     "ReadyToPrint" |
     "Enqueued" |
     "Printed" |

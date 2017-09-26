@@ -141,7 +141,7 @@ define(["require", "exports", "d3"], function (require, exports, d3) {
             return new Rule(object, totalSize);
         }
         ChartUtils.rule = rule;
-        var Rule = (function () {
+        var Rule = /** @class */ (function () {
             function Rule(object, totalSize) {
                 this.sizes = {};
                 this.starts = {};

@@ -8,14 +8,6 @@ import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
-export const ApplicationEventLogEntity = new Type<ApplicationEventLogEntity>("ApplicationEventLog");
-export interface ApplicationEventLogEntity extends Entities.Entity {
-    Type: "ApplicationEventLog";
-    machineName?: string | null;
-    date?: string;
-    globalEvent?: TypeEvent;
-}
-
 export const HolidayCalendarEntity = new Type<HolidayCalendarEntity>("HolidayCalendar");
 export interface HolidayCalendarEntity extends Entities.Entity {
     Type: "HolidayCalendar";
@@ -46,6 +38,7 @@ export module ITaskMessage {
     export const Execute = new MessageKey("ITaskMessage", "Execute");
     export const Executions = new MessageKey("ITaskMessage", "Executions");
     export const LastExecution = new MessageKey("ITaskMessage", "LastExecution");
+    export const ExceptionLines = new MessageKey("ITaskMessage", "ExceptionLines");
 }
 
 export module ITaskOperation {
@@ -126,6 +119,14 @@ export module SchedulerPermission {
     export const ViewSchedulerPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "SchedulerPermission.ViewSchedulerPanel");
 }
 
+export const SchedulerTaskExceptionLineEntity = new Type<SchedulerTaskExceptionLineEntity>("SchedulerTaskExceptionLine");
+export interface SchedulerTaskExceptionLineEntity extends Entities.Entity {
+    Type: "SchedulerTaskExceptionLine";
+    elementInfo?: string | null;
+    schedulerTaskLog?: Entities.Lite<ScheduledTaskLogEntity> | null;
+    exception?: Entities.Lite<Basics.ExceptionEntity> | null;
+}
+
 export const ScheduleRuleMinutelyEntity = new Type<ScheduleRuleMinutelyEntity>("ScheduleRuleMinutely");
 export interface ScheduleRuleMinutelyEntity extends Entities.Entity, IScheduleRuleEntity {
     Type: "ScheduleRuleMinutely";
@@ -172,9 +173,14 @@ export interface SimpleTaskSymbol extends Entities.Symbol, ITaskEntity {
     Type: "SimpleTask";
 }
 
-export const TypeEvent = new EnumType<TypeEvent>("TypeEvent");
-export type TypeEvent =
-    "Start" |
-    "Stop";
+export const SystemEventLogEntity = new Type<SystemEventLogEntity>("SystemEventLog");
+export interface SystemEventLogEntity extends Entities.Entity {
+    Type: "SystemEventLog";
+    machineName?: string | null;
+    date?: string;
+    user?: Entities.Lite<Basics.IUserEntity> | null;
+    eventType?: string | null;
+    exception?: Entities.Lite<Basics.ExceptionEntity> | null;
+}
 
 

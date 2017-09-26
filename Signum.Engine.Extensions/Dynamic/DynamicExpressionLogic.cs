@@ -189,7 +189,12 @@ namespace Signum.Engine.Dynamic
             sb.AppendLine("    {");
             foreach(var kvp in fieldNames)
             {
-                sb.AppendLine($"        dqm.RegisterExpression(({kvp.Value.FromType} e) => e.{kvp.Value.Name}(){GetNiceNameCode(kvp.Value)});");
+                sb.AppendLine($"        var ei = dqm.RegisterExpression(({kvp.Value.FromType} e) => e.{kvp.Value.Name}(){GetNiceNameCode(kvp.Value)});");
+                if(kvp.Value.Format.HasText())
+                    sb.AppendLine($"        ei.ForceFormat = {CSharpRenderer.Value(kvp.Value.Format, typeof(string), new string[0])};");
+                if (kvp.Value.Unit.HasText())
+                    sb.AppendLine($"        ei.ForceUnit = {CSharpRenderer.Value(kvp.Value.Unit, typeof(string), new string[0])};");
+
             }
             sb.AppendLine("    }");
             sb.AppendLine("}");

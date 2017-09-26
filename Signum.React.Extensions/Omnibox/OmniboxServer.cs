@@ -57,7 +57,7 @@ namespace Signum.React.Omnibox
 
         public override bool AllowedQuery(object queryName)
         {
-            return DynamicQueryManager.Current.QueryAllowed(queryName);
+            return DynamicQueryManager.Current.QueryAllowed(queryName, true);
         }
 
         public override Lite<Entity> RetrieveLite(Type type, PrimaryKey id)

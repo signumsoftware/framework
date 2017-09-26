@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Calendar } from 'react-widgets'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { ModelState } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -51,7 +50,7 @@ export default class ChangePassword extends React.Component<{}, { modelState?: M
     handlePasswordBlur = (event: React.SyntheticEvent<any>) => {
         
         if (this.newPassword.value && this.newPassword2.value && this.newPassword2.value != this.newPassword.value)
-            this.setState({ modelState: { ["newPassword"]: AuthMessage.PasswordsAreDifferent.niceToString() } });
+            this.setState({ modelState: { ["newPassword"]: [AuthMessage.PasswordsAreDifferent.niceToString()] } });
         else
             this.setState({ modelState: undefined });
     }

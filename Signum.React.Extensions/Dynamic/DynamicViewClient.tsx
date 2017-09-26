@@ -27,7 +27,7 @@ import DynamicViewEntityComponent from './View/DynamicView' //Just Typing
 import * as DynamicClient from './DynamicClient'
 
 import * as DynamicViewComponent from './View/DynamicViewComponent'
-import { DynamicViewComponentProps, DynamicViewPart } from './View/DynamicViewComponent'
+import { DynamicViewComponentProps } from './View/DynamicViewComponent'
 import * as Nodes from './View/Nodes' //Typings-only
 import * as NodeUtils from './View/NodeUtils' //Typings-only
 import MessageModal from "../../../Framework/Signum.React/Scripts/Modals/MessageModal";
@@ -89,14 +89,41 @@ interface CustomContextSettings {
 
 export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
 
-    hasView(typeName: string) {
+    hasDefaultView(typeName: string) {
         return true;
     }
 
-    getView(entity: ModifiableEntity) {
+    getViewNames(typeName: string) {
+        const es = Navigator.getSettings(typeName);
+        var staticViewNames = es && es.namedViews && Dic.getKeys(es.namedViews) || [];
 
-        if (!isTypeEntity(entity.Type))
-            return this.fallback(entity);
+        if (!isTypeEntity(typeName))
+            return Promise.resolve(staticViewNames);
+
+        return getDynamicViewNames(typeName).then(dynamicViewNames => [
+            ...staticViewNames,
+            ...dynamicViewNames
+        ]);
+    }
+
+
+    getViewOverrides(typeName: string, viewName?: string) {
+        const es = Navigator.getSettings(typeName);
+        var staticViewOverrides = es && es.viewOverrides && es.viewOverrides.filter(a => a.viewName == viewName) || [];
+
+        if (!isTypeEntity(typeName))
+            return Promise.resolve(staticViewOverrides);
+
+        return getDynamicViewOverrides(typeName).then(dvos => [
+            ...staticViewOverrides,
+            ...dvos.filter(dvo => dvo.entity.viewName == viewName)
+        ])
+    }
+
+    getViewPromise(entity: ModifiableEntity, viewName?: string) {
+
+        if (!isTypeEntity(entity.Type) || viewName != undefined)
+            return this.fallback(entity, viewName);
 
         return ViewPromise.flat(getSelector(entity.Type).then(sel => {
 
@@ -110,83 +137,71 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
                     return this.static(entity);
 
                 if (viewName == "NEW")
-                    return ViewPromise.flat(createDefaultDynamicView(entity.Type).then(dv => this.dynamicViewComponent(dv)));
+                    return ViewPromise.flat(createDefaultDynamicView(entity.Type).then(dv => dynamicViewComponent(dv)));
 
                 if (viewName == "CHOOSE")
-                    return ViewPromise.flat(this.chooseDynamicView(entity.Type, true).then(dv => this.dynamicViewComponent(dv)));
+                    return this.chooseViewName(entity, true);
 
-                return ViewPromise.flat(API.getDynamicView(entity.Type, viewName).then(dv => this.dynamicViewComponent(dv)));
+                return ViewPromise.flat(API.getDynamicView(entity.Type, viewName).then(dv => dynamicViewComponent(dv)));
             } catch (error) {
                 return MessageModal.showError("There was an error executing the DynamicViewSelector. Fallback to default").then(() => this.fallback(entity));
             }
         }));
     }
 
-    dynamicViewComponent(dynamicView: DynamicViewEntity): ViewPromise<ModifiableEntity> {
-        return new ViewPromise(import('./View/DynamicViewComponent'))
-            .withProps({ initialDynamicView: dynamicView });
+    getViewPromiseWithName(entity: ModifiableEntity, viewName: string) {
+        const es = Navigator.getSettings(entity.Type);
+        var namedView = es && es.namedViews && es.namedViews[viewName];
+
+        if (namedView)
+            return namedView.getViewPromise(entity).applyViewOverrides(entity.Type, viewName);
+
+        return ViewPromise.flat(API.getDynamicView(entity.Type, viewName).then(dve => dynamicViewComponent(dve)));
     }
 
-    fallback(entity: ModifiableEntity): ViewPromise<ModifiableEntity> {
-        const settings = Navigator.getSettings(entity.Type) as EntitySettings<ModifiableEntity>;
+
+
+    fallback(entity: ModifiableEntity, viewName?: string): ViewPromise<ModifiableEntity> {
+
+        if (viewName)
+            return this.getViewPromiseWithName(entity, viewName);
+
+        const settings = Navigator.getSettings(entity.Type);
 
         if (!settings || !settings.getViewPromise) {
 
             if (!isTypeEntity(entity.Type))
                 return new ViewPromise(import('../../../Framework/Signum.React/Scripts/Lines/DynamicComponent'));
 
-            return ViewPromise.flat(this.chooseDynamicView(entity.Type, true).then(dv => this.dynamicViewComponent(dv)));
+            return this.chooseViewName(entity, true);
         }
-
-        var staticViewPromise = settings.getViewPromise(entity).applyViewOverrides(settings);
-
-        return this.applyDynamicViewOverride(entity.Type, staticViewPromise);
+        
+        return settings.getViewPromise(entity).applyViewOverrides(entity.Type);
     }
 
     static(entity: ModifiableEntity): ViewPromise<ModifiableEntity> {
-        const settings = Navigator.getSettings(entity.Type) as EntitySettings<ModifiableEntity>;
+        const es = Navigator.getSettings(entity.Type);
         
-        if (!settings)
+        if (!es)
             throw new Error(`No EntitySettings registered for ${entity.Type}`);
 
-        if (!settings.getViewPromise)
+        if (!es.getViewPromise)
             throw new Error(`The EntitySettings registered for ${entity.Type} has not getViewPromise`);
-        var staticViewPromise = settings.getViewPromise(entity).applyViewOverrides(settings);
-
-        return this.applyDynamicViewOverride(entity.Type, staticViewPromise);
+        
+        return es.getViewPromise(entity).applyViewOverrides(entity.Type);
     }
 
-    applyDynamicViewOverride(typeName: string, staticViewPromise: ViewPromise<ModifiableEntity>): ViewPromise<ModifiableEntity> {
-
-        if (!isTypeEntity(typeName))
-            return staticViewPromise;
-
-
-        return ViewPromise.flat(getViewOverride(typeName).then(viewOverride => {
-            if (viewOverride == undefined)
-                return staticViewPromise;
-
-            staticViewPromise.promise = staticViewPromise.promise.then(func => {
-                return (ctx: TypeContext<Entity>) => {
-                    var result = func(ctx);
-                    var component = result.type as React.ComponentClass<{ ctx: TypeContext<Entity> }>;
-                    patchComponent(component, viewOverride);
-                    return result;
-                };
-            });
-
-            return staticViewPromise;
-        }));
-    }
-
-    chooseDynamicView(typeName: string, avoidMessage = false) {
-        return getViewNames(typeName)
+    chooseViewName(entity: ModifiableEntity, avoidMessage = false) : ViewPromise<ModifiableEntity> {
+        return ViewPromise.flat(this.getViewNames(entity.Type)
             .then(names => SelectorModal.chooseElement(names, {
                 title: DynamicViewMessage.ChooseAView.niceToString(),
                 message: avoidMessage ? undefined : DynamicViewMessage.SinceThereIsNoDynamicViewSelectorYouNeedToChooseAViewManually.niceToString(),
             })).then(viewName => {
-                return this.getOrCreateDynamicView(typeName, viewName);
-            });
+                if (!viewName)
+                    return createDefaultDynamicView(entity.Type).then(dv => dynamicViewComponent(dv));
+
+                return this.getViewPromiseWithName(entity, viewName);
+            }));
     }
 
     getOrCreateDynamicView(typeName: string, viewName: string | undefined): Promise<DynamicViewEntity> {
@@ -254,7 +269,7 @@ export function cleanCaches() {
 }
 
 const viewNamesCache: { [typeName: string]: string[] } = {};
-export function getViewNames(typeName: string): Promise<string[]> {
+export function getDynamicViewNames(typeName: string): Promise<string[]> {
 
     return getOrCreate(viewNamesCache, typeName, () =>
         API.getDynamicViewNames(typeName)
@@ -285,18 +300,22 @@ function evalWithScope(code: string, modules: any) {
     return eval(code);
 }
 
-const overrideCache: { [typeName: string]: ((vr: ViewReplacer<Entity>) => string) | undefined } = {};
-export function getViewOverride(typeName: string): Promise<((vr: ViewReplacer<Entity>) => void) | undefined> {
+interface DynamiViewOverridePair {
+    override: (vr: ViewReplacer<Entity>) => void;
+    entity: DynamicViewOverrideEntity;
+}
 
+const overrideCache: { [typeName: string]: DynamiViewOverridePair[] } = {};
+export function getDynamicViewOverrides(typeName: string): Promise<DynamiViewOverridePair[]> {
     return getOrCreate(overrideCache, typeName, () =>
         API.getDynamicViewOverride(typeName)
-            .then(dvr => dvr && asOverrideFunction(dvr))
+            .then(dvos => dvos.map(dvo => ({ entity: dvo, override: asOverrideFunction(dvo) }) as DynamiViewOverridePair))
     );
 }
 
 
-export function asOverrideFunction(dvr: DynamicViewOverrideEntity): (vr: ViewReplacer<Entity>) => string {
-    let code = dvr.script!;
+export function asOverrideFunction(dvo: DynamicViewOverrideEntity): (vr: ViewReplacer<Entity>) => string {
+    let code = dvo.script!;
 
     // Lines
     var ValueLine = Lines.ValueLine;
@@ -315,6 +334,9 @@ export function asOverrideFunction(dvr: DynamicViewOverrideEntity): (vr: ViewRep
     var FileLine = FileLineModule.default;
 
     // Search
+    var SearchControl = Search.SearchControl;
+    var SearchControlLoaded = Search.SearchControlLoaded;
+    var ValueSearchControl = Search.ValueSearchControl;
     var ValueSearchControlLine = Search.ValueSearchControlLine;
 
     // ReactBootstrap
@@ -343,9 +365,6 @@ export function asOverrideFunction(dvr: DynamicViewOverrideEntity): (vr: ViewRep
 
     // ReactRouterBootstrap
     var LinkContainer = ReactRouterBootstrap.LinkContainer;
-    
-    // Custom
-    var DynamicViewPart = DynamicViewComponent.DynamicViewPart;
 
     var modules = globalModules;
 
@@ -354,7 +373,7 @@ export function asOverrideFunction(dvr: DynamicViewOverrideEntity): (vr: ViewRep
     try {
         return eval(code);
     } catch (e) {
-        throw new Error("Syntax in DynamicViewOverride for '" + dvr.entityType!.toStr + "':\r\n" + code + "\r\n" + (e as Error).message);
+        throw new Error("Syntax in DynamicViewOverride for '" + dvo.entityType!.toStr + "':\r\n" + code + "\r\n" + (e as Error).message);
     }
 }
 
@@ -371,7 +390,7 @@ export function loadNodes(): Promise<typeof Nodes> {
     return import("./View/Nodes");
 }
 
-export function getDynamicViewPromise(typeName: string, viewName: string): ViewPromise<ModifiableEntity> {
+export function getDynamicViewEntity(typeName: string, viewName: string): ViewPromise<ModifiableEntity> {
 
     return ViewPromise.flat(
         API.getDynamicView(typeName, viewName)
@@ -379,20 +398,24 @@ export function getDynamicViewPromise(typeName: string, viewName: string): ViewP
     );
 }
 
+export function dynamicViewComponent(dynamicView: DynamicViewEntity): ViewPromise < ModifiableEntity > {
+    return new ViewPromise(import('./View/DynamicViewComponent'))
+        .withProps({ initialDynamicView: dynamicView });
+}
+
 
 export namespace API {
     
     export function getDynamicView(typeName: string, viewName: string): Promise<DynamicViewEntity> {
-        
-            return ajaxGet<DynamicViewEntity>({ url: `~/api/dynamic/view/${typeName}?` + QueryString.stringify({ viewName}) });
+        return ajaxGet<DynamicViewEntity>({ url: `~/api/dynamic/view/${typeName}?` + QueryString.stringify({ viewName }) });
     }
 
     export function getDynamicViewSelector(typeName: string): Promise<DynamicViewSelectorEntity | undefined> {
         return ajaxGet<DynamicViewSelectorEntity>({ url: `~/api/dynamic/selector/${typeName}` });
     }
 
-    export function getDynamicViewOverride(typeName: string): Promise<DynamicViewOverrideEntity | undefined> {
-        return ajaxGet<DynamicViewOverrideEntity>({ url: `~/api/dynamic/override/${typeName}` });
+    export function getDynamicViewOverride(typeName: string): Promise<DynamicViewOverrideEntity[]> {
+        return ajaxGet<DynamicViewOverrideEntity[]>({ url: `~/api/dynamic/override/${typeName}` });
     }
     
     export function getDynamicViewNames(typeName: string): Promise<string[]> {

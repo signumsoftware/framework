@@ -8,6 +8,7 @@ import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator
 import { API, DynamicValidationTestResponse } from '../DynamicValidationClient'
 import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
 import TypeHelpComponent from '../Help/TypeHelpComponent'
+import TypeHelpButtonBarComponent from '../Help/TypeHelpButtonBarComponent'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/SearchControl/ContextMenu'
 import PropertyRouteCombo from "../../Basics/Templates/PropertyRouteCombo";
@@ -74,7 +75,6 @@ export default class DynamicValidation extends React.Component<DynamicValidation
                     {ctx.value.entityType && <PropertyRouteCombo ctx={ctx.subCtx(d => d.propertyRoute)} type={ctx.value.entityType} onChange={this.handlePropertyRouteChange} />}
                 </FormGroup>
                 <ValueLine ctx={ctx.subCtx(d => d.name)} />
-                <ValueLine ctx={ctx.subCtx(d => d.isGlobalyEnabled)} inlineCheckbox={true} />
                 {ctx.value.propertyRoute &&
                     <div>
                         <br />
@@ -82,6 +82,7 @@ export default class DynamicValidation extends React.Component<DynamicValidation
                             <div className="col-sm-7">
                                 {this.state.exampleEntity && <button className="btn btn-success" onClick={this.handleEvaluate}><i className="fa fa-play" aria-hidden="true"></i> Evaluate</button>}
                                 <div className="code-container">
+                                    <TypeHelpButtonBarComponent typeName={ctx.value.entityType!.cleanName} mode="CSharp" ctx={ctx} />
                                     <pre style={{ border: "0px", margin: "0px" }}>{"string PropertyValidate(" + (this.state.parentType || "ModifiableEntity") + " e, PropertyInfo pi)\n{"}</pre>
                                     <CSharpCodeMirror script={ctx.value.eval.script || ""} onChange={this.handleCodeChange} />
                                     <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>

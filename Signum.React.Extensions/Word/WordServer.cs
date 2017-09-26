@@ -22,6 +22,7 @@ using Signum.Engine.Authorization;
 using Signum.Engine.Maps;
 using Signum.Entities.Templating;
 using Signum.Entities.Word;
+using Signum.Engine.Word;
 
 namespace Signum.React.Word
 {
@@ -34,6 +35,29 @@ namespace Signum.React.Word
             ReflectionServer.RegisterLike(typeof(TemplateTokenMessage));
 
             CustomizeFiltersModel();
+
+            EntityPackTS.AddExtension += ep =>
+            {
+                if (ep.entity.IsNew || !WordTemplatePermission.GenerateReport.IsAuthorized())
+                    return;
+
+                var wordTemplates = WordTemplateLogic.TemplatesByEntityType.Value.TryGetC(ep.entity.GetType());
+                if (wordTemplates != null)
+                {
+                    var applicable = wordTemplates.Where(a => a.IsApplicable(ep.entity));
+                    if (applicable.HasItems())
+                        ep.Extension.Add("wordTemplates", applicable.Select(a => a.ToLite()).ToList());
+                }
+            };
+
+            QueryDescriptionTS.AddExtension += qd =>
+            {
+                object type = QueryLogic.ToQueryName(qd.queryKey);
+                var templates = WordTemplateLogic.GetApplicableWordTemplates(type, null, WordTemplateVisibleOn.Query);
+
+                if (templates.HasItems())
+                    qd.Extension.Add("wordTemplates", templates);
+            };
         }
 
         private static void CustomizeFiltersModel()

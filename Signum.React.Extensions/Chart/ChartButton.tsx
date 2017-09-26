@@ -28,12 +28,16 @@ export default class ChartButton extends React.Component<ChartButtonProps> {
             filterOptions : fo.filterOptions
         }));
 
-        Navigator.pushOrOpenInTab(path, e);
+        if (this.props.searchControl.props.avoidChangeUrl)
+            window.open(Navigator.toAbsoluteUrl(path));
+        else
+            Navigator.pushOrOpenInTab(path, e);
     }
     
     render() {
+        var label = this.props.searchControl.props.largeToolbarButtons == true ? " " + ChartMessage.Chart.niceToString() : undefined;
         return (
-            <Button onMouseUp={this.handleOnMouseUp}><i className="glyphicon glyphicon-stats"></i> &nbsp; {ChartMessage.Chart.niceToString()}</Button>
+            <Button onMouseUp={this.handleOnMouseUp}><i className="glyphicon glyphicon-stats"></i>&nbsp;{label}</Button>
         );
     }
  

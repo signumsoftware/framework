@@ -16,6 +16,9 @@ using System.Xml.Linq;
 using Signum.Entities.Basics;
 using Signum.Engine.Authorization;
 using Signum.Entities.Scheduler;
+using Signum.Entities.Dynamic;
+using System.CodeDom.Compiler;
+using System.Text.RegularExpressions;
 
 namespace Signum.Engine.Workflow
 {
@@ -51,6 +54,14 @@ namespace Signum.Engine.Workflow
         public static IQueryable<WorkflowEventEntity> WorkflowEvents(this WorkflowEntity e)
         {
             return WorkflowEventsExpression.Evaluate(e);
+        }
+
+        static Expression<Func<WorkflowEntity, WorkflowEventEntity>> WorkflowStartEventExpression =
+            e => e.WorkflowEvents().Where(we => we.Type == WorkflowEventType.Start).SingleOrDefault();
+        [ExpressionField]
+        public static WorkflowEventEntity WorkflowStartEvent(this WorkflowEntity e)
+        {
+            return WorkflowStartEventExpression.Evaluate(e);
         }
 
         public static IEnumerable<WorkflowEventEntity> WorkflowEventsFromCache(this WorkflowEntity e)
@@ -195,6 +206,45 @@ namespace Signum.Engine.Workflow
             get { return getConfiguration(); }
         }
 
+        static Regex CurrentIsRegex = new Regex($@"{nameof(WorkflowActivityInfo)}\s*\.\s*{nameof(WorkflowActivityInfo.Current)}\s*\.\s*{nameof(WorkflowActivityInfo.Is)}\s*\(\s*""(?<workflowName>[^""]*)""\s*,\s*""(?<activityName>[^""]*)""\s*\)");
+        internal static List<CompilerError> GetCustomErrors(string code)
+        {
+            var matches = CurrentIsRegex.Matches(code).Cast<Match>().ToList();
+
+            return matches.Select(m =>
+            {
+                var workflowName = m.Groups["workflowName"].Value;
+                var wa = WorkflowLogic.WorkflowGraphLazy.Value.Values.SingleOrDefault(w => w.Workflow.Name == workflowName);
+
+                if (wa == null)
+                    return CreateCompilerError(code, m, $"No workflow with Name '{workflowName}' found.");
+
+                var activityName = m.Groups["activityName"].Value;
+                if (!wa.Activities.Values.Any(a => a.Name == activityName))
+                    return CreateCompilerError(code, m, $"No activity with Name '{activityName}' found in workflow '{workflowName}'.");
+
+                return null;
+
+            }).NotNull().ToList();
+        }
+
+        private static CompilerError CreateCompilerError(string code, Match m, string errorText)
+        {
+            int index = 0;
+            int line = 1;
+            while (true)
+            {
+                var newIndex = code.IndexOf('\n', index + 1);
+                if (newIndex >= m.Index || newIndex == -1)
+                    return new CompilerError("DynamicCode.cs", line, m.Index - index, "CustomError", errorText);
+
+                index = newIndex;
+                line++;
+            }
+
+            throw new InvalidOperationException("Line not found");
+        }
+
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<WorkflowConfigurationEmbedded> getConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -214,6 +264,9 @@ namespace Signum.Engine.Workflow
                     });
 
                 WorkflowGraph.Register();
+                dqm.RegisterExpression((WorkflowEntity wf) => wf.WorkflowStartEvent());
+
+                DynamicCode.GetCustomErrors += GetCustomErrors;
 
 
                 sb.Include<WorkflowPoolEntity>()

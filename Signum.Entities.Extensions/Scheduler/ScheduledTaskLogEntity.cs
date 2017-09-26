@@ -70,4 +70,17 @@ namespace Signum.Entities.Scheduler
     {
         public static readonly ExecuteSymbol<ScheduledTaskLogEntity> CancelRunningTask;
     }
+
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    public class SchedulerTaskExceptionLineEntity : Entity
+    {
+        [SqlDbType(Size = int.MaxValue)]
+        public string ElementInfo { get; set; }
+
+        public Lite<ScheduledTaskLogEntity> SchedulerTaskLog { get; set; }
+
+        [NotNullable]
+        [NotNullValidator]
+        public Lite<ExceptionEntity> Exception { get; set; }
+    }
 }

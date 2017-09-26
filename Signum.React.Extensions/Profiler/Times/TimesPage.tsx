@@ -87,7 +87,7 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
                     {
                         times.orderByDescending(a => a.totalTime).map((pair, i)=>
                             <tr className="task" key={i}>
-                                <td width="300">
+                                <td>
                                     <div>
                                         <span className="processName"> { pair.key.tryBefore(' ') || pair.key }</span>
                                                 { pair.key.tryAfter(' ') != undefined && <span className="entityName"> { pair.key.after(' ') } </span> }
@@ -100,28 +100,28 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
                                 <td>
                                     <table>
                                             <tr>
-                                                <td width="40">Max
+                                                <td>Max
                                                 </td>
                                                 <td className="leftBorder">
                                                     <span className="max" style={{ width: (pair.maxTime * ratio) +"px" }}></span> {pair.maxTime} ms ({ moment(pair.maxDate).fromNow()})
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td width="40">Average
+                                                <td>Average
                                                 </td>
                                                 <td className="leftBorder">
                                                     <span className="med" style={{ width: (pair.averageTime * ratio) +"px" }}></span> {pair.averageTime} ms
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td width="40">Min
+                                                <td>Min
                                                 </td>
                                                 <td className="leftBorder">
                                                     <span className="min" style={{ width: (pair.minTime * ratio) +"px" }}></span> {pair.minTime} ms ({ moment(pair.minDate).fromNow()})
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td width="40">Last
+                                                <td>Last
                                                 </td>
                                                 <td className="leftBorder">
                                                     <span className="last" style={{ width: (pair.lastTime * ratio) +"px" }}></span> {pair.lastTime} ms ({ moment(pair.lastDate).fromNow()})

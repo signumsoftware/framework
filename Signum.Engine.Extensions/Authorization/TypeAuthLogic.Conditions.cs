@@ -299,6 +299,20 @@ namespace Signum.Engine.Authorization
             return miIsAllowedForDebugEntity.GetInvoker(ident.GetType()).Invoke((Entity)ident, allowed, inUserInterface);
         }
 
+        [MethodExpander(typeof(IsAllowedForDebugExpander))]
+        public static string CanBeModified(this IEntity ident)
+        {
+            var taac = TypeAuthLogic.GetAllowed(ident.GetType());
+
+            if (taac.Conditions.IsEmpty())
+                return taac.FallbackOrNone.GetDB() >= TypeAllowedBasic.Modify ? null : AuthAdminMessage.CanNotBeModified.NiceToString();
+
+            if (ident.IsNew)
+                return null;
+
+            return IsAllowedForDebug(ident, TypeAllowedBasic.Modify, false)?.CanBeModified;
+        }
+
         static GenericInvoker<Func<IEntity, TypeAllowedBasic, bool, DebugData>> miIsAllowedForDebugEntity =
             new GenericInvoker<Func<IEntity, TypeAllowedBasic, bool, DebugData>>((ii, tab, ec) => IsAllowedForDebug<Entity>((Entity)ii, tab, ec));
         [MethodExpander(typeof(IsAllowedForDebugExpander))]
@@ -557,6 +571,22 @@ namespace Signum.Engine.Authorization
 
                     return Requested <= Fallback.Get(UserInterface) ? null :
                         "is a {0} but does not belong to any condition and the base value is {1} (less than {2})".FormatWith(Lite.EntityType.TypeName(), Fallback.Get(UserInterface), Requested);
+                }
+            }
+
+            public string CanBeModified
+            {
+                get
+                {
+                    foreach (var cond in Conditions.AsEnumerable().Reverse())
+                    {
+                        if (cond.InGroup)
+                            return Requested <= cond.Allowed.Get(UserInterface) ? null :
+                                AuthAdminMessage.CanNotBeModifiedBecauseIsA0.NiceToString(cond.TypeCondition.NiceToString());
+                    }
+
+                    return Requested <= Fallback.Get(UserInterface) ? null :
+                        AuthAdminMessage.CanNotBeModifiedBecauseIsNotA0.NiceToString(Conditions.AsEnumerable().Reverse());
                 }
             }
         }

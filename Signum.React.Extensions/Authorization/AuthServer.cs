@@ -60,13 +60,13 @@ namespace Signum.React.Authorization
                 ReflectionServer.AddTypeExtension += (ti, t) =>
                 {
                     if (ti.QueryDefined)
-                        ti.Extension.Add("queryAllowed", UserEntity.Current == null ? false : QueryAuthLogic.GetQueryAllowed(t));
+                        ti.Extension.Add("queryAllowed", UserEntity.Current == null ? QueryAllowed.None : QueryAuthLogic.GetQueryAllowed(t));
                 };
 
                 ReflectionServer.AddFieldInfoExtension += (mi, fi) =>
                 {
                     if (fi.DeclaringType.Name.EndsWith("Query"))
-                        mi.Extension.Add("queryAllowed", UserEntity.Current == null ? false : QueryAuthLogic.GetQueryAllowed(fi.GetValue(null)));
+                        mi.Extension.Add("queryAllowed", UserEntity.Current == null ? QueryAllowed.None : QueryAuthLogic.GetQueryAllowed(fi.GetValue(null)));
                 };
                 
             }
@@ -75,8 +75,7 @@ namespace Signum.React.Authorization
             {
                 ReflectionServer.AddPropertyRouteExtension += (mi, pr) =>
                 {
-                    mi.Extension.Add("propertyAllowed",
-                        UserEntity.Current == null ? PropertyAllowed.None : pr.GetPropertyAllowed());
+                    mi.Extension.Add("propertyAllowed", UserEntity.Current == null ? PropertyAllowed.None : pr.GetPropertyAllowed());
                 };
                 
             }

@@ -172,7 +172,7 @@ namespace Signum.Entities.Chart
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
             DisplayName = element.Attribute("DisplayName").Value;
-            Query = ctx.GetQuery(element.Attribute("Query").Value);
+            Query = ctx.TryGetQuery(element.Attribute("Query").Value);
             EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value));
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value));
             ChartScript = ctx.ChartScript(element.Attribute("ChartScript").Value);
