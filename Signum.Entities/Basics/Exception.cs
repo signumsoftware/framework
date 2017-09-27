@@ -31,7 +31,6 @@ namespace Signum.Entities.Basics
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
         [NotNullable, SqlDbType(Size = 100)]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string ExceptionType { get; set; }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
@@ -50,7 +49,6 @@ namespace Signum.Entities.Basics
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
         string stackTrace;
-        [StringLengthValidator(AllowNulls = false, Min = 1, MultiLine = true)]
         public string StackTrace
         {
             get { return stackTrace; }
@@ -68,49 +66,39 @@ namespace Signum.Entities.Basics
         public Lite<IUserEntity> User { get; set; }
 
         [SqlDbType(Size = 100)]
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string Environment { get; set; }
 
         [SqlDbType(Size = 100)]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Version { get; set; }
 
         [SqlDbType(Size = 300)]
-        [StringLengthValidator(AllowNulls = true, Max = 300)]
         public string UserAgent { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
         public string RequestUrl { get; set; }
 
         [SqlDbType(Size = 100)]
-        [StringLengthValidator(AllowNulls = true, Max = 100)]
         public string ControllerName { get; set; }
 
         [SqlDbType(Size = 100)]
-        [StringLengthValidator(AllowNulls = true, Max = 100)]
         public string ActionName { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
         public string UrlReferer { get; set; }
 
         [SqlDbType(Size = 100)]
-        [StringLengthValidator(AllowNulls = true, Max = 100)]
         public string MachineName { get; set; }
 
         [SqlDbType(Size = 100)]
-        [StringLengthValidator(AllowNulls = true, Max = 100)]
         public string ApplicationName { get; set; }
 
         [SqlDbType(Size = 100)]
-        [StringLengthValidator(AllowNulls = true, Max = 100)]
         public string UserHostAddress { get; set; }
 
         [SqlDbType(Size = 100)]
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string UserHostName { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = int.MaxValue)]
         public string Referrer { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
