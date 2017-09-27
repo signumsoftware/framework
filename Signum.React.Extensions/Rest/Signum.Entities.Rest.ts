@@ -34,6 +34,9 @@ export interface RestLogEntity extends Entities.Entity {
     requestBody: string;
     queryString: Entities.MList<QueryStringValueEmbedded>;
     user: Entities.Lite<Basics.IUserEntity> | null;
+    userHostAddress: string | null;
+    userHostName: string | null;
+    referrer: string | null;
     controller: string;
     action: string;
     exception: Entities.Lite<Basics.ExceptionEntity> | null;
