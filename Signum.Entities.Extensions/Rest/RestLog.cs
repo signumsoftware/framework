@@ -24,21 +24,17 @@ namespace Signum.Entities.Rest
         public string RequestBody { get; set; }
 
         [NotNullable, PreserveOrder]
-        [NotNullValidator, NoRepeatValidator]
         public MList<QueryStringValueEmbedded> QueryString { get; set; } = new MList<QueryStringValueEmbedded>();
 
         public Lite<IUserEntity> User { get; set; }
         
-        [SqlDbType(Size = 100)]
-        [StringLengthValidator(AllowNulls = true, Max = 100)]
+        [SqlDbType(Size = int.MaxValue)]
         public string UserHostAddress { get; set; }
 
-        [SqlDbType(Size = 100)]
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
+        [SqlDbType(Size = int.MaxValue)]
         public string UserHostName { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = int.MaxValue)]
         public string Referrer { get; set; }
 
         [NotNullable, SqlDbType(Size = 100)]
