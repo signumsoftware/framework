@@ -6,6 +6,7 @@ using Signum.Utilities;
 using System.Threading;
 using System.Collections.Specialized;
 using System.Collections;
+using Signum.Entities;
 
 namespace Signum.Entities.Basics
 {
@@ -107,6 +108,10 @@ namespace Signum.Entities.Basics
         [SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string UserHostName { get; set; }
+
+        [SqlDbType(Size = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = int.MaxValue)]
+        public string Referrer { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
         public string Form { get; set; }

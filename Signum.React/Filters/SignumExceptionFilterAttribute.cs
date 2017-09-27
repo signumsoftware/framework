@@ -42,6 +42,7 @@ namespace Signum.React.Filters
                     e.UrlReferer = req.Headers.Referrer?.ToString();
                     e.UserHostAddress = GetClientIp(req);
                     e.UserHostName = GetClientName(req);
+                    e.Referrer = req.Headers.Referrer.ToString();
                     e.User = (UserHolder.Current ?? (IUserEntity)GetProp(req, SignumAuthenticationFilterAttribute.UserKey))?.ToLite();
                     e.QueryString = ExceptionEntity.Dump(req.RequestUri.ParseQueryString());
                     e.Form =  (string)GetProp(req, SignumAuthenticationFilterAttribute.SavedRequestKey);
@@ -82,7 +83,7 @@ namespace Signum.React.Filters
             return HttpStatusCode.InternalServerError;
         }
 
-        private string GetClientIp(HttpRequestMessage request)
+        public static string GetClientIp(HttpRequestMessage request)
         {
             if (request.Properties.ContainsKey("MS_HttpContext"))
             {
@@ -103,7 +104,7 @@ namespace Signum.React.Filters
             }
         }
 
-        private string GetClientName(HttpRequestMessage request)
+        public static string GetClientName(HttpRequestMessage request)
         {
             if (request.Properties.ContainsKey("MS_HttpContext"))
             {
