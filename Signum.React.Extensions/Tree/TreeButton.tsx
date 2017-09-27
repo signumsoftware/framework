@@ -31,8 +31,9 @@ export default class TreeButton extends React.Component<TreeButtonProps> {
     }
     
     render() {
+        var label = this.props.searchControl.props.largeToolbarButtons == true ? " " + TreeMessage.Tree.niceToString() : undefined;
         return (
-            <Button onClick={this.handleClick}><i className="fa fa-sitemap"></i> &nbsp; {TreeMessage.Tree.niceToString()}</Button>
+            <Button onClick={this.handleClick}><i className="fa fa-sitemap"></i>&nbsp;{label}</Button>
         );
     }
 }
