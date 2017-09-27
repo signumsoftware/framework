@@ -35,6 +35,9 @@ namespace Signum.React.RestLog
                 Controller = actionContext.ControllerContext.Controller.ToString(),
                 Action = actionContext.ActionDescriptor.ActionName,
                 StartDate = TimeZoneManager.Now,
+                UserHostAddress = SignumExceptionFilterAttribute.GetClientIp(actionContext.Request),
+                UserHostName = SignumExceptionFilterAttribute.GetClientName(actionContext.Request),
+                Referrer = actionContext.Request.Headers.Referrer.ToString(),
                 RequestBody = (string)(actionContext.Request.Properties.ContainsKey(SignumAuthenticationFilterAttribute.SavedRequestKey) ?
                     actionContext.Request.Properties[SignumAuthenticationFilterAttribute.SavedRequestKey] : null)
             };
