@@ -7,25 +7,24 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
+import * as Files from '../Files/Signum.Entities.Files'
 
 
-export const ActivationFunction = new EnumType<ActivationFunction>("ActivationFunction");
-export type ActivationFunction =
-    "ReLU" |
-    "Tanh" |
-    "Sigmoid" |
-    "Linear";
+export const PredictorAlgorithmSymbol = new Type<PredictorAlgorithmSymbol>("PredictorAlgorithm");
+export interface PredictorAlgorithmSymbol extends Entities.Symbol {
+    Type: "PredictorAlgorithm";
+}
 
-export const NeuronalNetworkSettingsEntity = new Type<NeuronalNetworkSettingsEntity>("NeuronalNetworkSettingsEntity");
-export interface NeuronalNetworkSettingsEntity extends Entities.EmbeddedEntity {
-    Type: "NeuronalNetworkSettingsEntity";
-    learningRate?: number;
-    activationFunction?: ActivationFunction;
-    regularization?: Regularization;
-    regularizationRate?: number;
-    trainingRatio?: number;
-    backSize?: number;
-    neuronalNetworkDescription?: string | null;
+export const PredictorCodificatonEntity = new Type<PredictorCodificatonEntity>("PredictorCodificaton");
+export interface PredictorCodificatonEntity extends Entities.Entity {
+    Type: "PredictorCodificaton";
+    predictor?: Entities.Lite<PredictorEntity> | null;
+    columnIndex?: number;
+    originalColumnIndex?: number;
+    groupKey1?: string | null;
+    groupKey2?: string | null;
+    groupKey3?: string | null;
+    isValue?: string | null;
 }
 
 export const PredictorColumnEmbedded = new Type<PredictorColumnEmbedded>("PredictorColumnEmbedded");
@@ -52,8 +51,17 @@ export interface PredictorEntity extends Entities.Entity {
     Type: "Predictor";
     query?: Basics.QueryEntity | null;
     name?: string | null;
+    state?: PredictorState;
     filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
     columns: Entities.MList<PredictorColumnEmbedded>;
+    files: Entities.MList<PredictorFileEmbedded>;
+}
+
+export const PredictorFileEmbedded = new Type<PredictorFileEmbedded>("PredictorFileEmbedded");
+export interface PredictorFileEmbedded extends Entities.EmbeddedEntity {
+    Type: "PredictorFileEmbedded";
+    key?: string | null;
+    file?: Files.FilePathEmbedded | null;
 }
 
 export module PredictorMessage {
@@ -78,12 +86,14 @@ export interface PredictorMultiColumnEntity extends Entities.Entity {
 
 export module PredictorOperation {
     export const Save : Entities.ExecuteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Save");
+    export const Train : Entities.ExecuteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Train");
+    export const Delete : Entities.DeleteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Delete");
+    export const Clone : Entities.ConstructSymbol_From<PredictorEntity, PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Clone");
 }
 
-export const Regularization = new EnumType<Regularization>("Regularization");
-export type Regularization =
-    "None" |
-    "L1" |
-    "L2";
+export const PredictorState = new EnumType<PredictorState>("PredictorState");
+export type PredictorState =
+    "Draft" |
+    "Trained";
 
 

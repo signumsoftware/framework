@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Signum.Entities.DynamicQuery;
 using System.Reflection;
+using Signum.Entities.Files;
 
 namespace Signum.Entities.MachineLearning
 {
@@ -27,12 +28,18 @@ namespace Signum.Entities.MachineLearning
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name { get; set; }
 
+        public PredictorState State { get; set; }
+
         [NotNullable, PreserveOrder]
         public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
         [NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
         public MList<PredictorColumnEmbedded> Columns { get; set; } = new MList<PredictorColumnEmbedded>();
+
+        [NotNullable, PreserveOrder]
+        [NotNullValidator, NoRepeatValidator]
+        public MList<PredictorFileEmbedded> Files { get; set; } = new MList<PredictorFileEmbedded>();
 
         internal void ParseData(QueryDescription qd)
         {
@@ -44,6 +51,16 @@ namespace Signum.Entities.MachineLearning
                 foreach (var c in Columns)
                     c.ParseData(this, qd, SubTokensOptions.CanElement);
         }
+    }
+
+    [AutoInit]
+    public static class PredictorOperation
+    {
+        public static readonly ExecuteSymbol<PredictorEntity> Save;
+        public static readonly ExecuteSymbol<PredictorEntity> Train;
+        public static readonly ExecuteSymbol<PredictorEntity> Untrain;
+        public static readonly DeleteSymbol<PredictorEntity> Delete;
+        public static readonly ConstructSymbol<PredictorEntity>.From<PredictorEntity> Clone;
     }
 
     [Serializable]
@@ -75,6 +92,25 @@ namespace Signum.Entities.MachineLearning
             { PredictorColumnType.MultiColumn, false, true},
         };
     }
+
+    public enum PredictorState
+    {
+        Draft, 
+        Trained,
+    }
+
+    public enum PredictorColumnType
+    {
+        SimpleColumn,
+        MultiColumn,
+    }
+
+    public enum PredictorColumnUsage
+    {
+        Input,
+        Output
+    }
+
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Transactional)]
     public class PredictorMultiColumnEntity : Entity
@@ -109,61 +145,49 @@ namespace Signum.Entities.MachineLearning
         }
     }
 
+   
+
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
+    public class PredictorCodificationEntity : Entity
+    {
+        [NotNullable]
+        public Lite<PredictorEntity> Predictor { get; set; }
+
+        public int ColumnIndex { get; set; }
+
+        public int OriginalColumnIndex { get; set; }
+
+        [SqlDbType(Size = 100)]
+        public string GroupKey0 { get; set; }
+
+        [SqlDbType(Size = 100)]
+        public string GroupKey1 { get; set; }
+
+        [SqlDbType(Size = 100)]
+        public string GroupKey2 { get; set; }
+
+        [SqlDbType(Size = 100)]
+        public string IsValue { get; set; }
+    }
+
     [Serializable]
-    public class NeuronalNetworkSettingsEntity : EmbeddedEntity
+    public class PredictorFileEmbedded : EmbeddedEntity
     {
-        public double LearningRate { get; set; }
+        [NotNullable, SqlDbType(Size = 100)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        public string Key { get; set; }
 
-        public ActivationFunction ActivationFunction { get; set; }
-
-        public Regularization Regularization { get; set; }
-
-        public double RegularizationRate { get; set; }
-
-        public double TrainingRatio { get; set; }
-
-        public double BackSize { get; set; }
-
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
-        public string NeuronalNetworkDescription { get; set; }
+        public FilePathEmbedded File { get; set; }
     }
 
-    [AutoInit]
-    public static class PredictorOperation
+    [Serializable]
+    public class PredictorAlgorithmSymbol : Symbol
     {
-        public static readonly ExecuteSymbol<PredictorEntity> Save;
-    }
+        private PredictorAlgorithmSymbol() { }
 
-    public class NeuronalNetworkDescription
-    {
-        public double LearningRate;
-        public ActivationFunction ActivationFuntion;
-    }
-
-    public enum PredictorColumnType
-    {
-        SimpleColumn,
-        MultiColumn,
-    }
-
-    public enum PredictorColumnUsage
-    {
-        Input,
-        Output
-    }
-
-    public enum ActivationFunction
-    {
-        ReLU,
-        Tanh,
-        Sigmoid,
-        Linear,
-    }
-
-    public enum Regularization
-    {
-        None, 
-        L1,
-        L2,
+        public PredictorAlgorithmSymbol(Type declaringType, string fieldName) :
+            base(declaringType, fieldName)
+        {
+        }
     }
 }
