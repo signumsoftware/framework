@@ -42,7 +42,6 @@ namespace Signum.React.Filters
                     e.UrlReferer = req.Headers.Referrer?.ToString();
                     e.UserHostAddress = GetClientIp(req);
                     e.UserHostName = GetClientName(req);
-                    e.Referrer = req.Headers.Referrer.ToString();
                     e.User = (UserHolder.Current ?? (IUserEntity)GetProp(req, SignumAuthenticationFilterAttribute.UserKey))?.ToLite();
                     e.QueryString = ExceptionEntity.Dump(req.RequestUri.ParseQueryString());
                     e.Form =  (string)GetProp(req, SignumAuthenticationFilterAttribute.SavedRequestKey);

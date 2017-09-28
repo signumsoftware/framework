@@ -99,9 +99,6 @@ namespace Signum.Entities.Basics
         public string UserHostName { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        public string Referrer { get; set; }
-
-        [SqlDbType(Size = int.MaxValue)]
         public string Form { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
