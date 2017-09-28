@@ -193,7 +193,13 @@
   <Type Name="IWorkflowNodeEntity" />
   <Type Name="IWorkflowObjectEntity" />
   <Type Name="JoyrideEntity" />
-  <Type Name="JoyrideMessage" />
+  <Type Name="JoyrideMessage">
+    <Member Name="Back" Description="Terug" />
+    <Member Name="Close" Description="Sluiten" />
+    <Member Name="Last" Description="Stop" />
+    <Member Name="Next" Description="Volgende" />
+    <Member Name="Skip" Description="Annuleren" />
+  </Type>
   <Type Name="JoyrideOperation" />
   <Type Name="JoyrideStepEntity" />
   <Type Name="JoyrideStepOperation" />
@@ -309,6 +315,7 @@
   <Type Name="ScheduledTaskOperation" />
   <Type Name="SchedulerMessage" />
   <Type Name="SchedulerPermission" />
+  <Type Name="SchedulerTaskExceptionLineEntity" />
   <Type Name="ScheduleRuleMinutelyEntity" />
   <Type Name="ScheduleRuleMonthsEntity" />
   <Type Name="ScheduleRuleWeekDaysEntity" />
