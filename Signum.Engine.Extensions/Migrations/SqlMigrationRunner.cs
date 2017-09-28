@@ -195,12 +195,16 @@ namespace Signum.Engine.Migrations
 
                 try
                 {
+                    DateTime start = TimeZoneManager.Now;
+
                     foreach (var mi in migrations.AsEnumerable().Where(a => !a.IsExecuted))
                     {
                         Draw(migrations, mi);
 
                         Execute(mi);
                     }
+
+                    Console.WriteLine("Elapsed time: {0}".FormatWith(TimeZoneManager.Now.Subtract(start).ToString(@"hh\:mm\:ss")));
 
                     return true;
                 }
