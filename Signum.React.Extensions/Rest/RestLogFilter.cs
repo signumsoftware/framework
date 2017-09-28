@@ -22,27 +22,35 @@ namespace Signum.React.RestLog
     {
         public override void OnActionExecuting(HttpActionContext actionContext)
         {
-            var queryParams =
-             actionContext.Request.GetQueryNameValuePairs()
-                 .Select(a => new QueryStringValueEmbedded { Key = a.Key, Value = a.Value })
-                 .ToMList();
-
-            var request = new RestLogEntity
+            try
             {
-                Url = actionContext.Request.RequestUri.ToString(),
-                QueryString = queryParams,
-                User = UserHolder.Current?.ToLite(),
-                Controller = actionContext.ControllerContext.Controller.ToString(),
-                Action = actionContext.ActionDescriptor.ActionName,
-                StartDate = TimeZoneManager.Now,
-                UserHostAddress = SignumExceptionFilterAttribute.GetClientIp(actionContext.Request),
-                UserHostName = SignumExceptionFilterAttribute.GetClientName(actionContext.Request),
-                Referrer = actionContext.Request.Headers.Referrer.ToString(),
-                RequestBody = (string)(actionContext.Request.Properties.ContainsKey(SignumAuthenticationFilterAttribute.SavedRequestKey) ?
-                    actionContext.Request.Properties[SignumAuthenticationFilterAttribute.SavedRequestKey] : null)
-            };
+                var queryParams =
+                 actionContext.Request.GetQueryNameValuePairs()
+                     .Select(a => new QueryStringValueEmbedded { Key = a.Key, Value = a.Value })
+                     .ToMList();
 
-            actionContext.ControllerContext.RouteData.Values.Add(typeof(RestLogEntity).FullName, request);
+                var request = new RestLogEntity
+                {
+                    Url = actionContext.Request.RequestUri.ToString(),
+                    QueryString = queryParams,
+                    User = UserHolder.Current?.ToLite(),
+                    Controller = actionContext.ControllerContext.Controller.ToString(),
+                    Action = actionContext.ActionDescriptor.ActionName,
+                    StartDate = TimeZoneManager.Now,
+                    UserHostAddress = SignumExceptionFilterAttribute.GetClientIp(actionContext.Request),
+                    UserHostName = SignumExceptionFilterAttribute.GetClientName(actionContext.Request),
+                    Referrer = actionContext.Request.Headers.Referrer?.ToString(),
+                    RequestBody = (string)(actionContext.Request.Properties.ContainsKey(SignumAuthenticationFilterAttribute.SavedRequestKey) ?
+                        actionContext.Request.Properties[SignumAuthenticationFilterAttribute.SavedRequestKey] : null)
+                };
+
+                actionContext.ControllerContext.RouteData.Values.Add(typeof(RestLogEntity).FullName, request);
+
+            }
+            catch (Exception e)
+            {
+                e.LogException();
+            }
         }
 
 
