@@ -59,7 +59,7 @@ export interface SearchControlLoadedProps {
     avoidAutoRefresh: boolean;
     avoidChangeUrl: boolean;
     
-    onCreate?: () => Promise<void>;
+    onCreate?: () => void;
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
     onNavigated?: (lite: Lite<Entity>) => void;
     onSelectionChanged?: (entity: Lite<Entity>[]) => void;
@@ -437,7 +437,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         const onCreate = this.props.onCreate;
 
         if (onCreate)
-            onCreate().done();
+            onCreate();
         else {
             const isWindowsOpen = ev.button == 1 || ev.ctrlKey;
 
