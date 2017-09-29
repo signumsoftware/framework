@@ -44,7 +44,6 @@ export interface ExceptionEntity extends Entities.Entity {
     applicationName?: string | null;
     userHostAddress?: string | null;
     userHostName?: string | null;
-    referrer?: string | null;
     form?: string | null;
     queryString?: string | null;
     session?: string | null;
