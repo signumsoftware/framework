@@ -11,7 +11,7 @@ import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessa
 import Typeahead from '../Lines/Typeahead'
 import { EntityListBase, EntityListBaseProps } from './EntityListBase'
 import { RenderEntity } from './RenderEntity'
-import { Tab, Tabs } from '../Tabs';
+import { Tab, UncontrolledTabs } from '../Tabs';
 
 export interface EntityTabRepeaterProps extends EntityListBaseProps {
     createAsLink?: boolean;
@@ -68,7 +68,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
         const readOnly = ctx.readOnly;
 
         return (
-            <Tabs unmountOnExit={true}>
+            <UncontrolledTabs unmountOnExit={true}>
                 {
                     mlistItemContext(ctx).map((mlec, i) => {
                         const drag = this.canMove(mlec.value) && !readOnly ? this.getDragConfig(i, "h") : undefined;
@@ -105,7 +105,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                         </Tab>
                     })
                 }
-            </Tabs>
+            </UncontrolledTabs>
         );
     }
 }

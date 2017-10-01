@@ -4,7 +4,6 @@ import { DropdownItem} from 'reactstrap'
 import { Dic, classes, combineFunction } from '../Globals'
 import { QueryDescription, } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
-import * as RootCloseWrapper from 'react-overlays/lib/RootCloseWrapper'
 import SearchControlLoaded from "./SearchControlLoaded";
 
 

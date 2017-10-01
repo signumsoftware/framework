@@ -1,6 +1,5 @@
 ﻿import * as React from 'react'
 import { Dic, classes, combineFunction, DomUtils } from '../Globals'
-import * as RootCloseWrapper from 'react-overlays/lib/RootCloseWrapper'
 
 
 export interface ContextMenuPosition {
@@ -52,6 +51,7 @@ export default class ContextMenu extends React.Component<ContextMenuProps> {
             </ul>
         );
 
-        return <RootCloseWrapper onRootClose={onHide}>{ul}</RootCloseWrapper>;
+        return ul;
+        //return <RootCloseWrapper onRootClose={onHide}>{ul}</RootCloseWrapper>;
     }
 }

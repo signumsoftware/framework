@@ -2,7 +2,7 @@
 import * as moment from 'moment'
 import { ExceptionEntity } from '../Signum.Entities.Basics'
 import { ValueLine, ValueLineType, EntityLine, TypeContext } from '../Lines'
-import { Tabs, Tab } from '../Tabs';
+import { Tabs, Tab, UncontrolledTabs } from '../Tabs';
 
 export default class Exception extends React.Component<{ ctx: TypeContext<ExceptionEntity> }> {
     render() {
@@ -32,13 +32,13 @@ export default class Exception extends React.Component<{ ctx: TypeContext<Except
                 <ValueLine ctx={ctx.subCtx(f => f.urlReferer)} />
                 <h3 style={{ color: "rgb(139, 0, 0)" }}>{ctx.value.exceptionType}</h3>
                 <pre><code>{ctx.value.exceptionMessage}</code></pre>
-                <Tabs>
+                <UncontrolledTabs>
                     {this.codeTab(0, a => a.stackTrace)}
                     {this.codeTab(1, a => a.data)}
                     {this.codeTab(2, a => a.queryString)}
                     {this.codeTab(3, a => a.form)}
                     {this.codeTab(4, a => a.session)}
-                </Tabs>
+                </UncontrolledTabs>
             </div>
         );
     }
@@ -50,7 +50,7 @@ export default class Exception extends React.Component<{ ctx: TypeContext<Except
             return undefined;
 
         return (
-            <Tab title={tc.propertyRoute.member!.niceName} tabId={tabId}>
+            <Tab title={tc.propertyRoute.member!.niceName} eventKey={tabId}>
                 <pre>
                     <code>{tc.value}</code>
                 </pre>
