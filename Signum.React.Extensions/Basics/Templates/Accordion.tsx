@@ -2,7 +2,7 @@
 import { Card, CardHeader, Collapse } from "reactstrap";
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { BsColor } from "../../../../Framework/Signum.React/Scripts/Operations";
-import { CollapsableCardProps, CollapsableCard } from 'Basics/Templates/CollapsableCard';
+import CollapsableCard, { CollapsableCardProps } from './CollapsableCard';
 
 export interface AccordionProps {
     defaultCardId?: number | string;

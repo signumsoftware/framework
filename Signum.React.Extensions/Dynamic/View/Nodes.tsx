@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Tabs, Tab } from 'reactstrap'
 import {
     FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityTable,
     EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip, RenderEntity
@@ -32,6 +31,7 @@ import { toStyleOptions, subCtx, StyleOptionsExpression } from './StyleOptionsEx
 import FileLine from "../../Files/FileLine";
 import { DownloadBehaviour } from "../../Files/FileDownloader";
 import { registerSymbol } from "../../../../Framework/Signum.React/Scripts/Reflection";
+import { Tabs, Tab, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Tabs';
 
 export interface BaseNode {
     kind: string;
@@ -139,7 +139,7 @@ export interface TabsNode extends ContainerNode {
     field?: string;
     styleOptions?: StyleOptionsExpression;
     id: ExpressionOrValue<string>;
-    defaultActiveKey?: string;
+    defaultEventKey?: string;
 }
 
 NodeUtils.register<TabsNode>({
@@ -152,18 +152,18 @@ NodeUtils.register<TabsNode>({
     renderTreeNode: NodeUtils.treeNodeKind,
     renderCode: (node, cc) => cc.elementCodeWithChildrenSubCtx("Tabs", {
         id: { __code__: cc.ctxName  + ".compose(" + toCodeEx(node.id) + ")" } as Expression<string>, 
-        defaultActiveKey: node.defaultActiveKey
+        defaultActiveKey: node.defaultEventKey
     }, node),
     render: (dn, parentCtx) => {
-        return NodeUtils.withChildrensSubCtx(dn, parentCtx, <Tabs
-            id={parentCtx.compose(NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.id, NodeUtils.isString) !)}
-            defaultActiveKey={dn.node.defaultActiveKey} />);
+        return NodeUtils.withChildrensSubCtx(dn, parentCtx, <UncontrolledTabs
+            id={parentCtx.compose(NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.id, NodeUtils.isString)!)}
+            defaultEventKey={dn.node.defaultEventKey} />);
     },
     renderDesigner: (dn) => (<div>
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
         <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
         <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.id)} type="string" defaultValue={null} />
-        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.defaultActiveKey)} type="string" defaultValue={null} allowsExpression={false} />
+        <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.defaultEventKey)} type="string" defaultValue={null} allowsExpression={false} />
     </div>),
 });
 
@@ -199,7 +199,7 @@ NodeUtils.register<TabNode>({
     render: (dn, parentCtx) => {
         return NodeUtils.withChildrensSubCtx(dn, parentCtx, <Tab
             title={NodeUtils.evaluateAndValidate(parentCtx, dn.node, n => n.title, NodeUtils.isString)}
-            eventKey={dn.node.eventKey} />);
+            eventKey={dn.node.eventKey!} />);
     },
     renderDesigner: (dn) => (<div>
         <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />

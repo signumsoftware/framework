@@ -406,8 +406,7 @@ export function asOverrideFunction(dvo: DynamicViewOverrideEntity): (vr: ViewRep
     var TabContent = Reactstrap.TabContent;
     var Table = Reactstrap.Table;
     var TabPane = Reactstrap.TabPane;
-    var Tag = Reactstrap.Tag;
-    var TetherContent = Reactstrap.TetherContent;
+    var PopperContent = Reactstrap.PopperContent;
     var Tooltip = Reactstrap.Tooltip;
     var UncontrolledAlert = Reactstrap.UncontrolledAlert;
     var UncontrolledButtonDropdown = Reactstrap.UncontrolledButtonDropdown;

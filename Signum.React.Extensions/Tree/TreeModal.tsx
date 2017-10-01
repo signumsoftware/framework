@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'reactstrap'
+import { Modal, ModalBody, ModalHeader, ButtonToolbar } from 'reactstrap'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { openModal, IModalProps } from '../../../Framework/Signum.React/Scripts/Modals';
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -18,13 +18,13 @@ interface TreeModalProps extends React.Props<TreeModal>, IModalProps {
     title?: string;
 }
 
-export default class TreeModal extends React.Component<TreeModalProps, { show: boolean; }>  {
+export default class TreeModal extends React.Component<TreeModalProps, { isOpen: boolean; }>  {
 
     constructor(props: any) {
         super(props);
 
         this.state = {
-            show: true
+            isOpen: true
         };
     }
 
@@ -38,15 +38,15 @@ export default class TreeModal extends React.Component<TreeModalProps, { show: b
 
     handleOkClicked = () => {
         this.okPressed = true;
-        this.setState({ show: false });
+        this.setState({ isOpen: false });
     }
 
     handleCancelClicked = () => {
         this.okPressed = false;
-        this.setState({ show: false });
+        this.setState({ isOpen: false });
     }
 
-    handleOnExited = () => {
+    handleOnExit = () => {
         this.props.onExited!(this.okPressed ? this.selectedNode : null);
     }
 
@@ -54,7 +54,7 @@ export default class TreeModal extends React.Component<TreeModalProps, { show: b
         e.preventDefault();
         this.selectedNode = selectedNode;
         this.okPressed = true;
-        this.setState({ show: false });
+        this.setState({ isOpen: false });
     }
 
     treeView?: TreeViewer;
@@ -64,8 +64,8 @@ export default class TreeModal extends React.Component<TreeModalProps, { show: b
         const okEnabled = this.selectedNode != null;
 
         return (
-            <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited}>
-                <Modal.Header>
+            <Modal size="lg" toggle={this.handleCancelClicked} isOpen={this.state.isOpen} onExit={this.handleOnExit}>
+                <ModalHeader toggle={this.handleCancelClicked}>
                     <div className="btn-toolbar" style={{ float: "right" }}>
                         <button className="btn btn-primary sf-entity-button sf-close-button sf-ok-button" disabled={!okEnabled} onClick={this.handleOkClicked}>
                             {JavascriptMessage.ok.niceToString()}
@@ -80,9 +80,9 @@ export default class TreeModal extends React.Component<TreeModalProps, { show: b
                             <span className="glyphicon glyphicon-new-window"></span>
                         </a>
                     </h4>
-                </Modal.Header>
+                </ModalHeader>
 
-                <Modal.Body>
+                <ModalBody>
                     <TreeViewer
                         filterOptions={this.props.filterOptions}
                         avoidChangeUrl={true}
@@ -91,7 +91,7 @@ export default class TreeModal extends React.Component<TreeModalProps, { show: b
                         onDoubleClick={this.handleDoubleClick}
                         ref={tv => this.treeView = tv!}
                     />
-                </Modal.Body>
+                </ModalBody>
             </Modal>
         );
     }

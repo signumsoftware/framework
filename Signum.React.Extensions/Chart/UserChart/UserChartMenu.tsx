@@ -16,18 +16,31 @@ export interface UserChartMenuProps {
     chartRequestView: ChartRequestView;
 }
 
-export default class UserChartMenu extends React.Component<UserChartMenuProps, { currentUserChart?: UserChartEntity, userCharts?: Lite<UserChartEntity>[] }> {
+
+interface UserChartMenuState {
+    currentUserChart?: UserChartEntity;
+    userCharts?: Lite<UserChartEntity>[];
+    isOpen: boolean;
+}
+
+
+export default class UserChartMenu extends React.Component<UserChartMenuProps, UserChartMenuState> {
 
     constructor(props: UserChartMenuProps) {
         super(props);
-        this.state = { currentUserChart: props.chartRequestView.props.userChart };
+        this.state = {
+            currentUserChart: props.chartRequestView.props.userChart,
+            isOpen: false
+        };
     }
 
 
-    handleSelectedToggle = (isOpen: boolean) => {
+    handleSelectedToggle = () => {
 
-        if (isOpen && this.state.userCharts == undefined)
+        if (!this.state.isOpen && this.state.userCharts == undefined)
             this.reloadList().done();
+
+        this.setState({ isOpen: !this.state.isOpen });
     }
 
     reloadList(): Promise<void> {
@@ -74,8 +87,8 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, {
         const label = <span><i className="glyphicon glyphicon-stats"></i> &nbsp; {UserChartEntity.nicePluralName()}</span>;
         const userCharts = this.state.userCharts;
         return (
-            <DropdownButton title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown"
-                onToggle={this.handleSelectedToggle}>
+            <ButtonDropdown title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown"
+                toggle={this.handleSelectedToggle} isOpen={this.state.isOpen}>
                 {
                     userCharts && userCharts.map((uc, i) =>
                         <DropdownItem key={i}
@@ -87,7 +100,7 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, {
                 { userCharts && userCharts.length > 0 && <DropdownItem divider/> }
                 { this.state.currentUserChart && <DropdownItem onSelect={this.handleEdit} >{ChartMessage.EditUserChart.niceToString() }</DropdownItem> }
                 <DropdownItem onSelect={this.handleCreate}>{ChartMessage.CreateNew.niceToString() }</DropdownItem>
-            </DropdownButton>
+            </ButtonDropdown>
         );
     }
  

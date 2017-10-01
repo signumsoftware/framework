@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { Modal } from "reactstrap";
+import { Modal, ModalBody, ModalHeader } from "reactstrap";
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
@@ -124,74 +124,3 @@ export default class Dashboard extends React.Component<{ ctx: TypeContext<Dashbo
         );
     }
 }
-
-
-
-
-interface IconModalModalProps extends IModalProps {
-    question: string;
-}
-
-interface IconModalModalState {
-    show: boolean;
-}
-
-class IconModalModal extends React.Component<IconModalModalProps, IconModalModalState> {
-
-    constructor(props: IconModalModalProps) {
-        super(props);
-        this.state = { show: true };
-    }
-
-    answer?: boolean;
-    handleButtonClicked = (val: boolean) => {
-        this.answer = val;
-        this.setState({ show: false });
-    }
-
-    handleClosedClicked = () => {
-        this.setState({ show: false });
-    }
-
-    handleOnExited = () => {
-        this.props.onExited!(this.answer);
-    }
-
-    render() {
-        return (
-            <Modal onHide={this.handleClosedClicked}
-                show={this.state.show} className="message-modal">
-                <Modal.Header closeButton={true}>
-                    <h4 className={"modal-title"}>
-                        Important Question
-                    </h4>
-                </Modal.Header>
-                <Modal.Body>
-                    {this.props.question}
-                </Modal.Body>
-                <Modal.Footer>
-                    <div>
-                        <button
-                            className="btn btn-primary sf-close-button sf-ok-button"
-                            onClick={() => this.handleButtonClicked(true)}
-                            name="accept">
-                            Yes
-                        </button>
-                        <button
-                            className="btn btn-default sf-close-button sf-button"
-                            onClick={() => this.handleButtonClicked(false)}
-                            name="cancel">
-                            No
-                        </button>
-                    </div>
-                </Modal.Footer>
-            </Modal>
-        );
-    }
-
-    static show(question: string): Promise<boolean | undefined> {
-        return openModal<boolean | undefined>(<IconModalModal question={question} />);
-    }
-}
-
-

@@ -18,7 +18,7 @@ import {
 import { API, WorkflowScriptRunnerState } from '../WorkflowClient'
 import { CaseActivityEntity, WorkflowActivityType, DoneType, WorkflowScriptRunnerPanelPermission, CaseActivityOperation } from '../Signum.Entities.Workflow'
 import * as AuthClient from '../../Authorization/AuthClient'
-import { Tabs, Tab } from '../../../../Framework/Signum.React/Scripts/Tabs';
+import { UncontrolledTabs, Tab } from '../../../../Framework/Signum.React/Scripts/Tabs';
 
 
 interface WorkflowScriptRunnerPanelPageProps extends RouteComponentProps<{}> {
@@ -111,8 +111,8 @@ export default class WorkflowScriptRunnerPanelPage extends React.Component<Workf
                     ],
                     pagination: { elementsPerPage: 10, mode: "Firsts" }
                 }} />
-                <Tabs unmountOnExit={true}>
-                    <Tab title="Last operation logs" tabId="logs">
+                <UncontrolledTabs unmountOnExit={true}>
+                    <Tab title="Last operation logs" eventKey="logs">
                         <SearchControl findOptions={{
                             queryName: OperationLogEntity,
                             filterOptions: [
@@ -127,7 +127,7 @@ export default class WorkflowScriptRunnerPanelPage extends React.Component<Workf
                             pagination: { elementsPerPage: 10, mode: "Firsts" }
                         }} />
                     </Tab>
-                    <Tab title="Last executed activities" tabId="lastActivities">
+                    <Tab title="Last executed activities" eventKey="lastActivities">
                         <SearchControl findOptions={{
                             queryName: CaseActivityEntity,
                             filterOptions: [
@@ -152,7 +152,7 @@ export default class WorkflowScriptRunnerPanelPage extends React.Component<Workf
                             pagination: { elementsPerPage: 10, mode: "Firsts" }
                         }} />
                     </Tab>
-                </Tabs>
+                </UncontrolledTabs>
            </div>
         );
     }

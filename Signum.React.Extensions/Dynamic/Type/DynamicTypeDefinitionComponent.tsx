@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import Combobox from 'react-widgets/lib/Combobox'
-import { PanelGroup, Panel, Tabs, Tab, DropdownItem } from 'reactstrap'
+import { DropdownItem, Card, CardHeader } from 'reactstrap'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
@@ -28,6 +28,8 @@ import { ContextMenuPosition } from '../../../../Framework/Signum.React/Scripts/
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
 
 import "./DynamicType.css"
+import { Tabs, Tab, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Tabs';
+import CollapsableCard from '../../Basics/Templates/CollapsableCard';
 
 export interface DynamicTypeDesignContext {
     refreshView: () => void;
@@ -214,7 +216,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                     </div>
                 }
 
-                <Tabs unmountOnExit={true} defaultActiveKey="properties" id="DynamicTypeTabs" onSelect={this.handleTabSelect}>
+                <UncontrolledTabs unmountOnExit={true} defaultEventKey="properties" id="DynamicTypeTabs" onToggled={this.handleTabSelect}>
                     <Tab eventKey="properties" title="Properties">
                         <PropertyRepeaterComponent dc={this.props.dc} properties={def.properties} onRemove={this.handlePropertyRemoved} showDatabaseMapping={this.props.showDatabaseMapping} />
                         <br/>
@@ -249,7 +251,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                     }
 
                     {dt.baseType == "Entity" &&
-                        <Tab unmountOnExit={true} eventKey="operations" title="Operations">
+                        <Tab eventKey="operations" title="Operations">
                             <div className="row">
                                 <div className="col-sm-7">
                                     <CreateOperationFieldsetComponent
@@ -294,7 +296,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                         </Tab>
                     }
 
-                    <Tab unmountOnExit={true} eventKey="customCode" title="Custom Code">
+                    <Tab eventKey="customCode" title="Custom Code">
                         <CustomCodeTab definition={def} dynamicType={dt} />
                     </Tab>
 
@@ -325,7 +327,7 @@ export class DynamicTypeDefinitionComponent extends React.Component<DynamicTypeD
                             {this.renderOthers()}
                         </Tab>
                     }
-                </Tabs>
+                </UncontrolledTabs>
             </div>
         );
     }
@@ -722,14 +724,14 @@ export interface PropertyRepeaterComponentProps {
 }
 
 export interface PropertyRepeaterComponentState {
-    activeIndex?: number;
+    currentEventKey?: number;
 }
 
 export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterComponentProps, PropertyRepeaterComponentState> {
 
     constructor(props: PropertyRepeaterComponentProps) {
         super(props);
-        this.state = { activeIndex: 0 };
+        this.state = { currentEventKey: 0 };
     }
 
     componentWillMount() {
@@ -740,8 +742,8 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
         newProps.properties.filter(a => a._propertyType_ == undefined).forEach(p => fetchPropertyType(p, this.props.dc));
     }
 
-    handleSelect = (activeIndex: number) => {
-        this.setState({ activeIndex });
+    handleSelect = (eventKey: number) => {
+        this.setState({ currentEventKey: eventKey });
     }
 
     handleOnRemove = (event: React.MouseEvent<any>, index: number) => {
@@ -750,8 +752,8 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
         var old = this.props.properties[index];
         this.props.properties.removeAt(index);
 
-        if (this.state.activeIndex == index)
-            this.setState({ activeIndex: undefined });
+        if (this.state.currentEventKey == index)
+            this.setState({ currentEventKey: undefined });
 
         this.props.dc.refreshView();
 
@@ -764,10 +766,10 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
         event.stopPropagation();
         const newIndex = this.props.properties.moveUp(index);
         if (newIndex != index) {
-            if (index == this.state.activeIndex)
-                this.setState({ activeIndex: this.state.activeIndex - 1 });
-            else if (newIndex == this.state.activeIndex)
-                this.setState({ activeIndex: this.state.activeIndex + 1 });
+            if (index == this.state.currentEventKey)
+                this.setState({ currentEventKey: this.state.currentEventKey - 1 });
+            else if (newIndex == this.state.currentEventKey)
+                this.setState({ currentEventKey: this.state.currentEventKey + 1 });
         }
 
         this.props.dc.refreshView();
@@ -779,10 +781,10 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
         const newIndex = this.props.properties.moveDown(index);
 
         if (newIndex != index) {
-            if (index == this.state.activeIndex)
-                this.setState({ activeIndex: this.state.activeIndex + 1 });
-            else if (newIndex == this.state.activeIndex)
-                this.setState({ activeIndex: this.state.activeIndex - 1 });
+            if (index == this.state.currentEventKey)
+                this.setState({ currentEventKey: this.state.currentEventKey + 1 });
+            else if (newIndex == this.state.currentEventKey)
+                this.setState({ currentEventKey: this.state.currentEventKey - 1 });
         }
 
         this.props.dc.refreshView();
@@ -797,7 +799,7 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
         } as DynamicProperty;
         autoFix(p);
         this.props.properties.push(p);
-        this.setState({ activeIndex: this.props.properties.length - 1 });
+        this.setState({ currentEventKey: this.props.properties.length - 1 });
         this.props.dc.refreshView();
 
         fetchPropertyType(p, this.props.dc);
@@ -815,14 +817,14 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
     render() {
         return (
             <div className="properties">
-                <PanelGroup activeKey={this.state.activeIndex} onSelect={this.handleSelect as any} accordion>
+                <div>
                     {
                         this.props.properties.map((p, i) =>
-                            <Panel header={this.renderPropertyHeader(p, i)} eventKey={i} key={i} bsStyle="info">
+                            <CollapsableCard isOpen={this.state.currentEventKey == i} toggle={() => this.handleSelect(i)} header={this.renderPropertyHeader(p, i)} key={i} color="info">
                                 <PropertyComponent property={p} dc={this.props.dc} showDatabaseMapping={this.props.showDatabaseMapping} />
-                            </Panel>)
+                            </CollapsableCard>)
                     }
-                </PanelGroup>
+                </div>
                 <a title="Create Property"
                     className="sf-line-button sf-create"
                     onClick={this.handleCreateClick}>
@@ -1178,9 +1180,10 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
                 <div className="panel-group">
                     {
                         (this.props.property.validators || []).map((val, i) =>
-                            <Panel header={this.renderHeader(val, i)} eventKey={i} key={i} bsStyle="warning">
+                            <Card key={i} color="warning">
+                                <CardHeader>{this.renderHeader(val, i)}</CardHeader>
                                 {registeredValidators[val.type].render && registeredValidators[val.type].render!(val, this.props.dc)}
-                            </Panel>)
+                            </Card>)
                     }
                 </div>
                 <a title="Create Validator"

@@ -15,7 +15,7 @@ import { FormGroup, StyleContext } from "../../../../Framework/Signum.React/Scri
 import { CaseActivityEntity, WorkflowActivityEntity, WorkflowActivityMessage, DoneType, CaseNotificationEntity, CaseActivityMessage, WorkflowActivityType, CaseEntity } from "../Signum.Entities.Workflow";
 import { EntityLink, SearchControl } from "../../../../Framework/Signum.React/Scripts/Search";
 import { OperationLogEntity } from "../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics";
-import { Tab, Tabs } from '../../../../Framework/Signum.React/Scripts/Tabs';
+import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Tabs';
 
 
 interface CaseActivityStatsModalProps extends React.Props<CaseActivityStatsModal>, IModalProps {
@@ -37,7 +37,7 @@ export default class CaseActivityStatsModal extends React.Component<CaseActivity
         this.setState({ show: false });
     }
 
-    handleOnExited = () => {
+    handleOnExit = () => {
         this.props.onExited!(undefined);
     }
 
@@ -45,28 +45,25 @@ export default class CaseActivityStatsModal extends React.Component<CaseActivity
 
         var caseActivityStats = this.props.caseActivityStats;
         return (
-            <Modal size="lg" onHide={this.handleCloseClicked} show={this.state.show} onExited={this.handleOnExited}>
-
-                <ModalHeader closeButton={true}>
+            <Modal size="lg" toggle={this.handleCloseClicked} isOpen={this.state.show} onExit={this.handleOnExit}>
+                <ModalHeader toggle={this.handleCloseClicked}>
                     <h4 className="modal-title">
                         {caseActivityStats.first().WorkflowActivity.toStr} ({caseActivityStats.length} {caseActivityStats.length == 1 ? CaseActivityEntity.niceName() : CaseActivityEntity.nicePluralName()})
                 </h4>
                 </ModalHeader>
-
                 <ModalBody>
                     {
                         <div>
                             {caseActivityStats.length == 1 ? <CaseActivityStatsComponent stats={caseActivityStats.first()} caseEntity={this.props.case} /> :
-                                <Tabs id="statsTabs">
+                                <UncontrolledTabs id="statsTabs">
                                     {
                                         caseActivityStats.map(a =>
-                                            <Tab key={a.CaseActivity.id!.toString()} tabId={a.CaseActivity.id} eventKey={a.CaseActivity.id} title={
-                                                a.DoneDate == null ? CaseActivityMessage.Pending.niceToString() :
-                                                    <span>{a.DoneBy.toStr} {DoneType.niceName(a.DoneType)} <mark>({moment(a.DoneDate).fromNow()})</mark></span> as any}>
+                                            <Tab key={a.CaseActivity.id!.toString()} eventKey={a.CaseActivity.id!}
+                                                title={a.DoneDate == null ? CaseActivityMessage.Pending.niceToString() : <span>{a.DoneBy.toStr} {DoneType.niceName(a.DoneType)} <mark>({moment(a.DoneDate).fromNow()})</mark></span> as any}>
                                                 <CaseActivityStatsComponent stats={a} caseEntity={this.props.case} />
                                             </Tab>)
                                     }
-                                </Tabs>
+                                </UncontrolledTabs>
                             }
                         </div>
                     }
@@ -178,7 +175,3 @@ function formatDuration(duration: number | undefined) {
 
     return <span>{numbro(duration).format("0.00")} {unit} <mark>({moment.duration(duration, "minutes").format("d[d] h[h] m[m] s[s]")})</mark></span>
 }
-
-
-
-

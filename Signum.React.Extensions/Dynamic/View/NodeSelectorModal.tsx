@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'reactstrap'
+import { Modal, ModalBody, ModalHeader, ButtonToolbar } from 'reactstrap'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
 import { SelectorMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -13,24 +13,24 @@ import { BaseNode } from './Nodes'
 interface NodeSelectorModalProps extends React.Props<NodeSelectorModal>, IModalProps {
 }
 
-export default class NodeSelectorModal extends React.Component<NodeSelectorModalProps, { show: boolean }>  {
+export default class NodeSelectorModal extends React.Component<NodeSelectorModalProps, { isOpen: boolean }>  {
 
     constructor(props: NodeSelectorModalProps) {
         super(props);
 
-        this.state = { show: true };
+        this.state = { isOpen: true };
     }
 
 
     selectedValue: any;
     handleButtonClicked = (val: any) => {
         this.selectedValue = val;
-        this.setState({ show: false });
+        this.setState({ isOpen: false });
 
     }
 
     handleCancelClicked = () => {
-        this.setState({ show: false });
+        this.setState({ isOpen: false });
     }
 
     handleOnExited = () => {
@@ -48,15 +48,15 @@ export default class NodeSelectorModal extends React.Component<NodeSelectorModal
             .groupBy(n => n.group!)
             .groupsOf(nodes.length / 3, g => g.elements.length);
 
-        return <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-selector-modal">
-            <Modal.Header closeButton={true}>
-                
+        return <Modal size="lg" toggle={this.handleCancelClicked} isOpen={this.state.isOpen} onExit={this.handleOnExited} className="sf-selector-modal">
+            <ModalHeader toggle={this.handleCancelClicked} >
+
                 <h4 className="modal-title">
                     {DynamicViewMessage.SelectATypeOfComponent.niceToString()}
-                    </h4>
-            </Modal.Header>
+                </h4>
+            </ModalHeader>
 
-            <Modal.Body>
+            <ModalBody>
                 <div className="row">
                     {
                         columns.map((c, i) =>
@@ -76,7 +76,7 @@ export default class NodeSelectorModal extends React.Component<NodeSelectorModal
                             </div>)
                     }
                 </div>
-            </Modal.Body>
+            </ModalBody>
         </Modal>;
     }
 

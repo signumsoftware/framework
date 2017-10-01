@@ -1,7 +1,6 @@
 
 import * as React from 'react'
 import { Route } from 'react-router'
-import { Tab } from 'reactstrap'
 import { ifError } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '../../../Framework/Signum.React/Scripts/Services';
 import { SearchControl, ValueSearchControlLine } from '../../../Framework/Signum.React/Scripts/Search'
@@ -23,6 +22,7 @@ import { DynamicTypeEntity, DynamicMixinConnectionEntity, DynamicTypeOperation, 
 import DynamicTypeComponent from './Type/DynamicType' //typings only
 import * as DynamicClient from './DynamicClient'
 import * as AuthClient from '../Authorization/AuthClient'
+import { Tab } from '../../../Framework/Signum.React/Scripts/Tabs';
 
 export function start(options: { routes: JSX.Element[] }) {
 

@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Tabs, Tab } from 'reactstrap'
 import * as numbro from 'numbro'
 import * as moment from 'moment'
 import { classes } from '../../../Framework/Signum.React/Scripts/Globals'
@@ -21,6 +20,7 @@ import { RouteComponentProps } from "react-router";
 import * as QueryString from 'query-string';
 
 import "./DynamicPanelPage.css"
+import { Tab, Tabs } from '../../../Framework/Signum.React/Scripts/Tabs';
 
 interface DynamicPanelProps extends RouteComponentProps<{}> {
 }
@@ -68,7 +68,7 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
                         </p>
                     </div>
                 }
-                <Tabs activeKey={step || "compile"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} onSelect={this.handleSelect}>
+                <Tabs activeEventKey={step || "compile"} id="dynamicPanelTabs" style={{ marginTop: "20px" }} toggle={this.handleSelect}>
                     <Tab eventKey="compile" title="1. Edit and Compile">
                         <CompileStep />
                     </Tab>

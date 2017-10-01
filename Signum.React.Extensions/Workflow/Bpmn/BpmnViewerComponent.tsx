@@ -144,12 +144,12 @@ export default class BpmnViewerComponent extends React.Component<BpmnViewerCompo
         });
     }
 
-    handleSearchClick = (e: React.MouseEvent<Button>) => {
+    handleSearchClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         var searchPad = this.viewer.get<any>("searchPad");
         searchPad.toggle();
     }
 
-    handleZoomClick = (e: React.MouseEvent<Button>) => {
+    handleZoomClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         var zoomScroll = this.viewer.get<any>("zoomScroll");
         zoomScroll.reset();
     }

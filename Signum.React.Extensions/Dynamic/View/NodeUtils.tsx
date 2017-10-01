@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Tabs, Tab } from 'reactstrap'
 import { globalModules } from './GlobalModules'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityDetail, EntityStrip } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ModifiableEntity, isLite, isEntity, External } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'

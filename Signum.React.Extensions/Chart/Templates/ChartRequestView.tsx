@@ -24,7 +24,7 @@ import ChartRenderer from './ChartRenderer'
 
 import "../Chart.css"
 import "../../../../Framework/Signum.React/Scripts/SearchControl/Search.css"
-import { Tab, Tabs } from '../../../../Framework/Signum.React/Scripts/Tabs';
+import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Tabs';
 
 
 interface ChartRequestViewProps {
@@ -163,15 +163,15 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                     <br />
                     <div className="sf-search-results-container" >
                         {!s.chartResult || !s.lastChartRequest ? JavascriptMessage.searchForResults.niceToString() :
-                            <Tabs id="chartResultTabs" unmountOnExit={true}>
-                                <Tab tabId="chart" title={ChartMessage.Chart.niceToString()}>
+                            <UncontrolledTabs id="chartResultTabs" unmountOnExit={true}>
+                                <Tab eventKey="chart" title={ChartMessage.Chart.niceToString()}>
                                     <ChartRenderer chartRequest={cr} lastChartRequest={s.lastChartRequest} data={s.chartResult.chartTable} />
                                 </Tab>
 
-                                <Tab tabId="data" title={ChartMessage.Data.niceToString() }>
+                                <Tab eventKey="data" title={ChartMessage.Data.niceToString() }>
                                     <ChartTable chartRequest={cr} lastChartRequest={s.lastChartRequest} resultTable={s.chartResult.resultTable} onRedraw={this.handleOnDrawClick} />
                                 </Tab>
-                            </Tabs>
+                            </UncontrolledTabs>
                         }
                     </div>
                 </div>

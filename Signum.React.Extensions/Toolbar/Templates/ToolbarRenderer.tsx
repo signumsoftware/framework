@@ -15,8 +15,7 @@ import { ToolbarConfig } from "../ToolbarClient";
 import '../../../../Framework/Signum.React/Scripts/Frames/MenuIcons.css'
 import './Toolbar.css'
 import { PermissionSymbol } from "../../Authorization/Signum.Entities.Authorization";
-import { NavDropdown, DropdownItem, DropdownToggle, NavItem, NavLink } from 'reactstrap';
-import { UncontrolledNavDropdown } from '../../../../Framework/Signum.React/node_modules/@types/reactstrap/lib/Uncontrolled';
+import { NavDropdown, DropdownItem, DropdownToggle, NavItem, NavLink, UncontrolledNavDropdown } from 'reactstrap';
 
 export interface ToolbarRendererState {
     response?: ToolbarClient.ToolbarResponse<any>;

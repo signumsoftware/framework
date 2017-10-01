@@ -97,10 +97,10 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
                     {no.isContainer && <DropdownItem divider={true} />}
 
                     {no.isContainer && cn.children.length == 0 && dn.route && <DropdownItem onClick={this.handleGenerateChildren}><i className="fa fa-bolt" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.GenerateChildren.niceToString()}</DropdownItem>}
-                    {no.isContainer && cn.children.length > 0 && <DropdownItem onClick={this.handleClearChildren} bsClass="danger"><i className="fa fa-trash" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.ClearChildren.niceToString()}</DropdownItem>}
+                    {no.isContainer && cn.children.length > 0 && <DropdownItem onClick={this.handleClearChildren} color="danger"><i className="fa fa-trash" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.ClearChildren.niceToString()}</DropdownItem>}
 
                     {!isRoot && <DropdownItem divider={true} />}
-                    {!isRoot && <DropdownItem onClick={this.handleRemove} bsClass="danger"><i className="fa fa-times" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.Remove.niceToString()}</DropdownItem>}
+                    {!isRoot && <DropdownItem onClick={this.handleRemove} color="danger"><i className="fa fa-times" aria-hidden="true"></i>&nbsp; {DynamicViewMessage.Remove.niceToString()}</DropdownItem>}
                 </ContextMenu>
         );
     }

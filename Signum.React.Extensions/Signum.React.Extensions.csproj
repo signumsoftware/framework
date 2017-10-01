@@ -250,10 +250,8 @@
     <TypeScriptCompile Include="Dynamic\View\NodeSelectorModal.tsx" />
     <TypeScriptCompile Include="Files\FileUploader.tsx" />
     <TypeScriptCompile Include="Files\FileDownloader.tsx" />
-    <TypeScriptCompile Include="Dynamic\View\DynamicViewEntity.tsx" />
     <TypeScriptCompile Include="Dynamic\View\DynamicView.tsx" />
     <TypeScriptCompile Include="HtmlEditor\HtmlEditor.tsx" />
-    <TypeScriptCompile Include="Dynamic\View\DynamicViewEntity.tsx" />
     <TypeScriptCompile Include="MachineLearning\PredictorClient.tsx" />
     <TypeScriptCompile Include="MachineLearning\Signum.Entities.Excel.ts">
       <DependentUpon>Signum.Entities.MachineLearning.t4s</DependentUpon>

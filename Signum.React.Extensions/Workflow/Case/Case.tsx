@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import { Tabs, Tab } from "reactstrap";
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { getMixin, toLite, JavascriptMessage, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { ColorTypeaheadLine } from '../../Basics/Templates/ColorTypeahead'
@@ -12,6 +11,7 @@ import { API, CaseFlow } from '../WorkflowClient'
 import BpmnViewerComponent from '../Bpmn/BpmnViewerComponent'
 import InlineCaseTags from "../Case/InlineCaseTags";
 import { SearchControl } from "../../../../Framework/Signum.React/Scripts/Search";
+import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Tabs';
 
 interface CaseComponentProps {
     ctx: TypeContext<CaseEntity>;
@@ -77,7 +77,7 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
                     </div>
                 </div>
 
-                <Tabs id="caseTabs">
+                <UncontrolledTabs id="caseTabs">
                     <Tab eventKey="CaseFlow" title={WorkflowActivityMessage.CaseFlow.niceToString()}>
                         {this.state.initialXmlDiagram && this.state.entities && this.state.caseFlow ?
                             <div className="code-container">
@@ -101,7 +101,7 @@ export default class CaseComponent extends React.Component<CaseComponentProps, C
                             }]
                         }} />
                     </Tab>
-                </Tabs>
+                </UncontrolledTabs>
             </div>
         );
     }

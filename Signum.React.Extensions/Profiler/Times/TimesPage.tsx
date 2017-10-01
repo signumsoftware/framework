@@ -13,7 +13,7 @@ import { API, TimeTrackerEntry } from '../ProfilerClient'
 import { RouteComponentProps } from "react-router";
 
 import "./Times.css"
-import { Tab, Tabs } from '../../../../Framework/Signum.React/Scripts/Tabs';
+import { Tab, Tabs, UncontrolledTabs } from '../../../../Framework/Signum.React/Scripts/Tabs';
 
 interface TimesPageProps extends RouteComponentProps<{}> {
 
@@ -59,14 +59,14 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
                 <button onClick={this.handleClear} className="btn btn-warning">Clear</button>
                     </div>
                 <br />
-                <Tabs>
-                    <Tab tabId="bars" title="Bars">
+                <UncontrolledTabs>
+                    <Tab eventKey="bars" title="Bars">
                         {this.renderBars()}
                     </Tab>
-                    <Tab tabId="table" title="Table">
+                    <Tab eventKey="table" title="Table">
                         {this.renderTable()}
                     </Tab>
-                </Tabs>
+                </UncontrolledTabs>
             </div>
         );
     }

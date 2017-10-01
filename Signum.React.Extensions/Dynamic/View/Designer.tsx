@@ -13,7 +13,7 @@ import { BaseNode, LineBaseNode } from './Nodes'
 import * as NodeUtils from './NodeUtils'
 import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
-import { Modal, ModalProps, ModalClass, ButtonToolbar, Button } from 'reactstrap'
+import { Modal, ModalBody, ModalHeader, ButtonToolbar, Button } from 'reactstrap'
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
 import TypeHelpComponent from '../Help/TypeHelpComponent'
 import ValueLineModal from '../../../../Framework/Signum.React/Scripts/ValueLineModal'
@@ -396,32 +396,32 @@ interface DesignerModalProps extends React.Props<DesignerModal>, IModalProps {
     mainComponent: () => React.ReactElement<any>;
 }
 
-export class DesignerModal extends React.Component<DesignerModalProps, { show: boolean }>  {
+export class DesignerModal extends React.Component<DesignerModalProps, { isOpen: boolean }>  {
 
     constructor(props: DesignerModalProps) {
         super(props);
 
-        this.state = { show: true };
+        this.state = { isOpen: true };
     }
 
     okClicked: boolean
     handleOkClicked = () => {
         this.okClicked = true;
-        this.setState({ show: false });
+        this.setState({ isOpen: false });
 
     }
 
     handleCancelClicked = () => {
-        this.setState({ show: false });
+        this.setState({ isOpen: false });
     }
 
-    handleOnExited = () => {
+    handleOnExit = () => {
         this.props.onExited!(this.okClicked);
     }
 
     render() {
-        return <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-selector-modal">
-            <Modal.Header closeButton={true}>
+        return <Modal size="lg" toggle={this.handleCancelClicked} isOpen={this.state.isOpen} onExit={this.handleOnExit} className="sf-selector-modal">
+            <ModalHeader toggle={this.handleCancelClicked}>
                 <h4 className="modal-title">
                     {this.props.title}
                 </h4>
@@ -429,11 +429,11 @@ export class DesignerModal extends React.Component<DesignerModalProps, { show: b
                     <Button className="sf-entity-button sf-close-button sf-ok-button" color="primary" onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString()}</Button>
                     <Button className="sf-entity-button sf-close-button sf-cancel-button" color="default" onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString()}</Button>
                 </ButtonToolbar>
-            </Modal.Header>
+            </ModalHeader>
 
-            <Modal.Body>
+            <ModalBody>
                 {this.props.mainComponent()}
-            </Modal.Body>
+            </ModalBody>
         </Modal>;
     }
 

@@ -43,7 +43,8 @@ export default class WorkflowDropdown extends React.Component<{}, { starts: Arra
                 {this.state.starts.length > 0 && <DropdownItem disabled>{JavascriptMessage.create.niceToString()}</DropdownItem>}
                 {this.getStarts().map((val, i) =>
                     <LinkContainer key={i} to={`~/workflow/new/${val.workflow.id}/${val.mainEntityStrategy}`}>
-                        <DropdownItem>{val.workflow.toStr}{val.mainEntityStrategy == "SelectByUser" ? `(${WorkflowMainEntityStrategy.niceName(val.mainEntityStrategy)})` : ""}</DropdownItem></LinkContainer>
+                        <DropdownItem>{val.workflow.toStr}{val.mainEntityStrategy == "SelectByUser" ? `(${WorkflowMainEntityStrategy.niceName(val.mainEntityStrategy)})` : ""}</DropdownItem>
+                    </LinkContainer>
                 )}
             </UncontrolledNavDropdown>
         );

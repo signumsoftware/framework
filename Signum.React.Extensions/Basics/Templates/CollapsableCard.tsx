@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import { BsColor } from "../../../../Framework/Signum.React/Scripts/Operations";
-import { CardTitle, Card, Collapse } from '../../../../Framework/Signum.React/node_modules/@types/reactstrap';
+import { CardTitle, Card, Collapse } from 'reactstrap';
 
 export interface CollapsableCardProps {
     color?: BsColor;

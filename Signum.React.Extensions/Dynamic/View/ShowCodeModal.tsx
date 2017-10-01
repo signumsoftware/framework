@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'reactstrap'
+import { Modal, ModalHeader, ModalBody, ButtonToolbar } from 'reactstrap'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals';
 import { openModal, IModalProps } from '../../../../Framework/Signum.React/Scripts/Modals';
 import { SelectorMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -28,25 +28,25 @@ export default class ShowCodeModal extends React.Component<ShowCodeModalProps, {
         this.setState({ show: false });
     }
 
-    handleOnExited = () => {
+    handleOnExit = () => {
         this.props.onExited!(undefined);
     }
 
     render() {
         
         return (
-            <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-selector-modal">
-                <Modal.Header closeButton={true}>
+            <Modal size="lg" toggle={this.handleCancelClicked} isOpen={this.state.show} onExit={this.handleOnExit} className="sf-selector-modal">
+                <ModalHeader toggle={this.handleCancelClicked}>
                     <h4 className="modal-title">
                         {this.props.typeName + "Component code"}
                     </h4>
-                </Modal.Header>
+                </ModalHeader>
 
-                <Modal.Body>
+                <ModalBody>
                     <pre>
                         {renderFile(this.props.typeName, this.props.node)}
                     </pre>
-                </Modal.Body>
+                </ModalBody>
             </Modal>
         );
     }
