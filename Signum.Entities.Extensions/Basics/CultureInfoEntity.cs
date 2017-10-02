@@ -54,7 +54,8 @@ namespace Signum.Entities.Basics
             {
                 var ci = CultureInfo.GetCultureInfo(Name);
                 EnglishName = ci.EnglishName;
-                NativeName = ci.NativeName;
+                if (this.IsGraphModified || NativeName == null)
+                    NativeName = ci.NativeName;
             }
             catch (CultureNotFoundException)
             {

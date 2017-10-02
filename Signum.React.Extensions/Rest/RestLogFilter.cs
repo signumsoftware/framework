@@ -5,6 +5,7 @@ using Signum.Entities.Basics;
 using Signum.Entities.Rest;
 using Signum.React.Filters;
 using Signum.Utilities;
+using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -21,48 +22,64 @@ namespace Signum.React.RestLog
     {
         public override void OnActionExecuting(HttpActionContext actionContext)
         {
-            var queryParams =
-             actionContext.Request.GetQueryNameValuePairs()
-                 .Select(a => new QueryStringValueEmbedded { Key = a.Key, Value = a.Value })
-                 .ToMList();
-
-
-            var request = new RestLogEntity
+            try
             {
-                Url = actionContext.Request.RequestUri.ToString(),
-                QueryString = queryParams,
-                User = UserHolder.Current?.ToLite(),
-                Controller = actionContext.ControllerContext.Controller.ToString(),
-                Action = actionContext.ActionDescriptor.ActionName,
-                StartDate = TimeZoneManager.Now,
-                RequestBody = (string)(actionContext.Request.Properties.ContainsKey(SignumAuthenticationFilterAttribute.SavedRequestKey) ?
-                    actionContext.Request.Properties[SignumAuthenticationFilterAttribute.SavedRequestKey] : null)
-            };
+                var queryParams =
+                 actionContext.Request.GetQueryNameValuePairs()
+                     .Select(a => new QueryStringValueEmbedded { Key = a.Key, Value = a.Value })
+                     .ToMList();
 
-            actionContext.ControllerContext.RouteData.Values.Add(typeof(RestLogEntity).FullName, request);
+                var request = new RestLogEntity
+                {
+                    Url = actionContext.Request.RequestUri.ToString(),
+                    QueryString = queryParams,
+                    User = UserHolder.Current?.ToLite(),
+                    Controller = actionContext.ControllerContext.Controller.ToString(),
+                    Action = actionContext.ActionDescriptor.ActionName,
+                    StartDate = TimeZoneManager.Now,
+                    UserHostAddress = SignumExceptionFilterAttribute.GetClientIp(actionContext.Request),
+                    UserHostName = SignumExceptionFilterAttribute.GetClientName(actionContext.Request),
+                    Referrer = actionContext.Request.Headers.Referrer?.ToString(),
+                    RequestBody = (string)(actionContext.Request.Properties.ContainsKey(SignumAuthenticationFilterAttribute.SavedRequestKey) ?
+                        actionContext.Request.Properties[SignumAuthenticationFilterAttribute.SavedRequestKey] : null)
+                };
+
+                actionContext.ControllerContext.RouteData.Values.Add(typeof(RestLogEntity).FullName, request);
+
+            }
+            catch (Exception e)
+            {
+                e.LogException();
+            }
         }
 
 
-        public override Task OnActionExecutedAsync(HttpActionExecutedContext actionExecutedContext,
-            CancellationToken cancellationToken)
+        public override Task OnActionExecutedAsync(HttpActionExecutedContext actionExecutedContext, CancellationToken cancellationToken)
         {
-            var request =
+            try
+            {
+                var request =
                 (RestLogEntity)actionExecutedContext.ActionContext.ControllerContext.RouteData.Values.GetOrThrow(
                     typeof(RestLogEntity).FullName);
-            request.EndDate = TimeZoneManager.Now;
+                request.EndDate = TimeZoneManager.Now;
 
-            if (actionExecutedContext.Exception == null)
-            {
-                request.ResponseBody = actionExecutedContext.Response.Content?.ReadAsStringAsync()?.Result;
+                if (actionExecutedContext.Exception == null)
+                {
+                    request.ResponseBody = actionExecutedContext.Response.Content?.ReadAsStringAsync()?.Result;
+                }
+
+                if (actionExecutedContext.Exception != null)
+                {
+                    request.Exception = actionExecutedContext.Exception.LogException()?.ToLite();
+                }
+
+                using (ExecutionMode.Global())
+                    request.Save();
             }
-
-            if (actionExecutedContext.Exception != null)
+            catch(Exception e)
             {
-                request.Exception = actionExecutedContext.Exception.LogException()?.ToLite();
+                e.LogException();
             }
-
-            using (ExecutionMode.Global())
-                request.Save();
 
             return base.OnActionExecutedAsync(actionExecutedContext, cancellationToken);
         }

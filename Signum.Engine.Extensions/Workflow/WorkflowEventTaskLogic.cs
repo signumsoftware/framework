@@ -228,18 +228,18 @@ namespace Signum.Engine.Workflow
                .UnsafeDeleteChunksLog(parameters, sb, token);
         }
 
-        public static Lite<IEntity> ExecuteTask(WorkflowEventTaskEntity task)
+        public static Lite<IEntity> ExecuteTask(WorkflowEventTaskEntity wet)
         {
             using (Transaction tr = new Transaction())
             {
-                if (!EvaluateCondition(task))
+                if (!EvaluateCondition(wet))
                     return tr.Commit<Lite<IEntity>>(null);
 
-                var mainEntities = task.Action.Algorithm.EvaluateUntyped();
+                var mainEntities = wet.Action.Algorithm.EvaluateUntyped();
                 var caseActivities = new List<Lite<CaseActivityEntity>>();
-                foreach (var item in mainEntities)
+                foreach (var me in mainEntities)
                 {
-                    var @case = task.ConstructFrom(CaseActivityOperation.CreateCaseFromWorkflowEventTask, item);
+                    var @case = wet.ConstructFrom(CaseActivityOperation.CreateCaseFromWorkflowEventTask, me);
                     caseActivities.AddRange(@case.CaseActivities().Select(a => a.ToLite()).ToList());
                     caseActivities.AddRange(@case.SubCases().SelectMany(sc => sc.CaseActivities()).Select(a => a.ToLite()).ToList());
                 }
@@ -247,7 +247,7 @@ namespace Signum.Engine.Workflow
                 var result =
                     caseActivities.Count == 0 ? null :
                     caseActivities.Count == 1 ? (Lite<IEntity>)caseActivities.SingleEx() :
-                    new PackageEntity { Name = task.Event.ToString() + " " + TimeZoneManager.Now.ToString()}
+                    new PackageEntity { Name = wet.Event.ToString() + " " + TimeZoneManager.Now.ToString()}
                     .CreateLines(caseActivities).ToLite();
 
                 return tr.Commit(result);

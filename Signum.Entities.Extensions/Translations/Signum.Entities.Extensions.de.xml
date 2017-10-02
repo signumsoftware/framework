@@ -1731,6 +1731,7 @@
   <Type Name="SchedulerPermission">
     <Member Name="ViewSchedulerPanel" Description="Schedulersteuerung anzeigen" />
   </Type>
+  <Type Name="SchedulerTaskExceptionLineEntity" />
   <Type Name="ScheduleRuleMinutelyEntity" Description="Schedule-Regel minütlich" PluralDescription="Schedule-Regeln minütlich" Gender="f">
     <Member Name="EachMinutes" Description="Alle Minuten" />
     <Member Name="IsAligned" Description="Ist ausgerichtet" />
