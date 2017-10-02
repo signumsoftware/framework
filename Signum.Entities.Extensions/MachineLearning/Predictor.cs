@@ -24,9 +24,19 @@ namespace Signum.Entities.MachineLearning
         [NotNullValidator]
         public QueryEntity Query { get; set; }
 
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [SqlDbType(Size = 100),]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string Name { get; set; }
+
+        [NotNullable]
+        [NotNullValidator]
+        public PredictorSettingsEmbedded Settings { get; set; }
+
+        [NotNullable, NotNullValidator]
+        public PredictorAlgorithmSymbol Algorithm { get; set; }
+
+        [ImplementedBy(typeof(NeuronalNetworkSettingsEntity))]
+        public IPredictorAlgorithmSettings AlgorithmSettings { get; set; }
 
         public PredictorState State { get; set; }
 
@@ -51,6 +61,23 @@ namespace Signum.Entities.MachineLearning
                 foreach (var c in Columns)
                     c.ParseData(this, qd, SubTokensOptions.CanElement);
         }
+    }
+
+    [Serializable]
+    public class PredictorSettingsEmbedded : EmbeddedEntity
+    {
+        public int Bar { get; set; }
+
+
+        internal PredictorSettingsEmbedded Clone()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public interface IPredictorAlgorithmSettings : IEntity
+    {
+        IPredictorAlgorithmSettings Clone();
     }
 
     [AutoInit]
@@ -90,6 +117,14 @@ namespace Signum.Entities.MachineLearning
         {
             { PredictorColumnType.SimpleColumn, true, false },
             { PredictorColumnType.MultiColumn, false, true},
+        };
+
+        internal PredictorColumnEmbedded Clone() => new PredictorColumnEmbedded
+        {
+            Type = Type,
+            Usage = Usage, 
+            Token = Token.Clone(),
+            MultiColumn = MultiColumn?.Clone()
         };
     }
 
@@ -143,6 +178,14 @@ namespace Signum.Entities.MachineLearning
                 foreach (var a in Aggregates)
                     a.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate);
         }
+
+        public PredictorMultiColumnEntity Clone() => new PredictorMultiColumnEntity
+        {
+            Query = Query,
+            AdditionalFilters = AdditionalFilters.Select(f => f.Clone()).ToMList(),
+            GroupKeys = GroupKeys.Select(f => f.Clone()).ToMList(),
+            Aggregates = Aggregates.Select(f => f.Clone()).ToMList(),
+        };
     }
 
    

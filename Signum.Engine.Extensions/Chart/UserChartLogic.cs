@@ -136,7 +136,7 @@ namespace Signum.Engine.Chart
             {
                 ChartScript = userChart.ChartScript,
                 Filters = userChart.Filters.Select(qf =>
-                    new Filter(qf.Token.Token, qf.Operation, FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation.IsList())))
+                    new Filter(qf.Token.Token, qf.Operation, FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation.IsList(), allowSmart: true)))
                 .ToList(),
                 GroupResults = userChart.GroupResults,
                 Orders = userChart.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList(),

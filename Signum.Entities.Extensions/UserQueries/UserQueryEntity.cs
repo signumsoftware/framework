@@ -330,7 +330,7 @@ namespace Signum.Entities.UserQueries
 
                 if (pi.Name == nameof(ValueString))
                 {
-                    return FilterValueConverter.TryParse(ValueString, Token.Token.Type, out object val, Operation.IsList());
+                    return FilterValueConverter.TryParse(ValueString, Token.Token.Type, out object val, Operation.IsList(), allowSmart: true);
                 }
             }
 
@@ -357,7 +357,12 @@ namespace Signum.Entities.UserQueries
             return "{0} {1} {2}".FormatWith(token, Operation, ValueString);
         }
 
-
+        internal QueryFilterEmbedded Clone() => new QueryFilterEmbedded
+        {
+            Token = Token.Clone(),
+            Operation = Operation,
+            ValueString = ValueString,
+        };
     }
 
     public static class UserQueryUtils
@@ -385,7 +390,7 @@ namespace Signum.Entities.UserQueries
                 {
                     Token = new QueryTokenEmbedded(f.Token),
                     Operation = f.Operation,
-                    ValueString = FilterValueConverter.ToString(f.Value, f.Token.Type)
+                    ValueString = FilterValueConverter.ToString(f.Value, f.Token.Type, allowSmart: true)
                 }).ToMList(),
                 ColumnsMode = tuple.mode,
                 Columns = tuple.columns,

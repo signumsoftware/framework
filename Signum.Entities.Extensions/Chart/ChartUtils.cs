@@ -182,7 +182,7 @@ namespace Signum.Entities.Chart
 				{
 					Token = new QueryTokenEmbedded(f.Token),
 					Operation = f.Operation,
-					ValueString = FilterValueConverter.ToString(f.Value, f.Token.Type),
+					ValueString = FilterValueConverter.ToString(f.Value, f.Token.Type, allowSmart: true),
 				}).ToMList(),
 
 				Orders = request.Orders.Select(o => new QueryOrderEmbedded
@@ -213,7 +213,7 @@ namespace Signum.Entities.Chart
 				GroupResults = uq.GroupResults,
 				ChartScript = uq.ChartScript,
 				Filters = uq.Filters.Select(qf => new Filter(qf.Token.Token, qf.Operation,
-					FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation.IsList()))).ToList(),
+					FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation.IsList(), allowSmart: true))).ToList(),
 				Orders = uq.Orders.Select(o => new Order(o.Token.Token, o.OrderType)).ToList(),
 			};
 

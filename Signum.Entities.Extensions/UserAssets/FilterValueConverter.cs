@@ -69,16 +69,16 @@ namespace Signum.Entities.UserAssets
             return null;
         }
 
-        public static object Parse(string stringValue, Type type, bool allowSmart, bool isList)
+        public static object Parse(string stringValue, Type type,  bool isList, bool allowSmart)
         {
-            string error = TryParse(stringValue, type, allowSmart, out object result, isList);
+            string error = TryParse(stringValue, type, out object result, isList, allowSmart);
             if (error.HasText())
                 throw new FormatException(error);
 
             return result;
         }
 
-        public static string TryParse(string stringValue, Type type, bool allowSmart, out object result, bool isList)
+        public static string TryParse(string stringValue, Type type, out object result, bool isList, bool allowSmart)
         {
             if (isList && stringValue != null && stringValue.Contains('|'))
             {

@@ -117,6 +117,12 @@ namespace Signum.Entities.UserAssets
         {
             return this.GetTokenString().GetHashCode();
         }
+
+        public QueryTokenEmbedded Clone() => new QueryTokenEmbedded
+        {
+            TokenString = TokenString,
+            token = token
+        };
     }
 
 }
