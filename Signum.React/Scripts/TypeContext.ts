@@ -5,11 +5,11 @@ import { EntityOperationContext } from './Operations'
 import { MListElementBinding } from "./Reflection";
 
 export type FormGroupStyle =
-    "None" |  /// Unaffected by FormGroupSize     
-    "Basic" |   /// Requires form-vertical container
-    "BasicDown" |  /// Requires form-vertical container
-    "SrOnly" |    /// Requires form-vertical / form-inline container
-    "LabelColumns"; /// Requires form-horizontal (default),  affected by LabelColumns / ValueColumns
+    "None" |  /// Only the value is rendered. Unaffected by FormGroupSize     
+    "Basic" |   /// Label on top, value below. Requires form-vertical container
+    "BasicDown" |  /// Value on top, label below. Requires form-vertical container
+    "SrOnly" |    /// Label visible only for Screen-Readers. Requires form-vertical / form-inline container
+    "LabelColumns"; /// (default) Label on the left, value on the right (exept RTL). Requires form-horizontal, affected by LabelColumns / ValueColumns
 
 export type FormGroupSize =
     "Normal" | //Raw Bootstrap default

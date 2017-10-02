@@ -64,7 +64,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     onHeighChanged?: () => void;
     onResult?: (table: ResultTable) => void;
     onSearch?: (fo: FindOptionsParsed) => void;
-    onCreate?: () => Promise<void>;
+    onCreate?: () => void;
 }
 
 export interface SearchControlState {
@@ -199,7 +199,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             showBarExtensionOption={p.showBarExtensionOption}
             largeToolbarButtons={p.largeToolbarButtons != null ? p.largeToolbarButtons : false}
             avoidAutoRefresh={p.avoidAutoRefresh != null ? p.avoidAutoRefresh : false}
-            avoidChangeUrl={p.avoidChangeUrl != null ? p.avoidChangeUrl : false}
+            avoidChangeUrl={p.avoidChangeUrl != null ? p.avoidChangeUrl : true}
 
             onCreate={p.onCreate}
             onNavigated={p.onNavigated}

@@ -82,7 +82,6 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
 
                 <ModalBody>
                     <SearchControl
-                        avoidChangeUrl={true}
                         hideFullScreenButton={true}
                         throwIfNotFindable={true}
                         ref={(e: SearchControl) => this.searchControl = e}

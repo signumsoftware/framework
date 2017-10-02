@@ -46,9 +46,9 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
     }
 
     onResize = () => {
-
-        var containerDiv = this.searchControl.searchControlLoaded.containerDiv;
-
+        var sc = this.searchControl;
+        var scl = sc && sc.searchControlLoaded;
+        var containerDiv = scl && scl.containerDiv;
         if (containerDiv) {
             
             var marginTop = containerDiv.offsetTop;
@@ -115,6 +115,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
                     hideFullScreenButton={true}
                     largeToolbarButtons={true}
                     showFilters={true}
+                    avoidChangeUrl={false}
 
                     onHeighChanged={this.onResize}
                     onSearch={result => this.changeUrl()}

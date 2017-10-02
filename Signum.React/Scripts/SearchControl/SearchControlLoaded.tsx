@@ -59,7 +59,7 @@ export interface SearchControlLoadedProps {
     avoidAutoRefresh: boolean;
     avoidChangeUrl: boolean;
     
-    onCreate?: () => Promise<void>;
+    onCreate?: () => void;
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
     onNavigated?: (lite: Lite<Entity>) => void;
     onSelectionChanged?: (entity: Lite<Entity>[]) => void;
@@ -293,8 +293,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
     }
 
     handleFiltersKeyUp = (e: React.KeyboardEvent<HTMLDivElement>) => {
-        if (e.keyCode == 13)
+        if (e.keyCode == 13) {
+            var input = (document.activeElement as HTMLInputElement);
+            input.blur();
             this.doSearchPage1();
+        }
     }
 
     componentDidMount() {
@@ -437,7 +440,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         const onCreate = this.props.onCreate;
 
         if (onCreate)
-            onCreate().done();
+            onCreate();
         else {
             const isWindowsOpen = ev.button == 1 || ev.ctrlKey;
 
@@ -472,7 +475,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         const path = Finder.findOptionsPath(findOptions);
 
-        if (ev.ctrlKey || ev.button == 1)
+        if (ev.ctrlKey || ev.button == 1 || this.props.avoidChangeUrl)
             window.open(path);
         else
             Navigator.history.push(path);
