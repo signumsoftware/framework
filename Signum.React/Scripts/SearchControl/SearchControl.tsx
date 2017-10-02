@@ -65,7 +65,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     onHeighChanged?: () => void;
     onResult?: (table: ResultTable) => void;
     onSearch?: (fo: FindOptionsParsed) => void;
-    onCreate?: () => Promise<void>;
+    onCreate?: () => void;
 }
 
 export interface SearchControlState {
