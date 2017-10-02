@@ -23,6 +23,17 @@ namespace Signum.Entities.MachineLearning
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
         public string NeuronalNetworkDescription { get; set; }
+
+        public IPredictorAlgorithmSettings Clone() => new NeuronalNetworkSettingsEntity
+        {
+            LearningRate = LearningRate,
+            ActivationFunction = ActivationFunction,
+            Regularization = Regularization,
+            RegularizationRate = RegularizationRate,
+            TrainingRatio = TrainingRatio,
+            BackSize = BackSize,
+            NeuronalNetworkDescription = NeuronalNetworkDescription,
+        };
     }
 
     public enum ActivationFunction
