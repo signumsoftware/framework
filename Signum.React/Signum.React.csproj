@@ -159,6 +159,7 @@
     <Compile Include="JsonConverters\LiteJsonConverter.cs" />
     <Compile Include="JsonModelValidators\SignumBodyModelValidator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <TypeScriptCompile Include="Scripts\LinkContainer.tsx" />
     <TypeScriptCompile Include="Scripts\Tabs.tsx" />
     <Content Include="Scripts\Frames\MenuIcons.css" />
     <Content Include="Scripts\SearchControl\QueryTokenBuilder.css" />
