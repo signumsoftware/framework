@@ -745,7 +745,7 @@ export function isType(obj: any): obj is IType {
 }
 
 export function newLite<T extends Entity>(type: Type<T>, id: number | string | undefined): Lite<T>;
-export function newLite(typeName: string, id: number | string | undefined): Lite<Entity>;
+export function newLite(typeName: PseudoType, id: number | string | undefined): Lite<Entity>;
 export function newLite(type: PseudoType, id: number | string | undefined): Lite<Entity>{
     return {
         EntityType: getTypeName(type),
