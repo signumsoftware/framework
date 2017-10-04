@@ -89,7 +89,7 @@ export default class DashboardView extends React.Component<{ dashboard: Dashboar
 
                             return (
                                 <div key={j} className={`col-sm-${c.columnWidth} col-sm-offset-${offset}`}>
-                                    {c.parts.map(p => <PanelPart ctx={p} entity={this.props.entity} />)}
+                                    {c.parts.map((p, i) => <PanelPart key={i} ctx={p} entity={this.props.entity} />)}
                                 </div>
                             );
                         })}
