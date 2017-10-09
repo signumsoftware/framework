@@ -198,8 +198,16 @@ namespace Signum.Engine.MachineLearning
         public PredictorColumnEmbedded PredictorColumn; 
         //Multu Column case
         public PredictorMultiColumnEntity MultiColumn;
+
+        //Only for multi columns (values inside of collections)
         public object[] Keys;
-        public object OneHotValue; 
+        
+        //Only for 1-hot encoding in the column (i.e: Neuronal Networks)
+        public object IsValue;
+
+        //Serves as Codification (i.e: Bayes)
+        public string[] Values;
+
         public int AggregateIndex;
     }
 

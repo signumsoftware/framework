@@ -18,11 +18,6 @@ using System.Threading.Tasks;
 
 namespace Signum.Engine.MachineLearning
 {
-    public abstract class PredictorAlgorithm
-    {
-        public abstract bool Initialize(PredictorEntity predictor);
-        public abstract bool TrainPredictor(PredictorEntity predictor, PredictorResultColumn[] columnDescriptions, object[][] data);
-    }
 
     public static class PredictorLogic
     {

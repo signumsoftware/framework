@@ -211,6 +211,10 @@ namespace Signum.Entities.MachineLearning
 
         [SqlDbType(Size = 100)]
         public string IsValue { get; set; }
+
+        [NotNullable, PreserveOrder]
+        [NotNullValidator, NoRepeatValidator]
+        public MList<string> CodedValues { get; set; } = new MList<string>();
     }
 
     [Serializable]
