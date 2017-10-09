@@ -310,6 +310,7 @@
     <Content Include="Translations\Signum.Entities.Extensions.it.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Translations\Signum.Entities.Extensions.nl.xml" />
     <Content Include="Translations\Signum.Entities.Extensions.pt.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
