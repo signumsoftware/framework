@@ -46,6 +46,7 @@ export type ToolbarLocation =
 export const ToolbarMenuEntity = new Type<ToolbarMenuEntity>("ToolbarMenu");
 export interface ToolbarMenuEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
     Type: "ToolbarMenu";
+    owner?: Entities.Lite<Entities.Entity> | null;
     guid?: string;
     name?: string | null;
     elements: Entities.MList<ToolbarElementEmbedded>;
