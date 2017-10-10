@@ -34,7 +34,7 @@ export default class MultipliedMessage extends React.Component<{ findOptions: Fi
 
         return (
             <div className="sf-td-multiply alert alert-warning">
-                <span className="glyphicon glyphicon-exclamation-sign" />{ "\u00A0" + message}
+                <span className="fa fa-exclamation-triangle" />{ "\u00A0" + message}
             </div>
         );
     }

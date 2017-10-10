@@ -77,12 +77,12 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
     }
 
     renderTitle(e: any) {
-            return <h4 className="modal-title text-danger"><span className="glyphicon glyphicon-alert"></span> Error </h4>;
+            return <h4 className="modal-title text-danger"><span className="fa fa-exclamation-triangle"></span> Error </h4>;
     }
 
     renderServiceTitle(se: ServiceError) {
         return (<h4 className="modal-title text-danger">
-            <span className={classes("glyphicon", se.defaultIcon)}></span>&nbsp; <span>{se.httpError.ExceptionType}</span>
+            <span className={classes("fa", se.defaultIcon)}></span>&nbsp; <span>{se.httpError.ExceptionType}</span>
             ({
                 Navigator.isViewable(ExceptionEntity) ?
                     <a href={Navigator.navigateRoute(ExceptionEntity, se.httpError.ExceptionID!)}>{se.httpError.ExceptionID}</a> :
@@ -94,7 +94,7 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
 
     renderValidationTitle(ve: ValidationError) {
         return <h4 className="modal-title text-danger">
-            <span className="glyphicon glyphicon-alert"></span> {NormalWindowMessage.ThereAreErrors.niceToString()}
+            <span className="fa fa-exclamation-triangle"></span> {NormalWindowMessage.ThereAreErrors.niceToString()}
         </h4>;
     }
 

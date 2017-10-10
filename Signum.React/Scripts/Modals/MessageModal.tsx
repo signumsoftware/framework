@@ -124,19 +124,19 @@ export default class MessageModal extends React.Component<MessageModalProps, { s
         if (this.props.icon) {
             switch (this.props.icon) {
                 case "info":
-                    icon = "glyphicon glyphicon-info-sign";
+                    icon = "fa fa-info-circle";
                     break;
                 case "error":
-                    icon = "glyphicon glyphicon-alert";
+                    icon = "fa fa-exclamation-circle";
                     break;
                 case "question":
-                    icon = "glyphicon glyphicon-question-sign";
+                    icon = "fa fa-question-circle";
                     break;
                 case "success":
-                    icon = "glyphicon glyphicon-ok-sign";
+                    icon = "fa fa-check-circle";
                     break;
                 case "warning":
-                    icon = "glyphicon glyphicon-exclamation-sign";
+                    icon = "fa fa-exclamantion";
                     break;
             }
         }

@@ -107,7 +107,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
         const elementPr = ctx.propertyRoute.add(a => a[0].element);
 
         return (
-            <table className="table table-condensed form-vertical sf-table">
+            <table className="table table-condensed sf-table">
                 <thead>
                     <tr>
                         <th></th>
@@ -137,7 +137,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                                     <a title={EntityControlMessage.Create.niceToString()}
                                         className="sf-line-button sf-create"
                                         onClick={this.handleCreateClick}>
-                                        <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
+                                        <span className="fa fa-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
                                     </a>}
                             </td>
                         </tr>
@@ -185,7 +185,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
                         {this.props.onRemove && <a className={classes("sf-line-button", "sf-remove")}
                             onClick={this.props.onRemove}
                             title={EntityControlMessage.Remove.niceToString()}>
-                            <span className="glyphicon glyphicon-remove"/>
+                            <span className="fa fa-remove"/>
                         </a>}
                         &nbsp;
                         {drag && <a className={classes("sf-line-button", "sf-move")}
@@ -193,7 +193,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { rowSt
                             onDragStart={drag.onDragStart}
                             onDragEnd={drag.onDragEnd}
                             title={EntityControlMessage.Move.niceToString()}>
-                            <span className="glyphicon glyphicon-menu-hamburger"/>
+                            <span className="fa fa-bars"/>
                         </a>}
                     </div>
                 </td>

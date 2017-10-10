@@ -171,7 +171,7 @@ export default class FramePage extends React.Component<FramePageProps, FramePage
                 { this.entityComponent && <ButtonBar frame={frame} pack={this.state.pack} /> }
                 <ValidationErrors entity={this.state.pack.entity} ref={ve => this.validationErrors = ve}/>
                 { embeddedWidgets.top }
-                <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-main-entity={entityInfo(ctx.value) }>
+                <div className="sf-main-control" data-test-ticks={new Date().valueOf() } data-main-entity={entityInfo(ctx.value) }>
                     {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx),  { ref: (c: React.Component<any, any>) => this.setComponent(c) }) }
                 </div>
                 { embeddedWidgets.bottom }

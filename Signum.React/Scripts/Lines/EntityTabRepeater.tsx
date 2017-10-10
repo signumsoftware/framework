@@ -88,7 +88,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                                         <span className={classes("sf-line-button", "sf-create")}
                                             onClick={e => this.handleRemoveElementClick(e, i)}
                                             title={EntityControlMessage.Remove.niceToString()}>
-                                            <span className="glyphicon glyphicon-remove" />
+                                            <span className="fa fa-remove" />
                                         </span>
                                     }
                                     &nbsp;
@@ -97,7 +97,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                                         onDragStart={drag.onDragStart}
                                         onDragEnd={drag.onDragEnd}
                                         title={EntityControlMessage.Move.niceToString()}>
-                                        <span className="glyphicon glyphicon-menu-hamburger" />
+                                        <span className="fa fa-bars" />
                                     </span>}
                                 </div> as any
                             }>

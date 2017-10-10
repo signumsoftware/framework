@@ -161,7 +161,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             <a className={classes("sf-line-button", "sf-view", btn ? "btn btn-default" : undefined) }
                 onClick={this.handleViewClick}
                 title={EntityControlMessage.View.niceToString() }>
-                <span className="glyphicon glyphicon-arrow-right"/>
+                <span className="fa fa-arrow-right"/>
             </a>
         );
     }
@@ -238,7 +238,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             <a className={classes("sf-line-button", "sf-create", btn ? "btn btn-default" : undefined) }
                 onClick={this.handleCreateClick}
                 title={EntityControlMessage.Create.niceToString() }>
-                <span className="glyphicon glyphicon-plus sf-create"/>
+                <span className="fa fa-plus sf-create"/>
             </a>
         );
     }
@@ -285,7 +285,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             <a className={classes("sf-line-button", "sf-find", btn ? "btn btn-default" : undefined) }
                 onClick={this.handleFindClick}
                 title={EntityControlMessage.Find.niceToString() }>
-                <span className="glyphicon glyphicon-search"/>
+                <span className="fa fa-search"/>
             </a>
         );
     }
@@ -311,7 +311,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             <a className={classes("sf-line-button", "sf-remove", btn ? "btn btn-default" : undefined) }
                 onClick={this.handleRemoveClick}
                 title={EntityControlMessage.Remove.niceToString() }>
-                <span className="glyphicon glyphicon-remove"/>
+                <span className="fa fa-remove"/>
             </a>
         );
     }

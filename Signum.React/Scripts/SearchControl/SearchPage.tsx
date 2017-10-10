@@ -103,7 +103,7 @@ export default class SearchPage extends React.Component<SearchPageProps, SearchP
                     <span className="sf-entity-title">{getQueryNiceName(fo.queryName)}</span>
                     &nbsp;
                     <a className="sf-popup-fullscreen" href="#" onClick={(e) => this.searchControl.handleFullScreenClick(e) }>
-                        <span className="glyphicon glyphicon-new-window"></span>
+                        <span className="fa fa-external-link"></span>
                     </a>
                 </h2>
                 <SearchControl ref={(e: SearchControl) => this.searchControl = e}

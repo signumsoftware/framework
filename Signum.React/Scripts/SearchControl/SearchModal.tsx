@@ -75,7 +75,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
                     <h4>
                         <span className="sf-entity-title"> {this.props.title}</span>&nbsp;
                         <a className="sf-popup-fullscreen pointer" onMouseUp={(e) => this.searchControl.handleFullScreenClick(e)}>
-                            <span className="glyphicon glyphicon-new-window"></span>
+                            <span className="fa fa-external-link"></span>
                         </a>
                     </h4>
                 </ModalHeader>

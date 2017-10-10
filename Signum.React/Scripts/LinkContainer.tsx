@@ -17,7 +17,7 @@ interface LinkContainerProps extends React.AnchorHTMLAttributes<HTMLAnchorElemen
     isActive?: (m: match<any>, l: H.Location) => boolean;
 }
 
-export default class LinkContainer extends React.Component<LinkContainerProps> {
+export class LinkContainer extends React.Component<LinkContainerProps> {
     static propTypes = {
         onClick: PropTypes.func,
         target: PropTypes.string,

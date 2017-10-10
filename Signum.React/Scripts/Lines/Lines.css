@@ -355,18 +355,6 @@ ul.nav-tabs {
     font-size: 16px;
 }
 
-.form-horizontal .form-xs .control-label,
-.form-horizontal .form-xs .radio,
-.form-horizontal .form-xs .checkbox,
-.form-horizontal .form-xs .radio-inline,
-.form-horizontal .form-xs .checkbox-inline,
-.form-horizontal .form-xs .form-control-static {
-    margin-top: 0;
-    margin-bottom: 0;
-    padding-top: 0px;
-}
-
-
 
 /*form sm*/
 
@@ -459,54 +447,10 @@ ul.nav-tabs {
     font-size: 18px;
 }
 
-.form-horizontal .form-sm .control-label,
-.form-horizontal .form-sm .radio,
-.form-horizontal .form-sm .checkbox,
-.form-horizontal .form-sm .radio-inline,
-.form-horizontal .form-sm .checkbox-inline,
-.form-horizontal .form-sm .form-control-static {
-    margin-top: 0;
-    margin-bottom: 0;
-    padding-top: 2px;
-}
-
 
 /*form-inline*/
-.form-horizontal .form-inline .form-group {
-    margin-right: 0px;
-    margin-left: 0px;
-}
-
 .form-inline .sf-query-token-builder {
     vertical-align: middle;
-}
-
-/*form-vertical*/
-.form-vertical .form-group > label {
-    float: none;
-    padding-top: 0;
-    text-align: start;
-    width: auto;
-}
-
-.form-vertical .form-sm.form-group > label {
-    margin-bottom: 0px;
-}
-
-.form-vertical .form-xs.form-group > label {
-    margin-bottom: 0px;
-}
-
-.form-vertical .form-group {
-    margin-left: 0;
-    margin-right: 0;
-}
-
-.form-vertical .form-control,
-.form-vertical .form-control-static {
-    display: block;
-    /*width: initial;*/
-    vertical-align: baseline;
 }
 
 /* table non-fluid*/

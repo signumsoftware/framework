@@ -236,7 +236,7 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
                             <a className="sf-line-button sf-remove"
                                 onClick={this.props.onRemove}
                                 title={EntityControlMessage.Remove.niceToString()}>
-                                <span className="glyphicon glyphicon-remove"></span></a>
+                                <span className="fa fa-remove"></span></a>
                         </span>
                     }
                     &nbsp;
@@ -245,7 +245,7 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
                         onDragStart={drag.onDragStart}
                         onDragEnd={drag.onDragEnd}
                         title={EntityControlMessage.Move.niceToString()}>
-                        <span className="glyphicon glyphicon-menu-hamburger" />
+                        <span className="fa fa-bars" />
                     </span>}
                 </div>
             </li>

@@ -84,7 +84,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
                         <a title={EntityControlMessage.Create.niceToString()}
                             className="sf-line-button sf-create"
                             onClick={this.handleCreateClick}>
-                            <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
+                            <span className="fa fa-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
                         </a>)
                 }
             </div>
@@ -119,7 +119,7 @@ export class EntityRepeaterElement extends React.Component<EntityRepeaterElement
                             {this.props.onRemove && <a className={classes("sf-line-button", "sf-remove")}
                                 onClick={this.props.onRemove}
                                 title={EntityControlMessage.Remove.niceToString()}>
-                                <span className="glyphicon glyphicon-remove" />
+                                <span className="fa fa-remove" />
                             </a>}
                             &nbsp;
                         {drag && <a className={classes("sf-line-button", "sf-move")}
@@ -127,7 +127,7 @@ export class EntityRepeaterElement extends React.Component<EntityRepeaterElement
                                 onDragStart={drag.onDragStart}
                                 onDragEnd={drag.onDragEnd}
                                 title={EntityControlMessage.Move.niceToString()}>
-                                <span className="glyphicon glyphicon-menu-hamburger" />
+                                <span className="fa fa-bars" />
                             </a>}
                         </div>
                     </legend>

@@ -99,7 +99,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
             <a className={classes("sf-line-button", "sf-find", isFormControl ? "btn btn-default" : undefined)}
                 onClick={this.valueSearchControl!.handleClick}
                 title={EntityControlMessage.Find.niceToString()}>
-                <span className="glyphicon glyphicon-search" />
+                <span className="fa fa-search" />
             </a>;
 
 
@@ -107,7 +107,7 @@ export default class ValueSearchControlLine extends React.Component<ValueSearchC
             <a className={classes("sf-line-button", "sf-view", isFormControl ? "btn btn-default" : undefined)}
                 onClick={this.handleViewEntityClick}
                 title={EntityControlMessage.View.niceToString()}>
-                <span className="glyphicon glyphicon-arrow-right" />
+                <span className="fa fa-arrow-right" />
             </a>
 
         let extra = this.valueSearchControl && this.props.extraButtons && this.props.extraButtons(this.valueSearchControl);

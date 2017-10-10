@@ -25,7 +25,7 @@ export default class ContainerToggleComponent extends React.Component<React.Prop
         return (
             <div className={this.state.fluid ? "container-fluid" : "container"}>
                 <a className="expand-window" onClick={this.handleExpandToggle} href="#">
-                    <span className={classes("glyphicon", this.state.fluid ? "glyphicon-minus" : "glyphicon-fullscreen")} />
+                    <span className={classes("fa", this.state.fluid ? "fa-minus" : "fa-arrow-alt")} />
                 </a> 
                 { this.props.children }
             </div>

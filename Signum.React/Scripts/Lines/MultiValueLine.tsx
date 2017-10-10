@@ -73,7 +73,7 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
                                             <a title={SearchMessage.DeleteFilter.niceToString()}
                                                 className="sf-line-button sf-remove"
                                                 onClick={() => this.handleDeleteValue(i)}>
-                                                <span className="glyphicon glyphicon-remove" />
+                                                <span className="fa fa-remove" />
                                             </a>}
                                     </td>
                                     <td>
@@ -87,7 +87,7 @@ export class MultiValueLine extends LineBase<MultiValueLineProps, MultiValueLine
                                     <a title={this.props.addValueText || SearchMessage.AddValue.niceToString()}
                                         className="sf-line-button sf-create"
                                         onClick={this.handleAddValue}>
-                                        <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{this.props.addValueText || SearchMessage.AddValue.niceToString()}
+                                        <span className="fa fa-plus sf-create sf-create-label" />{this.props.addValueText || SearchMessage.AddValue.niceToString()}
                                     </a>}
                             </td>
                         </tr>

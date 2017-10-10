@@ -149,7 +149,7 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
                 href="#"
                 data-toggle="dropdown"
                 onClick={e => e.preventDefault()} >
-                {links && <span className="glyphicon glyphicon-star"></span>}
+                {links && <span className="fa fa-star"></span>}
                 {links ? "\u00A0" + links.length : "…"}
             </a >
         );
@@ -183,7 +183,7 @@ class QuickLinkToggle extends React.Component<{ bsRole: string, onClick?: (e: Re
                 title={QuickLinkMessage.Quicklinks.niceToString()}
                 role="button"
                 onClick={this.handleOnClick} >
-                {links && <span className="glyphicon glyphicon-star"></span>}
+                {links && <span className="fa fa-star"></span>}
                 {links ? "\u00A0" + links.length : "…"}
             </a >
         );

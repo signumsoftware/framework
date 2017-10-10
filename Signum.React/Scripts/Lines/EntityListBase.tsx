@@ -54,7 +54,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
             <a className={classes("sf-line-button", "sf-move", btn ? "btn btn-default" : undefined) }
                 onClick={() => this.moveUp(index) }
                 title={EntityControlMessage.MoveUp.niceToString() }>
-                <span className="glyphicon glyphicon-chevron-up"/>
+                <span className="fa fa-chevron-up"/>
             </a>
         );
     }
@@ -73,7 +73,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
             <a className={classes("sf-line-button", "sf-move", btn ? "btn btn-default" : undefined) }
                 onClick={() => this.moveDown(index) }
                 title={EntityControlMessage.MoveUp.niceToString() }>
-                <span className="glyphicon glyphicon-chevron-down"/>
+                <span className="fa fa-chevron-down"/>
             </a>);
     }
 

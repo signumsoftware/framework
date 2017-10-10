@@ -395,12 +395,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             p.showFilterButton && OrderUtils.setOrder(-4, <a
                 className={"sf-query-button sf-filters-header btn btn-default" + (s.showFilters ? " active" : "")}
                 onClick={this.handleToggleFilters}
-                title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="glyphicon glyphicon glyphicon-filter"></span></a >),
+                title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="fa fa-filter"></span></a >),
 
             OrderUtils.setOrder(-3, <button className={classes("sf-query-button sf-search btn", p.findOptions.pagination.mode == "All" ? "btn-danger" : "btn-primary")} onClick={this.handleSearchClick}>{SearchMessage.Search.niceToString()} </button>),
 
             p.create && OrderUtils.setOrder(-2, <a className="sf-query-button btn btn-default sf-search-button sf-create" title={this.createTitle()} onClick={this.handleCreate}>
-                <span className="glyphicon glyphicon-plus sf-create"></span>
+                <span className="fa fa-plus sf-create"></span>
             </a>),
 
             this.props.showContextMenu != false && this.renderSelecterButton(),
@@ -411,7 +411,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
             !this.props.hideFullScreenButton && Finder.isFindable(p.findOptions.queryKey, true) &&
             <a className="sf-query-button btn btn-default" href="#" onClick={this.handleFullScreenClick} >
-                <span className="glyphicon glyphicon-new-window"></span>
+                <span className="fa fa-new-window"></span>
             </a>
         ]
             .filter(a => a)

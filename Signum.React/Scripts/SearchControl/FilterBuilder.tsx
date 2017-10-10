@@ -89,7 +89,7 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps>{
                                         <a title={SearchMessage.AddFilter.niceToString() }
                                             className="sf-line-button sf-create"
                                             onClick={this.handlerNewFilter}>
-                                            <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{SearchMessage.AddFilter.niceToString()}
+                                            <span className="fa fa-plus sf-create sf-create-label" />{SearchMessage.AddFilter.niceToString()}
                                         </a>
                                     </td>
                                 </tr>
@@ -179,7 +179,7 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
                         <a title={SearchMessage.DeleteFilter.niceToString() }
                             className="sf-line-button sf-remove"
                             onClick={this.handleDeleteFilter}>
-                            <span className="glyphicon glyphicon-remove"/>
+                            <span className="fa fa-remove"/>
                         </a>}
                 </td>
                 <td>
@@ -279,7 +279,7 @@ export class MultiValue extends React.Component<MultiValueProps> {
                                         <a title={SearchMessage.DeleteFilter.niceToString() }
                                             className="sf-line-button sf-remove"
                                             onClick={() => this.handleDeleteValue(i) }>
-                                            <span className="glyphicon glyphicon-remove"/>
+                                            <span className="fa fa-remove"/>
                                         </a>}
                                 </td>
                                 <td>
@@ -300,7 +300,7 @@ export class MultiValue extends React.Component<MultiValueProps> {
                                 <a title={SearchMessage.AddValue.niceToString()}
                                     className="sf-line-button sf-create"
                                     onClick={this.handleAddValue}>
-                                    <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{SearchMessage.AddValue.niceToString()}
+                                    <span className="fa fa-plus sf-create sf-create-label" />{SearchMessage.AddValue.niceToString()}
                                 </a>}
                         </td>
                     </tr>
