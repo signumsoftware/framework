@@ -79,7 +79,7 @@ export class StyleOptionsLine extends React.Component<StyleOptionsLineProps>{
                     {val && <a className={classes("sf-line-button", "sf-remove")}
                         onClick={this.handleRemove}
                         title={EntityControlMessage.Remove.niceToString()}>
-                        <span className="glyphicon glyphicon-remove" />
+                        <span className="fa fa-remove" />
                     </a>}
                 </label>
                 <div>
@@ -89,7 +89,7 @@ export class StyleOptionsLine extends React.Component<StyleOptionsLineProps>{
                         <a title={EntityControlMessage.Create.niceToString()}
                             className="sf-line-button sf-create"
                             onClick={this.handleCreate}>
-                            <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
+                            <span className="fa fa-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
                         </a>}
                 </div>
             </div>

@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { NavDropdown, UncontrolledNavDropdown, DropdownItem } from 'reactstrap'
+import { NavDropdown, UncontrolledNavDropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap'
 import { Route } from 'react-router'
 import { Dic } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
@@ -24,7 +24,7 @@ export default class CultureDropdown extends React.Component<CultureDropdownProp
         super(props);
         this.state = {};
     }
-    
+
     componentWillMount() {
         CultureClient.getCultures()
             .then(cultures => this.setState({ cultures }))
@@ -46,13 +46,15 @@ export default class CultureDropdown extends React.Component<CultureDropdownProp
         const pair = Dic.map(cultures, (name, c) => ({ name, c })).filter(p => is(p.c, current)).singleOrNull();
 
         return (
-            <UncontrolledNavDropdown id="culture-dropdown" title={current.toStr} data-culture={pair && pair.name}>
-                {
-                    Dic.map(cultures, (name, c, i) =>
+            <UncontrolledNavDropdown data-culture={pair && pair.name}>
+                <DropdownToggle>{current.toStr}</DropdownToggle>
+                <DropdownMenu>
+                    {Dic.map(cultures, (name, c, i) =>
                         <DropdownItem key={i} data-culture={name} disabled={is(c, current)} onSelect={() => this.handleSelect(c)}>
                             {c.toStr}
                         </DropdownItem>)
-                }
+                    }
+                </DropdownMenu>
             </UncontrolledNavDropdown>
         );
     }

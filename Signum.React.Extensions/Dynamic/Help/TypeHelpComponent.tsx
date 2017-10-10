@@ -172,11 +172,11 @@ export default class TypeHelpComponent extends React.Component<TypeHelpComponent
                     <span className="input-group-btn">
                         <button className="btn btn-default" disabled={!this.canBack()}
                             onClick={e => this.handleGoHistory(e, this.state.historyIndex - 1)} type="button">
-                            <span className="glyphicon glyphicon-circle-arrow-left" />
+                            <span className="fa fa-arrow-circle-left" />
                         </button>
                         <button className="btn btn-default" disabled={!this.canForth()}
                             onClick={e => this.handleGoHistory(e, this.state.historyIndex + 1)} type="button">
-                            <span className="glyphicon glyphicon-circle-arrow-right" />
+                            <span className="fa fa-arrow-circle-right" />
                         </button>
                     </span>
                     <div style={{ position: "relative" }}>

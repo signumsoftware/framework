@@ -244,7 +244,7 @@ export class PanelPart extends React.Component<PanelPartProps, PanelPartState>{
                 <div className="panel-heading sf-show-hover">
                     {renderer.handleEditClick &&
                         <a className="sf-pointer pull-right flip sf-hide" onMouseUp={e => renderer.handleEditClick!(content, lite, e)}>
-                            <span className="glyphicon glyphicon-edit"></span>&nbsp;Edit
+                            <span className="fa fa-edit"></span>&nbsp;Edit
                         </a>}
                     &nbsp;
                     {renderer.handleTitleClick == undefined ? title :

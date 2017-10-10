@@ -84,7 +84,7 @@ export class HtmlAttributesLine extends React.Component<HtmlAttributesLineProps>
                     {val && <a className={classes("sf-line-button", "sf-remove")}
                         onClick={this.handleRemove}
                         title={EntityControlMessage.Remove.niceToString()}>
-                        <span className="glyphicon glyphicon-remove" />
+                        <span className="fa fa-remove" />
                     </a>}
                 </label>
                 <div>
@@ -94,7 +94,7 @@ export class HtmlAttributesLine extends React.Component<HtmlAttributesLineProps>
                         <a title={EntityControlMessage.Create.niceToString()}
                             className="sf-line-button sf-create"
                             onClick={this.handleCreate}>
-                            <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
+                            <span className="fa fa-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
                         </a>}
                 </div>
             </div>
@@ -212,7 +212,7 @@ export class ExpressionOrValueStrip extends React.Component<ExpressionOrValueStr
                         <a className="sf-line-button sf-remove"
                             onClick={() => this.handleOnRemove(key)}
                             title={EntityControlMessage.Remove.niceToString()}>
-                            <span className="glyphicon glyphicon-remove"></span>
+                            <span className="fa fa-remove"></span>
                         </a>
                         <ExpressionOrValueComponent dn={this.props.dn} refreshView={() => this.forceUpdate()}
                             binding={new Binding(this.props.object, key)} type="string" defaultValue={null} avoidDelete={true} />

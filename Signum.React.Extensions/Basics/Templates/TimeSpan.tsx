@@ -20,7 +20,7 @@ export default class TimeSpan extends React.Component<{ ctx: TypeContext<TimeSpa
         const sc = e.subCtx({ formGroupStyle: "BasicDown" });
 
         return (
-            <div className="row form-vertical">
+            <div className="row">
                 <div className="col-sm-3">
                     <ValueLine ctx={sc.subCtx(n => n.days)} />
                 </div>

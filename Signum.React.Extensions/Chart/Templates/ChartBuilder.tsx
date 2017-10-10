@@ -155,7 +155,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
                         </div>
                     </div>
                     <div className="sf-chart-parameters panel panel-default">
-                        <div className="panel-body form-vertical">
+                        <div className="panel-body">
                             {
                                 this.state.expanded && mlistItemContext(this.props.ctx.subCtx(c => c.parameters, { formGroupStyle: "Basic", formGroupSize: "ExtraSmall" }))
                                     .map((ctx, i) => this.getParameterValueLine(ctx, chart.chartScript.parameters[i].element))

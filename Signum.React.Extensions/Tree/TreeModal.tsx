@@ -77,7 +77,7 @@ export default class TreeModal extends React.Component<TreeModalProps, { isOpen:
                         <span className="sf-entity-title"> {this.props.title || getTypeInfo(this.props.typeName).nicePluralName}</span>
                         &nbsp;
                         <a className="sf-popup-fullscreen" href="" onClick={(e) => this.treeView && this.treeView.handleFullScreenClick(e)}>
-                            <span className="glyphicon glyphicon-new-window"></span>
+                            <span className="fa fa-external-link"></span>
                         </a>
                     </h4>
                 </ModalHeader>

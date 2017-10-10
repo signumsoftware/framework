@@ -2,7 +2,6 @@
 import * as React from 'react'
 import { Route } from 'react-router'
 import * as Reactstrap from 'reactstrap'
-import * as ReactRouterBootstrap from 'react-router-bootstrap'
 import * as QueryString from 'query-string'
 import { globalModules} from './View/GlobalModules'
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
@@ -32,6 +31,8 @@ import * as Nodes from './View/Nodes' //Typings-only
 import * as NodeUtils from './View/NodeUtils' //Typings-only
 import MessageModal from "../../../Framework/Signum.React/Scripts/Modals/MessageModal";
 import { Dic } from "../../../Framework/Signum.React/Scripts/Globals";
+import * as LinkContainerModule from "../../../Framework/Signum.React/Scripts/LinkContainer";
+import * as TabsModule from "../../../Framework/Signum.React/Scripts/Tabs";
 
 
 export function start(options: { routes: JSX.Element[] }) {
@@ -414,9 +415,12 @@ export function asOverrideFunction(dvo: DynamicViewOverrideEntity): (vr: ViewRep
     var UncontrolledNavDropdown = Reactstrap.UncontrolledNavDropdown;
     var UncontrolledTooltip = Reactstrap.UncontrolledTooltip;
 
-    // ReactRouterBootstrap
-    var LinkContainer = ReactRouterBootstrap.LinkContainer;
-
+    // Signum
+    var LinkContainer = LinkContainerModule.LinkContainer;
+    var Tab = TabsModule.Tab;
+    var Tabs = TabsModule.Tabs;
+    var UncontrolledTabs = TabsModule.UncontrolledTabs;
+    
     var modules = globalModules;
 
     code = "(function(vr){ " + code + "})";

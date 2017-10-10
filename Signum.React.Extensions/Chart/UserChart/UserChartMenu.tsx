@@ -84,7 +84,7 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, U
     }
 
     render() {
-        const label = <span><i className="glyphicon glyphicon-stats"></i> &nbsp; {UserChartEntity.nicePluralName()}</span>;
+        const label = <span><i className="fa fa-bar-chart"></i> &nbsp; {UserChartEntity.nicePluralName()}</span>;
         const userCharts = this.state.userCharts;
         return (
             <ButtonDropdown title={label as any} id="userQueriesDropDown" className="sf-userquery-dropdown"

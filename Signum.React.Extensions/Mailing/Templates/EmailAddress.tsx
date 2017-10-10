@@ -13,7 +13,7 @@ export default class EmailAddress extends React.Component<{ ctx: TypeContext<Ema
          const sc = this.props.ctx.subCtx({ placeholderLabels: true, formGroupStyle: "SrOnly"});
 
         return (
-            <div className="row form-vertical">
+            <div className="row">
                 <div className="col-sm-4 col-sm-offset-2">
                      <EntityLine ctx={sc.subCtx(ea => ea.emailOwner)}  />
                 </div>

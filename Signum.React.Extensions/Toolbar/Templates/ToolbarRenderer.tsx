@@ -10,7 +10,6 @@ import ValidationErrors from '../../../../Framework/Signum.React/Scripts/Frames/
 import ButtonBar from '../../../../Framework/Signum.React/Scripts/Frames/ButtonBar'
 import { ToolbarElementEmbedded, ToolbarElementType, ToolbarMenuEntity, ToolbarLocation } from '../Signum.Entities.Toolbar'
 import * as ToolbarClient from '../ToolbarClient'
-import { LinkContainer, IndexLinkContainer } from 'react-router-bootstrap'
 import { ToolbarConfig } from "../ToolbarClient";
 import '../../../../Framework/Signum.React/Scripts/Frames/MenuIcons.css'
 import './Toolbar.css'

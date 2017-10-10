@@ -1,6 +1,5 @@
 ﻿import * as React from 'react'
 import { TabContent, TabPane } from 'reactstrap'
-import { LinkContainer } from 'react-router-bootstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
@@ -12,6 +11,7 @@ import {SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 
 import "./DiffLog.css"
+import { LinkContainer } from '../../../../Framework/Signum.React/Scripts/LinkContainer';
 
 export default class OperationLog extends React.Component<{ ctx: TypeContext<OperationLogEntity> }> {
 
@@ -92,7 +92,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
                     <span title={DiffLogMessage.NavigatesToThePreviousOperationLog.niceToString() }>
                         {DiffLogMessage.PreviousLog.niceToString() }
                         &nbsp;
-                        <span className="glyphicon glyphicon-new-window"></span>
+                        <span className="fa fa-external-link"></span>
                     </span>
                 </LinkContainer> as any
             }>
@@ -106,8 +106,8 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
 
         const title =  (
             <span title={ DiffLogMessage.DifferenceBetweenFinalStateOfPreviousLogAndTheInitialState.niceToString()}>
-                <span className={`glyphicon glyphicon-fast-backward colorIcon red ${eq ? "mini" : ""}`}></span>
-                <span className={`glyphicon glyphicon-step-backward colorIcon green ${eq ? "mini" : ""}`}></span>
+                <span className={`fa fa-fast-backward colorIcon red ${eq ? "mini" : ""}`}></span>
+                <span className={`fa fa-step-backward colorIcon green ${eq ? "mini" : ""}`}></span>
             </span>
         );
 
@@ -136,8 +136,8 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
 
         const title = (
             <span title={ DiffLogMessage.DifferenceBetweenInitialStateAndFinalState.niceToString() }>
-                <span className={`glyphicon glyphicon-step-backward colorIcon red ${eq ? "mini" : ""}`}></span>
-                <span className={`glyphicon glyphicon-step-forward colorIcon green ${eq ? "mini" : ""}`}></span>
+                <span className={`fa fa-step-backward colorIcon red ${eq ? "mini" : ""}`}></span>
+                <span className={`fa fa-step-forward colorIcon green ${eq ? "mini" : ""}`}></span>
             </span>
         );
 
@@ -162,8 +162,8 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
 
         const title = (
             <span title={ DiffLogMessage.DifferenceBetweenFinalStateAndTheInitialStateOfNextLog.niceToString() }>
-                <span className={`glyphicon glyphicon-step-forward colorIcon red ${eq ? "mini" : ""}`}></span>
-                <span className={`glyphicon glyphicon-fast-forward colorIcon green ${eq ? "mini" : ""}`}></span>
+                <span className={`fa fa-step-forward colorIcon red ${eq ? "mini" : ""}`}></span>
+                <span className={`fa fa-fast-forward colorIcon green ${eq ? "mini" : ""}`}></span>
             </span>
         );
 
@@ -181,7 +181,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
                     <span title={DiffLogMessage.NavigatesToTheNextOperationLog.niceToString() }>
                         {DiffLogMessage.NextLog.niceToString() }
                         &nbsp;
-                        <span className="glyphicon glyphicon-new-window"></span>
+                        <span className="fa fa-external-link"></span>
                     </span>
                 </LinkContainer> as any}>
             </TabPane>
@@ -195,7 +195,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
                     <span title={DiffLogMessage.NavigatesToTheCurrentEntity.niceToString() }>
                         {DiffLogMessage.CurrentEntity.niceToString() }
                         &nbsp;
-                        <span className="glyphicon glyphicon-new-window"></span>
+                        <span className="fa fa-external-link"></span>
                     </span>
                 </LinkContainer> as any}>
             </TabPane>

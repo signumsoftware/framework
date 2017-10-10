@@ -14,7 +14,7 @@ import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperat
 import * as WorkflowClient from '../WorkflowClient'
 
 import { Navbar, Nav, NavItem, UncontrolledNavDropdown, DropdownItem, DropdownToggle } from 'reactstrap'
-import { LinkContainer, IndexLinkContainer } from 'react-router-bootstrap'
+import { LinkContainer } from '../../../../Framework/Signum.React/Scripts/LinkContainer';
 
 export default class WorkflowDropdown extends React.Component<{}, { starts: Array<WorkflowEntity> }>
 {
@@ -38,7 +38,7 @@ export default class WorkflowDropdown extends React.Component<{}, { starts: Arra
                 <DropdownToggle nav caret>
                     {WorkflowEntity.nicePluralName()}
                 </DropdownToggle>
-                <IndexLinkContainer to={inboxUrl}><DropdownItem>{CaseActivityQuery.Inbox.niceName()}</DropdownItem></IndexLinkContainer>
+                <LinkContainer exact to={inboxUrl}><DropdownItem>{CaseActivityQuery.Inbox.niceName()}</DropdownItem></LinkContainer>
                 {this.state.starts.length > 0 && <DropdownItem divider />}
                 {this.state.starts.length > 0 && <DropdownItem disabled>{JavascriptMessage.create.niceToString()}</DropdownItem>}
                 {this.getStarts().map((val, i) =>

@@ -828,7 +828,7 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
                 <a title="Create Property"
                     className="sf-line-button sf-create"
                     onClick={this.handleCreateClick}>
-                    <span className="glyphicon glyphicon-plus sf-create sf-create-label" />Create Property
+                    <span className="fa fa-plus sf-create sf-create-label" />Create Property
                 </a>
             </div>
         );
@@ -842,19 +842,19 @@ export class PropertyRepeaterComponent extends React.Component<PropertyRepeaterC
                     <a className={classes("sf-line-button", "sf-remove")}
                         onClick={e => this.handleOnRemove(e, i)}
                         title={EntityControlMessage.Remove.niceToString()}>
-                        <span className="glyphicon glyphicon-remove" />
+                        <span className="fa fa-remove" />
                     </a>
 
                     <a className={classes("sf-line-button", "move-up")}
                         onClick={e => this.handleOnMoveUp(e, i)}
                         title={EntityControlMessage.MoveUp.niceToString()}>
-                        <span className="glyphicon glyphicon-chevron-up" />
+                        <span className="fa fa-chevron-up" />
                     </a>
 
                     <a className={classes("sf-line-button", "move-down")}
                         onClick={e => this.handleOnMoveDown(e, i)}
                         title={EntityControlMessage.MoveDown.niceToString()}>
-                        <span className="glyphicon glyphicon-chevron-down" />
+                        <span className="fa fa-chevron-down" />
                     </a>
                 </span>
                 {" " + (p._propertyType_ || "") + " " + p.name}
@@ -1093,7 +1093,7 @@ export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterC
                                 <a title="Create Query Column"
                                     className="sf-line-button sf-create"
                                     onClick={this.handleCreateClick}>
-                                    <span className="glyphicon glyphicon-plus sf-create sf-create-label" />Create Query Column
+                                    <span className="fa fa-plus sf-create sf-create-label" />Create Query Column
                                 </a>
                             </td>
                         </tr>
@@ -1111,19 +1111,19 @@ export class ComboBoxRepeaterComponent extends React.Component<ComboBoxRepeaterC
                         <a className={classes("sf-line-button", "sf-remove")}
                             onClick={e => this.handleOnRemove(e, i)}
                             title={EntityControlMessage.Remove.niceToString()}>
-                            <span className="glyphicon glyphicon-remove" />
+                            <span className="fa fa-remove" />
                         </a>
 
                         <a className={classes("sf-line-button", "move-up")}
                             onClick={e => this.handleOnMoveUp(e, i)}
                             title={EntityControlMessage.MoveUp.niceToString()}>
-                            <span className="glyphicon glyphicon-chevron-up" />
+                            <span className="fa fa-chevron-up" />
                         </a>
 
                         <a className={classes("sf-line-button", "move-down")}
                             onClick={e => this.handleOnMoveDown(e, i)}
                             title={EntityControlMessage.MoveDown.niceToString()}>
-                            <span className="glyphicon glyphicon-chevron-down" />
+                            <span className="fa fa-chevron-down" />
                         </a>
                     </span>
                 </td>
@@ -1189,7 +1189,7 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
                 <a title="Create Validator"
                     className="sf-line-button sf-create"
                     onClick={this.handleCreateClick}>
-                    <span className="glyphicon glyphicon-plus sf-create sf-create-label" />Create Validator
+                    <span className="fa fa-plus sf-create sf-create-label" />Create Validator
                 </a>
             </div>
         );
@@ -1202,7 +1202,7 @@ export class ValidatorRepeaterComponent extends React.Component<ValidatorRepeate
                     <a className={classes("sf-line-button", "sf-remove")}
                         onClick={e => this.handleOnRemove(e, i)}
                         title={EntityControlMessage.Remove.niceToString()}>
-                        <span className="glyphicon glyphicon-remove" />
+                        <span className="fa fa-remove" />
                     </a>
                 </span>
                 {" "}

@@ -109,8 +109,8 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
                 <DropdownItem header>{pr.propertyPath()}</DropdownItem>
                 <DropdownItem divider />
                 <DropdownItem onClick={() => this.handleRemoveClick(lambda)}><i className="fa fa-trash" aria-hidden="true" />&nbsp; Remove</DropdownItem>
-                <DropdownItem onClick={() => this.handleInsertBeforeClick(lambda)}><i className="glyphicon glyphicon-menu-left" aria-hidden="true" />&nbsp; Insert Before</DropdownItem>
-                <DropdownItem onClick={() => this.handleInsertAfterClick(lambda)}><i className="glyphicon glyphicon-menu-right" aria-hidden="true" />&nbsp; Insert After</DropdownItem>
+                <DropdownItem onClick={() => this.handleInsertBeforeClick(lambda)}><i className="fa fa-arrow-up" aria-hidden="true" />&nbsp; Insert Before</DropdownItem>
+                <DropdownItem onClick={() => this.handleInsertAfterClick(lambda)}><i className="fa fa-arrow-down" aria-hidden="true" />&nbsp; Insert After</DropdownItem>
             </DropdownItem>
         );
     }
@@ -201,7 +201,7 @@ export default class DynamicViewOverrideComponent extends React.Component<Dynami
         const exampleCtx = new TypeContext<Entity | undefined>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(this.state, s => s.exampleEntity));
 
         return (
-            <div className="form-vertical code-container">
+            <div className="code-container">
                 <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={this.handleOnView} onChange={this.handleEntityChange} formGroupStyle="Basic"
                     type={{ name: typeName }} labelText={DynamicViewMessage.ExampleEntity.niceToString()} />
             </div>

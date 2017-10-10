@@ -42,7 +42,7 @@ export default class PrintPanelPage extends React.Component<{}, PrintPanelPageSt
             <div>
                 <h2>PrintPanel</h2>
 
-                <div className="form-horizontal">
+                <div>
                     <fieldset>
                         <legend>Ready To Print</legend>
                         {this.state.stats.map((s, i) =>
@@ -77,7 +77,7 @@ export default class PrintPanelPage extends React.Component<{}, PrintPanelPageSt
 
         return (
             <a className="sf-line-button" title="Print" onClick={() => this.handlePrintClick(fileType, vsc)}>
-                <span className="glyphicon glyphicon-print"></span>
+                <span className="fa fa-print"></span>
             </a>
         );
     }

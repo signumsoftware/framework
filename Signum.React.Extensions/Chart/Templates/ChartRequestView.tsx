@@ -136,7 +136,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                 <h2>
                     <span className="sf-entity-title">{getQueryNiceName(cr.queryKey) }</span>&nbsp;
                     <a className ="sf-popup-fullscreen" href="#" onClick={this.handleOnFullScreen}>
-                        <span className="glyphicon glyphicon-new-window"></span>
+                        <span className="fa fa-external-link"></span>
                     </a>
                 </h2 >
                 <ValidationErrors entity={cr}/>
@@ -158,7 +158,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                         <button type="submit" className="sf-query-button sf-chart-draw btn btn-primary" onClick={this.handleOnDrawClick}>{ChartMessage.DrawChart.niceToString()}</button>
                         <button className="sf-query-button sf-chart-script-edit btn btn-default" onClick={this.handleEditScript}><i className="fa fa-pencil" aria-hidden="true"/> &nbsp; {ChartMessage.EditScript.niceToString()}</button>
                         {ChartClient.ButtonBarChart.getButtonBarElements({ chartRequest: cr, chartRequestView: this }).map((a, i) => React.cloneElement(a, { key: i }))}
-                        <button className="btn btn-default" onMouseUp={this.handleExplore} ><i className="glyphicon glyphicon-search"></i> &nbsp; {SearchMessage.Explore.niceToString()}</button>
+                        <button className="btn btn-default" onMouseUp={this.handleExplore} ><i className="fa fa-search"></i> &nbsp; {SearchMessage.Explore.niceToString()}</button>
                     </div>
                     <br />
                     <div className="sf-search-results-container" >

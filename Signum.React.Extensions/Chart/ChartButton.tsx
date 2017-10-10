@@ -37,7 +37,7 @@ export default class ChartButton extends React.Component<ChartButtonProps> {
     render() {
         var label = this.props.searchControl.props.largeToolbarButtons == true ? " " + ChartMessage.Chart.niceToString() : undefined;
         return (
-            <Button onMouseUp={this.handleOnMouseUp}><i className="glyphicon glyphicon-stats"></i>&nbsp;{label}</Button>
+            <Button onMouseUp={this.handleOnMouseUp}><i className="fa fa-bar-chart"></i>&nbsp;{label}</Button>
         );
     }
  

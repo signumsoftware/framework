@@ -107,7 +107,7 @@ export class ChartColumnInfo extends React.Component<ChartColumnInfoProps> {
                 <td></td>
                 <td></td>
                 <td colSpan={1}>
-                    <div className="form-vertical">
+                    <div>
                         <div className="row">
                             <div className="col-sm-4">
                                 <ValueLine ctx={ctx.subCtx(a => a.displayName) } onChange={this.props.onRedraw} />

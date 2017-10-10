@@ -95,7 +95,7 @@ export class CaseActivityStatsComponent extends React.Component<CaseActivityStat
         var stats = this.props.stats;
 
         return (
-            <div className="form-horizontal" >
+            <div>
                 <FormGroup ctx={ctx} labelText={CaseActivityEntity.niceName()}> <EntityLink lite={stats.CaseActivity} /></FormGroup>
                 <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.doneBy)}>{stats.DoneBy && <EntityLink lite={stats.DoneBy} />}</FormGroup>
                 <FormGroup ctx={ctx} labelText={CaseActivityEntity.nicePropertyName(a => a.startDate)}>{formatDate(stats.StartDate)}</FormGroup>

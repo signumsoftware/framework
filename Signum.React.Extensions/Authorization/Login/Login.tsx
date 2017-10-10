@@ -52,7 +52,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
         return (
             <form onSubmit={(e) => this.handleSubmit(e)}>
 
-                <div className="form-horizontal">
+                <div>
 
                     <div className="form-group">
                         <div className="col-sm-offset-4 col-sm-6">
@@ -65,7 +65,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                         <label htmlFor="userName" className="col-sm-offset-2 col-sm-2 control-label">{AuthMessage.Username.niceToString()}</label>
                         <div className="col-sm-4">
                             <div className="input-group">
-                                <span className="input-group-addon"><i className="glyphicon glyphicon-user"></i></span>
+                                <span className="input-group-addon"><i className="fa fa-user"></i></span>
                                 <input type="text" className="form-control" id="userName" ref={r => this.userName = r!} placeholder={AuthMessage.Username.niceToString()} />
                             </div>
                             {this.error("userName") && <span className="help-block">{this.error("userName")}</span>}
@@ -76,7 +76,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                         <label htmlFor="password" className="col-sm-offset-2 col-sm-2 control-label">{AuthMessage.Password.niceToString()}</label>
                         <div className="col-sm-4">
                             <div className="input-group">
-                                <span className="input-group-addon"><i className="glyphicon glyphicon-lock"></i></span>
+                                <span className="input-group-addon"><i className="fa fa-lock"></i></span>
                                 <input type="password" className="form-control" id="password" ref={r => this.password = r!} placeholder={AuthMessage.Password.niceToString()} />
                             </div>
                             {this.error("password") && <span className="help-block">{this.error("password")}</span>}

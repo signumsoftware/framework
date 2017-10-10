@@ -319,7 +319,7 @@ export class EntityGridItem extends React.Component<EntityGridItemProps>{
                     {this.props.onRemove &&
                         <a className="sf-line-button sf-remove pull-right" onClick={this.props.onRemove}
                             title={EntityControlMessage.Remove.niceToString() }>
-                            <span className="glyphicon glyphicon-remove"></span>
+                            <span className="fa fa-remove"></span>
                         </a>
                     }
                     {this.props.title}

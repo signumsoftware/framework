@@ -21,7 +21,7 @@ export default class EmailConfiguration extends React.Component<{ ctx: TypeConte
                 <EntityCombo ctx={sc.subCtx(ca => ca.defaultCulture) }  />
                 <ValueLine ctx={sc.subCtx(ca => ca.urlLeft) }  />
                 
-                <fieldset className="form-vertical">
+                <fieldset>
                     <legend>Async</legend>
                     <div className="row">
                         <div className="col-sm-6">

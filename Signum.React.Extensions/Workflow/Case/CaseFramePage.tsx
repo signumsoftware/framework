@@ -150,7 +150,7 @@ export default class CaseFramePage extends React.Component<CaseFramePageProps, C
                 {this.renderTitle()}     
                 <CaseFromSenderInfo current={pack.activity} />  
                 {!pack.activity.case.isNew && <div className="inline-tags"> <InlineCaseTags case={toLite(pack.activity.case)} /></div>}
-                <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-activity-entity={entityInfo(pack.activity) }>
+                <div className="sf-main-control" data-test-ticks={new Date().valueOf() } data-activity-entity={entityInfo(pack.activity) }>
                     {this.renderMainEntity() }
                 </div>
                 {this.entityComponent && <CaseButtonBar frame={activityFrame} pack={activityPack} />}

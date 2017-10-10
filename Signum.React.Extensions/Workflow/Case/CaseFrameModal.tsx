@@ -202,7 +202,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
             <ModalBody>
                 <CaseFromSenderInfo current={pack.activity} />
                 {!pack.activity.case.isNew && <div className="inline-tags"> <InlineCaseTags case={toLite(pack.activity.case)} /></div>}
-                <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-activity-entity={entityInfo(pack.activity) }>
+                <div className="sf-main-control" data-test-ticks={new Date().valueOf() } data-activity-entity={entityInfo(pack.activity) }>
                     { this.renderMainEntity() }
                 </div>
                 {this.entityComponent && <CaseButtonBar frame={activityFrame} pack={activityPack} />}
@@ -295,7 +295,7 @@ export default class CaseFrameModal extends React.Component<CaseFrameModalProps,
 
         return (
             <a href="" className="sf-popup-fullscreen" onClick={this.handlePopupFullScreen}>
-                <span className="glyphicon glyphicon-new-window"></span>
+                <span className="fa fa-external-link"></span>
             </a>
         );
     }

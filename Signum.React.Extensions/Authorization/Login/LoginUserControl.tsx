@@ -1,8 +1,9 @@
 ﻿import * as React from 'react'
-import { UncontrolledNavDropdown, DropdownItem, NavItem } from 'reactstrap'
-import { LinkContainer } from 'react-router-bootstrap'
+import { UncontrolledNavDropdown, DropdownItem, NavItem, NavLink } from 'reactstrap'
 import { AuthMessage, UserEntity } from '../Signum.Entities.Authorization'
 import * as AuthClient from '../AuthClient'
+import { LinkContainer } from '../../../../Framework/Signum.React/Scripts/LinkContainer'
+
 
 export default class LoginUserControl extends React.Component<{}, { user: UserEntity }> {
 
@@ -10,7 +11,7 @@ export default class LoginUserControl extends React.Component<{}, { user: UserEn
         const user = AuthClient.currentUser();
 
         if (!user)
-            return <LinkContainer to="~/auth/login" className="sf-login"><NavItem>{AuthMessage.Login.niceToString() }</NavItem></LinkContainer>;
+            return <NavItem><LinkContainer to="~/auth/login" className="sf-login"><NavLink>{AuthMessage.Login.niceToString()}</NavLink></LinkContainer></NavItem>;
 
         return (
             <UncontrolledNavDropdown className="sf-user" title={user.userName!} id="sfUserDropDown">

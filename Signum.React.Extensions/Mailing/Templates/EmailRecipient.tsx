@@ -13,7 +13,7 @@ export default class EmailRecipient extends React.Component<{ ctx: TypeContext<E
 	    const sc = this.props.ctx.subCtx({ placeholderLabels: true, formGroupStyle: "SrOnly"});
 
         return (
-            <div className="row form-vertical">
+            <div className="row">
                 <div className="col-sm-1">
                     <ValueLine ctx={sc.subCtx(c => c.kind)}  />
                 </div>

@@ -91,7 +91,7 @@ export default class DashboardPage extends React.Component<DashboardPageProps, D
                 {!dashboard ? <h2>{JavascriptMessage.loading.niceToString()}</h2> :
                     <div className="sf-show-hover">
                         {Navigator.isNavigable({ entity: dashboard, canExecute: {} } as EntityPack<Entity>) &&
-                            <Link className="sf-hide pull-right flip" to={Navigator.navigateRoute(dashboard)}><span className="glyphicon glyphicon-edit"></span>&nbsp;Edit</Link>
+                            <Link className="sf-hide pull-right flip" to={Navigator.navigateRoute(dashboard)}><span className="fa fa-pencil"></span>&nbsp;Edit</Link>
                         }
                         <h2>{getToString(dashboard)}</h2>
                     </div>}

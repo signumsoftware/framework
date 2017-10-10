@@ -101,12 +101,12 @@ export class FindOptionsLine extends React.Component<FindOptionsLineProps>{
                         <a className={classes("sf-line-button", "sf-remove")}
                             onClick={this.handleRemove}
                             title={EntityControlMessage.Remove.niceToString()}>
-                            <span className="glyphicon glyphicon-remove" />
+                            <span className="fa fa-remove" />
                         </a></div> :
                         <a title={EntityControlMessage.Create.niceToString()}
                             className="sf-line-button sf-create"
                             onClick={this.handleCreate}>
-                            <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
+                            <span className="fa fa-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
                         </a>}
                 </div>
             </div>
@@ -294,7 +294,7 @@ export class QueryKeyLine extends React.Component<{ queryKey: string | undefined
                     <a className={classes("sf-line-button", "sf-remove btn btn-default")}
                         onClick={() => this.props.onChange(undefined)}
                         title={EntityControlMessage.Remove.niceToString()}>
-                        <span className="glyphicon glyphicon-remove" />
+                        <span className="fa fa-remove" />
                     </a>
                 </span>
             </div>
@@ -409,19 +409,19 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
             <a className={classes("sf-line-button", "sf-remove")}
                 onClick={e => this.handleOnRemove(e, index)}
                 title={EntityControlMessage.Remove.niceToString()}>
-                <span className="glyphicon glyphicon-remove" />
+                <span className="fa fa-remove" />
             </a>
 
             <a className={classes("sf-line-button", "move-up")}
                 onClick={e => this.handleOnMoveUp(e, index)}
                 title={EntityControlMessage.MoveUp.niceToString()}>
-                <span className="glyphicon glyphicon-chevron-up" />
+                <span className="fa fa-chevron-up" />
             </a>
 
             <a className={classes("sf-line-button", "move-down")}
                 onClick={e => this.handleOnMoveDown(e, index)}
                 title={EntityControlMessage.MoveDown.niceToString()}>
-                <span className="glyphicon glyphicon-chevron-down" />
+                <span className="fa fa-chevron-down" />
             </a>
         </div>);
     }
@@ -441,7 +441,7 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
             <legend>
                 {this.renderTitle()}
             </legend>
-            <table className="table table-condensed form-vertical code-container">
+            <table className="table table-condensed code-container">
                 <thead>
                     {this.renderHeader()}
                 </thead>
@@ -452,7 +452,7 @@ abstract class BaseOptionsComponent<T> extends React.Component<BaseOptionsCompon
                             <a title={EntityControlMessage.Create.niceToString()}
                                 className="sf-line-button sf-create"
                                 onClick={this.handleCreateClick}>
-                                <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
+                                <span className="fa fa-plus sf-create sf-create-label" />{EntityControlMessage.Create.niceToString()}
                             </a>
                         </td>
                     </tr>

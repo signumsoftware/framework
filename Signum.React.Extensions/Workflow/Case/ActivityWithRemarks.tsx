@@ -71,7 +71,7 @@ export default class ActivityWithRemarksComponent extends React.Component<Activi
                         "case-icon",
                         !this.state.remarks && "case-icon-ghost")}>
                     <span className={classes(
-                        this.state.remarks ? "glyphicon glyphicon-comment" : "glyphicon glyphicon-pencil")} />
+                        this.state.remarks ? "fa fa-comment" : "fa fa-comment-o")} />
                 </a>
                 {this.state.alerts > 0 && " "}
                 {this.state.alerts > 0 && <a href="" onClick={this.handleAlertsClick} style={{ color: "orange" }}>

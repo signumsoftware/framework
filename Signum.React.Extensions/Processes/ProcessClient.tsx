@@ -106,7 +106,7 @@ function monkeyPatchCreateContextualMenuItem(){
                 key={key}>
                 {bsColor && <span className={"icon empty-icon btn-" + bsColor}></span>}
                 {text}
-                <span className="glyphicon glyphicon-cog process-contextual-icon" aria-hidden={true} onClick={processOnClick}></span>
+                <span className="fa fa-cog process-contextual-icon" aria-hidden={true} onClick={processOnClick}></span>
                 {coc.canExecute && id && <UncontrolledTooltip target={id} placement="right">{coc.canExecute}</UncontrolledTooltip>}
             </DropdownItem>
         );

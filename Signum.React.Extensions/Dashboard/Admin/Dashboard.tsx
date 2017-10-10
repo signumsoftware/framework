@@ -37,7 +37,7 @@ export default class Dashboard extends React.Component<{ ctx: TypeContext<Dashbo
         const sc = ctx.subCtx({ formGroupStyle: "Basic" });
         return (
             <div>
-                <div className="form-vertical">
+                <div>
                     <div className="row">
                         <div className="col-sm-6">
                             <ValueLine ctx={sc.subCtx(cp => cp.displayName)} />
@@ -93,7 +93,7 @@ export default class Dashboard extends React.Component<{ ctx: TypeContext<Dashbo
         const tcs = tc.subCtx({ formGroupStyle: "Basic", placeholderLabels: true });
         
         const title = (
-            <div className="form-vertical"> 
+            <div> 
                 <div className="row">
                     <div className="col-sm-1">
                         <span className={tc.value.iconName || undefined} style={{ color: tc.value.iconColor || undefined, fontSize: "25px", marginTop: "17px" }} />

@@ -63,7 +63,7 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
                 {errors && errors.length > 0 &&
                     <div role="alert" className="alert alert-danger" style={{ marginTop: "20px" }}>
                         <p>
-                        <span className="glyphicon glyphicon-warning-sign"></span>
+                        <span className="fa fa-exclamation-triangle"></span>
                         {" "}The server started, but there {errors.length > 1 ? "are" : "is"} <a href="" onClick={this.handleErrorClick}>{errors.length} {errors.length > 1 ? "errors" : "error"}</a>.
                         </p>
                     </div>
@@ -119,7 +119,7 @@ export class CompileStep extends React.Component<{}, DynamicCompileStepState>{
         var sc = new StyleContext(undefined, { labelColumns: { sm: 3 } });
 
         const lines = Options.onGetDynamicLineForPanel.map(f => f(sc));
-        const lineContainer = React.cloneElement(<div className="form-horizontal" />, undefined, ...lines);
+        const lineContainer = React.cloneElement(<div />, undefined, ...lines);
 
         const errors = this.state.complationErrors;
 

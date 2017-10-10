@@ -165,7 +165,7 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, Dyna
         var ctx = TypeContext.root(dv);
 
         return (
-            <div className="form-vertical code-container">
+            <div className="code-container">
                 <button type="button" className="close" aria-label="Close" style={{ float: "right" }} onClick={this.props.rootNode.context.onClose}><span aria-hidden="true">×</span></button>
                 <h3>
                     <small>{Navigator.getTypeTitle(this.props.dynamicView, undefined)}</small>

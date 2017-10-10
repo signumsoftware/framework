@@ -21,7 +21,7 @@ export default class DateSpan extends React.Component<{ ctx: TypeContext<DateSpa
         const sc = e.subCtx({ formGroupStyle: "BasicDown" });
 
         return (
-            <div className="row form-vertical">
+            <div className="row">
                 <div className="col-sm-4">
                     <ValueLine ctx={sc.subCtx(n => n.years)} />
                 </div>

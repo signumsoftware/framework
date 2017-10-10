@@ -77,7 +77,7 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
 
         return (
             <div>
-                <div className="row form-vertical">
+                <div className="row">
                     <div className="col-sm-2" >
                         <FormGroup labelText={EmailTemplateEntity.nicePropertyName(a => a.recipients![0].element.kind)} ctx={sc}>
                             <span className="form-control">{EmailTemplateEntity.nicePropertyName(a => a.from)} </span>
@@ -106,7 +106,7 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
 
         return (
             <div>
-                <div className="row form-vertical">
+                <div className="row">
                     <div className="col-sm-2">
                         <label>
                             <ValueLine ctx={sc.subCtx(c => c.kind)} />
@@ -161,7 +161,7 @@ export class EmailTemplateMessageComponent extends React.Component<EmailTemplate
         return (
             <div className="sf-email-template-message">
                 <EntityCombo ctx={ec.subCtx(e => e.cultureInfo)} labelText={EmailTemplateViewMessage.Language.niceToString()} onChange={this.props.invalidate} />
-                <div className="form-vertical">
+                <div>
                     <TemplateControls queryKey={this.props.queryKey} onInsert={this.handleOnInsert} forHtml={true} />
                     <ValueLine ctx={ec.subCtx(e => e.subject)} formGroupStyle={"SrOnly"} placeholderLabels={true} labelHtmlAttributes={{ style: { width: "100px" } }} />
                     <div className="code-container">

@@ -85,7 +85,7 @@ export default class ChartScript extends React.Component<{ ctx: TypeContext<Char
         const cc = ctx.subCtx({ formGroupStyle: "Basic" });
         return (
             <div>
-                <div className="form-vertical">
+                <div>
                     <div className="col-sm-2">
                         <ValueLine ctx={cc.subCtx(c => c.name) }  />
                     </div>

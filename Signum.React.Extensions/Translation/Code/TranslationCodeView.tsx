@@ -108,7 +108,7 @@ export class TranslateSearchBox extends React.Component<{ search: (newValue: str
                     placeholder={ TranslationMessage.Search.niceToString() }  value={ this.state.filter} onChange={this.handleChange}/>
                 <div className="input-group-btn">
                     <button className="btn btn-default" type="submit" title={ TranslationMessage.Search.niceToString() }>
-                        <i className="glyphicon glyphicon-search"></i>
+                        <i className="fa fa-search"></i>
                     </button>
                 </div>
             </form>

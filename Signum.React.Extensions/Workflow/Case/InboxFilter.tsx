@@ -37,7 +37,7 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
             <CollapsableCard
                 header={InboxMessage.Filters.niceToString()}
                 color="success">
-                <div className="sf-main-control form-horizontal">
+                <div className="sf-main-control">
                     <div className="row">
                         <div className="col-sm-3">
                             <EnumCheckboxList ctx={ctx.subCtx(o => o.states)} columnCount={2} formGroupHtmlAttributes={{ style: { marginTop: -15, marginBottom: -15 } }} />

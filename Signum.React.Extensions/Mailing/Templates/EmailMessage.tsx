@@ -59,7 +59,7 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
                     <ValueLine ctx={sc1.subCtx(f => f.isBodyHtml)} inlineCheckbox={true} onChange={() => this.forceUpdate()} />
                     {sc1.value.state != "Created" ? <IFrameRenderer style={{ width: "100%" }} html={e.value.body} /> :
                         sc1.value.isBodyHtml ? <div className="code-container"><HtmlCodemirror ctx={e.subCtx(f => f.body)} /></div> :
-                            <div className="form-vertical">
+                            <div>
                                 <ValueLine ctx={e.subCtx(f => f.body)} valueLineType="TextArea" valueHtmlAttributes={{ style: { height: "180px" } }} formGroupStyle="SrOnly" />
                             </div>
                     }
@@ -135,7 +135,7 @@ export class EmailMessageComponent extends React.Component<EmailMessageComponent
         const ec = this.props.ctx.subCtx({ labelColumns: { sm: 2 } });
         return (
             <div className="sf-email-template-message">
-                <div className="form-vertical">
+                <div>
                     <br />
                     <a href="#" onClick={this.handlePreviewClick}>
                         {this.state.showPreview ?

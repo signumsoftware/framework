@@ -57,7 +57,7 @@ export default class TreePage extends React.Component<TreePageProps, TreePageSta
                     <span className="sf-entity-title">{ti.nicePluralName}</span>
                     &nbsp;
                     <a className="sf-popup-fullscreen" href="#" onClick={(e) => this.treeView!.handleFullScreenClick(e)}>
-                        <span className="glyphicon glyphicon-new-window"></span>
+                        <span className="fa fa-external-link"></span>
                     </a>
                 </h2>
                 <TreeViewer ref={tv => this.treeView = tv!}

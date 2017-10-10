@@ -240,9 +240,9 @@ export class NullableCheckBox extends React.Component<NullableCheckBoxProps>{
 
     getIcon() {
         switch (this.props.value) {
-            case true: return "glyphicon glyphicon-ok design-changed";
-            case false: return "glyphicon glyphicon-remove design-changed";
-            case undefined: return "glyphicon glyphicon-minus design-default"
+            case true: return "fa fa-check design-changed";
+            case false: return "fa fa-remove design-changed";
+            case undefined: return "fa fa-minus design-default"
         }
     }
 
@@ -329,7 +329,7 @@ export class DynamicViewInspector extends React.Component<{ selectedNode?: Desig
 
         const error = NodeUtils.validate(sn, undefined);
 
-        return (<div className="form-sm form-horizontal">
+        return (<div className="form-sm ">
             <h4>
                 {sn.node.kind}
                 {sn.route && <small> ({Finder.getTypeNiceName(sn.route.typeReference())})</small>}
