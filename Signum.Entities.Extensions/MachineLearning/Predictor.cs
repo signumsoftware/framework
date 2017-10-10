@@ -45,7 +45,12 @@ namespace Signum.Entities.MachineLearning
 
         [NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
-        public MList<PredictorColumnEmbedded> Columns { get; set; } = new MList<PredictorColumnEmbedded>();
+        public MList<PredictorColumnEmbedded> SimpleColumns { get; set; } = new MList<PredictorColumnEmbedded>();
+        
+        [NotNullable, PreserveOrder]
+        [NotNullValidator, NoRepeatValidator]
+        public MList<PredictorMultiColumnEntity> MultiColumns { get; set; } = new MList<PredictorMultiColumnEntity>();
+
 
         [NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
@@ -57,8 +62,8 @@ namespace Signum.Entities.MachineLearning
                 foreach (var f in Filters)
                     f.ParseData(this, qd, SubTokensOptions.CanAnyAll);
 
-            if (Columns != null)
-                foreach (var c in Columns)
+            if (SimpleColumns != null)
+                foreach (var c in SimpleColumns)
                     c.ParseData(this, qd, SubTokensOptions.CanElement);
         }
     }
@@ -93,13 +98,11 @@ namespace Signum.Entities.MachineLearning
     [Serializable]
     public class PredictorColumnEmbedded : EmbeddedEntity
     {
-        public PredictorColumnType Type { get; set; }
-
         public PredictorColumnUsage Usage { get; set; }
 
         public QueryTokenEmbedded Token { get; set; }
 
-        public PredictorMultiColumnEntity MultiColumn { get; set; }
+        public PredictorColumnEncoding Encoding { get; set; }
 
         public void ParseData(Entity context, QueryDescription description, SubTokensOptions options)
         {
@@ -109,23 +112,25 @@ namespace Signum.Entities.MachineLearning
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            return base.PropertyValidation(pi) ?? StateValidator.Validate(this, pi);
+            return base.PropertyValidation(pi);
         }
 
-        static readonly StateValidator<PredictorColumnEmbedded, PredictorColumnType> StateValidator = new StateValidator<PredictorColumnEmbedded, PredictorColumnType>
-            (p => p.Type, p => p.Token, p => p.MultiColumn)
-        {
-            { PredictorColumnType.SimpleColumn, true, false },
-            { PredictorColumnType.MultiColumn, false, true},
-        };
+        
 
         internal PredictorColumnEmbedded Clone() => new PredictorColumnEmbedded
         {
-            Type = Type,
+        
             Usage = Usage, 
             Token = Token.Clone(),
-            MultiColumn = MultiColumn?.Clone()
+        
         };
+    }
+
+    public enum PredictorColumnEncoding
+    {
+        None,
+        OneHot,
+        Codified
     }
 
     public enum PredictorState
@@ -134,11 +139,7 @@ namespace Signum.Entities.MachineLearning
         Trained,
     }
 
-    public enum PredictorColumnType
-    {
-        SimpleColumn,
-        MultiColumn,
-    }
+    
 
     public enum PredictorColumnUsage
     {
@@ -162,7 +163,7 @@ namespace Signum.Entities.MachineLearning
 
         [NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
-        public MList<QueryTokenEmbedded> Aggregates { get; set; } = new MList<QueryTokenEmbedded>();
+        public MList<PredictorColumnEmbedded> Aggregates { get; set; } = new MList<PredictorColumnEmbedded>();
 
         public void ParseData(QueryDescription description)
         {
@@ -198,8 +199,14 @@ namespace Signum.Entities.MachineLearning
 
         public int ColumnIndex { get; set; }
 
+
+        public int? OriginalMultiColumnIndex{ get; set; }
+
         public int OriginalColumnIndex { get; set; }
 
+        
+
+        //For flatting collections
         [SqlDbType(Size = 100)]
         public string GroupKey0 { get; set; }
 
@@ -209,9 +216,13 @@ namespace Signum.Entities.MachineLearning
         [SqlDbType(Size = 100)]
         public string GroupKey2 { get; set; }
 
+
+        //For 1-hot encoding
         [SqlDbType(Size = 100)]
         public string IsValue { get; set; }
 
+
+        //For encoding values
         [NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
         public MList<string> CodedValues { get; set; } = new MList<string>();

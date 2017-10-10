@@ -1,23 +1,26 @@
-﻿using Signum.Entities.MachineLearning;
+﻿using Signum.Entities;
+using Signum.Entities.MachineLearning;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace Signum.Engine.MachineLearning
 {
     public abstract class PredictorAlgorithm
     {
         public abstract void Initialize(PredictorEntity predictor);
-        public abstract bool TrainPredictor(PredictorEntity predictor, PredictorResultColumn[] columnDescriptions, object[][] data);
+        public virtual string ValidatePredictor(PredictorEntity predictor) => null;
+        public abstract void Train(PredictorEntity predictor, PredictorResultColumn[] column, object[][] input, object[][] output);
+        public abstract void Evaluate(PredictorEntity predictor, PredictorResultColumn[] column, object[][] input, object[][] output);
+        public abstract object[][] Predict(PredictorEntity predictor, PredictorResultColumn[] column, object[][] input);
+    }
 
-        //public (int[][] inputs, int[][] outputs) SplitAsCategories(object[][] data, PredictorResultColumn[] columnDescriptions)
-        //{
-        //    int[][] inputs = new int[data.Length][];
-        //    int[][] outputs = new int[data.Length][];
-            
-        //    columnDescriptions.
-
-        //    for (int i = 0; i < data.Length; i++)
-        //    {
-                
-        //    }
-        //}
+    public static class PredictorAlgorithmValidation
+    {
+        public static IEnumerable<PredictorColumnEmbedded> GetAllPredictorColumnEmbeddeds(this PredictorEntity predictor)
+        {
+            return predictor.SimpleColumns.Concat(predictor.MultiColumns.SelectMany(a => a.Aggregates));
+        }
     }
 }

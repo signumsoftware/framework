@@ -52,6 +52,7 @@ namespace Signum.Engine.MachineLearning
                     });
 
                 sb.Include<PredictorCodificationEntity>()
+                    .WithUniqueIndex(pc => new { pc.Predictor, pc.ColumnIndex })
                     .WithExpressionFrom(dqm, (PredictorEntity e) => e.Codifications())
                     .WithQuery(dqm, () => e => new
                     {
@@ -120,7 +121,7 @@ namespace Signum.Engine.MachineLearning
                         State = e.State,
                         Query = e.Query,
                         Filters = e.Filters.Select(f => f.Clone()).ToMList(),
-                        Columns = e.Columns.Select(a=>a.Clone()).ToMList(),
+                        SimpleColumns = e.SimpleColumns.Select(a=>a.Clone()).ToMList(),
                         Algorithm = e.Algorithm,
                         AlgorithmSettings = e.AlgorithmSettings?.Clone(),
                         Settings = e.Settings?.Clone(),
@@ -152,13 +153,15 @@ namespace Signum.Engine.MachineLearning
                     if (obj == null)
                         return null;
 
-                    return FilterValueConverter.ToString(obj, token.Type, allowSmart: false);
+                    return FilterValueConverter.ToString(obj, token.Token.Type, allowSmart: false);
                 }
 
                 return new PredictorCodificationEntity
                 {
                     Predictor = predictor.ToLite(),
                     ColumnIndex = i,
+                    OriginalMultiColumnIndex = a.MultiColumn == null ? (int?)null : predictor.MultiColumns.IndexOf(a.MultiColumn),
+                    OriginalColumnIndex = a.MultiColumn == null ? predictor.SimpleColumns.IndexOf(a.PredictorColumn) : a.MultiColumn.Aggregates.IndexOf(a.PredictorColumn),
                     GroupKey0 = GetGroupKey(0),
                     GroupKey1 = GetGroupKey(1),
                     GroupKey2 = GetGroupKey(2),
@@ -205,9 +208,9 @@ namespace Signum.Engine.MachineLearning
 
 class MultiColumnQuery
 {
-    public PredictorMultiColumnEntity MultiColumnEntity;
-    public QueryGroupRequest Query;
-    public ResultTable Result;
+    public PredictorMultiColumnEntity MultiColumn;
+    public QueryGroupRequest QueryGroupRequest;
+    public ResultTable ResultTable;
     public Dictionary<Lite<Entity>, Dictionary<object[], object[]>> GroupedValues;
 
     public ResultColumn[] Aggregates { get; internal set; }

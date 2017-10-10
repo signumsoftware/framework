@@ -42,26 +42,20 @@ export interface PredictorCodificationEntity extends Entities.Entity {
     Type: "PredictorCodification";
     predictor?: Entities.Lite<PredictorEntity> | null;
     columnIndex?: number;
+    originalMultiColumnIndex?: number | null;
     originalColumnIndex?: number;
     groupKey0?: string | null;
     groupKey1?: string | null;
     groupKey2?: string | null;
     isValue?: string | null;
+    codedValues: Entities.MList<string>;
 }
 
-export const PredictorColumnEmbedded = new Type<PredictorColumnEmbedded>("PredictorColumnEmbedded");
-export interface PredictorColumnEmbedded extends Entities.EmbeddedEntity {
-    Type: "PredictorColumnEmbedded";
-    type?: PredictorColumnType;
-    usage?: PredictorColumnUsage;
-    token?: UserAssets.QueryTokenEmbedded | null;
-    multiColumn?: PredictorMultiColumnEntity | null;
-}
-
-export const PredictorColumnType = new EnumType<PredictorColumnType>("PredictorColumnType");
-export type PredictorColumnType =
-    "SimpleColumn" |
-    "MultiColumn";
+export const PredictorColumnEncoding = new EnumType<PredictorColumnEncoding>("PredictorColumnEncoding");
+export type PredictorColumnEncoding =
+    "None" |
+    "OneHot" |
+    "Codified";
 
 export const PredictorColumnUsage = new EnumType<PredictorColumnUsage>("PredictorColumnUsage");
 export type PredictorColumnUsage =
@@ -78,7 +72,8 @@ export interface PredictorEntity extends Entities.Entity {
     algorithmSettings?: IPredictorAlgorithmSettings | null;
     state?: PredictorState;
     filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
-    columns: Entities.MList<PredictorColumnEmbedded>;
+    simpleColumns: Entities.MList<PredictorSimpleColumnEmbedded>;
+    multiColumns: Entities.MList<PredictorMultiColumnEntity>;
     files: Entities.MList<PredictorFileEmbedded>;
 }
 
@@ -106,7 +101,7 @@ export interface PredictorMultiColumnEntity extends Entities.Entity {
     query?: Basics.QueryEntity | null;
     additionalFilters: Entities.MList<UserQueries.QueryFilterEmbedded>;
     groupKeys: Entities.MList<UserAssets.QueryTokenEmbedded>;
-    aggregates: Entities.MList<UserAssets.QueryTokenEmbedded>;
+    aggregates: Entities.MList<PredictorSimpleColumnEmbedded>;
 }
 
 export module PredictorOperation {
@@ -120,6 +115,15 @@ export module PredictorOperation {
 export const PredictorSettingsEmbedded = new Type<PredictorSettingsEmbedded>("PredictorSettingsEmbedded");
 export interface PredictorSettingsEmbedded extends Entities.EmbeddedEntity {
     Type: "PredictorSettingsEmbedded";
+    bar?: number;
+}
+
+export const PredictorSimpleColumnEmbedded = new Type<PredictorSimpleColumnEmbedded>("PredictorSimpleColumnEmbedded");
+export interface PredictorSimpleColumnEmbedded extends Entities.EmbeddedEntity {
+    Type: "PredictorSimpleColumnEmbedded";
+    usage?: PredictorColumnUsage;
+    token?: UserAssets.QueryTokenEmbedded | null;
+    encoding?: PredictorColumnEncoding;
 }
 
 export const PredictorState = new EnumType<PredictorState>("PredictorState");
