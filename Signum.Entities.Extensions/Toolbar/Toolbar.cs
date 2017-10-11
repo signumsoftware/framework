@@ -196,6 +196,9 @@ namespace Signum.Entities.Toolbar
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
     public class ToolbarMenuEntity : Entity, IUserAssetEntity
     {
+        [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
+        public Lite<IEntity> Owner { get; set; }
+
         [UniqueIndex]
         public Guid Guid { get; set; } = Guid.NewGuid();
 
@@ -212,6 +215,7 @@ namespace Signum.Entities.Toolbar
             return new XElement("ToolbarMenu",
                 new XAttribute("Guid", Guid),
                 new XAttribute("Name", Name),
+                Owner == null ? null : new XAttribute("Owner", Owner.Key()),
                 new XElement("Elements", Elements.Select(p => p.ToXml(ctx))));
         }
 
@@ -220,6 +224,7 @@ namespace Signum.Entities.Toolbar
         {
             Name = element.Attribute("Name").Value;
             Elements.Synchronize(element.Element("Elements").Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
+            Owner = element.Attribute("Owner")?.Let(a => Lite.Parse<Entity>(a.Value));
         }
 
 
