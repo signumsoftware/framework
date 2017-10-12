@@ -70,7 +70,7 @@ namespace Signum.Engine.MachineLearning
 
                             PredictorColumn = a.PredictorColumn,
                             IsValue = a.IsValue,
-                            Values = a.Values,
+                            ValuesToIndex = a.ValuesToIndex,
                         });
 
                     columns.AddRange(list);
@@ -115,7 +115,7 @@ namespace Signum.Engine.MachineLearning
                         row[j] = Object.Equals(value, c.IsValue) ? 1 : 0;
                         break;
                     case PredictorColumnEncoding.Codified:
-                        row[j] = c.Values.GetOrThrow(value);
+                        row[j] = c.ValuesToIndex.GetOrThrow(value);
                         break;
                     default:
                         break;
@@ -134,8 +134,10 @@ namespace Signum.Engine.MachineLearning
                 case PredictorColumnEncoding.OneHot:
                     return rc.Values.Cast<object>().Distinct().Select(v => new PredictorResultColumn { PredictorColumn = pc, IsValue = v }).ToList();
                 case PredictorColumnEncoding.Codified:
-                    int i = 0;
-                    return new[] { new PredictorResultColumn { PredictorColumn = pc, Values = rc.Values.Cast<object>().Distinct().ToDictionary(v => v, v => i++) } };
+                    
+                    var values = rc.Values.Cast<object>().Distinct().ToArray();
+                    var valuesToIndex = values.Select((v, i) => KVP.Create(v, i)).ToDictionary();
+                    return new[] { new PredictorResultColumn { PredictorColumn = pc, ValuesToIndex = valuesToIndex, Values = values} };
                 default:
                     throw new InvalidOperationException("Unexcpected Encoding");
             }
@@ -235,7 +237,7 @@ namespace Signum.Engine.MachineLearning
         public PredictorMultiColumnEntity MultiColumn;
 
         public PredictorColumnEmbedded PredictorColumn;
-        public int? PredictorColumnIndex { get; set; }
+        public int? PredictorColumnIndex;
 
         //Only for multi columns (values inside of collections)
         public object[] Keys;
@@ -244,7 +246,11 @@ namespace Signum.Engine.MachineLearning
         public object IsValue;
 
         //Serves as Codification (i.e: Bayes)
-        public Dictionary<object, int> Values;
+        public Dictionary<object, int> ValuesToIndex;
+
+        public object[] Values;
+
+
     }
 
     public class ObjectArrayComparer : IEqualityComparer<object[]>, IComparer<object[]>

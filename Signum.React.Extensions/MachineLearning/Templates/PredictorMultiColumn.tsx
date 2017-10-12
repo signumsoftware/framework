@@ -38,7 +38,7 @@ export default class PredictorMultiColumn extends React.Component<{ ctx: TypeCon
                             {
                                 property: a => a.token,
                                 template: ctx => <QueryTokenEntityBuilder
-                                    ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
+                                    ctx={ctx.subCtx(a => a.token)}
                                     queryKey={this.props.ctx.value.query!.key}
                                     subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate} />,
                                 headerHtmlAttributes: { style: { width: "40%" } },
@@ -48,28 +48,29 @@ export default class PredictorMultiColumn extends React.Component<{ ctx: TypeCon
                         ])} />
 
                         <EntityTable ctx={ctxxs.subCtx(e => e.groupKeys)} columns={EntityTable.typedColumns<QueryTokenEmbedded>([
-                        {
+                            {
                                 header: "Token",
                                 template: ctx => <QueryTokenEntityBuilder
-                                        ctx={ctx.subCtx({ formGroupStyle: "None" })}
-                                        queryKey={this.props.ctx.value.query!.key}
-                                        subTokenOptions={SubTokensOptions.CanElement} />,
+                                    ctx={ctx}
+                                    queryKey={this.props.ctx.value.query!.key}
+                                    subTokenOptions={SubTokensOptions.CanElement} />,
                                 headerHtmlAttributes: { style: { width: "100%" } },
                             },
                         ])} />
 
-                        <EntityTable ctx={ctxxs.subCtx(e => e.aggregates)} columns={EntityTable.typedColumns<QueryTokenEmbedded>([
+                        <EntityTable ctx={ctxxs.subCtx(e => e.aggregates)} columns={EntityTable.typedColumns<PredictorColumnEmbedded>([
                             {
-                                header: "Token",
+                                property: a => a.token,
                                 template: ctx => <QueryTokenEntityBuilder
-                                    ctx={ctx.subCtx({ formGroupStyle: "None" })}
+                                    ctx={ctx.subCtx(a => a.token)}
                                     queryKey={this.props.ctx.value.query!.key}
                                     subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanAggregate} />,
                                 headerHtmlAttributes: { style: { width: "100%" } },
                             },
+                            { property: a => a.encoding },
                         ])} />
 
-                </div>}
+                    </div>}
             </div>
         );
     }

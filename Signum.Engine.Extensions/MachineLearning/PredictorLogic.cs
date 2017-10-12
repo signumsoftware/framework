@@ -67,6 +67,8 @@ namespace Signum.Engine.MachineLearning
                         e.IsValue,
                     });
 
+                SymbolLogic<PredictorAlgorithmSymbol>.Start(sb, dqm, () => Algorithms.Keys);
+
                 sb.Schema.EntityEvents<PredictorEntity>().Retrieved += PredictorEntity_Retrieved;
                 sb.Schema.EntityEvents<PredictorMultiColumnEntity>().Retrieved += PredictorMultiColumnEntity_Retrieved;
             }

@@ -6,9 +6,13 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../F
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
-import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 import * as Files from '../Files/Signum.Entities.Files'
+import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 
+
+export module AccordPredictorAlgorithm {
+    export const DiscreteNaiveBayes : PredictorAlgorithmSymbol = registerSymbol("PredictorAlgorithm", "AccordPredictorAlgorithm.DiscreteNaiveBayes");
+}
 
 export const ActivationFunction = new EnumType<ActivationFunction>("ActivationFunction");
 export type ActivationFunction =
@@ -18,6 +22,12 @@ export type ActivationFunction =
     "Linear";
 
 export interface IPredictorAlgorithmSettings extends Entities.Entity {
+}
+
+export const NaiveBayesSettingsEntity = new Type<NaiveBayesSettingsEntity>("NaiveBayesSettings");
+export interface NaiveBayesSettingsEntity extends Entities.Entity, IPredictorAlgorithmSettings {
+    Type: "NaiveBayesSettings";
+    empirical?: boolean;
 }
 
 export const NeuronalNetworkSettingsEntity = new Type<NeuronalNetworkSettingsEntity>("NeuronalNetworkSettings");
@@ -51,6 +61,14 @@ export interface PredictorCodificationEntity extends Entities.Entity {
     codedValues: Entities.MList<string>;
 }
 
+export const PredictorColumnEmbedded = new Type<PredictorColumnEmbedded>("PredictorColumnEmbedded");
+export interface PredictorColumnEmbedded extends Entities.EmbeddedEntity {
+    Type: "PredictorColumnEmbedded";
+    usage?: PredictorColumnUsage;
+    token?: UserAssets.QueryTokenEmbedded | null;
+    encoding?: PredictorColumnEncoding;
+}
+
 export const PredictorColumnEncoding = new EnumType<PredictorColumnEncoding>("PredictorColumnEncoding");
 export type PredictorColumnEncoding =
     "None" |
@@ -72,16 +90,9 @@ export interface PredictorEntity extends Entities.Entity {
     algorithmSettings?: IPredictorAlgorithmSettings | null;
     state?: PredictorState;
     filters: Entities.MList<UserQueries.QueryFilterEmbedded>;
-    simpleColumns: Entities.MList<PredictorSimpleColumnEmbedded>;
+    simpleColumns: Entities.MList<PredictorColumnEmbedded>;
     multiColumns: Entities.MList<PredictorMultiColumnEntity>;
-    files: Entities.MList<PredictorFileEmbedded>;
-}
-
-export const PredictorFileEmbedded = new Type<PredictorFileEmbedded>("PredictorFileEmbedded");
-export interface PredictorFileEmbedded extends Entities.EmbeddedEntity {
-    Type: "PredictorFileEmbedded";
-    key?: string | null;
-    file?: Files.FilePathEmbedded | null;
+    files: Entities.MList<Files.FilePathEmbedded>;
 }
 
 export module PredictorMessage {
@@ -101,7 +112,7 @@ export interface PredictorMultiColumnEntity extends Entities.Entity {
     query?: Basics.QueryEntity | null;
     additionalFilters: Entities.MList<UserQueries.QueryFilterEmbedded>;
     groupKeys: Entities.MList<UserAssets.QueryTokenEmbedded>;
-    aggregates: Entities.MList<PredictorSimpleColumnEmbedded>;
+    aggregates: Entities.MList<PredictorColumnEmbedded>;
 }
 
 export module PredictorOperation {
@@ -115,15 +126,7 @@ export module PredictorOperation {
 export const PredictorSettingsEmbedded = new Type<PredictorSettingsEmbedded>("PredictorSettingsEmbedded");
 export interface PredictorSettingsEmbedded extends Entities.EmbeddedEntity {
     Type: "PredictorSettingsEmbedded";
-    bar?: number;
-}
-
-export const PredictorSimpleColumnEmbedded = new Type<PredictorSimpleColumnEmbedded>("PredictorSimpleColumnEmbedded");
-export interface PredictorSimpleColumnEmbedded extends Entities.EmbeddedEntity {
-    Type: "PredictorSimpleColumnEmbedded";
-    usage?: PredictorColumnUsage;
-    token?: UserAssets.QueryTokenEmbedded | null;
-    encoding?: PredictorColumnEncoding;
+    crossValidationFolds?: number;
 }
 
 export const PredictorState = new EnumType<PredictorState>("PredictorState");

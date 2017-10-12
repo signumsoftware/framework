@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTable, IRenderButtons } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityDetail, EntityCombo, EntityList, EntityRepeater, EntityTable, IRenderButtons } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle, ButtonsContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import FileLine from '../../../../Extensions/Signum.React.Extensions/Files/FileLine'
@@ -38,26 +38,24 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
         API.downloadTsvMetadataById(toLite(this.props.ctx.value));
     }
 
-    handleOnChange = () => {
+    handleQueryChange = () => {
         const e = this.props.ctx.value;
         e.filters = [];
-        e.columns = [];
+        e.simpleColumns = [];
+        e.multiColumns = [];
         this.forceUpdate();
     }
 
-    handleChange = (column: PredictorColumnEmbedded) => {
-        if (column.type == "SimpleColumn")
-            column.multiColumn = null;
-        else
-            column.token = null;
-
-        this.forceUpdate();
-    }
+   
 
     handleCreate = () => {
         return Promise.resolve(PredictorMultiColumnEntity.New(
             { query: this.props.ctx.value.query }
         ))
+    }
+
+    handleAlgorithmChange = () => {
+        this.forceUpdate();
     }
 
     render() {
@@ -68,9 +66,12 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
 
         return (
             <div>
-                <ValueLine ctx={ctx.subCtx(e => e.name)} />
-                <EntityLine ctx={ctx.subCtx(f => f.query)} remove={ctx.value.isNew} onChange={this.handleOnChange} />
+                <ValueLine ctx={ctxxs.subCtx(e => e.name)} />
+                <EntityLine ctx={ctxxs.subCtx(f => f.query)} remove={ctx.value.isNew} onChange={this.handleQueryChange} />
                 {queryKey && <div>
+                    <EntityCombo ctx={ctxxs.subCtx(f => f.algorithm)} onChange={this.handleAlgorithmChange} />
+                    {ctxxs.value.algorithm && < EntityDetail ctx={ctxxs.subCtx(f => f.algorithmSettings)} />}
+                    <EntityDetail ctx={ctxxs.subCtx(f => f.settings)} remove={false} />
                     <EntityTable ctx={ctxxs.subCtx(e => e.filters)} columns={EntityTable.typedColumns<QueryFilterEmbedded>([
                         {
                             property: a => a.token,
@@ -84,21 +85,20 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                         { property: a => a.valueString, headerHtmlAttributes: { style: { width: "40%" } } }
                     ])} />
 
-                    <EntityTable ctx={ctxxs.subCtx(e => e.columns)} columns={EntityTable.typedColumns<PredictorColumnEmbedded>([
+                    <EntityTable ctx={ctxxs.subCtx(e => e.simpleColumns)} columns={EntityTable.typedColumns<PredictorColumnEmbedded>([
                         { property: a => a.usage },
-                        { property: a => a.type, template: ctx => <ValueLine ctx={ctx.subCtx(a => a.type)} onChange={() => this.handleChange(ctx.value)} /> },
                         {
                             property: a => a.token,
-                            template: ctx => ctx.value.type == "SimpleColumn" ?
-                                <QueryTokenEntityBuilder
-                                    ctx={ctx.subCtx(a => a.token)}
-                                    queryKey={this.props.ctx.value.query!.key}
-                                    subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} /> :
-                                <EntityLine ctx={ctx.subCtx(a => a.multiColumn)} onCreate={this.handleCreate} />,
+                            template: ctx => <QueryTokenEntityBuilder
+                                ctx={ctx.subCtx(a => a.token)}
+                                queryKey={this.props.ctx.value.query!.key}
+                                subTokenOptions={0} />, 
                             headerHtmlAttributes: { style: { width: "40%" } },
                         },
-
+                        { property: a => a.encoding },
                     ])} />
+
+                    <EntityRepeater ctx={ctxxs.subCtx(e => e.multiColumns)} onCreate={this.handleCreate} />
 
                 </div>}
             </div>

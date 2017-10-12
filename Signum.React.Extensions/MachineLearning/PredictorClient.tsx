@@ -47,6 +47,9 @@ export function start(options: { routes: JSX.Element[] }) {
 
 }
 
+
+let export : { [key: string] : (pred: PredictorEntity) => void } = { };
+
 export namespace API {
 
     export function downloadCsvById(lite: Lite<PredictorEntity>): void {

@@ -35,7 +35,7 @@ namespace Signum.Entities.MachineLearning
         [NotNullable, NotNullValidator]
         public PredictorAlgorithmSymbol Algorithm { get; set; }
 
-        [ImplementedBy(typeof(NeuronalNetworkSettingsEntity))]
+        [ImplementedBy(typeof(NeuronalNetworkSettingsEntity), typeof(NaiveBayesSettingsEntity))]
         public IPredictorAlgorithmSettings AlgorithmSettings { get; set; }
 
         public PredictorState State { get; set; }
@@ -52,9 +52,12 @@ namespace Signum.Entities.MachineLearning
         public MList<PredictorMultiColumnEntity> MultiColumns { get; set; } = new MList<PredictorMultiColumnEntity>();
 
 
+        [Ignore]
+        public object Model;
+
         [NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
-        public MList<PredictorFileEmbedded> Files { get; set; } = new MList<PredictorFileEmbedded>();
+        public MList<FilePathEmbedded> Files { get; set; } = new MList<FilePathEmbedded>();
 
         internal void ParseData(QueryDescription qd)
         {
@@ -71,8 +74,8 @@ namespace Signum.Entities.MachineLearning
     [Serializable]
     public class PredictorSettingsEmbedded : EmbeddedEntity
     {
-        public int Bar { get; set; }
-
+        //K
+        public int CrossValidationFolds { get; set; }
 
         internal PredictorSettingsEmbedded Clone()
         {
@@ -191,7 +194,7 @@ namespace Signum.Entities.MachineLearning
 
    
 
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class PredictorCodificationEntity : Entity
     {
         [NotNullable]
@@ -228,15 +231,6 @@ namespace Signum.Entities.MachineLearning
         public MList<string> CodedValues { get; set; } = new MList<string>();
     }
 
-    [Serializable]
-    public class PredictorFileEmbedded : EmbeddedEntity
-    {
-        [NotNullable, SqlDbType(Size = 100)]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Key { get; set; }
-
-        public FilePathEmbedded File { get; set; }
-    }
 
     [Serializable]
     public class PredictorAlgorithmSymbol : Symbol
@@ -247,5 +241,11 @@ namespace Signum.Entities.MachineLearning
             base(declaringType, fieldName)
         {
         }
+    }
+
+    [AutoInit]
+    public static class AccordPredictorAlgorithm
+    {
+        public static PredictorAlgorithmSymbol DiscreteNaiveBayes;
     }
 }

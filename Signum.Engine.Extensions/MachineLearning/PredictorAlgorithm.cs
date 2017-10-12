@@ -11,9 +11,34 @@ namespace Signum.Engine.MachineLearning
     {
         public abstract void Initialize(PredictorEntity predictor);
         public virtual string ValidatePredictor(PredictorEntity predictor) => null;
-        public abstract void Train(PredictorEntity predictor, PredictorResultColumn[] column, object[][] input, object[][] output);
-        public abstract void Evaluate(PredictorEntity predictor, PredictorResultColumn[] column, object[][] input, object[][] output);
-        public abstract object[][] Predict(PredictorEntity predictor, PredictorResultColumn[] column, object[][] input);
+        public abstract void Train(PredictorEntity predictor, PredictorResultColumn[] columns, object[][] input, object[][] output);
+        public abstract EvaluateResult Evaluate(PredictorEntity predictor, PredictorResultColumn[] columns, object[][] input, object[][] output);
+        public abstract object[] Predict(PredictorEntity predictor, PredictorResultColumn[] columns, object[] input);
+    }
+
+    public abstract class ClasificationPredictorAlgorithm : PredictorAlgorithm
+    {
+        public override object[] Predict(PredictorEntity predictor, PredictorResultColumn[] columns, object[] input)
+        {
+            var singleOutput = PredictDecide(predictor, columns, input);
+            return new[] { singleOutput };
+        }
+
+        public abstract object PredictDecide(PredictorEntity predictor, PredictorResultColumn[] columns, object[] input);
+        public abstract Dictionary<object, double> PredictProbabilities(PredictorEntity predictor, PredictorResultColumn[] columns, object[] input);
+    }
+
+    public class EvaluateResult
+    {
+        public EvaluateStats Training;
+        public EvaluateStats Validation;
+    }
+
+    public class EvaluateStats
+    {
+        public double Mean;
+        public double Variance;
+        public double StandartDeviation; 
     }
 
     public static class PredictorAlgorithmValidation

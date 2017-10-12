@@ -58,7 +58,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NaiveBayes.cs" />
+    <Compile Include="DiscreteNaiveBayesPredictorAlgorithm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -72,6 +72,10 @@
     <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj">
       <Project>{f2b51d08-498d-4c9f-8112-9521a7762b02}</Project>
       <Name>Signum.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Framework\Signum.Utilities\Signum.Utilities.csproj">
+      <Project>{f7d3f72d-741d-4f67-8cf8-cd41b9035fed}</Project>
+      <Name>Signum.Utilities</Name>
     </ProjectReference>
     <ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj">
       <Project>{ba7fa363-61a1-41b1-945b-9b9c7bbcd357}</Project>
