@@ -1,1 +1,9 @@
 ﻿
+
+export interface PredictorEntity {
+	filterOptions?: FilterOptionParsed[];
+}
+
+export interface PredictorMultiColumnEntity {
+	filterOptions?: FilterOptionParsed[];
+}
