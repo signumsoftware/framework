@@ -48,12 +48,20 @@ namespace Signum.Entities.Basics
             return base.PropertyValidation(pi);
         }
 
+        protected override void SetSelfModified()
+        {
+            base.SetSelfModified();
+        }
+
         protected override void PreSaving(ref bool graphModified)
         {
             try
             {
                 var ci = CultureInfo.GetCultureInfo(Name);
-                EnglishName = ci.EnglishName;
+
+                //To be more resilient with diferent versions of windows 
+                if (this.IsGraphModified || EnglishName == null)
+                    EnglishName = ci.EnglishName;
                 if (this.IsGraphModified || NativeName == null)
                     NativeName = ci.NativeName;
             }
