@@ -18,12 +18,6 @@ namespace Signum.Engine.MachineLearning.AccordNet
 {
     public class DiscreteNaiveBayesPredictorAlgorithm : ClasificationPredictorAlgorithm
     {
-        public override void Initialize(PredictorEntity predictor)
-        {
-            predictor.AlgorithmSettings = new NaiveBayesSettingsEntity();
-        }
-
-   
         public override string ValidatePredictor(PredictorEntity predictor)
         {
             var outputCount = predictor.GetAllPredictorColumnEmbeddeds().Count(a => a.Usage == PredictorColumnUsage.Output);

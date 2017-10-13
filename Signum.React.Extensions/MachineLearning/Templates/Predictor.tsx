@@ -10,7 +10,7 @@ import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Ref
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import { QueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { API } from '../PredictorClient';
+import { API, initializers } from '../PredictorClient';
 import { toLite } from "../../../../Framework/Signum.React/Scripts/Signum.Entities";
 
 export default class Predictor extends React.Component<{ ctx: TypeContext<PredictorEntity> }> implements IRenderButtons {
@@ -55,6 +55,13 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
     }
 
     handleAlgorithmChange = () => {
+        var pred = this.props.ctx.value;
+        var al = pred.algorithm;
+        if (al == null)
+            pred.algorithmSettings = null;
+        else
+            initializers[al.key](pred);
+
         this.forceUpdate();
     }
 
@@ -70,7 +77,7 @@ export default class Predictor extends React.Component<{ ctx: TypeContext<Predic
                 <EntityLine ctx={ctxxs.subCtx(f => f.query)} remove={ctx.value.isNew} onChange={this.handleQueryChange} />
                 {queryKey && <div>
                     <EntityCombo ctx={ctxxs.subCtx(f => f.algorithm)} onChange={this.handleAlgorithmChange} />
-                    {ctxxs.value.algorithm && < EntityDetail ctx={ctxxs.subCtx(f => f.algorithmSettings)} />}
+                    {ctxxs.value.algorithm && < EntityDetail ctx={ctxxs.subCtx(f => f.algorithmSettings)} remove={false} />}
                     <EntityDetail ctx={ctxxs.subCtx(f => f.settings)} remove={false} />
                     <EntityTable ctx={ctxxs.subCtx(e => e.filters)} columns={EntityTable.typedColumns<QueryFilterEmbedded>([
                         {

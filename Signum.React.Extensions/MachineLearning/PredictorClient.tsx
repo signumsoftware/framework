@@ -1,6 +1,7 @@
 ﻿import * as React from 'react'
 import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
+import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor';
 import { Button, OverlayTrigger, Tooltip, MenuItem } from "react-bootstrap"
 import { ajaxPost, ajaxPostRaw, ajaxGet, saveFile, ajaxGetRaw } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -12,7 +13,7 @@ import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
-import { PredictorEntity, PredictorMultiColumnEntity, PredictorMessage } from './Signum.Entities.MachineLearning'
+import { PredictorEntity, PredictorMultiColumnEntity, PredictorMessage, PredictorAlgorithmSymbol, AccordPredictorAlgorithm, NaiveBayesSettingsEntity, PredictorSettingsEmbedded } from './Signum.Entities.MachineLearning'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as ChartClient from '../Chart/ChartClient'
@@ -45,10 +46,19 @@ export function start(options: { routes: JSX.Element[] }) {
         PredictorMessage.OpenTensorflowProjector.niceToString(),
         e => window.open("http://projector.tensorflow.org/", "_blank")));
 
+    Constructor.registerConstructor(PredictorEntity, () => PredictorEntity.New({
+        settings: PredictorSettingsEmbedded.New()
+    }));
+
+    registerInitializer(AccordPredictorAlgorithm.DiscreteNaiveBayes, a => a.algorithmSettings = NaiveBayesSettingsEntity.New());
+
 }
 
+export function registerInitializer(symbol: PredictorAlgorithmSymbol, initialize: (predictor: PredictorEntity) => void) {
+    initializers[symbol.key] = initialize;
+}
 
-let export : { [key: string] : (pred: PredictorEntity) => void } = { };
+export let initializers: { [key: string]: (pred: PredictorEntity) => void } = {};
 
 export namespace API {
 
