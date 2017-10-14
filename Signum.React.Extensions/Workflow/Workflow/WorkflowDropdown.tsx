@@ -13,7 +13,7 @@ import ButtonBar from '../../../../Framework/Signum.React/Scripts/Frames/ButtonB
 import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, CaseActivityOperation, CaseActivityQuery, WorkflowMainEntityStrategy } from '../Signum.Entities.Workflow'
 import * as WorkflowClient from '../WorkflowClient'
 
-import { Navbar, Nav, NavItem, UncontrolledNavDropdown, DropdownItem, DropdownToggle } from 'reactstrap'
+import { Navbar, Nav, NavItem, UncontrolledNavDropdown, DropdownItem, DropdownToggle, DropdownMenu } from 'reactstrap'
 import { LinkContainer } from '../../../../Framework/Signum.React/Scripts/LinkContainer';
 
 export default class WorkflowDropdown extends React.Component<{}, { starts: Array<WorkflowEntity> }>
@@ -38,6 +38,7 @@ export default class WorkflowDropdown extends React.Component<{}, { starts: Arra
                 <DropdownToggle nav caret>
                     {WorkflowEntity.nicePluralName()}
                 </DropdownToggle>
+                <DropdownMenu>
                 <LinkContainer exact to={inboxUrl}><DropdownItem>{CaseActivityQuery.Inbox.niceName()}</DropdownItem></LinkContainer>
                 {this.state.starts.length > 0 && <DropdownItem divider />}
                 {this.state.starts.length > 0 && <DropdownItem disabled>{JavascriptMessage.create.niceToString()}</DropdownItem>}
@@ -46,6 +47,7 @@ export default class WorkflowDropdown extends React.Component<{}, { starts: Arra
                         <DropdownItem>{val.workflow.toStr}{val.mainEntityStrategy == "SelectByUser" ? `(${WorkflowMainEntityStrategy.niceName(val.mainEntityStrategy)})` : ""}</DropdownItem>
                     </LinkContainer>
                 )}
+                </DropdownMenu>
             </UncontrolledNavDropdown>
         );
     }

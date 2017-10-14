@@ -47,13 +47,15 @@ export default class CultureDropdown extends React.Component<CultureDropdownProp
 
         return (
             <UncontrolledNavDropdown data-culture={pair && pair.name}>
-                <DropdownToggle>{current.toStr}</DropdownToggle>
-                <DropdownMenu>
+                <DropdownToggle nav caret>
+                    {current.toStr}
+                </DropdownToggle>
+                <DropdownMenu right>
                     {Dic.map(cultures, (name, c, i) =>
                         <DropdownItem key={i} data-culture={name} disabled={is(c, current)} onSelect={() => this.handleSelect(c)}>
                             {c.toStr}
-                        </DropdownItem>)
-                    }
+                        </DropdownItem>
+                    )}
                 </DropdownMenu>
             </UncontrolledNavDropdown>
         );

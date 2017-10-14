@@ -58,7 +58,7 @@ export default class ToolbarRenderer extends React.Component<{ location?: Toolba
         else
             return (
                 <ul className="nav">
-                    {r.elements && r.elements.flatMap(sr => this.renderMenuItem(sr, 0, r)).map((sr, i) => withKey(sr, i))}
+                    {r.elements && r.elements.flatMap(sr => this.renderDropdownItem(sr, 0, r)).map((sr, i) => withKey(sr, i))}
                 </ul>
             );
     }
@@ -91,7 +91,7 @@ export default class ToolbarRenderer extends React.Component<{ location?: Toolba
                         toggle={() => this.handleOnToggle(res)}
                         isOpen={this.state.expanded.contains(res)}>
                             <DropdownToggle>{!icon ? title : (<span>{icon}{title}</span>)}</DropdownToggle>
-                        {res.elements && res.elements.flatMap(sr => this.renderMenuItem(sr, 0, res)).map((sr, i) => withKey(sr, i))}
+                            {res.elements && res.elements.flatMap(sr => this.renderDropdownItem(sr, 0, res)).map((sr, i) => withKey(sr, i))}
                     </NavDropdown>
                 );
             case "Header":
@@ -155,7 +155,7 @@ export default class ToolbarRenderer extends React.Component<{ location?: Toolba
         this.forceUpdate();
     }
     
-    renderMenuItem(res: ToolbarClient.ToolbarResponse<any>, indent: number, topRes: ToolbarClient.ToolbarResponse<any>): React.ReactElement<any>[] {
+    renderDropdownItem(res: ToolbarClient.ToolbarResponse<any>, indent: number, topRes: ToolbarClient.ToolbarResponse<any>): React.ReactElement<any>[] {
 
         var padding  = (indent * 20) + "px";
 
@@ -170,7 +170,7 @@ export default class ToolbarRenderer extends React.Component<{ location?: Toolba
                         className={classes(menuItemN, this.state.expanded.contains(res) && "active")}>
                         {this.icon(res)}{res.label || res.content!.toStr}<span className="fa arrow" />
                     </DropdownItem>
-                ].concat(res.elements && res.elements.length && this.state.expanded.contains(res) ? res.elements.flatMap(r => this.renderMenuItem(r, indent + 1, topRes)) : []);
+                ].concat(res.elements && res.elements.length && this.state.expanded.contains(res) ? res.elements.flatMap(r => this.renderDropdownItem(r, indent + 1, topRes)) : []);
             case "Header":
                 return [
                     <DropdownItem header className={menuItemN}>{this.icon(res)}{res.label}</DropdownItem>

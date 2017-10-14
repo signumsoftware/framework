@@ -39,13 +39,13 @@
 
 
 @media (min-width: 768px) {
-    body:not(.rtl-mode) .navbar-header {
+    body:not(.rtl-mode) .navbar-brand {
         width: 235px;
         border-right: 1px solid #e7e7e7;
         margin-right: 10px !important;
     }
 
-    body.rtl-mode .navbar-header {
+    body.rtl-mode .navbar-brand {
         width: 235px;
         border-left: 1px solid #e7e7e7;
         margin-left: 10px !important;
