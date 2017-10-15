@@ -39,13 +39,13 @@ namespace Signum.Entities
 
         protected internal const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-        protected virtual T Get<T>(T fieldValue, [CallerMemberNameAttribute]string automaticPropertyName = null)
+        protected virtual T Get<T>(T fieldValue, [CallerMemberName]string automaticPropertyName = null)
         {
             return fieldValue;
         }
 
       
-        protected virtual bool Set<T>(ref T field, T value, [CallerMemberNameAttribute]string automaticPropertyName = null)
+        protected virtual bool Set<T>(ref T field, T value, [CallerMemberName]string automaticPropertyName = null)
         {
             if (EqualityComparer<T>.Default.Equals(field, value))
                 return false;
