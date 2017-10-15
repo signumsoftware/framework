@@ -286,7 +286,11 @@ namespace Signum.Engine.Workflow
             }
         }
 
-     
+        public static CaseActivityEntity CreateCaseActivity(this WorkflowEntity workflow, ICaseMainEntity mainEntity)
+        {
+            var caseActivity = workflow.ConstructFrom(CaseActivityOperation.CreateCaseActivityFromWorkflow, mainEntity);
+            return caseActivity.Execute(CaseActivityOperation.Register);
+        }
 
         static readonly GenericInvoker<Action> giFixCaseDescriptions = new GenericInvoker<Action>(() => FixCaseDescriptions<Entity>());
         public static void FixCaseDescriptions<T>() where T : Entity
