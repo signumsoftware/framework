@@ -238,7 +238,7 @@ export function setAuthToken(authToken: string | undefined): void{
     sessionStorage.setItem("authToken", authToken || "");
 }
 
-export function autoLogin(): Promise<UserEntity>  {
+export function autoLogin(): Promise<UserEntity | undefined>  {
 
     if (Navigator.currentUser)
         return Promise.resolve(Navigator.currentUser as UserEntity);
