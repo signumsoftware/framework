@@ -880,7 +880,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             return;
         }
 
-        if (!Navigator.isNavigable(row.entity.EntityType))
+        if (!Navigator.isNavigable(row.entity.EntityType, undefined, true))
             return;
 
         e.preventDefault();
