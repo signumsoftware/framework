@@ -8,6 +8,7 @@ using Signum.Utilities;
 using System.Reflection;
 using Signum.Entities.Authorization;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities;
 
 namespace Signum.Entities.Basics
 {
@@ -30,6 +31,11 @@ namespace Signum.Entities.Basics
         public string NativeName { get; private set; }
 
         public string EnglishName { get; private set; }
+
+        /// <summary>
+        /// Used for Culture that can be translated but not selected, like Hidden
+        /// </summary>
+        public bool Hidden { get; set; }
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
