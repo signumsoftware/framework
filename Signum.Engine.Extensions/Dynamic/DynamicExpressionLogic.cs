@@ -58,7 +58,6 @@ namespace Signum.Engine.Dynamic
 
                 DynamicTypeLogic.GetAlreadyTranslatedExpressions = () =>
                 {
-
                     CacheLogic.GloballyDisabled = true;
                     try
                     {
@@ -74,9 +73,27 @@ namespace Signum.Engine.Dynamic
                     {
                         CacheLogic.GloballyDisabled = false;
                     }
-
-                   
                 };
+
+                DynamicTypeLogic.GetFormattedExpressions = () =>
+                {
+                    CacheLogic.GloballyDisabled = true;
+                    try
+                    {
+                        if (!Administrator.ExistsTable<DynamicExpressionEntity>())
+                            return new Dictionary<string, Dictionary<string, Tuple<string, string>>>();
+
+                        using (ExecutionMode.Global())
+                            return Database.Query<DynamicExpressionEntity>()
+                            .Where(a => a.Format != null || a.Unit != null)
+                            .AgGroupToDictionary(a => a.FromType, gr => gr.ToDictionary(a => a.Name, a => new Tuple<string, string>(a.Format, a.Unit)));
+                    }
+                    finally
+                    {
+                        CacheLogic.GloballyDisabled = false;
+                    }
+                };
+
                 sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicExpressionEntity>().Where(de => de.FromType == ((TypeEntity)type).ClassName));
             }
         }
