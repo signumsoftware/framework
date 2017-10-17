@@ -243,7 +243,7 @@ export function autoLogin(): Promise<UserEntity | undefined>  {
     if (Navigator.currentUser)
         return Promise.resolve(Navigator.currentUser as UserEntity);
 
-    if (getAuthToken())
+    if (Services.SessionSharing.avoidSharingSession == false && getAuthToken())
         return API.fetchCurrentUser().then(u => {
             setCurrentUser(u);
             Navigator.resetUI();
@@ -252,7 +252,7 @@ export function autoLogin(): Promise<UserEntity | undefined>  {
 
     return new Promise<UserEntity>((resolve) => {
         setTimeout(() => {
-            if (getAuthToken()) {
+            if (Services.SessionSharing.avoidSharingSession == false && getAuthToken()) {
                 API.fetchCurrentUser()
                     .then(u => {
                         setCurrentUser(u);
