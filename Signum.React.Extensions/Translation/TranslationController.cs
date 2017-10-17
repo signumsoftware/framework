@@ -169,7 +169,7 @@ namespace Signum.React.Translation
             Dictionary<CultureInfo, LocalizedAssembly> reference = (from ci in cultures
                                                                     let la = DescriptionManager.GetLocalizedAssembly(ass, ci)
                                                                     where la != null || ci == defaultCulture || ci == targetCulture
-                                                                    select KVP.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci, forceCreate: true))).ToDictionary();
+                                                                    select KVP.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci, forceCreate: ci == defaultCulture || ci == targetCulture))).ToDictionary();
 
             var master = reference.Extract(defaultCulture);
             var target = reference.Extract(targetCulture);
