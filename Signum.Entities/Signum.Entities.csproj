@@ -197,6 +197,7 @@
     <Content Include="Translations\Signum.Entities.it.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Translations\Signum.Entities.nl.xml" />
     <Content Include="Translations\Signum.Entities.pt.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
