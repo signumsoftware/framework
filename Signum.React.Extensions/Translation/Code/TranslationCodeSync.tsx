@@ -14,7 +14,7 @@ import * as CultureClient from '../CultureClient'
 import { API, AssemblyResult, LocalizedType, LocalizableType } from '../TranslationClient'
 import { CultureInfoEntity } from '../../Basics/Signum.Entities.Basics'
 import { TranslationMessage } from '../Signum.Entities.Translation'
-import { TranslationTypeTable } from './TranslationCodeView'
+import { TranslationTypeTable } from './TranslationTypeTable'
 import { Link } from "react-router-dom";
 
 import "../Translation.css"
@@ -31,7 +31,7 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
     }
 
     componentWillMount() {
-        CultureClient.getCultures().then(cultures => this.setState({ cultures })).done();
+        CultureClient.getCultures(true).then(cultures => this.setState({ cultures })).done();
 
         this.loadSync().done();
     }

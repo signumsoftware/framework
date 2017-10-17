@@ -17,9 +17,15 @@
   <Type Name="AuthAdminMessage" />
   <Type Name="AuthEmailMessage" />
   <Type Name="AuthMessage">
-    <Member Name="ChangePassword" Description="&#xA;Verander wachtwoord" />
-    <Member Name="ChangePasswordAspx_ChangePassword" Description="&#xA;Verander wachtwoord" />
-    <Member Name="Logout" Description="Afmelden" />
+    <Member Name="ChangePassword" Description="Wachtwoord wijzigen" />
+    <Member Name="ChangePasswordAspx_ActualPassword" Description="Huidig wachtwoord" />
+    <Member Name="ChangePasswordAspx_ChangePassword" Description="Wachtwoord wijzigen" />
+    <Member Name="ChangePasswordAspx_ConfirmNewPassword" Description="Bevestig nieuw wachtwoord" />
+    <Member Name="ChangePasswordAspx_EnterActualPasswordAndNewOne" Description="Voer huidig en nieuw wachtwoord in" />
+    <Member Name="ChangePasswordAspx_NewPassword" Description="Nieuw wachtwoord" />
+    <Member Name="ConfirmNewPassword" Description="Bevestig nieuw wachtwoord" />
+    <Member Name="EnterTheNewPassword" Description="Voer nieuw wachtwoord in" />
+    <Member Name="NewPassword" Description="&#xA;Nieuw wachtwoord " />
   </Type>
   <Type Name="AuthThumbnail" />
   <Type Name="AuthTokenConfigurationEmbedded" />
@@ -193,13 +199,7 @@
   <Type Name="IWorkflowNodeEntity" />
   <Type Name="IWorkflowObjectEntity" />
   <Type Name="JoyrideEntity" />
-  <Type Name="JoyrideMessage">
-    <Member Name="Back" Description="Terug" />
-    <Member Name="Close" Description="Sluiten" />
-    <Member Name="Last" Description="Stop" />
-    <Member Name="Next" Description="Volgende" />
-    <Member Name="Skip" Description="Annuleren" />
-  </Type>
+  <Type Name="JoyrideMessage" />
   <Type Name="JoyrideOperation" />
   <Type Name="JoyrideStepEntity" />
   <Type Name="JoyrideStepOperation" />
