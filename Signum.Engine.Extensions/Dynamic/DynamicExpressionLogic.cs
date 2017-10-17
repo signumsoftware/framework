@@ -187,14 +187,15 @@ namespace Signum.Engine.Dynamic
 
             sb.AppendLine("    public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)");
             sb.AppendLine("    {");
-            foreach(var kvp in fieldNames)
-            {
-                sb.AppendLine($"        var ei = dqm.RegisterExpression(({kvp.Value.FromType} e) => e.{kvp.Value.Name}(){GetNiceNameCode(kvp.Value)});");
-                if(kvp.Value.Format.HasText())
-                    sb.AppendLine($"        ei.ForceFormat = {CSharpRenderer.Value(kvp.Value.Format, typeof(string), new string[0])};");
-                if (kvp.Value.Unit.HasText())
-                    sb.AppendLine($"        ei.ForceUnit = {CSharpRenderer.Value(kvp.Value.Unit, typeof(string), new string[0])};");
 
+            foreach (var kvp in fieldNames)
+            {
+                var expr = kvp.Value;
+                sb.AppendLine($"        var ei{expr.Name} = dqm.RegisterExpression(({expr.FromType} e) => e.{expr.Name}(){GetNiceNameCode(expr)});");
+                if(expr.Format.HasText()) 
+                    sb.AppendLine($"        ei{expr.Name}.ForceFormat = {CSharpRenderer.Value(expr.Format, typeof(string), new string[0])};");
+                if (expr.Unit.HasText())  
+                    sb.AppendLine($"        ei{expr.Name}.ForceUnit = {CSharpRenderer.Value(expr.Unit, typeof(string), new string[0])};");
             }
             sb.AppendLine("    }");
             sb.AppendLine("}");
