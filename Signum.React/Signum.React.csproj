@@ -343,7 +343,7 @@
   </Target>
   <UsingTask TaskName="SignumTSGenerator" AssemblyFile="..\Signum.TSGenerator\Binaries\Signum.TSGenerator.dll" />
   <Target Name="GenerateSignumTS">
-    <SignumTSGenerator References="@(ReferencePath)" />
+    <SignumTSGenerator References="@(ReferencePath)" Content="@(Content)" />
   </Target>
   <PropertyGroup>
     <CompileTypeScriptDependsOn>
