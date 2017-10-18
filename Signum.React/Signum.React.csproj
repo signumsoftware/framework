@@ -222,6 +222,7 @@
     <TypeScriptCompile Include="Scripts\Lines\EnumCheckboxList.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\MultiValueLine.tsx" />
     <TypeScriptCompile Include="Scripts\Modals\MessageModal.tsx" />
+    <TypeScriptCompile Include="Scripts\Retrieve.tsx" />
     <TypeScriptCompile Include="Scripts\Search.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityBase.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityCombo.tsx" />
