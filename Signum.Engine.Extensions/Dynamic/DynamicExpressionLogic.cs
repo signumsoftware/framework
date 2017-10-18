@@ -192,12 +192,13 @@ namespace Signum.Engine.Dynamic
 
             foreach (var kvp in fieldNames)
             {
-                sb.AppendLine($"    static Expression<Func<{kvp.Value.FromType}, {kvp.Value.ReturnType}>> {kvp.Key} =");
+                var expressionName = $"{kvp.Value.Name}From{kvp.Value.FromType.BeforeLast("Entity")}Expression".FirstUpper();
+                sb.AppendLine($"    static Expression<Func<{kvp.Value.FromType}, {kvp.Value.ReturnType}>> {expressionName} = ");
                 sb.AppendLine($"        e => {kvp.Value.Body};");
-                sb.AppendLine($"    [ExpressionField(\"{kvp.Key}\")]");
+                sb.AppendLine($"    [ExpressionField(\"{expressionName}\")]");
                 sb.AppendLine($"    public static {kvp.Value.ReturnType} {kvp.Value.Name}(this {kvp.Value.FromType} e)");
                 sb.AppendLine($"    {{");
-                sb.AppendLine($"        return {kvp.Key}.Evaluate(e);");
+                sb.AppendLine($"        return {expressionName}.Evaluate(e);");
                 sb.AppendLine($"    }}");
                 sb.AppendLine("");
             }
@@ -207,12 +208,14 @@ namespace Signum.Engine.Dynamic
 
             foreach (var kvp in fieldNames)
             {
-                var expr = kvp.Value;
-                sb.AppendLine($"        var ei{expr.Name} = dqm.RegisterExpression(({expr.FromType} e) => e.{expr.Name}(){GetNiceNameCode(expr)});");
-                if(expr.Format.HasText()) 
-                    sb.AppendLine($"        ei{expr.Name}.ForceFormat = {CSharpRenderer.Value(expr.Format, typeof(string), new string[0])};");
-                if (expr.Unit.HasText())  
-                    sb.AppendLine($"        ei{expr.Name}.ForceUnit = {CSharpRenderer.Value(expr.Unit, typeof(string), new string[0])};");
+                var entity = kvp.Value;
+                var varName = $"{entity.Name}{entity.FromType.BeforeLast("Entity")}".FirstLower();
+
+                sb.AppendLine($"        var {varName} = dqm.RegisterExpression(({entity.FromType} e) => e.{entity.Name}(){GetNiceNameCode(entity)});");
+                if(entity.Format.HasText()) 
+                    sb.AppendLine($"        {varName}.ForceFormat = {CSharpRenderer.Value(entity.Format, typeof(string), new string[0])};");
+                if (entity.Unit.HasText())  
+                    sb.AppendLine($"        {varName}.ForceUnit = {CSharpRenderer.Value(entity.Unit, typeof(string), new string[0])};");
             }
             sb.AppendLine("    }");
             sb.AppendLine("}");

@@ -37,7 +37,7 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
 
     handleErrorClick = (e: React.MouseEvent<any>) => {
         e.preventDefault();
-        this.handleSelect("restartAppServer");
+        this.handleSelect("restartServerApp");
     }
 
     constructor(props: DynamicPanelProps) {
@@ -55,7 +55,7 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
     render() {
         AuthClient.asserPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel);
 
-        let step = QueryString.parse(this.props.location.search).step as "compile" | "restartAppServer" | "migrations" | "refreshClients" | undefined;
+        let step = QueryString.parse(this.props.location.search).step as "compile" | "restartServerApp" | "migrations" | "refreshClients" | undefined;
 
         const errors = this.state.startErrors
         return (
@@ -73,8 +73,8 @@ export default class DynamicPanelPage extends React.Component<DynamicPanelProps,
                         <CompileStep />
                     </Tab>
 
-                    <Tab eventKey="restartAppServer" title="2. Restart Application Server">
-                        <RestartAppServerStep
+                    <Tab eventKey="restartServerApp" title="2. Restart Server Application">
+                        <RestartServerAppStep
                             startErrors={this.state.startErrors}
                             setStartErrors={errors => this.setState({ startErrors: errors })} />
                     </Tab>
@@ -189,16 +189,16 @@ export class CompileStep extends React.Component<{}, DynamicCompileStepState>{
     }
 }
 
-interface RestartAppServerStepProps {
+interface RestartServerAppStepProps {
     setStartErrors: (startErrors?: WebApiHttpError[]) => void;
     startErrors?: WebApiHttpError[];
 }
 
-interface RestartAppServerStepState {
+interface RestartServerAppStepState {
     serverRestarting?: moment.Moment;
 }
 
-export class RestartAppServerStep extends React.Component<RestartAppServerStepProps, RestartAppServerStepState>{
+export class RestartServerAppStep extends React.Component<RestartServerAppStepProps, RestartServerAppStepState>{
 
     constructor(props: any) {
         super(props);
@@ -235,7 +235,7 @@ export class RestartAppServerStep extends React.Component<RestartAppServerStepPr
             <div>
                 {
                     AuthClient.isPermissionAuthorized(DynamicPanelPermission.RestartApplication) &&
-                    <a href="#" className="sf-button btn btn-danger" onClick={this.handleRestartApplication}>Restart Application Server</a>
+                    <a href="#" className="sf-button btn btn-danger" onClick={this.handleRestartApplication}>Restart Server Application</a>
                 }
                 {this.props.startErrors && this.props.startErrors.map((e, i) => <ErrorBlock key={i} error={e} />)}
             </div>
