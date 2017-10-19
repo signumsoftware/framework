@@ -26,8 +26,8 @@ export default class CultureDropdown extends React.Component<CultureDropdownProp
     }
 
     componentWillMount() {
-        CultureClient.getCultures()
-            .then(cultures => this.setState({ cultures }))
+        CultureClient.getCultures(false)
+            .then(cultures => this.setState({ cultures: cultures }))
             .done();
     }
 

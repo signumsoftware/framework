@@ -158,7 +158,7 @@ export default class BpmnViewerComponent extends React.Component<BpmnViewerCompo
         return (
             <div>
                 <Button style={{ marginLeft: "20px" }} onClick={this.handleZoomClick}>{WorkflowMessage.ResetZoom.niceToString()}</Button>{" "}
-                <UncontrolledButtonDropdown title={"Color: " + CaseFlowColor.niceName(this.state.caseFlowColor)} id="colorMenu">
+                <UncontrolledButtonDropdown title={WorkflowMessage.Color.niceToString() + CaseFlowColor.niceName(this.state.caseFlowColor)} id="colorMenu">
                     {this.menuItem("CaseMaxDuration")}
                     {this.menuItem("AverageDuration")}
                     {this.menuItem("EstimatedDuration")}

@@ -108,6 +108,8 @@ namespace Signum.Entities.Workflow
         [Description("Workflow uses in {0} for decomposition or call workflow.")]
         WorkflowUsedIn0ForDecompositionOrCallWorkflow,
         ResetZoom,
+        [Description("Color: ")]
+        Color,
     }
 
     [Serializable]

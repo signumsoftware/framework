@@ -9,11 +9,6 @@ import * as Basics from '../Basics/Signum.Entities.Basics'
 import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
-export const TranslatedCultureAction = new EnumType<TranslatedCultureAction>("TranslatedCultureAction");
-export type TranslatedCultureAction =
-    "Translate" |
-    "Read";
-
 export const TranslatedInstanceEntity = new Type<TranslatedInstanceEntity>("TranslatedInstance");
 export interface TranslatedInstanceEntity extends Entities.Entity {
     Type: "TranslatedInstance";
@@ -76,25 +71,6 @@ export interface TranslationReplacementEntity extends Entities.Entity {
 export module TranslationReplacementOperation {
     export const Save : Entities.ExecuteSymbol<TranslationReplacementEntity> = registerSymbol("Operation", "TranslationReplacementOperation.Save");
     export const Delete : Entities.DeleteSymbol<TranslationReplacementEntity> = registerSymbol("Operation", "TranslationReplacementOperation.Delete");
-}
-
-export const TranslatorUserCultureEmbedded = new Type<TranslatorUserCultureEmbedded>("TranslatorUserCultureEmbedded");
-export interface TranslatorUserCultureEmbedded extends Entities.EmbeddedEntity {
-    Type: "TranslatorUserCultureEmbedded";
-    culture?: Basics.CultureInfoEntity | null;
-    action?: TranslatedCultureAction;
-}
-
-export const TranslatorUserEntity = new Type<TranslatorUserEntity>("TranslatorUser");
-export interface TranslatorUserEntity extends Entities.Entity {
-    Type: "TranslatorUser";
-    user?: Entities.Lite<Signum.IUserEntity> | null;
-    cultures: Entities.MList<TranslatorUserCultureEmbedded>;
-}
-
-export module TranslatorUserOperation {
-    export const Save : Entities.ExecuteSymbol<TranslatorUserEntity> = registerSymbol("Operation", "TranslatorUserOperation.Save");
-    export const Delete : Entities.DeleteSymbol<TranslatorUserEntity> = registerSymbol("Operation", "TranslatorUserOperation.Delete");
 }
 
 

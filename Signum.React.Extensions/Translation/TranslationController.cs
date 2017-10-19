@@ -169,7 +169,7 @@ namespace Signum.React.Translation
             Dictionary<CultureInfo, LocalizedAssembly> reference = (from ci in cultures
                                                                     let la = DescriptionManager.GetLocalizedAssembly(ass, ci)
                                                                     where la != null || ci == defaultCulture || ci == targetCulture
-                                                                    select KVP.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci, forceCreate: true))).ToDictionary();
+                                                                    select KVP.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci, forceCreate: ci == defaultCulture || ci == targetCulture))).ToDictionary();
 
             var master = reference.Extract(defaultCulture);
             var target = reference.Extract(targetCulture);
@@ -178,11 +178,11 @@ namespace Signum.React.Translation
             return new AssemblyResultTS
             {
                 totalTypes = totalTypes,
+                cultures = cultures.Select(c => new CulturesTS(c)).ToDictionary(a => a.name),
                 types = changes.Types.Select(t => new LocalizableTypeTS(t.Type.Type)
                 {
-                    cultures = cultures.ToDictionary(c => c.Name, c => GetLocalizedType(t, c, c.Equals(target)))
+                    cultures = cultures.ToDictionary(c => c.Name, c => GetLocalizedType(t, c, c.Equals(targetCulture)))
                 }).ToDictionary(lt => lt.type),
-                cultures = cultures.Select(c => new CulturesTS(c)).ToDictionary(a => a.name)
             };
         }
         
@@ -199,26 +199,26 @@ namespace Signum.React.Translation
             return TranslationSynchronizer.SyncNamespaceStats(targetAssembly, defaultAssembly);
         }
 
-        private LocalizedTypeTS GetLocalizedType(LocalizedTypeChanges t, CultureInfo c, bool isTarget)
+        private LocalizedTypeTS GetLocalizedType(LocalizedTypeChanges t, CultureInfo ci, bool isTarget)
         {
-            var tc = t.TypeConflict?.TryGetC(c);
+            var tc = t.TypeConflict?.TryGetC(ci);
             
             return new LocalizedTypeTS
             {
-                culture = c.Name,
-                typeDescription = t.TypeConflict == null ? null : 
+                culture = ci.Name,
+                typeDescription = t.TypeConflict == null || (tc == null && !isTarget) ? null : /*Message, Symbol, etc...*/
                 new LocalizedDescriptionTS
                 {
-                    description = tc?.Original.Description ?? (isTarget && t.TypeConflict.Count > 3 ? t.TypeConflict.Select(a => a.Value.Translated).Distinct().Only() : null),
+                    description = tc?.Original.Description ?? (isTarget && t.TypeConflict.Count >= 2 ? t.TypeConflict.Select(a => a.Value.Translated).Distinct().Only() : null),
                     pluralDescription = tc?.Original.PluralDescription,
                     gender = tc?.Original.Gender?.ToString(),
                     translatedDescription = tc?.Translated,
                 },
-                members = t.MemberConflicts.EmptyIfNull().Select(kvp => new LocalizedMemberTS
+                members = t.MemberConflicts.EmptyIfNull().Where(kvp=> kvp.Value.ContainsKey(ci) || isTarget).Select(kvp => new LocalizedMemberTS
                 {
                     name = kvp.Key,
-                    description = kvp.Value.TryGetC(c)?.Original ?? (isTarget && kvp.Value.Count > 3 ? kvp.Value.Select(a => a.Value.Translated).Distinct().Only() : null),
-                    translatedDescription = kvp.Value.TryGetC(c)?.Translated
+                    description = kvp.Value.TryGetC(ci)?.Original ?? (isTarget && kvp.Value.Count >= 2 ? kvp.Value.Select(a => a.Value.Translated).Distinct().Only() : null),
+                    translatedDescription = kvp.Value.TryGetC(ci)?.Translated
                 }).ToDictionary(a => a.name),
             };
         }

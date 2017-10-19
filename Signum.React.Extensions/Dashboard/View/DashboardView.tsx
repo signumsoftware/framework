@@ -116,15 +116,14 @@ function combineRows(rows: CombinedRow[]): CombinedRow[] {
         } as CombinedRow;
 
         newRows.push(row);
-
-        for (let j = 1; i + j < rows.length; j++) {
-
-            if (!tryCombine(row, rows[i + j])) {
-                i = i + j - 1;
+        let j = 1;
+        for (; i + j < rows.length; j++) {
+            if (!tryCombine(row, rows[i + j])) {             
                 break;
             }
-
         }
+
+        i = i + j - 1;
     }
 
     return newRows;
