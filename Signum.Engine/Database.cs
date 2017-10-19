@@ -629,9 +629,9 @@ namespace Signum.Engine
         }
 
 
-        static GenericInvoker<Func<List<PrimaryKey>, IList>> giRetrieveList = 
-            new GenericInvoker<Func<List<PrimaryKey>, IList>>(ids => RetrieveList<Entity>(ids));
-        public static List<T> RetrieveList<T>(List<PrimaryKey> ids)
+        private static GenericInvoker<Func<List<PrimaryKey>, string, IList>> giRetrieveList =
+            new GenericInvoker<Func<List<PrimaryKey>, string, IList>>((ids, message) => RetrieveList<Entity>(ids, message));
+        public static List<T> RetrieveList<T>(List<PrimaryKey> ids, string message = null)
             where T : Entity
         {
             using (HeavyProfiler.Log("DBRetrieve", () => "List<{0}>".FormatWith(typeof(T).TypeName())))
@@ -655,7 +655,7 @@ namespace Signum.Engine
 
                 if (remainingIds.Count > 0)
                 {
-                    var retrieved = RetrieveFromDatabaseOrCache<T>(remainingIds).ToDictionary(a => a.Id);
+                    var retrieved = RetrieveFromDatabaseOrCache<T>(remainingIds, message).ToDictionary(a => a.Id);
 
                     var missing = remainingIds.Except(retrieved.Keys);
 
@@ -677,7 +677,7 @@ namespace Signum.Engine
             }
         }
 
-        static List<T> RetrieveFromDatabaseOrCache<T>(List<PrimaryKey> ids) where T : Entity
+        static List<T> RetrieveFromDatabaseOrCache<T>(List<PrimaryKey> ids, string message = null) where T : Entity
         {
             var cc = GetCacheController<T>();
             if (cc != null)
@@ -702,7 +702,23 @@ namespace Signum.Engine
                 }
             }
 
-            return ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters).SelectMany(gr => Database.Query<T>().Where(a => gr.Contains(a.Id))).ToList();
+            if (message == null)
+                return ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters)
+                    .SelectMany(gr => Database.Query<T>().Where(a => gr.Contains(a.Id)))
+                    .ToList();
+            else
+            {
+                SafeConsole.WriteLineColor(ConsoleColor.Cyan, message == "auto" ? "Retriving " + typeof(T).Name : message);
+
+                var result = new List<T>();
+                var groups = ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters).ToList();
+                groups.ProgressForeach(gr => gr.Count.ToString(), gr =>
+                {
+                    result.AddRange(Database.Query<T>().Where(a => gr.Contains(a.Id)));
+                });
+
+                return result;
+            }
         }
 
         static GenericInvoker<Func<List<PrimaryKey>, CancellationToken, Task<IList>>> giRetrieveListAsync = 
@@ -789,12 +805,12 @@ namespace Signum.Engine
             return task.SelectMany(list => list).ToList();
         }
 
-        public static List<Entity> RetrieveList(Type type, List<PrimaryKey> ids)
+        public static List<Entity> RetrieveList(Type type, List<PrimaryKey> ids, string message = null)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
 
-            IList list = giRetrieveList.GetInvoker(type)(ids);
+            IList list = giRetrieveList.GetInvoker(type)(ids, message);
             return list.Cast<Entity>().ToList();
         }
 
@@ -886,7 +902,7 @@ namespace Signum.Engine
             return list.Cast<Lite<Entity>>().ToList();
         }
 
-        public static List<T> RetrieveFromListOfLite<T>(this IEnumerable<Lite<T>> lites)
+        public static List<T> RetrieveFromListOfLite<T>(this IEnumerable<Lite<T>> lites, string message = null)
             where T : class, IEntity
         {
             if (lites == null)
@@ -898,7 +914,7 @@ namespace Signum.Engine
             using (Transaction tr = new Transaction())
             {
                 var dic = lites.AgGroupToDictionary(a => a.EntityType, gr =>
-                    RetrieveList(gr.Key, gr.Select(a => a.Id).ToList()).ToDictionary(a => a.Id));
+                    RetrieveList(gr.Key, gr.Select(a => a.Id).ToList(), message).ToDictionary(a => a.Id));
 
                 var result = lites.Select(l => (T)(object)dic[l.EntityType][l.Id]).ToList(); // keep same order
 

@@ -40,9 +40,10 @@ export class FormGroup extends React.Component<FormGroupProps> {
         }
 
         const labelClasses = classes(ctx.formGroupStyle == "SrOnly" && "sr-only", ctx.formGroupStyle == "LabelColumns" && ("control-label " + ctx.labelColumnsCss));
+        let pr = tCtx.propertyRoute;
         const label = (
             <label htmlFor={this.props.controlId} {...this.props.labelHtmlAttributes } className={addClass(this.props.labelHtmlAttributes, labelClasses)} >
-                {this.props.labelText || tCtx.propertyRoute && tCtx.propertyRoute.member!.niceName}
+                {this.props.labelText || pr && pr.member && pr.member.niceName}
             </label>
         );
 
@@ -166,7 +167,7 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
 
         const so: StyleOptions = { formControlClassReadonly, formGroupSize, formGroupStyle, labelColumns, placeholderLabels, readOnly, valueColumns };
 
-        const state = { ctx: ctx.subCtx(so), type: (type || ctx.propertyRoute.member!.type) } as LineBaseProps as S;
+        const state = { ctx: ctx.subCtx(so), type: (type || ctx.propertyRoute.typeReference() ) } as LineBaseProps as S;
 
         this.calculateDefaultState(state);
         runTasks(this, state);

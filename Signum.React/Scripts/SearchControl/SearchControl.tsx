@@ -46,6 +46,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     showBarExtension?: boolean;
     showBarExtensionOption?: ShowBarExtensionOption;
     showFilters?: boolean;
+    showSimpleFilterBuilder?: boolean;
     showFilterButton?: boolean;
     showFooter?: boolean;
     allowChangeColumns?: boolean;
@@ -184,6 +185,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             searchOnLoad={p.searchOnLoad != null ? p.searchOnLoad : true}
             showHeader={p.showHeader != null ? p.showHeader : true}
             showFilters={p.showFilters != null ? p.showFilters : false}
+            showSimpleFilterBuilder={p.showSimpleFilterBuilder != null ? p.showSimpleFilterBuilder : true}
             showFilterButton={ p.showFilterButton != null ? p.showFilterButton : true}
             showFooter={ p.showFooter != null ? p.showFooter : true}
             allowChangeColumns={p.allowChangeColumns != null ? p.allowChangeColumns : true}

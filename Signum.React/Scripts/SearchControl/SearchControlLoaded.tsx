@@ -49,6 +49,7 @@ export interface SearchControlLoadedProps {
     showBarExtension: boolean;
     showBarExtensionOption?: ShowBarExtensionOption;
     showFilters: boolean;
+    showSimpleFilterBuilder: boolean;
     showFilterButton: boolean;
     showFooter: boolean;
     allowChangeColumns: boolean;
@@ -111,7 +112,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         const qs = Finder.getSettings(fo.queryKey);
         const qd = this.props.queryDescription;
 
-        const sfb = qs && qs.simpleFilterBuilder && qs.simpleFilterBuilder(qd, fo.filterOptions);
+        const sfb = this.props.showSimpleFilterBuilder == false ? undefined :
+            qs && qs.simpleFilterBuilder && qs.simpleFilterBuilder(qd, fo.filterOptions);
 
         if (sfb) {
             this.setState({
@@ -885,7 +887,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             return;
         }
 
-        if (!Navigator.isNavigable(row.entity.EntityType))
+        if (!Navigator.isNavigable(row.entity.EntityType, undefined, true))
             return;
 
         e.preventDefault();

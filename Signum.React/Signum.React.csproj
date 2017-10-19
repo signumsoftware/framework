@@ -224,6 +224,7 @@
     <TypeScriptCompile Include="Scripts\Lines\EnumCheckboxList.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\MultiValueLine.tsx" />
     <TypeScriptCompile Include="Scripts\Modals\MessageModal.tsx" />
+    <TypeScriptCompile Include="Scripts\Retrieve.tsx" />
     <TypeScriptCompile Include="Scripts\Search.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityBase.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityCombo.tsx" />
@@ -345,7 +346,7 @@
   </Target>
   <UsingTask TaskName="SignumTSGenerator" AssemblyFile="..\Signum.TSGenerator\Binaries\Signum.TSGenerator.dll" />
   <Target Name="GenerateSignumTS">
-    <SignumTSGenerator References="@(ReferencePath)" />
+    <SignumTSGenerator References="@(ReferencePath)" Content="@(Content)" />
   </Target>
   <PropertyGroup>
     <CompileTypeScriptDependsOn>

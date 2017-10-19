@@ -18,10 +18,7 @@ namespace Signum.Entities.DynamicQuery
     public class ResultColumn :ISerializable
     {
         Column column;
-        public Column Column
-        {
-            get { return column; }
-        }
+        public Column Column => column;
 
         int index;
         public int Index
@@ -30,12 +27,13 @@ namespace Signum.Entities.DynamicQuery
             internal set { index = value; }
         }
 
-        internal IList Values;
+        IList values;
+        public IList Values => values;
 
         public ResultColumn(Column column, IList values)
         {
             this.column = column;
-            this.Values = values;
+            this.values = values;
         }
 
 
@@ -46,8 +44,8 @@ namespace Signum.Entities.DynamicQuery
                 switch (entry.Name)
                 {
                     case "column": column = (Column)entry.Value; break;
-                    case "valuesList": Values = (IList)entry.Value; break;
-                    case "valuesString": Values = Split((string)entry.Value, GetValueDeserializer()); break;
+                    case "valuesList": values = (IList)entry.Value; break;
+                    case "valuesString": values = Split((string)entry.Value, GetValueDeserializer()); break;
                 }
             }
         }
@@ -79,10 +77,10 @@ namespace Signum.Entities.DynamicQuery
             Func<object, string> serializer = GetValueSerializer();
 
             if (serializer == null)
-                info.AddValue("valuesList", Values);
+                info.AddValue("valuesList", values);
             else
             {
-                string result = Join(Values, serializer);
+                string result = Join(values, serializer);
                 info.AddValue("valuesString", result);
             }
         }

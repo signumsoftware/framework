@@ -530,6 +530,10 @@ namespace Signum.Utilities
         _0Minute,
         [Description("{0} Minutes")]
         _0Minutes,
+        [Description("{0} Week")]
+        _0Week,
+        [Description("{0} Weeks")]
+        _0Weeks,
         [Description("{0} Month")]
         _0Month,
         [Description("{0} Months")]

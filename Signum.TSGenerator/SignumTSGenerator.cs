@@ -15,6 +15,9 @@ namespace Signum.TSGenerator
         [Required]
         public string References { get; set; }
 
+        [Required]
+        public string Content { get; set; }
+
         public override bool Execute()
         {
             AppDomain domain = AppDomain.CreateDomain("reflectionRomain");
@@ -22,7 +25,15 @@ namespace Signum.TSGenerator
             {
                 dynamic obj = domain.CreateInstanceFromAndUnwrap(this.GetType().Assembly.Location, "Signum.TSGenerator.ProxyGenerator");
 
-                foreach (var file in Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.t4s", SearchOption.AllDirectories))
+                Log.LogMessage("Starting SigumTSGenerator");
+
+                var currentDir = Directory.GetCurrentDirectory();
+                var files = Content.Split(';')
+                    .Where(file => Path.GetExtension(file) == ".t4s")
+                    .Select(file => Path.Combine(currentDir, file))
+                    .ToList();
+
+                foreach (var file in files)
                 {
                     try
                     {
@@ -51,6 +62,8 @@ namespace Signum.TSGenerator
                     }
                 }
 
+
+                Log.LogMessage("Finish SigumTSGenerator");
             }
             finally
             {
