@@ -3,7 +3,7 @@ import { Button } from 'react-bootstrap'
 import * as numbro from 'numbro'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { notifySuccess }from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
+import { notifySuccess } from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
 import { TypeContext, ButtonsContext, IRenderButtons } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { EntityLine, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines'
@@ -16,6 +16,7 @@ import { PropertyRulePack, PropertyAllowedRule, PropertyAllowed, AuthAdminMessag
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 
 import "./AuthAdmin.css"
+
 
 export default class PropertyRulesPackControl extends React.Component<{ ctx: TypeContext<PropertyRulePack> }> implements IRenderButtons {
 
@@ -33,10 +34,20 @@ export default class PropertyRulesPackControl extends React.Component<{ ctx: Typ
 
     renderButtons(bc: ButtonsContext) {
         return [
-            <Button bsStyle="primary" onClick={() => this.handleSaveClick(bc) }>{AuthMessage.Save.niceToString() }</Button>
+            <Button bsStyle="primary" onClick={() => this.handleSaveClick(bc)}>{AuthMessage.Save.niceToString()}</Button>
         ];
     }
 
+    handleHeaderClick(e: React.MouseEvent<HTMLAnchorElement>, hc: PropertyAllowed) {
+        this.props.ctx.mlistItemCtxs(a => a.rules).forEach(tcr => {
+            let c = tcr.value;
+
+            if (!c.coercedValues!.contains(hc)) {
+                let cr = this.refs[c.toStr + "-" + hc] as ColorRadio;
+                cr.props.onClicked(e);
+            }
+        });
+    }
 
     render() {
 
@@ -45,32 +56,32 @@ export default class PropertyRulesPackControl extends React.Component<{ ctx: Typ
         return (
             <div>
                 <div className="form-compact">
-                    <EntityLine ctx={ctx.subCtx(f => f.role) }  />
-                    <ValueLine ctx={ctx.subCtx(f => f.strategy) }  />
-                    <EntityLine ctx={ctx.subCtx(f => f.type) }  />
+                    <EntityLine ctx={ctx.subCtx(f => f.role)} />
+                    <ValueLine ctx={ctx.subCtx(f => f.strategy)} />
+                    <EntityLine ctx={ctx.subCtx(f => f.type)} />
                 </div>
                 <table className="table table-condensed sf-auth-rules">
                     <thead>
                         <tr>
                             <th>
-                                { PermissionSymbol.niceName() }
+                                {PermissionSymbol.niceName()}
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                { PropertyAllowed.niceName("Modify") }
+                                <a onClick={e => this.handleHeaderClick(e, "Modify")}>{PropertyAllowed.niceName("Modify")}</a>
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                { PropertyAllowed.niceName("Read") }
+                                <a onClick={e => this.handleHeaderClick(e, "Read")}>{PropertyAllowed.niceName("Read")}</a>
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                { PropertyAllowed.niceName("None") }
+                                <a onClick={e => this.handleHeaderClick(e, "None")}>{PropertyAllowed.niceName("None")}</a>
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                {AuthAdminMessage.Overriden.niceToString() }
+                                {AuthAdminMessage.Overriden.niceToString()}
                             </th>
                         </tr>
                     </thead>
                     <tbody>
-                        { ctx.mlistItemCtxs(a => a.rules).map((c, i) =>
+                        {ctx.mlistItemCtxs(a => a.rules).map((c, i) =>
                             <tr key={i}>
                                 <td>
                                     {c.value.resource.path}
@@ -79,15 +90,15 @@ export default class PropertyRulesPackControl extends React.Component<{ ctx: Typ
                                     {this.renderRadio(c.value, "Modify", "green")}
                                 </td>
                                 <td style={{ textAlign: "center" }}>
-                                    {this.renderRadio(c.value, "Read", "#FFAD00") }
+                                    {this.renderRadio(c.value, "Read", "#FFAD00")}
                                 </td>
                                 <td style={{ textAlign: "center" }}>
-                                    {this.renderRadio(c.value, "None", "red") }
+                                    {this.renderRadio(c.value, "None", "red")}
                                 </td>
                                 <td style={{ textAlign: "center" }}>
                                     <GrayCheckbox checked={c.value.allowed != c.value.allowedBase} onUnchecked={() => {
                                         c.value.allowed = c.value.allowedBase;
-                                        ctx.value.modified = true; 
+                                        ctx.value.modified = true;
                                         this.forceUpdate();
                                     }} />
                                 </td>
@@ -101,14 +112,19 @@ export default class PropertyRulesPackControl extends React.Component<{ ctx: Typ
         );
     }
 
+
     renderRadio(c: PropertyAllowedRule, allowed: PropertyAllowed, color: string) {
 
         if (c.coercedValues!.contains(allowed))
             return;
 
-        return <ColorRadio checked={c.allowed == allowed} color={color} onClicked={a => { c.allowed = allowed; c.modified = true; this.forceUpdate() } }/>;
+        return <ColorRadio
+            ref={c.toStr + "-" + allowed}
+            checked={c.allowed == allowed}
+            color={color}
+            onClicked={a => { c.allowed = allowed; c.modified = true; this.forceUpdate() }}
+        />;
     }
 }
-
 
 
