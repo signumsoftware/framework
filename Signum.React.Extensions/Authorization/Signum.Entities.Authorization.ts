@@ -159,12 +159,6 @@ export module BasicPermission {
     export const AutomaticUpgradeOfOperations : PermissionSymbol = registerSymbol("Permission", "BasicPermission.AutomaticUpgradeOfOperations");
 }
 
-export const LastAuthRulesImportEntity = new Type<LastAuthRulesImportEntity>("LastAuthRulesImport");
-export interface LastAuthRulesImportEntity extends Entities.Entity {
-    Type: "LastAuthRulesImport";
-    date?: string;
-}
-
 export const MergeStrategy = new EnumType<MergeStrategy>("MergeStrategy");
 export type MergeStrategy =
     "Union" |

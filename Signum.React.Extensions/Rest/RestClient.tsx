@@ -7,8 +7,8 @@ import { ajaxGet } from "../../../Framework/Signum.React/Scripts/Services";
 import * as AuthClient from "../Authorization/AuthClient";
 
 export function registerAuthenticator() {
-    AuthClient.authenticators.push(loginFromApiKey);
-}
+    AuthClient.authenticators.insertAt(0, loginFromApiKey);
+} 
 
 
 export function start(options: { routes: JSX.Element[] }) {

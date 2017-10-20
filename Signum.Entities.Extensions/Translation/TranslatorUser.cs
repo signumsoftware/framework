@@ -11,64 +11,11 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Translation
 {
-    [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
-    public class TranslatorUserEntity : Entity
-    {
-        [NotNullable, UniqueIndex, ImplementedBy(typeof(UserEntity))]
-        [NotNullValidator]
-        public Lite<IUserEntity> User { get; set; }
-
-        [NotNullable, PreserveOrder]
-        [NotNullValidator, NoRepeatValidator]
-        public MList<TranslatorUserCultureEmbedded> Cultures { get; set; } = new MList<TranslatorUserCultureEmbedded>();
-
-        protected override string PropertyValidation(PropertyInfo pi)
-        {
-            if (pi.Name == nameof(Cultures))
-            {
-                var error = Cultures.GroupBy(a => a.Culture).Where(a => a.Count() > 1).ToString(a => a.Key.ToString(), ", ");
-
-                if (error.HasText())
-                    return TranslationMessage.RepeatedCultures0.NiceToString().FormatWith(error);
-            }
-
-            return base.PropertyValidation(pi);
-        }
-
-        public override string ToString()
-        {
-            return User?.ToString();
-        }
-    }
-
-    [Serializable]
-    public class TranslatorUserCultureEmbedded : EmbeddedEntity
-    {
-        [NotNullable]
-        [NotNullValidator]
-        public CultureInfoEntity Culture { get; set; }
-
-        public TranslatedCultureAction Action { get; set; }
-    }
-
-    public enum TranslatedCultureAction
-    {
-        Translate,
-        Read,
-    }
-
     [AutoInit]
     public static class TranslationPermission
     {
         public static PermissionSymbol TranslateCode;
         public static PermissionSymbol TranslateInstances;
-    }
-
-    [AutoInit]
-    public static class TranslatorUserOperation
-    {
-        public static ExecuteSymbol<TranslatorUserEntity> Save;
-        public static DeleteSymbol<TranslatorUserEntity> Delete;
     }
 
     public enum TranslationMessage
