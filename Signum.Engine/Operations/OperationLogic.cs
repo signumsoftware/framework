@@ -201,17 +201,17 @@ Consider the following options:
                 ex.Data["args"] = args;
         }
 
-        public static bool OperationAllowed(OperationSymbol operationSymbol, bool inUserInterface)
+        public static bool OperationAllowed(OperationSymbol operationSymbol, Type entityType, bool inUserInterface)
         {
             if (AllowOperation != null)
-                return AllowOperation(operationSymbol, inUserInterface);
+                return AllowOperation(operationSymbol, entityType, inUserInterface);
             else
                 return true;
         }
 
-        public static void AssertOperationAllowed(OperationSymbol operationSymbol, bool inUserInterface)
+        public static void AssertOperationAllowed(OperationSymbol operationSymbol, Type entityType, bool inUserInterface)
         {
-            if (!OperationAllowed(operationSymbol, inUserInterface))
+            if (!OperationAllowed(operationSymbol, entityType, inUserInterface))
                 throw new UnauthorizedAccessException(OperationMessage.Operation01IsNotAuthorized.NiceToString().FormatWith(operationSymbol.NiceToString(), operationSymbol.Key) +
                     (inUserInterface ? " " + OperationMessage.InUserInterface.NiceToString() : ""));
         }
@@ -251,7 +251,7 @@ Consider the following options:
             try
             {
                 return (from oper in TypeOperations(entityType)
-                        where OperationAllowed(oper.OperationSymbol, true)
+                        where OperationAllowed(oper.OperationSymbol, entityType, true)
                         select ToOperationInfo(oper)).ToList();
             }
             catch(Exception e)
@@ -301,9 +301,11 @@ Consider the following options:
         {
             try
             {
-                return (from o in TypeOperations(entity.GetType())
+                var entityType = entity.GetType();
+
+                return (from o in TypeOperations(entityType)
                         let eo = o as IEntityOperation
-                        where eo != null && (eo.AllowsNew || !entity.IsNew) && OperationAllowed(o.OperationSymbol, true)
+                        where eo != null && (eo.AllowsNew || !entity.IsNew) && OperationAllowed(o.OperationSymbol, entityType, true)
                         select KVP.Create(eo.OperationSymbol, eo.CanExecute(entity))).ToDictionary();
             }
             catch(Exception e)
@@ -619,7 +621,7 @@ Consider the following options:
             {
                 foreach (var grLites in lites.GroupBy(a => a.EntityType))
                 {
-                    var operations = operationSymbols.Select(k => FindOperation(grLites.Key, k)).ToList();
+                    var operations = operationSymbols.Select(opKey => FindOperation(grLites.Key, opKey)).ToList();
 
                     foreach (var grOperations in operations.GroupBy(a => a.GetType().GetGenericArguments().Let(arr=>Tuple.Create(arr[0], arr[1]))))
                     {
@@ -746,7 +748,7 @@ Consider the following options:
     public delegate IDisposable SurroundOperationHandler(IOperation operation, OperationLogEntity log, Entity entity, object[] args);
     public delegate void OperationHandler(IOperation operation, Entity entity);
     public delegate void ErrorOperationHandler(IOperation operation, Entity entity, Exception ex);
-    public delegate bool AllowOperationHandler(OperationSymbol operationSymbol, bool inUserInterface);
+    public delegate bool AllowOperationHandler(OperationSymbol operationSymbol, Type entityType, bool inUserInterface);
 
 
 }

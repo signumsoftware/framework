@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Signum.Engine;
 using Signum.Entities;
 using Signum.React.ApiControllers;
 using Signum.Utilities;
@@ -35,7 +36,7 @@ namespace Signum.React.Json
         {
             var request = (OperationController.BaseOperationRequest)Activator.CreateInstance(objectType);
             serializer.Populate(reader, request);
-            var operationSymbol = request.operarionSymbol;
+            var operationSymbol = SymbolLogic<OperationSymbol>.ToSymbol(request.operationKey);
             if (request.args != null)
                 for (int i = 0; i < request.args.Length; i++)
                 {
