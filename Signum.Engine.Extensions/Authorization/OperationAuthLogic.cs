@@ -43,8 +43,8 @@ namespace Signum.Engine.Authorization
                      .WithUniqueIndex(rt => new { rt.Resource.Operation, rt.Resource.Type, rt.Role });
 
                 cache = new AuthCache<RuleOperationEntity, OperationAllowedRule, OperationTypeEmbedded, (OperationSymbol operation, Type type), OperationAllowed>(sb,
-                     toKey: s => (operation: s.Operation, type: s.Type.ToType()),
-                     toEntity: s => new OperationTypeEmbedded { Operation = s.operation, Type = s.type.ToTypeEntity() },
+                     toKey: s => (operation: s.Operation, type: s.Type?.ToType()),
+                     toEntity: s => new OperationTypeEmbedded { Operation = s.operation, Type = s.type?.ToTypeEntity() },
                      isEquals: (o1, o2) => o1.Operation == o2.Operation && o1.Type == o2.Type,
                      merger: new OperationMerger(),
                      invalidateWithTypes: true,
