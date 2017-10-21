@@ -277,7 +277,7 @@ function hasAllowedConstructor(typeName: string) {
     if (!constructOperations.length)
         return true;
 
-    const allowed = constructOperations.filter(oi => Operations.isOperationAllowed(oi));
+    const allowed = constructOperations.filter(oi => Operations.isOperationInfoAllowed(oi));
 
     return allowed.length > 0;
 }
