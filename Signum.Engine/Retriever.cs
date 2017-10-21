@@ -163,7 +163,19 @@ namespace Signum.Engine
         }
 
         public Task CompleteAllAsync(CancellationToken token) => CompleteAllPrivate(token);
-        public void CompleteAll() => CompleteAllPrivate(null).Wait();
+        public void CompleteAll()
+        {
+            try
+            {
+                CompleteAllPrivate(null).Wait();
+            }
+            catch (AggregateException ag)
+            {
+                var ex = ag.InnerExceptions.FirstEx();
+                ex.PreserveStackTrace();
+                throw ex;
+            }
+        }
 
         public async Task CompleteAllPrivate(CancellationToken? token)
         {
