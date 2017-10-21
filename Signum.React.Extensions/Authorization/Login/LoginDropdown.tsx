@@ -23,7 +23,7 @@ export default class LoginDropdown extends React.Component<{}, { user: UserEntit
                         <DropdownItem><i className="fa fa-key fa-fw"></i> {AuthMessage.ChangePassword.niceToString()}</DropdownItem>
                     </LinkContainer>
                     <DropdownItem divider />
-                    <DropdownItem id="sf-auth-logout" onSelect={() => AuthClient.logout()}><i className="fa fa-sign-out fa-fw"></i> {AuthMessage.Logout.niceToString()}</DropdownItem>
+                    <DropdownItem id="sf-auth-logout" onClick={() => AuthClient.logout()}><i className="fa fa-sign-out fa-fw"></i> {AuthMessage.Logout.niceToString()}</DropdownItem>
                 </DropdownMenu>
             </UncontrolledNavDropdown>
         );

@@ -52,7 +52,7 @@ export default class CultureDropdown extends React.Component<CultureDropdownProp
                 </DropdownToggle>
                 <DropdownMenu right>
                     {Dic.map(cultures, (name, c, i) =>
-                        <DropdownItem key={i} data-culture={name} disabled={is(c, current)} onSelect={() => this.handleSelect(c)}>
+                        <DropdownItem key={i} data-culture={name} disabled={is(c, current)} onClick={() => this.handleSelect(c)}>
                             {c.toStr}
                         </DropdownItem>
                     )}
