@@ -46,10 +46,13 @@ namespace Signum.React.Mailing
             QueryDescriptionTS.AddExtension += qd =>
             {
                 object type = QueryLogic.ToQueryName(qd.queryKey);
-                var templates = EmailTemplateLogic.GetApplicableEmailTemplates(type, null,  EmailTemplateVisibleOn.Query);
+                if (Schema.Current.IsAllowed(typeof(EmailTemplateEntity), true) == null)
+                {
+                    var templates = EmailTemplateLogic.GetApplicableEmailTemplates(type, null, EmailTemplateVisibleOn.Query);
 
-                if (templates.HasItems())
-                    qd.Extension.Add("emailTemplates", templates);
+                    if (templates.HasItems())
+                        qd.Extension.Add("emailTemplates", templates);
+                }
             };
         }
     }

@@ -43,7 +43,7 @@ namespace Signum.Entities.Authorization
     public class RuleOperationEntity : RuleEntity<OperationTypeEmbedded, OperationAllowed> { }
 
 
-    [Serializable]
+    [Serializable, InTypeScript(Undefined = false)]
     public class OperationTypeEmbedded : EmbeddedEntity
     {
         [NotNullable]

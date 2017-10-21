@@ -14,6 +14,7 @@ using Signum.Entities;
 using Signum.Engine.Operations;
 using System.Reflection;
 using Signum.Entities.DynamicQuery;
+using System.Xml.Linq;
 
 namespace Signum.Engine.Authorization
 {
@@ -49,7 +50,7 @@ namespace Signum.Engine.Authorization
                      invalidateWithTypes: true,
                      coercer:  OperationCoercer.Instance);
 
-                AuthLogic.ExportToXml += exportAll => cache.ExportXml("Operations", "Operation", s => s.operation.Key + "/" + s.type.ToTypeEntity().CleanName, b => b.ToString(),
+                AuthLogic.ExportToXml += exportAll => cache.ExportXml("Operations", "Operation", s => s.operation.Key + "/" + s.type?.ToTypeEntity().CleanName, b => b.ToString(),
                     exportAll ? AllOperationTypes() : null);
 
                 AuthLogic.ImportFromXml += (x, roles, replacements) =>
@@ -57,9 +58,37 @@ namespace Signum.Engine.Authorization
                     var allResources = x.Element("Operations").Elements("Role").SelectMany(r => r.Elements("Operation")).Select(p => p.Attribute("Resource").Value).ToHashSet();
 
                     replacements.AskForReplacements(
-                        allResources.Select(a => a.Before("/")).ToHashSet(),
-                        SymbolLogic<OperationSymbol>.AllUniqueKeys(),
-                        operationReplacementKey);
+                      allResources.Select(a => a.TryBefore("/") ?? a).ToHashSet(),
+                      SymbolLogic<OperationSymbol>.AllUniqueKeys(),
+                      operationReplacementKey);
+
+
+                    if (allResources.Any(a => string.IsNullOrEmpty(a.TryAfter("/")))) //Only for transition
+                    {
+                        var groups = x.Element("Operations").Elements("Role").SelectMany(r => r.Elements("Operation")).GroupToDictionary(p => p.Attribute("Resource").Value);
+
+                        foreach (var gr in groups.Where(gr => string.IsNullOrEmpty(gr.Key.TryAfter("/"))))
+                        {
+                            var operationKey = gr.Key.TryBefore("/") ?? gr.Key;
+
+                            var operation = SymbolLogic<OperationSymbol>.TryToSymbol(replacements.Apply(operationReplacementKey, operationKey));
+
+                            var types = Schema.Current.Tables.Keys.Where(t => OperationLogic.IsDefined(t, operation)).ToList();
+
+                            foreach (var xElem in gr.Value)
+                            {
+                                xElem.AddAfterSelf(types.Select(t =>
+                                {
+                                    var copy = new XElement(xElem);
+                                    copy.SetAttributeValue("Resource", operationKey + "/" + t.ToTypeEntity().CleanName);
+                                    return copy;
+                                }));
+                                xElem.Remove();
+                            }
+                        }
+
+                        allResources = x.Element("Operations").Elements("Role").SelectMany(r => r.Elements("Operation")).Select(p => p.Attribute("Resource").Value).ToHashSet();
+                    }
 
                     string typeReplacementKey = "AuthRules:" + typeof(OperationSymbol).Name;
                     replacements.AskForReplacements(

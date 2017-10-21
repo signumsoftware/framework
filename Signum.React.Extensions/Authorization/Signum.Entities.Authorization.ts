@@ -184,8 +184,8 @@ export interface OperationRulePack extends BaseRulePack<OperationAllowedRule> {
 export const OperationTypeEmbedded = new Type<OperationTypeEmbedded>("OperationTypeEmbedded");
 export interface OperationTypeEmbedded extends Entities.EmbeddedEntity {
     Type: "OperationTypeEmbedded";
-    operation?: Entities.OperationSymbol | null;
-    type?: Basics.TypeEntity | null;
+    operation: Entities.OperationSymbol;
+    type: Basics.TypeEntity;
 }
 
 export const PasswordExpiresIntervalEntity = new Type<PasswordExpiresIntervalEntity>("PasswordExpiresInterval");
