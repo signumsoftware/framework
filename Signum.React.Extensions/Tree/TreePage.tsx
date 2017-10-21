@@ -63,7 +63,7 @@ export default class TreePage extends React.Component<TreePageProps, TreePageSta
                 <TreeViewer ref={tv => this.treeView = tv!}
                     initialShowFilters={true}
                     typeName={ti.name}
-                    allowMove={Operations.isOperationAllowed(TreeOperation.Move)}
+                    allowMove={Operations.isOperationAllowed(TreeOperation.Move, ti.name)}
                     filterOptions={this.state.filterOptions}
                     key={ti.name}
                     onSearch={() => this.changeUrl()} />
