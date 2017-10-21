@@ -75,8 +75,9 @@ namespace Signum.Engine.Authorization
                 SymbolLogic<PermissionSymbol>.Start(sb, dqm, () => RegisteredPermission.ToHashSet());
 
                 cache = new AuthCache<RulePermissionEntity, PermissionAllowedRule, PermissionSymbol, PermissionSymbol, bool>(sb,
-                    s=>s,
-                    s=>s,
+                    toKey: p => p,
+                    toEntity: p => p,
+                    isEquals: (p1, p2) => p1 == p2,
                     merger: new PermissionMerger(),
                     invalidateWithTypes: false);
 
@@ -99,7 +100,14 @@ namespace Signum.Engine.Authorization
                     return cache.ImportXml(x, "Permissions", "Permission", roles,
                         s => SymbolLogic<PermissionSymbol>.TryToSymbol(replacements.Apply(replacementKey, s)), bool.Parse);
                 };
+
+                sb.Schema.Table<PermissionSymbol>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
             }
+        }
+
+        static SqlPreCommand AuthCache_PreDeleteSqlSync(Entity arg)
+        {
+            return Administrator.DeleteWhereScript((RulePermissionEntity rt) => rt.Resource, (PermissionSymbol)arg);
         }
 
         public static void AssertAuthorized(this PermissionSymbol permissionSymbol)

@@ -37,8 +37,9 @@ namespace Signum.Engine.Authorization
                 OperationLogic.AllowOperation += OperationLogic_AllowOperation;
 
                 cache = new AuthCache<RuleOperationEntity, OperationAllowedRule, OperationSymbol, OperationSymbol, OperationAllowed>(sb,
-                     s=>s,
-                     s=>s,
+                     toKey: s => s,
+                     toEntity: s => s,
+                     isEquals: (o1, o2) => o1 == o2,
                      merger: new OperationMerger(),
                      invalidateWithTypes: true,
                      coercer:  OperationCoercer.Instance);
@@ -57,7 +58,14 @@ namespace Signum.Engine.Authorization
                     return cache.ImportXml(x, "Operations", "Operation", roles,
                         s => SymbolLogic<OperationSymbol>.TryToSymbol(replacements.Apply(replacementKey, s)), EnumExtensions.ToEnum<OperationAllowed>);
                 };
+
+                sb.Schema.Table<OperationSymbol>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
             }
+        }
+
+        static SqlPreCommand AuthCache_PreDeleteSqlSync(Entity arg)
+        {
+            return Administrator.DeleteWhereScript((RuleOperationEntity rt) => rt.Resource, (OperationSymbol)arg);
         }
 
         public static T AvoidAutomaticUpgrade<T>(this T operation) where T : IOperation

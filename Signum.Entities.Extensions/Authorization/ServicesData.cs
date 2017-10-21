@@ -116,7 +116,6 @@ namespace Signum.Entities.Authorization
 
     [Serializable, InTypeScript(Undefined = false)]
     public abstract class AllowedRule<R, A> : ModelEntity
-        where R : Entity
     {
         A allowedBase;
         [InTypeScript(Null = false)]
