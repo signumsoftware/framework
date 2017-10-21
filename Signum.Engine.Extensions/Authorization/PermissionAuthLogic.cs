@@ -74,6 +74,9 @@ namespace Signum.Engine.Authorization
 
                 SymbolLogic<PermissionSymbol>.Start(sb, dqm, () => RegisteredPermission.ToHashSet());
 
+                sb.Include<RulePermissionEntity>()
+                   .WithUniqueIndex(rt => new { rt.Resource, rt.Role });
+
                 cache = new AuthCache<RulePermissionEntity, PermissionAllowedRule, PermissionSymbol, PermissionSymbol, bool>(sb,
                     toKey: p => p,
                     toEntity: p => p,

@@ -331,7 +331,6 @@ namespace Signum.Entities.Authorization
 
     [Serializable]
     public abstract class AllowedRuleCoerced<R, A> : AllowedRule<R, A>
-         where R : Entity
     {
         public A[] CoercedValues { get; internal set; }
     }
@@ -380,8 +379,7 @@ namespace Signum.Entities.Authorization
         }
     }
     [Serializable]
-    public class OperationAllowedRule : AllowedRuleCoerced<OperationSymbol, OperationAllowed> { }
-
+    public class OperationAllowedRule : AllowedRuleCoerced<OperationTypeEmbedded, OperationAllowed> { }
 
     [Serializable]
     public class PermissionRulePack : BaseRulePack<PermissionAllowedRule>

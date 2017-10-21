@@ -82,15 +82,11 @@ namespace Signum.React.Authorization
 
             if (OperationAuthLogic.IsStarted)
             {
-                ReflectionServer.AddFieldInfoExtension += (mi, fi) =>
+                ReflectionServer.AddOperationExtension += (oits, oi, type) =>
                 {
-                    if (fi.DeclaringType.Name.EndsWith("Operation"))
-                    {
-                        if (fi.GetValue(null) is IOperationSymbolContainer container)
-                            mi.Extension.Add("operationAllowed",
-                                UserEntity.Current == null ? false
-                                    : OperationAuthLogic.GetOperationAllowed(container.Symbol, inUserInterface: true));
-                    }
+                    oits.Extension.Add("operationAllowed",
+                               UserEntity.Current == null ? false :
+                               OperationAuthLogic.GetOperationAllowed(oi.OperationSymbol, type, inUserInterface: true));
                 };
                 
             }
@@ -101,9 +97,8 @@ namespace Signum.React.Authorization
                 {
                     if (fi.FieldType == typeof(PermissionSymbol))
                         mi.Extension.Add("permissionAllowed",
-                            UserEntity.Current == null
-                                ? false
-                                : PermissionAuthLogic.IsAuthorized((PermissionSymbol) fi.GetValue(null)));
+                            UserEntity.Current == null ? false : 
+                            PermissionAuthLogic.IsAuthorized((PermissionSymbol) fi.GetValue(null)));
                 };
                 
             }

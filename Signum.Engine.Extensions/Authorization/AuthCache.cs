@@ -57,14 +57,10 @@ namespace Signum.Entities.Authorization
             this.IsEquals = isEquals;
             this.coercer = coercer ?? Coercer<A, K>.None;
 
-            sb.Include<RT>();
-
             runtimeRules = sb.GlobalLazy(this.NewCache,
                 invalidateWithTypes ?
                 new InvalidateWith(typeof(RT), typeof(RoleEntity), typeof(RuleTypeEntity)) :
                 new InvalidateWith(typeof(RT), typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
-
-            sb.AddUniqueIndex<RT>(rt => new { rt.Resource, rt.Role });
         }
 
         A IManualAuth<K, A>.GetAllowed(Lite<RoleEntity> role, K key)
@@ -321,8 +317,6 @@ namespace Signum.Entities.Authorization
 
             Table table = Schema.Current.Table(typeof(RT));
 
-
-
             return Synchronizer.SynchronizeScript(Spacing.Double, should, current, 
                 createNew: (role, x) =>
                 {
@@ -346,24 +340,26 @@ namespace Signum.Entities.Authorization
                 {
                     var def = list.SingleOrDefaultEx(a => a.Resource == null);
 
-                    var dic = (from xr in x.Elements(elementName)
+                    var shouldResources = (from xr in x.Elements(elementName)
                                let r = toResource(xr.Attribute("Resource").Value)
                                where r != null
-                               select KVP.Create(r, xr))
+                               select KVP.Create(ToKey(r), xr))
                                .ToDictionaryEx("{0} rules for {1}".FormatWith(typeof(R).NiceName(), role));
 
-                    SqlPreCommand restSql = Synchronizer.SynchronizeScript(Spacing.Simple, dic, list.Where(a => a.Resource != null).ToDictionary(a => a.Resource),
+                    var currentResources = list.Where(a => a.Resource != null).ToDictionary(a => ToKey(a.Resource));
+
+                    SqlPreCommand restSql = Synchronizer.SynchronizeScript(Spacing.Simple, shouldResources, currentResources,
                         (r, xr) =>
                         {
                             var a = parseAllowed(xr.Attribute("Allowed").Value);
-                            return table.InsertSqlSync(new RT { Resource = r, Role = role, Allowed = a }, comment: Comment(role, r, a));
+                            return table.InsertSqlSync(new RT { Resource = ToEntity(r), Role = role, Allowed = a }, comment: Comment(role, ToEntity(r), a));
                         },
-                        (r, rt) => table.DeleteSqlSync(rt, Comment(role, r, rt.Allowed)),
+                        (r, rt) => table.DeleteSqlSync(rt, Comment(role, ToEntity(r), rt.Allowed)),
                         (r, xr, rt) =>
                         {
                             var oldA = rt.Allowed;
                             rt.Allowed = parseAllowed(xr.Attribute("Allowed").Value);
-                            return table.UpdateSqlSync(rt, comment: Comment(role, r, oldA, rt.Allowed));
+                            return table.UpdateSqlSync(rt, comment: Comment(role, ToEntity(r), oldA, rt.Allowed));
                         })?.Do(p => p.GoBefore = true);
 
                     return restSql;

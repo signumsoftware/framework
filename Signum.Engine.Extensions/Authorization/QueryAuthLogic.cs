@@ -36,6 +36,9 @@ namespace Signum.Engine.Authorization
 
                 dqm.AllowQuery += new Func<object, bool, bool>(dqm_AllowQuery);
 
+                sb.Include<RuleQueryEntity>()
+                    .WithUniqueIndex(rt => new { rt.Resource, rt.Role });
+
                 cache = new AuthCache<RuleQueryEntity, QueryAllowedRule, QueryEntity, object, QueryAllowed>(sb,
                     toKey: qn => QueryLogic.ToQueryName(qn.Key),
                     toEntity: QueryLogic.GetQueryEntity,

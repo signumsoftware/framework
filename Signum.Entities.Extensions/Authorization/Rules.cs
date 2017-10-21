@@ -6,6 +6,7 @@ using Signum.Utilities;
 using Signum.Entities.Basics;
 using System.Text.RegularExpressions;
 using System.Reflection;
+using Signum.Entities;
 
 namespace Signum.Entities.Authorization
 {
@@ -39,7 +40,25 @@ namespace Signum.Entities.Authorization
     public class RulePermissionEntity : RuleEntity<PermissionSymbol, bool> { }
 
     [Serializable]
-    public class RuleOperationEntity : RuleEntity<OperationSymbol, OperationAllowed> { }
+    public class RuleOperationEntity : RuleEntity<OperationTypeEmbedded, OperationAllowed> { }
+
+
+    [Serializable]
+    public class OperationTypeEmbedded : EmbeddedEntity
+    {
+        [NotNullable]
+        [NotNullValidator]
+        public OperationSymbol Operation { get; set; }
+
+        //[NotNullable] While transition
+        [NotNullValidator]
+        public TypeEntity Type { get; set; }
+
+        public override string ToString()
+        {
+            return $"{Operation}/{Type}";
+        }
+    }
 
     [Serializable]
     public class RulePropertyEntity : RuleEntity<PropertyRouteEntity, PropertyAllowed> { }

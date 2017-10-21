@@ -32,6 +32,9 @@ namespace Signum.Engine.Authorization
                 AuthLogic.AssertStarted(sb);
                 PropertyRouteLogic.Start(sb);
 
+                sb.Include<RulePropertyEntity>()
+                 .WithUniqueIndex(rt => new { rt.Resource, rt.Role });
+
                 cache = new AuthCache<RulePropertyEntity, PropertyAllowedRule, PropertyRouteEntity, PropertyRoute, PropertyAllowed>(sb,
                     toKey: PropertyRouteEntity.ToPropertyRouteFunc,
                     toEntity: PropertyRouteLogic.ToPropertyRouteEntity,

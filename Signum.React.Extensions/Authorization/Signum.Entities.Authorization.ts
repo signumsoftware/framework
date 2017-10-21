@@ -171,7 +171,7 @@ export type OperationAllowed =
     "Allow";
 
 export const OperationAllowedRule = new Type<OperationAllowedRule>("OperationAllowedRule");
-export interface OperationAllowedRule extends AllowedRuleCoerced<Entities.OperationSymbol, OperationAllowed> {
+export interface OperationAllowedRule extends AllowedRuleCoerced<OperationTypeEmbedded, OperationAllowed> {
     Type: "OperationAllowedRule";
 }
 
@@ -179,6 +179,13 @@ export const OperationRulePack = new Type<OperationRulePack>("OperationRulePack"
 export interface OperationRulePack extends BaseRulePack<OperationAllowedRule> {
     Type: "OperationRulePack";
     type: Basics.TypeEntity;
+}
+
+export const OperationTypeEmbedded = new Type<OperationTypeEmbedded>("OperationTypeEmbedded");
+export interface OperationTypeEmbedded extends Entities.EmbeddedEntity {
+    Type: "OperationTypeEmbedded";
+    operation?: Entities.OperationSymbol | null;
+    type?: Basics.TypeEntity | null;
 }
 
 export const PasswordExpiresIntervalEntity = new Type<PasswordExpiresIntervalEntity>("PasswordExpiresInterval");
@@ -275,7 +282,7 @@ export interface RuleEntity<R, A> extends Entities.Entity {
 }
 
 export const RuleOperationEntity = new Type<RuleOperationEntity>("RuleOperation");
-export interface RuleOperationEntity extends RuleEntity<Entities.OperationSymbol, OperationAllowed> {
+export interface RuleOperationEntity extends RuleEntity<OperationTypeEmbedded, OperationAllowed> {
     Type: "RuleOperation";
 }
 
