@@ -8,6 +8,7 @@ using Signum.Utilities;
 using System.Reflection;
 using Signum.Entities.Authorization;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities;
 
 namespace Signum.Entities.Basics
 {
@@ -31,6 +32,11 @@ namespace Signum.Entities.Basics
 
         public string EnglishName { get; private set; }
 
+        /// <summary>
+        /// Used for Culture that can be translated but not selected, like Hidden
+        /// </summary>
+        public bool Hidden { get; set; }
+
         protected override string PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(Name) && Name.HasText())
@@ -48,13 +54,22 @@ namespace Signum.Entities.Basics
             return base.PropertyValidation(pi);
         }
 
+        protected override void SetSelfModified()
+        {
+            base.SetSelfModified();
+        }
+
         protected override void PreSaving(ref bool graphModified)
         {
             try
             {
                 var ci = CultureInfo.GetCultureInfo(Name);
-                EnglishName = ci.EnglishName;
-                NativeName = ci.NativeName;
+
+                //To be more resilient with diferent versions of windows 
+                if (this.IsGraphModified || EnglishName == null)
+                    EnglishName = ci.EnglishName;
+                if (this.IsGraphModified || NativeName == null)
+                    NativeName = ci.NativeName;
             }
             catch (CultureNotFoundException)
             {

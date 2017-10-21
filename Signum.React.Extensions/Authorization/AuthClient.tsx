@@ -238,12 +238,12 @@ export function setAuthToken(authToken: string | undefined): void{
     sessionStorage.setItem("authToken", authToken || "");
 }
 
-export function autoLogin(): Promise<UserEntity>  {
+export function autoLogin(): Promise<UserEntity | undefined>  {
 
     if (Navigator.currentUser)
         return Promise.resolve(Navigator.currentUser as UserEntity);
 
-    if (getAuthToken())
+    if (Services.SessionSharing.avoidSharingSession == false && getAuthToken())
         return API.fetchCurrentUser().then(u => {
             setCurrentUser(u);
             Navigator.resetUI();
@@ -252,7 +252,7 @@ export function autoLogin(): Promise<UserEntity>  {
 
     return new Promise<UserEntity>((resolve) => {
         setTimeout(() => {
-            if (getAuthToken()) {
+            if (Services.SessionSharing.avoidSharingSession == false && getAuthToken()) {
                 API.fetchCurrentUser()
                     .then(u => {
                         setCurrentUser(u);

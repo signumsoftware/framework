@@ -85,20 +85,4 @@ namespace Signum.Entities.Authorization
         public static ExecuteSymbol<RoleEntity> Save;
         public static DeleteSymbol<RoleEntity> Delete;
     }
-
-    [Serializable, EntityKind(EntityKind.System, EntityData.Master), TicksColumn(false)]
-    public class LastAuthRulesImportEntity : Entity
-    {
-        [UniqueIndex, FieldWithoutProperty]
-        string uniqueKey = "Unique";
-
-        public DateTime Date { get; set; }
-
-        static Expression<Func<LastAuthRulesImportEntity, string>> ToStringExpression = e => e.uniqueKey;
-        [ExpressionField]
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
-    }
 }

@@ -82,6 +82,11 @@ namespace Signum.Engine.Toolbar
 
             TypeConditionLogic.RegisterCompile<ToolbarEntity>(typeCondition,
                 t => t.Owner.RefersTo(UserEntity.Current));
+
+            sb.Schema.Settings.AssertImplementedBy((ToolbarMenuEntity t) => t.Owner, typeof(UserEntity));
+
+            TypeConditionLogic.RegisterCompile<ToolbarMenuEntity>(typeCondition,
+                t => t.Owner.RefersTo(UserEntity.Current));
         }
 
         public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
@@ -89,6 +94,11 @@ namespace Signum.Engine.Toolbar
             sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Owner, typeof(RoleEntity));
 
             TypeConditionLogic.RegisterCompile<ToolbarEntity>(typeCondition,
+                t => AuthLogic.CurrentRoles().Contains(t.Owner));
+
+            sb.Schema.Settings.AssertImplementedBy((ToolbarMenuEntity t) => t.Owner, typeof(RoleEntity));
+
+            TypeConditionLogic.RegisterCompile<ToolbarMenuEntity>(typeCondition,
                 t => AuthLogic.CurrentRoles().Contains(t.Owner));
         }
 

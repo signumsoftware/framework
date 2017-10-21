@@ -15,7 +15,10 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
 
                 <EntityLine ctx={ctx.subCtx(f => f.user)}/>
                 <ValueLine ctx={ctx.subCtx(f => f.url)} />
-                <ValueLine ctx={ctx.subCtx(f => f.controller)}/>
+                <ValueLine ctx={ctx.subCtx(f => f.controller)} />
+                <ValueLine ctx={ctx.subCtx(f => f.userHostAddress)} />
+                <ValueLine ctx={ctx.subCtx(f => f.userHostName)} />
+                <ValueLine ctx={ctx.subCtx(f => f.referrer)} />
                 <ValueLine ctx={ctx.subCtx(f => f.action)}/>
 
 

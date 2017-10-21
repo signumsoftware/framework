@@ -89,7 +89,7 @@ export default class DashboardView extends React.Component<{ dashboard: Dashboar
 
                             return (
                                 <div key={j} className={`col-sm-${c.columnWidth} col-sm-offset-${offset}`}>
-                                    {c.parts.map(p => <PanelPart ctx={p} entity={this.props.entity} />)}
+                                    {c.parts.map((p, i) => <PanelPart key={i} ctx={p} entity={this.props.entity} />)}
                                 </div>
                             );
                         })}
@@ -116,15 +116,14 @@ function combineRows(rows: CombinedRow[]): CombinedRow[] {
         } as CombinedRow;
 
         newRows.push(row);
-
-        for (let j = 1; i + j < rows.length; j++) {
-
-            if (!tryCombine(row, rows[i + j])) {
-                i = i + j - 1;
+        let j = 1;
+        for (; i + j < rows.length; j++) {
+            if (!tryCombine(row, rows[i + j])) {             
                 break;
             }
-
         }
+
+        i = i + j - 1;
     }
 
     return newRows;

@@ -44,8 +44,8 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
                         <ValueLine ctx={ctx3.subCtx(e => e.sendDifferentMessages)} inlineCheckbox={true} />
                     </div>
                 </div>
-                <EntityDetail ctx={ctx3.subCtx(e => e.applicable)}
-                    getComponent={(ec2: TypeContext<TemplateApplicableEval>) => <TemplateApplicable ctx={ec2} query={ctx.value.query!} />} />
+                {ctx3.value.query && <EntityDetail ctx={ctx3.subCtx(e => e.applicable)}
+                    getComponent={(ec2: TypeContext<TemplateApplicableEval>) => <TemplateApplicable ctx={ec2} query={ctx.value.query!} />} />}
 
                 {ctx3.value.query && this.renderQueryPart()}
             </div>
