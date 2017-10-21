@@ -51,7 +51,7 @@ namespace Signum.React.ApiControllers
         }
 
         [Route("api/query/allLites"), HttpGet, ProfilerActionSplitter("types")]
-        public async Task<List<Lite<Entity>>> FetchAllLites([FromUri]string types, CancellationToken token)
+        public async Task<List<Lite<Entity>>> FetchAllLites(string types, CancellationToken token)
         {
             Implementations implementations = ParseImplementations(types);
 

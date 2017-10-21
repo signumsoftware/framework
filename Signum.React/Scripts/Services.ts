@@ -16,7 +16,7 @@ export interface AjaxOptions {
     mode?: string;
     credentials?: string;
     cache?: string;
-    abortController?: { abort?: () => void };
+    abortController?: FetchAbortController;
 }
 
 
@@ -243,41 +243,52 @@ export class ValidationError  {
     }
 }
 
-//localStorage: Domain+Browser
-//sessionStorage: Browser tab
 
-var _appName: string = "";
+export namespace SessionSharing {
 
-export function setAppNameAndRequestSessionStorage(appName: string) {
-    _appName = appName;
-    if (!sessionStorage.length) {
-        localStorage.setItem('requestSessionStorage' + _appName, new Date().toString());
-        localStorage.removeItem('requestSessionStorage' + _appName);
-    }
-}
+    export let avoidSharingSession = false;
 
-//http://blog.guya.net/2015/06/12/sharing-sessionstorage-between-tabs-for-secure-multi-tab-authentication/
-//To share session storage between tabs
-window.addEventListener("storage", se => {
+    //localStorage: Domain+Browser
+    //sessionStorage: Browser tab
 
-    if (se.key == 'requestSessionStorage' + _appName) {
-        // Some tab asked for the sessionStorage -> send it
+    var _appName: string = "";
 
-        localStorage.setItem('responseSessionStorage' + _appName, JSON.stringify(sessionStorage));
-        localStorage.removeItem('responseSessionStorage' + _appName);
-
-    } else if (se.key == ('responseSessionStorage' + _appName) && !sessionStorage.length) {
-        // sessionStorage is empty -> fill it
-
-        if (se.newValue) {
-            const data = JSON.parse(se.newValue);
-
-            for (let key in data) {
-                sessionStorage.setItem(key, data[key]);
-            }
+    export function setAppNameAndRequestSessionStorage(appName: string) {
+        _appName = appName;
+        if (!sessionStorage.length) {
+            localStorage.setItem('requestSessionStorage' + _appName, new Date().toString());
+            localStorage.removeItem('requestSessionStorage' + _appName);
         }
     }
-});
+
+    //http://blog.guya.net/2015/06/12/sharing-sessionstorage-between-tabs-for-secure-multi-tab-authentication/
+    //To share session storage between tabs
+    window.addEventListener("storage", se => {
+
+        if (avoidSharingSession)
+            return;
+
+        if (se.key == 'requestSessionStorage' + _appName) {
+            // Some tab asked for the sessionStorage -> send it
+
+            localStorage.setItem('responseSessionStorage' + _appName, JSON.stringify(sessionStorage));
+            localStorage.removeItem('responseSessionStorage' + _appName);
+
+        } else if (se.key == ('responseSessionStorage' + _appName) && !sessionStorage.length) {
+            // sessionStorage is empty -> fill it
+
+            if (se.newValue) {
+                const data = JSON.parse(se.newValue);
+
+                for (let key in data) {
+                    sessionStorage.setItem(key, data[key]);
+                }
+            }
+        }
+    });
+
+
+}
 
 
 /// This class encapsulates a sequence of ajax request, making them abortable, and auto-aborting previous request when a new one is made 

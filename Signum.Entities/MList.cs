@@ -812,4 +812,10 @@ namespace Signum.Entities
             this.Name = name;
         }
     }
+    //only used for Virtual Mlist
+    public interface ICanBeOrdered
+    {
+        int Order { get; set; }
+    }
+
 }
