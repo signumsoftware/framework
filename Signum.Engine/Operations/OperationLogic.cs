@@ -162,22 +162,14 @@ Consider the following options:
 
         static SqlPreCommand Operation_PreDeleteSqlSync(Entity arg)
         {
-            var t = Schema.Current.Table<OperationLogEntity>();
-            var f = (FieldReference)Schema.Current.Field((OperationLogEntity ol) => ol.Operation);
-
-            var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", arg.Id, t.PrimaryKey);
-
-            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".FormatWith(t.Name, f.Name, param.ParameterName), new List<DbParameter> { param });
+            return Administrator.DeleteWhereScript((OperationLogEntity ol) => ol.Operation, (OperationSymbol)arg);
         }
 
         static SqlPreCommand Type_PreDeleteSqlSync(Entity arg)
         {
-            var t = Schema.Current.Table<OperationLogEntity>();
-            var f = ((FieldImplementedByAll)Schema.Current.Field((OperationLogEntity ol) => ol.Target)).ColumnType;
-
-            var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", arg.Id, t.PrimaryKey);
-
-            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".FormatWith(t.Name, f.Name, param.ParameterName), new List<DbParameter> { param });
+            var table = Schema.Current.Table<OperationLogEntity>();
+            var column = (IColumn)((FieldImplementedByAll)Schema.Current.Field((OperationLogEntity ol) => ol.Target)).ColumnType;
+            return Administrator.DeleteWhereScript(table, column, ((TypeEntity)arg).Id);
         }
 
         static void EntityEventsGlobal_Saving(Entity ident)
