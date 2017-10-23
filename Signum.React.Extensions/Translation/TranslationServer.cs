@@ -12,6 +12,8 @@ using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using Signum.React.Facades;
+using Signum.Entities.Translation;
 
 namespace Signum.React.Translation
 {
@@ -21,8 +23,9 @@ namespace Signum.React.Translation
 
         public static void Start(HttpConfiguration config, ITranslator translator, bool copyNewTranslationsToRootFolder = true)
         {
-            SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+            ReflectionServer.RegisterLike(typeof(TranslationMessage));
 
+            SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
             Translator = translator;
 
             if (copyNewTranslationsToRootFolder)

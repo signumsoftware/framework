@@ -9,6 +9,7 @@ import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { CultureInfoEntity } from '../Basics/Signum.Entities.Basics'
 import { reloadTypes } from '../../../Framework/Signum.React/Scripts/Reflection'
+import { toLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities';
 
 export let currentCulture: CultureInfoEntity;
 
@@ -35,16 +36,24 @@ export function changeCurrentCulture(newCulture: Lite<CultureInfoEntity>) {
         .done();
 }
 
-let cachedCultures: Promise<{ [name: string]: Lite<CultureInfoEntity> }>;
+let cachedCultures: Promise<CultureInfoEntity[]>;
 
-export function getCultures(): Promise<{ [name: string]: Lite<CultureInfoEntity> }> {
-    return cachedCultures || (cachedCultures = API.fetchCultures());
+export function getCultures(withHidden: boolean): Promise<{ [name: string]: Lite<CultureInfoEntity> }> {
+
+    if (cachedCultures == null)
+        cachedCultures = API.fetchCultures();
+    
+    return cachedCultures.then(list => {
+        return list
+            .filter(a => withHidden || !a.hidden)
+            .toObject(a => a.name, a => toLite(a));
+    });
 }
 
 
 export module API {
-    export function fetchCultures(): Promise<{ [name: string]: Lite<CultureInfoEntity> }> {
-        return ajaxGet<{ [name: string]: Lite<CultureInfoEntity> }>({ url: "~/api/culture/cultures", cache: "no-cache" });
+    export function fetchCultures(): Promise<CultureInfoEntity[]> {
+        return ajaxGet<CultureInfoEntity[]>({ url: "~/api/culture/cultures", cache: "no-cache" });
     }
 
     export function fetchCurrentCulture(): Promise<CultureInfoEntity> {
