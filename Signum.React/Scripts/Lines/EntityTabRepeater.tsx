@@ -106,7 +106,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                     })
 
                 }
-                <Tab eventKey={"x"} disabled></Tab> {/*Temporal hack*/}
+              
             </Tabs>
         );
     }
