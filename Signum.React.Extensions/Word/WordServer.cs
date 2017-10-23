@@ -53,10 +53,13 @@ namespace Signum.React.Word
             QueryDescriptionTS.AddExtension += qd =>
             {
                 object type = QueryLogic.ToQueryName(qd.queryKey);
-                var templates = WordTemplateLogic.GetApplicableWordTemplates(type, null, WordTemplateVisibleOn.Query);
+                if (Schema.Current.IsAllowed(typeof(WordTemplateEntity), true) == null)
+                {
+                    var templates = WordTemplateLogic.GetApplicableWordTemplates(type, null, WordTemplateVisibleOn.Query);
 
-                if (templates.HasItems())
-                    qd.Extension.Add("wordTemplates", templates);
+                    if (templates.HasItems())
+                        qd.Extension.Add("wordTemplates", templates);
+                }
             };
         }
 

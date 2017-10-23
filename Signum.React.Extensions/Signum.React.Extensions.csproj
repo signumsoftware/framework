@@ -312,6 +312,7 @@
     <TypeScriptCompile Include="Toolbar\Templates\ToolbarElement.tsx" />
     <TypeScriptCompile Include="Toolbar\Templates\ToolbarMenu.tsx" />
     <TypeScriptCompile Include="Translation\Code\TranslationCodeSyncNamespaces.tsx" />
+    <TypeScriptCompile Include="Translation\Code\TranslationTypeTable.tsx" />
     <TypeScriptCompile Include="Tree\Templates\MoveTreeModel.tsx" />
     <TypeScriptCompile Include="Tree\TreeButton.tsx" />
     <TypeScriptCompile Include="Tree\TreeClient.tsx" />
@@ -759,7 +760,7 @@
   </Target>
   <UsingTask TaskName="SignumTSGenerator" AssemblyFile="..\..\Framework\Signum.TSGenerator\Binaries\Signum.TSGenerator.dll" />
   <Target Name="GenerateSignumTS">
-    <SignumTSGenerator References="@(ReferencePath)" />
+    <SignumTSGenerator References="@(ReferencePath)" Content="@(Content);@(None)" />
   </Target>
   <PropertyGroup>
     <CompileTypeScriptDependsOn>

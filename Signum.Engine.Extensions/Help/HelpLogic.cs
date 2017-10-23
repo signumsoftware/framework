@@ -40,7 +40,6 @@ namespace Signum.Engine.Help
         public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<string, NamespaceHelp>>> Namespaces;
         public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<string, AppendixHelp>>> Appendices;
         public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<object, QueryHelp>>> Queries;
-        public static ResetLazy<ConcurrentDictionary<CultureInfo, Dictionary<OperationSymbol, OperationHelp>>> Operations;
 
         public static Lazy<Dictionary<Type, List<object>>> TypeToQuery = new Lazy<Dictionary<Type, List<object>>>(() =>
         {
@@ -137,17 +136,6 @@ namespace Signum.Engine.Help
             return CachedQueriesHelp().GetOrThrow(queryName).Do(a => a.AssertAllowed());
         }
 
-
-        public static Dictionary<OperationSymbol, OperationHelp> CachedOperationsHelp()
-        {
-            return Operations.Value.GetOrAdd(GetCulture(), ci =>
-            {
-                var dic = Database.Query<OperationHelpEntity>().Where(n => n.Culture == ci.ToCultureInfoEntity()).ToDictionary(a => a.Operation);
-
-                return OperationLogic.AllSymbols().ToDictionary(o => o, o => new OperationHelp(o, ci, dic.TryGetC(o)));
-            }).Where(a => OperationLogic.OperationAllowed(a.Key, inUserInterface: true)).ToDictionary();
-        }
-
         public static T GlobalContext<T>(Func<T> customFunc)
         {
             using (var tr = Transaction.ForceNew())
@@ -198,15 +186,14 @@ namespace Signum.Engine.Help
                 sb.Include<NamespaceHelpEntity>();
                 sb.Include<AppendixHelpEntity>();
                 sb.Include<QueryHelpEntity>();
-                sb.Include<OperationHelpEntity>();
 
                 sb.AddUniqueIndex((EntityHelpEntity e) => new { e.Type, e.Culture });
                 sb.AddUniqueIndexMList((EntityHelpEntity e) => e.Properties, mle => new { mle.Parent, mle.Element.Property });
+                sb.AddUniqueIndexMList((EntityHelpEntity e) => e.Operations, mle => new { mle.Parent, mle.Element.Operation });
                 sb.AddUniqueIndex((NamespaceHelpEntity e) => new { e.Name, e.Culture });
                 sb.AddUniqueIndex((AppendixHelpEntity e) => new { Name = e.UniqueName, e.Culture });
                 sb.AddUniqueIndex((QueryHelpEntity e) => new { e.Query, e.Culture });
                 sb.AddUniqueIndexMList((QueryHelpEntity e) => e.Columns, mle => new { mle.Parent, mle.Element.ColumnName });
-                sb.AddUniqueIndex((OperationHelpEntity e) => new { e.Operation, e.Culture });
 
                 Types = sb.GlobalLazy<ConcurrentDictionary<CultureInfo, Dictionary<Type, EntityHelp>>>(() => new ConcurrentDictionary<CultureInfo, Dictionary<Type, EntityHelp>>(),
                     invalidateWith: new InvalidateWith(typeof(EntityHelpEntity)));
@@ -219,9 +206,6 @@ namespace Signum.Engine.Help
 
                 Queries = sb.GlobalLazy<ConcurrentDictionary<CultureInfo, Dictionary<object, QueryHelp>>>(() => new ConcurrentDictionary<CultureInfo, Dictionary<object, QueryHelp>>(),
                    invalidateWith: new InvalidateWith(typeof(QueryHelpEntity)));
-
-                Operations = sb.GlobalLazy<ConcurrentDictionary<CultureInfo, Dictionary<OperationSymbol, OperationHelp>>>(() => new ConcurrentDictionary<CultureInfo, Dictionary<OperationSymbol, OperationHelp>>(),
-                    invalidateWith: new InvalidateWith(typeof(OperationHelpEntity)));
 
                 sb.Include<EntityHelpEntity>()
                     .WithSave(EntityHelpOperation.Save)
@@ -266,23 +250,15 @@ namespace Signum.Engine.Help
                         q.Culture,
                         Description = q.Description.Etc(100)
                     });
-            
-                sb.Include<OperationHelpEntity>()
-                    .WithSave(OperationHelpOperation.Save)
-                    .WithQuery(dqm, () => o => new
-                    {
-                        Entity = o,
-                        o.Id,
-                        o.Operation,
-                        o.Culture,
-                        Description = o.Description.Etc(100)
-                    });
                
                 sb.Schema.Synchronizing += Schema_Synchronizing;
 
                 sb.Schema.Table<OperationSymbol>().PreDeleteSqlSync += operation =>
-                    Administrator.UnsafeDeletePreCommand(Database.Query<OperationHelpEntity>().Where(e => e.Operation == (OperationSymbol)operation));
+                    Administrator.UnsafeDeletePreCommand((EntityHelpEntity eh) => eh.Operations, Database.MListQuery((EntityHelpEntity eh) => eh.Operations).Where(mle => mle.Element.Operation == (OperationSymbol)operation));
 
+                sb.Schema.Table<PropertyRouteEntity>().PreDeleteSqlSync += property =>
+                    Administrator.UnsafeDeletePreCommand((EntityHelpEntity eh) => eh.Properties, Database.MListQuery((EntityHelpEntity eh) => eh.Properties).Where(mle => mle.Element.Property == (PropertyRouteEntity)property));
+                
                 sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type =>
                     Administrator.UnsafeDeletePreCommand(Database.Query<EntityHelpEntity>().Where(e => e.Type == (TypeEntity)type));
 
@@ -297,7 +273,6 @@ namespace Signum.Engine.Help
         {
             bool any =
                 Database.Query<EntityHelpEntity>().Any() ||
-                Database.Query<OperationHelpEntity>().Any() ||
                 Database.Query<QueryHelpEntity>().Any() ||
                 Database.Query<NamespaceHelpEntity>().Any() ||
                 Database.Query<AppendixHelpEntity>().Any();
@@ -316,7 +291,6 @@ namespace Signum.Engine.Help
             var appendix = SynchronizeAppendix(replacements, data);
             var types = SynchronizeTypes(replacements, data);
             var queries = SynchronizeQueries(replacements, data);
-            var operations = SynchronizeOperations(replacements, data);
 
             return SqlPreCommand.Combine(Spacing.Double, ns, appendix, types, queries);
         }
@@ -372,28 +346,6 @@ namespace Signum.Engine.Help
             }).Combine(Spacing.Simple);
         }
 
-        static SqlPreCommand SynchronizeOperations(Replacements replacements, SyncData data)
-        {
-            var dic = Database.Query<OperationHelpEntity>().ToList();
-
-            if (dic.IsEmpty())
-                return null;
-
-            var queryKeys = DynamicQueryManager.Current.GetQueryNames().ToDictionary(a => QueryUtils.GetKey(a));
-
-            var table = Schema.Current.Table<OperationHelpEntity>();
-
-            var replace = replacements.TryGetC(QueryLogic.QueriesKey);
-
-            using (replacements.WithReplacedDatabaseName())
-                return dic.Select(qh =>
-                {
-                    qh.Description = SynchronizeContent(qh.Description, replacements, data);
-
-                    return table.UpdateSqlSync(qh);
-                }).Combine(Spacing.Simple);
-        }
-
         static SqlPreCommand SynchronizeTypes(Replacements replacements, SyncData data)
         {
             var dic = Database.Query<EntityHelpEntity>().ToList();
@@ -420,6 +372,12 @@ namespace Signum.Engine.Help
                     eh.Properties.RemoveAll(p => !routes.ContainsKey(p.Property.Path));
                     foreach (var prop in eh.Properties)
                         prop.Description = SynchronizeContent(prop.Description, replacements, data);
+                    
+                    var resOperations = replacements.TryGetC(typeof(OperationSymbol).Name);
+                    var operations = OperationLogic.TypeOperations(type).ToDictionary(o => { var key = o.OperationSymbol.Key; return resOperations.TryGetC(key) ?? key; });
+                    eh.Operations.RemoveAll(p => !operations.ContainsKey(p.Operation.Key));
+                    foreach (var op in eh.Operations)
+                        op.Description = SynchronizeContent(op.Description, replacements, data);
 
                     eh.Description = SynchronizeContent(eh.Description, replacements, data);
 

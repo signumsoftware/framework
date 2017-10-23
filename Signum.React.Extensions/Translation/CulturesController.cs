@@ -24,9 +24,9 @@ namespace Signum.React.Translation
     public class CultureController : ApiController
     {
         [Route("api/culture/cultures"), HttpGet, AllowAnonymous]
-        public Dictionary<string, Lite<CultureInfoEntity>> GetCultures()
+        public List<CultureInfoEntity> GetCultures()
         {
-            return CultureInfoLogic.CultureInfoToEntity.Value.Values.ToDictionary(a => a.Name, a => a.ToLite());
+            return CultureInfoLogic.CultureInfoToEntity.Value.Values.ToList();
         }
 
         [Route("api/culture/currentCulture"), HttpGet, AllowAnonymous]

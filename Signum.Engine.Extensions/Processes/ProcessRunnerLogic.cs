@@ -431,6 +431,18 @@ namespace Signum.Engine.Processes
             }
         }
 
+        public void WriteMessage(string status)
+        {
+            if (status != CurrentProcess.Status)
+            {
+                CurrentProcess.Status = status;
+                CurrentProcess.InDB()
+                    .UnsafeUpdate()
+                    .Set(a => a.Status, a => status)
+                    .Execute();
+            }
+        }
+
 
         public void TakeForThisMachine()
         {
@@ -503,6 +515,8 @@ namespace Signum.Engine.Processes
         {
             return "Execution (ID = {0}): {1} ".FormatWith(CurrentProcess.Id, CurrentProcess);
         }
+
+       
     }
 
 

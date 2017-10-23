@@ -206,49 +206,6 @@ namespace Signum.Engine.Help
             }
         }
 
-        public static class OperationXml
-        {
-            static readonly XName _Name = "Name";
-            static readonly XName _Key = "Key";
-            static readonly XName _Description = "Description";
-            static readonly XName _Culture = "Culture";
-            public static readonly XName _Operation = "Operation";
-
-            public static XDocument ToXDocument(OperationHelpEntity entity)
-            {
-                return new XDocument(
-                    new XDeclaration("1.0", "utf-8", "yes"),
-                       new XElement(_Operation,
-                           new XAttribute(_Key, entity.Operation.Key),
-                           new XAttribute(_Culture, entity.Culture.Name),
-                           entity.Description.HasText() ? new XElement(_Description, entity.Description) : null
-                           )
-                       );
-            }
-
-
-            public static ImportAction Load(XDocument document)
-            {
-                XElement element = document.Element(_Operation);
-                var ci = CultureInfoLogic.CultureInfoToEntity.Value.GetOrThrow(element.Attribute(_Culture).Value);
-                var operation = SelectInteractive(element.Attribute(_Key).Value, SymbolLogic<OperationSymbol>.Symbols.ToDictionary(a => a.Key), "operation");
-
-                if (operation == null)
-                    return ImportAction.Skipped;
-
-                var entity = Database.Query<OperationHelpEntity>().SingleOrDefaultEx(a => a.Culture == ci && a.Operation == operation) ??
-                    new OperationHelpEntity
-                    {
-                        Culture = ci,
-                        Operation = operation,
-                    };
-
-                element.Element(_Description)?.Let(d => entity.Description = d.Value);
-
-                return Save(entity);
-            }
-        }
-
         public static class EntityXml
         {
             static readonly XName _FullName = "FullName";
@@ -332,6 +289,36 @@ namespace Signum.Engine.Help
                             entity.Properties.Add(new PropertyRouteHelpEmbedded
                             {
                                 Property = property,
+                                Description = item.Value
+                            });
+                        }
+                    }
+                }
+
+                var opers = element.Element(_Operations);
+                if (opers != null)
+                {
+                    var operations = OperationLogic.TypeOperations(typeEntity.ToType()).ToDictionary(a => a.OperationSymbol.Key, a => a.OperationSymbol);
+
+                    foreach (var item in opers.Elements(_Operation))
+                    {
+                        string name = item.Attribute(_Name).Value;
+
+                        var operation = SelectInteractive(name, operations, "operations for {0}".FormatWith(type.Name));
+
+                        if (name == null)
+                            continue;
+
+                        var col = entity.Operations.SingleOrDefaultEx(c => c.Operation.Is(operation));
+                        if (col != null)
+                        {
+                            col.Description = item.Value;
+                        }
+                        else
+                        {
+                            entity.Operations.Add(new OperationHelpEmbedded
+                            {
+                                Operation = operation,
                                 Description = item.Value
                             });
                         }
@@ -446,16 +433,6 @@ namespace Signum.Engine.Help
                 if (!File.Exists(path) || SafeConsole.Ask(ref replace, "Overwrite {0}?".FormatWith(path)))
                     QueryXml.ToXDocument(qh).Save(path);
             }
-
-            foreach (var qh in Database.Query<OperationHelpEntity>())
-            {
-                string path = Path.Combine(directoryName, qh.Culture.Name, OperationsDirectory, "{0}.{1}.help".FormatWith(RemoveInvalid(qh.Operation.Key), qh.Culture.Name));
-
-                FileTools.CreateParentDirectory(path);
-
-                if (!File.Exists(path) || SafeConsole.Ask(ref replace, "Overwrite {0}?".FormatWith(path)))
-                    OperationXml.ToXDocument(qh).Save(path);
-            }
         }
 
         public static void ImportAll(string directoryName = "../../Help")
@@ -475,7 +452,6 @@ namespace Signum.Engine.Help
                         doc.Root.Name == NamespaceXml._Namespace ? NamespaceXml.Load(doc, namespaces):
                         doc.Root.Name == EntityXml._Entity ? EntityXml.Load(doc, types):
                         doc.Root.Name == QueryXml._Query ? QueryXml.Load(doc) :
-                        doc.Root.Name == OperationXml._Operation ? OperationXml.Load(doc) :
                         throw new InvalidOperationException("Unknown Xml root: " + doc.Root.Name);
 
                     ConsoleColor color =

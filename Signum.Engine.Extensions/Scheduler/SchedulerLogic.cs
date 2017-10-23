@@ -559,7 +559,7 @@ namespace Signum.Engine.Scheduler
                             tr.Commit();
                         }
                     }
-                    catch(OperationCanceledException e)
+                    catch(OperationCanceledException)
                     {
                         throw;
                     }

@@ -409,6 +409,37 @@ namespace Signum.Engine.Processes
                 }
             }
         }
+
+        public static void Synchronize<K, N, O>(this ExecutingProcess ep,
+            Dictionary<K,N> newDictionary, 
+            Dictionary<K, O> oldDictionary, 
+            Action<K, N> createNew, 
+            Action<K, O> removeOld, 
+            Action<K, N, O> merge)
+        {
+            HashSet<K> keys = new HashSet<K>();
+            keys.UnionWith(oldDictionary.Keys);
+            keys.UnionWith(newDictionary.Keys);
+
+            foreach (var key in keys)
+            {
+                var oldExists = oldDictionary.TryGetValue(key, out var oldVal);
+                var newExists = newDictionary.TryGetValue(key, out var newVal);
+
+                if (!oldExists)
+                {
+                    createNew?.Invoke(key, newVal);
+                }
+                else if (!newExists)
+                {
+                    removeOld?.Invoke(key, oldVal);
+                }
+                else
+                {
+                    merge?.Invoke(key, newVal, oldVal);
+                }
+            }
+        }
     }
 
     public interface IProcessAlgorithm

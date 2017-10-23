@@ -87,9 +87,6 @@ namespace Signum.Engine.Authorization
                         r.Name,
                     });
 
-
-                sb.Include<LastAuthRulesImportEntity>(); 
-
                 roles = sb.GlobalLazy(CacheRoles, new InvalidateWith(typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
                 mergeStrategies = sb.GlobalLazy(() =>
                 {
@@ -349,15 +346,11 @@ namespace Signum.Engine.Authorization
 
         public static XDocument ExportRules(bool exportAll = false)
         {
-            var imported = Database.Query<LastAuthRulesImportEntity>().SingleOrDefault();
-
             SystemEventLogLogic.Log("Export AuthRules");
 
             return new XDocument(
                 new XDeclaration("1.0", "utf-8", "yes"),
                 new XElement("Auth",
-                    imported == null ? null : new XElement("Imported", new XAttribute("On", imported.Date.ToString("s"))),
-                    new XElement("Exported", new XAttribute("On", TimeZoneManager.Now.ToString("s"))),
                     new XElement("Roles",
                         RolesInOrder().Select(r => new XElement("Role",
                             new XAttribute("Name", r.ToString()),
@@ -414,9 +407,6 @@ namespace Signum.Engine.Authorization
             SqlPreCommand result = ImportFromXml.GetInvocationListTyped()
                 .Select(inv => inv(doc.Root, rolesDic, replacements)).Combine(Spacing.Triple);
 
-            result = SqlPreCommand.Combine(Spacing.Triple, result, UpdateLastAuthRules(doc.Root.Element("Exported")));
-            
-
             if (replacements.Values.Any(a => a.Any()))
                 SafeConsole.WriteLineColor(ConsoleColor.Red, "There are renames! Remember to export after executing the script");
 
@@ -430,30 +420,6 @@ namespace Signum.Engine.Authorization
                 dbOnlyWarnings,
                 result,
                 new SqlPreCommandSimple("-- END AUTH SYNC SCRIPT"));
-        }
-
-        private static SqlPreCommand UpdateLastAuthRules(XElement exported)
-        {
-            var table = Schema.Current.Table(typeof(LastAuthRulesImportEntity)); 
-
-            LastAuthRulesImportEntity last = Database.Query<LastAuthRulesImportEntity>().SingleOrDefaultEx();
-
-            if (exported == null)
-            {
-                if (last == null)
-                    return null;
-
-                return table.DeleteSqlSync(last);
-            }
-
-            DateTime dt =  DateTime.ParseExact(exported.Attribute("On").Value, "s", null).FromUserInterface();
-
-            if (last == null)
-                return table.InsertSqlSync(new LastAuthRulesImportEntity { Date = dt });
-
-            last.Date = dt;
-
-            return table.UpdateSqlSync(last); 
         }
 
         public static void LoadRoles(XDocument doc)

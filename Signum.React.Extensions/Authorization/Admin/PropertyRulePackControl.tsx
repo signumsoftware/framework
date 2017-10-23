@@ -3,6 +3,7 @@ import { Button } from 'react-bootstrap'
 import * as numbro from 'numbro'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
+import { PropertyRouteEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics';
 import { notifySuccess } from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
 import { TypeContext, ButtonsContext, IRenderButtons } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -65,7 +66,7 @@ export default class PropertyRulesPackControl extends React.Component<{ ctx: Typ
                     <thead>
                         <tr>
                             <th>
-                                {PermissionSymbol.niceName()}
+                                { PropertyRouteEntity.niceName() }
                             </th>
                             <th style={{ textAlign: "center" }}>
                                 <a onClick={e => this.handleHeaderClick(e, "Modify")}>{PropertyAllowed.niceName("Modify")}</a>
