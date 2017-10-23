@@ -17,7 +17,7 @@ namespace Signum.React.Processes
         {
             var type = request.type == null ? null : TypeLogic.GetType(request.type);
 
-            var entity = PackageLogic.CreatePackageOperation(request.lites, request.operarionSymbol, request.args);
+            var entity = PackageLogic.CreatePackageOperation(request.lites, request.GetOperationSymbol(type), request.args);
 
             return SignumServer.GetEntityPack(entity);
         }

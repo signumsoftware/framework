@@ -238,10 +238,10 @@ namespace Signum.Services
                () => OperationAuthLogic.SetOperationRules(rules));
         }
 
-        public Dictionary<OperationSymbol, OperationAllowed> AllowedOperations()
+        public Dictionary<(OperationSymbol operation, Type type), OperationAllowed> AllowedOperations()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-            () => OperationAuthLogic.AllowedOperations());
+                () => OperationAuthLogic.AllowedOperations());
         }
         #endregion
 

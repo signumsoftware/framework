@@ -235,10 +235,12 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
     renderMenuItems(): React.ReactElement<any>[] {
 
+        let type = this.props.typeName;
+
         var menuItems = [
-            Navigator.isNavigable(this.props.typeName, undefined, true) && <MenuItem onClick={this.handleNavigate} bsClass="danger" > <i className="fa fa-arrow-right" aria-hidden="true"></i>&nbsp;{EntityControlMessage.View.niceToString()}</MenuItem >,
-            Operations.isOperationAllowed(TreeOperation.CreateChild) && <MenuItem onClick={this.handleAddChildren}><i className="fa fa-caret-square-o-right" aria-hidden="true"></i>&nbsp;{TreeViewerMessage.AddChild.niceToString()}</MenuItem>,
-            Operations.isOperationAllowed(TreeOperation.CreateNextSibling) && <MenuItem onClick={this.handleAddSibling}><i className="fa fa-caret-square-o-down" aria-hidden="true"></i>&nbsp;{TreeViewerMessage.AddSibling.niceToString()}</MenuItem>,
+            Navigator.isNavigable(type, undefined, true) && <MenuItem onClick={this.handleNavigate} bsClass="danger" > <i className="fa fa-arrow-right" aria-hidden="true"></i>&nbsp;{EntityControlMessage.View.niceToString()}</MenuItem >,
+            Operations.isOperationAllowed(TreeOperation.CreateChild, type) && <MenuItem onClick={this.handleAddChildren}><i className="fa fa-caret-square-o-right" aria-hidden="true"></i>&nbsp;{TreeViewerMessage.AddChild.niceToString()}</MenuItem>,
+            Operations.isOperationAllowed(TreeOperation.CreateNextSibling, type) && <MenuItem onClick={this.handleAddSibling}><i className="fa fa-caret-square-o-down" aria-hidden="true"></i>&nbsp;{TreeViewerMessage.AddSibling.niceToString()}</MenuItem>,
         ].filter(a => a != false) as React.ReactElement<any>[];
 
         if (this.state.currentMenuItems == undefined) {
@@ -390,7 +392,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
                     onClick={this.handleToggleFilters}
                     title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><span className="glyphicon glyphicon glyphicon-filter"></span></a>
                 <button className="btn btn-primary" onClick={this.handleSearchSubmit}>{JavascriptMessage.search.niceToString()}</button>
-                {Operations.isOperationAllowed(TreeOperation.CreateRoot) && <button className= "btn btn-default" onClick= { this.handleAddRoot } disabled= { s.treeNodes == null } > <i className="fa fa-star" aria-hidden="true"></i>&nbsp;{TreeViewerMessage.AddRoot.niceToString()}</button>}
+                {Operations.isOperationAllowed(TreeOperation.CreateRoot, this.props.typeName) && <button className="btn btn-default" onClick={this.handleAddRoot} disabled={s.treeNodes == null} > <i className="fa fa-star" aria-hidden="true"></i>&nbsp;{TreeViewerMessage.AddRoot.niceToString()}</button>}
                 <DropdownButton id="selectedButton"
                     className="sf-query-button sf-tm-selected"
                     title={`${JavascriptMessage.Selected.niceToString()} (${selected && selected.lite.toStr || TreeViewerMessage.AddRoot.niceToString()})`}
