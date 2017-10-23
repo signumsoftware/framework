@@ -39,14 +39,15 @@ export default class PropertyRulesPackControl extends React.Component<{ ctx: Typ
     }
 
     handleHeaderClick(e: React.MouseEvent<HTMLAnchorElement>, hc: PropertyAllowed) {
-        this.props.ctx.mlistItemCtxs(a => a.rules).forEach(tcr => {
-            let c = tcr.value;
 
-            if (!c.coercedValues!.contains(hc)) {
-                let cr = this.refs[c.toStr + "-" + hc] as ColorRadio;
-                cr.props.onClicked(e);
+        this.props.ctx.value.rules.forEach(mle => {
+            if (!mle.element.coercedValues!.contains(hc)) {
+                mle.element.allowed = hc;
+                mle.element.modified = true;
             }
         });
+
+        this.forceUpdate();
     }
 
     render() {
@@ -119,7 +120,6 @@ export default class PropertyRulesPackControl extends React.Component<{ ctx: Typ
             return;
 
         return <ColorRadio
-            ref={c.toStr + "-" + allowed}
             checked={c.allowed == allowed}
             color={color}
             onClicked={a => { c.allowed = allowed; c.modified = true; this.forceUpdate() }}
