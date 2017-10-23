@@ -17,10 +17,21 @@ function fixBaseName<T>(baseFunction: (location: H.LocationDescriptorObject | st
     };
 }
 
+function fixBaseNameSimple<T>(baseFunction: (location: H.LocationDescriptorObject | string, state?: any) => T): (location: H.LocationDescriptorObject | string, state?: any) => T {
+    return (location, state) => {
+        if (typeof location === "string") {
+            return baseFunction(Navigator.toAbsoluteUrl(location), state);
+        } else {
+            location!.pathname = Navigator.toAbsoluteUrl(location!.pathname!);
+            return baseFunction(location, state);
+        }
+    };
+}
+
 export function useAppRelativeBasename(history: H.History) {
-    history.push = fixBaseName(history.push);
-    history.replace = fixBaseName(history.replace);
-    history.createHref = fixBaseName(history.createHref);
+    history.push = fixBaseName(history.push as any) as any;
+    history.replace = fixBaseName(history.replace as any) as any;
+    history.createHref = fixBaseName(history.createHref as any) as any;
 }
 
 export function useAppRelativeComputeMatch(RouteClass: typeof Route) {
@@ -44,10 +55,12 @@ export function useAppRelativeSwitch(SwitchClass: typeof Switch) {
 
         let match: match<any> | undefined;
         let child: React.ReactElement<any> | undefined;
-        React.Children.forEach(children, (element: React.ReactElement<RouteProps & { from?: string }>) => {
+        React.Children.forEach(children, (child) => {
+            let element = child as React.ReactElement<RouteProps & { from?: string }>;
+
             if (!React.isValidElement(element))
                 return;
-            
+
             const { path: pathProp, exact, strict, from } = element.props;
             const path = pathProp || from
 
@@ -55,8 +68,8 @@ export function useAppRelativeSwitch(SwitchClass: typeof Switch) {
                 child = element
                 match = path ? matchPath(location.pathname, { path: Navigator.toAbsoluteUrl(path), exact, strict }) : route.match
             }
-        })
-
+        });
+        
         return match && child ? React.cloneElement(child, { location, computedMatch: match }) : null
     };
 }

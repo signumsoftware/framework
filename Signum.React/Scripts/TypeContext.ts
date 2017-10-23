@@ -184,7 +184,6 @@ export class TypeContext<T> extends StyleContext {
         this.binding = binding;
         
         this.prefix = compose(parent && (parent as TypeContext<any>).prefix, binding.suffix);
-
     }
   
     subCtx(styleOptions: StyleOptions): TypeContext<T>     

@@ -65,8 +65,8 @@ export interface ModelState {
 }
 
 export interface EntityPack<T extends ModifiableEntity> {
-    entity: T
-    canExecute: { [key: string]: string };
+    readonly entity: T
+    readonly canExecute: { [key: string]: string };
 }
 
 //The interfaces add no real members, they are there just to force TS structural typing
