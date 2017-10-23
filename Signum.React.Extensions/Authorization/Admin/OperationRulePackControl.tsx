@@ -37,6 +37,17 @@ export default class OperationRulePackControl extends React.Component<{ ctx: Typ
         ];
     }
 
+    handleHeaderClick(e: React.MouseEvent<HTMLAnchorElement>, hc: OperationAllowed) {
+
+        this.props.ctx.value.rules.forEach(mle => {
+            if (!mle.element.coercedValues!.contains(hc)) {
+                mle.element.allowed = hc;
+                mle.element.modified = true;
+            }
+        });
+
+        this.forceUpdate();
+    }
 
     render() {
 
@@ -56,13 +67,13 @@ export default class OperationRulePackControl extends React.Component<{ ctx: Typ
                                 { PermissionSymbol.niceName() }
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                { OperationAllowed.niceName("Allow") }
+                                <a onClick={e => this.handleHeaderClick(e, "Allow")}>{OperationAllowed.niceName("Allow")}</a>
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                { OperationAllowed.niceName("DBOnly") }
+                                <a onClick={e => this.handleHeaderClick(e, "DBOnly")}>{ OperationAllowed.niceName("DBOnly") }</a>
                             </th>
                             <th style={{ textAlign: "center" }}>
-                                { OperationAllowed.niceName("None") }
+                                <a onClick={e => this.handleHeaderClick(e, "None")}>{ OperationAllowed.niceName("None") }</a>
                             </th>
                             <th style={{ textAlign: "center" }}>
                                 {AuthAdminMessage.Overriden.niceToString() }
