@@ -15,7 +15,7 @@ import QueryTokenBuilder from './QueryTokenBuilder'
 
 import "./FilterBuilder.css"
 
-interface FilterBuilderProps extends React.Props<FilterBuilder> {
+interface FilterBuilderProps {
     filterOptions: FilterOptionParsed[];
     subTokensOptions: SubTokensOptions;
     queryDescription: QueryDescription;
@@ -23,6 +23,7 @@ interface FilterBuilderProps extends React.Props<FilterBuilder> {
     lastToken?: QueryToken;
     onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
     onHeightChanged?: () => void;
+    title?: React.ReactNode;
 }
 
 export default class FilterBuilder extends React.Component<FilterBuilderProps>{
@@ -64,41 +65,39 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps>{
 
 
         return (
-            <div className="panel panel-default sf-filters form-xs">
-                <div className="panel-body sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
-                    {
-                        <table className="table table-condensed sf-filter-table">
-                            <thead>
-                                <tr>
-                                    <th style={{ minWidth: "24px" }}></th>
-                                    <th className="sf-filter-field-header">{ SearchMessage.Field.niceToString() }</th>
-                                    <th>{ SearchMessage.Operation.niceToString() }</th>
-                                    <th>{ SearchMessage.Value.niceToString() }</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {this.props.filterOptions.map((f, i) => <FilterComponent filter={f} key={i}
-                                    onDeleteFilter={this.handlerDeleteFilter}
-                                    subTokenOptions={this.props.subTokensOptions}
-                                    queryDescription={this.props.queryDescription}
-                                    onTokenChanged ={this.props.onTokenChanged}
-                                    onFilterChanged={this.handleFilterChanged}
-                                     />) }
-                                <tr >
-                                    <td colSpan={4}>
-                                        <a title={SearchMessage.AddFilter.niceToString() }
-                                            className="sf-line-button sf-create"
-                                            onClick={this.handlerNewFilter}>
-                                            <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{SearchMessage.AddFilter.niceToString()}
-                                        </a>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    }
+            <fieldset className="form-xs">
+                {this.props.title && <legend>{this.props.title}</legend>}
+                <div className="sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
+                    <table className="table table-condensed sf-filter-table">
+                        <thead>
+                            <tr>
+                                <th style={{ minWidth: "24px" }}></th>
+                                <th className="sf-filter-field-header">{SearchMessage.Field.niceToString()}</th>
+                                <th>{SearchMessage.Operation.niceToString()}</th>
+                                <th>{SearchMessage.Value.niceToString()}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {this.props.filterOptions.map((f, i) => <FilterComponent filter={f} key={i}
+                                onDeleteFilter={this.handlerDeleteFilter}
+                                subTokenOptions={this.props.subTokensOptions}
+                                queryDescription={this.props.queryDescription}
+                                onTokenChanged={this.props.onTokenChanged}
+                                onFilterChanged={this.handleFilterChanged}
+                            />)}
+                            <tr >
+                                <td colSpan={4}>
+                                    <a title={SearchMessage.AddFilter.niceToString()}
+                                        className="sf-line-button sf-create"
+                                        onClick={this.handlerNewFilter}>
+                                        <span className="glyphicon glyphicon-plus sf-create sf-create-label" />{SearchMessage.AddFilter.niceToString()}
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-
-            </div>
+            </fieldset>
         );
     }
 }
@@ -111,6 +110,7 @@ export interface FilterComponentProps extends React.Props<FilterComponent> {
     subTokenOptions: SubTokensOptions;
     onTokenChanged?: (token: QueryToken) => void;
     onFilterChanged: (filter: FilterOptionParsed) => void;
+
 }
 
 export class FilterComponent extends React.Component<FilterComponentProps>{
@@ -152,16 +152,16 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
         if (!momentFormat)
             return date;
 
-        const formatted = moment(date).format( momentFormat);
+        const formatted = moment(date).format(momentFormat);
         return moment(formatted, momentFormat).format();
     }
-    
+
 
     handleChangeOperation = (event: React.FormEvent<HTMLSelectElement>) => {
         const operation = (event.currentTarget as HTMLSelectElement).value as any;
         if (isList(operation) != isList(this.props.filter.operation!))
             this.props.filter.value = isList(operation) ? [this.props.filter.value] : this.props.filter.value[0];
-        
+
         this.props.filter.operation = operation;
 
         this.props.onFilterChanged(this.props.filter);
@@ -176,29 +176,29 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
             <tr>
                 <td>
                     {!f.frozen &&
-                        <a title={SearchMessage.DeleteFilter.niceToString() }
+                        <a title={SearchMessage.DeleteFilter.niceToString()}
                             className="sf-line-button sf-remove"
                             onClick={this.handleDeleteFilter}>
-                            <span className="glyphicon glyphicon-remove"/>
+                            <span className="glyphicon glyphicon-remove" />
                         </a>}
                 </td>
                 <td>
                     <QueryTokenBuilder
                         queryToken={f.token!}
                         onTokenChange={this.handleTokenChanged}
-                        queryKey={ this.props.queryDescription.queryKey }
+                        queryKey={this.props.queryDescription.queryKey}
                         subTokenOptions={this.props.subTokenOptions}
-                        readOnly={!!f.frozen}/></td>
+                        readOnly={!!f.frozen} /></td>
                 <td className="sf-filter-operation">
                     {f.token && f.token.filterType && f.operation &&
                         <select className="form-control" value={f.operation as any} disabled={f.frozen} onChange={this.handleChangeOperation}>
-                        {f.token.filterType && filterOperations[f.token.filterType!]
-                                .map((ft, i) => <option key={i} value={ft as any}>{ FilterOperation.niceName(ft) }</option>) }
-                        </select> }
+                            {f.token.filterType && filterOperations[f.token.filterType!]
+                                .map((ft, i) => <option key={i} value={ft as any}>{FilterOperation.niceName(ft)}</option>)}
+                        </select>}
                 </td>
 
                 <td className="sf-filter-value">
-                    {f.token && f.token.filterType && f.operation && this.renderValue() }
+                    {f.token && f.token.filterType && f.operation && this.renderValue()}
                 </td>
             </tr>
         );
@@ -208,7 +208,7 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
         const f = this.props.filter;
 
         if (isList(f.operation!))
-            return <MultiValue values={f.value} onRenderItem={this.handleCreateAppropiateControl} frozen={!!this.props.filter.frozen} onChange={this.handleValueChange}/>;
+            return <MultiValue values={f.value} onRenderItem={this.handleCreateAppropiateControl} frozen={!!this.props.filter.frozen} onChange={this.handleValueChange} />;
 
         const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: f.frozen, formGroupSize: "ExtraSmall" }, undefined as any, Binding.create(f, a => a.value));
 
@@ -224,17 +224,17 @@ export class FilterComponent extends React.Component<FilterComponentProps>{
                 if (token.type.name == IsByAll || getTypeInfos(token.type).some(ti => !ti.isLowPopulation))
                     return <EntityLine ctx={ctx} type={token.type} create={false} onChange={this.handleValueChange} />;
                 else
-                    return <EntityCombo ctx={ctx} type={token.type} create={false} onChange={this.handleValueChange}/>
+                    return <EntityCombo ctx={ctx} type={token.type} create={false} onChange={this.handleValueChange} />
             case "Embedded":
-                return <EntityLine ctx={ctx} type={token.type} create={false} autoComplete={null} onChange={this.handleValueChange}/>;
+                return <EntityLine ctx={ctx} type={token.type} create={false} autoComplete={null} onChange={this.handleValueChange} />;
             case "Enum":
                 const ti = getTypeInfos(token.type).single();
                 if (!ti)
                     throw new Error(`EnumType ${token.type.name} not found`);
                 const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-                return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} comboBoxItems={members} onChange={this.handleValueChange}/>;
+                return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} comboBoxItems={members} onChange={this.handleValueChange} />;
             default:
-                return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} onChange={this.handleValueChange}/>;
+                return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} onChange={this.handleValueChange} />;
         }
     }
 
@@ -276,20 +276,20 @@ export class MultiValue extends React.Component<MultiValueProps> {
                             <tr key={i}>
                                 <td>
                                     {!this.props.frozen &&
-                                        <a title={SearchMessage.DeleteFilter.niceToString() }
+                                        <a title={SearchMessage.DeleteFilter.niceToString()}
                                             className="sf-line-button sf-remove"
-                                            onClick={() => this.handleDeleteValue(i) }>
-                                            <span className="glyphicon glyphicon-remove"/>
+                                            onClick={() => this.handleDeleteValue(i)}>
+                                            <span className="glyphicon glyphicon-remove" />
                                         </a>}
                                 </td>
                                 <td>
                                     {
                                         this.props.onRenderItem(new TypeContext<any>(undefined,
-                                        {
-                                            formGroupStyle: "None",
-                                            formGroupSize: "ExtraSmall",
-                                            readOnly: this.props.frozen
-                                        }, undefined as any, new Binding<any>(this.props.values, i)))
+                                            {
+                                                formGroupStyle: "None",
+                                                formGroupSize: "ExtraSmall",
+                                                readOnly: this.props.frozen
+                                            }, undefined as any, new Binding<any>(this.props.values, i)))
                                     }
                                 </td>
                             </tr>)
@@ -306,7 +306,6 @@ export class MultiValue extends React.Component<MultiValueProps> {
                     </tr>
                 </tbody>
             </table>
-
         );
 
     }
