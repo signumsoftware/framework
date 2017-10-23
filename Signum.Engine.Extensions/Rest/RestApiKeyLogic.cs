@@ -27,6 +27,7 @@ namespace Signum.Engine.Rest
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<RestApiKeyEntity>()
+                    .WithDelete(RestApiKeyOperation.Delete)
                     .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
