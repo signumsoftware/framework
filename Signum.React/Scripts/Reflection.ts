@@ -1264,11 +1264,12 @@ export class GraphExplorer {
             return false;
 
         if (obj instanceof Array) {
+            let result = false;
             for (let i = 0; i < obj.length; i++) {
                 if (this.isModified(obj[i], modelStatePrefix + "[" + i + "]"))
-                    return true;
+                    result = true;
             }
-            return false;
+            return result;
         }
 
         const mle = obj as MListElement<any>;
