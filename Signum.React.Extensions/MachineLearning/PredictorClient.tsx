@@ -46,13 +46,16 @@ export function start(options: { routes: JSX.Element[] }) {
         PredictorMessage.OpenTensorflowProjector.niceToString(),
         e => window.open("http://projector.tensorflow.org/", "_blank")));
 
+    
+
     Constructor.registerConstructor(PredictorEntity, () => PredictorEntity.New({
         settings: PredictorSettingsEmbedded.New()
     }));
 
     registerInitializer(AccordPredictorAlgorithm.DiscreteNaiveBayes, a => a.algorithmSettings = NaiveBayesSettingsEntity.New());
-
 }
+
+
 
 export function registerInitializer(symbol: PredictorAlgorithmSymbol, initialize: (predictor: PredictorEntity) => void) {
     initializers[symbol.key] = initialize;

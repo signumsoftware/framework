@@ -1,6 +1,7 @@
 ﻿using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
+using Signum.Engine.Files;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
@@ -9,15 +10,22 @@ using Signum.Entities.MachineLearning;
 using Signum.Entities.UserAssets;
 using Signum.Utilities;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Signum.Engine.MachineLearning
 {
+    public class PredictorTrainingState
+    {
+        public CancellationTokenSource CancellationTokenSource;
+        public PredictorTrainingContext Context; 
+    }
 
     public static class PredictorLogic
     {
@@ -35,12 +43,14 @@ namespace Signum.Engine.MachineLearning
             Algorithms.Add(symbol, algorithm);
         }
 
+        public static ConcurrentDictionary<Lite<PredictorEntity>, PredictorTrainingState> Trainings = new ConcurrentDictionary<Lite<PredictorEntity>, PredictorTrainingState>();
+
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<PredictorEntity>()
-                    .WithSave(PredictorOperation.Save)
+                    .WithVirtualMList(p => p.MultiColumns, mc => mc.Predictor)
                     .WithQuery(dqm, () => e => new
                     {
                         Entity = e,
@@ -49,6 +59,18 @@ namespace Signum.Engine.MachineLearning
                         e.Query,
                         InputCount = e.Filters.Count,
                         OutputCount = e.Filters.Count,
+                    });
+
+                PredictorGraph.Register();
+
+                sb.Include<PredictorMultiColumnEntity>()
+                    .WithQuery(dqm, () => e => new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.Name,
+                        e.Query,
+                        e.Predictor
                     });
 
                 sb.Include<PredictorCodificationEntity>()
@@ -88,22 +110,68 @@ namespace Signum.Engine.MachineLearning
                     Lite = false,
                     Execute = (e, _) => { },
                 }.Register();
-
+                
                 new Execute(PredictorOperation.Train)
                 {
                     FromStates = { PredictorState.Draft },
-                    ToStates = { PredictorState.Trained },
+                    ToStates = { PredictorState.Training },
                     AllowsNew = true,
                     Lite = false,
-                    Execute = (e, _) => { },
+                    Execute = (e, _) => {
+                        var state = Trainings.TryGetC(e.ToLite());
+
+                        if (state != null)
+                            throw new InvalidOperationException(PredictorMessage._0IsAlreadyBeingTrained.NiceToString(e));
+
+                        var cancellationSource = new CancellationTokenSource();
+
+                        var state = new PredictorTrainingState
+                        {
+                            CancellationTokenSource = cancellationSource,
+                            Context = new PredictorTrainingContext(e, cancellationSource.Token)
+                        };
+
+                        Task.Run(() =>
+                        {
+                            var rows = PredictorLogicQuery.RetrieveData(e, out var columns);
+
+                            var output =  
+
+
+
+                            
+
+                        });
+
+                        Trainings.TryAdd(state);
+
+
+                        state.CancellationTokenSource.Cancel();
+                    },
                 }.Register();
 
                 new Execute(PredictorOperation.Untrain)
                 {
                     FromStates = { PredictorState.Trained },
                     ToStates = { PredictorState.Draft },
-                    Execute = (e, _) => { },
+                    Execute = (e, _) =>
+                    {
+                        CleanTrained(e);
+                        e.State = PredictorState.Draft;
+                    },
                 }.Register();
+
+                new Execute(PredictorOperation.CancelTraining)
+                {
+                    FromStates = { PredictorState.Training },
+                    ToStates = { PredictorState.Draft },
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (e, _) => {
+                        
+                    },
+                }.Register();
+
 
                 new Delete(PredictorOperation.Delete)
                 {
@@ -122,13 +190,24 @@ namespace Signum.Engine.MachineLearning
                         Name = e.Name.HasText() ? (e.Name + " (2)") : "",
                         State = e.State,
                         Query = e.Query,
-                        Filters = e.Filters.Select(f => f.Clone()).ToMList(),
-                        SimpleColumns = e.SimpleColumns.Select(a=>a.Clone()).ToMList(),
                         Algorithm = e.Algorithm,
                         AlgorithmSettings = e.AlgorithmSettings?.Clone(),
                         Settings = e.Settings?.Clone(),
+                        Filters = e.Filters.Select(f => f.Clone()).ToMList(),
+                        SimpleColumns = e.SimpleColumns.Select(a => a.Clone()).ToMList(),
+                        MultiColumns = e.MultiColumns.Select(a => a.Clone()).ToMList()
                     },
                 }.Register();
+            }
+
+            private static void CleanTrained(PredictorEntity e)
+            {
+                foreach (var fp in e.Files)
+                {
+                    fp.DeleteFileOnCommit();
+                }
+                e.Files.RemoveAll();
+                e.Codifications().UnsafeDelete();
             }
         }
 
@@ -205,6 +284,8 @@ namespace Signum.Engine.MachineLearning
             mc.ParseData(description);
         }
     }
+
+
 }
 
 

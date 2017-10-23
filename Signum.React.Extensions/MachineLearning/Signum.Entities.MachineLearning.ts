@@ -95,6 +95,16 @@ export interface PredictorEntity extends Entities.Entity {
     files: Entities.MList<Files.FilePathEmbedded>;
 }
 
+export module PredictorFileType {
+    export const PredictorFile : Files.FileTypeSymbol = registerSymbol("FileType", "PredictorFileType.PredictorFile");
+}
+
+export const PredictorGroupKeyEmbedded = new Type<PredictorGroupKeyEmbedded>("PredictorGroupKeyEmbedded");
+export interface PredictorGroupKeyEmbedded extends Entities.EmbeddedEntity {
+    Type: "PredictorGroupKeyEmbedded";
+    token?: UserAssets.QueryTokenEmbedded | null;
+}
+
 export module PredictorMessage {
     export const Csv = new MessageKey("PredictorMessage", "Csv");
     export const Tsv = new MessageKey("PredictorMessage", "Tsv");
@@ -104,20 +114,24 @@ export module PredictorMessage {
     export const DownloadTsv = new MessageKey("PredictorMessage", "DownloadTsv");
     export const DownloadTsvMetadata = new MessageKey("PredictorMessage", "DownloadTsvMetadata");
     export const OpenTensorflowProjector = new MessageKey("PredictorMessage", "OpenTensorflowProjector");
+    export const _0IsAlreadyBeingTrained = new MessageKey("PredictorMessage", "_0IsAlreadyBeingTrained");
 }
 
 export const PredictorMultiColumnEntity = new Type<PredictorMultiColumnEntity>("PredictorMultiColumn");
 export interface PredictorMultiColumnEntity extends Entities.Entity {
     Type: "PredictorMultiColumn";
+    predictor?: Entities.Lite<PredictorEntity> | null;
+    name?: string | null;
     query?: Basics.QueryEntity | null;
     additionalFilters: Entities.MList<UserQueries.QueryFilterEmbedded>;
-    groupKeys: Entities.MList<UserAssets.QueryTokenEmbedded>;
+    groupKeys: Entities.MList<PredictorGroupKeyEmbedded>;
     aggregates: Entities.MList<PredictorColumnEmbedded>;
 }
 
 export module PredictorOperation {
     export const Save : Entities.ExecuteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Save");
     export const Train : Entities.ExecuteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Train");
+    export const CancelTraining : Entities.ExecuteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.CancelTraining");
     export const Untrain : Entities.ExecuteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Untrain");
     export const Delete : Entities.DeleteSymbol<PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Delete");
     export const Clone : Entities.ConstructSymbol_From<PredictorEntity, PredictorEntity> = registerSymbol("Operation", "PredictorOperation.Clone");
@@ -132,6 +146,7 @@ export interface PredictorSettingsEmbedded extends Entities.EmbeddedEntity {
 export const PredictorState = new EnumType<PredictorState>("PredictorState");
 export type PredictorState =
     "Draft" |
+    "Training" |
     "Trained";
 
 export const Regularization = new EnumType<Regularization>("Regularization");

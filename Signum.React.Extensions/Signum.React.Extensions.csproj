@@ -190,6 +190,7 @@
     <TypeScriptCompile Include="Joyride\Templates\Joyride.tsx" />
     <TypeScriptCompile Include="Joyride\Templates\JoyrideStepStyle.tsx" />
     <TypeScriptCompile Include="Joyride\Templates\JoyrideStep.tsx" />
+    <TypeScriptCompile Include="MachineLearning\Templates\FilterBuilderEmbedded.tsx" />
     <TypeScriptCompile Include="MachineLearning\Templates\PredictorMultiColumn.tsx" />
     <TypeScriptCompile Include="Templating\Templates\TemplateApplicable.tsx" />
     <TypeScriptCompile Include="Toolbar\SidebarContainer.tsx" />
@@ -251,10 +252,8 @@
     <TypeScriptCompile Include="Dynamic\View\NodeSelectorModal.tsx" />
     <TypeScriptCompile Include="Files\FileUploader.tsx" />
     <TypeScriptCompile Include="Files\FileDownloader.tsx" />
-    <TypeScriptCompile Include="Dynamic\View\DynamicViewEntity.tsx" />
     <TypeScriptCompile Include="Dynamic\View\DynamicView.tsx" />
     <TypeScriptCompile Include="HtmlEditor\HtmlEditor.tsx" />
-    <TypeScriptCompile Include="Dynamic\View\DynamicViewEntity.tsx" />
     <TypeScriptCompile Include="MachineLearning\PredictorClient.tsx" />
     <TypeScriptCompile Include="MachineLearning\Signum.Entities.Excel.ts">
       <DependentUpon>Signum.Entities.MachineLearning.t4s</DependentUpon>

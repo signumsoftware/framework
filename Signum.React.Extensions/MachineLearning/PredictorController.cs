@@ -42,5 +42,13 @@ namespace Signum.React.MachineLearning
 
             return FilesController.GetHttpReponseMessage(new MemoryStream(content), $"{predictor.Name}.metadata.tsv");
         }
+
+        [Route("api/predictor/trainingState/{id}"), HttpGet]
+        public TrainingState GetState(int id)
+        {
+            PredictorLogic.
+        }
     }
+
+   
 }
