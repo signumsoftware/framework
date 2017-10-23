@@ -35,7 +35,7 @@ export function construct(type: string | Type<any>): Promise<EntityPack<Modifiab
 
         if (constructOperations.length) {
 
-            const ctrs = constructOperations.filter(oi => Operations.isOperationAllowed(oi));
+            const ctrs = constructOperations.filter(oi => Operations.isOperationInfoAllowed(oi));
 
             if (!ctrs.length)
                 throw new Error("No constructor is allowed!");

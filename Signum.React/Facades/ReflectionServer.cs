@@ -104,14 +104,14 @@ namespace Signum.React.Facades
             return mi;
         }
 
-        public static event Action<OperationInfoTS, OperationInfo> AddOperationExtension;
-        static OperationInfoTS OnAddOperationExtension(OperationInfoTS oi, OperationInfo o)
+        public static event Action<OperationInfoTS, OperationInfo, Type> AddOperationExtension;
+        static OperationInfoTS OnAddOperationExtension(OperationInfoTS oi, OperationInfo o, Type type)
         {
             if (AddOperationExtension == null)
                 return oi;
 
             foreach (var a in AddOperationExtension.GetInvocationListTyped())
-                a(oi, o);
+                a(oi, o, type);
 
             return oi;
         }
@@ -203,7 +203,7 @@ namespace Signum.React.Facades
                                 }),
 
                               Operations = !type.IsEntity() ? null : OperationLogic.GetAllOperationInfos(type)
-                                .ToDictionary(oi => oi.OperationSymbol.Key, oi => OnAddOperationExtension(new OperationInfoTS(oi), oi))
+                                .ToDictionary(oi => oi.OperationSymbol.Key, oi => OnAddOperationExtension(new OperationInfoTS(oi), oi, type))
 
                           }, type))).ToDictionaryEx("entities");
 
